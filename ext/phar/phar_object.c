@@ -537,7 +537,9 @@ finish: ;
  */
 PHP_METHOD(Phar, webPhar)
 {
-	zval *mimeoverride = NULL, *rewrite = NULL;
+	zval *mimeoverride = NULL;
+	zend_fcall_info rewrite_fci = {0};
+	zend_fcall_info_cache rewrite_fcc;
 	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
 	size_t alias_len = 0, f404_len = 0, free_pathinfo = 0;
 	size_t ru_len = 0;
@@ -550,7 +552,7 @@ PHP_METHOD(Phar, webPhar)
 	phar_entry_info *info = NULL;
 	size_t sapi_mod_name_len = strlen(sapi_module.name);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!saz", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!saf!", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -668,38 +670,23 @@ PHP_METHOD(Phar, webPhar)
 		not_cgi = 1;
 	}
 
-	if (rewrite) {
-		zend_fcall_info fci;
-		zend_fcall_info_cache fcc;
+	if (ZEND_FCI_INITIALIZED(rewrite_fci)) {
 		zval params, retval;
 
 		ZVAL_STRINGL(&params, entry, entry_len);
 
-		if (FAILURE == zend_fcall_info_init(rewrite, 0, &fci, &fcc, NULL, NULL)) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: invalid rewrite callback");
+		rewrite_fci.param_count = 1;
+		rewrite_fci.params = &params;
+		rewrite_fci.retval = &retval;
 
-cleanup_fail:
-			zval_ptr_dtor(&params);
-			if (free_pathinfo) {
-				efree(path_info);
-			}
-			efree(entry);
-			efree(pt);
-			RETURN_THROWS();
-		}
-
-		fci.param_count = 1;
-		fci.params = &params;
-		fci.retval = &retval;
-
-		if (FAILURE == zend_call_function(&fci, &fcc)) {
+		if (FAILURE == zend_call_function(&rewrite_fci, &rewrite_fcc)) {
 			if (!EG(exception)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: failed to call rewrite callback");
 			}
 			goto cleanup_fail;
 		}
 
-		if (Z_TYPE_P(fci.retval) == IS_UNDEF || Z_TYPE(retval) == IS_UNDEF) {
+		if (Z_TYPE_P(rewrite_fci.retval) == IS_UNDEF || Z_TYPE(retval) == IS_UNDEF) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 			goto cleanup_fail;
 		}
@@ -707,8 +694,8 @@ cleanup_fail:
 		switch (Z_TYPE(retval)) {
 			case IS_STRING:
 				efree(entry);
-				entry = estrndup(Z_STRVAL_P(fci.retval), Z_STRLEN_P(fci.retval));
-				entry_len = Z_STRLEN_P(fci.retval);
+				entry = estrndup(Z_STRVAL_P(rewrite_fci.retval), Z_STRLEN_P(rewrite_fci.retval));
+				entry_len = Z_STRLEN_P(rewrite_fci.retval);
 				break;
 			case IS_TRUE:
 			case IS_FALSE:
@@ -723,7 +710,15 @@ cleanup_fail:
 				return;
 			default:
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-				goto cleanup_fail;
+
+cleanup_fail:
+				zval_ptr_dtor(&params);
+				if (free_pathinfo) {
+					efree(path_info);
+				}
+				efree(entry);
+				efree(pt);
+				RETURN_THROWS();
 		}
 	}
 
@@ -2703,71 +2698,67 @@ PHP_METHOD(Phar, setAlias)
 		RETURN_THROWS();
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &alias, &alias_len) == SUCCESS) {
-		if (alias_len == phar_obj->archive->alias_len && memcmp(phar_obj->archive->alias, alias, alias_len) == 0) {
-			RETURN_TRUE;
-		}
-		if (alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", alias, fd_ptr->fname);
-			if (SUCCESS == phar_free_alias(fd_ptr, alias, alias_len)) {
-				efree(error);
-				goto valid_alias;
-			}
-			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
-			efree(error);
-			RETURN_THROWS();
-		}
-		if (!phar_validate_alias(alias, alias_len)) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Invalid alias \"%s\" specified for phar \"%s\"", alias, phar_obj->archive->fname);
-			RETURN_THROWS();
-		}
-valid_alias:
-		if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
-			RETURN_THROWS();
-		}
-		if (phar_obj->archive->alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len))) {
-			zend_hash_str_del(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len);
-			readd = 1;
-		}
-
-		oldalias = phar_obj->archive->alias;
-		oldalias_len = phar_obj->archive->alias_len;
-		old_temp = phar_obj->archive->is_temporary_alias;
-
-		if (alias_len) {
-			phar_obj->archive->alias = estrndup(alias, alias_len);
-		} else {
-			phar_obj->archive->alias = NULL;
-		}
-
-		phar_obj->archive->alias_len = alias_len;
-		phar_obj->archive->is_temporary_alias = 0;
-		phar_flush(phar_obj->archive, NULL, 0, 0, &error);
-
-		if (error) {
-			phar_obj->archive->alias = oldalias;
-			phar_obj->archive->alias_len = oldalias_len;
-			phar_obj->archive->is_temporary_alias = old_temp;
-			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
-			if (readd) {
-				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), oldalias, oldalias_len, phar_obj->archive);
-			}
-			efree(error);
-			RETURN_THROWS();
-		}
-
-		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, phar_obj->archive);
-
-		if (oldalias) {
-			efree(oldalias);
-		}
-
+	if (alias_len == phar_obj->archive->alias_len && memcmp(phar_obj->archive->alias, alias, alias_len) == 0) {
 		RETURN_TRUE;
 	}
+	if (alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
+		spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", alias, fd_ptr->fname);
+		if (SUCCESS == phar_free_alias(fd_ptr, alias, alias_len)) {
+			efree(error);
+			goto valid_alias;
+		}
+		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
+		efree(error);
+		RETURN_THROWS();
+	}
+	if (!phar_validate_alias(alias, alias_len)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+			"Invalid alias \"%s\" specified for phar \"%s\"", alias, phar_obj->archive->fname);
+		RETURN_THROWS();
+	}
+valid_alias:
+	if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
+		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
+		RETURN_THROWS();
+	}
+	if (phar_obj->archive->alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len))) {
+		zend_hash_str_del(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len);
+		readd = 1;
+	}
 
-	RETURN_FALSE;
+	oldalias = phar_obj->archive->alias;
+	oldalias_len = phar_obj->archive->alias_len;
+	old_temp = phar_obj->archive->is_temporary_alias;
+
+	if (alias_len) {
+		phar_obj->archive->alias = estrndup(alias, alias_len);
+	} else {
+		phar_obj->archive->alias = NULL;
+	}
+
+	phar_obj->archive->alias_len = alias_len;
+	phar_obj->archive->is_temporary_alias = 0;
+	phar_flush(phar_obj->archive, NULL, 0, 0, &error);
+
+	if (error) {
+		phar_obj->archive->alias = oldalias;
+		phar_obj->archive->alias_len = oldalias_len;
+		phar_obj->archive->is_temporary_alias = old_temp;
+		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
+		if (readd) {
+			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), oldalias, oldalias_len, phar_obj->archive);
+		}
+		efree(error);
+		RETURN_THROWS();
+	}
+
+	zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, phar_obj->archive);
+
+	if (oldalias) {
+		efree(oldalias);
+	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -4305,19 +4296,22 @@ PHP_METHOD(Phar, extractTo)
 	php_stream *fp;
 	php_stream_statbuf ssb;
 	char *pathto;
-	zend_string *filename;
+	zend_string *filename = NULL;
 	size_t pathto_len;
 	int ret;
 	zval *zval_file;
-	zval *zval_files = NULL;
+	HashTable *files_ht = NULL;
 	zend_bool overwrite = 0;
 	char *error = NULL;
 
-	PHAR_ARCHIVE_OBJECT();
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_PATH(pathto, pathto_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(filename, files_ht)
+		Z_PARAM_BOOL(overwrite)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z!b", &pathto, &pathto_len, &zval_files, &overwrite) == FAILURE) {
-		RETURN_THROWS();
-	}
+	PHAR_ARCHIVE_OBJECT();
 
 	fp = php_stream_open_wrapper(phar_obj->archive->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK, NULL);
 
@@ -4356,47 +4350,32 @@ PHP_METHOD(Phar, extractTo)
 		RETURN_THROWS();
 	}
 
-	if (zval_files) {
-		switch (Z_TYPE_P(zval_files)) {
-			case IS_NULL:
-				filename = NULL;
-				break;
-			case IS_STRING:
-				filename = Z_STR_P(zval_files);
-				break;
-			case IS_ARRAY:
-				if (zend_hash_num_elements(Z_ARRVAL_P(zval_files)) == 0) {
-					RETURN_FALSE;
-				}
-
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zval_files), zval_file) {
-					ZVAL_DEREF(zval_file);
-					if (IS_STRING != Z_TYPE_P(zval_file)) {
-						zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-							"Invalid argument, array of filenames to extract contains non-string value");
-						RETURN_THROWS();
-					}
-					switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), pathto, pathto_len, overwrite, &error)) {
-						case -1:
-							zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
-								phar_obj->archive->fname, error);
-							efree(error);
-							RETURN_THROWS();
-						case 0:
-							zend_throw_exception_ex(phar_ce_PharException, 0,
-								"phar error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
-								ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
-							RETURN_THROWS();
-					}
-				} ZEND_HASH_FOREACH_END();
-				RETURN_TRUE;
-			default:
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-					"Invalid argument, expected a filename (string) or array of filenames");
-				RETURN_THROWS();
+	if (files_ht) {
+		if (zend_hash_num_elements(files_ht) == 0) {
+			RETURN_FALSE;
 		}
-	} else {
-		filename = NULL;
+
+		ZEND_HASH_FOREACH_VAL(files_ht, zval_file) {
+			ZVAL_DEREF(zval_file);
+			if (IS_STRING != Z_TYPE_P(zval_file)) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+					"Invalid argument, array of filenames to extract contains non-string value");
+				RETURN_THROWS();
+			}
+			switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), pathto, pathto_len, overwrite, &error)) {
+				case -1:
+					zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
+						phar_obj->archive->fname, error);
+					efree(error);
+					RETURN_THROWS();
+				case 0:
+					zend_throw_exception_ex(phar_ce_PharException, 0,
+						"phar error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
+						ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
+					RETURN_THROWS();
+			}
+		} ZEND_HASH_FOREACH_END();
+		RETURN_TRUE;
 	}
 
 	ret = extract_helper(phar_obj->archive, filename, pathto, pathto_len, overwrite, &error);

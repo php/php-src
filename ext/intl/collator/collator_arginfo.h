@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 95fee5001472494653e6a83467c3c0079ea70728 */
+ * Stub hash: 4cb1470cf2566c9d947be638c7d14a14a10290dd */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -14,17 +14,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sort, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, sort_flag, "Collator::SORT_REGULAR")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sort_flag, IS_LONG, 0, "Collator::SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sortWithSortKeys, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_asort, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sort_flag, IS_LONG, 0, "Collator::SORT_REGULAR")
-ZEND_END_ARG_INFO()
+#define arginfo_class_Collator_asort arginfo_class_Collator_sort
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getAttribute, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)

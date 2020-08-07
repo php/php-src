@@ -4,17 +4,11 @@
 
 class PDOStatement implements IteratorAggregate
 {
-    /**
-     * @param mixed $driverdata
-     * @return bool
-     */
-    public function bindColumn(int|string $column, &$param, int $type = 0, int $maxlen = 0, $driverdata = null) {}
+    /** @return bool */
+    public function bindColumn(int|string $column, &$param, int $type = 0, int $maxlen = 0, mixed $driverdata = null) {}
 
-    /**
-     * @param mixed $driver_options
-     * @return bool
-     */
-    public function bindParam(int|string $parameter, &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, $driverdata = null) {}
+    /** @return bool */
+    public function bindParam(int|string $parameter, &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, mixed $driverdata = null) {}
 
     /**
      * @param int|string $parameter
@@ -75,7 +69,7 @@ class PDOStatement implements IteratorAggregate
     public function setAttribute(int $attribute, $value) {}
 
     /** @return bool */
-    public function setFetchMode(int $mode, ...$params) {}
+    public function setFetchMode(int $mode, mixed ...$params) {}
 
     public function getIterator(): Iterator {}
 }

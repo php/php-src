@@ -267,6 +267,11 @@ function ldap_parse_reference($link, $entry, &$referrals): bool {}
 /**
  * @param resource $link
  * @param resource $result
+ * @param int $errcode
+ * @param string $matcheddn
+ * @param string $errmsg
+ * @param array $referrals
+ * @param array $serverctrls
  */
 function ldap_parse_result($link, $result, &$errcode, &$matcheddn = null, &$errmsg = null, &$referrals = null, &$serverctrls = null): bool {}
 #endif

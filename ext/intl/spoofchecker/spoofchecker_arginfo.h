@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dbcdb94753d19921594c48a735d6bd9194b02996 */
+ * Stub hash: 5f4ea7ab66c1748a8de076fca4b62a7d0a235598 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()

@@ -37,7 +37,7 @@ class PDO
     public function prepare(string $statement, array $driver_options = []) {}
 
     /** @return PDOStatement|false */
-    public function query(string $statement, ?int $fetch_mode = null, ...$fetch_mode_args) {}
+    public function query(string $statement, ?int $fetch_mode = null, mixed ...$fetch_mode_args) {}
 
     /** @return string|false */
     public function quote(string $string, int $parameter_type = PDO::PARAM_STR) {}

@@ -235,7 +235,7 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_set
      */
-    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {}
+    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {}
 
     /**
      * @return bool
@@ -283,6 +283,14 @@ class IntlCalendar
 
 class IntlGregorianCalendar extends IntlCalendar
 {
+    /**
+     * @param DateTimeZone|IntlTimeZone|string|int|null $timeZoneOrYear
+     * @param string|int|null $localeOrMonth
+     * @param int $dayOfMonth
+     * @param int $hour
+     * @param int $minute
+     * @param int $second
+     */
     public function __construct($timeZoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $dayOfMonth = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN) {}
 
     /**

@@ -6,10 +6,16 @@ class Spoofchecker
 {
     public function __construct() {}
 
-    /** @return bool */
+    /**
+     * @param int $error
+     * @return bool
+     */
     public function isSuspicious(string $text, &$error = null) {}
 
-    /** @return bool */
+    /**
+     * @param int $error
+     * @return bool
+     */
     public function areConfusable(string $s1, string $s2, &$error = null) {}
 
     /** @return void */

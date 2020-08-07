@@ -415,7 +415,7 @@ class mysqli_stmt
      * @return bool
      * @alias mysqli_stmt_bind_result
      */
-    public function bind_result(&...$vars) {}
+    public function bind_result(mixed &...$vars) {}
 
     /**
      * @return bool

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fb889b72e823f3033a54209059f8c6803961cef3 */
+ * Stub hash: 6b5e8ddfbdc436fab3a263d6922146ca7c2f3845 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)

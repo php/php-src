@@ -22,7 +22,7 @@ class Collator
      * @return bool
      * @alias collator_sort
      */
-    public function sort(array &$arr, $sort_flag = Collator::SORT_REGULAR) {}
+    public function sort(array &$arr, int $sort_flag = Collator::SORT_REGULAR) {}
 
     /**
      * @return bool

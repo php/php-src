@@ -58,7 +58,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function delMetadata() {}
 
     /** @return bool */
-    public function extractTo(string $pathto, $files = null, bool $overwrite = false) {}
+    public function extractTo(string $pathto, array|string|null $files = null, bool $overwrite = false) {}
 
     /** @return string|null */
     public function getAlias() {}
@@ -140,7 +140,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      * @param resource $newstub
      * @return bool
      */
-    public function setStub($newstub, $maxlen = -1) {}
+    public function setStub($newstub, int $maxlen = -1) {}
 
     /** @return void */
     public function startBuffering() {}
@@ -180,13 +180,13 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
     final public static function webPhar(
         ?string $alias = null, ?string $index = null, string $f404 = UNKNOWN,
-        array $mimetypes = [], $rewrites = UNKNOWN): void {}
+        array $mimetypes = [], ?callable $rewrites = null): void {}
 }
 
 class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 {
     /** @alias Phar::__construct */
-    public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null, $fileformat = 0) {}
+    public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null, int $fileformat = 0) {}
 
     /** @alias Phar::__destruct */
     public function __destruct() {}
@@ -285,7 +285,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @alias Phar::extractTo
      */
-    public function extractTo(string $pathto, $files = null, bool $overwrite = false) {}
+    public function extractTo(string $pathto, array|string|null $files = null, bool $overwrite = false) {}
 
     /**
      * @return string|null
@@ -418,7 +418,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @alias Phar::setStub
      */
-    public function setStub($newstub, $maxlen = -1) {}
+    public function setStub($newstub, int $maxlen = -1) {}
 
     /**
      * @return void
@@ -479,7 +479,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     /** @alias Phar::webPhar */
     final public static function webPhar(
         ?string $alias = null, ?string $index = null, string $f404 = UNKNOWN,
-        array $mimetypes = [], $rewrites = UNKNOWN): void {}
+        array $mimetypes = [], ?callable $rewrites = null): void {}
 }
 
 class PharFileInfo extends SplFileInfo
@@ -519,11 +519,11 @@ class PharFileInfo extends SplFileInfo
     public function hasMetadata() {}
 
     /** @return bool */
-    public function isCompressed($compression_type = 9021976) {}
+    public function isCompressed(int $compression_type = 9021976) {}
 
     /** @return bool */
     public function isCRCChecked() {}
 
     /** @return void */
-    public function setMetadata($metadata) {}
+    public function setMetadata(mixed $metadata) {}
 }

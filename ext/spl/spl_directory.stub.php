@@ -206,7 +206,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fread(int $length) {}
 
     /** @return array|false */
-    public function fgetcsv(string $delimiter = ",", string $enclosure = '"', $escape = "\\") {}
+    public function fgetcsv(string $delimiter = ",", string $enclosure = '"', string $escape = "\\") {}
 
     /** @return int|false */
     public function fputcsv(array $fields, string $delimiter = ',', string $enclosure = '"', string $escape = "\\") {}
@@ -217,7 +217,10 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return array */
     public function getCsvControl() {}
 
-    /** @return bool */
+    /**
+     * @param int $wouldblock
+     * @return bool
+     */
     public function flock(int $operation, &$wouldblock = null) {}
 
     /** @return bool */
@@ -235,11 +238,8 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return int */
     public function fpassthru() {}
 
-    /**
-     * @param string $format
-     * @return array|int
-     */
-    public function fscanf(string $format, &...$params) {}
+    /** @return array|int|false|null */
+    public function fscanf(string $format, mixed &...$params) {}
 
     /** @return int|false */
     public function fwrite(string $str, int $length = 0) {}

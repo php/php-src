@@ -98,7 +98,14 @@ function intlcal_get_error_code(IntlCalendar $calendar): int|false {}
 
 function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timeZone */
+/**
+ * @param DateTimeZone|IntlTimeZone|string|int|null $timeZoneOrYear
+ * @param string|int|null $localeOrMonth
+ * @param int $dayOfMonth
+ * @param int $hour
+ * @param int $minute
+ * @param int $second
+ */
 function intlgregcal_create_instance($timeZoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $dayOfMonth = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, float $change): bool {}
@@ -393,6 +400,10 @@ function intltz_get_gmt(): IntlTimeZone {}
 
 function intltz_get_id(IntlTimeZone $tz): string|false {}
 
+/**
+ * @param int $rawOffset
+ * @param int $dstOffset
+ */
 function intltz_get_offset(IntlTimeZone $tz, float $date, bool $local, &$rawOffset, &$dstOffset): bool {}
 
 function intltz_get_raw_offset(IntlTimeZone $tz): int {}
