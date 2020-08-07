@@ -1185,7 +1185,7 @@ static zval* get_zval_property(zval* object, char* name, zval *rv)
 static void unset_zval_property(zval* object, char* name)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zend_unset_property(Z_OBJCE_P(object), object, name, strlen(name));
+		zend_unset_property(Z_OBJCE_P(object), Z_OBJ_P(object), name, strlen(name));
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_hash_str_del(Z_ARRVAL_P(object), name, strlen(name));
 	}
