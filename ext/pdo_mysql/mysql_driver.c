@@ -38,6 +38,55 @@
 #	define pdo_mysql_init(persistent) mysql_init(NULL)
 #endif
 
+/* {{{ _pdo_mysql_stmt_error */
+
+int _pdo_mysql_stmt_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line)
+{
+        pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+        pdo_error_type *pdo_err;
+        pdo_mysql_error_info *einfo;
+        pdo_mysql_stmt *S = NULL;
+
+
+        PDO_DBG_ENTER("_pdo_mysql_stmt_error");
+        PDO_DBG_INF_FMT("file=%s line=%d", file, line);
+        S = (pdo_mysql_stmt*)stmt->driver_data;
+        pdo_err = &stmt->error_code;
+        einfo   = &S->einfo;
+
+        einfo->errcode = mysql_errno(H->server);
+        einfo->file = file;
+        einfo->line = line;
+
+        if (einfo->errcode) {
+                if (einfo->errcode == 2014) {
+                        einfo->errmsg = pestrdup(
+                                "Cannot execute queries while other unbuffered queries are active.  "
+                                "Consider using PDOStatement::fetchAll().  Alternatively, if your code "
+                                "is only ever going to run against mysql, you may enable query "
+                                "buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+                                dbh->is_persistent);
+                } else if (einfo->errcode == 2057) {
+                        einfo->errmsg = pestrdup(
+                                "A stored procedure returning result sets of different size was called. "
+                                "This is not supported by libmysql",
+                                dbh->is_persistent);
+
+                } else {
+                        einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
+                }
+        } else { /* no error */
+                strcpy(*pdo_err, PDO_ERR_NONE);
+                PDO_DBG_RETURN(0);
+        }
+        strcpy(*pdo_err, mysql_sqlstate(H->server));
+
+        PDO_DBG_INF("Throwing exception");
+        zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "SQLSTATE[%s] [%d] %s",
+                                *pdo_err, einfo->errcode, einfo->errmsg);
+        PDO_DBG_RETURN(einfo->errcode);
+}
+
 /* {{{ _pdo_mysql_error */
 int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line)
 {
