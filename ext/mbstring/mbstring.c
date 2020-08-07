@@ -2911,10 +2911,10 @@ PHP_FUNCTION(mb_convert_kana)
 				opt |= MBFL_FILT_TL_HAN2ZEN_GLUE;
 				break;
 			case 'C':
-				opt |= MBFL_FILT_TL_ZEN2HAN_HIRA2KANA;
+				opt |= MBFL_FILT_TL_ZENKAKU_HIRA2KATA;
 				break;
 			case 'c':
-				opt |= MBFL_FILT_TL_ZEN2HAN_KANA2HIRA;
+				opt |= MBFL_FILT_TL_ZENKAKU_KATA2HIRA;
 				break;
 			case 'M':
 				opt |= MBFL_FILT_TL_HAN2ZEN_SPECIAL;

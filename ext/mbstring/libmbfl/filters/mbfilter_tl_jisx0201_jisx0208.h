@@ -42,8 +42,9 @@
 #define MBFL_FILT_TL_HAN2ZEN_GLUE      0x00000800
 #define MBFL_FILT_TL_ZEN2HAN_KATAKANA  0x00001000
 #define MBFL_FILT_TL_ZEN2HAN_HIRAGANA  0x00002000
-#define MBFL_FILT_TL_ZEN2HAN_HIRA2KANA 0x00010000
-#define MBFL_FILT_TL_ZEN2HAN_KANA2HIRA 0x00020000
+/* Convert fullwidth hiragana to fullwidth katakana, or vice versa */
+#define MBFL_FILT_TL_ZENKAKU_HIRA2KATA 0x00010000
+#define MBFL_FILT_TL_ZENKAKU_KATA2HIRA 0x00020000
 /* A few "special" ASCII characters correspond to fullwidth Unicode characters
  * which are commonly used in Japanese
  * For example, ' corresponds to a fullwidth single quote */
