@@ -1,0 +1,53 @@
+--TEST--
+Observer: Basic observability of userland functions
+--INI--
+zend_test.observer.enabled=1
+zend_test.observer.observe_all=1
+--FILE--
+<?php
+function bar()
+{
+    echo 'Bar' . PHP_EOL;
+    var_dump(array_sum([1,2,3]));
+}
+
+function foo()
+{
+    echo 'Foo' . PHP_EOL;
+    bar();
+}
+
+foo();
+foo();
+foo();
+
+echo 'DONE' . PHP_EOL;
+?>
+--EXPECTF--
+[should observe '%s/observer_basic_01.php'?]
+<file '%s/observer_basic_01.php'>
+[should observe foo()?]
+  <foo>
+Foo
+[should observe bar()?]
+    <bar>
+Bar
+int(6)
+    </bar>
+  </foo>
+  <foo>
+Foo
+    <bar>
+Bar
+int(6)
+    </bar>
+  </foo>
+  <foo>
+Foo
+    <bar>
+Bar
+int(6)
+    </bar>
+  </foo>
+DONE
+</file '%s/observer_basic_01.php'>
