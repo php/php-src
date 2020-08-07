@@ -20,13 +20,13 @@
 
 #include "php.h"
 
-#if DBA_DBM
+#ifdef DBA_DBM
 #include "php_dbm.h"
 
 #ifdef DBM_INCLUDE_FILE
 #include DBM_INCLUDE_FILE
 #endif
-#if DBA_GDBM
+#ifdef DBA_GDBM
 #include "php_gdbm.h"
 #endif
 
