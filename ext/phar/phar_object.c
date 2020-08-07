@@ -2895,7 +2895,7 @@ PHP_METHOD(Phar, setStub)
 		RETURN_TRUE;
 	}
 
-	RETURN_FALSE;
+	RETURN_THROWS();
 }
 /* }}} */
 
@@ -2992,8 +2992,8 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 	char *error, *key = NULL;
 	size_t key_len = 0;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "l|s", &algo, &key, &key_len) != SUCCESS) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s", &algo, &key, &key_len) != SUCCESS) {
+		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
@@ -3693,6 +3693,11 @@ PHP_METHOD(Phar, offsetSet)
 	size_t fname_len, cont_len;
 	zval *zresource;
 
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "pr", &fname, &fname_len, &zresource) == FAILURE
+	&& zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &fname, &fname_len, &cont_str, &cont_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
@@ -3700,10 +3705,6 @@ PHP_METHOD(Phar, offsetSet)
 		RETURN_THROWS();
 	}
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "pr", &fname, &fname_len, &zresource) == FAILURE
-	&& zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &fname, &fname_len, &cont_str, &cont_len) == FAILURE) {
-		RETURN_THROWS();
-	}
 	if (fname_len == sizeof(".phar/stub.php")-1 && !memcmp(fname, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set stub \".phar/stub.php\" directly in phar \"%s\", use setStub", phar_obj->archive->fname);
 		RETURN_THROWS();
@@ -3730,14 +3731,14 @@ PHP_METHOD(Phar, offsetUnset)
 	size_t fname_len;
 	phar_entry_info *entry;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
-		RETURN_THROWS();
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -4013,14 +4014,14 @@ PHP_METHOD(Phar, setMetadata)
 	char *error;
 	zval *metadata;
 
-	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &metadata) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &metadata) == FAILURE) {
+	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
 		RETURN_THROWS();
 	}
 
@@ -4049,14 +4050,14 @@ PHP_METHOD(Phar, delMetadata)
 {
 	char *error;
 
-	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
 		RETURN_THROWS();
 	}
 
@@ -4305,6 +4306,7 @@ PHP_METHOD(Phar, extractTo)
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(pathto, pathto_len)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(filename, files_ht)
 		Z_PARAM_BOOL(overwrite)
 	ZEND_PARSE_PARAMETERS_END();
