@@ -2761,6 +2761,9 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 	uint32_t call_info = EX_CALL_INFO();
 	SAVE_OPLINE();
 
+	// TODO Maybe not pass in return_value explicitly?
+	zend_observer_maybe_fcall_call_end(execute_data, EX(return_value));
+
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
 		i_free_compiled_variables(execute_data);
@@ -3932,14 +3935,6 @@ ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL))
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
-	if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
-		ZEND_ASSERT(observer_handlers);
-		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-			zend_observe_fcall_begin(observer_handlers, call);
-		}
-	}
-
 	ZEND_VM_ENTER_EX();
 }
 
@@ -3962,14 +3957,6 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
-		if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, call);
-			}
-		}
 
 		LOAD_OPLINE_EX();
 
@@ -4052,14 +4039,6 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
-
-		if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, call);
-			}
-		}
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
@@ -4274,9 +4253,6 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 			}
 		}
 	}
-
-	// todo: should this go in the leave helper?
-	zend_observer_maybe_fcall_call_end(execute_data, return_value);
 
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
@@ -5906,14 +5882,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
 
-		if (zend_observer_fcall_op_array_extension != -1 && new_op_array != ZEND_FAKE_OP_ARRAY) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(new_op_array);
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, execute_data);
-			}
-		}
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -7374,7 +7342,6 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 	}
 
 	/* Uncaught exception */
-	zend_observer_maybe_fcall_call_end(execute_data, &EG(uninitialized_zval));
 
 	cleanup_live_vars(execute_data, op_num, 0);
 	if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
