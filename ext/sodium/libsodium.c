@@ -96,10 +96,8 @@ ZEND_GET_MODULE(sodium)
 
 /* Remove argument information from backtrace to prevent information leaks */
 static void sodium_remove_param_values_from_backtrace(zend_object *obj) {
-	zval obj_zv, rv, *trace;
-
-	ZVAL_OBJ(&obj_zv, obj);
-	trace = zend_read_property(zend_get_exception_base(&obj_zv), Z_OBJ(obj_zv), "trace", sizeof("trace")-1, 0, &rv);
+	zval rv;
+	zval *trace = zend_read_property(zend_get_exception_base(obj), obj, "trace", sizeof("trace")-1, 0, &rv);
 	if (trace && Z_TYPE_P(trace) == IS_ARRAY) {
 		zval *frame;
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(trace), frame) {

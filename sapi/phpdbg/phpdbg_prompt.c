@@ -726,16 +726,16 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 
 	ZVAL_OBJ(&zv, ex);
 	zend_call_known_instance_method_with_0_params(ex->ce->__tostring, ex, &tmp);
-	file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), Z_OBJ(zv), ZEND_STRL("file"), 1, &rv));
-	line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), Z_OBJ(zv), ZEND_STRL("line"), 1, &rv));
+	file = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("file"), 1, &rv));
+	line = zval_get_long(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("line"), 1, &rv));
 
 	if (EG(exception)) {
 		EG(exception) = NULL;
 		msg = ZSTR_EMPTY_ALLOC();
 	} else {
-		zend_update_property_string(zend_get_exception_base(&zv), &zv, ZEND_STRL("string"), Z_STRVAL(tmp));
+		zend_update_property_string(zend_get_exception_base(ex), &zv, ZEND_STRL("string"), Z_STRVAL(tmp));
 		zval_ptr_dtor(&tmp);
-		msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), Z_OBJ(zv), ZEND_STRL("string"), 1, &rv));
+		msg = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("string"), 1, &rv));
 	}
 
 	phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
@@ -1721,9 +1721,6 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		/* check for uncaught exceptions */
 		if (exception && PHPDBG_G(handled_exception) != exception && !(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
 			zend_execute_data *prev_ex = execute_data;
-			zval zv, rv;
-			zend_string *file, *msg;
-			zend_long line;
 
 			do {
 				prev_ex = zend_generator_check_placeholder_frame(prev_ex);
@@ -1739,10 +1736,10 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 
 			PHPDBG_G(handled_exception) = exception;
 
-			ZVAL_OBJ(&zv, exception);
-			file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), Z_OBJ(zv), ZEND_STRL("file"), 1, &rv));
-			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), Z_OBJ(zv), ZEND_STRL("line"), 1, &rv));
-			msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), Z_OBJ(zv), ZEND_STRL("message"), 1, &rv));
+			zval rv;
+			zend_string *file = zval_get_string(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("file"), 1, &rv));
+			zend_long line = zval_get_long(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("line"), 1, &rv));
+			zend_string *msg = zval_get_string(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("message"), 1, &rv));
 
 			phpdbg_error("exception",
 				"name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"",
