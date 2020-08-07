@@ -1531,6 +1531,33 @@ ZEND_API void add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, c
 }
 /* }}} */
 
+ZEND_API void add_assoc_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_ARR(&tmp, arr);
+	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
+}
+/* }}} */
+
+ZEND_API void add_assoc_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_OBJ(&tmp, obj);
+	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
+}
+/* }}} */
+
+ZEND_API void add_assoc_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_REF(&tmp, ref);
+	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
+}
+/* }}} */
+
 ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value) /* {{{ */
 {
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, value);
@@ -1609,6 +1636,33 @@ ZEND_API void add_index_stringl(zval *arg, zend_ulong index, const char *str, si
 }
 /* }}} */
 
+ZEND_API void add_index_array(zval *arg, zend_ulong index, zend_array *arr) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_ARR(&tmp, arr);
+	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
+}
+/* }}} */
+
+ZEND_API void add_index_object(zval *arg, zend_ulong index, zend_object *obj) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_OBJ(&tmp, obj);
+	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
+}
+/* }}} */
+
+ZEND_API void add_index_reference(zval *arg, zend_ulong index, zend_reference *ref) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_REF(&tmp, ref);
+	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
+}
+/* }}} */
+
 ZEND_API zend_result add_next_index_long(zval *arg, zend_long n) /* {{{ */
 {
 	zval tmp;
@@ -1677,6 +1731,33 @@ ZEND_API zend_result add_next_index_stringl(zval *arg, const char *str, size_t l
 	zval tmp;
 
 	ZVAL_STRINGL(&tmp, str, length);
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
+}
+/* }}} */
+
+ZEND_API zend_result add_next_index_array(zval *arg, zend_array *arr) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_ARR(&tmp, arr);
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
+}
+/* }}} */
+
+ZEND_API zend_result add_next_index_object(zval *arg, zend_object *obj) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_OBJ(&tmp, obj);
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
+}
+/* }}} */
+
+ZEND_API zend_result add_next_index_reference(zval *arg, zend_reference *ref) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_REF(&tmp, ref);
 	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
 }
 /* }}} */
@@ -1793,6 +1874,36 @@ ZEND_API void add_property_stringl_ex(zval *arg, const char *key, size_t key_len
 	zval tmp;
 
 	ZVAL_STRINGL(&tmp, str, length);
+	add_property_zval_ex(arg, key, key_len, &tmp);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+}
+/* }}} */
+
+ZEND_API void add_property_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_ARR(&tmp, arr);
+	add_property_zval_ex(arg, key, key_len, &tmp);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+}
+/* }}} */
+
+ZEND_API void add_property_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_OBJ(&tmp, obj);
+	add_property_zval_ex(arg, key, key_len, &tmp);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+}
+/* }}} */
+
+ZEND_API void add_property_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_REF(&tmp, ref);
 	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 }
