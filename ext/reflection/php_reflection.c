@@ -5360,7 +5360,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			RETURN_THROWS();
 		}
 
-		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
+		zend_update_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, value);
 	}
 }
 /* }}} */

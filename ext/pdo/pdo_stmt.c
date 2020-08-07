@@ -997,7 +997,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 				case PDO_FETCH_OBJ:
 				case PDO_FETCH_INTO:
-					zend_update_property_ex(NULL, return_value,
+					zend_update_property_ex(NULL, Z_OBJ_P(return_value),
 						stmt->columns[i].name,
 						&val);
 					zval_ptr_dtor(&val);
@@ -1005,7 +1005,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 				case PDO_FETCH_CLASS:
 					if ((flags & PDO_FETCH_SERIALIZE) == 0 || idx) {
-						zend_update_property_ex(ce, return_value,
+						zend_update_property_ex(ce, Z_OBJ_P(return_value),
 							stmt->columns[i].name,
 							&val);
 						zval_ptr_dtor(&val);

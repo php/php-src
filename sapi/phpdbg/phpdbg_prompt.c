@@ -720,11 +720,10 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	zend_object *ex = EG(exception);
 	zend_string *msg, *file;
 	zend_long line;
-	zval zv, rv, tmp;
+	zval rv, tmp;
 
 	EG(exception) = NULL;
 
-	ZVAL_OBJ(&zv, ex);
 	zend_call_known_instance_method_with_0_params(ex->ce->__tostring, ex, &tmp);
 	file = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("file"), 1, &rv));
 	line = zval_get_long(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("line"), 1, &rv));
@@ -733,7 +732,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 		EG(exception) = NULL;
 		msg = ZSTR_EMPTY_ALLOC();
 	} else {
-		zend_update_property_string(zend_get_exception_base(ex), &zv, ZEND_STRL("string"), Z_STRVAL(tmp));
+		zend_update_property_string(zend_get_exception_base(ex), ex, ZEND_STRL("string"), Z_STRVAL(tmp));
 		zval_ptr_dtor(&tmp);
 		msg = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("string"), 1, &rv));
 	}
