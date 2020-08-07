@@ -710,17 +710,16 @@ PHP_METHOD(Phar, webPhar)
 				return;
 			default:
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-				goto cleanup_fail;
-		}
 
 cleanup_fail:
-		zval_ptr_dtor(&params);
-		if (free_pathinfo) {
-			efree(path_info);
+				zval_ptr_dtor(&params);
+				if (free_pathinfo) {
+					efree(path_info);
+				}
+				efree(entry);
+				efree(pt);
+				RETURN_THROWS();
 		}
-		efree(entry);
-		efree(pt);
-		RETURN_THROWS();
 	}
 
 	if (entry_len) {
@@ -2840,27 +2839,26 @@ PHP_METHOD(Phar, setStub)
 	zend_long len = -1;
 	php_stream *stream;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "r|l", &zstub, &len) == SUCCESS) {
+	PHAR_ARCHIVE_OBJECT();
 
-		PHAR_ARCHIVE_OBJECT();
+	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+			"Cannot change stub, phar is read-only");
+		RETURN_THROWS();
+	}
 
-		if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
+	if (phar_obj->archive->is_data) {
+		if (phar_obj->archive->is_tar) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot change stub, phar is read-only");
-			RETURN_THROWS();
+				"A Phar stub cannot be set in a plain tar archive");
+		} else {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+				"A Phar stub cannot be set in a plain zip archive");
 		}
+		RETURN_THROWS();
+	}
 
-		if (phar_obj->archive->is_data) {
-			if (phar_obj->archive->is_tar) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-					"A Phar stub cannot be set in a plain tar archive");
-			} else {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-					"A Phar stub cannot be set in a plain zip archive");
-			}
-			RETURN_THROWS();
-		}
-
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "r|l", &zstub, &len) == SUCCESS) {
 		if ((php_stream_from_zval_no_verify(stream, zstub)) != NULL) {
 			if (len > 0) {
 				len = -len;
@@ -2882,26 +2880,6 @@ PHP_METHOD(Phar, setStub)
 				"Cannot change stub, unable to read from input stream");
 		}
 	} else if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &stub, &stub_len) == SUCCESS) {
-
-		PHAR_ARCHIVE_OBJECT();
-
-		if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot change stub, phar is read-only");
-			RETURN_THROWS();
-		}
-
-		if (phar_obj->archive->is_data) {
-			if (phar_obj->archive->is_tar) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-					"A Phar stub cannot be set in a plain tar archive");
-			} else {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-					"A Phar stub cannot be set in a plain zip archive");
-			}
-			RETURN_THROWS();
-		}
-
 		if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 			RETURN_THROWS();
@@ -3752,12 +3730,12 @@ PHP_METHOD(Phar, offsetUnset)
 	size_t fname_len;
 	phar_entry_info *entry;
 
+	PHAR_ARCHIVE_OBJECT();
+
 	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
 		RETURN_THROWS();
 	}
-
-	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
 		RETURN_THROWS();
@@ -4322,14 +4300,13 @@ PHP_METHOD(Phar, extractTo)
 	int ret;
 	zval *zval_file;
 	HashTable *files_ht = NULL;
-	zend_string *files_str = NULL;
 	zend_bool overwrite = 0;
 	char *error = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(pathto, pathto_len)
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(files_str, files_ht)
-		Z_PARAM_bool(overwrite)
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(filename, files_ht)
+		Z_PARAM_BOOL(overwrite)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHAR_ARCHIVE_OBJECT();
@@ -4371,9 +4348,7 @@ PHP_METHOD(Phar, extractTo)
 		RETURN_THROWS();
 	}
 
-	if (files_str) {
-		filename = files_str;
-	} else if (files_ht) {
+	if (files_ht) {
 		if (zend_hash_num_elements(files_ht) == 0) {
 			RETURN_FALSE;
 		}
@@ -4399,8 +4374,6 @@ PHP_METHOD(Phar, extractTo)
 			}
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
-	} else {
-		filename = NULL;
 	}
 
 	ret = extract_helper(phar_obj->archive, filename, pathto, pathto_len, overwrite, &error);
