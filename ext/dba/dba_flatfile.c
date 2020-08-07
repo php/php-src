@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_FLATFILE
+#ifdef DBA_FLATFILE
 #include "php_flatfile.h"
 
 #include "libflatfile/flatfile.h"

@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_LMDB
+#ifdef DBA_LMDB
 #include "php_lmdb.h"
 
 #ifdef LMDB_INCLUDE_FILE

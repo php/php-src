@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_DB1
+#ifdef DBA_DB1
 #include "php_db1.h"
 
 #ifdef DB1_INCLUDE_FILE
