@@ -2848,6 +2848,12 @@ PHP_FUNCTION(mb_decode_mimeheader)
 }
 /* }}} */
 
+char mb_convert_kana_flags[17] = {
+	'A', 'R', 'N', 'S', 'K', 'H', 'M', 'C',
+	'a', 'r', 'n', 's', 'k', 'h', 'm', 'c',
+	'V'
+};
+
 /* {{{ Conversion between full-width character and half-width character (Japanese) */
 PHP_FUNCTION(mb_convert_kana)
 {
@@ -2866,70 +2872,78 @@ PHP_FUNCTION(mb_convert_kana)
 
 	string.val = (unsigned char*)string_val;
 
-	/* "Zen" is 全, or "full"; "Han" is 半, or "half"
-	 * This refers to "fullwidth" or "halfwidth" variants of characters used for writing Japanese */
 	if (optstr != NULL) {
 		char *p = optstr, *e = p + optstr_len;
 		opt = 0;
+next_option:
 		while (p < e) {
-			switch (*p++) {
-			case 'A':
-				opt |= MBFL_FILT_TL_HAN2ZEN_ALL;
-				break;
-			case 'a':
-				opt |= MBFL_FILT_TL_ZEN2HAN_ALL;
-				break;
-			case 'R':
-				opt |= MBFL_FILT_TL_HAN2ZEN_ALPHA;
-				break;
-			case 'r':
-				opt |= MBFL_FILT_TL_ZEN2HAN_ALPHA;
-				break;
-			case 'N':
-				opt |= MBFL_FILT_TL_HAN2ZEN_NUMERIC;
-				break;
-			case 'n':
-				opt |= MBFL_FILT_TL_ZEN2HAN_NUMERIC;
-				break;
-			case 'S':
-				opt |= MBFL_FILT_TL_HAN2ZEN_SPACE;
-				break;
-			case 's':
-				opt |= MBFL_FILT_TL_ZEN2HAN_SPACE;
-				break;
-			case 'K':
-				opt |= MBFL_FILT_TL_HAN2ZEN_KATAKANA;
-				break;
-			case 'k':
-				opt |= MBFL_FILT_TL_ZEN2HAN_KATAKANA;
-				break;
-			case 'H':
-				opt |= MBFL_FILT_TL_HAN2ZEN_HIRAGANA;
-				break;
-			case 'h':
-				opt |= MBFL_FILT_TL_ZEN2HAN_HIRAGANA;
-				break;
-			case 'V':
-				opt |= MBFL_FILT_TL_HAN2ZEN_GLUE;
-				break;
-			case 'C':
-				opt |= MBFL_FILT_TL_ZENKAKU_HIRA2KANA;
-				break;
-			case 'c':
-				opt |= MBFL_FILT_TL_ZENKAKU_KANA2HIRA;
-				break;
-			case 'M':
-				/* TODO: figure out what 'M' and 'm' are for, and rename the constant
-				 * to something meaningful */
-				opt |= MBFL_FILT_TL_HAN2ZEN_COMPAT1;
-				break;
-			case 'm':
-				opt |= MBFL_FILT_TL_ZEN2HAN_COMPAT1;
-				break;
+			/* Walk through option string and convert to bit vector
+			 * See mbfilter_tl_jisx0201_jisx0208.h for the values used */
+			char c = *p++;
+			if (c == 'A') {
+				opt |= MBFL_HAN2ZEN_ALL | MBFL_HAN2ZEN_ALPHA | MBFL_HAN2ZEN_NUMERIC;
+			} else if (c == 'a') {
+				opt |= MBFL_ZEN2HAN_ALL | MBFL_ZEN2HAN_ALPHA | MBFL_ZEN2HAN_NUMERIC;
+			} else {
+				for (int i = 0; i < sizeof(mb_convert_kana_flags) / sizeof(char); i++) {
+					if (c == mb_convert_kana_flags[i]) {
+						opt |= (1 << i);
+						goto next_option;
+					}
+				}
+
+				zend_argument_value_error(2, "contains invalid flag: '%c'", c);
+				RETURN_THROWS();
+			}
+		}
+
+		/* Check for illegal combinations of options */
+		if (((opt & 0xFF00) >> 8) & opt) {
+			/* It doesn't make sense to convert the same type of characters from halfwidth to
+			 * fullwidth and then back to halfwidth again. Neither does it make sense to convert
+			 * FW hiragana to FW katakana and then back again. */
+			int badflag = ((opt & 0xFF00) >> 8) & opt, i;
+			for (i = 0; (badflag & 1) == 0; badflag >>= 1, i++);
+			char flag1 = mb_convert_kana_flags[i], flag2 = mb_convert_kana_flags[i+8];
+			if ((flag1 == 'R' || flag1 == 'N') && (opt & MBFL_HAN2ZEN_ALL))
+				flag1 = 'A';
+			if ((flag2 == 'r' || flag2 == 'n') && (opt & MBFL_ZEN2HAN_ALL))
+				flag2 = 'a';
+			zend_argument_value_error(2, "must not combine '%c' and '%c' flags", flag1, flag2);
+			RETURN_THROWS();
+		}
+
+		if ((opt & MBFL_HAN2ZEN_HIRAGANA) && (opt & MBFL_HAN2ZEN_KATAKANA)) {
+			/* We can either convert all HW kana to FW hiragana, or to FW katakana, but not both */
+			zend_argument_value_error(2, "must not combine 'H' and 'K' flags");
+			RETURN_THROWS();
+		}
+
+		/* We can either convert all FW kana to HW hiragana, or all FW kana to HW katakana,
+		 * or all FW hiragana to FW katakana, or all FW katakana to FW hiragana, but not
+		 * more than one of these */
+		if (opt & MBFL_ZEN2HAN_HIRAGANA) {
+			if (opt & MBFL_ZEN2HAN_KATAKANA) {
+				zend_argument_value_error(2, "must not combine 'h' and 'k' flags");
+				RETURN_THROWS();
+			} else if (opt & MBFL_ZENKAKU_HIRA2KATA) {
+				zend_argument_value_error(2, "must not combine 'h' and 'C' flags");
+				RETURN_THROWS();
+			} else if (opt & MBFL_ZENKAKU_KATA2HIRA) {
+				zend_argument_value_error(2, "must not combine 'h' and 'c' flags");
+				RETURN_THROWS();
+			}
+		} else if (opt & MBFL_ZEN2HAN_KATAKANA) {
+			if (opt & MBFL_ZENKAKU_HIRA2KATA) {
+				zend_argument_value_error(2, "must not combine 'k' and 'C' flags");
+				RETURN_THROWS();
+			} else if (opt & MBFL_ZENKAKU_KATA2HIRA) {
+				zend_argument_value_error(2, "must not combine 'k' and 'c' flags");
+				RETURN_THROWS();
 			}
 		}
 	} else {
-		opt = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
+		opt = MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE;
 	}
 
 	/* encoding */
