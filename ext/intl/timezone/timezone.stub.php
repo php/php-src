@@ -44,6 +44,7 @@ class IntlTimeZone
     public static function fromDateTimeZone(DateTimeZone $zone) {}
 
     /**
+     * @param bool $isSystemID
      * @return string|false
      * @alias intltz_get_canonical_id
      */
@@ -92,6 +93,8 @@ class IntlTimeZone
     public function getID() {}
 
     /**
+     * @param int $rawOffset
+     * @param int $dstOffset
      * @return bool
      * @alias intltz_get_offset
      */

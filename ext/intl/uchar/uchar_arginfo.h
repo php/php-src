@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2f9658fe9c23180244786ed48a5ca542b7ed95ea */
+ * Stub hash: 61f9c0a6c5048d25e070379f2f98fa10f8ce25ee */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -53,7 +53,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_forDigit, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, digit, IS_LONG, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, radix, "10")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, radix, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52

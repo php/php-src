@@ -61,6 +61,7 @@ function com_create_guid(): string|false {}
 /** @param array|string|null $sinkinterface */
 function com_event_sink(variant $comobject, object $sinkobject, $sinkinterface = UNKNOWN): bool {}
 
+/** @param com|dotnet|variant|string $comobject */
 function com_print_typeinfo($comobject, ?string $dispinterface = null, bool $wantsink = false): bool {}
 
 function com_message_pump(int $timeoutms = 0): bool {}

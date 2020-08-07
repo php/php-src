@@ -19,6 +19,7 @@ class NumberFormatter
     public function format(int|float $value, int $type = NumberFormatter::TYPE_DEFAULT) {}
 
     /**
+     * @param int $position
      * @return int|float|false
      * @alias numfmt_parse
      */
@@ -31,6 +32,8 @@ class NumberFormatter
     public function formatCurrency(float $value, string $currency) {}
 
     /**
+     * @param string $currency
+     * @param int $position
      * @return float|false
      * @alias numfmt_parse_currency
      */

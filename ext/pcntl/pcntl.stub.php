@@ -4,10 +4,16 @@
 
 function pcntl_fork(): int {}
 
-/** @param int $status */
+/**
+ * @param int $status
+ * @param array $rusage
+ */
 function pcntl_waitpid(int $pid, &$status, int $options = 0, &$rusage = []): int {}
 
-/** @param int $status */
+/**
+ * @param int $status
+ * @param array $rusage
+ */
 function pcntl_wait(&$status, int $options = 0, &$rusage = []): int {}
 
 /** @param callable|int $handler */
