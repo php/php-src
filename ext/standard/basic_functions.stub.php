@@ -120,6 +120,10 @@ function array_search(mixed $needle, array $haystack, bool $strict = false): int
 /** @prefer-ref $array */
 function extract(array &$array, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
 
+/**
+ * @param string|array $var_name
+ * @param string|array $var_names
+ */
 function compact($var_name, ...$var_names): array {}
 
 function array_fill(int $start_key, int $num, mixed $val): array {}
@@ -177,34 +181,44 @@ function array_unique(array $array, int $flags = SORT_STRING): array {}
 
 function array_intersect_key(array $array1, array $array2, array ...$arrays): array {}
 
+/** @param array|callable $rest */
 function array_intersect_ukey(array $array1, array $array2, ...$rest): array {}
 
 function array_intersect(array $array1, array $array2, array ...$arrays): array {}
 
+/** @param array|callable $rest */
 function array_uintersect(array $array1, array $array2, ...$rest): array {}
 
 function array_intersect_assoc(array $array1, array $array2, array ...$arrays): array {}
 
+/** @param array|callable $rest */
 function array_uintersect_assoc(array $array1, array $array2, ...$rest): array {}
 
+/** @param array|callable $rest */
 function array_intersect_uassoc(array $array1, array $array2, ...$rest): array {}
 
+/** @param array|callable $rest */
 function array_uintersect_uassoc(array $array1, array $array2, ...$rest): array {}
 
 function array_diff_key(array $array1, array $array2, array ...$arrays): array {}
 
+/** @param array|callable $rest */
 function array_diff_ukey(array $array1, array $array2, ...$rest): array {}
 
 function array_diff(array $array1, array $array2, array ...$arrays): array {}
 
+/** @param array|callable $rest */
 function array_udiff(array $array1, array $array2, ...$rest): array {}
 
 function array_diff_assoc(array $array1, array $array2, array ...$arrays): array {}
 
+/** @param array|callable $rest */
 function array_diff_uassoc(array $array1, array $array2, ...$rest): array {}
 
+/** @param array|callable $rest */
 function array_udiff_assoc(array $array1, array $array2, ...$rest): array {}
 
+/** @param array|callable $rest */
 function array_udiff_uassoc(array $array1, array $array2, ...$rest): array {}
 
 /**
@@ -925,13 +939,17 @@ function stat(string $filename): array|false {}
 
 function lstat(string $filename): array|false {}
 
+/** @param string|int $user */
 function chown(string $filename, $user): bool {}
 
+/** @param string|int $group */
 function chgrp(string $filename, $group): bool {}
 
 #if HAVE_LCHOWN
+/** @param string|int $user */
 function lchown(string $filename, $user): bool {}
 
+/** @param string|int $group */
 function lchgrp(string $filename, $group): bool {}
 #endif
 

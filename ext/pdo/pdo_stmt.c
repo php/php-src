@@ -1435,7 +1435,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 }
 /* }}} */
 
-static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
+static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* {{{ */
 {
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
@@ -1444,15 +1444,16 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	memset(&param, 0, sizeof(param));
 	param.paramno = -1;
 
-	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-			"lz|llz!", &param.paramno, &parameter, &param_type, &param.max_value_len,
-			&driver_params)) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|llz!", &param.name,
-				&parameter, &param_type, &param.max_value_len,
-				&driver_params)) {
-			return 0;
-		}
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
+		Z_PARAM_ZVAL(parameter)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(param_type)
+		Z_PARAM_LONG(param.max_value_len)
+		Z_PARAM_ZVAL_OR_NULL(driver_params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STMT_GET_OBJ;
 
 	param.param_type = (int) param_type;
 
@@ -1460,7 +1461,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 		--param.paramno; /* make it zero-based internally */
 	} else if (!param.name) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
-		return 0;
+		RETURN_FALSE;
 	}
 
 	if (driver_params) {
@@ -1472,9 +1473,11 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
 		}
-		return 0;
+
+		RETURN_FALSE;
 	}
-	return 1;
+
+	RETURN_TRUE;
 } /* }}} */
 
 /* {{{ bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
@@ -1520,16 +1523,14 @@ PHP_METHOD(PDOStatement, bindValue)
 /* {{{ bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
 PHP_METHOD(PDOStatement, bindParam)
 {
-	PHP_STMT_GET_OBJ;
-	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, TRUE));
+	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 /* {{{ bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
 PHP_METHOD(PDOStatement, bindColumn)
 {
-	PHP_STMT_GET_OBJ;
-	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 0));
+	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
