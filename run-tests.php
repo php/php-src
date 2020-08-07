@@ -3283,19 +3283,16 @@ function show_result(
             switch ( $result ) {
                 case 'PASS': // Light Green
                     $color = "\e[1;32m{$result}\e[0m"; break;
-                case 'SKIP': // Light Gray
-                    $color = "\e[0;37m{$result}\e[0m"; break;
-                case 'FAIL': // Light Red
+                case 'FAIL':
+                case 'BORK':
+                case 'LEAK':
+                    // Light Red
                     $color = "\e[1;31m{$result}\e[0m"; break;
-                case 'BORK': // Purple
-                    $color = "\e[0;35m{$result}\e[0m"; break;
-                case 'LEAK': // Dark Blue
-                    $color = "\e[2;34m{$result}\e[0m"; break;
                 default: // Yellow
                     $color = "\e[1;33m{$result}\e[0m"; break;
             }
 
-            echo "$color $tested [$tested_file] $extra\e[0m\n";
+            echo "$color $tested [$tested_file] $extra\n";
         } else {
             echo "$result $tested [$tested_file] $extra\n";
         }
