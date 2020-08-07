@@ -45,8 +45,8 @@ var_dump(file_get_contents(__DIR__ . '/extract1-2/file2.txt'));
 var_dump(is_dir(__DIR__ . '/extract1-2/one/level'));
 
 try {
-    $a->extractTo(__DIR__ . '/whatever', 134);
-} catch (Exception $e) {
+    $a->extractTo(__DIR__ . '/whatever', new stdClass());
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -141,7 +141,7 @@ string(2) "hi"
 string(3) "hi3"
 string(3) "hi2"
 bool(false)
-Invalid argument, expected a filename (string) or array of filenames
+Phar::extractTo(): Argument #2 ($files) must be of type string|array|null, stdClass given
 Phar::extractTo(): Argument #1 ($pathto) must be a valid path, array given
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory

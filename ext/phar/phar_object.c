@@ -4296,7 +4296,7 @@ PHP_METHOD(Phar, extractTo)
 	php_stream *fp;
 	php_stream_statbuf ssb;
 	char *pathto;
-	zend_string *filename;
+	zend_string *filename = NULL;
 	size_t pathto_len;
 	int ret;
 	zval *zval_file;

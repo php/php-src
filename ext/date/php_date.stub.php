@@ -396,7 +396,7 @@ class DatePeriod implements IteratorAggregate
     /**
      * @param DateTimeInterface|string $start
      * @param DateInterval|int $interval
-     * @param DateTimeInterface $end
+     * @param DateTimeInterface|int $end
      * @param int $options
      */
     public function __construct($start, $interval = UNKNOWN, $end = UNKNOWN, $options = UNKNOWN) {}
