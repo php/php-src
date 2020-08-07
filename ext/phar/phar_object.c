@@ -675,9 +675,9 @@ PHP_METHOD(Phar, webPhar)
 
 		ZVAL_STRINGL(&params, entry, entry_len);
 
-		fci.param_count = 1;
-		fci.params = &params;
-		fci.retval = &retval;
+		rewrite_fci.param_count = 1;
+		rewrite_fci.params = &params;
+		rewrite_fci.retval = &retval;
 
 		if (FAILURE == zend_call_function(&rewrite_fci, &rewrite_fcc)) {
 			if (!EG(exception)) {
@@ -3715,12 +3715,12 @@ PHP_METHOD(Phar, offsetSet)
 	size_t fname_len, cont_len;
 	zval *zresource;
 
+	PHAR_ARCHIVE_OBJECT();
+
 	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
 		RETURN_THROWS();
 	}
-
-	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "pr", &fname, &fname_len, &zresource) == FAILURE
 	&& zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &fname, &fname_len, &cont_str, &cont_len) == FAILURE) {
