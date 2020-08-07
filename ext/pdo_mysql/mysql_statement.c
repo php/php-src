@@ -118,7 +118,15 @@ static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
 	row_count = (zend_long) mysql_stmt_affected_rows(S->stmt);
 	if (row_count != (zend_long)-1) {
 		stmt->row_count = row_count;
-	}
+	}else {
+        if (!H->buffered) {
+                S->result = mysql_use_result(H->server);
+        } else {
+                S->result = mysql_store_result(H->server);
+        }
+        pdo_mysql_error_stmt_emulate_false(stmt);                
+        PDO_DBG_VOID_RETURN;
+    }
 }
 /* }}} */
 
