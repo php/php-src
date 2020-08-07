@@ -4007,7 +4007,7 @@ ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, c
 }
 /* }}} */
 
-ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length) /* {{{ */
+ZEND_API void zend_unset_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length) /* {{{ */
 {
 	zend_string *property;
 	zend_class_entry *old_scope = EG(fake_scope);
@@ -4015,7 +4015,7 @@ ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const c
 	EG(fake_scope) = scope;
 
 	property = zend_string_init(name, name_length, 0);
-	Z_OBJ_HT_P(object)->unset_property(Z_OBJ_P(object), property, 0);
+	object->handlers->unset_property(object, property, 0);
 	zend_string_release_ex(property, 0);
 
 	EG(fake_scope) = old_scope;
