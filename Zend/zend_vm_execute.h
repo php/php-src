@@ -1376,7 +1376,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 		LOAD_OPLINE_EX();
 
 		ZEND_VM_ENTER_EX();
@@ -1458,7 +1457,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 		LOAD_OPLINE_EX();
 
 		ZEND_VM_ENTER_EX();
@@ -3533,7 +3531,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_
 			}
 		}
 	}
-
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -3996,7 +3993,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 	SAVE_OPLINE();
 	inc_filename = RT_CONSTANT(opline, opline->op1);
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 
 		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
@@ -4032,17 +4028,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-
-		/* TODO Move to i_init_code_execute_data
-		if (zend_observer_fcall_op_array_extension != -1 && new_op_array != ZEND_FAKE_OP_ARRAY) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(new_op_array);
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, execute_data);
-			}
-		}
-		*/
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -13235,7 +13220,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 	SAVE_OPLINE();
 	inc_filename = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
@@ -13271,17 +13255,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-
-		/* TODO Move to i_init_code_execute_data
-		if (zend_observer_fcall_op_array_extension != -1 && new_op_array != ZEND_FAKE_OP_ARRAY) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(new_op_array);
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, execute_data);
-			}
-		}
-		*/
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -17511,7 +17484,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HA
 			}
 		}
 	}
-
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -19998,7 +19970,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HA
 			}
 		}
 	}
-
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -35964,7 +35935,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HAN
 			}
 		}
 	}
-
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -36465,7 +36435,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 	SAVE_OPLINE();
 	inc_filename = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 
 		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
@@ -36501,17 +36470,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-
-		/* TODO Move to i_init_code_execute_data
-		if (zend_observer_fcall_op_array_extension != -1 && new_op_array != ZEND_FAKE_OP_ARRAY) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(new_op_array);
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, execute_data);
-			}
-		}
-		*/
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -52572,7 +52530,6 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
-
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -54074,7 +54031,6 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
-
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -54368,7 +54324,6 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
-
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -55450,7 +55405,6 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
-
 	goto zend_leave_helper_SPEC_LABEL;
 }
 

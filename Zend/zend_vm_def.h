@@ -3957,7 +3957,6 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 		LOAD_OPLINE_EX();
 
 		ZEND_VM_ENTER_EX();
@@ -4253,7 +4252,6 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 			}
 		}
 	}
-
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
@@ -5845,7 +5843,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 	SAVE_OPLINE();
 	inc_filename = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		FREE_OP1();
 		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
@@ -5881,7 +5878,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
