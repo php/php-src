@@ -34,11 +34,16 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump(gmp_pow(array(),10));
+
+try {
+    var_dump(gmp_pow(array(),10));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "1024"
 string(4) "1024"
 string(5) "-2048"
@@ -52,7 +57,5 @@ gmp_pow(): Argument #2 ($exp) must be greater than or equal to 0
 string(14) "10240000000000"
 string(14) "10240000000000"
 gmp_pow(): Argument #2 ($exp) must be of type int, array given
-
-Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_pow(): Argument #1 ($base) must be of type GMP|string|int|bool, array given
 Done
