@@ -99,16 +99,16 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	ZVAL_OBJ(&zv, exception);
 	ex = &zv;
 	do {
-		ancestor = zend_read_property_ex(i_get_exception_base(&pv), &pv, ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
+		ancestor = zend_read_property_ex(i_get_exception_base(&pv), Z_OBJ(pv), ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
 		while (Z_TYPE_P(ancestor) == IS_OBJECT) {
 			if (Z_OBJ_P(ancestor) == Z_OBJ_P(ex)) {
 				OBJ_RELEASE(add_previous);
 				return;
 			}
-			ancestor = zend_read_property_ex(i_get_exception_base(ancestor), ancestor, ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
+			ancestor = zend_read_property_ex(i_get_exception_base(ancestor), Z_OBJ_P(ancestor), ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
 		}
 		base_ce = i_get_exception_base(ex);
-		previous = zend_read_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
+		previous = zend_read_property_ex(base_ce, Z_OBJ_P(ex), ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &pv);
 			GC_DELREF(add_previous);
@@ -309,7 +309,7 @@ ZEND_METHOD(Exception, __construct)
 
 /* {{{ Exception unserialize checks */
 #define CHECK_EXC_TYPE(id, type) \
-	pvalue = zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 1, &value); \
+	pvalue = zend_read_property_ex(i_get_exception_base(object), Z_OBJ_P(object), ZSTR_KNOWN(id), 1, &value); \
 	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
 		zend_unset_property(i_get_exception_base(object), object, ZSTR_VAL(ZSTR_KNOWN(id)), ZSTR_LEN(ZSTR_KNOWN(id))); \
 	}
@@ -375,9 +375,9 @@ ZEND_METHOD(ErrorException, __construct)
 /* }}} */
 
 #define GET_PROPERTY(object, id) \
-	zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 0, &rv)
+	zend_read_property_ex(i_get_exception_base(object), Z_OBJ_P(object), ZSTR_KNOWN(id), 0, &rv)
 #define GET_PROPERTY_SILENT(object, id) \
-	zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 1, &rv)
+	zend_read_property_ex(i_get_exception_base(object), Z_OBJ_P(object), ZSTR_KNOWN(id), 1, &rv)
 
 /* {{{ Get the file in which the exception occurred */
 ZEND_METHOD(Exception, getFile)
@@ -603,7 +603,7 @@ ZEND_METHOD(Exception, getTraceAsString)
 	object = ZEND_THIS;
 	base_ce = i_get_exception_base(object);
 
-	trace = zend_read_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
+	trace = zend_read_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}

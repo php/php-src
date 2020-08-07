@@ -643,10 +643,10 @@ PHP_METHOD(SoapFault, __toString)
 	}
 
 	this_ptr = ZEND_THIS;
-	faultcode   = zend_read_property(soap_fault_class_entry, this_ptr, "faultcode", sizeof("faultcode")-1, 1, &rv1);
-	faultstring = zend_read_property(soap_fault_class_entry, this_ptr, "faultstring", sizeof("faultstring")-1, 1, &rv2);
-	file = zend_read_property(soap_fault_class_entry, this_ptr, "file", sizeof("file")-1, 1, &rv3);
-	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1, &rv4);
+	faultcode = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultcode", sizeof("faultcode")-1, 1, &rv1);
+	faultstring = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultstring", sizeof("faultstring")-1, 1, &rv2);
+	file = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "file", sizeof("file")-1, 1, &rv3);
+	line = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "line", sizeof("line")-1, 1, &rv4);
 
 	zend_call_method_with_0_params(
 		Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), NULL, "gettraceasstring", &trace);
@@ -1176,7 +1176,7 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 	} else if (instanceof_function(Z_OBJCE(exception_object), zend_ce_error)) {
 		if (service->send_errors) {
 			zval rv;
-			zend_string *msg = zval_get_string(zend_read_property(zend_ce_error, &exception_object, "message", sizeof("message")-1, 0, &rv));
+			zend_string *msg = zval_get_string(zend_read_property(zend_ce_error, Z_OBJ(exception_object), "message", sizeof("message")-1, 0, &rv));
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", ZSTR_VAL(msg), NULL, NULL);
 			zend_string_release_ex(msg, 0);
 		} else {
@@ -2241,7 +2241,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 				zval exception_object;
 
 				ZVAL_OBJ(&exception_object, EG(exception));
-				msg = zval_get_string(zend_read_property(zend_ce_error, &exception_object, "message", sizeof("message")-1, 0, &rv));
+				msg = zval_get_string(zend_read_property(zend_ce_error, Z_OBJ(exception_object), "message", sizeof("message")-1, 0, &rv));
 				/* change class */
 				EG(exception)->ce = soap_fault_class_entry;
 				set_soap_fault(&exception_object, NULL, "Client", ZSTR_VAL(msg), NULL, NULL, NULL);

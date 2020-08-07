@@ -4179,21 +4179,21 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zval *object, zend_string *name, zend_bool silent, zval *rv) /* {{{ */
+ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zend_bool silent, zval *rv) /* {{{ */
 {
 	zval *value;
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
-	value = Z_OBJ_HT_P(object)->read_property(Z_OBJ_P(object), name, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
+	value = object->handlers->read_property(object, name, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
 
 	EG(fake_scope) = old_scope;
 	return value;
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
 {
 	zval *value;
 	zend_string *str;

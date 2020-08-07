@@ -5316,7 +5316,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 			RETURN_THROWS();
 		}
 
-		member_p = zend_read_property_ex(intern->ce, object, ref->unmangled_name, 0, &rv);
+		member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
 		if (member_p != &rv) {
 			ZVAL_COPY_DEREF(return_value, member_p);
 		} else {

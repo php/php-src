@@ -1170,7 +1170,7 @@ static void set_zval_property(zval* object, char* name, zval* val)
 static zval* get_zval_property(zval* object, char* name, zval *rv)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval *data = zend_read_property(Z_OBJCE_P(object), object, name, strlen(name), 1, rv);
+		zval *data = zend_read_property(Z_OBJCE_P(object), Z_OBJ_P(object), name, strlen(name), 1, rv);
 		if (data == &EG(uninitialized_zval)) {
 			return NULL;
 		}

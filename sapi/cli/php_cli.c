@@ -1067,12 +1067,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						pce->constructor, Z_OBJ(ref), NULL, &arg);
 
 					if (EG(exception)) {
-						zval tmp, *msg, rv;
-
-						ZVAL_OBJ(&tmp, EG(exception));
-						msg = zend_read_property(zend_ce_exception, &tmp, "message", sizeof("message")-1, 0, &rv);
+						zval rv;
+						zval *msg = zend_read_property(zend_ce_exception, EG(exception), "message", sizeof("message")-1, 0, &rv);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
-						zval_ptr_dtor(&tmp);
+						zend_object_release(EG(exception));
 						EG(exception) = NULL;
 					} else {
 						zend_print_zval(&ref, 0);
