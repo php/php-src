@@ -77,14 +77,14 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_string(def_ex, &ex, "message", sizeof("message")-1, message);
-		zend_update_property_string(def_ex, &ex, "code", sizeof("code")-1, *pdo_err);
+		zend_update_property_string(def_ex, Z_OBJ(ex), "message", sizeof("message")-1, message);
+		zend_update_property_string(def_ex, Z_OBJ(ex), "code", sizeof("code")-1, *pdo_err);
 
 		array_init(&info);
 
 		add_next_index_string(&info, *pdo_err);
 		add_next_index_long(&info, 0);
-		zend_update_property(pdo_ex, &ex, "errorInfo", sizeof("errorInfo")-1, &info);
+		zend_update_property(pdo_ex, Z_OBJ(ex), "errorInfo", sizeof("errorInfo")-1, &info);
 		zval_ptr_dtor(&info);
 
 		zend_throw_exception_object(&ex);
@@ -152,11 +152,11 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_str(def_ex, &ex, "message", sizeof("message") - 1, message);
-		zend_update_property_string(def_ex, &ex, "code", sizeof("code") - 1, *pdo_err);
+		zend_update_property_str(def_ex, Z_OBJ(ex), "message", sizeof("message") - 1, message);
+		zend_update_property_string(def_ex, Z_OBJ(ex), "code", sizeof("code") - 1, *pdo_err);
 
 		if (!Z_ISUNDEF(info)) {
-			zend_update_property(pdo_ex, &ex, "errorInfo", sizeof("errorInfo") - 1, &info);
+			zend_update_property(pdo_ex, Z_OBJ(ex), "errorInfo", sizeof("errorInfo") - 1, &info);
 		}
 
 		zend_throw_exception_object(&ex);

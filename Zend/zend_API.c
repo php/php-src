@@ -3971,19 +3971,19 @@ ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const cha
 }
 /* }}} */
 
-ZEND_API void zend_update_property_ex(zend_class_entry *scope, zval *object, zend_string *name, zval *value) /* {{{ */
+ZEND_API void zend_update_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zval *value) /* {{{ */
 {
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
-	Z_OBJ_HT_P(object)->write_property(Z_OBJ_P(object), name, value, NULL);
+	object->handlers->write_property(object, name, value, NULL);
 
 	EG(fake_scope) = old_scope;
 }
 /* }}} */
 
-ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zval *value) /* {{{ */
+ZEND_API void zend_update_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zval *value) /* {{{ */
 {
 	zend_string *property;
 	zend_class_entry *old_scope = EG(fake_scope);
@@ -3991,14 +3991,14 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 	EG(fake_scope) = scope;
 
 	property = zend_string_init(name, name_length, 0);
-	Z_OBJ_HT_P(object)->write_property(Z_OBJ_P(object), property, value, NULL);
+	object->handlers->write_property(object, property, value, NULL);
 	zend_string_release_ex(property, 0);
 
 	EG(fake_scope) = old_scope;
 }
 /* }}} */
 
-ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, const char *name, size_t name_length) /* {{{ */
+ZEND_API void zend_update_property_null(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length) /* {{{ */
 {
 	zval tmp;
 
@@ -4022,7 +4022,7 @@ ZEND_API void zend_unset_property(zend_class_entry *scope, zend_object *object, 
 }
 /* }}} */
 
-ZEND_API void zend_update_property_bool(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_long value) /* {{{ */
+ZEND_API void zend_update_property_bool(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value) /* {{{ */
 {
 	zval tmp;
 
@@ -4031,7 +4031,7 @@ ZEND_API void zend_update_property_bool(zend_class_entry *scope, zval *object, c
 }
 /* }}} */
 
-ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_long value) /* {{{ */
+ZEND_API void zend_update_property_long(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value) /* {{{ */
 {
 	zval tmp;
 
@@ -4040,7 +4040,7 @@ ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, c
 }
 /* }}} */
 
-ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object, const char *name, size_t name_length, double value) /* {{{ */
+ZEND_API void zend_update_property_double(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, double value) /* {{{ */
 {
 	zval tmp;
 
@@ -4049,7 +4049,7 @@ ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object,
 }
 /* }}} */
 
-ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_string *value) /* {{{ */
+ZEND_API void zend_update_property_str(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_string *value) /* {{{ */
 {
 	zval tmp;
 
@@ -4058,7 +4058,7 @@ ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, co
 }
 /* }}} */
 
-ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, const char *name, size_t name_length, const char *value) /* {{{ */
+ZEND_API void zend_update_property_string(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value) /* {{{ */
 {
 	zval tmp;
 
@@ -4068,7 +4068,7 @@ ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object,
 }
 /* }}} */
 
-ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, const char *name, size_t name_length, const char *value, size_t value_len) /* {{{ */
+ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value, size_t value_len) /* {{{ */
 {
 	zval tmp;
 
