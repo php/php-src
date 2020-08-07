@@ -13,22 +13,10 @@ if test "$PHP_ICONV" != "no"; then
   ])
 
   if test "$iconv_avail" != "no"; then
-    if test -z "$ICONV_DIR"; then
-      for i in /usr/local /usr; do
-        if test -f "$i/include/iconv.h"; then
-          PHP_ICONV_PREFIX="$i"
-          break
-        fi
-      done
-      if test -z "$PHP_ICONV_PREFIX"; then
-        PHP_ICONV_PREFIX="/usr"
-      fi
-    else
-      PHP_ICONV_PREFIX="$ICONV_DIR"
-    fi
-
-    CFLAGS="-I$PHP_ICONV_PREFIX/include $CFLAGS"
-    LDFLAGS="-L$PHP_ICONV_PREFIX/$PHP_LIBDIR $LDFLAGS"
+    save_LDFLAGS="$LDFLAGS"
+    save_CFLAGS="$CFLAGS"
+    LDFLAGS="$ICONV_SHARED_LIBADD $LDFLAGS"
+    CFLAGS="$INCLUDES $CFLAGS"
 
     AC_MSG_CHECKING([if iconv is glibc's])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <gnu/libc-version.h>]], [[gnu_get_libc_version();]])],[
@@ -40,8 +28,6 @@ if test "$PHP_ICONV" != "no"; then
 
     if test -z "$iconv_impl_name"; then
       AC_MSG_CHECKING([if using GNU libiconv])
-      php_iconv_old_ld="$LDFLAGS"
-      LDFLAGS="-liconv $LDFLAGS"
       AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <iconv.h>
 int main() {
@@ -53,10 +39,8 @@ int main() {
         iconv_impl_name="gnu_libiconv"
       ],[
         AC_MSG_RESULT(no)
-        LDFLAGS="$php_iconv_old_ld"
       ],[
         AC_MSG_RESULT([no, cross-compiling])
-        LDFLAGS="$php_iconv_old_ld"
       ])
     fi
 
@@ -72,14 +56,11 @@ int main() {
 
     if test -z "$iconv_impl_name"; then
       AC_MSG_CHECKING([if using IBM iconv])
-      php_iconv_old_ld="$LDFLAGS"
-      LDFLAGS="-liconv $LDFLAGS"
       AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]], [[cstoccsid("");]])],[
         AC_MSG_RESULT(yes)
         iconv_impl_name="ibm"
       ],[
         AC_MSG_RESULT(no)
-        LDFLAGS="$php_iconv_old_ld"
       ])
     fi
 
@@ -87,7 +68,6 @@ int main() {
       gnu_libiconv [)]
         AC_DEFINE([PHP_ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
         AC_DEFINE([HAVE_LIBICONV],1,[Whether libiconv is used])
-        PHP_ADD_LIBRARY_WITH_PATH(iconv, "$PHP_ICONV_PREFIX/$PHP_LIBDIR", ICONV_SHARED_LIBADD)
         ;;
 
       bsd [)]
@@ -163,17 +143,10 @@ int main() {
       AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
     ])
 
-    AC_MSG_CHECKING([if your cpp allows macro usage in include lines])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#define FOO <iconv.h>
-#include FOO
-    ]], [])], [
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ])
+    LDFLAGS="$save_LDFLAGS"
+    CFLAGS="$save_CFLAGS"
 
-    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-I\"$PHP_ICONV_PREFIX/include\" -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_SUBST(ICONV_SHARED_LIBADD)
     PHP_INSTALL_HEADERS([ext/iconv/])
   else
