@@ -2917,12 +2917,10 @@ PHP_FUNCTION(mb_convert_kana)
 				opt |= MBFL_FILT_TL_ZEN2HAN_KANA2HIRA;
 				break;
 			case 'M':
-				/* TODO: figure out what 'M' and 'm' are for, and rename the constant
-				 * to something meaningful */
-				opt |= MBFL_FILT_TL_HAN2ZEN_COMPAT1;
+				opt |= MBFL_FILT_TL_HAN2ZEN_SPECIAL;
 				break;
 			case 'm':
-				opt |= MBFL_FILT_TL_ZEN2HAN_COMPAT1;
+				opt |= MBFL_FILT_TL_ZEN2HAN_SPECIAL;
 				break;
 			}
 		}

@@ -126,7 +126,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT1) {
+	if (mode & MBFL_FILT_TL_HAN2ZEN_SPECIAL) {
 		/* special ascii to symbol */
 		if (c == 0x5c) {
 			s = 0xffe5;				/* FULLWIDTH YEN SIGN */
@@ -213,7 +213,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT1) {	/* special symbol to ascii */
+	if (mode & MBFL_FILT_TL_ZEN2HAN_SPECIAL) {	/* special symbol to ascii */
 		if (c == 0xffe5) {			/* FULLWIDTH YEN SIGN */
 			s = 0x5c;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
