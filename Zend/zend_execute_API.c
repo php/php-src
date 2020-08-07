@@ -35,7 +35,6 @@
 #include "zend_float.h"
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
-#include "zend_observer.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -783,13 +782,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		uint32_t orig_jit_trace_num = EG(jit_trace_num);
 
 		zend_init_func_execute_data(call, &func->op_array, fci->retval);
-		if (zend_observer_fcall_op_array_extension != -1 && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&func->op_array);
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, call);
-			}
-		}
 		zend_execute_ex(call);
 		EG(jit_trace_num) = orig_jit_trace_num;
 		EG(opline_before_exception) = current_opline_before_exception;
