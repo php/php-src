@@ -19,40 +19,43 @@ $hanKakuB    =	'ｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿ';
 $hanKakuC    =	'ﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏ';
 $hanKakuD    =	'ﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ';
 
+// Convert all Zenkaku to Hankaku; no effect
+echo "'A': " . $zenKakuA . ' => ' . mb_convert_kana($zenKakuA, 'AK', 'utf-8') . "\n";
+// Convert all Hankaku to Zenkaku; has an effect
+echo "'a': " . $zenKakuB . ' => ' . mb_convert_kana($zenKakuB, 'ak', 'utf-8') . "\n";
+echo "'a': " . $zenKakuC . ' => ' . mb_convert_kana($zenKakuC, 'ak', 'utf-8') . "\n";
+echo "'a': " . $zenKakuD . ' => ' . mb_convert_kana($zenKakuD, 'ak', 'utf-8') . "\n";
+echo "'a': " . $zenKakuE . ' => ' . mb_convert_kana($zenKakuE, 'ak', 'utf-8') . "\n";
+echo "'a': " . $zenKakuF . ' => ' . mb_convert_kana($zenKakuF, 'ak', 'utf-8') . "\n";
+echo "\n";
+// Convert all Zenkaku to Hankaku; has an effect
+echo "'A': " . $hanKakuA . ' => ' . mb_convert_kana($hanKakuA, 'AK', 'utf-8') . "\n";
+echo "'A': " . $hanKakuB . ' => ' . mb_convert_kana($hanKakuB, 'AK', 'utf-8') . "\n";
+echo "'A': " . $hanKakuC . ' => ' . mb_convert_kana($hanKakuC, 'AK', 'utf-8') . "\n";
+echo "'A': " . $hanKakuD . ' => ' . mb_convert_kana($hanKakuD, 'AK', 'utf-8') . "\n";
 
-echo $zenKakuA . ' => ' . mb_convert_kana($zenKakuA, 'AZKH', 'utf-8');
 echo "\n";
-echo $zenKakuB . ' => ' . mb_convert_kana($zenKakuB, 'azkh', 'utf-8');
-echo "\n";
-echo $zenKakuC . ' => ' . mb_convert_kana($zenKakuC, 'azkh', 'utf-8');
-echo "\n";
-echo $zenKakuD . ' => ' . mb_convert_kana($zenKakuD, 'azkh', 'utf-8');
-echo "\n";
-echo $zenKakuE . ' => ' . mb_convert_kana($zenKakuE, 'azkh', 'utf-8');
-echo "\n";
-echo $zenKakuF . ' => ' . mb_convert_kana($zenKakuF, 'azkh', 'utf-8');
-echo "\n";
-echo "\n";
-echo $hanKakuA . ' => ' . mb_convert_kana($hanKakuA, 'AZKH', 'utf-8');
-echo "\n";
-echo $hanKakuB . ' => ' . mb_convert_kana($hanKakuB, 'AZKH', 'utf-8');
-echo "\n";
-echo $hanKakuC . ' => ' . mb_convert_kana($hanKakuC, 'AZKH', 'utf-8');
-echo "\n";
-echo $hanKakuD . ' => ' . mb_convert_kana($hanKakuD, 'AZKH', 'utf-8');
+// Try combination of flags which doesn't make sense
+try {
+  mb_convert_kana($zenKakuA, 'HK', 'utf-8');
+} catch (\ValueError $e) {
+  echo $e->getMessage() . "\n";
+}
 ?>
 --EXPECT--
-ァアィイゥウェエォオカガキギク => ァアィイゥウェエォオカガキギク
-グケゲコゴサザシジスズセゼソゾタ => ｸﾞｹｹﾞｺｺﾞｻｻﾞｼｼﾞｽｽﾞｾｾﾞｿｿﾞﾀ
-ダチヂッツヅテデトドナニヌネノハ => ﾀﾞﾁﾁﾞｯﾂﾂﾞﾃﾃﾞﾄﾄﾞﾅﾆﾇﾈﾉﾊ
-バパヒビピフブプヘベペホボポマミ => ﾊﾞﾊﾟﾋﾋﾞﾋﾟﾌﾌﾞﾌﾟﾍﾍﾞﾍﾟﾎﾎﾞﾎﾟﾏﾐ
-ムメモャヤュユョヨラリルレロヮワ => ﾑﾒﾓｬﾔｭﾕｮﾖﾗﾘﾙﾚﾛﾜﾜ
-ヰヱヲンヴヵヶヷヸヹヺ・ーヽヾ => ｲｴｦﾝｳﾞヵヶヷヸヹヺ･ｰヽヾ
+'A': ァアィイゥウェエォオカガキギク => ァアィイゥウェエォオカガキギク
+'a': グケゲコゴサザシジスズセゼソゾタ => ｸﾞｹｹﾞｺｺﾞｻｻﾞｼｼﾞｽｽﾞｾｾﾞｿｿﾞﾀ
+'a': ダチヂッツヅテデトドナニヌネノハ => ﾀﾞﾁﾁﾞｯﾂﾂﾞﾃﾃﾞﾄﾄﾞﾅﾆﾇﾈﾉﾊ
+'a': バパヒビピフブプヘベペホボポマミ => ﾊﾞﾊﾟﾋﾋﾞﾋﾟﾌﾌﾞﾌﾟﾍﾍﾞﾍﾟﾎﾎﾞﾎﾟﾏﾐ
+'a': ムメモャヤュユョヨラリルレロヮワ => ﾑﾒﾓｬﾔｭﾕｮﾖﾗﾘﾙﾚﾛﾜﾜ
+'a': ヰヱヲンヴヵヶヷヸヹヺ・ーヽヾ => ｲｴｦﾝｳﾞヵヶヷヸヹヺ･ｰヽヾ
 
-｠｡｢｣､･ｦｧｨｩｪｫｬｭｮｯ => ｠。「」、・ヲァィゥェォャュョッ
-ｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿ => ーアイウエオカキクケコサシスセソ
-ﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏ => タチツテトナニヌネノハヒフヘホマ
-ﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ => ミムメモヤユヨラリルレロワン゛゜
+'A': ｠｡｢｣､･ｦｧｨｩｪｫｬｭｮｯ => ｠。「」、・ヲァィゥェォャュョッ
+'A': ｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿ => ーアイウエオカキクケコサシスセソ
+'A': ﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏ => タチツテトナニヌネノハヒフヘホマ
+'A': ﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ => ミムメモヤユヨラリルレロワン゛゜
+
+mb_convert_kana(): Argument #2 ($mode) must not combine 'K' and 'H' flags
 --CREDITS--
 Jason Easter <easter@phpug-wuerzburg.de>
 PHPUG Würzburg <phpug-wuerzburg.de>

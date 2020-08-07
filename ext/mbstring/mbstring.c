@@ -2864,6 +2864,13 @@ PHP_FUNCTION(mb_convert_kana)
 
 	string.val = (unsigned char*)string_val;
 
+#define DISALLOW_FLAG(flag, opt1, opt2) do { \
+		if (opt & flag) { \
+			zend_argument_value_error(2, "must not combine '%c' and '%c' flags", opt1, opt2); \
+			RETURN_THROWS(); \
+		} \
+	} while(0)
+
 	/* "Zen" is 全, or "full"; "Han" is 半, or "half"
 	 * This refers to "fullwidth" or "halfwidth" variants of characters used for writing Japanese */
 	if (optstr != NULL) {
@@ -2872,54 +2879,76 @@ PHP_FUNCTION(mb_convert_kana)
 		while (p < e) {
 			switch (*p++) {
 			case 'A':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_ALL, 'A', 'a');
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_ALPHA, 'A', 'r');
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_NUMERIC, 'A', 'n');
 				opt |= MBFL_FILT_TL_HAN2ZEN_ALL;
 				break;
 			case 'a':
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_ALL, 'a', 'A');
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_ALPHA, 'a', 'R');
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_NUMERIC, 'a', 'N');
 				opt |= MBFL_FILT_TL_ZEN2HAN_ALL;
 				break;
 			case 'R':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_ALPHA, 'R', 'r');
 				opt |= MBFL_FILT_TL_HAN2ZEN_ALPHA;
 				break;
 			case 'r':
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_ALPHA, 'r', 'R');
 				opt |= MBFL_FILT_TL_ZEN2HAN_ALPHA;
 				break;
 			case 'N':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_NUMERIC, 'N', 'n');
 				opt |= MBFL_FILT_TL_HAN2ZEN_NUMERIC;
 				break;
 			case 'n':
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_NUMERIC, 'n', 'N');
 				opt |= MBFL_FILT_TL_ZEN2HAN_NUMERIC;
 				break;
 			case 'S':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_SPACE, 'S', 's');
 				opt |= MBFL_FILT_TL_HAN2ZEN_SPACE;
 				break;
 			case 's':
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_SPACE, 's', 'S');
 				opt |= MBFL_FILT_TL_ZEN2HAN_SPACE;
 				break;
 			case 'K':
+				/* Convert ALL hankaku kana to zenkaku katakana... so it doesn't make
+				 * sense to combine with HAN2ZEN_HIRAGANA. Likewise below */
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_HIRAGANA, 'K', 'H');
 				opt |= MBFL_FILT_TL_HAN2ZEN_KATAKANA;
 				break;
 			case 'k':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_HIRAGANA, 'k', 'h');
 				opt |= MBFL_FILT_TL_ZEN2HAN_KATAKANA;
 				break;
 			case 'H':
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_KATAKANA, 'H', 'K');
 				opt |= MBFL_FILT_TL_HAN2ZEN_HIRAGANA;
 				break;
 			case 'h':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_KATAKANA, 'h', 'k');
 				opt |= MBFL_FILT_TL_ZEN2HAN_HIRAGANA;
 				break;
 			case 'V':
 				opt |= MBFL_FILT_TL_HAN2ZEN_GLUE;
 				break;
 			case 'C':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZENKAKU_KATA2HIRA, 'C', 'c');
 				opt |= MBFL_FILT_TL_ZENKAKU_HIRA2KATA;
 				break;
 			case 'c':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZENKAKU_HIRA2KATA, 'c', 'C');
 				opt |= MBFL_FILT_TL_ZENKAKU_KATA2HIRA;
 				break;
 			case 'M':
+				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_SPECIAL, 'M', 'm');
 				opt |= MBFL_FILT_TL_HAN2ZEN_SPECIAL;
 				break;
 			case 'm':
+				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_SPECIAL, 'm', 'M');
 				opt |= MBFL_FILT_TL_ZEN2HAN_SPECIAL;
 				break;
 			}
