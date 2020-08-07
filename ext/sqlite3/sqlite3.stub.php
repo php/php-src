@@ -59,13 +59,23 @@ class SQLite3
     /** @return mixed */
     public function querySingle(string $query, bool $entire_row = false) {}
 
-    /** @return bool */
+    /**
+     * @param callable $callback
+     * @return bool
+     */
     public function createFunction(string $name, $callback, int $argument_count = -1, int $flags = 0) {}
 
-    /** @return bool */
+    /**
+     * @param callable $step_callback
+     * @param callable $final_callback
+     * @return bool
+     */
     public function createAggregate(string $name, $step_callback, $final_callback, int $argument_count = -1) {}
 
-    /** @return bool */
+    /**
+     * @param callable $callback
+     * @return bool
+     */
     public function createCollation(string $name, $callback) {}
 
     /** @return resource|false */
@@ -86,10 +96,10 @@ class SQLite3Stmt
     private function __construct(SQLite3 $sqlite3, string $sql) {}
 
     /** @return bool */
-    public function bindParam($param_number, &$param, int $type = SQLITE3_TEXT) {}
+    public function bindParam(string|int $param_number, mixed &$param, int $type = SQLITE3_TEXT) {}
 
     /** @return bool */
-    public function bindValue($param_number, $param, int $type = SQLITE3_TEXT) {}
+    public function bindValue(string|int $param_number, mixed $param, int $type = SQLITE3_TEXT) {}
 
     /** @return bool */
     public function clear() {}

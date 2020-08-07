@@ -3747,7 +3747,7 @@ ZEND_METHOD(FFI, free) /* {{{ */
 ZEND_METHOD(FFI, cast) /* {{{ */
 {
 	zend_string *type_def = NULL;
-	zval *ztype = NULL;
+	zend_object *ztype = NULL;
 	zend_ffi_type *old_type, *type, *type_ptr;
 	zend_ffi_cdata *old_cdata, *cdata;
 	zend_bool is_const = 0;
@@ -3756,12 +3756,8 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		if (Z_TYPE_P(EX_VAR_NUM(0)) == IS_STRING) {
-			Z_PARAM_STR(type_def)
-		} else {
-			Z_PARAM_OBJECT_OF_CLASS(ztype, zend_ffi_ctype_ce)
-		}
-		Z_PARAM_ZVAL(zv);
+		Z_PARAM_STR_OR_OBJ_OF_CLASS(type_def, ztype, zend_ffi_ctype_ce)
+		Z_PARAM_ZVAL(zv)
 	ZEND_PARSE_PARAMETERS_END();
 
 	arg = zv;
@@ -3818,7 +3814,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 		type_ptr = dcl.type;
 	} else {
-		zend_ffi_ctype *ctype = (zend_ffi_ctype*)Z_OBJ_P(ztype);
+		zend_ffi_ctype *ctype = (zend_ffi_ctype*) ztype;
 
 		type_ptr = type = ctype->type;
 		if (ZEND_FFI_TYPE_IS_OWNED(type)) {
