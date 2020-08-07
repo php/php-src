@@ -1539,11 +1539,8 @@ static int dom_nodelist_has_dimension(zend_object *object, zval *member, int che
 	if (offset < 0) {
 		return 0;
 	} else {
-		zval obj;
-		zval *length;
-
-		ZVAL_OBJ(&obj, object);
-		length = zend_read_property(object->ce, &obj, "length", sizeof("length") - 1, 0, &rv);
+		zval *length = zend_read_property(
+			object->ce, object, "length", sizeof("length") - 1, 0, &rv);
 		return length && offset < Z_LVAL_P(length);
 	}
 } /* }}} end dom_nodelist_has_dimension */
