@@ -9144,7 +9144,9 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_UNPACK
 		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST
 		|| kind == ZEND_AST_CLASS_NAME
-		|| kind == ZEND_AST_MAGIC_CONST || kind == ZEND_AST_COALESCE;
+		|| kind == ZEND_AST_MAGIC_CONST || kind == ZEND_AST_COALESCE
+		|| kind == ZEND_AST_MATCH || kind == ZEND_AST_MATCH_ARM
+		|| kind == ZEND_AST_MATCH_ARM_LIST || kind == ZEND_AST_EXPR_LIST;
 }
 /* }}} */
 

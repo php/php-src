@@ -654,6 +654,51 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 				zval_ptr_dtor_nogc(&op1);
 			}
 			break;
+		case ZEND_AST_MATCH:
+		{
+			zend_ast_list *list;
+			uint32_t i;
+			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
+				ret = FAILURE;
+				break;
+			}
+			list = zend_ast_get_list(ast->child[1]);
+			for (i = 0; i < list->children; i++) {
+				zend_ast *arm = list->child[i];
+				zend_ast_list *arm_expr_list;
+				uint32_t j;
+				if (arm->child[0] == NULL) {
+return_arm_expr:
+					if (UNEXPECTED(zend_ast_evaluate(result, arm->child[1], scope) != SUCCESS)) {
+						zval_ptr_dtor_nogc(&op1);
+						return FAILURE;
+					}
+					zval_ptr_dtor_nogc(&op1);
+					return SUCCESS;
+				}
+				arm_expr_list = zend_ast_get_list(arm->child[0]);
+				for (j = 0; j < arm_expr_list->children; j++) {
+					zval is_identical_zv;
+					if (UNEXPECTED(zend_ast_evaluate(&op2, arm_expr_list->child[j], scope) != SUCCESS)) {
+						return FAILURE;
+					}
+					ret = is_identical_function(&is_identical_zv, &op1, &op2);
+					zval_ptr_dtor_nogc(&op2);
+					if (ret != SUCCESS) {
+						zval_ptr_dtor_nogc(&op1);
+						return ret;
+					}
+					if (Z_TYPE(is_identical_zv) == IS_TRUE) {
+						goto return_arm_expr;
+					}
+				}
+			}
+
+			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(&op1));
+			zval_ptr_dtor_nogc(&op1);
+			ret = FAILURE;
+			break;
+		}
 		case ZEND_AST_COALESCE:
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
