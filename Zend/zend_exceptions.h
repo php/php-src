@@ -59,7 +59,6 @@ ZEND_API void zend_register_default_classes(void);
  * message        NULL or the message of the exception */
 ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code);
 ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, zend_long code, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
-ZEND_API ZEND_COLD void zend_throw_exception_obj(zend_object *exception);
 ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception);
 ZEND_API void zend_clear_exception(void);
 

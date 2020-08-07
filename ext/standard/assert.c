@@ -158,7 +158,7 @@ PHP_FUNCTION(assert)
 
 	if (description_obj) {
 		GC_ADDREF(description_obj);
-		zend_throw_exception_obj(description_obj);
+		zend_throw_exception_internal(description_obj);
 		RETURN_THROWS();
 	}
 
@@ -282,7 +282,11 @@ PHP_FUNCTION(assert_options)
 
 		if (ac == 2) {
 			zval_ptr_dtor(&ASSERTG(callback));
-			ZVAL_COPY(&ASSERTG(callback), value);
+			if (Z_TYPE_P(value) == IS_NULL) {
+				ZVAL_UNDEF(&ASSERTG(callback));
+			} else {
+				ZVAL_COPY(&ASSERTG(callback), value);
+			}
 		}
 		return;
 

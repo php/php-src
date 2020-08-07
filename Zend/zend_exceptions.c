@@ -986,13 +986,6 @@ ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void zend_throw_exception_obj(zend_object *exception) /* {{{ */
-{
-	ZEND_ASSERT(exception && instanceof_function(exception->ce, zend_ce_throwable));
-
-	zend_throw_exception_internal(exception);
-}
-
 ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 {
 	if (exception == NULL || Z_TYPE_P(exception) != IS_OBJECT) {
@@ -1007,7 +1000,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 		return;
 	}
 
-	zend_throw_exception_obj(Z_OBJ_P(exception));
+	zend_throw_exception_internal(Z_OBJ_P(exception));
 }
 /* }}} */
 

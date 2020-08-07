@@ -1,5 +1,5 @@
 --TEST--
-assert() - Define null as assert callback
+assert() - Remove the assert callback
 --INI--
 assert.active=1
 --FILE--
@@ -10,14 +10,20 @@ function f1()
     echo "foo\n";
 }
 
-assert_options(ASSERT_CALLBACK);
+assert_options(ASSERT_CALLBACK, "f1");
+var_dump(assert_options(ASSERT_CALLBACK));
+
 try {
     assert(false);
 } catch (AssertionError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
+echo "\n";
+
 assert_options(ASSERT_CALLBACK, null);
+var_dump(assert_options(ASSERT_CALLBACK));
+
 try {
     assert(false);
 } catch (AssertionError $exception) {
@@ -25,8 +31,10 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
+string(2) "f1"
+foo
 assert(false)
 
-Warning: Invalid callback , no array or string given in %s on line %d
+NULL
 assert(false)
