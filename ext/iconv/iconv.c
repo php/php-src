@@ -34,11 +34,7 @@
 
 #ifdef HAVE_ICONV
 
-#ifdef PHP_ICONV_H_PATH
-#include PHP_ICONV_H_PATH
-#else
 #include <iconv.h>
-#endif
 
 #ifdef HAVE_GLIBC_ICONV
 #include <gnu/libc-version.h>

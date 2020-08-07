@@ -29,7 +29,6 @@ if test "$PHP_ICONV" != "no"; then
 
     CFLAGS="-I$PHP_ICONV_PREFIX/include $CFLAGS"
     LDFLAGS="-L$PHP_ICONV_PREFIX/$PHP_LIBDIR $LDFLAGS"
-    PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/iconv.h"
 
     AC_MSG_CHECKING([if iconv is glibc's])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <gnu/libc-version.h>]], [[gnu_get_libc_version();]])],[
@@ -44,7 +43,7 @@ if test "$PHP_ICONV" != "no"; then
       php_iconv_old_ld="$LDFLAGS"
       LDFLAGS="-liconv $LDFLAGS"
       AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <$PHP_ICONV_H_PATH>
+#include <iconv.h>
 int main() {
   printf("%d", _libiconv_version);
   return 0;
@@ -108,7 +107,7 @@ int main() {
 
     AC_MSG_CHECKING([if iconv supports errno])
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <$PHP_ICONV_H_PATH>
+#include <iconv.h>
 #include <errno.h>
 
 int main() {
@@ -135,7 +134,7 @@ int main() {
 
     AC_MSG_CHECKING([if iconv supports //IGNORE])
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <$PHP_ICONV_H_PATH>
+#include <iconv.h>
 #include <stdlib.h>
 
 int main() {
@@ -166,11 +165,10 @@ int main() {
 
     AC_MSG_CHECKING([if your cpp allows macro usage in include lines])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#define FOO <$PHP_ICONV_H_PATH>
+#define FOO <iconv.h>
 #include FOO
     ]], [])], [
       AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>], [Path to iconv.h])
     ], [
       AC_MSG_RESULT([no])
     ])
