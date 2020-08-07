@@ -1924,19 +1924,6 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   found_iconv=no
   unset ICONV_DIR
 
-  dnl Create the directories for a VPATH build.
-  $php_shtool mkdir -p ext/iconv
-
-  echo > ext/iconv/php_have_bsd_iconv.h
-  echo > ext/iconv/php_have_ibm_iconv.h
-  echo > ext/iconv/php_have_glibc_iconv.h
-  echo > ext/iconv/php_have_libiconv.h
-  echo > ext/iconv/php_have_iconv.h
-  echo > ext/iconv/php_php_iconv_impl.h
-  echo > ext/iconv/php_iconv_aliased_libiconv.h
-  echo > ext/iconv/php_php_iconv_h_path.h
-  echo > ext/iconv/php_iconv_supports_errno.h
-
   dnl Check libc first if no path is provided in --with-iconv.
   if test "$PHP_ICONV" = "yes"; then
     dnl Reset LIBS temporarily as it may have already been included -liconv in.

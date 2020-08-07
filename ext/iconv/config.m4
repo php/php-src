@@ -89,11 +89,6 @@ int main() {
       ])
     fi
 
-    echo > ext/iconv/php_have_bsd_iconv.h
-    echo > ext/iconv/php_have_glibc_iconv.h
-    echo > ext/iconv/php_have_libiconv.h
-    echo > ext/iconv/php_have_ibm_iconv.h
-
     case "$iconv_impl_name" in
       gnu_libiconv [)]
         AC_DEFINE([PHP_ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
