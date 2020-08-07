@@ -15,7 +15,7 @@ if test "$PHP_ICONV" != "no"; then
   if test "$iconv_avail" != "no"; then
     if test -z "$ICONV_DIR"; then
       for i in /usr/local /usr; do
-        if test -f "$i/include/iconv.h" || test -f "$i/include/giconv.h"; then
+        if test -f "$i/include/iconv.h"; then
           PHP_ICONV_PREFIX="$i"
           break
         fi
@@ -29,12 +29,7 @@ if test "$PHP_ICONV" != "no"; then
 
     CFLAGS="-I$PHP_ICONV_PREFIX/include $CFLAGS"
     LDFLAGS="-L$PHP_ICONV_PREFIX/$PHP_LIBDIR $LDFLAGS"
-
-    if test -r "$PHP_ICONV_PREFIX/include/giconv.h"; then
-      PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/giconv.h"
-    else
-      PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/iconv.h"
-	fi
+    PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/iconv.h"
 
     AC_MSG_CHECKING([if iconv is glibc's])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <gnu/libc-version.h>]], [[gnu_get_libc_version();]])],[

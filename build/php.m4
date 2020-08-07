@@ -1944,12 +1944,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   if test "$found_iconv" = "no"; then
 
     for i in $PHP_ICONV /usr/local /usr; do
-      if test -r $i/include/giconv.h; then
-        AC_DEFINE(HAVE_GICONV_H, 1, [ ])
-        ICONV_DIR=$i
-        iconv_lib_name=giconv
-        break
-      elif test -r $i/include/iconv.h; then
+      if test -r $i/include/iconv.h; then
         ICONV_DIR=$i
         iconv_lib_name=iconv
         break
