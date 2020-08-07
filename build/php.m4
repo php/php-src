@@ -1944,8 +1944,14 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   if test "$found_iconv" = "no"; then
 
     for i in $PHP_ICONV /usr/local /usr; do
-      if test -r $i/include/iconv.h; then
+      if test -r $i/include/gnu-libiconv/iconv.h; then
         ICONV_DIR=$i
+        ICONV_INCLUDE_DIR=$i/include/gnu-libiconv
+        iconv_lib_name=iconv
+        break
+      elif test -r $i/include/iconv.h; then
+        ICONV_DIR=$i
+        ICONV_INCLUDE_DIR=$i/include
         iconv_lib_name=iconv
         break
       fi
@@ -1979,7 +1985,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     AC_DEFINE(HAVE_ICONV,1,[ ])
     if test -n "$ICONV_DIR"; then
       PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/$PHP_LIBDIR, $1)
-      PHP_ADD_INCLUDE($ICONV_DIR/include)
+      PHP_ADD_INCLUDE($ICONV_INCLUDE_DIR)
     fi
     $2
 ifelse([$3],[],,[else $3])
