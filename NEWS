@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed inclusion order for phpize builds on Windows. (cmb)
+  . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
 
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)

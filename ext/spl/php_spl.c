@@ -604,17 +604,15 @@ PHP_FUNCTION(spl_autoload_functions)
 	if (SPL_G(autoload_functions)) {
 		ZEND_HASH_FOREACH_PTR(SPL_G(autoload_functions), alfi) {
 			if (alfi->closure) {
-				zval obj_zv;
-				ZVAL_OBJ_COPY(&obj_zv, alfi->closure);
-				add_next_index_zval(return_value, &obj_zv);
+				GC_ADDREF(alfi->closure);
+				add_next_index_object(return_value, alfi->closure);
 			} else if (alfi->func_ptr->common.scope) {
 				zval tmp;
 
 				array_init(&tmp);
 				if (alfi->obj) {
-					zval obj_zv;
-					ZVAL_OBJ_COPY(&obj_zv, alfi->obj);
-					add_next_index_zval(&tmp, &obj_zv);
+					GC_ADDREF(alfi->obj);
+					add_next_index_object(&tmp, alfi->obj);
 				} else {
 					add_next_index_str(&tmp, zend_string_copy(alfi->ce->name));
 				}

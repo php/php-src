@@ -402,12 +402,12 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 	zend_ulong obj_addr;
 	zval *val;
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&wm->ht, obj_addr, val) {
+		zend_object *obj = (zend_object*)obj_addr;
 		zval pair;
-		zval obj_zv;
 		array_init(&pair);
 
-		ZVAL_OBJ_COPY(&obj_zv, (zend_object *) obj_addr);
-		add_assoc_zval(&pair, "key", &obj_zv);
+		GC_ADDREF(obj);
+		add_assoc_object(&pair, "key", obj);
 		Z_TRY_ADDREF_P(val);
 		add_assoc_zval(&pair, "value", val);
 
