@@ -69,51 +69,72 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_valid_closure_binding(
-		zend_closure *closure, zval *newthis, zend_class_entry *scope) /* {{{ */
+static zend_bool zend_valid_closure_binding_ex(
+	zend_closure *closure, zval *newthis, zend_class_entry *scope, zend_bool loud)
 {
 	zend_function *func = &closure->func;
 	zend_bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_WARNING, "Cannot bind an instance to a static closure");
+			if (loud) {
+				zend_error(E_WARNING, "Cannot bind an instance to a static closure");
+			}
 			return 0;
 		}
 
 		if (is_fake_closure && func->common.scope &&
 				!instanceof_function(Z_OBJCE_P(newthis), func->common.scope)) {
-			/* Binding incompatible $this to an internal method is not supported. */
-			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s",
-					ZSTR_VAL(func->common.scope->name),
-					ZSTR_VAL(func->common.function_name),
-					ZSTR_VAL(Z_OBJCE_P(newthis)->name));
+			if (loud) {
+				/* Binding incompatible $this to an internal method is not supported. */
+				zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s",
+						ZSTR_VAL(func->common.scope->name),
+						ZSTR_VAL(func->common.function_name),
+						ZSTR_VAL(Z_OBJCE_P(newthis)->name));
+			}
 			return 0;
 		}
 	} else if (is_fake_closure && func->common.scope
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-		zend_error(E_WARNING, "Cannot unbind $this of method");
+		if (loud) {
+			zend_error(E_WARNING, "Cannot unbind $this of method");
+		}
 		return 0;
 	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)
 			&& (func->common.fn_flags & ZEND_ACC_USES_THIS)) {
-		zend_error(E_WARNING, "Cannot unbind $this of closure using $this");
+		if (loud) {
+			zend_error(E_WARNING, "Cannot unbind $this of closure using $this");
+		}
 		return 0;
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
 		/* rebinding to internal class is not allowed */
-		zend_error(E_WARNING, "Cannot bind closure to scope of internal class %s",
+		if (loud) {
+			zend_error(E_WARNING,
+				"Cannot bind closure to scope of internal class %s",
 				ZSTR_VAL(scope->name));
+		}
 		return 0;
 	}
 
 	if (is_fake_closure && scope != func->common.scope) {
-		zend_error(E_WARNING, "Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()");
+		if (loud) {
+			zend_error(E_WARNING,
+				"Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()");
+		}
 		return 0;
 	}
 
 	return 1;
 }
-/* }}} */
+
+ZEND_API zend_bool zend_valid_closure_binding(
+	zend_object *closure_obj, zval *newthis, zend_class_entry *scope, zend_bool loud)
+{
+	ZEND_ASSERT(closure_obj->ce == zend_ce_closure);
+	zend_closure *closure = (zend_closure *) closure_obj;
+	return zend_valid_closure_binding_ex(closure, newthis, scope, loud);
+}
 
 /* {{{ Call closure, binding to a given object with its class as the scope */
 ZEND_METHOD(Closure, call)
@@ -137,7 +158,7 @@ ZEND_METHOD(Closure, call)
 
 	newobj = Z_OBJ_P(newthis);
 
-	if (!zend_valid_closure_binding(closure, newthis, Z_OBJCE_P(newthis))) {
+	if (!zend_valid_closure_binding_ex(closure, newthis, Z_OBJCE_P(newthis), 1)) {
 		return;
 	}
 
@@ -226,7 +247,7 @@ ZEND_METHOD(Closure, bind)
 		ce = closure->func.common.scope;
 	}
 
-	if (!zend_valid_closure_binding(closure, newthis, ce)) {
+	if (!zend_valid_closure_binding_ex(closure, newthis, ce, 1)) {
 		return;
 	}
 
