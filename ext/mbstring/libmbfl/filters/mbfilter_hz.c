@@ -212,16 +212,14 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int
-mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter)
 {
 	/* back to latin */
-	if ((filter->status & 0xff00) != 0) {
-		CK((*filter->output_function)(0x7e, filter->data));		/* ~ */
-		CK((*filter->output_function)(0x7d, filter->data));		/* '{' */
+	if (filter->status & 0xff00) {
+		(*filter->output_function)(0x7e, filter->data);		/* ~ */
+		(*filter->output_function)(0x7d, filter->data);		/* '{' */
 	}
 	filter->status &= 0xff;
-	return 0;
 }
 
 static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)

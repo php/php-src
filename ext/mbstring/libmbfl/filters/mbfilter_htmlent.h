@@ -40,9 +40,9 @@ extern const struct mbfl_convert_vtbl vtbl_html_wchar;
 void mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter);
 void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter);
 int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter);
+void mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter);
 int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter);
+void mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter);
 void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 
 #endif /* MBFL_MBFILTER_HTMLENT_H */

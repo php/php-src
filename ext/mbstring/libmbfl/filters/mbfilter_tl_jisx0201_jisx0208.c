@@ -236,28 +236,23 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 	return (*filt->output_function)(s, filt->data);
 }
 
-int
-mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
+void mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
 {
-	int ret, n;
 	intptr_t mode = (intptr_t)filt->opaque;
 
-	ret = 0;
 	if (filt->status) {
-		n = (filt->cache - 0xff60) & 0x3f;
+		int n = (filt->cache - 0xff60) & 0x3f;
 		if (mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) {	/* hankaku kana to zenkaku katakana */
-			ret = (*filt->output_function)(0x3000 + hankana2zenkana_table[n], filt->data);
+			(*filt->output_function)(0x3000 + hankana2zenkana_table[n], filt->data);
 		} else if (mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA) {	/* hankaku kana to zenkaku hiragana */
-			ret = (*filt->output_function)(0x3000 + hankana2zenhira_table[n], filt->data);
+			(*filt->output_function)(0x3000 + hankana2zenhira_table[n], filt->data);
 		}
 		filt->status = 0;
 	}
 
-	if (filt->flush_function != NULL) {
-		return (*filt->flush_function)(filt->data);
+	if (filt->flush_function) {
+		(*filt->flush_function)(filt->data);
 	}
-
-	return ret;
 }
 
 const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208 = {

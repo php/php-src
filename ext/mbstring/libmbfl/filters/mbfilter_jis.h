@@ -44,6 +44,6 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_2022jp;
 int mbfl_filt_conv_jis_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
+void mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_JIS_H */

@@ -187,7 +187,7 @@ retry:
 	return c;
 }
 
-int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
 	int status, cache;
 
@@ -198,13 +198,12 @@ int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 	filter->cache = 0;
 
 	if (status != 0) {
-		CK(mbfl_filt_put_invalid_char(cache, filter));
+		mbfl_filt_put_invalid_char(cache, filter);
 	}
 
-	if (filter->flush_function != NULL) {
+	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-	return 0;
 }
 
 /*

@@ -409,7 +409,7 @@ int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 
 }
 
-int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 {
 	int status = filter->status;
 	int cache = filter->cache;
@@ -417,33 +417,31 @@ int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 	/* flush fragments */
 	switch (status) {
 	case 1:
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 10) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 4) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache << 2) & 0x3c], filter->data));
-		CK((*filter->output_function)('-', filter->data));
+		(*filter->output_function)(mbfl_base64_table[(cache >> 10) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 4) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache << 2) & 0x3c], filter->data);
+		(*filter->output_function)('-', filter->data);
 		break;
 
 	case 2:
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 14) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 8) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 2) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache << 4) & 0x30], filter->data));
-		CK((*filter->output_function)('-', filter->data));
+		(*filter->output_function)(mbfl_base64_table[(cache >> 14) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 8) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 2) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache << 4) & 0x30], filter->data);
+		(*filter->output_function)('-', filter->data);
 		break;
 
 	case 3:
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 6) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[cache & 0x3f], filter->data));
-		CK((*filter->output_function)('-', filter->data));
+		(*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 6) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[cache & 0x3f], filter->data);
+		(*filter->output_function)('-', filter->data);
 		break;
 	}
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
 static int mbfl_filt_ident_utf7_base64(int c, mbfl_identify_filter *filter);

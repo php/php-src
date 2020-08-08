@@ -39,6 +39,6 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_hz;
 
 int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter);
+void mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_HZ_H */

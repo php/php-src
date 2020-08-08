@@ -904,19 +904,15 @@ mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int
-mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 {
 	int c1 = filter->cache;
 	if (filter->status == 1 && (c1 == 0x0023 || (c1 >= 0x0030 && c1<=0x0039))) {
-		CK((*filter->output_function)(c1, filter->data));
+		(*filter->output_function)(c1, filter->data);
 	}
-	filter->status = 0;
-	filter->cache = 0;
+	filter->status = filter->cache = 0;
 
-	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }

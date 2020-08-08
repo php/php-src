@@ -264,21 +264,18 @@ mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int
-mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)
 {
 	/* back to ascii */
-	if ((filter->status & 0xff00) != 0) {
-		CK((*filter->output_function)(0x0f, filter->data));		/* SI */
+	if (filter->status & 0xff00) {
+		(*filter->output_function)(0x0f, filter->data);		/* SI */
 	}
 
 	filter->status &= 0xff;
 
-	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
 static int mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter)

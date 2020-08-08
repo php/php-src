@@ -35,7 +35,7 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
+extern void mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
 extern int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_2022jp_kddi_aliases[] = {"ISO-2022-JP-KDDI", NULL};

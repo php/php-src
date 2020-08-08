@@ -59,6 +59,6 @@ int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp50220raw(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_CP50221_h */

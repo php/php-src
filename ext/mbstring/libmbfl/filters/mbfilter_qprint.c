@@ -147,13 +147,11 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
 {
-	/* flush filter cache */
 	(*filter->filter_function)('\0', filter);
 	filter->status &= ~0xffff;
 	filter->cache = 0;
-	return 0;
 }
 
 /*
@@ -227,7 +225,7 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 {
 	int status, cache;
 
@@ -237,11 +235,9 @@ int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 	filter->cache = 0;
 	/* flush fragments */
 	if (status == 1) {
-		CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+		(*filter->output_function)(0x3d, filter->data);		/* '=' */
 	} else if (status == 2) {
-		CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-		CK((*filter->output_function)(cache, filter->data));
+		(*filter->output_function)(0x3d, filter->data);		/* '=' */
+		(*filter->output_function)(cache, filter->data);
 	}
-
-	return 0;
 }

@@ -119,7 +119,7 @@ int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 {
 	int status, cache, len;
 
@@ -132,21 +132,20 @@ int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 	if (status >= 1) {
 		if ((filter->status & MBFL_BASE64_STS_MIME_HEADER) == 0) {
 			if (len > 72){
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+				(*filter->output_function)(0x0d, filter->data);		/* CR */
+				(*filter->output_function)(0x0a, filter->data);		/* LF */
 			}
 		}
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 18) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_base64_table[(cache >> 18) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data);
 		if (status == 1) {
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+			(*filter->output_function)(0x3d, filter->data);		/* '=' */
+			(*filter->output_function)(0x3d, filter->data);		/* '=' */
 		} else {
-			CK((*filter->output_function)(mbfl_base64_table[(cache >> 6) & 0x3f], filter->data));
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+			(*filter->output_function)(mbfl_base64_table[(cache >> 6) & 0x3f], filter->data);
+			(*filter->output_function)(0x3d, filter->data);		/* '=' */
 		}
 	}
-	return 0;
 }
 
 /*
@@ -201,7 +200,7 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 {
 	int status, cache;
 
@@ -211,12 +210,11 @@ int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 	filter->cache = 0;
 	/* flush fragments */
 	if (status >= 2) {
-		CK((*filter->output_function)((cache >> 16) & 0xff, filter->data));
+		(*filter->output_function)((cache >> 16) & 0xff, filter->data);
 		if (status >= 3) {
-			CK((*filter->output_function)((cache >> 8) & 0xff, filter->data));
+			(*filter->output_function)((cache >> 8) & 0xff, filter->data);
 		}
 	}
-	return 0;
 }
 
 static int mbfl_filt_ident_base64(int c, mbfl_identify_filter *filter)

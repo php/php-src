@@ -40,8 +40,8 @@
 extern const unsigned char mblen_table_sjis[];
 
 static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter);
-static int mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter);
+static void mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter);
+static void mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_sjis_mac_aliases[] = {"MacJapanese", "x-Mac-Japanese", NULL};
 
@@ -278,13 +278,12 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter)
+static void mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status == 1) {
 		int w = (filter->cache & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH;
-		CK((*filter->output_function)(w, filter->data));
+		(*filter->output_function)(w, filter->data);
 	}
-	return 0;
 }
 
 /*
@@ -684,31 +683,28 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int
-mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter)
+static void mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter)
 {
-	int i, c1, s1 = 0;
+	int s1 = 0;
 	if (filter->status == 1 && filter->cache > 0) {
-		c1 = filter->cache;
-		for (i=0;i<s_form_tbl_len;i++) {
+		int c1 = filter->cache;
+		for (int i = 0; i < s_form_tbl_len; i++) {
 			if (c1 == s_form_tbl[i]) {
 				s1 = s_form_sjis_fallback_tbl[i];
 				break;
 			}
 		}
 		if (s1 > 0) {
-			CK((*filter->output_function)((s1 >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s1 & 0xff, filter->data));
+			(*filter->output_function)((s1 >> 8) & 0xff, filter->data);
+			(*filter->output_function)(s1 & 0xff, filter->data);
 		}
 	}
 	filter->cache = 0;
 	filter->status = 0;
 
-	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
 /* MacJapanese doesn't use all the 2-byte sequences which would otherwise be legal;

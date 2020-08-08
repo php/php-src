@@ -33,7 +33,7 @@
 static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter);
+static void mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
 
@@ -323,7 +323,7 @@ int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
+static void mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 {
 	int status = filter->status;
 	int cache = filter->cache;
@@ -331,14 +331,12 @@ static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 
 	if (status) {
 		/* Input string was truncated */
-		CK((*filter->output_function)(cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		(*filter->output_function)(cache | MBFL_WCSGROUP_THROUGH, filter->data);
 	}
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
 static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter)

@@ -170,10 +170,12 @@ unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsi
 	return p;
 }
 
-int mbfl_convert_filter_flush(mbfl_convert_filter *filter)
+void mbfl_convert_filter_flush(mbfl_convert_filter *filter)
 {
 	(*filter->filter_flush)(filter);
-	return filter->flush_function ? (*filter->flush_function)(filter->data) : 0;
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
 }
 
 void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to)
@@ -368,13 +370,10 @@ void mbfl_filt_conv_common_ctor(mbfl_convert_filter *filter)
 	filter->cache = 0;
 }
 
-int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
 {
-	filter->status = 0;
-	filter->cache = 0;
-
-	if (filter->flush_function != NULL) {
+	filter->status = filter->cache = 0;
+	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-	return 0;
 }

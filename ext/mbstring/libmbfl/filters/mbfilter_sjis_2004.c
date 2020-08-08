@@ -515,13 +515,12 @@ retry:
 	return c;
 }
 
-int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
 {
 	int status = filter->status & 0xF;
 	if (status == 1 || status == 4 || status == 5) {
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
 	}
-	return 0;
 }
 
 int
@@ -718,8 +717,7 @@ retry:
 	return c;
 }
 
-int
-mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
 {
 	int k, c1, c2, s1, s2;
 
@@ -740,34 +738,32 @@ mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
 			s2 = s1 & 0x7f;
 			s1 = (s1 >> 8) & 0x7f;
 			if ((filter->status & 0xff00) != 0x200) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x51, filter->data));		/* 'Q' */
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x24, filter->data);		/* '$' */
+				(*filter->output_function)(0x28, filter->data);		/* '(' */
+				(*filter->output_function)(0x51, filter->data);		/* 'Q' */
 			}
 			filter->status = 0x200;
 		}
 
-		CK((*filter->output_function)(s1, filter->data));
-		CK((*filter->output_function)(s2, filter->data));
+		(*filter->output_function)(s1, filter->data);
+		(*filter->output_function)(s2, filter->data);
 	}
 
 	/* If we had switched to a different charset, go back to ASCII mode
 	 * This makes it possible to concatenate arbitrary valid strings
 	 * together and get a valid string */
 	if ((filter->status & 0xff00) != 0) {
-		CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
+		(*filter->output_function)(0x1b, filter->data);		/* ESC */
+		(*filter->output_function)(0x28, filter->data);		/* '(' */
+		(*filter->output_function)(0x42, filter->data);		/* 'B' */
 	}
 
 	filter->status = 0;
 
 	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
+		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
 /* SJIS-2004 doesn't use all the 2-byte sequences which would otherwise be legal;

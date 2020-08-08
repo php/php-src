@@ -134,8 +134,8 @@ struct mbfl_convert_vtbl {
 	enum mbfl_no_encoding to;
 	void (*filter_ctor)(struct _mbfl_convert_filter *filter);
 	void (*filter_dtor)(struct _mbfl_convert_filter *filter);
-	int (*filter_function)(int c, struct _mbfl_convert_filter *filter);
-	int (*filter_flush)(struct _mbfl_convert_filter *filter);
+	int  (*filter_function)(int c, struct _mbfl_convert_filter *filter);
+	void (*filter_flush)(struct _mbfl_convert_filter *filter);
 };
 
 /*

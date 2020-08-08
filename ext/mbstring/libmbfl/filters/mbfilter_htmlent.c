@@ -141,16 +141,14 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter)
 {
 	filter->status = 0;
 	filter->opaque = NULL;
 
-	if (filter->flush_function != NULL) {
+	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
 /*
@@ -284,11 +282,10 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 {
 	int status, pos = 0;
 	unsigned char *buffer;
-	int err = 0;
 
 	buffer = (unsigned char*)filter->opaque;
 	status = filter->status;
@@ -296,14 +293,10 @@ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 
 	/* flush fragments */
 	while (status--) {
-		int e = (*filter->output_function)(buffer[pos++], filter->data);
-		if (e != 0)
-			err = e;
+		(*filter->output_function)(buffer[pos++], filter->data);
 	}
 
-	if (filter->flush_function != NULL) {
+	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-
-	return err;
 }

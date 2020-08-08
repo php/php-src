@@ -33,7 +33,7 @@
 static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter);
+static void mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf32_aliases[] = {"utf32", NULL};
 
@@ -232,18 +232,16 @@ int mbfl_filt_conv_wchar_utf32le(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
+static void mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		/* Input string was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
 	}
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
 static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)

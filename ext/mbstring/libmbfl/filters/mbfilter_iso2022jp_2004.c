@@ -34,7 +34,7 @@
 #include "unicode_table_jis.h"
 #include "unicode_table_jis2004.h"
 
-extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
+extern void mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_2022jp_2004 = {
