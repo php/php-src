@@ -1,9 +1,12 @@
 --TEST--
-Ensure a interface can not have protected constants
+Ensure an interface can have protected constants
 --FILE--
 <?php
-interface A {
+interface I {
     protected const FOO = 10;
 }
---EXPECTF--
-Fatal error: Access type for interface constant A::FOO must be public in %s on line 3
+
+echo "Done\n";
+?>
+--EXPECT--
+Done
