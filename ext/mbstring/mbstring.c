@@ -2883,28 +2883,38 @@ PHP_FUNCTION(mb_convert_kana)
 				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_ALPHA, 'A', 'r');
 				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_NUMERIC, 'A', 'n');
 				opt |= MBFL_FILT_TL_HAN2ZEN_ALL;
+				opt &= ~(MBFL_FILT_TL_HAN2ZEN_ALPHA | MBFL_FILT_TL_HAN2ZEN_NUMERIC); /* No need for these flags, they're covered */
 				break;
 			case 'a':
 				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_ALL, 'a', 'A');
 				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_ALPHA, 'a', 'R');
 				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_NUMERIC, 'a', 'N');
 				opt |= MBFL_FILT_TL_ZEN2HAN_ALL;
+				opt &= ~(MBFL_FILT_TL_ZEN2HAN_ALPHA | MBFL_FILT_TL_ZEN2HAN_NUMERIC); /* These flags are covered by 'a' */
 				break;
 			case 'R':
 				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_ALPHA, 'R', 'r');
-				opt |= MBFL_FILT_TL_HAN2ZEN_ALPHA;
+				if (!(opt & MBFL_FILT_TL_HAN2ZEN_ALL)) { /* 'R' is redundant if we have 'A' */
+					opt |= MBFL_FILT_TL_HAN2ZEN_ALPHA;
+				}
 				break;
 			case 'r':
 				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_ALPHA, 'r', 'R');
-				opt |= MBFL_FILT_TL_ZEN2HAN_ALPHA;
+				if (!(opt & MBFL_FILT_TL_ZEN2HAN_ALL)) { /* 'r' is redundant if we have 'a' */
+					opt |= MBFL_FILT_TL_ZEN2HAN_ALPHA;
+				}
 				break;
 			case 'N':
 				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_NUMERIC, 'N', 'n');
-				opt |= MBFL_FILT_TL_HAN2ZEN_NUMERIC;
+				if (!(opt & MBFL_FILT_TL_HAN2ZEN_ALL)) { /* 'N' is redundant if we have 'A' */
+					opt |= MBFL_FILT_TL_HAN2ZEN_NUMERIC;
+				}
 				break;
 			case 'n':
 				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_NUMERIC, 'n', 'N');
-				opt |= MBFL_FILT_TL_ZEN2HAN_NUMERIC;
+				if (!(opt & MBFL_FILT_TL_ZEN2HAN_ALL)) { /* 'n' is redundant if we have 'a' */
+					opt |= MBFL_FILT_TL_ZEN2HAN_NUMERIC;
+				}
 				break;
 			case 'S':
 				DISALLOW_FLAG(MBFL_FILT_TL_ZEN2HAN_SPACE, 'S', 's');
