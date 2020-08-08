@@ -38,7 +38,6 @@
 #	define pdo_mysql_stmt_close(stmt) mysql_stmt_close(stmt)
 #endif
 
-extern int _pdo_mysql_stmt_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 
 static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 {
