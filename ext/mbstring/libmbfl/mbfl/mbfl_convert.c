@@ -173,9 +173,6 @@ unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsi
 void mbfl_convert_filter_flush(mbfl_convert_filter *filter)
 {
 	(*filter->filter_flush)(filter);
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
 }
 
 void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to)
