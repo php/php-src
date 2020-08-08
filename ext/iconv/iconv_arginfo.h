@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4e26168b04450adf510a4e638184c46757679ac1 */
+ * Stub hash: c299905ab2225a1d5d4f3dff5dbab019ccbb18b4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_iconv_strlen, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
@@ -56,7 +56,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iconv_set_encoding, 0, 2, _IS_BO
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_iconv_get_encoding, 0, 0, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 0, "\"all\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 0, "\'all\'")
 ZEND_END_ARG_INFO()
 
 
@@ -81,7 +81,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(iconv_mime_decode, arginfo_iconv_mime_decode)
 	ZEND_FE(iconv_mime_decode_headers, arginfo_iconv_mime_decode_headers)
 	ZEND_FE(iconv, arginfo_iconv)
-	ZEND_FE(iconv_set_encoding, arginfo_iconv_set_encoding)
-	ZEND_FE(iconv_get_encoding, arginfo_iconv_get_encoding)
+	ZEND_DEP_FE(iconv_set_encoding, arginfo_iconv_set_encoding)
+	ZEND_DEP_FE(iconv_get_encoding, arginfo_iconv_get_encoding)
 	ZEND_FE_END
 };

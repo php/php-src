@@ -6,10 +6,8 @@ extension_loaded('iconv') or die('skip');
 function_exists('iconv_get_encoding') or die("skip iconv_get_encoding() is not available in this build");
 ?>
 --INI--
-error_reporting=E_ALL & ~E_DEPRECATED
+error_reporting=E_ALL
 input_encoding=ISO-8859-1
-iconv.internal_encoding=ISO-8859-1
-iconv.output_encoding=ISO-8859-1
 --FILE--
 <?php
 /*
@@ -41,49 +39,75 @@ var_dump(iconv_get_encoding("all"));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing iconv_get_encoding()/iconv_set_encoding() : basic functionality ***
 --- Default get_encoding ---
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
 array(3) {
   ["input_encoding"]=>
   string(10) "ISO-8859-1"
   ["output_encoding"]=>
-  string(10) "ISO-8859-1"
+  string(5) "UTF-8"
   ["internal_encoding"]=>
-  string(10) "ISO-8859-1"
+  string(5) "UTF-8"
 }
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
 string(10) "ISO-8859-1"
-string(10) "ISO-8859-1"
-string(10) "ISO-8859-1"
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
+string(5) "UTF-8"
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
+string(5) "UTF-8"
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
 array(3) {
   ["input_encoding"]=>
   string(10) "ISO-8859-1"
   ["output_encoding"]=>
-  string(10) "ISO-8859-1"
+  string(5) "UTF-8"
   ["internal_encoding"]=>
-  string(10) "ISO-8859-1"
+  string(5) "UTF-8"
 }
 
 --- Altering encodings ---
-bool(true)
-bool(true)
-bool(true)
+
+Deprecated: Function iconv_set_encoding() is deprecated in %s on line %d
+bool(false)
+
+Deprecated: Function iconv_set_encoding() is deprecated in %s on line %d
+bool(false)
+
+Deprecated: Function iconv_set_encoding() is deprecated in %s on line %d
+bool(false)
 
 --- results of alterations ---
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
 array(3) {
   ["input_encoding"]=>
-  string(5) "UTF-8"
+  string(10) "ISO-8859-1"
   ["output_encoding"]=>
   string(5) "UTF-8"
   ["internal_encoding"]=>
   string(5) "UTF-8"
 }
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
+string(10) "ISO-8859-1"
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
 string(5) "UTF-8"
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
 string(5) "UTF-8"
-string(5) "UTF-8"
+
+Deprecated: Function iconv_get_encoding() is deprecated in %s on line %d
 array(3) {
   ["input_encoding"]=>
-  string(5) "UTF-8"
+  string(10) "ISO-8859-1"
   ["output_encoding"]=>
   string(5) "UTF-8"
   ["internal_encoding"]=>
