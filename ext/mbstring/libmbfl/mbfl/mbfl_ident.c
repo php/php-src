@@ -180,25 +180,17 @@ const struct mbfl_identify_vtbl* mbfl_identify_filter_get_vtbl(enum mbfl_no_enco
 
 mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 {
-	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
-	mbfl_identify_filter_init(filter, encoding);
-	return filter;
+	return mbfl_identify_filter_new2(mbfl_no2encoding(encoding));
 }
 
 mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
 {
 	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
-	mbfl_identify_filter_init2(filter, encoding);
+	mbfl_identify_filter_init(filter, encoding);
 	return filter;
 }
 
-void mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
-{
-	const mbfl_encoding *enc = mbfl_no2encoding(encoding);
-	mbfl_identify_filter_init2(filter, enc ? enc : &mbfl_encoding_pass);
-}
-
-void mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
+void mbfl_identify_filter_init(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
 {
 	filter->encoding = encoding;
 	filter->status = filter->flag = filter->score = 0;
