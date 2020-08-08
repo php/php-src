@@ -114,6 +114,7 @@ static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
 {
 	zend_long row_count;
 	pdo_mysql_stmt *S = stmt->driver_data;
+	pdo_mysql_db_handle *H = S->H;
 	row_count = (zend_long) mysql_stmt_affected_rows(S->stmt);
 	if (row_count != (zend_long)-1) {
 		stmt->row_count = row_count;
