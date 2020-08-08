@@ -206,10 +206,9 @@ void mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encodin
 	/* setup the function table */
 	const struct mbfl_identify_vtbl *vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
 	ZEND_ASSERT(vtbl);
-	filter->filter_ctor = vtbl->filter_ctor;
 	filter->filter_function = vtbl->filter_function;
 
-	(*filter->filter_ctor)(filter);
+	(*vtbl->filter_ctor)(filter);
 }
 
 void mbfl_identify_filter_delete(mbfl_identify_filter *filter)

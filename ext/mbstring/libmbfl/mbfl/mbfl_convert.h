@@ -45,7 +45,6 @@ typedef int (*output_function_t)(int, void*);
 typedef void (*flush_function_t)(void *);
 
 struct _mbfl_convert_filter {
-	void (*filter_ctor)(mbfl_convert_filter *filter);
 	void (*filter_dtor)(mbfl_convert_filter *filter);
 	int (*filter_function)(int c, mbfl_convert_filter *filter);
 	filter_flush_t  filter_flush;

@@ -112,12 +112,11 @@ static void mbfl_convert_filter_common_init(mbfl_convert_filter *filter, const m
 	filter->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	filter->illegal_substchar = '?';
 	filter->num_illegalchar = 0;
-	filter->filter_ctor = vtbl->filter_ctor;
 	filter->filter_dtor = vtbl->filter_dtor;
 	filter->filter_function = vtbl->filter_function;
 	filter->filter_flush = (filter_flush_t)vtbl->filter_flush;
 
-	(*filter->filter_ctor)(filter);
+	(*vtbl->filter_ctor)(filter);
 }
 
 

@@ -40,7 +40,6 @@
 typedef struct _mbfl_identify_filter mbfl_identify_filter;
 
 struct _mbfl_identify_filter {
-	void (*filter_ctor)(mbfl_identify_filter *filter);
 	int (*filter_function)(int c, mbfl_identify_filter *filter);
 	int status;
 	int flag;
