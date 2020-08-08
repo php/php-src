@@ -3,7 +3,7 @@ Bug #79191 (Error in SoapClient ctor disables DOMDocument::save())
 --SKIPIF--
 <?php
 if (!extension_loaded('soap')) die('skip soap extension not available');
-if (!extension_loaded('dom')) die('dom extension not available');
+if (!extension_loaded('dom')) die('skip dom extension not available');
 ?>
 --FILE--
 <?php
