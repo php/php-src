@@ -43,7 +43,6 @@ struct _mbfl_identify_filter {
 	int (*filter_function)(int c, mbfl_identify_filter *filter);
 	int status;
 	int flag;
-	int score;
 	const mbfl_encoding *encoding;
 };
 
