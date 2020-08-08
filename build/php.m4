@@ -305,7 +305,7 @@ fi
 ])
 
 AC_DEFUN([PHP_CHECK_GCC_ARG],[
-  AC_MSG_ERROR([Use AX_CHECK_COMPILE_FLAG instead])
+  AC_MSG_ERROR([[Use AX_CHECK_COMPILE_FLAG instead]])
 ])
 
 dnl
