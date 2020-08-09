@@ -2886,21 +2886,23 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
     $old1 = array();
     $old2 = array();
 
-    $format_diff_line = function (int $line_number, string $contents, string $diff_character) use ($colorize): string {
-        $output = sprintf("%03d%s ", $line_number, $diff_character) . $contents;
+    $format_expected_line = function (int $line_number, string $contents) use ($colorize): string {
+        $output = sprintf("%03d- ", $line_number) . $contents;
         if ($colorize) {
-            // Light red for any line of the diff, for each line (e.g. in case post-processing removes lines).
-            // Using green for the expected lines missing from the output
-            // would cause some confusion (green could be interpreted as something the test did correctly)
+            // Reuse the colors used for `-` in other diff tools.
+            // Here, red should be interpreted as "removed", and not "bad".
             return "\e[1;31m{$output}\e[0m";
         }
         return $output;
     };
-    $format_expected_line = function (int $line_number, string $contents) use ($format_diff_line): string {
-        return $format_diff_line($line_number, $contents, '-');
-    };
-    $format_actual_line = function (int $line_number, string $contents) use ($format_diff_line): string {
-        return $format_diff_line($line_number, $contents, '+');
+    $format_actual_line = function (int $line_number, string $contents) use ($colorize): string {
+        $output = sprintf("%03d+ ", $line_number) . $contents;
+        if ($colorize) {
+            // Reuse the colors used for `+` in other diff tools.
+            // Here, green should be interpreted as "added", and not "good".
+            return "\e[1;32m{$output}\e[0m";
+        }
+        return $output;
     };
 
     while ($idx1 < $cnt1 && $idx2 < $cnt2) {
