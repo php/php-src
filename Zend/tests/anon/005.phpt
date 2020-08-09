@@ -32,5 +32,6 @@ $proxy = $outer->getArrayAccess();
 
 /* null because no inheritance, so no access to protected member */
 var_dump(@$outer->getArrayAccess()[0]);
+?>
 --EXPECT--
 NULL

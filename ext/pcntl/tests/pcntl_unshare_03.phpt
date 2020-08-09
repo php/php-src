@@ -1,7 +1,7 @@
 --TEST--
 pcntl_unshare() with CLONE_NEWNET
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("pcntl")) die("skip");
 if (!extension_loaded("posix")) die("skip posix extension not available");
 if (!function_exists("pcntl_unshare")) die("skip pcntl_unshare is not available");
@@ -23,6 +23,7 @@ if(posix_getuid() !== 0) {
 var_dump(gethostbyname('php.net'));
 pcntl_unshare(CLONE_NEWNET);
 var_dump(gethostbyname('php.net'));
+?>
 --EXPECTF--
 string(%d) %s
 string(7) "php.net"

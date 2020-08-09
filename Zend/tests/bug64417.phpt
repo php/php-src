@@ -34,5 +34,6 @@ $o = new obj;
 $o['x'] = 1;
 ++$o['x'];
 echo $o['x'], "\n";
+?>
 --EXPECT--
 2

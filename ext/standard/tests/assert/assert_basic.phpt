@@ -15,6 +15,7 @@ function f1()
 
 var_dump($r2 = assert(0));
 var_dump($r2 = assert(1));
+?>
 --EXPECT--
 f1 called
 bool(false)

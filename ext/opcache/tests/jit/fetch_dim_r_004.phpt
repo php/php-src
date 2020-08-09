@@ -34,6 +34,7 @@ foo("2x");
 $x=2;
 $y="x";
 foo($x.$y);
+?>
 --EXPECTF--
 string(1) "A"
 string(1) "C"

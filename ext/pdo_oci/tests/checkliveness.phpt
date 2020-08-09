@@ -46,6 +46,7 @@ try {
 }
 
 $db = null;
+?>
 --EXPECT--
 array(2) {
   ["DUMMY"]=>

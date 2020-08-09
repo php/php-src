@@ -14,6 +14,7 @@ $addrinfo = socket_addrinfo_lookup('127.0.0.1', 2000, array(
 ));
 var_dump($addrinfo[0]);
 echo "Done";
+?>
 --EXPECTF--
 Notice: socket_addrinfo_lookup(): Unknown hint invalid in %ssocket_addrinfo_lookup.php on line %d
 object(AddressInfo)#%d (0) {

@@ -69,6 +69,7 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
+?>
 --EXPECTF--
 *** Testing session_set_save_handler() function: class with create_sid ***
 string(%d) "%s"

@@ -93,6 +93,7 @@ echo file_get_contents("test1://hello"),"\n";
 include "test1://hello";
 echo file_get_contents("test2://hello"),"\n";
 include "test2://hello";
+?>
 --EXPECTF--
 Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 

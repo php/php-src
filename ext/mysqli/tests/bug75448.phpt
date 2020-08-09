@@ -17,5 +17,6 @@ try {
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
 }
+?>
 --EXPECT--
 mysqli object is already closed

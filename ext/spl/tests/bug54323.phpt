@@ -16,6 +16,7 @@ function testAccess($c, $ao) {
         unset($ao['prop']);
         var_dump($c->prop, $ao['prop']);
 }
+?>
 --EXPECTF--
 Warning: Undefined property: C::$prop in %s on line %d
 

@@ -35,6 +35,7 @@ DONE
 <?php
 
 @unlink(__DIR__ . '/bug64342.zip');
+?>
 --EXPECTF--
 %s.txt
 add failed

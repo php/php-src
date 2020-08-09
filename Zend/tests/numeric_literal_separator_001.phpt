@@ -13,6 +13,7 @@ var_dump(0b0101_1111 === 0b01011111);
 var_dump(0b01_0000_10 === 0b01000010);
 var_dump(0137_041 === 0137041);
 var_dump(0_124 === 0124);
+?>
 --EXPECT--
 bool(true)
 bool(true)

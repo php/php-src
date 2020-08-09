@@ -6,5 +6,6 @@ Destructors cannot declare a return type
 class Foo {
     function __destruct() : Foo {}
 }
+?>
 --EXPECTF--
 Fatal error: Method Foo::__destruct() cannot declare a return type in %s on line %d

@@ -9,6 +9,7 @@ function get() {
 }
 var_dump(get());
 var_dump(gc_collect_cycles());
+?>
 --EXPECT--
 object(stdClass)#1 (1) {
   ["prop"]=>

@@ -77,6 +77,7 @@ if ($data["control"]) {
     echo "FAIL CONTROL\n";
     var_dump($data);
 }
+?>
 --EXPECTF--
 creating send socket
 object(Socket)#%d (0) {

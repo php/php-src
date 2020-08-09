@@ -11,7 +11,6 @@ $r = new Phar($fname, 0);
     echo $e;
 }
 ?>
-
 --EXPECTF--
 UnexpectedValueException: phar error: "%s%ebug69453.tar.phar" is a corrupted tar file (checksum mismatch of file "") in %s:%d
 Stack trace:

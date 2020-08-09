@@ -11,6 +11,7 @@ if (!extension_loaded('intl'))
 ini_set("intl.error_level", E_WARNING);
 
 var_dump(intlcal_is_lenient(1));
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: intlcal_is_lenient(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
 Stack trace:

@@ -30,6 +30,7 @@ foreach (glob($sessdir. "*") as $sessfile) {
   unlink($sessfile);
 }
 rmdir($sessdir);
+?>
 --EXPECT--
 hello world
 string(6) "100777"

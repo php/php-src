@@ -18,6 +18,7 @@ $i === $j
 TESTS;
 
 include(__DIR__ . '/../quicktester.inc');
+?>
 --EXPECT--
 1,1,0,0
 OK

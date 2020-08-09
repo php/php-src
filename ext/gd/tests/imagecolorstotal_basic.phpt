@@ -23,7 +23,6 @@ echo 'Total colors in image: ' . imagecolorstotal($im);
 // Free image
 imagedestroy($im);
 ?>
-
 --EXPECT--
 *** Testing imagecolorstotal() : basic functionality ***
 Total colors in image: 128

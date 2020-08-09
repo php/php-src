@@ -9,6 +9,7 @@ function x($s) { $s['2a'] = 1; };
 $y = '1';
 x($y);
 print_r($y);
+?>
 --EXPECT--
 string(26) "Illegal string offset "2a""
 1

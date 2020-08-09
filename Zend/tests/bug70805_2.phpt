@@ -35,5 +35,6 @@ unset($t);
 
 unset($a);
 var_dump(gc_collect_cycles());
+?>
 --EXPECT--
 int(2)

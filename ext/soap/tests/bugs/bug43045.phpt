@@ -45,6 +45,7 @@ var_dump($client->test(0.1));
 var_dump($client->test(NAN));
 var_dump($response = $client->test(INF));
 var_dump($response = $client->test(-INF));
+?>
 --EXPECT--
 float(0.1)
 float(NAN)

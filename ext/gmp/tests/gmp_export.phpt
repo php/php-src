@@ -73,6 +73,7 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+?>
 --EXPECT--
 bool(true)
 gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1

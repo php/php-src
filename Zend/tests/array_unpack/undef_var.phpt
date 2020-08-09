@@ -5,6 +5,7 @@ array unpacking with undefinded variable
 
 var_dump([...$arr]);
 
+?>
 --EXPECTF--
 Warning: Undefined variable $arr in %s on line %d
 

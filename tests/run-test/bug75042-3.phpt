@@ -8,5 +8,6 @@ display_errors=1
 nonexistentsharedmodule
 --FILE--
 <?php
+?>
 --EXPECTF--
 Warning: PHP Startup: Unable to load dynamic library '%snonexistentsharedmodule.%s' %A

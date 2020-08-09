@@ -14,5 +14,6 @@ try {
 } catch(TypeError $e) {
     echo "OK! {$e->getMessage()}";
 }
+?>
 --EXPECT--
 OK! DOMElement::append(): Argument #1 must be of type DOMNode|string, array given

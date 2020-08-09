@@ -21,6 +21,7 @@ function foo() {
     var_dump($x, $b, $c);
 }
 foo();
+?>
 --EXPECT--
 float(2.3)
 array(0) {

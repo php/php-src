@@ -17,6 +17,7 @@ try {
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
+?>
 --EXPECTF--
 socket_select(): At least one array argument must be passed
 --CREDITS--

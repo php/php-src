@@ -9,6 +9,7 @@ if (!extension_loaded('intl'))
 ini_set("intl.error_level", E_WARNING);
 
 new IntlBreakIterator();
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Call to private IntlBreakIterator::__construct() from global scope in %s:%d
 Stack trace:

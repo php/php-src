@@ -36,6 +36,7 @@ var_dump($so);
 stream_set_blocking($stream, 0);
 var_dump(fread($stream, strlen($m)));
 echo "Done.\n";
+?>
 --EXPECTF--
 object(Socket)#%d (0) {
 }

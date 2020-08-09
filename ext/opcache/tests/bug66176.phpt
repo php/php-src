@@ -15,5 +15,6 @@ function foo($v) {
 }
 $a = array(PHP_VERSION => 1);
 var_dump(foo(PHP_VERSION));
+?>
 --EXPECT--
 int(1)

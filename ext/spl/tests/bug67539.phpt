@@ -11,5 +11,6 @@ function badsort($a, $b) {
 }
 
 $it->uksort('badsort');
+?>
 --EXPECTF--
 Warning: Modification of ArrayObject during sorting is prohibited in %sbug67539.php on line %d

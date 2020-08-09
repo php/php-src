@@ -26,6 +26,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $a = new test('sqlite::memory:');
 $a->foo();
 $a->bar();
+?>
 --EXPECT--
 Called foo in test
 Called bar in test

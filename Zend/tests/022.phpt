@@ -19,6 +19,7 @@ class Ext extends Base
 $a = new Ext();
 $a->someMethod("foo");
 $a->someMethod();
+?>
 --EXPECT--
 foo
 default

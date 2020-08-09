@@ -29,6 +29,7 @@ class Foo {
     }
 }
 var_dump(Foo::bar());
+?>
 --EXPECT--
 string(2) "ok"
 

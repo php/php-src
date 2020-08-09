@@ -16,6 +16,7 @@ try {
     echo get_class($e) . PHP_EOL;
     echo $e->getMessage(), "\n";
 }
+?>
 --EXPECT--
 ArgumentCountError
 substr() expects at least 2 parameters, 1 given

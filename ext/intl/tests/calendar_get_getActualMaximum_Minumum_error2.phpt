@@ -74,6 +74,7 @@ try {
 } catch (Error $e) {
     echo get_class($e) . ': ' . $e->getCode() . ', ' . $e->getMessage() . \PHP_EOL;
 }
+?>
 --EXPECT--
 ArgumentCountError: 0, intlcal_get() expects exactly 2 parameters, 1 given
 ArgumentCountError: 0, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given

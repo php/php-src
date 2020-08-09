@@ -13,6 +13,7 @@ a::staticTest();
 
 $b = new b();
 $b->test();
+?>
 --EXPECTF--
 Warning: The magic method b::__invoke() must have public visibility in %s on line %d
 b::test()

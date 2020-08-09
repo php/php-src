@@ -41,6 +41,7 @@ function test_3() {
 }
 $f = test_3(); $f();
 $f = test_3(); $f();
+?>
 --EXPECT--
 Outer function increments $v to 1
 Inner function reckons $v is 1

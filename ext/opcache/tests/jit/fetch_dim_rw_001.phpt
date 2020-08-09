@@ -15,6 +15,7 @@ function foo() {
     return $a[0];
 }
 var_dump(foo());
+?>
 --EXPECTF--
 Warning: Undefined variable $a in %s on line %d
 

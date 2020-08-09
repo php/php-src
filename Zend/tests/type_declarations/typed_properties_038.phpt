@@ -38,6 +38,7 @@ try {
 }
 
 var_dump($foo);
+?>
 --EXPECTF--
 string(82) "Cannot increment property class@anonymous::$bar of type int past its maximal value"
 object(class@anonymous)#1 (1) {

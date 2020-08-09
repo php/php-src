@@ -30,6 +30,7 @@ foo("2x");
 $x=2;
 $y="x";
 foo($x.$y);
+?>
 --EXPECT--
 int(1)
 int(3)

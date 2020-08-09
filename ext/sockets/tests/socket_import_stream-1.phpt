@@ -20,6 +20,7 @@ socket_write($sock, "test message");
 socket_close($sock);
 
 var_dump(stream_get_contents($s1));
+?>
 --EXPECTF--
 object(Socket)#%d (0) {
 }

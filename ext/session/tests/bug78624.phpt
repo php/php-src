@@ -46,6 +46,7 @@ session_start();
 var_dump(session_gc());
 session_write_close();
 
+?>
 --EXPECTF--
 *** Test session_set_save_handler() : session_gc() returns the number of deleted records. ***
 Open

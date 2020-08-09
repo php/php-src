@@ -39,6 +39,7 @@ try {
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
+?>
 --EXPECTF--
 array(4) {
   [0]=>

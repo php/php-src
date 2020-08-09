@@ -24,6 +24,7 @@ var_dump($bi->getText());
 var_dump($bi->next());
 var_dump($bi->setText('foo bar'));
 var_dump($bi->current());
+?>
 --EXPECT--
 bool(true)
 string(7) "foo bar"

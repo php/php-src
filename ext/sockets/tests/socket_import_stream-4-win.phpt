@@ -68,6 +68,7 @@ $stream4 = stream_socket_server("udp://0.0.0.0:0", $errno, $errstr, STREAM_SERVE
 $sock4 = socket_import_stream($stream4);
 socket_close($sock4);
 test($stream4, $sock4);
+?>
 --EXPECTF--
 normal
 stream_set_blocking 1

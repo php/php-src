@@ -16,6 +16,7 @@ $result = socket_addrinfo_explain($addrinfo[0]);
 unset($result['ai_canonname']);
 var_dump($result);
 echo "Done";
+?>
 --EXPECTF--
 array(5) {
   ["ai_flags"]=>

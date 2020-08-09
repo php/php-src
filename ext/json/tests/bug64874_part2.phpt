@@ -27,6 +27,7 @@ decode('[Null]');
 echo PHP_EOL;
 
 echo "Done\n";
+?>
 --EXPECT--
 bool(true)
 SUCCESS

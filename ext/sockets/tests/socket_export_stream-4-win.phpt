@@ -73,6 +73,7 @@ socket_bind($sock4, '0.0.0.0', 0);
 $stream4 = socket_export_stream($sock4);
 socket_close($sock4);
 test($stream4, $sock4);
+?>
 --EXPECTF--
 normal
 stream_set_blocking 1

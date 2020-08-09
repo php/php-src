@@ -32,6 +32,7 @@ var_dump($out, $my_var);
 $my_var = str_repeat('A', 40);
 $out = substr_replace(array(&$my_var), array(new test3), 40, 0);
 var_dump($out, $my_var);
+?>
 --EXPECTF--
 array(1) {
   [0]=>

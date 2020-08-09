@@ -18,6 +18,7 @@ if(!$phpfuncxsl) {
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions(array('ucwords')));
 var_dump($proc->transformToXml($dom));
+?>
 --EXPECT--
 NULL
 string(18) "This Is An Example"

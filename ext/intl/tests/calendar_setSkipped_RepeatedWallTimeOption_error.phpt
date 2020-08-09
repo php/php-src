@@ -28,6 +28,7 @@ try {
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+?>
 --EXPECT--
 IntlCalendar::setSkippedWallTimeOption(): Argument #1 ($wallTimeOption) must be one of IntlCalendar::WALLTIME_FIRST, IntlCalendar::WALLTIME_LAST, or IntlCalendar::WALLTIME_NEXT_VALID
 IntlCalendar::setRepeatedWallTimeOption(): Argument #1 ($wallTimeOption) must be either IntlCalendar::WALLTIME_FIRST or IntlCalendar::WALLTIME_LAST

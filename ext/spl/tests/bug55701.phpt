@@ -293,6 +293,7 @@ testChildClass( function() {
     $o = new SplTempFileObjectChild();
     $o->count();
 } );
+?>
 --EXPECT--
 ->count()... ran normally (expected)
 ->rewind()... ran normally (expected)

@@ -23,6 +23,7 @@ $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions('ucwords'));
 var_dump($proc->registerPHPFunctions('strpos'));
 var_dump($proc->transformToXml($dom));
+?>
 --EXPECT--
 NULL
 NULL

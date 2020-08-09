@@ -25,6 +25,7 @@ Foo::baz();
 $y = new \test\ns1\Foo;
 $y->bar();
 \test\ns1\Foo::baz();
+?>
 --EXPECT--
 test\ns1\Foo
 test\ns1\Foo

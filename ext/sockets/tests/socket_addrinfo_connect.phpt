@@ -13,6 +13,7 @@ $addrinfo = socket_addrinfo_lookup('127.0.0.1', 2000, array(
 ));
 var_dump(socket_addrinfo_connect($addrinfo[0]));
 echo "Done";
+?>
 --EXPECT--
 object(Socket)#2 (0) {
 }

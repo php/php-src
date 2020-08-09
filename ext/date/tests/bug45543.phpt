@@ -21,6 +21,7 @@ foreach ($test_dates as $test_date)
     echo $d2->format(DATE_ISO8601), PHP_EOL;
     echo PHP_EOL;
 }
+?>
 --EXPECT--
 2008-01-01T12:00:00-0700
 2008-01-01T12:00:00+0000

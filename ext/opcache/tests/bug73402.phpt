@@ -25,5 +25,6 @@ class B
 
 $b = new B;
 $b->test();
+?>
 --EXPECT--
 test

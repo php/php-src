@@ -24,5 +24,6 @@ $stream1 = socket_export_stream($sock1);
 zend_leak_variable($sock1);
 
 echo "Done.\n";
+?>
 --EXPECT--
 Done.

@@ -10,5 +10,6 @@ function strlen($x) {
 
 $x = "strlen";
 echo $x("Hello"),"\n";
+?>
 --EXPECT--
 5

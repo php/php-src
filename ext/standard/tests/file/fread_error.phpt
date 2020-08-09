@@ -22,6 +22,7 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
+?>
 --EXPECT--
 *** Testing error conditions ***
 -- Testing fread() with invalid length arguments --

@@ -56,6 +56,7 @@ print_r($data);
 
 $pid = getmypid();
 var_dump($data['control'][0]['data']['pid'] === $pid);
+?>
 --EXPECTF--
 creating send socket
 object(Socket)#%d (0) {

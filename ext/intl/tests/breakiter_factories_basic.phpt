@@ -22,6 +22,7 @@ foreach ($m as $method) {
     var_dump($o1 == $o2 && $o2 == $o3);
     echo "\n";
 }
+?>
 --EXPECT--
 ===== createWordInstance =====
 bool(true)

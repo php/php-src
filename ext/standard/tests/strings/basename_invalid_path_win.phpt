@@ -10,6 +10,7 @@ if((substr(PHP_OS, 0, 3) != "WIN"))
 var_dump(basename("\377"));
 
 echo "Done\n";
+?>
 --EXPECTF--
 string(1) "%c"
 Done

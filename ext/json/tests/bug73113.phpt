@@ -18,5 +18,6 @@ try {
 } catch (\Exception $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECT--
 This error is expected

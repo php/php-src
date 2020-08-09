@@ -12,6 +12,7 @@ $friday = new Friday;
 echo "$friday->require ($friday->require) {$friday->require}", PHP_EOL;
 
 echo "\nDone\n";
+?>
 --EXPECT--
 fun (fun) fun
 

@@ -33,6 +33,7 @@ foreach([1, 2, 4] as $mem) {
     var_dump(sodium_crypto_pwhash_str_verify($hash, $password));
   }
 }
+?>
 --EXPECTF--
 Argon2 provider: string(%d) "%s"
 Using password: string(44) "%s"

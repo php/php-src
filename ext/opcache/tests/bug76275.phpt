@@ -24,5 +24,6 @@ if (!is_callable('random_bytes')) {
         return '';
     }
 }
+?>
 --EXPECT--
 Done

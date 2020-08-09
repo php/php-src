@@ -16,6 +16,7 @@ try {
     var_dump($ex->getMessage());
 }
 
+?>
 --EXPECT--
 string(36) "Cannot unpack array with string keys"
 string(42) "Cannot unpack Traversable with string keys"

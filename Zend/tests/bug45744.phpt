@@ -33,6 +33,7 @@ class Bar2 extends Foo2 {
 }
 
 new Bar2(array());
+?>
 --EXPECT--
 array(0) {
 }

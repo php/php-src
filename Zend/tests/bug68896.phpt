@@ -26,6 +26,7 @@ $obj = new A;
 $obj["a"] = 1;
 $obj["a"] .= "test";
 var_dump($obj["a"]);
+?>
 --EXPECT--
 string(5) "1test"
 string(5) "1test"

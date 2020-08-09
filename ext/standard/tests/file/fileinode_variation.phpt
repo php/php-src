@@ -81,6 +81,7 @@ rmdir("$file_path/dir/subdir");
 rmdir("$file_path/dir");
 
 echo "\n*** Done ***";
+?>
 --EXPECTF--
 *** Testing fileinode() with files, links and directories ***
 -- Testing with files --

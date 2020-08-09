@@ -57,6 +57,7 @@ function bar() {
     echo "13\n";
 }
 bar();
+?>
 --EXPECT--
 1
 2

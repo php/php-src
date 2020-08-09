@@ -17,6 +17,7 @@ var_dump(transliterator_transliterate($tr,"str",7,6));
 transliterator_transliterate($tr, "\x80\x03");
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Warning: transliterator_transliterate(): transliterator_transliterate: Neither "start" nor the "end" arguments can exceed the number of UTF-16 code units (in this case, 3) in %s on line %d
 bool(false)

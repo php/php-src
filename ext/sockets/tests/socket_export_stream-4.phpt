@@ -75,6 +75,7 @@ socket_close($sock4);
 test($stream4, $sock4);
 
 echo "Done.\n";
+?>
 --EXPECTF--
 normal
 stream_set_blocking 1

@@ -4,6 +4,7 @@ Bug #54291 (Crash iterating DirectoryIterator for dir name starting with \0)
 <?php
 $dir = new DirectoryIterator("\x00/abc");
 $dir->isFile();
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: DirectoryIterator::__construct(): Argument #1 ($path) must be a valid path, string given in %s:%d
 Stack trace:
