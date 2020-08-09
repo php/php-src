@@ -114,7 +114,8 @@ Options:
 
     --no-clean  Do not execute clean section if any.
 
-    --no-color Do not colorize the result type in the test result
+    --color
+    --no-color  Do/Don't colorize the result type in the test result.
 
 
 HELP;
@@ -390,6 +391,9 @@ function main(): void
     if (function_exists('sapi_windows_vt100_support') && !sapi_windows_vt100_support(STDOUT, true)) {
         $colorize = false;
     }
+    if (array_key_exists('NO_COLOR', $_ENV)) {
+        $colorize = false;
+    }
     $selected_tests = false;
     $slow_min_ms = INF;
     $preload = false;
@@ -535,6 +539,9 @@ function main(): void
                     break;
                 case '--no-clean':
                     $no_clean = true;
+                    break;
+                case '--color':
+                    $colorize = true;
                     break;
                 case '--no-color':
                     $colorize = false;
