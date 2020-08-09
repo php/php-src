@@ -12,6 +12,7 @@ $s = serialize($x);
 $s = str_replace("Foo", "Bar", $s);
 $y = unserialize($s);
 var_dump($y);
+?>
 --EXPECT--
 array(2) {
   [0]=>

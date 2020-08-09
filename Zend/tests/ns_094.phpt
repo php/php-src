@@ -10,5 +10,6 @@ use const Foo\Bar\{
     const B,
     function C
 };
+?>
 --EXPECTF--
 Parse error: syntax error, unexpected token "const", expecting "}" in %s on line %d

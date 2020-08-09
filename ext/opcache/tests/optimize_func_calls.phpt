@@ -89,6 +89,7 @@ function ref(&$b) {
     $b = "changed";
     return "ref";
 }
+?>
 --EXPECTF--
 Array
 (

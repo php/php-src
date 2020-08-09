@@ -14,6 +14,7 @@ echo $a, $a->__toString(), $a->__toString() . '', "\n";
 
 // Does not work - outputs parent::__toString()
 echo $a . '', "\n";
+?>
 --EXPECT--
  -expected-  -expected-  -expected- 
  -expected- 

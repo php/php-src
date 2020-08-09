@@ -41,6 +41,7 @@ try {
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+?>
 --EXPECT--
 IntlCalendar::set() expects at most 6 parameters, 7 given
 IntlCalendar::set() has no variant with exactly 4 parameters

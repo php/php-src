@@ -38,6 +38,7 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
+?>
 --EXPECT--
 OK
 wordwrap(): Argument #3 ($break) cannot be empty

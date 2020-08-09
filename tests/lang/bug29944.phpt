@@ -13,6 +13,5 @@ switch ($a) {
         echo foo($b);
 }
 ?>
-
 --EXPECT--
 1

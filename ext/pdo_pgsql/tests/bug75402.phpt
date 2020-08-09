@@ -81,6 +81,7 @@ if ($db) {
 }
 
 var_dump($resp);
+?>
 --EXPECT--
 object(stdClass)#2 (1) {
   ["entries"]=>

@@ -42,6 +42,7 @@ for ($i = 0; $i < 10; $i++) {
     socket_close($senderSocket);
     unlink($senderSocketPath);
 }
+?>
 --EXPECT--
 Received 'Ping!'
 Responded to sender with 'Pong!'

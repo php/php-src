@@ -29,6 +29,7 @@ class Test {
 
 $t = new Test();
 var_dump ($t->run());
+?>
 --EXPECT--
 bool(true)
 bool(true)

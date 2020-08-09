@@ -12,6 +12,7 @@ var_dump( fileinode("string") );
 var_dump( fileinode(100) );
 
 echo "\n*** Done ***";
+?>
 --EXPECTF--
 *** Testing error conditions of fileinode() ***
 Warning: fileinode(): stat failed for /no/such/file/dir in %s on line %d

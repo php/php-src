@@ -25,6 +25,7 @@ foreach (range(0, 10) as $char) {
     var_dump(test($char));
 }
 
+?>
 --EXPECTF--
 $_main:
      ; (lines=15, args=0, vars=1, tmps=2)

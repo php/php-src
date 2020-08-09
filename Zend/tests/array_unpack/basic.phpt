@@ -24,6 +24,7 @@ var_dump([...new ArrayIterator(['a', 'b', 'c'])]);
 var_dump([0, ...$array, ...getArr(), 6, 7, 8, 9, 10, ...arrGen()]);
 var_dump([0, ...$array, ...$array, 'end']);
 
+?>
 --EXPECT--
 array(0) {
 }

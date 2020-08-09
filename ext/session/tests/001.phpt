@@ -31,5 +31,6 @@ $_SESSION["arr"] = $arr;
 print session_encode()."\n";
 
 session_destroy();
+?>
 --EXPECT--
 baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}}

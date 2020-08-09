@@ -21,5 +21,6 @@ switch (PHP_OS) {
     default:
     break;
 }
+?>
 --EXPECT--
 okey

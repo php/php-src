@@ -22,6 +22,7 @@ try {
 } catch (Error $ex) {
     echo "Exception: " . $ex->getMessage() . "\n";
 }
+?>
 --EXPECT--
 array(5) {
   [0]=>

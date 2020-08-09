@@ -15,6 +15,7 @@ if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
 }
 socket_create_pair($domain, SOCK_STREAM, 0, $sockets);
 var_dump($sockets);
+?>
 --EXPECT--
 array(2) {
   [0]=>

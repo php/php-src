@@ -23,6 +23,7 @@ var_dump($stmt->fetchAll(\PDO::FETCH_ASSOC));
 $connection->query('ALTER TABLE user ADD new_col VARCHAR(255)');
 $stmt->execute(['id' => 10]);
 var_dump($stmt->fetchAll(\PDO::FETCH_ASSOC));
+?>
 --EXPECT--
 array(1) {
   [0]=>

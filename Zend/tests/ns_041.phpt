@@ -12,6 +12,7 @@ echo(\test\ns1\FOO);
 echo(BAR);
 
 const BAR = "ok\n";
+?>
 --EXPECTF--
 ok
 ok

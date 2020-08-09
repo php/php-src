@@ -18,6 +18,7 @@ function foo() {
     var_dump($b, $d);
 }
 foo();
+?>
 --EXPECT--
 array(0) {
 }

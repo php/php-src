@@ -1,7 +1,7 @@
 --TEST--
 pcntl_unshare() with CLONE_NEWPID
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("pcntl")) die("skip");
 if (!extension_loaded("posix")) die("skip posix extension not available");
 if (!function_exists("pcntl_unshare")) die("skip pcntl_unshare is not available");
@@ -29,6 +29,7 @@ if(!pcntl_fork()) {
     var_dump(getmypid());
     exit();
 }
+?>
 --EXPECTF--
 int(%d)
 int(1)

@@ -13,6 +13,7 @@ var_dump(gc_collect_cycles());
 unset($a);
 var_dump(gc_collect_cycles());
 echo "ok\n";
+?>
 --EXPECT--
 int(0)
 int(1000)

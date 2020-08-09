@@ -45,6 +45,7 @@ $dom = new domDocument();
         return $id;
     }
   }
+?>
 --EXPECTF--
 Test 11: php:function Support
 

@@ -13,6 +13,7 @@ $d->setTimeZone( new DateTimeZone( 'Europe/Budapest' ) );
 var_dump( $d );
 echo $d->format( DATE_ISO8601 ), "\n\n";
 echo $d->format( 'U' ), "\n\n";
+?>
 --EXPECT--
 object(DateTime)#1 (3) {
   ["date"]=>

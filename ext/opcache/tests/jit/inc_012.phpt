@@ -17,5 +17,6 @@ function foo() {
     return $x;
 }
 var_dump(foo());
+?>
 --EXPECT--
 float(2)

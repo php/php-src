@@ -145,6 +145,7 @@ foreach ($arr as $u => $v) {
         $res = unpack("H*", $res)[1];
     echo sprintf("%s => %s\n\n", $ent, $res);
 }
+?>
 --EXPECT--
 CYRILLIC CAPITAL LETTER A: &#x410; => 80
 &#x80; => &#x80;

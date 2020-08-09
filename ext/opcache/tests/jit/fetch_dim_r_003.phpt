@@ -38,6 +38,7 @@ function foo() {
     var_dump($a[$x . $y]);
 }
 foo();
+?>
 --EXPECTF--
 string(1) "A"
 string(1) "C"

@@ -11,6 +11,7 @@ class foo {
 $foo = new foo;
 $foo->bar($foo); // Ok!
 $foo->bar(new \stdclass); // Error, ok!
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: foobar\foo::bar(): Argument #1 ($a) must be of type foobar\foo, stdClass given, called in %s:%d
 Stack trace:

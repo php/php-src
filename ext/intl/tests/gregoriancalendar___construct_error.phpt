@@ -33,6 +33,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+?>
 --EXPECT--
 Too many arguments
 Too many arguments

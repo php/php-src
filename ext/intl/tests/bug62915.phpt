@@ -20,5 +20,6 @@ try {
 } catch (Exception $e) {
         var_dump($e->getMessage());
 }
+?>
 --EXPECT--
 string(39) "Cannot clone unconstructed IntlTimeZone"

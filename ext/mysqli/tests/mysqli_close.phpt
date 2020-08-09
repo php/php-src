@@ -25,6 +25,7 @@ require_once('skipifconnectfailure.inc');
     }
 
     print "done!";
+?>
 --EXPECT--
 mysqli object is already closed
 done!

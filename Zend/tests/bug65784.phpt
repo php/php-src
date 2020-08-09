@@ -53,6 +53,7 @@ function foo3() {
 }
 
 $bar = foo3();
+?>
 --EXPECTF--
 string(9) "not catch"
 NULL

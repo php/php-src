@@ -10,4 +10,5 @@ interface A {
 interface B extends A {
     function method(): int;
 }
+?>
 --EXPECT--

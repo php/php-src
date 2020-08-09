@@ -11,5 +11,6 @@ if (!extension_loaded('zend-test')) {
 @@ZendTestAttribute
 function foo() {
 }
+?>
 --EXPECTF--
 Fatal error: Only classes can be marked with @@ZendTestAttribute in %s

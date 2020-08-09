@@ -8,6 +8,7 @@ function get_config(): array {
 }
 
 get_config();
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: get_config(): Return value must be of type array, int returned in %s:%d
 Stack trace:

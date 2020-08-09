@@ -158,6 +158,7 @@ error_reporting=E_ALL
     $db->query('THIS IS NOT VALID SQL');
 
     print "done!\n";
+?>
 --EXPECTF--
 [003] Maybe PDO could indicate that this is not a proper way of setting the ERRMODE...true
 

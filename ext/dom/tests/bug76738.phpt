@@ -233,5 +233,6 @@ final class rh_rte_helper_debug
   return $return;
  }
 }
+?>
 --EXPECT--
 bool(true)

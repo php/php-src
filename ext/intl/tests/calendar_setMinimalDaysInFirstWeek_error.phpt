@@ -28,6 +28,7 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
+?>
 --EXPECT--
 IntlCalendar::setMinimalDaysInFirstWeek(): Argument #1 ($numberOfDays) must be between 1 and 7
 intlcal_set_minimal_days_in_first_week(): Argument #2 ($numberOfDays) must be between 1 and 7

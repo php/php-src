@@ -17,5 +17,6 @@ function foo() {
     var_dump($c);
 }
 foo();
+?>
 --EXPECT--
 int(2)

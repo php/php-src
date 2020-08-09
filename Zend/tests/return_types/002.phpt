@@ -7,6 +7,7 @@ function test1() : array {
 }
 
 test1();
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: test1(): Return value must be of type array, null returned in %s:%d
 Stack trace:

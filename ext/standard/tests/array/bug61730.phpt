@@ -26,6 +26,7 @@ array_walk(
 
 
 print_r($myArray);
+?>
 --EXPECT--
 int(0)
 int(3)

@@ -35,6 +35,7 @@ require_once('skipifconnectfailure.inc');
     }
 
     print "done!";
+?>
 --EXPECTF--
 string(%d) "Table 'няма_такава_таблица' doesn't exist"
 mysqli object is already closed

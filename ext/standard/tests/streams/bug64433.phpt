@@ -42,6 +42,7 @@ $context = stream_context_create($arr);
 foreach($codes as $code) {
     echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1", false, $context);
 }
+?>
 --EXPECT--
 HELLO!
 default

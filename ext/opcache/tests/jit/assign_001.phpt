@@ -19,6 +19,7 @@ function foo() {
     var_dump($x, $b, $c);
 }
 foo();
+?>
 --EXPECT--
 int(1)
 array(0) {

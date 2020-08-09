@@ -14,6 +14,7 @@ include __DIR__ .'/prepare.inc';
 $proc->importStylesheet($xsl);
 $proc->setParameter('', '', '"\'');
 $proc->transformToXml($dom);
+?>
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): Cannot create XPath expression (string contains both quote and double-quotes) in %s on line %d
 --CREDITS--

@@ -24,6 +24,7 @@ $fp = fopen(__FILE__, 'r');
 var_dump($a[$fp]);
 
 fclose($fp);
+?>
 --EXPECTF--
 Warning: Undefined array key "epic_magic" in %s on line %d
 NULL

@@ -73,6 +73,7 @@ var_dump($_SESSION);
 --CLEAN--
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_class_018');
+?>
 --EXPECT--
 *** Testing session_set_save_handler() function: class with validate_sid ***
 string(34) "session_set_save_handler_class_018"

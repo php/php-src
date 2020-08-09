@@ -36,6 +36,7 @@ curl_close($ch);
 
 // Clean the temporary file
 @unlink($tempname);
+?>
 --EXPECT--
 array(2) {
   ["hello"]=>

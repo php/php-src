@@ -13,5 +13,6 @@ try {
     echo "Exception: " . $ex->getMessage() . "\n";
 }
 
+?>
 --EXPECT--
 Exception: Cannot unpack Traversable with non-integer keys

@@ -56,6 +56,7 @@ for ($index = 0; $index < $children->length; $index++) {
     $current = $children->item($index);
     dumpcourse($current);
 }
+?>
 --EXPECT--
 original has 5 nodes
 node 4

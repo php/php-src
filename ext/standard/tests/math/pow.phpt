@@ -142,6 +142,7 @@ TESTS;
 
  echo "On failure, please mail result to php-dev@lists.php.net\n";
  include(__DIR__ . '/../../../../tests/quicktester.inc');
+?>
 --EXPECT--
 1,1,0,0
 On failure, please mail result to php-dev@lists.php.net

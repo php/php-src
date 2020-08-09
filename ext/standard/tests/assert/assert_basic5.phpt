@@ -20,6 +20,7 @@ var_dump($r2=assert(0 == 0));
 
 //switch warning on and test return value
 var_dump($rao=assert_options(ASSERT_WARNING, 0));
+?>
 --EXPECTF--
 int(0)
 f1 called

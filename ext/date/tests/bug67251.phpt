@@ -5,6 +5,7 @@ date.timezone=Europe/Berlin
 --FILE--
 <?php
 var_dump(date_parse_from_format("\\","AAAABBBB"));
+?>
 --EXPECT--
 array(12) {
   ["year"]=>

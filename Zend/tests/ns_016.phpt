@@ -10,5 +10,6 @@ function strlen($x) {
 
 $x = "test\\ns1\\strlen";
 echo $x("Hello"),"\n";
+?>
 --EXPECT--
 test\ns1\strlen

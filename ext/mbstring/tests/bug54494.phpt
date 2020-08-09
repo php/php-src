@@ -42,6 +42,7 @@ for ($i=0; $i < $length; $i++) {
   echo $t[1];
 }
 echo "\n";
+?>
 --EXPECT--
 UTF-32LE:
 Length: 12

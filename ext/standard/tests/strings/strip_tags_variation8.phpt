@@ -31,6 +31,7 @@ foreach($quotes as $string_value)
 }
 
 echo "Done";
+?>
 --EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --

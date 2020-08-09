@@ -44,6 +44,7 @@ require 'ipv6_skipif.inc';
     echo "Received $buf from remote address $from and remote port $port" . PHP_EOL;
 
     socket_close($socket);
+?>
 --EXPECTF--
 Warning: socket_recvfrom(): unable to recvfrom [10022]: %s
  in %s on line %d

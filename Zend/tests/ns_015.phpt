@@ -9,5 +9,6 @@ function strlen($x) {
 }
 
 echo \strlen("Hello"),"\n";
+?>
 --EXPECT--
 5

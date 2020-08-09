@@ -6,6 +6,7 @@ var_dump(base64_decode("*", true));
 var_dump(base64_decode("=*", true));
 var_dump(base64_decode("VVV=", true));
 var_dump(base64_decode("VVV=*", true));
+?>
 --EXPECT--
 bool(false)
 bool(false)

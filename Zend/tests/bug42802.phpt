@@ -31,6 +31,7 @@ test2($x);
 test3($x);
 test4($y);
 test5($x);
+?>
 --EXPECTF--
 ok
 ok

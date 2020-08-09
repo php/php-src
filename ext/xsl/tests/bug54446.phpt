@@ -69,6 +69,7 @@ if (file_exists($outputfile)) {
 } else {
     print "OK, no file created\n";
 }
+?>
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 

@@ -72,6 +72,7 @@ var_dump(Phar::isValidPharFilename('dir.phar.php', false));
 --CLEAN--
 <?php
 rmdir(__DIR__ . '/.phar');
+?>
 --EXPECT--
 bool(false)
 bool(false)

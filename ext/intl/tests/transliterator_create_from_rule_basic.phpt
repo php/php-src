@@ -21,6 +21,7 @@ $u = transliterator_create_from_rules($rules, Transliterator::REVERSE);
 echo $u->transliterate("``akk ``bkk ``aooy"), "\n";
 
 echo "Done.\n";
+?>
 --EXPECT--
 RulesTransPHP
 “akk ``bkk “aooy

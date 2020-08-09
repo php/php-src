@@ -19,6 +19,7 @@ try {
 }
 }
 echo "DONE\n";
+?>
 --EXPECTF--
 Error at offset 6 of 34 bytes
 Error at offset 46 of 89 bytes

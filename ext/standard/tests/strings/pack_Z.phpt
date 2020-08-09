@@ -16,6 +16,7 @@ var_dump(
     unpack("Z2", "AB\0"),
     unpack("Z2", "ABC")
 );
+?>
 --EXPECTF--
 Warning: unpack(): Type Z: not enough input, need 2, have 1 in %s on line %d
 string(0) ""

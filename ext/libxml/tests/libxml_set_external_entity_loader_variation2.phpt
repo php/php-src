@@ -34,6 +34,7 @@ file_put_contents(__DIR__ . "/foobar.dtd", $dtd);
 var_dump($dd->validate());
 
 echo "Done.\n";
+?>
 --EXPECTF--
 string(10) "-//FOO/BAR"
 string(%d) "%sfoobar.dtd"

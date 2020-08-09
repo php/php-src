@@ -27,6 +27,7 @@ try {
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+?>
 --EXPECT--
 IntlCalendar::clear(): Argument #1 ($field) must be a valid field
 intlcal_clear(): Argument #2 ($field) must be a valid field

@@ -14,6 +14,7 @@ include __DIR__ .'/prepare.inc';
 $proc->importStylesheet($xsl);
 var_dump($proc->setParameter('', array(4, 'abc')));
 $proc->transformToXml($dom);
+?>
 --EXPECTF--
 Warning: XSLTProcessor::setParameter(): Invalid parameter array in %s on line %d
 bool(false)

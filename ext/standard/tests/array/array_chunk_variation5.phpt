@@ -38,7 +38,6 @@ foreach ($sizes as $size){
     }
 }
 ?>
-
 --EXPECT--
 *** Testing array_chunk() : usage variations ***
 

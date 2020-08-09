@@ -22,6 +22,7 @@ $except = null;
 $time   = 0;
 $usec   = 2000000;
 var_dump(socket_select($sockets, $write, $except, $time, $usec));
+?>
 --EXPECT--
 int(0)
 --CREDITS--

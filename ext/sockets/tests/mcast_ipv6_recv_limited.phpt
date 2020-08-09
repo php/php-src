@@ -106,6 +106,7 @@ if ($i == 3) {
 }
 
 }
+?>
 --EXPECTF--
 creating send socket
 object(Socket)#%d (0) {

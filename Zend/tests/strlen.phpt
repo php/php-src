@@ -41,6 +41,7 @@ var_dump($a);
 $a = 'foobar';
 var_dump(strlen($t2));
 var_dump($t2->something);
+?>
 --EXPECT--
 int(5)
 string(5) "hello"

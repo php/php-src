@@ -73,6 +73,7 @@ try {
 } catch (Error $e) {
     echo get_class($e) . ': ' . $e->getCode() . ', ' . $e->getMessage() . \PHP_EOL;
 }
+?>
 --EXPECT--
 ValueError: 0, IntlCalendar::getLeastMaximum(): Argument #1 ($field) must be a valid field
 ValueError: 0, IntlCalendar::getMaximum(): Argument #1 ($field) must be a valid field

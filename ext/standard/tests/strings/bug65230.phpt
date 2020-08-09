@@ -29,6 +29,7 @@ test('german', 3.41);
 test('english', 3.41);
 test('french', 3.41);
 test('german', 3.41);
+?>
 --EXPECT--
 German_Germany.1252
 --------------------------

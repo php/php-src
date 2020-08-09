@@ -21,6 +21,7 @@ $e = $d->getElementsByTagName("p");
 $e = $e->item(0);
 echo $d->saveXml($e),"\n";
 echo $d->saveHtml($e),"\n";
+?>
 --EXPECT--
 <p>Hi.<br/>there</p>
 <p>Hi.<br>there</p>

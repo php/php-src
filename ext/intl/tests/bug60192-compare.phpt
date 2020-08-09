@@ -14,6 +14,7 @@ class Collator2 extends Collator{
 
 $c = new Collator2();
 $a = $c->compare('h', 'H');
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Object not initialized in %s:%d
 Stack trace:

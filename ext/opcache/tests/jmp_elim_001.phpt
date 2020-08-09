@@ -12,5 +12,6 @@ $info = array('arch' => $archName,
               'webserver' =>$webserver);
 header('Content-Type: application/json');
 echo json_encode($info) . "\n";
+?>
 --EXPECT--
 {"arch":"64","webserver":"Apache"}

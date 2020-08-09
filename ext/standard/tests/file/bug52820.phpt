@@ -39,6 +39,7 @@ echo "\nmemory stream (leak):\n";
 zend_leak_variable(do_stuff("php://memory"));
 
 echo "\nDone.\n";
+?>
 --EXPECTF--
 temp stream (close after):
 About to rewind!

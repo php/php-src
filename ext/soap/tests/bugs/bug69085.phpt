@@ -13,5 +13,6 @@ try {
 } catch (Exception $e) {
     echo "okey";
 }
+?>
 --EXPECT--
 okey

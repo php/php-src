@@ -178,6 +178,7 @@ if ($i == 8) {
 }
 
 }
+?>
 --EXPECTF--
 creating send socket
 object(Socket)#%d (0) {

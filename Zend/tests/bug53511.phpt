@@ -19,6 +19,7 @@ function test() {
 
 test();
 echo "bug\n";
+?>
 --EXPECTF--
 Fatal error: Uncaught Exception: ops 1 in %sbug53511.php:4
 Stack trace:

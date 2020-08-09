@@ -44,6 +44,7 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 test("stream_truncate bad return", $fd3, 0);
+?>
 --EXPECTF--
 bool(true)
 bool(true)

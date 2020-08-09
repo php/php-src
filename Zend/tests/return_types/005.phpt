@@ -12,6 +12,7 @@ class qux {
 
 $qux = new qux();
 $qux->foo();
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: qux::foo(): Return value must be of type foo, qux returned in %s:%d
 Stack trace:

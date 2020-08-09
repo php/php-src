@@ -90,6 +90,7 @@ foreach ($db->query('SELECT id, data from TEST ORDER BY LEN(data) ASC') as $row)
 }
 
 echo "Finished\n";
+?>
 --EXPECT--
 Passed on size 32
 Passed on size 53

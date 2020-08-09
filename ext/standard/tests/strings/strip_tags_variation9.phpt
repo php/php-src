@@ -29,6 +29,7 @@ foreach($double_quote_string as $string_value)
 }
 
 echo "Done";
+?>
 --EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --

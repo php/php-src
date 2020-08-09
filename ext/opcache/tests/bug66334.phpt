@@ -15,5 +15,6 @@ if (extension_loaded("unknown_extension")) {
 } else {
     var_dump(2);
 }
+?>
 --EXPECT--
 int(2)

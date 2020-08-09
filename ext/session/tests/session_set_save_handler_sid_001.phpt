@@ -71,6 +71,7 @@ var_dump($_SESSION);
 --CLEAN--
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_sid_001');
+?>
 --EXPECT--
 *** Testing session_set_save_handler() function: create_sid ***
 string(32) "session_set_save_handler_sid_001"

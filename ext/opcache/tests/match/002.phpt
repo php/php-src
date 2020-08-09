@@ -27,6 +27,7 @@ function test2() {
 }
 test2();
 
+?>
 --EXPECTF--
 $_main:
      ; (lines=5, args=0, vars=0, tmps=0)
