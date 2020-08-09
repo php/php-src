@@ -114,7 +114,8 @@ Options:
 
     --no-clean  Do not execute clean section if any.
 
-    --no-color Do not colorize the result type in the test result
+    --color
+    --no-color  Do/Don't colorize the result type in the test result.
 
 
 HELP;
@@ -538,6 +539,9 @@ function main(): void
                     break;
                 case '--no-clean':
                     $no_clean = true;
+                    break;
+                case '--color':
+                    $colorize = true;
                     break;
                 case '--no-color':
                     $colorize = false;
