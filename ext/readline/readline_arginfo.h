@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 226b138a99e3e32aea90cbb5c44446ac7c16db71 */
+ * Stub hash: f756ad4cde88bfef32707a677ddf6624fa4ed146 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_readline, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prompt, IS_STRING, 1, "null")
@@ -30,6 +30,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_completion_function, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_interactive_shell_result_function, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
 #if HAVE_RL_CALLBACK_READ_CHAR
@@ -69,6 +73,7 @@ ZEND_FUNCTION(readline_list_history);
 ZEND_FUNCTION(readline_read_history);
 ZEND_FUNCTION(readline_write_history);
 ZEND_FUNCTION(readline_completion_function);
+ZEND_FUNCTION(readline_interactive_shell_result_function);
 #if HAVE_RL_CALLBACK_READ_CHAR
 ZEND_FUNCTION(readline_callback_handler_install);
 #endif
@@ -97,6 +102,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(readline_read_history, arginfo_readline_read_history)
 	ZEND_FE(readline_write_history, arginfo_readline_write_history)
 	ZEND_FE(readline_completion_function, arginfo_readline_completion_function)
+	ZEND_FE(readline_interactive_shell_result_function, arginfo_readline_interactive_shell_result_function)
 #if HAVE_RL_CALLBACK_READ_CHAR
 	ZEND_FE(readline_callback_handler_install, arginfo_readline_callback_handler_install)
 #endif

@@ -114,9 +114,8 @@ static void cli_readline_init_globals(zend_cli_readline_globals *rg)
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("cli.pager", "", PHP_INI_ALL, OnUpdateString, pager, zend_cli_readline_globals, cli_readline_globals)
 	STD_PHP_INI_ENTRY("cli.prompt", DEFAULT_PROMPT, PHP_INI_ALL, OnUpdateString, prompt, zend_cli_readline_globals, cli_readline_globals)
-PHP_INI_END()
-
-
+	STD_PHP_INI_BOOLEAN("cli.enable_interactive_shell_result_function", "1", PHP_INI_SYSTEM, OnUpdateBool, enable_interactive_shell_result_function, zend_cli_readline_globals, cli_readline_globals)
+PHP_INI_END();
 
 typedef enum {
 	body,
@@ -130,6 +129,127 @@ typedef enum {
 	heredoc,
 	outside,
 } php_code_type;
+
+/* Generate a snippet to try to convert single-statement statement lists to a statement returning an expression.
+ * If this fails to parse, the passed-in statements are used instead. */
+static zend_string *php_readline_create_return_expression_string(const char* str, size_t str_len) /* {{{ */
+{
+	/* E.g. convert "2+2; \t" to "return (2+2);"  */
+	zend_string *result;
+	while (str_len > 0) {
+		char c = str[str_len - 1];
+		/* Remove trailing whitespace and semicolon(s) from statements.
+		 * TODO: Could tokenize to remove trailing comments as well. */
+		if (c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == ';') {
+			str_len--;
+		} else {
+			break;
+		}
+	}
+
+	result = zend_string_alloc(str_len + sizeof("return ();")-1, 0);
+	memcpy(ZSTR_VAL(result), "return (", sizeof("return (") - 1);
+	memcpy(ZSTR_VAL(result) + sizeof("return (") - 1, str, str_len);
+	memcpy(ZSTR_VAL(result) + sizeof("return (") - 1 + str_len, ");", sizeof(");") - 1);
+	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
+	return result;
+}
+
+static int php_readline_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name) /* {{{ */
+{
+	zend_string *pv;
+	zend_op_array *new_op_array;
+	uint32_t original_compiler_options = CG(compiler_options);
+	int retval;
+
+	if (retval_ptr) {
+		pv = php_readline_create_return_expression_string(str, str_len);
+	} else {
+recompile_without_block_expression:
+		pv = zend_string_init(str, str_len, 0);
+	}
+
+	CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;
+	if (retval_ptr) {
+		int original_error_reporting = EG(error_reporting);
+		EG(error_reporting) &= ~(E_PARSE);
+		new_op_array = zend_compile_string(pv, string_name);
+		EG(error_reporting) = original_error_reporting;
+		if (!new_op_array) {
+			zend_string_release(pv);
+			if (!EG(exception) || EG(exception)->ce != zend_ce_parse_error) {
+				/* Don't retry if this is any exception other than ParseError (even CompileError).
+				 * If we could parse but not compile `return (expr);`, we likely couldn't compile `expr;` either */
+				return FAILURE;
+			}
+			retval_ptr = NULL;
+			/* TODO: Only retry if the error in question was a ParseError, not a compile error. */
+			/* Code such as `return 123;;` with too many semicolons doesn't parse with the mechanism this uses to get the value of the last expression/statement. */
+			zend_clear_exception();
+			goto recompile_without_block_expression;
+		}
+	} else {
+		new_op_array = zend_compile_string(pv, string_name);
+	}
+	CG(compiler_options) = original_compiler_options;
+
+	if (new_op_array) {
+		zval local_retval;
+
+		EG(no_extensions)=1;
+
+		new_op_array->scope = zend_get_executed_scope();
+
+		zend_try {
+			ZVAL_UNDEF(&local_retval);
+			zend_execute(new_op_array, &local_retval);
+		} zend_catch {
+			destroy_op_array(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
+			zend_bailout();
+		} zend_end_try();
+
+		if (Z_TYPE(local_retval) != IS_UNDEF) {
+			if (retval_ptr) {
+				ZVAL_COPY_VALUE(retval_ptr, &local_retval);
+			} else {
+				zval_ptr_dtor(&local_retval);
+			}
+		} else {
+			if (retval_ptr) {
+				ZVAL_NULL(retval_ptr);
+			}
+		}
+
+		EG(no_extensions)=0;
+		destroy_op_array(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
+		retval = SUCCESS;
+	} else {
+		retval = FAILURE;
+	}
+	zend_string_release(pv);
+	return retval;
+}
+/* }}} */
+
+static void php_readline_try_interactive_eval(const char* code, const size_t codelen, const char* string_name) /* {{{ */
+{
+	zval returned_zv;
+	const zend_bool should_dump = CLIR_G(enable_interactive_shell_result_function) && php_readline_should_dump_interactive_result();
+	ZVAL_UNDEF(&returned_zv);
+	zend_try {
+		php_readline_eval_stringl(code, codelen, should_dump ? &returned_zv : NULL, string_name);
+		if (!EG(exception) && should_dump && !Z_ISUNDEF(returned_zv)) {
+			php_readline_dump_interactive_result(code, codelen, &returned_zv);
+		}
+	} zend_end_try();
+	if (should_dump) {
+		zend_try {
+			zval_ptr_dtor(&returned_zv);
+		} zend_end_try();
+	}
+}
 
 static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 {
@@ -185,9 +305,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 				code = estrndup(prompt_spec + 1, prompt_end - prompt_spec - 1);
 
 				CLIR_G(prompt_str) = &retval;
-				zend_try {
-					zend_eval_stringl(code, prompt_end - prompt_spec - 1, NULL, "php prompt code");
-				} zend_end_try();
+				php_readline_try_interactive_eval(prompt_spec + 1, prompt_end - (prompt_spec + 1), "php prompt code");
 				CLIR_G(prompt_str) = NULL;
 				efree(code);
 				prompt_spec = prompt_end;
@@ -682,9 +800,7 @@ static int readline_shell_run(void) /* {{{ */
 			history_lines_to_write = 0;
 		}
 
-		zend_try {
-			zend_eval_stringl(code, pos, NULL, "php shell code");
-		} zend_end_try();
+		php_readline_try_interactive_eval(code, pos, "php shell code");
 
 		pos = 0;
 
