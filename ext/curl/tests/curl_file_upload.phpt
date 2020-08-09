@@ -42,7 +42,12 @@ var_dump($file->getPostFilename());
 curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
 var_dump(curl_exec($ch));
 
-curl_setopt($ch, CURLOPT_SAFE_UPLOAD, 0);
+try {
+    curl_setopt($ch, CURLOPT_SAFE_UPLOAD, 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 $params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));
@@ -69,8 +74,7 @@ string(%d) "%s/curl_testdata1.txt"
 string(%d) "curl_testdata1.txt|text/plain|6"
 string(%d) "foo.txt"
 string(%d) "foo.txt|application/octet-stream|6"
-
-Warning: curl_setopt(): Disabling safe uploads is no longer supported in %s on line %d
+curl_setopt(): Disabling safe uploads is no longer supported
 string(0) ""
 string(0) ""
 string(%d) "array(1) {

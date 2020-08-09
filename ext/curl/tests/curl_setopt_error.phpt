@@ -16,10 +16,21 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-curl_setopt($ch, -10, 0);
+try {
+    curl_setopt($ch, -10, 0);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    curl_setopt($ch, 1000, 0);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
---EXPECTF--
+--EXPECT--
 *** curl_setopt() call with incorrect parameters
 curl_setopt(): Argument #2 ($option) must be of type int, string given
-
-Warning: curl_setopt(): Invalid curl configuration option in %scurl_setopt_error.php on line %d
+curl_setopt(): Argument #2 ($option) is not a valid cURL option
+curl_setopt(): Argument #2 ($option) is not a valid cURL option
