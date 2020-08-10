@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     in the stack trace). (Nikita)
   . Fixed bug #79897 (Promoted constructor params with attribs cause crash).
     (Deus Kane)
+  . Fixed bug #79946 (Build fails due to undeclared UINT32_C). (Nikita)
 
 - Date:
   . Fixed bug #60302 (DateTime::createFromFormat should new static(), not new
