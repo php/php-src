@@ -979,9 +979,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			break;
 		case PHP_MODE_CLI_DIRECT:
 			cli_register_file_handles();
-			if (zend_eval_string_ex(exec_direct, NULL, "Command line code", 1) == FAILURE) {
-				exit_status=254;
-			}
+			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
+			exit_status = EG(exit_status);
 			break;
 
 		case PHP_MODE_PROCESS_STDIN:
@@ -993,7 +992,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				cli_register_file_handles();
 
 				if (exec_begin && zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1) == FAILURE) {
-					exit_status=254;
+					exit_status = EG(exit_status);
 				}
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
@@ -1006,7 +1005,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
 					if (exec_run) {
 						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1) == FAILURE) {
-							exit_status=254;
+							exit_status = EG(exit_status);
 						}
 					} else {
 						if (script_file) {
@@ -1022,7 +1021,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					efree(input);
 				}
 				if (exec_end && zend_eval_string_ex(exec_end, NULL, "Command line end code", 1) == FAILURE) {
-					exit_status=254;
+					exit_status = EG(exit_status);
 				}
 
 				break;

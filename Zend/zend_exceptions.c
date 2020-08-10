@@ -973,8 +973,8 @@ ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{
 		zend_string_release_ex(str, 0);
 		zend_string_release_ex(file, 0);
 	} else if (ce_exception == &zend_ce_unwind_exit) {
-		/* We successfully unwound, nothing more to do */
-		result = SUCCESS;
+		/* We successfully unwound, nothing more to do.
+		 * We still return FAILURE in this case, as further execution should still be aborted. */
 	} else {
 		zend_error(severity, "Uncaught exception %s", ZSTR_VAL(ce_exception->name));
 	}

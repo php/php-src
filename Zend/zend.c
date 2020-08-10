@@ -1674,9 +1674,16 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 	int ret = SUCCESS;
 
 	va_start(files, file_count);
-	for (i = 0; i < file_count && ret != FAILURE; i++) {
+	for (i = 0; i < file_count; i++) {
 		file_handle = va_arg(files, zend_file_handle *);
 		if (!file_handle) {
+			continue;
+		}
+
+		if (ret == FAILURE) {
+			/* If a failure occurred in one of the earlier files,
+			 * only destroy the following file handles. */
+			zend_file_handle_dtor(file_handle);
 			continue;
 		}
 
