@@ -1132,7 +1132,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	XML_SetUserData(parser->parser, parser);
 
 	RETVAL_RES(zend_register_resource(parser, le_xml_parser));
-	ZVAL_COPY(&parser->index, return_value);
+	ZVAL_COPY_VALUE(&parser->index, return_value);
 }
 /* }}} */
 
@@ -1559,7 +1559,7 @@ PHP_FUNCTION(xml_parser_free)
 		RETURN_FALSE;
 	}
 
-	if (zend_list_delete(Z_RES(parser->index)) == FAILURE) {
+	if (zend_list_close(Z_RES(parser->index)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
