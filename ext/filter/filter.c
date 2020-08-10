@@ -487,8 +487,8 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown source");
-			break;
+			zend_argument_value_error(1, "must be an INPUT_* constant");
+			return NULL;
 	}
 
 	if (array_ptr && Z_TYPE_P(array_ptr) != IS_ARRAY) {
@@ -512,6 +512,9 @@ PHP_FUNCTION(filter_has_var)
 	}
 
 	array_ptr = php_filter_get_storage(arg);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	if (array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var)) {
 		RETURN_TRUE;
@@ -614,14 +617,12 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(op), arg_key, arg_elm) {
 			if (arg_key == NULL) {
-				php_error_docref(NULL, E_WARNING, "Numeric keys are not allowed in the definition array");
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+				zend_argument_type_error(2, "must contain only string keys");
+				RETURN_THROWS();
 	 		}
 			if (ZSTR_LEN(arg_key) == 0) {
-				php_error_docref(NULL, E_WARNING, "Empty keys are not allowed in the definition array");
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+				zend_argument_value_error(2, "cannot contain empty keys");
+				RETURN_THROWS();
 			}
 			if ((tmp = zend_hash_find(Z_ARRVAL_P(input), arg_key)) == NULL) {
 				if (add_empty) {
@@ -658,6 +659,9 @@ PHP_FUNCTION(filter_input)
 	}
 
 	input = php_filter_get_storage(fetch_from);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	if (!input || (tmp = zend_hash_find(Z_ARRVAL_P(input), var)) == NULL) {
 		zend_long filter_flags = 0;
@@ -731,6 +735,9 @@ PHP_FUNCTION(filter_input_array)
 	}
 
 	array_input = php_filter_get_storage(fetch_from);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	if (!array_input) {
 		zend_long filter_flags = 0;
