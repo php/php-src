@@ -261,7 +261,6 @@ static PHP_INI_MH(OnSetSerializePrecision)
 }
 /* }}} */
 
-
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
@@ -523,7 +522,7 @@ static PHP_INI_DISP(display_errors_mode)
 }
 /* }}} */
 
-PHPAPI const char *php_get_internal_encoding() {
+PHPAPI const char *php_get_internal_encoding(void) {
 	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
 		return PG(internal_encoding);
 	} else if (SG(default_charset) && SG(default_charset)[0]) {
@@ -532,7 +531,7 @@ PHPAPI const char *php_get_internal_encoding() {
 	return "UTF-8";
 }
 
-PHPAPI const char *php_get_input_encoding() {
+PHPAPI const char *php_get_input_encoding(void) {
 	if (PG(input_encoding) && PG(input_encoding)[0]) {
 		return PG(input_encoding);
 	} else if (SG(default_charset) && SG(default_charset)[0]) {
@@ -541,7 +540,7 @@ PHPAPI const char *php_get_input_encoding() {
 	return "UTF-8";
 }
 
-PHPAPI const char *php_get_output_encoding() {
+PHPAPI const char *php_get_output_encoding(void) {
 	if (PG(output_encoding) && PG(output_encoding)[0]) {
 		return PG(output_encoding);
 	} else if (SG(default_charset) && SG(default_charset)[0]) {
@@ -1176,6 +1175,31 @@ static void clear_last_error() {
 	}
 }
 
+#if ZEND_DEBUG
+/* {{{ report_zend_debug_error_notify_cb */
+static void report_zend_debug_error_notify_cb(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	if (PG(report_zend_debug)) {
+		zend_bool trigger_break;
+
+		switch (type) {
+			case E_ERROR:
+			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
+				trigger_break=1;
+				break;
+			default:
+				trigger_break=0;
+				break;
+		}
+
+		zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s", error_filename, error_lineno, ZSTR_VAL(message));
+	}
+}
+/* }}} */
+#endif
+
 /* {{{ php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message)
@@ -1289,7 +1313,8 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				break;
 		}
 
-		if (!module_initialized || PG(log_errors)) {
+		if (PG(log_errors)
+				|| (!module_initialized && (!PG(display_startup_errors) || !PG(display_errors)))) {
 			char *log_buffer;
 #ifdef PHP_WIN32
 			if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
@@ -1331,24 +1356,6 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				}
 			}
 		}
-#if ZEND_DEBUG
-		if (PG(report_zend_debug)) {
-			zend_bool trigger_break;
-
-			switch (type) {
-				case E_ERROR:
-				case E_CORE_ERROR:
-				case E_COMPILE_ERROR:
-				case E_USER_ERROR:
-					trigger_break=1;
-					break;
-				default:
-					trigger_break=0;
-					break;
-			}
-			zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", error_filename, error_lineno, error_type_str, ZSTR_VAL(message));
-		}
-#endif
 	}
 
 	/* Bail out if we can't recover */
@@ -2084,6 +2091,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_startup(&zuf);
 	zend_update_current_locale();
 
+#if ZEND_DEBUG
+	zend_register_error_notify_callback(report_zend_debug_error_notify_cb);
+#endif
+
 #if HAVE_TZSET
 	tzset();
 #endif
@@ -2464,7 +2475,6 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 #endif
 	int retval = 0;
 
-	EG(exit_status) = 0;
 #ifndef HAVE_BROKEN_GETCWD
 # define OLD_CWD_SIZE 4096
 	old_cwd = do_alloca(OLD_CWD_SIZE, use_heap);
@@ -2526,20 +2536,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 			zend_set_timeout(INI_INT("max_execution_time"), 0);
 		}
 
-		/*
-		   If cli primary file has shebang line and there is a prepend file,
-		   the `skip_shebang` will be used by prepend file but not primary file,
-		   save it and restore after prepend file been executed.
-		 */
-		if (CG(skip_shebang) && prepend_file_p) {
-			CG(skip_shebang) = 0;
-			if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p) == SUCCESS) {
-				CG(skip_shebang) = 1;
-				retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 2, primary_file, append_file_p) == SUCCESS);
-			}
-		} else {
-			retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
-		}
+		retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 	} zend_end_try();
 
 	if (EG(exception)) {

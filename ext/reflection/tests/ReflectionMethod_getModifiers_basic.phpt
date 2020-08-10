@@ -32,9 +32,13 @@ class TestClass
 
     public final function fin() {}
 
+    public function __construct() {}
+
     public function __destruct() {}
 
     public function __call($a, $b) {}
+
+    public static function __callStatic($a, $b) {}
 
     public function __clone() {}
 
@@ -44,6 +48,8 @@ class TestClass
 
     public function __unset($a) {}
 
+    public function __invoke() {}
+
     public function __isset($a) {}
 
     public function __tostring() {}
@@ -52,9 +58,15 @@ class TestClass
 
     public function __wakeup() {}
 
-    public static function __set_state() {}
+    public static function __set_state($a) {}
 
     public function __autoload() {}
+
+    public function __serialize() {}
+
+    public function __unserialize($data) {}
+
+    public function __debugInfo() {}
 }
 
 class DerivedClass extends TestClass {}
@@ -102,12 +114,20 @@ Modifiers for method TestClass::fin():
 0x00000021
 
 
+Modifiers for method TestClass::__construct():
+0x00000001
+
+
 Modifiers for method TestClass::__destruct():
 0x00000001
 
 
 Modifiers for method TestClass::__call():
 0x00000001
+
+
+Modifiers for method TestClass::__callStatic():
+0x00000011
 
 
 Modifiers for method TestClass::__clone():
@@ -123,6 +143,10 @@ Modifiers for method TestClass::__set():
 
 
 Modifiers for method TestClass::__unset():
+0x00000001
+
+
+Modifiers for method TestClass::__invoke():
 0x00000001
 
 
@@ -147,6 +171,18 @@ Modifiers for method TestClass::__set_state():
 
 
 Modifiers for method TestClass::__autoload():
+0x00000001
+
+
+Modifiers for method TestClass::__serialize():
+0x00000001
+
+
+Modifiers for method TestClass::__unserialize():
+0x00000001
+
+
+Modifiers for method TestClass::__debugInfo():
 0x00000001
 
 
@@ -166,12 +202,20 @@ Modifiers for method TestClass::fin():
 0x00000021
 
 
+Modifiers for method TestClass::__construct():
+0x00000001
+
+
 Modifiers for method TestClass::__destruct():
 0x00000001
 
 
 Modifiers for method TestClass::__call():
 0x00000001
+
+
+Modifiers for method TestClass::__callStatic():
+0x00000011
 
 
 Modifiers for method TestClass::__clone():
@@ -187,6 +231,10 @@ Modifiers for method TestClass::__set():
 
 
 Modifiers for method TestClass::__unset():
+0x00000001
+
+
+Modifiers for method TestClass::__invoke():
 0x00000001
 
 
@@ -211,6 +259,18 @@ Modifiers for method TestClass::__set_state():
 
 
 Modifiers for method TestClass::__autoload():
+0x00000001
+
+
+Modifiers for method TestClass::__serialize():
+0x00000001
+
+
+Modifiers for method TestClass::__unserialize():
+0x00000001
+
+
+Modifiers for method TestClass::__debugInfo():
 0x00000001
 
 

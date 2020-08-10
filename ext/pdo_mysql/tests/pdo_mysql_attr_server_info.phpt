@@ -47,5 +47,6 @@ $db = MySQLPDOTest::factory();
     }
 
     print "done!";
+?>
 --EXPECT--
 done!

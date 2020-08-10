@@ -53,10 +53,10 @@ bool(false)
 Warning: openssl_cms_sign(): Error opening output file %s in %s on line %d
 bool(false)
 
-Warning: openssl_cms_sign(): Error getting cert in %s on line %d
+Warning: openssl_cms_sign(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_cms_sign(): Error getting cert in %s on line %d
+Warning: openssl_cms_sign(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
 Warning: openssl_cms_sign(): Error getting private key in %s on line %d

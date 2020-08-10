@@ -114,12 +114,14 @@ class IntlDateFormatter
     public static function formatObject($object, $format = null, ?string $locale = null) {}
 
     /**
+     * @param int $position
      * @return int|float|false
      * @alias datefmt_parse
      */
     public function parse(string $value, &$position = null) {}
 
     /**
+     * @param int $position
      * @return array|false
      * @alias datefmt_localtime
      */

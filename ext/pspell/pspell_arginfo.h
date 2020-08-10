@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 83cadd382dfcccf598b743dfdccad09eb39e30c2 */
+ * Stub hash: 9103420bb4162cad03e7ee06efa0d1c16820a099 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pspell_new, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, language, IS_STRING, 0)
@@ -15,7 +15,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pspell_new_personal, 0, 2, MAY_B
 	ZEND_ARG_TYPE_INFO(0, spelling, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, jargon, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, mode, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pspell_new_config, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)

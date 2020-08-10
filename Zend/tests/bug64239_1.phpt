@@ -15,6 +15,7 @@ trait T2 {
 }
 print_r(get_class_methods("A"));
 print_r(get_class_methods("B"));
+?>
 --EXPECT--
 Array
 (

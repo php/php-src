@@ -111,6 +111,7 @@ try {
     echo $e->getMessage() . "\n";
 }
 
+?>
 --EXPECT--
 Not found
 Static not found

@@ -26,12 +26,6 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 
-/* {{{ pdo_pgsql_functions[] */
-static const zend_function_entry pdo_pgsql_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -44,7 +38,7 @@ zend_module_entry pdo_pgsql_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_pgsql_deps,
 	"pdo_pgsql",
-	pdo_pgsql_functions,
+	NULL,
 	PHP_MINIT(pdo_pgsql),
 	PHP_MSHUTDOWN(pdo_pgsql),
 	NULL,

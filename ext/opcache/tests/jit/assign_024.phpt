@@ -18,6 +18,7 @@ function foo() {
 }
 foo();
 echo "ok\n";
+?>
 --EXPECTF--
 Warning: Undefined variable $undef in %s on line %d
 ok

@@ -199,7 +199,7 @@ enum pdo_null_handling {
 };
 
 /* {{{ utils for reading attributes set as driver_options */
-static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type option_name, zend_long defval)
+static inline zend_long pdo_attr_lval(zval *options, unsigned option_name, zend_long defval)
 {
 	zval *v;
 
@@ -208,7 +208,7 @@ static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	}
 	return defval;
 }
-static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, zend_string *defval)
+static inline zend_string *pdo_attr_strval(zval *options, unsigned option_name, zend_string *defval)
 {
 	zval *v;
 

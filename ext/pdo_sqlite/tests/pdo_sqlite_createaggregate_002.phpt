@@ -7,11 +7,18 @@ PDO_sqlite: Testing invalid callback for sqliteCreateAggregate()
 
 $pdo = new PDO('sqlite::memory:');
 
-$pdo->sqliteCreateAggregate('foo', 'a', '');
-$pdo->sqliteCreateAggregate('foo', 'strlen', '');
+try {
+    $pdo->sqliteCreateAggregate('foo', 'a', '');
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    $pdo->sqliteCreateAggregate('foo', 'strlen', '');
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: PDO::sqliteCreateAggregate(): Function 'a' is not callable in %s on line %d
-
-Warning: PDO::sqliteCreateAggregate(): Function '' is not callable in %s on line %d
+--EXPECT--
+PDO::sqliteCreateAggregate(): Argument #2 ($step_func) must be a valid callback, function "a" not found or invalid function name
+PDO::sqliteCreateAggregate(): Argument #3 ($finalize_func) must be a valid callback, function "" not found or invalid function name

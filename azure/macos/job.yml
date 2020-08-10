@@ -5,7 +5,7 @@ parameters:
 jobs:
   - job: ${{ parameters.configurationName }}
     pool:
-      vmImage: 'macOS-10.14'
+      vmImage: 'macOS-10.15'
     steps:
     - template: brew.yml
     - script: |
@@ -85,8 +85,14 @@ jobs:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'OpCache'
         runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1
+    - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+      - template: test.yml
+        parameters:
+          configurationName: ${{ parameters.configurationName }}
+          runTestsName: 'Function JIT'
+          runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M -d opcache.jit=1205
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'JIT'
+        runTestsName: 'Tracing JIT'
         runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M

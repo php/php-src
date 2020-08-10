@@ -14,6 +14,7 @@ EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
 var_dump($mf->format(array(7)));
+?>
 --EXPECTF--
 Warning: MessageFormatter::format(): Inconsistent types declared for an argument in %s on line %d
 bool(false)

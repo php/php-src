@@ -79,7 +79,7 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 		called_scope = obj_ce;
 	}
 
-	zend_call_known_function(fn, object, called_scope, retval_ptr, param_count, params);
+	zend_call_known_function(fn, object, called_scope, retval_ptr, param_count, params, NULL);
 	return retval_ptr;
 }
 /* }}} */

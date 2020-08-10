@@ -41,8 +41,6 @@ static void zend_op_array_collect(zend_op_array *op_array, void *context)
 	ZEND_SET_FUNC_INFO(op_array, func_info);
 	call_graph->op_arrays[call_graph->op_arrays_count] = op_array;
 	func_info->num = call_graph->op_arrays_count;
-	func_info->num_args = -1;
-	func_info->return_value_used = -1;
 	call_graph->op_arrays_count++;
 }
 
@@ -126,8 +124,12 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 			case ZEND_SEND_VAR_NO_REF_EX:
 			case ZEND_SEND_USER:
 				if (call_info) {
-					uint32_t num = opline->op2.num;
+					if (opline->op2_type == IS_CONST) {
+						call_info->named_args = 1;
+						break;
+					}
 
+					uint32_t num = opline->op2.num;
 					if (num > 0) {
 						num--;
 					}

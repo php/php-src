@@ -22,6 +22,7 @@ Class E {
 }
 $isCallable = is_callable(array('E', 'f'));
 var_dump($isCallable);
+?>
 --EXPECT--
 bool(false)
 bool(false)

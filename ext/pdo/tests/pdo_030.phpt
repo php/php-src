@@ -49,7 +49,7 @@ class PDODatabase extends PDO
         echo __METHOD__ . "()\n";
     }
 
-    function query($sql)
+    function query($sql, ...$rest)
     {
         echo __METHOD__ . "()\n";
         return parent::query($sql);

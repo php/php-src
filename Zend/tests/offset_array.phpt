@@ -36,10 +36,10 @@ echo "Done\n";
 int(2)
 int(1)
 
-Notice: Undefined array key "" in %s on line %d
+Warning: Undefined array key "" in %s on line %d
 NULL
 
-Notice: Undefined array key "run away" in %s on line %d
+Warning: Undefined array key "run away" in %s on line %d
 NULL
 int(2)
 int(1)

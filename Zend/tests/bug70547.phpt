@@ -33,7 +33,7 @@ array(4) {
   [0]=>
   string(3) "1st"
   [1]=>
-  &string(3) "2nd"
+  string(3) "2nd"
   [2]=>
   string(3) "3th"
   [3]=>
@@ -57,7 +57,7 @@ array(4) {
   [0]=>
   string(3) "1st"
   [1]=>
-  &string(3) "2nd"
+  string(3) "2nd"
   [2]=>
   NULL
   [3]=>
@@ -77,7 +77,7 @@ array(4) {
   [0]=>
   NULL
   [1]=>
-  &string(3) "2nd"
+  string(3) "2nd"
   [2]=>
   NULL
   [3]=>

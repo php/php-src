@@ -11,9 +11,12 @@ if (!extension_loaded('xml')) {
 
 $xmlParser = xml_parser_create();
 
-var_dump(xml_parser_get_option ($xmlParser, 42));
+try {
+    xml_parser_get_option ($xmlParser, 42);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Warning: xml_parser_get_option(): Unknown option in %s on line %d
-bool(false)
+--EXPECT--
+xml_parser_get_option(): Argument #2 ($option) must be a PHP_XML_OPTION_* constant

@@ -26,6 +26,7 @@
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
+#include "sqlite_driver_arginfo.h"
 
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
@@ -514,12 +515,13 @@ static int php_sqlite3_collation_callback(void *context,
 	return ret;
 }
 
-/* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount, int flags])
+/* {{{ bool SQLite::sqliteCreateFunction(string name, callable callback [, int argcount, int flags])
    Registers a UDF with the sqlite db handle */
-static PHP_METHOD(SQLite, sqliteCreateFunction)
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
 {
 	struct pdo_sqlite_func *func;
-	zval *callback;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
@@ -530,7 +532,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_ZVAL(callback)
+		Z_PARAM_FUNC(fci, fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
 		Z_PARAM_LONG(flags)
@@ -538,13 +540,6 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
-
-	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
-	}
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -555,7 +550,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
-		ZVAL_COPY(&func->func, callback);
+		ZVAL_COPY(&func->func, &fci.function_name);
 
 		func->argc = argc;
 
@@ -570,7 +565,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 }
 /* }}} */
 
-/* {{{ bool SQLite::sqliteCreateAggregate(string name, mixed step, mixed fini [, int argcount])
+/* {{{ bool SQLite::sqliteCreateAggregate(string name, callable step, callable fini [, int argcount])
    Registers a UDF with the sqlite db handle */
 
 /* The step function should have the prototype:
@@ -589,10 +584,11 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
    aggregate UDF.
 */
 
-static PHP_METHOD(SQLite, sqliteCreateAggregate)
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
 {
 	struct pdo_sqlite_func *func;
-	zval *step_callback, *fini_callback;
+	zend_fcall_info step_fci, fini_fci;
+	zend_fcall_info_cache step_fcc, fini_fcc;
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
@@ -602,28 +598,14 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_ZVAL(step_callback)
-		Z_PARAM_ZVAL(fini_callback)
+		Z_PARAM_FUNC(step_fci, step_fcc)
+		Z_PARAM_FUNC(fini_fci, fini_fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
-
-	if (!zend_is_callable(step_callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(step_callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
-	}
-
-	if (!zend_is_callable(fini_callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(fini_callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
-	}
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -634,9 +616,9 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
-		ZVAL_COPY(&func->step, step_callback);
+		ZVAL_COPY(&func->step, &step_fci.function_name);
 
-		ZVAL_COPY(&func->fini, fini_callback);
+		ZVAL_COPY(&func->fini, &fini_fci.function_name);
 
 		func->argc = argc;
 
@@ -651,12 +633,13 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 }
 /* }}} */
 
-/* {{{ bool SQLite::sqliteCreateCollation(string name, mixed callback)
+/* {{{ bool SQLite::sqliteCreateCollation(string name, callable callback)
    Registers a collation with the sqlite db handle */
-static PHP_METHOD(SQLite, sqliteCreateCollation)
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateCollation)
 {
 	struct pdo_sqlite_collation *collation;
-	zval *callback;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	char *collation_name;
 	size_t collation_name_len;
 	pdo_dbh_t *dbh;
@@ -665,18 +648,11 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(collation_name, collation_name_len)
-		Z_PARAM_ZVAL(callback)
+		Z_PARAM_FUNC(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
-
-	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
-	}
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -686,7 +662,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	if (ret == SQLITE_OK) {
 		collation->name = estrdup(collation_name);
 
-		ZVAL_COPY(&collation->callback, callback);
+		ZVAL_COPY(&collation->callback, &fci.function_name);
 
 		collation->next = H->collations;
 		H->collations = collation;
@@ -699,18 +675,11 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 }
 /* }}} */
 
-static const zend_function_entry dbh_methods[] = {
-	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(SQLite, sqliteCreateAggregate, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(SQLite, sqliteCreateCollation, NULL, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 static const zend_function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind)
 {
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
-			return dbh_methods;
+			return class_PDO_SQLite_Ext_methods;
 
 		default:
 			return NULL;

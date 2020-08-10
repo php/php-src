@@ -300,7 +300,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-PHPAPI void TSMClose()
+PHPAPI void TSMClose(void)
 {
 	Post("QUIT\r\n");
 	Ack(NULL);

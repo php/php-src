@@ -59,6 +59,8 @@ PHPAPI zend_long php_var_unserialize_get_cur_depth(php_unserialize_data_t d);
 #define PHP_VAR_UNSERIALIZE_DESTROY(d) \
 	php_var_unserialize_destroy(d)
 
+PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, const size_t buf_len, HashTable *options, const char* function_name);
+
 PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx);

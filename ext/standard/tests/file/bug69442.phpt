@@ -51,6 +51,7 @@ var_dump($data3);
 fclose($pipes[3]);
 
 proc_close($process);
+?>
 --EXPECT--
 read from pipe 0: string(5) "foo
 "

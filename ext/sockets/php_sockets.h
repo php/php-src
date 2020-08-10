@@ -29,6 +29,8 @@
 #include <php.h>
 #ifdef PHP_WIN32
 # include "windows_common.h"
+#else
+# define IS_INVALID_SOCKET(a) (a->bsd_socket < 0)
 #endif
 
 #define PHP_SOCKETS_VERSION PHP_VERSION
@@ -52,13 +54,31 @@ typedef int PHP_SOCKET;
 typedef SOCKET PHP_SOCKET;
 #endif
 
+/* Socket class */
+
 typedef struct {
 	PHP_SOCKET	bsd_socket;
 	int			type;
 	int			error;
 	int			blocking;
 	zval		zstream;
+	zend_object std;
 } php_socket;
+
+extern zend_class_entry *socket_ce;
+
+static inline php_socket *socket_from_obj(zend_object *obj) {
+	return (php_socket *)((char *)(obj) - XtOffsetOf(php_socket, std));
+}
+
+#define Z_SOCKET_P(zv) socket_from_obj(Z_OBJ_P(zv))
+
+#define ENSURE_SOCKET_VALID(php_sock) do { \
+	if (IS_INVALID_SOCKET(php_sock)) { \
+		zend_argument_error(NULL, 1, "has already been closed"); \
+		RETURN_THROWS(); \
+	} \
+} while (0)
 
 #ifdef PHP_WIN32
 struct	sockaddr_un {
@@ -66,14 +86,6 @@ struct	sockaddr_un {
 	char	sun_path[108];
 };
 #endif
-
-PHP_SOCKETS_API int php_sockets_le_socket(void);
-PHP_SOCKETS_API php_socket *php_create_socket(void);
-PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc);
-PHP_SOCKETS_API void php_destroy_sockaddr(zend_resource *rsrc);
-
-#define php_sockets_le_socket_name "Socket"
-#define php_sockets_le_addrinfo_name "AddressInfo"
 
 #define PHP_SOCKET_ERROR(socket, msg, errn) \
 		do { \
@@ -104,7 +116,7 @@ enum sockopt_return {
 };
 
 char *sockets_strerror(int error);
-php_socket *socket_import_file_descriptor(PHP_SOCKET sock);
+int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock);
 
 #else
 #define phpext_sockets_ptr NULL

@@ -4,7 +4,7 @@
 
 function use_soap_error_handler(bool $handler = true): bool {}
 
-function is_soap_fault($object): bool {}
+function is_soap_fault(mixed $object): bool {}
 
 class SoapParam
 {
@@ -64,10 +64,7 @@ class SoapClient
     /** @return mixed */
     public function __call(string $function_name, array $arguments) {}
 
-    /**
-     * @return mixed
-     * @alias SoapClient::__call
-     */
+    /** @return mixed */
     public function __soapCall(string $function_name, array $arguments, ?array $options = null, $input_headers = null, $output_headers = null) {}
 
     /** @return array|null */

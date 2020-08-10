@@ -17,5 +17,6 @@ function foo() {
     return ++$x; // mem -> reg, reg
 }
 var_dump(foo());
+?>
 --EXPECT--
 float(2)

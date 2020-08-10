@@ -21,5 +21,6 @@ function foo() {
 }
 foo();
 echo "ok\n";
+?>
 --EXPECT--
 ok

@@ -26,12 +26,6 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-/* {{{ pdo_odbc_functions[] */
-static const zend_function_entry pdo_odbc_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -44,7 +38,7 @@ zend_module_entry pdo_odbc_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_odbc_deps,
 	"PDO_ODBC",
-	pdo_odbc_functions,
+	NULL,
 	PHP_MINIT(pdo_odbc),
 	PHP_MSHUTDOWN(pdo_odbc),
 	NULL,

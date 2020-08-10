@@ -30,11 +30,17 @@
 #define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<6)
 #define ZEND_ATTRIBUTE_FLAGS				((1<<7) - 1)
 
-#define ZEND_ATTRIBUTE_SIZE(argc) (sizeof(zend_attribute) + sizeof(zval) * (argc) - sizeof(zval))
+#define ZEND_ATTRIBUTE_SIZE(argc) \
+	(sizeof(zend_attribute) + sizeof(zend_attribute_arg) * (argc) - sizeof(zend_attribute_arg))
 
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_attribute;
+
+typedef struct {
+	zend_string *name;
+	zval value;
+} zend_attribute_arg;
 
 typedef struct _zend_attribute {
 	zend_string *name;
@@ -42,7 +48,7 @@ typedef struct _zend_attribute {
 	/* Parameter offsets start at 1, everything else uses 0. */
 	uint32_t offset;
 	uint32_t argc;
-	zval argv[1];
+	zend_attribute_arg args[1];
 } zend_attribute;
 
 typedef struct _zend_internal_attribute {

@@ -178,11 +178,14 @@ if ($i == 8) {
 }
 
 }
+?>
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 creating receive socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 bool(true)
 int(14)

@@ -8,12 +8,12 @@ class DOMDocumentType
 
 class DOMCdataSection
 {
-    public function __construct(string $value) {}
+    public function __construct(string $data) {}
 }
 
 class DOMComment
 {
-    public function __construct(string $value = "") {}
+    public function __construct(string $data = "") {}
 }
 
 interface DOMParentNode
@@ -42,16 +42,16 @@ interface DOMChildNode
 class DOMNode
 {
     /** @return DOMNode|false */
-    public function appendChild(DOMNode $newChild) {}
+    public function appendChild(DOMNode $node) {}
 
     /** @return string|false */
-    public function C14N(bool $exclusive = false, bool $with_comments = false, ?array $xpath = null, ?array $ns_prefixes = null) {}
+    public function C14N(bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null) {}
 
     /** @return int|false */
-    public function C14NFile(string $uri, bool $exclusive = false, bool $with_comments = false, ?array $xpath = null, ?array $ns_prefixes = null) {}
+    public function C14NFile(string $uri, bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null) {}
 
     /** @return DOMNode|false */
-    public function cloneNode(bool $recursive = false) {}
+    public function cloneNode(bool $deep = false) {}
 
     /** @return int */
     public function getLineNo() {}
@@ -67,13 +67,13 @@ class DOMNode
     public function hasChildNodes() {}
 
     /** @return DOMNode|false */
-    public function insertBefore(DOMNode $newChild, ?DOMNode $refChild = null) {}
+    public function insertBefore(DOMNode $node, ?DOMNode $child = null) {}
 
     /** @return bool */
-    public function isDefaultNamespace(string $namespaceURI) {}
+    public function isDefaultNamespace(string $namespace) {}
 
     /** @return bool */
-    public function isSameNode(DOMNode $other) {}
+    public function isSameNode(DOMNode $otherNode) {}
 
     /** @return bool */
     public function isSupported(string $feature, string $version) {}
@@ -82,16 +82,16 @@ class DOMNode
     public function lookupNamespaceURI(?string $prefix) {}
 
     /** @return string|null */
-    public function lookupPrefix(string $namespaceURI) {}
+    public function lookupPrefix(string $namespace) {}
 
     /** @return void */
     public function normalize() {}
 
     /** @return DOMNode|false */
-    public function removeChild(DOMNode $oldChild) {}
+    public function removeChild(DOMNode $child) {}
 
     /** @return DOMNode|false */
-    public function replaceChild(DOMNode $newChild, DOMNode $oldChild) {}
+    public function replaceChild(DOMNode $node, DOMNode $child) {}
 }
 
 class DOMImplementation
@@ -106,7 +106,7 @@ class DOMImplementation
     public function createDocumentType(string $qualifiedName, string $publicId = "", string $systemId = "") {}
 
     /** @return DOMDocument|false */
-    public function createDocument(string $namespaceURI = "", string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
+    public function createDocument(string $namespace = "", string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
 }
 
 class DOMDocumentFragment implements DOMParentNode
@@ -173,46 +173,46 @@ class DOMAttr
 
 class DOMElement implements DOMParentNode, DOMChildNode
 {
-    public function __construct(string $name, ?string $value = null, string $uri = "") {}
+    public function __construct(string $qualifiedName, ?string $value = null, string $namespace = "") {}
 
     /** @return string */
-    public function getAttribute(string $name) {}
+    public function getAttribute(string $qualifiedName) {}
 
     /** @return string */
-    public function getAttributeNS(?string $namespaceURI, string $localName) {}
+    public function getAttributeNS(?string $namespace, string $localName) {}
 
     /** @return DOMAttr|DOMNamespaceNode|false */
-    public function getAttributeNode(string $name) {}
+    public function getAttributeNode(string $qualifiedName) {}
 
     /** @return DOMAttr|DOMNamespaceNode|null */
-    public function getAttributeNodeNS(?string $namespaceURI, string $localName) {}
+    public function getAttributeNodeNS(?string $namespace, string $localName) {}
 
     /** @return DOMNodeList */
-    public function getElementsByTagName(string $name) {}
+    public function getElementsByTagName(string $qualifiedName) {}
 
     /** @return DOMNodeList */
-    public function getElementsByTagNameNS(string $namespaceURI, string $localName) {}
+    public function getElementsByTagNameNS(string $namespace, string $localName) {}
 
     /** @return bool */
-    public function hasAttribute(string $name) {}
+    public function hasAttribute(string $qualifiedName) {}
 
     /** @return bool */
-    public function hasAttributeNS(?string $namespaceURI, string $localName) {}
+    public function hasAttributeNS(?string $namespace, string $localName) {}
 
     /** @return bool */
-    public function removeAttribute(string $name) {}
+    public function removeAttribute(string $qualifiedName) {}
 
     /** @return DOMAttr|false */
-    public function removeAttributeNS(?string $namespaceURI, string $localName) {}
+    public function removeAttributeNS(?string $namespace, string $localName) {}
 
     /** @return DOMAttr|false */
-    public function removeAttributeNode(string $name) {}
+    public function removeAttributeNode(string $qualifiedName) {}
 
     /** @return DOMAttr|bool */
-    public function setAttribute(string $name, string $value) {}
+    public function setAttribute(string $qualifiedName, string $value) {}
 
     /** @return null|false */
-    public function setAttributeNS(?string $namespaceURI, string $localName, string $value) {}
+    public function setAttributeNS(?string $namespace, string $qualifiedName, string $value) {}
 
     /** @return DOMAttr|null|false */
     public function setAttributeNode(DOMAttr $attr) {}
@@ -221,10 +221,10 @@ class DOMElement implements DOMParentNode, DOMChildNode
     public function setAttributeNodeNS(DOMAttr $attr) {}
 
     /** @return void */
-    public function setIdAttribute(string $name, bool $isId) {}
+    public function setIdAttribute(string $qualifiedName, bool $isId) {}
 
     /** @return void */
-    public function setIdAttributeNS(string $namespaceURI, string $localName, bool $isId) {}
+    public function setIdAttributeNS(string $namespace, string $qualifiedName, bool $isId) {}
 
     /** @return void */
     public function setIdAttributeNode(DOMAttr $attr, bool $isId) {}
@@ -252,10 +252,10 @@ class DOMDocument implements DOMParentNode
     public function __construct(string $version = "1.0", string $encoding = "") {}
 
     /** @return DOMAttr|false */
-    public function createAttribute(string $name) {}
+    public function createAttribute(string $localName) {}
 
     /** @return DOMAttr|false */
-    public function createAttributeNS(?string $namespaceURI, string $qualifiedName) {}
+    public function createAttributeNS(?string $namespace, string $qualifiedName) {}
 
     /** @return DOMCdataSection|false */
     public function createCDATASection(string $data) {}
@@ -267,10 +267,10 @@ class DOMDocument implements DOMParentNode
     public function createDocumentFragment() {}
 
     /** @return DOMElement|false */
-    public function createElement(string $tagName, string $value = "") {}
+    public function createElement(string $localName, string $value = "") {}
 
     /** @return DOMElement|false */
-    public function createElementNS(?string $namespaceURI, string $qualifiedName, string $value = "") {}
+    public function createElementNS(?string $namespace, string $qualifiedName, string $value = "") {}
 
     /** @return DOMEntityReference|false */
     public function createEntityReference(string $name) {}
@@ -285,13 +285,13 @@ class DOMDocument implements DOMParentNode
     public function getElementById(string $elementId) {}
 
     /** @return DOMNodeList */
-    public function getElementsByTagName(string $tagName) {}
+    public function getElementsByTagName(string $qualifiedName) {}
 
     /** @return DOMNodeList */
-    public function getElementsByTagNameNS(string $namespaceURI, string $localName) {}
+    public function getElementsByTagNameNS(string $namespace, string $localName) {}
 
     /** @return DOMNode|false */
-    public function importNode(DOMNode $importedNode, bool $deep = false) {}
+    public function importNode(DOMNode $node, bool $deep = false) {}
 
     /** @return DOMDocument|bool */
     public function load(string $filename, int $options = 0) {}
@@ -303,7 +303,7 @@ class DOMDocument implements DOMParentNode
     public function normalizeDocument() {}
 
     /** @return bool */
-    public function registerNodeClass(string $baseclass, ?string $extendedclass) {}
+    public function registerNodeClass(string $baseClass, ?string $extendedClass) {}
 
     /** @return int|false */
     public function save(string $filename, int $options = 0) {}
@@ -346,7 +346,7 @@ class DOMDocument implements DOMParentNode
     public function xinclude(int $options = 0) {}
 
     /** @return DOMNode|false */
-    public function adoptNode(DOMNode $source) {}
+    public function adoptNode(DOMNode $node) {}
 
     /** @var ...DOMNode|string $nodes */
     public function append(...$nodes): void {}
@@ -361,7 +361,7 @@ final class DOMException extends Exception
 
 class DOMText
 {
-    public function __construct(string $value = "") {}
+    public function __construct(string $data = "") {}
 
     /** @return bool */
     public function isWhitespaceInElementContent() {}
@@ -379,10 +379,10 @@ class DOMText
 class DOMNamedNodeMap implements IteratorAggregate, Countable
 {
     /** @return DOMNode|null */
-    public function getNamedItem(string $name) {}
+    public function getNamedItem(string $qualifiedName) {}
 
     /** @return DOMNode|null */
-    public function getNamedItemNS(?string $namespaceURI, string $localName) {}
+    public function getNamedItemNS(?string $namespace, string $localName) {}
 
     /** @return DOMNode|null */
     public function item(int $index) {}
@@ -414,22 +414,19 @@ class DOMProcessingInstruction
 #ifdef LIBXML_XPATH_ENABLED
 class DOMXPath
 {
-    public function __construct(DOMDocument $doc, bool $registerNodeNS = true) {}
+    public function __construct(DOMDocument $document, bool $registerNodeNS = true) {}
 
     /** @return mixed */
-    public function evaluate(string $expr, ?DOMNode $context = null, bool $registerNodeNS = true) {}
+    public function evaluate(string $expression, ?DOMNode $contextNode = null, bool $registerNodeNS = true) {}
 
     /** @return mixed */
-    public function query(string $expr, ?DOMNode $context = null, bool $registerNodeNS = true) {}
+    public function query(string $expression, ?DOMNode $contextNode = null, bool $registerNodeNS = true) {}
 
     /** @return bool */
-    public function registerNamespace(string $prefix, string $namespaceURI) {}
+    public function registerNamespace(string $prefix, string $namespace) {}
 
-    /**
-     * @param string|array $restrict
-     * @return bool|null
-     */
-    public function registerPhpFunctions($restrict = null) {}
+    /** @return void */
+    public function registerPhpFunctions(string|array|null $restrict = null) {}
 }
 #endif
 

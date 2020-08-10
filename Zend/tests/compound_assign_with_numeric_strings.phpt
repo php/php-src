@@ -38,6 +38,7 @@ try{
 $n = "-1";
 $n %= $n;
 var_dump($n);
+?>
 --EXPECT--
 int(0)
 

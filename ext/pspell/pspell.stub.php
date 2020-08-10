@@ -4,7 +4,7 @@
 
 function pspell_new(string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, int $mode = 0): int|false {}
 
-function pspell_new_personal(string $personal, string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, $mode = 0): int|false {}
+function pspell_new_personal(string $personal, string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, int $mode = 0): int|false {}
 
 function pspell_new_config(int $config): int|false {}
 

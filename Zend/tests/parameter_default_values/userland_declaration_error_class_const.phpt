@@ -21,5 +21,6 @@ class B extends A
     {
     }
 }
+?>
 --EXPECTF--
 Fatal error: Declaration of B::foo() must be compatible with A::foo($param1 = Foo\Bar::CONSTANT, $param2 = Foo\Bar::CONSTANT, $param3 = Foo\Bar::CONSTANT) in %s on line %d

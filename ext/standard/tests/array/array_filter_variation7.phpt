@@ -27,13 +27,15 @@ echo "Done"
 --EXPECT--
 *** Testing array_filter() : usage variations - Anonymous callback functions ***
 Anonymous callback function with regular parameter and statement
-array(3) {
+array(4) {
   [3]=>
   int(10)
   [4]=>
   int(100)
   [5]=>
   int(1000)
+  [6]=>
+  string(5) "Hello"
 }
 Anonymous callback function with null argument
 array(8) {

@@ -1,68 +1,68 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d04e9173f45a10b9f6614b79029d96a528bec49 */
+ * Stub hash: ed45da0e8786db9b20fd33d574b20f3d41304e0a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, x509)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, outfilename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, notext, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, x509)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(1, out)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, notext, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_fingerprint, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, method, IS_STRING, 0, "\'sha1\'")
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, method, IS_STRING, 0, "\"sha1\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, raw_output, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_check_private_key, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, cert)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_verify, 0, 2, IS_LONG, 0)
-	ZEND_ARG_INFO(0, cert)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_parse, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, x509)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, shortname, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_checkpurpose, 0, 2, MAY_BE_BOOL|MAY_BE_LONG)
-	ZEND_ARG_INFO(0, x509cert)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, purpose, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cainfo, IS_ARRAY, 1, "[]")
-	ZEND_ARG_TYPE_INFO(0, untrustedfile, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, untrustedfile, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_read, 0, 0, 1)
-	ZEND_ARG_INFO(0, cert)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_x509_read, 0, 1, OpenSSLCertificate, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_free, 0, 1, _IS_BOOL, 1)
-	ZEND_ARG_INFO(0, x509)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_free, 0, 1, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, x509, OpenSSLCertificate, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs12_export_to_file, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, x509cert)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509cert, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_INFO(0, priv_key)
 	ZEND_ARG_TYPE_INFO(0, pass, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs12_export, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, x509)
+	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(1, out)
 	ZEND_ARG_INFO(0, priv_key)
 	ZEND_ARG_TYPE_INFO(0, pass, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs12_read, 0, 3, _IS_BOOL, 0)
@@ -72,27 +72,27 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs12_read, 0, 3, _IS_B
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_csr_export_to_file, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, csr)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, outfilename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, notext, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_csr_export, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, csr)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(1, out)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, notext, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_sign, 0, 0, 4)
-	ZEND_ARG_INFO(0, csr)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, cacert, "null")
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_sign, 0, 4, OpenSSLCertificate, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, cacert, OpenSSLCertificate, MAY_BE_STRING|MAY_BE_NULL, NULL)
 	ZEND_ARG_INFO(0, priv_key)
 	ZEND_ARG_TYPE_INFO(0, days, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, config_args, IS_ARRAY, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, serial, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_new, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_new, 0, 2, OpenSSLCertificateSigningRequest, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_ARRAY, 0)
 	ZEND_ARG_INFO(1, privkey)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, configargs, IS_ARRAY, 1, "null")
@@ -100,16 +100,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_new, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_csr_get_subject, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, csr)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_shortnames, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_get_public_key, 0, 0, 1)
-	ZEND_ARG_INFO(0, csr)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_get_public_key, 0, 1, OpenSSLAsymmetricKey, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_shortnames, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_new, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_pkey_new, 0, 0, OpenSSLAsymmetricKey, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, configargs, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -127,17 +127,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkey_export, 0, 2, _IS_B
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, configargs, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_openssl_pkey_get_public arginfo_openssl_x509_read
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_pkey_get_public, 0, 1, OpenSSLAsymmetricKey, MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, cert)
+ZEND_END_ARG_INFO()
 
-#define arginfo_openssl_get_publickey arginfo_openssl_x509_read
+#define arginfo_openssl_get_publickey arginfo_openssl_pkey_get_public
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkey_free, 0, 1, IS_VOID, 0)
-	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_OBJ_INFO(0, key, OpenSSLAsymmetricKey, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_openssl_free_key arginfo_openssl_pkey_free
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_get_private, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_pkey_get_private, 0, 1, OpenSSLAsymmetricKey, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_TYPE_INFO(0, passphrase, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -145,7 +147,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_openssl_get_privatekey arginfo_openssl_pkey_get_private
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkey_get_details, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_OBJ_INFO(0, key, OpenSSLAsymmetricKey, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pbkdf2, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
@@ -178,7 +180,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs7_sign, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, infile, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, outfile, IS_STRING, 0)
-	ZEND_ARG_INFO(0, signcert)
+	ZEND_ARG_OBJ_TYPE_MASK(0, signcert, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(0, signkey)
 	ZEND_ARG_TYPE_INFO(0, headers, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PKCS7_DETACHED")
@@ -188,8 +190,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs7_decrypt, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, infilename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, outfilename, IS_STRING, 0)
-	ZEND_ARG_INFO(0, recipcert)
-	ZEND_ARG_INFO(0, recipkey)
+	ZEND_ARG_OBJ_TYPE_MASK(0, recipcert, OpenSSLCertificate, MAY_BE_STRING, NULL)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, recipkey, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs7_read, 0, 2, _IS_BOOL, 0)
@@ -206,7 +208,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_verify, 0, 1, _IS_BO
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, content, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pk7, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sigfile, IS_STRING, 1, "null")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, encoding, "OPENSSL_ENCODING_SMIME")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_encrypt, 0, 4, _IS_BOOL, 0)
@@ -222,7 +224,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_sign, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, infile, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, outfile, IS_STRING, 0)
-	ZEND_ARG_INFO(0, signcert)
+	ZEND_ARG_OBJ_TYPE_MASK(0, signcert, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(0, signkey)
 	ZEND_ARG_TYPE_INFO(0, headers, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
@@ -233,7 +235,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_decrypt, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, infilename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, outfilename, IS_STRING, 0)
-	ZEND_ARG_INFO(0, recipcert)
+	ZEND_ARG_OBJ_TYPE_MASK(0, recipcert, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(0, recipkey)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
 ZEND_END_ARG_INFO()
@@ -289,7 +291,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_open, 0, 4, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_md_methods, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, aliases, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, aliases, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 #define arginfo_openssl_get_cipher_methods arginfo_openssl_get_md_methods
@@ -332,7 +334,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_dh_compute_key, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pub_key, IS_STRING, 0)
-	ZEND_ARG_INFO(0, dh_key)
+	ZEND_ARG_OBJ_INFO(0, dh_key, OpenSSLAsymmetricKey, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkey_derive, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
@@ -347,7 +349,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_random_pseudo_bytes, 0, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_spki_new, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, privkey)
+	ZEND_ARG_OBJ_INFO(0, privkey, OpenSSLAsymmetricKey, 0)
 	ZEND_ARG_TYPE_INFO(0, challenge, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, algo, IS_LONG, 0, "OPENSSL_ALGO_MD5")
 ZEND_END_ARG_INFO()
@@ -439,7 +441,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_parse, arginfo_openssl_x509_parse)
 	ZEND_FE(openssl_x509_checkpurpose, arginfo_openssl_x509_checkpurpose)
 	ZEND_FE(openssl_x509_read, arginfo_openssl_x509_read)
-	ZEND_FE(openssl_x509_free, arginfo_openssl_x509_free)
+	ZEND_DEP_FE(openssl_x509_free, arginfo_openssl_x509_free)
 	ZEND_FE(openssl_pkcs12_export_to_file, arginfo_openssl_pkcs12_export_to_file)
 	ZEND_FE(openssl_pkcs12_export, arginfo_openssl_pkcs12_export)
 	ZEND_FE(openssl_pkcs12_read, arginfo_openssl_pkcs12_read)
@@ -454,8 +456,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_pkey_export, arginfo_openssl_pkey_export)
 	ZEND_FE(openssl_pkey_get_public, arginfo_openssl_pkey_get_public)
 	ZEND_FALIAS(openssl_get_publickey, openssl_pkey_get_public, arginfo_openssl_get_publickey)
-	ZEND_FE(openssl_pkey_free, arginfo_openssl_pkey_free)
-	ZEND_FALIAS(openssl_free_key, openssl_pkey_free, arginfo_openssl_free_key)
+	ZEND_DEP_FE(openssl_pkey_free, arginfo_openssl_pkey_free)
+	ZEND_DEP_FALIAS(openssl_free_key, openssl_pkey_free, arginfo_openssl_free_key)
 	ZEND_FE(openssl_pkey_get_private, arginfo_openssl_pkey_get_private)
 	ZEND_FALIAS(openssl_get_privatekey, openssl_pkey_get_private, arginfo_openssl_get_privatekey)
 	ZEND_FE(openssl_pkey_get_details, arginfo_openssl_pkey_get_details)
@@ -496,5 +498,20 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_spki_export, arginfo_openssl_spki_export)
 	ZEND_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
 	ZEND_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_OpenSSLCertificate_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_OpenSSLCertificateSigningRequest_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
 	ZEND_FE_END
 };

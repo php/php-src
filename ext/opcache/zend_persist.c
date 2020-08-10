@@ -278,7 +278,10 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 			zend_accel_store_interned_string(copy->lcname);
 
 			for (i = 0; i < copy->argc; i++) {
-				zend_persist_zval(&copy->argv[i]);
+				if (copy->args[i].name) {
+					zend_accel_store_interned_string(copy->args[i].name);
+				}
+				zend_persist_zval(&copy->args[i].value);
 			}
 
 			ZVAL_PTR(v, copy);
@@ -536,6 +539,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_FE_RESET_R:
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSERT_CHECK:
+					case ZEND_JMP_NULL:
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_CATCH:
@@ -1240,9 +1244,4 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZCG(current_persistent_script) = NULL;
 
 	return script;
-}
-
-int zend_accel_script_persistable(zend_persistent_script *script)
-{
-	return 1;
 }

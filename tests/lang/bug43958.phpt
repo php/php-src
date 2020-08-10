@@ -10,6 +10,7 @@ class MyClass
 }
 
 MyClass::loadCode('file-which-does-not-exist-on-purpose.php');
+?>
 --EXPECTF--
 Warning: include(file-which-does-not-exist-on-purpose.php): Failed to open stream: No such file or directory in %sbug43958.php on line 5
 

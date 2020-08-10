@@ -1403,17 +1403,13 @@ PHP_FUNCTION(mysqli_get_server_info)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
-	const char	*info;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	info = mysql_get_server_info(mysql->mysql);
-	if (info) {
-		RETURN_STRING(info);
-	}
+	RETURN_STRING(mysql_get_server_info(mysql->mysql));
 }
 /* }}} */
 

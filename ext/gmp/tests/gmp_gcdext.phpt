@@ -29,12 +29,20 @@ foreach ($a as $val) {
     var_dump(gmp_strval($check));
 }
 
-var_dump(gmp_gcdext($val[0],array()));
-var_dump(gmp_gcdext(array(),array()));
+try {
+    var_dump(gmp_gcdext($val[0], array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_gcdext(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "3"
 string(1) "3"
 string(1) "1"
@@ -55,10 +63,6 @@ string(1) "1"
 string(1) "1"
 string(3) "195"
 string(3) "195"
-
-Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_gcdext(): Argument #2 ($b) must be of type GMP|string|int|bool, array given
+gmp_gcdext(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 Done

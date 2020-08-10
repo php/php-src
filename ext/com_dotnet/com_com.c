@@ -129,7 +129,7 @@ PHP_METHOD(com, __construct)
 		info.pwszName = php_com_string_to_olestring(server_name, server_name_len, obj->code_page);
 
 		if (user_name) {
-			authid.User = php_com_string_to_olestring(user_name, -1, obj->code_page);
+			authid.User = (OLECHAR*)user_name;
 			authid.UserLength = (ULONG)user_name_len;
 
 			if (password) {
@@ -288,16 +288,21 @@ PHP_FUNCTION(com_get_active_object)
 	CLSID clsid;
 	char *module_name;
 	size_t module_name_len;
-	zend_long code_page = COMG(code_page);
+	zend_long code_page;
+	zend_bool code_page_is_null = 1;
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
 	OLECHAR *module = NULL;
 
 	php_com_initialize();
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l",
-				&module_name, &module_name_len, &code_page)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l!",
+				&module_name, &module_name_len, &code_page, &code_page_is_null)) {
 		RETURN_THROWS();
+	}
+
+	if (code_page_is_null) {
+		code_page = COMG(code_page);
 	}
 
 	module = php_com_string_to_olestring(module_name, module_name_len, (int)code_page);
@@ -821,8 +826,7 @@ PHP_FUNCTION(com_load_typelib)
 	}
 
 	if (!cs) {
-		php_error_docref(NULL, E_WARNING, "Declaration of case-insensitive constants is no longer supported");
-		RETURN_FALSE;
+		php_error_docref(NULL, E_WARNING, "com_load_typelib(): Argument #2 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
 	}
 
 	RETVAL_FALSE;

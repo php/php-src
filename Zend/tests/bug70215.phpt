@@ -17,5 +17,4 @@ $b();
 
 ?>
 --EXPECTF--
-Warning: The magic method A::__invoke() cannot be static in %s on line %d
-A
+Fatal error: Method A::__invoke() cannot be static in %s on line %d

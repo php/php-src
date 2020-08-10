@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ce2eb70f449197eca39ca5d8c53ee1369577b035 */
+ * Stub hash: a792b0c5497013c85cca83c4baab928a5191f3b9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -9,7 +9,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageloadfont, 0, 1, MAY_BE_LONG
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetstyle, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, styles, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
@@ -31,8 +31,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_imagepalettetotruecolor arginfo_imageistruecolor
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolormatch, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, im1)
-	ZEND_ARG_INFO(0, im2)
+	ZEND_ARG_OBJ_INFO(0, im1, GdImage, 0)
+	ZEND_ARG_OBJ_INFO(0, im2, GdImage, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetthickness, 0, 2, _IS_BOOL, 0)
@@ -124,12 +124,12 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesettile, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_INFO(0, tile)
+	ZEND_ARG_OBJ_INFO(0, tile, GdImage, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetbrush, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_INFO(0, brush)
+	ZEND_ARG_OBJ_INFO(0, brush, GdImage, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_imagecreate arginfo_imagecreatetruecolor
@@ -200,7 +200,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagexbm, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, foreground, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, foreground, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegif, 0, 1, _IS_BOOL, 0)
@@ -212,8 +212,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagepng, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, to, "null")
-	ZEND_ARG_TYPE_INFO(0, quality, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, filters, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, quality, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filters, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -221,7 +221,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagewebp, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, to, "null")
-	ZEND_ARG_TYPE_INFO(0, quality, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, quality, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -229,24 +229,24 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagejpeg, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, to, "null")
-	ZEND_ARG_TYPE_INFO(0, quality, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, quality, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagewbmp, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, to, "null")
-	ZEND_ARG_TYPE_INFO(0, foreground, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, foreground, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd2, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, chunk_size, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -255,7 +255,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagebmp, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, to, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compressed, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compressed, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -363,19 +363,19 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolortransparent, 0, 1, IS_LONG, 1)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, col, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageinterlace, 0, 1, IS_LONG, 1)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_TYPE_INFO(0, interlace, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, interlace, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagepolygon, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, points, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, num_points_or_col, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, col, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_imageopenpolygon arginfo_imagepolygon
@@ -540,14 +540,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagescale, 0, 2, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, new_width, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, new_height, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, new_height, IS_LONG, 0, "-1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "IMG_BILINEAR_FIXED")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imageaffine, 0, 2, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, affine, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, clip, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, clip, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageaffinematrixget, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -569,8 +569,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageresolution, 0, 1, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_TYPE_INFO(0, res_x, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, res_y, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, res_x, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, res_y, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 
@@ -853,5 +853,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagegetinterpolation, arginfo_imagegetinterpolation)
 	ZEND_FE(imagesetinterpolation, arginfo_imagesetinterpolation)
 	ZEND_FE(imageresolution, arginfo_imageresolution)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_GdImage_methods[] = {
 	ZEND_FE_END
 };

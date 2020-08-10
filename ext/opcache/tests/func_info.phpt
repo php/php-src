@@ -13,7 +13,10 @@ $contents = "<?php\n";
 
 $contents .= "function test() {\n";
 foreach (get_defined_functions()["internal"] as $function) {
-    $contents .= "    {$function}();\n";
+    if (in_array($function, ["extract", "compact", "get_defined_vars"])) {
+        continue;
+    }
+    $contents .= "    \$result = {$function}();\n";
 }
 $contents .= "}\n";
 

@@ -69,9 +69,9 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 4 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
@@ -93,13 +93,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 10 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 11 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 12 --
 bool(false)
 bool(false)
@@ -109,13 +109,13 @@ int(0)
 bool(false)
 int(0)
 -- Iteration 14 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 15 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 16 --
 int(0)
 bool(false)
@@ -125,9 +125,9 @@ int(0)
 int(0)
 int(0)
 -- Iteration 18 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 19 --
 int(4)
 int(4)
@@ -189,13 +189,13 @@ int(7)
 int(7)
 int(7)
 -- Iteration 34 --
-string(1) "a"
+string(0) ""
 bool(false)
-string(1) "a"
+string(0) ""
 -- Iteration 35 --
-string(1) "a"
+string(0) ""
 bool(false)
-string(1) "a"
+string(0) ""
 -- Iteration 36 --
 bool(false)
 bool(false)
@@ -333,13 +333,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 70 --
-int(2)
 bool(false)
-int(2)
+bool(false)
+bool(false)
 -- Iteration 71 --
-int(2)
 bool(false)
-int(2)
+bool(false)
+bool(false)
 -- Iteration 72 --
 bool(false)
 bool(false)
@@ -477,13 +477,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 106 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 107 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 108 --
 bool(false)
 bool(false)
@@ -549,13 +549,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 124 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 125 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 126 --
 int(0)
 int(0)
@@ -621,13 +621,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 142 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 143 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 144 --
 bool(false)
 bool(false)

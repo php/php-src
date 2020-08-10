@@ -2,11 +2,15 @@
 
 /** @generate-function-entries */
 
+final class GdImage
+{
+}
+
 function gd_info(): array {}
 
 function imageloadfont(string $filename): int|false {}
 
-function imagesetstyle($im, array $styles): bool {}
+function imagesetstyle(GdImage $im, array $styles): bool {}
 
 function imagecreatetruecolor(int $x_size, int $y_size): GdImage|false {}
 
@@ -16,7 +20,7 @@ function imagetruecolortopalette(GdImage $im, bool $ditherFlag, int $colorWanted
 
 function imagepalettetotruecolor(GdImage $im): bool {}
 
-function imagecolormatch($im1, $im2): bool {}
+function imagecolormatch(GdImage $im1, GdImage $im2): bool {}
 
 function imagesetthickness(GdImage $im, int $thickness): bool {}
 
@@ -50,9 +54,9 @@ function imagegrabscreen(): GdImage|false {}
 
 function imagerotate(GdImage $im, float $angle, int $bgdcolor, int $ignoretransparent = 0): GdImage|false {}
 
-function imagesettile(GdImage $im, $tile): bool {}
+function imagesettile(GdImage $im, GdImage $tile): bool {}
 
-function imagesetbrush(GdImage $im, $brush): bool {}
+function imagesetbrush(GdImage $im, GdImage $brush): bool {}
 
 function imagecreate(int $x_size, int $y_size): GdImage|false {}
 
@@ -96,30 +100,36 @@ function imagecreatefrombmp(string $filename): GdImage|false {}
 function imagecreatefromtga(string $filename): GdImage|false {}
 #endif
 
-function imagexbm(GdImage $im, ?string $filename, int $foreground = UNKNOWN): bool {}
+function imagexbm(GdImage $im, ?string $filename, ?int $foreground = null): bool {}
 
+/** @param resource|string|null $to */
 function imagegif(GdImage $im, $to = null): bool {}
 
 #ifdef HAVE_GD_PNG
-function imagepng(GdImage $im, $to = null, int $quality = UNKNOWN, int $filters = UNKNOWN): bool {}
+/** @param resource|string|null $to */
+function imagepng(GdImage $im, $to = null, int $quality = -1, int $filters = -1): bool {}
 #endif
 
 #ifdef HAVE_GD_WEBP
-function imagewebp(GdImage $im, $to = null, int $quality = UNKNOWN): bool {}
+/** @param resource|string|null $to */
+function imagewebp(GdImage $im, $to = null, int $quality = -1): bool {}
 #endif
 
 #ifdef HAVE_GD_JPG
-function imagejpeg(GdImage $im, $to = null, int $quality = UNKNOWN): bool {}
+/** @param resource|string|null $to */
+function imagejpeg(GdImage $im, $to = null, int $quality = -1): bool {}
 #endif
 
-function imagewbmp(GdImage $im, $to = null, int $foreground = UNKNOWN): bool {}
+/** @param resource|string|null $to */
+function imagewbmp(GdImage $im, $to = null, ?int $foreground = null): bool {}
 
-function imagegd(GdImage $im, $to = UNKNOWN): bool {}
+function imagegd(GdImage $im, string $to = UNKNOWN): bool {}
 
-function imagegd2(GdImage $im, $to = UNKNOWN, int $chunk_size = UNKNOWN, int $type = UNKNOWN): bool {}
+function imagegd2(GdImage $im, string $to = UNKNOWN, int $chunk_size = UNKNOWN, int $type = UNKNOWN): bool {}
 
 #ifdef HAVE_GD_BMP
-function imagebmp(GdImage $im, $to = null, int $compressed = 1): bool {}
+/** @param resource|string|null $to */
+function imagebmp(GdImage $im, $to = null, bool $compressed = true): bool {}
 #endif
 
 function imagedestroy(GdImage $im): bool {}
@@ -166,15 +176,15 @@ function imagefill(GdImage $im, int $x, int $y, int $col): bool {}
 
 function imagecolorstotal(GdImage $im): int {}
 
-function imagecolortransparent(GdImage $im, int $col = UNKNOWN): ?int {}
+function imagecolortransparent(GdImage $im, ?int $col = null): ?int {}
 
-function imageinterlace(GdImage $im, int $interlace = UNKNOWN): ?int {}
+function imageinterlace(GdImage $im, ?int $interlace = null): ?int {}
 
-function imagepolygon(GdImage $im, array $points, int $num_points_or_col, int $col = UNKNOWN): bool {}
+function imagepolygon(GdImage $im, array $points, int $num_points_or_col, ?int $col = null): bool {}
 
-function imageopenpolygon(GdImage $im, array $points, int $num_points_or_col, int $col = UNKNOWN): bool {}
+function imageopenpolygon(GdImage $im, array $points, int $num_points_or_col, ?int $col = null): bool {}
 
-function imagefilledpolygon(GdImage $im, array $points, int $num_points_or_col, int $col = UNKNOWN): bool {}
+function imagefilledpolygon(GdImage $im, array $points, int $num_points_or_col, ?int $col = null): bool {}
 
 function imagefontwidth(int $font): int {}
 
@@ -226,10 +236,11 @@ function imagecrop(GdImage $im, array $rect): GdImage|false {}
 
 function imagecropauto(GdImage $im, int $mode = IMG_CROP_DEFAULT, float $threshold = 0.5, int $color = -1): GdImage|false {}
 
-function imagescale(GdImage $im, int $new_width, int $new_height = UNKNOWN, int $mode = IMG_BILINEAR_FIXED): GdImage|false {}
+function imagescale(GdImage $im, int $new_width, int $new_height = -1, int $mode = IMG_BILINEAR_FIXED): GdImage|false {}
 
-function imageaffine(GdImage $im, array $affine, array $clip = UNKNOWN): GdImage|false {}
+function imageaffine(GdImage $im, array $affine, ?array $clip = null): GdImage|false {}
 
+/** @param array|int|float $options */
 function imageaffinematrixget(int $type, $options = UNKNOWN): array|false {}
 
 function imageaffinematrixconcat(array $m1, array $m2): array|false {}
@@ -238,4 +249,4 @@ function imagegetinterpolation(GdImage $im): int {}
 
 function imagesetinterpolation(GdImage $im, int $method = IMG_BILINEAR_FIXED): bool {}
 
-function imageresolution(GdImage $im, int $res_x = UNKNOWN, int $res_y = UNKNOWN): array|bool {}
+function imageresolution(GdImage $im, ?int $res_x = null, ?int $res_y = null): array|bool {}

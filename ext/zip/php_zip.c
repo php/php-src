@@ -2884,14 +2884,10 @@ static void _php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 PHP_METHOD(ZipArchive, registerProgressCallback)
 {
 	struct zip *intern;
-	zval *self = getThis();
+	zval *self = ZEND_THIS;
 	double rate;
 	zval *callback;
 	ze_zip_object *obj;
-
-	if (!self) {
-		RETURN_FALSE;
-	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dz", &rate, &callback) == FAILURE) {
 		return;
@@ -2942,13 +2938,9 @@ static int _php_zip_cancel_callback(zip_t *arch, void *ptr)
 PHP_METHOD(ZipArchive, registerCancelCallback)
 {
 	struct zip *intern;
-	zval *self = getThis();
+	zval *self = ZEND_THIS;
 	zval *callback;
 	ze_zip_object *obj;
-
-	if (!self) {
-		RETURN_FALSE;
-	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback) == FAILURE) {
 		return;
@@ -3081,6 +3073,9 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_LZMA", ZIP_CM_LZMA);
 #ifdef ZIP_CM_LZMA2
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_LZMA2", ZIP_CM_LZMA2);
+#endif
+#ifdef ZIP_CM_ZSTD
+	REGISTER_ZIP_CLASS_CONST_LONG("CM_ZSTD", ZIP_CM_ZSTD);
 #endif
 #ifdef ZIP_CM_XZ
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_XZ", ZIP_CM_XZ);

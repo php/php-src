@@ -38,6 +38,7 @@ function enchant_broker_set_ordering(EnchantBroker $broker, string $tag, string 
 
 function enchant_broker_describe(EnchantBroker $broker): array {}
 
+/** @param array $suggestions */
 function enchant_dict_quick_check(EnchantDictionary $dict, string $word, &$suggestions = null): bool {}
 
 function enchant_dict_check(EnchantDictionary $dict, string $word): bool {}

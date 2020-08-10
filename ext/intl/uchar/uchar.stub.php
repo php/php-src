@@ -47,7 +47,7 @@ class IntlChar
     public static function foldCase(int|string $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT) {}
 
     /** @return int */
-    public static function forDigit(int $digit, $radix = 10) {}
+    public static function forDigit(int $digit, int $radix = 10) {}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @return int|string|null */

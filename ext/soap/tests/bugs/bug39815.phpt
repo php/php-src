@@ -40,6 +40,7 @@ echo $x->__getLastResponse();
 setlocale(LC_ALL,"en_US","en_US.ISO8859-1");
 var_dump($x->test());
 echo $x->__getLastResponse();
+?>
 --EXPECT--
 float(123.456)
 <?xml version="1.0" encoding="UTF-8"?>

@@ -2,9 +2,9 @@
 ZipArchive::addGlob() method with more compression and encryption
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encrytion not supported');
+if(!defined("GLOB_BRACE")) die ('skip requires GLOB_BRACE');
 ?>
 --FILE--
 <?php

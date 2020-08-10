@@ -37,7 +37,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection, ctor> public method __construct ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $argument ]
+        Parameter #0 [ <required> $objectOrClass ]
       }
     }
 
@@ -261,7 +261,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method newInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> ...$args = <default> ]
+        Parameter #0 [ <optional> mixed ...$args = <default> ]
       }
     }
 
@@ -287,7 +287,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method isSubclassOf ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $class ]
+        Parameter #0 [ <required> ReflectionClass|string $class ]
       }
     }
 
@@ -301,7 +301,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [2] {
         Parameter #0 [ <required> string $name ]
-        Parameter #1 [ <optional> $default = <default> ]
+        Parameter #1 [ <optional> mixed $default = <default> ]
       }
     }
 
@@ -309,7 +309,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [2] {
         Parameter #0 [ <required> string $name ]
-        Parameter #1 [ <required> $value ]
+        Parameter #1 [ <required> mixed $value ]
       }
     }
 
@@ -334,7 +334,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method implementsInterface ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $interface ]
+        Parameter #0 [ <required> ReflectionClass|string $interface ]
       }
     }
 

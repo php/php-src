@@ -9,7 +9,7 @@ $client=new SOAPClient(null, array('location' => 'http://localhost',
 
 $header = new SOAPHeader(null, 'foo', 'bar');
 
-$response= $client->__call('function', array(), null, $header);
+$response= $client->__soapCall('function', array(), null, $header);
 
 print $client->__getLastRequest();
 ?>

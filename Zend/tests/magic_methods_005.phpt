@@ -9,4 +9,4 @@ interface a {
 
 ?>
 --EXPECTF--
-Warning: The magic method a::__call() cannot be static in %s on line %d
+Fatal error: Method a::__call() cannot be static in %s on line %d

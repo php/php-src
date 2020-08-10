@@ -60,6 +60,7 @@ try {
 } catch (Error $ex) {
     echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
+?>
 --EXPECT--
 error: 0, IntlCalendar::after() expects exactly 1 parameter, 0 given
 

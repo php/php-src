@@ -30,7 +30,7 @@ class IntlBreakIterator implements IteratorAggregate
     /** @return int */
     public function first() {}
 
-    /** @return int|false */
+    /** @return int */
     public function following(int $offset) {}
 
     /** @return int */
@@ -42,7 +42,7 @@ class IntlBreakIterator implements IteratorAggregate
     /** @return string */
     public function getLocale(int $locale_type) {}
 
-    /** @return IntlPartsIterator|false */
+    /** @return IntlPartsIterator */
     public function getPartsIterator(string $key_type = IntlPartsIterator::KEY_SEQUENTIAL) {}
 
     /** @return string|null */
@@ -54,10 +54,10 @@ class IntlBreakIterator implements IteratorAggregate
     /** @return int */
     public function last() {}
 
-    /** @return int|false */
+    /** @return int */
     public function next(?int $offset = null) {}
 
-    /** @return int|false */
+    /** @return int */
     public function preceding(int $offset) {}
 
     /** @return int */

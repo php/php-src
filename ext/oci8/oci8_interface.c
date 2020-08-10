@@ -31,7 +31,7 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
-#if HAVE_OCI8
+#ifdef HAVE_OCI8
 
 #include "php_oci8.h"
 #include "php_oci8_int.h"
@@ -45,44 +45,20 @@ PHP_FUNCTION(oci_register_taf_callback)
 {
 	zval *z_connection;
 	php_oci_connection *connection;
-	zval *callback;
-	zend_string *callback_name;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval *callback = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!", &z_connection, &callback) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|f!", &z_connection, &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (callback) {
-#if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 2)
-		if (!zend_is_callable(callback, 0, 0)) {
-			callback_name = zend_get_callable_name(callback);
-			php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(callback_name));
-#if PHP_VERSION_ID < 70300
-			zend_string_release(callback_name);
-#else
-			zend_string_release_ex(callback_name, 0);
-#endif
-			RETURN_FALSE;
-		}
-#else
-		if (!zend_is_callable(callback, 0, &callback_name)) {
-			php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(callback_name));
-#if PHP_VERSION_ID < 70300
-			zend_string_release(callback_name);
-#else
-			zend_string_release_ex(callback_name, 0);
-#endif
-			RETURN_FALSE;
-		}
-#if PHP_VERSION_ID < 70300
-		zend_string_release(callback_name);
-#else
-		zend_string_release_ex(callback_name, 0);
-#endif
-#endif
-	}
-
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	/* If callable passed, assign callback zval so that it can be passed to php_oci_register_taf_callback() */
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		callback = &fci.function_name;
+	}
 
 	if (php_oci_register_taf_callback(connection, callback) == 0) {
 		RETURN_TRUE;
@@ -152,18 +128,10 @@ PHP_FUNCTION(oci_define_by_name)
 	/* if (zend_hash_add(statement->defines, name, name_len, define, sizeof(php_oci_define), (void **)&tmp_define) == SUCCESS) { */
 	zvtmp = zend_string_init(name, name_len, 0);
 	if ((define = zend_hash_add_new_ptr(statement->defines, zvtmp, define)) != NULL) {
-#if PHP_VERSION_ID < 70300
-		zend_string_release(zvtmp);
-#else
 		zend_string_release_ex(zvtmp, 0);
-#endif
 	} else {
 		efree(define);
-#if PHP_VERSION_ID < 70300
-		zend_string_release(zvtmp);
-#else
 		zend_string_release_ex(zvtmp, 0);
-#endif
 		RETURN_FALSE;
 	}
 
@@ -1365,11 +1333,7 @@ PHP_FUNCTION(oci_fetch_all)
 					zend_string *zvtmp;
 					zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 					zend_symtable_update(Z_ARRVAL(row), zvtmp, &element);
-#if PHP_VERSION_ID < 70300
-					zend_string_release(zvtmp);
-#else
 					zend_string_release_ex(zvtmp, 0);
-#endif
 				}
 			}
 
@@ -1408,11 +1372,7 @@ PHP_FUNCTION(oci_fetch_all)
 				array_init(&tmp);
 				zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zvtmp, &tmp);
-#if PHP_VERSION_ID < 70300
-				zend_string_release(zvtmp);
-#else
 				zend_string_release_ex(zvtmp, 0);
-#endif
 			}
 		}
 

@@ -49,6 +49,7 @@ foreach($a as $f) {
 	unlink($f);
 }
 rmdir("$base_path/51353_unpack");
+?>
 --EXPECT--
 100000
 OK

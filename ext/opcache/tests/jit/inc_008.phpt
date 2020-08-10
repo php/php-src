@@ -16,5 +16,6 @@ function foo() {
     return ++$x; // reg -> reg, reg
 }
 var_dump(foo());
+?>
 --EXPECT--
 int(2)

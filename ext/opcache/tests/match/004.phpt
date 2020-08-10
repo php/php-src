@@ -30,11 +30,12 @@ foreach (range(0, 6) as $number) {
     var_dump(test((string) $number));
 }
 
+?>
 --EXPECTF--
 $_main:
      ; (lines=22, args=0, vars=1, tmps=2)
      ; (after optimizer)
-     ; %s.php:1-24
+     ; %s.php:1-25
 0000 INIT_FCALL 2 %d string("range")
 0001 SEND_VAL int(0) 1
 0002 SEND_VAL int(6) 2

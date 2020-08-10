@@ -15,5 +15,6 @@ function buggy($a) {
 }
 
 buggy(42);
+?>
 --EXPECT--
 int(42)

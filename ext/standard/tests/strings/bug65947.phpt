@@ -11,5 +11,6 @@ if ($filename != $b2)
     print "BUG";
 else
     print "OKEY";
+?>
 --EXPECT--
 OKEY

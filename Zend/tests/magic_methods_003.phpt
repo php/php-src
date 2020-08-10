@@ -11,4 +11,4 @@ class foo {
 
 ?>
 --EXPECTF--
-Warning: The magic method foo::__unset() cannot be static in %s on line %d
+Fatal error: Method foo::__unset() cannot be static in %s on line %d

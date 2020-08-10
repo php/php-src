@@ -9,6 +9,7 @@ function foo($a = array(\unknown => unknown))
 }
 
 foo();
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant "unknown" in %s:%d
 Stack trace:

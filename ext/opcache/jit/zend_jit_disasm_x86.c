@@ -190,7 +190,8 @@ static void zend_jit_disasm_destroy_symbols(zend_sym_node *n) {
 	if (n) {
 		if (n->child[0]) {
 			zend_jit_disasm_destroy_symbols(n->child[0]);
-		} else if (n->child[1]) {
+		}
+		if (n->child[1]) {
 			zend_jit_disasm_destroy_symbols(n->child[1]);
 		}
 		free(n);
@@ -409,7 +410,6 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_hash_lookup_w);
 	REGISTER_HELPER(zend_jit_symtable_lookup_rw);
 	REGISTER_HELPER(zend_jit_symtable_lookup_w);
-	REGISTER_HELPER(zend_jit_fetch_dimension_rw_long_helper);
 	REGISTER_HELPER(zend_jit_undefined_op_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_is_helper);

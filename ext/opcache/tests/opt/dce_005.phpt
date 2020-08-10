@@ -16,11 +16,12 @@ function foo(int $x) {
     $a = new A;
     $a->foo = $x;
 }
+?>
 --EXPECTF--
 $_main:
      ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
-     ; %sdce_005.php:1-8
+     ; %sdce_005.php:1-9
 0000 RETURN int(1)
 
 foo:

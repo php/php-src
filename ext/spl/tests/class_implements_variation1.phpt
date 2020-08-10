@@ -113,61 +113,61 @@ fclose($res);
 *** Testing class_implements() : variation ***
 
 --int 0--
-class_implements(): Argument #1 ($what) must be of type object|string, int given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int 1--
-class_implements(): Argument #1 ($what) must be of type object|string, int given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int 12345--
-class_implements(): Argument #1 ($what) must be of type object|string, int given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int -12345--
-class_implements(): Argument #1 ($what) must be of type object|string, int given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --float 10.5--
-class_implements(): Argument #1 ($what) must be of type object|string, float given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float -10.5--
-class_implements(): Argument #1 ($what) must be of type object|string, float given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float 12.3456789000e10--
-class_implements(): Argument #1 ($what) must be of type object|string, float given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float -12.3456789000e10--
-class_implements(): Argument #1 ($what) must be of type object|string, float given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float .5--
-class_implements(): Argument #1 ($what) must be of type object|string, float given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --empty array--
-class_implements(): Argument #1 ($what) must be of type object|string, array given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --int indexed array--
-class_implements(): Argument #1 ($what) must be of type object|string, array given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --associative array--
-class_implements(): Argument #1 ($what) must be of type object|string, array given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --nested arrays--
-class_implements(): Argument #1 ($what) must be of type object|string, array given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --uppercase NULL--
-class_implements(): Argument #1 ($what) must be of type object|string, null given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase null--
-class_implements(): Argument #1 ($what) must be of type object|string, null given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase true--
-class_implements(): Argument #1 ($what) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --lowercase false--
-class_implements(): Argument #1 ($what) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --uppercase TRUE--
-class_implements(): Argument #1 ($what) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --uppercase FALSE--
-class_implements(): Argument #1 ($what) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --empty string DQ--
 Error: 2 - class_implements(): Class  does not exist and could not be loaded, %s(%d)
@@ -188,10 +188,10 @@ array(0) {
 }
 
 --undefined var--
-class_implements(): Argument #1 ($what) must be of type object|string, null given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --unset var--
-class_implements(): Argument #1 ($what) must be of type object|string, null given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --resource--
-class_implements(): Argument #1 ($what) must be of type object|string, resource given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, resource given

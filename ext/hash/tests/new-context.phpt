@@ -8,5 +8,6 @@ try {
 } catch (Error $e) {
   echo "Exception: {$e->getMessage()}\n";
 }
+?>
 --EXPECT--
 Exception: Call to private HashContext::__construct() from global scope

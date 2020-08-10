@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-Exception: Cannot unpack Traversable with non-integer keys
+Exception: Keys must be of type int|string during argument unpacking

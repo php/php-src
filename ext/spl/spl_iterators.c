@@ -862,7 +862,8 @@ static zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_st
 	zval                    *zobj;
 
 	if (!object->iterators) {
-		php_error_docref(NULL, E_ERROR, "The %s instance wasn't initialized properly", ZSTR_VAL((*zobject)->ce->name));
+		zend_throw_error(NULL, "The %s instance wasn't initialized properly", ZSTR_VAL((*zobject)->ce->name));
+		return NULL;
 	}
 	zobj = &object->iterators[level].zobject;
 
@@ -1289,7 +1290,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		return NULL;
 	}
 
-	intern->dit_type = dit_type;
 	switch (dit_type) {
 		case DIT_LimitIterator: {
 			intern->u.limit.offset = 0; /* start at beginning */
@@ -1363,8 +1363,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			if (zend_parse_parameters_none() == FAILURE) {
 				return NULL;
 			}
+			intern->dit_type = DIT_AppendIterator;
 			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
-			spl_instantiate(spl_ce_ArrayIterator, &intern->u.append.zarrayit);
+			object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
 			zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
 			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
 			zend_restore_error_handling(&error_handling);
@@ -1384,8 +1385,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
 				return NULL;
 			}
-			intern->u.regex.mode = mode;
-			intern->u.regex.regex = zend_string_copy(regex);
 
 			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex);
@@ -1395,6 +1394,8 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				/* pcre_get_compiled_regex_cache has already sent error */
 				return NULL;
 			}
+			intern->u.regex.mode = mode;
+			intern->u.regex.regex = zend_string_copy(regex);
 			php_pcre_pce_incref(intern->u.regex.pce);
 			break;
 		}
@@ -1419,6 +1420,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			break;
 	}
 
+	intern->dit_type = dit_type;
 	if (inc_refcount) {
 		Z_ADDREF_P(zobject);
 	}
@@ -1765,33 +1767,31 @@ PHP_METHOD(RegexIterator, __construct)
 /* {{{ Calls the callback with the current value, the current key and the inner iterator as arguments */
 PHP_METHOD(CallbackFilterIterator, accept)
 {
-	spl_dual_it_object     *intern = Z_SPLDUAL_IT_P(ZEND_THIS);
-	zend_fcall_info        *fci = &intern->u.cbfilter->fci;
-	zend_fcall_info_cache  *fcc = &intern->u.cbfilter->fcc;
-	zval                    params[3];
+	spl_dual_it_object *intern = Z_SPLDUAL_IT_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
+
 	if (Z_TYPE(intern->current.data) == IS_UNDEF || Z_TYPE(intern->current.key) == IS_UNDEF) {
 		RETURN_FALSE;
 	}
 
+	zval params[3];
 	ZVAL_COPY_VALUE(&params[0], &intern->current.data);
 	ZVAL_COPY_VALUE(&params[1], &intern->current.key);
 	ZVAL_COPY_VALUE(&params[2], &intern->inner.zobject);
 
+	zend_fcall_info *fci = &intern->u.cbfilter->fci;
+	zend_fcall_info_cache *fcc = &intern->u.cbfilter->fcc;
 	fci->retval = return_value;
 	fci->param_count = 3;
 	fci->params = params;
 
 	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
-	}
-
-	if (EG(exception)) {
-		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -1863,7 +1863,7 @@ PHP_METHOD(RegexIterator, accept)
 			break;
 
 		case REGIT_MODE_REPLACE: {
-			zval *replacement = zend_read_property(intern->std.ce, ZEND_THIS, "replacement", sizeof("replacement")-1, 1, &rv);
+			zval *replacement = zend_read_property(intern->std.ce, Z_OBJ_P(ZEND_THIS), "replacement", sizeof("replacement")-1, 1, &rv);
 			zend_string *replacement_str = zval_try_get_string(replacement);
 			if (UNEXPECTED(!replacement_str)) {
 				return;

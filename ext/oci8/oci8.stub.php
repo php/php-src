@@ -614,9 +614,8 @@ function ocinewcollection($connection_resource, string $type_name, string $schem
 
 /**
  * @param resource $connection_resource
- * @param callable|null $function_name
  */
-function oci_register_taf_callback($connection_resource, $function_name): bool {}
+function oci_register_taf_callback($connection_resource, ?callable $function_name): bool {}
 
 /**
  * @param resource $connection_resource

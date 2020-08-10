@@ -78,7 +78,7 @@ function sodium_crypto_generichash_init(string $key = "", int $length = SODIUM_C
 
 function sodium_crypto_generichash_update(string &$state, string $string): bool {}
 
-function sodium_crypto_generichash_final(string &$state, $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
+function sodium_crypto_generichash_final(string &$state, int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
 function sodium_crypto_kdf_derive_from_key(int $subkey_len, int $subkey_id, string $context, string $key): string {}
 
@@ -176,7 +176,7 @@ function sodium_unpad(string $string, int $block_size): string {}
 
 function sodium_bin2hex(string $string): string {}
 
-function sodium_hex2bin(string $string, $ignore  = ""): string {}
+function sodium_hex2bin(string $string, string $ignore = ""): string {}
 
 #ifdef sodium_base64_VARIANT_ORIGINAL
 function sodium_bin2base64(string $string, int $id): string {}

@@ -8,6 +8,7 @@ function &foo(array &$in) : array {
 
 $array = [1, 2, 3];
 var_dump(foo($array));
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: foo(): Return value must be of type array, null returned in %s:%d
 Stack trace:

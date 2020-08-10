@@ -1398,14 +1398,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_RECV:
 		case ZEND_RECV_INIT:
 			if (ssa_op->result_def == var) {
-				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-
-				if (func_info &&
-				    (int)opline->op1.num-1 < func_info->num_args &&
-				    func_info->arg_info[opline->op1.num-1].info.has_range) {
-					*tmp = func_info->arg_info[opline->op1.num-1].info.range;
-					return 1;
-				} else if (op_array->arg_info &&
+				if (op_array->arg_info &&
 				    opline->op1.num <= op_array->num_args) {
 					zend_type type = op_array->arg_info[opline->op1.num-1].type;
 					uint32_t mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
@@ -2499,6 +2492,17 @@ static zend_always_inline int _zend_update_type_info(
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->result_def);
 			break;
+		case ZEND_JMP_NULL:
+			if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR) {
+				tmp = MAY_BE_NULL;
+			} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+				tmp = MAY_BE_FALSE;
+			} else {
+				ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+				tmp = MAY_BE_TRUE;
+			}
+			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+			break;
 		case ZEND_ASSIGN_OP:
 		case ZEND_ASSIGN_DIM_OP:
 		case ZEND_ASSIGN_OBJ_OP:
@@ -2992,48 +2996,27 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_RECV:
 		case ZEND_RECV_INIT:
+		case ZEND_RECV_VARIADIC:
 		{
 			/* Typehinting */
-			zend_func_info *func_info;
-			zend_arg_info *arg_info = NULL;
-			if (op_array->arg_info && opline->op1.num <= op_array->num_args) {
-				arg_info = &op_array->arg_info[opline->op1.num-1];
-			}
+			zend_arg_info *arg_info = &op_array->arg_info[opline->op1.num-1];
 
 			ce = NULL;
-			if (arg_info) {
-				tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
-				if (ZEND_ARG_SEND_MODE(arg_info)) {
-					tmp |= MAY_BE_REF;
-				}
-			} else {
-				tmp = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+			tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
+			if (ZEND_ARG_SEND_MODE(arg_info)) {
+				tmp |= MAY_BE_REF;
 			}
-			func_info = ZEND_FUNC_INFO(op_array);
-			if (func_info && (int)opline->op1.num-1 < func_info->num_args) {
-				tmp = (tmp & (MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF)) |
-					(tmp & func_info->arg_info[opline->op1.num-1].info.type);
+
+			if (opline->opcode == ZEND_RECV_VARIADIC) {
+				uint32_t elem_type = tmp & MAY_BE_REF
+					? MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF
+					: (tmp & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
+				tmp = MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|elem_type;
+				ce = NULL;
 			}
-#if 0
-			/* We won't receive unused arguments */
-			if (ssa_vars[ssa_op->result_def].use_chain < 0 &&
-			    ssa_vars[ssa_op->result_def].phi_use_chain == NULL &&
-			    op_array->arg_info &&
-			    opline->op1.num <= op_array->num_args &&
-			    op_array->arg_info[opline->op1.num-1].class_name == NULL &&
-			    !op_array->arg_info[opline->op1.num-1].type_hint) {
-				tmp = MAY_BE_UNDEF|MAY_BE_RCN;
-			}
-#endif
+
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
-			if (func_info &&
-			    (int)opline->op1.num-1 < func_info->num_args &&
-			    func_info->arg_info[opline->op1.num-1].info.ce) {
-				UPDATE_SSA_OBJ_TYPE(
-					func_info->arg_info[opline->op1.num-1].info.ce,
-					func_info->arg_info[opline->op1.num-1].info.is_instanceof,
-					ssa_op->result_def);
-			} else if (ce) {
+			if (ce) {
 				UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_op->result_def);
 			} else {
 				UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_op->result_def);
@@ -4312,7 +4295,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			}
 		}
 	} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-		if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
+		if ((t1 & MAY_BE_RC1)
+		 && (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 			switch (opline->opcode) {
 				case ZEND_CASE:
 				case ZEND_CASE_STRICT:
@@ -4350,7 +4334,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			}
 		}
 	} else if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
-		if (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
+		if ((t2 & MAY_BE_RC1)
+		 && (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN:
 					break;
@@ -4369,13 +4354,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_JMP:
 		case ZEND_CHECK_VAR:
 		case ZEND_MAKE_REF:
-		case ZEND_SEND_VAR:
 		case ZEND_BEGIN_SILENCE:
 		case ZEND_END_SILENCE:
-		case ZEND_SEND_VAL:
-		case ZEND_SEND_REF:
-		case ZEND_SEND_VAR_EX:
-		case ZEND_SEND_FUNC_ARG:
 		case ZEND_FREE:
 		case ZEND_SEPARATE:
 		case ZEND_TYPE_CHECK:
@@ -4390,9 +4370,17 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_COPY_TMP:
-		case ZEND_CHECK_FUNC_ARG:
 		case ZEND_CASE_STRICT:
+		case ZEND_JMP_NULL:
 			return 0;
+		case ZEND_SEND_VAR:
+		case ZEND_SEND_VAL:
+		case ZEND_SEND_REF:
+		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
+		case ZEND_CHECK_FUNC_ARG:
+			/* May throw for named params. */
+			return opline->op2_type == IS_CONST;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
 			return 0;

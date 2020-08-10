@@ -1,6 +1,45 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0alpha3
+?? ??? ????, PHP 8.0.0beta2
+
+
+06 Aug 2020, PHP 8.0.0beta1
+
+- Core:
+  . Fixed bug #78236 (convert error on receiving variables when duplicate [).
+    (cmb)
+  . Fixed bug #79108 (Referencing argument in a function makes it a reference
+    in the stack trace). (Nikita)
+  . Fixed bug #79897 (Promoted constructor params with attribs cause crash).
+    (Deus Kane)
+  . Fixed bug #79946 (Build fails due to undeclared UINT32_C). (Nikita)
+  . Fixed bug #77561 (Shebang line not stripped for non-primary script).
+    (Nikita)
+  . Fixed bug #79948 (Exit in auto-prepended file does not abort PHP execution).
+    (Nikita)
+  . Fixed bug #65275 (Calling exit() in a shutdown function does not change the
+    exit value in CLI). (Nikita)
+  . Fixed bug #62294 (register_shutdown_function() does not correctly handle
+    exit code). (Nikita)
+
+- Date:
+  . Fixed bug #60302 (DateTime::createFromFormat should new static(), not new
+    self()). (Derick)
+  . Implemented FR #79903 (datetime: new format "p", same as "P" but returning
+    "Z" for UTC). (gharlan)
+
+- JIT:
+  . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
+  . Fixed bug #79888 (Incorrect execution with JIT enabled). (Dmitry)
+
+- LDAP:
+  . Fixed memory leaks. (ptomulik)
+
+- OCI8:
+  . Modernized oci_register_taf_callback() callable argument parsing
+    implementation. (girgias)
+
+23 Jul 2020, PHP 8.0.0alpha3
 
 - Core:
   . Fixed bug #79790 ("Illegal offset type" exception during AST evaluation
@@ -13,6 +52,11 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #79852 (count(DOMNodeList) doesn't match
     count(IteratorIterator(DOMNodeList))). (Nikita)
+  . Fixed bug #79867 (Promoted untyped properties should get null default
+    value). (Nikita)
+
+- Standard:
+  . Fixed bug #79868 (Sorting with array_unique gives unwanted result). (Nikita)
 
 09 Jul 2020, PHP 8.0.0alpha2
 
@@ -73,15 +117,16 @@ PHP                                                                        NEWS
     that allow global flag to configure query() or evaluate() calls.
 
 - Enchant:
-  . Add LIBENCHANT_VERSION macro
-  . Deprecate enchant_broker_set_dict_path, enchant_broker_get_dict_path
-    enchant_dict_add_to_personal and enchant_dict_is_in_session
-  . Add enchant_dict_add and enchant_dict_is_added functions
-  . Use libenchant-2 when available
+  . Add LIBENCHANT_VERSION macro.
+  . Deprecate enchant_broker_set_dict_path, enchant_broker_get_dict_path,
+    enchant_dict_add_to_personal and enchant_dict_is_in_session.
+  . Add enchant_dict_add and enchant_dict_is_added functions.
+  . Use libenchant-2 when available.
 
 - FPM:
   . Fixed bug #64865 (Search for .user.ini files from script dir up to
     CONTEXT_DOCUMENT_ROOT). (Will Bender)
+  . Add pm.status_listen option. (Jakub Zelenka)
 
 - GD:
   . Fixed bug #55005 (imagepolygon num_points requirement). (cmb)

@@ -11,8 +11,8 @@ if (!extension_loaded('pcntl')) {
 if (!function_exists('pcntl_setpriority')) {
     die('skip pcntl_setpriority doesn\'t exist');
 }
-if (!function_exists('posix_getuid') || posix_getuid() !== 0) {
-    die('skip this functions needs to run with superuser');
+if (@pcntl_setpriority(-5) === false && pcntl_get_last_error() == PCNTL_EACCES) {
+    die('skip this function needs to run with CAP_SYS_NICE privileges');
 }
 ?>
 --FILE--

@@ -488,26 +488,12 @@ void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
-static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
-{
-	unsigned ival;
-	memcpy(&ival, data, sizeof(ival));
-
-	ZVAL_LONG(zv, (zend_long)ival);
-}
 static void to_zval_read_net_uint16(const char *data, zval *zv, res_context *ctx)
 {
 	uint16_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
 	ZVAL_LONG(zv, (zend_long)ntohs(ival));
-}
-static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
-{
-	uint32_t ival;
-	memcpy(&ival, data, sizeof(ival));
-
-	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 {
@@ -516,6 +502,22 @@ static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
+#if HAVE_IPV6
+static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
+{
+	unsigned ival;
+	memcpy(&ival, data, sizeof(ival));
+
+	ZVAL_LONG(zv, (zend_long)ival);
+}
+static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
+{
+	uint32_t ival;
+	memcpy(&ival, data, sizeof(ival));
+
+	ZVAL_LONG(zv, (zend_long)ival);
+}
+#endif
 #ifdef SO_PASSCRED
 static void to_zval_read_pid_t(const char *data, zval *zv, res_context *ctx)
 {
@@ -1221,6 +1223,7 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 	to_zval_read_aggregation(msghdr_c, zv, descriptors, ctx);
 }
 
+#if defined(IPV6_PKTINFO) && HAVE_IPV6
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
@@ -1277,7 +1280,6 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 }
 
 /* CONVERSIONS for struct in6_pktinfo */
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
 static const field_descriptor descriptors_in6_pktinfo[] = {
 		{"addr", sizeof("addr"), 1, offsetof(struct in6_pktinfo, ipi6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
 		{"ifindex", sizeof("ifindex"), 1, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_ifindex, to_zval_read_unsigned},
@@ -1339,29 +1341,32 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 {
 	int *iarr = args[0];
 
-	if (Z_TYPE_P(elem) == IS_RESOURCE) {
-		php_stream *stream;
-		php_socket *sock;
-
-		sock = (php_socket *)zend_fetch_resource_ex(elem, NULL, php_sockets_le_socket());
-		if (sock) {
-			iarr[i] = sock->bsd_socket;
+	if (Z_TYPE_P(elem) == IS_OBJECT && Z_OBJCE_P(elem) == socket_ce) {
+		php_socket *sock = Z_SOCKET_P(elem);
+		if (IS_INVALID_SOCKET(sock)) {
+			do_from_zval_err(ctx, "socket is already closed");
 			return;
 		}
+
+		iarr[i] = sock->bsd_socket;
+		return;
+	}
+
+	if (Z_TYPE_P(elem) == IS_RESOURCE) {
+		php_stream *stream;
 
 		stream = (php_stream *)zend_fetch_resource2_ex(elem, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
-			do_from_zval_err(ctx, "resource is not a stream or a socket");
+			do_from_zval_err(ctx, "resource is not a stream");
 			return;
 		}
 
-		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i - 1],
-				REPORT_ERRORS) == FAILURE) {
+		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i - 1], REPORT_ERRORS) == FAILURE) {
 			do_from_zval_err(ctx, "cast stream to file descriptor failed");
 			return;
 		}
 	} else {
-		do_from_zval_err(ctx, "expected a resource variable");
+		do_from_zval_err(ctx, "expected a Socket object or a stream resource");
 	}
 }
 void from_zval_write_fd_array(const zval *arr, char *int_arr, ser_context *ctx)
@@ -1412,8 +1417,10 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 			return;
 		}
 		if (S_ISSOCK(statbuf.st_mode)) {
-			php_socket *sock = socket_import_file_descriptor(fd);
-			ZVAL_RES(&elem, zend_register_resource(sock, php_sockets_le_socket()));
+			object_init_ex(&elem, socket_ce);
+			php_socket *sock = Z_SOCKET_P(&elem);
+
+			socket_import_file_descriptor(fd, sock);
 		} else {
 			php_stream *stream = php_stream_fopen_from_fd(fd, "rw", NULL);
 			php_stream_to_zval(stream, &elem);

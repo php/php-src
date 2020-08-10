@@ -30,6 +30,7 @@ function foo() {
     var_dump($a[$x . $y]);
 }
 foo();
+?>
 --EXPECT--
 int(1)
 int(3)

@@ -62,6 +62,8 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_API zend_utility_values zend_uv;
 ZEND_API zend_bool zend_dtrace_enabled;
 
+zend_llist zend_error_notify_callbacks;
+
 /* version information */
 static char *zend_version_info;
 static uint32_t zend_version_info_length;
@@ -159,6 +161,20 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
+{
+	zend_long i;
+
+	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	if (i >= 0 && i <= 1000000) {
+		EG(exception_string_param_max_len) = i;
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
 #if ZEND_DEBUG
 # define SIGNAL_CHECK_DEFAULT "1"
 #else
@@ -176,6 +192,7 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_BOOLEAN("zend.signal_check", SIGNAL_CHECK_DEFAULT, ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
 #endif
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
+	STD_ZEND_INI_ENTRY("zend.exception_string_param_max_len",	"15",	ZEND_INI_ALL,	OnSetExceptionStringParamMaxLen,	exception_string_param_max_len,		zend_executor_globals,	executor_globals)
 ZEND_INI_END()
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
@@ -816,6 +833,7 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
+	zend_startup_error_notify_callbacks();
 
 	/* Set up utility functions and values */
 	zend_error_cb = utility_functions->error_function;
@@ -847,6 +865,8 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 			zend_compile_file = dtrace_compile_file;
 			zend_execute_ex = dtrace_execute_ex;
 			zend_execute_internal = dtrace_execute_internal;
+
+			zend_register_error_notify_callback(dtrace_error_notify_cb);
 		} else {
 			zend_compile_file = compile_file;
 			zend_execute_ex = execute_ex;
@@ -1076,6 +1096,7 @@ void zend_shutdown(void) /* {{{ */
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 
+	zend_shutdown_error_notify_callbacks();
 	zend_shutdown_extensions();
 	free(zend_version_info);
 
@@ -1099,6 +1120,11 @@ void zend_shutdown(void) /* {{{ */
 		free(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)));
 		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), NULL);
 		CG(map_ptr_size) = 0;
+	}
+	if (CG(script_encoding_list)) {
+		free(ZEND_VOIDP(CG(script_encoding_list)));
+		CG(script_encoding_list) = NULL;
+		CG(script_encoding_list_size) = 0;
 	}
 #endif
 	zend_destroy_rsrc_list_dtors();
@@ -1314,11 +1340,7 @@ static ZEND_COLD void zend_error_impl(
 		}
 	}
 
-#ifdef HAVE_DTRACE
-	if (DTRACE_ERROR_ENABLED()) {
-		DTRACE_ERROR(ZSTR_VAL(message), (char *)error_filename, error_lineno);
-	}
-#endif /* HAVE_DTRACE */
+	zend_error_notify_all_callbacks(type, error_filename, error_lineno, message);
 
 	/* if we don't have a user defined error handler */
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
@@ -1655,9 +1677,16 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 	int ret = SUCCESS;
 
 	va_start(files, file_count);
-	for (i = 0; i < file_count && ret != FAILURE; i++) {
+	for (i = 0; i < file_count; i++) {
 		file_handle = va_arg(files, zend_file_handle *);
 		if (!file_handle) {
+			continue;
+		}
+
+		if (ret == FAILURE) {
+			/* If a failure occurred in one of the earlier files,
+			 * only destroy the following file handles. */
+			zend_file_handle_dtor(file_handle);
 			continue;
 		}
 
@@ -1772,5 +1801,31 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 		ptr = (void**)ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)) + CG(map_ptr_last);
 		memset(ptr, 0, (last - CG(map_ptr_last)) * sizeof(void*));
 		CG(map_ptr_last) = last;
+	}
+}
+
+void zend_startup_error_notify_callbacks(void)
+{
+	zend_llist_init(&zend_error_notify_callbacks, sizeof(zend_error_notify_cb), NULL, 1);
+}
+
+void zend_shutdown_error_notify_callbacks(void)
+{
+	zend_llist_destroy(&zend_error_notify_callbacks);
+}
+
+ZEND_API void zend_register_error_notify_callback(zend_error_notify_cb cb)
+{
+	zend_llist_add_element(&zend_error_notify_callbacks, &cb);
+}
+
+void zend_error_notify_all_callbacks(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	zend_llist_element *element;
+	zend_error_notify_cb callback;
+
+	for (element = zend_error_notify_callbacks.head; element; element = element->next) {
+		callback = *(zend_error_notify_cb *) (element->data);
+		callback(type, error_filename, error_lineno, message);
 	}
 }

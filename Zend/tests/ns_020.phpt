@@ -11,6 +11,7 @@ foo();
 \X\foo();
 Y\foo();
 \X\foo();
+?>
 --EXPECT--
 X\foo
 X\foo

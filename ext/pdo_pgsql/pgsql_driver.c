@@ -33,6 +33,7 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
+#include "pgsql_driver_arginfo.h"
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
@@ -545,7 +546,7 @@ static int pgsql_handle_rollback(pdo_dbh_t *dbh)
 }
 
 /* {{{ Returns true if the copy worked fine or false if error */
-static PHP_METHOD(PDO, pgsqlCopyFromArray)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -658,7 +659,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 /* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-static PHP_METHOD(PDO, pgsqlCopyFromFile)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -756,7 +757,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 
 
 /* {{{ Returns true if the copy worked fine or false if error */
-static PHP_METHOD(PDO, pgsqlCopyToFile)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -850,7 +851,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 /* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-static PHP_METHOD(PDO, pgsqlCopyToArray)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -926,7 +927,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 
 
 /* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
-static PHP_METHOD(PDO, pgsqlLOBCreate)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBCreate)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -954,7 +955,7 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 /* }}} */
 
 /* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
-static PHP_METHOD(PDO, pgsqlLOBOpen)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1005,7 +1006,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 /* }}} */
 
 /* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
-static PHP_METHOD(PDO, pgsqlLOBUnlink)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1040,7 +1041,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 /* }}} */
 
 /* {{{ Get asynchronous notification */
-static PHP_METHOD(PDO, pgsqlGetNotify)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1120,7 +1121,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 /* }}} */
 
 /* {{{ Get backend(server) pid */
-static PHP_METHOD(PDO, pgsqlGetPid)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1136,25 +1137,11 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 }
 /* }}} */
 
-
-static const zend_function_entry dbh_methods[] = {
-	PHP_ME(PDO, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, pgsqlLOBOpen, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, pgsqlLOBUnlink, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, pgsqlCopyFromArray, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, pgsqlCopyFromFile, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, pgsqlCopyToArray, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, pgsqlCopyToFile, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(PDO, pgsqlGetNotify, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(PDO, pgsqlGetPid, NULL, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, int kind)
 {
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
-			return dbh_methods;
+			return class_PDO_PGSql_Ext_methods;
 		default:
 			return NULL;
 	}

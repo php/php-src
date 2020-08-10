@@ -40,5 +40,7 @@ var_dump(openssl_csr_get_public_key($csr));
 var_dump(openssl_csr_get_public_key($csr_file));
 ?>
 --EXPECTF--
-resource(%d) of type (OpenSSL key)
-resource(%d) of type (OpenSSL key)
+object(OpenSSLAsymmetricKey)#%d (0) {
+}
+object(OpenSSLAsymmetricKey)#%d (0) {
+}

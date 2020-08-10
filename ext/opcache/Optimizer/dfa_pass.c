@@ -622,6 +622,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
+			case ZEND_JMP_NULL:
 				if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, op_array->opcodes + dst->start);
 				}
@@ -891,6 +892,28 @@ optimize_jmpnz:
 							COPY_NODE(opline->op1, opline->op2);
 							take_successor_0(ssa, block_num, block);
 							goto optimize_jmp;
+						}
+					}
+					break;
+				}
+				case ZEND_JMP_NULL:
+				{
+					zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
+					if (opline->op1_type == IS_CONST
+							&& var->use_chain < 0 && var->phi_use_chain == NULL) {
+						if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op1.constant)) == IS_NULL) {
+							opline->opcode = ZEND_JMP;
+							opline->result_type = IS_UNUSED;
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							COPY_NODE(opline->op1, opline->op2);
+							take_successor_0(ssa, block_num, block);
+							goto optimize_jmp;
+						} else {
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							MAKE_NOP(opline);
+							removed_ops++;
+							take_successor_1(ssa, block_num, block);
+							goto optimize_nop;
 						}
 					}
 					break;

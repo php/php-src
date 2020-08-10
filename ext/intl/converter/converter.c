@@ -797,12 +797,12 @@ PHP_METHOD(UConverter, getErrorCode) {
 /* {{{ */
 PHP_METHOD(UConverter, getErrorMessage) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
-	zend_string *message = intl_error_get_message(&(objval->error));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	zend_string *message = intl_error_get_message(&(objval->error));
 	if (message) {
 		RETURN_STR(message);
 	} else {

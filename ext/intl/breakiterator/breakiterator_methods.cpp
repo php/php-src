@@ -63,6 +63,7 @@ static void _breakiter_factory(const char *func_name,
 
 	biter = func(Locale::createFromName(locale_str), status);
 	intl_error_set_code(NULL, status);
+	// Todo check if this can happen?
 	if (U_FAILURE(status)) {
 		spprintf(&msg, 0, "%s: error creating BreakIterator",
 				func_name);
@@ -170,7 +171,6 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, setText)
 }
 
 static void _breakiter_no_args_ret_int32(
-		const char *func_name,
 		int32_t (BreakIterator::*func)(),
 		INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -190,11 +190,9 @@ static void _breakiter_no_args_ret_int32(
 }
 
 static void _breakiter_int32_ret_int32(
-		const char *func_name,
 		int32_t (BreakIterator::*func)(int32_t),
 		INTERNAL_FUNCTION_PARAMETERS)
 {
-	char	*msg;
 	zend_long	arg;
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -206,11 +204,8 @@ static void _breakiter_int32_ret_int32(
 	BREAKITER_METHOD_FETCH_OBJECT;
 
 	if (arg < INT32_MIN || arg > INT32_MAX) {
-		spprintf(&msg, 0, "%s: offset argument is outside bounds of "
-				"a 32-bit wide integer", func_name);
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
-		efree(msg);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
 	}
 
 	int32_t res = (bio->biter->*func)((int32_t)arg);
@@ -220,22 +215,19 @@ static void _breakiter_int32_ret_int32(
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, first)
 {
-	_breakiter_no_args_ret_int32("breakiter_first",
-			&BreakIterator::first,
+	_breakiter_no_args_ret_int32(&BreakIterator::first,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, last)
 {
-	_breakiter_no_args_ret_int32("breakiter_last",
-			&BreakIterator::last,
+	_breakiter_no_args_ret_int32(&BreakIterator::last,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, previous)
 {
-	_breakiter_no_args_ret_int32("breakiter_previous",
-			&BreakIterator::previous,
+	_breakiter_no_args_ret_int32(&BreakIterator::previous,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
@@ -253,12 +245,10 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, next)
 	if (arg == NULL) {
 		ZEND_NUM_ARGS() = 0; /* pretend we don't have any argument */
 		no_arg_version:
-		_breakiter_no_args_ret_int32("breakiter_next",
-				&BreakIterator::next,
+		_breakiter_no_args_ret_int32(&BreakIterator::next,
 				INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	} else {
-		_breakiter_int32_ret_int32("breakiter_next",
-				&BreakIterator::next,
+		_breakiter_int32_ret_int32(&BreakIterator::next,
 				INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 }
@@ -281,14 +271,14 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, current)
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, following)
 {
-	_breakiter_int32_ret_int32("breakiter_following",
+	_breakiter_int32_ret_int32(
 			&BreakIterator::following,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, preceding)
 {
-	_breakiter_int32_ret_int32("breakiter_preceding",
+	_breakiter_int32_ret_int32(
 			&BreakIterator::preceding,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -305,10 +295,8 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, isBoundary)
 	}
 
 	if (offset < INT32_MIN || offset > INT32_MAX) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"breakiter_is_boundary: offset argument is outside bounds of "
-				"a 32-bit wide integer", 0);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -328,6 +316,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getLocale)
 		RETURN_THROWS();
 	}
 
+	/* Change to ValueError? */
 	if (locale_type != ULOC_ACTUAL_LOCALE && locale_type != ULOC_VALID_LOCALE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"breakiter_get_locale: invalid locale type", 0);
@@ -357,9 +346,9 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getPartsIterator)
 	if (key_type != PARTS_ITERATOR_KEY_SEQUENTIAL
 			&& key_type != PARTS_ITERATOR_KEY_LEFT
 			&& key_type != PARTS_ITERATOR_KEY_RIGHT) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_get_parts_iterator: bad key type", 0);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be one of IntlPartsIterator::KEY_SEQUENTIAL, "
+			"IntlPartsIterator::KEY_LEFT, or IntlPartsIterator::KEY_RIGHT");
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

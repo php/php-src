@@ -13,5 +13,6 @@ class C {
         T2::foo as private;
     }
 }
+?>
 --EXPECTF--
 Fatal error: Required Trait T2 wasn't added to C in %slanguage017.php on line %d

@@ -2400,6 +2400,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 
 	fci.size = sizeof(fci);
 	fci.object = NULL;
+	fci.named_params = NULL;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, str_idx_regex, replace) {
 		if (!str_idx_regex) {

@@ -1415,11 +1415,6 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 {
 	uint32_t orig_compiler_options;
 
-	/* Check if script may be stored in shared memory */
-	if (!zend_accel_script_persistable(new_persistent_script)) {
-		return new_persistent_script;
-	}
-
 	orig_compiler_options = CG(compiler_options);
 	CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
@@ -1437,11 +1432,6 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	zend_accel_hash_entry *bucket;
 	uint32_t memory_used;
 	uint32_t orig_compiler_options;
-
-	/* Check if script may be stored in shared memory */
-	if (!zend_accel_script_persistable(new_persistent_script)) {
-		return new_persistent_script;
-	}
 
 	orig_compiler_options = CG(compiler_options);
 	if (ZCG(accel_directives).file_cache) {
@@ -1726,7 +1716,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 			if (!EG(exception)) {
 				if (type == ZEND_REQUIRE) {
 					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-					zend_bailout();
 				} else {
 					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 				}
@@ -1885,7 +1874,6 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 			if (!EG(exception)) {
 				if (type == ZEND_REQUIRE) {
 					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-					zend_bailout();
 				} else {
 					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 				}
@@ -2042,7 +2030,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				if (!EG(exception)) {
 					if (type == ZEND_REQUIRE) {
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-						zend_bailout();
 					} else {
 						zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 					}
@@ -2100,7 +2087,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		if (!EG(exception)) {
 			if (type == ZEND_REQUIRE) {
 				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-				zend_bailout();
 			} else {
 				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 			}

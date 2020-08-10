@@ -267,9 +267,7 @@ PHP_RINIT_FUNCTION( intl )
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION( intl )
 {
-	if(!Z_ISUNDEF(INTL_G(current_collator))) {
-		ZVAL_UNDEF(&INTL_G(current_collator));
-	}
+	INTL_G(current_collator) = NULL;
 	if (INTL_G(grapheme_iterator)) {
 		grapheme_close_global_iterator(  );
 		INTL_G(grapheme_iterator) = NULL;

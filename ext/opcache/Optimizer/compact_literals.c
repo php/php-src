@@ -228,6 +228,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_POST_DEC_OBJ:
 				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 				case ZEND_ASSIGN_OBJ_OP:
+					if (opline->op1_type == IS_CONST) {
+						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1);
+					}
 					if (opline->op2_type == IS_CONST) {
 						LITERAL_INFO(opline->op2.constant, LITERAL_PROPERTY, 1);
 					}
@@ -778,6 +781,20 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_CLASS_DELAYED:
 					opline->extended_value = cache_size;
 					cache_size += sizeof(void *);
+					break;
+				case ZEND_SEND_VAL:
+				case ZEND_SEND_VAL_EX:
+				case ZEND_SEND_VAR:
+				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_VAR_NO_REF:
+				case ZEND_SEND_VAR_NO_REF_EX:
+				case ZEND_SEND_REF:
+				case ZEND_SEND_FUNC_ARG:
+				case ZEND_CHECK_FUNC_ARG:
+					if (opline->op2_type == IS_CONST) {
+						opline->result.num = cache_size;
+						cache_size += 2 * sizeof(void *);
+					}
 					break;
 			}
 			opline++;

@@ -20,4 +20,4 @@ try {
 ?>
 --EXPECT--
 *** Testing strncmp() function: error conditions ***
-strncmp(): Argument #3 ($len) must be greater than or equal to 0
+strncmp(): Argument #3 ($length) must be greater than or equal to 0

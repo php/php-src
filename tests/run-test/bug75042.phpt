@@ -13,5 +13,6 @@ openssl
 --FILE--
 <?php
 var_dump(extension_loaded('openssl'));
+?>
 --EXPECT--
 bool(true)

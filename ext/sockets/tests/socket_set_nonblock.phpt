@@ -17,5 +17,6 @@ fa@php.net
     //socket_accept($s_c_l);
     socket_close($s_c_l);
 ?>
---EXPECTF--
-resource(%i) of type (Socket)
+--EXPECT--
+object(Socket)#1 (0) {
+}

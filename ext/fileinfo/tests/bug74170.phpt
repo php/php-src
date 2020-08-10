@@ -15,6 +15,7 @@ var_dump(setlocale(LC_CTYPE, 'ru_RU.koi8r'));
 var_dump(nl_langinfo(CODESET));
 var_dump(mime_content_type(__DIR__ . '/resources/test.ppt'));
 var_dump(nl_langinfo(CODESET));
+?>
 --EXPECT--
 string(11) "ru_RU.koi8r"
 string(6) "KOI8-R"

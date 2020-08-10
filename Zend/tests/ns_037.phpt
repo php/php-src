@@ -26,6 +26,7 @@ echo \X\X::C;
 echo X::$var;
 echo Y\X::$var;
 echo \X\X::$var;
+?>
 --EXPECT--
 class ok
 class ok

@@ -1114,7 +1114,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 }
 /* }}} */
 
-PHPAPI php_serialize_data_t php_var_serialize_init() {
+PHPAPI php_serialize_data_t php_var_serialize_init(void) {
 	struct php_serialize_data *d;
 	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
 	if (BG(serialize_lock) || !BG(serialize).level) {
@@ -1171,23 +1171,14 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ Takes a string representation of variable and recreates it */
-PHP_FUNCTION(unserialize)
+/* {{{ Takes a string representation of variable and recreates it, subject to the optional unserialize options HashTable */
+PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, const size_t buf_len, HashTable *options, const char* function_name)
 {
-	char *buf = NULL;
-	size_t buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
-	zval *options = NULL;
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
 	zend_long prev_max_depth, prev_cur_depth;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(buf, buf_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY(options)
-	ZEND_PARSE_PARAMETERS_END();
 
 	if (buf_len == 0) {
 		RETURN_FALSE;
@@ -1202,7 +1193,7 @@ PHP_FUNCTION(unserialize)
 	if (options != NULL) {
 		zval *classes, *max_depth;
 
-		classes = zend_hash_str_find_deref(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
+		classes = zend_hash_str_find_deref(options, "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
 			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
 			RETVAL_FALSE;
@@ -1231,14 +1222,14 @@ PHP_FUNCTION(unserialize)
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 
-		max_depth = zend_hash_str_find_deref(Z_ARRVAL_P(options), "max_depth", sizeof("max_depth") - 1);
+		max_depth = zend_hash_str_find_deref(options, "max_depth", sizeof("max_depth") - 1);
 		if (max_depth) {
 			if (Z_TYPE_P(max_depth) != IS_LONG) {
-				zend_type_error("unserialize(): \"max_depth\" option must be of type int, %s given", zend_zval_type_name(max_depth));
+				zend_type_error("%s(): \"max_depth\" option must be of type int, %s given", function_name, zend_zval_type_name(max_depth));
 				goto cleanup;
 			}
 			if (Z_LVAL_P(max_depth) < 0) {
-				zend_value_error("unserialize(): \"max_depth\" option must be greater than or equal to 0");
+				zend_value_error("%s(): \"max_depth\" option must be greater than or equal to 0", function_name);
 				goto cleanup;
 			}
 
@@ -1288,6 +1279,23 @@ cleanup:
 	if (Z_ISREF_P(return_value)) {
 		zend_unwrap_reference(return_value);
 	}
+}
+/* }}} */
+
+/* {{{ Takes a string representation of variable and recreates it */
+PHP_FUNCTION(unserialize)
+{
+	char *buf = NULL;
+	size_t buf_len;
+	HashTable *options = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(buf, buf_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_unserialize_with_options(return_value, buf, buf_len, options, "unserialize");
 }
 /* }}} */
 

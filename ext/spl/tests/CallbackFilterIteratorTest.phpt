@@ -55,6 +55,7 @@ foreach($tests as $name => $test) {
         echo "=> $value\n";
     }
 }
+?>
 --EXPECT--
 = instance method =
 1 / 0 / 1 / 1

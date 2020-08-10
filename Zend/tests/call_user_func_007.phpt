@@ -11,7 +11,7 @@ var_dump($a);
 
 ?>
 --EXPECTF--
-Notice: Undefined array key 0 in %s on line %d
+Warning: Undefined array key 0 in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 

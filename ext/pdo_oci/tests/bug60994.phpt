@@ -92,6 +92,7 @@ echo 'size of string4 is ', strlen($string4), ' bytes, ', mb_strlen($string4), '
 echo 'size of stream4 is ', strlen($stream4), ' bytes, ', mb_strlen($stream4), ' chars.', PHP_EOL;
 echo 'beg  of stream4 is ', $start4, PHP_EOL;
 echo 'end  of stream4 is ', $ending4, PHP_EOL;
+?>
 --XFAIL--
 Fails due to Bug 60994
 --EXPECT--

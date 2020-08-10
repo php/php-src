@@ -870,9 +870,6 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 
 void zend_dump_op_array_name(const zend_op_array *op_array)
 {
-	zend_func_info *func_info = NULL;
-
-	func_info = ZEND_FUNC_INFO(op_array);
 	if (op_array->function_name) {
 		if (op_array->scope && op_array->scope->name) {
 			fprintf(stderr, "%s::%s", op_array->scope->name->val, op_array->function_name->val);
@@ -881,9 +878,6 @@ void zend_dump_op_array_name(const zend_op_array *op_array)
 		}
 	} else {
 		fprintf(stderr, "%s", "$_main");
-	}
-	if (func_info && func_info->clone_num > 0) {
-		fprintf(stderr, "_@_clone_%d", func_info->clone_num);
 	}
 }
 
@@ -915,9 +909,6 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	fprintf(stderr, ":\n     ; (lines=%d, args=%d",
 		op_array->last,
 		op_array->num_args);
-	if (func_info && func_info->num_args >= 0) {
-		fprintf(stderr, "/%d", func_info->num_args);
-	}
 	fprintf(stderr, ", vars=%d, tmps=%d", op_array->last_var, op_array->T);
 	if (ssa) {
 		fprintf(stderr, ", ssa_vars=%d", ssa->vars_count);
@@ -964,27 +955,11 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		fprintf(stderr, ", inline");
 	}
 #endif
-	if (func_info && func_info->return_value_used == 0) {
-		fprintf(stderr, ", no_return_value");
-	} else if (func_info && func_info->return_value_used == 1) {
-		fprintf(stderr, ", return_value");
-	}
 	fprintf(stderr, ")\n");
 	if (msg) {
 		fprintf(stderr, "     ; (%s)\n", msg);
 	}
 	fprintf(stderr, "     ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
-
-	if (func_info && func_info->num_args > 0) {
-		uint32_t j;
-
-		for (j = 0; j < MIN(op_array->num_args, func_info->num_args ); j++) {
-			fprintf(stderr, "     ; arg %d ", j);
-			zend_dump_type_info(func_info->arg_info[j].info.type, func_info->arg_info[j].info.ce, func_info->arg_info[j].info.is_instanceof, dump_flags);
-			zend_dump_range(&func_info->arg_info[j].info.range);
-			fprintf(stderr, "\n");
-		}
-	}
 
 	if (func_info) {
 		fprintf(stderr, "     ; return ");

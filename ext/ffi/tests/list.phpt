@@ -89,6 +89,7 @@ $dlist->print();
 $dlist->del(3);
 $dlist->print();
 echo "OK\n";
+?>
 --EXPECT--
 [1, 3, 5]
 [1, 5]

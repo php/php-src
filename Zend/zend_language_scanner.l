@@ -576,7 +576,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	}
 
 	if (CG(skip_shebang)) {
-		CG(skip_shebang) = 0;
 		BEGIN(SHEBANG);
 	} else {
 		BEGIN(INITIAL);
@@ -656,7 +655,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 		if (!EG(exception)) {
 			if (type==ZEND_REQUIRE) {
 				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-				zend_bailout();
 			} else {
 				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 			}
@@ -1170,6 +1168,7 @@ static const char *next_newline(const char *str, const char *end, size_t *newlin
 	for (; str < end; str++) {
 		if (*str == '\r') {
 			*newline_len = str + 1 < end && *(str + 1) == '\n' ? 2 : 1;
+			return str;
 		} else if (*str == '\n') {
 			*newline_len = 1;
 			return str;
@@ -1422,6 +1421,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_RETURN);
 }
 
+<ST_IN_SCRIPTING>"@@" {
+	RETURN_TOKEN(T_ATTRIBUTE);
+}
+
 <ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
 	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
@@ -1573,12 +1576,21 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_OBJECT_OPERATOR);
 }
 
+<ST_IN_SCRIPTING>"?->" {
+	yy_push_state(ST_LOOKING_FOR_PROPERTY);
+	return T_NULLSAFE_OBJECT_OPERATOR;
+}
+
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
 	goto return_whitespace;
 }
 
 <ST_LOOKING_FOR_PROPERTY>"->" {
 	RETURN_TOKEN(T_OBJECT_OPERATOR);
+}
+
+<ST_LOOKING_FOR_PROPERTY>"?->" {
+	RETURN_TOKEN(T_NULLSAFE_OBJECT_OPERATOR);
 }
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
@@ -1594,10 +1606,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"::" {
 	RETURN_TOKEN(T_PAAMAYIM_NEKUDOTAYIM);
-}
-
-<ST_IN_SCRIPTING>"\\" {
-	RETURN_TOKEN(T_NS_SEPARATOR);
 }
 
 <ST_IN_SCRIPTING>"..." {
@@ -2286,6 +2294,22 @@ inline_char_handler:
 	yy_pop_state();
 	ZVAL_NULL(zendlval);
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
+}
+
+<ST_IN_SCRIPTING>"namespace"("\\"{LABEL})+ {
+	RETURN_TOKEN_WITH_STR(T_NAME_RELATIVE, sizeof("namespace\\") - 1);
+}
+
+<ST_IN_SCRIPTING>{LABEL}("\\"{LABEL})+ {
+	RETURN_TOKEN_WITH_STR(T_NAME_QUALIFIED, 0);
+}
+
+<ST_IN_SCRIPTING>"\\"{LABEL}("\\"{LABEL})* {
+	RETURN_TOKEN_WITH_STR(T_NAME_FULLY_QUALIFIED, 1);
+}
+
+<ST_IN_SCRIPTING>"\\" {
+	RETURN_TOKEN(T_NS_SEPARATOR);
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {

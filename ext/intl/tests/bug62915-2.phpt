@@ -28,6 +28,7 @@ foreach (range('A', 'D') as $subclass) {
                 $clone = clone $obj;
                     var_dump(get_class($clone));
 }
+?>
 --EXPECT--
 string(1) "A"
 string(1) "B"

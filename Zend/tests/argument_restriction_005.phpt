@@ -8,4 +8,4 @@ class Sub implements ArrayAccess {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of Sub::offsetSet() must be compatible with ArrayAccess::offsetSet($offset, $value) in %sargument_restriction_005.php on line %d
+Fatal error: Declaration of Sub::offsetSet() must be compatible with ArrayAccess::offsetSet(mixed $offset, mixed $value) in %sargument_restriction_005.php on line %d

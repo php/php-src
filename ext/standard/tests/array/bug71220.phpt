@@ -9,6 +9,5 @@ try {
     echo $e->getMessage();
 }
 ?>
-
 --EXPECT--
 Cannot call compact() dynamically

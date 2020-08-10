@@ -44,6 +44,7 @@ foreach($opsSet as $ops) {
     var_dump(password_verify($password, $hash));
   }
 }
+?>
 --EXPECTF--
 Argon2 provider: string(%d) "%s"
 Using password: string(44) "%s"

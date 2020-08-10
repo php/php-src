@@ -21,6 +21,8 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Assertion failures now throw by default. If the old behavior is desired,
+    then set `assert.exception=0` in INI settings.
   . Methods with the same name as the class are no longer interpreted as
     constructors. The __construct() method should be used instead.
   . Removed ability to call non-static methods statically.
@@ -47,7 +49,7 @@ PHP 8.0 UPGRADE NOTES
     parameter consistent with isset() and normal array access. All key types now
     use the usual coercions and array/object keys throw a TypeError.
   . Any array that has a number n as its first numeric key will use n+1 for
-    its next implicit key. Even if n is negative.
+    its next implicit key, even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
   . The default error_reporting level is now E_ALL. Previously it excluded
     E_NOTICE and E_DEPRECATED.
@@ -78,6 +80,10 @@ PHP 8.0 UPGRADE NOTES
     Additionally, care should be taken that error messages are not displayed in
     production environments, which can result in information leaks. Please
     ensure that display_errors=Off is used in conjunction with error logging.
+  . Adding more than one @ operator to an expression is no longer supported,
+    since this syntax is now used for attributes (previously extra @ operators
+    had no effect).
+    RFC: https://wiki.php.net/rfc/shorter_attribute_syntax
   . Inheritance errors due to incompatible method signatures (LSP violations)
     will now always generate a fatal error. Previously a warning was generated
     in some cases.
@@ -85,7 +91,7 @@ PHP 8.0 UPGRADE NOTES
   . The precedence of the concatenation operator has changed relative to
     bitshifts and addition as well as subtraction.
     RFC: https://wiki.php.net/rfc/concatenation_precedence
-  . Arguments with a default-value that resolves to null at run-time will no
+  . Arguments with a default value that resolves to null at runtime will no
     longer implicitly mark the argument type as nullable. Either use an explicit
     nullable type, or an explicit null default value instead.
 
@@ -110,11 +116,12 @@ PHP 8.0 UPGRADE NOTES
 
     * Attempting to read an undefined variable.
     * Attempting to read an undefined property.
+    * Attempting to read an undefined array key.
     * Attempting to read a property of a non-object.
     * Attempting to access an array index of a non-array.
     * Attempting to convert an array to string.
     * Attempting to use a resource as an array key.
-    * Attempting to use null, a boolean or a float as a string offset.
+    * Attempting to use null, a boolean, or a float as a string offset.
     * Attempting to read an out-of-bounds string offset.
     * Attempting to assign an empty string to a string offset.
 
@@ -127,7 +134,7 @@ PHP 8.0 UPGRADE NOTES
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
   . Compile time fatal error "Only variables can be passed by reference" has
-    been delayed until run-time and converted to "Cannot pass parameter by
+    been delayed until runtime and converted to "Cannot pass parameter by
     reference" exception.
   . Some "Only variables should be passed by reference" notices have been
     converted to "Cannot pass parameter by reference" exception.
@@ -143,13 +150,6 @@ PHP 8.0 UPGRADE NOTES
 
     The name shown above is still followed by a null byte and and a unique
     suffix.
-  . Declaring a required parameter after an optional one is deprecated. As an
-    exception, declaring a parameter of the form "Type $param = null" before
-    a required one continues to be allowed, because this pattern was sometimes
-    used to achieve nullable types in older PHP versions.
-
-        function test($a = [], $b) {}       // Deprecated
-        function test(Foo $a = null, $b) {} // Allowed
   . Non-absolute trait method references in trait alias adaptations are now
     required to be unambiguous:
 
@@ -194,6 +194,65 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/locale_independent_float_to_string
   . Removed support for deprecated curly braces for offset access
     RFC: https://wiki.php.net/rfc/deprecate_curly_braces_array_access
+  . Applying the final modifier on a private method will now produce a warning
+    unless that method is the constructor.
+    RFC: https://wiki.php.net/rfc/inheritance_private_methods
+  . If an object constructor exit()s, the object destructor will no longer be
+    called. This matches the behavior when the constructor throws.
+  . Non-strict comparisons between numbers and non-numeric strings now work by
+    casting the number to string and comparing the strings. Comparisons between
+    numbers and numeric strings continue to work as before. Notably, this means
+    that `0 == "not-a-number"` is considered false now.
+    RFC: https://wiki.php.net/rfc/string_to_number_comparison
+  . Namespaced names can no longer contain whitespace: While `Foo\Bar` will be
+    recognized as a namespaced name, `Foo \ Bar` will not. Conversely, reserved
+    keywords are now permitted as namespace segments, which may also change the
+    interpretation of code: `new\x` is now the same as `constant('new\x')`, not
+    `new \x()`.
+    RFC: https://wiki.php.net/rfc/namespaced_names_as_token
+  . Nested ternaries now require explicit parentheses.
+    RFC: https://wiki.php.net/rfc/ternary_associativity
+  . debug_backtrace() and Exception::getTrace() will no longer provide
+    references to arguments. It will not be possible to change function
+    arguments through the backtrace.
+  . Numeric string handling has been altered to be more intuitive and less
+    error-prone. Trailing whitespace is now allowed in numeric strings for
+    consistency with how leading whitespace is treated. This mostly affects:
+     - The is_numeric() function
+     - String-to-string comparisons
+     - Type declarations
+     - Increment and decrement operations
+    The concept of a "leading-numeric string" has been mostly dropped; the
+    cases where this remains exist in order to ease migration. Strings which
+    emitted an E_NOTICE "A non well-formed numeric value encountered" will now
+    emit an E_WARNING "A non-numeric value encountered" and all strings which
+    emitted an E_WARNING "A non-numeric value encountered" will now throw a
+    TypeError. This mostly affects:
+     - Arithmetic operations
+     - Bitwise operations
+    This E_WARNING to TypeError change also affects the E_WARNING
+    "Illegal string offset 'string'" for illegal string offsets. The behavior
+    of explicit casts to int/float from strings has not been changed.
+    RFC: https://wiki.php.net/rfc/saner-numeric-strings
+  . Magic Methods will now have their arguments and return types checked if
+    they have them declared. The signatures should match the following list:
+
+      __call(string $name, array $arguments): mixed
+      __callStatic(string $name, array $arguments): mixed
+      __clone(): void
+      __debugInfo(): ?array
+      __get(string $name): mixed
+      __invoke(mixed $arguments): mixed
+      __isset(string $name): bool
+      __serialize(): array
+      __set(string $name, mixed $value): void
+      __set_state(array $properties): object
+      __sleep(): array
+      __unserialize(array $data): void
+      __unset(string $name): void
+      __wakeup(): void
+
+    RFC: https://wiki.php.net/rfc/magic-methods-signature
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -262,7 +321,7 @@ PHP 8.0 UPGRADE NOTES
     gmp_random_bits() should be used instead.
 
 - Iconv:
-  . iconv() implementations which do not properly set errno in case of errors,
+  . iconv() implementations which do not properly set errno in case of errors
     are no longer supported.
 
 - Intl:
@@ -312,8 +371,8 @@ PHP 8.0 UPGRADE NOTES
     now be empty.
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
-  . The legacy behaviour of passing the encoding as the third argument instead
-    of an offset for the mb_strrpos() function has been removed, provide an
+  . The legacy behavior of passing the encoding as the third argument instead
+    of an offset for the mb_strrpos() function has been removed; provide an
     explicit 0 offset with the encoding as the fourth argument instead.
   . The ISO_8859-* character encoding aliases have been replaced by ISO8859-*
     aliases for better interoperability with the iconv extension. The mbregex
@@ -324,9 +383,26 @@ PHP 8.0 UPGRADE NOTES
   . Several alias functions have been marked as deprecated.
   . oci_internal_debug() and its alias ociinternaldebug() have been removed.
 
+- OpenSSL:
+  . openssl_x509_read() and openssl_csr_sign() will now return an
+    OpenSSLCertificate object rather than a resource. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+  . The openssl_x509_free() function is deprecated and no longer has an effect,
+    instead the OpenSSLCertificate instance is automatically destroyed if it is no
+    longer referenced.
+  . openssl_csr_new() will now return an OpenSSLCertificateSigningRequest object
+    rather than a resource. Return value checks using is_resource() should be
+    replaced with checks for `false`.
+  . openssl_pkey_new() will now return an OpenSSLAsymmetricKey object rather than a
+    resource. Return value checks using is_resource() should be replaced with
+    checks for `false`.
+  . The openssl_pkey_free() function is deprecated and no longer has an effect,
+    instead the OpenSSLAsymmetricKey instance is automatically destroyed if it is no
+    longer referenced.
+
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
-    literals. This behaviour previously required the X modifier - which is
+    literals. This behavior previously required the X modifier - which is
     now ignored.
 
 - PDO:
@@ -334,12 +410,19 @@ PHP 8.0 UPGRADE NOTES
     "exceptions". See https://www.php.net/manual/en/pdo.error-handling.php
     for details of behavior changes and how to explicitly set this attribute.
     RFC: https://wiki.php.net/rfc/pdo_default_errmode
-  . The method PDOStatement::setFetchMode() now accepts the following signature:
+  . The signatures of some PDO methods have changed:
 
-        PDOStatement::setFetchMode($mode, $classname, $params)
+        PDO::query(
+            string $statement, ?int $fetch_mode = null, ...$fetch_mode_args)
+        PDOStatement::setFetchMode(int $mode, ...$params)
 
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
+
+- Phar:
+  . Metadata associated with a phar will no longer be automatically unserialized,
+    to fix potential security vulnerabilities due to object instantiation, autoloading, etc.
+    RFC: https://wiki.php.net/rfc/phar_stop_autoloading_metadata
 
 - Reflection:
   . The method signatures
@@ -378,9 +461,16 @@ PHP 8.0 UPGRADE NOTES
   . ReflectionType::isBuiltin() method has been moved to ReflectionNamedType.
     ReflectionUnionType does not have it.
 
-- Socket:
+- Sockets:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
     flags for socket_addrinfo_lookup() have been removed.
+  . socket_create(), socket_create_listen(), socket_accept(),
+    socket_import_stream(), socket_addrinfo_connect(), socket_addrinfo_bind(),
+    and socket_wsaprotocol_info_import() will now return a Socket object rather
+    than a resource. Return value checks using is_resource() should be replaced
+    with checks for `false`.
+  . socket_addrinfo_lookup() will now return an array of AddressInfo objects
+    rather than resources.
 
 - SPL:
   . SplFileObject::fgetss() has been removed.
@@ -460,10 +550,10 @@ PHP 8.0 UPGRADE NOTES
   . Specifying out of range rounds for sha256/sha526 crypt() will now fail with
     *0 instead of clamping to the closest limit. This matches glibc behavior.
   . The result of sorting functions may have changed, if the array contains
-    equal-comparing elements.
-  . Sort comparison functions return true/false will now throw a deprecation
-    warning and should be replaced with an implementation return an integer
-    smaller than, equal to, or greater than zero.
+    elements that compare as equal.
+  . Sort comparison functions that return true or false will now throw a
+    deprecation warning, and should be replaced with an implementation
+    that returns an integer less than, equal to, or greater than zero.
 
         // Replace
         usort($array, fn($a, $b) => $a > $b);
@@ -474,6 +564,14 @@ PHP 8.0 UPGRADE NOTES
     accept parameters by reference will now warn if a callback with reference
     parameters is used. Examples include array_filter() and array_reduce().
     This was already the case for most, but not all, functions previously.
+  . The HTTP stream wrapper as used by functions like file_get_contents()
+    now advertises HTTP/1.1 rather than HTTP/1.0 by default. This does not
+    change the behavior of the client, but may cause servers to respond
+    differently. To retain the old behavior, set the 'protocol_version'
+    stream context option, e.g.
+
+        $ctx = stream_context_create(['http' => ['protocol_version' => '1.0']]);
+        echo file_get_contents('http://example.org', false, $ctx);
 
 - Sysvmsg:
   . msg_get_queue() will now return an SysvMessageQueue object rather than a
@@ -499,6 +597,11 @@ PHP 8.0 UPGRADE NOTES
     instead be part of a following T_WHITESPACE token. It should be noted that
     T_COMMENT is not always followed by whitespace, it may also be followed by
     T_CLOSE_TAG or end-of-file.
+  . Namespaced names are now represented using the T_NAME_QUALIFIED (Foo\Bar),
+    T_NAME_FULLY_QUALIFIED (\Foo\Bar) and T_NAME_RELATIVE (namespace\Foo\Bar)
+    tokens. T_NS_SEPARATOR is only used for standalone namespace separators,
+    and only syntactially valid in conjunction with group use declarations.
+    RFC: https://wiki.php.net/rfc/namespaced_names_as_token
 
 - XML:
   . xml_parser_create(_ns) will now return an XmlParser object rather than a
@@ -512,8 +615,8 @@ PHP 8.0 UPGRADE NOTES
     objects instead of resources.
 
 - Zip:
-  . ZipArchive::OPSYS_Z_CPM have been removed, should use ZipArchive::OPSYS_CPM
-    (this name was a typo).
+  . ZipArchive::OPSYS_Z_CPM has been removed (this name was a typo). Use
+    ZipArchive::OPSYS_CPM instead.
 
 - Zlib:
   . gzgetss() has been removed.
@@ -579,15 +682,26 @@ PHP 8.0 UPGRADE NOTES
   . Added support for Attributes
     RFC: https://wiki.php.net/rfc/attributes_v2
     RFC: https://wiki.php.net/rfc/attribute_amendments
+    RFC: https://wiki.php.net/rfc/shorter_attribute_syntax
   . Added support for constructor property promotion (declaring properties in
     the constructor signature).
     RFC: https://wiki.php.net/rfc/constructor_promotion
   . Added support for `match` expression.
     RFC: https://wiki.php.net/rfc/match_expression_v2
+  . Private methods declared on a parent class no longer enforce any
+    inheritance rules on the methods of a child class. (with the exception of
+    final private constructors)
+    RFC: https://wiki.php.net/rfc/inheritance_private_methods
+  . Added support for nullsafe operator (`?->`).
+    RFC: https://wiki.php.net/rfc/nullsafe_operator
+  . Added support for named arguments.
+    RFC: https://wiki.php.net/rfc/named_params
 
 - Date:
   . Added DateTime::createFromInterface() and
     DateTimeImmutable::createFromInterface().
+  . Added the DateTime format specifier "p" which is the same as "P" but
+    returning "Z" for UTC.
 
 - Dom:
   . Introduce DOMParentNode and DOMChildNode with new traversal and
@@ -598,6 +712,11 @@ PHP 8.0 UPGRADE NOTES
   . enchant_dict_add()
   . enchant_dict_is_added()
   . LIBENCHANT_VERSION macro
+
+- FPM:
+  . Added a new option pm.status_listen that allows getting status from
+    different endpoint (e.g. port or UDS file) which is useful for getting
+    status when all children are busy with serving long running requests.
 
 - Hash:
   . HashContext objects can now be serialized.
@@ -669,6 +788,13 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Declaring a required parameter after an optional one is deprecated. As an
+    exception, declaring a parameter of the form "Type $param = null" before
+    a required one continues to be allowed, because this pattern was sometimes
+    used to achieve nullable types in older PHP versions.
+
+        function test($a = [], $b) {}       // Deprecated
+        function test(Foo $a = null, $b) {} // Allowed
   . Calling get_defined_functions() with $exclude_disabled explicitly set to
     false is deprecated. get_defined_functions() will never include disabled
     functions.
@@ -680,6 +806,11 @@ PHP 8.0 UPGRADE NOTES
   . enchant_dict_is_in_session, use enchant_dict_is_added instead
   . enchant_broker_free and enchant_broker_free_dict, unset the object instead
   . ENCHANT_MYSPELL and ENCHANT_ISPELL constants
+
+- LibXML:
+  . libxml_disable_entity_loader() has been deprecated. As libxml 2.9.0 is now
+    required, external entity loading is guaranteed to be disabled by default,
+    and this function is no longer needed to protect against XXE attacks.
 
 - PGSQL / PDO PGSQL:
   . The constant PG_VERSION_STR has now the same value as PG_VERSION, and thus
@@ -722,7 +853,7 @@ PHP 8.0 UPGRADE NOTES
    . env_method
    . enc_password
  . ZipArchive::addEmptyDir, ZipArchive::addFile and aZipArchive::addFromString
-   methods have a new "flags" argument. This allow to manage name encoding
+   methods have a new "flags" argument. This allows managing name encoding
    (ZipArchive::FL_ENC_*) and entry replacement (ZipArchive::FL_OVERWRITE)
  . ZipArchive::extractTo now restore file modification time.
 
@@ -866,6 +997,11 @@ PHP 8.0 UPGRADE NOTES
 - PDO:
   . PDOStatement now implements IteratorAggregate (instead of Traversable).
 
+- LibXML:
+  . The minimum required libxml version is now 2.9.0. This means that external
+    entity loading is now guaranteed to be disabled by default, and no extra
+    steps need to be taken to protect against XXE attacks.
+
 - MySQLi / PDO MySQL:
   . When mysqlnd is not used (which is the default and recommended option),
     the minimum supported libmysqlclient version is now 5.1.
@@ -873,6 +1009,12 @@ PHP 8.0 UPGRADE NOTES
 
 - PGSQL / PDO PGSQL:
   . The PGSQL and PDO PGSQL extensions now require at least libpq 9.1.
+
+- Readline:
+  . Calling readline_completion_function() before the interactive prompt starts
+    (e.g. in auto_prepend_file) will now override the default interactive prompt
+	completion function. Previously, readline_completion_function() only worked
+	when called after starting the interactive prompt.
 
 - SimpleXML:
   . SimpleXMLElement now implements RecursiveIterator and absorbed the
@@ -897,6 +1039,10 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- zend.exception_string_param_max_len
+  . New INI directive to set the maximum string length in an argument of a
+    stringified stack strace.
 
 ========================================
 12. Windows Support

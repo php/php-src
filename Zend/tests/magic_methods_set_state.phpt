@@ -4,11 +4,11 @@ Testing __set_state() declaration with wrong modifier
 <?php
 
 class Foo {
-    function __set_state()
+    function __set_state($array)
     {
     }
 }
 
 ?>
 --EXPECTF--
-Warning: The magic method Foo::__set_state() must be static in %s on line %d
+Fatal error: Method Foo::__set_state() must be static in %s on line %d

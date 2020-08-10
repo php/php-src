@@ -222,7 +222,7 @@ int main() {
     have_shm_mmap_anon=yes],[have_shm_mmap_anon=no],[have_shm_mmap_anon=no])
   AC_MSG_RESULT([$have_shm_mmap_anon=yes])
 
-  PHP_CHECK_FUNC_LIB(shm_open, rt)
+  PHP_CHECK_FUNC_LIB(shm_open, rt, root)
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>

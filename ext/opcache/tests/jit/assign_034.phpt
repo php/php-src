@@ -17,5 +17,6 @@ function bar() {
     return $a;
 }
 var_dump(bar());
+?>
 --EXPECT--
 int(2)

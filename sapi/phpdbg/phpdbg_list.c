@@ -242,7 +242,6 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	if (zend_stream_fixup(file, &bufptr, &len) == FAILURE) {
 		if (type == ZEND_REQUIRE) {
 			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file->filename);
-			zend_bailout();
 		} else {
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file->filename);
 		}

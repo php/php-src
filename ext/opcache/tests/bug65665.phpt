@@ -112,6 +112,7 @@ dummy:
     return;
 }
 foo();foo1();foo2();
+?>
 --EXPECT--
 correct
 correct

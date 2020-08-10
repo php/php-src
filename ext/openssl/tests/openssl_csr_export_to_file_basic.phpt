@@ -36,13 +36,11 @@ $privkey_file = 'file://' . __DIR__ . '/private_rsa_2048.key';
 $csr = openssl_csr_new($dn, $privkey_file, $args);
 var_dump(openssl_csr_export_to_file($csr, $csrfile));
 var_dump(file_get_contents($csrfile));
+
+var_dump(openssl_csr_export_to_file($wrong, $csrfile));
+
 try {
-    var_dump(openssl_csr_export_to_file($wrong, $csrfile));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-try {
-    var_dump(openssl_csr_export_to_file($dh, $csrfile));
+    openssl_csr_export_to_file($dh, $csrfile);
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -55,7 +53,7 @@ if (file_exists($csrfile)) {
     unlink($csrfile);
 }
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 string(1086) "-----BEGIN CERTIFICATE REQUEST-----
 MIIC6jCCAdICAQAwgaQxCzAJBgNVBAYTAkJSMRowGAYDVQQIExFSaW8gR3JhbmRl
@@ -76,6 +74,8 @@ sfBgVeqg0P4SWez5fHXqBNcjMdMI5f0bikcDZSIfTHS8FX+PMurLBC8UPB0YNIOl
 JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
 -----END CERTIFICATE REQUEST-----
 "
-openssl_csr_export_to_file(): Argument #1 ($csr) must be of type resource, string given
-openssl_csr_export_to_file(): supplied resource is not a valid OpenSSL X.509 CSR resource
+
+Warning: openssl_csr_export_to_file(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
+bool(false)
+openssl_csr_export_to_file(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
 bool(true)

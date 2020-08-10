@@ -29,6 +29,7 @@ static HashTable internal_attributes;
 
 void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
+	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
 		zval flags;
 
@@ -121,7 +122,7 @@ ZEND_API int zend_get_attribute_value(zval *ret, zend_attribute *attr, uint32_t 
 		return FAILURE;
 	}
 
-	ZVAL_COPY_OR_DUP(ret, &attr->argv[i]);
+	ZVAL_COPY_OR_DUP(ret, &attr->args[i].value);
 
 	if (Z_TYPE_P(ret) == IS_CONSTANT_AST) {
 		if (SUCCESS != zval_update_constant_ex(ret, scope)) {
@@ -182,7 +183,10 @@ static zend_always_inline void free_attribute(zend_attribute *attr, int persiste
 	zend_string_release(attr->lcname);
 
 	for (i = 0; i < attr->argc; i++) {
-		zval_ptr_dtor(&attr->argv[i]);
+		if (attr->args[i].name) {
+			zend_string_release(attr->args[i].name);
+		}
+		zval_ptr_dtor(&attr->args[i].value);
 	}
 
 	pefree(attr, persistent);
@@ -219,7 +223,8 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_bool pe
 
 	/* Initialize arguments to avoid partial initialization in case of fatal errors. */
 	for (uint32_t i = 0; i < argc; i++) {
-		ZVAL_UNDEF(&attr->argv[i]);
+		attr->args[i].name = NULL;
+		ZVAL_UNDEF(&attr->args[i].value);
 	}
 
 	zend_hash_next_index_insert_ptr(*attributes, attr);

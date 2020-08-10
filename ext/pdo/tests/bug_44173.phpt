@@ -24,9 +24,11 @@ var_dump($stmt);
 
 
 // Bug entry [3]
-$stmt = $db->query("SELECT * FROM test", 'abc');
-var_dump($stmt);
-
+try {
+    $stmt = $db->query("SELECT * FROM test", 'abc');
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // Bug entry [4]
 $stmt = $db->query("SELECT * FROM test", PDO::FETCH_CLASS, 0, 0, 0);
@@ -52,9 +54,7 @@ var_dump($stmt);
 --EXPECTF--
 Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode doesn't allow any extra arguments in %s
 bool(false)
-
-Warning: PDO::query(): SQLSTATE[HY000]: General error: mode must be an integer in %s
-bool(false)
+PDO::query(): Argument #2 ($fetch_mode) must be of type ?int, string given
 
 Warning: PDO::query(): SQLSTATE[HY000]: General error: too many arguments in %s
 bool(false)

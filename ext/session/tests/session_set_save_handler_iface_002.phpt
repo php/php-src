@@ -77,6 +77,7 @@ try {
 }
 
 session_start();
+?>
 --EXPECT--
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)

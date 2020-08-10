@@ -13,5 +13,6 @@ var_dump($meta);
 } catch(Exception $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECTF--
 internal corruption of phar "%s" (truncated manifest entry)

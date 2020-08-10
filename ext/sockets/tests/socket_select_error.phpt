@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-socket_select(): supplied argument is not a valid Socket resource
+socket_select(): Argument #1 ($read_fds) must only have elements of type Socket, string given

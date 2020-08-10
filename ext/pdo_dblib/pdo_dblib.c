@@ -31,10 +31,6 @@
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 static PHP_GINIT_FUNCTION(dblib);
 
-static const zend_function_entry pdo_dblib_functions[] = {
-	PHP_FE_END
-};
-
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
@@ -54,7 +50,7 @@ zend_module_entry pdo_dblib_module_entry = {
 #else
 	"pdo_dblib",
 #endif
-	pdo_dblib_functions,
+	NULL,
 	PHP_MINIT(pdo_dblib),
 	PHP_MSHUTDOWN(pdo_dblib),
 	NULL,

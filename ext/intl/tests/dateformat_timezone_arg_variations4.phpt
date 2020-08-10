@@ -34,6 +34,7 @@ echo $df->format($ts), "\n";
 
 $df = new IntlDateFormatter('es_ES', 0, 0, 'Europe/Amsterdam', 0);
 echo $df->format($ts), "\n";
+?>
 --EXPECT--
 sábado, 31 de diciembre de 2011, 23:00:00 (hora estándar de las Azores)
 domingo, 1 de enero de 2012, 1:00:00 (hora estándar de Europa central)

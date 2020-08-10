@@ -35,6 +35,7 @@ $b = new ModelA(false);
 
 var_dump($a);
 var_dump($b);
+?>
 --EXPECTF--
 bool(true)
 bool(false)

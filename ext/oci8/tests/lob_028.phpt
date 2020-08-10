@@ -48,27 +48,27 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

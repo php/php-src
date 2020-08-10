@@ -16,6 +16,7 @@ echo grapheme_extract($haiyore, 12, GRAPHEME_EXTR_MAXBYTES) . "\n";
 echo grapheme_extract($haiyore, 1, GRAPHEME_EXTR_MAXCHARS) . "\n";
 echo grapheme_extract($haiyore, 2, GRAPHEME_EXTR_MAXCHARS) . "\n";
 echo grapheme_extract($haiyore, 3, GRAPHEME_EXTR_MAXCHARS) . "\n";
+?>
 --EXPECT--
 葛󠄁
 這󠄀

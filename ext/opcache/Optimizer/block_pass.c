@@ -1039,6 +1039,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
+			case ZEND_JMP_NULL:
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_CATCH:
@@ -1280,6 +1281,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_JMP_NULL:
 			jmp_hitlist_count = 0;
 
 			target_block = get_target_block(cfg, block, 0, opt_count);

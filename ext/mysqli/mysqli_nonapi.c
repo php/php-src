@@ -734,7 +734,7 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 				return FAILURE;
 		  	}
 			mysql = (MY_MYSQL*) my_res->ptr;
-			if (MYSQLI_STATUS_VALID && my_res->status < MYSQLI_STATUS_VALID) {
+			if (my_res->status < MYSQLI_STATUS_VALID) {
 				zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name));
 				return FAILURE;
 			}

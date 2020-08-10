@@ -16,6 +16,7 @@ for($ch = 1; $ch < 80000; $ch++) {
     }
 }
 echo 'OK';
+?>
 --EXPECT--
 ERROR(55296)
 ERROR(55297)

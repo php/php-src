@@ -8,5 +8,6 @@ class MyDateTime extends DateTime
     {
     }
 }
+?>
 --EXPECTF--
-Fatal error: Declaration of MyDateTime::createFromFormat() must be compatible with DateTime::createFromFormat(string $format, string $time, ?DateTimeZone $timezone = null) in %s on line %d
+Fatal error: Declaration of MyDateTime::createFromFormat() must be compatible with DateTime::createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null) in %s on line %d

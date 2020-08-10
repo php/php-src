@@ -352,6 +352,10 @@ typedef struct _zend_oparray_context {
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
+#define ZEND_SHORT_CIRCUITING_CHAIN_EXPR 0
+#define ZEND_SHORT_CIRCUITING_CHAIN_ISSET 1
+#define ZEND_SHORT_CIRCUITING_CHAIN_EMPTY 2
+
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
@@ -507,6 +511,7 @@ struct _zend_execute_data {
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
 	void               **run_time_cache;   /* cache op_array->run_time_cache */
+	zend_array          *extra_named_params;
 };
 
 #define ZEND_CALL_HAS_THIS           IS_OBJECT_EX
@@ -524,6 +529,8 @@ struct _zend_execute_data {
 #define ZEND_CALL_FAKE_CLOSURE       (1 << 23)
 #define ZEND_CALL_GENERATOR          (1 << 24)
 #define ZEND_CALL_DYNAMIC            (1 << 25)
+#define ZEND_CALL_MAY_HAVE_UNDEF     (1 << 26)
+#define ZEND_CALL_HAS_EXTRA_NAMED_PARAMS (1 << 27)
 #define ZEND_CALL_SEND_ARG_BY_REF    (1u << 31)
 
 #define ZEND_CALL_NESTED_FUNCTION    (ZEND_CALL_FUNCTION | ZEND_CALL_NESTED)
@@ -946,6 +953,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_SEND_PREFER_REF 2u
 
 #define ZEND_THROW_IS_EXPR 1u
+
+#define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
 
 /* The send mode and is_variadic flag are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT

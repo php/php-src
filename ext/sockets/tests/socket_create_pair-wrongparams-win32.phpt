@@ -24,6 +24,7 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+?>
 --EXPECT--
 bool(true)
 socket_create_pair(): Argument #1 ($domain) must be either AF_UNIX, AF_INET6 or AF_INET

@@ -37,10 +37,12 @@ var_dump($so);
 stream_set_blocking($stream, 0);
 var_dump(fread($stream, strlen($m)));
 echo "Done.\n";
+?>
 --EXPECTF--
 resource(%d) of type (stream)
 bool(true)
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 int(10)
 string(10) "my message"
 Done.

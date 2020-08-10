@@ -37,7 +37,6 @@
 #define ZEND_JIT_REG_ALLOC_GLOBAL (1<<1) /* global linear scan register allocation */
 #define ZEND_JIT_CPU_AVX          (1<<2) /* use AVX instructions, if available */
 
-#define ZEND_JIT_DEFAULT_OPTIONS      "1205"
 #define ZEND_JIT_DEFAULT_BUFFER_SIZE  "0"
 
 #define ZEND_JIT_COUNTER_INIT         32531
@@ -69,7 +68,6 @@
 
 #define ZEND_JIT_TRACE_MAX_LENGTH        1024 /* max length of single trace */
 #define ZEND_JIT_TRACE_MAX_EXITS          512 /* max number of side exits per trace */
-#define ZEND_JIT_TRACE_MAX_EXIT_COUNTERS 8192 /* max number of side exits for all trace */
 
 #define ZEND_JIT_TRACE_MAX_FUNCS           30 /* max number of different functions in a single trace */
 #define ZEND_JIT_TRACE_MAX_CALL_DEPTH      10 /* max depth of inlined calls */
@@ -96,6 +94,7 @@ typedef struct _zend_jit_globals {
 	double      prof_threshold;
 	zend_long   max_root_traces;       /* max number of root traces */
 	zend_long   max_side_traces;       /* max number of side traces (per root trace) */
+	zend_long   max_exit_counters;     /* max total number of side exits for all traces */
 	zend_long   hot_loop;
 	zend_long   hot_func;
 	zend_long   hot_return;
@@ -119,7 +118,7 @@ typedef struct _zend_jit_globals {
 	uint8_t bad_root_cache_stop[ZEND_JIT_TRACE_BAD_ROOT_SLOTS];
 	uint32_t bad_root_slot;
 
-	uint8_t  exit_counters[ZEND_JIT_TRACE_MAX_EXIT_COUNTERS];
+	uint8_t  *exit_counters;
 } zend_jit_globals;
 
 #ifdef ZTS

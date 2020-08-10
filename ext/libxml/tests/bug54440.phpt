@@ -32,6 +32,7 @@ stream_context_set_default(stream_context_get_options($ctx1));
 
 libxml_set_streams_context($ctx2);
 @simplexml_load_file('test://sdfsdf');
+?>
 --EXPECT--
 Array
 (

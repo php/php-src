@@ -39,12 +39,24 @@ function session_register_shutdown(): void {}
 /** @alias session_write_close */
 function session_commit(): bool {}
 
+/**
+ * @param callable|object $open
+ * @param callable|bool $close
+ * @param callable $read
+ * @param callable $write
+ * @param callable $destroy
+ * @param callable $gc
+ * @param callable $create_sid
+ * @param callable $validate_sid
+ * @param callable $update_timestamp
+ */
 function session_set_save_handler($open, $close = UNKNOWN, $read = UNKNOWN, $write = UNKNOWN, $destroy = UNKNOWN, $gc = UNKNOWN, $create_sid = UNKNOWN, $validate_sid = UNKNOWN, $update_timestamp = UNKNOWN): bool {}
 
 function session_cache_limiter(?string $cache_limiter = null): string|false {}
 
 function session_cache_expire(?int $new_cache_expire = null): int|false {}
 
+/** @param int|array $lifetime_or_options */
 function session_set_cookie_params($lifetime_or_options, string $path = UNKNOWN, string $domain  = "", ?bool $secure = null, ?bool $httponly = null): bool {}
 
 function session_start(array $options = []): bool {}

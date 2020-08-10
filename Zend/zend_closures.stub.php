@@ -6,13 +6,17 @@ final class Closure
 {
     private function __construct() {}
 
-    public static function bind(Closure $closure, ?object $newthis, $newscope = UNKNOWN): ?Closure {}
+    /** @param object|string|null $newScope */
+    public static function bind(Closure $closure, ?object $newThis, $newScope = UNKNOWN): ?Closure {}
 
-    /** @alias Closure::bind */
-    public function bindTo(?object $newthis, $newscope = UNKNOWN): ?Closure {}
+    /**
+     * @param object|string|null $newScope
+     * @alias Closure::bind
+     */
+    public function bindTo(?object $newThis, $newScope = UNKNOWN): ?Closure {}
 
-    public function call(object $newthis, mixed ...$parameters): mixed {}
+    public function call(object $newThis, mixed ...$arguments): mixed {}
 
-    /** @param callable $callable Not a proper type annotation due to bug #78770 */
-    public static function fromCallable($callable): Closure {}
+    /** @param callable $callback callable is not a proper type due to bug #78770. */
+    public static function fromCallable($callback): Closure {}
 }

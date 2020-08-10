@@ -61,5 +61,6 @@ if (!empty($values)) {
 }
 
 print "done!";
+?>
 --EXPECT--
 done!

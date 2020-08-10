@@ -464,6 +464,7 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 		fci.retval = retval;
 		fci.param_count = argc;
 		fci.params = argv;
+		fci.named_params = NULL;
 
 		result = zend_call_function(&fci, NULL);
 		if (result == FAILURE) {
@@ -1028,8 +1029,8 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
 			encoding = (XML_Char*)"US-ASCII";
 		} else {
-			php_error_docref(NULL, E_WARNING, "Unsupported source encoding \"%s\"", encoding_param);
-			RETURN_FALSE;
+			zend_argument_value_error(1, "is not a supported source encoding");
+			RETURN_THROWS();
 		}
 	} else {
 		encoding = XML(default_encoding);
@@ -1441,15 +1442,15 @@ PHP_FUNCTION(xml_parser_set_option)
 
 			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));
 			if (enc == NULL) {
-				php_error_docref(NULL, E_WARNING, "Unsupported target encoding \"%s\"", Z_STRVAL_P(val));
-				RETURN_FALSE;
+				zend_argument_value_error(3, "is not a supported target encoding");
+				RETURN_THROWS();
 			}
 			parser->target_encoding = enc->name;
 			break;
 		}
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option");
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a PHP_XML_OPTION_* constant");
+			RETURN_THROWS();
 			break;
 	}
 	RETVAL_TRUE;
@@ -1482,12 +1483,9 @@ PHP_FUNCTION(xml_parser_get_option)
 			RETURN_STRING((char *)parser->target_encoding);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option");
-			RETURN_FALSE;
-			break;
+			zend_argument_value_error(2, "must be a PHP_XML_OPTION_* constant");
+			RETURN_THROWS();
 	}
-
-	RETVAL_FALSE;	/* never reached */
 }
 /* }}} */
 

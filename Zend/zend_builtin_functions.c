@@ -155,8 +155,8 @@ ZEND_FUNCTION(func_num_args)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
-		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
-		RETURN_LONG(-1);
+		zend_throw_error(NULL, "func_num_args() must be called from a function context");
+		RETURN_THROWS();
 	}
 
 	if (zend_forbid_dynamic_call("func_num_args()") == FAILURE) {
@@ -197,7 +197,7 @@ ZEND_FUNCTION(func_get_arg)
 	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
 	if ((zend_ulong)requested_offset >= arg_count) {
-		zend_throw_error(NULL, "func_get_arg(): Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
+		zend_argument_value_error(1, "must be less than the number of the arguments passed to the currently executed function");
 		RETURN_THROWS();
 	}
 
@@ -369,17 +369,19 @@ ZEND_FUNCTION(strncasecmp)
 /* {{{ Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
-	zval *err = NULL;
+	zend_long err;
+	zend_bool err_is_null = 1;
 	int old_error_reporting;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(err)
+		Z_PARAM_LONG_OR_NULL(err, err_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	old_error_reporting = EG(error_reporting);
-	if (ZEND_NUM_ARGS() != 0) {
-		zend_string *new_val = zval_try_get_string(err);
+
+	if (!err_is_null) {
+		zend_string *new_val = zend_long_to_str(err);
 		if (UNEXPECTED(!new_val)) {
 			RETURN_THROWS();
 		}
@@ -410,11 +412,7 @@ ZEND_FUNCTION(error_reporting)
 			}
 
 			p->value = new_val;
-			if (Z_TYPE_P(err) == IS_LONG) {
-				EG(error_reporting) = Z_LVAL_P(err);
-			} else {
-				EG(error_reporting) = atoi(ZSTR_VAL(p->value));
-			}
+			EG(error_reporting) = err;
 		} while (0);
 	}
 
@@ -422,7 +420,7 @@ ZEND_FUNCTION(error_reporting)
 }
 /* }}} */
 
-static int validate_constant_array(HashTable *ht) /* {{{ */
+static int validate_constant_array_argument(HashTable *ht, int argument_number) /* {{{ */
 {
 	int ret = 1;
 	zval *val;
@@ -434,16 +432,16 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 			if (Z_TYPE_P(val) == IS_ARRAY) {
 				if (Z_REFCOUNTED_P(val)) {
 					if (Z_IS_RECURSIVE_P(val)) {
-						zend_error(E_WARNING, "Constants cannot be recursive arrays");
+						zend_argument_value_error(argument_number, "cannot be a recursive array");
 						ret = 0;
 						break;
-					} else if (!validate_constant_array(Z_ARRVAL_P(val))) {
+					} else if (!validate_constant_array_argument(Z_ARRVAL_P(val), argument_number)) {
 						ret = 0;
 						break;
 					}
 				}
 			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
-				zend_error(E_WARNING, "Constants may only evaluate to scalar values, arrays or resources");
+				zend_argument_type_error(argument_number, "cannot be an object, %s given", zend_zval_type_name(val));
 				ret = 0;
 				break;
 			}
@@ -496,15 +494,13 @@ ZEND_FUNCTION(define)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
-		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be a class constant");
+		RETURN_THROWS();
 	}
 
 	if (non_cs) {
-		zend_error(E_WARNING,
-			"define(): Declaration of case-insensitive constants is no longer supported");
-		RETURN_FALSE;
-	}
+		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
+    }
 
 	ZVAL_UNDEF(&val_free);
 
@@ -519,8 +515,8 @@ ZEND_FUNCTION(define)
 			break;
 		case IS_ARRAY:
 			if (Z_REFCOUNTED_P(val)) {
-				if (!validate_constant_array(Z_ARRVAL_P(val))) {
-					RETURN_FALSE;
+				if (!validate_constant_array_argument(Z_ARRVAL_P(val), 2)) {
+					RETURN_THROWS();
 				} else {
 					copy_constant_array(&c.value, val);
 					goto register_constant;
@@ -534,9 +530,9 @@ ZEND_FUNCTION(define)
 			}
 			/* no break */
 		default:
-			zend_error(E_WARNING, "Constants may only evaluate to scalar values, arrays or resources");
 			zval_ptr_dtor(&val_free);
-			RETURN_FALSE;
+			zend_argument_type_error(2, "cannot be an object, %s given", zend_zval_type_name(val));
+			RETURN_THROWS();
 	}
 
 	ZVAL_COPY(&c.value, val);
@@ -1120,8 +1116,8 @@ ZEND_FUNCTION(class_alias)
 				RETURN_FALSE;
 			}
 		} else {
-			zend_error(E_WARNING, "First argument of class_alias() must be a name of user defined class");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be a user-defined class name, internal class name given");
+			RETURN_THROWS();
 		}
 	} else {
 		zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(class_name));
@@ -1436,7 +1432,7 @@ ZEND_FUNCTION(get_resources)
 	zend_ulong index;
 	zval *val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &type) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1460,8 +1456,8 @@ ZEND_FUNCTION(get_resources)
 		int id = zend_fetch_list_dtor_id(ZSTR_VAL(type));
 
 		if (id <= 0) {
-			zend_error(E_WARNING, "get_resources():  Unknown resource type '%s'", ZSTR_VAL(type));
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be a valid resource type");
+			RETURN_THROWS();
 		}
 
 		array_init(return_value);
@@ -1595,16 +1591,12 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					 * and we have to access them through symbol_table
 					 * See: https://bugs.php.net/bug.php?id=73156
 					 */
-					zend_string *arg_name;
-					zval *arg;
-
 					while (i < first_extra_arg) {
-						arg_name = call->func->op_array.vars[i];
-						arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
+						zend_string *arg_name = call->func->op_array.vars[i];
+						zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
 						if (arg) {
-							if (Z_OPT_REFCOUNTED_P(arg)) {
-								Z_ADDREF_P(arg);
-							}
+							ZVAL_DEREF(arg);
+							Z_TRY_ADDREF_P(arg);
 							ZEND_HASH_FILL_SET(arg);
 						} else {
 							ZEND_HASH_FILL_SET_NULL();
@@ -1615,10 +1607,10 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				} else {
 					while (i < first_extra_arg) {
 						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
-							if (Z_OPT_REFCOUNTED_P(p)) {
-								Z_ADDREF_P(p);
-							}
-							ZEND_HASH_FILL_SET(p);
+							zval *arg = p;
+							ZVAL_DEREF(arg);
+							Z_TRY_ADDREF_P(arg);
+							ZEND_HASH_FILL_SET(arg);
 						} else {
 							ZEND_HASH_FILL_SET_NULL();
 						}
@@ -1632,10 +1624,10 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 			while (i < num_args) {
 				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
-					if (Z_OPT_REFCOUNTED_P(p)) {
-						Z_ADDREF_P(p);
-					}
-					ZEND_HASH_FILL_SET(p);
+					zval *arg = p;
+					ZVAL_DEREF(arg);
+					Z_TRY_ADDREF_P(arg);
+					ZEND_HASH_FILL_SET(arg);
 				} else {
 					ZEND_HASH_FILL_SET_NULL();
 				}
@@ -1648,17 +1640,33 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 	} else {
 		ZVAL_EMPTY_ARRAY(arg_array);
 	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_string *name;
+		zval *arg;
+		SEPARATE_ARRAY(arg_array);
+		ZEND_HASH_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
+			ZVAL_DEREF(arg);
+			Z_TRY_ADDREF_P(arg);
+			zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
 void debug_print_backtrace_args(zval *arg_array) /* {{{ */
 {
+	zend_string *name;
 	zval *tmp;
 	int i = 0;
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arg_array), tmp) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(arg_array), name, tmp) {
 		if (i++) {
 			ZEND_PUTS(", ");
+		}
+		if (name) {
+			ZEND_PUTS(ZSTR_VAL(name));
+			ZEND_PUTS(": ");
 		}
 		zend_print_flat_zval_r(tmp);
 	} ZEND_HASH_FOREACH_END();

@@ -22,6 +22,7 @@ var_dump(is_callable("Test::foo"));
 var_dump(is_callable("\\Test::foo"));
 var_dump(is_callable("is_string"));
 var_dump(is_callable("\\is_string"));
+?>
 --EXPECT--
 bool(false)
 bool(false)

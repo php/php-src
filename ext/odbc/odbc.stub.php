@@ -11,7 +11,7 @@ function odbc_binmode($result_id, int $mode): bool {}
 function odbc_longreadlen($result_id, int $length): bool {}
 
 /**
- * @param resource $result_id
+ * @param resource $connection_id
  * @return resource|false
  */
 function odbc_prepare($connection_id, string $query) {}
@@ -48,7 +48,10 @@ function odbc_fetch_object($result, int $rownumber = -1): stdClass|false {}
 function odbc_fetch_array($result, int $rownumber = -1): array|false {}
 #endif
 
-/** @param resource $result_id */
+/**
+ * @param resource $result_id
+ * @param array $result_array
+ */
 function odbc_fetch_into($result_id, &$result_array, int $rownumber = 0): int|false {}
 
 /** @param resource $result_id */

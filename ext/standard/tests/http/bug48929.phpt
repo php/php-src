@@ -13,7 +13,7 @@ function do_test($context_options) {
     $context = stream_context_create(array('http' => $context_options));
 
     $responses = array(
-        "data://text/plain,HTTP/1.0 200 OK\r\n\r\n",
+        "data://text/plain,HTTP/1.1 200 OK\r\n\r\n",
     );
 
     $pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
@@ -41,7 +41,7 @@ do_test(array('header' => "X-Foo: bar\r\nContent-Type: text/plain", 'method' => 
 ?>
 --EXPECTF--
 -- Test: requests with 'header' as array --
-string(%d) "POST / HTTP/1.0
+string(%d) "POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 Content-Length: 4
@@ -50,7 +50,7 @@ Content-Type: text/plain
 
 ohai"
 -- Test: requests with 'header' as string --
-string(%d) "POST / HTTP/1.0
+string(%d) "POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 Content-Length: 4

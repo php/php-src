@@ -23,5 +23,6 @@ stream_wrapper_register("test", "TestStream");
 
 $f = fopen("test://", "r");
 var_dump(stream_get_line($f, 100, "\0"));
+?>
 --EXPECT--
 string(1) "a"

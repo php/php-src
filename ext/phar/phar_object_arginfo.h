@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fd4f05b74248e4f7efb234cac8e3a90e17037ee0 */
+ * Stub hash: f25efd47b496a7d06a30c77911a565a49e383bce */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -74,7 +74,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_extractTo, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, pathto, IS_STRING, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, files, "null")
+	ZEND_ARG_TYPE_MASK(0, files, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, overwrite, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
@@ -82,7 +82,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_getPath arginfo_class_Phar___destruct
 
-#define arginfo_class_Phar_getMetadata arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_getMetadata, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unserialize_options, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_getModified arginfo_class_Phar___destruct
 
@@ -137,7 +139,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, maxlen, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxlen, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_startBuffering arginfo_class_Phar___destruct
@@ -204,14 +206,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_webPhar, 0, 0, IS_VOI
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, f404, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mimetypes, IS_ARRAY, 0, "[]")
-	ZEND_ARG_INFO(0, rewrites)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rewrites, IS_CALLABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharData___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alias, IS_STRING, 1, "null")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, fileformat, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fileformat, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData___destruct arginfo_class_Phar___destruct
@@ -252,7 +254,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_getPath arginfo_class_Phar___destruct
 
-#define arginfo_class_PharData_getMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharData_getMetadata arginfo_class_Phar_getMetadata
 
 #define arginfo_class_PharData_getModified arginfo_class_Phar___destruct
 
@@ -346,19 +348,21 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharFileInfo_getContent arginfo_class_Phar___destruct
 
-#define arginfo_class_PharFileInfo_getMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharFileInfo_getMetadata arginfo_class_Phar_getMetadata
 
 #define arginfo_class_PharFileInfo_getPharFlags arginfo_class_Phar___destruct
 
 #define arginfo_class_PharFileInfo_hasMetadata arginfo_class_Phar___destruct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharFileInfo_isCompressed, 0, 0, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, compression_type, "9021976")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compression_type, IS_LONG, 0, "9021976")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharFileInfo_isCRCChecked arginfo_class_Phar___destruct
 
-#define arginfo_class_PharFileInfo_setMetadata arginfo_class_Phar_setMetadata
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharFileInfo_setMetadata, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, metadata, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(Phar, __construct);

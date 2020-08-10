@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e9aea4eb45aba216347d3cf821cf5adebc217ba1 */
+ * Stub hash: 3facb6bdce18efae3d6b9594d1fcddfb220dd54d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -115,7 +115,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_set, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, dayOfMonth, IS_LONG, 0)
-	ZEND_ARG_INFO(0, hour)
+	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, second, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -142,7 +142,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_toDateTime arginfo_class_IntlCalendar___construct
 
-#define arginfo_class_IntlGregorianCalendar___construct arginfo_class_IntlCalendar___construct
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlGregorianCalendar___construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, timeZoneOrYear)
+	ZEND_ARG_INFO(0, localeOrMonth)
+	ZEND_ARG_INFO(0, dayOfMonth)
+	ZEND_ARG_INFO(0, hour)
+	ZEND_ARG_INFO(0, minute)
+	ZEND_ARG_INFO(0, second)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlGregorianCalendar_setGregorianChange, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, change, IS_DOUBLE, 0)

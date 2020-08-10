@@ -71,6 +71,7 @@ for ($index = 0; $index < $children->length; $index++) {
     echo "node $index\n";
     dumpcourse($children->item($index));
 }
+?>
 --EXPECT--
 Start cloneNode test
 node 0

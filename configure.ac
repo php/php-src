@@ -224,10 +224,8 @@ case $host_alias in
     ;;
   *darwin*)
     if test -n "$GCC"; then
-      PHP_CHECK_GCC_ARG(-no-cpp-precomp, gcc_no_cpp_precomp=yes)
-      if test "$gcc_no_cpp_precomp" = "yes"; then
-        CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
-      fi
+      AX_CHECK_COMPILE_FLAG([-no-cpp-precomp],
+                            [CPPFLAGS="$CPPFLAGS -no-cpp-precomp"])
     fi
     ;;
   *mips*)

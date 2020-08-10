@@ -17,4 +17,5 @@ while ($i++ < 5000) {
 
 zend_leak_variable($s);
 zend_leak_variable($t);
+?>
 --EXPECT--

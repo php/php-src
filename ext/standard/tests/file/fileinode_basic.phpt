@@ -23,9 +23,9 @@ unlink (__DIR__."/inode.tmp");
 ?>
 --EXPECTF--
 *** Testing fileinode() with file, directory ***
-%d
-%d
-%d
-%d
+%i
+%i
+%i
+%i
 
 *** Done ***

@@ -171,6 +171,9 @@ int fpm_status_handle_request(void) /* {{{ */
 		fpm_request_executing();
 
 		scoreboard_p = fpm_scoreboard_get();
+		if (scoreboard_p->shared) {
+			scoreboard_p = scoreboard_p->shared;
+		}
 		if (!scoreboard_p) {
 			zlog(ZLOG_ERROR, "status: unable to find or access status shared memory");
 			SG(sapi_headers).http_response_code = 500;

@@ -18,6 +18,7 @@ $anonClass = new class("cats", "dogs") {
 
 var_dump($anonClass::$foo);
 var_dump($anonClass::getBar());
+?>
 --EXPECT--
 string(4) "cats"
 string(4) "dogs"

@@ -51,7 +51,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: socket_shutdown(): Unable to shutdown socket [%d]: Transport endpoint is not connected in %s on line %d
+Warning: socket_shutdown(): Unable to shutdown socket [%d]: %s in %s on line %d
 bool(false)
 
 Warning: socket_shutdown(): Unable to shutdown socket [%d]: Invalid argument in %s on line %d

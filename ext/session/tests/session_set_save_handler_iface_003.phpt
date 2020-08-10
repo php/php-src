@@ -70,6 +70,7 @@ var_dump($_SESSION);
 --CLEAN--
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_iface_003');
+?>
 --EXPECT--
 *** Testing session_set_save_handler() function: id interface ***
 string(34) "session_set_save_handler_iface_003"

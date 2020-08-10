@@ -293,6 +293,7 @@ $node2 = new Node('value2', 2);
 $node1->addChild($node2);
 
 print_r($tree->findAll(2)->offsetGet(0));
+?>
 --EXPECTF--
 Node Object
 (

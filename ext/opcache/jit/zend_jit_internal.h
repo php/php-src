@@ -208,6 +208,8 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_TO_VM         (1<<2) /* exit to VM without attempt to create a side trace */
 #define ZEND_JIT_EXIT_RESTORE_CALL  (1<<3) /* deoptimizer should restore EX(call) chain */
 #define ZEND_JIT_EXIT_POLYMORPHISM  (1<<4) /* exit because of polymorphic call */
+#define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
+#define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */

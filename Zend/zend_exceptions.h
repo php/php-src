@@ -41,11 +41,11 @@ ZEND_API void zend_exception_set_previous(zend_object *exception, zend_object *a
 ZEND_API void zend_exception_save(void);
 ZEND_API void zend_exception_restore(void);
 
-ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception);
+ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception);
 
 void zend_register_default_exception(void);
 
-ZEND_API zend_class_entry *zend_get_exception_base(zval *object);
+ZEND_API zend_class_entry *zend_get_exception_base(zend_object *object);
 
 /* Deprecated - Use zend_ce_exception directly instead */
 ZEND_API zend_class_entry *zend_exception_get_default(void);
@@ -64,7 +64,7 @@ ZEND_API void zend_clear_exception(void);
 
 ZEND_API zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, zend_string *message, zend_long code, int severity);
 
-extern ZEND_API void (*zend_throw_exception_hook)(zval *ex);
+extern ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
 ZEND_API ZEND_COLD int zend_exception_error(zend_object *exception, int severity);

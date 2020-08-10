@@ -10,6 +10,7 @@ var_dump(urlencode(UConverter::transcode("Espa\xF1ol", 'utf-8', 'latin1')));
 var_dump(urlencode(UConverter::transcode("Stra\xDFa",  'utf-8', 'latin1')));
 
 var_dump(bin2hex(UConverter::transcode("\xE4", 'utf-8', 'koi8-r')));
+?>
 --EXPECT--
 string(23) "This is an ascii string"
 string(12) "Espa%C3%B1ol"

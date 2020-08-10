@@ -19,6 +19,7 @@ echo "*** XML 1.0 ***\n";
 echo html_entity_decode("&apos;", ENT_QUOTES | ENT_XML1, "UTF-8"), "\n";
 
 echo "Done.\n";
+?>
 --EXPECT--
 *** HTML 4.01 implicit (shouldn't decode) ***
 &apos;

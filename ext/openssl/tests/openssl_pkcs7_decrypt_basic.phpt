@@ -48,16 +48,16 @@ bool(true)
 Warning: openssl_pkcs7_decrypt(): Unable to get private key in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_decrypt(): Unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_decrypt(): Unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
-Warning: openssl_pkcs7_decrypt(): Unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
 Warning: openssl_pkcs7_decrypt(): Unable to get private key in %s on line %d

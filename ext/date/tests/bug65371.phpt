@@ -15,6 +15,7 @@ function p($str)
 
 setlocale(LC_ALL, 'C');
 p('あ');
+?>
 --EXPECT--
 あ
 あ
