@@ -258,33 +258,42 @@ int mbfl_filt_conv_wchar_utf16be(int c, mbfl_convert_filter *filter)
  */
 int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
 	switch (filter->status) {
 	case 0:
+		filter->cache = c & 0xff;
 		filter->status = 1;
-		n = c & 0xff;
-		filter->cache |= n;
 		break;
-	default:
-		filter->status = 0;
-		n = (filter->cache & 0xff) | ((c & 0xff) << 8);
-		if (n >= 0xd800 && n < 0xdc00) {
-			filter->cache = ((n & 0x3ff) << 16) + 0x400000;
-		} else if (n >= 0xdc00 && n < 0xe000) {
-			n &= 0x3ff;
-			n |= (filter->cache & 0xfff0000) >> 6;
-			filter->cache = 0;
-			if (n >= MBFL_WCSPLANE_SUPMIN && n < MBFL_WCSPLANE_SUPMAX) {
-				CK((*filter->output_function)(n, filter->data));
-			} else {		/* illegal character */
-				n &= MBFL_WCSGROUP_MASK;
-				n |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(n, filter->data));
-			}
-		} else {
-			filter->cache = 0;
+
+	case 1:
+		if ((c & 0xfc) == 0xd8) {
+			/* Looks like we have a surrogate pair here */
+			filter->cache += ((c & 0x3) << 8);
+			filter->status = 2;
+		} else if ((c & 0xfc) == 0xdc) {
+			/* This is wrong; the second part of the surrogate pair has come first
+			 * Flag it with `MBFL_WCSGROUP_THROUGH`; the following filter will handle
+			 * the error */
+			int n = (filter->cache + ((c & 0xff) << 8)) | MBFL_WCSGROUP_THROUGH;
+			filter->status = 0;
 			CK((*filter->output_function)(n, filter->data));
+		} else {
+			filter->status = 0;
+			CK((*filter->output_function)(filter->cache + ((c & 0xff) << 8), filter->data));
+		}
+		break;
+
+	case 2:
+		filter->cache = (filter->cache << 10) + (c & 0xff);
+		filter->status = 3;
+		break;
+
+	case 3:
+		filter->status = 0;
+		int n = filter->cache + ((c & 0x3) << 8) + 0x10000;
+		if (n >= MBFL_WCSPLANE_SUPMIN && n < MBFL_WCSPLANE_SUPMAX) {
+			CK((*filter->output_function)(n, filter->data));
+		} else { /* illegal character */
+			CK((*filter->output_function)((n & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data));
 		}
 		break;
 	}
