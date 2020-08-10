@@ -2471,7 +2471,6 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 #endif
 	int retval = 0;
 
-	EG(exit_status) = 0;
 #ifndef HAVE_BROKEN_GETCWD
 # define OLD_CWD_SIZE 4096
 	old_cwd = do_alloca(OLD_CWD_SIZE, use_heap);

@@ -607,7 +607,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	int behavior = PHP_MODE_STANDARD;
 	char *reflection_what = NULL;
 	volatile int request_started = 0;
-	volatile int exit_status = 0;
 	char *php_optarg = NULL, *orig_optarg = NULL;
 	int php_optind = 1, orig_optind = 1;
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
@@ -631,7 +630,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				request_started = 1;
 				php_print_info(0xFFFFFFFF);
 				php_output_end_all();
-				exit_status = (c == '?' && argc > 1 && !strchr(argv[1],  c));
+				EG(exit_status) = (c == '?' && argc > 1 && !strchr(argv[1],  c));
 				goto out;
 
 			case 'v': /* show php version & quit */
@@ -673,7 +672,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				print_extensions();
 				php_printf("\n");
 				php_output_end_all();
-				exit_status=0;
+				EG(exit_status) = 0;
 				goto out;
 
 			default:
@@ -848,7 +847,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 
 		if (param_error) {
 			PUTS(param_error);
-			exit_status=1;
+			EG(exit_status) = 1;
 			goto err;
 		}
 
@@ -946,15 +945,14 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			}
 
 			if (interactive && cli_shell_callbacks.cli_shell_run) {
-				exit_status = cli_shell_callbacks.cli_shell_run();
+				EG(exit_status) = cli_shell_callbacks.cli_shell_run();
 			} else {
 				php_execute_script(&file_handle);
-				exit_status = EG(exit_status);
 			}
 			break;
 		case PHP_MODE_LINT:
-			exit_status = php_lint_script(&file_handle);
-			if (exit_status==SUCCESS) {
+			EG(exit_status) = php_lint_script(&file_handle);
+			if (EG(exit_status) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", file_handle.filename);
 			} else {
 				zend_printf("Errors parsing %s\n", file_handle.filename);
@@ -980,7 +978,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		case PHP_MODE_CLI_DIRECT:
 			cli_register_file_handles();
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
-			exit_status = EG(exit_status);
 			break;
 
 		case PHP_MODE_PROCESS_STDIN:
@@ -991,10 +988,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 
 				cli_register_file_handles();
 
-				if (exec_begin && zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1) == FAILURE) {
-					exit_status = EG(exit_status);
+				if (exec_begin) {
+					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
 				}
-				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
+				while (EG(exit_status) == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
 					while (len > 0 && len-- && (input[len]=='\n' || input[len]=='\r')) {
 						input[len] = '\0';
@@ -1004,24 +1001,21 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					ZVAL_LONG(&argi, ++index);
 					zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
 					if (exec_run) {
-						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1) == FAILURE) {
-							exit_status = EG(exit_status);
-						}
+						zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
 					} else {
 						if (script_file) {
 							if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
-								exit_status = 1;
+								EG(exit_status) = 1;
 							} else {
 								CG(skip_shebang) = 1;
 								php_execute_script(&file_handle);
-								exit_status = EG(exit_status);
 							}
 						}
 					}
 					efree(input);
 				}
-				if (exec_end && zend_eval_string_ex(exec_end, NULL, "Command line end code", 1) == FAILURE) {
-					exit_status = EG(exit_status);
+				if (exec_end) {
+					zend_eval_string_ex(exec_end, NULL, "Command line end code", 1);
 				}
 
 				break;
@@ -1091,7 +1085,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 							display_ini_entries(NULL);
 						} else {
 							zend_printf("Extension '%s' not present.\n", reflection_what);
-							exit_status = 1;
+							EG(exit_status) = 1;
 						}
 					} else {
 						php_info_print_module(module);
@@ -1119,14 +1113,11 @@ out:
 	if (translated_path) {
 		free(translated_path);
 	}
-	if (exit_status == 0) {
-		exit_status = EG(exit_status);
-	}
-	return exit_status;
+	return EG(exit_status);
 err:
 	sapi_deactivate();
 	zend_ini_deactivate();
-	exit_status = 1;
+	EG(exit_status) = 1;
 	goto out;
 }
 /* }}} */
