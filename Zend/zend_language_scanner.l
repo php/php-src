@@ -576,7 +576,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	}
 
 	if (CG(skip_shebang)) {
-		CG(skip_shebang) = 0;
 		BEGIN(SHEBANG);
 	} else {
 		BEGIN(INITIAL);
