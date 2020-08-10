@@ -2624,7 +2624,8 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
     while( isspace( *pBind ) )
         ++pBind;
 
-    strncpy( achAddr, pBind, 256 );
+    strncpy(achAddr, pBind, 255);
+    achAddr[255] = 0;
 
     switch( *p )
     {
