@@ -6748,8 +6748,8 @@ PHP_FUNCTION(openssl_open)
 			RETURN_THROWS();
 		}
 		if ((size_t)cipher_iv_len != iv_len) {
-			zend_argument_value_error(6, "length is invalid");
-			RETURN_THROWS();
+			php_error_docref(NULL, E_WARNING, "IV length is invalid");
+			RETURN_FALSE;
 		}
 		iv_buf = (unsigned char *)iv;
 	} else {
