@@ -24,12 +24,12 @@ foo();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-[should observe '%s/observer_basic_01.php'?]
+<!-- init '%s/observer_basic_01.php' -->
 <file '%s/observer_basic_01.php'>
-[should observe foo()?]
+  <!-- init foo() -->
   <foo>
 Foo
-[should observe bar()?]
+    <!-- init bar() -->
     <bar>
 Bar
 int(6)

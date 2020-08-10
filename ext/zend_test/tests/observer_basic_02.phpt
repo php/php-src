@@ -28,12 +28,12 @@ $test->foo();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-[should observe '%s/observer_basic_02.php'?]
+<!-- init '%s/observer_basic_02.php' -->
 <file '%s/observer_basic_02.php'>
-[should observe TestClass::foo()?]
+  <!-- init TestClass::foo() -->
   <TestClass::foo>
 Foo
-[should observe TestClass::bar()?]
+    <!-- init TestClass::bar() -->
     <TestClass::bar>
 Bar
 int(6)

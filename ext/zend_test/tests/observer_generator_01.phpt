@@ -23,11 +23,11 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-[should observe '%s/observer_generator_01.php'?]
+<!-- init '%s/observer_generator_01.php' -->
 <file '%s/observer_generator_01.php'>
-[should observe doSomething()?]
+  <!-- init doSomething() -->
   <doSomething>
-[should observe getResults()?]
+    <!-- init getResults() -->
     <getResults>
     </getResults>
 10

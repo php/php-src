@@ -26,13 +26,13 @@ $test->bar();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-[should observe '%s/observer_magic_01.php'?]
+<!-- init '%s/observer_magic_01.php' -->
 <file '%s/observer_magic_01.php'>
-[should observe MagicTest::foo()?]
+  <!-- init MagicTest::foo() -->
   <MagicTest::foo>
 test
   </MagicTest::foo>
-[should observe MagicTest::__call()?]
+  <!-- init MagicTest::__call() -->
   <MagicTest::__call>
 __call()
     <MagicTest::foo>

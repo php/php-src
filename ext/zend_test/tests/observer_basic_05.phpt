@@ -15,13 +15,13 @@ include __DIR__ . '/observer.inc';
 foo();
 ?>
 --EXPECTF--
-[should observe '%s/observer_basic_05.php'?]
-[should observe foo()?]
+<!-- init '%s/observer_basic_05.php' -->
+<!-- init foo() -->
 <foo>
 Foo
 </foo>
-[should observe '%s/observer.inc'?]
-[should observe foo_observer_test()?]
+<!-- init '%s/observer.inc' -->
+<!-- init foo_observer_test() -->
 <foo_observer_test>
 foo_observer_test
 </foo_observer_test>

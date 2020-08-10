@@ -427,12 +427,12 @@ static zend_observer_fcall observer_fcall_init(zend_function *fbc)
 {
 	if (fbc->common.function_name) {
 		if (fbc->common.scope) {
-			php_printf("[should observe %s::%s()?]\n", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			php_printf("%*s<!-- init %s::%s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 		} else {
-			php_printf("[should observe %s()?]\n", ZSTR_VAL(fbc->common.function_name));
+			php_printf("%*s<!-- init %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
 	} else {
-		php_printf("[should observe '%s'?]\n", ZSTR_VAL(fbc->op_array.filename));
+		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
 	}
 
 	if (ZT_G(observer_observe_all)) {
