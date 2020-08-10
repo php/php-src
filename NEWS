@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #65275 (Calling exit() in a shutdown function does not change the
     exit value in CLI). (Nikita)
+  . Fixed bug #62294 (register_shutdown_function() does not correctly handle
+    exit code). (Nikita)
 
 - Date:
   . Fixed bug #60302 (DateTime::createFromFormat should new static(), not new

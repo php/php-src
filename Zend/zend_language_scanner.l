@@ -655,7 +655,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 		if (!EG(exception)) {
 			if (type==ZEND_REQUIRE) {
 				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-				zend_bailout();
 			} else {
 				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 			}
