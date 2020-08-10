@@ -102,6 +102,10 @@ Options:
                 seconds. The default value is 60 seconds, or 300 seconds when
                 testing for memory leaks.
 
+    --context [n]
+                Sets the number of lines of surrounding context to print for diffs.
+                The default value is 3.
+
     --show-[all|php|skip|clean|exp|diff|out|mem]
                 Show 'all' files, 'php' test file, 'skip' or 'clean' file. You
                 can also use this to show the output 'out', the expected result
@@ -146,6 +150,7 @@ function main(): void
            $user_tests, $valgrind, $sum_results, $shuffle, $file_cache;
     // Parallel testing
     global $workers, $workerID;
+    global $context_line_count;
 
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
 
@@ -400,6 +405,7 @@ function main(): void
     $file_cache = null;
     $shuffle = false;
     $workers = null;
+    $context_line_count = 3;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -567,6 +573,13 @@ function main(): void
                     break;
                 case '--set-timeout':
                     $environment['TEST_TIMEOUT'] = $argv[++$i];
+                    break;
+                case '--context':
+                    $context_line_count = $argv[++$i] ?? '';
+                    if (!preg_match('/^\d+$/', $context_line_count)) {
+                        error("'$context_line_count' is not a valid number of lines of context, try e.g. --context 3 for 3 lines");
+                    }
+                    $context_line_count = intval($context_line_count, 10);
                     break;
                 case '--show-all':
                     foreach ($cfgfiles as $file) {
@@ -2890,6 +2903,7 @@ function count_array_diff(
 
 function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): array
 {
+    global $context_line_count;
     $idx1 = 0;
     $cnt1 = @count($ar1);
     $idx2 = 0;
@@ -2897,8 +2911,14 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
     $diff = [];
     $old1 = [];
     $old2 = [];
+    $number_len = max(3, strlen((string)max($cnt1 + 1, $cnt2 + 1)));
+    $line_number_spec = '%0' . $number_len . 'd';
+
+    /** Mapping from $idx2 to $idx1, including indexes of idx2 that are identical to idx1 as well as entries that don't have matches */
+    $mapping = [];
 
     while ($idx1 < $cnt1 && $idx2 < $cnt2) {
+        $mapping[$idx2] = $idx1;
         if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
             $idx1++;
             $idx2++;
@@ -2908,15 +2928,17 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
             $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2 + 1, $cnt1, $cnt2, 10);
 
             if ($c1 > $c2) {
-                $old1[$idx1] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
+                $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
             } elseif ($c2 > 0) {
-                $old2[$idx2] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
+                $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
             } else {
-                $old1[$idx1] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
-                $old2[$idx2] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
+                $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
+                $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
             }
+            $last_printed_context_line = $idx1;
         }
     }
+    $mapping[$idx2] = $idx1;
 
     reset($old1);
     $k1 = key($old1);
@@ -2924,21 +2946,51 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
     reset($old2);
     $k2 = key($old2);
     $l2 = -2;
+    $old_k1 = -1;
+    $add_context_lines = function (int $new_k1) use (&$old_k1, &$diff, $w, $context_line_count, $number_len) {
+        if ($old_k1 >= $new_k1 || !$context_line_count) {
+            return;
+        }
+        $end = $new_k1 - 1;
+        $range_end = min($end, $old_k1 + $context_line_count);
+        if ($old_k1 >= 0) {
+            while ($old_k1 < $range_end) {
+                $diff[] = str_repeat(' ', $number_len + 2) . $w[$old_k1++];
+            }
+        }
+        if ($end - $context_line_count > $old_k1) {
+            $old_k1 = $end - $context_line_count;
+            if ($old_k1 > 0) {
+                // Add a '--' to mark sections where the common areas were truncated
+                $diff[] = '--';
+            }
+        }
+        $old_k1 = max($old_k1, 0);
+        while ($old_k1 < $end) {
+            $diff[] = str_repeat(' ', $number_len + 2) . $w[$old_k1++];
+        }
+        $old_k1 = $new_k1;
+    };
 
     while ($k1 !== null || $k2 !== null) {
         if ($k1 == $l1 + 1 || $k2 === null) {
+            $add_context_lines($k1);
             $l1 = $k1;
             $diff[] = current($old1);
+            $old_k1 = $k1;
             $k1 = next($old1) ? key($old1) : null;
         } elseif ($k2 == $l2 + 1 || $k1 === null) {
+            $add_context_lines($mapping[$k2]);
             $l2 = $k2;
             $diff[] = current($old2);
             $k2 = next($old2) ? key($old2) : null;
-        } elseif ($k1 < $k2) {
+        } elseif ($k1 < $mapping[$k2]) {
+            $add_context_lines($k1);
             $l1 = $k1;
             $diff[] = current($old1);
             $k1 = next($old1) ? key($old1) : null;
         } else {
+            $add_context_lines($mapping[$k2]);
             $l2 = $k2;
             $diff[] = current($old2);
             $k2 = next($old2) ? key($old2) : null;
@@ -2946,11 +2998,20 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
     }
 
     while ($idx1 < $cnt1) {
-        $diff[] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
+        $add_context_lines($idx1 + 1);
+        $diff[] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
     }
 
     while ($idx2 < $cnt2) {
-        $diff[] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
+        if (isset($mapping[$idx2])) {
+            $add_context_lines($mapping[$idx2] + 1);
+        }
+        $diff[] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
+    }
+    $add_context_lines(min($old_k1 + $context_line_count + 1, $cnt1 + 1));
+    if ($context_line_count && $old_k1 < $cnt1 + 1) {
+        // Add a '--' to mark sections where the common areas were truncated
+        $diff[] = '--';
     }
 
     return $diff;
