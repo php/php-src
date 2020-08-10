@@ -114,8 +114,8 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
@@ -125,8 +125,8 @@ PHP_FUNCTION(grapheme_strpos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (offset >= 0) {
@@ -154,7 +154,6 @@ PHP_FUNCTION(grapheme_strpos)
 	} else {
 		RETURN_FALSE;
 	}
-
 }
 /* }}} */
 
@@ -174,8 +173,8 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_stripos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
@@ -184,8 +183,8 @@ PHP_FUNCTION(grapheme_stripos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_stripos: Empty delimiter", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
@@ -240,8 +239,8 @@ PHP_FUNCTION(grapheme_strrpos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
@@ -250,8 +249,8 @@ PHP_FUNCTION(grapheme_strrpos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
@@ -300,8 +299,8 @@ PHP_FUNCTION(grapheme_strripos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
@@ -310,8 +309,8 @@ PHP_FUNCTION(grapheme_strripos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
@@ -377,8 +376,8 @@ PHP_FUNCTION(grapheme_substr)
 	}
 
 	if ( OUTSIDE_STRING(lstart, str_len)) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: start not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be contained in argument #1 ($string)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
@@ -532,10 +531,9 @@ PHP_FUNCTION(grapheme_substr)
 
 	if ( UBRK_DONE == sub_str_end_pos) {
 		if(length < 0) {
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length not contained in string", 1 );
-
+			zend_argument_value_error(3, "must be contained in argument #1 ($string)");
 			efree(ustr);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		} else {
 			sub_str_end_pos = ustr_len;
 		}
@@ -582,12 +580,9 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	}
 
 	if (needle_len == 0) {
-
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
-
 
 	if ( !f_ignore_case ) {
 
@@ -783,9 +778,8 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( extract_type < GRAPHEME_EXTRACT_TYPE_MIN || extract_type > GRAPHEME_EXTRACT_TYPE_MAX ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_extract: unknown extract type param", 0 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be either GRAPHEME_EXTR_COUNT, GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS");
+		RETURN_THROWS();
 	}
 
 	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
@@ -793,10 +787,16 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_FALSE;
 	}
 
-	if ( size > INT32_MAX || size < 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: size is invalid", 0 );
-		RETURN_FALSE;
+	if (size < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
+
+	if (size > INT32_MAX) {
+		zend_argument_value_error(2, "is too large");
+		RETURN_THROWS();
+	}
+
 	if (size == 0) {
 		RETURN_EMPTY_STRING();
 	}

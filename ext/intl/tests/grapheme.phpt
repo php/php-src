@@ -400,11 +400,19 @@ function ut_main()
         $arg0 = urlencode($test[0]);
         $res_str .= "substring of \"$arg0\" from \"$test[1]\" - grapheme_substr";
         if ( 3 == count( $test ) ) {
-            $result = grapheme_substr($test[0], $test[1]);
+            try {
+                $result = grapheme_substr($test[0], $test[1]);
+            } catch (ValueError $exception) {
+                $res_str .= ": " . $exception->getMessage() . "\n";
+            }
         }
         else {
             $res_str .= " with length $test[2]";
-            $result = grapheme_substr($test[0], $test[1], $test[2]);
+            try {
+                $result = grapheme_substr($test[0], $test[1], $test[2]);
+            } catch (ValueError $exception) {
+                $res_str .= ": " . $exception->getMessage() . "\n";
+            }
         }
         $res_str .= " = ";
         if ( $result === false ) {
@@ -465,11 +473,19 @@ function ut_main()
         $arg0 = urlencode($test[0]);
         $res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_strstr";
         if ( 3 == count( $test ) ) {
-            $result = grapheme_strstr($test[0], $test[1]);
+            try {
+                $result = grapheme_strstr($test[0], $test[1]);
+            } catch (ValueError $exception) {
+                $res_str .= ": " . $exception->getMessage() . "\n";
+            }
         }
         else {
             $res_str .= " before flag is " . ( $test[2] ? "TRUE" : "FALSE" );
-            $result = grapheme_strstr($test[0], $test[1], $test[2]);
+            try {
+                $result = grapheme_strstr($test[0], $test[1], $test[2]);
+            } catch (ValueError $exception) {
+                $res_str .= ": " . $exception->getMessage() . "\n";
+            }
         }
         $res_str .= " = ";
         if ( $result === false ) {
@@ -957,7 +973,8 @@ find "a%CC%8ABca%CC%8A" in "o%CC%88a%CC%8AaA%CC%8AbCa%CC%8Adef" - grapheme_strri
 
 function grapheme_substr($string, $start, $length = -1) {}
 
-substring of "abc" from "3" - grapheme_substr = false == false
+substring of "abc" from "3" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+ = 3 == false **FAILED** 
 substring of "aa%CC%8Abco%CC%88" from "5" - grapheme_substr = false == false
 substring of "aoa%CC%8Abco%CC%88O" from "2" - grapheme_substr = a%CC%8Abco%CC%88O == a%CC%8Abco%CC%88O
 substring of "o%CC%88a%CC%8AaA%CC%8Abc" from "2" - grapheme_substr = aA%CC%8Abc == aA%CC%8Abc
@@ -966,14 +983,17 @@ substring of "aa%CC%8Abco%CC%88" from "5" - grapheme_substr = false == false
 substring of "aa%CC%8AbcO%CC%88" from "4" - grapheme_substr = O%CC%88 == O%CC%88
 substring of "o%CC%88aa%CC%8Abc" from "2" - grapheme_substr = a%CC%8Abc == a%CC%8Abc
 substring of "aA%CC%8Abc" from "1" - grapheme_substr = A%CC%8Abc == A%CC%8Abc
-substring of "Abc" from "-5" - grapheme_substr = false == false
+substring of "Abc" from "-5" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+ = A%CC%8Abc == false **FAILED** 
 substring of "a%CC%8Abc" from "3" - grapheme_substr = false == false
-substring of "abc" from "4" - grapheme_substr = false == false
+substring of "abc" from "4" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+ = false == false
 substring of "abC" from "2" - grapheme_substr = C == C
 substring of "abc" from "1" - grapheme_substr = bc == bc
 substring of "Abc" from "1" - grapheme_substr with length 1 = b == b
 substring of "abc" from "0" - grapheme_substr with length 2 = ab == ab
-substring of "Abc" from "-4" - grapheme_substr with length 1 = false == false
+substring of "Abc" from "-4" - grapheme_substr with length 1: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+ = ab == false **FAILED** 
 substring of "ababc" from "1" - grapheme_substr with length 2 = ba == ba
 substring of "ababc" from "0" - grapheme_substr with length 10 = ababc == ababc
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length 10 = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
@@ -991,7 +1011,8 @@ substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -5 = 
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -6 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -7 = a == a
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -8 =  == 
-substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -9 = false == false
+substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -9: grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
+ =  == false **FAILED** 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-7" - grapheme_substr = a%CC%8Abco%CC%88Opq == a%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-6" - grapheme_substr = bco%CC%88Opq == bco%CC%88Opq
@@ -1000,7 +1021,8 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-4" - grapheme_substr = o%CC%88Opq == 
 substring of "aa%CC%8Abco%CC%88Opq" from "-3" - grapheme_substr = Opq == Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-2" - grapheme_substr = pq == pq
 substring of "aa%CC%8Abco%CC%88Opq" from "-1" - grapheme_substr = q == q
-substring of "aa%CC%8Abco%CC%88Opq" from "-999" - grapheme_substr = false == false
+substring of "aa%CC%8Abco%CC%88Opq" from "-999" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+ = q == false **FAILED** 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 8 = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 7 = aa%CC%8Abco%CC%88Op == aa%CC%8Abco%CC%88Op
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 6 = aa%CC%8Abco%CC%88O == aa%CC%8Abco%CC%88O
@@ -1010,7 +1032,8 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 3 = 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 2 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 1 = a == a
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 0 =  == 
-substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -999 = false == false
+substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -999: grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
+ =  == false **FAILED** 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -1 = aa%CC%8Abco%CC%88Op == aa%CC%8Abco%CC%88Op
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -2 = aa%CC%8Abco%CC%88O == aa%CC%8Abco%CC%88O
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -3 = aa%CC%8Abco%CC%88 == aa%CC%8Abco%CC%88
@@ -1019,7 +1042,8 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -5 =
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -6 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -7 = a == a
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -8 =  == 
-substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -9 = false == false
+substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -9: grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
+ =  == false **FAILED** 
 
 function grapheme_strstr($haystack, $needle, $before_needle = FALSE) {}
 

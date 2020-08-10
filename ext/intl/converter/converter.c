@@ -693,8 +693,8 @@ PHP_METHOD(UConverter, reasonText) {
 		UCNV_REASON_CASE(CLOSE)
 		UCNV_REASON_CASE(CLONE)
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown UConverterCallbackReason: " ZEND_LONG_FMT, reason);
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be a UConverter::REASON_* constant");
+			RETURN_THROWS();
 	}
 }
 /* }}} */

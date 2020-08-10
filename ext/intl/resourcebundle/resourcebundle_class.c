@@ -105,9 +105,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (bundlename_len >= MAXPATHLEN) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
-		zval_ptr_dtor(return_value);
-		ZVAL_NULL(return_value);
+		zend_argument_value_error(2, "is too long");
 		return FAILURE;
 	}
 
@@ -296,8 +294,8 @@ PHP_FUNCTION( resourcebundle_locales )
 	}
 
 	if (bundlename_len >= MAXPATHLEN) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"resourcebundle_locales: bundle name too long", 0 );
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 
 	if(bundlename_len == 0) {
