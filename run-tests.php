@@ -2877,7 +2877,6 @@ function count_array_diff(
 
 function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): array
 {
-    global $colorize;
     $idx1 = 0;
     $cnt1 = @count($ar1);
     $idx2 = 0;
@@ -2885,25 +2884,6 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
     $diff = [];
     $old1 = [];
     $old2 = [];
-
-    $format_expected_line = function (int $line_number, string $contents) use ($colorize): string {
-        $output = sprintf("%03d- ", $line_number) . $contents;
-        if ($colorize) {
-            // Reuse the colors used for `-` in other diff tools.
-            // Here, red should be interpreted as "removed", and not "bad".
-            return "\e[1;31m{$output}\e[0m";
-        }
-        return $output;
-    };
-    $format_actual_line = function (int $line_number, string $contents) use ($colorize): string {
-        $output = sprintf("%03d+ ", $line_number) . $contents;
-        if ($colorize) {
-            // Reuse the colors used for `+` in other diff tools.
-            // Here, green should be interpreted as "added", and not "good".
-            return "\e[1;32m{$output}\e[0m";
-        }
-        return $output;
-    };
 
     while ($idx1 < $cnt1 && $idx2 < $cnt2) {
         if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
@@ -2915,12 +2895,12 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
             $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2 + 1, $cnt1, $cnt2, 10);
 
             if ($c1 > $c2) {
-                $old1[$idx1] = $format_expected_line($idx1 + 1, $w[$idx1++]);
+                $old1[$idx1] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
             } elseif ($c2 > 0) {
-                $old2[$idx2] = $format_actual_line($idx2 + 1, $ar2[$idx2++]);
+                $old2[$idx2] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
             } else {
-                $old1[$idx1] = $format_expected_line($idx1 + 1, $w[$idx1++]);
-                $old2[$idx2] = $format_actual_line($idx2 + 1, $ar2[$idx2++]);
+                $old1[$idx1] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
+                $old2[$idx2] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
             }
         }
     }
@@ -2953,11 +2933,11 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
     }
 
     while ($idx1 < $cnt1) {
-        $diff[] = $format_expected_line($idx1 + 1, $w[$idx1++]);
+        $diff[] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
     }
 
     while ($idx2 < $cnt2) {
-        $diff[] = $format_actual_line($idx2 + 1, $ar2[$idx2++]);
+        $diff[] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
     }
 
     return $diff;
