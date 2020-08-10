@@ -3781,6 +3781,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CONST_HA
 		}
 	}
 
+	zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
+
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
 
@@ -17934,6 +17936,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_TMP_HAND
 		}
 	}
 
+	zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
+
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
 
@@ -20478,6 +20482,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_VAR_HAND
 			ZVAL_COPY_VALUE(&generator->retval, retval);
 		}
 	}
+
+	zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
@@ -36943,6 +36949,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CV_HANDL
 			ZVAL_COPY_VALUE(&generator->retval, retval);
 		}
 	}
+
+	zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);

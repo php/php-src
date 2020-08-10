@@ -24,6 +24,7 @@
 #include "zend_generators.h"
 #include "zend_closures.h"
 #include "zend_generators_arginfo.h"
+#include "zend_observer.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
 ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
@@ -771,7 +772,18 @@ try_again:
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
+		if (zend_observer_fcall_op_array_extension != -1) {
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&generator->execute_data->func->op_array);
+			ZEND_ASSERT(observer_handlers);
+			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+				zend_observe_fcall_begin(observer_handlers, generator->execute_data);
+			}
+		}
 		zend_execute_ex(generator->execute_data);
+		if (generator->execute_data) {
+			/* On the final return, this will be called from ZEND_GENERATOR_RETURN */
+			zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
+		}
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 		generator->frozen_call_stack = NULL;

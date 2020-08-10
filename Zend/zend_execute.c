@@ -3542,7 +3542,7 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 
 	EG(current_execute_data) = execute_data;
 
-	if (ZEND_SHOULD_OBSERVE_FN(op_array->fn_flags)) {
+	if (ZEND_SHOULD_OBSERVE_FN(op_array->fn_flags) && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
 		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&EX(func)->op_array);
 		ZEND_ASSERT(observer_handlers);
 		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {

@@ -16,7 +16,8 @@ extern int zend_observer_fcall_op_array_extension;
 #define ZEND_OBSERVER_NOT_OBSERVED ((void *) 2)
 
 #define ZEND_SHOULD_OBSERVE_FN(fn_flags) \
-	zend_observer_fcall_op_array_extension != -1 && !(fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	zend_observer_fcall_op_array_extension != -1 && \
+	!(fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
 
 struct zend_observer_fcall {
 	void (*begin)(zend_execute_data *execute_data);

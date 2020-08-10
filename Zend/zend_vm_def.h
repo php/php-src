@@ -4457,6 +4457,8 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 
+	zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
+
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
 
