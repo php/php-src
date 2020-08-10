@@ -1,0 +1,43 @@
+--TEST--
+Observer: Basic magic method observability
+--INI--
+zend_test.observer.enabled=1
+zend_test.observer.observe_all=1
+--FILE--
+<?php
+class MagicTest
+{
+    public function __call($name, $args)
+    {
+        echo '__call()' . PHP_EOL;
+        $this->foo($name);
+    }
+
+    public function foo($name)
+    {
+        echo $name . PHP_EOL;
+    }
+}
+
+$test = new MagicTest();
+$test->foo('test');
+$test->bar();
+
+echo 'DONE' . PHP_EOL;
+?>
+--EXPECTF--
+[should observe '%s/observer_magic_01.php'?]
+<file '%s/observer_magic_01.php'>
+[should observe MagicTest::foo()?]
+  <MagicTest::foo>
+test
+  </MagicTest::foo>
+[should observe MagicTest::__call()?]
+  <MagicTest::__call>
+__call()
+    <MagicTest::foo>
+bar
+    </MagicTest::foo>
+  </MagicTest::__call>
+DONE
+</file '%s/observer_magic_01.php'>
