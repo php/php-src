@@ -1135,7 +1135,7 @@ PHP_FUNCTION(dns_get_mx)
 		}
 	}
 	php_dns_free_handle(handle);
-	RETURN_BOOL(zend_hash_num_elements(Z_ARRVAL_P(weight_list)) != 0);
+	RETURN_BOOL(zend_hash_num_elements(Z_ARRVAL_P(mx_list)) != 0);
 }
 /* }}} */
 #endif /* HAVE_FULL_DNS_FUNCS */
