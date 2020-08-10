@@ -1612,9 +1612,7 @@ PHP_FUNCTION(openssl_spki_new)
 	goto cleanup;
 
 cleanup:
-	if (pkey != NULL) {
-		EVP_PKEY_free(pkey);
-	}
+	EVP_PKEY_free(pkey);
 	if (spki != NULL) {
 		NETSCAPE_SPKI_free(spki);
 	}
@@ -1669,9 +1667,7 @@ cleanup:
 	if (spki != NULL) {
 		NETSCAPE_SPKI_free(spki);
 	}
-	if (pkey != NULL) {
-		EVP_PKEY_free(pkey);
-	}
+	EVP_PKEY_free(pkey);
 	if (spkstr_cleaned != NULL) {
 		efree(spkstr_cleaned);
 	}
@@ -1738,12 +1734,8 @@ cleanup:
 	if (spki != NULL) {
 		NETSCAPE_SPKI_free(spki);
 	}
-	if (out != NULL) {
-		BIO_free_all(out);
-	}
-	if (pkey != NULL) {
-		EVP_PKEY_free(pkey);
-	}
+	BIO_free_all(out);
+	EVP_PKEY_free(pkey);
 	if (spkstr_cleaned != NULL) {
 		efree(spkstr_cleaned);
 	}
@@ -2627,10 +2619,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	php_sk_X509_free(ca);
 
 cleanup:
-
-	if (priv_key) {
-		EVP_PKEY_free(priv_key);
-	}
+	EVP_PKEY_free(priv_key);
 
 	if (cert_str) {
 		X509_free(cert);
@@ -2719,10 +2708,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	php_sk_X509_free(ca);
 
 cleanup:
-
-	if (priv_key) {
-		EVP_PKEY_free(priv_key);
-	}
+	EVP_PKEY_free(priv_key);
 	if (cert_str) {
 		X509_free(cert);
 	}
@@ -2822,13 +2808,9 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		php_openssl_store_errors();
 	}
 
-	cleanup:
-	if (bio_in) {
-		BIO_free(bio_in);
-	}
-	if (pkey) {
-		EVP_PKEY_free(pkey);
-	}
+cleanup:
+	BIO_free(bio_in);
+	EVP_PKEY_free(pkey);
 	if (cert) {
 		X509_free(cert);
 	}
@@ -3300,13 +3282,8 @@ cleanup:
 	}
 
 	PHP_SSL_REQ_DISPOSE(&req);
-
-	if (priv_key) {
-		EVP_PKEY_free(priv_key);
-	}
-	if (key) {
-		EVP_PKEY_free(key);
-	}
+	EVP_PKEY_free(priv_key);
+	EVP_PKEY_free(key);
 	if (csr_str) {
 		X509_REQ_free(csr);
 	}
@@ -4265,9 +4242,7 @@ clean_exit:
 			if (eckey != NULL) {
 				EC_KEY_free(eckey);
 			}
-			if (pkey != NULL) {
-				EVP_PKEY_free(pkey);
-			}
+			EVP_PKEY_free(pkey);
 			RETURN_FALSE;
 #endif
 		}
@@ -4367,13 +4342,8 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 
 clean_exit:
 	PHP_SSL_REQ_DISPOSE(&req);
-
-	if (key) {
-		EVP_PKEY_free(key);
-	}
-	if (bio_out) {
-		BIO_free(bio_out);
-	}
+	EVP_PKEY_free(key);
+	BIO_free(bio_out);
 }
 /* }}} */
 
@@ -4448,13 +4418,8 @@ PHP_FUNCTION(openssl_pkey_export)
 		}
 	}
 	PHP_SSL_REQ_DISPOSE(&req);
-
-	if (key) {
-		EVP_PKEY_free(key);
-	}
-	if (bio_out) {
-		BIO_free(bio_out);
-	}
+	EVP_PKEY_free(key);
+	BIO_free(bio_out);
 }
 /* }}} */
 
@@ -4789,12 +4754,8 @@ PHP_FUNCTION(openssl_pkey_derive)
 	}
 
 cleanup:
-	if (pkey) {
-		EVP_PKEY_free(pkey);
-	}
-	if (peer_key) {
-		EVP_PKEY_free(peer_key);
-	}
+	EVP_PKEY_free(pkey);
+	EVP_PKEY_free(peer_key);
 	if (ctx) {
 		EVP_PKEY_CTX_free(ctx);
 	}
@@ -5231,9 +5192,7 @@ PHP_FUNCTION(openssl_pkcs7_read)
 	RETVAL_TRUE;
 
 clean_exit:
-	if (bio_in != NULL) {
-		BIO_free(bio_in);
-	}
+	BIO_free(bio_in);
 
 	if (p7 != NULL) {
 		PKCS7_free(p7);
@@ -5359,9 +5318,7 @@ clean_exit:
 	if (others) {
 		sk_X509_pop_free(others, X509_free);
 	}
-	if (privkey) {
-		EVP_PKEY_free(privkey);
-	}
+	EVP_PKEY_free(privkey);
 	if (cert && cert_str) {
 		X509_free(cert);
 	}
@@ -5441,9 +5398,7 @@ clean_exit:
 	if (cert && free_recipcert) {
 		X509_free(cert);
 	}
-	if (key) {
-		EVP_PKEY_free(key);
-	}
+	EVP_PKEY_free(key);
 }
 /* }}} */
 
@@ -6191,9 +6146,7 @@ clean_exit:
 	if (cert && free_recipcert) {
 		X509_free(cert);
 	}
-	if (key) {
-		EVP_PKEY_free(key);
-	}
+	EVP_PKEY_free(key);
 }
 /* }}} */
 
