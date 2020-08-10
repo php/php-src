@@ -206,7 +206,9 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/string_to_number_comparison
   . Namespaced names can no longer contain whitespace: While `Foo\Bar` will be
     recognized as a namespaced name, `Foo \ Bar` will not. Conversely, reserved
-    keywords are now permitted as namespace segments.
+    keywords are now permitted as namespace segments, which may also change the
+    interpretation of code: `new\x` is now the same as `constant('new\x')`, not
+    `new \x()`.
     RFC: https://wiki.php.net/rfc/namespaced_names_as_token
   . Nested ternaries now require explicit parentheses.
     RFC: https://wiki.php.net/rfc/ternary_associativity
