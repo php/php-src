@@ -92,12 +92,15 @@
 || (id >= FILTER_VALIDATE_ALL && id <= FILTER_VALIDATE_LAST) \
 || id == FILTER_CALLBACK)
 
-#define RETURN_VALIDATION_FAILED	\
-	zval_ptr_dtor(value);	\
-	if (flags & FILTER_NULL_ON_FAILURE) {	\
-		ZVAL_NULL(value);	\
-	} else {	\
-		ZVAL_FALSE(value);	\
+#define RETURN_VALIDATION_FAILED \
+	if (EG(exception)) { \
+		return; \
+	} else if (flags & FILTER_NULL_ON_FAILURE) { \
+		zval_ptr_dtor(value); \
+		ZVAL_NULL(value); \
+	} else { \
+		zval_ptr_dtor(value); \
+		ZVAL_FALSE(value); \
 	}	\
 	return;	\
 
