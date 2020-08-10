@@ -26,7 +26,7 @@ try {
 
 echo "\nNul byte in argument:\n";
 try {
-    proc_open(["php", "arg\0oops"], $ds, $pipes);
+    proc_open(["php", "array\0oops"], $ds, $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }

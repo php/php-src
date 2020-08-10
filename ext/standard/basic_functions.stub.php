@@ -59,9 +59,9 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 function array_push(array &$stack, mixed ...$args): int {}
 
-function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function krsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
-function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function ksort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
 /** @param array|Countable|null $var */
 function count($var, int $mode = COUNT_NORMAL): int {}
@@ -72,23 +72,23 @@ function count($var, int $mode = COUNT_NORMAL): int {}
  */
 function sizeof($var, int $mode = COUNT_NORMAL): int {}
 
-function natsort(array &$arg): bool {}
+function natsort(array &$array): bool {}
 
-function natcasesort(array &$arg): bool {}
+function natcasesort(array &$array): bool {}
 
-function asort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function asort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
-function arsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function arsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
-function sort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function sort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
-function rsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function rsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
-function usort(array &$arg, callable $cmp_function): bool {}
+function usort(array &$array, callable $cmp_function): bool {}
 
-function uasort(array &$arg, callable $cmp_function): bool {}
+function uasort(array &$array, callable $cmp_function): bool {}
 
-function uksort(array &$arg, callable $cmp_function): bool {}
+function uksort(array &$array, callable $cmp_function): bool {}
 
 function end(array|object &$arg): mixed {}
 
@@ -117,8 +117,8 @@ function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
 function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
 
-/** @prefer-ref $arg */
-function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
+/** @prefer-ref $array */
+function extract(array &$array, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
 
 function compact($var_name, ...$var_names): array {}
 
@@ -133,7 +133,7 @@ function array_fill_keys(array $keys, mixed $val): array {}
  */
 function range($low, $high, $step = 1): array {}
 
-function shuffle(array &$arg): bool {}
+function shuffle(array &$array): bool {}
 
 function array_pop(array &$stack): mixed {}
 
@@ -141,95 +141,95 @@ function array_shift(array &$stack): mixed {}
 
 function array_unshift(array &$stack, mixed ...$vars): int {}
 
-function array_splice(array &$arg, int $offset, ?int $length = null, mixed $replacement = []): array {}
+function array_splice(array &$array, int $offset, ?int $length = null, mixed $replacement = []): array {}
 
-function array_slice(array $arg, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
+function array_slice(array $array, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
 
 function array_merge(array ...$arrays): array {}
 
 function array_merge_recursive(array ...$arrays): array {}
 
-function array_replace(array $arr1, array ...$arrays): array {}
+function array_replace(array $array1, array ...$arrays): array {}
 
-function array_replace_recursive(array $arr1, array ...$arrays): array {}
+function array_replace_recursive(array $array1, array ...$arrays): array {}
 
-function array_keys(array $arg, mixed $search_value = UNKNOWN, bool $strict = false): array {}
+function array_keys(array $array, mixed $search_value = UNKNOWN, bool $strict = false): array {}
 
-function array_key_first(array $arg): int|string|null {}
+function array_key_first(array $array): int|string|null {}
 
-function array_key_last(array $arg): int|string|null {}
+function array_key_last(array $array): int|string|null {}
 
-function array_values(array $arg): array {}
+function array_values(array $array): array {}
 
-function array_count_values(array $arg): array {}
+function array_count_values(array $array): array {}
 
-function array_column(array $arg, int|string|null $column_key, int|string|null $index_key = null): array {}
+function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
 
 function array_reverse(array $input, bool $preserve_keys = false): array {}
 
-function array_pad(array $arg, int $pad_size, mixed $pad_value): array {}
+function array_pad(array $array, int $pad_size, mixed $pad_value): array {}
 
-function array_flip(array $arg): array {}
+function array_flip(array $array): array {}
 
 function array_change_key_case(array $input, int $case = CASE_LOWER): array {}
 
-function array_unique(array $arg, int $flags = SORT_STRING): array {}
+function array_unique(array $array, int $flags = SORT_STRING): array {}
 
-function array_intersect_key(array $arr1, array $arr2, array ...$arrays): array {}
+function array_intersect_key(array $array1, array $array2, array ...$arrays): array {}
 
-function array_intersect_ukey(array $arr1, array $arr2, ...$rest): array {}
+function array_intersect_ukey(array $array1, array $array2, ...$rest): array {}
 
-function array_intersect(array $arr1, array $arr2, array ...$arrays): array {}
+function array_intersect(array $array1, array $array2, array ...$arrays): array {}
 
-function array_uintersect(array $arr1, array $arr2, ...$rest): array {}
+function array_uintersect(array $array1, array $array2, ...$rest): array {}
 
-function array_intersect_assoc(array $arr1, array $arr2, array ...$arrays): array {}
+function array_intersect_assoc(array $array1, array $array2, array ...$arrays): array {}
 
-function array_uintersect_assoc(array $arr1, array $arr2, ...$rest): array {}
+function array_uintersect_assoc(array $array1, array $array2, ...$rest): array {}
 
-function array_intersect_uassoc(array $arr1, array $arr2, ...$rest): array {}
+function array_intersect_uassoc(array $array1, array $array2, ...$rest): array {}
 
-function array_uintersect_uassoc(array $arr1, array $arr2, ...$rest): array {}
+function array_uintersect_uassoc(array $array1, array $array2, ...$rest): array {}
 
-function array_diff_key(array $arr1, array $arr2, array ...$arrays): array {}
+function array_diff_key(array $array1, array $array2, array ...$arrays): array {}
 
-function array_diff_ukey(array $arr1, array $arr2, ...$rest): array {}
+function array_diff_ukey(array $array1, array $array2, ...$rest): array {}
 
-function array_diff(array $arr1, array $arr2, array ...$arrays): array {}
+function array_diff(array $array1, array $array2, array ...$arrays): array {}
 
-function array_udiff(array $arr1, array $arr2, ...$rest): array {}
+function array_udiff(array $array1, array $array2, ...$rest): array {}
 
-function array_diff_assoc(array $arr1, array $arr2, array ...$arrays): array {}
+function array_diff_assoc(array $array1, array $array2, array ...$arrays): array {}
 
-function array_diff_uassoc(array $arr1, array $arr2, ...$rest): array {}
+function array_diff_uassoc(array $array1, array $array2, ...$rest): array {}
 
-function array_udiff_assoc(array $arr1, array $arr2, ...$rest): array {}
+function array_udiff_assoc(array $array1, array $array2, ...$rest): array {}
 
-function array_udiff_uassoc(array $arr1, array $arr2, ...$rest): array {}
+function array_udiff_uassoc(array $array1, array $array2, ...$rest): array {}
 
 /**
- * @param array $arr1
+ * @param array $array1
  * @param int $sort_order
  * @param int $sort_flags
- * @param array $arr2
- * @prefer-ref $arr1
+ * @param array $array2
+ * @prefer-ref $array1
  * @prefer-ref $sort_order
  * @prefer-ref $sort_flags
- * @prefer-ref $arr2
+ * @prefer-ref $arrays
  */
-function array_multisort(&$arr1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arr2): bool {}
+function array_multisort(&$array1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arrays): bool {}
 
-function array_rand(array $arg, int $num_req = 1): int|string|array {}
+function array_rand(array $array, int $num_req = 1): int|string|array {}
 
-function array_sum(array $arg): int|float {}
+function array_sum(array $array): int|float {}
 
-function array_product(array $arg): int|float {}
+function array_product(array $array): int|float {}
 
-function array_reduce(array $arg, callable $callback, mixed $initial = null): mixed {}
+function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
 
-function array_filter(array $arg, ?callable $callback = null, int $use_keys = 0): array {}
+function array_filter(array $array, ?callable $callback = null, int $use_keys = 0): array {}
 
-function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
+function array_map(?callable $callback, array $array1, array ...$arrays): array {}
 
 /** @param int|string $key */
 function array_key_exists($key, array $search): bool {}
@@ -240,7 +240,7 @@ function array_key_exists($key, array $search): bool {}
  */
 function key_exists($key, array $search): bool {}
 
-function array_chunk(array $arg, int $size, bool $preserve_keys = false): array {}
+function array_chunk(array $array, int $size, bool $preserve_keys = false): array {}
 
 function array_combine(array $keys, array $values): array {}
 
