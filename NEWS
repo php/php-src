@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug #79919 (Stack use-after-scope in define()). (cmb)
   . Fixed bug #79934 (CRLF-only line in heredoc causes parsing error).
     (Pieter van den Ham)
+  . Fixed bug #79947 (Memory leak on invalid offset type in compound
+    assignment). (Nikita)
 
 - Gettext:
   . Fixed bug #70574 (Tests fail due to relying on Linux fallback behavior for

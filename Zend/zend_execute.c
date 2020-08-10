@@ -2051,8 +2051,6 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 
 static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
-	zend_free_op free_op_data1;
-
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		if (opline->op2_type == IS_UNUSED) {
 			zend_use_new_element_for_string();
@@ -2063,8 +2061,6 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 	} else if (EXPECTED(!Z_ISERROR_P(container))) {
 		zend_use_scalar_as_array();
 	}
-	get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
-	FREE_OP(free_op_data1);
 }
 
 static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval *dim, zend_value *value EXECUTE_DATA_DC)
