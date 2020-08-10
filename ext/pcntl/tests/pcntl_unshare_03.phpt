@@ -9,10 +9,13 @@ if (!defined("CLONE_NEWNET")) die("skip flag unavailable");
 if (posix_getuid() !== 0 &&
     (!defined("CLONE_NEWUSER") ||
     (pcntl_unshare(CLONE_NEWUSER) == false && pcntl_get_last_error() == PCNTL_EPERM))) {
-    die("skip Insufficient previleges to run test");
+    die("skip Insufficient privileges for CLONE_NEWUSER");
+}
+if (@pcntl_unshare(CLONE_NEWNET) == false && pcntl_get_last_error() == PCNTL_EPERM) {
+    die("skip Insufficient privileges for CLONE_NEWPID");
 }
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
-
+?>
 --FILE--
 <?php
 
