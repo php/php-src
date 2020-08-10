@@ -26,6 +26,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array
     with single reference). (Nikita)
+  . Fixed bug #79944 (getmxrr always returns true on Alpine linux). (Nikita)
 
 - XML:
   . Fixed bug #79922 (Crash after multiple calls to xml_parser_free()). (cmb)
