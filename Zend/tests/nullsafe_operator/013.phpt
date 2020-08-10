@@ -54,7 +54,7 @@ string(56) "get_called_class() expects exactly 0 parameters, 1 given"
 string(4) "NULL"
 string(53) "func_num_args() expects exactly 0 parameters, 1 given"
 string(53) "func_get_args() expects exactly 0 parameters, 1 given"
-string(67) "array_slice(): Argument #1 ($arg) must be of type array, null given"
+string(69) "array_slice(): Argument #1 ($array) must be of type array, null given"
 array(1) {
   [0]=>
   string(3) "foo"
