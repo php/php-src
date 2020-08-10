@@ -2002,7 +2002,6 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 	} else {
 		zend_use_scalar_as_array();
 	}
-	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 }
 
 static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval *dim, zend_value *value EXECUTE_DATA_DC)
