@@ -105,9 +105,8 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
-			RETURN_FALSE;
-			break;
+			zend_argument_value_error(3, "must be a NumberFormatter::TYPE_* constant");
+			RETURN_THROWS();
 	}
 
 	INTL_METHOD_RETVAL_UTF8( nfo, formatted, formatted_len, ( formatted != format_buf ) );

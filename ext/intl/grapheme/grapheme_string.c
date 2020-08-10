@@ -125,8 +125,8 @@ PHP_FUNCTION(grapheme_strpos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (offset >= 0) {
@@ -184,8 +184,8 @@ PHP_FUNCTION(grapheme_stripos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_stripos: Empty delimiter", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
@@ -250,7 +250,7 @@ PHP_FUNCTION(grapheme_strrpos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
+		zend_argument_value_error(2, "cannot be empty");
 		RETURN_FALSE;
 	}
 
@@ -310,8 +310,8 @@ PHP_FUNCTION(grapheme_strripos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
@@ -582,10 +582,8 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	}
 
 	if (needle_len == 0) {
-
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 
@@ -783,9 +781,8 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( extract_type < GRAPHEME_EXTRACT_TYPE_MIN || extract_type > GRAPHEME_EXTRACT_TYPE_MAX ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_extract: unknown extract type param", 0 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be either GRAPHEME_EXTR_COUNT, GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS");
+		RETURN_THROWS();
 	}
 
 	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
@@ -793,10 +790,16 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_FALSE;
 	}
 
-	if ( size > INT32_MAX || size < 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: size is invalid", 0 );
-		RETURN_FALSE;
+	if (size < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
+
+	if ( size > INT32_MAX) {
+		zend_argument_value_error(2, "is too large");
+		RETURN_THROWS();
+	}
+
 	if (size == 0) {
 		RETURN_EMPTY_STRING();
 	}
