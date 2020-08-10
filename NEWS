@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #67792 (HTTP Authorization schemes are treated as case-sensitive).
     (cmb)
   . Fixed bug #80972 (Memory exhaustion on invalid string offset). (girgias)
+  . Fixed bug #77561 (Shebang line not stripped for non-primary script).
+    (Nikita)
 
 - FTP:
   . Fixed bug #80901 (Info leak in ftp extension). (cmb)
