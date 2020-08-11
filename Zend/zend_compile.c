@@ -2788,14 +2788,16 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 			zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
+
+		/* We will throw if $this doesn't exist, so there's no need to emit a JMP_NULL
+		 * check for a nullsafe access. */
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
-	}
-
-	if (nullsafe) {
-		zend_emit_jmp_null(&obj_node);
+		if (nullsafe) {
+			zend_emit_jmp_null(&obj_node);
+		}
 	}
 
 	zend_compile_expr(&prop_node, prop_ast);
@@ -4347,13 +4349,15 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 			zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
+
+		/* We will throw if $this doesn't exist, so there's no need to emit a JMP_NULL
+		 * check for a nullsafe access. */
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
 		zend_compile_expr(&obj_node, obj_ast);
-	}
-
-	if (nullsafe) {
-		zend_emit_jmp_null(&obj_node);
+		if (nullsafe) {
+			zend_emit_jmp_null(&obj_node);
+		}
 	}
 
 	zend_compile_expr(&method_node, method_ast);
