@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug #73060 (php failed with error after temp folder cleaned up).
     (cmb)
+  . Fixed bug #79917 (File cache segfault with a static variable in inherited
+    method). (Nikita)
 
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array
