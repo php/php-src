@@ -731,6 +731,9 @@ try_again:
 		return;
 	}
 
+	/* Drop the AT_FIRST_YIELD flag */
+	orig_generator->flags &= ~ZEND_GENERATOR_AT_FIRST_YIELD;
+
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
 			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
@@ -739,9 +742,6 @@ try_again:
 		/* If there are no more deletegated values, resume the generator
 		 * after the "yield from" expression. */
 	}
-
-	/* Drop the AT_FIRST_YIELD flag */
-	orig_generator->flags &= ~ZEND_GENERATOR_AT_FIRST_YIELD;
 
 	{
 		/* Backup executor globals */
