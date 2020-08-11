@@ -1,5 +1,5 @@
 --TEST--
-Observer: Basic generator observability
+Observer: Generator with explicit return
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -10,6 +10,7 @@ function getResults() {
     for ($i = 10; $i < 13; $i++) {
         yield $i;
     }
+    return 1337;
 }
 
 function doSomething() {
@@ -17,6 +18,7 @@ function doSomething() {
     foreach ($generator as $value) {
         echo $value . PHP_EOL;
     }
+    echo $generator->getReturn() . PHP_EOL;
 
     return 'Done';
 }
@@ -39,7 +41,8 @@ echo doSomething() . PHP_EOL;
     </getResults:12>
 12
     <getResults>
-    </getResults:NULL>
+    </getResults:1337>
+1337
   </doSomething:'Done'>
 Done
 </file '%s/observer_generator_%d.php'>
