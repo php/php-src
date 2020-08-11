@@ -350,11 +350,6 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 
 	if ((option = zend_hash_str_find(options, "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_FALSE && Z_TYPE_P(option) != IS_TRUE) {
-			if (ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) {
-				zend_type_error("Option \"comp_method\" must be of type bool, %s given",
-					zend_zval_type_name(option));
-				return false;
-			}
 			php_error_docref(NULL, E_WARNING, "Option \"remove_all_path\" must be of type bool, %s given",
 				zend_zval_type_name(option));
 		}
@@ -363,11 +358,6 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 
 	if ((option = zend_hash_str_find(options, "comp_method", sizeof("comp_method") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
-			if (ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) {
-				zend_type_error("Option \"comp_method\" must be of type int, %s given",
-					zend_zval_type_name(option));
-				return false;
-			}
 			php_error_docref(NULL, E_WARNING, "Option \"comp_method\" must be of type int, %s given",
 				zend_zval_type_name(option));
 		}
@@ -375,11 +365,6 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 
 		if ((option = zend_hash_str_find(options, "comp_flags", sizeof("comp_flags") - 1)) != NULL) {
 			if (Z_TYPE_P(option) != IS_LONG) {
-				if (ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) {
-					zend_type_error("Option \"comp_flags\" must be of type int, %s given",
-						zend_zval_type_name(option));
-					return false;
-				}
 				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be of type int, %s given",
 					zend_zval_type_name(option));
 			}
@@ -390,11 +375,6 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 #ifdef HAVE_ENCRYPTION
 	if ((option = zend_hash_str_find(options, "enc_method", sizeof("enc_method") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
-			if (ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) {
-				zend_type_error("Option \"enc_method\" must be of type int, %s given",
-					zend_zval_type_name(option));
-				return false;
-			}
 			php_error_docref(NULL, E_WARNING, "Option \"enc_method\" must be of type int, %s given",
 				zend_zval_type_name(option));
 		}
