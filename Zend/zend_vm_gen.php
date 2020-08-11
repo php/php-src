@@ -1514,6 +1514,7 @@ function gen_null_handler($f) {
         out($f,"{\n");
         out($f,"\tUSE_OPLINE\n");
         out($f,"\n");
+        out($f,"\tSAVE_OPLINE();\n");
         out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
         out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
         out($f,"}\n\n");
