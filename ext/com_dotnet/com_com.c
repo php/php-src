@@ -239,9 +239,7 @@ PHP_METHOD(com, __construct)
 	/* see if it has TypeInfo available */
 	if (FAILED(IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo)) && typelib_name) {
 		/* load up the library from the named file */
-		int cached;
-
-		TL = php_com_load_typelib_via_cache(typelib_name, obj->code_page, &cached);
+		TL = php_com_load_typelib_via_cache(typelib_name, obj->code_page);
 
 		if (TL) {
 			if (COMG(autoreg_on)) {
@@ -819,7 +817,6 @@ PHP_FUNCTION(com_load_typelib)
 	ITypeLib *pTL = NULL;
 	zend_bool cs = TRUE;
 	int codepage = COMG(code_page);
-	int cached = 0;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &name, &namelen, &cs)) {
 		RETURN_THROWS();
@@ -832,7 +829,7 @@ PHP_FUNCTION(com_load_typelib)
 	RETVAL_FALSE;
 
 	php_com_initialize();
-	pTL = php_com_load_typelib_via_cache(name, codepage, &cached);
+	pTL = php_com_load_typelib_via_cache(name, codepage);
 	if (pTL) {
 		if (php_com_import_typelib(pTL, cs ? CONST_CS : 0, codepage) == SUCCESS) {
 			RETVAL_TRUE;

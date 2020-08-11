@@ -132,8 +132,7 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1);
 
 /* com_typeinfo.c */
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string,
-		int codepage, int *cached);
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage);
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage);
 PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
 		int codepage);

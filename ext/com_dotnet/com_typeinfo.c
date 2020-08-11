@@ -260,8 +260,7 @@ ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_k
 	return result;
 }
 
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string,
-	int codepage, int *cached)
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage)
 {
 	ITypeLib *TL;
 	char *name_dup;
@@ -272,14 +271,12 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_s
 #endif
 
 	if ((TL = zend_hash_find_ptr(&php_com_typelibraries, key)) != NULL) {
-		*cached = 1;
 		/* add a reference for the caller */
 		ITypeLib_AddRef(TL);
 
 		goto php_com_load_typelib_via_cache_return;
 	}
 
-	*cached = 0;
 	name_dup = estrndup(ZSTR_VAL(key), ZSTR_LEN(key));
 	TL = php_com_load_typelib(name_dup, codepage);
 	efree(name_dup);

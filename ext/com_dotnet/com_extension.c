@@ -75,7 +75,6 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	FILE *typelib_file;
 	char *typelib_name_buffer;
 	char *strtok_buf = NULL;
-	int cached;
 
 	if (NULL == new_value || !new_value->val[0] || (typelib_file = VCWD_FOPEN(new_value->val, "r"))==NULL) {
 		return FAILURE;
@@ -114,7 +113,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 			ptr--;
 		}
 
-		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page), &cached)) != NULL) {
+		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page))) != NULL) {
 			php_com_import_typelib(pTL, mode, COMG(code_page));
 			ITypeLib_Release(pTL);
 		}
