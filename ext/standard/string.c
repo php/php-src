@@ -4357,12 +4357,9 @@ PHPAPI void php_stripslashes(zend_string *str)
  */
 static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *subject, zval *result, int case_sensitivity)
 {
-	zval		*search_entry,
-				*replace_entry = NULL;
+	zval		*search_entry;
 	zend_string	*tmp_result,
-	            *tmp_subject_str,
-	            *tmp_replace_entry_str = NULL,
-				*replace_entry_str;
+	            *tmp_subject_str;
 	char		*replace_value = NULL;
 	size_t		 replace_len = 0;
 	zend_long	 replace_count = 0;
@@ -4396,10 +4393,12 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			/* Make sure we're dealing with strings. */
 			zend_string *tmp_search_str;
 			zend_string *search_str = zval_get_tmp_string(search_entry, &tmp_search_str);
+			zend_string *replace_entry_str, *tmp_replace_entry_str = NULL;
 
 			/* If replace is an array. */
 			if (Z_TYPE_P(replace) == IS_ARRAY) {
 				/* Get current entry */
+				zval *replace_entry = NULL;
 				while (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
 					replace_entry = &Z_ARRVAL_P(replace)->arData[replace_idx].val;
 					if (Z_TYPE_P(replace_entry) != IS_UNDEF) {
@@ -4456,15 +4455,12 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}
 			} else {
 				zend_tmp_string_release(tmp_search_str);
+				zend_tmp_string_release(tmp_replace_entry_str);
 				continue;
 			}
 
 			zend_tmp_string_release(tmp_search_str);
-
-			if (tmp_replace_entry_str) {
-				zend_string_release_ex(tmp_replace_entry_str, 0);
-				tmp_replace_entry_str = NULL;
-			}
+			zend_tmp_string_release(tmp_replace_entry_str);
 
 			if (subject_str == tmp_result) {
 				zend_string_delref(subject_str);
