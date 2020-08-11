@@ -100,12 +100,12 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		php_error_docref(NULL, E_WARNING, "%s", message);
 	} else {
 		zval ex, info;
-		zend_class_entry *def_ex = php_pdo_get_exception_base(1), *pdo_ex = php_pdo_get_exception();
+		zend_class_entry *pdo_ex = php_pdo_get_exception();
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_string(def_ex, Z_OBJ(ex), "message", sizeof("message")-1, message);
-		zend_update_property_string(def_ex, Z_OBJ(ex), "code", sizeof("code")-1, *pdo_err);
+		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message")-1, message);
+		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", sizeof("code")-1, *pdo_err);
 
 		array_init(&info);
 
@@ -175,12 +175,12 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(message));
 	} else if (EG(exception) == NULL) {
 		zval ex;
-		zend_class_entry *def_ex = php_pdo_get_exception_base(1), *pdo_ex = php_pdo_get_exception();
+		zend_class_entry *pdo_ex = php_pdo_get_exception();
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_str(def_ex, Z_OBJ(ex), "message", sizeof("message") - 1, message);
-		zend_update_property_string(def_ex, Z_OBJ(ex), "code", sizeof("code") - 1, *pdo_err);
+		zend_update_property_str(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message") - 1, message);
+		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", sizeof("code") - 1, *pdo_err);
 
 		if (!Z_ISUNDEF(info)) {
 			zend_update_property(pdo_ex, Z_OBJ(ex), "errorInfo", sizeof("errorInfo") - 1, &info);
