@@ -3,6 +3,7 @@ Observer: Basic generator observability
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
+zend_test.observer.show_return_value=1
 --FILE--
 <?php
 function getResults() {
@@ -29,16 +30,16 @@ echo doSomething() . PHP_EOL;
   <doSomething>
     <!-- init getResults() -->
     <getResults>
-    </getResults>
+    </getResults:10>
 10
     <getResults>
-    </getResults>
+    </getResults:11>
 11
     <getResults>
-    </getResults>
+    </getResults:12>
 12
     <getResults>
-    </getResults>
-  </doSomething>
+    </getResults:NULL>
+  </doSomething:'Done'>
 Done
 </file '%s/observer_generator_01.php'>

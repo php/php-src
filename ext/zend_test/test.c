@@ -21,16 +21,20 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_var.h"
 #include "php_test.h"
 #include "test_arginfo.h"
 #include "zend_attributes.h"
 #include "zend_observer.h"
+#include "zend_smart_str.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
 	int observer_observe_all;
 	int observer_observe_includes;
 	int observer_observe_functions;
+	int observer_show_return_type;
+	int observer_show_return_value;
 	//HashTable observer_observe_functions_list;
 	int observer_nesting_depth;
 ZEND_END_MODULE_GLOBALS(zend_test)
@@ -296,6 +300,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_all", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_all, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_includes", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_includes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_functions", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_functions, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(zend_test)
@@ -409,15 +415,35 @@ static void observer_begin(zend_execute_data *execute_data)
 	ZT_G(observer_nesting_depth)++;
 }
 
+static void get_retval_info(zval *retval, smart_str *buf)
+{
+	if (!ZT_G(observer_show_return_type) && !ZT_G(observer_show_return_value)) {
+		return;
+	}
+
+	smart_str_appendc(buf, ':');
+	if (retval == NULL) {
+		smart_str_appendl(buf, "NULL", 4);
+	} else if (ZT_G(observer_show_return_value)) {
+		php_var_export_ex(retval, 2 * ZT_G(observer_nesting_depth) + 3, buf);
+	} else if (ZT_G(observer_show_return_type)) {
+		smart_str_appends(buf, zend_zval_type_name(retval));
+	}
+	smart_str_0(buf);
+}
+
 static void observer_end(zend_execute_data *execute_data, zval *retval)
 {
 	ZT_G(observer_nesting_depth)--;
 	if (execute_data->func && execute_data->func->common.function_name) {
+		smart_str retval_info = {0};
+		get_retval_info(retval, &retval_info);
 		if (execute_data->func->common.scope) {
-			php_printf("%*s</%s::%s>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->common.scope->name), ZSTR_VAL(execute_data->func->common.function_name));
+			php_printf("%*s</%s::%s%s>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->common.scope->name), ZSTR_VAL(execute_data->func->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
 		} else {
-			php_printf("%*s</%s>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->common.function_name));
+			php_printf("%*s</%s%s>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
 		}
+		smart_str_free(&retval_info);
 	} else {
 		php_printf("%*s</file '%s'>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->op_array.filename));
 	}
