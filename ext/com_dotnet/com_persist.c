@@ -276,7 +276,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	return (IStream*)stm;
 }
 
-#define CPH_METHOD(fname)		static PHP_METHOD(COMPersistHelper, fname)
+#define CPH_METHOD(fname)		PHP_METHOD(COMPersistHelper, fname)
 
 #define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(getThis());
 
