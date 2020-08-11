@@ -251,9 +251,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		}
 
 		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page), &cached)) != NULL) {
-			if (!cached) {
-				php_com_import_typelib(pTL, mode, COMG(code_page));
-			}
+			php_com_import_typelib(pTL, mode, COMG(code_page));
 			ITypeLib_Release(pTL);
 		}
 	}

@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #79947 (Memory leak on invalid offset type in compound
     assignment). (Nikita)
 
+- COM:
+  . Fixed bug #48585 (com_load_typelib holds reference, fails on second call).
+    (cmb)
+
 - Gettext:
   . Fixed bug #70574 (Tests fail due to relying on Linux fallback behavior for
     gettext()). (Florian Engelhardt)
