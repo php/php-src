@@ -397,23 +397,27 @@ function ut_main()
     );
 
     foreach( $tests as $test ) {
-        $arg0 = urlencode($test[0]);
-        $res_str .= "substring of \"$arg0\" from \"$test[1]\" - grapheme_substr";
-        if ( 3 == count( $test ) ) {
-            $result = grapheme_substr($test[0], $test[1]);
+        try {
+            $arg0 = urlencode($test[0]);
+            $res_str .= "substring of \"$arg0\" from \"$test[1]\" - grapheme_substr";
+            if ( 3 == count( $test ) ) {
+                $result = grapheme_substr($test[0], $test[1]);
+            }
+            else {
+                $res_str .= " with length $test[2]";
+                $result = grapheme_substr($test[0], $test[1], $test[2]);
+            }
+            $res_str .= " = ";
+            if ( $result === false ) {
+                $res_str .= 'false';
+            }
+            else {
+                $res_str .= urlencode($result);
+            }
+            $res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
+        } catch (ValueError $exception) {
+            echo $exception->getMessage() . "\n";
         }
-        else {
-            $res_str .= " with length $test[2]";
-            $result = grapheme_substr($test[0], $test[1], $test[2]);
-        }
-        $res_str .= " = ";
-        if ( $result === false ) {
-            $res_str .= 'false';
-        }
-        else {
-            $res_str .= urlencode($result);
-        }
-        $res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
     }
 
 
@@ -782,6 +786,15 @@ function check_result($result, $expected) {
 
 ?>
 --EXPECT--
+grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
+grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
+grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
+
 function grapheme_strlen($string) {}
 
 "hindi" in devanagari strlen 2

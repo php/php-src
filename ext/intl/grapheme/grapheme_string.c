@@ -114,8 +114,8 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
@@ -123,11 +123,6 @@ PHP_FUNCTION(grapheme_strpos)
 	noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
-
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	if (offset >= 0) {
 		/* quick check to see if the string might be there
@@ -154,7 +149,6 @@ PHP_FUNCTION(grapheme_strpos)
 	} else {
 		RETURN_FALSE;
 	}
-
 }
 /* }}} */
 
@@ -174,19 +168,14 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_stripos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
 	offset = (int32_t) loffset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
-
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
@@ -240,19 +229,14 @@ PHP_FUNCTION(grapheme_strrpos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
 	offset = (int32_t) loffset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
-
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_FALSE;
-	}
 
 	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
@@ -300,19 +284,14 @@ PHP_FUNCTION(grapheme_strripos)
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
 	offset = (int32_t) loffset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
-
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
@@ -377,8 +356,8 @@ PHP_FUNCTION(grapheme_substr)
 	}
 
 	if ( OUTSIDE_STRING(lstart, str_len)) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: start not contained in string", 1 );
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be contained in argument #1 ($string)");
+		RETURN_THROWS();
 	}
 
 	/* we checked that it will fit: */
@@ -532,10 +511,9 @@ PHP_FUNCTION(grapheme_substr)
 
 	if ( UBRK_DONE == sub_str_end_pos) {
 		if(length < 0) {
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length not contained in string", 1 );
-
+			zend_argument_value_error(3, "must be contained in argument #1 ($string)");
 			efree(ustr);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		} else {
 			sub_str_end_pos = ustr_len;
 		}
@@ -580,12 +558,6 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 
 	if ( !f_ignore_case ) {
 
