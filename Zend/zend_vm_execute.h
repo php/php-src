@@ -4375,6 +4375,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_CON
 	zval *val;
 
 	val = RT_CONSTANT(opline, opline->op1);
+	if (IS_CONST != IS_CONST) {
+		ZVAL_DEREF(val);
+	}
 
 	if (Z_TYPE_INFO_P(val) > IS_NULL) {
 		ZEND_VM_NEXT_OPCODE();
@@ -11095,6 +11098,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_TMPV
 	zval *val;
 
 	val = EX_VAR(opline->op1.var);
+	if ((IS_TMP_VAR|IS_VAR|IS_CV) != IS_CONST) {
+		ZVAL_DEREF(val);
+	}
 
 	if (Z_TYPE_INFO_P(val) > IS_NULL) {
 		ZEND_VM_NEXT_OPCODE();
