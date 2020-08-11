@@ -244,7 +244,7 @@ PHP_METHOD(com, __construct)
 		TL = php_com_load_typelib_via_cache(typelib_name, obj->code_page, &cached);
 
 		if (TL) {
-			if (COMG(autoreg_on) && !cached) {
+			if (COMG(autoreg_on)) {
 				php_com_import_typelib(TL, mode, obj->code_page);
 			}
 
@@ -834,9 +834,7 @@ PHP_FUNCTION(com_load_typelib)
 	php_com_initialize();
 	pTL = php_com_load_typelib_via_cache(name, codepage, &cached);
 	if (pTL) {
-		if (cached) {
-			RETVAL_TRUE;
-		} else if (php_com_import_typelib(pTL, cs ? CONST_CS : 0, codepage) == SUCCESS) {
+		if (php_com_import_typelib(pTL, cs ? CONST_CS : 0, codepage) == SUCCESS) {
 			RETVAL_TRUE;
 		}
 
