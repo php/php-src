@@ -782,7 +782,7 @@ try_again:
 		zend_execute_ex(generator->execute_data);
 		if (generator->execute_data) {
 			/* On the final return, this will be called from ZEND_GENERATOR_RETURN */
-			zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
+			zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->value);
 		}
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
