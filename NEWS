@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #79917 (File cache segfault with a static variable in inherited
     method). (Nikita)
 
+- PDO:
+  . Fixed bug #64705 (errorInfo property of PDOException is null when
+    PDO::__construct() fails). (Ahmed Abdou)
+
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array
     with single reference). (Nikita)
