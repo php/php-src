@@ -24,16 +24,6 @@
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
-/* {{{ mysqlnd_functions[]
- *
- * Every user visible function must have an entry in mysqlnd_functions[].
- */
-static zend_function_entry mysqlnd_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
-
 /* {{{ mysqlnd_minfo_print_hash */
 PHPAPI void
 mysqlnd_minfo_print_hash(zval *values)
@@ -294,7 +284,7 @@ zend_module_entry mysqlnd_module_entry = {
 	NULL,
 	mysqlnd_deps,
 	"mysqlnd",
-	mysqlnd_functions,
+	NULL,
 	PHP_MINIT(mysqlnd),
 	PHP_MSHUTDOWN(mysqlnd),
 #if PHP_DEBUG
