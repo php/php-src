@@ -1442,7 +1442,6 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 	zval *parameter, *driver_params = NULL;
 
 	memset(&param, 0, sizeof(param));
-	param.paramno = -1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
@@ -1458,6 +1457,7 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 	param.param_type = (int) param_type;
 
 	if (param.name) {
+		param.paramno = -1;
 	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
 	} else {
@@ -1489,9 +1489,8 @@ PHP_METHOD(PDOStatement, bindValue)
 	zval *parameter;
 
 	memset(&param, 0, sizeof(param));
-	param.paramno = -1;
 
-	ZEND_PARSE_PARAMETERS_START(2, 5)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
 		Z_PARAM_ZVAL(parameter)
 		Z_PARAM_OPTIONAL
@@ -1502,6 +1501,7 @@ PHP_METHOD(PDOStatement, bindValue)
 	param.param_type = (int) param_type;
 
 	if (param.name) {
+		param.paramno = -1;
 	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
 	} else {

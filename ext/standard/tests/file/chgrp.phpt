@@ -13,5 +13,5 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Warning: chgrp(): No such file or directory in %s on line %d
