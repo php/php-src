@@ -347,7 +347,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 			void *value;
 			if (group_str) {
 				option = PHP_STREAM_META_GROUP_NAME;
-				value = group_str;
+				value = ZSTR_VAL(group_str);
 			} else {
 				option = PHP_STREAM_META_GROUP;
 				value = &group_long;
@@ -473,7 +473,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 			void *value;
 			if (user_str) {
 				option = PHP_STREAM_META_OWNER_NAME;
-				value = user_str;
+				value = ZSTR_VAL(user_str);
 			} else {
 				option = PHP_STREAM_META_OWNER;
 				value = &user_long;
