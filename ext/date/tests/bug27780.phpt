@@ -35,7 +35,7 @@ foreach ($timezones as $timezone) {
     foreach ($timestrings as $timestring) {
         $time = strtotime($timestring);
 
-        echo $time, strftime(" [%Y-%m-%d %H:%M:%S %Z]", $time), " [$timestring]\n";
+        echo $time, date(" [Y-m-d H:i:s T]", $time), " [$timestring]\n";
     }
 
     echo "\n";

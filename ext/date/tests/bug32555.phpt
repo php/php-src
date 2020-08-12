@@ -3,6 +3,7 @@ Bug #32555 (strtotime("tomorrow") can return false)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip strftime uses system TZ');
+if (!strftime('%Z')) die('skip strftime does not support %Z');
 ?>
 --INI--
 date.timezone=US/Eastern
