@@ -4724,7 +4724,8 @@ PHP_FUNCTION(setlocale)
 		}
 	}
 
-	RETURN_FALSE;
+	zend_value_error("Requested locale is not installed on your system");
+	return;
 }
 /* }}} */
 

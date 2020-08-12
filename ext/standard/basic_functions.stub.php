@@ -664,7 +664,7 @@ function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
  * @param array|string $locales
  * @param string $rest
  */
-function setlocale(int $category, $locales, ...$rest): string|false {}
+function setlocale(int $category, $locales, ...$rest): string {}
 
 /** @param array $result */
 function parse_str(string $encoded_string, &$result): void {}
