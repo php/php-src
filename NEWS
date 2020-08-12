@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     exit value in CLI). (Nikita)
   . Fixed bug #62294 (register_shutdown_function() does not correctly handle
     exit code). (Nikita)
+  . Fixed bug #79927 (Generator doesn't throw exception after multiple yield
+    from iterable). (Nikita)
 
 - Date:
   . Fixed bug #60302 (DateTime::createFromFormat should new static(), not new

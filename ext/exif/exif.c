@@ -62,7 +62,7 @@ typedef unsigned char uchar;
 
 #define EFREE_IF(ptr)	if (ptr) efree(ptr)
 
-#define MAX_IFD_NESTING_LEVEL 150
+#define MAX_IFD_NESTING_LEVEL 200
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(exif)
@@ -3185,14 +3185,12 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 
 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
-	switch (maker_note->offset_mode) {
-		case MN_OFFSET_MAKER:
-			exif_offset_info_init(&new_info, value_ptr, value_ptr, value_len);
-			info = &new_info;
-			break;
-		default:
-		case MN_OFFSET_NORMAL:
-			break;
+	/* It can be that motorola_intel is wrongly mapped, let's try inverting it */
+	if ((2+NumDirEntries*12) > value_len) {
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Potentially invalid endianess, trying again with different endianness before imminent failure.");
+
+		ImageInfo->motorola_intel = ImageInfo->motorola_intel == 0 ? 1 : 0;
+		NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 	}
 
 	if ((2+NumDirEntries*12) > value_len) {
@@ -3202,6 +3200,16 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 	if ((dir_start - value_ptr) > value_len - (2+NumDirEntries*12)) {
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 0x%04X > 0x%04X", (dir_start - value_ptr) + (2+NumDirEntries*12), value_len);
 		return false;
+	}
+
+	switch (maker_note->offset_mode) {
+		case MN_OFFSET_MAKER:
+			exif_offset_info_init(&new_info, value_ptr, value_ptr, value_len);
+			info = &new_info;
+			break;
+		default:
+		case MN_OFFSET_NORMAL:
+			break;
 	}
 
 	for (de=0;de<NumDirEntries;de++) {

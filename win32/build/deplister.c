@@ -22,8 +22,8 @@
 #include <imagehlp.h>
 
 BOOL CALLBACK StatusRoutine(IMAGEHLP_STATUS_REASON reason,
-		PSTR image_name, PSTR dll_name,
-		ULONG va, ULONG param)
+		PCSTR image_name, PCSTR dll_name,
+		ULONG_PTR va, ULONG_PTR param)
 {
 	switch (reason) {
 		case BindImportModuleFailed:

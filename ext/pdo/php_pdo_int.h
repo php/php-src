@@ -23,7 +23,6 @@
 
 extern HashTable pdo_driver_hash;
 extern zend_class_entry *pdo_exception_ce;
-PDO_API zend_class_entry *php_pdo_get_exception_base(int root);
 int php_pdo_list_entry(void);
 
 void pdo_dbh_init(void);

@@ -1219,7 +1219,6 @@ static int cli_main( int argc, char * argv[] )
 {
 
     static const char * ini_defaults[] = {
-        "report_zend_debug",    "0",
         "display_errors",       "1",
         "register_argc_argv",   "1",
         "html_errors",          "0",

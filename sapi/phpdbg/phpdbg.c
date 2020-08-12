@@ -1062,17 +1062,6 @@ const char phpdbg_ini_hardcoded[] =
 "error_log=\n"
 "output_buffering=off\n\0";
 
-/* overwritable ini defaults must be set in phpdbg_ini_defaults() */
-#define INI_DEFAULT(name, value) \
-	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value) - 1, 1)); \
-	zend_hash_str_update(configuration_hash, name, sizeof(name) - 1, &tmp);
-
-void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
-{
-	zval tmp;
-	INI_DEFAULT("report_zend_debug", "0");
-} /* }}} */
-
 static void phpdbg_welcome(zend_bool cleaning) /* {{{ */
 {
 	/* print blurb */
@@ -1567,7 +1556,7 @@ phpdbg_main:
 		phpdbg->name = sapi_name;
 	}
 
-	phpdbg->ini_defaults = phpdbg_ini_defaults;
+	phpdbg->ini_defaults = NULL;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
 
