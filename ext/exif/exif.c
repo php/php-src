@@ -66,7 +66,8 @@ typedef unsigned char uchar;
 
 #define EFREE_IF(ptr)	if (ptr) efree(ptr)
 
-#define MAX_IFD_NESTING_LEVEL 200
+#define MAX_IFD_NESTING_LEVEL 10
+#define MAX_IFD_TAGS 1000
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_exif_tagname, 0)
@@ -1940,6 +1941,7 @@ typedef struct {
 	int             read_thumbnail;
 	int             read_all;
 	int             ifd_nesting_level;
+	int             ifd_count;
 	/* internal */
 	file_section_list 	file;
 } image_info_type;
@@ -2674,6 +2676,7 @@ static void exif_process_SOFn (uchar *Data, int marker, jpeg_sof_info *result)
 /* forward declarations */
 static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int tag);
 static int exif_process_IFD_TAG(    image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table);
+static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offset, int section_index);
 
 /* {{{ exif_get_markername
 	Get name of marker */
@@ -3246,7 +3249,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 /* {{{ exif_process_IFD_TAG
  * Process one of the nested IFDs directories. */
-static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)
+static int exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)
 {
 	size_t length;
 	unsigned int tag, format, components;
@@ -3258,13 +3261,6 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	char *dump_data;
 	int dump_free;
 #endif /* EXIF_DEBUG */
-
-	/* Protect against corrupt headers */
-	if (ImageInfo->ifd_nesting_level > MAX_IFD_NESTING_LEVEL) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "corrupt EXIF header: maximum directory nesting level reached");
-		return FALSE;
-	}
-	ImageInfo->ifd_nesting_level++;
 
 	tag = php_ifd_get16u(dir_entry, ImageInfo->motorola_intel);
 	format = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
@@ -3584,6 +3580,24 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	return TRUE;
 }
 /* }}} */
+
+static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)
+{
+	int result;
+	/* Protect against corrupt headers */
+	if (ImageInfo->ifd_count++ > MAX_IFD_TAGS) {
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "corrupt EXIF header: maximum IFD tag count reached");
+		return FALSE;
+	}
+	if (ImageInfo->ifd_nesting_level > MAX_IFD_NESTING_LEVEL) {
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "corrupt EXIF header: maximum directory nesting level reached");
+		return FALSE;
+	}
+	ImageInfo->ifd_nesting_level++;
+	result = exif_process_IFD_TAG_impl(ImageInfo, dir_entry, offset_base, IFDlength, displacement, section_index, ReadNextIFD, tag_table);
+	ImageInfo->ifd_nesting_level--;
+	return result;
+}
 
 /* {{{ exif_process_IFD_in_JPEG
  * Process one of the nested IFDs directories. */
@@ -4018,7 +4032,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo)
 
 /* {{{ exif_process_IFD_in_TIFF
  * Parse the TIFF header; */
-static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offset, int section_index)
+static int exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir_offset, int section_index)
 {
 	int i, sn, num_entries, sub_section_index = 0;
 	unsigned char *dir_entry;
@@ -4026,10 +4040,6 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value=0, fgot;
 	int entry_tag , entry_type;
 	tag_table_type tag_table = exif_get_tag_table(section_index);
-
-	if (ImageInfo->ifd_nesting_level > MAX_IFD_NESTING_LEVEL) {
-		return FALSE;
-	}
 
 	if (ImageInfo->FileSize >= 2 && ImageInfo->FileSize - 2 >= dir_offset) {
 		sn = exif_file_sections_add(ImageInfo, M_PSEUDO, 2, NULL);
@@ -4174,7 +4184,6 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 #ifdef EXIF_DEBUG
 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s @x%04X", exif_get_sectionname(sub_section_index), entry_offset);
 #endif
-						ImageInfo->ifd_nesting_level++;
 						exif_process_IFD_in_TIFF(ImageInfo, entry_offset, sub_section_index);
 						if (section_index!=SECTION_THUMBNAIL && entry_tag==TAG_SUB_IFD) {
 							if (ImageInfo->Thumbnail.filetype != IMAGE_FILETYPE_UNKNOWN
@@ -4218,7 +4227,6 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) at x%04X", next_offset);
 #endif
-					ImageInfo->ifd_nesting_level++;
 					exif_process_IFD_in_TIFF(ImageInfo, next_offset, SECTION_THUMBNAIL);
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
@@ -4254,6 +4262,21 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 	}
 }
 /* }}} */
+
+static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offset, int section_index)
+{
+	int result;
+	if (ImageInfo->ifd_count++ > MAX_IFD_TAGS) {
+		return FALSE;
+	}
+	if (ImageInfo->ifd_nesting_level > MAX_IFD_NESTING_LEVEL) {
+		return FALSE;
+	}
+	ImageInfo->ifd_nesting_level++;
+	result = exif_process_IFD_in_TIFF_impl(ImageInfo, dir_offset, section_index);
+	ImageInfo->ifd_nesting_level--;
+	return result;
+}
 
 /* {{{ exif_scan_FILE_header
  * Parse the marker stream until SOS or EOI is seen; */
@@ -4410,6 +4433,7 @@ static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, i
 
 
 	ImageInfo->ifd_nesting_level = 0;
+	ImageInfo->ifd_count = 0;
 
 	/* Scan the headers */
 	ret = exif_scan_FILE_header(ImageInfo);
