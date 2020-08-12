@@ -1097,7 +1097,6 @@ PHP_FUNCTION(number_format)
 	double num;
 	zend_long dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
-	char thousand_sep_chr = ',', dec_point_chr = '.';
 	size_t thousand_sep_len = 0, dec_point_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
@@ -1108,30 +1107,16 @@ PHP_FUNCTION(number_format)
 		Z_PARAM_STRING_OR_NULL(thousand_sep, thousand_sep_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch(ZEND_NUM_ARGS()) {
-	case 1:
-		RETURN_STR(_php_math_number_format(num, 0, dec_point_chr, thousand_sep_chr));
-		break;
-	case 2:
-		RETURN_STR(_php_math_number_format(num, (int)dec, dec_point_chr, thousand_sep_chr));
-		break;
-	case 4:
-		if (dec_point == NULL) {
-			dec_point = &dec_point_chr;
-			dec_point_len = 1;
-		}
-
-		if (thousand_sep == NULL) {
-			thousand_sep = &thousand_sep_chr;
-			thousand_sep_len = 1;
-		}
-
-		RETVAL_STR(_php_math_number_format_ex(num, (int)dec,
-				dec_point, dec_point_len, thousand_sep, thousand_sep_len));
-		break;
-	default:
-		WRONG_PARAM_COUNT;
+	if (dec_point == NULL) {
+		dec_point = ".";
+		dec_point_len = 1;
 	}
+	if (thousand_sep == NULL) {
+		thousand_sep = ",";
+		thousand_sep_len = 1;
+	}
+
+	RETURN_STR(_php_math_number_format_ex(num, (int)dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 }
 /* }}} */
 
