@@ -304,6 +304,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
+static zend_observer_fcall observer_fcall_init(zend_function *fbc);
+
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_class_entry class_entry;
@@ -391,6 +393,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	REGISTER_INI_ENTRIES();
 
+	zend_observer_fcall_register(observer_fcall_init);
+
 	return SUCCESS;
 }
 
@@ -451,6 +455,10 @@ static void observer_end(zend_execute_data *execute_data, zval *retval)
 
 static zend_observer_fcall observer_fcall_init(zend_function *fbc)
 {
+	if (!ZT_G(observer_enabled)) {
+		return (zend_observer_fcall){NULL, NULL};
+	}
+
 	if (fbc->common.function_name) {
 		if (fbc->common.scope) {
 			php_printf("%*s<!-- init %s::%s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
@@ -473,9 +481,6 @@ static zend_observer_fcall observer_fcall_init(zend_function *fbc)
 
 PHP_RINIT_FUNCTION(zend_test)
 {
-	if (ZT_G(observer_enabled)) {
-		zend_observer_fcall_register(observer_fcall_init);
-	}
 	return SUCCESS;
 }
 

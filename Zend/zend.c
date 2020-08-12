@@ -1209,6 +1209,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 	if (CG(map_ptr_last)) {
 		memset(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), 0, CG(map_ptr_last) * sizeof(void*));
 	}
+	zend_observer_activate();
 }
 /* }}} */
 

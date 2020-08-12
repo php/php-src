@@ -17,8 +17,6 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 	/* We don't want to get an extension handle unless an ext installs an observer */
 	if (zend_observer_fcall_op_array_extension == -1) {
 		zend_observer_fcall_op_array_extension = zend_get_op_array_extension_handle();
-		/* todo: how to size the arena? */
-		fcall_handlers_arena = zend_arena_create(1024);
 	}
 	zend_llist_add_element(&zend_observers_fcall_list, &init);
 }
@@ -26,6 +24,13 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 // Called by engine before MINITs
 ZEND_API void zend_observer_startup(void) {
 	zend_llist_init(&zend_observers_fcall_list, sizeof(zend_observer_fcall_init), NULL, 1);
+}
+
+ZEND_API void zend_observer_activate(void) {
+	/* todo: how to size the arena? */
+	if (zend_observer_fcall_op_array_extension != -1) {
+		fcall_handlers_arena = zend_arena_create(1024);
+	}
 }
 
 ZEND_API void zend_observer_deactivate(void) {
