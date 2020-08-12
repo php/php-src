@@ -939,18 +939,14 @@ function stat(string $filename): array|false {}
 
 function lstat(string $filename): array|false {}
 
-/** @param string|int $user */
-function chown(string $filename, $user): bool {}
+function chown(string $filename, string|int $user): bool {}
 
-/** @param string|int $group */
-function chgrp(string $filename, $group): bool {}
+function chgrp(string $filename, string|int $group): bool {}
 
 #if HAVE_LCHOWN
-/** @param string|int $user */
-function lchown(string $filename, $user): bool {}
+function lchown(string $filename, string|int $user): bool {}
 
-/** @param string|int $group */
-function lchgrp(string $filename, $group): bool {}
+function lchgrp(string $filename, string|int $group): bool {}
 #endif
 
 function chmod(string $filename, int $mode): bool {}

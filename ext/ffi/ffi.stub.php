@@ -17,7 +17,7 @@ final class FFI
     public static function free(FFI\CData $ptr): void {}
 
     /**
-     * @param FFI\CData $ptr
+     * @param FFI\CData|string|int|null $ptr
      * @prefer-ref $ptr
      */
     public static function cast(FFI\CType|string $type, $ptr): ?FFI\CData {}

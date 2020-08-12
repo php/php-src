@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-chgrp(): Argument #2 ($group) must be of type string|int, null given
+Warning: chgrp(): No such file or directory in %s on line %d

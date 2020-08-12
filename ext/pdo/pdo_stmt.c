@@ -1457,9 +1457,10 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 
 	param.param_type = (int) param_type;
 
-	if (param.paramno > 0) {
+	if (param.name) {
+	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
-	} else if (!param.name) {
+	} else {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
 		RETURN_FALSE;
 	}
@@ -1490,20 +1491,20 @@ PHP_METHOD(PDOStatement, bindValue)
 	memset(&param, 0, sizeof(param));
 	param.paramno = -1;
 
-	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-			"lz|l", &param.paramno, &parameter, &param_type)) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &param.name,
-				&parameter, &param_type)) {
-			return;
-		}
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
+		Z_PARAM_ZVAL(parameter)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(param_type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
 	param.param_type = (int) param_type;
 
-	if (param.paramno > 0) {
+	if (param.name) {
+	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
-	} else if (!param.name) {
+	} else {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
 		RETURN_FALSE;
 	}
