@@ -91,6 +91,7 @@
 #include "filters/mbfilter_utf8.h"
 #include "../mbstring_singlebyte.h"
 
+#include "mbfl_filter_output.h"
 #include "eaw_table.h"
 #include "filters/unicode_prop.h"
 
@@ -1256,7 +1257,7 @@ struct mime_header_decoder_data *mime_header_decoder_new(const mbfl_encoding *ou
 		(flush_function_t)pd->conv2_filter->filter_flush, pd->conv2_filter);
 
 	/* decode filter; 'from' encoding may change to base64 or qprint later */
-	pd->decode_filter = mbfl_convert_filter_new(&mbfl_encoding_8bit, &mbfl_encoding_8bit, (filter_output_func)pd->conv1_filter->filter_function,
+	pd->decode_filter = mbfl_convert_filter_new(&mbfl_encoding_8bit, &mbfl_encoding_8bit, mbfl_filter_output_pipe,
 		(flush_function_t)pd->conv1_filter->filter_flush, pd->conv1_filter);
 	return pd;
 }
@@ -1298,7 +1299,6 @@ static void mime_prepare_filters_for_encword_contents(struct mime_header_decoder
 	const mbfl_encoding *transfer_encoding)
 {
 	mbfl_convert_filter_reset(pd->conv1_filter, content_encoding, &mbfl_encoding_wchar);
-	pd->decode_filter->output_function = (int(*)(int, void*))pd->conv1_filter->filter_function;
 	pd->decode_filter->flush_function  = (flush_function_t)pd->conv1_filter->filter_flush;
 	mbfl_convert_filter_reset(pd->decode_filter, transfer_encoding, &mbfl_encoding_8bit);
 }

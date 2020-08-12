@@ -28,6 +28,14 @@
  *
  */
 
+#include "mbfl_convert.h"
+
+int mbfl_filter_output_pipe(int c, void* data)
+{
+	mbfl_convert_filter *filter = (mbfl_convert_filter*)data;
+	return (*filter->filter_function)(c, filter);
+}
+
 int mbfl_filter_output_null(int c, void* data)
 {
 	return c;

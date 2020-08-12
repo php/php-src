@@ -31,6 +31,7 @@
 #ifndef MBFL_FILTER_OUTPUT_H
 #define MBFL_FILTER_OUTPUT_H
 
+MBFLAPI extern int mbfl_filter_output_pipe(int c, void* data);
 MBFLAPI extern int mbfl_filter_output_null(int c, void* data);
 
 #endif /* MBFL_FILTER_OUTPUT_H */

@@ -92,123 +92,114 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 
 int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
 {
-	int w;
-	w = c & MBFL_WCSGROUP_MASK;
-	w |= MBFL_WCSGROUP_THROUGH;
-	filter->status = 0;
-	filter->cache = 0;
-	CK((*filter->output_function)(w, filter->data));
+	filter->filter_function = mbfl_filt_conv_utf8_wchar;
+	filter->cache = filter->status = 0;
+	CK((*filter->output_function)((c & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data));
 	return 0;
 }
 
+int mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_utf8_wchar_lastbyte(int c, mbfl_convert_filter *filter);
 
-/*
- * UTF-8 => wchar
- */
 int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 {
-	int s, c1;
+	if (c < 0x80) {
+		CK((*filter->output_function)(c, filter->data));
+	} else if (c >= 0xC2 && c <= 0xDF) { /* 2-byte character */
+		/* The first byte of a 2-byte character must be at least 0xC2... if it was
+		 * 0xC0 or 0xC1, that would mean the character could have fit into 1 byte!
+		 * UTF-8 characters must be encoded in the smallest number of bytes that works */
+		filter->filter_function = mbfl_filt_conv_utf8_wchar_lastbyte;
+		filter->status = 1;
+		filter->cache = c & 0x1F;
+	} else if (c >= 0xE0 && c <= 0xEF) { /* 3-byte character */
+		filter->filter_function = mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte;
+		filter->status = 1;
+		filter->cache = c & 0xF;
+	} else if (c >= 0xF0 && c <= 0xF4) { /* 4-byte character */
+		filter->filter_function = mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes;
+		filter->status = 1;
+		filter->cache = c & 0x7;
+	} else {
+		CK(mbfl_filt_put_invalid_char(c, filter));
+	}
+	return c;
+}
 
-retry:
-	switch (filter->status & 0xff) {
-	case 0x00:
-		if (c < 0x80) {
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c >= 0xc2 && c <= 0xdf) { /* 2byte code first char: 0xc2-0xdf */
-			filter->status = 0x10;
-			filter->cache = c & 0x1f;
-		} else if (c >= 0xe0 && c <= 0xef) { /* 3byte code first char: 0xe0-0xef */
-			filter->status = 0x20;
-			filter->cache = c & 0xf;
-		} else if (c >= 0xf0 && c <= 0xf4) { /* 3byte code first char: 0xf0-0xf4 */
-			filter->status = 0x30;
-			filter->cache = c & 0x7;
-		} else {
-			CK(mbfl_filt_put_invalid_char(c, filter));
+int mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes(int c, mbfl_convert_filter *filter)
+{
+	/* 2nd byte of a 4-byte character
+	 *
+	 * If the cache is zero, and `c & 0x30` is zero, that means the top 5 bits
+	 * of the 21-bit codepoint were all zero... meaning this character could
+	 * have fit into the 16 data bits of a 3-byte character */
+	if (c >= 0x80 && c <= 0xBF && (filter->cache || (c & 0x30))) {
+		filter->cache = (filter->cache << 6) | (c & 0x3F);
+		filter->filter_function = mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte;
+	} else {
+		CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+		if (c < 0x80 || (c >= 0xC2 && c <= 0xF4)) {
+			/* Only retry if byte could be the start of a valid UTF-8 character */
+			return mbfl_filt_conv_utf8_wchar(c, filter);
 		}
-		break;
-	case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
-	case 0x21: /* 3byte code 3rd char: 0x80-0xbf */
-	case 0x32: /* 4byte code 4th char: 0x80-0xbf */
-		filter->status = 0;
-		if (c >= 0x80 && c <= 0xbf) {
-			s = (filter->cache<<6) | (c & 0x3f);
-			filter->cache = 0;
+	}
+	return c;
+}
+
+int mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte(int c, mbfl_convert_filter *filter)
+{
+	if (c >= 0x80 && c <= 0xBF && (filter->cache || (c & 0x20)) && (filter->cache != 0xD || !(c & 0x20))) {
+		/* This could be the 2nd byte of a 3-byte character
+		 * If so, and the cache is zero, and `c & 0x20` is zero, then this
+		 * character could have fit into 2 bytes
+		 *
+		 * Again, if the cache is 0xD, and the high bit of `c` is 1, then this
+		 * codepoint is in the illegal range 0xD800-0xDFFF, which is not used
+		 * so as not to overlap with 'surrogates' in some encodings like UTF-16 */
+		filter->cache = (filter->cache << 6) | (c & 0x3f);
+		filter->filter_function = mbfl_filt_conv_utf8_wchar_lastbyte;
+	} else {
+		CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+		if (c < 0x80 || (c >= 0xC2 && c <= 0xF4)) {
+			return mbfl_filt_conv_utf8_wchar(c, filter);
+		}
+	}
+	return c;
+}
+
+int mbfl_filt_conv_utf8_wchar_lastbyte(int c, mbfl_convert_filter *filter)
+{
+	filter->filter_function = mbfl_filt_conv_utf8_wchar;
+	filter->status = 0;
+	if (c >= 0x80 && c <= 0xBF) {
+		int s = (filter->cache << 6) | (c & 0x3F);
+		filter->cache = 0;
+		if (s <= 0x10FFFF) {
 			CK((*filter->output_function)(s, filter->data));
-		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			goto retry;
+			return;
 		}
-		break;
-	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
-		s = (filter->cache<<6) | (c & 0x3f);
-		c1 = filter->cache & 0xf;
-
-		if ((c >= 0x80 && c <= 0xbf) &&
-			((c1 == 0x0 && c >= 0xa0) ||
-			 (c1 == 0xd && c < 0xa0) ||
-			 (c1 > 0x0 && c1 != 0xd))) {
-			filter->cache = s;
-			filter->status++;
-		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			goto retry;
-		}
-		break;
-	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
-		s = (filter->cache<<6) | (c & 0x3f);
-		c1 = filter->cache & 0x7;
-
-		if ((c >= 0x80 && c <= 0xbf) &&
-			((c1 == 0x0 && c >= 0x90) ||
-			 (c1 == 0x4 && c < 0x90) ||
-			 (c1 > 0x0 && c1 != 0x4))) {
-			filter->cache = s;
-			filter->status++;
-		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			goto retry;
-		}
-		break;
-	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
-		if (c >= 0x80 && c <= 0xbf) {
-			filter->cache = (filter->cache<<6) | (c & 0x3f);
-			filter->status++;
-		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			goto retry;
-		}
-		break;
-	default:
-		filter->status = 0;
-		break;
 	}
 
+	CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+	if (c < 0x80 || (c >= 0xC2 && c <= 0xF4)) {
+		return mbfl_filt_conv_utf8_wchar(c, filter);
+	}
 	return c;
 }
 
 void mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
-	int status, cache;
-
-	status = filter->status;
-	cache = filter->cache;
-
-	filter->status = 0;
-	filter->cache = 0;
-
-	if (status != 0) {
-		mbfl_filt_put_invalid_char(cache, filter);
+	if (filter->cache != 0) {
+		mbfl_filt_put_invalid_char(filter->cache, filter);
 	}
+	filter->cache = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
 }
 
-/*
- * wchar => UTF-8
- */
 int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x110000) {
