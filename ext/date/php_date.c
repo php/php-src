@@ -1158,6 +1158,38 @@ PHP_FUNCTION(checkdate)
 }
 /* }}} */
 
+/* Explicitly expand stftime %Z format, to make it independent of the TZ environment
+ * variable and avoid libc behavior discrepancies.  */
+zend_string *strftime_expand_tzname(zend_string *format, const char *tm_zone)
+{
+	size_t tm_zone_len = strlen(tm_zone);
+	zend_string_addref(format);
+	for (size_t i = 0; i < ZSTR_LEN(format);) {
+		if (ZSTR_VAL(format)[i] != '%') {
+			i++;
+			continue;
+		}
+
+		if (ZSTR_VAL(format)[i+1] != 'Z') {
+			i += 2;
+			continue;
+		}
+
+		zend_string *new_format = zend_string_concat3(
+			/* Format string up to %Z */
+			ZSTR_VAL(format), i,
+			/* The timezone name */
+			tm_zone, tm_zone_len,
+			/* Format string after %Z */
+			ZSTR_VAL(format) + i + 2, ZSTR_LEN(format) - (i + 2)
+		);
+		zend_string_release(format);
+		format = new_format;
+		i += tm_zone_len;
+	}
+	return format;
+}
+
 /* {{{ php_strftime - (gm)strftime helper */
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
@@ -1171,6 +1203,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_tzinfo      *tzi;
 	timelib_time_offset *offset = NULL;
 	zend_string 		*buf;
+	const char			*tm_zone;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
@@ -1205,24 +1238,25 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	ta.tm_wday  = timelib_day_of_week(ts->y, ts->m, ts->d);
 	ta.tm_yday  = timelib_day_of_year(ts->y, ts->m, ts->d);
 	if (gmt) {
+		tm_zone = "GMT";
 		ta.tm_isdst = 0;
 #if HAVE_STRUCT_TM_TM_GMTOFF
 		ta.tm_gmtoff = 0;
 #endif
-#if HAVE_STRUCT_TM_TM_ZONE
-		ta.tm_zone = "GMT";
-#endif
 	} else {
 		offset = timelib_get_time_zone_info(timestamp, tzi);
+		tm_zone = offset->abbr;
 
 		ta.tm_isdst = offset->is_dst;
 #if HAVE_STRUCT_TM_TM_GMTOFF
 		ta.tm_gmtoff = offset->offset;
 #endif
-#if HAVE_STRUCT_TM_TM_ZONE
-		ta.tm_zone = offset->abbr;
-#endif
 	}
+#if HAVE_STRUCT_TM_TM_ZONE
+	ta.tm_zone = tm_zone;
+#endif
+
+	format = strftime_expand_tzname(format, tm_zone);
 
 	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
 	   initial buffer is too small. See
@@ -1243,6 +1277,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 #endif
 
+	zend_string_release(format);
 	timelib_time_dtor(ts);
 	if (!gmt) {
 		timelib_time_offset_dtor(offset);
