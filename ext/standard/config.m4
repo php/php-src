@@ -368,24 +368,6 @@ if test "$ac_cv_strptime_decl_fails" = "yes"; then
   AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], 1, [whether strptime() declaration fails])
 fi
 
-dnl musl has a badly broken setlocale() implementation that always reports success.
-AC_CACHE_CHECK([whether setlocale() is broken], ac_cv_setlocale_broken, [
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <locale.h>
-int main() {
-    return setlocale(LC_CTYPE, "This locale certainly does not exist") == NULL;
-}
-]])],[
-  ac_cv_setlocale_broken=yes
-],[
-  ac_cv_setlocale_broken=no
-],[
-  ac_cv_setlocale_broken=no
-])])
-if test "$ac_cv_setlocale_broken" = "yes"; then
-  AC_DEFINE([HAVE_BROKEN_SETLOCALE], 1, [whether setlocale() is broken])
-fi
-
 dnl
 dnl Check for arc4random on BSD systems
 dnl
