@@ -2,10 +2,11 @@
 Test strptime() function : basic functionality
 --SKIPIF--
 <?php
-	if (!function_exists('strptime')) {
-		die("skip - strptime() function not available in this build");
-	}
-        if(PHP_OS == 'Darwin') die("skip - strptime() behaves differently on Darwin");
+if (!function_exists('strptime')) {
+    die("skip - strptime() function not available in this build");
+}
+if (PHP_OS == 'Darwin') die("skip - strptime() behaves differently on Darwin");
+if (!strftime('%Z')) die('skip strftime does not support %Z');
 ?>
 --FILE--
 <?php
