@@ -5,9 +5,8 @@ Test setlocale() function : usage variations - setting system locale = 0
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
-if (setlocale(LC_ALL,'en_US.utf8') === false) {
-    die('skip en_US.utf8 locale not available');
-}
+require __DIR__ . '/setlocale_skipif.inc';
+require_locale(LC_ALL, 'en_US.utf8');
 ?>
 --FILE--
 <?php
