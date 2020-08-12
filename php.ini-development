@@ -539,7 +539,7 @@ ignore_repeated_source = Off
 ; http://php.net/report-memleaks
 report_memleaks = On
 
-; This setting is on by default.
+; This setting is off by default.
 ;report_zend_debug = 0
 
 ; Turn off normal error reporting and emit XML-RPC error XML

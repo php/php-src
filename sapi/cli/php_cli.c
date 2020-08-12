@@ -420,7 +420,6 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 {
 	zval tmp;
-	INI_DEFAULT("report_zend_debug", "0");
 	INI_DEFAULT("display_errors", "1");
 }
 /* }}} */
