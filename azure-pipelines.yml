@@ -12,10 +12,11 @@ trigger:
       - UPGRADING.INTERNALS
 
 jobs:
+  # We specify --with-mm here, because it cannot be used together with --enable-maintainer-zts.
   - template: azure/job.yml
     parameters:
       configurationName: DEBUG_NTS
-      configurationParameters: '--enable-debug --disable-maintainer-zts'
+      configurationParameters: '--enable-debug --disable-maintainer-zts --with-mm'
   - template: azure/job.yml
     parameters:
       configurationName: RELEASE_ZTS
@@ -36,7 +37,7 @@ jobs:
     - template: azure/job.yml
       parameters:
         configurationName: RELEASE_NTS
-        configurationParameters: '--disable-debug --disable-maintainer-zts'
+        configurationParameters: '--disable-debug --disable-maintainer-zts --with-mm'
     - template: azure/i386/job.yml
       parameters:
         configurationName: I386_DEBUG_NTS

@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug #64705 (errorInfo property of PDOException is null when
     PDO::__construct() fails). (Ahmed Abdou)
 
+- Session:
+  . Fixed bug #79724 (Return type does not match in ext/session/mod_mm.c).
+    (Nikita)
+
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array
     with single reference). (Nikita)
