@@ -44,7 +44,7 @@ ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 
 ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
 {
-	if (GC_DELREF(res) <= 0) {
+	if (res && GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
 	} else {
 		return SUCCESS;
