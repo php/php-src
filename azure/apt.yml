@@ -34,6 +34,7 @@ steps:
                        libldap2-dev \
                        libsodium-dev \
                        libargon2-0-dev \
+                       libmm-dev \
                        postgresql \
                        postgresql-contrib \
                        llvm \
