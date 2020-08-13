@@ -36,6 +36,11 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
+    var_dump($sxe->registerXPathNamespace('', ''));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
     var_dump($sxe->foo);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
@@ -43,6 +48,7 @@ try {
 
 ?>
 --EXPECT--
+SimpleXMLElement is not properly initialized
 SimpleXMLElement is not properly initialized
 SimpleXMLElement is not properly initialized
 SimpleXMLElement is not properly initialized

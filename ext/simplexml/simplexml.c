@@ -1390,6 +1390,11 @@ SXE_METHOD(registerXPathNamespace)
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
+	if (!sxe->document) {
+		zend_throw_error(NULL, "SimpleXMLElement is not properly initialized");
+		RETURN_THROWS();
+	}
+
 	if (!sxe->xpath) {
 		sxe->xpath = xmlXPathNewContext((xmlDocPtr) sxe->document->ptr);
 	}
