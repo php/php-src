@@ -866,10 +866,6 @@ PHP_FUNCTION(fprintf)
 	int argc;
 	zend_string *result;
 
-	if (ZEND_NUM_ARGS() < 2) {
-		WRONG_PARAM_COUNT;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_RESOURCE(arg1)
 		Z_PARAM_STRING(format, format_len)
@@ -900,10 +896,6 @@ PHP_FUNCTION(vfprintf)
 	zend_array *array;
 	int argc;
 	zend_string *result;
-
-	if (ZEND_NUM_ARGS() != 3) {
-		WRONG_PARAM_COUNT;
-	}
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_RESOURCE(arg1)
