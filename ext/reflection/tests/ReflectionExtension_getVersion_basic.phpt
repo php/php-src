@@ -10,4 +10,4 @@ $var = $obj->getVersion() ? $obj->getVersion() : null;
 var_dump($var);
 ?>
 --EXPECTF--
-string(9) "%d.%d.%s"
+string(%d) "%d.%d.%s"
