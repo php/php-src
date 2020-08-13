@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2019-02-20 03:35:27.000000000 +0100
-+++ libmagic/apprentice.c	2020-04-07 22:25:10.486120900 +0200
++++ libmagic/apprentice.c	2020-08-21 15:28:20.802569900 +0200
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -974,8 +974,26 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	}
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
 --- libmagic.orig/ascmagic.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/ascmagic.c	2020-04-07 22:25:10.501740300 +0200
-@@ -96,7 +96,7 @@
++++ libmagic/ascmagic.c	2020-08-21 16:09:54.656316500 +0200
+@@ -51,7 +51,7 @@
+ #define ISSPC(x) ((x) == ' ' || (x) == '\t' || (x) == '\r' || (x) == '\n' \
+ 		  || (x) == 0x85 || (x) == '\f')
+ 
+-private unsigned char *encode_utf8(unsigned char *, size_t, unichar *, size_t);
++private unsigned char *encode_utf8(unsigned char *, size_t, unicodechar *, size_t);
+ private size_t trim_nuls(const unsigned char *, size_t);
+ 
+ /*
+@@ -70,7 +70,7 @@
+ protected int
+ file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
+ {
+-	unichar *ubuf = NULL;
++	unicodechar *ubuf = NULL;
+ 	size_t ulen = 0;
+ 	int rv = 1;
+ 	struct buffer bb;
+@@ -96,14 +96,14 @@
  		rv = file_ascmagic_with_encoding(ms, &bb,
  		    ubuf, ulen, code, type, text);
  
@@ -984,6 +1002,14 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  
  	return rv;
  }
+ 
+ protected int
+ file_ascmagic_with_encoding(struct magic_set *ms,
+-    const struct buffer *b, unichar *ubuf, size_t ulen, const char *code,
++    const struct buffer *b, unicodechar *ubuf, size_t ulen, const char *code,
+     const char *type, int text)
+ {
+ 	struct buffer bb;
 @@ -144,7 +144,7 @@
  		/* malloc size is a conservative overestimate; could be
  		   improved, or at least realloced after conversion. */
@@ -1003,9 +1029,18 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  
  	return rv;
  }
+@@ -337,7 +338,7 @@
+  * after end of string, or NULL if an invalid character is found.
+  */
+ private unsigned char *
+-encode_utf8(unsigned char *buf, size_t len, unichar *ubuf, size_t ulen)
++encode_utf8(unsigned char *buf, size_t len, unicodechar *ubuf, size_t ulen)
+ {
+ 	size_t i;
+ 	unsigned char *end = buf + len;
 diff -u libmagic.orig/buffer.c libmagic/buffer.c
 --- libmagic.orig/buffer.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/buffer.c	2020-04-07 22:25:10.501740300 +0200
++++ libmagic/buffer.c	2020-08-21 15:28:20.802569900 +0200
 @@ -31,19 +31,23 @@
  #endif	/* lint */
  
@@ -1062,7 +1097,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2019-02-20 03:35:27.000000000 +0100
-+++ libmagic/cdf.c	2020-05-05 20:05:37.698461100 +0200
++++ libmagic/cdf.c	2020-08-21 15:28:20.802569900 +0200
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1341,7 +1376,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #endif
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
 --- libmagic.orig/cdf.h	2019-02-20 02:24:19.000000000 +0100
-+++ libmagic/cdf.h	2020-04-07 22:25:10.517321000 +0200
++++ libmagic/cdf.h	2020-08-21 15:28:20.802569900 +0200
 @@ -35,10 +35,10 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1366,7 +1401,7 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  #define CDF_SECID_FREE					-1
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/cdf_time.c	2020-04-07 22:25:10.517321000 +0200
++++ libmagic/cdf_time.c	2020-08-21 15:28:20.802569900 +0200
 @@ -23,6 +23,7 @@
   * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   * POSSIBILITY OF SUCH DAMAGE.
@@ -1395,7 +1430,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/compress.c	2020-06-17 02:13:31.620121400 +0200
++++ libmagic/compress.c	2020-08-21 15:28:20.802569900 +0200
 @@ -45,13 +45,11 @@
  #endif
  #include <string.h>
@@ -1545,7 +1580,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 +#endif
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2019-02-20 03:35:27.000000000 +0100
-+++ libmagic/der.c	2020-04-07 22:25:10.517321000 +0200
++++ libmagic/der.c	2020-08-21 15:28:20.802569900 +0200
 @@ -51,7 +51,9 @@
  #include "magic.h"
  #include "der.h"
@@ -1575,7 +1610,7 @@ diff -u libmagic.orig/der.c libmagic/der.c
  			snprintf(buf + z, blen - z, "%.2x", d[i]);
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
 --- libmagic.orig/elfclass.h	2019-02-20 02:30:19.000000000 +0100
-+++ libmagic/elfclass.h	2020-04-07 22:25:10.517321000 +0200
++++ libmagic/elfclass.h	2020-08-21 15:28:20.802569900 +0200
 @@ -41,7 +41,7 @@
  			return toomany(ms, "program headers", phnum);
  		flags |= FLAGS_IS_CORE;
@@ -1605,13 +1640,58 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    CAST(int, elf_getu16(swap, elfhdr.e_shstrndx)),
 diff -u libmagic.orig/encoding.c libmagic/encoding.c
 --- libmagic.orig/encoding.c	2019-04-15 18:48:41.000000000 +0200
-+++ libmagic/encoding.c	2020-04-07 22:25:10.517321000 +0200
++++ libmagic/encoding.c	2020-08-21 16:09:54.670315100 +0200
+@@ -44,14 +44,14 @@
+ #include <stdlib.h>
+ 
+ 
+-private int looks_ascii(const unsigned char *, size_t, unichar *, size_t *);
+-private int looks_utf8_with_BOM(const unsigned char *, size_t, unichar *,
++private int looks_ascii(const unsigned char *, size_t, unicodechar *, size_t *);
++private int looks_utf8_with_BOM(const unsigned char *, size_t, unicodechar *,
+     size_t *);
+-private int looks_utf7(const unsigned char *, size_t, unichar *, size_t *);
+-private int looks_ucs16(const unsigned char *, size_t, unichar *, size_t *);
+-private int looks_ucs32(const unsigned char *, size_t, unichar *, size_t *);
+-private int looks_latin1(const unsigned char *, size_t, unichar *, size_t *);
+-private int looks_extended(const unsigned char *, size_t, unichar *, size_t *);
++private int looks_utf7(const unsigned char *, size_t, unicodechar *, size_t *);
++private int looks_ucs16(const unsigned char *, size_t, unicodechar *, size_t *);
++private int looks_ucs32(const unsigned char *, size_t, unicodechar *, size_t *);
++private int looks_latin1(const unsigned char *, size_t, unicodechar *, size_t *);
++private int looks_extended(const unsigned char *, size_t, unicodechar *, size_t *);
+ private void from_ebcdic(const unsigned char *, size_t, unsigned char *);
+ 
+ #ifdef DEBUG_ENCODING
+@@ -63,11 +63,11 @@
+ /*
+  * Try to determine whether text is in some character code we can
+  * identify.  Each of these tests, if it succeeds, will leave
+- * the text converted into one-unichar-per-character Unicode in
++ * the text converted into one-unicodechar-per-character Unicode in
+  * ubuf, and the number of characters converted in ulen.
+  */
+ protected int
+-file_encoding(struct magic_set *ms, const struct buffer *b, unichar **ubuf,
++file_encoding(struct magic_set *ms, const struct buffer *b, unicodechar **ubuf,
+     size_t *ulen, const char **code, const char **code_mime, const char **type)
+ {
+ 	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
+@@ -75,7 +75,7 @@
+ 	size_t mlen;
+ 	int rv = 1, ucs_type;
+ 	unsigned char *nbuf = NULL;
+-	unichar *udefbuf;
++	unicodechar *udefbuf;
+ 	size_t udeflen;
+ 
+ 	if (ubuf == NULL)
 @@ -89,13 +89,13 @@
  	*code_mime = "binary";
  
  	mlen = (nbytes + 1) * sizeof((*ubuf)[0]);
 -	if ((*ubuf = CAST(unichar *, calloc(CAST(size_t, 1), mlen))) == NULL) {
-+	if ((*ubuf = CAST(unichar *, ecalloc(CAST(size_t, 1), mlen))) == NULL) {
++	if ((*ubuf = CAST(unicodechar *, ecalloc(CAST(size_t, 1), mlen))) == NULL) {
  		file_oomem(ms, mlen);
  		goto done;
  	}
@@ -1634,9 +1714,123 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  
  	return rv;
  }
+@@ -251,7 +251,7 @@
+ };
+ 
+ private int
+-looks_ascii(const unsigned char *buf, size_t nbytes, unichar *ubuf,
++looks_ascii(const unsigned char *buf, size_t nbytes, unicodechar *ubuf,
+     size_t *ulen)
+ {
+ 	size_t i;
+@@ -271,7 +271,7 @@
+ }
+ 
+ private int
+-looks_latin1(const unsigned char *buf, size_t nbytes, unichar *ubuf, size_t *ulen)
++looks_latin1(const unsigned char *buf, size_t nbytes, unicodechar *ubuf, size_t *ulen)
+ {
+ 	size_t i;
+ 
+@@ -290,7 +290,7 @@
+ }
+ 
+ private int
+-looks_extended(const unsigned char *buf, size_t nbytes, unichar *ubuf,
++looks_extended(const unsigned char *buf, size_t nbytes, unicodechar *ubuf,
+     size_t *ulen)
+ {
+ 	size_t i;
+@@ -321,11 +321,11 @@
+  * ubuf must be big enough!
+  */
+ protected int
+-file_looks_utf8(const unsigned char *buf, size_t nbytes, unichar *ubuf, size_t *ulen)
++file_looks_utf8(const unsigned char *buf, size_t nbytes, unicodechar *ubuf, size_t *ulen)
+ {
+ 	size_t i;
+ 	int n;
+-	unichar c;
++	unicodechar c;
+ 	int gotone = 0, ctrl = 0;
+ 
+ 	if (ubuf)
+@@ -392,7 +392,7 @@
+  * rest of the text.
+  */
+ private int
+-looks_utf8_with_BOM(const unsigned char *buf, size_t nbytes, unichar *ubuf,
++looks_utf8_with_BOM(const unsigned char *buf, size_t nbytes, unicodechar *ubuf,
+     size_t *ulen)
+ {
+ 	if (nbytes > 3 && buf[0] == 0xef && buf[1] == 0xbb && buf[2] == 0xbf)
+@@ -402,7 +402,7 @@
+ }
+ 
+ private int
+-looks_utf7(const unsigned char *buf, size_t nbytes, unichar *ubuf, size_t *ulen)
++looks_utf7(const unsigned char *buf, size_t nbytes, unicodechar *ubuf, size_t *ulen)
+ {
+ 	if (nbytes > 4 && buf[0] == '+' && buf[1] == '/' && buf[2] == 'v')
+ 		switch (buf[3]) {
+@@ -421,7 +421,7 @@
+ }
+ 
+ private int
+-looks_ucs16(const unsigned char *bf, size_t nbytes, unichar *ubf,
++looks_ucs16(const unsigned char *bf, size_t nbytes, unicodechar *ubf,
+     size_t *ulen)
+ {
+ 	int bigend;
+@@ -444,10 +444,10 @@
+ 
+ 		if (bigend)
+ 			ubf[(*ulen)++] = bf[i + 1]
+-			    | (CAST(unichar, bf[i]) << 8);
++			    | (CAST(unicodechar, bf[i]) << 8);
+ 		else
+ 			ubf[(*ulen)++] = bf[i]
+-			    | (CAST(unichar, bf[i + 1]) << 8);
++			    | (CAST(unicodechar, bf[i + 1]) << 8);
+ 
+ 		if (ubf[*ulen - 1] == 0xfffe)
+ 			return 0;
+@@ -460,7 +460,7 @@
+ }
+ 
+ private int
+-looks_ucs32(const unsigned char *bf, size_t nbytes, unichar *ubf,
++looks_ucs32(const unsigned char *bf, size_t nbytes, unicodechar *ubf,
+     size_t *ulen)
+ {
+ 	int bigend;
+@@ -482,15 +482,15 @@
+ 		/* XXX fix to properly handle chars > 65536 */
+ 
+ 		if (bigend)
+-			ubf[(*ulen)++] = CAST(unichar, bf[i + 3])
+-			    | (CAST(unichar, bf[i + 2]) << 8)
+-			    | (CAST(unichar, bf[i + 1]) << 16)
+-			    | (CAST(unichar, bf[i]) << 24);
++			ubf[(*ulen)++] = CAST(unicodechar, bf[i + 3])
++			    | (CAST(unicodechar, bf[i + 2]) << 8)
++			    | (CAST(unicodechar, bf[i + 1]) << 16)
++			    | (CAST(unicodechar, bf[i]) << 24);
+ 		else
+-			ubf[(*ulen)++] = CAST(unichar, bf[i + 0])
+-			    | (CAST(unichar, bf[i + 1]) << 8) 
+-			    | (CAST(unichar, bf[i + 2]) << 16)
+-			    | (CAST(unichar, bf[i + 3]) << 24);
++			ubf[(*ulen)++] = CAST(unicodechar, bf[i + 0])
++			    | (CAST(unicodechar, bf[i + 1]) << 8) 
++			    | (CAST(unicodechar, bf[i + 2]) << 16)
++			    | (CAST(unicodechar, bf[i + 3]) << 24);
+ 
+ 		if (ubf[*ulen - 1] == 0xfffe)
+ 			return 0;
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/file.h	2020-06-21 00:23:48.421548900 +0200
++++ libmagic/file.h	2020-08-21 16:09:54.697579400 +0200
 @@ -33,18 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1738,9 +1932,12 @@ diff -u libmagic.orig/file.h libmagic/file.h
  	((t) == FILE_STRING || \
  	 (t) == FILE_PSTRING || \
  	 (t) == FILE_BESTRING16 || \
-@@ -447,28 +441,23 @@
+@@ -445,39 +439,34 @@
+ };
+ 
  /* Type for Unicode characters */
- typedef unsigned long unichar;
+-typedef unsigned long unichar;
++typedef unsigned long unicodechar;
  
 -struct stat;
  #define FILE_T_LOCAL	1
@@ -1772,7 +1969,18 @@ diff -u libmagic.orig/file.h libmagic/file.h
  protected int file_zmagic(struct magic_set *, const struct buffer *,
      const char *);
  #endif
-@@ -491,13 +480,9 @@
+ protected int file_ascmagic(struct magic_set *, const struct buffer *,
+     int);
+ protected int file_ascmagic_with_encoding(struct magic_set *,
+-    const struct buffer *, unichar *, size_t, const char *, const char *, int);
++    const struct buffer *, unicodechar *, size_t, const char *, const char *, int);
+ protected int file_encoding(struct magic_set *, const struct buffer *,
+-    unichar **, size_t *, const char **, const char **, const char **);
++    unicodechar **, size_t *, const char **, const char **, const char **);
+ protected int file_is_json(struct magic_set *, const struct buffer *);
+ protected int file_is_tar(struct magic_set *, const struct buffer *);
+ protected int file_softmagic(struct magic_set *, const struct buffer *,
+@@ -491,19 +480,15 @@
  protected void file_badread(struct magic_set *);
  protected void file_badseek(struct magic_set *);
  protected void file_oomem(struct magic_set *, size_t);
@@ -1789,6 +1997,13 @@ diff -u libmagic.orig/file.h libmagic/file.h
  protected void file_showstr(FILE *, const char *, size_t);
  protected size_t file_mbswidth(const char *);
  protected const char *file_getbuffer(struct magic_set *);
+ protected ssize_t sread(int, void *, size_t, int);
+ protected int file_check_mem(struct magic_set *, unsigned int);
+-protected int file_looks_utf8(const unsigned char *, size_t, unichar *,
++protected int file_looks_utf8(const unsigned char *, size_t, unicodechar *,
+     size_t *);
+ protected size_t file_pstring_length_size(const struct magic *);
+ protected size_t file_pstring_get_length(const struct magic *, const char *);
 @@ -513,34 +498,13 @@
      size_t);
  #endif /* __EMX__ */
@@ -1919,7 +2134,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #endif
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 --- libmagic.orig/fsmagic.c	2019-05-07 04:26:48.000000000 +0200
-+++ libmagic/fsmagic.c	2020-04-07 22:25:10.532971400 +0200
++++ libmagic/fsmagic.c	2020-08-21 15:28:20.802569900 +0200
 @@ -66,26 +66,10 @@
  # define minor(dev)  ((dev) & 0xff)
  #endif
@@ -2212,7 +2427,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
 --- libmagic.orig/funcs.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/funcs.c	2020-06-17 02:13:31.651362400 +0200
++++ libmagic/funcs.c	2020-08-21 15:46:02.589327200 +0200
 @@ -31,87 +31,80 @@
  #endif	/* lint */
  
@@ -2584,7 +2799,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/magic.c	2020-04-07 22:25:10.532971400 +0200
++++ libmagic/magic.c	2020-08-21 15:28:20.818197700 +0200
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -3048,8 +3263,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  public const char *
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2020-07-08 18:10:37.403232400 +0200
-+++ libmagic/magic.h	2020-04-07 22:25:10.548560600 +0200
+--- libmagic.orig/magic.h	2020-08-21 16:11:36.790038600 +0200
++++ libmagic/magic.h	2020-08-21 15:28:20.818197700 +0200
 @@ -124,6 +124,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -3060,7 +3275,7 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/print.c	2020-07-08 18:05:40.114527900 +0200
++++ libmagic/print.c	2020-08-21 15:46:02.589327200 +0200
 @@ -28,6 +28,7 @@
  /*
   * print.c - debugging printout routines
@@ -3134,7 +3349,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/readcdf.c	2020-04-07 22:25:10.548560600 +0200
++++ libmagic/readcdf.c	2020-08-21 15:28:20.818197700 +0200
 @@ -31,7 +31,11 @@
  
  #include <assert.h>
@@ -3253,7 +3468,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	if (i != -1)
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2019-05-17 04:24:59.000000000 +0200
-+++ libmagic/softmagic.c	2020-04-26 00:43:35.734037100 +0200
++++ libmagic/softmagic.c	2020-08-21 15:28:20.818197700 +0200
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3620,7 +3835,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	case FILE_INDIRECT:
 diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
 --- libmagic.orig/strcasestr.c	2014-09-11 17:05:33.000000000 +0200
-+++ libmagic/strcasestr.c	2019-12-19 20:37:55.833385900 +0100
++++ libmagic/strcasestr.c	2020-06-15 11:16:08.173462200 +0200
 @@ -39,6 +39,8 @@
  
  #include "file.h"

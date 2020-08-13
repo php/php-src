@@ -51,7 +51,7 @@ FILE_RCSID("@(#)$File: ascmagic.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
 #define ISSPC(x) ((x) == ' ' || (x) == '\t' || (x) == '\r' || (x) == '\n' \
 		  || (x) == 0x85 || (x) == '\f')
 
-private unsigned char *encode_utf8(unsigned char *, size_t, unichar *, size_t);
+private unsigned char *encode_utf8(unsigned char *, size_t, unicodechar *, size_t);
 private size_t trim_nuls(const unsigned char *, size_t);
 
 /*
@@ -70,7 +70,7 @@ trim_nuls(const unsigned char *buf, size_t nbytes)
 protected int
 file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 {
-	unichar *ubuf = NULL;
+	unicodechar *ubuf = NULL;
 	size_t ulen = 0;
 	int rv = 1;
 	struct buffer bb;
@@ -103,7 +103,7 @@ file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 
 protected int
 file_ascmagic_with_encoding(struct magic_set *ms,
-    const struct buffer *b, unichar *ubuf, size_t ulen, const char *code,
+    const struct buffer *b, unicodechar *ubuf, size_t ulen, const char *code,
     const char *type, int text)
 {
 	struct buffer bb;
@@ -338,7 +338,7 @@ done:
  * after end of string, or NULL if an invalid character is found.
  */
 private unsigned char *
-encode_utf8(unsigned char *buf, size_t len, unichar *ubuf, size_t ulen)
+encode_utf8(unsigned char *buf, size_t len, unicodechar *ubuf, size_t ulen)
 {
 	size_t i;
 	unsigned char *end = buf + len;
