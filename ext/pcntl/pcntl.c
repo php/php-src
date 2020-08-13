@@ -1181,7 +1181,7 @@ PHP_FUNCTION(pcntl_getpriority)
 	zend_bool pid_is_null = 1;
 	int pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l", &pid, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l", &pid, &pid_is_null, &who) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1220,7 +1220,7 @@ PHP_FUNCTION(pcntl_setpriority)
 	zend_bool pid_is_null = 1;
 	zend_long pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &pri, &pid, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &pri, &pid, &pid_is_null, &who) == FAILURE) {
 		RETURN_THROWS();
 	}
 
