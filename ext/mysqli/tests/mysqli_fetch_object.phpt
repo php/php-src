@@ -128,8 +128,11 @@ require_once('skipifconnectfailure.inc');
     $obj = mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', array('a', 'b'));
     mysqli_free_result($res);
 
-    // Fatal error, script execution will end
-    var_dump(mysqli_fetch_object($res, 'this_class_does_not_exist'));
+    try {
+        var_dump(mysqli_fetch_object($res, 'this_class_does_not_exist'));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
 
     mysqli_close($link);
@@ -146,5 +149,5 @@ NULL
 NULL
 mysqli_result object is already closed
 [0] mysqli_fetch_object(): Argument #3 ($params) must be of type array, string given in %s on line %d
-
-Fatal error: Class "this_class_does_not_exist" not found in %s on line %d
+mysqli_fetch_object(): Argument #2 ($class_name) must be a valid class name, this_class_does_not_exist given
+done!
