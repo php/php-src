@@ -225,7 +225,7 @@ function array_udiff_uassoc(array $array1, array $array2, ...$rest): array {}
  * @param array $array1
  * @param int $sort_order
  * @param int $sort_flags
- * @param array $array2
+ * @param array $arrays
  * @prefer-ref $array1
  * @prefer-ref $sort_order
  * @prefer-ref $sort_flags
