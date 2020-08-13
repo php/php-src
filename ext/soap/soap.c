@@ -575,10 +575,14 @@ PHP_METHOD(SoapHeader, __construct)
 	}
 	add_property_bool(this_ptr, "mustUnderstand", must_understand);
 
-	if (!actor_is_null) {
-		if (actor_str && ZSTR_LEN(actor_str) > 2) {
+	if (actor_str) {
+		if (ZSTR_LEN(actor_str) > 2) {
 			add_property_stringl(this_ptr, "actor", ZSTR_VAL(actor_str), ZSTR_LEN(actor_str));
-		} else if ((actor_long == SOAP_ACTOR_NEXT || actor_long == SOAP_ACTOR_NONE || actor_long == SOAP_ACTOR_UNLIMATERECEIVER)) {
+		} else {
+			php_error_docref(NULL, E_WARNING, "Invalid actor");
+		}
+	} else if (!actor_is_null) {
+		if ((actor_long == SOAP_ACTOR_NEXT || actor_long == SOAP_ACTOR_NONE || actor_long == SOAP_ACTOR_UNLIMATERECEIVER)) {
 			add_property_long(this_ptr, "actor", actor_long);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid actor");
@@ -609,15 +613,13 @@ PHP_METHOD(SoapFault, __construct)
 	if (code_str) {
 		fault_code = ZSTR_VAL(code_str);
 		fault_code_len = ZSTR_LEN(code_str);
-	} else if (code_ht) {
-		if (zend_hash_num_elements(code_ht) == 2) {
-			zval *t_ns = zend_hash_index_find(code_ht, 0);
-			zval *t_code = zend_hash_index_find(code_ht, 1);
-			if (t_ns && t_code && Z_TYPE_P(t_ns) == IS_STRING && Z_TYPE_P(t_code) == IS_STRING) {
-				fault_code_ns = Z_STRVAL_P(t_ns);
-				fault_code = Z_STRVAL_P(t_code);
-				fault_code_len = Z_STRLEN_P(t_code);
-			}
+	} else if (code_ht && zend_hash_num_elements(code_ht) == 2) {
+		zval *t_ns = zend_hash_index_find(code_ht, 0);
+		zval *t_code = zend_hash_index_find(code_ht, 1);
+		if (t_ns && t_code && Z_TYPE_P(t_ns) == IS_STRING && Z_TYPE_P(t_code) == IS_STRING) {
+			fault_code_ns = Z_STRVAL_P(t_ns);
+			fault_code = Z_STRVAL_P(t_code);
+			fault_code_len = Z_STRLEN_P(t_code);
 		}
 	}
 
