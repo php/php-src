@@ -993,6 +993,17 @@ PHP_METHOD(MultipleIterator, containsIterator)
 	RETURN_BOOL(spl_object_storage_contains(intern, iterator));
 } /* }}} */
 
+PHP_METHOD(MultipleIterator, countIterators)
+{
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+}
+
 /* {{{ Rewind all attached iterator instances */
 PHP_METHOD(MultipleIterator, rewind)
 {
