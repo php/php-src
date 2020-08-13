@@ -82,15 +82,6 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 }
 /* }}} */
 
-#define GET_NODE(__s, __n) { \
-	if ((__s)->node && (__s)->node->node) { \
-		__n = (__s)->node->node; \
-	} else { \
-		__n = NULL; \
-		php_error_docref(NULL, E_WARNING, "Node no longer exists"); \
-	} \
-}
-
 static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node) /* {{{ */
 {
 	php_sxe_object *intern;
@@ -1323,18 +1314,15 @@ SXE_METHOD(xpath)
 		return; /* attributes don't have attributes */
 	}
 
+	GET_NODE(sxe, nodeptr);
+	nodeptr = php_sxe_get_first_node(sxe, nodeptr);
+	if (!nodeptr) {
+		return;
+	}
+
 	if (!sxe->xpath) {
 		sxe->xpath = xmlXPathNewContext((xmlDocPtr) sxe->document->ptr);
 	}
-	if (!sxe->node) {
-		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement((xmlDocPtr) sxe->document->ptr), NULL);
-		if (!sxe->node) {
-			RETURN_FALSE;
-		}
-	}
-
-	nodeptr = php_sxe_get_first_node(sxe, sxe->node->node);
-
 	sxe->xpath->node = nodeptr;
 
  	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, nodeptr);
@@ -1599,9 +1587,14 @@ SXE_METHOD(getDocNamespaces)
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
-	if(from_root){
+	if (from_root) {
+		if (!sxe->document) {
+			zend_throw_error(NULL, "SimpleXMLElement is not properly initialized");
+			RETURN_THROWS();
+		}
+
 		node = xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr);
-	}else{
+	} else {
 		GET_NODE(sxe, node);
 	}
 
@@ -1635,6 +1628,9 @@ SXE_METHOD(children)
 
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node);
+	if (!node) {
+		return;
+	}
 
 	_node_as_zval(sxe, node, return_value, SXE_ITER_CHILD, NULL, (xmlChar *)nsprefix, isprefix);
 
@@ -1680,12 +1676,14 @@ SXE_METHOD(attributes)
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
+	node = php_sxe_get_first_node(sxe, node);
+	if (!node) {
+		return;
+	}
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* attributes don't have attributes */
 	}
-
-	node = php_sxe_get_first_node(sxe, node);
 
 	_node_as_zval(sxe, node, return_value, SXE_ITER_ATTRLIST, NULL, (xmlChar *)nsprefix, isprefix);
 }
