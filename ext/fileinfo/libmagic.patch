@@ -1610,8 +1610,8 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  	*code_mime = "binary";
  
  	mlen = (nbytes + 1) * sizeof((*ubuf)[0]);
--	if ((*ubuf = CAST(unichar *, calloc(CAST(size_t, 1), mlen))) == NULL) {
-+	if ((*ubuf = CAST(unichar *, ecalloc(CAST(size_t, 1), mlen))) == NULL) {
+-	if ((*ubuf = CAST(unicodechar *, calloc(CAST(size_t, 1), mlen))) == NULL) {
++	if ((*ubuf = CAST(unicodechar *, ecalloc(CAST(size_t, 1), mlen))) == NULL) {
  		file_oomem(ms, mlen);
  		goto done;
  	}
@@ -1740,7 +1740,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  	 (t) == FILE_BESTRING16 || \
 @@ -447,28 +441,23 @@
  /* Type for Unicode characters */
- typedef unsigned long unichar;
+ typedef unsigned long unicodechar;
  
 -struct stat;
  #define FILE_T_LOCAL	1

@@ -439,7 +439,7 @@ struct magic_set {
 };
 
 /* Type for Unicode characters */
-typedef unsigned long unichar;
+typedef unsigned long unicodechar;
 
 #define FILE_T_LOCAL	1
 #define FILE_T_WINDOWS	2
@@ -464,9 +464,9 @@ protected int file_zmagic(struct magic_set *, const struct buffer *,
 protected int file_ascmagic(struct magic_set *, const struct buffer *,
     int);
 protected int file_ascmagic_with_encoding(struct magic_set *,
-    const struct buffer *, unichar *, size_t, const char *, const char *, int);
+    const struct buffer *, unicodechar *, size_t, const char *, const char *, int);
 protected int file_encoding(struct magic_set *, const struct buffer *,
-    unichar **, size_t *, const char **, const char **, const char **);
+    unicodechar **, size_t *, const char **, const char **, const char **);
 protected int file_is_json(struct magic_set *, const struct buffer *);
 protected int file_is_tar(struct magic_set *, const struct buffer *);
 protected int file_softmagic(struct magic_set *, const struct buffer *,
@@ -488,7 +488,7 @@ protected size_t file_mbswidth(const char *);
 protected const char *file_getbuffer(struct magic_set *);
 protected ssize_t sread(int, void *, size_t, int);
 protected int file_check_mem(struct magic_set *, unsigned int);
-protected int file_looks_utf8(const unsigned char *, size_t, unichar *,
+protected int file_looks_utf8(const unsigned char *, size_t, unicodechar *,
     size_t *);
 protected size_t file_pstring_length_size(const struct magic *);
 protected size_t file_pstring_get_length(const struct magic *, const char *);
