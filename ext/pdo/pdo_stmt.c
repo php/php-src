@@ -1191,14 +1191,14 @@ PHP_METHOD(PDOStatement, fetchObject)
 	zend_long how = PDO_FETCH_CLASS;
 	zend_long ori = PDO_FETCH_ORI_NEXT;
 	zend_long off = 0;
-	zend_string *class_name = NULL;
+	zend_class_entry *ce = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
-	int error = 0, old_arg_count;
+	int old_arg_count;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(class_name, 1, 0)
+		Z_PARAM_CLASS_OR_NULL(ce)
 		Z_PARAM_ARRAY(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1222,31 +1222,21 @@ PHP_METHOD(PDOStatement, fetchObject)
 			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 		}
 	}
-	if (class_name && !error) {
-		stmt->fetch.cls.ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);
-
-		if (!stmt->fetch.cls.ce) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Could not find user-supplied class");
-			error = 1;
-		}
-	} else if (!error) {
+	if (ce) {
+		stmt->fetch.cls.ce = ce;
+	} else {
 		stmt->fetch.cls.ce = zend_standard_class_def;
 	}
 
-	if (!error && !do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
-		error = 1;
-	}
-	if (error) {
+	if (!do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
 		PDO_HANDLE_STMT_ERR();
+		RETVAL_FALSE;
 	}
 	do_fetch_opt_finish(stmt, 1);
 
 	stmt->fetch.cls.ce = old_ce;
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
-	if (error) {
-		RETURN_FALSE;
-	}
 }
 /* }}} */
 

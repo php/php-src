@@ -1405,6 +1405,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_CLASS(dest) \
 	Z_PARAM_CLASS_EX(dest, 0, 0)
 
+#define Z_PARAM_CLASS_OR_NULL(dest) \
+	Z_PARAM_CLASS_EX(dest, 1, 0)
+
 #define Z_PARAM_CLASS_NAME_OR_OBJ_EX(dest, allow_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_class_name_or_obj(_arg, &dest, allow_null))) { \
