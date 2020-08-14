@@ -2099,6 +2099,8 @@ SPL_METHOD(RegexIterator, getRegex)
 		return;
 	}
 
+	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
+
 	RETURN_STR_COPY(intern->u.regex.regex);
 } /* }}} */
 
