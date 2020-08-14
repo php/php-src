@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     exit code). (Nikita)
   . Fixed bug #79927 (Generator doesn't throw exception after multiple yield
     from iterable). (Nikita)
+  . Fixed bug #78770 (Incorrect callability check inside internal methods).
+    (Nikita)
 
 - Date:
   . Fixed bug #60302 (DateTime::createFromFormat should new static(), not new

@@ -332,7 +332,6 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 ZEND_METHOD(Closure, fromCallable)
 {
 	zval *callable;
-	int success;
 	char *error = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callable) == FAILURE) {
@@ -344,12 +343,7 @@ ZEND_METHOD(Closure, fromCallable)
 		RETURN_COPY(callable);
 	}
 
-	/* create closure as if it were called from parent scope */
-	EG(current_execute_data) = EX(prev_execute_data);
-	success = zend_create_closure_from_callable(return_value, callable, &error);
-	EG(current_execute_data) = execute_data;
-
-	if (success == FAILURE) {
+	if (zend_create_closure_from_callable(return_value, callable, &error) == FAILURE) {
 		if (error) {
 			zend_type_error("Failed to create closure from callable: %s", error);
 			efree(error);
