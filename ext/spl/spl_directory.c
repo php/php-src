@@ -1045,7 +1045,7 @@ PHP_METHOD(SplFileInfo, getPathname)
 	if (path != NULL) {
 		RETURN_STRINGL(path, path_len);
 	} else {
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 }
 /* }}} */
