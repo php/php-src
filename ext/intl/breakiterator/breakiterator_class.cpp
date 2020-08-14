@@ -69,7 +69,7 @@ U_CFUNC void breakiterator_object_construct(zval *object,
 	BreakIterator_object *bio;
 
 	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
-	assert(bio->biter == NULL);
+	ZEND_ASSERT(bio->biter == NULL);
 	bio->biter = biter;
 }
 
@@ -203,10 +203,10 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
 {
 	BreakIterator_object*	intern;
 
-	intern = (BreakIterator_object*)ecalloc(1, sizeof(BreakIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	intern = (BreakIterator_object*) zend_object_alloc(sizeof(BreakIterator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
-    object_properties_init((zend_object*) intern, ce);
+	object_properties_init(&intern->zo, ce);
 	breakiterator_object_init(intern);
 
 	intern->zo.handlers = &BreakIterator_handlers;
