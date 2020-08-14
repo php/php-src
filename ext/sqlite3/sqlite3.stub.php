@@ -59,24 +59,14 @@ class SQLite3
     /** @return mixed */
     public function querySingle(string $query, bool $entire_row = false) {}
 
-    /**
-     * @param callable $callback
-     * @return bool
-     */
-    public function createFunction(string $name, $callback, int $argument_count = -1, int $flags = 0) {}
+    /** @return bool */
+    public function createFunction(string $name, callable $callback, int $argument_count = -1, int $flags = 0) {}
 
-    /**
-     * @param callable $step_callback
-     * @param callable $final_callback
-     * @return bool
-     */
-    public function createAggregate(string $name, $step_callback, $final_callback, int $argument_count = -1) {}
+    /** @return bool */
+    public function createAggregate(string $name, callable $step_callback, callable $final_callback, int $argument_count = -1) {}
 
-    /**
-     * @param callable $callback
-     * @return bool
-     */
-    public function createCollation(string $name, $callback) {}
+    /** @return bool */
+    public function createCollation(string $name, callable $callback) {}
 
     /** @return resource|false */
     public function openBlob(string $table, string $column, int $rowid, string $dbname = "main", int $flags = SQLITE3_OPEN_READONLY) {}
