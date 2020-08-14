@@ -977,13 +977,7 @@ ZEND_GET_MODULE(mysqli)
 #endif
 
 
-/* {{{ mixed mysqli_stmt_construct()
-constructor for statement object.
-Parameters:
-  object -> mysqli_stmt_init
-  object, query -> mysqli_prepare
-*/
-PHP_FUNCTION(mysqli_stmt_construct)
+PHP_METHOD(mysqli_stmt, __construct)
 {
 	MY_MYSQL			*mysql;
 	zval				*mysql_link;
@@ -1018,14 +1012,8 @@ PHP_FUNCTION(mysqli_stmt_construct)
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
-/* }}} */
 
-/* {{{ mixed mysqli_result_construct()
-constructor for result object.
-Parameters:
-  object [, mode] -> mysqli_store/use_result
-*/
-PHP_FUNCTION(mysqli_result_construct)
+PHP_METHOD(mysqli_result, __construct)
 {
 	MY_MYSQL			*mysql;
 	MYSQL_RES			*result = NULL;
@@ -1071,7 +1059,6 @@ PHP_FUNCTION(mysqli_result_construct)
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
-/* }}} */
 
 PHP_METHOD(mysqli_result, getIterator)
 {

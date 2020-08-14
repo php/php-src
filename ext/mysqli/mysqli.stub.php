@@ -8,7 +8,6 @@ final class mysqli_driver
 
 class mysqli
 {
-    /** @alias mysqli_link_construct */
     public function __construct(
         ?string $host = null,
         ?string $user = null,
@@ -302,7 +301,6 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    /** @alias mysqli_result_construct */
     public function __construct(object $mysqli_link, int $resmode = MYSQLI_STORE_RESULT) {}
 
     /**
@@ -390,7 +388,6 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
-    /** @alias mysqli_stmt_construct */
     public function __construct(mysqli $mysqli_link, ?string $statement = null) {}
 
     /**

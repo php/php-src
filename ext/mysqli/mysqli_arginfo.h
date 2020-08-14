@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9f7063a0495441cb184f15b895771a32e8ef3195 */
+ * Stub hash: a8626c7c42e4d117b08df7f42a7523f60f357b82 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)
@@ -791,7 +791,7 @@ ZEND_FUNCTION(mysqli_thread_safe);
 ZEND_FUNCTION(mysqli_use_result);
 ZEND_FUNCTION(mysqli_warning_count);
 ZEND_FUNCTION(mysqli_refresh);
-ZEND_FUNCTION(mysqli_link_construct);
+ZEND_METHOD(mysqli, __construct);
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_get_connection_stats);
 #endif
@@ -802,12 +802,12 @@ ZEND_FUNCTION(mysqli_poll);
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_reap_async_query);
 #endif
-ZEND_FUNCTION(mysqli_result_construct);
+ZEND_METHOD(mysqli_result, __construct);
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_fetch_all);
 #endif
 ZEND_METHOD(mysqli_result, getIterator);
-ZEND_FUNCTION(mysqli_stmt_construct);
+ZEND_METHOD(mysqli_stmt, __construct);
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_stmt_more_results);
 #endif
@@ -936,7 +936,7 @@ static const zend_function_entry class_mysqli_driver_methods[] = {
 
 
 static const zend_function_entry class_mysqli_methods[] = {
-	ZEND_ME_MAPPING(__construct, mysqli_link_construct, arginfo_class_mysqli___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(mysqli, __construct, arginfo_class_mysqli___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(autocommit, mysqli_autocommit, arginfo_class_mysqli_autocommit, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(begin_transaction, mysqli_begin_transaction, arginfo_class_mysqli_begin_transaction, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(change_user, mysqli_change_user, arginfo_class_mysqli_change_user, ZEND_ACC_PUBLIC)
@@ -990,7 +990,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 
 
 static const zend_function_entry class_mysqli_result_methods[] = {
-	ZEND_ME_MAPPING(__construct, mysqli_result_construct, arginfo_class_mysqli_result___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(mysqli_result, __construct, arginfo_class_mysqli_result___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(close, mysqli_free_result, arginfo_class_mysqli_result_close, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(free, mysqli_free_result, arginfo_class_mysqli_result_free, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(data_seek, mysqli_data_seek, arginfo_class_mysqli_result_data_seek, ZEND_ACC_PUBLIC)
@@ -1012,7 +1012,7 @@ static const zend_function_entry class_mysqli_result_methods[] = {
 
 
 static const zend_function_entry class_mysqli_stmt_methods[] = {
-	ZEND_ME_MAPPING(__construct, mysqli_stmt_construct, arginfo_class_mysqli_stmt___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(mysqli_stmt, __construct, arginfo_class_mysqli_stmt___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(attr_get, mysqli_stmt_attr_get, arginfo_class_mysqli_stmt_attr_get, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(attr_set, mysqli_stmt_attr_set, arginfo_class_mysqli_stmt_attr_set, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(bind_param, mysqli_stmt_bind_param, arginfo_class_mysqli_stmt_bind_param, ZEND_ACC_PUBLIC)
