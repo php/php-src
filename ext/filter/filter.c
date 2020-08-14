@@ -487,7 +487,7 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
 		default:
-			zend_argument_value_error(1, "must be a PARSE_* constant");
+			zend_argument_value_error(1, "must be an INPUT_* constant");
 			return NULL;
 	}
 

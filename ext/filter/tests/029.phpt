@@ -77,9 +77,9 @@ echo "Done\n";
 string(4) "DATA"
 string(46) "~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?"}{:"
 string(0) ""
-filter_var(): Argument #1 ($variable) must be a valid callback
-filter_var(): Argument #1 ($variable) must be a valid callback
-filter_var(): Argument #1 ($variable) must be a valid callback
+filter_var(): Option must be a valid callback
+filter_var(): Option must be a valid callback
+filter_var(): Option must be a valid callback
 string(4) "data"
 string(46) "~!@#$%^&*()_qwertyuiopasdfghjklzxcvbnm<>>?"}{:"
 string(0) ""
