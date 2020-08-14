@@ -200,7 +200,7 @@ PHP_FUNCTION(shmop_open)
 	}
 
 	if (shm.shm_segsz > ZEND_LONG_MAX) {
-		php_error_docref(NULL, E_WARNING, "Shared memory segment too large to attach");
+		zend_argument_value_error(4, "is too large");
 		goto err;
 	}
 

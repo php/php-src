@@ -77,10 +77,10 @@ echo PHP_EOL, '## shmop_write function tests ##', PHP_EOL;
 shmop_open(): Argument #2 ($flags) must be a valid access mode
 shmop_open(): Argument #2 ($flags) must be a valid access mode
 
-Warning: shmop_open(): Unable to attach or create shared memory segment "Invalid argument" in %s on line %d
+Warning: shmop_open(): Unable to attach or create shared memory segment "%s" in %s on line %d
 bool(false)
 
-Warning: shmop_open(): Unable to attach or create shared memory segment "Invalid argument" in %s on line %d
+Warning: shmop_open(): Unable to attach or create shared memory segment "%s" in %s on line %d
 shmop_open(): Argument #4 ($size) must be greater than 0 for the "c" and "n" access modes
 
 ## shmop_read function tests ##
