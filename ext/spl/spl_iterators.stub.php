@@ -53,7 +53,6 @@ interface RecursiveIterator extends Iterator
 
 class RecursiveIteratorIterator implements OuterIterator
 {
-    /** @param Traversable $iterator */
     public function __construct(Traversable $iterator, int $mode = self::LEAVES_ONLY, int $flags = 0) {}
 
     /** @return void */
@@ -232,10 +231,9 @@ class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
 
     /**
      * @param string $index
-     * @param mixed $value
      * @return void
      */
-    public function offsetSet($index, $value) {}
+    public function offsetSet($index, mixed $value) {}
 
     /**
      * @param string $index

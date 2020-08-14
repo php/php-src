@@ -2,39 +2,28 @@
 
 /** @generate-function-entries */
 
-/**
- * @param resource $statement_resource
- * @param mixed $variable
- */
-function oci_define_by_name($statement_resource, string $column_name, &$variable, int $type = 0): bool {}
+/** @param resource $statement_resource */
+function oci_define_by_name($statement_resource, string $column_name, mixed &$variable, int $type = 0): bool {}
 
 /**
  * @param resource $statement_resource
- * @param mixed $variable
  * @alias oci_define_by_name
  * @deprecated
  */
-function ocidefinebyname($statement_resource, string $column_name, &$variable, int $type = 0): bool {}
+function ocidefinebyname($statement_resource, string $column_name, mixed &$variable, int $type = 0): bool {}
+
+/** @param resource $statement_resource */
+function oci_bind_by_name($statement_resource, string $column_name, mixed &$variable, int $maximum_length = -1, int $type = 0): bool {}
 
 /**
  * @param resource $statement_resource
- * @param mixed $variable
- */
-function oci_bind_by_name($statement_resource, string $column_name, &$variable, int $maximum_length = -1, int $type = 0): bool {}
-
-/**
- * @param resource $statement_resource
- * @param mixed $variable
  * @alias oci_bind_by_name
  * @deprecated
  */
-function ocibindbyname($statement_resource, string $column_name, &$variable, int $maximum_length = -1, int $type = 0): bool {}
+function ocibindbyname($statement_resource, string $column_name, mixed &$variable, int $maximum_length = -1, int $type = 0): bool {}
 
-/**
- * @param resource $statement_resource
- * @param mixed $variable
- */
-function oci_bind_array_by_name($statement_resource, string $column_name, &$variable, int $maximum_array_length, int $maximum_item_length = -1, int $type = SQLT_AFC): bool {}
+/** @param resource $statement_resource */
+function oci_bind_array_by_name($statement_resource, string $column_name, mixed &$variable, int $maximum_array_length, int $maximum_item_length = -1, int $type = SQLT_AFC): bool {}
 
 function oci_free_descriptor(OCILob $lob_descriptor): bool {}
 

@@ -3590,7 +3590,7 @@ static void zend_ffi_tags_cleanup(zend_ffi_dcl *dcl) /* {{{ */
 ZEND_METHOD(FFI, new) /* {{{ */
 {
 	zend_string *type_def = NULL;
-	zval *ztype = NULL;
+	zend_object *type_obj = NULL;
 	zend_ffi_type *type, *type_ptr;
 	zend_ffi_cdata *cdata;
 	void *ptr;
@@ -3601,11 +3601,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		if (Z_TYPE_P(EX_VAR_NUM(0)) == IS_STRING) {
-			Z_PARAM_STR(type_def)
-		} else {
-			Z_PARAM_OBJECT_OF_CLASS(ztype, zend_ffi_ctype_ce)
-		}
+		Z_PARAM_STR_OR_OBJ_OF_CLASS(type_def, type_obj, zend_ffi_ctype_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(owned)
 		Z_PARAM_BOOL(persistent)
@@ -3670,7 +3666,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 
 		type_ptr = dcl.type;
 	} else {
-		zend_ffi_ctype *ctype = (zend_ffi_ctype*)Z_OBJ_P(ztype);
+		zend_ffi_ctype *ctype = (zend_ffi_ctype*) type_obj;
 
 		type_ptr = type = ctype->type;
 		if (ZEND_FFI_TYPE_IS_OWNED(type)) {

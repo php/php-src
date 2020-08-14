@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fcf9d56587eb60bdc7824ff7587a5c7365eee5c0 */
+ * Stub hash: 3d98c82203230f2636c7fedb5717da5f7ab973f2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -165,7 +165,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_CachingIterator_offsetUnset arginfo_class_CachingIterator_offsetGet

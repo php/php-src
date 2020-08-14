@@ -1,14 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7f0aaeba31232e23367618eae98398fa41ac6ef5 */
+ * Stub hash: e57b1d7e9139aa2759f548cf800857cccf1d1f25 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 0, 2)
-	ZEND_ARG_INFO(0, priority1)
-	ZEND_ARG_INFO(0, priority2)
+	ZEND_ARG_TYPE_INFO(0, priority1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, priority2, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_insert, 0, 0, 2)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, priority)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, priority, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_setExtractFlags, 0, 0, 1)
@@ -45,7 +45,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplHeap_extract arginfo_class_SplPriorityQueue_top
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplHeap_insert, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplHeap_top arginfo_class_SplPriorityQueue_top
@@ -67,8 +67,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplHeap_recoverFromCorruption arginfo_class_SplPriorityQueue_top
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplHeap_compare, 0, 0, 2)
-	ZEND_ARG_INFO(0, value1)
-	ZEND_ARG_INFO(0, value2)
+	ZEND_ARG_TYPE_INFO(0, value1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value2, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplHeap_isCorrupted arginfo_class_SplPriorityQueue_top

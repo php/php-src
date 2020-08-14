@@ -722,16 +722,14 @@ PHP_METHOD(SplDoublyLinkedList, getIteratorMode)
 /* {{{ Returns whether the requested $index exists. */
 PHP_METHOD(SplDoublyLinkedList, offsetExists)
 {
-	zval              *zindex;
 	spl_dllist_object *intern;
-	zend_long               index;
+	zend_long index;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
-	index  = spl_offset_convert_to_long(zindex);
 
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
 } /* }}} */
@@ -739,58 +737,53 @@ PHP_METHOD(SplDoublyLinkedList, offsetExists)
 /* {{{ Returns the value at the specified $index. */
 PHP_METHOD(SplDoublyLinkedList, offsetGet)
 {
-	zval                  *zindex;
 	zend_long                   index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
-	index  = spl_offset_convert_to_long(zindex);
 
 	if (index < 0 || index >= intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
+		zend_argument_error(spl_ce_OutOfRangeException, 1, "is out of range");
 		RETURN_THROWS();
 	}
 
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
-
-	if (element != NULL) {
-		zval *value = &element->data;
-
-		ZVAL_COPY_DEREF(return_value, value);
-	} else {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
+	if (element == NULL) {
+		zend_argument_error(spl_ce_OutOfRangeException, 1, "is an invalid offset");
+		RETURN_THROWS();
 	}
+
+	ZVAL_COPY_DEREF(return_value, &element->data);
 } /* }}} */
 
 /* {{{ Sets the value at the specified $index to $newval. */
 PHP_METHOD(SplDoublyLinkedList, offsetSet)
 {
-	zval                  *zindex, *value;
-	spl_dllist_object     *intern;
+	zend_long index;
+	zend_bool index_is_null = 1;
+	zval *value;
+	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zindex, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l!z", &index, &index_is_null, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (Z_TYPE_P(zindex) == IS_NULL) {
+	if (index_is_null) {
 		/* $obj[] = ... */
 		spl_ptr_llist_push(intern->llist, value);
 	} else {
 		/* $obj[$foo] = ... */
-		zend_long                   index;
 		spl_ptr_llist_element *element;
 
-		index = spl_offset_convert_to_long(zindex);
-
 		if (index < 0 || index >= intern->llist->count) {
-			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
+			zend_argument_error(spl_ce_OutOfRangeException, 1, "is out of range");
 			RETURN_THROWS();
 		}
 
@@ -813,7 +806,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 			}
 		} else {
 			zval_ptr_dtor(value);
-			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
+			zend_argument_error(spl_ce_OutOfRangeException, 1, "is an invalid offset");
 			RETURN_THROWS();
 		}
 	}
@@ -822,22 +815,20 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 /* {{{ Unsets the value at the specified $index. */
 PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 {
-	zval                  *zindex;
 	zend_long             index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 	spl_ptr_llist         *llist;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
-	index  = spl_offset_convert_to_long(zindex);
 	llist  = intern->llist;
 
 	if (index < 0 || index >= intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset out of range", 0);
+		zend_argument_error(spl_ce_OutOfRangeException, 1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -878,7 +869,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 
 		SPL_LLIST_DELREF(element);
 	} else {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
+		zend_argument_error(spl_ce_OutOfRangeException, 1, "is an invalid offset");
 		RETURN_THROWS();
 	}
 } /* }}} */
@@ -1073,9 +1064,7 @@ PHP_METHOD(SplDoublyLinkedList, current)
 	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
 	} else {
-		zval *value = &element->data;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		ZVAL_COPY_DEREF(return_value, &element->data);
 	}
 }
 /* }}} */
@@ -1243,20 +1232,19 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 /* {{{ Inserts a new entry before the specified $index consisting of $newval. */
 PHP_METHOD(SplDoublyLinkedList, add)
 {
-	zval                  *zindex, *value;
+	zval                  *value;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 	zend_long                  index;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zindex, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz", &index, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
-	index  = spl_offset_convert_to_long(zindex);
 
 	if (index < 0 || index > intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
+		zend_argument_error(spl_ce_OutOfRangeException, 1, "is out of range");
 		RETURN_THROWS();
 	}
 

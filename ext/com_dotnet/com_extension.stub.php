@@ -58,8 +58,7 @@ function com_get_active_object(string $progid, ?int $code_page = null): variant 
 
 function com_create_guid(): string|false {}
 
-/** @param array|string|null $sinkinterface */
-function com_event_sink(variant $comobject, object $sinkobject, $sinkinterface = UNKNOWN): bool {}
+function com_event_sink(variant $comobject, object $sinkobject, array|string|null $sinkinterface = null): bool {}
 
 /** @param com|dotnet|variant|string $comobject */
 function com_print_typeinfo($comobject, ?string $dispinterface = null, bool $wantsink = false): bool {}
@@ -75,8 +74,7 @@ class variant
 
 class com
 {
-    /** @param string|array|null $server_name */
-    public function __construct(string $module_name, $server_name = UNKNOWN, int $codepage = CP_ACP, string $typelib = "") {}
+    public function __construct(string $module_name, array|string|null $server_name = null, int $codepage = CP_ACP, string $typelib = "") {}
 }
 
 #if HAVE_MSCOREE_H

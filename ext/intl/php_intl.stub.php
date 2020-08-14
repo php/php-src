@@ -89,8 +89,7 @@ function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $wall
 
 function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $wallTimeOption): bool {}
 
-/** @param DateTime|string $dateTime */
-function intlcal_from_date_time($dateTime, ?string $locale = null): ?IntlCalendar {}
+function intlcal_from_date_time(DateTime|string $dateTime, ?string $locale = null): ?IntlCalendar {}
 
 function intlcal_to_date_time(IntlCalendar $calendar): DateTime|false {}
 
@@ -188,7 +187,7 @@ function datefmt_set_lenient(IntlDateFormatter $df, bool $lenient): void {}
 
 function datefmt_is_lenient(IntlDateFormatter $df): bool {}
 
-/** @param mixed $value */
+/** @param object|array|string|int|float $value */
 function datefmt_format(IntlDateFormatter $df, $value): string|false {}
 
 /**
@@ -227,7 +226,7 @@ function numfmt_parse_currency(NumberFormatter $fmt, string $value, &$currency, 
 /** @param int|float $value */
 function numfmt_set_attribute(NumberFormatter $fmt, int $attr, $value): bool {}
 
-function numfmt_get_attribute(NumberFormatter $fmt, int $attr): int|double|false {}
+function numfmt_get_attribute(NumberFormatter $fmt, int $attr): int|float|false {}
 
 function numfmt_set_text_attribute(NumberFormatter $fmt, int $attr, string $value): bool {}
 
@@ -372,7 +371,7 @@ function intltz_count_equivalent_ids(string $zoneId): int|false {}
 function intltz_create_default(): IntlTimeZone {}
 
 /**
- * @param IntlTimeZone|string|int|double|null $countryOrRawOffset
+ * @param IntlTimeZone|string|int|float|null $countryOrRawOffset
  * @return IntlIterator|false
  */
 function intltz_create_enumeration($countryOrRawOffset = null) {}
@@ -436,8 +435,7 @@ function transliterator_list_ids(): array|false {}
 
 function transliterator_create_inverse(Transliterator $orig_trans): ?Transliterator {}
 
-/** @param Transliterator|string $transliterator */
-function transliterator_transliterate($transliterator, string $subject, int $start = 0, int $end = -1): string|false {}
+function transliterator_transliterate(Transliterator|string $transliterator, string $subject, int $start = 0, int $end = -1): string|false {}
 
 function transliterator_get_error_code(Transliterator $trans): int|false {}
 

@@ -4,12 +4,8 @@
 
 class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
 {
-    /**
-     * @param mixed $index
-     * @param mixed $value
-     * @return void
-     */
-    public function add($index, $value) {}
+    /** @return void */
+    public function add(int $index, mixed $value) {}
 
     /** @return mixed */
     public function pop() {}
@@ -17,17 +13,11 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     /** @return mixed */
     public function shift() {}
 
-    /**
-     * @param mixed $value
-     * @return void
-     */
-    public function push($value) {}
+    /** @return void */
+    public function push(mixed $value) {}
 
-    /**
-     * @param mixed $value
-     * @return void
-     */
-    public function unshift($value) {}
+    /** @return void */
+    public function unshift(mixed $value) {}
 
     /** @return mixed */
     public function top() {}
@@ -57,20 +47,19 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     public function offsetExists($index) {}
 
     /**
-     * @param mixed $index
+     * @param int $index
      * @return mixed
      */
     public function offsetGet($index) {}
 
     /**
-     * @param mixed $index
-     * @param mixed $value
+     * @param int|null $index
      * @return void
      */
-    public function offsetSet($index, $value) {}
+    public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param mixed $index
+     * @param int $index
      * @return void
      */
     public function offsetUnset($index) {}
@@ -109,11 +98,10 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
 class SplQueue extends SplDoublyLinkedList
 {
     /**
-     * @param mixed $value
      * @return void
      * @alias SplDoublyLinkedList::push
      */
-    public function enqueue($value) {}
+    public function enqueue(mixed $value) {}
 
     /**
      * @return mixed

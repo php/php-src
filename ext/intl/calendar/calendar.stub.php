@@ -50,11 +50,10 @@ class IntlCalendar
     public function clear(?int $field = null) {}
 
     /**
-     * @param DateTime|string $dateTime
      * @return IntlCalendar|null
      * @alias intlcal_from_date_time
      */
-    public static function fromDateTime($dateTime, ?string $locale = null) {}
+    public static function fromDateTime(DateTime|string $dateTime, ?string $locale = null) {}
 
     /**
      * @return int

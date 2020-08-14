@@ -46,7 +46,7 @@ class PDO
     public function rollBack() {}
 
     /**
-     * @param mixed $value
+     * @param array|int $value
      * @return bool
      */
     public function setAttribute(int $attribute, $value) {}

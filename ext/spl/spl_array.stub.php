@@ -4,39 +4,34 @@
 
 class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Countable
 {
-    /** @param array|object $input */
-    public function __construct($input = [], int $flags = 0, string $iterator_class = ArrayIterator::class) {}
+    public function __construct(array|object $input = [], int $flags = 0, string $iterator_class = ArrayIterator::class) {}
 
     /**
-     * @param mixed $index
+     * @param string|int $index
      * @return bool
      */
     public function offsetExists($index) {}
 
     /**
-     * @param mixed $index
+     * @param string|int $index
      * @return mixed
      */
     public function offsetGet($index) {}
 
     /**
-     * @param mixed $index
-     * @param mixed $value
+     * @param string|int $index
      * @return void
      */
-    public function offsetSet($index, $value) {}
+    public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param mixed $index
+     * @param string|int $index
      * @return void
      */
     public function offsetUnset($index) {}
 
-    /**
-     * @param mixed $value
-     * @return void
-     */
-    public function append($value) {}
+    /** @return void */
+    public function append(mixed $value) {}
 
     /** @return array */
     public function getArrayCopy() {}
@@ -50,29 +45,17 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     /** @return void */
     public function setFlags(int $flags) {}
 
-    /**
-     * @param int $sort_flags
-     * @return bool
-     */
-    public function asort($sort_flags = SORT_REGULAR) {}
+    /** @return bool */
+    public function asort(int $sort_flags = SORT_REGULAR) {}
 
-    /**
-     * @param int $sort_flags
-     * @return bool
-     */
-    public function ksort($sort_flags = SORT_REGULAR) {}
+    /** @return bool */
+    public function ksort(int $sort_flags = SORT_REGULAR) {}
 
-    /**
-     * @param callback $cmp_function
-     * @return bool
-     */
-    public function uasort($cmp_function) {}
+    /** @return bool */
+    public function uasort(callable $cmp_function) {}
 
-    /**
-     * @param callback $cmp_function
-     * @return bool
-     */
-    public function uksort($cmp_function) {}
+    /** @return bool */
+    public function uksort(callable $cmp_function) {}
 
     /** @return bool */
     public function natsort() {}
@@ -95,11 +78,8 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     /** @return Iterator */
     public function getIterator() {}
 
-    /**
-     * @param array|object $input
-     * @return array|null
-     */
-    public function exchangeArray($input) {}
+    /** @return array|null */
+    public function exchangeArray(array|object $input) {}
 
     /** @return void */
     public function setIteratorClass(string $iteratorClass) {}
@@ -113,44 +93,41 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
 
 class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Countable
 {
-    /** @param array|object $array */
-    public function __construct($array = [], int $flags = 0) {}
+    public function __construct(array|object $array = [], int $flags = 0) {}
 
     /**
-     * @param mixed $index
+     * @param string|int $index
      * @return bool
      * @alias ArrayObject::offsetExists
      */
     public function offsetExists($index) {}
 
     /**
-     * @param mixed $index
+     * @param string|int $index
      * @return mixed
      * @alias ArrayObject::offsetGet
      */
     public function offsetGet($index) {}
 
     /**
-     * @param mixed $index
-     * @param mixed $value
+     * @param string|int $index
      * @return void
      * @alias ArrayObject::offsetSet
      */
-    public function offsetSet($index, $value) {}
+    public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param mixed $index
+     * @param string|int $index
      * @return void
      * @alias ArrayObject::offsetUnset
      */
     public function offsetUnset($index) {}
 
     /**
-     * @param mixed $value
      * @return void
      * @alias ArrayObject::append
      */
-    public function append($value) {}
+    public function append(mixed $value) {}
 
     /**
      * @return array
@@ -177,32 +154,28 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
     public function setFlags(int $flags) {}
 
     /**
-     * @param int $sort_flags
      * @return bool
      * @alias ArrayObject::asort
      */
-    public function asort($sort_flags = SORT_REGULAR) {}
+    public function asort(int $sort_flags = SORT_REGULAR) {}
 
     /**
-     * @param int $sort_flags
      * @return bool
      * @alias ArrayObject::ksort
      */
-    public function ksort($sort_flags = SORT_REGULAR) {}
+    public function ksort(int $sort_flags = SORT_REGULAR) {}
 
     /**
-     * @param callback $cmp_function
      * @return bool
      * @alias ArrayObject::uasort
      */
-    public function uasort($cmp_function) {}
+    public function uasort(callable $cmp_function) {}
 
     /**
-     * @param callback $cmp_function
      * @return bool
      * @alias ArrayObject::uksort
      */
-    public function uksort($cmp_function) {}
+    public function uksort(callable $cmp_function) {}
 
     /**
      * @return bool

@@ -20,4 +20,4 @@ PHPNW Testfest 2009 - Paul Court ( g@rgoyle.com )
     }
 ?>
 --EXPECT--
-Offset out of range
+SplDoublyLinkedList::offsetUnset(): Argument #1 ($index) is out of range

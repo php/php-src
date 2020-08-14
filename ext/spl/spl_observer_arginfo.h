@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4a31f2cc1b0c874f1256aef60afbd285dbe6c078 */
+ * Stub hash: f795244462fc7b6aed3f38f6b2e1985b3a2ab7c1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObserver_update, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -16,7 +16,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_attach, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, info, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, info, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_detach, 0, 0, 1)
@@ -36,7 +36,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplObjectStorage_getInfo arginfo_class_SplSubject_notify
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_setInfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, info)
+	ZEND_ARG_TYPE_INFO(0, info, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_count, 0, 0, 0)
@@ -67,7 +67,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_offsetSet, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, info, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, info, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_offsetUnset arginfo_class_SplObjectStorage_offsetExists

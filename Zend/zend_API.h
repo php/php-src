@@ -1634,6 +1634,9 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_PATH_STR(dest) \
 	Z_PARAM_PATH_STR_EX(dest, 0, 0)
 
+#define Z_PARAM_PATH_STR_OR_NULL(dest) \
+	Z_PARAM_PATH_STR_EX(dest, 1, 0)
+
 /* old "r" */
 #define Z_PARAM_RESOURCE_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \

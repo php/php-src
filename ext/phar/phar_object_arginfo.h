@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: be0f8bcd0ef8fdac59700160dff7d0beb210aa48 */
+ * Stub hash: d735d786b6804e336f45ac99c80276f5c67d4258 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -129,7 +129,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setMetadata, 0, 0, 1)
-	ZEND_ARG_INFO(0, metadata)
+	ZEND_ARG_TYPE_INFO(0, metadata, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setSignatureAlgorithm, 0, 0, 1)
@@ -360,9 +360,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharFileInfo_isCRCChecked arginfo_class_Phar___destruct
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharFileInfo_setMetadata, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, metadata, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_PharFileInfo_setMetadata arginfo_class_Phar_setMetadata
 
 
 ZEND_METHOD(Phar, __construct);

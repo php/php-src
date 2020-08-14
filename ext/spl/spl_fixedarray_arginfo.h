@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a14156d542422823fcee53eb8a151576d055f38f */
+ * Stub hash: 4b6c37c54416ee46f610baba2a8b2be45d1db96f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -31,7 +31,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFixedArray_offsetUnset arginfo_class_SplFixedArray_offsetExists

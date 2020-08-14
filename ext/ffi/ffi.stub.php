@@ -10,8 +10,7 @@ final class FFI
 
     public static function scope(string $scope_name): ?FFI {}
 
-    /** @param FFI\CType|string $type */
-    public static function new($type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
+    public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
 
     /** @prefer-ref $ptr */
     public static function free(FFI\CData $ptr): void {}
