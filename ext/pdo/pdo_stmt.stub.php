@@ -34,11 +34,8 @@ class PDOStatement implements IteratorAggregate
     /** @return mixed */
     public function fetch(int $fetch_style = PDO::FETCH_BOTH, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {}
 
-    /**
-     * @param mixed $fetch_argument
-     * @return array|false
-     */
-    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, $fetch_argument = UNKNOWN, array $ctor_args = []) {}
+    /** @return array|false */
+    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, mixed ...$fetch_args) {}
 
     /** @return mixed */
     public function fetchColumn(int $column_number = 0) {}

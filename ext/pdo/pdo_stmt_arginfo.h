@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d64c75660cfc44b582e7dcc20c4ce22e8e0848e1 */
+ * Stub hash: 45c43e025d9194f2dd7b2ab13d86a4e5f316fa48 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -46,8 +46,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_fetchAll, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fetch_style, IS_LONG, 0, "PDO::FETCH_BOTH")
-	ZEND_ARG_INFO(0, fetch_argument)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ctor_args, IS_ARRAY, 0, "[]")
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, fetch_args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_fetchColumn, 0, 0, 0)
