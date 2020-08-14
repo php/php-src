@@ -8,7 +8,7 @@ require_once('skipif.inc');
 <?php
 
 $mysqli = new mysqli();
-@$mysqli->__construct(null);
+@$mysqli->__construct('doesnotexist');
 $mysqli->close();
 
 ?>
