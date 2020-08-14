@@ -1021,19 +1021,8 @@ PHP_METHOD(mysqli_result, __construct)
 	MYSQLI_RESOURCE		*mysqli_resource;
 	zend_long				resmode = MYSQLI_STORE_RESULT;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				RETURN_THROWS();
-			}
-			break;
-		case 2:
-			if (zend_parse_parameters(2, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
-				RETURN_THROWS();
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l", &mysql_link, mysqli_link_class_entry, &resmode) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
