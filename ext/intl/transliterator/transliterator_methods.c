@@ -282,43 +282,38 @@ PHP_FUNCTION( transliterator_transliterate )
 	object = getThis();
 	ZVAL_UNDEF(&tmp_object);
 
-	if( object == NULL )
-	{
+	if (object == NULL) {
 		/* in non-OOP version, accept both a transliterator and a string */
-		zval *arg1;
-		if( zend_parse_parameters( ZEND_NUM_ARGS(), "zs|ll",
-			&arg1, &str, &str_len, &start, &limit ) == FAILURE )
-		{
-			RETURN_THROWS();
-		}
+		zend_string *arg1_str;
+		zend_object *arg1_obj;
 
-		if( Z_TYPE_P( arg1 ) == IS_OBJECT &&
-			instanceof_function( Z_OBJCE_P( arg1 ), Transliterator_ce_ptr ) )
-		{
-			object = arg1;
-		}
-		else
-		{ /* not a transliterator object as first argument */
+		ZEND_PARSE_PARAMETERS_START(2, 4)
+			Z_PARAM_STR_OR_OBJ_OF_CLASS(arg1_str, arg1_obj, Transliterator_ce_ptr)
+			Z_PARAM_STRING(str, str_len)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(start)
+			Z_PARAM_LONG(limit)
+		ZEND_PARSE_PARAMETERS_END();
+
+		if (arg1_str) { /* not a transliterator object as first argument */
 			int res;
-			if( !try_convert_to_string( arg1 ) ) {
-				RETURN_THROWS();
-			}
 			object = &tmp_object;
-			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),
-					TRANSLITERATOR_FORWARD, object );
+			res = create_transliterator(ZSTR_VAL(arg1_str), ZSTR_LEN(arg1_str), TRANSLITERATOR_FORWARD, object);
 			if( res == FAILURE )
 			{
 				zend_string *message = intl_error_get_message( NULL );
 				php_error_docref(NULL, E_WARNING, "Could not create "
-					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), ZSTR_VAL(message) );
+					"transliterator with ID \"%s\" (%s)", ZSTR_VAL(arg1_str), ZSTR_VAL(message) );
 				zend_string_free( message );
 				ZVAL_UNDEF(&tmp_object);
 				/* don't set U_ILLEGAL_ARGUMENT_ERROR to allow fetching of inner error */
 				goto cleanup;
 			}
+		} else {
+			ZVAL_OBJ(&tmp_object, arg1_obj);
+			object = &tmp_object;
 		}
-	}
-	else if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll",
+	} else if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll",
 		&str, &str_len, &start, &limit ) == FAILURE )
 	{
 		RETURN_THROWS();
@@ -424,7 +419,9 @@ cleanup:
 		RETVAL_FALSE;
 	}
 
-	zval_ptr_dtor( &tmp_object );
+	if (object != &tmp_object) {
+		zval_ptr_dtor( &tmp_object );
+	}
 }
 /* }}} */
 

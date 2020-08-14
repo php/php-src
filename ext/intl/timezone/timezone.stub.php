@@ -19,7 +19,7 @@ class IntlTimeZone
     public static function createDefault() {}
 
     /**
-     * @param IntlTimeZone|string|int|double|null $countryOrRawOffset
+     * @param IntlTimeZone|string|int|float|null $countryOrRawOffset
      * @return IntlIterator|false
      * @alias intltz_create_enumeration
      */

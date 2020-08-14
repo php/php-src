@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3facb6bdce18efae3d6b9594d1fcddfb220dd54d */
+ * Stub hash: 0ac7a1d4e011518fc956fb05624b45b061fa9710 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -32,7 +32,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_clear, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_fromDateTime, 0, 0, 1)
-	ZEND_ARG_INFO(0, dateTime)
+	ZEND_ARG_OBJ_TYPE_MASK(0, dateTime, DateTime, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 

@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9d2c9ec251d72065d4502bbbc29e927c6b597731 */
+ * Stub hash: 58e1e222a4ef53ab086c6180445c8b79bb85baa5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_pop, 0, 0, 0)
@@ -12,7 +12,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplDoublyLinkedList_shift arginfo_class_SplDoublyLinkedList_pop
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_push, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplDoublyLinkedList_unshift arginfo_class_SplDoublyLinkedList_push
@@ -34,14 +34,16 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplDoublyLinkedList_getIteratorMode arginfo_class_SplDoublyLinkedList_pop
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetExists, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, index, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_offsetGet arginfo_class_SplDoublyLinkedList_offsetExists
-
 #define arginfo_class_SplDoublyLinkedList_offsetSet arginfo_class_SplDoublyLinkedList_add
 
-#define arginfo_class_SplDoublyLinkedList_offsetUnset arginfo_class_SplDoublyLinkedList_offsetExists
+#define arginfo_class_SplDoublyLinkedList_offsetUnset arginfo_class_SplDoublyLinkedList_offsetGet
 
 #define arginfo_class_SplDoublyLinkedList_rewind arginfo_class_SplDoublyLinkedList_pop
 

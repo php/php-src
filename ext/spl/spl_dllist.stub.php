@@ -5,11 +5,10 @@
 class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
 {
     /**
-     * @param mixed $index
-     * @param mixed $value
+     * @param resource|string|int|float|bool $index
      * @return void
      */
-    public function add($index, $value) {}
+    public function add($index, mixed $value) {}
 
     /** @return mixed */
     public function pop() {}
@@ -17,17 +16,11 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     /** @return mixed */
     public function shift() {}
 
-    /**
-     * @param mixed $value
-     * @return void
-     */
-    public function push($value) {}
+    /** @return void */
+    public function push(mixed $value) {}
 
-    /**
-     * @param mixed $value
-     * @return void
-     */
-    public function unshift($value) {}
+    /** @return void */
+    public function unshift(mixed $value) {}
 
     /** @return mixed */
     public function top() {}
@@ -50,27 +43,23 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     /** @return int */
     public function getIteratorMode() {}
 
-    /**
-     * @param int $index
-     * @return bool
-     */
-    public function offsetExists($index) {}
+    /** @return bool */
+    public function offsetExists(mixed $index) {}
 
     /**
-     * @param mixed $index
+     * @param resource|string|int|float|bool $index
      * @return mixed
      */
     public function offsetGet($index) {}
 
     /**
-     * @param mixed $index
-     * @param mixed $value
+     * @param resource|string|int|float|bool|null $index
      * @return void
      */
-    public function offsetSet($index, $value) {}
+    public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param mixed $index
+     * @param resource|string|int|float|bool $index
      * @return void
      */
     public function offsetUnset($index) {}
@@ -109,11 +98,10 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
 class SplQueue extends SplDoublyLinkedList
 {
     /**
-     * @param mixed $value
      * @return void
      * @alias SplDoublyLinkedList::push
      */
-    public function enqueue($value) {}
+    public function enqueue(mixed $value) {}
 
     /**
      * @return mixed

@@ -29,11 +29,12 @@
 PHP_METHOD(com, __construct)
 {
 	zval *object = getThis();
-	zval *server_params = NULL;
+	zend_string *server_name = NULL;
+	HashTable *server_params = NULL;
 	php_com_dotnet_object *obj;
 	char *module_name, *typelib_name = NULL;
 	size_t module_name_len = 0, typelib_name_len = 0;
-	zend_string *server_name = NULL, *user_name = NULL, *password = NULL, *domain_name = NULL;
+	zend_string *user_name = NULL, *password = NULL, *domain_name = NULL;
 	OLECHAR *moniker;
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
@@ -50,16 +51,13 @@ PHP_METHOD(com, __construct)
 	zend_long cp = GetACP();
 	const struct php_win32_cp *cp_it;
 
-	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS(), "s|S!ls",
-			&module_name, &module_name_len, &server_name,
-			&cp, &typelib_name, &typelib_name_len) &&
-		FAILURE == zend_parse_parameters(
-			ZEND_NUM_ARGS(), "sa|ls",
-			&module_name, &module_name_len, &server_params, &cp,
-			&typelib_name, &typelib_name_len)) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(module_name, module_name_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(server_name, server_params)
+		Z_PARAM_LONG(cp)
+		Z_PARAM_STRING(typelib_name, typelib_name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_com_initialize();
 	obj = CDNO_FETCH(object);
@@ -78,28 +76,28 @@ PHP_METHOD(com, __construct)
 
 		/* decode the data from the array */
 
-		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
+		if (NULL != (tmp = zend_hash_str_find(server_params,
 				"Server", sizeof("Server")-1))) {
 			server_name = zval_get_string(tmp);
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
+		if (NULL != (tmp = zend_hash_str_find(server_params,
 				"Username", sizeof("Username")-1))) {
 			user_name = zval_get_string(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
+		if (NULL != (tmp = zend_hash_str_find(server_params,
 				"Password", sizeof("Password")-1))) {
 			password = zval_get_string(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
+		if (NULL != (tmp = zend_hash_str_find(server_params,
 				"Domain", sizeof("Domain")-1))) {
 			domain_name = zval_get_string(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
+		if (NULL != (tmp = zend_hash_str_find(server_params,
 				"Flags", sizeof("Flags")-1))) {
 			ctx = (CLSCTX)zval_get_long(tmp);
 		}
@@ -693,7 +691,7 @@ PHP_FUNCTION(com_event_sink)
 
 	RETVAL_FALSE;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Oo|z/",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Oo|z!/",
 			&object, php_com_variant_class_entry, &sinkobject, &sink)) {
 		RETURN_THROWS();
 	}

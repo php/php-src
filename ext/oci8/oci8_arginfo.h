@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1c1a73f6a4de5fa2ca9595125822d65bc4f5fc55 */
+ * Stub hash: a5a245b354b48a56c274c8f74c974d92ec430853 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_TYPE_INFO(0, column_name, IS_STRING, 0)
-	ZEND_ARG_INFO(1, variable)
+	ZEND_ARG_TYPE_INFO(1, variable, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -13,7 +13,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_bind_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_TYPE_INFO(0, column_name, IS_STRING, 0)
-	ZEND_ARG_INFO(1, variable)
+	ZEND_ARG_TYPE_INFO(1, variable, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maximum_length, IS_LONG, 0, "-1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -23,7 +23,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_bind_array_by_name, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_TYPE_INFO(0, column_name, IS_STRING, 0)
-	ZEND_ARG_INFO(1, variable)
+	ZEND_ARG_TYPE_INFO(1, variable, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, maximum_array_length, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maximum_item_length, IS_LONG, 0, "-1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "SQLT_AFC")

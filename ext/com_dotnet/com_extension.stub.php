@@ -75,8 +75,7 @@ class variant
 
 class com
 {
-    /** @param string|array|null $server_name */
-    public function __construct(string $module_name, $server_name = UNKNOWN, int $codepage = CP_ACP, string $typelib = "") {}
+    public function __construct(string $module_name, array|string|null $server_name = null, int $codepage = CP_ACP, string $typelib = "") {}
 }
 
 #if HAVE_MSCOREE_H

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 48167f9ee38966beaf550cd0a7b07d873575b48e */
+ * Stub hash: 9c7d872d61142127560453283a1ca9f07bfdc207 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -118,7 +118,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_com___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, module_name, IS_STRING, 0)
-	ZEND_ARG_INFO(0, server_name)
+	ZEND_ARG_TYPE_MASK(0, server_name, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codepage, IS_LONG, 0, "CP_ACP")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, typelib, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()

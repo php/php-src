@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 94e3c8228a0625a2c5825b0747fb1e5e08808b50 */
+ * Stub hash: 69c4f052e9c75c4adb5b1b7056db981b2b26a22f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()

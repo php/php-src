@@ -659,31 +659,17 @@ retry:
 * OID parser (and type, value for SNMP_SET command)
 */
 
-static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_query, zval *oid, zval *type, zval *value)
+static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_query, zend_string *oid_str, HashTable *oid_ht, zval *type, zval *value)
 {
 	char *pptr;
 	uint32_t idx_type = 0, idx_value = 0;
 	zval *tmp_oid, *tmp_type, *tmp_value;
 
-	if (Z_TYPE_P(oid) != IS_ARRAY) {
-		convert_to_string_ex(oid);
-	}
-
-	if (st & SNMP_CMD_SET) {
-		if (Z_TYPE_P(type) != IS_ARRAY) {
-			convert_to_string_ex(type);
-		}
-
-		if (Z_TYPE_P(value) != IS_ARRAY) {
-			convert_to_string_ex(value);
-		}
-	}
-
 	objid_query->count = 0;
 	objid_query->array_output = ((st & SNMP_CMD_WALK) ? TRUE : FALSE);
-	if (Z_TYPE_P(oid) == IS_STRING) {
+	if (oid_str) {
 		objid_query->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg));
-		objid_query->vars[objid_query->count].oid = Z_STRVAL_P(oid);
+		objid_query->vars[objid_query->count].oid = ZSTR_VAL(oid_str);
 		if (st & SNMP_CMD_SET) {
 			if (Z_TYPE_P(type) == IS_STRING && Z_TYPE_P(value) == IS_STRING) {
 				if (Z_STRLEN_P(type) != 1) {
@@ -701,14 +687,14 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 			}
 		}
 		objid_query->count++;
-	} else if (Z_TYPE_P(oid) == IS_ARRAY) { /* we got objid array */
-		if (zend_hash_num_elements(Z_ARRVAL_P(oid)) == 0) {
+	} else if (oid_ht) { /* we got objid array */
+		if (zend_hash_num_elements(oid_ht) == 0) {
 			php_error_docref(NULL, E_WARNING, "Got empty OID array");
 			return FALSE;
 		}
-		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(Z_ARRVAL_P(oid)), 0);
+		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
 		objid_query->array_output = ( (st & SNMP_CMD_SET) ? FALSE : TRUE );
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(oid), tmp_oid) {
+		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {
 			convert_to_string_ex(tmp_oid);
 			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
 			if (st & SNMP_CMD_SET) {
@@ -1091,7 +1077,9 @@ static int netsnmp_session_set_security(struct snmp_session *session, char *sec_
 */
 static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
-	zval *oid, *value = NULL, *type = NULL;
+	zend_string *oid_str;
+	HashTable *oid_ht;
+	zval *value = NULL, *type = NULL;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
 	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
@@ -1112,64 +1100,104 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	if (session_less_mode) {
 		if (version == SNMP_VERSION_3) {
 			if (st & SNMP_CMD_SET) {
-				if (zend_parse_parameters(argc, "ssssssszzz|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
-					&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &oid, &type, &value, &timeout, &retries) == FAILURE) {
-					RETURN_THROWS();
-				}
+				ZEND_PARSE_PARAMETERS_START(10, 12)
+					Z_PARAM_STRING(a1, a1_len)
+					Z_PARAM_STRING(a2, a2_len)
+					Z_PARAM_STRING(a3, a3_len)
+					Z_PARAM_STRING(a4, a4_len)
+					Z_PARAM_STRING(a5, a5_len)
+					Z_PARAM_STRING(a6, a6_len)
+					Z_PARAM_STRING(a7, a7_len)
+					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_ZVAL(type)
+					Z_PARAM_ZVAL(value)
+					Z_PARAM_OPTIONAL
+					Z_PARAM_LONG(timeout)
+					Z_PARAM_LONG(retries)
+				ZEND_PARSE_PARAMETERS_END();
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
 				 * SNMP_CMD_WALK
 				 */
-				if (zend_parse_parameters(argc, "sssssssz|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
-					&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &oid, &timeout, &retries) == FAILURE) {
-					RETURN_THROWS();
-				}
+				ZEND_PARSE_PARAMETERS_START(8, 10)
+					Z_PARAM_STRING(a1, a1_len)
+					Z_PARAM_STRING(a2, a2_len)
+					Z_PARAM_STRING(a3, a3_len)
+					Z_PARAM_STRING(a4, a4_len)
+					Z_PARAM_STRING(a5, a5_len)
+					Z_PARAM_STRING(a6, a6_len)
+					Z_PARAM_STRING(a7, a7_len)
+					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_OPTIONAL
+					Z_PARAM_LONG(timeout)
+					Z_PARAM_LONG(retries)
+				ZEND_PARSE_PARAMETERS_END();
 			}
 		} else {
 			if (st & SNMP_CMD_SET) {
-				if (zend_parse_parameters(argc, "sszzz|ll", &a1, &a1_len, &a2, &a2_len, &oid, &type, &value, &timeout, &retries) == FAILURE) {
-					RETURN_THROWS();
-				}
+				ZEND_PARSE_PARAMETERS_START(5, 7)
+					Z_PARAM_STRING(a1, a1_len)
+					Z_PARAM_STRING(a2, a2_len)
+					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_ZVAL(type)
+					Z_PARAM_ZVAL(value)
+					Z_PARAM_OPTIONAL
+					Z_PARAM_LONG(timeout)
+					Z_PARAM_LONG(retries)
+				ZEND_PARSE_PARAMETERS_END();
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
 				 * SNMP_CMD_WALK
 				 */
-				if (zend_parse_parameters(argc, "ssz|ll", &a1, &a1_len, &a2, &a2_len, &oid, &timeout, &retries) == FAILURE) {
-					RETURN_THROWS();
-				}
+				ZEND_PARSE_PARAMETERS_START(3, 5)
+					Z_PARAM_STRING(a1, a1_len)
+					Z_PARAM_STRING(a2, a2_len)
+					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_OPTIONAL
+					Z_PARAM_LONG(timeout)
+					Z_PARAM_LONG(retries)
+				ZEND_PARSE_PARAMETERS_END();
 			}
 		}
 	} else {
 		if (st & SNMP_CMD_SET) {
-			if (zend_parse_parameters(argc, "zzz", &oid, &type, &value) == FAILURE) {
-				RETURN_THROWS();
-			}
+			ZEND_PARSE_PARAMETERS_START(3, 3)
+				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_ZVAL(type)
+				Z_PARAM_ZVAL(value)
+			ZEND_PARSE_PARAMETERS_END();
 		} else if (st & SNMP_CMD_WALK) {
-			if (zend_parse_parameters(argc, "z|bll", &oid, &suffix_keys, &(objid_query.max_repetitions), &(objid_query.non_repeaters)) == FAILURE) {
-				RETURN_THROWS();
-			}
+			ZEND_PARSE_PARAMETERS_START(1, 4)
+				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_OPTIONAL
+				Z_PARAM_BOOL(suffix_keys)
+				Z_PARAM_LONG(objid_query.max_repetitions)
+				Z_PARAM_LONG(objid_query.non_repeaters)
+			ZEND_PARSE_PARAMETERS_END();
 			if (suffix_keys) {
 				st |= SNMP_USE_SUFFIX_AS_KEYS;
 			}
 		} else if (st & SNMP_CMD_GET) {
-			if (zend_parse_parameters(argc, "z|b", &oid, &use_orignames) == FAILURE) {
-				RETURN_THROWS();
-			}
+			ZEND_PARSE_PARAMETERS_START(1, 2)
+				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_OPTIONAL
+				Z_PARAM_BOOL(use_orignames)
+			ZEND_PARSE_PARAMETERS_END();
 			if (use_orignames) {
 				st |= SNMP_ORIGINAL_NAMES_AS_KEYS;
 			}
 		} else {
 			/* SNMP_CMD_GETNEXT
 			 */
-			if (zend_parse_parameters(argc, "z", &oid) == FAILURE) {
-				RETURN_THROWS();
-			}
+			ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+			ZEND_PARSE_PARAMETERS_END();
 		}
 	}
 
-	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid, type, value)) {
+	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid_str, oid_ht, type, value)) {
 		RETURN_FALSE;
 	}
 
