@@ -116,8 +116,11 @@ function openssl_pkcs7_encrypt(string $infile, string $outfile, $recipcerts, ?ar
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $signkey */
 function openssl_pkcs7_sign(string $infile, string $outfile, OpenSSLCertificate|string $signcert, $signkey, ?array $headers, int $flags = PKCS7_DETACHED, ?string $extracertsfilename = null): bool {}
 
-/** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string|null $recipkey */
-function openssl_pkcs7_decrypt(string $infilename, string $outfilename, OpenSSLCertificate|string $recipcert, $recipkey = null): bool {}
+/**
+ * @param OpenSSLCertificate|string $recipcert
+ * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string|null $recipkey
+ */
+function openssl_pkcs7_decrypt(string $infilename, string $outfilename, $recipcert, $recipkey = null): bool {}
 
 /** @param array $certs */
 function openssl_pkcs7_read(string $infilename, &$certs): bool {}
@@ -130,8 +133,11 @@ function openssl_cms_encrypt(string $infile, string $outfile, $recipcerts, ?arra
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $signkey */
 function openssl_cms_sign(string $infile, string $outfile, OpenSSLCertificate|string $signcert, $signkey, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, ?string $extracertsfilename = null): bool {}
 
-/** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $recipkey */
-function openssl_cms_decrypt(string $infilename, string $outfilename, OpenSSLCertificate|string $recipcert, $recipkey, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
+/**
+ * @param OpenSSLCertificate|string $recipcert
+ * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $recipkey
+ */
+function openssl_cms_decrypt(string $infilename, string $outfilename, $recipcert, $recipkey = UNKNOWN, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
 
 /** @param array $certs */
 function openssl_cms_read(string $infilename, &$certs): bool {}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ed45da0e8786db9b20fd33d574b20f3d41304e0a */
+ * Stub hash: 10a514c9947313694296c6ec9ec6f2fa8e6c850b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -190,7 +190,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs7_decrypt, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, infilename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, outfilename, IS_STRING, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, recipcert, OpenSSLCertificate, MAY_BE_STRING, NULL)
+	ZEND_ARG_INFO(0, recipcert)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, recipkey, "null")
 ZEND_END_ARG_INFO()
 
@@ -232,10 +232,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_sign, 0, 5, _IS_BOOL
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extracertsfilename, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_decrypt, 0, 4, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_decrypt, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, infilename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, outfilename, IS_STRING, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, recipcert, OpenSSLCertificate, MAY_BE_STRING, NULL)
+	ZEND_ARG_INFO(0, recipcert)
 	ZEND_ARG_INFO(0, recipkey)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
 ZEND_END_ARG_INFO()
