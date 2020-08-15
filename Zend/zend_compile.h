@@ -758,7 +758,7 @@ ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
 void zend_stop_lexing(void);
-void zend_emit_final_return(int return_one);
+void zend_emit_final_return(bool return_one);
 
 /* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
@@ -847,7 +847,7 @@ ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
-ZEND_API ZEND_RESULT_CODE zend_is_smart_branch(const zend_op *opline);
+ZEND_API bool zend_is_smart_branch(const zend_op *opline);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
