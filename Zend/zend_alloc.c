@@ -2657,12 +2657,11 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 }
 
 
-ZEND_API int zend_set_memory_limit(size_t memory_limit)
+ZEND_API void zend_set_memory_limit(size_t memory_limit)
 {
 #if ZEND_MM_LIMIT
 	AG(mm_heap)->limit = (memory_limit >= ZEND_MM_CHUNK_SIZE) ? memory_limit : ZEND_MM_CHUNK_SIZE;
 #endif
-	return SUCCESS;
 }
 
 ZEND_API size_t zend_memory_usage(int real_usage)
