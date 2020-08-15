@@ -74,7 +74,7 @@ ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API size_t (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
 ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
-ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
+ZEND_API ZEND_RESULT_CODE (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -82,9 +82,9 @@ void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_li
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
-ZEND_API int (*zend_post_startup_cb)(void) = NULL;
+ZEND_API ZEND_RESULT_CODE (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
-ZEND_API int (*zend_preload_autoload)(zend_string *filename) = NULL;
+ZEND_API ZEND_RESULT_CODE (*zend_preload_autoload)(zend_string *filename) = NULL;
 
 /* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);
@@ -365,7 +365,7 @@ static void print_flat_hash(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
+ZEND_API bool zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
 {
 	if (Z_TYPE_P(expr) == IS_STRING) {
 		return 0;
@@ -1019,7 +1019,7 @@ static void zend_resolve_property_types(void) /* {{{ */
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
  */
-int zend_post_startup(void) /* {{{ */
+ZEND_RESULT_CODE zend_post_startup(void) /* {{{ */
 {
 #ifdef ZTS
 	zend_encoding **script_encoding_list;
@@ -1031,7 +1031,7 @@ int zend_post_startup(void) /* {{{ */
 	zend_resolve_property_types();
 
 	if (zend_post_startup_cb) {
-		int (*cb)(void) = zend_post_startup_cb;
+		ZEND_RESULT_CODE (*cb)(void) = zend_post_startup_cb;
 
 		zend_post_startup_cb = NULL;
 		if (cb() != SUCCESS) {
@@ -1663,13 +1663,13 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	}
 } /* }}} */
 
-ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */
+ZEND_API ZEND_RESULT_CODE zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */
 {
 	va_list files;
 	int i;
 	zend_file_handle *file_handle;
 	zend_op_array *op_array;
-	int ret = SUCCESS;
+	ZEND_RESULT_CODE ret = SUCCESS;
 
 	va_start(files, file_count);
 	for (i = 0; i < file_count; i++) {
