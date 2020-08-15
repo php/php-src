@@ -327,7 +327,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 	}
 	if (s >= 0) {
 		if (s < 0x80) { /* ASCII */
-			if ((filter->status & 0xff00) != 0) {
+			if (filter->status != 0) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
 				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
@@ -335,7 +335,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			filter->status = 0;
 			CK((*filter->output_function)(s, filter->data));
 		} else if (s < 0x100) { /* kana */
-			if ((filter->status & 0xff00) != 0x100) {
+			if (filter->status != 0x100) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
 				CK((*filter->output_function)(0x49, filter->data));		/* 'I' */
@@ -343,7 +343,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			filter->status = 0x100;
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x8080) { /* X 0208 */
-			if ((filter->status & 0xff00) != 0x200) {
+			if (filter->status != 0x200) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
 				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
@@ -352,7 +352,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x10000) { /* X 0212 */
-			if ((filter->status & 0xff00) != 0x300) {
+			if (filter->status != 0x300) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
 				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
@@ -362,7 +362,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else { /* X 0201 latin */
-			if ((filter->status & 0xff00) != 0x400) {
+			if (filter->status != 0x400) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
 				CK((*filter->output_function)(0x4a, filter->data));		/* 'J' */
