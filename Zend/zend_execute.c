@@ -568,7 +568,7 @@ static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_prop
 	return prop;
 }
 
-static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD bool zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_error(E_NOTICE, "Only variables should be assigned by reference");
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1035,7 +1035,7 @@ static zend_always_inline zend_bool zend_check_type(
 	return zend_check_type_slow(type, arg, ref, cache_slot, scope, is_return_type, is_internal);
 }
 
-static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
+static zend_always_inline bool zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
 
@@ -1051,7 +1051,7 @@ static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint3
 	return 1;
 }
 
-static zend_always_inline int zend_verify_variadic_arg_type(
+static zend_always_inline bool zend_verify_variadic_arg_type(
 		zend_function *zf, zend_arg_info *arg_info, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
@@ -1063,7 +1063,7 @@ static zend_always_inline int zend_verify_variadic_arg_type(
 	return 1;
 }
 
-static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
+static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
 {
 	uint32_t i;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
@@ -1203,7 +1203,7 @@ static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, con
 		fclass, fsep, fname, returned_msg, returned_kind);
 }
 
-static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
+static bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 {
 	zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
 	void *dummy_cache_slot = NULL;
@@ -3045,7 +3045,7 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info
 }
 
 /* 1: valid, 0: invalid, -1: may be valid after type coercion */
-static zend_always_inline bool i_zend_verify_type_assignable_zval(
+static zend_always_inline int i_zend_verify_type_assignable_zval(
 		zend_property_info *info, zval *zv, zend_bool strict) {
 	zend_type type = info->type;
 	uint32_t type_mask;
