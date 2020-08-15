@@ -2203,7 +2203,7 @@ static void *tracked_malloc(size_t size);
 static void tracked_free_all();
 #endif
 
-void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
+void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 {
 	zend_mm_chunk *p;
 	zend_mm_huge_list *list;
@@ -2364,7 +2364,7 @@ static size_t alloc_globals_offset;
 static zend_alloc_globals alloc_globals;
 #endif
 
-ZEND_API int is_zend_mm(void)
+ZEND_API bool is_zend_mm(void)
 {
 #if ZEND_MM_CUSTOM
 	return !AG(mm_heap)->use_custom_heap;
@@ -2373,7 +2373,7 @@ ZEND_API int is_zend_mm(void)
 #endif
 }
 
-ZEND_API int is_zend_ptr(const void *ptr)
+ZEND_API bool is_zend_ptr(const void *ptr)
 {
 #if ZEND_MM_CUSTOM
 	if (AG(mm_heap)->use_custom_heap) {
@@ -2664,7 +2664,7 @@ ZEND_API void zend_set_memory_limit(size_t memory_limit)
 #endif
 }
 
-ZEND_API size_t zend_memory_usage(int real_usage)
+ZEND_API size_t zend_memory_usage(bool real_usage)
 {
 #if ZEND_MM_STAT
 	if (real_usage) {
@@ -2677,7 +2677,7 @@ ZEND_API size_t zend_memory_usage(int real_usage)
 	return 0;
 }
 
-ZEND_API size_t zend_memory_peak_usage(int real_usage)
+ZEND_API size_t zend_memory_peak_usage(bool real_usage)
 {
 #if ZEND_MM_STAT
 	if (real_usage) {
@@ -2689,7 +2689,7 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage)
 	return 0;
 }
 
-ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
+ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 {
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
 }
@@ -2818,7 +2818,7 @@ ZEND_API zend_mm_heap *zend_mm_get_heap(void)
 	return AG(mm_heap);
 }
 
-ZEND_API int zend_mm_is_custom_heap(zend_mm_heap *new_heap)
+ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap)
 {
 #if ZEND_MM_CUSTOM
 	return AG(mm_heap)->use_custom_heap;

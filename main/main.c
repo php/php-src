@@ -268,7 +268,8 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		PG(memory_limit) = Z_L(1)<<30;		/* effectively, no limit */
 	}
-	return zend_set_memory_limit(PG(memory_limit));
+	zend_set_memory_limit(PG(memory_limit));
+	return SUCCESS;
 }
 /* }}} */
 
