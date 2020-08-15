@@ -3,7 +3,7 @@ bug79897: Promoted constructor params with attribs cause crash
 --FILE--
 <?php
 
-@@Attribute
+#[Attribute]
 class B {
     public function __construct($value)
     {
@@ -12,7 +12,7 @@ class B {
 
 class A {
     public function __construct(
-        @@B(12) public $b
+        #[B(12)] public $b
     )
     {
     }
