@@ -369,7 +369,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, int check_null) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
 
@@ -593,8 +593,8 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 {
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
-	int check_null = 0;
-	int separate = 0;
+	bool check_null = 0;
+	bool separate = 0;
 	zval *real_arg = arg;
 
 	/* scan through modifiers */
@@ -1436,7 +1436,7 @@ ZEND_API void add_assoc_null_ex(zval *arg, const char *key, size_t key_len) /* {
 }
 /* }}} */
 
-ZEND_API void add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, int b) /* {{{ */
+ZEND_API void add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, bool b) /* {{{ */
 {
 	zval tmp;
 
@@ -1514,7 +1514,7 @@ ZEND_API void add_index_null(zval *arg, zend_ulong index) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void add_index_bool(zval *arg, zend_ulong index, int b) /* {{{ */
+ZEND_API void add_index_bool(zval *arg, zend_ulong index, bool b) /* {{{ */
 {
 	zval tmp;
 
@@ -2860,7 +2860,7 @@ static zend_always_inline zend_class_entry *get_scope(zend_execute_data *frame)
 	return frame && frame->func ? frame->func->common.scope : NULL;
 }
 
-static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *scope, zend_execute_data *frame, zend_fcall_info_cache *fcc, int *strict_class, char **error) /* {{{ */
+static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *scope, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool *strict_class, char **error) /* {{{ */
 {
 	bool ret = 0;
 	zend_class_entry *ce;
@@ -2949,7 +2949,7 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	fcc->function_handler = NULL;
 }
 
-static zend_always_inline bool zend_is_callable_check_func(int check_flags, zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, int strict_class, char **error) /* {{{ */
+static zend_always_inline bool zend_is_callable_check_func(int check_flags, zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = 0;
@@ -3237,7 +3237,7 @@ static zend_always_inline zend_bool zend_is_callable_impl(
 {
 	zend_bool ret;
 	zend_fcall_info_cache fcc_local;
-	int strict_class = 0;
+	bool strict_class = 0;
 
 	if (fcc == NULL) {
 		fcc = &fcc_local;
@@ -3409,7 +3409,7 @@ ZEND_API ZEND_RESULT_CODE zend_fcall_info_init(zval *callable, uint32_t check_fl
 }
 /* }}} */
 
-ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
+ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, bool free_mem) /* {{{ */
 {
 	if (fci->params) {
 		zval *p = fci->params;
@@ -4129,7 +4129,7 @@ ZEND_API ZEND_RESULT_CODE zend_update_static_property_ex(zend_class_entry *scope
 ZEND_API ZEND_RESULT_CODE zend_update_static_property(zend_class_entry *scope, const char *name, size_t name_length, zval *value) /* {{{ */
 {
 	zend_string *key = zend_string_init(name, name_length, 0);
-	int retval = zend_update_static_property_ex(scope, key, value);
+	bool retval = zend_update_static_property_ex(scope, key, value);
 	zend_string_efree(key);
 	return retval;
 }
