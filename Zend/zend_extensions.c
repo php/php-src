@@ -24,7 +24,7 @@ ZEND_API uint32_t zend_extension_flags = 0;
 ZEND_API int zend_op_array_extension_handles = 0;
 static int last_resource_number;
 
-int zend_load_extension(const char *path)
+ZEND_RESULT_CODE zend_load_extension(const char *path)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	DL_HANDLE handle;
@@ -51,7 +51,7 @@ int zend_load_extension(const char *path)
 #endif
 }
 
-int zend_load_extension_handle(DL_HANDLE handle, const char *path)
+ZEND_RESULT_CODE zend_load_extension_handle(DL_HANDLE handle, const char *path)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	zend_extension *new_extension;
@@ -181,7 +181,7 @@ static void zend_extension_shutdown(zend_extension *extension)
 #endif
 }
 
-static int zend_extension_startup(zend_extension *extension)
+static bool zend_extension_startup(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->startup) {
