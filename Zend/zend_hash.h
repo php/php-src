@@ -508,7 +508,7 @@ static zend_always_inline zval *zend_symtable_find_ind(const HashTable *ht, zend
 }
 
 
-static zend_always_inline ZEND_RESULT_CODE zend_symtable_exists(HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_symtable_exists(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -520,7 +520,7 @@ static zend_always_inline ZEND_RESULT_CODE zend_symtable_exists(HashTable *ht, z
 }
 
 
-static zend_always_inline ZEND_RESULT_CODE zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_symtable_exists_ind(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -592,7 +592,7 @@ static zend_always_inline zval *zend_symtable_str_find(HashTable *ht, const char
 }
 
 
-static zend_always_inline ZEND_RESULT_CODE zend_symtable_str_exists(HashTable *ht, const char *str, size_t len)
+static zend_always_inline bool zend_symtable_str_exists(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
