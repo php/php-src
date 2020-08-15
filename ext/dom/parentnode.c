@@ -134,6 +134,11 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 	dom_object *newNodeObj;
 	int stricterror;
 
+	if (document == NULL) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, 1);
+		return NULL;
+	}
+
 	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
 		documentNode = (xmlDoc *) contextNode;
 	} else {
