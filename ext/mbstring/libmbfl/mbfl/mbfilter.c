@@ -1380,6 +1380,8 @@ mime_header_decode_feed:
 	return result;
 }
 
+ZEND_SET_ALIGNED(2, static char decimal_digits[]) = "00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
+
 mbfl_string *mbfl_html_numeric_entity_encode(mbfl_string *string, mbfl_string *result, int *convmap,
 	int mapsize, bool hex)
 {
@@ -1392,7 +1394,7 @@ mbfl_string *mbfl_html_numeric_entity_encode(mbfl_string *string, mbfl_string *r
 	size_t len;
 	unsigned int *wc_buffer = convert_string_to_wchar(string, &len), *p = wc_buffer, *e = p + len;
 	int *convmap_end = convmap + (mapsize * 4);
-	unsigned char buf[16];
+	ZEND_SET_ALIGNED(2, unsigned char buf[16]); /* We will do 16-bit writes into this buffer */
 
 next_character:
 	while (p < e) {
@@ -1425,9 +1427,13 @@ next_character:
 							c >>= 4;
 						}
 					} else {
-						while (c > 0) {
+						while (c >= 10) {
+							converted -= 2;
+							*((uint16_t*)converted) = ((uint16_t*)decimal_digits)[c % 100];
+							c /= 100;
+						}
+						if (c > 0) {
 							*(--converted) = "0123456789"[c % 10];
-							c /= 10;
 						}
 					}
 					mbfl_convert_filter_feed_string(decoder, converted, buf + sizeof(buf) - converted);
