@@ -119,6 +119,8 @@ struct _zend_compiler_globals {
 	zend_arena *ast_arena;
 
 	zend_stack delayed_oplines_stack;
+	zend_stack delayed_oplines_offset_stack;
+	uint32_t delayed_oplines_stack_level;
 	HashTable *memoized_exprs;
 	int memoize_mode;
 
