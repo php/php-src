@@ -138,7 +138,7 @@ ZEND_RESULT_CODE zend_load_extension_handle(DL_HANDLE handle, const char *path)
 }
 
 
-int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
+void zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	zend_extension extension;
@@ -167,8 +167,6 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 	}
 	/*fprintf(stderr, "Loaded %s, version %s\n", extension.name, extension.version);*/
 #endif
-
-	return SUCCESS;
 }
 
 
@@ -195,20 +193,18 @@ static bool zend_extension_startup(zend_extension *extension)
 }
 
 
-int zend_startup_extensions_mechanism()
+void zend_startup_extensions_mechanism()
 {
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
 	zend_op_array_extension_handles = 0;
 	last_resource_number = 0;
-	return SUCCESS;
 }
 
 
-int zend_startup_extensions()
+void zend_startup_extensions()
 {
 	zend_llist_apply_with_del(&zend_extensions, (int (*)(void *)) zend_extension_startup);
-	return SUCCESS;
 }
 
 
