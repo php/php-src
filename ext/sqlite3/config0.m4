@@ -15,6 +15,10 @@ if test $PHP_SQLITE3 != "no"; then
     AC_DEFINE(HAVE_SQLITE3_ERRSTR, 1, [have sqlite3_errstr function])
   ], [], [$SQLITE3_SHARED_LIBADD])
 
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_expanded_sql, [
+    AC_DEFINE(HAVE_SQLITE3_EXPANDED_SQL, 1, [have sqlite3_expanded_sql function])
+  ], [], [$SQLITE3_SHARED_LIBADD])
+
   PHP_CHECK_LIBRARY(sqlite3,sqlite3_load_extension,
     [],
     [AC_DEFINE(SQLITE_OMIT_LOAD_EXTENSION, 1, [have sqlite3 with extension support])],
