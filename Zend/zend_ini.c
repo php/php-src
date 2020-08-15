@@ -41,9 +41,9 @@ static int zend_remove_ini_entries(zval *el, void *arg) /* {{{ */
 }
 /* }}} */
 
-static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage) /* {{{ */
+static ZEND_RESULT_CODE zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage) /* {{{ */
 {
-	int result = FAILURE;
+	ZEND_RESULT_CODE result = FAILURE;
 
 	if (ini_entry->modified) {
 		if (ini_entry->on_modify) {
