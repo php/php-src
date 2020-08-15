@@ -50,7 +50,7 @@ ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 static zend_object_handlers default_exception_handlers;
 
 /* {{{ zend_implement_throwable */
-static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
+static ZEND_RESULT_CODE zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (instanceof_function(class_type, zend_ce_exception) || instanceof_function(class_type, zend_ce_error)) {
 		return SUCCESS;
@@ -213,7 +213,7 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 }
 /* }}} */
 
-static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, int skip_top_traces) /* {{{ */
+static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, bool skip_top_traces) /* {{{ */
 {
 	zval tmp;
 	zval trace;
@@ -908,11 +908,11 @@ static void zend_error_va(int type, const char *file, uint32_t lineno, const cha
 /* }}} */
 
 /* This function doesn't return if it uses E_ERROR */
-ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{{ */
+ZEND_API ZEND_COLD ZEND_RESULT_CODE zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception, rv;
 	zend_class_entry *ce_exception;
-	int result = FAILURE;
+	ZEND_RESULT_CODE result = FAILURE;
 
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = ex->ce;
