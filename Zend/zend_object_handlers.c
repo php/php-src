@@ -138,7 +138,7 @@ ZEND_API HashTable *zend_std_get_gc(zend_object *zobj, zval **table, int *n) /* 
 }
 /* }}} */
 
-ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, bool *is_temp) /* {{{ */
 {
 	zend_class_entry *ce = object->ce;
 	zval retval;
@@ -223,7 +223,7 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 }
 /* }}} */
 
-static zend_never_inline int is_protected_compatible_scope(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
+static zend_never_inline bool is_protected_compatible_scope(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
 {
 	return scope &&
 		(is_derived_class(ce, scope) || is_derived_class(scope, ce));
@@ -267,7 +267,7 @@ static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
-static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, zend_property_info **info_ptr) /* {{{ */
+static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, bool silent, void **cache_slot, zend_property_info **info_ptr) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *property_info;
@@ -443,7 +443,7 @@ found:
 }
 /* }}} */
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, zend_bool is_dynamic) /* {{{ */
+ZEND_API ZEND_RESULT_CODE zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, zend_bool is_dynamic) /* {{{ */
 {
 	zend_property_info *property_info;
 	const char *class_name = NULL;
@@ -875,11 +875,11 @@ ZEND_API void zend_std_write_dimension(zend_object *object, zval *offset, zval *
 }
 /* }}} */
 
-ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
+ZEND_API bool zend_std_has_dimension(zend_object *object, zval *offset, bool check_empty) /* {{{ */
 {
 	zend_class_entry *ce = object->ce;
 	zval retval, tmp_offset;
-	int result;
+	bool result;
 
 	if (EXPECTED(zend_class_implements_interface(ce, zend_ce_arrayaccess) != 0)) {
 		ZVAL_COPY_DEREF(&tmp_offset, offset);
@@ -1074,7 +1074,7 @@ static zend_never_inline zend_function *zend_get_parent_private_method(zend_clas
 
 /* Ensures that we're allowed to call a protected method.
  */
-ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
+ZEND_API bool zend_check_protected(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
 {
 	zend_class_entry *fbc_scope = ce;
 
@@ -1101,7 +1101,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
-ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
+ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, bool is_static) /* {{{ */
 {
 	size_t mname_len;
 	zend_op_array *func;
@@ -1599,9 +1599,9 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
+ZEND_API bool zend_std_has_property(zend_object *zobj, zend_string *name, bool has_set_exists, void **cache_slot) /* {{{ */
 {
-	int result;
+	bool result;
 	zval *value = NULL;
 	uintptr_t property_offset;
 	zend_property_info *prop_info = NULL;
@@ -1707,7 +1707,7 @@ ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj, int type) /* {{{ */
+ZEND_API ZEND_RESULT_CODE zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	switch (type) {
 		case IS_STRING: {
@@ -1737,7 +1737,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 }
 /* }}} */
 
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
+ZEND_API ZEND_RESULT_CODE zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
 {
 	zval *func;
 	zend_class_entry *ce = obj->ce;
@@ -1766,7 +1766,7 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 	switch (purpose) {
 		case ZEND_PROP_PURPOSE_DEBUG:
 			if (obj->handlers->get_debug_info) {
-				int is_temp;
+				bool is_temp;
 				ht = obj->handlers->get_debug_info(obj, &is_temp);
 				if (ht && !is_temp && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
 					GC_ADDREF(ht);
