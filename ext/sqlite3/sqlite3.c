@@ -1651,7 +1651,7 @@ PHP_METHOD(sqlite3stmt, getSQL)
 	}
 
 	if (expanded) {
-#if SQLITE_VERSION_NUMBER >= 3014000
+#ifdef HAVE_SQLITE3_EXPANDED_SQL
 		char *sql = sqlite3_expanded_sql(stmt_obj->stmt);
 		RETVAL_STRING(sql);
 		sqlite3_free(sql);
