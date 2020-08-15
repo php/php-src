@@ -42,7 +42,7 @@ ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
 }
 
-ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
+ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_list_delete(zend_resource *res)
 {
 	if (GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
@@ -232,6 +232,7 @@ void zend_destroy_rsrc_list(HashTable *ht)
 	zend_hash_graceful_reverse_destroy(ht);
 }
 
+/* int return due to HashTable API */
 static int clean_module_resource(zval *zv, void *arg)
 {
 	int resource_id = *(int *)arg;
@@ -239,7 +240,7 @@ static int clean_module_resource(zval *zv, void *arg)
 	return Z_RES_TYPE_P(zv) == resource_id;
 }
 
-
+/* int return due to HashTable API */
 static int zend_clean_module_rsrc_dtors_cb(zval *zv, void *arg)
 {
 	zend_rsrc_list_dtors_entry *ld = (zend_rsrc_list_dtors_entry *)Z_PTR_P(zv);
