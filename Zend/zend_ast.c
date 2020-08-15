@@ -1349,19 +1349,20 @@ static ZEND_COLD void zend_ast_export_class_no_header(smart_str *str, zend_ast_d
 	smart_str_appends(str, "}");
 }
 
-static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, int indent, zend_bool newlines) {
+static ZEND_COLD void zend_ast_export_attribute_group(smart_str *str, zend_ast *ast, int indent) {
 	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
+	uint32_t i, j;
 
 	for (i = 0; i < list->children; i++) {
 		zend_ast *attr = list->child[i];
 
-		smart_str_appends(str, "@@");
+		if (i) {
+			smart_str_appends(str, ", ");
+		}
 		zend_ast_export_ns_name(str, attr->child[0], 0, indent);
 
 		if (attr->child[1]) {
 			zend_ast_list *args = zend_ast_get_list(attr->child[1]);
-			uint32_t j;
 
 			smart_str_appendc(str, '(');
 			for (j = 0; j < args->children; j++) {
@@ -1372,6 +1373,17 @@ static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, 
 			}
 			smart_str_appendc(str, ')');
 		}
+	}
+}
+
+static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, int indent, zend_bool newlines) {
+	zend_ast_list *list = zend_ast_get_list(ast);
+	uint32_t i;
+
+	for (i = 0; i < list->children; i++) {
+		smart_str_appends(str, "#[");
+		zend_ast_export_attribute_group(str, list->child[i], indent);
+		smart_str_appends(str, "]");
 
 		if (newlines) {
 			smart_str_appendc(str, '\n');

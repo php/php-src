@@ -3,7 +3,7 @@ Named params in attributes
 --FILE--
 <?php
 
-@@Attribute
+#[Attribute]
 class MyAttribute {
     public function __construct(
         public $a = 'a',
@@ -12,10 +12,10 @@ class MyAttribute {
     ) {}
 }
 
-@@MyAttribute('A', c: 'C')
+#[MyAttribute('A', c: 'C')]
 class Test1 {}
 
-@@MyAttribute('A', a: 'C')
+#[MyAttribute('A', a: 'C')]
 class Test2 {}
 
 $attr = (new ReflectionClass(Test1::class))->getAttributes()[0];

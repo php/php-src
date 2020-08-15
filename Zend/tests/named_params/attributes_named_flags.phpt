@@ -3,11 +3,11 @@ Named flags parameter for Attribute attribute
 --FILE--
 <?php
 
-@@Attribute(flags: Attribute::TARGET_CLASS)
+#[Attribute(flags: Attribute::TARGET_CLASS)]
 class MyAttribute {
 }
 
-@@MyAttribute
+#[MyAttribute]
 function test() {}
 
 (new ReflectionFunction('test'))->getAttributes()[0]->newInstance();
