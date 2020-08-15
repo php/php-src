@@ -2960,8 +2960,10 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
         }
         if ($end - $context_line_count > $old_k1) {
             $old_k1 = $end - $context_line_count;
-            // Add a '--' to mark sections where the common areas were truncated
-            $diff[] = '--';
+            if ($old_k1 > 0) {
+                // Add a '--' to mark sections where the common areas were truncated
+                $diff[] = '--';
+            }
         }
         $old_k1 = max($old_k1, 0);
         while ($old_k1 < $end) {
@@ -3007,6 +3009,10 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
         $diff[] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
     }
     $add_context_lines(min($old_k1 + $context_line_count + 1, $cnt1 + 1));
+    if ($context_line_count && $old_k1 < $cnt1 + 1) {
+        // Add a '--' to mark sections where the common areas were truncated
+        $diff[] = '--';
+    }
 
     return $diff;
 }
