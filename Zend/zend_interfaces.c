@@ -118,13 +118,13 @@ static void zend_user_it_dtor(zend_object_iterator *_iter)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
+ZEND_API ZEND_RESULT_CODE zend_user_it_valid(zend_object_iterator *_iter)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
 		zval *object = &iter->it.data;
 		zval more;
-		int result;
+		bool result;
 
 		zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_valid, "valid", &more);
 		result = i_zend_is_true(&more);
@@ -203,6 +203,7 @@ static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator =
 };
 
 /* {{{ zend_user_it_get_iterator */
+/* by_ref is int due to Iterator API */
 static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	zend_user_iterator *iterator;
@@ -225,6 +226,7 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 /* }}} */
 
 /* {{{ zend_user_it_get_new_iterator */
+/* by_ref is int due to Iterator API */
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	zval iterator;
@@ -249,7 +251,7 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 /* }}} */
 
 /* {{{ zend_implement_traversable */
-static int zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
+static ZEND_RESULT_CODE zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	/* Abstract class can implement Traversable only, in which case the extending class must
 	 * implement Iterator or IteratorAggregate. */
@@ -276,7 +278,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 /* }}} */
 
 /* {{{ zend_implement_aggregate */
-static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
+static ZEND_RESULT_CODE zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_iterator)) {
 		zend_error_noreturn(E_ERROR,
@@ -316,7 +318,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 /* }}} */
 
 /* {{{ zend_implement_iterator */
-static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
+static ZEND_RESULT_CODE zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_aggregate)) {
 		zend_error_noreturn(E_ERROR,
@@ -352,11 +354,11 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 /* }}} */
 
 /* {{{ zend_user_serialize */
-ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
+ZEND_API ZEND_RESULT_CODE zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval retval;
-	int result;
+	ZEND_RESULT_CODE result;
 
 	zend_call_method_with_0_params(
 		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
@@ -389,7 +391,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 /* }}} */
 
 /* {{{ zend_user_unserialize */
-ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
+ZEND_API ZEND_RESULT_CODE zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
 {
 	zval zdata;
 
@@ -410,7 +412,7 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 }
 /* }}} */
 
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data) /* {{{ */
+ZEND_API ZEND_RESULT_CODE zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed", ZSTR_VAL(ce->name));
@@ -418,7 +420,7 @@ ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, siz
 }
 /* }}} */
 
-ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data) /* {{{ */
+ZEND_API ZEND_RESULT_CODE zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data) /* {{{ */
 {
 	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed", ZSTR_VAL(ce->name));
 	return FAILURE;
@@ -426,7 +428,7 @@ ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, con
 /* }}} */
 
 /* {{{ zend_implement_serializable */
-static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
+static ZEND_RESULT_CODE zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->parent
 		&& (class_type->parent->serialize || class_type->parent->unserialize)
@@ -458,7 +460,7 @@ static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	return &intern->std;
 }
 
-ZEND_API int zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
+ZEND_API ZEND_RESULT_CODE zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
 	zend_class_entry *scope = EG(current_execute_data)->func->common.scope;
 	ZEND_ASSERT(scope->get_iterator != zend_user_it_get_new_iterator);
 	zend_object_iterator *iter = scope->get_iterator(Z_OBJCE_P(obj), obj, /* by_ref */ 0);
@@ -492,7 +494,7 @@ static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 }
 
 /* Many iterators will not behave correctly if rewind() is not called, make sure it happens. */
-static int zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
+static ZEND_RESULT_CODE zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
 	if (!intern->rewind_called) {
 		zend_object_iterator *iter = intern->iter;
 		intern->rewind_called = 1;
