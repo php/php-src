@@ -76,14 +76,13 @@ static void zend_resource_dtor(zend_resource *res)
 }
 
 
-ZEND_API int ZEND_FASTCALL zend_list_close(zend_resource *res)
+ZEND_API void ZEND_FASTCALL zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
 		zend_list_free(res);
 	} else if (res->type >= 0) {
 		zend_resource_dtor(res);
 	}
-	return SUCCESS;
 }
 
 ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type)
@@ -203,18 +202,16 @@ void plist_entry_destructor(zval *zv)
 	free(res);
 }
 
-ZEND_API int zend_init_rsrc_list(void)
+ZEND_API void zend_init_rsrc_list(void)
 {
 	zend_hash_init(&EG(regular_list), 8, NULL, list_entry_destructor, 0);
 	EG(regular_list).nNextFreeElement = 0;
-	return SUCCESS;
 }
 
 
-int zend_init_rsrc_plist(void)
+void zend_init_rsrc_plist(void)
 {
 	zend_hash_init(&EG(persistent_list), 8, NULL, plist_entry_destructor, 1);
-	return SUCCESS;
 }
 
 
@@ -299,11 +296,10 @@ static void list_destructors_dtor(zval *zv)
 	free(Z_PTR_P(zv));
 }
 
-int zend_init_rsrc_list_dtors(void)
+void zend_init_rsrc_list_dtors(void)
 {
 	zend_hash_init(&list_destructors, 64, NULL, list_destructors_dtor, 1);
 	list_destructors.nNextFreeElement=1;	/* we don't want resource type 0 */
-	return SUCCESS;
 }
 
 
