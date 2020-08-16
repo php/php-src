@@ -433,8 +433,6 @@ void shutdown_executor(void) /* {{{ */
 /* return class name and "::" or "". */
 ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 {
-	zend_function *func;
-
 	if (!zend_is_executing()) {
 		if (space) {
 			*space = "";
@@ -442,7 +440,13 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 		return "";
 	}
 
-	func = EG(current_execute_data)->func;
+	return get_class_name(EG(current_execute_data)->func, space);
+}
+/* }}} */
+
+/* return class name and "::" or "". */
+ZEND_API const char *get_class_name(const zend_function *func, const char **space) /* {{{ */
+{
 	switch (func->type) {
 		case ZEND_USER_FUNCTION:
 		case ZEND_INTERNAL_FUNCTION:
@@ -465,12 +469,16 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 
 ZEND_API const char *get_active_function_name(void) /* {{{ */
 {
-	zend_function *func;
-
 	if (!zend_is_executing()) {
 		return NULL;
 	}
-	func = EG(current_execute_data)->func;
+
+	return get_function_name(EG(current_execute_data)->func);
+}
+/* }}} */
+
+ZEND_API const char *get_function_name(const zend_function *func) /* {{{ */
+{
 	switch (func->type) {
 		case ZEND_USER_FUNCTION: {
 				zend_string *function_name = func->common.function_name;
@@ -488,6 +496,29 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 		default:
 			return NULL;
 	}
+}
+/* }}} */
+
+ZEND_API char *get_active_function_or_method_name(void) /* {{{ */
+{
+	if (!zend_is_executing()) {
+		return "";
+	}
+
+	return get_function_or_method_name(EG(current_execute_data)->func);
+}
+/* }}} */
+
+ZEND_API char *get_function_or_method_name(const zend_function *func) /* {{{ */
+{
+	char *name = NULL;
+	const char *class_name, *space;
+
+	class_name = get_class_name(func, &space);
+
+	zend_spprintf(&name, 0, "%s%s%s", class_name, space, get_function_name(func));
+
+	return name;
 }
 /* }}} */
 

@@ -308,9 +308,13 @@ ZEND_API void ZEND_FASTCALL zend_free_extra_named_params(zend_array *extra_named
 
 /* services */
 ZEND_API const char *get_active_class_name(const char **space);
+ZEND_API const char *get_class_name(const zend_function *func, const char **space);
 ZEND_API const char *get_active_function_name(void);
+ZEND_API const char *get_function_name(const zend_function *func);
 ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
 ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
+ZEND_API char *get_active_function_or_method_name();
+ZEND_API char *get_function_or_method_name(const zend_function *func);
 ZEND_API const char *zend_get_executed_filename(void);
 ZEND_API zend_string *zend_get_executed_filename_ex(void);
 ZEND_API uint32_t zend_get_executed_lineno(void);

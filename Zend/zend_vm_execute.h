@@ -2281,9 +2281,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_cannot_pass_by_ref_helper_SPEC(uint32_t _arg_num, zval *_arg ZEND_OPCODE_HANDLER_ARGS_DC)
 {
 	USE_OPLINE
+	zval *arg;
+	char *func_name = get_function_or_method_name(EX(call)->func);
+	const char *param_name = get_function_arg_name(EX(call)->func, _arg_num);
 
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Cannot pass parameter %d by reference", _arg_num);
+
+	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s cannot be passed by reference",
+		func_name, _arg_num, param_name ? " ($" : "",
+		param_name ? param_name : "", param_name ? ")" : ""
+	);
+	efree(func_name);
 	FREE_OP(opline->op1_type, opline->op1.var);
 	ZVAL_UNDEF(_arg);
 	HANDLE_EXCEPTION();

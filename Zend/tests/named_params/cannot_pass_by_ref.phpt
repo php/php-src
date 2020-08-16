@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-Cannot pass parameter 2 by reference
+test(): Argument #2 ($e) cannot be passed by reference

@@ -325,23 +325,23 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void)
 
 static ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entry *error_ce, uint32_t arg_num, const char *format, va_list va) /* {{{ */
 {
-	const char *space;
-	const char *class_name;
+	char *func_name;
 	const char *arg_name;
 	char *message = NULL;
 	if (EG(exception)) {
 		return;
 	}
 
-	class_name = get_active_class_name(&space);
+	func_name = get_active_function_or_method_name();
 	arg_name = get_active_function_arg_name(arg_num);
 
 	zend_vspprintf(&message, 0, format, va);
-	zend_throw_error(error_ce, "%s%s%s(): Argument #%d%s%s%s %s",
-		class_name, space, get_active_function_name(), arg_num,
+	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %s",
+		func_name, arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
     );
 	efree(message);
+	efree(func_name);
 }
 /* }}} */
 
