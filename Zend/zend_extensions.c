@@ -180,7 +180,8 @@ static void zend_extension_shutdown(zend_extension *extension)
 #endif
 }
 
-static bool zend_extension_startup(zend_extension *extension)
+/* int return due to zend linked list API */
+static int zend_extension_startup(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->startup) {
