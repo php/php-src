@@ -841,7 +841,7 @@ typedef zend_bool (*zend_needs_live_range_cb)(zend_op_array *op_array, zend_op *
 ZEND_API void zend_recalc_live_ranges(
 	zend_op_array *op_array, zend_needs_live_range_cb needs_live_range);
 
-ZEND_API int pass_two(zend_op_array *op_array);
+ZEND_API void pass_two(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
