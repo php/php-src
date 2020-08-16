@@ -2954,7 +2954,17 @@ ZEND_METHOD(reflection_method, __construct)
 	size_t name_len, tmp_len;
 	zval ztmp;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 2) {
+		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
+			return;
+		}
+
+		if (Z_TYPE_P(classname) == IS_OBJECT) {
+			orig_obj = classname;
+		} else {
+			orig_obj = NULL;
+		}
+	} else {
 		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 			return;
 		}
@@ -2964,15 +2974,12 @@ ZEND_METHOD(reflection_method, __construct)
 				"Invalid method name %s", name_str);
 			return;
 		}
+
 		classname = &ztmp;
 		tmp_len = tmp - name_str;
 		ZVAL_STRINGL(classname, name_str, tmp_len);
 		name_len = name_len - (tmp_len + 2);
 		name_str = tmp + 2;
-		orig_obj = NULL;
-	} else if (Z_TYPE_P(classname) == IS_OBJECT) {
-		orig_obj = classname;
-	} else {
 		orig_obj = NULL;
 	}
 
