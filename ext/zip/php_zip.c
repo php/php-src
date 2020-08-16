@@ -1290,7 +1290,8 @@ PHP_FUNCTION(zip_entry_close)
 		RETURN_THROWS();
 	}
 
-	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(zip_entry)));
+	zend_list_close(Z_RES_P(zip_entry));
+	RETURN_TRUE;
 }
 /* }}} */
 
