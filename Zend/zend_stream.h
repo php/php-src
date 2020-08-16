@@ -69,7 +69,7 @@ ZEND_API void zend_stream_init_filename(zend_file_handle *handle, const char *fi
 ZEND_API ZEND_RESULT_CODE zend_stream_open(const char *filename, zend_file_handle *handle);
 ZEND_API ZEND_RESULT_CODE zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len);
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
-ZEND_API bool zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
+ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 END_EXTERN_C()
 
 #ifdef ZEND_WIN32
