@@ -757,9 +757,8 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{
 
 static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 {
-	if (zend_copy_ini_directives() == SUCCESS) {
-		zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
-	}
+	zend_copy_ini_directives();
+	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
 }
 /* }}} */
 #endif
