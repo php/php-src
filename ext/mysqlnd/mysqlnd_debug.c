@@ -412,7 +412,8 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 #endif
 	}
 
-	return zend_stack_del_top(&self->call_stack) == SUCCESS? PASS:FAIL;
+	zend_stack_del_top(&self->call_stack);
+	return PASS;
 }
 /* }}} */
 
