@@ -1176,7 +1176,7 @@ static zend_always_inline zval *zend_try_array_init_size(zval *zv, uint32_t size
 	if (EXPECTED(Z_ISREF_P(zv))) {
 		zend_reference *ref = Z_REF_P(zv);
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-			if (zend_try_assign_typed_ref_arr(ref, arr) != SUCCESS) {
+			if (zend_try_assign_typed_ref_arr(ref, arr) == FAILURE) {
 				return NULL;
 			}
 			return &ref->val;
