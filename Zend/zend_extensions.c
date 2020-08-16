@@ -126,7 +126,8 @@ ZEND_RESULT_CODE zend_load_extension_handle(DL_HANDLE handle, const char *path)
 		return FAILURE;
 	}
 
-	return zend_register_extension(new_extension, handle);
+	zend_register_extension(new_extension, handle);
+	return SUCCESS;
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
 /* See http://support.microsoft.com/kb/190351 */

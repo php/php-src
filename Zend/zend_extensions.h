@@ -141,7 +141,7 @@ ZEND_API extern uint32_t zend_extension_flags;
 void zend_extension_dtor(zend_extension *extension);
 ZEND_API void zend_append_version_info(const zend_extension *extension);
 void zend_startup_extensions_mechanism(void);
-bool zend_startup_extensions(void);
+void zend_startup_extensions(void);
 void zend_shutdown_extensions(void);
 
 BEGIN_EXTERN_C()
