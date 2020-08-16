@@ -215,7 +215,7 @@ static php_cli_server_http_response_status_code_pair template_map[] = {
 
 static int php_cli_server_log_level = 3;
 
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H || defined(PHP_WIN32)
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
 #endif
 
@@ -1160,6 +1160,14 @@ static int php_cli_is_output_tty() /* {{{ */
 	}
 	return php_cli_output_is_tty;
 } /* }}} */
+#elif defined(PHP_WIN32)
+static int php_cli_is_output_tty() /* {{{ */
+{
+	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
+		php_cli_output_is_tty = php_win32_console_fileno_is_console(STDOUT_FILENO) && php_win32_console_fileno_has_vt100(STDOUT_FILENO);
+	}
+	return php_cli_output_is_tty;
+} /* }}} */
 #endif
 
 static void php_cli_server_log_response(php_cli_server_client *client, int status, const char *message) /* {{{ */
@@ -1185,7 +1193,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 		}
 	}
 
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H || defined(PHP_WIN32)
 	if (CLI_SERVER_G(color) && php_cli_is_output_tty() == OUTPUT_IS_TTY) {
 		if (effective_status >= 500) {
 			/* server error: red */
