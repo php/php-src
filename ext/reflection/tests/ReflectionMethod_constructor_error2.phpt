@@ -12,20 +12,11 @@ class TestClass
     }
 }
 
+echo "Too few arguments:\n";
+$methodInfo = new ReflectionMethod();
 
-try {
-	echo "Too few arguments:\n";
-	$methodInfo = new ReflectionMethod();
-} catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
-}
-try {
-	echo "\nToo many arguments:\n";
-	$methodInfo = new ReflectionMethod("TestClass", "foo", true);
-} catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
-}
-
+echo "\nToo many arguments:\n";
+$methodInfo = new ReflectionMethod("TestClass", "foo", true);
 
 try {
 	//invalid class
@@ -50,12 +41,14 @@ try{
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 Too few arguments:
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
+
+Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
 
 Too many arguments:
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
+
+Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
 Ok - Class InvalidClassName does not exist
 Ok - The parameter class is expected to be either a string or an object
 Ok - ReflectionMethod::__construct() expects parameter 2 to be string, array given

@@ -6,16 +6,9 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 
-try {
-	new ReflectionMethod();
-} catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
-}
-try {
-	new ReflectionMethod('a', 'b', 'c');
-} catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
-}
+new ReflectionMethod();
+new ReflectionMethod('a', 'b', 'c');
+
 
 class C {
     public function f() {}
@@ -43,8 +36,9 @@ var_dump($rm->getName(1));
 
 ?>
 --EXPECTF--
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
+Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
+
+Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
 
 Warning: ReflectionMethod::isFinal() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
