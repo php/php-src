@@ -12,4 +12,4 @@ try {
 ?>
 --EXPECT--
 foo
-str_rot13() expects exactly 1 parameter, 2 given
+str_rot13() expects exactly 1 argument, 2 given

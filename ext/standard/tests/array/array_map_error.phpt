@@ -37,7 +37,7 @@ echo "Done";
 *** Testing array_map() : error conditions ***
 
 -- Testing array_map() function with one less than expected no. of arguments --
-Exception: array_map() expects at least 2 parameters, 1 given
+Exception: array_map() expects at least 2 arguments, 1 given
 
 -- Testing array_map() function with less no. of arrays than callback function arguments --
 Exception: Too few arguments to function callback2(), 1 passed and exactly 2 expected

@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-RecursiveTreeIterator::__construct() expects at least 1 parameter, 0 given
+RecursiveTreeIterator::__construct() expects at least 1 argument, 0 given

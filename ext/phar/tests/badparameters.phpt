@@ -253,16 +253,16 @@ Phar::compress(): Argument #1 ($compression_type) must be of type int, array giv
 Cannot compress phar archive, phar is read-only
 Phar::compressFiles(): Argument #1 ($compression_type) must be of type int, array given
 Phar is readonly, cannot change compression
-Phar::copy() expects exactly 2 parameters, 1 given
+Phar::copy() expects exactly 2 arguments, 1 given
 Cannot copy "a" to "b", phar is read-only
 Phar::offsetExists(): Argument #1 ($entry) must be of type string, array given
 Phar::offsetGet(): Argument #1 ($entry) must be of type string, array given
-Phar::offsetSet() expects exactly 2 parameters, 1 given
+Phar::offsetSet() expects exactly 2 arguments, 1 given
 PharData::offsetUnset(): Argument #1 ($entry) must be of type string, array given
 Write operations disabled by the php.ini setting phar.readonly
 Phar::addEmptyDir(): Argument #1 ($dirname) must be of type string, array given
 Phar::addFile(): Argument #1 ($filename) must be of type string, array given
-Phar::addFromString() expects exactly 2 parameters, 1 given
+Phar::addFromString() expects exactly 2 arguments, 1 given
 Write operations disabled by the php.ini setting phar.readonly
-Phar::setMetadata() expects exactly 1 parameter, 2 given
+Phar::setMetadata() expects exactly 1 argument, 2 given
 Write operations disabled by the php.ini setting phar.readonly

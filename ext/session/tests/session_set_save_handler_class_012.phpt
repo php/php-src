@@ -45,7 +45,7 @@ var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i
 Open 
 
 Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line %d
-SessionHandler::open() expects exactly 2 parameters, 0 given
+SessionHandler::open() expects exactly 2 arguments, 0 given
 
 Warning: Undefined variable $_SESSION in %s on line %d
 string(0) ""

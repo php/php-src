@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-func_get_args() expects exactly 0 parameters, 4 given
+func_get_args() expects exactly 0 arguments, 4 given

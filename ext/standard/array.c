@@ -745,7 +745,7 @@ PHP_FUNCTION(count)
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
 			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			php_error_docref(NULL, E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", get_active_function_name(), zend_zval_type_name(array));
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
@@ -780,13 +780,13 @@ PHP_FUNCTION(count)
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
 			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			php_error_docref(NULL, E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", get_active_function_name(), zend_zval_type_name(array));
 			RETURN_LONG(1);
 			break;
 		}
 		default:
 			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			php_error_docref(NULL, E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", get_active_function_name(), zend_zval_type_name(array));
 			RETURN_LONG(1);
 			break;
 	}
@@ -4637,7 +4637,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	}
 
 	if (argc < req_args) {
-		zend_argument_count_error("At least %d parameters are required, %d given", req_args, argc);
+		zend_argument_count_error("At least %d arguments are required, %d given", req_args, argc);
 		RETURN_THROWS();
 	}
 
@@ -4731,7 +4731,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 
@@ -4783,7 +4783,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 
@@ -5024,7 +5024,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	argc = ZEND_NUM_ARGS();
 	if (data_compare_type == DIFF_COMP_DATA_USER) {
 		if (argc < 3) {
-			zend_argument_count_error("At least 3 parameters are required, %d given", ZEND_NUM_ARGS());
+			zend_argument_count_error("At least 3 arguments are required, %d given", ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+f", &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
@@ -5033,7 +5033,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		diff_data_compare_func = zval_user_compare;
 	} else {
 		if (argc < 2) {
-			zend_argument_count_error("At least 2 parameters are required, %d given", ZEND_NUM_ARGS());
+			zend_argument_count_error("At least 2 arguments are required, %d given", ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
@@ -5130,7 +5130,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 
@@ -5182,7 +5182,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 
@@ -5378,7 +5378,7 @@ PHP_FUNCTION(array_diff)
 	zval dummy;
 
 	if (ZEND_NUM_ARGS() < 2) {
-		zend_argument_count_error("At least 2 parameters are required, %d given", ZEND_NUM_ARGS());
+		zend_argument_count_error("At least 2 arguments are required, %d given", ZEND_NUM_ARGS());
 		RETURN_THROWS();
 	}
 

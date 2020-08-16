@@ -52,10 +52,10 @@ try{
 ?>
 --EXPECT--
 Too few arguments:
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
+Ok - ReflectionMethod::__construct() expects exactly 1 argument, 0 given
 
 Too many arguments:
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
+Ok - ReflectionMethod::__construct() expects exactly 1 argument, 3 given
 Ok - Class "InvalidClassName" does not exist
 Ok - ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be of type object|string, array given
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 2 given
+Ok - ReflectionMethod::__construct() expects exactly 1 argument, 2 given

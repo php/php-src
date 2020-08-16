@@ -29,7 +29,7 @@ test(new Foo());
 
 ?>
 --EXPECT--
-Cannot pass parameter 1 by reference
-Cannot pass parameter 1 by reference
-Cannot pass parameter 1 by reference
-Cannot pass parameter 1 by reference
+set(): Argument #1 ($ref) cannot be passed by reference
+set(): Argument #1 ($ref) cannot be passed by reference
+set(): Argument #1 ($ref) cannot be passed by reference
+set(): Argument #1 ($ref) cannot be passed by reference

@@ -28,7 +28,7 @@ var_dump($array);
 echo "Done\n";
 ?>
 --EXPECTF--
-oci_bind_array_by_name() expects at most 6 parameters, 7 given
+oci_bind_array_by_name() expects at most 6 arguments, 7 given
 
 Warning: oci_bind_array_by_name(): You must provide max length value for empty arrays in %s on line %d
 bool(false)

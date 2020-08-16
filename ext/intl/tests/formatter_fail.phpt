@@ -95,13 +95,13 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-ArgumentCountError: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
+ArgumentCountError: NumberFormatter::__construct() expects at least 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: numfmt_create() expects at least 2 parameters, 0 given in %s on line %d
+ArgumentCountError: numfmt_create() expects at least 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: NumberFormatter::create() expects at least 2 parameters, 0 given in %s on line %d
+ArgumentCountError: NumberFormatter::create() expects at least 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
 Error: NumberFormatter object is already constructed in %s on line %d

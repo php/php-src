@@ -31,8 +31,8 @@ echo "Done";
 *** Testing array_diff() : error conditions ***
 
 -- Testing array_diff() function with zero arguments --
-At least 2 parameters are required, 0 given
+At least 2 arguments are required, 0 given
 
 -- Testing array_diff() function with less than expected no. of arguments --
-At least 2 parameters are required, 1 given
+At least 2 arguments are required, 1 given
 Done

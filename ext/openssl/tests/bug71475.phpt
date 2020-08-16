@@ -15,5 +15,5 @@ try {
 ?>
 DONE
 --EXPECT--
-openssl_seal() expects at least 5 parameters, 4 given
+openssl_seal() expects at least 5 arguments, 4 given
 DONE

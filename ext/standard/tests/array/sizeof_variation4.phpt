@@ -84,380 +84,380 @@ echo "Done";
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 2 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 3 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 4 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 5 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 6 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 7 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 8 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 9 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 10 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 11 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 12 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 13 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 14 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 15 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 16 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 17 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 18 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 19 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 -- Iteration 20 --
 Default Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_NORMAL Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 COUNT_RECURSIVE Mode: 
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: sizeof(): sizeof(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
 Done

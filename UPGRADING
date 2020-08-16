@@ -135,10 +135,10 @@ PHP 8.0 UPGRADE NOTES
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
   . Compile time fatal error "Only variables can be passed by reference" has
-    been delayed until runtime and converted to "Cannot pass parameter by
+    been delayed until runtime and converted to "Argument cannot be passed by
     reference" exception.
   . Some "Only variables should be passed by reference" notices have been
-    converted to "Cannot pass parameter by reference" exception.
+    converted to "Argument cannot be passed by reference" exception.
   . The generated name for anonymous classes has changed. It will now include
     the name of the first parent or interface:
 

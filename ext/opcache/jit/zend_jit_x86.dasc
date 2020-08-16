@@ -1912,20 +1912,8 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 	|	mov EX->call, RX
 	|1:
 	|	mov RX, r0
-	|.if X64
-		|	xor CARG1, CARG1
-		|	LOAD_ADDR CARG2, "Cannot pass parameter %d by reference"
-		|	mov CARG3d, dword OP:r0->op2.num
-		|	EXT_CALL zend_throw_error, r0
-	|.else
-		|	mov r1, dword OP:r0->op2.num
-		|	sub r4, 4
-		|	push r1
-		|	push "Cannot pass parameter %d by reference"
-		|	push 0
-		|	EXT_CALL zend_throw_error, r0
-		|	add r4, 16
-	|.endif
+	|	mov FCARG1d, dword OP:r0->op2.num
+	|	EXT_CALL zend_cannot_pass_by_reference, r0
 	|	cmp byte OP:RX->op1_type, IS_TMP_VAR
 	|	jne >9
 	|.if X64
@@ -8991,7 +8979,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 
 			if (call_num_args <= func->op_array.num_args) {
-				if (!trace || (trace->op == ZEND_JIT_TRACE_END				
+				if (!trace || (trace->op == ZEND_JIT_TRACE_END
 				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 					uint32_t num_args;
 
@@ -9040,7 +9028,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					}
 				}
 			} else {
-				if (!trace || (trace->op == ZEND_JIT_TRACE_END				
+				if (!trace || (trace->op == ZEND_JIT_TRACE_END
 				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 					if (func && zend_accel_in_shm(func->op_array.opcodes)) {
 						|	LOAD_IP_ADDR (func->op_array.opcodes)

@@ -108,22 +108,22 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-ArgumentCountError: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
+ArgumentCountError: MessageFormatter::__construct() expects exactly 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
+ArgumentCountError: msgfmt_create() expects exactly 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: MessageFormatter::create() expects exactly 2 parameters, 0 given in %s on line %d
+ArgumentCountError: MessageFormatter::create() expects exactly 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
+ArgumentCountError: MessageFormatter::__construct() expects exactly 2 arguments, 1 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
+ArgumentCountError: msgfmt_create() expects exactly 2 arguments, 1 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: MessageFormatter::create() expects exactly 2 parameters, 1 given in %s on line %d
+ArgumentCountError: MessageFormatter::create() expects exactly 2 arguments, 1 given in %s on line %d
 'U_ZERO_ERROR'
 
 IntlException: Constructor failed in %s on line %d

@@ -238,10 +238,10 @@ printf("%d", $tempstring);
 ?>
 --EXPECTF--
 *** Output for zero argument ***
-printf() expects at least 1 parameter, 0 given
+printf() expects at least 1 argument, 0 given
 
 *** Output for insufficient number of arguments ***
-Error found: 5 parameters are required, 3 given
+Error found: 5 arguments are required, 3 given
 *** Output for scalar argument ***
 3
 *** Output for NULL as argument ***
