@@ -28,8 +28,8 @@ ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
 
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str);
 static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *str);
-static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, int permanent);
-static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, int permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, bool permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, bool permanent);
 
 /* Any strings interned in the startup phase. Common to all the threads,
    won't be free'd until process exit. If we want an ability to
@@ -67,7 +67,7 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_DSC)
 	NULL
 };
 
-static zend_always_inline void zend_init_interned_strings_ht(HashTable *interned_strings, int permanent)
+static zend_always_inline void zend_init_interned_strings_ht(HashTable *interned_strings, bool permanent)
 {
 	zend_hash_init(interned_strings, 1024, NULL, _str_dtor, permanent);
 	if (permanent) {
@@ -251,7 +251,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 	return ret;
 }
 
-static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, bool permanent)
 {
 	zend_string *ret;
 	zend_ulong h = zend_inline_hash_func(str, size);
@@ -267,7 +267,7 @@ static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char
 	return zend_add_interned_string(ret, &interned_strings_permanent, IS_STR_PERMANENT);
 }
 
-static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, bool permanent)
 {
 	zend_string *ret;
 	zend_ulong h = zend_inline_hash_func(str, size);
