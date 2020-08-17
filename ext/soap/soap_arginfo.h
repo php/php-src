@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 75e1f968f03aacc08ad7858adff05040ed61e23d */
+ * Stub hash: b33d57ddba20c64739d51bfba39f2557026939cd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, handler, _IS_BOOL, 0, "true")
@@ -81,7 +81,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapServer_addFunction, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapServer_handle, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, soap_request, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, soap_request, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SoapClient___construct arginfo_class_SoapServer___construct

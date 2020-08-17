@@ -4,7 +4,12 @@ SoapFault class: Invalid Fault code warning given? Can't be an empty string, an 
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$fault = new SoapFault("", "message"); // Can't be an empty string
+
+try {
+    new SoapFault("", "message"); // Can't be an empty string
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 try {
     new SoapFault(new stdClass(), "message");  // Can't be a non-string (except for null)
@@ -16,18 +21,28 @@ $fault = new SoapFault("Sender", "message");
 echo get_class($fault) . "\n";
 $fault = new SoapFault(null, "message");
 echo get_class($fault) . "\n";
-$fault = new SoapFault(["more"], "message");  // two elements in array required
-$fault = new SoapFault(["m", "more", "superfluous"], "message"); // two required
+
+try {
+    new SoapFault(["more"], "message");  // two elements in array required
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    new SoapFault(["m", "more", "superfluous"], "message"); // two required
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 $fault = new SoapFault(["more-ns", "Sender"], "message");  // two given
 echo get_class($fault);
+
 ?>
---EXPECTF--
-Warning: SoapFault::__construct(): Invalid fault code in %s on line %d
+--EXPECT--
+SoapFault::__construct(): Argument #1 ($faultcode) is not a valid fault code
 SoapFault::__construct(): Argument #1 ($faultcode) must be of type string|array|null, stdClass given
 SoapFault
 SoapFault
-
-Warning: SoapFault::__construct(): Invalid fault code in %s on line %d
-
-Warning: SoapFault::__construct(): Invalid fault code in %s on line %d
+SoapFault::__construct(): Argument #1 ($faultcode) is not a valid fault code
+SoapFault::__construct(): Argument #1 ($faultcode) is not a valid fault code
 SoapFault

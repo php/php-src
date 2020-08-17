@@ -57,7 +57,7 @@ class SoapServer
     public function addFunction($functions) {}
 
     /** @return void */
-    public function handle(string $soap_request = UNKNOWN) {}
+    public function handle(?string $soap_request = null) {}
 }
 
 class SoapClient
