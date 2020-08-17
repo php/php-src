@@ -350,6 +350,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  stack_map_size;
 	uint32_t                  flags;         /* See ZEND_JIT_TRACE_... defines above */
 	uint32_t                  polymorphism;  /* Counter of polymorphic calls */
+	uint32_t                  jmp_table_size;/* number of jmp_table slots */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */

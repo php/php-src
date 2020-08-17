@@ -2925,7 +2925,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
 					case ZEND_MATCH:
-						if (!zend_jit_switch(&dasm_state, opline, op_array, ssa, NULL)) {
+						if (!zend_jit_switch(&dasm_state, opline, op_array, ssa, NULL, NULL)) {
 							goto jit_failure;
 						}
 						goto done;

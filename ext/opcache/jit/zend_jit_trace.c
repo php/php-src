@@ -4163,7 +4163,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
 					case ZEND_MATCH:
-						if (!zend_jit_switch(&dasm_state, opline, op_array, op_array_ssa, p+1)) {
+						if (!zend_jit_switch(&dasm_state, opline, op_array, op_array_ssa, p+1, &zend_jit_traces[ZEND_JIT_TRACE_NUM])) {
 							goto jit_failure;
 						}
 						goto done;
@@ -4827,6 +4827,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 		t->stack_map_size = 0;
 		t->flags = 0;
 		t->polymorphism = 0;
+		t->jmp_table_size = 0;
 		t->opline = trace_buffer[1].opline;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
@@ -5353,6 +5354,7 @@ static void zend_jit_blacklist_trace_exit(uint32_t trace_num, uint32_t exit_num)
 			zend_jit_link_side_trace(
 				zend_jit_traces[trace_num].code_start,
 				zend_jit_traces[trace_num].code_size,
+				zend_jit_traces[trace_num].jmp_table_size,
 				exit_num,
 				handler);
 		}
@@ -5421,6 +5423,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 		t->stack_map_size = 0;
 		t->flags = 0;
 		t->polymorphism = polymorphism;
+		t->jmp_table_size = 0;
 		t->opline = NULL;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
@@ -5464,6 +5467,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 			zend_jit_link_side_trace(
 				zend_jit_traces[parent_num].code_start,
 				zend_jit_traces[parent_num].code_size,
+				zend_jit_traces[parent_num].jmp_table_size,
 				exit_num,
 				handler);
 

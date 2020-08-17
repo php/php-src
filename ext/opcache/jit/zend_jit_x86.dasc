@@ -153,7 +153,7 @@ static size_t tsrm_tls_offset;
 |.globals zend_lb
 static void* dasm_labels[zend_lb_MAX];
 
-|.section code, cold_code
+|.section code, cold_code, jmp_table
 
 #define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0xffffffff)
 
@@ -3093,12 +3093,26 @@ mrm:
 typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
 typedef ZEND_SET_ALIGNED(1, int32_t unaligned_int32_t);
 
-static int zend_jit_patch(const void *code, size_t size, const void *from_addr, const void *to_addr)
+static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size, const void *from_addr, const void *to_addr)
 {
 	int ret = 0;
-	uint8_t *p = (uint8_t*)code;
-	uint8_t *end = p + size - 5;
+	uint8_t *p, *end;
 
+	if (jmp_table_size) {
+		const void **jmp_slot = (const void **)((char*)code + size);
+
+		size -= jmp_table_size * sizeof(void*);
+		do {
+			jmp_slot--;
+			if (*jmp_slot == from_addr) {
+				*jmp_slot = to_addr;
+				ret++;
+			}
+		} while (--jmp_table_size);
+	}
+
+	p = (uint8_t*)code;
+	end = p + size - 5;
 	while (p < end) {
 		if ((*(unaligned_uint16_t*)p & 0xf0ff) == 0x800f && p + *(unaligned_int32_t*)(p+2) == (uint8_t*)from_addr - 6) {
 			*(unaligned_int32_t*)(p+2) = ((uint8_t*)to_addr - (p + 6));
@@ -3115,9 +3129,9 @@ static int zend_jit_patch(const void *code, size_t size, const void *from_addr, 
 	return ret;
 }
 
-static int zend_jit_link_side_trace(const void *code, size_t size, uint32_t exit_num, const void *addr)
+static int zend_jit_link_side_trace(const void *code, size_t size, uint32_t jmp_table_size, uint32_t exit_num, const void *addr)
 {
-	return zend_jit_patch(code, size, zend_jit_trace_get_exit_addr(exit_num), addr);
+	return zend_jit_patch(code, size, jmp_table_size, zend_jit_trace_get_exit_addr(exit_num), addr);
 }
 
 static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t)
@@ -11782,7 +11796,7 @@ static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const ze
 	return 1;
 }
 
-static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_trace_rec *trace)
+static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info)
 {
 	HashTable *jumptable = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
 	const zend_op *next_opline = NULL;
@@ -11920,9 +11934,12 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|.else
 					|	jmp aword [FCARG2a * 4 + >4]
 					|.endif
-					|.cold_code
+					|.jmp_table
 					|.align aword
 					|4:
+					if (trace_info) {
+						trace_info->jmp_table_size += count;
+					}
 					p = jumptable->arData;
 					do {
 						if (Z_TYPE(p->val) == IS_UNDEF) {
@@ -11981,9 +11998,12 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|.else
 					|	jmp aword [r0 + >4]
 					|.endif
-					|.cold_code
+					|.jmp_table
 					|.align aword
 					|4:
+					if (trace_info) {
+						trace_info->jmp_table_size += zend_hash_num_elements(jumptable);
+					}
 					ZEND_HASH_FOREACH_VAL(jumptable, val) {
 						target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val));
 						if (!next_opline) {
@@ -12063,9 +12083,12 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 				|.else
 				|	jmp aword [r0 + >4]
 				|.endif
-				|.cold_code
+				|.jmp_table
 				|.align aword
 				|4:
+				if (trace_info) {
+					trace_info->jmp_table_size += zend_hash_num_elements(jumptable);
+				}
 				ZEND_HASH_FOREACH_VAL(jumptable, val) {
 					target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val));
 					if (!next_opline) {
