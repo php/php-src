@@ -4476,7 +4476,8 @@ done:
 				/* Check if SEND_UNPACK/SEND_ARRAY may cause enter at different opline */
 				if (opline > op_array->opcodes
 				 && ((opline-1)->opcode == ZEND_SEND_ARRAY
-				  || (opline-1)->opcode == ZEND_SEND_UNPACK)
+				  || (opline-1)->opcode == ZEND_SEND_UNPACK
+				  || (opline-1)->opcode == ZEND_CHECK_UNDEF_ARGS)
 				 && p->op_array->num_args
 				 && (p->op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0
 				 && ((p+1)->op == ZEND_JIT_TRACE_VM
