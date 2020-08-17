@@ -1449,7 +1449,6 @@ PHP_METHOD(ZipArchive, open)
 	if (ze_obj->za) {
 		/* we already have an opened zip, free it */
 		if (zip_close(ze_obj->za) != 0) {
-			// TODO Check this can be reached?
 			php_error_docref(NULL, E_WARNING, "Empty string as source");
 			efree(resolved_path);
 			RETURN_FALSE;
@@ -2092,7 +2091,6 @@ PHP_METHOD(ZipArchive, setCommentName)
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
-		// TODO Warning?
 		RETURN_FALSE;
 	}
 	PHP_ZIP_SET_FILE_COMMENT(intern, idx, comment, comment_len);
@@ -2116,7 +2114,6 @@ PHP_METHOD(ZipArchive, setCommentIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	// TODO Check for Index value?
 	if (comment_len > 0xffff) {
 		zend_argument_value_error(2, "must be less than 65535 bytes");
 		RETURN_THROWS();
@@ -2153,7 +2150,7 @@ PHP_METHOD(ZipArchive, setExternalAttributesName)
 	}
 
 	idx = zip_name_locate(intern, name, 0);
-	// TODO Warning?
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2214,7 +2211,7 @@ PHP_METHOD(ZipArchive, getExternalAttributesName)
 	}
 
 	idx = zip_name_locate(intern, name, 0);
-	// TODO Warning?
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2281,7 +2278,7 @@ PHP_METHOD(ZipArchive, setEncryptionName)
 	}
 
 	idx = zip_name_locate(intern, name, 0);
-	// TODO Warning?
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2342,7 +2339,7 @@ PHP_METHOD(ZipArchive, getCommentName)
 	}
 
 	idx = zip_name_locate(intern, name, 0);
-	// TODO Warning?
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2398,7 +2395,7 @@ PHP_METHOD(ZipArchive, setCompressionName)
 	}
 
 	idx = zip_name_locate(intern, name, 0);
-	// TODO Warning?
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2458,7 +2455,7 @@ PHP_METHOD(ZipArchive, setMtimeName)
 	}
 
 	idx = zip_name_locate(intern, name, 0);
-	// TODO Warning?
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2560,7 +2557,6 @@ PHP_METHOD(ZipArchive, renameIndex)
 		RETURN_THROWS();
 	}
 
-	// TODO Warning?
 	if (index < 0) {
 		RETURN_FALSE;
 	}
