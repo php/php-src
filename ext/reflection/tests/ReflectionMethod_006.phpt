@@ -19,5 +19,5 @@ try {
 
 ?>
 --EXPECT--
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
+Ok - ReflectionMethod::__construct(): Exactly 1 argument is expected, 0 given
+Ok - ReflectionMethod::__construct(): Exactly 1 argument is expected, 3 given

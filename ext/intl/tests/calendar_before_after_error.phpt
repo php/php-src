@@ -62,18 +62,18 @@ try {
 }
 ?>
 --EXPECT--
-error: 0, IntlCalendar::after() expects exactly 1 parameter, 0 given
+error: 0, IntlCalendar::after(): Exactly 1 argument is expected, 0 given
 
-error: 0, IntlCalendar::before() expects exactly 1 parameter, 0 given
+error: 0, IntlCalendar::before(): Exactly 1 argument is expected, 0 given
 
 error: 0, IntlCalendar::after(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
 error: 0, IntlCalendar::before(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, IntlCalendar::after() expects exactly 1 parameter, 2 given
+error: 0, IntlCalendar::after(): Exactly 1 argument is expected, 2 given
 
-error: 0, IntlCalendar::before() expects exactly 1 parameter, 2 given
+error: 0, IntlCalendar::before(): Exactly 1 argument is expected, 2 given
 
-error: 0, intlcal_after() expects exactly 2 parameters, 1 given
+error: 0, intlcal_after(): Exactly 2 arguments are expected, 1 given
 
-error: 0, intlcal_before() expects exactly 2 parameters, 1 given
+error: 0, intlcal_before(): Exactly 2 arguments are expected, 1 given

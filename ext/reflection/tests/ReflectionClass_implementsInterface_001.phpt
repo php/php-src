@@ -144,8 +144,8 @@ Does I2 implement I2?
 
 
 Test bad arguments:
-ReflectionClass::implementsInterface() expects exactly 1 parameter, 0 given
-ReflectionClass::implementsInterface() expects exactly 1 parameter, 2 given
+ReflectionClass::implementsInterface(): Exactly 1 argument is expected, 0 given
+ReflectionClass::implementsInterface(): Exactly 1 argument is expected, 2 given
 Interface "" does not exist
 Interface "ThisClassDoesNotExist" does not exist
 Interface "2" does not exist

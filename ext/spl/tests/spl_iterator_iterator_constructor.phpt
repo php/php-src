@@ -21,4 +21,4 @@ try {
 
 ?>
 --EXPECT--
-IteratorIterator::__construct() expects at most 2 parameters, 3 given
+IteratorIterator::__construct(): At most 2 arguments are expected, 3 given

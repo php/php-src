@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-string(60) "SQLite3::__construct() expects at least 1 parameter, 0 given"
+string(64) "SQLite3::__construct(): At least 1 argument is expected, 0 given"

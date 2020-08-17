@@ -25,7 +25,7 @@ try {
 *** Testing chr() : error conditions ***
 
 -- Testing chr() function with no arguments --
-chr() expects exactly 1 parameter, 0 given
+chr(): Exactly 1 argument is expected, 0 given
 
 -- Testing chr() function with more than expected no. of arguments --
-chr() expects exactly 1 parameter, 2 given
+chr(): Exactly 1 argument is expected, 2 given

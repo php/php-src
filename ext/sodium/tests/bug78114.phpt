@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-sodium_bin2hex() expects exactly 1 parameter, 0 given
+sodium_bin2hex(): Exactly 1 argument is expected, 0 given

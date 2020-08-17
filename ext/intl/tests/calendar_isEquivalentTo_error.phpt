@@ -52,11 +52,11 @@ try {
 --EXPECT--
 error: 0, IntlCalendar::isEquivalentTo(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, IntlCalendar::isEquivalentTo() expects exactly 1 parameter, 2 given
+error: 0, IntlCalendar::isEquivalentTo(): Exactly 1 argument is expected, 2 given
 
 error: 0, IntlCalendar::isEquivalentTo(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, intlcal_is_equivalent_to() expects exactly 2 parameters, 1 given
+error: 0, intlcal_is_equivalent_to(): Exactly 2 arguments are expected, 1 given
 
 error: 0, intlcal_is_equivalent_to(): Argument #2 ($calendar) must be of type IntlCalendar, int given
 

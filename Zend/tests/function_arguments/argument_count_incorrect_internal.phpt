@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-substr() expects at least 2 parameters, 1 given
+substr(): At least 2 arguments are expected, 1 given

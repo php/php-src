@@ -57,7 +57,7 @@ try {
 Instance without property:
 
 Static property / too many args:
-ReflectionProperty::getValue() expects at most 1 parameter, 2 given
+ReflectionProperty::getValue(): At most 1 argument is expected, 2 given
 
 Protected property:
 Cannot access non-public property TestClass::$prot

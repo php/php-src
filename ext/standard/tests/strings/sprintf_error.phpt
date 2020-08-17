@@ -69,11 +69,11 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : error conditions ***
 
 -- Testing sprintf() function with Zero arguments --
-sprintf() expects at least %d parameter, %d given
+sprintf(): At least 1 argument is expected, 0 given
 
 -- Testing sprintf() function with less than expected no. of arguments --
 2 parameters are required, 1 given

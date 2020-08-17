@@ -33,7 +33,7 @@ try {
 *** Testing mktime() : error conditions ***
 
 -- Testing mktime() function with Zero arguments --
-mktime() expects at least 1 parameter, 0 given
+mktime(): At least 1 argument is expected, 0 given
 
 -- Testing mktime() function with more than expected no. of arguments --
-mktime() expects at most 6 parameters, 7 given
+mktime(): At most 6 arguments are expected, 7 given

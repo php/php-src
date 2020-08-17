@@ -198,18 +198,18 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void) /* 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t min_num_args, uint32_t max_num_args) /* {{{ */
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-	zend_function *active_function = EG(current_execute_data)->func;
-	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
+	char *func_name = get_active_function_or_method_name();
 
 	zend_argument_count_error(
-				"%s%s%s() expects %s %d parameter%s, %d given",
-				class_name, \
-				class_name[0] ? "::" : "", \
-				ZSTR_VAL(active_function->common.function_name),
-				min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-				num_args < min_num_args ? min_num_args : max_num_args,
-				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
-				num_args);
+		"%s(): %s %d argument%s %s expected, %d given",
+		func_name, min_num_args == max_num_args ? "Exactly" : num_args < min_num_args ? "At least" : "At most",
+		num_args < min_num_args ? min_num_args : max_num_args,
+		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "is" : "are",
+		num_args
+	);
+
+	efree(func_name);
 }
 /* }}} */
 
@@ -1005,16 +1005,16 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 
 	if (num_args < min_num_args || num_args > max_num_args) {
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-			zend_function *active_function = EG(current_execute_data)->func;
-			const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
-			zend_argument_count_error("%s%s%s() expects %s %d parameter%s, %d given",
-					class_name,
-					class_name[0] ? "::" : "",
-					ZSTR_VAL(active_function->common.function_name),
-					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-					num_args < min_num_args ? min_num_args : max_num_args,
-					(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
-					num_args);
+			char *func_name = get_active_function_or_method_name();
+			zend_argument_count_error("%s(): %s %d argument%s %s expected, %d given",
+				func_name, min_num_args == max_num_args ? "Exactly" : num_args < min_num_args ? "At least" : "At most",
+				num_args < min_num_args ? min_num_args : max_num_args,
+				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "is" : "are",
+				num_args
+			);
+
+			efree(func_name);
 		}
 		return FAILURE;
 	}

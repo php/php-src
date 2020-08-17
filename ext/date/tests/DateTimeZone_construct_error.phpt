@@ -21,4 +21,4 @@ try {
 *** Testing DateTimeZone() : error conditions ***
 
 -- Testing new DateTimeZone() with more than expected no. of arguments --
-DateTimeZone::__construct() expects exactly 1 parameter, 2 given
+DateTimeZone::__construct(): Exactly 1 argument is expected, 2 given

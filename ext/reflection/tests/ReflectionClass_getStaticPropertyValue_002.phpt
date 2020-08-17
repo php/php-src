@@ -39,8 +39,8 @@ try {
 
 ?>
 --EXPECT--
-ReflectionClass::getStaticPropertyValue() expects at most 2 parameters, 3 given
-ReflectionClass::getStaticPropertyValue() expects at least 1 parameter, 0 given
+ReflectionClass::getStaticPropertyValue(): At most 2 arguments are expected, 3 given
+ReflectionClass::getStaticPropertyValue(): At least 1 argument is expected, 0 given
 Property C::$ does not exist
 string(3) "def"
 ReflectionClass::getStaticPropertyValue(): Argument #1 ($name) must be of type string, array given
