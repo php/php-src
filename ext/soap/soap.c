@@ -2059,7 +2059,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	   our fault code with their own handling... Figure this out later
 	*/
 	if (use_http_error_status) {
-		sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error")-1, 1);
+		sapi_add_header("HTTP/1.1 500 Internal Server Error", sizeof("HTTP/1.1 500 Internal Server Error")-1, 1);
 	}
 	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
 		sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
