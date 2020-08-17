@@ -4677,15 +4677,26 @@ done:
 
 	if (handler) {
 		if (p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL) {
-			op_array = trace_buffer->op_array;
+			const zend_op_array *rec_op_array;
+
+			rec_op_array = op_array = trace_buffer->op_array;
+			jit_extension =
+				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			p = trace_buffer + ZEND_JIT_TRACE_START_REC_SIZE;
 			for (;;p++) {
 				if (p->op == ZEND_JIT_TRACE_VM) {
 					opline = p->opline;
 				} else if (p->op == ZEND_JIT_TRACE_ENTER) {
-					if (p->op_array == op_array) {
+					if (p->op_array == rec_op_array) {
 						zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
 					}
+					op_array = p->op_array;
+					jit_extension =
+						(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+				} else if (p->op == ZEND_JIT_TRACE_BACK) {
+					op_array = p->op_array;
+					jit_extension =
+						(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 				} else if (p->op == ZEND_JIT_TRACE_END) {
 					break;
 				}
