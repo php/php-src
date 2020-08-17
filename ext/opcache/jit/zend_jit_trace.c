@@ -1626,6 +1626,11 @@ propagate_arg:
 			 && !(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 				/* RECV_INIT always copy the constant */
 				ssa_var_info[ssa_ops[idx].result_def].type = _const_op_type(RT_CONSTANT(opline, opline->op2));
+			} else if ((opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW)
+			 && ssa_opcodes[idx + 1] == ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value)) {
+				if (ssa_ops[idx].op2_use >= 0 && ssa_ops[idx].op2_def >= 0) {
+					ssa_var_info[ssa_ops[idx].op2_def] = ssa_var_info[ssa_ops[idx].op2_use];
+				}
 			} else {
 				if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 					// TODO:
@@ -1654,7 +1659,10 @@ propagate_arg:
 					}
 				}
 				if (ssa_ops[idx].op2_def >= 0) {
-					zend_jit_trace_restrict_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op2_def);
+					if ((opline->opcode != ZEND_FE_FETCH_R && opline->opcode != ZEND_FE_FETCH_RW)
+					 || ssa_opcodes[idx + 1] != ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value)) {
+						zend_jit_trace_restrict_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op2_def);
+					}
 				}
 				if (ssa_ops[idx].result_def >= 0) {
 					zend_jit_trace_restrict_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].result_def);
