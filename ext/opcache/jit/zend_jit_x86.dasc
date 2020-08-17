@@ -10488,15 +10488,6 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 			res_info |= AVOID_REFCOUNTING;
 			ssa->var_info[ssa_op->result_def].type |= AVOID_REFCOUNTING;
 		}
-		old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN);
-		SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_COPY_R0);
-		exit_point = zend_jit_trace_get_exit_point(opline, opline+1, NULL, flags);
-		SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
-		res_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-		if (!res_exit_addr) {
-			return 0;
-		}
 
 		if (!(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))) {
 			old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
