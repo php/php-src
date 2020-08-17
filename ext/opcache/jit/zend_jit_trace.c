@@ -4585,6 +4585,10 @@ done:
 			if (p->func) {
 				if (p->func->type == ZEND_USER_FUNCTION) {
 					if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
+						zend_jit_op_array_trace_extension *jit_extension =
+							(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(p->op_array);
+						zend_ssa *op_array_ssa = &jit_extension->func_info.ssa;
+
 						i = 0;
 						while (i < p->op_array->num_args) {
 							/* Types of arguments are going to be stored in abstract stack when processing SEV instruction */
@@ -4592,7 +4596,11 @@ done:
 							i++;
 						}
 						while (i < p->op_array->last_var) {
-							SET_STACK_TYPE(call->stack, i, IS_UNDEF);
+							if (zend_jit_var_may_be_modified_indirectly(p->op_array, op_array_ssa, i)) {
+								SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
+							} else {
+								SET_STACK_TYPE(call->stack, i, IS_UNDEF);
+							}
 							i++;
 						}
 						while (i < p->op_array->last_var + p->op_array->T) {
