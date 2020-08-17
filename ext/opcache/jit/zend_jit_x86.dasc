@@ -12159,6 +12159,75 @@ static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *op
 	return 1;
 }
 
+static int zend_jit_isset_isempty_cv(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr,  zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+{
+	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+	// TODO: support for empty() ???
+	ZEND_ASSERT(!(opline->extended_value & ZEND_ISEMPTY));
+
+	if (op1_info & MAY_BE_REF) {
+		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+		}
+		|	ZVAL_DEREF FCARG1a, op1_info
+		|1:
+	}
+
+	if (!(op1_info & (MAY_BE_UNDEF|MAY_BE_NULL))) {
+		if (exit_addr) {
+			ZEND_ASSERT(smart_branch_opcode == ZEND_JMPZ);
+		} else if (smart_branch_opcode) {
+			if (smart_branch_opcode == ZEND_JMPNZ) {
+				|	jmp =>target_label
+			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+				|	jmp =>target_label2
+			}
+		} else {
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+		}
+	} else if (!(op1_info & (MAY_BE_ANY - MAY_BE_NULL))) {
+		if (exit_addr) {
+			ZEND_ASSERT(smart_branch_opcode == ZEND_JMPNZ);
+		} else if (smart_branch_opcode) {
+			if (smart_branch_opcode != ZEND_JMPNZ) {
+				|	jmp =>target_label
+			}
+		} else {
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+		}
+	} else {
+		ZEND_ASSERT(Z_MODE(op1_addr) == IS_MEM_ZVAL);
+		|	cmp byte [Ra(Z_REG(op1_addr))+Z_OFFSET(op1_addr)+offsetof(zval, u1.v.type)], IS_NULL
+		if (exit_addr) {
+			if (smart_branch_opcode == ZEND_JMPNZ) {
+				|	jg &exit_addr
+			} else {
+				|	jle &exit_addr
+			}
+		} else if (smart_branch_opcode) {
+			if (smart_branch_opcode == ZEND_JMPZ) {
+				|	jle =>target_label
+			} else if (smart_branch_opcode == ZEND_JMPNZ) {
+				|	jg =>target_label
+			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+				|	jle =>target_label
+				|	jmp =>target_label2
+			} else {
+				ZEND_UNREACHABLE();
+			}
+		} else {
+			|	setg al
+			|	movzx eax, al
+			|	lea eax, [eax + IS_FALSE]
+			|	SET_ZVAL_TYPE_INFO res_addr, eax
+		}
+	}
+
+	return 1;
+}
+
 static zend_bool zend_jit_noref_guard(dasm_State **Dst, const zend_op *opline, zend_jit_addr var_addr)
 {
 	int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, 0);

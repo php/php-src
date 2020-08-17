@@ -1486,6 +1486,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_JMPNZ_EX:
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
+				case ZEND_ISSET_ISEMPTY_CV:
 					ADD_OP1_TRACE_GUARD();
 					break;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
@@ -3909,6 +3910,41 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								-1, -1,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, exit_addr)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_ISSET_ISEMPTY_CV:
+						if ((opline->extended_value & ZEND_ISEMPTY)) {
+							// TODO: support for empty() ???
+							break;
+						}
+						op1_info = OP1_INFO();
+						op1_addr = OP1_REG_ADDR();
+						if (orig_op1_type != IS_UNKNOWN
+						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 1)) {
+								goto jit_failure;
+							}
+						} else {
+							CHECK_OP1_TRACE_TYPE();
+						}
+						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
+							zend_bool exit_if_true = 0;
+							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
+							uint32_t exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
+
+							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+							if (!exit_addr) {
+								goto jit_failure;
+							}
+							smart_branch_opcode = exit_if_true ? ZEND_JMPNZ : ZEND_JMPZ;
+						} else {
+							smart_branch_opcode = 0;
+							exit_addr = NULL;
+						}
+						if (!zend_jit_isset_isempty_cv(&dasm_state, opline, op_array,
+								op1_info, op1_addr,
+								smart_branch_opcode, -1, -1, exit_addr)) {
 							goto jit_failure;
 						}
 						goto done;
