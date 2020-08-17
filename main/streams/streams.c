@@ -567,7 +567,7 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				/* after this call, bucket is owned by the brigade */
 				php_stream_bucket_append(brig_inp, bucket);
 
-				flags = PSFS_FLAG_NORMAL;
+				flags = stream->eof ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_NORMAL;
 			} else {
 				flags = stream->eof ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC;
 			}
