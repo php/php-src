@@ -28,7 +28,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(20) "Invalid method name "
-string(21) "Invalid method name 1"
+string(66) "The parameter class is expected to be either a string or an object"
 string(21) "Class  does not exist"
 string(22) "Class a does not exist"
 string(21) "Class  does not exist"

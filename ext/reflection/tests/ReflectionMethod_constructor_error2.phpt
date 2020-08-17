@@ -13,10 +13,20 @@ class TestClass
 }
 
 echo "Too few arguments:\n";
-$methodInfo = new ReflectionMethod();
+
+try {
+	$methodInfo = new ReflectionMethod();
+} catch (Throwable $e) {
+	var_dump($e->getMessage());
+}
 
 echo "\nToo many arguments:\n";
-$methodInfo = new ReflectionMethod("TestClass", "foo", true);
+
+try {
+	$methodInfo = new ReflectionMethod("TestClass", "foo", true);
+} catch (Throwable $e) {
+	var_dump($e->getMessage());
+}
 
 try {
 	//invalid class
@@ -43,12 +53,10 @@ try{
 ?>
 --EXPECTF--
 Too few arguments:
-
-Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
+string(69) "ReflectionMethod::__construct() expects at least 1 parameter, 0 given"
 
 Too many arguments:
-
-Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
+string(69) "ReflectionMethod::__construct() expects at most 2 parameters, 3 given"
 Ok - Class InvalidClassName does not exist
 Ok - The parameter class is expected to be either a string or an object
 Ok - ReflectionMethod::__construct() expects parameter 2 to be string, array given

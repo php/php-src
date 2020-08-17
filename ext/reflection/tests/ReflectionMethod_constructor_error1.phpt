@@ -65,14 +65,14 @@ try {
 ?>
 --EXPECTF--
 Wrong type of argument (bool):
-ReflectionException: Invalid method name 1 in %s
+ReflectionException: The parameter class is expected to be either a string or an object in %s:%d
 Stack trace:
-#0 %s ReflectionMethod->__construct('1')
+#0 %s ReflectionMethod->__construct(true)
 #1 {main}
 Wrong type of argument (int):
-ReflectionException: Invalid method name 3 in %s
+ReflectionException: The parameter class is expected to be either a string or an object in %s:%d
 Stack trace:
-#0 %s ReflectionMethod->__construct('3')
+#0 %s ReflectionMethod->__construct(3)
 #1 {main}
 Wrong type of argument (bool, string):
 ReflectionException: The parameter class is expected to be either a string or an object in %s

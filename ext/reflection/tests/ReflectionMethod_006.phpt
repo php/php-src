@@ -6,12 +6,39 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 
-new ReflectionMethod();
-new ReflectionMethod('a', 'b', 'c');
+try {
+    new ReflectionMethod();
+} catch (Throwable $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    new ReflectionMethod('a', 'b', 'c');
+} catch (Throwable $e) {
+    var_dump($e->getMessage());
+}
 
 
 class C {
     public function f() {}
+}
+
+try {
+    new ReflectionMethod(new C);
+} catch (Throwable $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    new ReflectionMethod(new C, null);
+} catch (Throwable $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    new ReflectionMethod(new C, "");
+} catch (Throwable $e) {
+    var_dump($e->getMessage());
 }
 
 $rm = new ReflectionMethod('C', 'f');
@@ -36,9 +63,11 @@ var_dump($rm->getName(1));
 
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
-
-Warning: Wrong parameter count for ReflectionMethod::__construct() in %s on line %d
+string(69) "ReflectionMethod::__construct() expects at least 1 parameter, 0 given"
+string(69) "ReflectionMethod::__construct() expects at most 2 parameters, 3 given"
+string(76) "ReflectionMethod::__construct() expects parameter 2 to be string, null given"
+string(76) "ReflectionMethod::__construct() expects parameter 2 to be string, null given"
+string(27) "Method C::() does not exist"
 
 Warning: ReflectionMethod::isFinal() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

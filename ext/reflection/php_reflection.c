@@ -2953,42 +2953,49 @@ ZEND_METHOD(reflection_method, __construct)
 	char *name_str, *tmp;
 	size_t name_len, tmp_len;
 	zval ztmp;
+	const char *space;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
-				return;
-			}
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "z|s!", &classname, &name_str, &name_len) == FAILURE) {
+		return;
+	}
 
-			if (Z_TYPE_P(classname) == IS_OBJECT) {
-				orig_obj = classname;
-			} else {
-				orig_obj = NULL;
+	switch (Z_TYPE_P(classname)) {
+		case IS_STRING:
+			orig_obj = NULL;
+
+			if (ZEND_NUM_ARGS() == 1) {	
+				name_str = Z_STRVAL_P(classname);
+				name_len = Z_STRLEN_P(classname);
+
+				if ((tmp = strstr(name_str, "::")) == NULL) {
+					zend_throw_exception_ex(reflection_exception_ptr, 0, "Invalid method name %s", name_str);
+					return;
+				}
+
+				classname = &ztmp;
+				tmp_len = tmp - name_str;
+				ZVAL_STRINGL(classname, name_str, tmp_len);
+				name_len = name_len - (tmp_len + 2);
+				name_str = tmp + 2;
 			}
 
 			break;
 
-		case 1:
-			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
-				return;
+		case IS_OBJECT:
+			if (ZEND_NUM_ARGS() == 1 || !name_str) {
+				tmp = get_active_class_name(&space);
+
+				zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
+					tmp, space, get_active_function_name(), 2, "string", "null");
+					return;
 			}
 
-			if ((tmp = strstr(name_str, "::")) == NULL) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0, "Invalid method name %s", name_str);
-				return;
-			}
-
-			classname = &ztmp;
-			tmp_len = tmp - name_str;
-			ZVAL_STRINGL(classname, name_str, tmp_len);
-			name_len = name_len - (tmp_len + 2);
-			name_str = tmp + 2;
-			orig_obj = NULL;
+			orig_obj = classname;
 
 			break;
 
 		default:
-			ZEND_WRONG_PARAM_COUNT();
+			_DO_THROW("The parameter class is expected to be either a string or an object");
 	}
 
 	object = getThis();
@@ -3017,8 +3024,8 @@ ZEND_METHOD(reflection_method, __construct)
 			if (classname == &ztmp) {
 				zval_ptr_dtor_str(&ztmp);
 			}
-			_DO_THROW("The parameter class is expected to be either a string or an object");
-			/* returns out of this function */
+			
+			return;
 	}
 
 	if (classname == &ztmp) {
