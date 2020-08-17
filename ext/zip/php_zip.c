@@ -335,7 +335,7 @@ typedef struct {
 #endif
 } zip_options;
 
-static bool php_zip_parse_options(HashTable *options, zip_options *opts)
+static int php_zip_parse_options(HashTable *options, zip_options *opts)
 /* {{{ */
 {
 	zval *option;
@@ -384,7 +384,7 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 			if (Z_TYPE_P(option) != IS_STRING) {
 				zend_type_error("Option \"enc_password\" must be of type string, %s given",
 					zend_zval_type_name(option));
-				return false;
+				return -1;
 			}
 			opts->enc_password = Z_STRVAL_P(option);
 		}
@@ -395,17 +395,17 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 		if (Z_TYPE_P(option) != IS_STRING) {
 			zend_type_error("Option \"remove_path\" must be of type string, %s given",
 				zend_zval_type_name(option));
-			return false;
+			return -1;
 		}
 
 		if (Z_STRLEN_P(option) == 0) {
 			zend_value_error("Option \"remove_path\" cannot be empty");
-			return false;
+			return -1;
 		}
 
 		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
 			zend_value_error("Option \"remove_path\" must be less than %d bytes", MAXPATHLEN - 1);
-			return false;
+			return -1;
 		}
 		opts->remove_path_len = Z_STRLEN_P(option);
 		opts->remove_path = Z_STRVAL_P(option);
@@ -415,17 +415,17 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 		if (Z_TYPE_P(option) != IS_STRING) {
 			zend_type_error("Option \"add_path\" must be of type string, %s given",
 				zend_zval_type_name(option));
-			return false;
+			return -1;
 		}
 
 		if (Z_STRLEN_P(option) == 0) {
 			zend_value_error("Option \"add_path\" cannot be empty");
-			return false;
+			return -1;
 		}
 
 		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
 			zend_value_error("Option \"add_path\" must be less than %d bytes", MAXPATHLEN - 1);
-			return false;
+			return -1;
 		}
 		opts->add_path_len = Z_STRLEN_P(option);
 		opts->add_path = Z_STRVAL_P(option);
@@ -435,12 +435,12 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 		if (Z_TYPE_P(option) != IS_LONG) {
 			zend_type_error("Option \"flags\" must be of type int, %s given",
 				zend_zval_type_name(option));
-			return false;
+			return -1;
 		}
 		opts->flags = Z_LVAL_P(option);
 	}
 
-	return true;
+	return 1;
 }
 /* }}} */
 
@@ -1700,7 +1700,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
-	if (options && zend_hash_num_elements(options) > 0 && (php_zip_parse_options(options, &opts) == false)) {
+	if (options && zend_hash_num_elements(options) > 0 && (php_zip_parse_options(options, &opts) < 0)) {
 		RETURN_THROWS();
 	}
 
