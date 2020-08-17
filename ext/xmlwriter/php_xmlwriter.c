@@ -896,8 +896,8 @@ PHP_FUNCTION(xmlwriter_open_uri)
 	}
 
 	if (source_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty string as source");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	valid_file = _xmlwriter_get_valid_file_path(source, resolved_path, MAXPATHLEN);
