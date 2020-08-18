@@ -137,8 +137,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 
 			if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
 				efree(arch);
-				php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero");
-				RETURN_FALSE;
+				zend_argument_value_error(5, "must be greater than or equal to 0");
+				RETURN_THROWS();
 			}
 
 			/* retrieving a file defaults to within the current directory, so use this if possible */

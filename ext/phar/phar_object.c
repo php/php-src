@@ -2918,7 +2918,7 @@ PHP_METHOD(Phar, setDefaultStub)
 	size_t index_len = 0, webindex_len = 0;
 	int created_stub = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2935,9 +2935,13 @@ PHP_METHOD(Phar, setDefaultStub)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_NUM_ARGS() > 0 && (phar_obj->archive->is_tar || phar_obj->archive->is_zip)) {
-		php_error_docref(NULL, E_WARNING, "Method accepts no arguments for a tar- or zip-based phar stub, %d given", ZEND_NUM_ARGS());
-		RETURN_FALSE;
+	if ((index || webindex) && (phar_obj->archive->is_tar || phar_obj->archive->is_zip)) {
+		const char *space;
+		zend_value_error(
+			"%s::setDefaultStub(): Argument #%d ($%s) must be null for a tar- or zip-based phar stub, string given",
+			get_active_class_name(&space), index ? 1 : 2, index ? "index" : "webindex"
+		);
+		RETURN_THROWS();
 	}
 
 	if (PHAR_G(readonly)) {

@@ -29,7 +29,11 @@ mkdir($pname . '/oops');
 file_put_contents($pname . '/foo/hi', '<?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
-file_get_contents("./hi", 0, $context, 0, -1);
+try {
+    file_get_contents("./hi", 0, $context, 0, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("' . addslashes(__DIR__) . '");
 echo file_get_contents("fgc_edgecases.txt", true);
@@ -53,7 +57,11 @@ blah
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
-file_get_contents("./hi", 0, $context, 0, -1);
+try {
+    file_get_contents("./hi", 0, $context, 0, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
 echo file_get_contents("fgc_edgecases.txt", true);
@@ -63,14 +71,17 @@ echo file_get_contents("./hi", 0, $context, 50000);
 echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
-
-Warning: file_get_contents(): Length must be greater than or equal to zero in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
+file_get_contents(): Argument #5 ($maxlen) must be greater than or equal to 0
 test
 test
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
-file_get_contents("./hi", 0, $context, 0, -1);
+try {
+    file_get_contents("./hi", 0, $context, 0, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
 echo file_get_contents("fgc_edgecases.txt", true);
@@ -87,7 +98,11 @@ Warning: file_get_contents(): Failed to seek to position 50000 in the stream in 
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
-file_get_contents("./hi", 0, $context, 0, -1);
+try {
+    file_get_contents("./hi", 0, $context, 0, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
 echo file_get_contents("fgc_edgecases.txt", true);
