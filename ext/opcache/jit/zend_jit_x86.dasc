@@ -10101,6 +10101,8 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 			|	mov FCARG1a, EX->This.value.obj
 			|	// OBJ_RELEASE(object);
 			|	OBJ_RELEASE ZREG_FCARG1a, >4
+			// TODO: avoid EG(excption) check for $this->foo() calls
+			may_throw = 1;
 		}
 		|4:
 	}
