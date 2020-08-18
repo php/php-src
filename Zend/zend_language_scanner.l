@@ -1423,8 +1423,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_RETURN);
 }
 
-<ST_IN_SCRIPTING>"@[" {
-	enter_nesting('[');
+<ST_IN_SCRIPTING>"@{" {
+	enter_nesting('{');
 	RETURN_TOKEN(T_ATTRIBUTE);
 }
 
