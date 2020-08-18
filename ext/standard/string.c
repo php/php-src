@@ -3156,7 +3156,7 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 {
 	zend_string *result;
 	size_t char_count = 0;
-	char lc_from = 0;
+	int lc_from = 0;
 	const char *source, *source_end= ZSTR_VAL(str) + ZSTR_LEN(str);
 	char *target;
 
