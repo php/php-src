@@ -1486,7 +1486,13 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_JMPNZ_EX:
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
+					ADD_OP1_TRACE_GUARD();
+					break;
 				case ZEND_ISSET_ISEMPTY_CV:
+					if ((opline->extended_value & ZEND_ISEMPTY)) {
+						// TODO: support for empty() ???
+						break;
+					}
 					ADD_OP1_TRACE_GUARD();
 					break;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
