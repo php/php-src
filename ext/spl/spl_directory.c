@@ -22,6 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
+#include "ext/standard/flock_compat.h"
 #include "ext/standard/scanf.h"
 #include "ext/standard/php_string.h"
 #include "zend_compile.h"
@@ -2547,18 +2548,47 @@ PHP_METHOD(SplFileObject, getCsvControl)
 }
 /* }}} */
 
-/* {{{ Portable file locking */
+/* {{{ Portable file locking, copy pasted from ext/standard/file.c flock() function.
+ * This is done to prevent this to fail if flock is disabled via disable_functions */
+static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
+
 PHP_METHOD(SplFileObject, flock)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_function *func_ptr;
+	zval *wouldblock = NULL;
+	int act;
+	zend_long operation = 0;
 
-	func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "flock", sizeof("flock") - 1);
-	if (func_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function flock() not found. Please report");
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z", &operation, &wouldblock) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
+
+	if(!intern->u.file.stream) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		RETURN_THROWS();
+	}
+
+	act = operation & PHP_LOCK_UN;
+	// TODO doesn't this fail if operation is a bitmask with LOCK_NB?
+	//if (act != PHP_LOCK_SH && act != PHP_LOCK_EX && act != PHP_LOCK_UN) {
+	if (act < 1 || act > 3) {
+		zend_argument_value_error(1, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
+		RETURN_THROWS();
+	}
+
+	if (wouldblock) {
+		ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 0);
+	}
+
+	/* flock_values contains all possible actions if (operation & PHP_LOCK_NB) we won't block on the lock */
+	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
+	if (php_stream_lock(intern->u.file.stream, act)) {
+		if (operation && errno == EWOULDBLOCK && wouldblock) {
+			ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 1);
+		}
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
