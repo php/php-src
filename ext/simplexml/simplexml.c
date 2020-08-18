@@ -436,7 +436,7 @@ long_dim:
 			}
 
 			if (!Z_STRLEN_P(member)) {
-				php_error_docref(NULL, E_WARNING, "Cannot write or create unnamed %s", attribs ? "attribute" : "element");
+				zend_value_error("Cannot create or write %s with an empty name", attribs ? "attributes" : "elements");
 				if (member == &tmp_zv) {
 					zval_ptr_dtor_str(&tmp_zv);
 				}
@@ -464,7 +464,7 @@ long_dim:
 			 * and could also be E_PARSE, but we use this only during parsing
 			 * and this is during runtime.
 			 */
-			zend_throw_error(NULL, "Cannot create unnamed attribute");
+			zend_value_error("Cannot create or write attributes with an empty name");
 			return &EG(error_zval);
 		}
 		if (attribs && !node && sxe->iter.type == SXE_ITER_ELEMENT) {
@@ -501,7 +501,7 @@ long_dim:
 				if (member == &tmp_zv) {
 					zval_ptr_dtor_str(&tmp_zv);
 				}
-				zend_error(E_WARNING, "It is not yet possible to assign complex types to %s", attribs ? "attributes" : "properties");
+				zend_type_error("It's not possible to assign a complex type to %s, %s given", attribs ? "attributes" : "properties", zend_zval_type_name(value));
 				return &EG(error_zval);
 		}
 	}
@@ -1684,8 +1684,8 @@ SXE_METHOD(addChild)
 	}
 
 	if (qname_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Element name is required");
-		return;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1749,8 +1749,8 @@ SXE_METHOD(addAttribute)
 	}
 
 	if (qname_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Attribute name is required");
-		return;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -2274,8 +2274,8 @@ PHP_FUNCTION(simplexml_load_file)
 	}
 
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
-		php_error_docref(NULL, E_WARNING, "Invalid options");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "is too large");
+		RETURN_THROWS();
 	}
 
 	docp = xmlReadFile(filename, NULL, (int)options);
@@ -2319,16 +2319,16 @@ PHP_FUNCTION(simplexml_load_string)
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
-		php_error_docref(NULL, E_WARNING, "Data is too long");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
-		php_error_docref(NULL, E_WARNING, "Namespace is too long");
-		RETURN_FALSE;
+		zend_argument_value_error(4, "is too long");
+		RETURN_THROWS();
 	}
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
-		php_error_docref(NULL, E_WARNING, "Invalid options");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "is too large");
+		RETURN_THROWS();
 	}
 
 	docp = xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
