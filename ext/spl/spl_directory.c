@@ -20,12 +20,11 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "ext/standard/file.h"
+#include "ext/standard/php_filestat.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/scanf.h"
 #include "ext/standard/php_string.h"
-#include "zend_compile.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
@@ -36,12 +35,6 @@
 #include "spl_directory.h"
 #include "spl_directory_arginfo.h"
 #include "spl_exceptions.h"
-
-#include "php.h"
-#include "fopen_wrappers.h"
-
-#include "ext/standard/basic_functions.h"
-#include "ext/standard/php_filestat.h"
 
 #define SPL_HAS_FLAG(flags, test_flag) ((flags & test_flag) ? 1 : 0)
 
