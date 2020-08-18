@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0beta2
 
+- SPL:
+  . Fixed bug #79987 (Memory leak in SplFileInfo because of missing
+    zend_restore_error_handling()). (Dmitry)
 
 06 Aug 2020, PHP 8.0.0beta1
 

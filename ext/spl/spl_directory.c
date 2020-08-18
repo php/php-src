@@ -1224,16 +1224,19 @@ PHP_METHOD(SplFileInfo, getLinkTarget)
 
 	if (intern->file_name == NULL) {
 		if (spl_filesystem_object_get_file_name(intern) != SUCCESS) {
+			zend_restore_error_handling(&error_handling);
 			RETURN_THROWS();
 		}
 	}
 #if defined(PHP_WIN32) || defined(HAVE_SYMLINK)
 	if (intern->file_name == NULL) {
+		zend_restore_error_handling(&error_handling);
 		php_error_docref(NULL, E_WARNING, "Empty filename");
 		RETURN_FALSE;
 	} else if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
 		char expanded_path[MAXPATHLEN];
 		if (!expand_filepath_with_mode(intern->file_name, expanded_path, NULL, 0, CWD_EXPAND )) {
+			zend_restore_error_handling(&error_handling);
 			php_error_docref(NULL, E_WARNING, "No such file or directory");
 			RETURN_FALSE;
 		}
@@ -1275,6 +1278,7 @@ PHP_METHOD(SplFileInfo, getRealPath)
 
 	if (intern->type == SPL_FS_DIR && !intern->file_name && intern->u.dir.entry.d_name[0]) {
 		if (spl_filesystem_object_get_file_name(intern) != SUCCESS) {
+			zend_restore_error_handling(&error_handling);
 			RETURN_THROWS();
 		}
 	}
