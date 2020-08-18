@@ -149,7 +149,7 @@ PHP 8.0 UPGRADE NOTES
         new class {};
         // -> class@anonymous
 
-    The name shown above is still followed by a null byte and and a unique
+    The name shown above is still followed by a null byte and a unique
     suffix.
   . Non-absolute trait method references in trait alias adaptations are now
     required to be unambiguous:

@@ -169,13 +169,13 @@ function array_count_values(array $array): array {}
 
 function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
 
-function array_reverse(array $input, bool $preserve_keys = false): array {}
+function array_reverse(array $array, bool $preserve_keys = false): array {}
 
 function array_pad(array $array, int $pad_size, mixed $pad_value): array {}
 
 function array_flip(array $array): array {}
 
-function array_change_key_case(array $input, int $case = CASE_LOWER): array {}
+function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
@@ -1500,11 +1500,11 @@ function convert_uudecode(string $data): string|false {}
 
 /* var.c */
 
-function var_dump(mixed $value, mixed ...$value): void {}
+function var_dump(mixed $value, mixed ...$values): void {}
 
 function var_export(mixed $value, bool $return = false): ?string {}
 
-function debug_zval_dump(mixed $value, mixed ...$value): void {}
+function debug_zval_dump(mixed $value, mixed ...$values): void {}
 
 function serialize(mixed $value): string {}
 
