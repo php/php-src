@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.22
+20 Aug 2020, PHP 7.3.22RC1
 
 - Core:
   . Fixed bug #79884 (PHP_CONFIG_FILE_PATH is meaningless). (cmb)
