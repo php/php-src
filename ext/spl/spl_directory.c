@@ -1901,13 +1901,13 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 	return SUCCESS;
 } /* }}} */
 
-static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function *func_ptr, int pass_num_args, zval *return_value, zval *arg2) /* {{{ */
+static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function *func_ptr, int pass_num_args, zval *return_value) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
 	zval *zresource_ptr = &intern->u.file.zresource, *params;
 	int result;
-	int num_args = pass_num_args + (arg2 ? 2 : 1);
+	int num_args = pass_num_args + 1;
 
 	if (Z_ISUNDEF_P(zresource_ptr)) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
@@ -1917,11 +1917,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	params = (zval*)safe_emalloc(num_args, sizeof(zval), 0);
 	params[0] = *zresource_ptr;
 
-	if (arg2) {
-		params[1] = *arg2;
-	}
-
-	if (zend_get_parameters_array_ex(pass_num_args, params + (arg2 ? 2 : 1)) != SUCCESS) {
+	if (zend_get_parameters_array_ex(pass_num_args, params + 1) != SUCCESS) {
 		efree(params);
 		WRONG_PARAM_COUNT_WITH_RETVAL(FAILURE);
 	}
@@ -1948,7 +1944,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	return result;
 } /* }}} */
 
-#define FileFunctionCall(func_name, pass_num_args, arg2) /* {{{ */ \
+#define FileFunctionCall(func_name, pass_num_args) /* {{{ */ \
 { \
 	zend_function *func_ptr; \
 	func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), #func_name, sizeof(#func_name) - 1); \
@@ -1956,7 +1952,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function %s() not found. Please report", #func_name); \
 		return; \
 	} \
-	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value, arg2); \
+	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value); \
 } /* }}} */
 
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
@@ -2387,7 +2383,7 @@ PHP_METHOD(SplFileObject, getChildren)
 PHP_METHOD(SplFileObject, func_name) \
 { \
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS); \
-	FileFunctionCall(func_name, ZEND_NUM_ARGS(), NULL); \
+	FileFunctionCall(func_name, ZEND_NUM_ARGS()); \
 }
 /* }}} */
 
@@ -2681,7 +2677,7 @@ PHP_METHOD(SplFileObject, fscanf)
 	spl_filesystem_file_free_line(intern);
 	intern->u.file.current_line_num++;
 
-	FileFunctionCall(fscanf, ZEND_NUM_ARGS(), NULL);
+	FileFunctionCall(fscanf, ZEND_NUM_ARGS());
 }
 /* }}} */
 
