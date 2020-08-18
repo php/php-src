@@ -22,6 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
+#include "ext/standard/scanf.h"
 #include "ext/standard/php_string.h"
 #include "zend_compile.h"
 #include "zend_exceptions.h"
@@ -2658,23 +2659,30 @@ PHP_METHOD(SplFileObject, fpassthru)
 /* {{{ Implements a mostly ANSI compatible fscanf() */
 PHP_METHOD(SplFileObject, fscanf)
 {
+	int result, num_varargs = 0;
+	zend_string *format_str;
+	zval *varargs= NULL;
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_function *func_ptr;
 
-	if(!intern->u.file.stream) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S*", &format_str, &varargs, &num_varargs) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
 		RETURN_THROWS();
 	}
 
-	spl_filesystem_file_free_line(intern);
-	intern->u.file.current_line_num++;
-
-		func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fscanf", sizeof("fscanf") - 1);
-		if (func_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function fscanf() not found. Please report");
+	/* Get next line */
+	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
 		RETURN_THROWS();
-		}
-		spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
+	}
+
+	result = php_sscanf_internal(intern->u.file.current_line, ZSTR_VAL(format_str), num_varargs, varargs, 0, return_value);
+
+	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
+		WRONG_PARAM_COUNT;
+	}
 }
 /* }}} */
 
@@ -2763,7 +2771,7 @@ PHP_METHOD(SplFileObject, fstat)
 		RETURN_THROWS();
 	}
 
-	zend_call_known_function(func_ptr, NULL, NULL, return_value, 0, NULL, NULL);	
+	zend_call_known_function(func_ptr, NULL, NULL, return_value, 0, NULL, NULL);
 }
 /* }}} */
 
