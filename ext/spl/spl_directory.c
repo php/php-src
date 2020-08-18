@@ -2548,10 +2548,17 @@ PHP_METHOD(SplFileObject, getCsvControl)
 }
 /* }}} */
 
-/* {{{ Portable file locking, copy pasted from ext/standard/file.c flock() function.
- * This is done to prevent this to fail if flock is disabled via disable_functions */
+/* Because apparently it doesn't want to pull them from flock_compat.h for some stupid reason */
+#define LOCK_SH 1
+#define LOCK_EX 2
+#define LOCK_NB 4
+#define LOCK_UN 8
+
+
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
+/* {{{ Portable file locking, copy pasted from ext/standard/file.c flock() function.
+ * This is done to prevent this to fail if flock is disabled via disable_functions */
 PHP_METHOD(SplFileObject, flock)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
