@@ -2552,12 +2552,12 @@ PHP_METHOD(SplFileObject, flock)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_function *func_ptr;
 
-    func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "flock", sizeof("flock") - 1);
-    if (func_ptr == NULL) {
+	func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "flock", sizeof("flock") - 1);
+	if (func_ptr == NULL) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function flock() not found. Please report");
 		RETURN_THROWS();
-    }
-    spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
+	}
+	spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
 }
 /* }}} */
 
@@ -2669,12 +2669,12 @@ PHP_METHOD(SplFileObject, fscanf)
 	spl_filesystem_file_free_line(intern);
 	intern->u.file.current_line_num++;
 
-    func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fscanf", sizeof("fscanf") - 1);
-    if (func_ptr == NULL) {
+		func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fscanf", sizeof("fscanf") - 1);
+		if (func_ptr == NULL) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function fscanf() not found. Please report");
 		RETURN_THROWS();
-    }
-    spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
+		}
+		spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
 }
 /* }}} */
 
@@ -2748,12 +2748,22 @@ PHP_METHOD(SplFileObject, fstat)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_function *func_ptr;
 
-    func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fstat", sizeof("fstat") - 1);
-    if (func_ptr == NULL) {
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fstat", sizeof("fstat") - 1);
+	if (func_ptr == NULL) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function fstat() not found. Please report");
 		RETURN_THROWS();
-    }
-    spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
+	}
+
+	if (Z_ISUNDEF_P(&intern->u.file.zresource)) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		RETURN_THROWS();
+	}
+
+	zend_call_known_function(func_ptr, NULL, NULL, return_value, 0, NULL, NULL);	
 }
 /* }}} */
 
