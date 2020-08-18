@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed bug #79724 (Return type does not match in ext/session/mod_mm.c).
     (Nikita)
 
+- SOAP:
+  . Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
+    "Transfer-Encoding: chunked"). (Matteo)
+
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array
     with single reference). (Nikita)
