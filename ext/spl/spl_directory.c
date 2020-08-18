@@ -2706,6 +2706,7 @@ PHP_METHOD(SplFileObject, fread)
 }
 
 /* {{{ Stat() on a filehandle */
+// TODO Don't call fstat? As it may be undefined if it is disabled via disable_functions
 PHP_METHOD(SplFileObject, fstat)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2717,7 +2718,7 @@ PHP_METHOD(SplFileObject, fstat)
 
 	func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fstat", sizeof("fstat") - 1);
 	if (func_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function fstat() not found. Please report");
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "fstat() is not defined");
 		RETURN_THROWS();
 	}
 
