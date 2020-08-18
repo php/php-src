@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #64705 (errorInfo property of PDOException is null when
     PDO::__construct() fails). (Ahmed Abdou)
 
+- SOAP:
+  . Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
+    "Transfer-Encoding: chunked"). (Matteo)
+
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array
     with single reference). (Nikita)
