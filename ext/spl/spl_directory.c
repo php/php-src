@@ -2378,15 +2378,6 @@ PHP_METHOD(SplFileObject, getChildren)
 	/* return NULL */
 } /* }}} */
 
-/* {{{ FileFunction */
-#define FileFunction(func_name) \
-PHP_METHOD(SplFileObject, func_name) \
-{ \
-	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS); \
-	FileFunctionCall(func_name, ZEND_NUM_ARGS()); \
-}
-/* }}} */
-
 /* {{{ Return current line as csv */
 PHP_METHOD(SplFileObject, fgetcsv)
 {
@@ -2567,7 +2558,11 @@ PHP_METHOD(SplFileObject, getCsvControl)
 /* }}} */
 
 /* {{{ Portable file locking */
-FileFunction(flock)
+PHP_METHOD(SplFileObject, flock)
+{
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
+	FileFunctionCall(flock, ZEND_NUM_ARGS());
+}
 /* }}} */
 
 /* {{{ Flush the file */
@@ -2746,7 +2741,11 @@ PHP_METHOD(SplFileObject, fread)
 }
 
 /* {{{ Stat() on a filehandle */
-FileFunction(fstat)
+PHP_METHOD(SplFileObject, fstat)
+{
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
+	FileFunctionCall(fstat, ZEND_NUM_ARGS());
+}
 /* }}} */
 
 /* {{{ Truncate file to 'size' length */
