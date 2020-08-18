@@ -314,8 +314,8 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	sem_ptr = Z_SYSVSEM_P(arg_id);
 
 	if (!acquire && sem_ptr->count == 0) {
-		php_error_docref(NULL, E_WARNING, "SysV semaphore for key 0x%x is not currently acquired", sem_ptr->key);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "SysV semaphore for key 0x%x is not currently acquired", sem_ptr->key);
+		RETURN_THROWS();
 	}
 
 	sop.sem_num = SYSVSEM_SEM;
