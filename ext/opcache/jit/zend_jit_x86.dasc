@@ -10676,6 +10676,9 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 			if (!(res_info & AVOID_REFCOUNTING)) {
 				|	TRY_ADDREF res_info, ch, r2
 			}
+			if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
+				return 0;
+			}
 		} else if (op1_info & MAY_BE_ARRAY_OF_REF) {
 			|	// ZVAL_COPY_DEREF
 			|	GET_ZVAL_TYPE_INFO Rd(ZREG_R2), val_addr
