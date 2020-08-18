@@ -344,7 +344,9 @@ PHP_FUNCTION(flock)
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	act = operation & 3;
+	act = operation & PHP_LOCK_UN;
+	// TODO doesn't this fail if operation is a bitmask with LOCK_NB?
+	//if (act != PHP_LOCK_SH && act != PHP_LOCK_EX && act != PHP_LOCK_UN) {
 	if (act < 1 || act > 3) {
 		zend_argument_value_error(2, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
 		RETURN_THROWS();
@@ -354,7 +356,7 @@ PHP_FUNCTION(flock)
 		ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 0);
 	}
 
-	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
+	/* flock_values contains all possible actions if (operation & PHP_LOCK_NB) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
