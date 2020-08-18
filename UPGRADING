@@ -21,6 +21,7 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
+  . `match` is now a reserved keyword.
   . Assertion failures now throw by default. If the old behavior is desired,
     then set `assert.exception=0` in INI settings.
   . Methods with the same name as the class are no longer interpreted as
