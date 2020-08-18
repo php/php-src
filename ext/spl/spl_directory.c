@@ -59,6 +59,13 @@ PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
+// TODO Use standard Error
+#define CHECK_SPL_FILE_OBJECT_IS_INITIALIZED() \
+	if (!intern->u.file.stream) { \
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized"); \
+		RETURN_THROWS(); \
+	}
+
 static void spl_filesystem_file_free_line(spl_filesystem_object *intern) /* {{{ */
 {
 	if (intern->u.file.current_line) {
@@ -2019,7 +2026,7 @@ static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object 
 
 static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
-	if(!intern->u.file.stream) {
+	if (!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
 		return;
 	}
@@ -2147,10 +2154,7 @@ PHP_METHOD(SplFileObject, eof)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	RETURN_BOOL(php_stream_eof(intern->u.file.stream));
 } /* }}} */
@@ -2183,10 +2187,7 @@ PHP_METHOD(SplFileObject, fgets)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
 		RETURN_FALSE;
@@ -2203,10 +2204,7 @@ PHP_METHOD(SplFileObject, current)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
 		spl_filesystem_file_read_line(ZEND_THIS, intern, 1);
@@ -2337,10 +2335,7 @@ PHP_METHOD(SplFileObject, fgetcsv)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 
-		if(!intern->u.file.stream) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-			RETURN_THROWS();
-		}
+		CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 		switch(ZEND_NUM_ARGS())
 		{
@@ -2527,10 +2522,7 @@ PHP_METHOD(SplFileObject, flock)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	act = operation & PHP_LOCK_UN;
 	// TODO doesn't this fail if operation is a bitmask with LOCK_NB?
@@ -2561,10 +2553,7 @@ PHP_METHOD(SplFileObject, fflush)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
 } /* }}} */
@@ -2575,10 +2564,7 @@ PHP_METHOD(SplFileObject, ftell)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_long ret;
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	ret = php_stream_tell(intern->u.file.stream);
 
@@ -2599,10 +2585,7 @@ PHP_METHOD(SplFileObject, fseek)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	spl_filesystem_file_free_line(intern);
 	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, (int)whence));
@@ -2615,10 +2598,7 @@ PHP_METHOD(SplFileObject, fgetc)
 	char buf[2];
 	int result;
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	spl_filesystem_file_free_line(intern);
 
@@ -2642,10 +2622,7 @@ PHP_METHOD(SplFileObject, fpassthru)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
 } /* }}} */
@@ -2662,10 +2639,7 @@ PHP_METHOD(SplFileObject, fscanf)
 		RETURN_THROWS();
 	}
 
-	if (!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	/* Get next line */
 	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
@@ -2693,10 +2667,7 @@ PHP_METHOD(SplFileObject, fwrite)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	if (ZEND_NUM_ARGS() > 1) {
 		if (length >= 0) {
@@ -2727,10 +2698,7 @@ PHP_METHOD(SplFileObject, fread)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	if (length <= 0) {
 		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
@@ -2779,10 +2747,7 @@ PHP_METHOD(SplFileObject, ftruncate)
 		RETURN_THROWS();
 	}
 
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	if (!php_stream_truncate_supported(intern->u.file.stream)) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't truncate file %s", intern->file_name);
@@ -2801,10 +2766,8 @@ PHP_METHOD(SplFileObject, seek)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &line_pos) == FAILURE) {
 		RETURN_THROWS();
 	}
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
+
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
 	if (line_pos < 0) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line " ZEND_LONG_FMT, intern->file_name, line_pos);
