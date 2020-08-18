@@ -1903,49 +1903,6 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 	return SUCCESS;
 } /* }}} */
 
-static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function *func_ptr, int pass_num_args, zval *return_value) /* {{{ */
-{
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
-	zval *zresource_ptr = &intern->u.file.zresource, *params;
-	int result;
-	int num_args = pass_num_args + 1;
-
-	if (Z_ISUNDEF_P(zresource_ptr)) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return FAILURE;
-	}
-
-	params = (zval*)safe_emalloc(num_args, sizeof(zval), 0);
-	params[0] = *zresource_ptr;
-
-	if (zend_get_parameters_array_ex(pass_num_args, params + 1) != SUCCESS) {
-		efree(params);
-		WRONG_PARAM_COUNT_WITH_RETVAL(FAILURE);
-	}
-
-	fci.size = sizeof(fci);
-	fci.object = NULL;
-	fci.retval = return_value;
-	fci.param_count = num_args;
-	fci.params = params;
-	fci.named_params = NULL;
-	ZVAL_STR(&fci.function_name, func_ptr->common.function_name);
-
-	fcic.function_handler = func_ptr;
-	fcic.called_scope = NULL;
-	fcic.object = NULL;
-
-	result = zend_call_function(&fci, &fcic);
-
-	if (result == FAILURE || Z_ISUNDEF_P(return_value)) {
-		RETVAL_FALSE;
-	}
-
-	efree(params);
-	return result;
-} /* }}} */
-
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
 	int ret = SUCCESS;
