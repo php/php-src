@@ -125,7 +125,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function setAlias(string $alias) {}
 
     /** @return bool */
-    public function setDefaultStub(?string $index = null, string $webindex = UNKNOWN) {}
+    public function setDefaultStub(?string $index = null, ?string $webindex = null) {}
 
     /**
      * @param mixed $metadata
@@ -398,7 +398,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @alias Phar::setDefaultStub
      */
-    public function setDefaultStub(?string $index = null, string $webindex = UNKNOWN) {}
+    public function setDefaultStub(?string $index = null, ?string $webindex = null) {}
 
     /**
      * @param mixed $metadata
