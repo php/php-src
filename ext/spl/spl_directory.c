@@ -1944,17 +1944,6 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	return result;
 } /* }}} */
 
-#define FileFunctionCall(func_name, pass_num_args) /* {{{ */ \
-{ \
-	zend_function *func_ptr; \
-	func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), #func_name, sizeof(#func_name) - 1); \
-	if (func_ptr == NULL) { \
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function %s() not found. Please report", #func_name); \
-		return; \
-	} \
-	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value); \
-} /* }}} */
-
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
 	int ret = SUCCESS;
@@ -2561,7 +2550,14 @@ PHP_METHOD(SplFileObject, getCsvControl)
 PHP_METHOD(SplFileObject, flock)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	FileFunctionCall(flock, ZEND_NUM_ARGS());
+	zend_function *func_ptr;
+
+    func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "flock", sizeof("flock") - 1);
+    if (func_ptr == NULL) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function flock() not found. Please report");
+		RETURN_THROWS();
+    }
+    spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
 }
 /* }}} */
 
@@ -2663,6 +2659,7 @@ PHP_METHOD(SplFileObject, fpassthru)
 PHP_METHOD(SplFileObject, fscanf)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
+	zend_function *func_ptr;
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
@@ -2672,7 +2669,12 @@ PHP_METHOD(SplFileObject, fscanf)
 	spl_filesystem_file_free_line(intern);
 	intern->u.file.current_line_num++;
 
-	FileFunctionCall(fscanf, ZEND_NUM_ARGS());
+    func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fscanf", sizeof("fscanf") - 1);
+    if (func_ptr == NULL) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function fscanf() not found. Please report");
+		RETURN_THROWS();
+    }
+    spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
 }
 /* }}} */
 
@@ -2744,7 +2746,14 @@ PHP_METHOD(SplFileObject, fread)
 PHP_METHOD(SplFileObject, fstat)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	FileFunctionCall(fstat, ZEND_NUM_ARGS());
+	zend_function *func_ptr;
+
+    func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fstat", sizeof("fstat") - 1);
+    if (func_ptr == NULL) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Internal error, function fstat() not found. Please report");
+		RETURN_THROWS();
+    }
+    spl_filesystem_file_call(intern, func_ptr, ZEND_NUM_ARGS(), return_value);
 }
 /* }}} */
 
