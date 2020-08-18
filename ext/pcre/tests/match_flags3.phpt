@@ -3,7 +3,11 @@ preg_match() flags 3
 --FILE--
 <?php
 
-var_dump(preg_match('', '', $match, 0xfff));
+try {
+    preg_match('', '', $match, 0xfff);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 var_dump(preg_match('/\d+/', '123 456 789 012', $match, 0, -8));
 var_dump($match);
@@ -18,8 +22,7 @@ var_dump(preg_match('/(?P<3>)/', ''));
 
 ?>
 --EXPECTF--
-Warning: preg_match(): Empty regular expression in %smatch_flags3.php on line 3
-bool(false)
+preg_match(): Regular expression cannot be empty
 int(1)
 array(1) {
   [0]=>

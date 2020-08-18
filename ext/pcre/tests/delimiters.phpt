@@ -3,35 +3,56 @@ Delimiters crash test
 --FILE--
 <?php
 
-var_dump(preg_match('', ''));
-var_dump(preg_match('      ', ''));
+try {
+    preg_match('', '');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match('      ', '');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(preg_match('@@', ''));
-var_dump(preg_match('12', ''));
+
+try {
+    preg_match('12', '');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(preg_match('<>', ''));
-var_dump(preg_match('~a', ''));
+
+try {
+    preg_match('~a', '');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(preg_match('@\@\@@', '@@'));
-var_dump(preg_match('//z', '@@'));
-var_dump(preg_match('{', ''));
+
+try {
+    preg_match('//z', '@@');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match('{', '');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Warning: preg_match(): Empty regular expression in %sdelimiters.php on line 3
-bool(false)
-
-Warning: preg_match(): Empty regular expression in %sdelimiters.php on line 4
-bool(false)
+--EXPECT--
+preg_match(): Regular expression cannot be empty
+preg_match(): Regular expression cannot be empty
 int(1)
-
-Warning: preg_match(): Delimiter must not be alphanumeric or backslash in %sdelimiters.php on line 6
-bool(false)
+preg_match(): Regular expression delimiter cannot be alphanumeric or a backslash
 int(1)
-
-Warning: preg_match(): No ending delimiter '~' found in %sdelimiters.php on line 8
-bool(false)
+preg_match(): Regular expression doesn't contain an ending delimiter "~"
 int(1)
-
-Warning: preg_match(): Unknown modifier 'z' in %sdelimiters.php on line 10
-bool(false)
-
-Warning: preg_match(): No ending matching delimiter '}' found in %sdelimiters.php on line 11
-bool(false)
+preg_match(): Regular expression modifier "z" is invalid
+preg_match(): No ending matching delimiter "}" found

@@ -19,37 +19,33 @@ $replace = 1;
 $subject = 'a';
 foreach($regex_array as $regex_value) {
     @print "\nArg value is $regex_value\n";
-    var_dump(preg_replace($regex_value, $replace, $subject));
+    try {
+        var_dump(preg_replace($regex_value, $replace, $subject));
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 $regex_value = new stdclass(); //Object
 try {
-    var_dump(preg_replace($regex_value, $replace, $subject));
-} catch (Error $e) {
+    preg_replace($regex_value, $replace, $subject);
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_replace() : error conditions***
 
 Arg value is abcdef
-
-Warning: preg_replace(): Delimiter must not be alphanumeric or backslash in %spreg_replace_error1.php on line %d
-NULL
+preg_replace(): Regular expression delimiter cannot be alphanumeric or a backslash
 
 Arg value is /[a-zA-Z]
-
-Warning: preg_replace(): No ending delimiter '/' found in %spreg_replace_error1.php on line %d
-NULL
+preg_replace(): Regular expression doesn't contain an ending delimiter "/"
 
 Arg value is [a-zA-Z]/
-
-Warning: preg_replace(): Unknown modifier '/' in %spreg_replace_error1.php on line %d
-NULL
+preg_replace(): Regular expression modifier "/" is invalid
 
 Arg value is /[a-zA-Z]/F
-
-Warning: preg_replace(): Unknown modifier 'F' in %spreg_replace_error1.php on line %d
-NULL
+preg_replace(): Regular expression modifier "F" is invalid
 
 Arg value is Array
 string(1) "a"

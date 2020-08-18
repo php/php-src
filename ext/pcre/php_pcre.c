@@ -543,7 +543,7 @@ static zend_string **make_subpats_table(uint32_t num_subpats, pcre_cache_entry *
 		const char *name = name_table + 2;
 		subpat_names[name_idx] = zend_string_init(name, strlen(name), 0);
 		if (is_numeric_string(ZSTR_VAL(subpat_names[name_idx]), ZSTR_LEN(subpat_names[name_idx]), NULL, NULL, 0) > 0) {
-			php_error_docref(NULL, E_WARNING, "Numeric named subpatterns are not allowed");
+			zend_value_error("%s(): Numeric named subpatterns are not allowed", get_active_function_name());
 			free_subpats_table(subpat_names, num_subpats);
 			return NULL;
 		}
@@ -621,8 +621,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		php_error_docref(NULL, E_WARNING,
-						 p < ZSTR_VAL(regex) + ZSTR_LEN(regex) ? "Null byte in regex" : "Empty regular expression");
+
+		if (p < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
+			zend_type_error("%s(): Regular expression cannot contain any null-bytes", get_active_function_name());
+		} else {
+			zend_value_error("%s(): Regular expression cannot be empty", get_active_function_name());
+		}
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
@@ -634,7 +638,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		php_error_docref(NULL,E_WARNING, "Delimiter must not be alphanumeric or backslash");
+		zend_value_error("%s(): Regular expression delimiter cannot be alphanumeric or a backslash", get_active_function_name());
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
@@ -678,11 +682,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			zend_string_release_ex(key, 0);
 		}
 		if (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
-			php_error_docref(NULL,E_WARNING, "Null byte in regex");
+			zend_type_error("%s(): Regular expression cannot contain any null-bytes", get_active_function_name());
 		} else if (start_delimiter == end_delimiter) {
-			php_error_docref(NULL,E_WARNING, "No ending delimiter '%c' found", delimiter);
+			zend_value_error("%s(): Regular expression doesn't contain an ending delimiter \"%c\"", get_active_function_name(), delimiter);
 		} else {
-			php_error_docref(NULL,E_WARNING, "No ending matching delimiter '%c' found", delimiter);
+			zend_value_error("%s(): No ending matching delimiter \"%c\" found", get_active_function_name(), delimiter);
 		}
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
@@ -731,9 +735,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 
 			default:
 				if (pp[-1]) {
-					php_error_docref(NULL,E_WARNING, "Unknown modifier '%c'", pp[-1]);
+					zend_value_error("%s(): Regular expression modifier \"%c\" is invalid", get_active_function_name(), pp[-1]);
 				} else {
-					php_error_docref(NULL,E_WARNING, "Null byte in regex");
+					zend_type_error("%s(): Regular expression cannot contain any null-bytes", get_active_function_name());
 				}
 				pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 				efree(pattern);
@@ -745,7 +749,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	}
 
 	if (poptions & PREG_REPLACE_EVAL) {
-		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
+		zend_value_error("%s(): Regular expression modifier \"e\" is no longer supported, use preg_replace_callback instead", get_active_function_name());
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		efree(pattern);
 		if (key != regex) {
@@ -1193,7 +1197,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 		if ((global && (subpats_order < PREG_PATTERN_ORDER || subpats_order > PREG_SET_ORDER)) ||
 			(!global && subpats_order != 0)) {
-			php_error_docref(NULL, E_WARNING, "Invalid flags specified");
+			zend_argument_value_error(4, "must be a PREG_* constant");
 			return;
 		}
 	} else {
@@ -2404,15 +2408,13 @@ PHP_FUNCTION(preg_replace_callback_array)
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, str_idx_regex, replace) {
 		if (!str_idx_regex) {
-			php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric or backslash");
+			zend_value_error("%s(): Regular expression delimiter cannot be alphanumeric or a backslash", get_active_function_name());
 			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 
 		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
-			zend_string *callback_name = zend_get_callable_name(replace);
-			zend_type_error("'%s' is not a valid callback", ZSTR_VAL(callback_name));
-			zend_string_release_ex(callback_name, 0);
+			zend_argument_type_error(1, "must contain only valid callbacks");
 			RETURN_THROWS();
 		}
 

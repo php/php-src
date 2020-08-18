@@ -22,31 +22,27 @@ function integer_word($matches) {
 $subject = 'number 1.';
 foreach($regex_array as $regex_value) {
     @print "\nArg value is $regex_value\n";
-    var_dump(preg_replace_callback($regex_value, 'integer_word', $subject));
+    try {
+        var_dump(preg_replace_callback($regex_value, 'integer_word', $subject));
+    } catch (Error $exception) {
+        echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+    }
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_replace_callback() : error conditions ***
 
 Arg value is abcdef
-
-Warning: preg_replace_callback(): Delimiter must not be alphanumeric or backslash in %s on line %d
-NULL
+ValueError: preg_replace_callback(): Regular expression delimiter cannot be alphanumeric or a backslash
 
 Arg value is /[a-zA-Z]
-
-Warning: preg_replace_callback(): No ending delimiter '/' found in %s on line %d
-NULL
+ValueError: preg_replace_callback(): Regular expression doesn't contain an ending delimiter "/"
 
 Arg value is [a-zA-Z]/
-
-Warning: preg_replace_callback(): Unknown modifier '/' in %s on line %d
-NULL
+ValueError: preg_replace_callback(): Regular expression modifier "/" is invalid
 
 Arg value is /[a-zA-Z]/F
-
-Warning: preg_replace_callback(): Unknown modifier 'F' in %s on line %d
-NULL
+ValueError: preg_replace_callback(): Regular expression modifier "F" is invalid
 
 Arg value is Array
 string(9) "number 1."

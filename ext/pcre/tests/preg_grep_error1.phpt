@@ -20,43 +20,35 @@ foreach($values as $value) {
     @print "\nArg value is $value\n";
     try {
         var_dump(preg_grep($value, $array));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Error $e) {
+        echo get_class($e) . ": " . $e->getMessage(), "\n";
     }
 }
 $value = new stdclass(); //Object
 try {
-    var_dump(preg_grep($value, $array));
+    preg_grep($value, $array);
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_grep() : error conditions ***
 
 Arg value is abcdef
-
-Warning: preg_grep(): Delimiter must not be alphanumeric or backslash in %spreg_grep_error1.php on line %d
-bool(false)
+ValueError: preg_grep(): Regular expression delimiter cannot be alphanumeric or a backslash
 
 Arg value is /[a-zA-Z]
-
-Warning: preg_grep(): No ending delimiter '/' found in %spreg_grep_error1.php on line %d
-bool(false)
+ValueError: preg_grep(): Regular expression doesn't contain an ending delimiter "/"
 
 Arg value is [a-zA-Z]/
-
-Warning: preg_grep(): Unknown modifier '/' in %spreg_grep_error1.php on line %d
-bool(false)
+ValueError: preg_grep(): Regular expression modifier "/" is invalid
 
 Arg value is /[a-zA-Z]/F
-
-Warning: preg_grep(): Unknown modifier 'F' in %spreg_grep_error1.php on line %d
-bool(false)
+ValueError: preg_grep(): Regular expression modifier "F" is invalid
 
 Arg value is Array
-preg_grep(): Argument #1 ($regex) must be of type string, array given
+TypeError: preg_grep(): Argument #1 ($regex) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 array(2) {

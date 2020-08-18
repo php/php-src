@@ -20,48 +20,40 @@ foreach($regex_array as $regex_value) {
     @print "\nArg value is $regex_value\n";
     try {
         var_dump(preg_match_all($regex_value, $subject, $matches1));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Error $e) {
+        echo get_class($e) . ": " . $e->getMessage(), "\n";
     }
     var_dump($matches1);
 }
 $regex_value = new stdclass(); //Object
 try {
-    var_dump(preg_match_all($regex_value, $subject, $matches));
+    preg_match_all($regex_value, $subject, $matches);
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 var_dump($matches);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_match_all() : error conditions ***
 
 Arg value is abcdef
-
-Warning: preg_match_all(): Delimiter must not be alphanumeric or backslash in %spreg_match_all_error1.php on line %d
-bool(false)
+ValueError: preg_match_all(): Regular expression delimiter cannot be alphanumeric or a backslash
 NULL
 
 Arg value is /[a-zA-Z]
-
-Warning: preg_match_all(): No ending delimiter '/' found in %spreg_match_all_error1.php on line %d
-bool(false)
+ValueError: preg_match_all(): Regular expression doesn't contain an ending delimiter "/"
 NULL
 
 Arg value is [a-zA-Z]/
-
-Warning: preg_match_all(): Unknown modifier '/' in %spreg_match_all_error1.php on line %d
-bool(false)
+ValueError: preg_match_all(): Regular expression modifier "/" is invalid
 NULL
 
 Arg value is /[a-zA-Z]/F
-
-Warning: preg_match_all(): Unknown modifier 'F' in %spreg_match_all_error1.php on line %d
-bool(false)
+ValueError: preg_match_all(): Regular expression modifier "F" is invalid
 NULL
 
 Arg value is Array
-preg_match_all(): Argument #1 ($pattern) must be of type string, array given
+TypeError: preg_match_all(): Argument #1 ($pattern) must be of type string, array given
 NULL
 
 Arg value is /[a-zA-Z]/

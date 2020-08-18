@@ -3,40 +3,82 @@ Zero byte test
 --FILE--
 <?php
 
-preg_match("\0//i", "");
-preg_match("/\0/i", "");
-preg_match("//\0i", "");
-preg_match("//i\0", "");
-preg_match("/\\\0/i", "");
+try {
+    preg_match("\0//i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-preg_match("\0[]i", "");
-preg_match("[\0]i", "");
-preg_match("[]\0i", "");
-preg_match("[]i\0", "");
-preg_match("[\\\0]i", "");
+try {
+    preg_match("/\0/i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-preg_replace("/foo/e\0/i", "echo('Eek');", "");
+try {
+    preg_match("//\0i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match("//i\0", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match("/\\\0/i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match("\0[]i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match("[\0]i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match("[]\0i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match("[]i\0", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_match("[\\\0]i", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    preg_replace("/foo/e\0/i", "echo('Eek');", "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 3
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 4
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 5
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 6
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 7
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 9
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 10
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 11
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 12
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 13
-
-Warning: preg_replace(): Null byte in regex in %snull_bytes.php on line 15
+--EXPECT--
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_match(): Regular expression cannot contain any null-bytes
+preg_replace(): Regular expression cannot contain any null-bytes

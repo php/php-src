@@ -19,21 +19,22 @@ function f() {
     throw new Exception($count);
 }
 
-var_dump(preg_replace_callback_array(array('/\w' => 'f'), 'z'));
-
 try {
-    var_dump(preg_replace_callback_array(array('/\w/' => 'f', '/.*/' => 'f'), 'z'));
+    preg_replace_callback_array(array('/\w' => 'f'), 'z');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+try {
+    preg_replace_callback_array(array('/\w/' => 'f', '/.*/' => 'f'), 'z');
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
-'s' is not a valid callback
+--EXPECT--
+preg_replace_callback_array(): Argument #1 ($pattern) must contain only valid callbacks
 string(0) ""
-
-Warning: preg_replace_callback_array(): No ending delimiter '/' found in %spreg_replace_callback_array2.php on line %d
-NULL
+preg_replace_callback_array(): Regular expression doesn't contain an ending delimiter "/"
 string(1) "1"
 Done

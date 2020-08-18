@@ -20,42 +20,35 @@ foreach($regex_array as $regex_value) {
     @print "\nArg value is $regex_value\n";
     try {
         var_dump(preg_split($regex_value, $subject));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Error $exception) {
+        echo get_class($exception) . ": " . $exception->getMessage() . "\n";
     }
 }
 $regex_value = new stdclass(); //Object
 try {
-    var_dump(preg_split($regex_value, $subject));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    preg_split($regex_value, $subject);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
 }
+
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_split() : error conditions ***
 
 Arg value is abcdef
-
-Warning: preg_split(): Delimiter must not be alphanumeric or backslash in %spreg_split_error1.php on line %d
-bool(false)
+ValueError: preg_split(): Regular expression delimiter cannot be alphanumeric or a backslash
 
 Arg value is /[a-zA-Z]
-
-Warning: preg_split(): No ending delimiter '/' found in %spreg_split_error1.php on line %d
-bool(false)
+ValueError: preg_split(): Regular expression doesn't contain an ending delimiter "/"
 
 Arg value is [a-zA-Z]/
-
-Warning: preg_split(): Unknown modifier '/' in %spreg_split_error1.php on line %d
-bool(false)
+ValueError: preg_split(): Regular expression modifier "/" is invalid
 
 Arg value is /[a-zA-Z]/F
-
-Warning: preg_split(): Unknown modifier 'F' in %spreg_split_error1.php on line %d
-bool(false)
+ValueError: preg_split(): Regular expression modifier "F" is invalid
 
 Arg value is Array
-preg_split(): Argument #1 ($pattern) must be of type string, array given
+TypeError: preg_split(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 array(3) {
