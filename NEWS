@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #80002 (calc free space for new interned string is wrong).
     (t-matsuno)
 
+- Standard:
+  . Fixed bug #79986 (str_ireplace bug with diacritics characters). (cmb)
+
 03 Sep 2020, PHP 7.3.22
 
 - Core:
