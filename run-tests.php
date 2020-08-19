@@ -942,7 +942,7 @@ function save_or_mail_results(): void
         flush();
 
         $user_input = fgets($fp, 10);
-        $just_save_results = (strtolower($user_input[0]) == 's');
+        $just_save_results = (!empty($user_input) && strtolower($user_input[0]) === 's');
     }
 
     if ($just_save_results || !getenv('NO_INTERACTION') || TRAVIS_CI) {
