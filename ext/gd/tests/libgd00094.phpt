@@ -11,5 +11,5 @@ $im = imagecreatefromxbm(__DIR__ . '/libgd00094.xbm');
 var_dump($im);
 ?>
 --EXPECTF--
-Warning: imagecreatefromxbm(): '%slibgd00094.xbm' is not a valid XBM file in %slibgd00094.php on line %d
+Warning: imagecreatefromxbm(): "%slibgd00094.xbm" is not a valid XBM file in %slibgd00094.php on line %d
 bool(false)

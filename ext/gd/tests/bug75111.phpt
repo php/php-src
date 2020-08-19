@@ -17,7 +17,7 @@ $str .= hex2bin("01001800000000000000000000000000000000000000000000000000");
 var_dump(imagecreatefromstring($str));
 ?>
 --EXPECTF--
-Warning: imagecreatefromstring(): Passed data is not in 'BMP' format in %s on line %d
+Warning: imagecreatefromstring(): Passed data is not in "BMP" format in %s on line %d
 
 Warning: imagecreatefromstring(): Couldn't create GD Image Stream out of Data in %s on line %d
 bool(false)

@@ -15,5 +15,5 @@ var_dump($im);
 gd-png:  fatal libpng error: Read Error: truncated data
 gd-png error: setjmp returns error condition 1
 
-Warning: imagecreatefrompng(): '%slibgd00086.png' is not a valid PNG file in %s on line %d
+Warning: imagecreatefrompng(): "%slibgd00086.png" is not a valid PNG file in %s on line %d
 bool(false)

@@ -44,4 +44,4 @@ unlink($filename);
 --EXPECTF--
 gd warning: Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
 
-Warning: imagecreatefromwbmp(): '%s_tmp.wbmp' is not a valid WBMP file in %s on line %d
+Warning: imagecreatefromwbmp(): "%s_tmp.wbmp" is not a valid WBMP file in %s on line %d
