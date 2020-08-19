@@ -1202,7 +1202,7 @@ PHP_FUNCTION(mhash)
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
-			algo = zend_string_init(algorithm_lookup.hash_name, strlen(algorithm_lookup.hash_name), 1);
+			algo = zend_string_init(algorithm_lookup.hash_name, strlen(algorithm_lookup.hash_name), 0);
 		}
 	}
 
@@ -1210,6 +1210,10 @@ PHP_FUNCTION(mhash)
 		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, 1, 0);
 	} else {
 		php_hash_do_hash(return_value, algo, data, data_len, 1, 0);
+	}
+
+	if (algo) {
+		zend_string_release(algo);
 	}
 }
 /* }}} */
