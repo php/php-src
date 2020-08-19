@@ -14,5 +14,5 @@ var_dump($im);
 Warning: imagecreatefromgd(): Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %slibgd00101.php on line %d
 
-Warning: imagecreatefromgd(): '%slibgd00101.gd' is not a valid GD file in %slibgd00101.php on line %d
+Warning: imagecreatefromgd(): "%slibgd00101.gd" is not a valid GD file in %slibgd00101.php on line %d
 bool(false)

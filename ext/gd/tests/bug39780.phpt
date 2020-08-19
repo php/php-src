@@ -16,5 +16,5 @@ Warning: imagecreatefrompng(): gd-png:  fatal libpng error: Read Error: truncate
 
 Warning: imagecreatefrompng(): gd-png error: setjmp returns error condition in %s on line %d
 
-Warning: imagecreatefrompng(): '%s' is not a valid PNG file in %s on line %d
+Warning: imagecreatefrompng(): "%s" is not a valid PNG file in %s on line %d
 bool(false)
