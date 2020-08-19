@@ -29,7 +29,7 @@ typedef struct _php_zlib_filter_data {
 	unsigned char *outbuf;
 	size_t outbuf_len;
 	int persistent;
-	zend_bool finished;
+	zend_bool finished; /* for zlib.deflate: signals that no flush is pending */
 } php_zlib_filter_data;
 
 /* }}} */
@@ -196,6 +196,8 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 		bucket = php_stream_bucket_make_writeable(bucket);
 
 		while (bin < (unsigned int) bucket->buflen) {
+			int flush_mode;
+
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
@@ -203,7 +205,9 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 			memcpy(data->strm.next_in, bucket->buf + bin, desired);
 			data->strm.avail_in = desired;
 
-			status = deflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FULL_FLUSH : (flags & PSFS_FLAG_FLUSH_INC ? Z_SYNC_FLUSH : Z_NO_FLUSH));
+			flush_mode = flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FULL_FLUSH : (flags & PSFS_FLAG_FLUSH_INC ? Z_SYNC_FLUSH : Z_NO_FLUSH);
+			data->finished = flush_mode != Z_NO_FLUSH;
+			status = deflate(&(data->strm), flush_mode);
 			if (status != Z_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket);
@@ -230,11 +234,12 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 		php_stream_bucket_delref(bucket);
 	}
 
-	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
+	if (flags & PSFS_FLAG_FLUSH_CLOSE || ((flags & PSFS_FLAG_FLUSH_INC) && !data->finished)) {
 		/* Spit it out! */
 		status = Z_OK;
 		while (status == Z_OK) {
-			status = deflate(&(data->strm), Z_FINISH);
+			status = deflate(&(data->strm), (flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FINISH : Z_SYNC_FLUSH));
+			data->finished = 1;
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
@@ -395,6 +400,7 @@ factory_setlevel:
 			}
 		}
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);
+		data->finished = 1;
 		fops = &php_zlib_deflate_ops;
 	} else {
 		status = Z_DATA_ERROR;
