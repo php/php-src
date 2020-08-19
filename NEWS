@@ -46,6 +46,9 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
 
+- Zlib:
+  . Fixed #48725 (Support for flushing in zlib stream). (cmb)
+
 26 Nov 2020, PHP 7.4.13
 
 - Core:
