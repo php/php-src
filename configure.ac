@@ -543,10 +543,17 @@ dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
 
 dnl Check instructions.
-PHP_CHECK_CPU_SUPPORTS([ssse3])
-PHP_CHECK_CPU_SUPPORTS([sse4.2])
-PHP_CHECK_CPU_SUPPORTS([avx])
-PHP_CHECK_CPU_SUPPORTS([avx2])
+case $host_alias in
+  *openbsd*)
+      AC_MSG_RESULT([extended cpu instructions disabled])
+      ;;
+  *)
+      PHP_CHECK_CPU_SUPPORTS([ssse3])
+      PHP_CHECK_CPU_SUPPORTS([sse4.2])
+      PHP_CHECK_CPU_SUPPORTS([avx])
+      PHP_CHECK_CPU_SUPPORTS([avx2])
+      ;;
+esac
 
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
