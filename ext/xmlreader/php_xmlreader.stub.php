@@ -7,7 +7,7 @@ class XMLReader
     /** @return bool */
     public function close() {}
 
-    /** @return string|null|false */
+    /** @return string|null */
     public function getAttribute(string $name) {}
 
     /** @return string|null */
@@ -22,7 +22,7 @@ class XMLReader
     /** @return bool */
     public function isValid() {}
 
-    /** @return string|null|false */
+    /** @return string|null */
     public function lookupNamespace(string $prefix) {}
 
     /** @return bool */

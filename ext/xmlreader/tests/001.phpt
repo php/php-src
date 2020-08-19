@@ -17,10 +17,15 @@ while ($reader->read()) {
 }
 $xmlstring = '';
 $reader = new XMLReader();
-$reader->XML($xmlstring);
-?>
---EXPECTF--
-books
-books
 
-Warning: XMLReader::XML(): Empty string supplied as input in %s on line %d
+try {
+    $reader->XML($xmlstring);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+?>
+--EXPECT--
+books
+books
+XMLReader::XML(): Argument #1 ($source) cannot be empty
