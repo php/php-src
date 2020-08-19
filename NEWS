@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0beta3
 
+- DOM:
+  . Fixed bug #79968 (DOMChildNode API crash on unattached nodes). (Benjamin)
+
 
 20 Aug 2020, PHP 8.0.0beta2
 
