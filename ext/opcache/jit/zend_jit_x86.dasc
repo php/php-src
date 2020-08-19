@@ -10672,13 +10672,24 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 			if (op1_info & MAY_BE_ARRAY_OF_REF) {
 				|	ZVAL_DEREF r0, MAY_BE_REF
 			}
-			|	IF_NOT_ZVAL_TYPE val_addr, type, &res_exit_addr
-			|	// ZVAL_COPY
-			|	ZVAL_COPY_VALUE res_addr, -1, val_addr, res_info, ZREG_R1, ZREG_R2
-			if (!(res_info & AVOID_REFCOUNTING)) {
-				|	TRY_ADDREF res_info, ch, r2
+			if (type < IS_STRING) {
+				|	IF_NOT_ZVAL_TYPE val_addr, type, &res_exit_addr
+			} else {
+				|	GET_ZVAL_TYPE_INFO edx, val_addr
+				|	IF_NOT_TYPE dl, type, &res_exit_addr
 			}
-			if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
+			|	// ZVAL_COPY
+			|	ZVAL_COPY_VALUE_V res_addr, -1, val_addr, res_info, ZREG_R0, ZREG_R1
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+				if (type < IS_STRING) {
+					|	SET_ZVAL_TYPE_INFO res_addr, type
+				} else {
+					|	SET_ZVAL_TYPE_INFO res_addr, edx
+					if (!(res_info & AVOID_REFCOUNTING)) {
+						|	TRY_ADDREF res_info, dh, r1
+					}
+				}
+			} else if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
 				return 0;
 			}
 		} else if (op1_info & MAY_BE_ARRAY_OF_REF) {
@@ -11511,7 +11522,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 				|	IF_NOT_TYPE dl, type, &exit_addr
 			}
 			|	// ZVAL_COPY
-			|	ZVAL_COPY_VALUE_V res_addr, -1, val_addr, res_info, ZREG_R2, ZREG_R1
+			|	ZVAL_COPY_VALUE_V res_addr, -1, val_addr, res_info, ZREG_R0, ZREG_R1
 			if (type < IS_STRING) {
 				|	SET_ZVAL_TYPE_INFO res_addr, type
 			} else {
