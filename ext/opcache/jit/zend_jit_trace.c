@@ -2105,9 +2105,25 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
 				if (support_opline) {
 					zend_jit_trace_use_var(idx, ssa_op->op1_use, ssa_op->op1_def, ssa_op->op1_use_chain, start, end, flags, ssa, ssa_opcodes, op_array, op_array_ssa);
-					if (opline->opcode == ZEND_CASE && opline->op1_type != IS_CV) {
-						/* The value may be used outside of the trace */
-						flags[ssa_op->op1_use] |= ZREG_STORE;
+					if (opline->op1_type != IS_CV) {
+						if (opline->opcode == ZEND_CASE
+						 || opline->opcode == ZEND_CASE_STRICT
+						 || opline->opcode == ZEND_SWITCH_LONG
+						 || opline->opcode == ZEND_MATCH
+						 || opline->opcode == ZEND_FETCH_LIST_R
+						 || opline->opcode == ZEND_COPY_TMP
+						 || opline->opcode == ZEND_SWITCH_STRING
+						 || opline->opcode == ZEND_FE_FETCH_R
+						 || opline->opcode == ZEND_FE_FETCH_RW
+						 || opline->opcode == ZEND_FETCH_LIST_W
+						 || opline->opcode == ZEND_VERIFY_RETURN_TYPE
+						 || opline->opcode == ZEND_BIND_LEXICAL
+						 || opline->opcode == ZEND_ROPE_ADD) {
+							/* The value is kept alive and may be used outside of the trace */
+							flags[ssa_op->op1_use] |= ZREG_STORE;
+						} else {
+							flags[ssa_op->op1_use] |= ZREG_LAST_USE;
+						}
 					}
 				} else {
 					start[ssa_op->op1_use] = -1;
@@ -2121,6 +2137,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
 				if (support_opline) {
 					zend_jit_trace_use_var(idx, ssa_op->op2_use, ssa_op->op2_def, ssa_op->op2_use_chain, start, end, flags, ssa, ssa_opcodes, op_array, op_array_ssa);
+					if (opline->op2_type != IS_CV) {
+						flags[ssa_op->op2_use] |= ZREG_LAST_USE;
+					}
 				} else {
 					start[ssa_op->op2_use] = -1;
 					end[ssa_op->op2_use] = -1;
@@ -2215,6 +2234,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
 						if (support_opline) {
 							zend_jit_trace_use_var(idx, ssa_op->op1_use, ssa_op->op1_def, ssa_op->op1_use_chain, start, end, flags, ssa, ssa_opcodes, op_array, op_array_ssa);
+							if (opline->op1_type != IS_CV) {
+								flags[ssa_op->op1_use] |= ZREG_LAST_USE;
+							}
 						} else {
 							start[ssa_op->op1_use] = -1;
 							end[ssa_op->op1_use] = -1;
