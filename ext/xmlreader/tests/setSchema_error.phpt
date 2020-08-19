@@ -6,24 +6,30 @@ XMLReader: setSchema Error
 <?php
 
 $reader = new XMLReader();
-var_dump($reader->setSchema(''));
+try {
+    $reader->setSchema('');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 $reader->close();
 
 $reader = new XMLReader();
-var_dump($reader->setSchema('schema-missing-file.xsd'));
+try {
+    $reader->setSchema('schema-missing-file.xsd');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 $reader->close();
 
 $reader = new XMLReader();
-var_dump($reader->setSchema('schema-empty.xsd'));
+try {
+    $reader->setSchema('schema-empty.xsd');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 $reader->close();
 ?>
---EXPECTF--
-
-Warning: XMLReader::setSchema(): Schema data source is required in %s on line %d
-bool(false)
-
-Warning: XMLReader::setSchema(): Unable to set schema. This must be set prior to reading or schema contains errors. in %s on line %d
-bool(false)
-
-Warning: XMLReader::setSchema(): Unable to set schema. This must be set prior to reading or schema contains errors. in %s on line %d
-bool(false)
+--EXPECT--
+XMLReader::setSchema(): Argument #1 ($filename) cannot be empty
+Unable to set schema. This must be set prior to reading or schema contains errors.
+Unable to set schema. This must be set prior to reading or schema contains errors.

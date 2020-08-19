@@ -24,12 +24,24 @@ while ($reader->read()) {
         // Find a node to try modifying
         if ($reader->nodeType == XMLREADER::ELEMENT && $reader->name == 'book') {
             // Try to set the value of the element from book1 to movie1
-            $reader->value = 'movie1';
+            try {
+                $reader->value = 'movie1';
+            } catch (Error $exception) {
+                echo $exception->getMessage() . "\n";
+            }
             // Try to set the value of the first "num" attribute from "1" to "num attribute 1"
             $attr = $reader->moveToFirstAttribute();
-            $reader->value = 'num attribute 1';
+            try {
+                $reader->value = 'num attribute 1';
+            } catch (Error $exception) {
+                echo $exception->getMessage() . "\n";
+            }
             // Try to set the name of the first attribute from "num" to "number"
-            $reader->name = 'number';
+            try {
+                $reader->name = 'number';
+            } catch (Error $exception) {
+                echo $exception->getMessage() . "\n";
+            }
         }
     }
 }
@@ -41,9 +53,7 @@ $reader->close();
 <?php
 unlink(__DIR__.'/_014.xml');
 ?>
---EXPECTF--
-Warning: main(): Cannot write to read-only property in %s on line %d
-
-Warning: main(): Cannot write to read-only property in %s on line %d
-
-Warning: main(): Cannot write to read-only property in %s on line %d
+--EXPECT--
+Cannot write to read-only property
+Cannot write to read-only property
+Cannot write to read-only property
