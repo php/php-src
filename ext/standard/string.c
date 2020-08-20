@@ -68,6 +68,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PATHINFO_BASENAME", PHP_PATHINFO_BASENAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_FILENAME", PHP_PATHINFO_FILENAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PATHINFO_ALL", PHP_PATHINFO_ALL, CONST_CS | CONST_PERSISTENT);
 
 	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
 	REGISTER_LONG_CONSTANT("CHAR_MAX", CHAR_MAX, CONST_CS | CONST_PERSISTENT);
@@ -247,16 +248,17 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 {
 	zend_string *s11, *s22;
 	zend_long start = 0, len = 0;
+	zend_bool len_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(s11)
 		Z_PARAM_STR(s22)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(start)
-		Z_PARAM_LONG(len)
+		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() < 4) {
+	if (len_is_null) {
 		len = ZSTR_LEN(s11);
 	}
 
@@ -1228,7 +1230,7 @@ PHP_FUNCTION(implode)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR_OR_ARRAY_HT(arg1_str, arg1_array)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT(pieces)
+		Z_PARAM_ARRAY_HT_OR_NULL(pieces)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (pieces == NULL) {
@@ -1265,10 +1267,10 @@ PHP_FUNCTION(strtok)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(tok)
+		Z_PARAM_STR_OR_NULL(tok)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (!tok) {
 		tok = str;
 	} else {
 		if (BG(strtok_string)) {
@@ -2239,7 +2241,6 @@ PHP_FUNCTION(substr_replace)
 	zval *len = NULL;
 	zend_long l = 0;
 	zend_long f;
-	int argc = ZEND_NUM_ARGS();
 	zend_string *result;
 	HashPosition from_idx, repl_idx, len_idx;
 	zval *tmp_str = NULL, *tmp_repl, *tmp_from = NULL, *tmp_len= NULL;
@@ -2249,7 +2250,7 @@ PHP_FUNCTION(substr_replace)
 		Z_PARAM_STR_OR_ARRAY_HT(repl_str, repl_ht)
 		Z_PARAM_ZVAL(from)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(len)
+		Z_PARAM_ZVAL_OR_NULL(len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(from) != IS_ARRAY) {
@@ -2259,7 +2260,7 @@ PHP_FUNCTION(substr_replace)
 		}
 	}
 
-	if (argc > 3) {
+	if (len) {
 		if (Z_TYPE_P(len) != IS_ARRAY) {
 			convert_to_long_ex(len);
 			l = Z_LVAL_P(len);
@@ -2272,13 +2273,13 @@ PHP_FUNCTION(substr_replace)
 
 	if (str) {
 		if (
-			(argc == 3 && Z_TYPE_P(from) == IS_ARRAY) ||
-			(argc == 4 && Z_TYPE_P(from) != Z_TYPE_P(len))
+			(!len && Z_TYPE_P(from) == IS_ARRAY) ||
+			(len && Z_TYPE_P(from) != Z_TYPE_P(len))
 		) {
 			php_error_docref(NULL, E_WARNING, "'start' and 'length' should be of same type - numerical or array ");
 			RETURN_STR_COPY(str);
 		}
-		if (argc == 4 && Z_TYPE_P(from) == IS_ARRAY) {
+		if (len && Z_TYPE_P(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
 				php_error_docref(NULL, E_WARNING, "'start' and 'length' should have the same number of elements");
 				RETURN_STR_COPY(str);
@@ -2398,7 +2399,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (argc > 3 && Z_TYPE_P(len) == IS_ARRAY) {
+			if (len && Z_TYPE_P(len) == IS_ARRAY) {
 				while (len_idx < Z_ARRVAL_P(len)->nNumUsed) {
 					tmp_len = &Z_ARRVAL_P(len)->arData[len_idx].val;
 					if (Z_TYPE_P(tmp_len) != IS_UNDEF) {
@@ -2412,7 +2413,7 @@ PHP_FUNCTION(substr_replace)
 				} else {
 					l = ZSTR_LEN(orig_str);
 				}
-			} else if (argc > 3) {
+			} else if (len) {
 				l = Z_LVAL_P(len);
 			} else {
 				l = ZSTR_LEN(orig_str);
@@ -3204,19 +3205,18 @@ PHP_FUNCTION(strtr)
 	HashTable *from_ht = NULL;
 	char *to = NULL;
 	size_t to_len = 0;
-	int ac = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_STR_OR_ARRAY_HT(from_str, from_ht)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(to, to_len)
+		Z_PARAM_STRING_OR_NULL(to, to_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ac == 2 && from_ht == NULL) {
+	if (!to && from_ht == NULL) {
 		zend_argument_type_error(2, "must be of type array, string given");
 		RETURN_THROWS();
-	} else if (ac != 2 && from_str == NULL) {
+	} else if (to && from_str == NULL) {
 		zend_argument_type_error(2, "must be of type string, array given");
 		RETURN_THROWS();
 	}
@@ -3226,7 +3226,7 @@ PHP_FUNCTION(strtr)
 		RETURN_EMPTY_STRING();
 	}
 
-	if (ac == 2) {
+	if (!to) {
 		if (zend_hash_num_elements(from_ht) < 1) {
 			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(from_ht) == 1) {
@@ -4249,7 +4249,6 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	zend_string *string_key;
 	zend_ulong num_key;
 	zend_long count = 0;
-	int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STR_OR_ARRAY_HT(search_str, search_ht)
@@ -4290,7 +4289,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	} else {	/* if subject is not an array */
 		count = php_str_replace_in_subject(search_str, search_ht, replace_str, replace_ht, subject_str, return_value, case_sensitivity);
 	}
-	if (argc > 3) {
+	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, count);
 	}
 }
@@ -4562,7 +4561,8 @@ PHP_FUNCTION(strip_tags)
 {
 	zend_string *buf;
 	zend_string *str;
-	zval *allow=NULL;
+	zend_string *allow_str = NULL;
+	HashTable *allow_ht = NULL;
 	const char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
 	smart_str tags_ss = {0};
@@ -4570,32 +4570,28 @@ PHP_FUNCTION(strip_tags)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(allow)
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(allow_str, allow_ht)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (allow) {
-		if (Z_TYPE_P(allow) == IS_ARRAY) {
-			zval *tmp;
-			zend_string *tag;
+	if (allow_ht) {
+		zval *tmp;
+		zend_string *tag;
 
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(allow), tmp) {
-				tag = zval_get_string(tmp);
-				smart_str_appendc(&tags_ss, '<');
-				smart_str_append(&tags_ss, tag);
-				smart_str_appendc(&tags_ss, '>');
-				zend_string_release(tag);
-			} ZEND_HASH_FOREACH_END();
-			if (tags_ss.s) {
-				smart_str_0(&tags_ss);
-				allowed_tags = ZSTR_VAL(tags_ss.s);
-				allowed_tags_len = ZSTR_LEN(tags_ss.s);
-			}
-		} else {
-			/* To maintain a certain BC, we allow anything for the second parameter and return original string */
-			convert_to_string(allow);
-			allowed_tags = Z_STRVAL_P(allow);
-			allowed_tags_len = Z_STRLEN_P(allow);
+		ZEND_HASH_FOREACH_VAL(allow_ht, tmp) {
+			tag = zval_get_string(tmp);
+			smart_str_appendc(&tags_ss, '<');
+			smart_str_append(&tags_ss, tag);
+			smart_str_appendc(&tags_ss, '>');
+			zend_string_release(tag);
+		} ZEND_HASH_FOREACH_END();
+		if (tags_ss.s) {
+			smart_str_0(&tags_ss);
+			allowed_tags = ZSTR_VAL(tags_ss.s);
+			allowed_tags_len = ZSTR_LEN(tags_ss.s);
 		}
+	} else if (allow_str) {
+		allowed_tags = ZSTR_VAL(allow_str);
+		allowed_tags_len = ZSTR_LEN(allow_str);
 	}
 
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
@@ -5753,7 +5749,7 @@ PHP_FUNCTION(str_word_count)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(type)
-		Z_PARAM_STRING(char_list, char_list_len)
+		Z_PARAM_STRING_OR_NULL(char_list, char_list_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch(type) {

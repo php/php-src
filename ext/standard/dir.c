@@ -61,9 +61,9 @@ static zend_class_entry *dir_class_entry_ptr;
 #define FETCH_DIRP() \
 	ZEND_PARSE_PARAMETERS_START(0, 1) \
 		Z_PARAM_OPTIONAL \
-		Z_PARAM_RESOURCE(id) \
+		Z_PARAM_RESOURCE_OR_NULL(id) \
 	ZEND_PARSE_PARAMETERS_END(); \
-	if (ZEND_NUM_ARGS() == 0) { \
+	if (!id) { \
 		myself = getThis(); \
 		if (myself) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
@@ -201,7 +201,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(dirname, dir_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -538,7 +538,7 @@ PHP_FUNCTION(scandir)
 		Z_PARAM_PATH(dirn, dirn_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
