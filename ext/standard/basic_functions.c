@@ -108,8 +108,9 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "basic_functions_arginfo.h"
 
-#define MICROS_IN_SEC 1000000
-#define NANOS_IN_SEC  1000000000
+#define MICROS_IN_SEC     1000000
+#define NANOS_IN_SEC      1000000000
+#define NANOS_IN_MICROSEC 1000
 
 static zend_class_entry *incomplete_class_entry = NULL;
 
@@ -1214,10 +1215,79 @@ PHP_FUNCTION(flush)
 }
 /* }}} */
 
+static int64_t nanosleep_internal(double seconds)
+{
+	uint64_t nanos;
+	int64_t remaining_nanos;
+	
+	if (isnan(seconds) || seconds < 0) {
+		return -1;
+	} else if (seconds < INT_MAX) { // prevent time_t overflow, equals to about 68 years
+		nanos = (uint64_t)(seconds * NANOS_IN_SEC);
+	} else {
+		nanos = INT_MAX;
+	}
+
+#if HAVE_NANOSLEEP
+	struct timespec php_req, php_rem;
+
+	php_req.tv_nsec = (long) (nanos % NANOS_IN_SEC);
+	php_req.tv_sec = (time_t) ((nanos - php_req.tv_nsec) / NANOS_IN_SEC);
+
+	if (!nanosleep(&php_req, &php_rem)) {
+		return 0;
+	} else if (errno == EINTR) {
+		remaining_nanos = (int64_t)php_rem.tv_sec * NANOS_IN_SEC + php_rem.tv_nsec;
+		if (remaining_nanos > 0) {
+			return remaining_nanos;
+		} else {
+			return 1;
+		}
+	}
+#else // fallback if nanosleep is not available
+#if HAVE_USLEEP && HAVE_GETTIMEOFDAY
+	struct timeval tp;
+	int usleep_res;
+	
+	// ceil to whole microseconds if nanosleep is not available
+	nanos += NANOS_IN_MICROSEC - 1;
+
+	gettimeofday(&tp, NULL);
+	remaining_nanos = (int64_t)tp.tv_sec * NANOS_IN_SEC + (int64_t)tp.tv_usec * NANOS_IN_MICROSEC;
+	usleep_res = usleep((unsigned int) ((nanos / NANOS_IN_MICROSEC) % MICROS_IN_SEC));
+	if (usleep_res == 0) {
+		remaining_nanos = 0;
+	} else if (usleep_res == EINTR) {
+		gettimeofday(&tp, NULL);
+		remaining_nanos = ((int64_t)tp.tv_sec * NANOS_IN_SEC + (int64_t)tp.tv_usec * NANOS_IN_MICROSEC) - remaining_nanos;
+		if (remaining_nanos <= 0) {
+			remaining_nanos = 1;
+		}
+	} else {
+		remaining_nanos = -1;
+	}
+#else
+	// ceil to whole seconds if nanosleep and usleep are not available
+	nanos += NANOS_IN_SEC - 1;
+
+	remaining_nanos = 0;
+#endif
+
+	if (remaining_nanos >= 0) {
+		remaining_nanos += php_sleep((unsigned int) (nanos / NANOS_IN_SEC)) * NANOS_IN_SEC;
+
+		return remaining_nanos;
+	}
+#endif
+
+	return -1;
+}
+
 /* {{{ Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
 	double seconds;
+	int64_t remaining_nanos;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(seconds)
@@ -1227,61 +1297,13 @@ PHP_FUNCTION(sleep)
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-#if HAVE_NANOSLEEP
-	struct timespec php_req, php_rem;
-
-	if (seconds < LONG_MAX) { // prevent time_t overflow, equals to about 68 years
-		php_req.tv_sec = (time_t) floor(seconds);
-		php_req.tv_nsec = (long) (fmod(seconds, 1.0) * NANOS_IN_SEC);
-	} else {
-		php_req.tv_sec = (time_t) LONG_MAX;
-		php_req.tv_nsec = 0;
-	}
-
-	if (!nanosleep(&php_req, &php_rem)) {
+	
+	remaining_nanos = nanosleep_internal(seconds);
+	if (remaining_nanos == 0) {
 		RETURN_LONG(0);
-	} else if (errno == EINTR) {
-		RETURN_DOUBLE((double)php_rem.tv_sec + (double)php_rem.tv_nsec / NANOS_IN_SEC);
+	} else if (remaining_nanos > 0) {
+		RETURN_DOUBLE((double)remaining_nanos / NANOS_IN_SEC);
 	}
-#else
-	int64_t remainig_micros;
-
-#if HAVE_USLEEP && HAVE_GETTIMEOFDAY
-	struct timeval tp = {0};
-	int usleep_res;
-
-	gettimeofday(&tp, NULL);
-	remainig_micros = tp.tv_sec * MICROS_IN_SEC + tp.tv_usec;
-	usleep_res = usleep((unsigned int) (fmod(seconds, 1.0) * MICROS_IN_SEC));
-	if (usleep_res == 0) {
-		remainig_micros = 0;
-	} else if (remainig_micros == EINTR) {
-		gettimeofday(&tp, NULL);
-		remainig_micros = (tp.tv_sec * MICROS_IN_SEC + tp.tv_usec) - remainig_micros;
-		if (remainig_micros < 0) {
-			remainig_micros = 1;
-		}
-	} else {
-		remainig_micros = -1;
-	}
-#else
-	// ceil to whole seconds if nanosleep not usleep
-	// is not available
-	seconds += 1.0 - 1.0 / MICROS_IN_SEC;
-	remainig_micros = 0;
-#endif
-
-	if (remainig_micros >= 0) {
-		remainig_micros += php_sleep((unsigned int) floor(seconds)) * MICROS_IN_SEC;
-
-		if (remainig_micros == 0) {
-			RETURN_LONG(0);
-		} else {
-			RETURN_DOUBLE((double)remainig_micros / MICROS_IN_SEC);
-		}
-	}
-#endif
 
 	RETURN_FALSE;
 }
@@ -1290,20 +1312,18 @@ PHP_FUNCTION(sleep)
 /* {{{ Delay for a given number of micro seconds */
 PHP_FUNCTION(usleep)
 {
-	zend_long num;
+	double micros;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(num)
+		Z_PARAM_DOUBLE(micros)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
+	if (isnan(micros) || micros < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-#if HAVE_USLEEP
-	usleep((unsigned int)num);
-#endif
+	
+	nanosleep_internal(micros / MICROS_IN_SEC);
 }
 /* }}} */
 
@@ -1312,7 +1332,7 @@ PHP_FUNCTION(usleep)
 PHP_FUNCTION(time_nanosleep)
 {
 	zend_long tv_sec, tv_nsec;
-	struct timespec php_req, php_rem;
+	int64_t remaining_nanos;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(tv_sec)
@@ -1327,19 +1347,19 @@ PHP_FUNCTION(time_nanosleep)
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-	php_req.tv_sec = (time_t) tv_sec;
-	php_req.tv_nsec = (long)tv_nsec;
-	if (!nanosleep(&php_req, &php_rem)) {
-		RETURN_TRUE;
-	} else if (errno == EINTR) {
-		array_init(return_value);
-		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
-		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
-		return;
-	} else if (errno == EINVAL) {
-		zend_value_error("Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
+	if (tv_nsec >= NANOS_IN_SEC) {
+		zend_argument_value_error(2, "must be less than or equal to 999 999 999");
 		RETURN_THROWS();
+	}
+
+	remaining_nanos = nanosleep_internal(tv_sec + (double)tv_nsec / NANOS_IN_SEC);
+	if (remaining_nanos == 0) {
+		RETURN_TRUE;
+	} else if (remaining_nanos > 0) {
+		array_init(return_value);
+		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, remaining_nanos / NANOS_IN_SEC);
+		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, remaining_nanos % NANOS_IN_SEC);
+		return;
 	}
 
 	RETURN_FALSE;

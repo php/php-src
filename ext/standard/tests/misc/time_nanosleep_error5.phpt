@@ -11,7 +11,7 @@ time_nanosleep(0, 1000000000);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative in %s:%d
+Fatal error: Uncaught ValueError: time_nanosleep(): Argument #2 ($nanoseconds) must be less than or equal to 999 999 999 in %s:%d
 Stack trace:
 #0 %s(%d): time_nanosleep(0, 1000000000)
 #1 {main}
