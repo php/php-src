@@ -1489,25 +1489,15 @@ PHP_FUNCTION(ftruncate)
 	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, size));
 }
 /* }}} */
-
-/* {{{ Stat() on a filehandle */
-PHP_FUNCTION(fstat)
+PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 {
-	zval *fp;
+	php_stream_statbuf stat_ssb;
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
-	php_stream *stream;
-	php_stream_statbuf stat_ssb;
 	char *stat_sb_names[13] = {
 		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_RESOURCE(fp)
-	ZEND_PARSE_PARAMETERS_END();
-
-	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;
@@ -1569,6 +1559,21 @@ PHP_FUNCTION(fstat)
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+}
+
+/* {{{ Stat() on a filehandle */
+PHP_FUNCTION(fstat)
+{
+	zval *fp;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(fp)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, fp);
+
+	php_fstat(stream, return_value);
 }
 /* }}} */
 

@@ -2699,28 +2699,17 @@ PHP_METHOD(SplFileObject, fread)
 }
 
 /* {{{ Stat() on a filehandle */
-// TODO Don't call fstat? As it may be undefined if it is disabled via disable_functions
 PHP_METHOD(SplFileObject, fstat)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_function *func_ptr;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	func_ptr = (zend_function *)zend_hash_str_find_ptr(EG(function_table), "fstat", sizeof("fstat") - 1);
-	if (func_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "fstat() is not defined");
-		RETURN_THROWS();
-	}
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED();
 
-	if (Z_ISUNDEF_P(&intern->u.file.zresource)) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		RETURN_THROWS();
-	}
-
-	zend_call_known_function(func_ptr, NULL, NULL, return_value, 0, NULL, NULL);
+	php_fstat(intern->u.file.stream, return_value);
 }
 /* }}} */
 
