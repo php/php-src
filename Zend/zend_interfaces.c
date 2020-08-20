@@ -118,7 +118,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-ZEND_API ZEND_RESULT_CODE zend_user_it_valid(zend_object_iterator *_iter)
+ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -251,7 +251,7 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 /* }}} */
 
 /* {{{ zend_implement_traversable */
-static ZEND_RESULT_CODE zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
+static int zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	/* Abstract class can implement Traversable only, in which case the extending class must
 	 * implement Iterator or IteratorAggregate. */
@@ -278,7 +278,7 @@ static ZEND_RESULT_CODE zend_implement_traversable(zend_class_entry *interface, 
 /* }}} */
 
 /* {{{ zend_implement_aggregate */
-static ZEND_RESULT_CODE zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
+static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_iterator)) {
 		zend_error_noreturn(E_ERROR,
@@ -318,7 +318,7 @@ static ZEND_RESULT_CODE zend_implement_aggregate(zend_class_entry *interface, ze
 /* }}} */
 
 /* {{{ zend_implement_iterator */
-static ZEND_RESULT_CODE zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
+static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_aggregate)) {
 		zend_error_noreturn(E_ERROR,
@@ -354,7 +354,7 @@ static ZEND_RESULT_CODE zend_implement_iterator(zend_class_entry *interface, zen
 /* }}} */
 
 /* {{{ zend_user_serialize */
-ZEND_API ZEND_RESULT_CODE zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
+ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval retval;
@@ -391,7 +391,7 @@ ZEND_API ZEND_RESULT_CODE zend_user_serialize(zval *object, unsigned char **buff
 /* }}} */
 
 /* {{{ zend_user_unserialize */
-ZEND_API ZEND_RESULT_CODE zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
+ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
 {
 	zval zdata;
 
@@ -412,7 +412,7 @@ ZEND_API ZEND_RESULT_CODE zend_user_unserialize(zval *object, zend_class_entry *
 }
 /* }}} */
 
-ZEND_API ZEND_RESULT_CODE zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data) /* {{{ */
+ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed", ZSTR_VAL(ce->name));
@@ -420,7 +420,7 @@ ZEND_API ZEND_RESULT_CODE zend_class_serialize_deny(zval *object, unsigned char 
 }
 /* }}} */
 
-ZEND_API ZEND_RESULT_CODE zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data) /* {{{ */
+ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data) /* {{{ */
 {
 	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed", ZSTR_VAL(ce->name));
 	return FAILURE;
@@ -428,7 +428,7 @@ ZEND_API ZEND_RESULT_CODE zend_class_unserialize_deny(zval *object, zend_class_e
 /* }}} */
 
 /* {{{ zend_implement_serializable */
-static ZEND_RESULT_CODE zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
+static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->parent
 		&& (class_type->parent->serialize || class_type->parent->unserialize)

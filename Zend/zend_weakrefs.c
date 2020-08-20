@@ -372,7 +372,7 @@ static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 	zend_weakref_unregister(obj_key, ZEND_WEAKREF_ENCODE(wm, ZEND_WEAKREF_TAG_MAP));
 }
 
-static ZEND_RESULT_CODE zend_weakmap_count_elements(zend_object *object, zend_long *count)
+static int zend_weakmap_count_elements(zend_object *object, zend_long *count)
 {
 	zend_weakmap *wm = zend_weakmap_from(object);
 	*count = zend_hash_num_elements(&wm->ht);

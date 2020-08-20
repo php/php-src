@@ -1,4 +1,4 @@
-/*
+	/*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
@@ -50,7 +50,7 @@ ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 static zend_object_handlers default_exception_handlers;
 
 /* {{{ zend_implement_throwable */
-static ZEND_RESULT_CODE zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
+static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (instanceof_function(class_type, zend_ce_exception) || instanceof_function(class_type, zend_ce_error)) {
 		return SUCCESS;
