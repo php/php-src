@@ -3428,8 +3428,17 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 		do {
 			if (OP1_TYPE == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((OP1_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					object = Z_REFVAL_P(object);
+					zend_reference *ref = Z_REF_P(object);
+
+					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						if (OP1_TYPE & IS_VAR) {
+							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+								efree_size(ref, sizeof(zend_reference));
+							} else {
+								Z_ADDREF_P(object);
+							}
+						}
 						break;
 					}
 				}
@@ -3473,7 +3482,9 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 			FREE_OP2();
-			FREE_OP1();
+			if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
+				zend_objects_store_del(orig_obj);
+			}
 			HANDLE_EXCEPTION();
 		}
 		if (OP2_TYPE == IS_CONST &&
@@ -3482,8 +3493,10 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
 		}
 		if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			/* Reset "object" to trigger reference counting */
-			object = NULL;
+			GC_ADDREF(obj); /* For $this pointer */
+			if (GC_DELREF(orig_obj) == 0) {
+				zend_objects_store_del(orig_obj);
+			}
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3496,10 +3509,11 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 
 	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		FREE_OP1();
-
-		if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(EG(exception))) {
-			HANDLE_EXCEPTION();
+		if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
+			zend_objects_store_del(obj);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 		}
 		/* call static method */
 		obj = (zend_object*)called_scope;
@@ -3507,12 +3521,6 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	} else if (OP1_TYPE & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		if (OP1_TYPE == IS_CV) {
 			GC_ADDREF(obj); /* For $this pointer */
-		} else {
-			zval *free_op1 = EX_VAR(opline->op1.var);
-			if (free_op1 != object) {
-				GC_ADDREF(obj); /* For $this pointer */
-				zval_ptr_dtor_nogc(free_op1);
-			}
 		}
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
