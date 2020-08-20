@@ -41,13 +41,13 @@ function gzuncompress(string $data, int $max_decoded_len = 0): string|false {}
  * @param resource $fp
  * @alias fwrite
  */
-function gzwrite($fp, string $str, int $length = UNKNOWN): int|false {}
+function gzwrite($fp, string $str, ?int $length = null): int|false {}
 
 /**
  * @param resource $fp
  * @alias fwrite
  */
-function gzputs($fp, string $str, int $length = UNKNOWN): int|false {}
+function gzputs($fp, string $str, ?int $length = null): int|false {}
 
 /**
  * @param resource $fp

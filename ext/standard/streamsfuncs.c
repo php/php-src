@@ -88,7 +88,8 @@ PHP_FUNCTION(stream_socket_client)
 {
 	zend_string *host;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
-	double timeout = (double)FG(default_socket_timeout);
+	double timeout;
+	zend_bool timeout_is_null = 1;
 	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
@@ -98,17 +99,21 @@ PHP_FUNCTION(stream_socket_client)
 	zend_string *errstr = NULL;
 	php_stream_context *context = NULL;
 
-	RETVAL_FALSE;
-
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_STR(host)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(zerrno)
 		Z_PARAM_ZVAL(zerrstr)
-		Z_PARAM_DOUBLE(timeout)
+		Z_PARAM_DOUBLE_OR_NULL(timeout, timeout_is_null)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_FALSE;
+
+	if (timeout_is_null) {
+		timeout = (double)FG(default_socket_timeout);
+	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
@@ -238,7 +243,8 @@ PHP_FUNCTION(stream_socket_server)
 /* {{{ Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)
 {
-	double timeout = (double)FG(default_socket_timeout);
+	double timeout;
+	zend_bool timeout_is_null = 1;
 	zval *zpeername = NULL;
 	zend_string *peername = NULL;
 	php_timeout_ull conv;
@@ -250,9 +256,13 @@ PHP_FUNCTION(stream_socket_accept)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_DOUBLE(timeout)
+		Z_PARAM_DOUBLE_OR_NULL(timeout, timeout_is_null)
 		Z_PARAM_ZVAL(zpeername)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (timeout_is_null) {
+		timeout = (double)FG(default_socket_timeout);
+	}
 
 	php_stream_from_zval(stream, zstream);
 
@@ -406,21 +416,23 @@ PHP_FUNCTION(stream_socket_recvfrom)
 /* {{{ Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
-	php_stream	*stream;
-	zval		*zsrc;
-	zend_long		maxlen		= (ssize_t) PHP_STREAM_COPY_ALL,
-				desiredpos	= -1L;
+	php_stream *stream;
+	zval *zsrc;
+	zend_long maxlen, desiredpos = -1L;
+	zend_bool maxlen_is_null = 1;
 	zend_string *contents;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_RESOURCE(zsrc)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 		Z_PARAM_LONG(desiredpos)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (maxlen < 0 && maxlen != PHP_STREAM_COPY_ALL) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero, or -1");
+	if (maxlen_is_null) {
+		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
+	} else if (maxlen < 0 && maxlen != PHP_STREAM_COPY_ALL) {
+		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0, or -1");
 		RETURN_FALSE;
 	}
 
@@ -463,7 +475,8 @@ PHP_FUNCTION(stream_copy_to_stream)
 {
 	php_stream *src, *dest;
 	zval *zsrc, *zdest;
-	zend_long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
+	zend_long maxlen, pos = 0;
+	zend_bool maxlen_is_null = 1;
 	size_t len;
 	int ret;
 
@@ -471,9 +484,13 @@ PHP_FUNCTION(stream_copy_to_stream)
 		Z_PARAM_RESOURCE(zsrc)
 		Z_PARAM_RESOURCE(zdest)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 		Z_PARAM_LONG(pos)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (maxlen_is_null) {
+		maxlen = PHP_STREAM_COPY_ALL;
+	}
 
 	php_stream_from_zval(src, zsrc);
 	php_stream_from_zval(dest, zdest);
@@ -1074,7 +1091,7 @@ PHP_FUNCTION(stream_context_get_default)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT(params)
+		Z_PARAM_ARRAY_HT_OR_NULL(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (FG(default_context) == NULL) {

@@ -271,7 +271,7 @@ function ip2long(string $ip_address): int|false {}
 
 function long2ip(int $proper_address): string|false {}
 
-function getenv(string $variable = UNKNOWN, bool $local_only = false): string|array|false {}
+function getenv(?string $variable = null, bool $local_only = false): string|array|false {}
 
 #ifdef HAVE_PUTENV
 function putenv(string $setting): bool {}
@@ -296,7 +296,7 @@ function get_current_user(): string {}
 
 function get_cfg_var(string $option_name): string|array|false {}
 
-function error_log(string $message, int $message_type = 0, string $destination = UNKNOWN, string $extra_headers = UNKNOWN): bool {}
+function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $extra_headers = null): bool {}
 
 function error_get_last(): ?array {}
 
@@ -343,7 +343,7 @@ function connection_aborted(): int {}
 
 function connection_status(): int {}
 
-function ignore_user_abort(bool $value = UNKNOWN): int {}
+function ignore_user_abort(?bool $value = null): int {}
 
 #if HAVE_GETSERVBYNAME
 function getservbyname(string $service, string $protocol): int|false {}
@@ -504,7 +504,7 @@ function metaphone(string $text, int $phones = 0): string|false {}
 /* {{{ head.c */
 function header(string $string, bool $replace = true, int $http_response_code = 0): void {}
 
-function header_remove(string $name = UNKNOWN): void {}
+function header_remove(?string $name = null): void {}
 
 /** @param array|int $expires_or_options */
 function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
@@ -528,7 +528,7 @@ function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string
 
 function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT): string|false {}
 
-function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, string $encoding = UNKNOWN): string|false {}
+function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null): string|false {}
 
 function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
@@ -549,9 +549,9 @@ function bin2hex(string $data): string {}
 
 function hex2bin(string $data): string|false {}
 
-function strspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN): int|false {}
+function strspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
 
-function strcspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN): int|false {}
+function strcspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
 
 #if HAVE_NL_LANGINFO
 function nl_langinfo(int $item): string|false {}
@@ -572,12 +572,12 @@ function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut 
 
 function explode(string $separator, string $str, int $limit = PHP_INT_MAX): array {}
 
-function implode(string|array $glue, array $pieces = UNKNOWN): string {}
+function implode(string|array $glue, ?array $pieces = null): string {}
 
 /** @alias implode */
-function join(string|array $glue, array $pieces = UNKNOWN): string {}
+function join(string|array $glue, ?array $pieces = null): string {}
 
-function strtok(string $str, string $token = UNKNOWN): string|false {}
+function strtok(string $str, ?string $token = null): string|false {}
 
 function strtoupper(string $str): string {}
 
@@ -587,7 +587,7 @@ function basename(string $path, string $suffix = ""): string {}
 
 function dirname(string $path, int $levels = 1): string {}
 
-function pathinfo(string $path, int $options = UNKNOWN): array|string {}
+function pathinfo(string $path, int $options = PATHINFO_ALL): array|string {}
 
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
@@ -617,10 +617,10 @@ function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): 
 function substr(string $str, int $start, ?int $length = null): string|false {}
 
 /**
- * @param mixed $start
- * @param mixed $length
+ * @param array|int $start
+ * @param array|int|null $length
  */
-function substr_replace(array|string $str, string|array $replace, $start, $length = UNKNOWN): string|array|false {}
+function substr_replace(array|string $str, string|array $replace, $start, $length = null): string|array|false {}
 
 function quotemeta(string $str): string {}
 
@@ -634,7 +634,7 @@ function lcfirst(string $str): string {}
 
 function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
 
-function strtr(string $str, string|array $from, string $to = UNKNOWN): string {}
+function strtr(string $str, string|array $from, ?string $to = null): string {}
 
 function strrev(string $str): string {}
 
@@ -650,17 +650,16 @@ function stripcslashes(string $str): string {}
 function stripslashes(string $str): string {}
 
 /** @param int $replace_count */
-function str_replace(array|string $search, array|string $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+function str_replace(array|string $search, array|string $replace, string|array $subject, &$replace_count = null): string|array {}
 
 /** @param int $replace_count */
-function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$replace_count = null): string|array {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
 function nl2br(string $str, bool $is_xhtml = true): string {}
 
-/** @param array|string|null $allowable_tags */
-function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
+function strip_tags(string $str, array|string|null $allowable_tags = null): string {}
 
 /**
  * @param array|string $locales
@@ -693,7 +692,7 @@ function str_rot13(string $str): string {}
 
 function str_shuffle(string $str): string {}
 
-function str_word_count(string $str, int $format = 0, string $charlist = UNKNOWN): array|int {}
+function str_word_count(string $str, int $format = 0, ?string $charlist = null): array|int {}
 
 function str_split(string $str, int $split_length = 1): array {}
 
@@ -706,22 +705,22 @@ function utf8_encode(string $data): string {}
 function utf8_decode(string $data): string {}
 
 /**
- * @param resource $context
+ * @param resource|null $context
  * @return resource|false
  */
-function opendir(string $path, $context = UNKNOWN) {}
+function opendir(string $path, $context = null) {}
 
 /** @param resource $context */
-function getdir(string $path, $context = UNKNOWN): Directory|false {}
+function getdir(string $path, $context = null): Directory|false {}
 
 /**
- * @param resource $context
+ * @param resource|null $context
  * @alias getdir
  */
-function dir(string $path, $context = UNKNOWN): Directory|false {}
+function dir(string $path, $context = null): Directory|false {}
 
-/** @param resource $dir_handle */
-function closedir($dir_handle = UNKNOWN): void {}
+/** @param resource|null $dir_handle */
+function closedir($dir_handle = null): void {}
 
 function chdir(string $directory): bool {}
 
@@ -731,14 +730,14 @@ function chroot(string $directory): bool {}
 
 function getcwd(): string|false {}
 
-/** @param resource $dir_handle */
-function rewinddir($dir_handle = UNKNOWN): void {}
+/** @param resource|null $dir_handle */
+function rewinddir($dir_handle = null): void {}
 
-/** @param resource $dir_handle */
-function readdir($dir_handle = UNKNOWN): string|false {}
+/** @param resource|null $dir_handle */
+function readdir($dir_handle = null): string|false {}
 
-/** @param resource $context */
-function scandir(string $directory, int $sorting_order = 0, $context = UNKNOWN): array|false {}
+/** @param resource|null $context */
+function scandir(string $directory, int $sorting_order = 0, $context = null): array|false {}
 
 #ifdef HAVE_GLOB
 function glob(string $pattern, int $flags = 0): array|false {}
@@ -793,7 +792,7 @@ function rewind($handle): bool {}
 /** @param resource|null $context */
 function rmdir(string $dirname, $context = null): bool {}
 
-function umask(int $mask = UNKNOWN): int {}
+function umask(?int $mask = null): int {}
 
 /** @param resource $handle */
 function fclose($handle): bool {}
@@ -805,7 +804,7 @@ function feof($handle): bool {}
 function fgetc($handle): string|false {}
 
 /** @param resource $handle */
-function fgets($handle, int $length = UNKNOWN): string|false {}
+function fgets($handle, ?int $length = null): string|false {}
 
 /** @param resource $handle */
 function fread($handle, int $length): string|false {}
@@ -838,13 +837,13 @@ function ftell($handle): int|false {}
 function fflush($handle): bool {}
 
 /** @param resource $handle */
-function fwrite($handle, string $content, int $max_length = UNKNOWN): int|false {}
+function fwrite($handle, string $content, ?int $max_length = null): int|false {}
 
 /**
  * @param resource $handle
  * @alias fwrite
  */
-function fputs($handle, string $content, int $max_length = UNKNOWN): int|false {}
+function fputs($handle, string $content, ?int $max_length = null): int|false {}
 
 /** @param resource|null $context */
 function mkdir(string $pathname, int $mode = 0777, bool $recursive = false, $context = null): bool {}
@@ -940,7 +939,7 @@ function lchgrp(string $filename, string|int $group): bool {}
 function chmod(string $filename, int $mode): bool {}
 
 #if HAVE_UTIME
-function touch(string $filename, int $time = UNKNOWN, int $atime = UNKNOWN): bool {}
+function touch(string $filename, ?int $time = null, ?int $atime = null): bool {}
 #endif
 
 function clearstatcache(bool $clear_realpath_cache = false, string $filename = ""): void {}
@@ -979,14 +978,14 @@ function vfprintf($handle, string $format, array $args): int {}
  * @param string $errstr
  * @return resource|false
  */
-function fsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr = null, float $timeout = UNKNOWN) {}
+function fsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr = null, ?float $timeout = null) {}
 
 /**
  * @param int $errno
  * @param string $errstr
  * @return resource|false
  */
-function pfsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr = null, float $timeout = UNKNOWN) {}
+function pfsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr = null, ?float $timeout = null) {}
 
 /* http.c */
 
@@ -1008,7 +1007,7 @@ function getimagesizefromstring(string $image, &$image_info = null): array|false
 
 function phpinfo(int $what = INFO_ALL): bool {}
 
-function phpversion(string $extension = UNKNOWN): string|false {}
+function phpversion(?string $extension = null): string|false {}
 
 function phpcredits(int $flag = CREDITS_ALL): bool {}
 
@@ -1044,7 +1043,7 @@ function link(string $target, string $link): bool {}
 
 /* mail.c */
 
-function mail(string $to, string $subject, string $message, string|array $additional_headers = UNKNOWN, string $additional_parameters = ""): bool {}
+function mail(string $to, string $subject, string $message, array|string $additional_headers = [], string $additional_parameters = ""): bool {}
 
 /* math.c */
 
@@ -1233,24 +1232,22 @@ function stream_context_set_option($context, array|string $wrapper_or_options, ?
 function stream_context_get_options($stream_or_context): array {}
 
 /** @return resource */
-function stream_context_get_default(array $options = UNKNOWN) {}
+function stream_context_get_default(?array $options = null) {}
 
 /** @return resource */
 function stream_context_set_default(array $options) {}
 
 /**
  * @param resource $stream
- * @param mixed $params
  * @return resource|false
  */
-function stream_filter_prepend($stream, string $filtername, int $read_write = 0, $params = UNKNOWN) {}
+function stream_filter_prepend($stream, string $filtername, int $read_write = 0, mixed $params = UNKNOWN) {}
 
 /**
  * @param resource $stream
- * @param mixed $params
  * @return resource|false
  */
-function stream_filter_append($stream, string $filtername, int $read_write = 0, $params = UNKNOWN) {}
+function stream_filter_append($stream, string $filtername, int $read_write = 0, mixed $params = UNKNOWN) {}
 
 /** @param resource $stream_filter */
 function stream_filter_remove($stream_filter): bool {}
@@ -1261,7 +1258,7 @@ function stream_filter_remove($stream_filter): bool {}
  * @param resource|null $context
  * @return resource|false
  */
-function stream_socket_client(string $remote_socket, &$errno = null, &$errstr = null, float $timeout = UNKNOWN, int $flags = STREAM_CLIENT_CONNECT, $context = null) {}
+function stream_socket_client(string $remote_socket, &$errno = null, &$errstr = null, ?float $timeout = null, int $flags = STREAM_CLIENT_CONNECT, $context = null) {}
 
 /**
  * @param int $errno
@@ -1277,7 +1274,7 @@ function stream_socket_server(string $local_socket, &$errno = null, &$errstr = n
  * @param string $peername
  * @return resource|false
  */
-function stream_socket_accept($server_socket, float $timeout = UNKNOWN, &$peername = null) {}
+function stream_socket_accept($server_socket, ?float $timeout = null, &$peername = null) {}
 
 /** @param resource $handle */
 function stream_socket_get_name($handle, bool $want_peer): string|false {}
@@ -1310,10 +1307,10 @@ function stream_socket_pair(int $domain, int $type, int $protocol): array|false 
  * @param resource $source
  * @param resource $dest
  */
-function stream_copy_to_stream($source, $dest, int $maxlength = UNKNOWN, int $position = 0): int|false {}
+function stream_copy_to_stream($source, $dest, ?int $maxlength = null, int $position = 0): int|false {}
 
 /** @param resource $handle */
-function stream_get_contents($handle, int $maxlength = UNKNOWN, int $position = -1): string|false {}
+function stream_get_contents($handle, ?int $maxlength = null, int $position = -1): string|false {}
 
 /** @param resource $stream */
 function stream_supports_lock($stream): bool {}
@@ -1498,14 +1495,14 @@ function memory_get_peak_usage(bool $real_usage = false): int {}
 
 /* versioning.c */
 
-function version_compare(string $version1, string $version2, string $operator = UNKNOWN): int|bool {}
+function version_compare(string $version1, string $version2, ?string $operator = null): int|bool {}
 
 /* win32/codepage.c */
 
 #ifdef PHP_WIN32
 function sapi_windows_cp_set(int $cp): bool {}
 
-function sapi_windows_cp_get(string $kind = UNKNOWN): int {}
+function sapi_windows_cp_get(string $kind = ""): int {}
 
 function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage, string $subject): ?string {}
 

@@ -1015,8 +1015,8 @@ PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *res;
 	zend_long len = 1024;
+	zend_bool len_is_null = 1;
 	char *buf = NULL;
-	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	zend_string *str;
 	php_stream *stream;
@@ -1024,12 +1024,12 @@ PHPAPI PHP_FUNCTION(fgets)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(len)
+		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	if (argc == 1) {
+	if (len_is_null) {
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL) {
@@ -1038,7 +1038,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		// TODO: avoid reallocation ???
 		RETVAL_STRINGL(buf, line_len);
 		efree(buf);
-	} else if (argc > 1) {
+	} else {
 		if (len <= 0) {
 			zend_argument_value_error(2, "must be greater than 0");
 			RETURN_THROWS();
@@ -1138,16 +1138,17 @@ PHPAPI PHP_FUNCTION(fwrite)
 	ssize_t ret;
 	size_t num_bytes;
 	zend_long maxlen = 0;
+	zend_bool maxlen_is_null = 1;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_STRING(input, inputlen)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 2) {
+	if (maxlen_is_null) {
 		num_bytes = inputlen;
 	} else if (maxlen <= 0) {
 		num_bytes = 0;
@@ -1354,7 +1355,13 @@ PHP_FUNCTION(readfile)
 PHP_FUNCTION(umask)
 {
 	zend_long mask = 0;
+	zend_bool mask_is_null = 1;
 	int oldumask;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(mask, mask_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	oldumask = umask(077);
 
@@ -1362,12 +1369,7 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	ZEND_PARSE_PARAMETERS_START(0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(mask)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (ZEND_NUM_ARGS() == 0) {
+	if (mask_is_null) {
 		umask(oldumask);
 	} else {
 		umask((int) mask);
