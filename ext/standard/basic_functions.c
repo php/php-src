@@ -108,7 +108,8 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "basic_functions_arginfo.h"
 
-#define NANOS_IN_SEC 1000000000
+#define MICROS_IN_SEC 1000000
+#define NANOS_IN_SEC  1000000000
 
 static zend_class_entry *incomplete_class_entry = NULL;
 
@@ -1239,12 +1240,47 @@ PHP_FUNCTION(sleep)
 	}
 
 	if (!nanosleep(&php_req, &php_rem)) {
-		RETURN_DOUBLE(0);
+		RETURN_LONG(0);
 	} else if (errno == EINTR) {
 		RETURN_DOUBLE((double)php_rem.tv_sec + (double)php_rem.tv_nsec / NANOS_IN_SEC);
 	}
 #else
-	RETURN_DOUBLE((double) php_sleep((unsigned int)seconds));
+	int64_t remainig_micros;
+
+#if HAVE_USLEEP && HAVE_GETTIMEOFDAY
+	struct timeval tp = {0};
+	int usleep_res;
+
+	gettimeofday(&tp, NULL);
+	remainig_micros = tp.tv_sec * MICROS_IN_SEC + tp.tv_usec;
+	usleep_res = usleep((unsigned int) (fmod(seconds, 1.0) * MICROS_IN_SEC));
+	if (usleep_res == 0) {
+		remainig_micros = 0;
+	} else if (remainig_micros == EINTR) {
+		gettimeofday(&tp, NULL);
+		remainig_micros = (tp.tv_sec * MICROS_IN_SEC + tp.tv_usec) - remainig_micros;
+		if (remainig_micros < 0) {
+			remainig_micros = 1;
+		}
+	} else {
+		remainig_micros = -1;
+	}
+#else
+	// ceil to whole seconds if nanosleep not usleep
+	// is not available
+	seconds += 1.0 - 1.0 / MICROS_IN_SEC;
+	remainig_micros = 0;
+#endif
+
+	if (remainig_micros >= 0) {
+		remainig_micros += php_sleep((unsigned int) floor(seconds)) * MICROS_IN_SEC;
+
+		if (remainig_micros == 0) {
+			RETURN_LONG(0);
+		} else {
+			RETURN_DOUBLE((double)remainig_micros / MICROS_IN_SEC);
+		}
+	}
 #endif
 
 	RETURN_FALSE;
