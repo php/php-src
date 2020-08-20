@@ -329,15 +329,14 @@ typedef struct _zend_fcall_info_cache {
 ZEND_API int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
-ZEND_API zend_result _zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array);
+ZEND_API zend_result zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array);
 
 /* internal function to efficiently copy parameters when executing __call() */
 ZEND_API zend_result zend_copy_parameters_array(uint32_t param_count, zval *argument_array);
 
+// TODO Replace _ex version with zend_get_parameters_array()
 #define zend_get_parameters_array(ht, param_count, argument_array) \
-	_zend_get_parameters_array_ex(param_count, argument_array)
-#define zend_get_parameters_array_ex(param_count, argument_array) \
-	_zend_get_parameters_array_ex(param_count, argument_array)
+	zend_get_parameters_array_ex(param_count, argument_array)
 #define zend_parse_parameters_none() \
 	(EXPECTED(ZEND_NUM_ARGS() == 0) ? SUCCESS : (zend_wrong_parameters_none_error(), FAILURE))
 #define zend_parse_parameters_none_throw() \

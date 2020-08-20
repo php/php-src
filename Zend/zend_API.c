@@ -43,7 +43,7 @@ static zend_module_entry **module_post_deactivate_handlers;
 
 static zend_class_entry  **class_cleanup_handlers;
 
-ZEND_API zend_result _zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array) /* {{{ */
+ZEND_API zend_result zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array) /* {{{ */
 {
 	zval *param_ptr;
 	uint32_t arg_count;
