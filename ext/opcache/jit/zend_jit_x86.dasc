@@ -1471,17 +1471,16 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro EFREE_REG_24, op_array, opline
+|.macro EFREE_REG_24
 ||#if ZEND_DEBUG
-||		const char *filename = op_array->filename ? op_array->filename->val : NULL;
-|		LOAD_ADDR FCARG2a, filename
+|		xor FCARG2a, FCARG2a // filename
 |		.if X64WIN
-|			mov CARG3d, opline->lineno
+|			xor CARG3d, CARG3d // lineno
 |			xor CARG4, CARG4
 |			mov aword A5, 0
 |			EXT_CALL _efree, r0
 |		.elif X64
-|			mov CARG3d, opline->lineno
+|			xor CARG3d, CARG3d // lineno
 |			xor CARG4, CARG4
 |			xor CARG5, CARG5
 |			EXT_CALL _efree, r0
@@ -1489,7 +1488,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			sub r4, 4
 |			push 0
 |			push 0
-|			push opline->lineno
+|			push 0 // lineno
 |			EXT_CALL _efree, r0
 |			add r4, 4
 |		.endif
@@ -1502,9 +1501,9 @@ static void* dasm_labels[zend_lb_MAX];
 ||#endif
 |.endmacro
 
-|.macro EFREE_24, ptr, op_array, opline
+|.macro EFREE_24, ptr
 |	mov FCARG1a, ptr
-|	EFREE_REG_24 op_array, opline
+|	EFREE_REG_24
 |.endmacro
 
 |.macro EMALLOC, size, op_array, opline
@@ -5465,7 +5464,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				if (save_r1) {
 					|	mov aword T1, FCARG1a // save
 				}
-				|	EFREE_24 aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)], op_array, opline
+				|	EFREE_24 aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)]
 				if (save_r1) {
 					|	mov FCARG1a, aword T1 // restore
 				}
@@ -9508,7 +9507,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				|	GC_ADDREF r2
 				|	jmp >2
 				|1:
-				|	EFREE_REG_24 op_array, opline
+				|	EFREE_REG_24
 				|	jmp >2
 				|.code
 				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R0, ZREG_R2
@@ -10353,7 +10352,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	jmp >9
 			}
 			|2:
-			|	EFREE_24 r0, op_array, opline
+			|	EFREE_24 r0
 			if (jit_return_label >= 0) {
 				|	jmp =>jit_return_label
 			} else {
