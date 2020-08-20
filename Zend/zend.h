@@ -252,8 +252,9 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent);
 ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
 
-#define zend_print_variable(var) \
-	zend_print_zval((var), 0)
+static zend_always_inline size_t zend_print_variable(zval *var) {
+	return zend_print_zval(var, 0);
+}
 
 ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
@@ -269,6 +270,7 @@ ZEND_API void free_estring(char **str_p);
 END_EXTERN_C()
 
 /* output support */
+// TODO Convert to inline functions?
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))
 #define ZEND_WRITE_EX(str, str_len)		write_func((str), (str_len))
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
