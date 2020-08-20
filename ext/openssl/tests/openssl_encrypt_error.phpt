@@ -28,5 +28,5 @@ bool(false)
 Warning: openssl_encrypt(): The authenticated tag cannot be provided for cipher that doesn not support AEAD in %s on line %d
 string(44) "iPR4HulskuaP5Z6me5uImk6BqVyJG73+63tkPauVZYk="
 
-Warning: openssl_encrypt(): Key length cannot be set for the cipher method in %s on line %d
+Warning: openssl_encrypt(): Key length cannot be set for the cipher algorithm in %s on line %d
 bool(false)

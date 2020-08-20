@@ -76,7 +76,7 @@ bool(false)
 Warning: openssl_csr_sign(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
 bool(false)
 openssl_csr_sign(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, array given
-openssl_csr_sign(): Argument #2 ($cacert) must be of type OpenSSLCertificate|string|null, array given
+openssl_csr_sign(): Argument #2 ($ca_certificate) must be of type OpenSSLCertificate|string|null, array given
 Key array must be of the form array(0 => key, 1 => phrase)
 object(OpenSSLCertificate)#%d (0) {
 }

@@ -27,4 +27,4 @@ try {
 }
 ?>
 --EXPECT--
-openssl_seal(): Argument #6 ($iv) must provide an IV for chosen cipher algorithm
+openssl_seal(): Argument #6 ($initialization_vector) cannot be null for the chosen cipher algorithm

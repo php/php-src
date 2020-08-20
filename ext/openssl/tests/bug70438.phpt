@@ -26,7 +26,7 @@ openssl_open($sealed, $decrypted, $ekeys[0], $priv_key, $cipher, $iv);
 echo $decrypted;
 ?>
 --EXPECTF--
-openssl_seal(): Argument #6 ($iv) must provide an IV for chosen cipher algorithm
+openssl_seal(): Argument #6 ($initialization_vector) cannot be null for the chosen cipher algorithm
 
-Warning: openssl_seal(): Unknown signature algorithm in %s on line %d
+Warning: openssl_seal(): Unknown digest algorithm in %s on line %d
 openssl_seal() test
