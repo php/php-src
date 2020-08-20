@@ -108,6 +108,8 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "basic_functions_arginfo.h"
 
+#define NANOS_IN_SEC 1000000000
+
 static zend_class_entry *incomplete_class_entry = NULL;
 
 typedef struct _user_tick_function_entry {
@@ -1214,18 +1216,38 @@ PHP_FUNCTION(flush)
 /* {{{ Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
-	zend_long num;
+	double seconds;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(num)
+		Z_PARAM_DOUBLE(seconds)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
+	if (isnan(seconds) || seconds < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(php_sleep((unsigned int)num));
+#if HAVE_NANOSLEEP
+	struct timespec php_req, php_rem;
+
+	if (seconds < LONG_MAX) { // prevent time_t overflow, equals to about 68 years
+		php_req.tv_sec = (time_t) floor(seconds);
+		php_req.tv_nsec = (long) (fmod(seconds, 1.0) * NANOS_IN_SEC);
+	} else {
+		php_req.tv_sec = (time_t) LONG_MAX;
+		php_req.tv_nsec = 0;
+	}
+
+	if (!nanosleep(&php_req, &php_rem)) {
+		RETURN_DOUBLE(0);
+	} else if (errno == EINTR) {
+		RETURN_DOUBLE((double)php_rem.tv_sec + (double)php_rem.tv_nsec / NANOS_IN_SEC);
+	}
+#else
+	RETURN_DOUBLE((double) php_sleep((unsigned int)seconds));
+#endif
+
+	RETURN_FALSE;
 }
 /* }}} */
 

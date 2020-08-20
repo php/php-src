@@ -283,7 +283,7 @@ function getopt(string $options, array $longopts = [], &$optind = null): array|f
 
 function flush(): void {}
 
-function sleep(int $seconds): int {}
+function sleep(float $seconds): float|false {}
 
 function usleep(int $microseconds): void {}
 
