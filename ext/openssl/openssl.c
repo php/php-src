@@ -865,7 +865,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		zend_long cipher_algo = Z_LVAL_P(item);
 		const EVP_CIPHER* cipher = php_openssl_get_evp_cipher_from_algo(cipher_algo);
 		if (cipher == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm for private key");
+			php_error_docref(NULL, E_WARNING, "Unknown cipher method for private key");
 			return FAILURE;
 		} else {
 			req->priv_key_encrypt_cipher = cipher;
@@ -1563,7 +1563,7 @@ PHP_FUNCTION(openssl_spki_new)
 	mdtype = php_openssl_get_evp_md_from_algo(algo);
 
 	if (!mdtype) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown digest method");
 		goto cleanup;
 	}
 
@@ -1589,7 +1589,7 @@ PHP_FUNCTION(openssl_spki_new)
 
 	if (!NETSCAPE_SPKI_sign(spki, pkey, mdtype)) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "Unable to sign with specified algorithm");
+		php_error_docref(NULL, E_WARNING, "Unable to sign with specified digest method");
 		goto cleanup;
 	}
 
@@ -1845,7 +1845,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_b
 	zend_string *ret;
 
 	if (!(mdtype = EVP_get_digestbyname(method))) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm");
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
 		php_openssl_store_errors();
@@ -3753,7 +3753,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 				{
 					EC_KEY *eckey;
 					if (req->curve_name == NID_undef) {
-						php_error_docref(NULL, E_WARNING, "Missing configuration value: 'curve_name' not set");
+						php_error_docref(NULL, E_WARNING, "Missing configuration value: \"curve_name\" not set");
 						return NULL;
 					}
 					eckey = EC_KEY_new_by_curve_name(req->curve_name);
@@ -4465,11 +4465,13 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	size_t passphrase_len = sizeof("")-1;
 	php_openssl_pkey_object *key_object;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s", &cert, &passphrase, &passphrase_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s!", &cert, &passphrase, &passphrase_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(passphrase_len, passphrase, 2);
+	if (passphrase) {
+		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(passphrase_len, passphrase, 2);
+	}
 
 	pkey = php_openssl_pkey_from_zval(cert, 0, passphrase, passphrase_len);
 	if (pkey == NULL) {
@@ -4847,7 +4849,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 	RETVAL_LONG(-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl|pappp", &filename, &filename_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl|p!a!p!p!p!", &filename, &filename_len,
 				&flags, &signersfilename, &signersfilename_len, &cainfo,
 				&extracerts, &extracerts_len, &datafilename, &datafilename_len, &p7bfilename, &p7bfilename_len) == FAILURE) {
 		RETURN_THROWS();
@@ -6082,7 +6084,7 @@ PHP_FUNCTION(openssl_cms_decrypt)
 		Z_PARAM_PATH(outfilename, outfilename_len)
 		Z_PARAM_ZVAL(recipcert)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(recipkey)
+		Z_PARAM_ZVAL_OR_NULL(recipkey)
 		Z_PARAM_LONG(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -6128,8 +6130,7 @@ PHP_FUNCTION(openssl_cms_decrypt)
 			cms = SMIME_read_CMS(in, &datain);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING,
-					 "Unknown OPENSSL encoding");
+			zend_argument_value_error(5, "must be an OPENSSL_ENCODING_* constant");
 			goto clean_exit;
 	}
 
@@ -6456,13 +6457,18 @@ PHP_FUNCTION(openssl_sign)
 	char * data;
 	size_t data_len;
 	EVP_MD_CTX *md_ctx;
-	zval *method = NULL;
-	zend_long signature_algo = OPENSSL_ALGO_SHA1;
+	zend_string *method_str = NULL;
+	zend_long method_long = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|z", &data, &data_len, &signature, &key, &method) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_STRING(data, data_len)
+		Z_PARAM_ZVAL(signature)
+		Z_PARAM_ZVAL(key)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG(method_str, method_long)
+	ZEND_PARSE_PARAMETERS_END();
+
 	pkey = php_openssl_pkey_from_zval(key, 0, "", 0);
 	if (pkey == NULL) {
 		if (!EG(exception)) {
@@ -6471,17 +6477,10 @@ PHP_FUNCTION(openssl_sign)
 		RETURN_FALSE;
 	}
 
-	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
-		if (method != NULL) {
-			signature_algo = Z_LVAL_P(method);
-		}
-		mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
-	} else if (Z_TYPE_P(method) == IS_STRING) {
-		mdtype = EVP_get_digestbyname(Z_STRVAL_P(method));
+	if (method_str) {
+		mdtype = EVP_get_digestbyname(ZSTR_VAL(method_str));
 	} else {
-		// TODO Use proper ZPP check.
-		zend_argument_type_error(4, "must be of type string|int|null, %s given" , zend_zval_type_name(method));
-		RETURN_THROWS();
+		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
 	if (!mdtype) {
 		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
@@ -6522,26 +6521,23 @@ PHP_FUNCTION(openssl_verify)
 	size_t data_len;
 	char * signature;
 	size_t signature_len;
-	zval *method = NULL;
-	zend_long signature_algo = OPENSSL_ALGO_SHA1;
+	zend_string *method_str = NULL;
+	zend_long method_long = OPENSSL_ALGO_SHA1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssz|z", &data, &data_len, &signature, &signature_len, &key, &method) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_STRING(data, data_len)
+		Z_PARAM_STRING(signature, signature_len)
+		Z_PARAM_ZVAL(key)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG(method_str, method_long)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(signature_len, signature, 2);
 
-	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
-		if (method != NULL) {
-			signature_algo = Z_LVAL_P(method);
-		}
-		mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
-	} else if (Z_TYPE_P(method) == IS_STRING) {
-		mdtype = EVP_get_digestbyname(Z_STRVAL_P(method));
+	if (method_str) {
+		mdtype = EVP_get_digestbyname(ZSTR_VAL(method_str));
 	} else {
-		// TODO Use proper ZPP check.
-		zend_argument_type_error(4, "must be of type string|int|null, %s given" , zend_zval_type_name(method));
-		RETURN_THROWS();
+		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
 	if (!mdtype) {
 		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
@@ -6579,8 +6575,8 @@ PHP_FUNCTION(openssl_seal)
 	unsigned char iv_buf[EVP_MAX_IV_LENGTH + 1], *buf = NULL, **eks;
 	char * data;
 	size_t data_len;
-	char *method =NULL;
-	size_t method_len = 0;
+	char *method;
+	size_t method_len;
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX *ctx;
 
@@ -6606,7 +6602,7 @@ PHP_FUNCTION(openssl_seal)
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
 	if (!iv && iv_len > 0) {
-		zend_argument_value_error(6, "must provide an IV for chosen cipher algorithm");
+		zend_argument_value_error(6, "cannot be null for the chosen cipher method");
 		RETURN_THROWS();
 	}
 
@@ -6707,11 +6703,11 @@ PHP_FUNCTION(openssl_open)
 	size_t data_len;
 	char * ekey;
 	size_t ekey_len;
-	char *method = NULL, *iv = NULL;
-	size_t method_len = 0, iv_len = 0;
+	char *method, *iv = NULL;
+	size_t method_len, iv_len = 0;
 	const EVP_CIPHER *cipher;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szszs|s", &data, &data_len, &opendata,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szszs|s!", &data, &data_len, &opendata,
 				&ekey, &ekey_len, &privkey, &method, &method_len, &iv, &iv_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -6729,14 +6725,14 @@ PHP_FUNCTION(openssl_open)
 
 	cipher = EVP_get_cipherbyname(method);
 	if (!cipher) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
 		RETURN_FALSE;
 	}
 
 	cipher_iv_len = EVP_CIPHER_iv_length(cipher);
 	if (cipher_iv_len > 0) {
 		if (!iv) {
-			zend_argument_value_error(6, "must provide an IV for chosen cipher algorithm");
+			zend_argument_value_error(6, "cannot be null for the chosen cipher method");
 			RETURN_THROWS();
 		}
 		if ((size_t)cipher_iv_len != iv_len) {
@@ -6858,7 +6854,7 @@ PHP_FUNCTION(openssl_digest)
 	}
 	mdtype = EVP_get_digestbyname(method);
 	if (!mdtype) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown digest method");
 		RETURN_FALSE;
 	}
 
@@ -7118,7 +7114,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
 		return NULL;
 	}
 
@@ -7234,7 +7230,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
 		return NULL;
 	}
 
@@ -7296,7 +7292,7 @@ PHP_FUNCTION(openssl_decrypt)
 	size_t data_len, method_len, password_len, iv_len = 0, tag_len = 0, aad_len = 0;
 	zend_string *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lsss", &data, &data_len, &method, &method_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lss!s", &data, &data_len, &method, &method_len,
 					&password, &password_len, &options, &iv, &iv_len, &tag, &tag_len, &aad, &aad_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -7320,7 +7316,7 @@ PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
 		return -1;
 	}
 

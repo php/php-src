@@ -77,5 +77,5 @@ JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
 
 Warning: openssl_csr_export_to_file(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
 bool(false)
-openssl_csr_export_to_file(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
+openssl_csr_export_to_file(): Argument #1 ($request) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
 bool(true)

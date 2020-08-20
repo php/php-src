@@ -40,7 +40,7 @@ bool(true)
 Warning: openssl_x509_export(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 bool(true)
-openssl_x509_export(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, array given
+openssl_x509_export(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
 int(0)
 int(0)
 int(%d)

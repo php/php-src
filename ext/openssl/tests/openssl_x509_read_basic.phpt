@@ -42,5 +42,5 @@ Warning: openssl_x509_read(): X.509 Certificate cannot be retrieved in %s on lin
 bool(false)
 object(OpenSSLCertificate)#%d (0) {
 }
-openssl_x509_read(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, array given
-openssl_x509_read(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, array given
+openssl_x509_read(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
+openssl_x509_read(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given

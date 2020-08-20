@@ -44,5 +44,5 @@ bool(true)
 
 Warning: openssl_csr_export(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
 bool(false)
-openssl_csr_export(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
+openssl_csr_export(): Argument #1 ($request) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
 bool(true)

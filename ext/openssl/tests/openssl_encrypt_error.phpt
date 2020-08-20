@@ -22,7 +22,7 @@ var_dump(openssl_encrypt($data, $method, $password, 0, $iv, $wrong));
 var_dump(openssl_encrypt($data, $method, $password, OPENSSL_DONT_ZERO_PAD_KEY, $iv));
 ?>
 --EXPECTF--
-Warning: openssl_encrypt(): Unknown cipher algorithm in %s on line %d
+Warning: openssl_encrypt(): Unknown cipher method in %s on line %d
 bool(false)
 
 Warning: openssl_encrypt(): The authenticated tag cannot be provided for cipher that doesn not support AEAD in %s on line %d
