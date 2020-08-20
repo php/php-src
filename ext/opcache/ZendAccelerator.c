@@ -487,7 +487,7 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 		} while (pos != STRTAB_INVALID_POS);
 	}
 
-	if (UNEXPECTED(ZCSG(interned_strings).end - ZCSG(interned_strings).top < STRTAB_STR_SIZE(str))) {
+	if (UNEXPECTED((char*)ZCSG(interned_strings).end - (char*)ZCSG(interned_strings).top < STRTAB_STR_SIZE(str))) {
 	    /* no memory, return the same non-interned string */
 		zend_accel_error(ACCEL_LOG_WARNING, "Interned string buffer overflow");
 		return str;
