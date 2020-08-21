@@ -103,8 +103,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht);
 
 #define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent) \
 	_zend_hash_init((ht), (nSize), (pDestructor), (persistent))
-#define zend_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection) \
-	_zend_hash_init((ht), (nSize), (pDestructor), (persistent))
 
 ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed);
 ZEND_API void ZEND_FASTCALL zend_hash_real_init_packed(HashTable *ht);
