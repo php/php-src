@@ -78,10 +78,6 @@ static zend_always_inline void zval_ptr_dtor_str(zval *zval_ptr)
 
 ZEND_API void zval_ptr_dtor(zval *zval_ptr);
 ZEND_API void zval_internal_ptr_dtor(zval *zvalue);
-
-/* Kept for compatibility */
-#define zval_dtor_func rc_dtor_func
-
 ZEND_API void zval_add_ref(zval *p);
 
 END_EXTERN_C()
