@@ -597,7 +597,7 @@ string_key:
 			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
 				zval_ptr_dtor(data);
 				ZVAL_UNDEF(data);
-				zval_dtor(&key);
+				zval_ptr_dtor_nogc(&key);
 				goto failure;
 			}
 			if (Z_ISREF_P(data)) {
