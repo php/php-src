@@ -155,7 +155,7 @@ function array_merge_recursive(array ...$arrays): array {}
 
 function array_replace(array $input, array ...$replacements): array {}
 
-function array_replace_recursive(array $array1, array ...$arrays): array {}
+function array_replace_recursive(array $input, array ...$replacements): array {}
 
 function array_keys(array $array, mixed $search_value = UNKNOWN, bool $strict = false): array {}
 
