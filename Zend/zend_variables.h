@@ -80,7 +80,6 @@ ZEND_API void zval_ptr_dtor(zval *zval_ptr);
 ZEND_API void zval_internal_ptr_dtor(zval *zvalue);
 
 /* Kept for compatibility */
-#define zval_dtor(zvalue) zval_ptr_dtor_nogc(zvalue)
 #define zval_internal_dtor(zvalue) zval_internal_ptr_dtor(zvalue)
 #define zval_dtor_func rc_dtor_func
 #define zval_ptr_dtor_wrapper zval_ptr_dtor
