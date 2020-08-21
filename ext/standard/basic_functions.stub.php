@@ -243,7 +243,7 @@ function array_reduce(array $array, callable $callback, mixed $initial = null): 
 
 function array_filter(array $array, ?callable $callback = null, int $use_keys = 0): array {}
 
-function array_map(?callable $callback, array $array1, array ...$arrays): array {}
+function array_map(?callable $callback, array $input, array ...$rest): array {}
 
 /** @param int|string $key */
 function array_key_exists($key, array $search): bool {}
