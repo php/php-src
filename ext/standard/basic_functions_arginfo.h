@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b592dc72a6de3ed1f299e6640162bd31241d0852 */
+ * Stub hash: c2b725713aba7134708d85f68e64a806d578a0ac */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -277,14 +277,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_unique, 0, 1, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_intersect_key, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, array1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, array2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, include, IS_ARRAY, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, arrays, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_intersect_ukey, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, array1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, array2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, include, IS_ARRAY, 0)
 	ZEND_ARG_VARIADIC_INFO(0, rest)
 ZEND_END_ARG_INFO()
 
@@ -292,7 +292,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_array_uintersect arginfo_array_intersect_ukey
 
-#define arginfo_array_intersect_assoc arginfo_array_intersect_key
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_intersect_assoc, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, include, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, rest, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_array_uintersect_assoc arginfo_array_intersect_ukey
 
@@ -300,21 +304,29 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_array_uintersect_uassoc arginfo_array_intersect_ukey
 
-#define arginfo_array_diff_key arginfo_array_intersect_key
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_key, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array2, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, arrays, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_array_diff_ukey arginfo_array_intersect_ukey
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_ukey, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array2, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_INFO(0, rest)
+ZEND_END_ARG_INFO()
 
-#define arginfo_array_diff arginfo_array_intersect_key
+#define arginfo_array_diff arginfo_array_diff_key
 
-#define arginfo_array_udiff arginfo_array_intersect_ukey
+#define arginfo_array_udiff arginfo_array_diff_ukey
 
-#define arginfo_array_diff_assoc arginfo_array_intersect_key
+#define arginfo_array_diff_assoc arginfo_array_diff_key
 
-#define arginfo_array_diff_uassoc arginfo_array_intersect_ukey
+#define arginfo_array_diff_uassoc arginfo_array_diff_ukey
 
-#define arginfo_array_udiff_assoc arginfo_array_intersect_ukey
+#define arginfo_array_udiff_assoc arginfo_array_diff_ukey
 
-#define arginfo_array_udiff_uassoc arginfo_array_intersect_ukey
+#define arginfo_array_udiff_uassoc arginfo_array_diff_ukey
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_multisort, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, array1)
