@@ -334,7 +334,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 {
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
-	zend_bool modifiable;
+	uint8_t modifiable;
 	zend_bool modified;
 
 	if ((ini_entry = zend_hash_find_ptr(EG(ini_directives), name)) == NULL) {
