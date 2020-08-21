@@ -32,10 +32,7 @@
 #include "zend_language_scanner.h"
 #include "zend_inheritance.h"
 #include "zend_vm.h"
-//#include "zend_observer.h"
-
-// TODO
-ZEND_API void zend_observer_fcall_install(zend_function *function);
+#include "zend_observer.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \

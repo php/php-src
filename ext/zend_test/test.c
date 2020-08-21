@@ -35,7 +35,6 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_observe_functions;
 	int observer_show_return_type;
 	int observer_show_return_value;
-	//HashTable observer_observe_functions_list;
 	int observer_nesting_depth;
 ZEND_END_MODULE_GLOBALS(zend_test)
 

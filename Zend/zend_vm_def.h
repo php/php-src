@@ -2762,7 +2762,6 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 	uint32_t call_info = EX_CALL_INFO();
 	SAVE_OPLINE();
 
-	// TODO Maybe not pass in return_value explicitly?
 	zend_observer_maybe_fcall_call_end(execute_data, EX(return_value));
 
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) == 0)) {

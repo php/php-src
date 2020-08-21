@@ -3638,13 +3638,11 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	if (zend_observer_fcall_op_array_extension != -1 && op_array != ZEND_FAKE_OP_ARRAY) {
 		if (ptr != NULL) {
-			// TODO: Pass execute_data via zend_observer_execute_install()
 			zend_observer_fcall_install((zend_function*)op_array);
 		}
 		void *observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
 		ZEND_ASSERT(observer_handlers);
 		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-			// TODO: Run zend_observe_execute_begin() handlers
 			zend_observe_fcall_begin(observer_handlers, execute_data);
 		}
 	}

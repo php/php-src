@@ -2239,6 +2239,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
+	zend_observer_startup();
 
 	/* startup extensions statically compiled in */
 	if (php_register_internal_extensions_func() == FAILURE) {
@@ -2257,7 +2258,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	   ahead of all other internals
 	 */
 	php_ini_register_extensions();
-	zend_observer_startup();
 	zend_startup_modules();
 
 	/* start Zend extensions */
