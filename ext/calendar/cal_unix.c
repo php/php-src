@@ -28,16 +28,19 @@
 PHP_FUNCTION(unixtojd)
 {
 	time_t ts = 0;
+	zend_long tl = 0;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &tl) == FAILURE) {
 		return;
 	}
 
-	if (!ts) {
+	if (!tl) {
 		ts = time(NULL);
-	} else if (ts < 0) {
+	} else if (tl < 0) {
 		RETURN_FALSE;
+	} else {
+		ts = (time_t)tl;
 	}
 
 	if (!(ta = php_localtime_r(&ts, &tmbuf))) {
