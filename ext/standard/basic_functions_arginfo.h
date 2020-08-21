@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8b6ef365e9635c92ef86adb40b2aba077867f3b2 */
+ * Stub hash: b592dc72a6de3ed1f299e6640162bd31241d0852 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -220,11 +220,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_array_merge_recursive arginfo_array_merge
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_replace, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, replacements, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_replace_recursive, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array1, IS_ARRAY, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, arrays, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
-
-#define arginfo_array_replace_recursive arginfo_array_replace
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_keys, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)

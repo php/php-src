@@ -153,7 +153,7 @@ function array_merge(array ...$arrays): array {}
 
 function array_merge_recursive(array ...$arrays): array {}
 
-function array_replace(array $array1, array ...$arrays): array {}
+function array_replace(array $input, array ...$replacements): array {}
 
 function array_replace_recursive(array $array1, array ...$arrays): array {}
 
