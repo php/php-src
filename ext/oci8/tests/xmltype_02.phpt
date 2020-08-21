@@ -111,7 +111,7 @@ oci8_test_sql_execute($c, $stmtarray);
 Test 1 Insert new XML data using a temporary CLOB
 array(1) {
   [0]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

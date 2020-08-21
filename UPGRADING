@@ -381,6 +381,9 @@ PHP 8.0 UPGRADE NOTES
     removed.
 
 - OCI8:
+  . The OCI-Lob class is now called OCILob, and the OCI-Collection class is now
+    called OCICollection for name compliance enforced by PHP 8 arginfo
+    type annotation tooling.
   . Several alias functions have been marked as deprecated.
   . oci_internal_debug() and its alias ociinternaldebug() have been removed.
 

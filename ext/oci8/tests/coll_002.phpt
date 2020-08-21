@@ -28,12 +28,12 @@ require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECTF--
-object(OCI_Collection)#%d (1) {
+object(OCICollection)#%d (1) {
   ["collection"]=>
   resource(%d) of type (oci8 collection)
 }
 bool(true)
-string(%d) "OCI_Collection::size(): supplied resource is not a valid oci8 collection resource"
+string(%d) "OCICollection::size(): supplied resource is not a valid oci8 collection resource"
 
 Warning: oci_new_collection(): OCI-22303: type ""."NONEXISTENT" not found in %s on line %d
 bool(false)

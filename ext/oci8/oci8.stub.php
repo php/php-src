@@ -36,87 +36,87 @@ function ocibindbyname($statement_resource, string $column_name, &$variable, int
  */
 function oci_bind_array_by_name($statement_resource, string $column_name, &$variable, int $maximum_array_length, int $maximum_item_length = -1, int $type = SQLT_AFC): bool {}
 
-function oci_free_descriptor(OCI_Lob $lob_descriptor): bool {}
+function oci_free_descriptor(OCILob $lob_descriptor): bool {}
 
 /**
  * @alias oci_free_descriptor
  * @deprecated
  */
-function ocifreedesc(OCI_Lob $lob_descriptor): bool {}
+function ocifreedesc(OCILob $lob_descriptor): bool {}
 
-function oci_lob_save(OCI_Lob $lob_descriptor, string $data, int $offset = 0): bool {}
+function oci_lob_save(OCILob $lob_descriptor, string $data, int $offset = 0): bool {}
 
 /**
  * @alias oci_lob_save
  * @deprecated
  */
-function ocisavelob(OCI_Lob $lob_descriptor, string $data, int $offset = 0): bool {}
+function ocisavelob(OCILob $lob_descriptor, string $data, int $offset = 0): bool {}
 
-function oci_lob_import(OCI_Lob $lob_descriptor, string $filename): bool {}
+function oci_lob_import(OCILob $lob_descriptor, string $filename): bool {}
 
 /**
  * @alias oci_lob_import
  * @deprecated
  */
-function ocisavelobfile(OCI_Lob $lob_descriptor, string $filename): bool {}
+function ocisavelobfile(OCILob $lob_descriptor, string $filename): bool {}
 
-function oci_lob_load(OCI_Lob $lob_descriptor): string|false {}
+function oci_lob_load(OCILob $lob_descriptor): string|false {}
 
 /**
  * @alias oci_lob_load
  * @deprecated
  */
-function ociloadlob(OCI_Lob $lob_descriptor): string|false {}
+function ociloadlob(OCILob $lob_descriptor): string|false {}
 
-function oci_lob_read(OCI_Lob $lob_descriptor, int $length): string|false {}
+function oci_lob_read(OCILob $lob_descriptor, int $length): string|false {}
 
-function oci_lob_eof(OCI_Lob $lob_descriptor): bool {}
+function oci_lob_eof(OCILob $lob_descriptor): bool {}
 
-function oci_lob_tell(OCI_Lob $lob_descriptor): int|false {}
+function oci_lob_tell(OCILob $lob_descriptor): int|false {}
 
-function oci_lob_rewind(OCI_Lob $lob_descriptor): bool {}
+function oci_lob_rewind(OCILob $lob_descriptor): bool {}
 
-function oci_lob_seek(OCI_Lob $lob_descriptor, int $offset, int $whence = OCI_SEEK_SET): bool {}
+function oci_lob_seek(OCILob $lob_descriptor, int $offset, int $whence = OCI_SEEK_SET): bool {}
 
-function oci_lob_size(OCI_Lob $lob_descriptor): int|false {}
+function oci_lob_size(OCILob $lob_descriptor): int|false {}
 
-function oci_lob_write(OCI_Lob $lob_descriptor, string $string, int $length = UNKNOWN): int|false {}
+function oci_lob_write(OCILob $lob_descriptor, string $string, int $length = UNKNOWN): int|false {}
 
-function oci_lob_append(OCI_Lob $lob_descriptor_to, OCI_Lob $lob_descriptor_from): bool {}
+function oci_lob_append(OCILob $lob_descriptor_to, OCILob $lob_descriptor_from): bool {}
 
-function oci_lob_truncate(OCI_Lob $lob_descriptor, int $length = 0): bool {}
+function oci_lob_truncate(OCILob $lob_descriptor, int $length = 0): bool {}
 
-function oci_lob_erase(OCI_Lob $lob_descriptor, int $offset = UNKNOWN, int $length = UNKNOWN): int|false {}
+function oci_lob_erase(OCILob $lob_descriptor, int $offset = UNKNOWN, int $length = UNKNOWN): int|false {}
 
-function oci_lob_flush(OCI_Lob $lob_descriptor, int $flag = 0): bool {}
+function oci_lob_flush(OCILob $lob_descriptor, int $flag = 0): bool {}
 
-function ocisetbufferinglob(OCI_Lob $lob_descriptor, bool $mode): bool {}
+function ocisetbufferinglob(OCILob $lob_descriptor, bool $mode): bool {}
 
-function ocigetbufferinglob(OCI_Lob $lob_descriptor): bool {}
+function ocigetbufferinglob(OCILob $lob_descriptor): bool {}
 
-function oci_lob_copy(OCI_Lob $lob_descriptor_to, OCI_Lob $lob_descriptor_from, int $length = UNKNOWN): bool {}
+function oci_lob_copy(OCILob $lob_descriptor_to, OCILob $lob_descriptor_from, int $length = UNKNOWN): bool {}
 
-function oci_lob_is_equal(OCI_Lob $lob_descriptor_first, OCI_Lob $lob_descriptor_second): bool {}
+function oci_lob_is_equal(OCILob $lob_descriptor_first, OCILob $lob_descriptor_second): bool {}
 
-function oci_lob_export(OCI_Lob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
+function oci_lob_export(OCILob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
 
 /**
  * @alias oci_lob_export
  * @deprecated
  */
-function ociwritelobtofile(OCI_Lob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
+function ociwritelobtofile(OCILob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
 
 /**
  * @param resource $connection_resource
  */
-function oci_new_descriptor($connection_resource, int $type = OCI_DTYPE_LOB): ?OCI_Lob {}
+function oci_new_descriptor($connection_resource, int $type = OCI_DTYPE_LOB): ?OCILob {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_new_descriptor
  * @deprecated
  */
-function ocinewdescriptor($connection_resource, int $type = OCI_DTYPE_LOB): ?OCI_Lob {}
+function ocinewdescriptor($connection_resource, int $type = OCI_DTYPE_LOB): ?OCILob {}
 
 /**
  * @param resource $connection_resource
@@ -542,75 +542,75 @@ function oci_num_rows($statement_resource): int|false {}
  */
 function ocirowcount($statement_resource): int|false {}
 
-function oci_free_collection(OCI_Collection $collection): bool {}
+function oci_free_collection(OCICollection $collection): bool {}
 
 /**
  * @alias oci_free_collection
  * @deprecated
  */
-function ocifreecollection(OCI_Collection $collection): bool {}
+function ocifreecollection(OCICollection $collection): bool {}
 
-function oci_collection_append(OCI_Collection $collection, string $value): bool {}
+function oci_collection_append(OCICollection $collection, string $value): bool {}
 
 /**
  * @alias oci_collection_append
  * @deprecated
  */
-function ocicollappend(OCI_Collection $collection, string $value): bool {}
+function ocicollappend(OCICollection $collection, string $value): bool {}
 
-function oci_collection_element_get(OCI_Collection $collection, int $index): string|float|null|false {}
+function oci_collection_element_get(OCICollection $collection, int $index): string|float|null|false {}
 
 /**
  * @alias oci_collection_element_get
  * @deprecated
  */
-function ocicollgetelem(OCI_Collection $collection, int $index): string|float|null|false {}
+function ocicollgetelem(OCICollection $collection, int $index): string|float|null|false {}
 
-function oci_collection_assign(OCI_Collection $collection_to, OCI_Collection $collection_from): bool {}
+function oci_collection_assign(OCICollection $collection_to, OCICollection $collection_from): bool {}
 
-function oci_collection_element_assign(OCI_Collection $collection, int $index, string $value): bool {}
+function oci_collection_element_assign(OCICollection $collection, int $index, string $value): bool {}
 
 /**
  * @alias oci_collection_element_assign
  * @deprecated
  */
-function ocicollassignelem(OCI_Collection $collection, int $index, string $value): bool {}
+function ocicollassignelem(OCICollection $collection, int $index, string $value): bool {}
 
-function oci_collection_size(OCI_Collection $collection): int|false {}
+function oci_collection_size(OCICollection $collection): int|false {}
 
 /**
  * @alias oci_collection_size
  * @deprecated
  */
-function ocicollsize(OCI_Collection $collection): int|false {}
+function ocicollsize(OCICollection $collection): int|false {}
 
-function oci_collection_max(OCI_Collection $collection): int|false {}
+function oci_collection_max(OCICollection $collection): int|false {}
 
 /**
  * @alias oci_collection_max
  * @deprecated
  */
-function ocicollmax(OCI_Collection $collection): int|false {}
+function ocicollmax(OCICollection $collection): int|false {}
 
-function oci_collection_trim(OCI_Collection $collection, int $number): bool {}
+function oci_collection_trim(OCICollection $collection, int $number): bool {}
 
 /**
  * @alias oci_collection_trim
  * @deprecated
  */
-function ocicolltrim(OCI_Collection $collection, int $number): bool {}
+function ocicolltrim(OCICollection $collection, int $number): bool {}
 
 /**
  * @param resource $connection_resource
  */
-function oci_new_collection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCI_Collection|false {}
+function oci_new_collection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCICollection|false {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_new_collection
  * @deprecated
  */
-function ocinewcollection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCI_Collection|false {}
+function ocinewcollection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCICollection|false {}
 
 /**
  * @param resource $connection_resource
@@ -622,7 +622,7 @@ function oci_register_taf_callback($connection_resource, ?callable $function_nam
  */
 function oci_unregister_taf_callback($connection_resource): bool {}
 
-class OCI_Lob {
+class OCILob {
     /**
      * @alias oci_lob_save
      * @return bool
@@ -693,7 +693,7 @@ class OCI_Lob {
      * @alias oci_lob_append
      * @return bool
      */
-    public function append(OCI_Lob $lob_descriptor_from) {}
+    public function append(OCILob $lob_descriptor_from) {}
 
     /**
      * @alias oci_lob_truncate
@@ -756,7 +756,7 @@ class OCI_Lob {
     public function free() {}
 }
 
-class OCI_Collection {
+class OCICollection {
     /**
      * @alias oci_free_collection
      * @return bool
@@ -779,7 +779,7 @@ class OCI_Collection {
      * @alias oci_collection_assign
      * @return bool
      */
-    public function assign(OCI_Collection $collection_from) {}
+    public function assign(OCICollection $collection_from) {}
 
     /**
      * @alias oci_collection_element_assign

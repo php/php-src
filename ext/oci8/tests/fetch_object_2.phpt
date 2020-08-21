@@ -69,7 +69,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "123"
   ["COL2"]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -80,7 +80,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "456"
   ["COL2"]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -91,7 +91,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "789"
   ["COL2"]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

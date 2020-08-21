@@ -291,8 +291,8 @@ PHP_MINIT_FUNCTION(oci)
 	le_descriptor = zend_register_list_destructors_ex(php_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
 	le_collection = zend_register_list_destructors_ex(php_oci_collection_list_dtor, NULL, "oci8 collection", module_number);
 
-	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI_Lob", class_OCI_Lob_methods);
-	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI_Collection", class_OCI_Collection_methods);
+	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCILob", class_OCILob_methods);
+	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCICollection", class_OCICollection_methods);
 
 	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
 	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry);

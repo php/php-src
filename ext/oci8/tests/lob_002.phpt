@@ -52,7 +52,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 --EXPECTF--
-object(OCI_Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

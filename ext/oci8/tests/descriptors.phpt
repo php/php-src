@@ -44,7 +44,7 @@ echo "Done\n";
 --EXPECTF--
 array(1) {
   ["BLOB"]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

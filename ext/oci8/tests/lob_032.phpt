@@ -32,5 +32,5 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: OCI_Lob::write(): ORA-22990: %s in %s on line 19
+Warning: OCILob::write(): ORA-22990: %s in %s on line 19
 Done
