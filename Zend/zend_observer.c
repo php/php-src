@@ -92,7 +92,7 @@ void zend_observe_fcall_begin(
 	for (handler = cache->handlers; handler != end; ++handler) {
 		if (handler->begin) {
 			handler->begin(execute_data);
-                }
+		}
 	}
 }
 
