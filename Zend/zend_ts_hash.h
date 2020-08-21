@@ -39,9 +39,6 @@ ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDe
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
 
-#define zend_ts_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)	\
-	zend_ts_hash_init(ht, nSize, pDestructor, persistent)
-
 
 /* additions/updates/changes */
 ZEND_API zval *zend_ts_hash_update(TsHashTable *ht, zend_string *key, zval *pData);
