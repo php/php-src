@@ -393,7 +393,10 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	REGISTER_INI_ENTRIES();
 
-	zend_observer_fcall_register(observer_fcall_init);
+	// Loading via dl() not supported with the observer API
+	if (type != MODULE_TEMPORARY) {
+		zend_observer_fcall_register(observer_fcall_init);
+	}
 
 	return SUCCESS;
 }
