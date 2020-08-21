@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.23
 
+- Calendar:
+  . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
+    (Andy Postnikov)
 
 03 Sep 2020, PHP 7.3.22
 
