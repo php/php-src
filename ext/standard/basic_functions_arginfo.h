@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 51ff985f775bae325186922a1b4b4f7335089081 */
+ * Stub hash: 7a35741aa95538773f364eb8b0b7ab0f046cfb33 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -298,13 +298,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_array_uintersect_uassoc arginfo_array_intersect_ukey
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_key, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, source, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, exclude, IS_ARRAY, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, rest, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_ukey, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, source, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, exclude, IS_ARRAY, 0)
 	ZEND_ARG_VARIADIC_INFO(0, rest)
 ZEND_END_ARG_INFO()
