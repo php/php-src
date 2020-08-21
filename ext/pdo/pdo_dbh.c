@@ -1207,8 +1207,8 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	}
 
 	dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent);
-	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL,
-			dbh->is_persistent? cls_method_pdtor : cls_method_dtor, dbh->is_persistent, 0);
+	zend_hash_init(dbh->cls_methods[kind], 8, NULL,
+			dbh->is_persistent? cls_method_pdtor : cls_method_dtor, dbh->is_persistent);
 
 	memset(&func, 0, sizeof(func));
 
