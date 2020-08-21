@@ -2524,13 +2524,13 @@ try_again:
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
 {
 	return i_zend_is_true(op);
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 {
 	zend_object *zobj = Z_OBJ_P(op);
 	zval tmp;
