@@ -917,7 +917,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, zend_long session_mode, int persistent, int exclusive)
 {
 	zval *zvp;
-	zend_resource *le;
+	zend_resource *le = NULL;
 	zend_resource new_le;
 	php_oci_connection *connection = NULL;
 	smart_str hashed_details = {0};
@@ -1163,7 +1163,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				/* We have to do a hash_del but need to preserve the resource if there is a positive
 				 * refcount. Set the data pointer in the list entry to NULL
 				 */
-				if (connection == connection->id->ptr) {
+				if (connection == connection->id->ptr && le) {
 					le->ptr = NULL;
 				}
 
