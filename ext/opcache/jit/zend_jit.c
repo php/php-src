@@ -2633,6 +2633,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					}
 					case ZEND_IS_IDENTICAL:
 					case ZEND_IS_NOT_IDENTICAL:
+					case ZEND_CASE_STRICT:
 						if ((opline->result_type & IS_TMP_VAR)
 						 && (i + 1) <= end
 						 && ((opline+1)->opcode == ZEND_JMPZ
