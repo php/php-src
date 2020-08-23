@@ -2257,13 +2257,13 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 #if MYSQL_VERSION_ID >= 50107
 	case STMT_ATTR_UPDATE_MAX_LENGTH:
 	{
-		my_bool mode_b;
+		//my_bool mode_b;
 		if (mode_in != 0 && mode_in != 1) {
 			zend_argument_value_error(ERROR_ARG_POS(3), "must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH");
 			RETURN_THROWS();
 		}
-		mode_b = (my_bool) mode_in;
-		mode_p = &mode_b;
+		mode = mode_in;//(my_bool) mode_in;
+		mode_p = &mode;
 		break;
 	}
 #endif
