@@ -80,10 +80,6 @@ class SimpleType {
 
     public static function fromNode(Node $node) {
         if ($node instanceof Node\Name) {
-            if ($node->toString() === "mixed") {
-                return new SimpleType($node->toString(), true);
-            }
-
             assert($node->isFullyQualified());
             return new SimpleType($node->toString(), false);
         }
@@ -680,7 +676,7 @@ function parseFunctionLike(
             $type && !$type->isNullable()
         ) {
             $simpleType = $type->tryToSimpleType();
-            if ($simpleType === null || $simpleType->name !== "mixed") {
+            if ($simpleType === null) {
                 throw new Exception(
                     "Parameter $varName of function $name has null default, but is not nullable");
             }
