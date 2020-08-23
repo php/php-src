@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 473cceef8ade1758128ddb348ec3c90216d12b3f */
+ * Stub hash: f2ff49a9cefcd31a990989b1c1ff525f9fb4d3de */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)
@@ -576,7 +576,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mysqli_link, IS_OBJECT, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, resmode, IS_LONG, 0, "MYSQLI_STORE_RESULT")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_mode, IS_LONG, 0, "MYSQLI_STORE_RESULT")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_result_close arginfo_class_mysqli_character_set_name
