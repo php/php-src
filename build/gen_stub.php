@@ -646,6 +646,7 @@ function parseFunctionLike(
         }
     }
 
+    $varNameSet = [];
     $args = [];
     $numRequiredArgs = 0;
     $foundVariadic = false;
@@ -653,6 +654,11 @@ function parseFunctionLike(
         $varName = $param->var->name;
         $preferRef = !empty($paramMeta[$varName]['preferRef']);
         unset($paramMeta[$varName]);
+
+        if (isset($varNameSet[$varName])) {
+            throw new Exception("Duplicate parameter name $varName for function $name");
+        }
+        $varNameSet[$varName] = true;
 
         if ($preferRef) {
             $sendBy = ArgInfo::SEND_PREFER_REF;
