@@ -571,7 +571,7 @@ if test "$PHP_FPM" != "no"; then
 
   if test "x$PHP_FPM_APPARMOR" != "xno" ; then
     AC_CHECK_HEADERS([sys/apparmor.h])
-    AC_CHECK_LIB(apparmor, change_hat, [
+    AC_CHECK_LIB(apparmor, aa_change_profile, [
       PHP_ADD_LIBRARY(apparmor)
       AC_DEFINE(HAVE_APPARMOR, 1, [ AppArmor confinement available ])
     ],[
