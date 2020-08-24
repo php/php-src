@@ -6238,6 +6238,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, zend_
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					|	sete al
 					break;
 				case ZEND_IS_NOT_EQUAL:
@@ -6271,6 +6272,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, zend_
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					if (exit_addr) {
 						| jne &exit_addr
 					} else {
@@ -6330,6 +6332,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, zend_
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					if (exit_addr) {
 						| je &exit_addr
 					} else {
@@ -6388,6 +6391,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, zend_
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					| jne => target_label
 					break;
 				case ZEND_IS_NOT_EQUAL:
@@ -6420,6 +6424,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, zend_
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
+			case ZEND_CASE_STRICT:
 				|	sete al
 				break;
 			case ZEND_IS_NOT_EQUAL:
@@ -6459,6 +6464,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					if (exit_addr) {
 						| jne &exit_addr
 						| jp &exit_addr
@@ -6528,6 +6534,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					| jp >1
 					if (exit_addr) {
 						| je &exit_addr
@@ -6597,6 +6604,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					| jne => target_label
 					| jp => target_label
 					break;
@@ -6630,6 +6638,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 					|	jne => target_label
 					|	jp => target_label
@@ -6675,6 +6684,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 					|	jp >1
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 					|	je => target_label
@@ -6729,6 +6739,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
+			case ZEND_CASE_STRICT:
 				|	jp >1
 				|	mov eax, IS_TRUE
 				|	je >2
@@ -7362,7 +7373,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, uint32_t 
 				|	jmp =>not_identical_label
 			}
 		} else {
-			|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode == ZEND_IS_IDENTICAL ? IS_FALSE : IS_TRUE)
+			|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode != ZEND_IS_NOT_IDENTICAL ? IS_FALSE : IS_TRUE)
 			zend_jit_check_exception(Dst);
 		}
 	} else if (has_concrete_type(op1_info) &&
@@ -7378,7 +7389,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, uint32_t 
 				|	jmp =>identical_label
 			}
 		} else {
-			|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode == ZEND_IS_IDENTICAL ? IS_TRUE : IS_FALSE)
+			|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode != ZEND_IS_NOT_IDENTICAL ? IS_TRUE : IS_FALSE)
 		}
 	} else if (Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_MODE(op2_addr) == IS_CONST_ZVAL) {
 		if (zend_is_identical(Z_ZV(op1_addr), Z_ZV(op2_addr))) {
@@ -7391,7 +7402,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, uint32_t 
 					|	jmp =>identical_label
 				}
 			} else {
-				|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode == ZEND_IS_IDENTICAL ? IS_TRUE : IS_FALSE)
+				|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode != ZEND_IS_NOT_IDENTICAL ? IS_TRUE : IS_FALSE)
 			}
 		} else {
 			if (smart_branch_opcode) {
@@ -7403,7 +7414,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, uint32_t 
 					|	jmp =>not_identical_label
 				}
 			} else {
-				|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode == ZEND_IS_IDENTICAL ? IS_FALSE : IS_TRUE)
+				|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode != ZEND_IS_NOT_IDENTICAL ? IS_FALSE : IS_TRUE)
 			}
 		}
 	} else if (Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_TYPE_P(Z_ZV(op1_addr)) <= IS_TRUE) {
@@ -7432,7 +7443,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, uint32_t 
 				|	je >9
 			}
 		} else {
-			if (opline->opcode == ZEND_IS_IDENTICAL) {
+			if (opline->opcode != ZEND_IS_NOT_IDENTICAL) {
 				|	sete al
 			} else {
 				|	setne al
@@ -7481,7 +7492,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, uint32_t 
 				|	je >9
 			}
 		} else {
-			if (opline->opcode == ZEND_IS_IDENTICAL) {
+			if (opline->opcode != ZEND_IS_NOT_IDENTICAL) {
 				|	sete al
 			} else {
 				|	setne al
@@ -7546,7 +7557,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, uint32_t 
 			}
 		} else {
 			|	movzx eax, al
-			if (opline->opcode == ZEND_IS_IDENTICAL) {
+			if (opline->opcode != ZEND_IS_NOT_IDENTICAL) {
 				|	lea eax, [eax + 2]
 			} else {
 				|	neg eax
