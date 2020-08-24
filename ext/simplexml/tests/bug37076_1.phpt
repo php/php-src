@@ -16,6 +16,6 @@ try {
 print $xml->asXML();
 ?>
 --EXPECT--
-Cannot create or write elements with an empty name
+Cannot create elements with an empty name
 <?xml version="1.0"?>
 <root><foo/></root>

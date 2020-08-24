@@ -411,7 +411,7 @@ static zval *sxe_prop_dim_write(zend_object *object, zval *member, zval *value, 
 			 * and could also be E_PARSE, but we use this only during parsing
 			 * and this is during runtime.
 			 */
-			zend_throw_error(NULL, "Cannot create unnamed attribute");
+			zend_throw_error(NULL, "Cannot append to an attribute list");
 			return &EG(error_zval);
 		}
 		goto long_dim;
@@ -436,7 +436,7 @@ long_dim:
 			}
 
 			if (!Z_STRLEN_P(member)) {
-				zend_value_error("Cannot create or write %s with an empty name", attribs ? "attributes" : "elements");
+				zend_value_error("Cannot create %s with an empty name", attribs ? "attributes" : "elements");
 				if (member == &tmp_zv) {
 					zval_ptr_dtor_str(&tmp_zv);
 				}
@@ -464,7 +464,7 @@ long_dim:
 			 * and could also be E_PARSE, but we use this only during parsing
 			 * and this is during runtime.
 			 */
-			zend_value_error("Cannot create or write attributes with an empty name");
+			zend_value_error("Cannot append to an attribute list");
 			return &EG(error_zval);
 		}
 		if (attribs && !node && sxe->iter.type == SXE_ITER_ELEMENT) {
@@ -489,8 +489,7 @@ long_dim:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
 					zval zval_copy;
 					if (sxe_object_cast_ex(Z_OBJ_P(value), &zval_copy, IS_STRING) == FAILURE) {
-						zend_error(E_ERROR, "Unable to cast node to string");
-						/* FIXME: Should not be fatal */
+						zend_throw_error(NULL, "Unable to cast node to string");
 					}
 
 					value_str = Z_STR(zval_copy);

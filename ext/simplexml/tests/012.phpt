@@ -15,7 +15,7 @@ EOF;
 $sxe = simplexml_load_string($xml);
 
 try {
-    $sxe[""] = "warning";
+    $sxe[""] = "value";
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
@@ -38,9 +38,9 @@ __HALT_COMPILER();
 ?>
 ===DONE===
 --EXPECT--
-Cannot create or write attributes with an empty name
+Cannot create attributes with an empty name
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <foo attr="value"/>
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <foo attr="new value"/>
-Cannot create or write attributes with an empty name
+Cannot append to an attribute list
