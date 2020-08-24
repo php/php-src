@@ -765,12 +765,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 					ZVAL_NEW_REF(arg, arg);
 				} else if (!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					/* By-value send is not allowed -- emit a warning,
-					 * but still perform the call with a by-value send. */
+					 * and perform the call with the value wrapped in a reference. */
 					zend_error(E_WARNING,
 						"Parameter %d to %s%s%s() expected to be a reference, value given", i+1,
 						func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
 						func->common.scope ? "::" : "",
 						ZSTR_VAL(func->common.function_name));
+					ZVAL_NEW_REF(arg, arg);
 					if (UNEXPECTED(EG(exception))) {
 						ZEND_CALL_NUM_ARGS(call) = i;
 						zend_vm_stack_free_args(call);
