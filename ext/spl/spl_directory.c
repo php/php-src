@@ -2511,8 +2511,6 @@ PHP_METHOD(SplFileObject, flock)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	act = operation & PHP_LOCK_UN;
-	// TODO doesn't this fail if operation is a bitmask with LOCK_NB?
-	//if (act != PHP_LOCK_SH && act != PHP_LOCK_EX && act != PHP_LOCK_UN) {
 	if (act < 1 || act > 3) {
 		zend_argument_value_error(1, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
 		RETURN_THROWS();
