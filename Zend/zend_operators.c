@@ -2524,13 +2524,13 @@ try_again:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
 {
 	return i_zend_is_true(op);
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 {
 	zend_object *zobj = Z_OBJ_P(op);
 	zval tmp;
@@ -2538,7 +2538,7 @@ ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 		return Z_TYPE(tmp) == IS_TRUE;
 	}
 	zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to bool", ZSTR_VAL(zobj->ce->name));
-	return 1;
+	return false;
 }
 /* }}} */
 
