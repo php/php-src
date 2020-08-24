@@ -2371,10 +2371,16 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			break;
 		}
 
+		/* Get parameter count including variadic parameter. */
+		uint32_t num_args = reg_function->common.num_args;
+		if (reg_function->common.fn_flags & ZEND_ACC_VARIADIC) {
+			num_args++;
+		}
+
 		/* If types of arguments have to be checked */
-		if (reg_function->common.arg_info && reg_function->common.num_args) {
+		if (reg_function->common.arg_info && num_args) {
 			uint32_t i;
-			for (i = 0; i < reg_function->common.num_args; i++) {
+			for (i = 0; i < num_args; i++) {
 				zend_internal_arg_info *arg_info = &reg_function->internal_function.arg_info[i];
 				ZEND_ASSERT(arg_info->name && "Parameter must have a name");
 				if (ZEND_TYPE_IS_SET(arg_info->type)) {
@@ -2396,13 +2402,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			/* convert "const char*" class type names into "zend_string*" */
 			uint32_t i;
-			uint32_t num_args = reg_function->common.num_args + 1;
 			zend_arg_info *arg_info = reg_function->common.arg_info - 1;
 			zend_arg_info *new_arg_info;
 
-			if (reg_function->common.fn_flags & ZEND_ACC_VARIADIC) {
-				num_args++;
-			}
+			/* Treat return type as an extra argument */
+			num_args++;
 			new_arg_info = malloc(sizeof(zend_arg_info) * num_args);
 			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
 			reg_function->common.arg_info = new_arg_info + 1;
