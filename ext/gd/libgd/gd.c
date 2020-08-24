@@ -1463,6 +1463,8 @@ void gdImageChar (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 	int cx, cy;
 	int px, py;
 	int fline;
+	const int xuppper = (x > INT_MAX - f->w) ? INT_MAX : x + f->w;
+	const int yuppper = (y > INT_MAX - f->h) ? INT_MAX : y + f->h;
 	cx = 0;
 	cy = 0;
 #ifdef CHARSET_EBCDIC
@@ -1472,8 +1474,8 @@ void gdImageChar (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 		return;
 	}
 	fline = (c - f->offset) * f->h * f->w;
-	for (py = y; (py < (y + f->h)); py++) {
-		for (px = x; (px < (x + f->w)); px++) {
+	for (py = y; py < yuppper; py++) {
+		for (px = x; px < xuppper; px++) {
 			if (f->data[fline + cy * f->w + cx]) {
 				gdImageSetPixel(im, px, py, color);
 			}
@@ -1489,6 +1491,8 @@ void gdImageCharUp (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 	int cx, cy;
 	int px, py;
 	int fline;
+	const int xuppper = (x > INT_MAX - f->h) ? INT_MAX : x + f->h;
+	const int ylower = (y < INT_MIN + f->w) ? INT_MIN : y - f->w;
 	cx = 0;
 	cy = 0;
 #ifdef CHARSET_EBCDIC
@@ -1498,8 +1502,8 @@ void gdImageCharUp (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 		return;
 	}
 	fline = (c - f->offset) * f->h * f->w;
-	for (py = y; py > (y - f->w); py--) {
-		for (px = x; px < (x + f->h); px++) {
+	for (py = y; py > ylower; py--) {
+		for (px = x; px < xuppper; px++) {
 			if (f->data[fline + cy * f->w + cx]) {
 				gdImageSetPixel(im, px, py, color);
 			}
