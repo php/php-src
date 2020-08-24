@@ -2936,11 +2936,7 @@ PHP_METHOD(Phar, setDefaultStub)
 	}
 
 	if ((index || webindex) && (phar_obj->archive->is_tar || phar_obj->archive->is_zip)) {
-		const char *space;
-		zend_value_error(
-			"%s::setDefaultStub(): Argument #%d ($%s) must be null for a tar- or zip-based phar stub, string given",
-			get_active_class_name(&space), index ? 1 : 2, index ? "index" : "webindex"
-		);
+		zend_argument_value_error(index ? 1 : 2, "must be null for a tar- or zip-based phar stub, string given");
 		RETURN_THROWS();
 	}
 
