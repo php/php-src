@@ -772,7 +772,7 @@ try_again:
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
-		if (zend_observer_fcall_op_array_extension != -1) {
+		if (ZEND_OBSERVER_ENABLED) {
 			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&generator->execute_data->func->op_array);
 			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {

@@ -3636,7 +3636,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	EG(current_execute_data) = execute_data;
 
-	if (zend_observer_fcall_op_array_extension != -1 && op_array != ZEND_FAKE_OP_ARRAY) {
+	if (ZEND_OBSERVER_ENABLED && op_array != ZEND_FAKE_OP_ARRAY) {
 		if (ptr != NULL) {
 			zend_observer_fcall_install((zend_function*)op_array);
 		}

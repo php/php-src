@@ -34,8 +34,9 @@ ZEND_API extern inline void zend_observer_maybe_fcall_call_end(
 // Call during minit/startup ONLY
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 	/* We don't want to get an extension handle unless an ext installs an observer */
-	if (zend_observer_fcall_op_array_extension == -1) {
-		zend_observer_fcall_op_array_extension = zend_get_op_array_extension_handle();
+	if (!ZEND_OBSERVER_ENABLED) {
+		zend_observer_fcall_op_array_extension =
+			zend_get_op_array_extension_handle();
 	}
 	zend_llist_add_element(&zend_observers_fcall_list, &init);
 }
@@ -47,7 +48,7 @@ ZEND_API void zend_observer_startup(void) {
 
 ZEND_API void zend_observer_activate(void) {
 	/* todo: how to size the arena? */
-	if (zend_observer_fcall_op_array_extension != -1) {
+	if (ZEND_OBSERVER_ENABLED) {
 		fcall_handlers_arena = zend_arena_create(1024);
 	}
 }
@@ -99,7 +100,7 @@ ZEND_API void zend_observer_fcall_install(zend_function *function) {
 		ext = ZEND_OBSERVER_NOT_OBSERVED;
 	}
 
-	ZEND_OP_ARRAY_EXTENSION(op_array, zend_observer_fcall_op_array_extension) = ext;
+	ZEND_OBSERVER_HANDLERS(op_array) = ext;
 	zend_llist_destroy(&handlers_list);
 }
 
@@ -112,6 +113,20 @@ void zend_observe_fcall_begin(
 		if (handler->begin) {
 			handler->begin(execute_data);
 		}
+	}
+}
+
+void zend_observer_fcall_call_end_helper(
+	zend_execute_data *execute_data,
+	zval *return_value)
+{
+	zend_function *func = execute_data->func;
+	ZEND_ASSUME(ZEND_SHOULD_OBSERVE_FN(func->common.fn_flags));
+	void *observer_handlers = ZEND_OBSERVER_HANDLERS(&func->op_array);
+	ZEND_ASSERT(observer_handlers);
+	if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+		zend_observer_fcall_cache *cache = observer_handlers;
+		zend_observe_fcall_end(cache, execute_data, return_value);
 	}
 }
 

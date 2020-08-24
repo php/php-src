@@ -27,14 +27,16 @@ BEGIN_EXTERN_C()
 
 extern int zend_observer_fcall_op_array_extension;
 
+#define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
+
 #define ZEND_OBSERVER_HANDLERS(op_array) \
 	ZEND_OP_ARRAY_EXTENSION(op_array, zend_observer_fcall_op_array_extension)
 
 #define ZEND_OBSERVER_NOT_OBSERVED ((void *) 2)
 
 #define ZEND_SHOULD_OBSERVE_FN(fn_flags) \
-	zend_observer_fcall_op_array_extension != -1 && \
-	!(fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	(ZEND_OBSERVER_ENABLED && \
+		!(fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE)))
 
 struct zend_observer_fcall {
 	void (*begin)(zend_execute_data *execute_data);
@@ -63,31 +65,26 @@ ZEND_API void zend_observer_shutdown(void);
 
 ZEND_API void zend_observer_fcall_install(zend_function *function);
 
-void zend_observe_fcall_begin(
+ZEND_API void zend_observe_fcall_begin(
 	zend_observer_fcall_cache *cache,
 	zend_execute_data *execute_data);
 
-void zend_observe_fcall_end(
+ZEND_API void zend_observe_fcall_end(
 	zend_observer_fcall_cache *cache,
 	zend_execute_data *execute_data,
 	zval *return_value);
 
-ZEND_API inline void zend_observer_maybe_fcall_call_end(
+ZEND_API void zend_observer_fcall_call_end_helper(
+	zend_execute_data *execute_data,
+	zval *return_value);
+
+ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_end(
 	zend_execute_data *execute_data,
 	zval *return_value)
 {
-	if (zend_observer_fcall_op_array_extension == -1) {
-		return;
-	}
-
 	zend_function *func = execute_data->func;
-	if (!(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&func->op_array);
-		ZEND_ASSERT(observer_handlers);
-		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-			zend_observer_fcall_cache *cache = observer_handlers;
-			zend_observe_fcall_end(cache, execute_data, return_value);
-		}
+	if (ZEND_SHOULD_OBSERVE_FN(func->common.fn_flags)) {
+		zend_observer_fcall_call_end_helper(execute_data, return_value);
 	}
 }
 
