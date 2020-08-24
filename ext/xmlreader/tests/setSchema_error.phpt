@@ -27,9 +27,17 @@ try {
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
 }
+
+$reader = new XMLReader();
+$reader->XML(<<<EOF
+<?xml version="1.0" encoding="UTF-8" ?>
+<foo/>
+EOF);
+var_dump(@$reader->setSchema('schema-bad.xsd'));
 $reader->close();
 ?>
 --EXPECT--
 XMLReader::setSchema(): Argument #1 ($filename) cannot be empty
-Unable to set schema. This must be set prior to reading or schema contains errors.
-Unable to set schema. This must be set prior to reading or schema contains errors.
+Schema must be set prior to reading
+Schema must be set prior to reading
+bool(false)

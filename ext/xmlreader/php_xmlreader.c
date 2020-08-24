@@ -506,14 +506,16 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 			intern->schema = schema;
 
 			RETURN_TRUE;
+		} else {
+			zend_throw_error(NULL, "Schema contains errors");
+			RETURN_FALSE;
 		}
+	} else {
+		zend_throw_error(NULL, "Schema must be set prior to reading");
+		RETURN_THROWS();
 	}
-
-	zend_throw_error(NULL, "Unable to set schema. This must be set prior to reading or schema contains errors.");
-	RETURN_THROWS();
 #else
-	php_error_docref(NULL, E_WARNING, "No Schema support built into libxml.");
-
+	php_error_docref(NULL, E_WARNING, "No schema support built into libxml");
 	RETURN_FALSE;
 #endif
 }
@@ -781,16 +783,16 @@ PHP_METHOD(XMLReader, read)
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
-	if (intern != NULL && intern->ptr != NULL) {
-		retval = xmlTextReaderRead(intern->ptr);
-		if (retval == -1) {
-			RETURN_FALSE;
-		} else {
-			RETURN_BOOL(retval);
-		}
+	if (intern == NULL || intern->ptr == NULL) {
+		zend_throw_error(NULL, "Data must be loaded before reading");
 	}
 
-	zend_throw_error(NULL, "Data must be loaded before reading");
+	retval = xmlTextReaderRead(intern->ptr);
+	if (retval == -1) {
+		RETURN_FALSE;
+	} else {
+		RETURN_BOOL(retval);
+	}
 }
 /* }}} */
 
@@ -939,14 +941,16 @@ PHP_METHOD(XMLReader, setSchema)
 
 		if (retval == 0) {
 			RETURN_TRUE;
+		} else {
+			php_error_docref(NULL, E_WARNING, "Schema contains errors");
+			RETURN_FALSE;
 		}
+	} else {
+		zend_throw_error(NULL, "Schema must be set prior to reading");
+		RETURN_THROWS();
 	}
-
-	zend_throw_error(NULL, "Unable to set schema. This must be set prior to reading or schema contains errors.");
-	RETURN_THROWS();
 #else
-	php_error_docref(NULL, E_WARNING, "No Schema support built into libxml.");
-
+	php_error_docref(NULL, E_WARNING, "No schema support built into libxml");
 	RETURN_FALSE;
 #endif
 }
