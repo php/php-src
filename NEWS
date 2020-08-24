@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2020, PHP 7.4.11
 
+- Core:
+  . Fixed bug #79979 (passing value to by-ref param via CUFA crashes). (cmb,
+    Nikita)
+
 - Calendar:
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
     (Andy Postnikov)
