@@ -5228,6 +5228,7 @@ ZEND_VM_C_LABEL(send_array):
 					if (EXPECTED(!must_wrap)) {
 						ZVAL_COPY(param, arg);
 					} else {
+						Z_TRY_ADDREF_P(arg);
 						ZVAL_NEW_REF(param, arg);
 					}
 					ZEND_CALL_NUM_ARGS(EX(call))++;
@@ -5280,6 +5281,7 @@ ZEND_VM_C_LABEL(send_array):
 				if (EXPECTED(!must_wrap)) {
 					ZVAL_COPY(param, arg);
 				} else {
+					Z_TRY_ADDREF_P(arg);
 					ZVAL_NEW_REF(param, arg);
 				}
 				if (!name) {
