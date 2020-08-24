@@ -531,7 +531,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif
 
-#if (defined(__i386__) || defined(__x86_64__))
+#if (defined(__i386__) || defined(__x86_64__)) && !defined(__OpenBSD__)
 # if PHP_HAVE_SSSE3_INSTRUCTIONS && defined(HAVE_TMMINTRIN_H)
 # define PHP_HAVE_SSSE3
 # endif
@@ -550,7 +550,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # endif
 #endif
 
-#ifdef __SSSE3__
+#if defined(__SSSE3__) && !defined(__OpenBSD__)
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSSE3_NATIVE 1
 #elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSSE3)) || defined(ZEND_WIN32)
