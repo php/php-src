@@ -826,6 +826,7 @@ cleanup_args:
 			if (EXPECTED(!must_wrap)) {
 				ZVAL_COPY(target, arg);
 			} else {
+				Z_TRY_ADDREF_P(arg);
 				ZVAL_NEW_REF(target, arg);
 			}
 			if (!name) {
