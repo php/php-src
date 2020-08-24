@@ -26,19 +26,8 @@
 # include <langinfo.h>
 #endif
 
-/*
- * This define is here because some versions of libintl redefine setlocale
- * to point to libintl_setlocale.  That's a ridiculous thing to do as far
- * as I am concerned, but with this define and the subsequent undef we
- * limit the damage to just the actual setlocale() call in this file
- * without turning zif_setlocale into zif_libintl_setlocale.  -Rasmus
- */
-#define php_my_setlocale setlocale
 #ifdef HAVE_LIBINTL
 # include <libintl.h> /* For LC_MESSAGES */
- #ifdef setlocale
- # undef setlocale
- #endif
 #endif
 
 #include "scanf.h"
@@ -4661,7 +4650,7 @@ PHP_FUNCTION(setlocale)
 		}
 
 # ifndef PHP_WIN32
-		retval = php_my_setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+		retval = setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
 # else
 		if (loc) {
 			/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
@@ -4676,10 +4665,10 @@ PHP_FUNCTION(setlocale)
 			) {
 				retval = NULL;
 			} else {
-				retval = php_my_setlocale(cat, ZSTR_VAL(loc));
+				retval = setlocale(cat, ZSTR_VAL(loc));
 			}
 		} else {
-			retval = php_my_setlocale(cat, NULL);
+			retval = setlocale(cat, NULL);
 		}
 # endif
 		zend_update_current_locale();
