@@ -358,7 +358,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval retval;
-	ZEND_RESULT_CODE result;
+	zend_result result;
 
 	zend_call_method_with_0_params(
 		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
@@ -460,7 +460,7 @@ static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	return &intern->std;
 }
 
-ZEND_API ZEND_RESULT_CODE zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
+ZEND_API zend_result zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
 	zend_class_entry *scope = EG(current_execute_data)->func->common.scope;
 	ZEND_ASSERT(scope->get_iterator != zend_user_it_get_new_iterator);
 	zend_object_iterator *iter = scope->get_iterator(Z_OBJCE_P(obj), obj, /* by_ref */ 0);
@@ -494,7 +494,7 @@ static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 }
 
 /* Many iterators will not behave correctly if rewind() is not called, make sure it happens. */
-static ZEND_RESULT_CODE zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
+static zend_result zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
 	if (!intern->rewind_called) {
 		zend_object_iterator *iter = intern->iter;
 		intern->rewind_called = 1;

@@ -908,11 +908,11 @@ static void zend_error_va(int type, const char *file, uint32_t lineno, const cha
 /* }}} */
 
 /* This function doesn't return if it uses E_ERROR */
-ZEND_API ZEND_COLD ZEND_RESULT_CODE zend_exception_error(zend_object *ex, int severity) /* {{{ */
+ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception, rv;
 	zend_class_entry *ce_exception;
-	ZEND_RESULT_CODE result = FAILURE;
+	zend_result result = FAILURE;
 
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = ex->ce;

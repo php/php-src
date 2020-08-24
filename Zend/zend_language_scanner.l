@@ -306,7 +306,7 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 	}
 }
 
-ZEND_API ZEND_RESULT_CODE zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
+ZEND_API zend_result zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
 {
 	char *ident = (char *) SCNG(yy_start) + ident_ref.offset;
 	size_t length = ident_ref.len;
@@ -486,7 +486,7 @@ static const zend_encoding* zend_multibyte_find_script_encoding(void)
 	return CG(script_encoding_list)[0];
 }
 
-ZEND_API ZEND_RESULT_CODE zend_multibyte_set_filter(const zend_encoding *onetime_encoding)
+ZEND_API zend_result zend_multibyte_set_filter(const zend_encoding *onetime_encoding)
 {
 	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding();
 	const zend_encoding *script_encoding = onetime_encoding ? onetime_encoding: zend_multibyte_find_script_encoding();
@@ -527,7 +527,7 @@ ZEND_API ZEND_RESULT_CODE zend_multibyte_set_filter(const zend_encoding *onetime
 	return SUCCESS;
 }
 
-ZEND_API ZEND_RESULT_CODE open_file_for_scanning(zend_file_handle *file_handle)
+ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 {
 	char *buf;
 	size_t size;
@@ -833,7 +833,7 @@ zend_op_array *compile_string(zval *source_string, const char *filename)
 
 
 BEGIN_EXTERN_C()
-ZEND_RESULT_CODE highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
+zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle;
@@ -927,7 +927,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
 
-static ZEND_RESULT_CODE zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
+static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
 {
 	register char *s, *t;
 	char *end;
@@ -1280,7 +1280,7 @@ static void enter_nesting(char opening)
 	zend_stack_push(&SCNG(nest_location_stack), &nest_loc);
 }
 
-static ZEND_RESULT_CODE exit_nesting(char closing)
+static zend_result exit_nesting(char closing)
 {
 	if (zend_stack_is_empty(&SCNG(nest_location_stack))) {
 		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unmatched '%c'", closing);
@@ -1301,7 +1301,7 @@ static ZEND_RESULT_CODE exit_nesting(char closing)
 	return SUCCESS;
 }
 
-static ZEND_RESULT_CODE check_nesting_at_end()
+static zend_result check_nesting_at_end()
 {
 	if (!zend_stack_is_empty(&SCNG(nest_location_stack))) {
 		zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));

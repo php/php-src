@@ -42,7 +42,7 @@ ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_list_delete(zend_resource *res)
+ZEND_API zend_result ZEND_FASTCALL zend_list_delete(zend_resource *res)
 {
 	if (GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);

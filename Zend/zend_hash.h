@@ -162,11 +162,11 @@ ZEND_API void ZEND_FASTCALL zend_hash_reverse_apply(HashTable *ht, apply_func_t 
 
 
 /* Deletes */
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key);
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key);
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *key, size_t len);
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *key, size_t len);
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *key, size_t len);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *key, size_t len);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h);
 ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p);
 
 /* Data retrieval */
@@ -227,11 +227,11 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *h
 
 #define zend_hash_has_more_elements_ex(ht, pos) \
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
-ZEND_API ZEND_RESULT_CODE   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
-ZEND_API ZEND_RESULT_CODE   ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
-ZEND_API ZEND_RESULT_CODE   ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos);
+ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
+ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
+ZEND_API zend_result   ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
-ZEND_API ZEND_RESULT_CODE   ZEND_FASTCALL zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
+ZEND_API zend_result   ZEND_FASTCALL zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API zval* ZEND_FASTCALL zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
@@ -460,7 +460,7 @@ static zend_always_inline zval *zend_symtable_update_ind(HashTable *ht, zend_str
 }
 
 
-static zend_always_inline ZEND_RESULT_CODE zend_symtable_del(HashTable *ht, zend_string *key)
+static zend_always_inline zend_result zend_symtable_del(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -472,7 +472,7 @@ static zend_always_inline ZEND_RESULT_CODE zend_symtable_del(HashTable *ht, zend
 }
 
 
-static zend_always_inline ZEND_RESULT_CODE zend_symtable_del_ind(HashTable *ht, zend_string *key)
+static zend_always_inline zend_result zend_symtable_del_ind(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -556,7 +556,7 @@ static zend_always_inline zval *zend_symtable_str_update_ind(HashTable *ht, cons
 }
 
 
-static zend_always_inline ZEND_RESULT_CODE zend_symtable_str_del(HashTable *ht, const char *str, size_t len)
+static zend_always_inline zend_result zend_symtable_str_del(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -568,7 +568,7 @@ static zend_always_inline ZEND_RESULT_CODE zend_symtable_str_del(HashTable *ht, 
 }
 
 
-static zend_always_inline ZEND_RESULT_CODE zend_symtable_str_del_ind(HashTable *ht, const char *str, size_t len)
+static zend_always_inline zend_result zend_symtable_str_del_ind(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 

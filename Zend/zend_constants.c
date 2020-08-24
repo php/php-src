@@ -393,7 +393,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		}
 
 		if (ret_constant && Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
-			ZEND_RESULT_CODE ret;
+			zend_result ret;
 
 			if (IS_CONSTANT_VISITED(ret_constant)) {
 				zend_throw_error(NULL, "Cannot declare self-referencing constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
@@ -477,11 +477,11 @@ static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_consta
 	return ret;
 }
 
-ZEND_API ZEND_RESULT_CODE zend_register_constant(zend_constant *c)
+ZEND_API zend_result zend_register_constant(zend_constant *c)
 {
 	zend_string *lowercase_name = NULL;
 	zend_string *name;
-	ZEND_RESULT_CODE ret = SUCCESS;
+	zend_result ret = SUCCESS;
 	zend_bool persistent = (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) != 0;
 
 #if 0

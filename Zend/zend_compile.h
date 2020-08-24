@@ -751,8 +751,8 @@ const char *zend_get_zendtext(void);
 int zend_get_zendleng(void);
 #endif
 
-typedef ZEND_RESULT_CODE (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
-typedef ZEND_RESULT_CODE (ZEND_FASTCALL *binary_op_type)(zval *, zval *, zval *);
+typedef zend_result (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
+typedef zend_result (ZEND_FASTCALL *binary_op_type)(zval *, zval *, zval *);
 
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
@@ -770,8 +770,8 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast);
 /* parser-driven code generators */
 void zend_do_free(znode *op1);
 
-ZEND_API ZEND_RESULT_CODE do_bind_function(zval *lcname);
-ZEND_API ZEND_RESULT_CODE do_bind_class(zval *lcname, zend_string *lc_parent_name);
+ZEND_API zend_result do_bind_function(zval *lcname);
+ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
 ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t first_early_binding_opline);
 
@@ -826,7 +826,7 @@ void zend_class_add_ref(zval *zv);
 ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_length, const char *src2, size_t src2_length, bool internal);
 #define zend_unmangle_property_name(mangled_property, class_name, prop_name) \
         zend_unmangle_property_name_ex(mangled_property, class_name, prop_name, NULL)
-ZEND_API ZEND_RESULT_CODE zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
+ZEND_API zend_result zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
 
 static zend_always_inline const char *zend_get_unmangled_property_name(const zend_string *mangled_prop) {
 	const char *class_name, *prop_name;
@@ -857,7 +857,7 @@ typedef struct _zend_auto_global {
 	zend_bool armed;
 } zend_auto_global;
 
-ZEND_API ZEND_RESULT_CODE zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback);
+ZEND_API zend_result zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback);
 ZEND_API void zend_activate_auto_globals(void);
 ZEND_API zend_bool zend_is_auto_global(zend_string *name);
 ZEND_API zend_bool zend_is_auto_global_str(const char *name, size_t len);

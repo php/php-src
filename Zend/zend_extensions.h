@@ -145,8 +145,8 @@ void zend_startup_extensions(void);
 void zend_shutdown_extensions(void);
 
 BEGIN_EXTERN_C()
-ZEND_API ZEND_RESULT_CODE zend_load_extension(const char *path);
-ZEND_API ZEND_RESULT_CODE zend_load_extension_handle(DL_HANDLE handle, const char *path);
+ZEND_API zend_result zend_load_extension(const char *path);
+ZEND_API zend_result zend_load_extension_handle(DL_HANDLE handle, const char *path);
 ZEND_API void zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 ZEND_API zend_extension *zend_get_extension(const char *extension_name);
 ZEND_API size_t zend_extensions_op_array_persist_calc(zend_op_array *op_array);

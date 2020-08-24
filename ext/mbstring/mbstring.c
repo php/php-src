@@ -296,11 +296,11 @@ static size_t count_commas(const char *p, const char *end) {
 	return count;
 }
 
-/* {{{ static ZEND_RESULT_CODE php_mb_parse_encoding_list()
+/* {{{ static zend_result php_mb_parse_encoding_list()
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  * 	Emits a ValueError in function context and a warning in INI context, in INI context arg_num must be 0.
  */
-static ZEND_RESULT_CODE php_mb_parse_encoding_list(const char *value, size_t value_length,
+static zend_result php_mb_parse_encoding_list(const char *value, size_t value_length,
 	const mbfl_encoding ***return_list, size_t *return_size, bool persistent, uint32_t arg_num,
 	zend_bool allow_pass_encoding)
 {
@@ -521,7 +521,7 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 	return loc;
 }
 
-static ZEND_RESULT_CODE php_mb_zend_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent)
+static zend_result php_mb_zend_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent)
 {
 	return php_mb_parse_encoding_list(
 		encoding_list, encoding_list_len,
@@ -534,7 +534,7 @@ static const zend_encoding *php_mb_zend_internal_encoding_getter(void)
 	return (const zend_encoding *)MBSTRG(internal_encoding);
 }
 
-static ZEND_RESULT_CODE php_mb_zend_internal_encoding_setter(const zend_encoding *encoding)
+static zend_result php_mb_zend_internal_encoding_setter(const zend_encoding *encoding)
 {
 	MBSTRG(internal_encoding) = (const mbfl_encoding *)encoding;
 	return SUCCESS;

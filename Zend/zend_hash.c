@@ -1360,7 +1360,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p)
 	_zend_hash_del_el(ht, HT_IDX_TO_HASH(p - ht->arData), p);
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1390,7 +1390,7 @@ ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string
 	return FAILURE;
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1438,7 +1438,7 @@ ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_st
 	return FAILURE;
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str, size_t len)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1482,7 +1482,7 @@ ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, con
 	return FAILURE;
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *str, size_t len)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1512,7 +1512,7 @@ ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const c
 	return FAILURE;
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h)
 {
 	uint32_t nIndex;
 	uint32_t idx;
@@ -2325,7 +2325,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Has
 }
 
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 {
 	uint32_t idx;
 
@@ -2350,7 +2350,7 @@ ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht,
 	}
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 {
 	uint32_t idx = *pos;
 

@@ -186,9 +186,9 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 	end_write(ht);
 }
 
-ZEND_API ZEND_RESULT_CODE zend_ts_hash_del(TsHashTable *ht, zend_string *key)
+ZEND_API zend_result zend_ts_hash_del(TsHashTable *ht, zend_string *key)
 {
-	ZEND_RESULT_CODE retval;
+	zend_result retval;
 
 	begin_write(ht);
 	retval = zend_hash_del(TS_HASH(ht), key);
@@ -197,9 +197,9 @@ ZEND_API ZEND_RESULT_CODE zend_ts_hash_del(TsHashTable *ht, zend_string *key)
 	return retval;
 }
 
-ZEND_API ZEND_RESULT_CODE zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h)
+ZEND_API zend_result zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h)
 {
-	ZEND_RESULT_CODE retval;
+	zend_result retval;
 
 	begin_write(ht);
 	retval = zend_hash_index_del(TS_HASH(ht), h);

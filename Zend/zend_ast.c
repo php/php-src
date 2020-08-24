@@ -438,7 +438,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *ast, zend_ast *op)
 	return (zend_ast *) list;
 }
 
-static ZEND_RESULT_CODE zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
+static zend_result zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 {
 	switch (Z_TYPE_P(offset)) {
 		case IS_UNDEF:
@@ -478,7 +478,7 @@ static ZEND_RESULT_CODE zend_ast_add_array_element(zval *result, zval *offset, z
 	return SUCCESS;
 }
 
-static ZEND_RESULT_CODE zend_ast_add_unpacked_element(zval *result, zval *expr) {
+static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 	if (EXPECTED(Z_TYPE_P(expr) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(expr);
 		zval *val;
@@ -505,10 +505,10 @@ static ZEND_RESULT_CODE zend_ast_add_unpacked_element(zval *result, zval *expr) 
 	return FAILURE;
 }
 
-ZEND_API ZEND_RESULT_CODE ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
 {
 	zval op1, op2;
-	ZEND_RESULT_CODE ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:

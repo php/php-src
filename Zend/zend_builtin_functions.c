@@ -57,7 +57,7 @@ zend_module_entry zend_builtin_module = { /* {{{ */
 };
 /* }}} */
 
-ZEND_RESULT_CODE zend_startup_builtin_functions(void) /* {{{ */
+zend_result zend_startup_builtin_functions(void) /* {{{ */
 {
 	zend_builtin_module.module_number = 0;
 	zend_builtin_module.type = MODULE_PERSISTENT;

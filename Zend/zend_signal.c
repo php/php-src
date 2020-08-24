@@ -281,7 +281,7 @@ ZEND_API void zend_signal(int signo, void (*handler)(int))
  *  Set a handler for a signal we want to defer.
  *  Previously set handler must have been saved before.
  */
-static ZEND_RESULT_CODE zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
+static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
 {
 	struct sigaction sa;
 

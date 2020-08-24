@@ -77,10 +77,10 @@ struct _zend_module_entry {
 	const struct _zend_module_dep *deps;
 	const char *name;
 	const struct _zend_function_entry *functions;
-	ZEND_RESULT_CODE (*module_startup_func)(INIT_FUNC_ARGS);
-	ZEND_RESULT_CODE (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-	ZEND_RESULT_CODE (*request_startup_func)(INIT_FUNC_ARGS);
-	ZEND_RESULT_CODE (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+	zend_result (*module_startup_func)(INIT_FUNC_ARGS);
+	zend_result (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+	zend_result (*request_startup_func)(INIT_FUNC_ARGS);
+	zend_result (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	const char *version;
 	size_t globals_size;

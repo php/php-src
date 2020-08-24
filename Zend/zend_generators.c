@@ -629,7 +629,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 	return root;
 }
 
-static ZEND_RESULT_CODE zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
+static zend_result zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
 {
 	zval *value;
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
