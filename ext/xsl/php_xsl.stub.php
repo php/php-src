@@ -25,11 +25,8 @@ class XSLTProcessor
      */
     public function transformToXml(object $document) {}
 
-    /**
-     * @param string|array $name
-     * @return bool
-     */
-    public function setParameter(string $namespace, $name, string $value = UNKNOWN) {}
+    /** @return bool */
+    public function setParameter(string $namespace, array|string $name, ?string $value = null) {}
 
     /** @return string|false */
     public function getParameter(string $namespace, string $name) {}
@@ -40,11 +37,8 @@ class XSLTProcessor
     /** @return bool */
     public function hasExsltSupport() {}
 
-    /**
-     * @param string|array|null $restrict
-     * @return void
-     */
-    public function registerPHPFunctions($restrict = null) {}
+    /** @return void */
+    public function registerPHPFunctions(array|string|null $restrict = null) {}
 
     /** @return bool */
     public function setProfiling(?string $filename) {}

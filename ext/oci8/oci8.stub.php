@@ -266,7 +266,7 @@ function oci_fetch_all($statement_resource, &$output, int $skip = 0, int $maximu
 
 /**
  * @param resource $statement_resource
- * @param mixed $output
+ * @param array $output
  * @alias oci_fetch_all
  * @deprecated
  */

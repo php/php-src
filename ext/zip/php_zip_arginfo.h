@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 880148896a71ad9bd076bb42c735ff1b83cd0731 */
+ * Stub hash: 49f168c537e48f8a3998d67812a5e2e6a2463533 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -175,7 +175,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_extractTo, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, pathto, IS_STRING, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, files, "null")
+	ZEND_ARG_TYPE_MASK(0, files, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_getFromName, 0, 0, 1)

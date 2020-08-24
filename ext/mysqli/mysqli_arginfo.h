@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a8626c7c42e4d117b08df7f42a7523f60f357b82 */
+ * Stub hash: 5695d494cc9a1f780e65c525c47e047780bf80f1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)
@@ -208,7 +208,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_options, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_ping arginfo_mysqli_more_results
@@ -545,7 +545,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_options, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_set_opt arginfo_class_mysqli_options

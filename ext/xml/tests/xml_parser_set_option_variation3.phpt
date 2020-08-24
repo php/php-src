@@ -78,8 +78,12 @@ $values = array(
 
 foreach($values as $value) {
       echo @"\nArg value $value \n";
-      var_dump( xml_parser_set_option($parser, $option, $value) );
-};
+      try {
+        var_dump(xml_parser_set_option($parser, $option, $value));
+      } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+      }
+}
 
 fclose($fp);
 xml_parser_free($parser);
@@ -116,19 +120,19 @@ Arg value 0.5
 bool(true)
 
 Arg value Array 
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
 
 Arg value Array 
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
 
 Arg value Array 
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
 
 Arg value Array 
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
 
 Arg value Array 
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
 
 Arg value  
 bool(true)
@@ -149,22 +153,20 @@ Arg value
 bool(true)
 
 Arg value  
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
 
 Arg value  
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
 
 Arg value string 
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
 
 Arg value string 
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
 
 Arg value Some Ascii Data 
-
-Notice: Object of class aClass could not be converted to int in %s on line %d
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
 
 Arg value Resource id %s
-bool(true)
+xml_parser_set_option(): Argument #3 ($value) must be of type string|int, resource given
 Done
