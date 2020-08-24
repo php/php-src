@@ -796,6 +796,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		if (EXPECTED(!must_wrap)) {
 			ZVAL_COPY(param, arg);
 		} else {
+			Z_TRY_ADDREF_P(arg);
 			ZVAL_NEW_REF(param, arg);
 		}
 	}

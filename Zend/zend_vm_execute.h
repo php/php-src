@@ -2097,6 +2097,7 @@ send_array:
 					if (EXPECTED(!must_wrap)) {
 						ZVAL_COPY(param, arg);
 					} else {
+						Z_TRY_ADDREF_P(arg);
 						ZVAL_NEW_REF(param, arg);
 					}
 					ZEND_CALL_NUM_ARGS(EX(call))++;
@@ -2130,6 +2131,7 @@ send_array:
 				if (EXPECTED(!must_wrap)) {
 					ZVAL_COPY(param, arg);
 				} else {
+					Z_TRY_ADDREF_P(arg);
 					ZVAL_NEW_REF(param, arg);
 				}
 				ZEND_CALL_NUM_ARGS(EX(call))++;
