@@ -1398,7 +1398,7 @@ mbfl_string *mbfl_html_numeric_entity_encode(mbfl_string *string, mbfl_string *r
 
 next_character:
 	while (p < e) {
-		int c = *p++;
+		unsigned int c = *p++;
 
 		for (int *mapelm = convmap; mapelm < convmap_end; mapelm += 4) {
 			int lo_code = mapelm[0];
@@ -1408,10 +1408,6 @@ next_character:
 
 			if (c >= lo_code && c <= hi_code) {
 				c = (c + offset) & mask;
-
-				if (c < 0) {
-					continue; /* Don't output anything, but see if another range matches */
-				}
 
 				mbfl_convert_filter_feed('&', decoder);
 				mbfl_convert_filter_feed('#', decoder);
