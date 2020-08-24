@@ -734,6 +734,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	for (i=0; i<fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
 		zval *arg = &fci->params[i];
+		zend_bool must_wrap = 0;
 		if (UNEXPECTED(Z_ISUNDEF_P(arg))) {
 			/* Allow forwarding undef slots. This is only used by Closure::__invoke(). */
 			ZVAL_UNDEF(param);
@@ -745,8 +746,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			if (UNEXPECTED(!Z_ISREF_P(arg))) {
 				if (!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					/* By-value send is not allowed -- emit a warning,
-					 * but still perform the call with a by-value send. */
+					 * and perform the call with the value wrapped in a reference. */
 					zend_param_must_be_ref(func, i + 1);
+					must_wrap = 1;
 					if (UNEXPECTED(EG(exception))) {
 						ZEND_CALL_NUM_ARGS(call) = i;
 cleanup_args:
@@ -767,7 +769,11 @@ cleanup_args:
 			}
 		}
 
-		ZVAL_COPY(param, arg);
+		if (EXPECTED(!must_wrap)) {
+			ZVAL_COPY(param, arg);
+		} else {
+			ZVAL_NEW_REF(param, arg);
+		}
 	}
 
 	if (fci->named_params) {
@@ -775,6 +781,7 @@ cleanup_args:
 		zval *arg;
 		uint32_t arg_num = ZEND_CALL_NUM_ARGS(call) + 1;
 		zend_bool have_named_params = 0;
+		zend_bool must_wrap = 0;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(fci->named_params, name, arg) {
 			zval *target;
 			if (name) {
@@ -799,8 +806,9 @@ cleanup_args:
 				if (UNEXPECTED(!Z_ISREF_P(arg))) {
 					if (!ARG_MAY_BE_SENT_BY_REF(func, arg_num)) {
 						/* By-value send is not allowed -- emit a warning,
-						 * but still perform the call with a by-value send. */
+						 * and perform the call with the value wrapped in a reference. */
 						zend_param_must_be_ref(func, arg_num);
+						must_wrap = 1;
 						if (UNEXPECTED(EG(exception))) {
 							goto cleanup_args;
 						}
@@ -814,7 +822,11 @@ cleanup_args:
 				}
 			}
 
-			ZVAL_COPY(target, arg);
+			if (EXPECTED(!must_wrap)) {
+				ZVAL_COPY(target, arg);
+			} else {
+				ZVAL_NEW_REF(target, arg);
+			}
 			if (!name) {
 				ZEND_CALL_NUM_ARGS(call)++;
 				arg_num++;
