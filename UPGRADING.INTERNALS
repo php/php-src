@@ -22,6 +22,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   s. zend_fcall_info no_separation flag removed
   t. Signature changes
   u. Error Notification callbacks to replace zend_error_cb overwrite use-cases
+  v. Removed Zend APIs
 
 2. Build system changes
   a. Abstract
@@ -200,6 +201,17 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 			zend_string *message) {
 		}
 		zend_register_error_notify_callback(my_error_notify_cb);
+
+  v. The following APIs have been removed from the Zend Engine:
+     - zend_ts_hash_init_ex(), drop the last argument and use zend_ts_hash_init() instead
+     - zend_hash_init_ex(), drop the last argument and use zend_hash_init() instead
+     - zval_internal_dtor(), use zval_internal_ptr_dtor() instead
+     - zval_dtor_func(), use rc_dtor_func() instead
+     - zval_ptr_dtor_wrapper(), use zval_ptr_dtor() instead
+     - zval_internal_ptr_dtor_wrapper(), use zval_internal_ptr_dtor() instead
+
+  w. The following APIs have been renamed:
+     - _zend_ts_hash_init() to zend_ts_hash_init()
 
 ========================
 2. Build system changes
