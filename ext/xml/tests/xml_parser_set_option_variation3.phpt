@@ -5,6 +5,9 @@ Test xml_parser_set_option() function : usage variations
 if (!extension_loaded("xml")) {
 	print "skip - XML extension not loaded";
 }
+if (PHP_INT_SIZE != 8) {
+    die('skip 64-bit only');
+}
 ?>
 --FILE--
 <?php
@@ -153,19 +156,19 @@ Arg value
 bool(true)
 
 Arg value  
-xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
+xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
 
 Arg value  
-xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
+xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
 
 Arg value string 
-xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
+xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
 
 Arg value string 
-xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
+xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
 
 Arg value Some Ascii Data 
-xml_parser_set_option(): Argument #3 ($value) must be of type string for the chosen option
+xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
 
 Arg value Resource id %s
 xml_parser_set_option(): Argument #3 ($value) must be of type string|int, resource given

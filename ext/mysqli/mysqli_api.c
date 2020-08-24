@@ -1717,7 +1717,7 @@ PHP_FUNCTION(mysqli_options)
 			RETURN_THROWS();
 		}
 		ret = mysql_options(mysql->mysql, mysql_option, (char *) &mysql_value_long);
-	} else if (expected_type == IS_NULL) {
+	} else {
 		ret = 1;
 	}
 

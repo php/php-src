@@ -3,6 +3,7 @@ Bug #72714 (_xml_startElementHandler() segmentation fault)
 --SKIPIF--
 <?php
 if (!extension_loaded('xml')) die('skip xml extension not available');
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
@@ -28,6 +29,6 @@ parse(3015809298423721);
 parse(20);
 ?>
 --EXPECTF--
-Notice: xml_parser_set_option(): tagstart ignored, because it is out of range in %s%ebug72714.php on line %d
+Warning: xml_parser_set_option(): tagstart ignored, because it is out of range in %s on line %d
 string(9) "NS1:TOTAL"
 string(0) ""

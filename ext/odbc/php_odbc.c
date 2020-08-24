@@ -1752,7 +1752,7 @@ PHP_FUNCTION(odbc_result)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(pv_res)
-		Z_PARAM_STR_OR_LONG(pv_field_str, pv_field_ind)
+		Z_PARAM_STR_OR_LONG(pv_field_str, pv_field_long)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (pv_field_str) {
@@ -1760,14 +1760,7 @@ PHP_FUNCTION(odbc_result)
 		field_ind = -1;
 	} else {
 		field = NULL;
-		field_ind = pv_field_long - 1;
-	}
-
-	if (Z_TYPE_P(pv_field) == IS_STRING) {
-		field = Z_STRVAL_P(pv_field);
-	} else {
-		convert_to_long_ex(pv_field);
-		field_ind = Z_LVAL_P(pv_field) - 1;
+		field_ind = (int) pv_field_long - 1;
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
