@@ -2524,9 +2524,9 @@ try_again:
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
 {
-	return i_zend_is_true(op);
+	return (int) i_zend_is_true(op);
 }
 /* }}} */
 
