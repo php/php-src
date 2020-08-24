@@ -4600,116 +4600,112 @@ PHP_FUNCTION(strip_tags)
 }
 /* }}} */
 
+static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
+	const char *retval;
+
+	if (!strcmp("0", ZSTR_VAL(loc))) {
+		loc = NULL;
+	} else {
+		if (ZSTR_LEN(loc) >= 255) {
+			php_error_docref(NULL, E_WARNING, "Specified locale name is too long");
+			return NULL;
+		}
+	}
+
+# ifndef PHP_WIN32
+	retval = setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+# else
+	if (loc) {
+		/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
+		char *locp = ZSTR_VAL(loc);
+		if (ZSTR_LEN(loc) >= 5 && locp[2] == '_'
+			&& locp[0] >= 'a' && locp[0] <= 'z' && locp[1] >= 'a' && locp[1] <= 'z'
+			&& locp[3] >= 'A' && locp[3] <= 'Z' && locp[4] >= 'A' && locp[4] <= 'Z'
+			&& (locp[5] == '\0' || locp[5] == '.')
+			&& !(locp[0] == 'u' && (locp[1] == 'k' || locp[1] == 's')
+				&& locp[3] == 'U' && (locp[4] == 'K' || locp[4] == 'S')
+				&& locp[5] == '\0')
+		) {
+			retval = NULL;
+		} else {
+			retval = setlocale(cat, ZSTR_VAL(loc));
+		}
+	} else {
+		retval = setlocale(cat, NULL);
+	}
+# endif
+	zend_update_current_locale();
+	if (!retval) {
+		return NULL;
+	}
+
+	if (loc) {
+		/* Remember if locale was changed */
+		size_t len = strlen(retval);
+
+		BG(locale_changed) = 1;
+		if (cat == LC_CTYPE || cat == LC_ALL) {
+			if (BG(ctype_string)) {
+				zend_string_release_ex(BG(ctype_string), 0);
+			}
+			if (len == 1 && *retval == 'C') {
+				/* C locale is represented as NULL. */
+				BG(ctype_string) = NULL;
+				zend_string_release_ex(loc, 0);
+				return ZSTR_CHAR('C');
+			} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
+				BG(ctype_string) = zend_string_copy(loc);
+				return zend_string_copy(BG(ctype_string));
+			} else {
+				BG(ctype_string) = zend_string_init(retval, len, 0);
+				return zend_string_copy(BG(ctype_string));
+			}
+		} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
+			return zend_string_copy(loc);
+		}
+	}
+	return zend_string_init(retval, strlen(retval), 0);
+}
+
+static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {
+	zend_string *loc_str = zval_try_get_string(loc_zv);
+	zend_string *result = try_setlocale_str(cat, loc_str);
+	zend_string_release_ex(loc_str, 0);
+	return result;
+}
+
 /* {{{ Set locale information */
 PHP_FUNCTION(setlocale)
 {
-	zval *args = NULL;
-	zval *plocale;
-	zend_string *loc;
-	const char *retval;
 	zend_long cat;
-	int num_args, i = 0;
-	uint32_t idx;
+	zval *args = NULL;
+	int num_args;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_LONG(cat)
 		Z_PARAM_VARIADIC('+', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	idx = 0;
-	while (1) {
-		if (Z_TYPE(args[0]) == IS_ARRAY) {
-			while (idx < Z_ARRVAL(args[0])->nNumUsed) {
-				plocale = &Z_ARRVAL(args[0])->arData[idx].val;
-				if (Z_TYPE_P(plocale) != IS_UNDEF) {
-					break;
+	for (uint32_t i = 0; i < num_args; i++) {
+		if (Z_TYPE(args[i]) == IS_ARRAY) {
+			zval *elem;
+			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), elem) {
+				zend_string *result = try_setlocale_zval(cat, elem);
+				if (EG(exception)) {
+					RETURN_THROWS();
 				}
-				idx++;
-			}
-			if (idx >= Z_ARRVAL(args[0])->nNumUsed) {
-				break;
-			}
-		} else {
-			plocale = &args[i];
-		}
-
-		loc = zval_try_get_string(plocale);
-		if (UNEXPECTED(!loc)) {
-			return;
-		}
-
-		if (!strcmp("0", ZSTR_VAL(loc))) {
-			zend_string_release_ex(loc, 0);
-			loc = NULL;
-		} else {
-			if (ZSTR_LEN(loc) >= 255) {
-				php_error_docref(NULL, E_WARNING, "Specified locale name is too long");
-				zend_string_release_ex(loc, 0);
-				break;
-			}
-		}
-
-# ifndef PHP_WIN32
-		retval = setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
-# else
-		if (loc) {
-			/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
-			char *locp = ZSTR_VAL(loc);
-			if (ZSTR_LEN(loc) >= 5 && locp[2] == '_'
-				&& locp[0] >= 'a' && locp[0] <= 'z' && locp[1] >= 'a' && locp[1] <= 'z'
-				&& locp[3] >= 'A' && locp[3] <= 'Z' && locp[4] >= 'A' && locp[4] <= 'Z'
-				&& (locp[5] == '\0' || locp[5] == '.')
-				&& !(locp[0] == 'u' && (locp[1] == 'k' || locp[1] == 's')
-					&& locp[3] == 'U' && (locp[4] == 'K' || locp[4] == 'S')
-					&& locp[5] == '\0')
-			) {
-				retval = NULL;
-			} else {
-				retval = setlocale(cat, ZSTR_VAL(loc));
-			}
-		} else {
-			retval = setlocale(cat, NULL);
-		}
-# endif
-		zend_update_current_locale();
-		if (retval) {
-			if (loc) {
-				/* Remember if locale was changed */
-				size_t len = strlen(retval);
-
-				BG(locale_changed) = 1;
-				if (cat == LC_CTYPE || cat == LC_ALL) {
-					if (BG(ctype_string)) {
-						zend_string_release_ex(BG(ctype_string), 0);
-					}
-					if (len == 1 && *retval == 'C') {
-						/* C locale is represented as NULL. */
-						BG(ctype_string) = NULL;
-						zend_string_release_ex(loc, 0);
-						RETURN_CHAR('C');
-					} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
-						BG(ctype_string) = zend_string_copy(loc);
-						RETURN_STR(BG(ctype_string));
-					} else {
-						BG(ctype_string) = zend_string_init(retval, len, 0);
-						zend_string_release_ex(loc, 0);
-						RETURN_STR_COPY(BG(ctype_string));
-					}
-				} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
-					RETURN_STR(loc);
+				if (result) {
+					RETURN_STR(result);
 				}
-				zend_string_release_ex(loc, 0);
-			}
-			RETURN_STRING(retval);
-		}
-		if (loc) {
-			zend_string_release_ex(loc, 0);
-		}
-
-		if (Z_TYPE(args[0]) == IS_ARRAY) {
-			idx++;
+			} ZEND_HASH_FOREACH_END();
 		} else {
-			if (++i >= num_args) break;
+			zend_string *result = try_setlocale_zval(cat, &args[i]);
+			if (EG(exception)) {
+				RETURN_THROWS();
+			}
+			if (result) {
+				RETURN_STR(result);
+			}
 		}
 	}
 
