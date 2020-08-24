@@ -57,11 +57,8 @@ function odbc_fetch_into($result_id, &$result_array, int $rownumber = 0): int|fa
 /** @param resource $result_id */
 function odbc_fetch_row($result_id, int $row_number = UNKNOWN): bool {}
 
-/**
- * @param resource $result_id
- * @param string|int $field
- */
-function odbc_result($result_id, $field): string|bool|null {}
+/** @param resource $result_id */
+function odbc_result($result_id, string|int $field): string|bool|null {}
 
 /** @param resource $result_id */
 function odbc_result_all($result_id, string $format = ''): int|false {}

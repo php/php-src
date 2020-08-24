@@ -1736,31 +1736,31 @@ PHP_FUNCTION(odbc_fetch_row)
 PHP_FUNCTION(odbc_result)
 {
 	char *field;
-	zend_string *field_str;
+	zend_string *field_str, *pv_field_str;
+	zend_long pv_field_long;
 	int field_ind;
 	SQLSMALLINT sql_c_type = SQL_C_CHAR;
 	odbc_result *result;
 	int i = 0;
 	RETCODE rc;
 	SQLLEN	fieldsize;
-	zval *pv_res, *pv_field;
+	zval *pv_res;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
 	SQLUSMALLINT RowStatus[1];
 #endif
 
-	field_ind = -1;
-	field = NULL;
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(pv_res)
+		Z_PARAM_STR_OR_LONG(pv_field_str, pv_field_long)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &pv_res, &pv_field) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (Z_TYPE_P(pv_field) == IS_STRING) {
-		field = Z_STRVAL_P(pv_field);
+	if (pv_field_str) {
+		field = ZSTR_VAL(pv_field_str);
+		field_ind = -1;
 	} else {
-		convert_to_long_ex(pv_field);
-		field_ind = Z_LVAL_P(pv_field) - 1;
+		field = NULL;
+		field_ind = (int) pv_field_long - 1;
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {

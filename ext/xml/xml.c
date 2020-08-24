@@ -1427,7 +1427,7 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP_XML_OPTION_SKIP_TAGSTART:
 			parser->toffset = zval_get_long(val);
 			if (parser->toffset < 0) {
-				php_error_docref(NULL, E_NOTICE, "tagstart ignored, because it is out of range");
+				php_error_docref(NULL, E_WARNING, "tagstart ignored, because it is out of range");
 				parser->toffset = 0;
 			}
 			break;
@@ -1445,6 +1445,7 @@ PHP_FUNCTION(xml_parser_set_option)
 				zend_argument_value_error(3, "is not a supported target encoding");
 				RETURN_THROWS();
 			}
+
 			parser->target_encoding = enc->name;
 			break;
 		}

@@ -2712,16 +2712,20 @@ PHP_METHOD(ZipArchive, extractTo)
 	struct zip *intern;
 
 	zval *self = ZEND_THIS;
-	zval *zval_files = NULL;
+	zend_string *files_str = NULL;
+	HashTable *files_ht = NULL;
+
 	zval *zval_file = NULL;
 	php_stream_statbuf ssb;
 	char *pathto;
 	size_t pathto_len;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &pathto, &pathto_len, &zval_files) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(pathto, pathto_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(files_str, files_ht)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ZIP_FROM_OBJECT(intern, self);
 
@@ -2736,37 +2740,29 @@ PHP_METHOD(ZipArchive, extractTo)
 		}
 	}
 
-	if (zval_files && Z_TYPE_P(zval_files) != IS_NULL) {
-		uint32_t nelems, i;
+	uint32_t nelems, i;
 
-		switch (Z_TYPE_P(zval_files)) {
-			case IS_STRING:
-				if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_files), Z_STRLEN_P(zval_files))) {
-					RETURN_FALSE;
-				}
-				break;
-			case IS_ARRAY:
-				nelems = zend_hash_num_elements(Z_ARRVAL_P(zval_files));
-				if (nelems == 0 ) {
-					RETURN_FALSE;
-				}
-				for (i = 0; i < nelems; i++) {
-					if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(zval_files), i)) != NULL) {
-						switch (Z_TYPE_P(zval_file)) {
-							case IS_LONG:
-								break;
-							case IS_STRING:
-								if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file))) {
-									RETURN_FALSE;
-								}
-								break;
+	if (files_str) {
+		if (!php_zip_extract_file(intern, pathto, ZSTR_VAL(files_str), ZSTR_LEN(files_str))) {
+			RETURN_FALSE;
+		}
+	} else if (files_ht) {
+		nelems = zend_hash_num_elements(files_ht);
+		if (nelems == 0 ) {
+			RETURN_FALSE;
+		}
+		for (i = 0; i < nelems; i++) {
+			if ((zval_file = zend_hash_index_find(files_ht, i)) != NULL) {
+				switch (Z_TYPE_P(zval_file)) {
+					case IS_LONG:
+						break;
+					case IS_STRING:
+						if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file))) {
+							RETURN_FALSE;
 						}
-					}
+						break;
 				}
-				break;
-			default:
-				zend_argument_type_error(2, "must be of type array|string|null, %s given", zend_zval_type_name(zval_files));
-				RETURN_THROWS();
+			}
 		}
 	} else {
 		/* Extract all files */
@@ -2784,6 +2780,7 @@ PHP_METHOD(ZipArchive, extractTo)
 			}
 		}
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */
