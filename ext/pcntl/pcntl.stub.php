@@ -19,7 +19,8 @@ function pcntl_wait(&$status, int $options = 0, &$rusage = []): int {}
 /** @param callable|int $handler */
 function pcntl_signal(int $signo, $handler, bool $restart_syscalls = true): bool {}
 
-function pcntl_signal_get_handler(int $signo): mixed {}
+/** @return callable|int */
+function pcntl_signal_get_handler(int $signo) {}
 
 function pcntl_signal_dispatch(): bool {}
 

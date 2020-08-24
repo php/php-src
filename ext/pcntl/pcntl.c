@@ -895,7 +895,9 @@ PHP_FUNCTION(pcntl_signal)
 	if (signo < 1) {
 		zend_argument_value_error(1, "must be greater than or equal to 1");
 		RETURN_THROWS();
-	} else if (signo >= NSIG) {
+	}
+
+	if (signo >= NSIG) {
 		zend_argument_value_error(1, "must be less than %d", NSIG);
 		RETURN_THROWS();
 	}
@@ -1201,7 +1203,7 @@ PHP_FUNCTION(pcntl_getpriority)
 				php_error_docref(NULL, E_WARNING, "Error %d: No process was located using the given parameters", errno);
 				break;
 			case EINVAL:
-				zend_argument_value_error(2, "must be a valid identifier flag");
+				zend_argument_value_error(2, "must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS");
 				RETURN_THROWS();
 			default:
 				php_error_docref(NULL, E_WARNING, "Unknown error %d has occurred", errno);
@@ -1235,7 +1237,7 @@ PHP_FUNCTION(pcntl_setpriority)
 				php_error_docref(NULL, E_WARNING, "Error %d: No process was located using the given parameters", errno);
 				break;
 			case EINVAL:
-				zend_argument_value_error(3, "must be a valid identifier flag");
+				zend_argument_value_error(3, "must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS");
 				RETURN_THROWS();
 				break;
 			case EPERM:
@@ -1415,7 +1417,7 @@ PHP_FUNCTION(pcntl_unshare)
 		switch (errno) {
 #ifdef EINVAL
 			case EINVAL:
-				zend_argument_value_error(1, "must be a valid identifier flag");
+				zend_argument_value_error(1, "must be a combination of CLONE_* flags");
 				RETURN_THROWS();
 				break;
 #endif

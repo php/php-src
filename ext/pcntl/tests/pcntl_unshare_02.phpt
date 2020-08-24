@@ -15,7 +15,7 @@ if (posix_getuid() !== 0 &&
 if (@pcntl_unshare(CLONE_NEWPID) == false && pcntl_get_last_error() == PCNTL_EPERM) {
     die("skip Insufficient privileges for CLONE_NEWPID");
 }
-
+?>
 --FILE--
 <?php
 
