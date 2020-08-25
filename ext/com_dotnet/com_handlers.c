@@ -38,9 +38,11 @@ static zval *com_property_read(zval *object, zval *member, int type, void **cahc
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		VariantInit(&v);
+		if (!try_convert_to_string(member)) {
+			return rv;
+		}
 
-		convert_to_string_ex(member);
+		VariantInit(&v);
 
 		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1);
@@ -66,9 +68,12 @@ static zval *com_property_write(zval *object, zval *member, zval *value, void **
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
+		if (!try_convert_to_string(member)) {
+			return value;
+		}
+
 		VariantInit(&v);
 
-		convert_to_string_ex(member);
 		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
 				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0)) {
 			VariantClear(&v);
@@ -205,7 +210,9 @@ static int com_property_exists(zval *object, zval *member, int check_empty, void
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		convert_to_string_ex(member);
+		if (!try_convert_to_string(member)) {
+			return 0;
+		}
 		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRLEN_P(member), &dispid))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
