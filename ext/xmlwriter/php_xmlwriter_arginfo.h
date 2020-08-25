@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c4717d4f5dafe071fb78799993db1e733d45470a */
+ * Stub hash: 9323f768ddea26f104b699a9c0ce54e3560b3b32 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -310,10 +310,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_XMLWriter_endDtdEntity arginfo_class_XMLWriter_openMemory
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_writeDtdEntity, 0, 3, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_writeDtdEntity, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, isparam, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, isparam, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO(0, publicId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, systemId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, ndataid, IS_STRING, 0)
