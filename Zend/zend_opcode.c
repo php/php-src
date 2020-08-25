@@ -1040,12 +1040,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
-			case ZEND_OBSERVE_RETURN:
-			// TODO case ZEND_OBSERVE_RETURN_BY_REF:
-				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-					opline->opcode = ZEND_GENERATOR_RETURN;  // TODO ZEND_OBSERVE_GENERATOR_RETURN
-				}
-				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
 			case ZEND_MATCH:

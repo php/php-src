@@ -2439,12 +2439,7 @@ void zend_emit_final_return(int return_one) /* {{{ */
 		ZVAL_NULL(&zn.u.constant);
 	}
 
-	if (ZEND_SHOULD_OBSERVE_FN(CG(active_op_array)->fn_flags)) {
-		// TODO Emit ZEND_OBSERVE_RETURN_BY_REF
-		ret = zend_emit_op(NULL, returns_reference ? ZEND_RETURN_BY_REF : ZEND_OBSERVE_RETURN, &zn, NULL);
-	} else {
-		ret = zend_emit_op(NULL, returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN, &zn, NULL);
-	}
+	ret = zend_emit_op(NULL, returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN, &zn, NULL);
 	ret->extended_value = -1;
 }
 /* }}} */
@@ -4781,12 +4776,8 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
 
-	if (ZEND_SHOULD_OBSERVE_FN(CG(active_op_array)->fn_flags)) {
-		// TODO Emit ZEND_OBSERVE_RETURN_BY_REF
-		opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_OBSERVE_RETURN, &expr_node, NULL);
-	} else {
-		opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN, &expr_node, NULL);
-	}
+	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
+		&expr_node, NULL);
 
 	if (by_ref && expr_ast) {
 		if (zend_is_call(expr_ast)) {
