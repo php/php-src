@@ -4020,8 +4020,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						res_info = RES_INFO();
+						avoid_refcounting =
+							ssa_op->op1_use >= 0 &&
+							ssa->var_info[ssa_op->op1_use].avoid_refcounting;
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
-								op1_info, op1_addr, ssa->var_info[ssa_op->op1_use].avoid_refcounting,
+								op1_info, op1_addr, avoid_refcounting,
 								op2_info, res_info, RES_REG_ADDR(),
 								(
 									(op1_info & MAY_BE_ANY) != MAY_BE_ARRAY ||
@@ -4063,7 +4066,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							if (ssa->var_info[ssa_op->op1_use].avoid_refcounting) {
+							if (ssa_op->op1_use >= 0
+							 && ssa->var_info[ssa_op->op1_use].avoid_refcounting) {
 								/* Temporary reset ZREG_ZVAL_TRY_ADDREF */
 								zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 								uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
@@ -4083,8 +4087,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							smart_branch_opcode = 0;
 							exit_addr = NULL;
 						}
+						avoid_refcounting =
+							ssa_op->op1_use >= 0 &&
+							ssa->var_info[ssa_op->op1_use].avoid_refcounting;
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline,
-								op1_info, op1_addr, ssa->var_info[ssa_op->op1_use].avoid_refcounting,
+								op1_info, op1_addr, avoid_refcounting,
 								op2_info,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info),
 								smart_branch_opcode, -1, -1,
