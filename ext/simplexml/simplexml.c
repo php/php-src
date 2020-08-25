@@ -377,31 +377,12 @@ static zval *sxe_dimension_read(zend_object *object, zval *offset, int type, zva
 static void change_node_zval(xmlNodePtr node, zval *value)
 {
 	xmlChar *buffer;
-
-	if (!value)
-	{
-		xmlNodeSetContentLen(node, (xmlChar *)"", 0);
-		return;
-	}
-	switch (Z_TYPE_P(value)) {
-		case IS_LONG:
-		case IS_FALSE:
-		case IS_TRUE:
-		case IS_DOUBLE:
-		case IS_NULL:
-			convert_to_string(value);
-			/* break missing intentionally */
-		case IS_STRING:
-			buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
-			/* check for NULL buffer in case of memory error in xmlEncodeEntitiesReentrant */
-			if (buffer) {
-				xmlNodeSetContent(node, buffer);
-				xmlFree(buffer);
-			}
-			break;
-		default:
-			php_error_docref(NULL, E_WARNING, "It is not possible to assign complex types to nodes");
-			break;
+	ZEND_ASSERT(Z_TYPE_P(value) == IS_STRING);
+	buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
+	/* check for NULL buffer in case of memory error in xmlEncodeEntitiesReentrant */
+	if (buffer) {
+		xmlNodeSetContent(node, buffer);
+		xmlFree(buffer);
 	}
 }
 /* }}} */
