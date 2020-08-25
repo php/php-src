@@ -374,11 +374,9 @@ static zval *sxe_dimension_read(zend_object *object, zval *offset, int type, zva
 /* }}} */
 
 /* {{{ change_node_zval() */
-static void change_node_zval(xmlNodePtr node, zval *value)
+static void change_node_zval(xmlNodePtr node, zend_string *value)
 {
-	xmlChar *buffer;
-	ZEND_ASSERT(Z_TYPE_P(value) == IS_STRING);
-	buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
+	xmlChar *buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)ZSTR_VAL(value));
 	/* check for NULL buffer in case of memory error in xmlEncodeEntitiesReentrant */
 	if (buffer) {
 		xmlNodeSetContent(node, buffer);
@@ -400,10 +398,10 @@ static zval *sxe_prop_dim_write(zend_object *object, zval *member, zval *value, 
 	int             is_attr = 0;
 	int				nodendx = 0;
 	int             test = 0;
-	int				new_value = 0;
 	zend_long            cnt = 0;
-	zval            tmp_zv, zval_copy;
+	zval            tmp_zv;
 	zend_string    *trim_str;
+	zend_string    *value_str = NULL;
 
 	sxe = php_sxe_fetch_object(object);
 
@@ -484,23 +482,18 @@ long_dim:
 			case IS_TRUE:
 			case IS_DOUBLE:
 			case IS_NULL:
-				if (Z_TYPE_P(value) != IS_STRING) {
-					ZVAL_STR(&zval_copy, zval_get_string_func(value));
-					value = &zval_copy;
-					new_value = 1;
-				}
-				break;
 			case IS_STRING:
+				value_str = zval_get_string(value);
 				break;
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
+					zval zval_copy;
 					if (sxe_object_cast_ex(Z_OBJ_P(value), &zval_copy, IS_STRING) == FAILURE) {
 						zend_error(E_ERROR, "Unable to cast node to string");
 						/* FIXME: Should not be fatal */
 					}
 
-					value = &zval_copy;
-					new_value = 1;
+					value_str = Z_STR(zval_copy);
 					break;
 				}
 				/* break is missing intentionally */
@@ -544,8 +537,8 @@ long_dim:
 			if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (node->type == XML_ATTRIBUTE_NODE) {
 					zend_throw_error(NULL, "Cannot create duplicate attribute");
-					if (new_value) {
-						zval_ptr_dtor(value);
+					if (value_str) {
+						zend_string_release(value_str);
 					}
 					return &EG(error_zval);
 				}
@@ -583,12 +576,12 @@ next_iter:
 			if (is_attr) {
 				newnode = (xmlNodePtr) attr;
 			}
-			if (value) {
+			if (value_str) {
 				while ((tempnode = (xmlNodePtr) newnode->children)) {
 					xmlUnlinkNode(tempnode);
 					php_libxml_node_free_resource((xmlNodePtr) tempnode);
 				}
-				change_node_zval(newnode, value);
+				change_node_zval(newnode, value_str);
 			}
 		} else if (counter > 1) {
 			php_error_docref(NULL, E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)");
@@ -596,21 +589,21 @@ next_iter:
 		} else if (elements) {
 			if (!node) {
 				if (!member || Z_TYPE_P(member) == IS_LONG) {
-					newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
+					newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
 				} else {
-					newnode = xmlNewTextChild(mynode, mynode->ns, (xmlChar *)Z_STRVAL_P(member), value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
+					newnode = xmlNewTextChild(mynode, mynode->ns, (xmlChar *)Z_STRVAL_P(member), value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
 				}
 			} else if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (member && cnt < Z_LVAL_P(member)) {
 					php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
 				}
-				newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
+				newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
 			}
 		} else if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
 				php_error_docref(NULL, E_WARNING, "Cannot change attribute number " ZEND_LONG_FMT " when only %d attributes exist", Z_LVAL_P(member), nodendx);
 			} else {
-				newnode = (xmlNodePtr)xmlNewProp(node, (xmlChar *)Z_STRVAL_P(member), value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
+				newnode = (xmlNodePtr)xmlNewProp(node, (xmlChar *)Z_STRVAL_P(member), value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
 			}
 		}
 	}
@@ -621,8 +614,8 @@ next_iter:
 	if (pnewnode) {
 		*pnewnode = newnode;
 	}
-	if (new_value) {
-		zval_ptr_dtor(value);
+	if (value_str) {
+		zend_string_release(value_str);
 	}
 	return value;
 }
