@@ -10479,12 +10479,23 @@ static zend_bool zend_jit_may_avoid_refcounting(const zend_op *opline)
 	return 0;
 }
 
-static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend_ssa *ssa, const zend_ssa_op *ssa_op, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, uint32_t res_info, zend_jit_addr res_addr, int may_throw)
+static int zend_jit_fetch_dim_read(dasm_State        **Dst,
+                                   const zend_op      *opline,
+                                   zend_ssa           *ssa,
+                                   const zend_ssa_op  *ssa_op,
+                                   uint32_t            op1_info,
+                                   zend_jit_addr       op1_addr,
+                                   zend_bool           op1_avoid_refcounting,
+                                   uint32_t            op2_info,
+                                   uint32_t            res_info,
+                                   zend_jit_addr       res_addr,
+                                   int                 may_throw)
 {
 	zend_jit_addr orig_op1_addr, op2_addr;
 	const void *exit_addr = NULL;
 	const void *not_found_exit_addr = NULL;
 	const void *res_exit_addr = NULL;
+	zend_bool result_avoid_refcounting = 0;
 
 	orig_op1_addr = OP1_ADDR();
 	op2_addr = OP2_ADDR();
@@ -10498,7 +10509,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 		}
 	}
 
-	if (op1_info & AVOID_REFCOUNTING) {
+	if (op1_avoid_refcounting) {
 		SET_STACK_REG(JIT_G(current_frame)->stack,
 			EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 	}
@@ -10512,7 +10523,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 		int32_t exit_point;
 
 		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
-		 && !(op1_info & AVOID_REFCOUNTING)) {
+		 && !op1_avoid_refcounting) {
 			flags |= ZEND_JIT_EXIT_FREE_OP1;
 		}
 		if ((opline->op2_type & (IS_VAR|IS_TMP_VAR))
@@ -10524,8 +10535,8 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 		 && (ssa_op+1)->op1_use == ssa_op->result_def
 		 && !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))
 		 && zend_jit_may_avoid_refcounting(opline+1)) {
-			res_info |= AVOID_REFCOUNTING;
-			ssa->var_info[ssa_op->result_def].type |= AVOID_REFCOUNTING;
+			result_avoid_refcounting = 1;
+			ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
 		}
 
 		if (!(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))) {
@@ -10722,7 +10733,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 					|	SET_ZVAL_TYPE_INFO res_addr, type
 				} else {
 					|	SET_ZVAL_TYPE_INFO res_addr, edx
-					if (!(res_info & AVOID_REFCOUNTING)) {
+					if (!result_avoid_refcounting) {
 						|	TRY_ADDREF res_info, dh, r1
 					}
 				}
@@ -10751,7 +10762,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 #endif
 
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
-	if (!(op1_info & AVOID_REFCOUNTING)) {
+	if (!op1_avoid_refcounting) {
 		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
 	}
 
@@ -10764,7 +10775,17 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 	return 1;
 }
 
-static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, int may_throw, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
+                                      const zend_op  *opline,
+                                      uint32_t        op1_info,
+                                      zend_jit_addr   op1_addr,
+                                      zend_bool       op1_avoid_refcounting,
+                                      uint32_t        op2_info,
+                                      int             may_throw,
+                                      zend_uchar      smart_branch_opcode,
+                                      uint32_t        target_label,
+                                      uint32_t        target_label2,
+                                      const void     *exit_addr)
 {
 	zend_jit_addr op2_addr, res_addr;
 
@@ -10791,7 +10812,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, u
 		if (exit_addr
 		 && !(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY))
 		 && !may_throw
-		 && (!(opline->op1_type & (IS_TMP_VAR|IS_VAR)) || (op1_info & AVOID_REFCOUNTING))
+		 && (!(opline->op1_type & (IS_TMP_VAR|IS_VAR)) || op1_avoid_refcounting)
 		 && (!(opline->op2_type & (IS_TMP_VAR|IS_VAR)) || !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)))) {
 			if (smart_branch_opcode == ZEND_JMPNZ) {
 				found_exit_addr = exit_addr;
@@ -10859,7 +10880,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, u
 
 	|8:
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
-	if (!(op1_info & AVOID_REFCOUNTING)) {
+	if (!op1_avoid_refcounting) {
 		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
 	}
 	if (may_throw) {
@@ -10895,7 +10916,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, u
 
 	|9: // not found
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
-	if (!(op1_info & AVOID_REFCOUNTING)) {
+	if (!op1_avoid_refcounting) {
 		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
 	}
 	if (may_throw) {
@@ -11320,7 +11341,20 @@ static int zend_jit_class_guard(dasm_State **Dst, const zend_op *opline, zend_cl
 	return 1;
 }
 
-static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, uint32_t op1_info, zend_jit_addr op1_addr, zend_bool op1_indirect, zend_class_entry *ce, zend_bool ce_is_instanceof, zend_bool use_this, zend_class_entry *trace_ce, int may_throw)
+static int zend_jit_fetch_obj(dasm_State          **Dst,
+                              const zend_op        *opline,
+                              const zend_op_array  *op_array,
+                              zend_ssa             *ssa,
+                              const zend_ssa_op    *ssa_op,
+                              uint32_t              op1_info,
+                              zend_jit_addr         op1_addr,
+                              zend_bool             op1_indirect,
+                              zend_class_entry     *ce,
+                              zend_bool             ce_is_instanceof,
+                              zend_bool             use_this,
+                              zend_bool             op1_avoid_refcounting,
+                              zend_class_entry     *trace_ce,
+                              int                   may_throw)
 {
 	zval *member;
 	zend_property_info *prop_info;
@@ -11494,7 +11528,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 			}
 		}
 	}
-	if (op1_info & AVOID_REFCOUNTING) {
+	if (op1_avoid_refcounting) {
 		SET_STACK_REG(JIT_G(current_frame)->stack,
 			EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 	}
@@ -11506,6 +11540,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_INDIRECT
 	} else {
 		uint32_t res_info = RES_INFO();
+		zend_bool result_avoid_refcounting = 0;
 
 		if ((res_info & MAY_BE_GUARD) && JIT_G(current_frame) && prop_info) {
 			uint32_t flags = 0;
@@ -11518,7 +11553,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
 			 && !use_this
-			 && !(op1_info & AVOID_REFCOUNTING)) {
+			 && !op1_avoid_refcounting) {
 				flags = ZEND_JIT_EXIT_FREE_OP1;
 			}
 
@@ -11528,8 +11563,8 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 			 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 			 && (ssa_op+1)->op1_use == ssa_op->result_def
 			 && zend_jit_may_avoid_refcounting(opline+1)) {
-				res_info |= AVOID_REFCOUNTING;
-				ssa->var_info[ssa_op->result_def].type |= AVOID_REFCOUNTING;
+				result_avoid_refcounting = 1;
+				ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
 			}
 
 			old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
@@ -11564,7 +11599,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 				|	SET_ZVAL_TYPE_INFO res_addr, type
 			} else {
 				|	SET_ZVAL_TYPE_INFO res_addr, edx
-				if (!(res_info & AVOID_REFCOUNTING)) {
+				if (!result_avoid_refcounting) {
 					|	TRY_ADDREF res_info, dh, r1
 				}
 			}
@@ -11652,7 +11687,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 			|	SAVE_VALID_OPLINE opline, r0
 			|	EXT_CALL zend_jit_extract_helper, r0
 			|1:
-		} else if (!(op1_info & AVOID_REFCOUNTING)) {
+		} else if (!op1_avoid_refcounting) {
 			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 		}
 	}

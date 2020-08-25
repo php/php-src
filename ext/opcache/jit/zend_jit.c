@@ -2817,7 +2817,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
-								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), RES_INFO(), RES_REG_ADDR(),
+								OP1_INFO(), OP1_REG_ADDR(), 0,
+								OP2_INFO(), RES_INFO(), RES_REG_ADDR(),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -2846,7 +2847,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							target_label = target_label2 = (uint32_t)-1;
 						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline,
-								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(),
+								OP1_INFO(), OP1_REG_ADDR(), 0,
+								OP2_INFO(),
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL)) {
@@ -2886,7 +2888,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, 0, ce, ce_is_instanceof, 0, NULL,
+								op1_info, op1_addr, 0, ce, ce_is_instanceof, 0, 0, NULL,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}

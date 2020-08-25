@@ -2895,6 +2895,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	zend_class_entry *ce;
 	zend_bool ce_is_instanceof;
 	zend_bool delayed_fetch_this = 0;
+	zend_bool avoid_refcounting = 0;
 	uint32_t i;
 	zend_jit_trace_stack_frame *frame, *top, *call;
 	zend_jit_trace_stack *stack;
@@ -4011,7 +4012,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP2_TRACE_TYPE();
 						res_info = RES_INFO();
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
-								op1_info, op1_addr, op2_info, res_info, RES_REG_ADDR(),
+								op1_info, op1_addr, ssa->var_info[ssa_op->op1_use].avoid_refcounting,
+								op2_info, res_info, RES_REG_ADDR(),
 								(
 									(op1_info & MAY_BE_ANY) != MAY_BE_ARRAY ||
 									(op2_info & (MAY_BE_ANY - (MAY_BE_LONG|MAY_BE_STRING))) != 0 ||
@@ -4052,7 +4054,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							if (op1_info & AVOID_REFCOUNTING) {
+							if (ssa->var_info[ssa_op->op1_use].avoid_refcounting) {
 								/* Temporary reset ZREG_ZVAL_TRY_ADDREF */
 								zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 								uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
@@ -4073,7 +4075,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							exit_addr = NULL;
 						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline,
-								op1_info, op1_addr, op2_info,
+								op1_info, op1_addr, ssa->var_info[ssa_op->op1_use].avoid_refcounting,
+								op2_info,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info),
 								smart_branch_opcode, -1, -1,
 								exit_addr)) {
@@ -4092,6 +4095,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:
 						delayed_fetch_this = 0;
+						avoid_refcounting = 0;
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
 						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
@@ -4140,11 +4144,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 							if (ssa_op->op1_use >= 0) {
 								delayed_fetch_this = ssa->var_info[ssa_op->op1_use].delayed_fetch_this;
+								avoid_refcounting = ssa->var_info[ssa_op->op1_use].avoid_refcounting;
 							}
 						}
 						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_indirect, ce, ce_is_instanceof,
-								delayed_fetch_this, op1_ce,
+								delayed_fetch_this, avoid_refcounting, op1_ce,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, MAY_BE_STRING))) {
 							goto jit_failure;
 						}
@@ -4353,7 +4358,7 @@ done:
 						if (opline->opcode == ZEND_FETCH_THIS
 						 && delayed_fetch_this) {
 							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_THIS);
-						} else if (ssa->var_info[ssa_op->result_def].type & AVOID_REFCOUNTING) {
+						} else if (ssa->var_info[ssa_op->result_def].avoid_refcounting) {
 							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_TRY_ADDREF);
 						} else if (ra && ra[ssa_op->result_def]) {
 							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
