@@ -217,7 +217,6 @@ PHP_METHOD(com, __construct)
 
 	if (server_name) {
 		if (info.pwszName) efree(info.pwszName);
-		if (authid.User) efree(authid.User);
 	}
 
 	efree(moniker);
