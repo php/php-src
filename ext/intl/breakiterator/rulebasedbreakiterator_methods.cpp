@@ -52,33 +52,33 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		UParseError		parseError = UParseError();
 		if (intl_stringFromChar(rulesStr, rules, rules_len, &status)
 				== FAILURE) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"rbbi_create_instance: rules were not a valid UTF-8 string",
-				0);
-			RETURN_NULL();
+			zend_throw_exception(IntlException_ce_ptr,
+				"IntlRuleBasedBreakIterator::__construct(): "
+				"rules were not a valid UTF-8 string", 0);
+			RETURN_THROWS();
 		}
 
 		rbbi = new RuleBasedBreakIterator(rulesStr, parseError, status);
 		intl_error_set_code(NULL, status);
 		if (U_FAILURE(status)) {
-			char *msg;
 			smart_str parse_error_str;
 			parse_error_str = intl_parse_error_to_string(&parseError);
-			spprintf(&msg, 0, "rbbi_create_instance: unable to create "
-				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "");
+			zend_throw_exception_ex(IntlException_ce_ptr, 0,
+				"IntlRuleBasedBreakIterator::__construct(): "
+				"unable to create RuleBasedBreakIterator from rules (%s)",
+				parse_error_str.s ? ZSTR_VAL(parse_error_str.s) : "");
 			smart_str_free(&parse_error_str);
-			intl_error_set_custom_msg(NULL, msg, 1);
-			efree(msg);
 			delete rbbi;
-			return;
+			RETURN_THROWS();
 		}
 	} else { // compiled
 		rbbi = new RuleBasedBreakIterator((uint8_t*)rules, rules_len, status);
 		if (U_FAILURE(status)) {
-			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
-				"create instance from compiled rules", 0);
+			zend_throw_exception(IntlException_ce_ptr,
+				"IntlRuleBasedBreakIterator::__construct(): "
+				"unable to create instance from compiled rules", 0);
 			delete rbbi;
-			return;
+			RETURN_THROWS();
 		}
 	}
 
