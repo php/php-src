@@ -2210,10 +2210,22 @@ TEST $file
 
             junit_start_timer($shortname);
 
+            $startTime = microtime(true);
             $output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0 \"$test_skipif\"", $env);
             $output = trim($output);
+            $time = microtime(true) - $startTime;
 
             junit_finish_timer($shortname);
+
+            if ($time > $slow_min_ms / 1000) {
+                $PHP_FAILED_TESTS['SLOW'][] = [
+                    'name' => $file,
+                    'test_name' => 'SKIPIF of ' . $tested . " [$tested_file]",
+                    'output' => '',
+                    'diff' => '',
+                    'info' => $time,
+                ];
+            }
 
             if (!$cfg['keep']['skip']) {
                 @unlink($test_skipif);
@@ -2524,7 +2536,7 @@ COMMAND $cmd
     if ($time >= $slow_min_ms * 1000000) {
         $PHP_FAILED_TESTS['SLOW'][] = [
             'name' => $file,
-            'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
+            'test_name' => $tested . " [$tested_file]",
             'output' => '',
             'diff' => '',
             'info' => $time / 1000000000,
