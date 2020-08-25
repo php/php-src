@@ -35,7 +35,7 @@ bool(false)
 
 Warning: diskfreespace(): No such file or directory in %s on line %d
 bool(false)
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Done --

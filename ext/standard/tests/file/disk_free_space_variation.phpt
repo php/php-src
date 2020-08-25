@@ -63,44 +63,44 @@ rmdir($file_path."/disk_free_space_variation");
 ?>
 --EXPECTF--
 *** Testing with a directory ***
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 Testing for the return type ***
 bool(true)
 
 *** Testing with different directory combinations ***
 -- Iteration 1 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 2 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 3 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 4 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 5 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 6 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 7 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 8 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 9 --
 disk_free_space(): Argument #1 ($directory) must be a valid path, string given

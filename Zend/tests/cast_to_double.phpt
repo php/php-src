@@ -50,7 +50,7 @@ float(1)
 float(0)
 float(1)
 float(0)
-float(%d)
+float(%f)
 
 Notice: Object of class test could not be converted to float in %s on line %d
 float(1)
