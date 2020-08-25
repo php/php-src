@@ -29,17 +29,17 @@ string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
 string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
 bool(false)
 
-Warning: openssl_decrypt(): Unknown cipher method in %s on line %d
+Warning: openssl_decrypt(): Unknown cipher algorithm in %s on line %d
 bool(false)
 bool(false)
 
-Warning: openssl_decrypt(): Unknown cipher method in %s on line %d
+Warning: openssl_decrypt(): Unknown cipher algorithm in %s on line %d
 bool(false)
 
-Warning: openssl_decrypt(): Unknown cipher method in %s on line %d
+Warning: openssl_decrypt(): Unknown cipher algorithm in %s on line %d
 bool(false)
 
-Warning: openssl_decrypt(): Unknown cipher method in %s on line %d
+Warning: openssl_decrypt(): Unknown cipher algorithm in %s on line %d
 bool(false)
 
 Warning: openssl_encrypt(): The authenticated tag cannot be provided for cipher that doesn not support AEAD in %s on line %d

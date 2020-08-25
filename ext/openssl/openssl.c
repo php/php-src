@@ -865,7 +865,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		zend_long cipher_algo = Z_LVAL_P(item);
 		const EVP_CIPHER* cipher = php_openssl_get_evp_cipher_from_algo(cipher_algo);
 		if (cipher == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unknown cipher method for private key");
+			php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm for private key");
 			return FAILURE;
 		} else {
 			req->priv_key_encrypt_cipher = cipher;
@@ -1182,7 +1182,7 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_ANY", X509_PURPOSE_ANY, CONST_CS|CONST_PERSISTENT);
 #endif
 
-	/* signature algorithm constants */
+	/* digest algorithm constants */
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA1", OPENSSL_ALGO_SHA1, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD4", OPENSSL_ALGO_MD4, CONST_CS|CONST_PERSISTENT);
@@ -1563,7 +1563,7 @@ PHP_FUNCTION(openssl_spki_new)
 	mdtype = php_openssl_get_evp_md_from_algo(algo);
 
 	if (!mdtype) {
-		php_error_docref(NULL, E_WARNING, "Unknown digest method");
+		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		goto cleanup;
 	}
 
@@ -1589,7 +1589,7 @@ PHP_FUNCTION(openssl_spki_new)
 
 	if (!NETSCAPE_SPKI_sign(spki, pkey, mdtype)) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "Unable to sign with specified digest method");
+		php_error_docref(NULL, E_WARNING, "Unable to sign with specified digest algorithm");
 		goto cleanup;
 	}
 
@@ -1845,7 +1845,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_b
 	zend_string *ret;
 
 	if (!(mdtype = EVP_get_digestbyname(method))) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
 		php_openssl_store_errors();
@@ -4807,7 +4807,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 	}
 
 	if (!digest) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
 
@@ -6483,7 +6483,7 @@ PHP_FUNCTION(openssl_sign)
 		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
 	if (!mdtype) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
 
@@ -6540,7 +6540,7 @@ PHP_FUNCTION(openssl_verify)
 		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
 	if (!mdtype) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
 
@@ -6596,13 +6596,13 @@ PHP_FUNCTION(openssl_seal)
 
 	cipher = EVP_get_cipherbyname(method);
 	if (!cipher) {
-		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
 	}
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
 	if (!iv && iv_len > 0) {
-		zend_argument_value_error(6, "cannot be null for the chosen cipher method");
+		zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
 		RETURN_THROWS();
 	}
 
@@ -6725,14 +6725,14 @@ PHP_FUNCTION(openssl_open)
 
 	cipher = EVP_get_cipherbyname(method);
 	if (!cipher) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
 	}
 
 	cipher_iv_len = EVP_CIPHER_iv_length(cipher);
 	if (cipher_iv_len > 0) {
 		if (!iv) {
-			zend_argument_value_error(6, "cannot be null for the chosen cipher method");
+			zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
 			RETURN_THROWS();
 		}
 		if ((size_t)cipher_iv_len != iv_len) {
@@ -6778,7 +6778,7 @@ static void php_openssl_add_method(const OBJ_NAME *name, void *arg) /* {{{ */
 }
 /* }}} */
 
-/* {{{ Return array of available digest methods */
+/* {{{ Return array of available digest algorithms */
 PHP_FUNCTION(openssl_get_md_methods)
 {
 	zend_bool aliases = 0;
@@ -6793,7 +6793,7 @@ PHP_FUNCTION(openssl_get_md_methods)
 }
 /* }}} */
 
-/* {{{ Return array of available cipher methods */
+/* {{{ Return array of available cipher algorithms */
 PHP_FUNCTION(openssl_get_cipher_methods)
 {
 	zend_bool aliases = 0;
@@ -6854,7 +6854,7 @@ PHP_FUNCTION(openssl_digest)
 	}
 	mdtype = EVP_get_digestbyname(method);
 	if (!mdtype) {
-		php_error_docref(NULL, E_WARNING, "Unknown digest method");
+		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
 
@@ -7008,7 +7008,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		}
 	} else if (!enc && tag && tag_len > 0) {
 		if (!mode->is_aead) {
-			php_error_docref(NULL, E_WARNING, "The tag cannot be used because the cipher method does not support AEAD");
+			php_error_docref(NULL, E_WARNING, "The tag cannot be used because the cipher algorithm does not support AEAD");
 		} else if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag)) {
 			php_error_docref(NULL, E_WARNING, "Setting tag for AEAD cipher decryption failed");
 			return FAILURE;
@@ -7020,7 +7020,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	if (key_len > password_len) {
 		if ((OPENSSL_DONT_ZERO_PAD_KEY & options) && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
 			php_openssl_store_errors();
-			php_error_docref(NULL, E_WARNING, "Key length cannot be set for the cipher method");
+			php_error_docref(NULL, E_WARNING, "Key length cannot be set for the cipher algorithm");
 			return FAILURE;
 		}
 		key = emalloc(key_len);
@@ -7114,7 +7114,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
 	}
 
@@ -7230,7 +7230,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
 	}
 
@@ -7316,7 +7316,7 @@ PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher method");
+		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return -1;
 	}
 
