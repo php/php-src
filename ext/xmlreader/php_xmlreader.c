@@ -507,7 +507,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 
 			RETURN_TRUE;
 		} else {
-			zend_throw_error(NULL, "Schema contains errors");
+			php_error_docref(NULL, E_WARNING, "Schema contains errors");
 			RETURN_FALSE;
 		}
 	} else {
@@ -785,6 +785,7 @@ PHP_METHOD(XMLReader, read)
 	intern = Z_XMLREADER_P(id);
 	if (intern == NULL || intern->ptr == NULL) {
 		zend_throw_error(NULL, "Data must be loaded before reading");
+		RETURN_THROWS();
 	}
 
 	retval = xmlTextReaderRead(intern->ptr);
