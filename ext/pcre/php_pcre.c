@@ -1193,8 +1193,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 		if ((global && (subpats_order < PREG_PATTERN_ORDER || subpats_order > PREG_SET_ORDER)) ||
 			(!global && subpats_order != 0)) {
-			php_error_docref(NULL, E_WARNING, "Invalid flags specified");
-			return;
+			zend_argument_value_error(4, "must be a PREG_* constant");
+			RETURN_THROWS();
 		}
 	} else {
 		offset_capture = 0;
@@ -2410,9 +2410,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 		}
 
 		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
-			zend_string *callback_name = zend_get_callable_name(replace);
-			zend_type_error("'%s' is not a valid callback", ZSTR_VAL(callback_name));
-			zend_string_release_ex(callback_name, 0);
+			zend_argument_type_error(1, "must contain only valid callbacks");
 			RETURN_THROWS();
 		}
 
