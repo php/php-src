@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35cb2432b5deea7cff903c2014bce795b4f30209 */
+ * Stub hash: 269d4da84e4bc6fae246b90e4c50e48463b86f41 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2229,7 +2229,7 @@ ZEND_END_ARG_INFO()
 
 #if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_set_ctrl_handler, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, handler)
+	ZEND_ARG_TYPE_INFO(0, handler, IS_CALLABLE, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, add, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif

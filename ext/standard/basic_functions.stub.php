@@ -1529,9 +1529,7 @@ function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage,
 
 function sapi_windows_cp_is_utf8(): bool {}
 
-/** @param callable|null $handler */
-function sapi_windows_set_ctrl_handler($handler, bool $add = true): bool {}
+function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bool {}
 
-/** @param callable|null $handler */
 function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif

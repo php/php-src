@@ -2480,19 +2480,11 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		zend_string *class_name = NULL;
-
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!Sz", &result, &zrow, &class_name, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!Cz", &result, &zrow, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
-		if (!class_name) {
-			ce = zend_standard_class_def;
-		} else {
-			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);
-		}
 		if (!ce) {
-			php_error_docref(NULL, E_WARNING, "Could not find class '%s'", ZSTR_VAL(class_name));
-			return;
+			ce = zend_standard_class_def;
 		}
 		result_type = PGSQL_ASSOC;
 	} else {

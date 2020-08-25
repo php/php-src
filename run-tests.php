@@ -1774,10 +1774,16 @@ function run_worker(): void
 function show_file_block(string $file, string $block, ?string $section = null): void
 {
     global $cfg;
+    global $colorize;
 
     if ($cfg['show'][$file]) {
         if (is_null($section)) {
             $section = strtoupper($file);
+        }
+        if ($section === 'DIFF' && $colorize) {
+            // '-' is Light Red for removal, '+' is Light Green for addition
+            $block = preg_replace('/^[0-9]+\-\s.*$/m', "\e[1;31m\\0\e[0m", $block);
+            $block = preg_replace('/^[0-9]+\+\s.*$/m', "\e[1;32m\\0\e[0m", $block);
         }
 
         echo "\n========" . $section . "========\n";
