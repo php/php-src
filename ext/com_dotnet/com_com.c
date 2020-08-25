@@ -221,7 +221,6 @@ PHP_FUNCTION(com_create_instance)
 
 	if (server_name) {
 		if (info.pwszName) efree(info.pwszName);
-		if (authid.User) efree(authid.User);
 	}
 
 	efree(moniker);
