@@ -19,7 +19,7 @@ steps:
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \
           --show-diff \
-          --show-slow 1000 \
+          --show-slow 0 \
           --set-timeout 120 \
           ${{ parameters.runTestsParameters }}
     displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
