@@ -18,10 +18,10 @@ class DOMComment
 
 interface DOMParentNode
 {
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function append(...$nodes): void;
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function prepend(...$nodes): void;
 }
 
@@ -29,13 +29,13 @@ interface DOMChildNode
 {
     public function remove(): void;
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function before(... $nodes): void;
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function after(...$nodes): void;
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function replaceWith(...$nodes): void;
 }
 
@@ -116,10 +116,10 @@ class DOMDocumentFragment implements DOMParentNode
     /** @return bool */
     public function appendXML(string $data) {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
 }
 
@@ -151,15 +151,15 @@ class DOMCharacterData implements DOMChildNode
     /** @return bool */
     public function replaceData(int $offset, int $count, string $data) {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function replaceWith(...$nodes): void {}
 
     public function remove(): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function before(... $nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function after(...$nodes): void {}
 }
 
@@ -231,19 +231,19 @@ class DOMElement implements DOMParentNode, DOMChildNode
 
     public function remove(): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function before(... $nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function after(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function replaceWith(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
 }
 
@@ -348,10 +348,10 @@ class DOMDocument implements DOMParentNode
     /** @return DOMNode|false */
     public function adoptNode(DOMNode $node) {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /** @var ...DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
 }
 

@@ -183,18 +183,10 @@ class ZipArchive
     /** @return bool */
     public function setExternalAttributesIndex(int $index, int $opsys, int $attr, int $flags = 0) {}
 
-    /**
-     * @param int $opsys
-     * @param int $attr
-     * @return bool
-     */
+    /** @return bool */
     public function getExternalAttributesName(string $name, &$opsys, &$attr, int $flags = 0) {}
 
-    /**
-     * @param int $opsys
-     * @param int $attr
-     * @return bool
-     */
+    /** @return bool */
     public function getExternalAttributesIndex(int $index, &$opsys, &$attr, int $flags = 0) {}
 #endif
 

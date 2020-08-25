@@ -477,7 +477,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 			break;
 #endif
 		default:
-			zend_argument_value_error(2, "is not a valid cURL multi option");
+			php_error_docref(NULL, E_WARNING, "Invalid curl multi configuration option");
 			error = CURLM_UNKNOWN_OPTION;
 			break;
 	}

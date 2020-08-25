@@ -8,16 +8,10 @@ Havard Eide <nucleuz@gmail.com>
 --FILE--
 <?php
 $a = new SimpleXMLElement("<php>testfest</php>");
-
-try {
-    $a->addAttribute( "", "" );
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
+$a->addAttribute( "", "" );
 echo $a->asXML();
 ?>
---EXPECT--
-SimpleXMLElement::addAttribute(): Argument #1 ($qualifiedName) cannot be empty
+--EXPECTF--
+Warning: SimpleXMLElement::addAttribute(): Attribute name is required in %s on line %d
 <?xml version="1.0"?>
 <php>testfest</php>

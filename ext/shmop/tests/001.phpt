@@ -43,11 +43,7 @@ shmop extension test
     echo "data in memory is: " . shmop_read($shm_id, 0, $written) . "\n";
 
     /* try to append data to the shared memory segment, this should fail */
-    try {
-        shmop_write($shm_id, $write_d1, $written);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
-    }
+    shmop_write($shm_id, $write_d1, $written);
 
     echo "shm open for read only: ";
     $shm_id = shmop_open($hex_shm_id, "w", 0644, 1024);
@@ -57,7 +53,7 @@ shmop extension test
         echo "ok\n";
     }
 
-    echo "shm write test #2: ";
+    echo "shm write test #1: ";
     $written = shmop_write($shm_id, $write_d2, $written);
     if ($written != strlen($write_d2)) {
         die("failed\n");
@@ -74,15 +70,16 @@ shmop extension test
         echo "ok\n";
     }
 ?>
---EXPECT--
+--EXPECTF--
 shm open for create: ok
 shm size is: 1024
 shm write test #1: ok
 data in memory is: test #1 of the shmop() extension
 shm open for read only: ok
 data in memory is: test #1 of the shmop() extension
-Read-only segment cannot be written
+
+Warning: shmop_write(): Trying to write to a read only segment in %s on line %d
 shm open for read only: ok
-shm write test #2: ok
+shm write test #1: ok
 data in memory is: test #1 of the shmop() extensiontest #2 append data to shared memory segment
 deletion of shm segment: ok

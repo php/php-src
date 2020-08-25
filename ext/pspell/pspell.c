@@ -76,8 +76,8 @@ static void php_pspell_close_config(zend_resource *rsrc)
 #define PSPELL_FETCH_CONFIG  do { \
 	zval *res = zend_hash_index_find(&EG(regular_list), conf); \
 	if (res == NULL || Z_RES_P(res)->type != le_pspell_config) { \
-		zend_throw_error(NULL, "%s(): " ZEND_LONG_FMT " is not a PSPELL config index", get_active_function_name(), conf); \
-		RETURN_THROWS(); \
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a PSPELL config index", conf); \
+		RETURN_FALSE; \
 	} \
 	config = (PspellConfig *)Z_RES_P(res)->ptr; \
 } while (0)
@@ -85,8 +85,8 @@ static void php_pspell_close_config(zend_resource *rsrc)
 #define PSPELL_FETCH_MANAGER do { \
 	zval *res = zend_hash_index_find(&EG(regular_list), scin); \
 	if (res == NULL || Z_RES_P(res)->type != le_pspell) { \
-		zend_throw_error(NULL, "%s(): " ZEND_LONG_FMT " is not a PSPELL result index", get_active_function_name(), scin); \
-		RETURN_THROWS(); \
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a PSPELL result index", scin); \
+		RETURN_FALSE; \
 	} \
 	manager = (PspellManager *)Z_RES_P(res)->ptr; \
 } while (0);

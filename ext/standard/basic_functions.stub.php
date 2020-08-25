@@ -120,10 +120,6 @@ function array_search(mixed $needle, array $haystack, bool $strict = false): int
 /** @prefer-ref $array */
 function extract(array &$array, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
 
-/**
- * @param string|array $var_name
- * @param string|array $var_names
- */
 function compact($var_name, ...$var_names): array {}
 
 function array_fill(int $start_key, int $num, mixed $val): array {}
@@ -169,63 +165,53 @@ function array_count_values(array $array): array {}
 
 function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
 
-function array_reverse(array $array, bool $preserve_keys = false): array {}
+function array_reverse(array $input, bool $preserve_keys = false): array {}
 
 function array_pad(array $array, int $pad_size, mixed $pad_value): array {}
 
 function array_flip(array $array): array {}
 
-function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
+function array_change_key_case(array $input, int $case = CASE_LOWER): array {}
 
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
 function array_intersect_key(array $array1, array $array2, array ...$arrays): array {}
 
-/** @param array|callable $rest */
 function array_intersect_ukey(array $array1, array $array2, ...$rest): array {}
 
 function array_intersect(array $array1, array $array2, array ...$arrays): array {}
 
-/** @param array|callable $rest */
 function array_uintersect(array $array1, array $array2, ...$rest): array {}
 
 function array_intersect_assoc(array $array1, array $array2, array ...$arrays): array {}
 
-/** @param array|callable $rest */
 function array_uintersect_assoc(array $array1, array $array2, ...$rest): array {}
 
-/** @param array|callable $rest */
 function array_intersect_uassoc(array $array1, array $array2, ...$rest): array {}
 
-/** @param array|callable $rest */
 function array_uintersect_uassoc(array $array1, array $array2, ...$rest): array {}
 
 function array_diff_key(array $array1, array $array2, array ...$arrays): array {}
 
-/** @param array|callable $rest */
 function array_diff_ukey(array $array1, array $array2, ...$rest): array {}
 
 function array_diff(array $array1, array $array2, array ...$arrays): array {}
 
-/** @param array|callable $rest */
 function array_udiff(array $array1, array $array2, ...$rest): array {}
 
 function array_diff_assoc(array $array1, array $array2, array ...$arrays): array {}
 
-/** @param array|callable $rest */
 function array_diff_uassoc(array $array1, array $array2, ...$rest): array {}
 
-/** @param array|callable $rest */
 function array_udiff_assoc(array $array1, array $array2, ...$rest): array {}
 
-/** @param array|callable $rest */
 function array_udiff_uassoc(array $array1, array $array2, ...$rest): array {}
 
 /**
  * @param array $array1
  * @param int $sort_order
  * @param int $sort_flags
- * @param array $arrays
+ * @param array $array2
  * @prefer-ref $array1
  * @prefer-ref $sort_order
  * @prefer-ref $sort_flags
@@ -939,14 +925,14 @@ function stat(string $filename): array|false {}
 
 function lstat(string $filename): array|false {}
 
-function chown(string $filename, string|int $user): bool {}
+function chown(string $filename, $user): bool {}
 
-function chgrp(string $filename, string|int $group): bool {}
+function chgrp(string $filename, $group): bool {}
 
 #if HAVE_LCHOWN
-function lchown(string $filename, string|int $user): bool {}
+function lchown(string $filename, $user): bool {}
 
-function lchgrp(string $filename, string|int $group): bool {}
+function lchgrp(string $filename, $group): bool {}
 #endif
 
 function chmod(string $filename, int $mode): bool {}
@@ -1500,11 +1486,11 @@ function convert_uudecode(string $data): string|false {}
 
 /* var.c */
 
-function var_dump(mixed $value, mixed ...$values): void {}
+function var_dump(mixed $value, mixed ...$value): void {}
 
 function var_export(mixed $value, bool $return = false): ?string {}
 
-function debug_zval_dump(mixed $value, mixed ...$values): void {}
+function debug_zval_dump(mixed $value, mixed ...$value): void {}
 
 function serialize(mixed $value): string {}
 
@@ -1529,7 +1515,9 @@ function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage,
 
 function sapi_windows_cp_is_utf8(): bool {}
 
-function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bool {}
+/** @param callable|null $handler */
+function sapi_windows_set_ctrl_handler($handler, bool $add = true): bool {}
 
+/** @param callable|null $handler */
 function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif

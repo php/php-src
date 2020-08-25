@@ -13,5 +13,5 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECTF--
-Warning: chgrp(): No such file or directory in %s on line %d
+--EXPECT--
+chgrp(): Argument #2 ($group) must be of type string|int, null given

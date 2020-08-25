@@ -33,28 +33,18 @@ echo "==========================================================================
 
 try {
     $phar->setDefaultStub('my/custom/thingy.php');
-} catch(ValueError $e) {
-    echo $e->getMessage(). "\n";
-}
-
-try {
     $phar->stopBuffering();
 } catch(Exception $e) {
     echo $e->getMessage(). "\n";
 }
+
 var_dump($phar->getStub());
 
 echo "============================================================================\n";
 echo "============================================================================\n";
 
-
 try {
     $phar->setDefaultStub('my/custom/thingy.php', 'the/web.php');
-} catch(ValueError $e) {
-    echo $e->getMessage(). "\n";
-}
-
-try {
     $phar->stopBuffering();
 } catch(Exception $e) {
     echo $e->getMessage(). "\n";
@@ -67,7 +57,7 @@ var_dump($phar->getStub());
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 ?>
---EXPECT--
+--EXPECTF--
 string(51) "<?php echo "Hello World\n"; __HALT_COMPILER(); ?>
 "
 ============================================================================
@@ -76,11 +66,13 @@ string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-Phar::setDefaultStub(): Argument #1 ($index) must be null for a tar- or zip-based phar stub, string given
+
+Warning: Phar::setDefaultStub(): Method accepts no arguments for a tar- or zip-based phar stub, 1 given in %sphar_setdefaultstub.php on line %d
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-Phar::setDefaultStub(): Argument #1 ($index) must be null for a tar- or zip-based phar stub, string given
+
+Warning: Phar::setDefaultStub(): Method accepts no arguments for a tar- or zip-based phar stub, 2 given in %sphar_setdefaultstub.php on line %d
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"

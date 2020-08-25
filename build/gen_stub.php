@@ -80,6 +80,10 @@ class SimpleType {
 
     public static function fromNode(Node $node) {
         if ($node instanceof Node\Name) {
+            if ($node->toString() === "mixed") {
+                return new SimpleType($node->toString(), true);
+            }
+
             assert($node->isFullyQualified());
             return new SimpleType($node->toString(), false);
         }
@@ -572,23 +576,11 @@ class DocCommentTag {
 
     public function getVariableName(): string {
         $value = $this->getValue();
-        if ($value === null || strlen($value) === 0) {
-            throw new Exception("@$this->name doesn't have any value");
+        if ($value === null || strlen($value) === 0 || $value[0] !== '$') {
+            throw new Exception("@$this->name not followed by variable name");
         }
 
-        $matches = [];
-
-        if ($this->name === "param") {
-            preg_match('/^\s*[\w\|\\\\]+\s*\$(\w+).*$/', $value, $matches);
-        } elseif ($this->name === "prefer-ref") {
-            preg_match('/^\s*\$(\w+).*$/', $value, $matches);
-        }
-
-        if (isset($matches[1]) === false) {
-            throw new Exception("@$this->name doesn't contain variable name or has an invalid format \"$value\"");
-        }
-
-        return $matches[1];
+        return substr($value, 1);
     }
 }
 
@@ -618,7 +610,6 @@ function parseFunctionLike(
     $alias = null;
     $isDeprecated = false;
     $haveDocReturnType = false;
-    $docParamTypes = [];
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -640,13 +631,10 @@ function parseFunctionLike(
                 $isDeprecated = true;
             } else if ($tag->name === 'return') {
                 $haveDocReturnType = true;
-            } else if ($tag->name === 'param') {
-                $docParamTypes[$tag->getVariableName()] = true;
             }
         }
     }
 
-    $varNameSet = [];
     $args = [];
     $numRequiredArgs = 0;
     $foundVariadic = false;
@@ -654,11 +642,6 @@ function parseFunctionLike(
         $varName = $param->var->name;
         $preferRef = !empty($paramMeta[$varName]['preferRef']);
         unset($paramMeta[$varName]);
-
-        if (isset($varNameSet[$varName])) {
-            throw new Exception("Duplicate parameter name $varName for function $name");
-        }
-        $varNameSet[$varName] = true;
 
         if ($preferRef) {
             $sendBy = ArgInfo::SEND_PREFER_REF;
@@ -673,16 +656,12 @@ function parseFunctionLike(
         }
 
         $type = $param->type ? Type::fromNode($param->type) : null;
-        if ($type === null && !isset($docParamTypes[$varName])) {
-            throw new Exception("Missing parameter type for function $name()");
-        }
-
         if ($param->default instanceof Expr\ConstFetch &&
             $param->default->name->toLowerString() === "null" &&
             $type && !$type->isNullable()
         ) {
             $simpleType = $type->tryToSimpleType();
-            if ($simpleType === null) {
+            if ($simpleType === null || $simpleType->name !== "mixed") {
                 throw new Exception(
                     "Parameter $varName of function $name has null default, but is not nullable");
             }
@@ -1107,7 +1086,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.9.0";
+    $version = "4.3.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
@@ -1124,7 +1103,7 @@ function initPhpParser() {
 $optind = null;
 $options = getopt("f", ["force-regeneration"], $optind);
 $forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
-$location = $argv[$optind] ?? ".";
+$location = $argv[$optind + 1] ?? ".";
 
 if (is_file($location)) {
     // Generate single file.

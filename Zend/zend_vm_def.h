@@ -3424,26 +3424,12 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 		} while (0);
 	}
 
-	if (OP1_TYPE == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
+	if (OP1_TYPE != IS_UNUSED) {
 		do {
-			if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
+			if (OP1_TYPE == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((OP1_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
+					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (OP1_TYPE & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
 						break;
 					}
 				}
@@ -3467,6 +3453,7 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 		} while (0);
 	}
 
+	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
 	if (OP2_TYPE == IS_CONST &&
@@ -3486,9 +3473,7 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 			FREE_OP2();
-			if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
+			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
 		if (OP2_TYPE == IS_CONST &&
@@ -3497,10 +3482,8 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
 		}
 		if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
+			/* Reset "object" to trigger reference counting */
+			object = NULL;
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3513,11 +3496,10 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 
 	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
+		FREE_OP1();
+
+		if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
 		}
 		/* call static method */
 		obj = (zend_object*)called_scope;
@@ -3525,6 +3507,12 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	} else if (OP1_TYPE & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		if (OP1_TYPE == IS_CV) {
 			GC_ADDREF(obj); /* For $this pointer */
+		} else {
+			zval *free_op1 = EX_VAR(opline->op1.var);
+			if (free_op1 != object) {
+				GC_ADDREF(obj); /* For $this pointer */
+				zval_ptr_dtor_nogc(free_op1);
+			}
 		}
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
@@ -5203,7 +5191,6 @@ ZEND_VM_C_LABEL(send_array):
 				arg_num = 1;
 				param = ZEND_CALL_ARG(EX(call), 1);
 				ZEND_HASH_FOREACH_VAL(ht, arg) {
-					zend_bool must_wrap = 0;
 					if (skip > 0) {
 						skip--;
 						continue;
@@ -5215,7 +5202,6 @@ ZEND_VM_C_LABEL(send_array):
 								/* By-value send is not allowed -- emit a warning,
 								 * but still perform the call. */
 								zend_param_must_be_ref(EX(call)->func, arg_num);
-								must_wrap = 1;
 							}
 						}
 					} else {
@@ -5225,12 +5211,7 @@ ZEND_VM_C_LABEL(send_array):
 							arg = Z_REFVAL_P(arg);
 						}
 					}
-					if (EXPECTED(!must_wrap)) {
-						ZVAL_COPY(param, arg);
-					} else {
-						Z_TRY_ADDREF_P(arg);
-						ZVAL_NEW_REF(param, arg);
-					}
+					ZVAL_COPY(param, arg);
 					ZEND_CALL_NUM_ARGS(EX(call))++;
 					arg_num++;
 					param++;
@@ -5260,14 +5241,12 @@ ZEND_VM_C_LABEL(send_array):
 					HANDLE_EXCEPTION();
 				}
 
-				zend_bool must_wrap = 0;
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 					if (UNEXPECTED(!Z_ISREF_P(arg))) {
 						if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 							/* By-value send is not allowed -- emit a warning,
 							 * but still perform the call. */
 							zend_param_must_be_ref(EX(call)->func, arg_num);
-							must_wrap = 1;
 						}
 					}
 				} else {
@@ -5278,12 +5257,7 @@ ZEND_VM_C_LABEL(send_array):
 					}
 				}
 
-				if (EXPECTED(!must_wrap)) {
-					ZVAL_COPY(param, arg);
-				} else {
-					Z_TRY_ADDREF_P(arg);
-					ZVAL_NEW_REF(param, arg);
-				}
+				ZVAL_COPY(param, arg);
 				if (!name) {
 					ZEND_CALL_NUM_ARGS(EX(call))++;
 					arg_num++;

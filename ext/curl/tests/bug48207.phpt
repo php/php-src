@@ -33,21 +33,16 @@ if(!empty($host)) {
 
 
 $tempfile	= tempnam(sys_get_temp_dir(), 'CURL_FILE_HANDLE');
-$fp = fopen($tempfile, "r"); // Opening 'fubar' with the incorrect readonly flag
 
 $ch = curl_init($url);
-try {
-    curl_setopt($ch, CURLOPT_FILE, $fp);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
+$fp = fopen($tempfile, "r"); // Opening 'fubar' with the incorrect readonly flag
+curl_setopt($ch, CURLOPT_FILE, $fp);
 curl_exec($ch);
 curl_close($ch);
 is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
---EXPECT--
-curl_setopt(): The provided file handle must be writable
+--EXPECTF--
+Warning: curl_setopt(): The provided file handle is not writable in %s on line %d
 Hello World!
 Hello World!

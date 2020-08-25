@@ -30,16 +30,9 @@ var_dump(filter_var_array(array(), array("var_name"=>-1)));
 var_dump(filter_var_array(array("var_name"=>""), array("var_name"=>-1)));
 
 echo "-- (5)\n";
-try {
-    filter_var_array(array("var_name"=>""), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>""));
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-try {
-    filter_var_array(array("asdas"=>"text"), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>""));
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+var_dump(filter_var_array(array("var_name"=>""), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
+var_dump(filter_var_array(array("asdas"=>"text"), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
+
 
 $a = array(""=>""); $b = -1;
 var_dump(filter_var_array($a, $b));
@@ -55,7 +48,7 @@ var_dump($a, $b);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 -- (1)
 array(0) {
 }
@@ -93,8 +86,12 @@ array(1) {
   string(0) ""
 }
 -- (5)
-filter_var_array(): Argument #2 ($options) cannot contain empty keys
-filter_var_array(): Argument #2 ($options) cannot contain empty keys
+
+Warning: filter_var_array(): Empty keys are not allowed in the definition array in %s on line %d
+bool(false)
+
+Warning: filter_var_array(): Empty keys are not allowed in the definition array in %s on line %d
+bool(false)
 bool(false)
 array(1) {
   [""]=>

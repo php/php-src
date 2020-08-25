@@ -68,18 +68,14 @@ while ($reader->read()) {
 
             var_dump($reader->moveToAttributeNo(20));
             var_dump($reader->moveToAttribute('missing-attribute'));
-            try {
-                $reader->moveToAttribute('');
-            } catch (ValueError $exception) {
-                echo $exception->getMessage() . "\n";
-            }
+            var_dump($reader->moveToAttribute(''));
         }
     }
 }
 $reader->close();
 unlink($filename);
 ?>
---EXPECT--
+--EXPECTF--
 num: 1
 idx: 2
 num: 1
@@ -88,4 +84,6 @@ num: 1
 idx: 2
 bool(false)
 bool(false)
-XMLReader::moveToAttribute(): Argument #1 ($name) cannot be empty
+
+Warning: XMLReader::moveToAttribute(): Attribute Name is required in %s on line %d
+bool(false)

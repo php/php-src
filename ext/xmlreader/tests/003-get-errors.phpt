@@ -31,12 +31,8 @@ while ($reader->read()) {
             echo $reader->value . "\n";
 
             // Test for call with an empty string argument
-            try {
-                $reader->getAttribute('');
-            } catch (ValueError $exception) {
-                echo $exception->getMessage() . "\n";
-            }
-
+            $attr = $reader->getAttribute('');
+            var_dump($attr);
             // Ensure that node pointer has not changed position
             echo $reader->name . ": ";
             echo $reader->value . "\n";
@@ -65,11 +61,13 @@ $reader->close();
 <?php
 unlink(__DIR__.'/003-get-errors.xml');
 ?>
---EXPECT--
+--EXPECTF--
 book
 bool(true)
 num: 1
-XMLReader::getAttribute(): Argument #1 ($name) cannot be empty
+
+Warning: XMLReader::getAttribute(): Argument cannot be an empty string in %s on line %d
+bool(false)
 num: 1
 NULL
 num: 1

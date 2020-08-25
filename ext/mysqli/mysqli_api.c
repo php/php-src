@@ -176,7 +176,8 @@ PHP_FUNCTION(mysqli_autocommit)
 /* {{{ mysqli_stmt_bind_param_do_bind */
 #ifndef MYSQLI_USE_MYSQLND
 static
-int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *args, const char * const types, unsigned int num_extra_args)
+int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned int num_vars,
+								   zval *args, unsigned int start, const char * const types)
 {
 	int				i, ofs;
 	MYSQL_BIND		*bind;
@@ -191,7 +192,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 	bind = (MYSQL_BIND *) ecalloc(num_vars, sizeof(MYSQL_BIND));
 
 	ofs = 0;
-	for (i = 0; i < num_vars; i++) {
+	for (i = start; i < argc; i++) {
 		zval *param;
 		if (Z_ISREF(args[i])) {
 			param = Z_REFVAL(args[i]);
@@ -228,7 +229,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 				break;
 
 			default:
-				php_error_docref(NULL, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[ofs], i + num_extra_args + 1);
+				php_error_docref(NULL, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[ofs], i+1);
 				rc = 1;
 				goto end_1;
 		}
@@ -244,7 +245,7 @@ end_1:
 		stmt->param.vars = safe_emalloc(num_vars, sizeof(zval), 0);
 		for (i = 0; i < num_vars; i++) {
 			if (bind[i].buffer_type != MYSQL_TYPE_LONG_BLOB) {
-				ZVAL_COPY(&stmt->param.vars[i], &args[i]);
+				ZVAL_COPY(&stmt->param.vars[i], &args[i+start]);
 			} else {
 				ZVAL_UNDEF(&stmt->param.vars[i]);
 			}
@@ -256,21 +257,22 @@ end_1:
 }
 #else
 static
-int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *args, const char * const types, unsigned int num_extra_args)
+int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned int num_vars,
+								   zval *args, unsigned int start, const char * const types)
 {
 	unsigned int i;
 	MYSQLND_PARAM_BIND	*params;
 	enum_func_status	ret = FAIL;
 
 	/* If no params -> skip binding and return directly */
-	if (num_vars == 0) {
+	if (argc == start) {
 		return PASS;
 	}
 	params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
 	if (!params) {
 		goto end;
 	}
-	for (i = 0; i < num_vars; i++) {
+	for (i = 0; i < (argc - start); i++) {
 		zend_uchar type;
 		switch (types[i]) {
 			case 'd': /* Double */
@@ -291,12 +293,12 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 				break;
 			default:
 				/* We count parameters from 1 */
-				php_error_docref(NULL, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[i], i + num_extra_args + 1);
+				php_error_docref(NULL, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[i], i + start + 1);
 				ret = FAIL;
 				mysqlnd_stmt_free_param_bind(stmt->stmt, params);
 				goto end;
 		}
-		ZVAL_COPY_VALUE(&params[i].zv, &args[i]);
+		ZVAL_COPY_VALUE(&params[i].zv, &args[i + start]);
 		params[i].type = type;
 	}
 	ret = mysqlnd_stmt_bind_param(stmt->stmt, params);
@@ -311,24 +313,41 @@ end:
 PHP_FUNCTION(mysqli_stmt_bind_param)
 {
 	zval			*args;
-	int				argc;
+	int				argc = ZEND_NUM_ARGS();
+	int				num_vars;
+	int				start = 2;
 	MY_STMT			*stmt;
 	zval			*mysql_stmt;
 	char			*types;
 	size_t			types_len;
+	zend_ulong	rc;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*", &mysql_stmt, mysqli_stmt_class_entry, &types, &types_len, &args, &argc) == FAILURE) {
+	/* calculate and check number of parameters */
+	if (argc < 2) {
+		/* there has to be at least one pair */
+		WRONG_PARAM_COUNT;
+	}
+
+	if (zend_parse_method_parameters((getThis()) ? 1:2, getThis(), "Os", &mysql_stmt, mysqli_stmt_class_entry,
+									&types, &types_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
+	num_vars = argc - 1;
+	if (getThis()) {
+		start = 1;
+	} else {
+		/* ignore handle parameter in procedural interface*/
+		--num_vars;
+	}
 	if (!types_len) {
 		php_error_docref(NULL, E_WARNING, "Invalid type or no types specified");
 		RETURN_FALSE;
 	}
 
-	if (types_len != (size_t) argc) {
+	if (types_len != (size_t)(argc - start)) {
 		/* number of bind variables doesn't match number of elements in type definition string */
 		php_error_docref(NULL, E_WARNING, "Number of elements in type definition string doesn't match number of bind variables");
 		RETURN_FALSE;
@@ -339,8 +358,19 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		RETURN_FALSE;
 	}
 
-	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, getThis() ? 1 : 2));
-	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+	args = safe_emalloc(argc, sizeof(zval), 0);
+
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		zend_wrong_param_count();
+		rc = 1;
+	} else {
+		rc = mysqli_stmt_bind_param_do_bind(stmt, argc, num_vars, args, start, types);
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+	}
+
+	efree(args);
+
+	RETURN_BOOL(!rc);
 }
 /* }}} */
 
@@ -1644,13 +1674,16 @@ static int mysqli_options_get_option_zval_type(int option)
 #ifdef MYSQL_OPT_COMPRESS
 		case MYSQL_OPT_COMPRESS:
 #endif /* mysqlnd @ PHP 5.3.2 */
+#ifdef MYSQL_OPT_SSL_VERIFY_SERVER_CERT
+	REGISTER_LONG_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
+#endif /* MySQL 5.1.1., mysqlnd @ PHP 5.3.3 */
 #if (MYSQL_VERSION_ID >= 50611 && defined(CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS)) || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS:
 #endif
 			return IS_LONG;
 
 #ifdef MYSQL_SHARED_MEMORY_BASE_NAME
-		case MYSQL_SHARED_MEMORY_BASE_NAME:
+                case MYSQL_SHARED_MEMORY_BASE_NAME:
 #endif /* MySQL 4.1.0 */
 #ifdef MYSQL_SET_CLIENT_IP
 		case MYSQL_SET_CLIENT_IP:

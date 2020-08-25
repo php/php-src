@@ -104,7 +104,7 @@ static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, 
 	CURLcode error = CURLE_OK;
 
 	if (strlen(str) != len) {
-		zend_type_error("%s(): cURL option cannot contain any null-bytes", get_active_function_name());
+		php_error_docref(NULL, E_WARNING, "Curl option contains invalid characters (\\0)");
 		return FAILURE;
 	}
 
@@ -2204,7 +2204,7 @@ PHP_FUNCTION(curl_copy_handle)
 }
 /* }}} */
 
-static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool is_array_config) /* {{{ */
+static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
 	zend_long lval;
@@ -2381,7 +2381,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			break;
 		case CURLOPT_SAFE_UPLOAD:
 			if (!zend_is_true(zvalue)) {
-				zend_value_error("%s(): Disabling safe uploads is no longer supported", get_active_function_name());
+				php_error_docref(NULL, E_WARNING, "Disabling safe uploads is no longer supported");
 				return FAILURE;
 			}
 			break;
@@ -2557,7 +2557,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 						ch->handlers->write->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers->write->stream, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						php_error_docref(NULL, E_WARNING, "The provided file handle is not writable");
 						return FAILURE;
 					}
 					break;
@@ -2575,7 +2575,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 						ch->handlers->write_header->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers->write_header->stream, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						php_error_docref(NULL, E_WARNING, "The provided file handle is not writable");
 						return FAILURE;
 					}
 					break;
@@ -2604,7 +2604,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 						zval_ptr_dtor(&ch->handlers->std_err);
 						ZVAL_COPY(&ch->handlers->std_err, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						php_error_docref(NULL, E_WARNING, "The provided file handle is not writable");
 						return FAILURE;
 					}
 					/* break omitted intentionally */
@@ -2674,8 +2674,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 						break;
 #endif
 				}
-
-				zend_type_error("%s(): The %s option must have an array value", get_active_function_name(), name);
+				php_error_docref(NULL, E_WARNING, "You must pass an array with the %s argument", name);
 				return FAILURE;
 			}
 
@@ -2851,14 +2850,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			ch->handlers->fnmatch->method = PHP_CURL_USER;
 			break;
 
-		default:
-			if (is_array_config) {
-				zend_argument_value_error(2, "must contain only valid cURL options");
-			} else {
-				zend_argument_value_error(2, "is not a valid cURL option");
-			}
-			error = CURLE_UNKNOWN_OPTION;
-			break;
 	}
 
 	SAVE_CURL_ERROR(ch, error);
@@ -2885,7 +2876,12 @@ PHP_FUNCTION(curl_setopt)
 
 	ch = Z_CURL_P(zid);
 
-	if (_php_curl_setopt(ch, options, zvalue, 0) == SUCCESS) {
+	if (options <= 0 && options != CURLOPT_SAFE_UPLOAD) {
+		php_error_docref(NULL, E_WARNING, "Invalid curl configuration option");
+		RETURN_FALSE;
+	}
+
+	if (_php_curl_setopt(ch, options, zvalue) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -2910,12 +2906,12 @@ PHP_FUNCTION(curl_setopt_array)
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(arr), option, string_key, entry) {
 		if (string_key) {
-			zend_argument_value_error(2, "contains an invalid cURL option");
-			RETURN_THROWS();
+			php_error_docref(NULL, E_WARNING,
+					"Array keys must be CURLOPT constants or equivalent integer values");
+			RETURN_FALSE;
 		}
-
 		ZVAL_DEREF(entry);
-		if (_php_curl_setopt(ch, (zend_long) option, entry, 1) == FAILURE) {
+		if (_php_curl_setopt(ch, (zend_long) option, entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -3296,8 +3292,8 @@ PHP_FUNCTION(curl_close)
 	ch = Z_CURL_P(zid);
 
 	if (ch->in_callback) {
-		zend_throw_error(NULL, "%s(): Attempt to close cURL handle from a callback", get_active_function_name());
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Attempt to close cURL handle from a callback");
+		return;
 	}
 }
 /* }}} */
@@ -3453,8 +3449,8 @@ PHP_FUNCTION(curl_reset)
 	ch = Z_CURL_P(zid);
 
 	if (ch->in_callback) {
-		zend_throw_error(NULL, "%s(): Attempt to reset cURL handle from a callback", get_active_function_name());
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Attempt to reset cURL handle from a callback");
+		return;
 	}
 
 	curl_easy_reset(ch->cp);

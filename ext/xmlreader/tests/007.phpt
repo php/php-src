@@ -42,15 +42,13 @@ $reader->close();
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 
-try {
-    $reader->setRelaxNGSchema('');
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+if ($reader->setRelaxNGSchema('')) {
+    echo 'failed';
 }
-
 $reader->close();
 ?>
---EXPECT--
+--EXPECTF--
 file relaxNG: ok
 string relaxNG: ok
-XMLReader::setRelaxNGSchema(): Argument #1 ($filename) cannot be empty
+
+Warning: XMLReader::setRelaxNGSchema(): Schema data source is required in %s on line %d

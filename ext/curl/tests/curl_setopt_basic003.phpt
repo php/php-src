@@ -17,11 +17,7 @@ echo "*** curl_setopt() call with CURLOPT_HTTPHEADER\n";
 $url = "{$host}/";
 $ch = curl_init();
 
-try {
-    curl_setopt($ch, CURLOPT_HTTPHEADER, 1);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+curl_setopt($ch, CURLOPT_HTTPHEADER, 1);
 
 $curl_content = curl_exec($ch);
 curl_close($ch);
@@ -40,8 +36,9 @@ curl_close($ch);
 
 var_dump( $curl_content );
 ?>
---EXPECT--
+--EXPECTF--
 *** curl_setopt() call with CURLOPT_HTTPHEADER
-curl_setopt(): The CURLOPT_HTTPHEADER option must have an array value
+
+Warning: curl_setopt(): You must pass an array with the CURLOPT_HTTPHEADER argument in %s on line %d
 bool(false)
 bool(true)

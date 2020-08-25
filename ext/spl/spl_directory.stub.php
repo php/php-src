@@ -18,7 +18,7 @@ class SplFileInfo
     /** @return string */
     public function getBasename(string $suffix = "") {}
 
-    /** @return string */
+    /** @return string|false */
     public function getPathname() {}
 
     /** @return int|false */

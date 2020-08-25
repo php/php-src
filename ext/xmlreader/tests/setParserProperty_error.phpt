@@ -10,12 +10,9 @@ $xml = '<?xml version="1.0" encoding="UTF-8"?><books><book>new book</book></book
 $invalidProperty = -1;
 $reader = new XMLReader();
 $reader->XML($xml);
-try {
-    $reader->setParserProperty(-1, true);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+var_dump($reader->setParserProperty(-1, true));
 $reader->close();
 ?>
---EXPECT--
-XMLReader::setParserProperty(): Argument #1 ($property) must be a valid parser property
+--EXPECTF--
+Warning: XMLReader::setParserProperty(): Invalid parser property in %s on line %d
+bool(false)

@@ -345,13 +345,22 @@ PHP_HASH_API int php_hash_unserialize(php_hashcontext_object *hash, zend_long ma
 
 /* Userspace */
 
-static void php_hash_do_hash(
-	zval *return_value, zend_string *algo, char *data, size_t data_len, zend_bool raw_output, bool isfilename
-) /* {{{ */ {
-	zend_string *digest;
+static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
+{
+	zend_string *digest, *algo;
+	char *data;
+	size_t data_len;
+	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(algo)
+		Z_PARAM_STRING(data, data_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(raw_output)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ops = php_hash_fetch_ops(algo);
 	if (!ops) {
@@ -411,19 +420,7 @@ static void php_hash_do_hash(
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash)
 {
-	zend_string *algo;
-	char *data;
-	size_t data_len;
-	zend_bool raw_output = 0;
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR(algo)
-		Z_PARAM_STRING(data, data_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(raw_output)
-	ZEND_PARSE_PARAMETERS_END();
-
-	php_hash_do_hash(return_value, algo, data, data_len, raw_output, 0);
+	php_hash_do_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
@@ -431,19 +428,7 @@ PHP_FUNCTION(hash)
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_file)
 {
-	zend_string *algo;
-	char *data;
-	size_t data_len;
-	zend_bool raw_output = 0;
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR(algo)
-		Z_PARAM_STRING(data, data_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(raw_output)
-	ZEND_PARSE_PARAMETERS_END();
-
-	php_hash_do_hash(return_value, algo, data, data_len, raw_output, 1);
+	php_hash_do_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
 }
 /* }}} */
 
@@ -482,14 +467,21 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 	ops->hash_final(final, context);
 }
 
-static void php_hash_do_hash_hmac(
-	zval *return_value, zend_string *algo, char *data, size_t data_len, char *key, size_t key_len, zend_bool raw_output, bool isfilename
-) /* {{{ */ {
-	zend_string *digest;
+static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
+{
+	zend_string *digest, *algo;
+	char *data, *key;
 	unsigned char *K;
+	size_t data_len, key_len;
+	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len,
+																  &key, &key_len, &raw_output) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	ops = php_hash_fetch_ops(algo);
 	if (!ops || !ops->is_crypto) {
@@ -564,16 +556,7 @@ static void php_hash_do_hash_hmac(
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_hmac)
 {
-	zend_string *algo;
-	char *data, *key;
-	size_t data_len, key_len;
-	zend_bool raw_output = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 0);
+	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
@@ -581,16 +564,7 @@ PHP_FUNCTION(hash_hmac)
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_hmac_file)
 {
-	zend_string *algo;
-	char *data, *key;
-	size_t data_len, key_len;
-	zend_bool raw_output = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 1);
+	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
 }
 /* }}} */
 
@@ -1189,31 +1163,29 @@ static void mhash_init(INIT_FUNC_ARGS)
 /* {{{ Hash data with hash */
 PHP_FUNCTION(mhash)
 {
+	zval *z_algorithm;
 	zend_long algorithm;
-	zend_string *algo = NULL;
-	char *data, *key = NULL;
-	size_t data_len, key_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls|s!", &algorithm, &data, &data_len, &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(1, "z", &z_algorithm) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	algorithm = zval_get_long(z_algorithm);
 
 	/* need to convert the first parameter from int constant to string algorithm name */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
-			algo = zend_string_init(algorithm_lookup.hash_name, strlen(algorithm_lookup.hash_name), 0);
+			ZVAL_STRING(z_algorithm, algorithm_lookup.hash_name);
 		}
 	}
 
-	if (key) {
-		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, 1, 0);
+	if (ZEND_NUM_ARGS() == 3) {
+		php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
+	} else if (ZEND_NUM_ARGS() == 2) {
+		php_hash_do_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
 	} else {
-		php_hash_do_hash(return_value, algo, data, data_len, 1, 0);
-	}
-
-	if (algo) {
-		zend_string_release(algo);
+		WRONG_PARAM_COUNT;
 	}
 }
 /* }}} */

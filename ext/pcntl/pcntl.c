@@ -892,14 +892,9 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	if (signo < 1) {
-		zend_argument_value_error(1, "must be greater than or equal to 1");
-		RETURN_THROWS();
-	}
-
-	if (signo >= NSIG) {
-		zend_argument_value_error(1, "must be less than %d", NSIG);
-		RETURN_THROWS();
+	if (signo < 1 || signo >= NSIG) {
+		php_error_docref(NULL, E_WARNING, "Invalid signal");
+		RETURN_FALSE;
 	}
 
 	if (!PCNTL_G(spares)) {
@@ -925,8 +920,8 @@ PHP_FUNCTION(pcntl_signal)
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
 		if (Z_LVAL_P(handle) != (zend_long) SIG_DFL && Z_LVAL_P(handle) != (zend_long) SIG_IGN) {
-			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
-			RETURN_THROWS();
+			php_error_docref(NULL, E_WARNING, "Invalid value for handle argument specified");
+			RETURN_FALSE;
 		}
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
@@ -940,11 +935,10 @@ PHP_FUNCTION(pcntl_signal)
 	if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, &error)) {
 		zend_string *func_name = zend_get_callable_name(handle);
 		PCNTL_G(last_error) = EINVAL;
-
-		zend_argument_type_error(2, "must be of type callable|int, %s given", zend_zval_type_name(handle));
+		php_error_docref(NULL, E_WARNING, "Specified handler \"%s\" is not callable (%s)", ZSTR_VAL(func_name), error);
 		zend_string_release_ex(func_name, 0);
 		efree(error);
-		RETURN_THROWS();
+		RETURN_FALSE;
 	}
 	ZEND_ASSERT(!error);
 
@@ -972,8 +966,8 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 	}
 
 	if (signo < 1 || signo > 32) {
-		zend_argument_value_error(1, "must be between 1 and 32");
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Invalid signal");
+		RETURN_FALSE;
 	}
 
 	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
@@ -1187,7 +1181,7 @@ PHP_FUNCTION(pcntl_getpriority)
 	zend_bool pid_is_null = 1;
 	int pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l", &pid, &pid_is_null, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l", &pid, &who) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1203,8 +1197,8 @@ PHP_FUNCTION(pcntl_getpriority)
 				php_error_docref(NULL, E_WARNING, "Error %d: No process was located using the given parameters", errno);
 				break;
 			case EINVAL:
-				zend_argument_value_error(2, "must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS");
-				RETURN_THROWS();
+				php_error_docref(NULL, E_WARNING, "Error %d: Invalid identifier flag", errno);
+				break;
 			default:
 				php_error_docref(NULL, E_WARNING, "Unknown error %d has occurred", errno);
 				break;
@@ -1226,7 +1220,7 @@ PHP_FUNCTION(pcntl_setpriority)
 	zend_bool pid_is_null = 1;
 	zend_long pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &pri, &pid, &pid_is_null, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &pri, &pid, &who) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1237,8 +1231,8 @@ PHP_FUNCTION(pcntl_setpriority)
 				php_error_docref(NULL, E_WARNING, "Error %d: No process was located using the given parameters", errno);
 				break;
 			case EINVAL:
-				zend_argument_value_error(3, "must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS");
-				RETURN_THROWS();
+				php_error_docref(NULL, E_WARNING, "Error %d: Invalid identifier flag", errno);
+				break;
 			case EPERM:
 				php_error_docref(NULL, E_WARNING, "Error %d: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller", errno);
 				break;
@@ -1406,18 +1400,19 @@ PHP_FUNCTION(pcntl_async_signals)
 PHP_FUNCTION(pcntl_unshare)
 {
 	zend_long flags;
+	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (unshare(flags) == -1) {
+	ret = unshare(flags);
+	if (ret == -1) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 #ifdef EINVAL
 			case EINVAL:
-				zend_argument_value_error(1, "must be a combination of CLONE_* flags");
-				RETURN_THROWS();
+				php_error_docref(NULL, E_WARNING, "Error %d: Invalid flag specified", errno);
 				break;
 #endif
 #ifdef ENOMEM

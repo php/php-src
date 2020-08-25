@@ -26,12 +26,8 @@ while ($reader->read()) {
             $attr = $reader->moveToNextAttribute();
 
             // Test for missing namespace argument
-            try {
-                $attr = $reader->getAttributeNs('idx', null);
-            } catch (ValueError $exception) {
-                echo $exception->getMessage() . "\n";
-            }
-
+            $attr = $reader->getAttributeNs('idx', null);
+            var_dump($attr);
             echo $reader->name . ": ";
             echo $reader->value . "\n";
         }
@@ -45,6 +41,7 @@ $reader->close();
 <?php
 unlink(__DIR__.'/015-get-errors.xml');
 ?>
---EXPECT--
-XMLReader::getAttributeNs(): Argument #2 ($namespaceURI) cannot be empty
+--EXPECTF--
+Warning: XMLReader::getAttributeNs(): Attribute Name and Namespace URI cannot be empty in %s on line %d
+bool(false)
 ns1:num: 1

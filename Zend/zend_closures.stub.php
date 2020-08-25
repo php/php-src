@@ -17,5 +17,6 @@ final class Closure
 
     public function call(object $newThis, mixed ...$arguments): mixed {}
 
-    public static function fromCallable(callable $callback): Closure {}
+    /** @param callable $callback callable is not a proper type due to bug #78770. */
+    public static function fromCallable($callback): Closure {}
 }

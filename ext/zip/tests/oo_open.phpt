@@ -25,11 +25,7 @@ if (!$r) {
 @unlink($dirname . 'nofile');
 
 $zip = new ZipArchive;
-try {
-    $zip->open('');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
+$zip->open('');
 
 if (!$zip->open($dirname . 'test.zip')) {
     exit("failed 1\n");
@@ -41,8 +37,9 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
     echo "failed\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 ER_OPEN: ok
 create: ok
-ZipArchive::open(): Argument #1 ($filename) cannot be empty
+
+Warning: ZipArchive::open(): Empty string as source in %s on line %d
 OK

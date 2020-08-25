@@ -51,17 +51,14 @@ unlink($dir . '/p.png');
 
 
 //empty string
-try {
-    imagecreatefromstring('');
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+$im = imagecreatefromstring('');
 //random string > 12
 $im = imagecreatefromstring(' asdf jklp foo');
 ?>
 --EXPECTF--
 createfromstring truecolor png: ok
 createfromstring palette png: ok
-imagecreatefromstring(): Argument #1 ($image) cannot be empty
+
+Warning: imagecreatefromstring(): Empty string or invalid image in %screatefromstring.php on line %d
 
 Warning: imagecreatefromstring(): Data is not in a recognized format in %screatefromstring.php on line %d

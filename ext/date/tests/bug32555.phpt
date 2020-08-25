@@ -1,17 +1,21 @@
 --TEST--
 Bug #32555 (strtotime("tomorrow") can return false)
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip strftime uses system TZ');
+?>
 --INI--
 date.timezone=US/Eastern
 --FILE--
 <?php
 $stamp = 1112427000;
-print date('r', strtotime('now',$stamp)) ."\n";
-print date('r', strtotime('tomorrow',$stamp)) ."\n";
-print date('r', strtotime('+1 day',$stamp)) ."\n";
-print date('r', strtotime('+2 day',$stamp)) ."\n";
+print strftime('%c %Z',strtotime('now',$stamp)) ."\n";
+print strftime('%c %Z',strtotime('tomorrow',$stamp)) ."\n";
+print strftime('%c %Z',strtotime('+1 day',$stamp)) ."\n";
+print strftime('%c %Z',strtotime('+2 day',$stamp)) ."\n";
 ?>
 --EXPECT--
-Sat, 02 Apr 2005 02:30:00 -0500
-Sun, 03 Apr 2005 00:00:00 -0500
-Sun, 03 Apr 2005 03:30:00 -0400
-Mon, 04 Apr 2005 02:30:00 -0400
+Sat Apr  2 02:30:00 2005 EST
+Sun Apr  3 00:00:00 2005 EST
+Sun Apr  3 03:30:00 2005 EDT
+Mon Apr  4 02:30:00 2005 EDT

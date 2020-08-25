@@ -1191,14 +1191,14 @@ PHP_METHOD(PDOStatement, fetchObject)
 	zend_long how = PDO_FETCH_CLASS;
 	zend_long ori = PDO_FETCH_ORI_NEXT;
 	zend_long off = 0;
-	zend_class_entry *ce = NULL;
+	zend_string *class_name = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
-	int old_arg_count;
+	int error = 0, old_arg_count;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_CLASS_OR_NULL(ce)
+		Z_PARAM_STR_EX(class_name, 1, 0)
 		Z_PARAM_ARRAY(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1222,21 +1222,31 @@ PHP_METHOD(PDOStatement, fetchObject)
 			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 		}
 	}
-	if (ce) {
-		stmt->fetch.cls.ce = ce;
-	} else {
+	if (class_name && !error) {
+		stmt->fetch.cls.ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);
+
+		if (!stmt->fetch.cls.ce) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Could not find user-supplied class");
+			error = 1;
+		}
+	} else if (!error) {
 		stmt->fetch.cls.ce = zend_standard_class_def;
 	}
 
-	if (!do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
+	if (!error && !do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
+		error = 1;
+	}
+	if (error) {
 		PDO_HANDLE_STMT_ERR();
-		RETVAL_FALSE;
 	}
 	do_fetch_opt_finish(stmt, 1);
 
 	stmt->fetch.cls.ce = old_ce;
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
+	if (error) {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1425,34 +1435,32 @@ PHP_METHOD(PDOStatement, fetchAll)
 }
 /* }}} */
 
-static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* {{{ */
+static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
 {
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter, *driver_params = NULL;
 
 	memset(&param, 0, sizeof(param));
+	param.paramno = -1;
 
-	ZEND_PARSE_PARAMETERS_START(2, 5)
-		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
-		Z_PARAM_ZVAL(parameter)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(param_type)
-		Z_PARAM_LONG(param.max_value_len)
-		Z_PARAM_ZVAL_OR_NULL(driver_params)
-	ZEND_PARSE_PARAMETERS_END();
-
-	PHP_STMT_GET_OBJ;
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
+			"lz|llz!", &param.paramno, &parameter, &param_type, &param.max_value_len,
+			&driver_params)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|llz!", &param.name,
+				&parameter, &param_type, &param.max_value_len,
+				&driver_params)) {
+			return 0;
+		}
+	}
 
 	param.param_type = (int) param_type;
 
-	if (param.name) {
-		param.paramno = -1;
-	} else if (param.paramno > 0) {
+	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
-	} else {
+	} else if (!param.name) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
-		RETURN_FALSE;
+		return 0;
 	}
 
 	if (driver_params) {
@@ -1464,11 +1472,9 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
 		}
-
-		RETURN_FALSE;
+		return 0;
 	}
-
-	RETURN_TRUE;
+	return 1;
 } /* }}} */
 
 /* {{{ bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
@@ -1479,22 +1485,22 @@ PHP_METHOD(PDOStatement, bindValue)
 	zval *parameter;
 
 	memset(&param, 0, sizeof(param));
+	param.paramno = -1;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
-		Z_PARAM_ZVAL(parameter)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(param_type)
-	ZEND_PARSE_PARAMETERS_END();
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
+			"lz|l", &param.paramno, &parameter, &param_type)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &param.name,
+				&parameter, &param_type)) {
+			return;
+		}
+	}
 
 	PHP_STMT_GET_OBJ;
 	param.param_type = (int) param_type;
 
-	if (param.name) {
-		param.paramno = -1;
-	} else if (param.paramno > 0) {
+	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
-	} else {
+	} else if (!param.name) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
 		RETURN_FALSE;
 	}
@@ -1514,14 +1520,16 @@ PHP_METHOD(PDOStatement, bindValue)
 /* {{{ bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
 PHP_METHOD(PDOStatement, bindParam)
 {
-	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	PHP_STMT_GET_OBJ;
+	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, TRUE));
 }
 /* }}} */
 
 /* {{{ bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
 PHP_METHOD(PDOStatement, bindColumn)
 {
-	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	PHP_STMT_GET_OBJ;
+	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 0));
 }
 /* }}} */
 

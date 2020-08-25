@@ -11,10 +11,6 @@ class _t extends DateTimeZone {
     function __construct() {
     }
 }
-class _p extends DatePeriod {
-    function __construct() {
-    }
-}
 
 $d = new DateTime;
 var_dump($d->format("Y-m-d H:i:s"));
@@ -48,18 +44,6 @@ try {
     echo $e->getMessage(),"\n";
 }
 
-$p = new _p;
-try {
-    var_dump($p->getStartDate());
-} catch (Error $e) {
-    echo $e->getMessage(),"\n";
-}
-try {
-    var_dump($p->getDateInterval());
-} catch (Error $e) {
-    echo $e->getMessage(),"\n";
-}
-
 echo "DONE\n";
 ?>
 --EXPECTF--
@@ -69,6 +53,4 @@ DateTime::__construct(): Failed to parse time string (1am todax) at position 4 (
 string(3) "UTC"
 The DateTimeZone object has not been correctly initialized by its constructor
 DateTimeZone::__construct(): Unknown or bad timezone (GottaFindThisOne)
-The DatePeriod object has not been correctly initialized by its constructor
-The DatePeriod object has not been correctly initialized by its constructor
 DONE

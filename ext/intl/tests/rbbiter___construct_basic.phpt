@@ -6,6 +6,7 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 
 $rules = <<<RULES
@@ -27,10 +28,11 @@ var_dump(get_class($rbbi));
 try {
     $obj = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+', 'aoeu');
 } catch (IntlException $e) {
-    echo $e->getMessage(), "\n";
+    var_dump(intl_get_error_code(), intl_get_error_message());
 }
 
 ?>
 --EXPECT--
 string(26) "IntlRuleBasedBreakIterator"
-IntlRuleBasedBreakIterator::__construct(): unable to create instance from compiled rules
+int(1)
+string(93) "rbbi_create_instance: unable to create instance from compiled rules: U_ILLEGAL_ARGUMENT_ERROR"

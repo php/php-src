@@ -13,12 +13,7 @@ $item->otherAttribute = $item->attribute;
 var_dump($item->otherAttribute);
 
 $a = array();
-
-try {
-    $item->$a = new stdclass;
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+$item->$a = new stdclass;
 
 echo "Done\n";
 ?>
@@ -33,5 +28,6 @@ object(SimpleXMLElement)#%d (1) {
 }
 
 Warning: Array to string conversion in %s on line %d
-It's not possible to assign a complex type to properties, stdClass given
+
+Warning: It is not yet possible to assign complex types to properties in %s on line %d
 Done

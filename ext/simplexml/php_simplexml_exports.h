@@ -31,7 +31,7 @@
 		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
-		zend_throw_error(NULL, "SimpleXMLElement is not properly initialized"); \
+		php_error_docref(NULL, E_WARNING, "Node no longer exists"); \
 	} \
 }
 

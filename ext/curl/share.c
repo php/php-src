@@ -67,7 +67,7 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 			break;
 
 		default:
-			zend_argument_value_error(2, "is not a valid cURL share option");
+			php_error_docref(NULL, E_WARNING, "Invalid curl share configuration option");
 			error = CURLSHE_BAD_OPTION;
 			break;
 	}

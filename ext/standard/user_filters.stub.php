@@ -4,13 +4,8 @@
 
 class php_user_filter
 {
-    /**
-     * @param resource $in
-     * @param resource $out
-     * @param int $consumed
-     * @return int
-     */
-    public function filter($in, $out, &$consumed, bool $closing) {}
+    /** @return int */
+    public function filter($in, $out, &$consumed, $closing) {}
 
     /** @return void */
     public function onCreate() {}

@@ -18,24 +18,10 @@ posix_kill(posix_getpid(), SIGUSR1);
 pcntl_signal_dispatch();
 
 var_dump(pcntl_signal(SIGALRM, SIG_IGN));
+var_dump(pcntl_signal(-1, -1));
+var_dump(pcntl_signal(-1, function(){}));
+var_dump(pcntl_signal(SIGALRM, "not callable"));
 
-try {
-    pcntl_signal(-1, -1);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
-try {
-    pcntl_signal(-1, function(){});
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
-try {
-    pcntl_signal(SIGALRM, "not callable");
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
 
 /* test freeing queue in RSHUTDOWN */
 posix_kill(posix_getpid(), SIGTERM);
@@ -45,7 +31,13 @@ echo "ok\n";
 signal dispatched
 got signal from %r\d+|nobody%r
 bool(true)
-pcntl_signal(): Argument #1 ($signo) must be greater than or equal to 1
-pcntl_signal(): Argument #1 ($signo) must be greater than or equal to 1
-pcntl_signal(): Argument #2 ($handler) must be of type callable|int, string given
+
+Warning: pcntl_signal(): Invalid signal %s
+bool(false)
+
+Warning: pcntl_signal(): Invalid signal %s
+bool(false)
+
+Warning: pcntl_signal(): Specified handler "not callable" is not callable (%s) in %s
+bool(false)
 ok

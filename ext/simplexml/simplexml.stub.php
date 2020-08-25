@@ -59,7 +59,7 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     /** @return bool */
     public function valid() {}
 
-    /** @return SimpleXMLElement|null */
+    /** @return ?SimpleXMLElement */
     public function current() {}
 
     /** @return string|false */
@@ -71,7 +71,7 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     /** @return bool */
     public function hasChildren() {}
 
-    /** @return SimpleXMLElement|null */
+    /** @return ?SimpleXMLElement */
     public function getChildren() {}
 }
 

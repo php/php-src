@@ -57,7 +57,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCILob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
@@ -67,12 +67,12 @@ int(3)
 bool(true)
 array(2) {
   [0]=>
-  object(OCILob)#%d (1) {
+  object(OCI_Lob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCILob)#%d (1) {
+  object(OCI_Lob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

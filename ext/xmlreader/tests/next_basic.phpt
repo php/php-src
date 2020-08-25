@@ -9,19 +9,8 @@ $xml = '<?xml version="1.0" encoding="UTF-8"?><nodes><node1><sub /></node1>
 <node2><sub /></node2><node3><sub /></node3><node4><sub /></node4></nodes>';
 
 $reader = new XMLReader();
-
-try {
-    $reader->read();
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
-try {
-    $reader->next();
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
+$reader->read();
+$reader->next();
 $reader->close();
 
 $reader->XML($xml);
@@ -39,9 +28,10 @@ echo $reader->name . PHP_EOL;
 $reader->close();
 
 ?>
---EXPECT--
-Data must be loaded before reading
-Data must be loaded before reading
+--EXPECTF--
+Warning: XMLReader::read(): Load Data before trying to read in %s on line %d
+
+Warning: XMLReader::next(): Load Data before trying to read in %s on line %d
 node1
 bool(true)
 node3

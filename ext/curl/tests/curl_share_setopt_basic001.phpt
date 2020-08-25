@@ -12,15 +12,12 @@ if (!extension_loaded("curl")) {
 $sh = curl_share_init();
 var_dump(curl_share_setopt($sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE));
 var_dump(curl_share_setopt($sh, CURLSHOPT_UNSHARE, CURL_LOCK_DATA_DNS));
-
-try {
-    curl_share_setopt($sh, -1, 0);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(curl_share_setopt($sh, -1, 0));
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
-curl_share_setopt(): Argument #2 ($option) is not a valid cURL share option
+
+Warning: curl_share_setopt(): Invalid curl share configuration option in %s on line %d
+bool(false)

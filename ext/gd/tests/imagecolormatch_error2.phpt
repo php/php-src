@@ -13,13 +13,8 @@ $ima = imagecreate(110, 20);
 $background_color = imagecolorallocate($ima, 0, 0, 0);
 $imb = imagecreate(110, 20);
 $background_color = imagecolorallocate($imb, 0, 0, 100);
-
-try {
-    imagecolormatch($ima, $imb);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
+var_dump(imagecolormatch($ima, $imb));
 ?>
---EXPECT--
-imagecolormatch(): Argument #1 ($im1) must be TrueColor
+--EXPECTF--
+Warning: imagecolormatch(): Image1 must be TrueColor in %s on line %d
+bool(false)

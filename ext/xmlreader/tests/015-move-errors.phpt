@@ -24,11 +24,7 @@ while ($reader->read()) {
         // Find the book node
         if ($reader->nodeType == XMLREADER::ELEMENT && $reader->name == 'book') {
             // Test for missing namespace argument
-            try {
-                $reader->moveToAttributeNs('idx', null);
-            } catch (ValueError $exception) {
-                echo $exception->getMessage() . "\n";
-            }
+            $attr = $reader->moveToAttributeNs('idx', null);
         }
     }
 }
@@ -40,5 +36,5 @@ $reader->close();
 <?php
 unlink(__DIR__.'/015-move-errors.xml');
 ?>
---EXPECT--
-XMLReader::moveToAttributeNs(): Argument #2 ($namespaceURI) cannot be empty
+--EXPECTF--
+Warning: XMLReader::moveToAttributeNs(): Attribute Name and Namespace URI cannot be empty in %s on line %d

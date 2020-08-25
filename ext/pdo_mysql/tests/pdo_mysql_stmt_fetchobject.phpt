@@ -67,11 +67,6 @@ try {
 
     var_dump($rows[$rowno - 1]);
 
-    try {
-        $stmt->fetchObject('class_does_not_exist');
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
-    }
 } catch (PDOException $e) {
     // we should never get here, we use warnings, but never trust a system...
     printf("[001] %s, [%s} %s\n",
@@ -111,5 +106,4 @@ object(myclass)#%d (4) {
   ["null"]=>
   NULL
 }
-PDOStatement::fetchObject(): Argument #1 ($class_name) must be a valid class name, class_does_not_exist given
 done!
