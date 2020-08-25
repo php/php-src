@@ -327,7 +327,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
-	zval *group;
+	zend_string *group_str;
+	zend_long group_long;
 #if !defined(WINDOWS)
 	gid_t gid;
 	int ret;
@@ -336,7 +337,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL(group)
+		Z_PARAM_STR_OR_LONG(group_str, group_long)
 	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -344,16 +345,14 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(group) == IS_LONG) {
-				option = PHP_STREAM_META_GROUP;
-				value = &Z_LVAL_P(group);
-			} else if (Z_TYPE_P(group) == IS_STRING) {
+			if (group_str) {
 				option = PHP_STREAM_META_GROUP_NAME;
-				value = Z_STRVAL_P(group);
+				value = ZSTR_VAL(group_str);
 			} else {
-				zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
-				RETURN_THROWS();
+				option = PHP_STREAM_META_GROUP;
+				value = &group_long;
 			}
+
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
 				RETURN_TRUE;
 			} else {
@@ -372,16 +371,13 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
-	if (Z_TYPE_P(group) == IS_LONG) {
-		gid = (gid_t)Z_LVAL_P(group);
-	} else if (Z_TYPE_P(group) == IS_STRING) {
-		if(php_get_gid_by_name(Z_STRVAL_P(group), &gid) != SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
+	if (group_str) {
+		if (php_get_gid_by_name(ZSTR_VAL(group_str), &gid) != SUCCESS) {
+			php_error_docref(NULL, E_WARNING, "Unable to find gid for %s", ZSTR_VAL(group_str));
 			RETURN_FALSE;
 		}
 	} else {
-		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
-		RETURN_THROWS();
+		gid = (gid_t) group_long;
 	}
 
 	/* Check the basedir */
@@ -416,11 +412,7 @@ PHP_FUNCTION(chgrp)
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchgrp)
 {
-# if !defined(WINDOWS)
 	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-# else
-	RETURN_FALSE;
-# endif
 }
 #endif
 /* }}} */
@@ -461,7 +453,8 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
-	zval *user;
+	zend_string *user_str;
+	zend_long user_long;
 #if !defined(WINDOWS)
 	uid_t uid;
 	int ret;
@@ -470,7 +463,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL(user)
+		Z_PARAM_STR_OR_LONG(user_str, user_long)
 	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -478,16 +471,14 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(user) == IS_LONG) {
-				option = PHP_STREAM_META_OWNER;
-				value = &Z_LVAL_P(user);
-			} else if (Z_TYPE_P(user) == IS_STRING) {
+			if (user_str) {
 				option = PHP_STREAM_META_OWNER_NAME;
-				value = Z_STRVAL_P(user);
+				value = ZSTR_VAL(user_str);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
-				RETURN_FALSE;
+				option = PHP_STREAM_META_OWNER;
+				value = &user_long;
 			}
+
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
 				RETURN_TRUE;
 			} else {
@@ -507,16 +498,13 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	RETURN_FALSE;
 #else
 
-	if (Z_TYPE_P(user) == IS_LONG) {
-		uid = (uid_t)Z_LVAL_P(user);
-	} else if (Z_TYPE_P(user) == IS_STRING) {
-		if(php_get_uid_by_name(Z_STRVAL_P(user), &uid) != SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
+	if (user_str) {
+		if (php_get_uid_by_name(ZSTR_VAL(user_str), &uid) != SUCCESS) {
+			php_error_docref(NULL, E_WARNING, "Unable to find uid for %s", ZSTR_VAL(user_str));
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
-		RETURN_FALSE;
+		uid = (uid_t) user_long;
 	}
 
 	/* Check the basedir */
@@ -552,12 +540,8 @@ PHP_FUNCTION(chown)
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
 {
-# if !defined(WINDOWS)
 	RETVAL_TRUE;
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-# else
-	RETURN_FALSE;
-# endif
 }
 #endif
 /* }}} */

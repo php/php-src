@@ -2,17 +2,25 @@
 
 /** @generate-function-entries */
 
+/** @param array $subpatterns */
 function preg_match(string $pattern, string $subject, &$subpatterns = null, int $flags = 0, int $offset = 0): int|false {}
 
+/** @param array $subpatterns */
 function preg_match_all(string $pattern, string $subject, &$subpatterns = null, int $flags = 0, int $offset = 0): int|false|null {}
 
+/** @param int $count */
 function preg_replace(string|array $regex, string|array $replace, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
 
+/** @param int $count */
 function preg_filter(string|array $regex, string|array $replace, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
 
+/** @param int $count */
 function preg_replace_callback(string|array $regex, callable $callback, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
-/** @param string|array $subject */
+/**
+ * @param array|string $subject
+ * @param int $count
+ */
 function preg_replace_callback_array(array $pattern, $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
 function preg_split(string $pattern, string $subject, int $limit = -1, int $flags = 0): array|false {}

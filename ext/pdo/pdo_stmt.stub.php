@@ -5,17 +5,13 @@
 class PDOStatement implements IteratorAggregate
 {
     /** @return bool */
-    public function bindColumn(int|string $column, &$param, int $type = 0, int $maxlen = 0, mixed $driverdata = null) {}
+    public function bindColumn(string|int $column, mixed &$param, int $type = 0, int $maxlen = 0, mixed $driverdata = null) {}
 
     /** @return bool */
-    public function bindParam(int|string $parameter, &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, mixed $driverdata = null) {}
+    public function bindParam(string|int $parameter, mixed &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, mixed $driverdata = null) {}
 
-    /**
-     * @param int|string $parameter
-     * @param mixed $value
-     * @return bool
-     */
-    public function bindValue($parameter, $value, int $type = PDO::PARAM_STR) {}
+    /** @return bool */
+    public function bindValue(string|int $parameter, mixed $value, int $type = PDO::PARAM_STR) {}
 
     /** @return bool */
     public function closeCursor() {}

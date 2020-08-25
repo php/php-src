@@ -140,10 +140,7 @@ class MultipleIterator implements Iterator
     /** @return bool */
     public function containsIterator(Iterator $iterator) {}
 
-    /**
-     * @return int
-     * @alias SplObjectStorage::count
-     */
+    /** @return int */
     public function countIterators() {}
 
     /** @return void */

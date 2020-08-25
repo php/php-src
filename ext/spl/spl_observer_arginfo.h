@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 22aaae107ec0c1c81a3f7135ffd7d22507437c57 */
+ * Stub hash: 4a31f2cc1b0c874f1256aef60afbd285dbe6c078 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObserver_update, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -145,6 +145,7 @@ ZEND_METHOD(MultipleIterator, setFlags);
 ZEND_METHOD(MultipleIterator, attachIterator);
 ZEND_METHOD(MultipleIterator, detachIterator);
 ZEND_METHOD(MultipleIterator, containsIterator);
+ZEND_METHOD(MultipleIterator, countIterators);
 ZEND_METHOD(MultipleIterator, rewind);
 ZEND_METHOD(MultipleIterator, valid);
 ZEND_METHOD(MultipleIterator, key);
@@ -202,7 +203,7 @@ static const zend_function_entry class_MultipleIterator_methods[] = {
 	ZEND_ME(MultipleIterator, attachIterator, arginfo_class_MultipleIterator_attachIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, detachIterator, arginfo_class_MultipleIterator_detachIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, containsIterator, arginfo_class_MultipleIterator_containsIterator, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplObjectStorage, countIterators, count, arginfo_class_MultipleIterator_countIterators, ZEND_ACC_PUBLIC)
+	ZEND_ME(MultipleIterator, countIterators, arginfo_class_MultipleIterator_countIterators, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, rewind, arginfo_class_MultipleIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, valid, arginfo_class_MultipleIterator_valid, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, key, arginfo_class_MultipleIterator_key, ZEND_ACC_PUBLIC)
