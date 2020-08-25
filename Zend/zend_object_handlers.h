@@ -60,7 +60,13 @@ typedef zval *(*zend_object_write_property_t)(zend_object *object, zend_string *
 typedef void (*zend_object_write_dimension_t)(zend_object *object, zval *offset, zval *value);
 
 
-/* Used to create pointer to the property of the object, for future direct r/w access */
+/* Used to create pointer to the property of the object, for future direct r/w access.
+ * May return one of:
+ *  * A zval pointer, without incrementing the reference count.
+ *  * &EG(error_zval), if an exception has been thrown.
+ *  * NULL, if acquiring a direct pointer is not possible.
+ *    In this case, the VM will fall back to using read_property and write_property.
+ */
 typedef zval *(*zend_object_get_property_ptr_ptr_t)(zend_object *object, zend_string *member, int type, void **cache_slot);
 
 /* Used to check if a property of the object exists */

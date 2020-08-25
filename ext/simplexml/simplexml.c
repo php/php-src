@@ -656,7 +656,7 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 	}
 	ZVAL_STR(&member, zname);
 	if (sxe_prop_dim_write(object, &member, NULL, 1, 0, &node) == &EG(error_zval)) {
-		return NULL;
+		return &EG(error_zval);
 	}
 	type = SXE_ITER_NONE;
 	name = NULL;
