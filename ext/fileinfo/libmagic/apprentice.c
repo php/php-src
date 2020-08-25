@@ -2597,10 +2597,10 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 			convert_libmagic_pattern(&pattern, m->value.s, strlen(m->value.s), options);
 
 			if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern))) == NULL) {
-				zval_ptr_dtor_nogc(&pattern);
+				zval_ptr_dtor_str(&pattern);
 				return -1;
 			}
-			zval_ptr_dtor_nogc(&pattern);
+			zval_ptr_dtor_str(&pattern);
 
 			return 0;
 		}
