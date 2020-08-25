@@ -12354,7 +12354,9 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
 	*var_addr_ptr = var_addr;
 
-	var_type &= ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT);
+	if (var_type != IS_UNKNOWN) {
+		var_type &= ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED);
+	}
 	if (add_type_guard
 	 && var_type != IS_UNKNOWN
 	 && (var_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << var_type)) {
@@ -12394,7 +12396,9 @@ static zend_bool zend_jit_fetch_indirect_var(dasm_State **Dst, const zend_op *op
 	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 	*var_addr_ptr = var_addr;
 
-	var_type &= ~IS_TRACE_INDIRECT;
+	if (var_type != IS_UNKNOWN) {
+		var_type &= ~(IS_TRACE_INDIRECT|IS_TRACE_PACKED);
+	}
 	if (!(var_type & IS_TRACE_REFERENCE)
 	 && var_type != IS_UNKNOWN
 	 && (var_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << var_type)) {
@@ -12514,7 +12518,7 @@ static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zen
 			op2_info = OP2_INFO();
 			if (trace
 			 && trace->op1_type != IS_UNKNOWN
-			 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) == IS_ARRAY) {
+			 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
 				op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
 			}
 			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&

@@ -1368,6 +1368,9 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
 				op1_type = IS_UNKNOWN;
 			}
+			if (op1_type != IS_UNKNOWN) {
+				op1_type &= ~IS_TRACE_PACKED;
+			}
 			if (op2_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
 				op2_type = IS_UNKNOWN;
 			}
@@ -3121,6 +3124,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			opline = p->opline;
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
 				op1_type = IS_UNKNOWN;
+			}
+			if (op1_type != IS_UNKNOWN) {
+				op1_type &= ~IS_TRACE_PACKED;
 			}
 			if (op2_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
 				op2_type = IS_UNKNOWN;
@@ -5134,8 +5140,8 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 						fprintf(stderr, " op1(%sobject of class %s)", ref,
 							ZSTR_VAL(p->ce->name));
 					} else {
-						const char *type = (op1_type == 0) ? "undef" : zend_get_type_by_const(op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
-						fprintf(stderr, " op1(%s%s)", ref, type);
+						const char *type = (op1_type == 0) ? "undef" : zend_get_type_by_const(op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
+						fprintf(stderr, " op1(%s%s%s)", ref, (op1_type & IS_TRACE_PACKED) ? "packed " : "", type);
 					}
 				}
 				if (op2_type != IS_UNKNOWN) {
