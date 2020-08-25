@@ -4277,7 +4277,6 @@ ZEND_API void zend_save_error_handling(zend_error_handling *current) /* {{{ */
 {
 	current->handling = EG(error_handling);
 	current->exception = EG(exception_class);
-	ZVAL_COPY(&current->user_handler, &EG(user_error_handler));
 }
 /* }}} */
 
@@ -4285,25 +4284,17 @@ ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, 
 {
 	if (current) {
 		zend_save_error_handling(current);
-		if (error_handling != EH_NORMAL && Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_error_handler));
-			ZVAL_UNDEF(&EG(user_error_handler));
-		}
 	}
+	ZEND_ASSERT(error_handling == EH_THROW || exception_class == NULL);
 	EG(error_handling) = error_handling;
-	EG(exception_class) = error_handling == EH_THROW ? exception_class : NULL;
+	EG(exception_class) = exception_class;
 }
 /* }}} */
 
 ZEND_API void zend_restore_error_handling(zend_error_handling *saved) /* {{{ */
 {
 	EG(error_handling) = saved->handling;
-	EG(exception_class) = saved->handling == EH_THROW ? saved->exception : NULL;
-	if (Z_TYPE(saved->user_handler) != IS_UNDEF) {
-		zval_ptr_dtor(&EG(user_error_handler));
-		ZVAL_COPY_VALUE(&EG(user_error_handler), &saved->user_handler);
-		ZVAL_UNDEF(&saved->user_handler);
-	}
+	EG(exception_class) = saved->exception;
 }
 /* }}} */
 

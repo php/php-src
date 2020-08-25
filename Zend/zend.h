@@ -344,7 +344,6 @@ typedef enum {
 typedef struct {
 	zend_error_handling_t  handling;
 	zend_class_entry       *exception;
-	zval                   user_handler;
 } zend_error_handling;
 
 ZEND_API void zend_save_error_handling(zend_error_handling *current);
