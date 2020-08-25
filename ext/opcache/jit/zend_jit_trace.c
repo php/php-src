@@ -1358,12 +1358,12 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	level = 0;
 	for (;;p++) {
 		if (p->op == ZEND_JIT_TRACE_VM) {
-			uint8_t op1_type, op2_type, op3_type;
+			uint8_t orig_op1_type, op1_type, op2_type, op3_type;
 
 			// TODO: range inference ???
 			opline = p->opline;
 
-			op1_type = p->op1_type;
+			op1_type = orig_op1_type = p->op1_type;
 			op2_type = p->op2_type;
 			op3_type = p->op3_type;
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
@@ -1425,8 +1425,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_IS_IDENTICAL:
 				case ZEND_IS_NOT_IDENTICAL:
 				case ZEND_CASE_STRICT:
-				case ZEND_FETCH_DIM_R:
-				case ZEND_FETCH_DIM_IS:
 				case ZEND_BW_OR:
 				case ZEND_BW_AND:
 				case ZEND_BW_XOR:
@@ -1505,8 +1503,38 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						// TODO: support for empty() ???
 						break;
 					}
+					/* break missing intentionally */
+				case ZEND_FETCH_DIM_R:
+				case ZEND_FETCH_DIM_IS:
 					ADD_OP1_TRACE_GUARD();
 					ADD_OP2_TRACE_GUARD();
+
+					if (opline->op1_type != IS_CONST
+					 && op1_type == IS_ARRAY
+					 && ((opline->op2_type == IS_CONST
+					   && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG)
+					  || (opline->op2_type != IS_CONST
+					   && op2_type == IS_LONG))) {
+
+						zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
+
+						if ((info->type & MAY_BE_ARRAY_PACKED)
+						 && (info->type & MAY_BE_ARRAY_HASH)
+						 && orig_op1_type != IS_UNKNOWN
+						 && !(orig_op1_type & IS_TRACE_REFERENCE)) {
+							/* setup "packed" guards only for loop invariant or reused variables */
+							if ((trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
+							  && tssa->ops[idx].op1_use < trace_buffer->op_array->last_var)
+							 || tssa->ops[idx].op1_use_chain >= 0) {
+								info->type |= MAY_BE_PACKED_GUARD;
+								if (orig_op1_type & IS_TRACE_PACKED) {
+									info->type &= ~MAY_BE_ARRAY_HASH;
+								} else {
+									info->type &= ~MAY_BE_ARRAY_PACKED;
+								}
+							}
+						}
+					}
 					break;
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR_EX:
@@ -3023,6 +3051,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			} else {
 				SET_STACK_TYPE(stack, i, IS_UNKNOWN);
 			}
+
+			if ((info & MAY_BE_PACKED_GUARD) != 0
+			 && trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
+			 && ssa->vars[i].use_chain != -1) {
+				if (!zend_jit_packed_guard(&dasm_state, opline, EX_NUM_TO_VAR(i), info)) {
+					goto jit_failure;
+				}
+				info &= ~MAY_BE_PACKED_GUARD;
+				ssa->var_info[i].type = info;
+			}
 		}
 
 		if (parent_trace) {
@@ -4023,6 +4061,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						avoid_refcounting =
 							ssa_op->op1_use >= 0 &&
 							ssa->var_info[ssa_op->op1_use].avoid_refcounting;
+						if (op1_info & MAY_BE_PACKED_GUARD) {
+							ssa->var_info[ssa_op->op1_use].type &= ~MAY_BE_PACKED_GUARD;
+						}
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
 								op1_info, op1_addr, avoid_refcounting,
 								op2_info, res_info, RES_REG_ADDR(),
@@ -4090,6 +4131,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						avoid_refcounting =
 							ssa_op->op1_use >= 0 &&
 							ssa->var_info[ssa_op->op1_use].avoid_refcounting;
+						if (op1_info & MAY_BE_PACKED_GUARD) {
+							ssa->var_info[ssa_op->op1_use].type &= ~MAY_BE_PACKED_GUARD;
+						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline,
 								op1_info, op1_addr, avoid_refcounting,
 								op2_info,

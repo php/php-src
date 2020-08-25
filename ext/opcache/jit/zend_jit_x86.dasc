@@ -3234,6 +3234,27 @@ static int zend_jit_type_guard(dasm_State **Dst, const zend_op *opline, uint32_t
 	return 1;
 }
 
+static int zend_jit_packed_guard(dasm_State **Dst, const zend_op *opline, uint32_t var, uint32_t op_info)
+{
+	int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_PACKED_GUARD);
+	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+	if (!exit_addr) {
+		return 0;
+	}
+
+	|	GET_ZVAL_LVAL ZREG_FCARG1a, ZEND_ADDR_MEM_ZVAL(ZREG_FP, var)
+	if (op_info & MAY_BE_ARRAY_PACKED) {
+		|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
+		|	jz &exit_addr
+	} else {
+		|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
+		|	jnz &exit_addr
+	}
+
+	return 1;
+}
+
 static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_array, const zend_op *opline, int may_throw, zend_jit_trace_rec *trace)
 {
 	zend_jit_op_array_trace_extension *jit_extension =
@@ -4953,12 +4974,27 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			|	// if (EXPECTED(Z_TYPE_P(dim) == IS_LONG))
 			|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >3
 		}
+		if (op1_info & MAY_BE_PACKED_GUARD) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_PACKED_GUARD);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			if (!exit_addr) {
+				return 0;
+			}
+			if (op1_info & MAY_BE_ARRAY_PACKED) {
+				|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
+				|	jz &exit_addr
+			} else {
+				|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
+				|	jnz &exit_addr
+			}
+		}
 		if (type == BP_VAR_W) {
 			|	// hval = Z_LVAL_P(dim);
 			|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
 			op2_loaded = 1;
 		}
-		if ((op1_info & MAY_BE_ARRAY_KEY_LONG) && (op1_info & MAY_BE_ARRAY_PACKED)) {
+		if (op1_info & MAY_BE_ARRAY_PACKED) {
 			if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
 				zend_long val = Z_LVAL_P(Z_ZV(op2_addr));
 				if (val >= 0 && val < HT_MAX_SIZE) {
@@ -5050,7 +5086,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 		}
 		switch (type) {
 			case BP_JIT_IS:
-				if ((op1_info & MAY_BE_ARRAY_KEY_LONG) && (op1_info & MAY_BE_ARRAY_HASH)) {
+				if (op1_info & MAY_BE_ARRAY_HASH) {
 					|4:
 					if (!op2_loaded) {
 						|	// hval = Z_LVAL_P(dim);
@@ -5076,9 +5112,9 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			case BP_VAR_IS:
 			case BP_VAR_UNSET:
 				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) ||
-						!(op1_info & MAY_BE_ARRAY_HASH) ||
-						Z_MODE(op2_addr) != IS_CONST_ZVAL ||
-						(Z_LVAL_P(Z_ZV(op2_addr)) >= 0 && Z_LVAL_P(Z_ZV(op2_addr)) < HT_MAX_SIZE)) {
+						((op1_info & MAY_BE_ARRAY_PACKED) &&
+							(Z_MODE(op2_addr) != IS_CONST_ZVAL ||
+							(Z_LVAL_P(Z_ZV(op2_addr)) >= 0 && Z_LVAL_P(Z_ZV(op2_addr)) < HT_MAX_SIZE)))) {
 					if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
 						|	jmp &exit_addr
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
@@ -5087,7 +5123,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 						|	jmp >2 // NOT_FOUND
 					}
 				}
-				if ((op1_info & MAY_BE_ARRAY_KEY_LONG) && (op1_info & MAY_BE_ARRAY_HASH)) {
+				if (op1_info & MAY_BE_ARRAY_HASH) {
 					|4:
 					if (!op2_loaded) {
 						|	// hval = Z_LVAL_P(dim);
@@ -5140,20 +5176,27 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|	jz >9
 				break;
 			case BP_VAR_W:
-				|2:
-				|	//retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-				|.if X64
-					|	LOAD_ADDR_ZTS CARG3, executor_globals, uninitialized_zval
-				|.else
-					|	sub r4, 12
-					|	PUSH_ADDR_ZTS executor_globals, uninitialized_zval, r0
-				|.endif
-				|	EXT_CALL zend_hash_index_add_new, r0
-				|.if not(X64)
-				|	add r4, 12
-				|.endif
-				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
-					|	jmp >8
+				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) ||
+						((op1_info & MAY_BE_ARRAY_PACKED) &&
+							(Z_MODE(op2_addr) != IS_CONST_ZVAL ||
+							(Z_LVAL_P(Z_ZV(op2_addr)) >= 0 && Z_LVAL_P(Z_ZV(op2_addr)) < HT_MAX_SIZE)))) {
+					|2:
+					|	//retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+					|.if X64
+						|	LOAD_ADDR_ZTS CARG3, executor_globals, uninitialized_zval
+					|.else
+						|	sub r4, 12
+						|	PUSH_ADDR_ZTS executor_globals, uninitialized_zval, r0
+					|.endif
+					|	EXT_CALL zend_hash_index_add_new, r0
+					|.if not(X64)
+					|	add r4, 12
+					|.endif
+					if (op1_info & MAY_BE_ARRAY_HASH) {
+						|	jmp >8
+					}
+				}
+				if (op1_info & MAY_BE_ARRAY_HASH) {
 					|4:
 					|	EXT_CALL zend_jit_hash_index_lookup_w, r0
 				}

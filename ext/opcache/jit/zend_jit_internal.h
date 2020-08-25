@@ -210,6 +210,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_POLYMORPHISM  (1<<4) /* exit because of polymorphic call */
 #define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
 #define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
+#define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
