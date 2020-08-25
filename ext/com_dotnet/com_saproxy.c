@@ -108,7 +108,10 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 		}
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return rv;
+		}
 		VariantInit(&v);
 
 		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
@@ -223,7 +226,10 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 		ZVAL_COPY_VALUE(&args[i], value);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return;
+		}
 		VariantInit(&v);
 		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
 					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
