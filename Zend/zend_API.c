@@ -4260,44 +4260,15 @@ ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, 
 }
 /* }}} */
 
-static int same_zval(zval *zv1, zval *zv2)  /* {{{ */
-{
-	if (Z_TYPE_P(zv1) != Z_TYPE_P(zv2)) {
-		return 0;
-	}
-	switch (Z_TYPE_P(zv1)) {
-		case IS_UNDEF:
-		case IS_NULL:
-		case IS_FALSE:
-		case IS_TRUE:
-			return 1;
-		case IS_LONG:
-			return Z_LVAL_P(zv1) == Z_LVAL_P(zv2);
-		case IS_DOUBLE:
-			return Z_LVAL_P(zv1) == Z_LVAL_P(zv2);
-		case IS_STRING:
-		case IS_ARRAY:
-		case IS_OBJECT:
-		case IS_RESOURCE:
-			return Z_COUNTED_P(zv1) == Z_COUNTED_P(zv2);
-		default:
-			return 0;
-	}
-}
-/* }}} */
-
 ZEND_API void zend_restore_error_handling(zend_error_handling *saved) /* {{{ */
 {
 	EG(error_handling) = saved->handling;
 	EG(exception_class) = saved->handling == EH_THROW ? saved->exception : NULL;
-	if (Z_TYPE(saved->user_handler) != IS_UNDEF
-		&& !same_zval(&saved->user_handler, &EG(user_error_handler))) {
+	if (Z_TYPE(saved->user_handler) != IS_UNDEF) {
 		zval_ptr_dtor(&EG(user_error_handler));
 		ZVAL_COPY_VALUE(&EG(user_error_handler), &saved->user_handler);
-	} else if (Z_TYPE(saved->user_handler)) {
-		zval_ptr_dtor(&saved->user_handler);
+		ZVAL_UNDEF(&saved->user_handler);
 	}
-	ZVAL_UNDEF(&saved->user_handler);
 }
 /* }}} */
 
