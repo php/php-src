@@ -2961,6 +2961,9 @@ PHP_FUNCTION(mb_convert_kana)
 				DISALLOW_FLAG(MBFL_FILT_TL_HAN2ZEN_SPECIAL, 'm', 'M');
 				opt |= MBFL_FILT_TL_ZEN2HAN_SPECIAL;
 				break;
+			default:
+				zend_argument_value_error(2, "contains invalid flag: '%c'", *--p);
+				RETURN_THROWS();
 			}
 		}
 	} else {

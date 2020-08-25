@@ -41,6 +41,13 @@ try {
 } catch (\ValueError $e) {
   echo $e->getMessage() . "\n";
 }
+
+// Try non-existent flag
+try {
+  mb_convert_kana($zenKakuA, 'Z', 'utf-8');
+} catch (\ValueError $e) {
+  echo $e->getMessage() . "\n";
+}
 ?>
 --EXPECT--
 'A': ァアィイゥウェエォオカガキギク => ァアィイゥウェエォオカガキギク
@@ -56,6 +63,7 @@ try {
 'A': ﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ => ミムメモヤユヨラリルレロワン゛゜
 
 mb_convert_kana(): Argument #2 ($mode) must not combine 'K' and 'H' flags
+mb_convert_kana(): Argument #2 ($mode) contains invalid flag: 'Z'
 --CREDITS--
 Jason Easter <easter@phpug-wuerzburg.de>
 PHPUG Würzburg <phpug-wuerzburg.de>
