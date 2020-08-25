@@ -436,7 +436,7 @@ long_dim:
 			}
 
 			if (!Z_STRLEN_P(member)) {
-				zend_value_error("Cannot create %s with an empty name", attribs ? "attributes" : "elements");
+				zend_value_error("Cannot create %s with an empty name", attribs ? "attribute" : "element");
 				if (member == &tmp_zv) {
 					zval_ptr_dtor_str(&tmp_zv);
 				}
@@ -490,6 +490,7 @@ long_dim:
 					zval zval_copy;
 					if (sxe_object_cast_ex(Z_OBJ_P(value), &zval_copy, IS_STRING) == FAILURE) {
 						zend_throw_error(NULL, "Unable to cast node to string");
+						return &EG(error_zval);
 					}
 
 					value_str = Z_STR(zval_copy);

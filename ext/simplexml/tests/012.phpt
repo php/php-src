@@ -38,7 +38,7 @@ __HALT_COMPILER();
 ?>
 ===DONE===
 --EXPECT--
-Cannot create attributes with an empty name
+Cannot create attribute with an empty name
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <foo attr="value"/>
 <?xml version="1.0" encoding="ISO-8859-1"?>
