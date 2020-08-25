@@ -257,6 +257,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
 		case ZEND_CASE:
+		case ZEND_CASE_STRICT:
 		case ZEND_ISSET_ISEMPTY_CV:
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
@@ -1423,6 +1424,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_CASE:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_IS_NOT_IDENTICAL:
+				case ZEND_CASE_STRICT:
 				case ZEND_FETCH_DIM_R:
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_BW_OR:
@@ -3733,6 +3735,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_IS_IDENTICAL:
 					case ZEND_IS_NOT_IDENTICAL:
+					case ZEND_CASE_STRICT:
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
 						op2_info = OP2_INFO();
