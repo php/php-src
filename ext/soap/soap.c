@@ -1145,7 +1145,7 @@ PHP_METHOD(SoapServer, addFunction)
 		key = zend_string_tolower(Z_STR_P(function_name));
 
 		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
-			zend_argument_type_error(1, "must be a valid callback, function \"%s\" not found", Z_STRVAL_P(function_name));
+			zend_argument_type_error(1, "must be a valid function name, function \"%s\" not found", Z_STRVAL_P(function_name));
 			RETURN_THROWS();
 		}
 		if (service->soap_functions.ft == NULL) {
@@ -1168,6 +1168,9 @@ PHP_METHOD(SoapServer, addFunction)
 			zend_argument_value_error(1, "must be SOAP_FUNCTIONS_ALL when an integer is passed");
 			RETURN_THROWS();
 		}
+	} else {
+		zend_argument_type_error(1, "must be of type array|string|int, %s given", zend_zval_type_name(function_name));
+		RETURN_THROWS();
 	}
 
 	SOAP_SERVER_END_CODE();
