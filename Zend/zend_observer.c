@@ -21,12 +21,15 @@
 
 #include "zend_extensions.h"
 #include "zend_llist.h"
+#include "zend_vm.h"
 
 zend_llist zend_observers_fcall_list;
 int zend_observer_fcall_op_array_extension = -1;
 
 ZEND_TLS zend_arena *fcall_handlers_arena = NULL;
 
+ZEND_API extern inline void zend_observer_maybe_fcall_call_begin(
+	zend_execute_data *execute_data);
 ZEND_API extern inline void zend_observer_maybe_fcall_call_end(
 	zend_execute_data *execute_data,
 	zval *return_value);
@@ -37,6 +40,11 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 	if (!ZEND_OBSERVER_ENABLED) {
 		zend_observer_fcall_op_array_extension =
 			zend_get_op_array_extension_handle();
+
+		/* ZEND_CALL_TRAMPOLINE has SPEC(OBSERVER) but zend_init_call_trampoline_op()
+		 * is called before any extensions have registered as an observer. So we
+		 * adjust the offset to the observed handler when we know we need to observe. */
+		ZEND_VM_SET_OPCODE_HANDLER(&EG(call_trampoline_op));
 	}
 	zend_llist_add_element(&zend_observers_fcall_list, &init);
 }

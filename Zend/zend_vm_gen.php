@@ -793,7 +793,10 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
             ($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
             : "\\0",
-        "/OBSERVER_END_HANDLERS\(\s*([^,]*)\s*,\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
+        "/OBSERVER_FCALL_BEGIN_HANDLERS\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
+            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_maybe_fcall_call_begin(\\1)")
+            : "",
+        "/OBSERVER_FCALL_END_HANDLERS\(\s*([^,]*)\s*,\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
             ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_maybe_fcall_call_end(\\1, \\2)")
             : "",
     );
@@ -2677,6 +2680,9 @@ function gen_vm($def, $skel) {
             if (isset($used_extra_spec["RETVAL"])) {
                 out($f, "\t\t{$else}if (spec & SPEC_RULE_RETVAL) {\n");
                 out($f, "\t\t\toffset = offset * 2 + (op->result_type != IS_UNUSED);\n");
+                out($f, "\t\t\tif ((spec & SPEC_RULE_OBSERVER) && ZEND_OBSERVER_ENABLED) {\n");
+                out($f,	"\t\t\t\toffset += 2;\n");
+                out($f, "\t\t\t}\n");
                 $else = "} else ";
             }
             if (isset($used_extra_spec["QUICK_ARG"])) {

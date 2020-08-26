@@ -78,6 +78,20 @@ ZEND_API void zend_observer_fcall_call_end_helper(
 	zend_execute_data *execute_data,
 	zval *return_value);
 
+ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_begin(
+	zend_execute_data *execute_data)
+{
+	zend_op_array *op_array = (zend_op_array *)execute_data->func;
+	if (ZEND_SHOULD_OBSERVE_FN(op_array->fn_flags) &&
+		!(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
+		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&EX(func)->op_array);
+		ZEND_ASSERT(observer_handlers);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_begin(observer_handlers, execute_data);
+		}
+	}
+}
+
 ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_end(
 	zend_execute_data *execute_data,
 	zval *return_value)
