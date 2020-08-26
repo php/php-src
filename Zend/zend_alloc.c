@@ -2221,6 +2221,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 				/* Make sure the heap free below does not use tracked_free(). */
 				heap->custom_heap.std._free = free;
 			}
+			heap->size = 0;
 		}
 
 		if (full) {
@@ -2696,41 +2697,67 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 }
 
 #if ZEND_MM_CUSTOM
-static void *tracked_malloc(size_t size)
-{
-	zend_mm_heap *heap = AG(mm_heap);
-	if (size > heap->limit) {
+static zend_always_inline void tracked_add(zend_mm_heap *heap, void *ptr, size_t size) {
+	zval size_zv;
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
+	ZVAL_LONG(&size_zv, size);
+	zend_hash_index_add_new(heap->tracked_allocs, h, &size_zv);
+}
+
+static zend_always_inline size_t tracked_del(zend_mm_heap *heap, void *ptr) {
+	if (!ptr) {
+		return 0;
+	}
+
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	zval *size_zv = zend_hash_index_find(heap->tracked_allocs, h);
+	ZEND_ASSERT(size_zv && "Trying to free pointer not allocated through ZendMM");
+	zend_hash_del_bucket(heap->tracked_allocs, (Bucket *) size_zv);
+	return Z_LVAL_P(size_zv);
+}
+
+static zend_always_inline void tracked_check_limit(zend_mm_heap *heap, size_t add_size) {
+	if (add_size > heap->limit - heap->size && !heap->overflow) {
 #if ZEND_DEBUG
 		zend_mm_safe_error(heap,
 			"Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)",
-			heap->limit, "file", 0, size);
+			heap->limit, "file", 0, add_size);
 #else
 		zend_mm_safe_error(heap,
 			"Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)",
-			heap->limit, size);
+			heap->limit, add_size);
 #endif
 	}
+}
+
+static void *tracked_malloc(size_t size)
+{
+	zend_mm_heap *heap = AG(mm_heap);
+	tracked_check_limit(heap, size);
 
 	void *ptr = __zend_malloc(size);
-	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
-	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
-	zend_hash_index_add_empty_element(heap->tracked_allocs, h);
+	tracked_add(heap, ptr, size);
+	heap->size += size;
 	return ptr;
 }
 
 static void tracked_free(void *ptr) {
-	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
-	zend_hash_index_del(AG(mm_heap)->tracked_allocs, h);
+	zend_mm_heap *heap = AG(mm_heap);
+	heap->size -= tracked_del(heap, ptr);
 	free(ptr);
 }
 
 static void *tracked_realloc(void *ptr, size_t new_size) {
-	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
-	zend_hash_index_del(AG(mm_heap)->tracked_allocs, h);
+	zend_mm_heap *heap = AG(mm_heap);
+	size_t old_size = tracked_del(heap, ptr);
+	if (new_size > old_size) {
+		tracked_check_limit(heap, new_size - old_size);
+	}
+
 	ptr = __zend_realloc(ptr, new_size);
-	h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
-	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
-	zend_hash_index_add_empty_element(AG(mm_heap)->tracked_allocs, h);
+	tracked_add(heap, ptr, new_size);
+	heap->size += new_size - old_size;
 	return ptr;
 }
 
