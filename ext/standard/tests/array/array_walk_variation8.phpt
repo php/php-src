@@ -35,5 +35,5 @@ bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-array_walk(): Argument #2 ($funcname) must be a valid callback, function "echo" not found or invalid function name
+array_walk(): Argument #2 ($callback) must be a valid callback, function "echo" not found or invalid function name
 Done
