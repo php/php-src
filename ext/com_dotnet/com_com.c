@@ -31,10 +31,9 @@ PHP_METHOD(com, __construct)
 	zval *object = getThis();
 	zval *server_params = NULL;
 	php_com_dotnet_object *obj;
-	char *module_name, *typelib_name = NULL, *server_name = NULL;
-	char *user_name = NULL, *domain_name = NULL, *password = NULL;
-	size_t module_name_len = 0, typelib_name_len = 0, server_name_len = 0,
-		user_name_len, domain_name_len, password_len;
+	char *module_name, *typelib_name = NULL;
+	size_t module_name_len = 0, typelib_name_len = 0;
+	zend_string *server_name = NULL, *user_name = NULL, *password = NULL, *domain_name = NULL;
 	OLECHAR *moniker;
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
@@ -52,11 +51,11 @@ PHP_METHOD(com, __construct)
 	const struct php_win32_cp *cp_it;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS(), "s|s!ls",
-			&module_name, &module_name_len, &server_name, &server_name_len,
+			ZEND_NUM_ARGS(), "s|S!ls",
+			&module_name, &module_name_len, &server_name,
 			&cp, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters(
-			ZEND_NUM_ARGS(), "sa/|ls",
+			ZEND_NUM_ARGS(), "sa|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
 		RETURN_THROWS();
@@ -81,39 +80,23 @@ PHP_METHOD(com, __construct)
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Server", sizeof("Server")-1))) {
-			if (!try_convert_to_string(tmp)) {
-				RETURN_THROWS();
-			}
-			server_name = Z_STRVAL_P(tmp);
-			server_name_len = Z_STRLEN_P(tmp);
+			server_name = zval_get_string(tmp);
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Username", sizeof("Username")-1))) {
-			if (!try_convert_to_string(tmp)) {
-				RETURN_THROWS();
-			}
-			user_name = Z_STRVAL_P(tmp);
-			user_name_len = Z_STRLEN_P(tmp);
+			user_name = zval_get_string(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Password", sizeof("Password")-1))) {
-			if (!try_convert_to_string(tmp)) {
-				RETURN_THROWS();
-			}
-			password = Z_STRVAL_P(tmp);
-			password_len = Z_STRLEN_P(tmp);
+			password = zval_get_string(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Domain", sizeof("Domain")-1))) {
-			if (!try_convert_to_string(tmp)) {
-				RETURN_THROWS();
-			}
-			domain_name = Z_STRVAL_P(tmp);
-			domain_name_len = Z_STRLEN_P(tmp);
+			domain_name = zval_get_string(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
@@ -134,25 +117,25 @@ PHP_METHOD(com, __construct)
 	if (server_name) {
 		info.dwReserved1 = 0;
 		info.dwReserved2 = 0;
-		info.pwszName = php_com_string_to_olestring(server_name, server_name_len, obj->code_page);
+		info.pwszName = php_com_string_to_olestring(ZSTR_VAL(server_name), ZSTR_LEN(server_name), obj->code_page);
 
 		if (user_name) {
-			authid.User = (OLECHAR*)user_name;
-			authid.UserLength = (ULONG)user_name_len;
+			authid.User = (OLECHAR*) ZSTR_VAL(user_name);
+			authid.UserLength = (ULONG) ZSTR_LEN(user_name);
 
 			if (password) {
-				authid.Password = (OLECHAR*)password;
-				authid.PasswordLength = (ULONG)password_len;
+				authid.Password = (OLECHAR*) ZSTR_VAL(password);
+				authid.PasswordLength = (ULONG) ZSTR_LEN(password);
 			} else {
-				authid.Password = (OLECHAR*)"";
+				authid.Password = (OLECHAR*) "";
 				authid.PasswordLength = 0;
 			}
 
 			if (domain_name) {
-				authid.Domain = (OLECHAR*)domain_name;
-				authid.DomainLength = (ULONG)domain_name_len;
+				authid.Domain = (OLECHAR*) ZSTR_VAL(domain_name);
+				authid.DomainLength = (ULONG) ZSTR_LEN(domain_name);
 			} else {
-				authid.Domain = (OLECHAR*)"";
+				authid.Domain = (OLECHAR*) "";
 				authid.DomainLength = 0;
 			}
 			authid.Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
@@ -225,7 +208,11 @@ PHP_METHOD(com, __construct)
 
 	if (server_name) {
 		if (info.pwszName) efree(info.pwszName);
+		if (server_params) zend_string_release(server_name);
 	}
+	if (user_name) zend_string_release(user_name);
+	if (password) zend_string_release(password);
+	if (domain_name) zend_string_release(domain_name);
 
 	efree(moniker);
 
