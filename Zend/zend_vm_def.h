@@ -6112,7 +6112,7 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
+ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	zend_op_array *new_op_array;
@@ -6156,6 +6156,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
+		OBSERVER_FCALL_INSTALL((zend_function*)new_op_array);
+		OBSERVER_FCALL_BEGIN_HANDLERS(call);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			FREE_OP1();
 			ZEND_VM_ENTER();

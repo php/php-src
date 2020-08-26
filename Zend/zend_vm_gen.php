@@ -793,6 +793,9 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
             ($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
             : "\\0",
+        "/OBSERVER_FCALL_INSTALL\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
+            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_install(\\1)")
+            : "",
         "/OBSERVER_FCALL_BEGIN_HANDLERS\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
             ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_maybe_fcall_call_begin(\\1)")
             : "",

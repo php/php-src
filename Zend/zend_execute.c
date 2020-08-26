@@ -3602,12 +3602,8 @@ ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_arra
 	}
 } /* }}} */
 
-#define ZEND_FAKE_OP_ARRAY ((zend_op_array*)(zend_intptr_t)-1)
-
 static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
-	void *ptr = NULL;
-
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
 	EX(opline) = op_array->opcodes;
@@ -3617,6 +3613,8 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	zend_attach_symbol_table(execute_data);
 
 	if (!ZEND_MAP_PTR(op_array->run_time_cache)) {
+		void *ptr = NULL;
+
 		ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
 		ptr = emalloc(op_array->cache_size + sizeof(void*));
 		ZEND_MAP_PTR_INIT(op_array->run_time_cache, ptr);
@@ -3627,17 +3625,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(run_time_cache) = RUN_TIME_CACHE(op_array);
 
 	EG(current_execute_data) = execute_data;
-
-	if (ZEND_OBSERVER_ENABLED && op_array != ZEND_FAKE_OP_ARRAY) {
-		if (ptr != NULL) {
-			zend_observer_fcall_install((zend_function*)op_array);
-		}
-		void *observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
-		ZEND_ASSERT(observer_handlers);
-		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-			zend_observe_fcall_begin(observer_handlers, execute_data);
-		}
-	}
 }
 /* }}} */
 
@@ -4159,6 +4146,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 		fbc, num_args, object_or_called_scope);
 }
 /* }}} */
+
+#define ZEND_FAKE_OP_ARRAY ((zend_op_array*)(zend_intptr_t)-1)
 
 static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type) /* {{{ */
 {
