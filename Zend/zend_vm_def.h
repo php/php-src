@@ -4587,17 +4587,14 @@ ZEND_VM_HOT_HANDLER(65, ZEND_SEND_VAL, CONST|TMPVAR, CONST|UNUSED|NUM)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_COLD_HELPER(zend_cannot_pass_by_ref_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_cannot_pass_by_ref_helper, ANY, ANY, uint32_t _arg_num, zval *_arg)
 {
 	USE_OPLINE
-	zval *arg;
-	uint32_t arg_num = opline->op2.num;
 
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
+	zend_throw_error(NULL, "Cannot pass parameter %d by reference", _arg_num);
 	FREE_OP1();
-	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_UNDEF(arg);
+	ZVAL_UNDEF(_arg);
 	HANDLE_EXCEPTION();
 }
 
@@ -4626,7 +4623,7 @@ ZEND_VM_HOT_SEND_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, CONST|UNUSED|NUM, SPE
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 ZEND_VM_C_LABEL(send_val_by_ref):
-		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
+		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper, _arg_num, arg_num, _arg, arg);
 	}
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	ZVAL_COPY_VALUE(arg, value);
@@ -9564,11 +9561,11 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_SEND_VAL_EX, op->op2_type == IS_UNUSED && op-
 	zval *value, *arg;
 	uint32_t arg_num = opline->op2.num;
 
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
+		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper, _arg_num, arg_num, _arg, arg);
 	}
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	ZEND_VM_NEXT_OPCODE();
 }

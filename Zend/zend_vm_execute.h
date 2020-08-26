@@ -1837,17 +1837,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 	}
 }
 
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_cannot_pass_by_ref_helper_SPEC(uint32_t _arg_num, zval *_arg ZEND_OPCODE_HANDLER_ARGS_DC)
 {
 	USE_OPLINE
-	zval *arg;
-	uint32_t arg_num = opline->op2.num;
 
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
+	zend_throw_error(NULL, "Cannot pass parameter %d by reference", _arg_num);
 	FREE_OP(opline->op1_type, opline->op1.var);
-	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_UNDEF(arg);
+	ZVAL_UNDEF(_arg);
 	HANDLE_EXCEPTION();
 }
 
@@ -4727,11 +4724,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SIMPLE
 	zval *value, *arg;
 	uint32_t arg_num = opline->op2.num;
 
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(arg_num, arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 	value = RT_CONSTANT(opline, opline->op1);
-	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -6115,7 +6112,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_CONST_CONST_H
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(arg_num, arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 	value = RT_CONSTANT(opline, opline->op1);
 	ZVAL_COPY_VALUE(arg, value);
@@ -9151,7 +9148,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_CONST_UNUSED_
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(arg_num, arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 	value = RT_CONSTANT(opline, opline->op1);
 	ZVAL_COPY_VALUE(arg, value);
@@ -9188,7 +9185,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_C
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(arg_num, arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 	value = RT_CONSTANT(opline, opline->op1);
 	ZVAL_COPY_VALUE(arg, value);
@@ -18631,7 +18628,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_CONST_HAN
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(arg_num, arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 	value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 	ZVAL_COPY_VALUE(arg, value);
@@ -19455,7 +19452,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_UNUSED_HA
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(arg_num, arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 	value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 	ZVAL_COPY_VALUE(arg, value);
@@ -19492,7 +19489,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_T
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(arg_num, arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 	value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 	ZVAL_COPY_VALUE(arg, value);
