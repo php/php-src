@@ -635,7 +635,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |			SSE_AVX_INS movsd, vmovsd, xmm(reg-ZREG_XMM0), qword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||		} else if (Z_MODE(addr) == IS_REG) {
-|			SSE_AVX_INS movsd, vmovaps, xmm(reg-ZREG_XMM0), xmm(Z_REG(addr)-ZREG_XMM0)
+|			SSE_AVX_INS movaps, vmovaps, xmm(reg-ZREG_XMM0), xmm(Z_REG(addr)-ZREG_XMM0)
 ||		} else {
 ||			ZEND_UNREACHABLE();
 ||		}
@@ -679,7 +679,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro SSE_SET_ZVAL_DVAL, addr, reg
 ||	if (Z_MODE(addr) == IS_REG) {
 ||		if (reg != Z_REG(addr)) {
-|			SSE_AVX_INS movsd, vmovaps, xmm(Z_REG(addr)-ZREG_XMM0), xmm(reg-ZREG_XMM0)
+|			SSE_AVX_INS movaps, vmovaps, xmm(Z_REG(addr)-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 ||		}
 ||	} else {
 ||		ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
@@ -3624,7 +3624,7 @@ static int zend_jit_update_regs(dasm_State **Dst, zend_jit_addr src, zend_jit_ad
 				if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
 					|	mov Ra(Z_REG(dst)), Ra(Z_REG(src))
 				} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-					|	SSE_AVX_INS movsd, vmovaps, xmm(Z_REG(dst)-ZREG_XMM0), xmm(Z_REG(src)-ZREG_XMM0)
+					|	SSE_AVX_INS movaps, vmovaps, xmm(Z_REG(dst)-ZREG_XMM0), xmm(Z_REG(src)-ZREG_XMM0)
 				} else {
 					ZEND_UNREACHABLE();
 				}
