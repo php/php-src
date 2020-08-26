@@ -3369,7 +3369,7 @@ uint32_t zend_compile_args(
 
 			if (fbc) {
 				arg_num = zend_get_arg_num(fbc, arg_name);
-				if (arg_num == arg_count + 1) {
+				if (arg_num == arg_count + 1 && !may_have_undef) {
 					/* Using named arguments, but passing in order. */
 					arg_name = NULL;
 					arg_count++;
