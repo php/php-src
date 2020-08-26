@@ -4545,6 +4545,7 @@ yield_from_try_again:
 		goto yield_from_try_again;
 	} else {
 		zend_throw_error(NULL, "Can use \"yield from\" only with arrays and Traversables");
+
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}
@@ -13707,6 +13708,7 @@ yield_from_try_again:
 		goto yield_from_try_again;
 	} else {
 		zend_throw_error(NULL, "Can use \"yield from\" only with arrays and Traversables");
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}
@@ -37728,6 +37730,7 @@ yield_from_try_again:
 		goto yield_from_try_again;
 	} else {
 		zend_throw_error(NULL, "Can use \"yield from\" only with arrays and Traversables");
+
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}

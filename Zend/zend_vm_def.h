@@ -8067,6 +8067,7 @@ ZEND_VM_C_LABEL(yield_from_try_again):
 		ZEND_VM_C_GOTO(yield_from_try_again);
 	} else {
 		zend_throw_error(NULL, "Can use \"yield from\" only with arrays and Traversables");
+		FREE_OP1();
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}
