@@ -440,6 +440,9 @@ static void get_retval_info(zval *retval, smart_str *buf)
 
 static void observer_end(zend_execute_data *execute_data, zval *retval)
 {
+	if (EG(exception)) {
+		php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
+	}
 	ZT_G(observer_nesting_depth)--;
 	if (execute_data->func && execute_data->func->common.function_name) {
 		smart_str retval_info = {0};

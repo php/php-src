@@ -7677,7 +7677,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 	}
 }
 
-ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
+ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY, SPEC(OBSERVER))
 {
 	const zend_op *throw_op = EG(opline_before_exception);
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
@@ -7706,6 +7706,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		}
 	}
 
+	OBSERVER_FCALL_END_HANDLERS(execute_data, EX(return_value));
 	cleanup_unfinished_calls(execute_data, throw_op_num);
 
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
