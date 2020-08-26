@@ -35,14 +35,9 @@ BEGIN_EXTERN_C()
 #define TS_HASH(table) (&(table->hash))
 
 /* startup/shutdown */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
+ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
-
-#define zend_ts_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)	\
-	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
-#define zend_ts_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)	\
-	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
 
 
 /* additions/updates/changes */

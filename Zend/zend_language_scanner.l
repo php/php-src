@@ -699,7 +699,7 @@ ZEND_API zend_ast *zend_compile_string_to_ast(
 	zend_restore_lexical_state(&original_lex_state);
 	CG(in_compilation) = original_in_compilation;
 
-	zval_dtor(&code_zv);
+	zval_ptr_dtor_str(&code_zv);
 
 	return ast;
 }

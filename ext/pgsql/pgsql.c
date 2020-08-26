@@ -911,8 +911,8 @@ static PHP_GINIT_FUNCTION(pgsql)
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initialize notice message hash at MINIT only */
-	zend_hash_init_ex(&pgsql_globals->notices, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&pgsql_globals->hashes, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init(&pgsql_globals->notices, 0, NULL, ZVAL_PTR_DTOR, 1);
+	zend_hash_init(&pgsql_globals->hashes, 0, NULL, ZVAL_PTR_DTOR, 1);
 }
 /* }}} */
 

@@ -57,7 +57,7 @@ static void end_write(TsHashTable *ht)
 }
 
 /* delegates */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
+ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
