@@ -61,7 +61,7 @@ PHP_FUNCTION(com_create_instance)
 			&module_name, &module_name_len, &server_name, &server_name_len,
 			&cp, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS(), "sa|ls",
+			ZEND_NUM_ARGS(), "sa/|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
 
