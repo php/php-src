@@ -10591,15 +10591,11 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		}
 	}
 
-	if (op1_avoid_refcounting) {
-		SET_STACK_REG(JIT_G(current_frame)->stack,
-			EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
-	}
-
 	if ((res_info & MAY_BE_GUARD)
 	 && JIT_G(current_frame)
 	 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
 		uint32_t flags = 0;
+		uint32_t old_op1_info = 0;
 		uint32_t old_info;
 		zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 		int32_t exit_point;
@@ -10613,12 +10609,18 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 			flags |= ZEND_JIT_EXIT_FREE_OP2;
 		}
 		if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
+		 && !(flags & ZEND_JIT_EXIT_FREE_OP1)
 		 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 		 && (ssa_op+1)->op1_use == ssa_op->result_def
 		 && !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))
 		 && zend_jit_may_avoid_refcounting(opline+1)) {
 			result_avoid_refcounting = 1;
 			ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
+		}
+
+		if (op1_avoid_refcounting) {
+			old_op1_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
+			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 		}
 
 		if (!(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))) {
@@ -10646,6 +10648,10 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 			if (!not_found_exit_addr) {
 				return 0;
 			}
+		}
+
+		if (op1_avoid_refcounting) {
+			SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var), old_op1_info);
 		}
 	}
 
@@ -11647,6 +11653,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	LOAD_ZVAL_ADDR r0, prop_addr
 
 			if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
+			 && !(flags & ZEND_JIT_EXIT_FREE_OP1)
 			 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 			 && (ssa_op+1)->op1_use == ssa_op->result_def
 			 && zend_jit_may_avoid_refcounting(opline+1)) {
