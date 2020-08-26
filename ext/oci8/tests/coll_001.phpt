@@ -20,7 +20,7 @@ require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECTF--
-object(OCI_Collection)#%d (1) {
+object(OCICollection)#%d (1) {
   ["collection"]=>
   resource(%d) of type (oci8 collection)
 }

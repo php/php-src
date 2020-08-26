@@ -52,11 +52,12 @@ static int le_zip_entry;
 	}
 /* }}} */
 
-/* {{{  PHP_ZIP_STAT_PATH(za, path, path_len, flags, sb) */
+/* {{{  PHP_ZIP_STAT_PATH(za, path, path_len, flags, sb)
+	This is always used for the first argument*/
 #define PHP_ZIP_STAT_PATH(za, path, path_len, flags, sb) \
-	if (path_len < 1) { \
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name"); \
-		RETURN_FALSE; \
+	if (path_len == 0) { \
+		zend_argument_value_error(1, "cannot be empty"); \
+		RETURN_THROWS(); \
 	} \
 	if (zip_stat(za, path, flags, &sb) != 0) { \
 		RETURN_FALSE; \
@@ -348,24 +349,41 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 #endif
 
 	if ((option = zend_hash_str_find(options, "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
+		if (Z_TYPE_P(option) != IS_FALSE && Z_TYPE_P(option) != IS_TRUE) {
+			php_error_docref(NULL, E_WARNING, "Option \"remove_all_path\" must be of type bool, %s given",
+				zend_zval_type_name(option));
+		}
 		opts->remove_all_path = zval_get_long(option);
 	}
 
 	if ((option = zend_hash_str_find(options, "comp_method", sizeof("comp_method") - 1)) != NULL) {
+		if (Z_TYPE_P(option) != IS_LONG) {
+			php_error_docref(NULL, E_WARNING, "Option \"comp_method\" must be of type int, %s given",
+				zend_zval_type_name(option));
+		}
 		opts->comp_method = zval_get_long(option);
 
 		if ((option = zend_hash_str_find(options, "comp_flags", sizeof("comp_flags") - 1)) != NULL) {
+			if (Z_TYPE_P(option) != IS_LONG) {
+				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be of type int, %s given",
+					zend_zval_type_name(option));
+			}
 			opts->comp_flags = zval_get_long(option);
 		}
 	}
 
 #ifdef HAVE_ENCRYPTION
 	if ((option = zend_hash_str_find(options, "enc_method", sizeof("enc_method") - 1)) != NULL) {
+		if (Z_TYPE_P(option) != IS_LONG) {
+			php_error_docref(NULL, E_WARNING, "Option \"enc_method\" must be of type int, %s given",
+				zend_zval_type_name(option));
+		}
 		opts->enc_method = zval_get_long(option);
 
 		if ((option = zend_hash_str_find(options, "enc_password", sizeof("enc_password") - 1)) != NULL) {
 			if (Z_TYPE_P(option) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "enc_password option expected to be a string");
+				zend_type_error("Option \"enc_password\" must be of type string, %s given",
+					zend_zval_type_name(option));
 				return -1;
 			}
 			opts->enc_password = Z_STRVAL_P(option);
@@ -375,18 +393,18 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 
 	if ((option = zend_hash_str_find(options, "remove_path", sizeof("remove_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_STRING) {
-			php_error_docref(NULL, E_WARNING, "remove_path option expected to be a string");
+			zend_type_error("Option \"remove_path\" must be of type string, %s given",
+				zend_zval_type_name(option));
 			return -1;
 		}
 
-		if (Z_STRLEN_P(option) < 1) {
-			php_error_docref(NULL, E_NOTICE, "Empty string given as remove_path option");
+		if (Z_STRLEN_P(option) == 0) {
+			zend_value_error("Option \"remove_path\" cannot be empty");
 			return -1;
 		}
 
 		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
-			php_error_docref(NULL, E_WARNING, "remove_path string is too long (max: %d, %zd given)",
-						MAXPATHLEN - 1, Z_STRLEN_P(option));
+			zend_value_error("Option \"remove_path\" must be less than %d bytes", MAXPATHLEN - 1);
 			return -1;
 		}
 		opts->remove_path_len = Z_STRLEN_P(option);
@@ -395,18 +413,18 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 
 	if ((option = zend_hash_str_find(options, "add_path", sizeof("add_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_STRING) {
-			php_error_docref(NULL, E_WARNING, "add_path option expected to be a string");
+			zend_type_error("Option \"add_path\" must be of type string, %s given",
+				zend_zval_type_name(option));
 			return -1;
 		}
 
-		if (Z_STRLEN_P(option) < 1) {
-			php_error_docref(NULL, E_NOTICE, "Empty string given as the add_path option");
+		if (Z_STRLEN_P(option) == 0) {
+			zend_value_error("Option \"add_path\" cannot be empty");
 			return -1;
 		}
 
 		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
-			php_error_docref(NULL, E_WARNING, "add_path string too long (max: %d, %zd given)",
-						MAXPATHLEN - 1, Z_STRLEN_P(option));
+			zend_value_error("Option \"add_path\" must be less than %d bytes", MAXPATHLEN - 1);
 			return -1;
 		}
 		opts->add_path_len = Z_STRLEN_P(option);
@@ -415,7 +433,8 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 
 	if ((option = zend_hash_str_find(options, "flags", sizeof("flags") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
-			php_error_docref(NULL, E_WARNING, "flags option expected to be a integer");
+			zend_type_error("Option \"flags\" must be of type int, %s given",
+				zend_zval_type_name(option));
 			return -1;
 		}
 		opts->flags = Z_LVAL_P(option);
@@ -599,6 +618,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	}
 
 	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {
+
 		php_error_docref(NULL, E_WARNING, "At least one of the passed flags is invalid or not supported on this platform");
 		return -1;
 	}
@@ -1134,8 +1154,8 @@ PHP_FUNCTION(zip_open)
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty string as source");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(ZSTR_VAL(filename))) {
@@ -1414,8 +1434,8 @@ PHP_METHOD(ZipArchive, open)
 	ze_obj = Z_ZIP_P(self);
 
 	if (ZSTR_LEN(filename) == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty string as source");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(ZSTR_VAL(filename))) {
@@ -1677,11 +1697,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	}
 
 	if (ZSTR_LEN(pattern) == 0) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as pattern");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 	if (options && zend_hash_num_elements(options) > 0 && (php_zip_parse_options(options, &opts) < 0)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (type == 1) {
@@ -1795,8 +1815,8 @@ PHP_METHOD(ZipArchive, addFile)
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as filename");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (entry_name_len == 0) {
@@ -1828,13 +1848,13 @@ PHP_METHOD(ZipArchive, replaceFile)
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as filename");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (index < 0) {
-		php_error_docref(NULL, E_NOTICE, "Invalid negative index");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	if (php_zip_add_file(Z_ZIP_P(self), ZSTR_VAL(filename), ZSTR_LEN(filename),
@@ -2008,8 +2028,8 @@ PHP_METHOD(ZipArchive, setArchiveComment)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (comment_len > 0xffff) {
-		php_error_docref(NULL, E_WARNING, "Comment must not exceed 65535 bytes");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be less than 65535 bytes");
+		RETURN_THROWS();
 	}
 
 	if (zip_set_archive_comment(intern, (const char *)comment, comment_len)) {
@@ -2057,15 +2077,16 @@ PHP_METHOD(ZipArchive, setCommentName)
 		RETURN_THROWS();
 	}
 
-	if (name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	if (name_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (comment_len > 0xffff) {
-		php_error_docref(NULL, E_WARNING, "Comment must not exceed 65535 bytes");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be less than 65535 bytes");
+		RETURN_THROWS();
 	}
 
 	idx = zip_name_locate(intern, name, 0);
@@ -2094,8 +2115,8 @@ PHP_METHOD(ZipArchive, setCommentIndex)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (comment_len > 0xffff) {
-		php_error_docref(NULL, E_WARNING, "Comment must not exceed 65535 bytes");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be less than 65535 bytes");
+		RETURN_THROWS();
 	}
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
@@ -2123,11 +2144,13 @@ PHP_METHOD(ZipArchive, setExternalAttributesName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	if (name_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	idx = zip_name_locate(intern, name, 0);
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2182,11 +2205,13 @@ PHP_METHOD(ZipArchive, getExternalAttributesName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	if (name_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	idx = zip_name_locate(intern, name, 0);
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2247,11 +2272,13 @@ PHP_METHOD(ZipArchive, setEncryptionName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	if (name_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	idx = zip_name_locate(intern, name, 0);
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2306,12 +2333,13 @@ PHP_METHOD(ZipArchive, getCommentName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
-		RETURN_FALSE;
+	if (name_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	idx = zip_name_locate(intern, name, 0);
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2346,7 +2374,7 @@ PHP_METHOD(ZipArchive, getCommentIndex)
 
 /* {{{ Set the compression of a file in zip, using its name */
 PHP_METHOD(ZipArchive, setCompressionName)
- {
+{
 	struct zip *intern;
 	zval *this = ZEND_THIS;
 	size_t name_len;
@@ -2361,11 +2389,13 @@ PHP_METHOD(ZipArchive, setCompressionName)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	if (name_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	idx = zip_name_locate(intern, name, 0);
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2404,7 +2434,7 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 #ifdef HAVE_SET_MTIME
 /* {{{ Set the modification time of a file in zip, using its name */
 PHP_METHOD(ZipArchive, setMtimeName)
- {
+{
 	struct zip *intern;
 	zval *this = ZEND_THIS;
 	size_t name_len;
@@ -2419,11 +2449,13 @@ PHP_METHOD(ZipArchive, setMtimeName)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	if (name_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	idx = zip_name_locate(intern, name, 0);
+
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
@@ -2531,9 +2563,9 @@ PHP_METHOD(ZipArchive, renameIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (new_name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as new entry name");
-		RETURN_FALSE;
+	if (new_name_len == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (zip_file_rename(intern, index, (const char *)new_name, 0) != 0) {
@@ -2559,9 +2591,9 @@ PHP_METHOD(ZipArchive, renameName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (new_name_len < 1) {
-		php_error_docref(NULL, E_NOTICE, "Empty string as new entry name");
-		RETURN_FALSE;
+	if (new_name_len == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
@@ -2886,19 +2918,12 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 	struct zip *intern;
 	zval *self = ZEND_THIS;
 	double rate;
-	zval *callback;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	ze_zip_object *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dz", &rate, &callback) == FAILURE) {
-		return;
-	}
-
-	/* callable? */
-	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Invalid callback '%s'", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "df", &rate, &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -2909,7 +2934,7 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 	_php_zip_progress_callback_free(obj);
 
 	/* register */
-	ZVAL_COPY(&obj->progress_callback, callback);
+	ZVAL_COPY(&obj->progress_callback, &fci.function_name);
 	if (zip_register_progress_callback_with_state(intern, rate, _php_zip_progress_callback, _php_zip_progress_callback_free, obj)) {
 		RETURN_FALSE;
 	}
@@ -2939,22 +2964,14 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
-	zval *callback;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	ze_zip_object *obj;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
-
-	/* callable? */
-	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Invalid callback '%s'", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
-	}
 
 	obj = Z_ZIP_P(self);
 
@@ -2962,7 +2979,7 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 	_php_zip_cancel_callback_free(obj);
 
 	/* register */
-	ZVAL_COPY(&obj->cancel_callback, callback);
+	ZVAL_COPY(&obj->cancel_callback, &fci.function_name);
 	if (zip_register_cancel_callback_with_state(intern, _php_zip_cancel_callback, _php_zip_cancel_callback_free, obj)) {
 		RETURN_FALSE;
 	}

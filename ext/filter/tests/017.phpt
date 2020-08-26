@@ -10,17 +10,19 @@ var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("rege
 var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/^d(.*)/'))));
 var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/blah/'))));
 var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/\[/'))));
-var_dump(filter_var("data", FILTER_VALIDATE_REGEXP));
+try {
+    filter_var("data", FILTER_VALIDATE_REGEXP);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "data"
 bool(false)
 string(4) "data"
 bool(false)
 bool(false)
-
-Warning: filter_var(): 'regexp' option missing in %s on line %d
-bool(false)
+filter_var(): "regexp" option is missing
 Done

@@ -234,7 +234,8 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			if (first) first = 0; else fprintf(stderr, ", ");
 			fprintf(stderr, "array");
 			if ((info & MAY_BE_ARRAY_KEY_ANY) != 0 &&
-			    (info & MAY_BE_ARRAY_KEY_ANY) != MAY_BE_ARRAY_KEY_ANY) {
+			    ((info & MAY_BE_ARRAY_KEY_LONG) == 0 ||
+			     (info & MAY_BE_ARRAY_KEY_STRING) == 0)) {
 				int afirst = 1;
 				fprintf(stderr, " [");
 				if (info & MAY_BE_ARRAY_KEY_LONG) {

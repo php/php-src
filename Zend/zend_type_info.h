@@ -56,11 +56,18 @@
 #define MAY_BE_ARRAY_OF_ANY			(MAY_BE_ANY      << MAY_BE_ARRAY_SHIFT)
 #define MAY_BE_ARRAY_OF_REF			(MAY_BE_REF      << MAY_BE_ARRAY_SHIFT)
 
-#define MAY_BE_ARRAY_KEY_LONG       (1<<21)
-#define MAY_BE_ARRAY_KEY_STRING     (1<<22)
+#define MAY_BE_ARRAY_PACKED         (1<<21)
+#define MAY_BE_ARRAY_HASH           (1<<22) /* hash with numeric keys */
+
+#define MAY_BE_ARRAY_KEY_LONG       (MAY_BE_ARRAY_PACKED | MAY_BE_ARRAY_HASH)
+#define MAY_BE_ARRAY_KEY_STRING     (1<<23)
 #define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING)
 
-#define MAY_BE_CLASS                (1<<23)
-#define MAY_BE_INDIRECT             (1<<24)
+#define MAY_BE_CLASS                (1<<24)
+#define MAY_BE_INDIRECT             (1<<25)
+
+
+#define MAY_BE_ANY_ARRAY \
+	(MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF)
 
 #endif /* ZEND_TYPE_INFO_H */

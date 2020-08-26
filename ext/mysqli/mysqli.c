@@ -977,13 +977,7 @@ ZEND_GET_MODULE(mysqli)
 #endif
 
 
-/* {{{ mixed mysqli_stmt_construct()
-constructor for statement object.
-Parameters:
-  object -> mysqli_stmt_init
-  object, query -> mysqli_prepare
-*/
-PHP_FUNCTION(mysqli_stmt_construct)
+PHP_METHOD(mysqli_stmt, __construct)
 {
 	MY_MYSQL			*mysql;
 	zval				*mysql_link;
@@ -1018,14 +1012,8 @@ PHP_FUNCTION(mysqli_stmt_construct)
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
-/* }}} */
 
-/* {{{ mixed mysqli_result_construct()
-constructor for result object.
-Parameters:
-  object [, mode] -> mysqli_store/use_result
-*/
-PHP_FUNCTION(mysqli_result_construct)
+PHP_METHOD(mysqli_result, __construct)
 {
 	MY_MYSQL			*mysql;
 	MYSQL_RES			*result = NULL;
@@ -1033,19 +1021,8 @@ PHP_FUNCTION(mysqli_result_construct)
 	MYSQLI_RESOURCE		*mysqli_resource;
 	zend_long				resmode = MYSQLI_STORE_RESULT;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				RETURN_THROWS();
-			}
-			break;
-		case 2:
-			if (zend_parse_parameters(2, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
-				RETURN_THROWS();
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l", &mysql_link, mysqli_link_class_entry, &resmode) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
@@ -1071,7 +1048,6 @@ PHP_FUNCTION(mysqli_result_construct)
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
-/* }}} */
 
 PHP_METHOD(mysqli_result, getIterator)
 {
@@ -1164,19 +1140,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		zend_string *class_name = NULL;
-
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Sa", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ca", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
-		if (class_name == NULL) {
+		if (ce == NULL) {
 			ce = zend_standard_class_def;
-		} else {
-			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);
-		}
-		if (!ce) {
-			php_error_docref(NULL, E_WARNING, "Could not find class '%s'", ZSTR_VAL(class_name));
-			return;
 		}
 		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_throw_error(NULL, "Class %s cannot be instantiated", ZSTR_VAL(ce->name));

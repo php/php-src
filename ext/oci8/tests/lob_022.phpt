@@ -67,7 +67,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 
-Warning: OCI_Lob::save(): Offset parameter must be greater than or equal to 0 in %s on line %d
+Warning: OCILob::save(): Offset parameter must be greater than or equal to 0 in %s on line %d
 string(4) "data"
 string(9) "long data"
 string(9) "long data"

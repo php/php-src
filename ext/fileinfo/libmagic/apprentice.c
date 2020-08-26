@@ -2590,17 +2590,17 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 			return -1;
 		}
 		if (m->type == FILE_REGEX) {
-			zval pattern;
+			zend_string *pattern;
 			int options = 0;
 			pcre_cache_entry *pce;
 
-			convert_libmagic_pattern(&pattern, m->value.s, strlen(m->value.s), options);
+			pattern = convert_libmagic_pattern(m->value.s, strlen(m->value.s), options);
 
-			if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern))) == NULL) {
-				zval_dtor(&pattern);
+			if ((pce = pcre_get_compiled_regex_cache(pattern)) == NULL) {
+				zend_string_release(pattern);
 				return -1;
 			}
-			zval_dtor(&pattern);
+			zend_string_release(pattern);
 
 			return 0;
 		}

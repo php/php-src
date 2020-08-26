@@ -40,10 +40,10 @@ require __DIR__."/drop_type.inc";
 --EXPECTF--
 bool(true)
 
-Warning: OCI_Collection::assignelem(): OCI-22165: given index [%d] must be in the range of %s to [0] in %s on line %d
+Warning: OCICollection::assignelem(): OCI-22165: given index [%d] must be in the range of %s to [0] in %s on line %d
 bool(false)
 
-Warning: OCI_Collection::assignelem(): OCI-22165: given index [5000] must be in the range of %s to [0] in %s on line %d
+Warning: OCICollection::assignelem(): OCI-22165: given index [5000] must be in the range of %s to [0] in %s on line %d
 bool(false)
 bool(false)
 bool(false)

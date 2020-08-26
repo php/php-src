@@ -376,12 +376,10 @@ PHP_FUNCTION(mysqli_connect)
 }
 /* }}} */
 
-/* {{{ */
-PHP_FUNCTION(mysqli_link_construct)
+PHP_METHOD(mysqli, __construct)
 {
 	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, TRUE);
 }
-/* }}} */
 
 /* {{{ Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)

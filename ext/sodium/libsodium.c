@@ -2495,6 +2495,7 @@ PHP_FUNCTION(sodium_crypto_kx_keypair)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
+	ZSTR_VAL(keypair)[crypto_kx_SECRETKEYBYTES + crypto_kx_PUBLICKEYBYTES] = 0;
 	RETURN_STR(keypair);
 }
 

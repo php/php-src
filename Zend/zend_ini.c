@@ -96,7 +96,7 @@ ZEND_API int zend_ini_startup(void) /* {{{ */
 	EG(ini_directives) = registered_zend_ini_directives;
 	EG(modified_ini_directives) = NULL;
 	EG(error_reporting_ini_entry) = NULL;
-	zend_hash_init_ex(registered_zend_ini_directives, 128, NULL, free_ini_entry, 1, 0);
+	zend_hash_init(registered_zend_ini_directives, 128, NULL, free_ini_entry, 1);
 	return SUCCESS;
 }
 /* }}} */
@@ -164,7 +164,7 @@ ZEND_API int zend_copy_ini_directives(void) /* {{{ */
 	EG(modified_ini_directives) = NULL;
 	EG(error_reporting_ini_entry) = NULL;
 	EG(ini_directives) = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, free_ini_entry, 1, 0);
+	zend_hash_init(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, free_ini_entry, 1);
 	zend_hash_copy(EG(ini_directives), registered_zend_ini_directives, copy_ini_entry);
 	return SUCCESS;
 }
@@ -315,7 +315,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 {
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
-	zend_bool modifiable;
+	uint8_t modifiable;
 	zend_bool modified;
 
 	if ((ini_entry = zend_hash_find_ptr(EG(ini_directives), name)) == NULL) {

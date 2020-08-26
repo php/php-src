@@ -659,10 +659,14 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				op1_type = Z_TYPE_P(zv);
 				flags |= IS_TRACE_REFERENCE;
 			}
-			op1_type |= flags;
 			if (Z_TYPE_P(zv) == IS_OBJECT) {
 				ce1 = Z_OBJCE_P(zv);
+			} else if (Z_TYPE_P(zv) == IS_ARRAY) {
+				if (HT_IS_PACKED(Z_ARRVAL_P(zv))) {
+					flags |= IS_TRACE_PACKED;
+				}
 			}
+			op1_type |= flags;
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)
 		 && opline->opcode != ZEND_INSTANCEOF
@@ -684,10 +688,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				op2_type = Z_TYPE_P(zv);
 				flags |= IS_TRACE_REFERENCE;
 			}
-			op2_type |= flags;
 			if (Z_TYPE_P(zv) == IS_OBJECT) {
 				ce2 = Z_OBJCE_P(zv);
 			}
+			op2_type |= flags;
 		}
 		if (opline->opcode == ZEND_ASSIGN_DIM ||
 			opline->opcode == ZEND_ASSIGN_OBJ ||

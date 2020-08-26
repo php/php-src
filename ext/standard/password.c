@@ -592,8 +592,8 @@ PHP_FUNCTION(password_get_info)
 	add_assoc_string(return_value, "algoName", algo->name);
 	if (algo->get_info &&
 		(FAILURE == algo->get_info(&options, hash))) {
-		zval_dtor(&options);
-		zval_dtor(return_value);
+		zval_ptr_dtor_nogc(&options);
+		zval_ptr_dtor_nogc(return_value);
 		RETURN_NULL();
 	}
 	add_assoc_zval(return_value, "options", &options);

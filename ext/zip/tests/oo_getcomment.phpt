@@ -16,16 +16,20 @@ if (!$zip->open($file)) {
 echo $zip->getArchiveComment() . "\n";
 
 $idx = $zip->locateName('foo');
-echo $zip->getCommentName('foo') . "\n";
-echo $zip->getCommentIndex($idx);
+var_dump($zip->getCommentName('foo'));
+var_dump($zip->getCommentIndex($idx));
 
-echo $zip->getCommentName('') . "\n";
+try {
+    echo $zip->getCommentName('') . "\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $zip->close();
 
 ?>
---EXPECTF--
+--EXPECT--
 Zip archive comment
-foo comment
-foo comment
-Notice: ZipArchive::getCommentName(): Empty string as entry name in %s on line %d
+string(11) "foo comment"
+string(11) "foo comment"
+ZipArchive::getCommentName(): Argument #1 ($name) cannot be empty

@@ -210,6 +210,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_POLYMORPHISM  (1<<4) /* exit because of polymorphic call */
 #define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
 #define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
+#define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -245,6 +246,7 @@ typedef enum _zend_jit_trace_op {
 } zend_jit_trace_op;
 
 #define IS_UNKNOWN 255 /* may be used for zend_jit_trace_rec.op?_type */
+#define IS_TRACE_PACKED    (1<<4)
 #define IS_TRACE_REFERENCE (1<<5)
 #define IS_TRACE_INDIRECT  (1<<6)
 
@@ -350,6 +352,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  stack_map_size;
 	uint32_t                  flags;         /* See ZEND_JIT_TRACE_... defines above */
 	uint32_t                  polymorphism;  /* Counter of polymorphic calls */
+	uint32_t                  jmp_table_size;/* number of jmp_table slots */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */

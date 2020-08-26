@@ -97,7 +97,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = -1;
-	zend_long maxlen = PHP_STREAM_COPY_ALL;
+	zend_long maxlen;
+	zend_bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -110,8 +111,12 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	}
 
 	/* Parse arguments */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!ll!", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen, &maxlen_is_null) == FAILURE) {
 		goto skip_phar;
+	}
+
+	if (maxlen_is_null) {
+		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
 	}
 
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
@@ -135,10 +140,10 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 
-			if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
+			if (!maxlen_is_null && maxlen < 0) {
 				efree(arch);
-				php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero");
-				RETURN_FALSE;
+				zend_argument_value_error(5, "must be greater than or equal to 0");
+				RETURN_THROWS();
 			}
 
 			/* retrieving a file defaults to within the current directory, so use this if possible */

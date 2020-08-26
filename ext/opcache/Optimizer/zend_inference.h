@@ -26,7 +26,7 @@
 /* Bitmask for type inference (zend_ssa_var_info.type) */
 #include "zend_type_info.h"
 
-#define AVOID_REFCOUNTING           (1<<26) /* avoid reference counting */
+#define MAY_BE_PACKED_GUARD         (1<<27) /* needs packed array guard */
 #define MAY_BE_CLASS_GUARD          (1<<27) /* needs class guard */
 #define MAY_BE_GUARD                (1<<28) /* needs type guard */
 #define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
@@ -179,6 +179,9 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 			}
 			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
 		} ZEND_HASH_FOREACH_END();
+		if (HT_IS_PACKED(ht)) {
+			tmp &= ~MAY_BE_ARRAY_HASH;
+		}
 		return tmp;
 	} else {
 		uint32_t tmp = (1 << Z_TYPE_P(zv));

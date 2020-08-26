@@ -516,7 +516,7 @@ file_printedlen(const struct magic_set *ms)
 protected int
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
-	zval patt;
+	zend_string *pattern;
 	uint32_t opts = 0;
 	pcre_cache_entry *pce;
 	zend_string *res;
@@ -524,13 +524,13 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	size_t rep_cnt = 0;
 
 	opts |= PCRE2_MULTILINE;
-	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
-	if ((pce = pcre_get_compiled_regex_cache_ex(Z_STR(patt), 0)) == NULL) {
-		zval_ptr_dtor(&patt);
+	pattern = convert_libmagic_pattern((char*)pat, strlen(pat), opts);
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
+		zend_string_release(pattern);
 		rep_cnt = -1;
 		goto out;
 	}
-	zval_ptr_dtor(&patt);
+	zend_string_release(pattern);
 
 	repl = zend_string_init(rep, strlen(rep), 0);
 	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);

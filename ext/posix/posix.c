@@ -655,14 +655,9 @@ PHP_FUNCTION(posix_mknod)
 	}
 
 	if ((mode & S_IFCHR) || (mode & S_IFBLK)) {
-		if (ZEND_NUM_ARGS() == 2) {
-			php_error_docref(NULL, E_WARNING, "For S_IFCHR and S_IFBLK you need to pass a major device kernel identifier");
-			RETURN_FALSE;
-		}
 		if (major == 0) {
-			php_error_docref(NULL, E_WARNING,
-				"Expects argument 3 to be non-zero for POSIX_S_IFCHR and POSIX_S_IFBLK");
-			RETURN_FALSE;
+			zend_argument_value_error(3, "cannot be 0 for the POSIX_S_IFCHR and POSIX_S_IFBLK modes");
+			RETURN_THROWS();
 		} else {
 #if defined(HAVE_MAKEDEV) || defined(makedev)
 			php_dev = makedev(major, minor);

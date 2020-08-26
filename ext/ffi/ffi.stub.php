@@ -17,10 +17,10 @@ final class FFI
     public static function free(FFI\CData $ptr): void {}
 
     /**
-     * @param FFI\CType|string $type
+     * @param FFI\CData|string|int|null $ptr
      * @prefer-ref $ptr
      */
-    public static function cast($type, $ptr): ?FFI\CData {}
+    public static function cast(FFI\CType|string $type, $ptr): ?FFI\CData {}
 
     public static function type(string $type): ?FFI\CType {}
 
@@ -39,9 +39,9 @@ final class FFI
     public static function alignof(object $ptr): ?int {}
 
     /**
+     * @param FFI\CData|string $src
      * @prefer-ref $dst
      * @prefer-ref $src
-     * @param string|FFI\CData $dst
      */
     public static function memcpy(FFI\CData $dst, $src, int $size): void {}
 

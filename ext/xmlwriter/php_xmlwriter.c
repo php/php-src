@@ -38,8 +38,8 @@ typedef int (*xmlwriter_read_int_t)(xmlTextWriterPtr writer);
 		ze_xmlwriter_object *obj = Z_XMLWRITER_P(object); \
 		ptr = obj->ptr; \
 		if (!ptr) { \
-			php_error_docref(NULL, E_WARNING, "Invalid or uninitialized XMLWriter object"); \
-			RETURN_FALSE; \
+			zend_throw_error(NULL, "Invalid or uninitialized XMLWriter object"); \
+			RETURN_THROWS(); \
 		} \
 	}
 /* }}} */

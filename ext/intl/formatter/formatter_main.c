@@ -43,6 +43,10 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	object = return_value;
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
+	if (FORMATTER_OBJECT(nfo)) {
+		zend_throw_error(NULL, "NumberFormatter object is already constructed");
+		return FAILURE;
+	}
 
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {

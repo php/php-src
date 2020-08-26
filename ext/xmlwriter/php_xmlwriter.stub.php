@@ -206,7 +206,7 @@ class XMLWriter
     public function endDtdEntity(): bool {}
 
     /** @alias xmlwriter_write_dtd_entity */
-    public function writeDtdEntity(string $name, string $content, bool $isparam, string $publicId = UNKNOWN, string $systemId = UNKNOWN, string $ndataid = UNKNOWN): bool {}
+    public function writeDtdEntity(string $name, string $content, bool $isparam = false, string $publicId = UNKNOWN, string $systemId = UNKNOWN, string $ndataid = UNKNOWN): bool {}
 
     /** @alias xmlwriter_output_memory */
     public function outputMemory(bool $flush = true): string {}

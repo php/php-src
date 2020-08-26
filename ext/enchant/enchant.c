@@ -307,8 +307,8 @@ PHP_FUNCTION(enchant_broker_free)
 	PHP_ENCHANT_GET_BROKER;
 
 	if (pbroker->nb_dict > 0) {
-		php_error_docref(NULL, E_WARNING, "Cannot free EnchantBroker object with open EnchantDictionary objects");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot free EnchantBroker object with open EnchantDictionary objects");
+		RETURN_THROWS();
 	}
 	if (pbroker->pbroker) {
 		enchant_broker_free(pbroker->pbroker);

@@ -75,6 +75,15 @@ try {
 }
 err($fmt);
 
+$fmt = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
+try {
+    $fmt->__construct('en_US', NumberFormatter::DECIMAL);
+} catch (Error $e) {
+    print_exception($e);
+    $fmt = null;
+}
+err($fmt);
+
 foreach($args as $arg) {
     $fmt = crt("O", $arg[0], $arg[1]);
     err($fmt);
@@ -93,6 +102,9 @@ ArgumentCountError: numfmt_create() expects at least 2 parameters, 0 given in %s
 'U_ZERO_ERROR'
 
 ArgumentCountError: NumberFormatter::create() expects at least 2 parameters, 0 given in %s on line %d
+'U_ZERO_ERROR'
+
+Error: NumberFormatter object is already constructed in %s on line %d
 'U_ZERO_ERROR'
 
 IntlException: Constructor failed in %s on line %d

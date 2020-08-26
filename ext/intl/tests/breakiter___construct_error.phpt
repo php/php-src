@@ -4,7 +4,6 @@ IntlRuleBasedBreakIterator::__construct(): arg errors
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 function print_exception($e) {
     echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
@@ -36,9 +35,16 @@ try {
 } catch (IntlException $e) {
     print_exception($e);
 }
+
+$rbbi = new IntlRuleBasedBreakIterator(".;");
+try {
+    $rbbi->__construct(".;");
+} catch (Error $e) {
+    print_exception($e);
+}
 ?>
 --EXPECTF--
-Exception: IntlRuleBasedBreakIterator::__construct(): rbbi_create_instance: unable to create RuleBasedBreakIterator from rules (parse error on line 1, offset 31) in %s on line %d
+Exception: IntlRuleBasedBreakIterator::__construct(): unable to create RuleBasedBreakIterator from rules (parse error on line 1, offset 31) in %s on line %d
 
 Exception: IntlRuleBasedBreakIterator::__construct() expects at least 1 parameter, 0 given in %s on line %d
 
@@ -46,4 +52,6 @@ Exception: IntlRuleBasedBreakIterator::__construct() expects at most 2 parameter
 
 Exception: IntlRuleBasedBreakIterator::__construct(): Argument #2 ($areCompiled) must be of type bool, array given in %s on line %d
 
-Exception: IntlRuleBasedBreakIterator::__construct(): rbbi_create_instance: unable to create instance from compiled rules in %s on line %d
+Exception: IntlRuleBasedBreakIterator::__construct(): unable to create instance from compiled rules in %s on line %d
+
+Exception: IntlRuleBasedBreakIterator object is already constructed in %s on line %d

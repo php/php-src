@@ -861,20 +861,20 @@ PHP_FUNCTION(imagecolormatch)
 	result = gdImageColorMatch(im1, im2);
 	switch (result) {
 		case -1:
-			php_error_docref(NULL, E_WARNING, "Image1 must be TrueColor" );
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be TrueColor");
+			RETURN_THROWS();
 			break;
 		case -2:
-			php_error_docref(NULL, E_WARNING, "Image2 must be Palette" );
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be Palette");
+			RETURN_THROWS();
 			break;
 		case -3:
-			php_error_docref(NULL, E_WARNING, "Image1 and Image2 must be the same size" );
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be the same size as argument #1 ($im1)");
+			RETURN_THROWS();
 			break;
 		case -4:
-			php_error_docref(NULL, E_WARNING, "Image2 must have at least one color" );
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must have at least one color");
+			RETURN_THROWS();
 			break;
 	}
 
@@ -1459,7 +1459,7 @@ gdImagePtr _php_image_create_from_string(zend_string *data, char *tn, gdImagePtr
 
 	im = (*ioctx_func_p)(io_ctx);
 	if (!im) {
-		php_error_docref(NULL, E_WARNING, "Passed data is not in '%s' format", tn);
+		php_error_docref(NULL, E_WARNING, "Passed data is not in \"%s\" format", tn);
 		io_ctx->gd_free(io_ctx);
 		return NULL;
 	}
@@ -1483,8 +1483,8 @@ PHP_FUNCTION(imagecreatefromstring)
 	}
 
 	if (ZSTR_LEN(data) < sizeof(sig)) {
-		php_error_docref(NULL, E_WARNING, "Empty string or invalid image");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	memcpy(sig, ZSTR_VAL(data), sizeof(sig));
@@ -1666,7 +1666,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		return;
 	}
 
-	php_error_docref(NULL, E_WARNING, "'%s' is not a valid %s file", file, tn);
+	php_error_docref(NULL, E_WARNING, "\"%s\" is not a valid %s file", file, tn);
 out_err:
 	php_stream_close(stream);
 	RETURN_FALSE;
@@ -1806,7 +1806,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 		fp = VCWD_FOPEN(fn, "wb");
 		if (!fp) {
-			php_error_docref(NULL, E_WARNING, "Unable to open '%s' for writing", fn);
+			php_error_docref(NULL, E_WARNING, "Unable to open \"%s\" for writing", fn);
 			RETURN_FALSE;
 		}
 
@@ -2297,8 +2297,8 @@ PHP_FUNCTION(imagecolorsforindex)
 		add_assoc_long(return_value,"blue", gdImageBlue(im,col));
 		add_assoc_long(return_value,"alpha", gdImageAlpha(im,col));
 	} else {
-		php_error_docref(NULL, E_WARNING, "Color index %d out of range", col);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "is out of range");
+		RETURN_THROWS();
 	}
 }
 /* }}} */

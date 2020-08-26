@@ -1904,8 +1904,7 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 	return file_strncmp(a, b, len, flags);
 }
 
-public void
-convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options)
+public zend_string* convert_libmagic_pattern(char *val, size_t len, uint32_t options)
 {
 	int i, j;
 	zend_string *t;
@@ -1956,7 +1955,7 @@ convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options)
 	ZSTR_VAL(t)[j]='\0';
 	ZSTR_LEN(t) = j;
 
-	ZVAL_NEW_STR(pattern, t);
+	return t;
 }
 
 private int
@@ -2137,7 +2136,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		break;
 	}
 	case FILE_REGEX: {
-		zval pattern;
+		zend_string *pattern;
 		uint32_t options = 0;
 		pcre_cache_entry *pce;
 
@@ -2147,11 +2146,11 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			options |= PCRE2_CASELESS;
 		}
 
-		convert_libmagic_pattern(&pattern, (char *)m->value.s, m->vallen, options);
+		pattern = convert_libmagic_pattern((char *)m->value.s, m->vallen, options);
 
 		l = v = 0;
-		if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern))) == NULL) {
-			zval_ptr_dtor(&pattern);
+		if ((pce = pcre_get_compiled_regex_cache(pattern)) == NULL) {
+			zend_string_release(pattern);
 			return -1;
 		} else {
 			/* pce now contains the compiled regex */
@@ -2172,7 +2171,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
 			if (Z_LVAL(retval) < 0) {
 				zval_ptr_dtor(&subpats);
-				zval_ptr_dtor(&pattern);
+				zend_string_release(pattern);
 				return -1;
 			} else if ((Z_LVAL(retval) > 0) && (Z_TYPE(subpats) == IS_ARRAY)) {
 				/* Need to fetch global match which equals pmatch[0] */
@@ -2199,14 +2198,14 @@ magiccheck(struct magic_set *ms, struct magic *m)
 				} else {
 error_out:
 					zval_ptr_dtor(&subpats);
-					zval_ptr_dtor(&pattern);
+					zend_string_release(pattern);
 					return -1;
 				}
 			} else {
 				v = 1;
 			}
 			zval_ptr_dtor(&subpats);
-			zval_ptr_dtor(&pattern);
+			zend_string_release(pattern);
 		}
 		break;
 	}

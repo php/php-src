@@ -906,7 +906,7 @@ literal:
 						__buf[0] = sch;
 						__buf[1] = '\0';
 						current = args[objIndex++];
-						zval_dtor(*current);
+						zval_ptr_dtor_nogc(*current);
 						ZVAL_STRINGL( *current, __buf, 1);
 					} else {
 						add_index_stringl(return_value, objIndex++, &sch, 1);

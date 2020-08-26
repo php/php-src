@@ -213,7 +213,7 @@ ZEND_API int zend_init_rsrc_list(void)
 
 int zend_init_rsrc_plist(void)
 {
-	zend_hash_init_ex(&EG(persistent_list), 8, NULL, plist_entry_destructor, 1, 0);
+	zend_hash_init(&EG(persistent_list), 8, NULL, plist_entry_destructor, 1);
 	return SUCCESS;
 }
 

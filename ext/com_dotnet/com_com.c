@@ -56,7 +56,7 @@ PHP_METHOD(com, __construct)
 			&module_name, &module_name_len, &server_name, &server_name_len,
 			&cp, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters(
-			ZEND_NUM_ARGS(), "sa|ls",
+			ZEND_NUM_ARGS(), "sa/|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
 		RETURN_THROWS();
@@ -217,7 +217,6 @@ PHP_METHOD(com, __construct)
 
 	if (server_name) {
 		if (info.pwszName) efree(info.pwszName);
-		if (authid.User) efree(authid.User);
 	}
 
 	efree(moniker);
@@ -437,8 +436,9 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 	if (obj->typeinfo) {
 		hr = ITypeInfo_GetIDsOfNames(obj->typeinfo, &olename, 1, dispid);
 		if (FAILED(hr)) {
+			HRESULT hr1 = hr;
 			hr = IDispatch_GetIDsOfNames(V_DISPATCH(&obj->v), &IID_NULL, &olename, 1, LOCALE_SYSTEM_DEFAULT, dispid);
-			if (SUCCEEDED(hr)) {
+			if (SUCCEEDED(hr) && hr1 != E_NOTIMPL) {
 				/* fall back on IDispatch direct */
 				ITypeInfo_Release(obj->typeinfo);
 				obj->typeinfo = NULL;
@@ -585,6 +585,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 			}
 		}
 		efree(vargs);
+		if (byref_vals) efree(byref_vals);
 	}
 
 	return SUCCEEDED(hr) ? SUCCESS : FAILURE;

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4a4e86dc175542bbf0bc29c9a957c5dfec834f93 */
+ * Stub hash: 1c1a73f6a4de5fa2ca9595125822d65bc4f5fc55 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
@@ -30,13 +30,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_bind_array_by_name, 0, 4, _I
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_free_descriptor, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocifreedesc arginfo_oci_free_descriptor
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_save, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -44,33 +44,33 @@ ZEND_END_ARG_INFO()
 #define arginfo_ocisavelob arginfo_oci_lob_save
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_import, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocisavelobfile arginfo_oci_lob_import
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_lob_load, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ociloadlob arginfo_oci_lob_load
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_lob_read, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_oci_lob_eof arginfo_oci_free_descriptor
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_lob_tell, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_oci_lob_rewind arginfo_oci_free_descriptor
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_seek, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, whence, IS_LONG, 0, "OCI_SEEK_SET")
 ZEND_END_ARG_INFO()
@@ -78,52 +78,52 @@ ZEND_END_ARG_INFO()
 #define arginfo_oci_lob_size arginfo_oci_lob_tell
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_lob_write, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_append, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor_to, OCI_Lob, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor_from, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor_to, OCILob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor_from, OCILob, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_truncate, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_lob_erase, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_flush, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flag, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ocisetbufferinglob, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocigetbufferinglob arginfo_oci_free_descriptor
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_copy, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor_to, OCI_Lob, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor_from, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor_to, OCILob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor_from, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_is_equal, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor_first, OCI_Lob, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor_second, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor_first, OCILob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor_second, OCILob, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_export, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
@@ -131,7 +131,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ociwritelobtofile arginfo_oci_lob_export
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_oci_new_descriptor, 0, 1, OCI_Lob, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_oci_new_descriptor, 0, 1, OCILob, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "OCI_DTYPE_LOB")
 ZEND_END_ARG_INFO()
@@ -374,32 +374,32 @@ ZEND_END_ARG_INFO()
 #define arginfo_ocirowcount arginfo_oci_num_rows
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_free_collection, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, collection, OCI_Collection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection, OCICollection, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocifreecollection arginfo_oci_free_collection
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_collection_append, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, collection, OCI_Collection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection, OCICollection, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocicollappend arginfo_oci_collection_append
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_collection_element_get, 0, 2, MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_NULL|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, collection, OCI_Collection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection, OCICollection, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocicollgetelem arginfo_oci_collection_element_get
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_collection_assign, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, collection_to, OCI_Collection, 0)
-	ZEND_ARG_OBJ_INFO(0, collection_from, OCI_Collection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection_to, OCICollection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection_from, OCICollection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_collection_element_assign, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, collection, OCI_Collection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection, OCICollection, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -407,7 +407,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_ocicollassignelem arginfo_oci_collection_element_assign
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_collection_size, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, collection, OCI_Collection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection, OCICollection, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocicollsize arginfo_oci_collection_size
@@ -417,13 +417,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_ocicollmax arginfo_oci_collection_size
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_collection_trim, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, collection, OCI_Collection, 0)
+	ZEND_ARG_OBJ_INFO(0, collection, OCICollection, 0)
 	ZEND_ARG_TYPE_INFO(0, number, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocicolltrim arginfo_oci_collection_trim
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_oci_new_collection, 0, 2, OCI_Collection, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_oci_new_collection, 0, 2, OCICollection, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection_resource)
 	ZEND_ARG_TYPE_INFO(0, type_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, schema_name, IS_STRING, 0)
@@ -438,106 +438,106 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_oci_unregister_taf_callback arginfo_oci_rollback
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_save, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_save, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_import, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_import, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OCI_Lob_savefile arginfo_class_OCI_Lob_import
+#define arginfo_class_OCILob_savefile arginfo_class_OCILob_import
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_load, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_load, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_read, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_read, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OCI_Lob_eof arginfo_class_OCI_Lob_load
+#define arginfo_class_OCILob_eof arginfo_class_OCILob_load
 
-#define arginfo_class_OCI_Lob_tell arginfo_class_OCI_Lob_load
+#define arginfo_class_OCILob_tell arginfo_class_OCILob_load
 
-#define arginfo_class_OCI_Lob_rewind arginfo_class_OCI_Lob_load
+#define arginfo_class_OCILob_rewind arginfo_class_OCILob_load
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_seek, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_seek, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, whence, IS_LONG, 0, "OCI_SEEK_SET")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OCI_Lob_size arginfo_class_OCI_Lob_load
+#define arginfo_class_OCILob_size arginfo_class_OCILob_load
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_write, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_write, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_append, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, lob_descriptor_from, OCI_Lob, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_append, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, lob_descriptor_from, OCILob, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_truncate, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_truncate, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_erase, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_erase, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OCI_Lob_flush, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OCILob_flush, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flag, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_setbuffering, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_setbuffering, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OCI_Lob_getbuffering arginfo_class_OCI_Lob_load
+#define arginfo_class_OCILob_getbuffering arginfo_class_OCILob_load
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_writetofile, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_writetofile, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OCI_Lob_export arginfo_class_OCI_Lob_writetofile
+#define arginfo_class_OCILob_export arginfo_class_OCILob_writetofile
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_writetemporary, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_writetemporary, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "OCI_TEMP_CLOB")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OCI_Lob_close arginfo_class_OCI_Lob_load
+#define arginfo_class_OCILob_close arginfo_class_OCILob_load
 
-#define arginfo_class_OCI_Lob_free arginfo_class_OCI_Lob_load
+#define arginfo_class_OCILob_free arginfo_class_OCILob_load
 
-#define arginfo_class_OCI_Collection_free arginfo_class_OCI_Lob_load
+#define arginfo_class_OCICollection_free arginfo_class_OCILob_load
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Collection_append, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_append, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Collection_getElem, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_getElem, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Collection_assign, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, collection_from, OCI_Collection, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_assign, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, collection_from, OCICollection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Collection_assignelem, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_assignelem, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OCI_Collection_size arginfo_class_OCI_Lob_load
+#define arginfo_class_OCICollection_size arginfo_class_OCILob_load
 
-#define arginfo_class_OCI_Collection_max arginfo_class_OCI_Lob_load
+#define arginfo_class_OCICollection_max arginfo_class_OCILob_load
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Collection_trim, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_trim, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, number, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -751,41 +751,41 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
-static const zend_function_entry class_OCI_Lob_methods[] = {
-	ZEND_ME_MAPPING(save, oci_lob_save, arginfo_class_OCI_Lob_save, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(import, oci_lob_import, arginfo_class_OCI_Lob_import, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(savefile, oci_lob_import, arginfo_class_OCI_Lob_savefile, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(load, oci_lob_load, arginfo_class_OCI_Lob_load, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(read, oci_lob_read, arginfo_class_OCI_Lob_read, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(eof, oci_lob_eof, arginfo_class_OCI_Lob_eof, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(tell, oci_lob_tell, arginfo_class_OCI_Lob_tell, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(rewind, oci_lob_rewind, arginfo_class_OCI_Lob_rewind, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(seek, oci_lob_seek, arginfo_class_OCI_Lob_seek, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(size, oci_lob_size, arginfo_class_OCI_Lob_size, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(write, oci_lob_write, arginfo_class_OCI_Lob_write, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(append, oci_lob_append, arginfo_class_OCI_Lob_append, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(truncate, oci_lob_truncate, arginfo_class_OCI_Lob_truncate, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(erase, oci_lob_erase, arginfo_class_OCI_Lob_erase, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(flush, oci_lob_flush, arginfo_class_OCI_Lob_flush, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setbuffering, ocisetbufferinglob, arginfo_class_OCI_Lob_setbuffering, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getbuffering, ocigetbufferinglob, arginfo_class_OCI_Lob_getbuffering, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writetofile, oci_lob_export, arginfo_class_OCI_Lob_writetofile, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(export, oci_lob_export, arginfo_class_OCI_Lob_export, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writetemporary, oci_lob_write_temporary, arginfo_class_OCI_Lob_writetemporary, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(close, oci_lob_close, arginfo_class_OCI_Lob_close, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(free, oci_free_descriptor, arginfo_class_OCI_Lob_free, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_OCILob_methods[] = {
+	ZEND_ME_MAPPING(save, oci_lob_save, arginfo_class_OCILob_save, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(import, oci_lob_import, arginfo_class_OCILob_import, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(savefile, oci_lob_import, arginfo_class_OCILob_savefile, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(load, oci_lob_load, arginfo_class_OCILob_load, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(read, oci_lob_read, arginfo_class_OCILob_read, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(eof, oci_lob_eof, arginfo_class_OCILob_eof, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(tell, oci_lob_tell, arginfo_class_OCILob_tell, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(rewind, oci_lob_rewind, arginfo_class_OCILob_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(seek, oci_lob_seek, arginfo_class_OCILob_seek, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(size, oci_lob_size, arginfo_class_OCILob_size, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(write, oci_lob_write, arginfo_class_OCILob_write, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(append, oci_lob_append, arginfo_class_OCILob_append, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(truncate, oci_lob_truncate, arginfo_class_OCILob_truncate, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(erase, oci_lob_erase, arginfo_class_OCILob_erase, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(flush, oci_lob_flush, arginfo_class_OCILob_flush, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(setbuffering, ocisetbufferinglob, arginfo_class_OCILob_setbuffering, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getbuffering, ocigetbufferinglob, arginfo_class_OCILob_getbuffering, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(writetofile, oci_lob_export, arginfo_class_OCILob_writetofile, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(export, oci_lob_export, arginfo_class_OCILob_export, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(writetemporary, oci_lob_write_temporary, arginfo_class_OCILob_writetemporary, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(close, oci_lob_close, arginfo_class_OCILob_close, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(free, oci_free_descriptor, arginfo_class_OCILob_free, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 
-static const zend_function_entry class_OCI_Collection_methods[] = {
-	ZEND_ME_MAPPING(free, oci_free_collection, arginfo_class_OCI_Collection_free, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(append, oci_collection_append, arginfo_class_OCI_Collection_append, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getElem, oci_collection_element_get, arginfo_class_OCI_Collection_getElem, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(assign, oci_collection_assign, arginfo_class_OCI_Collection_assign, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(assignelem, oci_collection_element_assign, arginfo_class_OCI_Collection_assignelem, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(size, oci_collection_size, arginfo_class_OCI_Collection_size, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(max, oci_collection_max, arginfo_class_OCI_Collection_max, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(trim, oci_collection_trim, arginfo_class_OCI_Collection_trim, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_OCICollection_methods[] = {
+	ZEND_ME_MAPPING(free, oci_free_collection, arginfo_class_OCICollection_free, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(append, oci_collection_append, arginfo_class_OCICollection_append, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getElem, oci_collection_element_get, arginfo_class_OCICollection_getElem, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(assign, oci_collection_assign, arginfo_class_OCICollection_assign, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(assignelem, oci_collection_element_assign, arginfo_class_OCICollection_assignelem, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(size, oci_collection_size, arginfo_class_OCICollection_size, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(max, oci_collection_max, arginfo_class_OCICollection_max, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(trim, oci_collection_trim, arginfo_class_OCICollection_trim, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

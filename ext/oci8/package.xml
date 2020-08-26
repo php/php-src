@@ -72,9 +72,9 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
 
     Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
 
-    The OCI-Lob class is now called OCI_Lob.
+    The OCI-Lob class is now called OCILob for standards compliance.
 
-    The OCI-Collection calls is now called OCI_Collection.
+    The OCI-Collection class is now called OCICollection for standards compliance.
 
     Generate arginfo from function stubs. (Jens de Nies)
   </notes>

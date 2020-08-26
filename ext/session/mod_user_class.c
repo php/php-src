@@ -22,9 +22,9 @@
 		php_error_docref(NULL, E_WARNING, "Session is not active"); \
 		RETURN_FALSE; \
 	} \
-	if (PS(default_mod) == NULL) {				\
-		php_error_docref(NULL, E_CORE_ERROR, "Cannot call default session handler"); \
-		RETURN_FALSE;						\
+	if (PS(default_mod) == NULL) { \
+		zend_throw_error(NULL, "Cannot call default session handler"); \
+		RETURN_THROWS(); \
 	}
 
 #define PS_SANITY_CHECK_IS_OPEN				\

@@ -38,7 +38,7 @@ require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECTF--
-Warning: OCI_Collection::append(): OCI-01861: literal does not match format string in %s on line %d
+Warning: OCICollection::append(): OCI-01861: literal does not match format string in %s on line %d
 bool(false)
 bool(true)
 bool(false)

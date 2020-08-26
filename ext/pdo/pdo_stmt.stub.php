@@ -5,17 +5,13 @@
 class PDOStatement implements IteratorAggregate
 {
     /** @return bool */
-    public function bindColumn(int|string $column, &$param, int $type = 0, int $maxlen = 0, mixed $driverdata = null) {}
+    public function bindColumn(string|int $column, mixed &$param, int $type = 0, int $maxlen = 0, mixed $driverdata = null) {}
 
     /** @return bool */
-    public function bindParam(int|string $parameter, &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, mixed $driverdata = null) {}
+    public function bindParam(string|int $parameter, mixed &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, mixed $driverdata = null) {}
 
-    /**
-     * @param int|string $parameter
-     * @param mixed $value
-     * @return bool
-     */
-    public function bindValue($parameter, $value, int $type = PDO::PARAM_STR) {}
+    /** @return bool */
+    public function bindValue(string|int $parameter, mixed $value, int $type = PDO::PARAM_STR) {}
 
     /** @return bool */
     public function closeCursor() {}
@@ -38,11 +34,8 @@ class PDOStatement implements IteratorAggregate
     /** @return mixed */
     public function fetch(int $fetch_style = PDO::FETCH_BOTH, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {}
 
-    /**
-     * @param mixed $fetch_argument
-     * @return array|false
-     */
-    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, $fetch_argument = UNKNOWN, array $ctor_args = []) {}
+    /** @return array|false */
+    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, mixed ...$fetch_args) {}
 
     /** @return mixed */
     public function fetchColumn(int $column_number = 0) {}

@@ -1365,11 +1365,24 @@ static char *get_http_header_value(char *headers, char *type)
 
 			/* match */
 			tmp = pos + typelen;
+
+			/* strip leading whitespace */
+			while (*tmp == ' ' || *tmp == '\t') {
+				tmp++;
+			}
+
 			eol = strchr(tmp, '\n');
 			if (eol == NULL) {
 				eol = headers + headerslen;
-			} else if (eol > tmp && *(eol-1) == '\r') {
-				eol--;
+			} else if (eol > tmp) {
+				if (*(eol-1) == '\r') {
+					eol--;
+				}
+
+				/* strip trailing whitespace */
+				while (eol > tmp && (*(eol-1) == ' ' || *(eol-1) == '\t')) {
+					eol--;
+				}
 			}
 			return estrndup(tmp, eol - tmp);
 		}

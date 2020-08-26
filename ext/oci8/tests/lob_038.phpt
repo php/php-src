@@ -125,7 +125,7 @@ Test 1b
 bool(true)
 array(1) {
   ["CLOB"]=>
-  object(OCI_Lob)#2 (1) {
+  object(OCILob)#2 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -133,7 +133,7 @@ array(1) {
 string(11) "clob test 1"
 array(1) {
   ["CLOB"]=>
-  object(OCI_Lob)#3 (1) {
+  object(OCILob)#3 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -141,7 +141,7 @@ array(1) {
 string(11) "clob test 2"
 array(1) {
   ["CLOB"]=>
-  object(OCI_Lob)#2 (1) {
+  object(OCILob)#2 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -167,7 +167,7 @@ Test 2b
 bool(true)
 array(1) {
   ["BLOB"]=>
-  object(OCI_Lob)#3 (1) {
+  object(OCILob)#3 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -175,7 +175,7 @@ array(1) {
 string(11) "blob test 1"
 array(1) {
   ["BLOB"]=>
-  object(OCI_Lob)#4 (1) {
+  object(OCILob)#4 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -183,7 +183,7 @@ array(1) {
 string(11) "blob test 2"
 array(1) {
   ["BLOB"]=>
-  object(OCI_Lob)#3 (1) {
+  object(OCILob)#3 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

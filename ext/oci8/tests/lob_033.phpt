@@ -35,7 +35,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: OCI_Lob::save(): OCI_INVALID_HANDLE in %s on line %d
+Warning: OCILob::save(): OCI_INVALID_HANDLE in %s on line %d
 bool(true)
 bool(true)
 Done

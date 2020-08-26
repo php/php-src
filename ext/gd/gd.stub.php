@@ -224,7 +224,8 @@ function imagettfbbox(float $size, float $angle, string $font_file, string $text
 function imagettftext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text): array|false {}
 #endif
 
-function imagefilter(GdImage $im, int $filtertype, $arg1 = UNKNOWN, $arg2 = UNKNOWN, $arg3 = UNKNOWN, $arg4 = UNKNOWN): bool {}
+/** @param array|int|float|bool $filter_args */
+function imagefilter(GdImage $im, int $filtertype, ...$filter_args): bool {}
 
 function imageconvolution(GdImage $im, array $matrix3x3, float $div, float $offset): bool {}
 
