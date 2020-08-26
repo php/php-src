@@ -6328,20 +6328,22 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 
 static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{ */
 {
+	static uint32_t counter = 0;
 	zend_string *result;
-	char char_pos_buf[32];
-	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
 
-	/* NULL, name length, filename length, last accepting char position length */
-	result = zend_string_alloc(sizeof("class@anonymous") + ZSTR_LEN(filename) + char_pos_len, 0);
-	sprintf(ZSTR_VAL(result), "class@anonymous%c%s%s", '\0', ZSTR_VAL(filename), char_pos_buf);
+	if (!zend_string_equals_literal(filename, "php shell code")) {
+		result = zend_strpprintf(0, "class@anonymous%c%s%p", '\0', ZSTR_VAL(filename), lex_pos);
+	} else {
+		/* increasing counter is not thread safe, but this is only for the interactive shell */
+		result = zend_strpprintf(0, "class@anonymous%c%s%p$%" PRIx32, '\0', ZSTR_VAL(filename), lex_pos, counter++);
+	}
 	return zend_new_interned_string(result);
 }
 /* }}} */
 
 void zend_compile_class_decl(zend_ast *ast) /* {{{ */
-{
+{ 
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
