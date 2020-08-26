@@ -6072,6 +6072,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_CONS
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -6099,6 +6100,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_CONST_CONST_H
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -9106,6 +9108,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_CONS
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -9133,6 +9136,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_CONST_UNUSED_
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -9169,6 +9173,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_C
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -14922,6 +14927,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_TMPV
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -16724,6 +16730,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_TMPV
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -18609,6 +18616,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_CONST_HAN
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -19432,6 +19440,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_UNUSED_HA
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -19468,6 +19477,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_T
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -23147,6 +23157,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_VAR_
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -23193,6 +23204,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_SPEC_VAR_CONST
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -23223,6 +23235,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_EX_SPEC_VAR_CO
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -23290,6 +23303,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_VAR_CONST_HANDLE
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -23319,6 +23333,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_CONST_HAN
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -23386,6 +23401,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_FUNC_ARG_SPEC
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27019,6 +27035,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_VAR_
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27065,6 +27082,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_SPEC_VAR_UNUSE
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27095,6 +27113,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_EX_SPEC_VAR_UN
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27162,6 +27181,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_EX
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27229,6 +27249,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_VAR_UNUSED_HANDL
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27258,6 +27279,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_HA
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27324,6 +27346,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_V
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -27391,6 +27414,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_FUNC_ARG_SPEC
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -40766,6 +40790,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_CV_C
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -40812,6 +40837,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_CV_CONST_HANDLER
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -40840,6 +40866,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_CV_CONST_HAND
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -45883,6 +45910,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_CV_U
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -45929,6 +45957,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_CV_UNUSED_HANDLE
 		uint32_t arg_num;
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -45957,6 +45986,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_HAN
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -46022,6 +46052,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_C
 		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
 		if (UNEXPECTED(!arg)) {
+
 			HANDLE_EXCEPTION();
 		}
 	} else {
