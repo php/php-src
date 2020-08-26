@@ -93,6 +93,11 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		return FAILURE;
 	}
 
+	if (rb->me) {
+		zend_throw_error(NULL, "ResourceBundle object is already constructed");
+		return FAILURE;
+	}
+
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 
 	if (locale == NULL) {
