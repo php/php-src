@@ -85,7 +85,13 @@ static void _php_intlgregcal_constructor_body(
 	}
 
 	// instantion of ICU object
+	Calendar_object *co = Z_INTL_CALENDAR_P(return_value);
 	GregorianCalendar *gcal = NULL;
+
+	if (co->ucal) {
+		zend_throw_error(NULL, "IntlGregorianCalendar object is already constructed");
+		RETURN_THROWS();
+	}
 
 	if (variant <= 2) {
 		// From timezone and locale (0 to 2 arguments)
@@ -174,8 +180,7 @@ static void _php_intlgregcal_constructor_body(
 		gcal->adoptTimeZone(tz);
 	}
 
-    Calendar_object *co = Z_INTL_CALENDAR_P(return_value);
-    co->ucal = gcal;
+	co->ucal = gcal;
 }
 
 U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)

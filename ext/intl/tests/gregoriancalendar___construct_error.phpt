@@ -33,6 +33,13 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
+$cal = new IntlGregorianCalendar();
+try {
+    $cal->__construct();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
 Too many arguments
@@ -40,3 +47,4 @@ Too many arguments
 No variant with 4 arguments (excluding trailing NULLs)
 No variant with 4 arguments (excluding trailing NULLs)
 IntlGregorianCalendar::__construct(): Argument #6 ($second) must be of type int, array given
+IntlGregorianCalendar object is already constructed
