@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
     (Andy Postnikov)
 
+- COM:
+  . Fixed bug #64130 (COM obj parameters passed by reference are not updated).
+    (cmb)
+
 - OPcache:
   . Fixed bug #80002 (calc free space for new interned string is wrong).
     (t-matsuno)
