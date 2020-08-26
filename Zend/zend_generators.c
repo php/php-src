@@ -772,17 +772,19 @@ try_again:
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
-		if (ZEND_OBSERVER_ENABLED) {
+		if (!ZEND_OBSERVER_ENABLED) {
+			zend_execute_ex(generator->execute_data);
+		} else {
 			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&generator->execute_data->func->op_array);
 			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, generator->execute_data);
 			}
-		}
-		zend_execute_ex(generator->execute_data);
-		if (generator->execute_data) {
-			/* On the final return, this will be called from ZEND_GENERATOR_RETURN */
-			zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->value);
+			zend_execute_ex(generator->execute_data);
+			if (generator->execute_data) {
+				/* On the final return, this will be called from ZEND_GENERATOR_RETURN */
+				zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->value);
+			}
 		}
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
