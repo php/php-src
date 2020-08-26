@@ -5107,6 +5107,7 @@ ZEND_VM_C_LABEL(send_again):
 					have_named_params = 1;
 					top = zend_handle_named_arg(&EX(call), name, &arg_num, cache_slot);
 					if (UNEXPECTED(!top)) {
+						zend_string_release(name);
 						break;
 					}
 

@@ -28,6 +28,12 @@ try {
 }
 
 try {
+    test(...new ArrayIterator(['unknown' => 42]));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
     test2(a: 42);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
@@ -38,3 +44,4 @@ try {
 Unknown named parameter $b
 Unknown named parameter $b
 Unknown named parameter $b
+Unknown named parameter $unknown
