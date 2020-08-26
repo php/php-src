@@ -3552,10 +3552,6 @@ static zend_always_inline void init_func_run_time_cache_i(zend_op_array *op_arra
 	run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 	memset(run_time_cache, 0, op_array->cache_size);
 	ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
-
-	if (ZEND_SHOULD_OBSERVE_FN(op_array->fn_flags)) {
-		zend_observer_fcall_install((zend_function*) op_array);
-	}
 }
 /* }}} */
 
@@ -3613,7 +3609,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	zend_attach_symbol_table(execute_data);
 
 	if (!ZEND_MAP_PTR(op_array->run_time_cache)) {
-		void *ptr = NULL;
+		void *ptr;
 
 		ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
 		ptr = emalloc(op_array->cache_size + sizeof(void*));
