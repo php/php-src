@@ -2783,6 +2783,10 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			}
 			goto end;
 		}
+		if (UNEXPECTED(EG(exception))) {
+			ZVAL_ERROR(result);
+			goto end;
+		}
 	} else if (UNEXPECTED(Z_ISERROR_P(ptr))) {
 		ZVAL_ERROR(result);
 		goto end;
