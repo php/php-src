@@ -37,10 +37,17 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	size_t		rules_len;
 	zend_bool	compiled	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
-	intl_error_reset(NULL);
+	BREAKITER_METHOD_INIT_VARS;
+	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 			&rules, &rules_len, &compiled) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK;
+	if (bio->biter) {
+		zend_throw_error(NULL, "IntlRuleBasedBreakIterator object is already constructed");
 		RETURN_THROWS();
 	}
 
