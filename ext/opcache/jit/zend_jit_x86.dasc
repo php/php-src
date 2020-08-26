@@ -12477,18 +12477,24 @@ static zend_bool zend_jit_noref_guard(dasm_State **Dst, const zend_op *opline, z
 	return 1;
 }
 
-static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *opline, uint8_t var_type, uint32_t *var_info_ptr, zend_jit_addr *var_addr_ptr, zend_bool add_type_guard)
+static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *opline, uint8_t var_type, uint32_t *var_info_ptr, zend_jit_addr *var_addr_ptr, zend_bool add_ref_guard, zend_bool add_type_guard)
 {
 	zend_jit_addr var_addr = *var_addr_ptr;
 	uint32_t var_info = *var_info_ptr;
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
-	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+	const void *exit_addr = NULL;
 
-	if (!exit_addr) {
-		return 0;
+	if (add_ref_guard || add_type_guard) {
+		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+
+		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		if (!exit_addr) {
+			return 0;
+		}
 	}
 
-	|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, &exit_addr
+	if (add_ref_guard) {
+		|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, &exit_addr
+	}
 	|	GET_ZVAL_PTR FCARG1a, var_addr
 
 	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
