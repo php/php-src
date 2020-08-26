@@ -56,7 +56,7 @@ PHP_METHOD(com, __construct)
 			&module_name, &module_name_len, &server_name, &server_name_len,
 			&cp, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters(
-			ZEND_NUM_ARGS(), "sa|ls",
+			ZEND_NUM_ARGS(), "sa/|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
 		RETURN_THROWS();
