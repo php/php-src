@@ -372,6 +372,11 @@ static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_object *obj_key = Z_OBJ_P(offset);
+	if (!zend_hash_index_exists(&wm->ht, (zend_ulong) Z_OBJ_P(offset))) {
+		/* Object not in WeakMap, do nothing. */
+		return;
+	}
+
 	zend_weakref_unregister(obj_key, ZEND_WEAKREF_ENCODE(wm, ZEND_WEAKREF_TAG_MAP));
 }
 
