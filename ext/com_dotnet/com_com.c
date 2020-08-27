@@ -81,7 +81,9 @@ PHP_METHOD(com, __construct)
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Server", sizeof("Server")-1))) {
-			convert_to_string_ex(tmp);
+			if (!try_convert_to_string(tmp)) {
+				RETURN_THROWS();
+			}
 			server_name = Z_STRVAL_P(tmp);
 			server_name_len = Z_STRLEN_P(tmp);
 			ctx = CLSCTX_REMOTE_SERVER;
@@ -89,21 +91,27 @@ PHP_METHOD(com, __construct)
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Username", sizeof("Username")-1))) {
-			convert_to_string_ex(tmp);
+			if (!try_convert_to_string(tmp)) {
+				RETURN_THROWS();
+			}
 			user_name = Z_STRVAL_P(tmp);
 			user_name_len = Z_STRLEN_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Password", sizeof("Password")-1))) {
-			convert_to_string_ex(tmp);
+			if (!try_convert_to_string(tmp)) {
+				RETURN_THROWS();
+			}
 			password = Z_STRVAL_P(tmp);
 			password_len = Z_STRLEN_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Domain", sizeof("Domain")-1))) {
-			convert_to_string_ex(tmp);
+			if (!try_convert_to_string(tmp)) {
+				RETURN_THROWS();
+			}
 			domain_name = Z_STRVAL_P(tmp);
 			domain_name_len = Z_STRLEN_P(tmp);
 		}
@@ -715,7 +723,9 @@ PHP_FUNCTION(com_event_sink)
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(sink), 1)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
 			dispname = Z_STRVAL_P(tmp);
 	} else if (sink != NULL) {
-		convert_to_string(sink);
+		if (!try_convert_to_string(sink)) {
+			RETURN_THROWS();
+		}
 		dispname = Z_STRVAL_P(sink);
 	}
 
