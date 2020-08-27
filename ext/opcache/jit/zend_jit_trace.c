@@ -2906,6 +2906,133 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 	return 1;
 }
 
+static void zend_jit_trace_set_var_range(zend_ssa_var_info *info, zend_long min, zend_long max)
+{
+	info->has_range = 1;
+	info->range.min = min;
+	info->range.max = max;
+	info->range.underflow = 0;
+	info->range.overflow = 0;
+}
+
+static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, zend_bool exit_if_true)
+{
+	zend_long op1_min, op1_max, op2_min, op2_max;
+
+	if ((OP1_INFO() & MAY_BE_ANY) != MAY_BE_LONG
+	 || (OP1_INFO() & MAY_BE_ANY) != MAY_BE_LONG) {
+		return;
+	}
+
+	op1_min = OP1_MIN_RANGE();
+	op1_max = OP1_MAX_RANGE();
+	op2_min = OP2_MIN_RANGE();
+	op2_max = OP2_MAX_RANGE();
+
+	switch (opline->opcode) {
+		case ZEND_IS_EQUAL:
+		case ZEND_CASE:
+		case ZEND_IS_IDENTICAL:
+		case ZEND_CASE_STRICT:
+			if (!exit_if_true) {
+				/* op1 == op2 */
+				if (ssa_op->op1_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						MAX(op1_min, op2_min),
+						MIN(op1_max, op2_max));
+				}
+				if (ssa_op->op2_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						MAX(op2_min, op1_min),
+						MIN(op2_max, op1_max));
+				}
+			}
+			break;
+		case ZEND_IS_NOT_EQUAL:
+		case ZEND_IS_NOT_IDENTICAL:
+			if (exit_if_true) {
+				/* op1 == op2 */
+				if (ssa_op->op1_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						MAX(op1_min, op2_min),
+						MIN(op1_max, op2_max));
+				}
+				if (ssa_op->op2_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						MAX(op2_min, op1_min),
+						MIN(op2_max, op1_max));
+				}
+			}
+			break;
+		case ZEND_IS_SMALLER_OR_EQUAL:
+			if (!exit_if_true) {
+				/* op1 <= op2 */
+				if (ssa_op->op1_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						op1_min,
+						MIN(op1_max, op2_max));
+				}
+				if (ssa_op->op2_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						MAX(op2_min, op1_min),
+						op2_max);
+				}
+			} else {
+				/* op1 > op2 */
+				if (ssa_op->op1_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						op2_min != ZEND_LONG_MAX ? MAX(op1_min, op2_min + 1) : op1_min,
+						op1_max);
+				}
+				if (ssa_op->op2_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						op2_min,
+						op2_max != ZEND_LONG_MIN ?MIN(op2_max, op1_max - 1) : op1_max);
+				}
+			}
+			break;
+		case ZEND_IS_SMALLER:
+			if (!exit_if_true) {
+				/* op1 < op2 */
+				if (ssa_op->op1_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						op1_min,
+						op2_max != ZEND_LONG_MIN ? MIN(op1_max, op2_max - 1) : op1_max);
+				}
+				if (ssa_op->op2_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						op1_min != ZEND_LONG_MAX ? MAX(op2_min, op1_min + 1) : op2_min,
+						op2_max);
+				}
+			} else {
+				/* op1 >= op2 */
+				if (ssa_op->op1_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						MAX(op1_min, op2_min),
+						op1_max);
+				}
+				if (ssa_op->op2_use >= 0) {
+					zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						op2_min,
+						MIN(op2_max, op1_max));
+				}
+			}
+			break;
+	}
+}
+
 static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num)
 {
 	const void *handler = NULL;
@@ -3235,7 +3362,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_def_info, OP1_DEF_REG_ADDR(),
 								res_use_info, res_info,
 								res_addr,
-								(op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
+								(op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3380,7 +3507,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op2_info, OP2_REG_ADDR(),
 								res_use_info, res_info, res_addr,
 								send_result,
-								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
+								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3477,7 +3604,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_assign_op(&dasm_state, opline,
 								op1_info, op1_def_info, OP1_RANGE(),
 								op2_info, OP2_RANGE(),
-								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
+								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3775,6 +3902,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							smart_branch_opcode = exit_if_true ? ZEND_JMPNZ : ZEND_JMPZ;
+							zend_jit_trace_update_condition_ranges(opline, ssa_op, op_array, ssa, exit_if_true);
 						} else {
 							smart_branch_opcode = 0;
 							exit_addr = NULL;
@@ -3812,6 +3940,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								exit_if_true = !exit_if_true;
 							}
 							smart_branch_opcode = exit_if_true ? ZEND_JMPNZ : ZEND_JMPZ;
+							zend_jit_trace_update_condition_ranges(opline, ssa_op, op_array, ssa, exit_if_true);
 						} else {
 							smart_branch_opcode = 0;
 							exit_addr = NULL;
