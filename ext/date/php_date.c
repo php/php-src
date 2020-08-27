@@ -4077,6 +4077,12 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 	if (errors->error_count > 0) {
 		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
 		retval = FAILURE;
+		if (b) {
+			timelib_time_dtor(b);
+		}
+		if (e) {
+			timelib_time_dtor(e);
+		}
 		if (p) {
 			timelib_rel_time_dtor(p);
 		}
