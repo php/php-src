@@ -4843,7 +4843,10 @@ done:
 				goto jit_failure;
 			}
 			t->link = zend_jit_find_trace(p->opline->handler);
-			zend_jit_trace_link_to_root(&dasm_state, &zend_jit_traces[t->link]);
+			zend_jit_trace_link_to_root(&dasm_state, &zend_jit_traces[t->link],
+				parent_trace &&
+				(zend_jit_traces[t->link].flags & ZEND_JIT_TRACE_CHECK_INTERRUPT) &&
+				zend_jit_traces[parent_trace].root == t->link);
 		} else {
 			zend_jit_trace_return(&dasm_state, 0);
 		}

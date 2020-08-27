@@ -3133,7 +3133,7 @@ static int zend_jit_link_side_trace(const void *code, size_t size, uint32_t jmp_
 	return zend_jit_patch(code, size, jmp_table_size, zend_jit_trace_get_exit_addr(exit_num), addr);
 }
 
-static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t)
+static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t, zend_bool check_interrupt)
 {
 	const void *link_addr;
 	size_t prologue_size;
@@ -3167,7 +3167,7 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t)
 	}
 	link_addr = (const void*)((const char*)t->code_start + prologue_size);
 
-	if (t->flags & ZEND_JIT_TRACE_CHECK_INTERRUPT) {
+	if (check_interrupt) {
 		/* Check timeout for links to LOOP */
 		|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
 		|	je &link_addr
