@@ -2633,6 +2633,13 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				if (intervals[def]) {
 					if (!intervals[use]) {
 						intervals[def]->flags |= ZREG_LOAD;
+						if ((intervals[def]->flags & ZREG_LAST_USE)
+						 && ssa->vars[def].use_chain >= 0
+						 && ssa->vars[def].use_chain == intervals[def]->range.end) {
+							/* remove interval used once */
+							intervals[def] = NULL;
+							count--;
+						}
 					} else if (intervals[def]->reg != intervals[use]->reg) {
 						intervals[def]->flags |= ZREG_LOAD;
 						if (ssa->vars[use].use_chain >= 0) {
