@@ -50,6 +50,8 @@ const char HARDCODED_INI[] =
 	",chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
 	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"
 	",fsockopen,stream_socket_pair,stream_socket_client"
+	/* crypt() can be very slow. */
+	",crypt"
 	/* openlog() has a known memory-management issue. */
 	",openlog"
 ;
