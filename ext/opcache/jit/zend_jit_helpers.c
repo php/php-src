@@ -1103,15 +1103,21 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(op1)) {
-		result_str = zend_string_extend(Z_STR_P(op1), result_len, 0);
-	} else {
+	do {
+		if (Z_REFCOUNTED_P(op1)) {
+			if (GC_REFCOUNT(Z_STR_P(op1)) == 1) {
+				result_str = perealloc(Z_STR_P(op1), ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(result_len)), 0);
+				ZSTR_LEN(result_str) = result_len;
+				zend_string_forget_hash_val(result_str);
+				break;
+			}
+			GC_DELREF(Z_STR_P(op1));
+		}
 		result_str = zend_string_alloc(result_len, 0);
 		memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
-	}
+	} while(0);
 
 	ZVAL_NEW_STR(op1, result_str);
-
 	memcpy(ZSTR_VAL(result_str) + op1_len, Z_STRVAL_P(op2), op2_len);
 	ZSTR_VAL(result_str)[result_len] = '\0';
 }
