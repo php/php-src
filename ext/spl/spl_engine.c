@@ -41,7 +41,7 @@ try_again:
 		}
 		break;
 	case IS_DOUBLE:
-		return (zend_long)Z_DVAL_P(offset);
+		return zend_dval_to_lval(Z_DVAL_P(offset));
 	case IS_LONG:
 		return Z_LVAL_P(offset);
 	case IS_FALSE:
