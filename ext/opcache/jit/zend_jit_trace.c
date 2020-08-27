@@ -348,16 +348,18 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 	return zend_jit_trace_type_to_info_ex(type, -1);
 }
 
-static zend_always_inline int zend_jit_var_may_be_modified_indirectly(const zend_op_array *op_array, const zend_ssa *ssa, uint32_t var)
+static zend_always_inline zend_ssa_alias_kind zend_jit_var_may_alias(const zend_op_array *op_array, const zend_ssa *ssa, uint32_t var)
 {
-	if ((!op_array->function_name || (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS))
-	 && var < op_array->last_var) {
-		return 1;
-	} else if (var < op_array->last_var
-	 && zend_string_equals_literal(op_array->vars[var], "http_response_header")) {
-		return 1;
+	if (var >= op_array->last_var) {
+		return NO_ALIAS;
+	} else if ((!op_array->function_name || (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS))) {
+		return SYMTABLE_ALIAS;
+	} else if (ssa->vars) {
+		return ssa->vars[var].alias;
+	} else if (zend_string_equals_literal(op_array->vars[var], "http_response_header")) {
+		return HTTP_RESPONSE_HEADER_ALIAS;
 	}
-	return 0;
+	return NO_ALIAS;
 }
 
 #define STACK_VAR_TYPE(_var) \
@@ -378,7 +380,7 @@ static zend_always_inline void zend_jit_trace_add_op_guard(const zend_op_array  
 {
 	zend_ssa_var_info *info = &tssa->var_info[ssa_var];
 
-	if (zend_jit_var_may_be_modified_indirectly(op_array, ssa, EX_VAR_TO_NUM(var))) {
+	if (zend_jit_var_may_alias(op_array, ssa, EX_VAR_TO_NUM(var)) != NO_ALIAS) {
 		info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info(op_type);
 	} else if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op_type)) {
 		info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op_type, info->type);
@@ -398,7 +400,7 @@ static zend_always_inline void zend_jit_trace_add_op_guard(const zend_op_array  
 				if (!zend_jit_type_guard(&dasm_state, opline, _var, op_type)) { \
 					goto jit_failure; \
 				} \
-				if (zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, _var)) { \
+				if (zend_jit_var_may_alias(op_array, op_array_ssa, _var) != NO_ALIAS) { \
 					SET_STACK_VAR_TYPE(_var, IS_UNKNOWN); \
 				} else { \
 					SET_STACK_VAR_TYPE(_var, op_type); \
@@ -1288,7 +1290,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				}
 			} else if (op_array->function_name
-			        && !zend_jit_var_may_be_modified_indirectly(op_array, ssa, i)) {
+			        && zend_jit_var_may_alias(op_array, ssa, i) == NO_ALIAS) {
 				ssa_vars[i].no_val = ssa->vars ? ssa->vars[i].no_val : 0;
 				ssa_var_info[i].type = MAY_BE_UNDEF;
 			} else {
@@ -1797,7 +1799,7 @@ propagate_arg:
 						ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 					}
 				} else if (op_array->function_name
-				        && !zend_jit_var_may_be_modified_indirectly(op_array, ssa, i)) {
+				        && zend_jit_var_may_alias(op_array, ssa, i) == NO_ALIAS) {
 					ssa_vars[v].no_val = ssa->vars ? ssa->vars[i].no_val : 0;
 					ssa_var_info[v].type = MAY_BE_UNDEF;
 				} else {
@@ -1917,7 +1919,7 @@ propagate_arg:
 			uint32_t t1 = ssa_var_info[phi->sources[1]].type;
 
 			if (t & MAY_BE_GUARD) {
-				if (zend_jit_var_may_be_modified_indirectly(op_array, ssa, phi->sources[0])) {
+				if (zend_jit_var_may_alias(op_array, ssa, phi->sources[0]) != NO_ALIAS) {
 					/* pass */
 				} else if (((t0 | t1) & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
 					if (!((t0 | t1) & MAY_BE_GUARD)) {
@@ -2082,7 +2084,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		/* We don't start intervals for variables used in Phi */
 		if ((ssa->vars[i].use_chain >= 0 /*|| ssa->vars[i].phi_use_chain*/)
 		 && zend_jit_var_supports_reg(ssa, i)
-		 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
+		 && zend_jit_var_may_alias(op_array, op_array_ssa, i) == NO_ALIAS) {
 			start[i] = 0;
 			if (i < parent_vars_count
 			 && STACK_REG(parent_stack, i) != ZREG_NONE
@@ -2113,7 +2115,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			vars_op_array[phi->ssa_var] = op_array;
 			if (ssa->vars[phi->ssa_var].use_chain >= 0
 			 && zend_jit_var_supports_reg(ssa, phi->ssa_var)
-			 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, phi->sources[0])) {
+			 && zend_jit_var_may_alias(op_array, op_array_ssa, phi->sources[0]) == NO_ALIAS) {
 				start[phi->ssa_var] = 0;
 				count++;
 			}
@@ -2211,7 +2213,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				 && (ssa->vars[ssa_op->result_def].use_chain >= 0
 			      || ssa->vars[ssa_op->result_def].phi_use_chain)
 				 && zend_jit_var_supports_reg(ssa, ssa_op->result_def)
-				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->result.var))) {
+				 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->result.var)) == NO_ALIAS) {
 					if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
 					 || opline->opcode == ZEND_PRE_INC
 					 || opline->opcode == ZEND_PRE_DEC
@@ -2233,7 +2235,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
 			      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 				 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)
-				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+				 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 					start[ssa_op->op1_def] = idx;
 					vars_op_array[ssa_op->op1_def] = op_array;
 					count++;
@@ -2242,7 +2244,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				 && (ssa->vars[ssa_op->op2_def].use_chain >= 0
 			      || ssa->vars[ssa_op->op2_def].phi_use_chain)
 				 && zend_jit_var_supports_reg(ssa, ssa_op->op2_def)
-				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op2.var))) {
+				 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op2.var)) == NO_ALIAS) {
 					start[ssa_op->op2_def] = idx;
 					vars_op_array[ssa_op->op2_def] = op_array;
 					count++;
@@ -2283,7 +2285,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 						 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
 					      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 						 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)
-						 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+						 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 							start[ssa_op->op1_def] = idx;
 							vars_op_array[ssa_op->op1_def] = op_array;
 							count++;
@@ -2346,7 +2348,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				vars_op_array[j] = op_array;
 				if (ssa->vars[j].use_chain >= 0
 				 && zend_jit_var_supports_reg(ssa, j)
-				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
+				 && zend_jit_var_may_alias(op_array, op_array_ssa, i) == NO_ALIAS) {
 					start[j] = idx;
 					flags[j] = ZREG_LOAD;
 					count++;
@@ -2378,7 +2380,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					vars_op_array[j] = op_array;
 					if (ssa->vars[j].use_chain >= 0
 					 && zend_jit_var_supports_reg(ssa, j)
-					 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
+					 && zend_jit_var_may_alias(op_array, op_array_ssa, i) == NO_ALIAS) {
 						start[j] = idx;
 						flags[j] = ZREG_LOAD;
 						count++;
@@ -3023,7 +3025,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 			if (!(info & MAY_BE_GUARD) && has_concrete_type(info)) {
 				SET_STACK_TYPE(stack, i, concrete_type(info));
-			} else if (zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
+			} else if (zend_jit_var_may_alias(op_array, op_array_ssa, i) != NO_ALIAS) {
 				SET_STACK_TYPE(stack, i, IS_UNKNOWN);
 			} else if (i < parent_vars_count
 			 && STACK_TYPE(parent_stack, i) != IS_UNKNOWN) {
@@ -3504,7 +3506,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+							 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
 							}
 						} else {
@@ -3535,7 +3537,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+							 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
 							}
 						} else {
@@ -3583,7 +3585,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									goto jit_failure;
 								}
 								if (opline->op1_type == IS_CV
-								 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+								 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
 								}
 								if (!zend_jit_assign_to_typed_ref(&dasm_state, opline, opline->op2_type, op2_addr, 1)) {
@@ -4029,7 +4031,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+							 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
 							}
 						} else {
@@ -4074,7 +4076,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+							 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
 							}
 						} else {
@@ -4121,7 +4123,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+							 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
 							}
 						} else {
@@ -4222,7 +4224,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									goto jit_failure;
 								}
 								if (opline->op1_type == IS_CV
-								 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
+								 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
 									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
 								}
 							} else {
@@ -4736,7 +4738,7 @@ done:
 						}
 						while (i < p->op_array->last_var) {
 							if (jit_extension
-							 && zend_jit_var_may_be_modified_indirectly(p->op_array, &jit_extension->func_info.ssa, i)) {
+							 && zend_jit_var_may_alias(p->op_array, &jit_extension->func_info.ssa, i) != NO_ALIAS) {
 								SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
 							} else {
 								SET_STACK_TYPE(call->stack, i, IS_UNDEF);
