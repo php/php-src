@@ -9240,12 +9240,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
 		|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
-		|	jne >1
-		|.cold_code
-		|1:
-		|	LOAD_IP_ADDR opline
-		|	jmp ->icall_throw_handler
-		|.code
+		|	jne ->icall_throw_handler
 
 		// TODO: Can we avoid checking for interrupts after each call ???
 		if (trace && last_valid_opline != opline) {
