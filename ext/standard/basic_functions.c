@@ -458,7 +458,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
 	BG(strtok_string) = NULL;
-	ZVAL_UNDEF(&BG(strtok_zval));
 	BG(strtok_last) = NULL;
 	BG(ctype_string) = NULL;
 	BG(locale_changed) = 0;
@@ -497,9 +496,10 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 {
-	zval_ptr_dtor(&BG(strtok_zval));
-	ZVAL_UNDEF(&BG(strtok_zval));
-	BG(strtok_string) = NULL;
+	if (BG(strtok_string)) {
+		zend_string_release(BG(strtok_string));
+		BG(strtok_string) = NULL;
+	}
 #ifdef HAVE_PUTENV
 	tsrm_env_lock();
 	zend_hash_destroy(&BG(putenv_ht));

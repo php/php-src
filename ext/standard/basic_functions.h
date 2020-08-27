@@ -60,8 +60,7 @@ typedef int32_t php_int32;
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
-	zval  strtok_zval;
-	char *strtok_string;
+	zend_string *strtok_string;
 	zend_string *ctype_string; /* current LC_CTYPE locale (or NULL for 'C') */
 	zend_bool locale_changed;   /* locale was changed and has to be restored */
 	char *strtok_last;

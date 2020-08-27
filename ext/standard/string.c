@@ -1271,16 +1271,24 @@ PHP_FUNCTION(strtok)
 	if (ZEND_NUM_ARGS() == 1) {
 		tok = str;
 	} else {
-		zval_ptr_dtor(&BG(strtok_zval));
-		ZVAL_STRINGL(&BG(strtok_zval), ZSTR_VAL(str), ZSTR_LEN(str));
-		BG(strtok_last) = BG(strtok_string) = Z_STRVAL(BG(strtok_zval));
+		if (BG(strtok_string)) {
+			zend_string_release(BG(strtok_string));
+		}
+		BG(strtok_string) = zend_string_copy(str);
+		BG(strtok_last) = ZSTR_VAL(str);
 		BG(strtok_len) = ZSTR_LEN(str);
 	}
 
-	p = BG(strtok_last); /* Where we start to search */
-	pe = BG(strtok_string) + BG(strtok_len);
+	if (!BG(strtok_string)) {
+		/* String to tokenize not set. */
+		// TODO: Should this warn?
+		RETURN_FALSE;
+	}
 
-	if (!p || p >= pe) {
+	p = BG(strtok_last); /* Where we start to search */
+	pe = ZSTR_VAL(BG(strtok_string)) + BG(strtok_len);
+	if (p >= pe) {
+		/* Reached the end of the string. */
 		RETURN_FALSE;
 	}
 
@@ -1295,9 +1303,7 @@ PHP_FUNCTION(strtok)
 	while (STRTOK_TABLE(p)) {
 		if (++p >= pe) {
 			/* no other chars left */
-			BG(strtok_last) = NULL;
-			RETVAL_FALSE;
-			goto restore;
+			goto return_false;
 		}
 		skipped++;
 	}
@@ -1314,14 +1320,14 @@ return_token:
 		RETVAL_STRINGL(BG(strtok_last) + skipped, (p - BG(strtok_last)) - skipped);
 		BG(strtok_last) = p + 1;
 	} else {
+return_false:
 		RETVAL_FALSE;
-		BG(strtok_last) = NULL;
+		zend_string_release(BG(strtok_string));
+		BG(strtok_string) = NULL;
 	}
 
 	/* Restore table -- usually faster then memset'ing the table on every invocation */
-restore:
 	token = ZSTR_VAL(tok);
-
 	while (token < token_end) {
 		STRTOK_TABLE(token++) = 0;
 	}
