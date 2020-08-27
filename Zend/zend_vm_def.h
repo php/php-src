@@ -3955,12 +3955,11 @@ ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		ret = EX_VAR(opline->result.var);
 	}
 
-	LOAD_OPLINE_EX();
-
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 	OBSERVER_FCALL_BEGIN_HANDLERS(execute_data);
+	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }

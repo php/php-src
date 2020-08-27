@@ -1347,11 +1347,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 		ret = EX_VAR(opline->result.var);
 	}
 
-	LOAD_OPLINE_EX();
-
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+
+	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1371,11 +1371,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 		ret = EX_VAR(opline->result.var);
 	}
 
-	LOAD_OPLINE_EX();
-
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+
+	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1395,12 +1395,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 		ret = EX_VAR(opline->result.var);
 	}
 
-	LOAD_OPLINE_EX();
-
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 	zend_observer_maybe_fcall_call_begin(execute_data);
+	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1420,12 +1419,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 		ret = EX_VAR(opline->result.var);
 	}
 
-	LOAD_OPLINE_EX();
-
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 	zend_observer_maybe_fcall_call_begin(execute_data);
+	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }
