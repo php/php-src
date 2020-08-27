@@ -29,6 +29,21 @@ function compare_timezones($timezone1, $timezone2)
     var_dump($tz1 > $tz2);
 }
 
+// Test comparison of uninitialized DateTimeZone objects.
+class MyDateTimeZone extends DateTimeZone {
+    function __construct() {
+         // parent ctor not called
+    }
+}
+
+$tz1 = new MyDateTimeZone();
+$tz2 = new MyDateTimeZone();
+try {
+    var_dump($tz1 == $tz2);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECTF--
 compare +0200 with +0200
@@ -58,3 +73,4 @@ compare Europe/Amsterdam with Europe/Berlin
 
 Warning: main(): Trying to compare different kinds of DateTimeZone objects in %s on line %d
 bool(false)
+Trying to compare uninitialized DateTimeZone objects
