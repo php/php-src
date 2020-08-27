@@ -393,7 +393,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	REGISTER_INI_ENTRIES();
 
 	// Loading via dl() not supported with the observer API
-	if (type != MODULE_TEMPORARY) {
+	if (ZT_G(observer_enabled) && type != MODULE_TEMPORARY) {
 		zend_observer_fcall_register(observer_fcall_init);
 	}
 
@@ -460,10 +460,6 @@ static void observer_end(zend_execute_data *execute_data, zval *retval)
 
 static zend_observer_fcall observer_fcall_init(zend_function *fbc)
 {
-	if (!ZT_G(observer_enabled)) {
-		return (zend_observer_fcall){NULL, NULL};
-	}
-
 	if (fbc->common.function_name) {
 		if (fbc->common.scope) {
 			php_printf("%*s<!-- init %s::%s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
