@@ -26,9 +26,9 @@ echo 'DONE' . PHP_EOL;
 <!-- init '%s/observer_closure_%d.php' -->
 <file '%s/observer_closure_%d.php'>
   <!-- init {closure}() -->
-  <!-- init {closure}() -->
   <{closure}>
 Answer
+    <!-- init {closure}() -->
     <{closure}>
 int(42)
     </{closure}>

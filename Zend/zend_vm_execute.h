@@ -3385,7 +3385,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		if (UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
@@ -3520,7 +3519,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_OBSERVER_
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		if (UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
@@ -3637,36 +3635,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-		CACHE_PTR(opline->result.num, fbc);
-	}
-	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_function *fbc;
-	zval *function_name, *func;
-	zend_execute_data *call;
-
-	fbc = CACHED_PTR(opline->result.num);
-	if (UNEXPECTED(fbc == NULL)) {
-		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(function_name+1), 1);
-		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-		}
-		fbc = Z_FUNC_P(func);
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -3753,41 +3721,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-		CACHE_PTR(opline->result.num, fbc);
-	}
-
-	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *func_name;
-	zval *func;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	fbc = CACHED_PTR(opline->result.num);
-	if (UNEXPECTED(fbc == NULL)) {
-		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 1), 1);
-		if (func == NULL) {
-			func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 2), 1);
-			if (UNEXPECTED(func == NULL)) {
-				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-			}
-		}
-		fbc = Z_FUNC_P(func);
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -3818,39 +3751,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-		CACHE_PTR(opline->result.num, fbc);
-	}
-
-	call = _zend_vm_stack_push_call_frame_ex(
-		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *fname;
-	zval *func;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	fbc = CACHED_PTR(opline->result.num);
-	if (UNEXPECTED(fbc == NULL)) {
-		fname = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(fname), 1);
-		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-		}
-		fbc = Z_FUNC_P(func);
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -5034,7 +4934,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
 
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 
 			ZEND_VM_ENTER();
@@ -5103,7 +5002,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_OBS
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-		zend_observer_fcall_install((zend_function*)new_op_array);
 		zend_observer_maybe_fcall_call_begin(call);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 
@@ -6819,163 +6717,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CONST != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_CONST == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = RT_CONSTANT(opline, opline->op1);
-
-	if (IS_CONST != IS_CONST) {
-		function_name = RT_CONSTANT(opline, opline->op2);
-	}
-
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_CONST == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_CONST & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CONST != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CONST == IS_CONST) {
-					function_name = RT_CONSTANT(opline, opline->op2);
-				}
-				zend_invalid_method_call(object, function_name);
-
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CONST == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CONST == IS_CONST) {
-			function_name = RT_CONSTANT(opline, opline->op2);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CONST == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -7093,7 +6834,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_CONST != IS_CONST) {
 
@@ -7110,141 +6850,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_CONST == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_CONST == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_CONST != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_CONST == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_CONST == IS_CONST &&
-	    IS_CONST == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_CONST != IS_UNUSED) {
-		function_name = RT_CONSTANT(opline, opline->op2);
-		if (IS_CONST != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_CONST & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CONST == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_CONST != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -7323,69 +6928,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 
 		if (EXPECTED(func->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&func->op_array))) {
 			init_func_run_time_cache(&func->op_array);
-
-		}
-	} else {
-		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
-		efree(error);
-
-		HANDLE_EXCEPTION();
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		func, opline->extended_value, object_or_called_scope);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_fcall_info_cache fcc;
-	char *error = NULL;
-	zend_function *func;
-	void *object_or_called_scope;
-	zend_execute_data *call;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
-
-	SAVE_OPLINE();
-	function_name = RT_CONSTANT(opline, opline->op2);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
-		ZEND_ASSERT(!error);
-		func = fcc.function_handler;
-		object_or_called_scope = fcc.called_scope;
-		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
-			/* Delay closure destruction until its invocation */
-			GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
-			call_info |= ZEND_CALL_CLOSURE;
-			if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-				call_info |= ZEND_CALL_FAKE_CLOSURE;
-			}
-			if (fcc.object) {
-				object_or_called_scope = fcc.object;
-				call_info |= ZEND_CALL_HAS_THIS;
-			}
-		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
-			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-		}
-
-		if ((IS_CONST & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
-			if (call_info & ZEND_CALL_CLOSURE) {
-				zend_object_release(ZEND_CLOSURE_OBJECT(func));
-			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
-				zend_object_release(fcc.object);
-			}
-			HANDLE_EXCEPTION();
-		}
-
-		if (EXPECTED(func->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&func->op_array))) {
-			init_func_run_time_cache(&func->op_array);
-			zend_observer_fcall_install((zend_function*)&func->op_array);
 		}
 	} else {
 		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
@@ -9465,163 +9007,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_CONST == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = RT_CONSTANT(opline, opline->op1);
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_CONST == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_CONST & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-							zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-				}
-				zend_invalid_method_call(object, function_name);
-				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -9739,7 +9124,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -9756,141 +9140,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_CONST == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_CONST == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-				HANDLE_EXCEPTION();
-			}
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_CONST == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_CONST == IS_CONST &&
-	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-					zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			HANDLE_EXCEPTION();
-		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -9970,70 +9219,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 
 		if (EXPECTED(func->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&func->op_array))) {
 			init_func_run_time_cache(&func->op_array);
-
-		}
-	} else {
-		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
-		efree(error);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		func, opline->extended_value, object_or_called_scope);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_fcall_info_cache fcc;
-	char *error = NULL;
-	zend_function *func;
-	void *object_or_called_scope;
-	zend_execute_data *call;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
-
-	SAVE_OPLINE();
-	function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
-		ZEND_ASSERT(!error);
-		func = fcc.function_handler;
-		object_or_called_scope = fcc.called_scope;
-		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
-			/* Delay closure destruction until its invocation */
-			GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
-			call_info |= ZEND_CALL_CLOSURE;
-			if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-				call_info |= ZEND_CALL_FAKE_CLOSURE;
-			}
-			if (fcc.object) {
-				object_or_called_scope = fcc.object;
-				call_info |= ZEND_CALL_HAS_THIS;
-			}
-		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
-			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-		}
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		if (((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
-			if (call_info & ZEND_CALL_CLOSURE) {
-				zend_object_release(ZEND_CLOSURE_OBJECT(func));
-			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
-				zend_object_release(fcc.object);
-			}
-			HANDLE_EXCEPTION();
-		}
-
-		if (EXPECTED(func->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&func->op_array))) {
-			init_func_run_time_cache(&func->op_array);
-			zend_observer_fcall_install((zend_function*)&func->op_array);
 		}
 	} else {
 		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
@@ -10680,7 +9865,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_UNUSED != IS_CONST) {
 
@@ -10697,141 +9881,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_CONST == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_CONST == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_UNUSED != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_CONST == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_CONST == IS_CONST &&
-	    IS_UNUSED == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_UNUSED != IS_UNUSED) {
-		function_name = NULL;
-		if (IS_UNUSED != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_UNUSED & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_UNUSED == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_UNUSED == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_UNUSED != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -11087,77 +10136,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_CONST_UNUSED_HANDLER(
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
 			init_func_run_time_cache(&constructor->op_array);
-
-		}
-		/* We are not handling overloaded classes right now */
-		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS,
-			constructor,
-			opline->extended_value,
-			Z_OBJ_P(result));
-		Z_ADDREF_P(result);
-	}
-
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_CONST_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *result;
-	zend_function *constructor;
-	zend_class_entry *ce;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-	if (IS_CONST == IS_CONST) {
-		ce = CACHED_PTR(opline->op2.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			CACHE_PTR(opline->op2.num, ce);
-		}
-	} else if (IS_CONST == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	result = EX_VAR(opline->result.var);
-	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (constructor == NULL) {
-		if (UNEXPECTED(EG(exception))) {
-			HANDLE_EXCEPTION();
-		}
-
-		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
-		 * opcode is DO_FCALL in case EXT instructions are used. */
-		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
-			ZEND_VM_NEXT_OPCODE_EX(1, 2);
-		}
-
-		/* Perform a dummy function call */
-		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
-			opline->extended_value, NULL);
-	} else {
-		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
-			init_func_run_time_cache(&constructor->op_array);
-			zend_observer_fcall_install((zend_function*)&constructor->op_array);
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
@@ -12413,163 +11391,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CV != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_CONST == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = RT_CONSTANT(opline, opline->op1);
-
-	if (IS_CV != IS_CONST) {
-		function_name = EX_VAR(opline->op2.var);
-	}
-
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_CONST == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_CONST & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CV != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CV == IS_CONST) {
-					function_name = EX_VAR(opline->op2.var);
-				}
-				zend_invalid_method_call(object, function_name);
-
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CV == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CV == IS_CONST) {
-			function_name = EX_VAR(opline->op2.var);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CV == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_CONST & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -12687,7 +11508,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_CV != IS_CONST) {
 
@@ -12704,141 +11524,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_CONST == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_CONST == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_CV != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_CONST == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_CONST == IS_CONST &&
-	    IS_CV == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_CV != IS_UNUSED) {
-		function_name = EX_VAR(opline->op2.var);
-		if (IS_CV != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_CV & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CV == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_CV != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -12917,69 +11602,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 
 		if (EXPECTED(func->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&func->op_array))) {
 			init_func_run_time_cache(&func->op_array);
-
-		}
-	} else {
-		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
-		efree(error);
-
-		HANDLE_EXCEPTION();
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		func, opline->extended_value, object_or_called_scope);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_fcall_info_cache fcc;
-	char *error = NULL;
-	zend_function *func;
-	void *object_or_called_scope;
-	zend_execute_data *call;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
-
-	SAVE_OPLINE();
-	function_name = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
-		ZEND_ASSERT(!error);
-		func = fcc.function_handler;
-		object_or_called_scope = fcc.called_scope;
-		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
-			/* Delay closure destruction until its invocation */
-			GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
-			call_info |= ZEND_CALL_CLOSURE;
-			if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-				call_info |= ZEND_CALL_FAKE_CLOSURE;
-			}
-			if (fcc.object) {
-				object_or_called_scope = fcc.object;
-				call_info |= ZEND_CALL_HAS_THIS;
-			}
-		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
-			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-		}
-
-		if ((IS_CV & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
-			if (call_info & ZEND_CALL_CLOSURE) {
-				zend_object_release(ZEND_CLOSURE_OBJECT(func));
-			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
-				zend_object_release(fcc.object);
-			}
-			HANDLE_EXCEPTION();
-		}
-
-		if (EXPECTED(func->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&func->op_array))) {
-			init_func_run_time_cache(&func->op_array);
-			zend_observer_fcall_install((zend_function*)&func->op_array);
 		}
 	} else {
 		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
@@ -15873,7 +14495,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
 
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			ZEND_VM_ENTER();
@@ -15942,7 +14563,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_OB
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-		zend_observer_fcall_install((zend_function*)new_op_array);
 		zend_observer_maybe_fcall_call_begin(call);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -17218,163 +15838,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CONST != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-	if (IS_CONST != IS_CONST) {
-		function_name = RT_CONSTANT(opline, opline->op2);
-	}
-
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if ((IS_TMP_VAR|IS_VAR) & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CONST != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CONST == IS_CONST) {
-					function_name = RT_CONSTANT(opline, opline->op2);
-				}
-				zend_invalid_method_call(object, function_name);
-
-				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CONST == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CONST == IS_CONST) {
-			function_name = RT_CONSTANT(opline, opline->op2);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CONST == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -18795,163 +17258,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if ((IS_TMP_VAR|IS_VAR) & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-							zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-				}
-				zend_invalid_method_call(object, function_name);
-				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -20265,163 +18571,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CV != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-	if (IS_CV != IS_CONST) {
-		function_name = EX_VAR(opline->op2.var);
-	}
-
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if ((IS_TMP_VAR|IS_VAR) & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CV != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CV == IS_CONST) {
-					function_name = EX_VAR(opline->op2.var);
-				}
-				zend_invalid_method_call(object, function_name);
-
-				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CV == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CV == IS_CONST) {
-			function_name = EX_VAR(opline->op2.var);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CV == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -26263,7 +24412,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_CONST != IS_CONST) {
 
@@ -26280,141 +24428,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_VAR == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_VAR == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_CONST != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_VAR == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_VAR == IS_CONST &&
-	    IS_CONST == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_CONST != IS_UNUSED) {
-		function_name = RT_CONSTANT(opline, opline->op2);
-		if (IS_CONST != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_CONST & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CONST == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_CONST != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -28915,7 +26928,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -28932,141 +26944,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_VAR == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_VAR == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-				HANDLE_EXCEPTION();
-			}
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_VAR == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_VAR == IS_CONST &&
-	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-					zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			HANDLE_EXCEPTION();
-		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -30346,7 +28223,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_UNUSED != IS_CONST) {
 
@@ -30363,141 +28239,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_VAR == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_VAR == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_UNUSED != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_VAR == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_VAR == IS_CONST &&
-	    IS_UNUSED == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_UNUSED != IS_UNUSED) {
-		function_name = NULL;
-		if (IS_UNUSED != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_UNUSED & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_UNUSED == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_UNUSED == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_UNUSED != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -31078,77 +28819,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_VAR_UNUSED_HANDLER(ZE
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
 			init_func_run_time_cache(&constructor->op_array);
-
-		}
-		/* We are not handling overloaded classes right now */
-		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS,
-			constructor,
-			opline->extended_value,
-			Z_OBJ_P(result));
-		Z_ADDREF_P(result);
-	}
-
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_VAR_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *result;
-	zend_function *constructor;
-	zend_class_entry *ce;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-	if (IS_VAR == IS_CONST) {
-		ce = CACHED_PTR(opline->op2.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			CACHE_PTR(opline->op2.num, ce);
-		}
-	} else if (IS_VAR == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	result = EX_VAR(opline->result.var);
-	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (constructor == NULL) {
-		if (UNEXPECTED(EG(exception))) {
-			HANDLE_EXCEPTION();
-		}
-
-		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
-		 * opcode is DO_FCALL in case EXT instructions are used. */
-		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
-			ZEND_VM_NEXT_OPCODE_EX(1, 2);
-		}
-
-		/* Perform a dummy function call */
-		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
-			opline->extended_value, NULL);
-	} else {
-		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
-			init_func_run_time_cache(&constructor->op_array);
-			zend_observer_fcall_install((zend_function*)&constructor->op_array);
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
@@ -33270,7 +30940,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_CV != IS_CONST) {
 
@@ -33287,141 +30956,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_VAR == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_VAR == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_CV != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_VAR == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_VAR == IS_CONST &&
-	    IS_CV == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_CV != IS_UNUSED) {
-		function_name = EX_VAR(opline->op2.var);
-		if (IS_CV != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_CV & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CV == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_CV != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -35447,163 +32981,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CONST != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_UNUSED == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = &EX(This);
-
-	if (IS_CONST != IS_CONST) {
-		function_name = RT_CONSTANT(opline, opline->op2);
-	}
-
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_UNUSED == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_UNUSED & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CONST != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CONST == IS_CONST) {
-					function_name = RT_CONSTANT(opline, opline->op2);
-				}
-				zend_invalid_method_call(object, function_name);
-
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CONST == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CONST == IS_CONST) {
-			function_name = RT_CONSTANT(opline, opline->op2);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CONST == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -35721,7 +33098,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_CONST != IS_CONST) {
 
@@ -35738,141 +33114,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_UNUSED == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_UNUSED == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_CONST != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_UNUSED == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_UNUSED == IS_CONST &&
-	    IS_CONST == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_CONST != IS_UNUSED) {
-		function_name = RT_CONSTANT(opline, opline->op2);
-		if (IS_CONST != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_CONST & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CONST == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_CONST != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -37649,163 +34890,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_UNUSED == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = &EX(This);
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_UNUSED == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_UNUSED & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-							zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-				}
-				zend_invalid_method_call(object, function_name);
-				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -37923,7 +35007,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -37940,141 +35023,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_UNUSED == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_UNUSED == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-				HANDLE_EXCEPTION();
-			}
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_UNUSED == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_UNUSED == IS_CONST &&
-	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-					zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			HANDLE_EXCEPTION();
-		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -38473,7 +35421,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_UNUSED != IS_CONST) {
 
@@ -38490,141 +35437,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_UNUSED == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_UNUSED == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_UNUSED != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_UNUSED == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_UNUSED == IS_CONST &&
-	    IS_UNUSED == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_UNUSED != IS_UNUSED) {
-		function_name = NULL;
-		if (IS_UNUSED != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_UNUSED & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_UNUSED == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_UNUSED == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_UNUSED != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -38856,77 +35668,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_UNUSED_UNUSED_HANDLER
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
 			init_func_run_time_cache(&constructor->op_array);
-
-		}
-		/* We are not handling overloaded classes right now */
-		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS,
-			constructor,
-			opline->extended_value,
-			Z_OBJ_P(result));
-		Z_ADDREF_P(result);
-	}
-
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_UNUSED_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *result;
-	zend_function *constructor;
-	zend_class_entry *ce;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-	if (IS_UNUSED == IS_CONST) {
-		ce = CACHED_PTR(opline->op2.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			CACHE_PTR(opline->op2.num, ce);
-		}
-	} else if (IS_UNUSED == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	result = EX_VAR(opline->result.var);
-	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (constructor == NULL) {
-		if (UNEXPECTED(EG(exception))) {
-			HANDLE_EXCEPTION();
-		}
-
-		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
-		 * opcode is DO_FCALL in case EXT instructions are used. */
-		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
-			ZEND_VM_NEXT_OPCODE_EX(1, 2);
-		}
-
-		/* Perform a dummy function call */
-		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
-			opline->extended_value, NULL);
-	} else {
-		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
-			init_func_run_time_cache(&constructor->op_array);
-			zend_observer_fcall_install((zend_function*)&constructor->op_array);
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
@@ -40636,163 +37377,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CV != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_UNUSED == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = &EX(This);
-
-	if (IS_CV != IS_CONST) {
-		function_name = EX_VAR(opline->op2.var);
-	}
-
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_UNUSED == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_UNUSED & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CV != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CV == IS_CONST) {
-					function_name = EX_VAR(opline->op2.var);
-				}
-				zend_invalid_method_call(object, function_name);
-
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CV == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CV == IS_CONST) {
-			function_name = EX_VAR(opline->op2.var);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CV == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_UNUSED & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -40910,7 +37494,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
 		}
 		if (IS_CV != IS_CONST) {
 
@@ -40927,141 +37510,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		fbc = ce->constructor;
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_TYPE(EX(This)) == IS_OBJECT && instanceof_function(Z_OBJCE(EX(This)), ce)) {
-			ce = (zend_class_entry*)Z_OBJ(EX(This));
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-		} else {
-			zend_non_static_method_call(fbc);
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		/* previous opcode is ZEND_FETCH_CLASS */
-		if (IS_UNUSED == IS_UNUSED
-		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
-		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (Z_TYPE(EX(This)) == IS_OBJECT) {
-				ce = Z_OBJCE(EX(This));
-			} else {
-				ce = Z_CE(EX(This));
-			}
-		}
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, ce);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zend_class_entry *ce;
-	uint32_t call_info;
-	zend_function *fbc;
-	zend_execute_data *call;
-
-	SAVE_OPLINE();
-
-	if (IS_UNUSED == IS_CONST) {
-		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
-		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(ce == NULL)) {
-
-				HANDLE_EXCEPTION();
-			}
-			if (IS_CV != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
-			}
-		}
-	} else if (IS_UNUSED == IS_UNUSED) {
-		ce = zend_fetch_class(NULL, opline->op1.num);
-		if (UNEXPECTED(ce == NULL)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		ce = Z_CE_P(EX_VAR(opline->op1.var));
-	}
-
-	if (IS_UNUSED == IS_CONST &&
-	    IS_CV == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
-		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else if (IS_CV != IS_UNUSED) {
-		function_name = EX_VAR(opline->op2.var);
-		if (IS_CV != IS_CONST) {
-			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				do {
-					if (IS_CV & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
-						function_name = Z_REFVAL_P(function_name);
-						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-							break;
-						}
-					} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-						ZVAL_UNDEFINED_OP2();
-						if (UNEXPECTED(EG(exception) != NULL)) {
-							HANDLE_EXCEPTION();
-						}
-					}
-					zend_throw_error(NULL, "Method name must be a string");
-
-					HANDLE_EXCEPTION();
-				} while (0);
-			}
-		}
-
-		if (ce->get_static_method) {
-			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
-		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		}
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(ce, Z_STR_P(function_name));
-			}
-
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CV == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
-		}
-		if (IS_CV != IS_CONST) {
-
-		}
-	} else {
-		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_throw_error(NULL, "Cannot call constructor");
-			HANDLE_EXCEPTION();
-		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
-			HANDLE_EXCEPTION();
-		}
-		fbc = ce->constructor;
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -42421,7 +38869,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
 
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 
 			ZEND_VM_ENTER();
@@ -42490,7 +38937,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_OBSERV
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-		zend_observer_fcall_install((zend_function*)new_op_array);
 		zend_observer_maybe_fcall_call_begin(call);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 
@@ -45863,163 +42309,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CONST != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_CV == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = EX_VAR(opline->op1.var);
-
-	if (IS_CONST != IS_CONST) {
-		function_name = RT_CONSTANT(opline, opline->op2);
-	}
-
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_CV == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_CV & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CONST != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CONST == IS_CONST) {
-					function_name = RT_CONSTANT(opline, opline->op2);
-				}
-				zend_invalid_method_call(object, function_name);
-
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CONST == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CONST == IS_CONST) {
-			function_name = RT_CONSTANT(opline, opline->op2);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CONST == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -49607,163 +45896,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_CV == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = EX_VAR(opline->op1.var);
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-	}
-
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_CV == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_CV & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-							zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-				}
-				zend_invalid_method_call(object, function_name);
-				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -54888,163 +51020,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
-
-		}
-	}
-
-	if (IS_CV != IS_CONST) {
-
-	}
-
-	call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
-		if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(obj) == 0) {
-			zend_objects_store_del(obj);
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
-		}
-		/* call static method */
-		obj = (zend_object*)called_scope;
-		call_info = ZEND_CALL_NESTED_FUNCTION;
-	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (IS_CV == IS_CV) {
-			GC_ADDREF(obj); /* For $this pointer */
-		}
-		/* CV may be changed indirectly (e.g. when it's a reference) */
-		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS;
-	}
-
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
-	call->prev_execute_data = EX(call);
-	EX(call) = call;
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *function_name;
-	zval *object;
-	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *obj;
-	zend_execute_data *call;
-	uint32_t call_info;
-
-	SAVE_OPLINE();
-
-	object = EX_VAR(opline->op1.var);
-
-	if (IS_CV != IS_CONST) {
-		function_name = EX_VAR(opline->op2.var);
-	}
-
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		do {
-			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
-				function_name = Z_REFVAL_P(function_name);
-				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-					break;
-				}
-			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Method name must be a string");
-
-
-			HANDLE_EXCEPTION();
-		} while (0);
-	}
-
-	if (IS_CV == IS_UNUSED) {
-		obj = Z_OBJ_P(object);
-	} else {
-		do {
-			if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				obj = Z_OBJ_P(object);
-			} else {
-				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
-					zend_reference *ref = Z_REF_P(object);
-
-					object = &ref->val;
-					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						obj = Z_OBJ_P(object);
-						if (IS_CV & IS_VAR) {
-							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-								efree_size(ref, sizeof(zend_reference));
-							} else {
-								Z_ADDREF_P(object);
-							}
-						}
-						break;
-					}
-				}
-				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					object = ZVAL_UNDEFINED_OP1();
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						if (IS_CV != IS_CONST) {
-
-						}
-						HANDLE_EXCEPTION();
-					}
-				}
-				if (IS_CV == IS_CONST) {
-					function_name = EX_VAR(opline->op2.var);
-				}
-				zend_invalid_method_call(object, function_name);
-
-
-				HANDLE_EXCEPTION();
-			}
-		} while (0);
-	}
-
-	called_scope = obj->ce;
-
-	if (IS_CV == IS_CONST &&
-	    EXPECTED(CACHED_PTR(opline->result.num) == called_scope)) {
-	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-	} else {
-	    zend_object *orig_obj = obj;
-
-		if (IS_CV == IS_CONST) {
-			function_name = EX_VAR(opline->op2.var);
-		}
-
-		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				zend_undefined_method(obj->ce, Z_STR_P(function_name));
-			}
-
-			if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-			HANDLE_EXCEPTION();
-		}
-		if (IS_CV == IS_CONST &&
-		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
-		    EXPECTED(obj == orig_obj)) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
-		}
-		if ((IS_CV & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(obj != orig_obj)) {
-			GC_ADDREF(obj); /* For $this pointer */
-			if (GC_DELREF(orig_obj) == 0) {
-				zend_objects_store_del(orig_obj);
-			}
-		}
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
-			zend_observer_fcall_install((zend_function*)&fbc->op_array);
 		}
 	}
 
@@ -57036,13 +53011,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_BEGIN_SILENCE_SPEC_LABEL,
 			(void*)&&ZEND_END_SILENCE_SPEC_TMP_LABEL,
 			(void*)&&ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_LABEL,
-			(void*)&&ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_LABEL,
 			(void*)&&ZEND_DO_FCALL_SPEC_RETVAL_USED_LABEL,
 			(void*)&&ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_OBSERVER_LABEL,
 			(void*)&&ZEND_DO_FCALL_SPEC_RETVAL_USED_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_FCALL_SPEC_CONST_LABEL,
-			(void*)&&ZEND_INIT_FCALL_SPEC_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_RETURN_SPEC_CONST_LABEL,
 			(void*)&&ZEND_RETURN_SPEC_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_RETURN_SPEC_TMP_LABEL,
@@ -57156,17 +53129,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_SEND_REF_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NEW_SPEC_CONST_UNUSED_LABEL,
-			(void*)&&ZEND_NEW_SPEC_CONST_UNUSED_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NEW_SPEC_VAR_UNUSED_LABEL,
-			(void*)&&ZEND_NEW_SPEC_VAR_UNUSED_OBSERVER_LABEL,
 			(void*)&&ZEND_NEW_SPEC_UNUSED_UNUSED_LABEL,
-			(void*)&&ZEND_NEW_SPEC_UNUSED_UNUSED_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_LABEL,
-			(void*)&&ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_FREE_SPEC_TMPVAR_LABEL,
 			(void*)&&ZEND_INIT_ARRAY_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_INIT_ARRAY_SPEC_CONST_TMPVAR_LABEL,
@@ -57693,100 +53660,50 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_RETURN_BY_REF_SPEC_CV_LABEL,
 			(void*)&&ZEND_RETURN_BY_REF_SPEC_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_CV_LABEL,
-			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CV_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_LABEL,
-			(void*)&&ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -57898,15 +53815,10 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_SEND_VAR_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_CONST_LABEL,
-			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_CONST_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER_LABEL,
 			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_LABEL,
-			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER_LABEL,
-			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_CV_LABEL,
-			(void*)&&ZEND_INIT_USER_CALL_SPEC_CONST_CV_OBSERVER_LABEL,
 			(void*)&&ZEND_SEND_ARRAY_SPEC_LABEL,
 			(void*)&&ZEND_SEND_USER_SPEC_CONST_LABEL,
 			(void*)&&ZEND_SEND_USER_SPEC_TMP_LABEL,
@@ -59579,10 +55491,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_FCALL_BY_NAME_SPEC_CONST)
 				ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_OBSERVER)
-				ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_DYNAMIC_CALL_SPEC_CONST):
 				VM_TRACE(ZEND_INIT_DYNAMIC_CALL_SPEC_CONST)
 				ZEND_INIT_DYNAMIC_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -59591,17 +55499,9 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST)
 				ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_OBSERVER)
-				ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_FCALL_SPEC_CONST):
 				VM_TRACE(ZEND_INIT_FCALL_SPEC_CONST)
 				ZEND_INIT_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_FCALL_SPEC_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_FCALL_SPEC_CONST_OBSERVER)
-				ZEND_INIT_FCALL_SPEC_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_RECV_INIT_SPEC_CONST):
 				VM_TRACE(ZEND_RECV_INIT_SPEC_CONST)
@@ -60027,25 +55927,13 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST)
 				ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_USER_CALL_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_INIT_USER_CALL_SPEC_CONST_CONST)
 				ZEND_INIT_USER_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_USER_CALL_SPEC_CONST_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_USER_CALL_SPEC_CONST_CONST_OBSERVER)
-				ZEND_INIT_USER_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAL_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_SEND_VAL_SPEC_CONST_CONST)
@@ -60267,25 +56155,13 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR)
 				ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR):
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR):
 				VM_TRACE(ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR)
 				ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER)
-				ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR)
@@ -60343,10 +56219,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED)
 				ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -60366,10 +56238,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_NEW_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_NEW_SPEC_CONST_UNUSED)
 				ZEND_NEW_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_NEW_SPEC_CONST_UNUSED_OBSERVER):
-				VM_TRACE(ZEND_NEW_SPEC_CONST_UNUSED_OBSERVER)
-				ZEND_NEW_SPEC_CONST_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED)
@@ -60467,25 +56335,13 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CONST_CV)
 				ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV):
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_USER_CALL_SPEC_CONST_CV):
 				VM_TRACE(ZEND_INIT_USER_CALL_SPEC_CONST_CV)
 				ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_USER_CALL_SPEC_CONST_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_USER_CALL_SPEC_CONST_CV_OBSERVER)
-				ZEND_INIT_USER_CALL_SPEC_CONST_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV)
@@ -61083,10 +56939,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST)
 				ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAL_SPEC_TMPVAR_CONST):
 				VM_TRACE(ZEND_SEND_VAL_SPEC_TMPVAR_CONST)
 				ZEND_SEND_VAL_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -61186,10 +57038,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR):
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR)
 				ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_CASE_SPEC_TMPVAR_TMPVAR):
 				VM_TRACE(ZEND_CASE_SPEC_TMPVAR_TMPVAR)
@@ -61302,10 +57150,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV):
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV)
 				ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_CASE_SPEC_TMPVAR_CV):
 				VM_TRACE(ZEND_CASE_SPEC_TMPVAR_CV)
@@ -62027,10 +57871,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAR_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_SEND_VAR_SPEC_VAR_CONST)
 				ZEND_SEND_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62183,10 +58023,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR)
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62287,10 +58123,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UNUSED)
 				ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62330,10 +58162,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_NEW_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_NEW_SPEC_VAR_UNUSED)
 				ZEND_NEW_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_NEW_SPEC_VAR_UNUSED_OBSERVER):
-				VM_TRACE(ZEND_NEW_SPEC_VAR_UNUSED_OBSERVER)
-				ZEND_NEW_SPEC_VAR_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED)
@@ -62479,10 +58307,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV)
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62591,17 +58415,9 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST)
 				ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST):
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_CHECK_FUNC_ARG_SPEC_UNUSED_CONST):
 				VM_TRACE(ZEND_CHECK_FUNC_ARG_SPEC_UNUSED_CONST)
@@ -62703,17 +58519,9 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR)
 				ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR):
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_UNUSED_TMPVAR):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_UNUSED_TMPVAR)
@@ -62739,10 +58547,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED_UNUSED):
 				VM_TRACE(ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED_UNUSED)
 				ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62762,10 +58566,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_NEW_SPEC_UNUSED_UNUSED):
 				VM_TRACE(ZEND_NEW_SPEC_UNUSED_UNUSED)
 				ZEND_NEW_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_NEW_SPEC_UNUSED_UNUSED_OBSERVER):
-				VM_TRACE(ZEND_NEW_SPEC_UNUSED_UNUSED_OBSERVER)
-				ZEND_NEW_SPEC_UNUSED_UNUSED_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED)
@@ -62871,17 +58671,9 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV)
 				ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV):
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER)
-				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_UNUSED_CV):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_UNUSED_CV)
@@ -63407,10 +59199,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CV_CONST)
 				ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAR_SPEC_CV_CONST):
 				VM_TRACE(ZEND_SEND_VAR_SPEC_CV_CONST)
 				ZEND_SEND_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -63642,10 +59430,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR):
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR)
 				ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR)
@@ -64039,10 +59823,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CV_CV)
 				ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_INIT_METHOD_CALL_SPEC_CV_CV_OBSERVER):
-				VM_TRACE(ZEND_INIT_METHOD_CALL_SPEC_CV_CV_OBSERVER)
-				ZEND_INIT_METHOD_CALL_SPEC_CV_CV_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV)
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -64150,7 +59930,6 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_code_execute_data(execute_data, op_array, return_value);
 	if (ZEND_OBSERVER_ENABLED) {
-		zend_observer_fcall_install((zend_function*)op_array);
 		zend_observer_maybe_fcall_call_begin(execute_data);
 	}
 	zend_execute_ex(execute_data);
@@ -65512,13 +61291,11 @@ void zend_vm_init(void)
 		ZEND_BEGIN_SILENCE_SPEC_HANDLER,
 		ZEND_END_SILENCE_SPEC_TMP_HANDLER,
 		ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER,
-		ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_OBSERVER_HANDLER,
 		ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HANDLER,
 		ZEND_DO_FCALL_SPEC_RETVAL_USED_HANDLER,
 		ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_OBSERVER_HANDLER,
 		ZEND_DO_FCALL_SPEC_RETVAL_USED_OBSERVER_HANDLER,
 		ZEND_INIT_FCALL_SPEC_CONST_HANDLER,
-		ZEND_INIT_FCALL_SPEC_CONST_OBSERVER_HANDLER,
 		ZEND_RETURN_SPEC_CONST_HANDLER,
 		ZEND_RETURN_SPEC_CONST_OBSERVER_HANDLER,
 		ZEND_RETURN_SPEC_TMP_HANDLER,
@@ -65632,17 +61409,11 @@ void zend_vm_init(void)
 		ZEND_SEND_REF_SPEC_CV_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NEW_SPEC_CONST_UNUSED_HANDLER,
-		ZEND_NEW_SPEC_CONST_UNUSED_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NEW_SPEC_VAR_UNUSED_HANDLER,
-		ZEND_NEW_SPEC_VAR_UNUSED_OBSERVER_HANDLER,
 		ZEND_NEW_SPEC_UNUSED_UNUSED_HANDLER,
-		ZEND_NEW_SPEC_UNUSED_UNUSED_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER,
-		ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_OBSERVER_HANDLER,
 		ZEND_FREE_SPEC_TMPVAR_HANDLER,
 		ZEND_INIT_ARRAY_SPEC_CONST_CONST_HANDLER,
 		ZEND_INIT_ARRAY_SPEC_CONST_TMPVAR_HANDLER,
@@ -66169,100 +61940,50 @@ void zend_vm_init(void)
 		ZEND_RETURN_BY_REF_SPEC_CV_HANDLER,
 		ZEND_RETURN_BY_REF_SPEC_CV_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER,
-		ZEND_INIT_METHOD_CALL_SPEC_CV_CV_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_UNUSED_OBSERVER_HANDLER,
 		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_HANDLER,
-		ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -66374,15 +62095,10 @@ void zend_vm_init(void)
 		ZEND_SEND_VAR_SPEC_CV_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_USER_CALL_SPEC_CONST_CONST_HANDLER,
-		ZEND_INIT_USER_CALL_SPEC_CONST_CONST_OBSERVER_HANDLER,
 		ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_HANDLER,
-		ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER,
 		ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_HANDLER,
-		ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_OBSERVER_HANDLER,
-		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER,
-		ZEND_INIT_USER_CALL_SPEC_CONST_CV_OBSERVER_HANDLER,
 		ZEND_SEND_ARRAY_SPEC_HANDLER,
 		ZEND_SEND_USER_SPEC_CONST_HANDLER,
 		ZEND_SEND_USER_SPEC_TMP_HANDLER,
@@ -67738,148 +63454,148 @@ void zend_vm_init(void)
 		1342 | SPEC_RULE_OP2,
 		1347,
 		1348,
-		1349 | SPEC_RULE_OBSERVER,
-		1351 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		1355 | SPEC_RULE_OBSERVER,
-		1357 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		1367,
-		1368,
-		1369 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1394 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		1444 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1469 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		1479 | SPEC_RULE_OBSERVER,
-		1481,
-		1482 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1507 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1532 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		1542 | SPEC_RULE_OP1,
-		1547 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1572 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1597 | SPEC_RULE_OP1,
-		1602,
-		1603,
-		1604 | SPEC_RULE_OP1,
-		1609 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1634 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1659 | SPEC_RULE_OP1,
-		1664 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1689 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1714 | SPEC_RULE_OP1,
-		1719 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1744 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1769 | SPEC_RULE_OP1,
-		1774 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1799 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1824 | SPEC_RULE_OP1,
-		1829 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1854 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1879 | SPEC_RULE_OP1,
-		1884 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1909 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1934 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1959,
-		1960 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		1970,
-		1971,
+		1349,
+		1350 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		1354,
+		1355 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		1365,
+		1366,
+		1367 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1392 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		1442 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1467 | SPEC_RULE_OP1,
+		1472,
+		1473,
+		1474 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1499 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1524 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		1534 | SPEC_RULE_OP1,
+		1539 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1564 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1589 | SPEC_RULE_OP1,
+		1594,
+		1595,
+		1596 | SPEC_RULE_OP1,
+		1601 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1626 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1651 | SPEC_RULE_OP1,
+		1656 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1681 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1706 | SPEC_RULE_OP1,
+		1711 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1736 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1761 | SPEC_RULE_OP1,
+		1766 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1791 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1816 | SPEC_RULE_OP1,
+		1821 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1846 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1871 | SPEC_RULE_OP1,
+		1876 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1901 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1926 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1951,
+		1952 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		1962,
+		1963,
+		1964,
+		1965,
+		1966,
+		1967 | SPEC_RULE_OP2,
 		1972,
-		1973,
-		1974,
-		1975 | SPEC_RULE_OP2,
-		1980,
-		1981 | SPEC_RULE_OP1,
-		1986 | SPEC_RULE_OP2,
-		1991 | SPEC_RULE_OP1,
-		1996 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		2006 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OBSERVER,
-		2056 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OBSERVER,
-		2106 | SPEC_RULE_OP1,
-		2111 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2136 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		2186 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2211 | SPEC_RULE_OP2 | SPEC_RULE_OBSERVER,
-		2221,
-		2222 | SPEC_RULE_OP1,
-		2227 | SPEC_RULE_OP1,
-		2232,
-		2233 | SPEC_RULE_OP1,
-		2238 | SPEC_RULE_OP1,
-		2243 | SPEC_RULE_OP1,
-		2248,
-		2249,
-		2250 | SPEC_RULE_OP2,
-		2255 | SPEC_RULE_RETVAL,
-		2257 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2261 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2265 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2265 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2290 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2290 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2315 | SPEC_RULE_OP1,
-		2320,
-		2321 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1973 | SPEC_RULE_OP1,
+		1978 | SPEC_RULE_OP2,
+		1983 | SPEC_RULE_OP1,
+		1988 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		1998 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2023 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2048 | SPEC_RULE_OP1,
+		2053 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2078 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		2128 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2153 | SPEC_RULE_OP2,
+		2158,
+		2159 | SPEC_RULE_OP1,
+		2164 | SPEC_RULE_OP1,
+		2169,
+		2170 | SPEC_RULE_OP1,
+		2175 | SPEC_RULE_OP1,
+		2180 | SPEC_RULE_OP1,
+		2185,
+		2186,
+		2187 | SPEC_RULE_OP2,
+		2192 | SPEC_RULE_RETVAL,
+		2194 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		2198 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		2202 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2202 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2227 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2227 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2252 | SPEC_RULE_OP1,
+		2257,
+		2258 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2283,
+		2284 | SPEC_RULE_OP1,
+		2289,
+		2290,
+		2291,
+		2292,
+		2293,
+		2294,
+		2295,
+		2296 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2321 | SPEC_RULE_OBSERVER,
+		2323,
+		2324,
+		2325 | SPEC_RULE_OP1,
+		2330,
+		2331 | SPEC_RULE_ISSET,
+		2333 | SPEC_RULE_OP2,
+		2338,
+		2339 | SPEC_RULE_OP1,
+		2344 | SPEC_RULE_OBSERVER,
 		2346,
-		2347 | SPEC_RULE_OP1,
-		2352,
-		2353,
-		2354,
-		2355,
-		2356,
-		2357,
-		2358,
-		2359 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2384 | SPEC_RULE_OBSERVER,
-		2386,
-		2387,
-		2388 | SPEC_RULE_OP1,
-		2393,
-		2394 | SPEC_RULE_ISSET,
-		2396 | SPEC_RULE_OP2,
-		2401,
-		2402 | SPEC_RULE_OP1,
-		2407 | SPEC_RULE_OBSERVER,
-		2409,
-		2410 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2435 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		2445,
-		2446,
-		2447,
-		2448,
-		2449 | SPEC_RULE_OP1,
-		2454,
-		2455,
+		2347 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2372 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		2382,
+		2383,
+		2384,
+		2385,
+		2386 | SPEC_RULE_OP1,
+		2391,
+		2392,
+		2393 | SPEC_RULE_OP1,
+		2398 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2423,
+		2424 | SPEC_RULE_OP1,
+		2429,
+		2430,
+		2431,
+		2432,
+		2433,
+		2434,
+		2435,
+		2436,
+		2437 | SPEC_RULE_OP1,
+		2442,
+		2443,
+		2444,
+		2445 | SPEC_RULE_OP2,
+		2450,
+		2451 | SPEC_RULE_OP1,
 		2456 | SPEC_RULE_OP1,
-		2461 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2486,
-		2487 | SPEC_RULE_OP1,
-		2492,
-		2493,
-		2494,
-		2495,
-		2496,
-		2497,
-		2498,
-		2499,
-		2500 | SPEC_RULE_OP1,
-		2505,
-		2506,
-		2507,
-		2508 | SPEC_RULE_OP2,
-		2513,
-		2514 | SPEC_RULE_OP1,
-		2519 | SPEC_RULE_OP1,
-		2524 | SPEC_RULE_OP1,
-		2529 | SPEC_RULE_OP1,
-		2534 | SPEC_RULE_OP1,
-		2539,
-		2540 | SPEC_RULE_OP1,
-		2545 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2570 | SPEC_RULE_OP1,
-		2575 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2600 | SPEC_RULE_OP1,
-		2605 | SPEC_RULE_OP1,
-		2610,
-		3514
+		2461 | SPEC_RULE_OP1,
+		2466 | SPEC_RULE_OP1,
+		2471 | SPEC_RULE_OP1,
+		2476,
+		2477 | SPEC_RULE_OP1,
+		2482 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2507 | SPEC_RULE_OP1,
+		2512 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2537 | SPEC_RULE_OP1,
+		2542 | SPEC_RULE_OP1,
+		2547,
+		3451
 	};
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	zend_opcode_handler_funcs = labels;
@@ -68052,7 +63768,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2613 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2550 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -68060,7 +63776,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2638 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2575 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -68068,7 +63784,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2663 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2600 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -68079,17 +63795,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2688 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2625 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2713 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2650 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2738 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2675 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -68100,17 +63816,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2763 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2700 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2788 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2725 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2813 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2750 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_IDENTICAL:
@@ -68121,14 +63837,14 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2838 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2775 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2913 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2850 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3138 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3075 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
@@ -68139,14 +63855,14 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2988 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2925 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3063 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3000 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3143 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3080 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_EQUAL:
@@ -68157,12 +63873,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2838 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2775 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2913 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2850 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
@@ -68173,12 +63889,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2988 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2925 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3063 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3000 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_SMALLER:
@@ -68186,12 +63902,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3148 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3085 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3223 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3160 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -68199,74 +63915,74 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3298 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3235 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3373 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3310 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if (op1_info == MAY_BE_LONG) {
-				spec = 3460 | SPEC_RULE_OP1;
+				spec = 3397 | SPEC_RULE_OP1;
 			} else if (op1_info == MAY_BE_DOUBLE) {
-				spec = 3465 | SPEC_RULE_OP1;
+				spec = 3402 | SPEC_RULE_OP1;
 			} else if ((op->op1_type == IS_CONST) ? !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1)) : (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 3470 | SPEC_RULE_OP1;
+				spec = 3407 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3448 | SPEC_RULE_RETVAL;
+				spec = 3385 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3450 | SPEC_RULE_RETVAL;
+				spec = 3387 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3452 | SPEC_RULE_RETVAL;
+				spec = 3389 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3454 | SPEC_RULE_RETVAL;
+				spec = 3391 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3456;
+				spec = 3393;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3457;
+				spec = 3394;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3458;
+				spec = 3395;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3459;
+				spec = 3396;
 			}
 			break;
 		case ZEND_JMP:
 			if (OP_JMP_ADDR(op, op->op1) > op) {
-				spec = 2612;
+				spec = 2549;
 			}
 			break;
 		case ZEND_RECV:
 			if (op->op2.num == MAY_BE_ANY) {
-				spec = 2611;
+				spec = 2548;
 			}
 			break;
 		case ZEND_SEND_VAL:
 			if (op->op1_type == IS_CONST && op->op2_type == IS_UNUSED && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3510;
+				spec = 3447;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3505 | SPEC_RULE_OP1;
+				spec = 3442 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 3512 | SPEC_RULE_RETVAL;
+				spec = 3449 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
@@ -68274,17 +63990,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3475 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3412 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAL_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3511;
+				spec = 3448;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if (op->op2_type == IS_UNUSED && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3500 | SPEC_RULE_OP1;
+				spec = 3437 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_BW_OR:

@@ -85,6 +85,10 @@ ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_begin(
 	if (ZEND_SHOULD_OBSERVE_FN(op_array->fn_flags) &&
 		!(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
 		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&EX(func)->op_array);
+		if (!observer_handlers) {
+			zend_observer_fcall_install((zend_function *)&EX(func)->op_array);
+			observer_handlers = ZEND_OBSERVER_HANDLERS(&EX(func)->op_array);
+		}
 		ZEND_ASSERT(observer_handlers);
 		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 			zend_observe_fcall_begin(observer_handlers, execute_data);

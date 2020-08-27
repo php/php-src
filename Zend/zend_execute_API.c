@@ -868,10 +868,6 @@ cleanup_args:
 
 		zend_init_func_execute_data(call, &func->op_array, fci->retval);
 		if (ZEND_OBSERVER_ENABLED) {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&func->op_array);
-			if (!observer_handlers) {
-				zend_observer_fcall_install((zend_function *)&func->op_array);
-			}
 			zend_observer_maybe_fcall_call_begin(call);
 		}
 		zend_execute_ex(call);

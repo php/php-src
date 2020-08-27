@@ -775,7 +775,12 @@ try_again:
 		if (!ZEND_OBSERVER_ENABLED) {
 			zend_execute_ex(generator->execute_data);
 		} else {
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&generator->execute_data->func->op_array);
+			zend_op_array *op_array = &generator->execute_data->func->op_array;
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
+			if (!observer_handlers) {
+				zend_observer_fcall_install((zend_function *)op_array);
+				observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
+			}
 			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, generator->execute_data);

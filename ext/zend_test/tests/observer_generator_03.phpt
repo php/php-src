@@ -45,8 +45,8 @@ echo doSomething() . PHP_EOL;
     </fooResults:1>
 1
     <fooResults>
-      <!-- init barResults() -->
     </fooResults:1>
+    <!-- init barResults() -->
     <barResults>
     </barResults:10>
 10

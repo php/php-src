@@ -25,7 +25,6 @@
 #include "zend_interfaces.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
-#include "zend_observer.h"
 #include "zend_globals.h"
 #include "zend_closures_arginfo.h"
 
@@ -166,9 +165,6 @@ ZEND_METHOD(Closure, call)
 			ptr = (char*)ptr + sizeof(void*);
 			ZEND_MAP_PTR_SET(my_function.op_array.run_time_cache, ptr);
 			memset(ptr, 0, my_function.op_array.cache_size);
-			if (ZEND_OBSERVER_ENABLED) {
-				zend_observer_fcall_install(&my_function);
-			}
 		}
 	}
 
@@ -699,9 +695,6 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
 			}
 			memset(ptr, 0, func->op_array.cache_size);
-			if (ZEND_OBSERVER_ENABLED) {
-				zend_observer_fcall_install(&closure->func);
-			}
 		}
 		zend_string_addref(closure->func.op_array.function_name);
 		if (closure->func.op_array.refcount) {
