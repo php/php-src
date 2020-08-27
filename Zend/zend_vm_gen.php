@@ -958,6 +958,9 @@ function is_hot_handler($hot, $op1, $op2, $extra_spec) {
     if (isset($extra_spec["SMART_BRANCH"]) && $extra_spec["SMART_BRANCH"] == 0) {
         return false;
     }
+    if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1) {
+        return false;
+    }
     if ($hot === 'HOT_' || $hot === 'INLINE_') {
         return true;
     } else if ($hot === 'HOT_NOCONST_') {
@@ -975,6 +978,8 @@ function is_hot_handler($hot, $op1, $op2, $extra_spec) {
 
 function is_cold_handler($hot, $op1, $op2, $extra_spec) {
     if ($hot === 'COLD_') {
+        return true;
+    } else if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1) {
         return true;
     } else if ($hot === 'COLD_CONST_') {
         return ($op1 === 'CONST');
