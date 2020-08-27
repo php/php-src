@@ -45,6 +45,14 @@ var_dump($map);
 gc_collect_cycles();
 var_dump($map);
 
+echo "\nStoring object as own value:\n";
+$map = new WeakMap;
+$obj = new stdClass;
+$map[$obj] = $obj;
+unset($obj);
+var_dump($map);
+unset($map);
+
 echo "\nStoring map in itself:\n";
 $map = new WeakMap;
 $map[$map] = $map;
@@ -93,6 +101,19 @@ object(WeakMap)#1 (1) {
   }
 }
 object(WeakMap)#1 (0) {
+}
+
+Storing object as own value:
+object(WeakMap)#3 (1) {
+  [0]=>
+  array(2) {
+    ["key"]=>
+    object(stdClass)#1 (0) {
+    }
+    ["value"]=>
+    object(stdClass)#1 (0) {
+    }
+  }
 }
 
 Storing map in itself:

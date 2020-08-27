@@ -119,9 +119,11 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
 	if (tag != ZEND_WEAKREF_TAG_HT) {
 		ZEND_ASSERT(tagged_ptr == payload);
-		zend_weakref_unref_single(ptr, tag, obj_addr);
 		zend_hash_index_del(&EG(weakrefs), obj_addr);
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
+
+		/* Do this last, as it may destroy the object. */
+		zend_weakref_unref_single(ptr, tag, obj_addr);
 		return;
 	}
 
@@ -129,8 +131,6 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 	tagged_ptr = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
 	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
 	ZEND_ASSERT(tagged_ptr == payload);
-	zend_weakref_unref_single(
-		ZEND_WEAKREF_GET_PTR(payload), ZEND_WEAKREF_GET_TAG(payload), obj_addr);
 	zend_hash_index_del(ht, (zend_ulong) payload);
 	if (zend_hash_num_elements(ht) == 0) {
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
@@ -138,6 +138,10 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 		FREE_HASHTABLE(ht);
 		zend_hash_index_del(&EG(weakrefs), obj_addr);
 	}
+
+	/* Do this last, as it may destroy the object. */
+	zend_weakref_unref_single(
+		ZEND_WEAKREF_GET_PTR(payload), ZEND_WEAKREF_GET_TAG(payload), obj_addr);
 }
 
 void zend_weakrefs_init(void) {
