@@ -17,7 +17,6 @@
 */
 
 #include "Zend/zend_API.h"
-#include "Zend/zend_observer.h"
 
 static ZEND_COLD void undef_result_after_exception() {
 	const zend_op *opline = EG(opline_before_exception);
@@ -41,9 +40,6 @@ static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_ti
 	run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 	memset(run_time_cache, 0, op_array->cache_size);
 	ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
-	if (ZEND_OBSERVER_ENABLED) {
-		zend_observer_fcall_install((zend_function*) op_array);
-	}
 	return (zend_function*)op_array;
 }
 /* }}} */
@@ -56,9 +52,6 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_tim
 		run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 		memset(run_time_cache, 0, op_array->cache_size);
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
-		if (ZEND_OBSERVER_ENABLED) {
-			zend_observer_fcall_install((zend_function*) op_array);
-		}
 	}
 	return op_array;
 }

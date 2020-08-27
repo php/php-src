@@ -25,7 +25,7 @@
 
 BEGIN_EXTERN_C()
 
-extern int zend_observer_fcall_op_array_extension;
+extern ZEND_API int zend_observer_fcall_op_array_extension;
 
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
