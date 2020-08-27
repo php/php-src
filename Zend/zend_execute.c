@@ -3133,6 +3133,7 @@ type_error:
 					zval_ptr_dtor(&tmp);
 					goto conflicting_coercion_error;
 				}
+				zval_ptr_dtor(&tmp);
 			}
 		} else {
 			if (!first_prop) {
