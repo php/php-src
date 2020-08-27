@@ -21,7 +21,7 @@
 #include <ext/standard/info.h>
 #include <ext/standard/php_var.h>
 #include <main/php_variables.h>
-#include <zend_exceptions.c>
+#include <zend_exceptions.h>
 
 #ifdef __SANITIZE_ADDRESS__
 # include "sanitizer/lsan_interface.h"
