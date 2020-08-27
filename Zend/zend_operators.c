@@ -816,7 +816,7 @@ try_again:
 				} else {
 					/* Previously we used strtol here, not is_numeric_string,
 					 * and strtol gives you LONG_MAX/_MIN on overflow.
-					 * We use use saturating conversion to emulate strtol()'s
+					 * We use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
 					 return zend_dval_to_lval_cap(dval);

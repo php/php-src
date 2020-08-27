@@ -1706,15 +1706,29 @@ PHP_FUNCTION(mysqli_options)
 #endif
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
 	if (expected_type == IS_STRING) {
+		bool is_long_arg = 0;
 		if (!mysql_value_str) {
-			zend_argument_type_error(3, "must be of type string for the chosen option");
-			RETURN_THROWS();
+			mysql_value_str = zend_long_to_str(mysql_value_long);
+			is_long_arg = 1;
 		}
 		ret = mysql_options(mysql->mysql, mysql_option, ZSTR_VAL(mysql_value_str));
+
+		if (is_long_arg) {
+			zend_string_release(mysql_value_str);
+		}
 	} else if (expected_type == IS_LONG) {
 		if (mysql_value_str) {
-			zend_argument_type_error(3, "must be of type int for the chosen option");
-			RETURN_THROWS();
+			double rv;
+			zend_long lv;
+			zend_uchar type;
+
+			type = is_numeric_string(ZSTR_VAL(mysql_value_str), ZSTR_LEN(mysql_value_str), &lv, &rv, 0);
+			if (type == IS_LONG) {
+				mysql_value_long = lv;
+			} else {
+				zend_argument_type_error(getThis() ? 1 : 2, "must be a numeric string for the chosen option");
+				RETURN_THROWS();
+			}
 		}
 		ret = mysql_options(mysql->mysql, mysql_option, (char *) &mysql_value_long);
 	} else {
