@@ -7,25 +7,25 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     public function __construct(array|object $input = [], int $flags = 0, string $iterator_class = ArrayIterator::class) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return bool
      */
     public function offsetExists($index) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return mixed
      */
     public function offsetGet($index) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return void
      */
     public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return void
      */
     public function offsetUnset($index) {}

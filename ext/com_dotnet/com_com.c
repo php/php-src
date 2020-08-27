@@ -684,34 +684,35 @@ PHP_FUNCTION(com_create_guid)
 /* {{{ Connect events from a COM object to a PHP object */
 PHP_FUNCTION(com_event_sink)
 {
-	zval *object, *sinkobject, *sink=NULL;
+	zval *object, *sinkobject;
+	zend_string *sink_str = NULL;
+	HashTable *sink_ht = NULL;
 	char *dispname = NULL, *typelibname = NULL;
 	php_com_dotnet_object *obj;
 	ITypeInfo *typeinfo = NULL;
 
-	RETVAL_FALSE;
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJECT_OF_CLASS(object, php_com_variant_class_entry)
+		Z_PARAM_OBJECT(sinkobject)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(sink_str, sink_ht)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Oo|z!/",
-			&object, php_com_variant_class_entry, &sinkobject, &sink)) {
-		RETURN_THROWS();
-	}
+	RETVAL_FALSE;
 
 	php_com_initialize();
 	obj = CDNO_FETCH(object);
 
-	if (sink && Z_TYPE_P(sink) == IS_ARRAY) {
+	if (sink_ht) {
 		/* 0 => typelibname, 1 => dispname */
 		zval *tmp;
 
-		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(sink), 0)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
+		if ((tmp = zend_hash_index_find(sink_ht, 0)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
 			typelibname = Z_STRVAL_P(tmp);
-		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(sink), 1)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
+		if ((tmp = zend_hash_index_find(sink_ht, 1)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
 			dispname = Z_STRVAL_P(tmp);
-	} else if (sink != NULL) {
-		if (!try_convert_to_string(sink)) {
-			RETURN_THROWS();
-		}
-		dispname = Z_STRVAL_P(sink);
+	} else if (sink_str) {
+		dispname = ZSTR_VAL(sink_str);
 	}
 
 	typeinfo = php_com_locate_typeinfo(typelibname, obj, dispname, 1);

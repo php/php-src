@@ -28,19 +28,19 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable
     public function offsetExists(mixed $index) {}
 
     /**
-     * @param resource|string|int|float|bool $index
+     * @param int $index
      * @return mixed
      */
     public function offsetGet($index) {}
 
     /**
-     * @param resource|string|int|float|bool $index
+     * @param int $index
      * @return void
      */
     public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param resource|string|int|float|bool $index
+     * @param int $index
      * @return void
      */
     public function offsetUnset($index) {}

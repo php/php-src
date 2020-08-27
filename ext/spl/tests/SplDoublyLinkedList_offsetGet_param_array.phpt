@@ -11,7 +11,7 @@ $get = $array->offsetGet( array( 'fail' ) );
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught OutOfRangeException: Offset invalid or out of range in %s
+Fatal error: Uncaught TypeError: SplDoublyLinkedList::offsetGet(): Argument #1 ($index) must be of type int, array given in %s
 Stack trace:
 #0 %s
 #1 {main}

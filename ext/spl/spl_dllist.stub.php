@@ -4,11 +4,8 @@
 
 class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
 {
-    /**
-     * @param resource|string|int|float|bool $index
-     * @return void
-     */
-    public function add($index, mixed $value) {}
+    /** @return void */
+    public function add(int $index, mixed $value) {}
 
     /** @return mixed */
     public function pop() {}
@@ -47,19 +44,19 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     public function offsetExists(mixed $index) {}
 
     /**
-     * @param resource|string|int|float|bool $index
+     * @param int $index
      * @return mixed
      */
     public function offsetGet($index) {}
 
     /**
-     * @param resource|string|int|float|bool|null $index
+     * @param int|null $index
      * @return void
      */
     public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param resource|string|int|float|bool $index
+     * @param int $index
      * @return void
      */
     public function offsetUnset($index) {}

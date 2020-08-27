@@ -68,19 +68,19 @@
 	obj = Z_TIDY_P(object);	\
 
 #define TIDY_APPLY_CONFIG(_doc, _val_str, _val_ht) \
-    if (_val_ht) { \
-    	_php_tidy_apply_config_array(_doc, _val_ht); \
-    } else if (_val_str) { \
+	if (_val_ht) { \
+		_php_tidy_apply_config_array(_doc, _val_ht); \
+	} else if (_val_str) { \
 		TIDY_OPEN_BASE_DIR_CHECK(ZSTR_VAL(_val_str)); \
 		switch (tidyLoadConfig(_doc, ZSTR_VAL(_val_str))) { \
-		  case -1: \
-			php_error_docref(NULL, E_WARNING, "Could not load configuration file \"%s\"", ZSTR_VAL(_val_str)); \
-			break; \
-		  case 1: \
-			php_error_docref(NULL, E_NOTICE, "There were errors while parsing the configuration file \"%s\"", ZSTR_VAL(_val_str)); \
-			break; \
+			case -1: \
+				php_error_docref(NULL, E_WARNING, "Could not load configuration file \"%s\"", ZSTR_VAL(_val_str)); \
+				break; \
+			case 1: \
+				php_error_docref(NULL, E_NOTICE, "There were errors while parsing the configuration file \"%s\"", ZSTR_VAL(_val_str)); \
+				break; \
 		} \
-    }
+	}
 
 #define REGISTER_TIDY_CLASS(classname, name, parent, __flags) \
 	{ \

@@ -1,8 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 58e1e222a4ef53ab086c6180445c8b79bb85baa5 */
+ * Stub hash: 983510483588b313a0cb290db5c82e825a80be62 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 0, 2)
-	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -41,7 +41,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_offsetSet arginfo_class_SplDoublyLinkedList_add
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetSet, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplDoublyLinkedList_offsetUnset arginfo_class_SplDoublyLinkedList_offsetGet
 

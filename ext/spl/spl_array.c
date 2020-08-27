@@ -1174,12 +1174,9 @@ PHP_METHOD(ArrayObject, __construct)
 		return; /* nothing to do */
 	}
 
-	ZEND_PARSE_PARAMETERS_START(0, 3)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_OR_OBJECT(array)
-		Z_PARAM_LONG(ar_flags)
-		Z_PARAM_CLASS(ce_get_iterator)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|AlC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	intern = Z_SPLARRAY_P(object);
 
@@ -1205,11 +1202,9 @@ PHP_METHOD(ArrayIterator, __construct)
 		return; /* nothing to do */
 	}
 
-	ZEND_PARSE_PARAMETERS_START(0, 2)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_OR_OBJECT(array)
-		Z_PARAM_LONG(ar_flags)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|Al", &array, &ar_flags) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	intern = Z_SPLARRAY_P(object);
 
@@ -1284,9 +1279,9 @@ PHP_METHOD(ArrayObject, exchangeArray)
 	zval *object = ZEND_THIS, *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT(array)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A", &array) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (intern->nApplyCount > 0) {
 		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");

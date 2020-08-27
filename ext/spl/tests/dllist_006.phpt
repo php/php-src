@@ -29,7 +29,7 @@ try {
 
 try {
     var_dump($a["a"]);
-} catch (OutOfRangeException $e) {
+} catch (TypeError $e) {
     echo "Exception: ".$e->getMessage()."\n";
 }
 
@@ -54,6 +54,6 @@ Unsetting..
 int(3)
 int(4)
 int(2)
-Exception: Offset invalid or out of range
+Exception: SplDoublyLinkedList::offsetGet(): Argument #1 ($index) must be of type int, string given
 int(1)
-Exception: Offset invalid or out of range
+Exception: SplDoublyLinkedList::offsetGet(): Argument #1 ($index) is out of range

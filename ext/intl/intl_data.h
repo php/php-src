@@ -71,6 +71,16 @@ typedef struct _intl_data {
         RETURN_FALSE;										\
     }
 
+/* Check status in object, if error goto a label */
+#define INTL_METHOD_CHECK_STATUS_OR_GOTO(obj, msg, label)							\
+    intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\
+    if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
+    {																				\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );				\
+        RETVAL_FALSE;																\
+        goto label;																	\
+    }
+
 /* Check status in object, if error return null */
 #define INTL_METHOD_CHECK_STATUS_OR_NULL(obj, msg)									\
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\

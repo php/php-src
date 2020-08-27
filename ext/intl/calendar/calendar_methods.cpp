@@ -1020,7 +1020,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	calendar_object_create(return_value, cal);
 
 error:
-	if (date_obj && date_str) {
+	if (date_str) {
 		OBJ_RELEASE(date_obj);
 	}
 }

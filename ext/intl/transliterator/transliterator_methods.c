@@ -280,6 +280,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
 	object = getThis();
+
 	ZVAL_UNDEF(&tmp_object);
 
 	if (object == NULL) {
@@ -310,12 +311,10 @@ PHP_FUNCTION( transliterator_transliterate )
 				goto cleanup;
 			}
 		} else {
-			ZVAL_OBJ(&tmp_object, arg1_obj);
+			ZVAL_OBJ_COPY(&tmp_object, arg1_obj);
 			object = &tmp_object;
 		}
-	} else if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll",
-		&str, &str_len, &start, &limit ) == FAILURE )
-	{
+	} else if(zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll", &str, &str_len, &start, &limit) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -324,7 +323,8 @@ PHP_FUNCTION( transliterator_transliterate )
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"transliterator_transliterate: \"end\" argument should be "
 			"either non-negative or -1", 0 );
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup_object;
 	}
 
 	if( start < 0 || ((limit != -1 ) && (start > limit )) )
@@ -332,16 +332,16 @@ PHP_FUNCTION( transliterator_transliterate )
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"transliterator_transliterate: \"start\" argument should be "
 			"non-negative and not bigger than \"end\" (if defined)", 0 );
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup_object;
 	}
 
 	/* end argument parsing/validation */
 
 	TRANSLITERATOR_METHOD_FETCH_OBJECT;
 
-	intl_convert_utf8_to_utf16( &ustr, &ustr_len, str, str_len,
-		TRANSLITERATOR_ERROR_CODE_P( to ) );
-	INTL_METHOD_CHECK_STATUS( to, "String conversion of string to UTF-16 failed" );
+	intl_convert_utf8_to_utf16(&ustr, &ustr_len, str, str_len, TRANSLITERATOR_ERROR_CODE_P(to));
+	INTL_METHOD_CHECK_STATUS_OR_GOTO(to, "String conversion of string to UTF-16 failed", cleanup_object);
 
 	/* we've started allocating resources, goto from now on */
 
@@ -419,9 +419,8 @@ cleanup:
 		RETVAL_FALSE;
 	}
 
-	if (object != &tmp_object) {
-		zval_ptr_dtor( &tmp_object );
-	}
+cleanup_object:
+	zval_ptr_dtor( &tmp_object );
 }
 /* }}} */
 

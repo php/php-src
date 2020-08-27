@@ -58,8 +58,7 @@ function com_get_active_object(string $progid, ?int $code_page = null): variant 
 
 function com_create_guid(): string|false {}
 
-/** @param array|string|null $sinkinterface */
-function com_event_sink(variant $comobject, object $sinkobject, $sinkinterface = UNKNOWN): bool {}
+function com_event_sink(variant $comobject, object $sinkobject, array|string|null $sinkinterface = null): bool {}
 
 /** @param com|dotnet|variant|string $comobject */
 function com_print_typeinfo($comobject, ?string $dispinterface = null, bool $wantsink = false): bool {}
