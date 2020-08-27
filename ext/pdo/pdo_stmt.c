@@ -92,6 +92,10 @@ static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_typ
 	struct pdo_bound_param_data *param;
 	HashTable *ht;
 
+	if (stmt->dbh->skip_param_evt & (1 << event_type)) {
+		return 1;
+	}
+
 	if (!stmt->methods->param_hook) {
 		return 1;
 	}
