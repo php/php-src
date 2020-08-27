@@ -34,7 +34,7 @@ extern ZEND_API int zend_observer_fcall_op_array_extension;
 
 #define ZEND_OBSERVER_NOT_OBSERVED ((void *) 2)
 
-#define ZEND_SHOULD_OBSERVE_FN(fn_flags) \
+#define ZEND_OBSERVABLE_FN(fn_flags) \
 	(ZEND_OBSERVER_ENABLED && \
 		!(fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE)))
 
@@ -82,7 +82,7 @@ ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_begin(
 	zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = (zend_op_array *)execute_data->func;
-	if (ZEND_SHOULD_OBSERVE_FN(op_array->fn_flags) &&
+	if (ZEND_OBSERVABLE_FN(op_array->fn_flags) &&
 		!(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
 		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&EX(func)->op_array);
 		if (!observer_handlers) {
@@ -101,7 +101,7 @@ ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_end(
 	zval *return_value)
 {
 	zend_function *func = execute_data->func;
-	if (ZEND_SHOULD_OBSERVE_FN(func->common.fn_flags)) {
+	if (ZEND_OBSERVABLE_FN(func->common.fn_flags)) {
 		zend_observer_fcall_call_end_helper(execute_data, return_value);
 	}
 }

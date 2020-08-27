@@ -135,7 +135,7 @@ void zend_observer_fcall_call_end_helper(
 	zval *return_value)
 {
 	zend_function *func = execute_data->func;
-	ZEND_ASSUME(ZEND_SHOULD_OBSERVE_FN(func->common.fn_flags));
+	ZEND_ASSUME(ZEND_OBSERVABLE_FN(func->common.fn_flags));
 	void *observer_handlers = ZEND_OBSERVER_HANDLERS(&func->op_array);
 	// TODO: Fix exceptions from generators
 	// ZEND_ASSERT(observer_handlers);
