@@ -62,7 +62,10 @@ typedef struct _zend_loop_var {
 
 static inline uint32_t zend_alloc_cache_slots(unsigned count) {
 	if (count == 0) {
-		return (uint32_t) -1;
+		/* Even if no cache slots are desired, the VM handler may still want to acquire
+		 * CACHE_ADDR() unconditionally. Returning zero makes sure that the address
+		 * calculation is still legal and ubsan does not complain. */
+		return 0;
 	}
 
 	zend_op_array *op_array = CG(active_op_array);
