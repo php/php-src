@@ -991,7 +991,7 @@ static const uint32_t valid_chars[8] = {
 	0xffffffff,
 };
 
-static zend_bool zend_is_valid_class_name(zend_string *name) {
+ZEND_API zend_bool zend_is_valid_class_name(zend_string *name) {
 	for (size_t i = 0; i < ZSTR_LEN(name); i++) {
 		unsigned char c = ZSTR_VAL(name)[i];
 		if (!ZEND_BIT_TEST(valid_chars, c)) {
