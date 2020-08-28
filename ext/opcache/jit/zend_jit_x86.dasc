@@ -2943,20 +2943,6 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 	return 1;
 }
 
-static int zend_jit_trace_opline_guard(dasm_State **Dst, const zend_op *opline)
-{
-	uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, 0);
-	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-
-	if (!exit_addr) {
-		return 0;
-	}
-	|	CMP_IP opline
-	|	jne &exit_addr
-
-	return 1;
-}
-
 /* This taken from LuaJIT. Thanks to Mike Pall. */
 static uint32_t _asm_x86_inslen(const uint8_t* p)
 {
@@ -3494,6 +3480,22 @@ static void zend_jit_start_reuse_ip(void) {
 
 static void zend_jit_stop_reuse_ip(void) {
 	reuse_ip = 0;
+}
+
+static int zend_jit_trace_opline_guard(dasm_State **Dst, const zend_op *opline)
+{
+	uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, 0);
+	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+	if (!exit_addr) {
+		return 0;
+	}
+	|	CMP_IP opline
+	|	jne &exit_addr
+
+	zend_jit_set_opline(opline);
+
+	return 1;
 }
 
 static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
@@ -8864,15 +8866,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	mov aword EX:RX->return_value, 0
 		}
 
-		if (func
-		 && !unknown_num_args
-		 && call_num_args <= func->op_array.num_args) {
-			for (i = call_num_args; i < func->op_array.last_var; i++) {
-				uint32_t n = EX_NUM_TO_VAR(i);
-				|	SET_Z_TYPE_INFO RX + n, IS_UNDEF
-			}
-		}
-
 		//EX_LOAD_RUN_TIME_CACHE(op_array);
 		if (!func || func->op_array.cache_size) {
 			if (func && op_array == &func->op_array) {
@@ -8919,74 +8912,78 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|	mov FP, RX
 
 		|	// opline = op_array->opcodes;
-		if (func
-		 && !unknown_num_args
-		 && call_num_args <= func->op_array.num_args) {
-			uint32_t num_args;
+		if (func && !unknown_num_args) {
 
-			if ((func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0) {
-				if (trace) {
-					num_args = 0;
-				} else if (call_info) {
-					num_args = skip_valid_arguments(op_array, ssa, call_info);
-				} else {
-					num_args = call_num_args;
-				}
-			} else {
-				num_args = call_num_args;
-			}
-			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
-				|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
-			} else {
-				if (func) {
-					|	mov r0, EX->func
-				}
-				if (GCC_GLOBAL_REGS) {
-					|	mov IP, aword [r0 + offsetof(zend_op_array, opcodes)]
-					if (num_args) {
-						|	add IP, (num_args * sizeof(zend_op))
-					}
-				} else {
-					|	mov FCARG1a, aword [r0 + offsetof(zend_op_array, opcodes)]
-					if (num_args) {
-						|	add FCARG1a, (num_args * sizeof(zend_op))
-					}
-					|	mov aword EX->opline, FCARG1a
-				}
-			}
-
-			if (!trace && op_array == &func->op_array) {
-				/* recursive call */
-#ifdef CONTEXT_THREADED_JIT
-				|	call >1
-				|.cold_code
-				|1:
-				|	pop r0
-				|	jmp =>num_args
-				|.code
-#else
-				|	jmp =>num_args
-#endif
-				return 1;
-			}
-		} else if (func
-		 && !unknown_num_args
-		 && call_num_args > func->op_array.num_args) {
-			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
-				|	LOAD_IP_ADDR (func->op_array.opcodes)
-			} else if (GCC_GLOBAL_REGS) {
-				|	mov IP, aword [r0 + offsetof(zend_op_array, opcodes)]
-			} else {
-				|	mov FCARG1a, aword [r0 + offsetof(zend_op_array, opcodes)]
-				|	mov aword EX->opline, FCARG1a
-			}
-			if (!GCC_GLOBAL_REGS) {
-				|	mov FCARG1a, FP
-			}
-			|	EXT_CALL zend_jit_copy_extra_args_helper, r0
 			for (i = call_num_args; i < func->op_array.last_var; i++) {
 				uint32_t n = EX_NUM_TO_VAR(i);
-				|	SET_Z_TYPE_INFO FP + n, IS_UNDEF
+				|	SET_Z_TYPE_INFO RX + n, IS_UNDEF
+			}
+
+			if (call_num_args <= func->op_array.num_args) {
+				if (!trace || (trace->op == ZEND_JIT_TRACE_END				
+				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+					uint32_t num_args;
+
+					if ((func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0) {
+						if (trace) {
+							num_args = 0;
+						} else if (call_info) {
+							num_args = skip_valid_arguments(op_array, ssa, call_info);
+						} else {
+							num_args = call_num_args;
+						}
+					} else {
+						num_args = call_num_args;
+					}
+					if (zend_accel_in_shm(func->op_array.opcodes)) {
+						|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
+					} else {
+						|	mov r0, EX->func
+						if (GCC_GLOBAL_REGS) {
+							|	mov IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+							if (num_args) {
+								|	add IP, (num_args * sizeof(zend_op))
+							}
+						} else {
+							|	mov FCARG1a, aword [r0 + offsetof(zend_op_array, opcodes)]
+							if (num_args) {
+								|	add FCARG1a, (num_args * sizeof(zend_op))
+							}
+							|	mov aword EX->opline, FCARG1a
+						}
+					}
+
+					if (!trace && op_array == &func->op_array) {
+						/* recursive call */
+#ifdef CONTEXT_THREADED_JIT
+						|	call >1
+						|.cold_code
+						|1:
+						|	pop r0
+						|	jmp =>num_args
+						|.code
+#else
+						|	jmp =>num_args
+#endif
+						return 1;
+					}
+				}
+			} else {
+				if (!trace || (trace->op == ZEND_JIT_TRACE_END				
+				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+					if (func && zend_accel_in_shm(func->op_array.opcodes)) {
+						|	LOAD_IP_ADDR (func->op_array.opcodes)
+					} else if (GCC_GLOBAL_REGS) {
+						|	mov IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+					} else {
+						|	mov FCARG1a, aword [r0 + offsetof(zend_op_array, opcodes)]
+						|	mov aword EX->opline, FCARG1a
+					}
+				}
+				if (!GCC_GLOBAL_REGS) {
+					|	mov FCARG1a, FP
+				}
+				|	EXT_CALL zend_jit_copy_extra_args_helper, r0
 			}
 		} else {
 			|	// opline = op_array->opcodes
