@@ -1302,7 +1302,7 @@ static zend_bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info
 
 	ret = zend_jit_verify_type_common(arg, arg_info, cache_slot);
 	if (UNEXPECTED(!ret)) {
-		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, cache_slot, arg);
+		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return 0;
 	}
 	return ret;
@@ -1311,7 +1311,7 @@ static zend_bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info
 static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
 {
 	if (UNEXPECTED(!zend_jit_verify_type_common(arg, arg_info, cache_slot))) {
-		zend_verify_return_error((zend_function*)op_array, cache_slot, arg);
+		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }
 
