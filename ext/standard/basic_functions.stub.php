@@ -283,9 +283,9 @@ function getopt(string $options, array $longopts = [], &$optind = null): array|f
 
 function flush(): void {}
 
-function sleep(int $seconds): int {}
+function sleep(float $seconds): int|float|false {}
 
-function usleep(int $microseconds): void {}
+function usleep(float $microseconds): void {}
 
 #if HAVE_NANOSLEEP
 function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
