@@ -299,43 +299,6 @@ static PHP_INI_MH(OnSetLogFilter)
 }
 /* }}} */
 
-/* {{{ php_disable_functions */
-static void php_disable_functions(void)
-{
-	char *s = NULL, *e;
-
-	if (!*(INI_STR("disable_functions"))) {
-		return;
-	}
-
-	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));
-	if (e == NULL) {
-		return;
-	}
-	while (*e) {
-		switch (*e) {
-			case ' ':
-			case ',':
-				if (s) {
-					*e = '\0';
-					zend_disable_function(s, e-s);
-					s = NULL;
-				}
-				break;
-			default:
-				if (!s) {
-					s = e;
-				}
-				break;
-		}
-		e++;
-	}
-	if (s) {
-		zend_disable_function(s, e-s);
-	}
-}
-/* }}} */
-
 /* {{{ php_disable_classes */
 static void php_disable_classes(void)
 {
@@ -1924,9 +1887,6 @@ static void core_globals_dtor(php_core_globals *core_globals)
 	ZEND_ASSERT(!core_globals->last_error_message);
 	ZEND_ASSERT(!core_globals->last_error_file);
 
-	if (core_globals->disable_functions) {
-		free(core_globals->disable_functions);
-	}
 	if (core_globals->disable_classes) {
 		free(core_globals->disable_classes);
 	}
@@ -2274,7 +2234,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	/* disable certain classes and functions as requested by php.ini */
-	php_disable_functions();
+	zend_disable_functions(INI_STR("disable_functions"));
 	php_disable_classes();
 
 	/* make core report what it should */

@@ -96,9 +96,7 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 	}
 
 	if (!strcmp(name, "disable_functions") && *value) {
-		char *v = strdup(value);
-		PG(disable_functions) = v;
-		fpm_php_disable(v, zend_disable_function);
+		zend_disable_functions(value);
 		return 1;
 	}
 

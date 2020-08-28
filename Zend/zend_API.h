@@ -341,7 +341,7 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 #define zend_register_ns_class_alias(ns, name, ce) \
 	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, 1)
 
-ZEND_API zend_result zend_disable_function(const char *function_name, size_t function_name_length);
+ZEND_API void zend_disable_functions(const char *function_list);
 ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_name_length);
 
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);

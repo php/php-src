@@ -2790,9 +2790,43 @@ ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t
 
 /* Disabled functions support */
 
-ZEND_API zend_result zend_disable_function(const char *function_name, size_t function_name_length) /* {{{ */
+static void zend_disable_function(const char *function_name, size_t function_name_length)
 {
-	return zend_hash_str_del(CG(function_table), function_name, function_name_length);
+	zend_hash_str_del(CG(function_table), function_name, function_name_length);
+}
+
+ZEND_API void zend_disable_functions(const char *function_list) /* {{{ */
+{
+	if (!function_list || !*function_list) {
+		return;
+	}
+
+	const char *s = NULL, *e = function_list;
+	while (*e) {
+		switch (*e) {
+			case ' ':
+			case ',':
+				if (s) {
+					zend_disable_function(s, e - s);
+					s = NULL;
+				}
+				break;
+			default:
+				if (!s) {
+					s = e;
+				}
+				break;
+		}
+		e++;
+	}
+	if (s) {
+		zend_disable_function(s, e - s);
+	}
+
+	/* Rehash the function table after deleting functions. This ensures that all internal
+	 * functions are contiguous, which means we don't need to perform full table cleanup
+	 * on shutdown. */
+	zend_hash_rehash(CG(function_table));
 }
 /* }}} */
 
