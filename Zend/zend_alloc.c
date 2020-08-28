@@ -2705,16 +2705,11 @@ static zend_always_inline void tracked_add(zend_mm_heap *heap, void *ptr, size_t
 	zend_hash_index_add_new(heap->tracked_allocs, h, &size_zv);
 }
 
-static zend_always_inline size_t tracked_del(zend_mm_heap *heap, void *ptr) {
-	if (!ptr) {
-		return 0;
-	}
-
+static zend_always_inline zval *tracked_get_size_zv(zend_mm_heap *heap, void *ptr) {
 	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
 	zval *size_zv = zend_hash_index_find(heap->tracked_allocs, h);
 	ZEND_ASSERT(size_zv && "Trying to free pointer not allocated through ZendMM");
-	zend_hash_del_bucket(heap->tracked_allocs, (Bucket *) size_zv);
-	return Z_LVAL_P(size_zv);
+	return size_zv;
 }
 
 static zend_always_inline void tracked_check_limit(zend_mm_heap *heap, size_t add_size) {
@@ -2743,16 +2738,33 @@ static void *tracked_malloc(size_t size)
 }
 
 static void tracked_free(void *ptr) {
+	if (!ptr) {
+		return;
+	}
+
 	zend_mm_heap *heap = AG(mm_heap);
-	heap->size -= tracked_del(heap, ptr);
+	zval *size_zv = tracked_get_size_zv(heap, ptr);
+	heap->size -= Z_LVAL_P(size_zv);
+	zend_hash_del_bucket(heap->tracked_allocs, (Bucket *) size_zv);
 	free(ptr);
 }
 
 static void *tracked_realloc(void *ptr, size_t new_size) {
 	zend_mm_heap *heap = AG(mm_heap);
-	size_t old_size = tracked_del(heap, ptr);
+	zval *old_size_zv = NULL;
+	size_t old_size = 0;
+	if (ptr) {
+		old_size_zv = tracked_get_size_zv(heap, ptr);
+		old_size = Z_LVAL_P(old_size_zv);
+	}
+
 	if (new_size > old_size) {
 		tracked_check_limit(heap, new_size - old_size);
+	}
+
+	/* Delete information about old allocation only after checking the memory limit. */
+	if (old_size_zv) {
+		zend_hash_del_bucket(heap->tracked_allocs, (Bucket *) old_size_zv);
 	}
 
 	ptr = __zend_realloc(ptr, new_size);
