@@ -648,8 +648,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 }
 
 static ZEND_COLD void zend_verify_type_error_common(
-		const zend_function *zf, const zend_arg_info *arg_info,
-		void **cache_slot, zval *value,
+		const zend_function *zf, const zend_arg_info *arg_info, zval *value,
 		const char **fname, const char **fsep, const char **fclass,
 		zend_string **need_msg, const char **given_kind)
 {
@@ -672,8 +671,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 }
 
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info,
-		int arg_num, void **cache_slot, zval *value)
+		const zend_function *zf, const zend_arg_info *arg_info, int arg_num, zval *value)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname, *fsep, *fclass;
@@ -688,8 +686,7 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 
 	if (value) {
 		zend_verify_type_error_common(
-			zf, arg_info, cache_slot, value,
-			&fname, &fsep, &fclass, &need_msg, &given_msg);
+			zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
 
 		if (zf->common.type == ZEND_USER_FUNCTION) {
 			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
@@ -1044,7 +1041,7 @@ static zend_always_inline bool zend_verify_recv_arg_type(zend_function *zf, uint
 
 	if (ZEND_TYPE_IS_SET(cur_arg_info->type)
 			&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
-		zend_verify_arg_error(zf, cur_arg_info, arg_num, cache_slot, arg);
+		zend_verify_arg_error(zf, cur_arg_info, arg_num, arg);
 		return 0;
 	}
 
@@ -1056,7 +1053,7 @@ static zend_always_inline bool zend_verify_variadic_arg_type(
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
 	if (UNEXPECTED(!zend_check_type(arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
-		zend_verify_arg_error(zf, arg_info, arg_num, cache_slot, arg);
+		zend_verify_arg_error(zf, arg_info, arg_num, arg);
 		return 0;
 	}
 
@@ -1150,8 +1147,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 	}
 }
 
-ZEND_API ZEND_COLD void zend_verify_return_error(
-		const zend_function *zf, void **cache_slot, zval *value)
+ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
@@ -1159,8 +1155,7 @@ ZEND_API ZEND_COLD void zend_verify_return_error(
 	const char *given_msg;
 
 	zend_verify_type_error_common(
-		zf, arg_info, cache_slot, value,
-		&fname, &fsep, &fclass, &need_msg, &given_msg);
+		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
 
 	zend_type_error("%s%s%s(): Return value must be of type %s, %s returned",
 		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg);
@@ -1169,8 +1164,7 @@ ZEND_API ZEND_COLD void zend_verify_return_error(
 }
 
 #if ZEND_DEBUG
-static ZEND_COLD void zend_verify_internal_return_error(
-		const zend_function *zf, void **cache_slot, zval *value)
+static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
@@ -1178,8 +1172,7 @@ static ZEND_COLD void zend_verify_internal_return_error(
 	const char *given_msg;
 
 	zend_verify_type_error_common(
-		zf, arg_info, cache_slot, value,
-		&fname, &fsep, &fclass, &need_msg, &given_msg);
+		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
 
 	zend_error_noreturn(E_CORE_ERROR, "%s%s%s(): Return value must be of type %s, %s returned",
 		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg);
@@ -1217,7 +1210,7 @@ static bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 	}
 
 	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &dummy_cache_slot, NULL, 1, /* is_internal */ 1))) {
-		zend_verify_internal_return_error(zf, &dummy_cache_slot, ret);
+		zend_verify_internal_return_error(zf, ret);
 		return 0;
 	}
 
@@ -1225,10 +1218,10 @@ static bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 }
 #endif
 
-static ZEND_COLD void zend_verify_missing_return_type(const zend_function *zf, void **cache_slot)
+static ZEND_COLD void zend_verify_missing_return_type(const zend_function *zf)
 {
 	/* VERIFY_RETURN_TYPE is not emitted for "void" functions, so this is always an error. */
-	zend_verify_return_error(zf, cache_slot, NULL);
+	zend_verify_return_error(zf, NULL);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(void)

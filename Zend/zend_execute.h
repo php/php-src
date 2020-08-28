@@ -70,10 +70,9 @@ ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_undefined_index_write(HashTabl
 
 ZEND_API zend_bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, zend_bool strict, zend_bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info,
-		int arg_num, void **cache_slot, zval *value);
+		const zend_function *zf, const zend_arg_info *arg_info, int arg_num, zval *value);
 ZEND_API ZEND_COLD void zend_verify_return_error(
-		const zend_function *zf, void **cache_slot, zval *value);
+		const zend_function *zf, zval *value);
 ZEND_API zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API zend_bool zend_value_instanceof_static(zval *zv);
 
