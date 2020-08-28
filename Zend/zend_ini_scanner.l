@@ -151,7 +151,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 	return type;                                                   \
 }
 
-static inline int convert_to_number(zval *retval, const char *str, const int str_len)
+static inline zend_result convert_to_number(zval *retval, const char *str, const int str_len)
 {
 	zend_uchar type;
 	int overflow;
@@ -218,7 +218,7 @@ static void yy_scan_buffer(char *str, unsigned int len)
 #define ini_filename SCNG(filename)
 
 /* {{{ init_ini_scanner() */
-static int init_ini_scanner(int scanner_mode, zend_file_handle *fh)
+static zend_result init_ini_scanner(int scanner_mode, zend_file_handle *fh)
 {
 	/* Sanity check */
 	if (scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW && scanner_mode != ZEND_INI_SCANNER_TYPED) {
@@ -268,7 +268,7 @@ ZEND_COLD char *zend_ini_scanner_get_filename(void)
 /* }}} */
 
 /* {{{ zend_ini_open_file_for_scanning() */
-int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode)
+zend_result zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode)
 {
 	char *buf;
 	size_t size;
@@ -289,7 +289,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode)
 /* }}} */
 
 /* {{{ zend_ini_prepare_string_for_scanning() */
-int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode)
+zend_result zend_ini_prepare_string_for_scanning(char *str, int scanner_mode)
 {
 	int len = (int)strlen(str);
 

@@ -1986,14 +1986,7 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	if (highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description) == FAILURE) {
-		efree(hicompiled_string_description);
-		EG(error_reporting) = old_error_reporting;
-		if (i) {
-			php_output_end();
-		}
-		RETURN_FALSE;
-	}
+	highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description);
 	efree(hicompiled_string_description);
 
 	EG(error_reporting) = old_error_reporting;
@@ -2003,6 +1996,7 @@ PHP_FUNCTION(highlight_string)
 		php_output_discard();
 		ZEND_ASSERT(Z_TYPE_P(return_value) == IS_STRING);
 	} else {
+		// TODO Make this function void?
 		RETURN_TRUE;
 	}
 }

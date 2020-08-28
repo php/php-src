@@ -549,7 +549,7 @@ ZEND_VM_C_LABEL(is_equal_double):
 		}
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			bool result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
 				zval_ptr_dtor_str(op1);
 			}
@@ -629,7 +629,7 @@ ZEND_VM_C_LABEL(is_not_equal_double):
 		}
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			bool result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
 				zval_ptr_dtor_str(op1);
 			}
@@ -2993,7 +2993,7 @@ ZEND_VM_COLD_CONST_HANDLER(46, ZEND_JMPZ_EX, CONST|TMPVAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
-	int ret;
+	bool ret;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -3029,7 +3029,7 @@ ZEND_VM_COLD_CONST_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
-	int ret;
+	bool ret;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -4982,7 +4982,7 @@ ZEND_VM_C_LABEL(send_again):
 		// TODO: Speed this up using a flag that specifies whether there are any ref parameters.
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_REFCOUNT_P(args) > 1) {
 			uint32_t tmp_arg_num = arg_num;
-			int separate = 0;
+			bool separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
 			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
@@ -5591,7 +5591,7 @@ ZEND_VM_C_LABEL(case_double):
 		}
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			bool result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 			FREE_OP2();
 			if (result) {
 				ZEND_VM_C_GOTO(case_true);
@@ -6950,7 +6950,7 @@ ZEND_VM_HOT_HANDLER(154, ZEND_ISSET_ISEMPTY_CV, CV, UNUSED, ISSET, SPEC(ISSET))
 			ZEND_VM_SMART_BRANCH_FALSE();
 		}
 	} else {
-		int result;
+		bool result;
 
 		SAVE_OPLINE();
 		result = !i_zend_is_true(value);
@@ -6962,6 +6962,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH|
 {
 	USE_OPLINE
 	zval *value;
+	/* Should be bool result? as below got: result = (opline->extended_value & ZEND_ISEMPTY) */
 	int result;
 	zval *varname;
 	zend_string *name, *tmp_name;
@@ -7007,17 +7008,18 @@ ZEND_VM_HANDLER(180, ZEND_ISSET_ISEMPTY_STATIC_PROP, ANY, CLASS_FETCH, ISSET|CAC
 {
 	USE_OPLINE
 	zval *value;
-	int result;
+	zend_result fetch_result;
+	bool result;
 
 	SAVE_OPLINE();
 
-	result = zend_fetch_static_property_address(&value, NULL, opline->extended_value & ~ZEND_ISEMPTY, BP_VAR_IS, 0 OPLINE_CC EXECUTE_DATA_CC);
+	fetch_result = zend_fetch_static_property_address(&value, NULL, opline->extended_value & ~ZEND_ISEMPTY, BP_VAR_IS, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 	if (!(opline->extended_value & ZEND_ISEMPTY)) {
-		result = result == SUCCESS && Z_TYPE_P(value) > IS_NULL &&
+		result = fetch_result == SUCCESS && Z_TYPE_P(value) > IS_NULL &&
 		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 	} else {
-		result = result != SUCCESS || !i_zend_is_true(value);
+		result = fetch_result != SUCCESS || !i_zend_is_true(value);
 	}
 
 	ZEND_VM_SMART_BRANCH(result, 1);
@@ -7027,7 +7029,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, CONST|TMPVAR|CV
 {
 	USE_OPLINE
 	zval *container;
-	int result;
+	bool result;
 	zend_ulong hval;
 	zval *offset;
 
@@ -7267,7 +7269,7 @@ ZEND_VM_COLD_CONST_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, JMP_ADDR)
 	USE_OPLINE
 	zval *value;
 	zval *ref = NULL;
-	int ret;
+	bool ret;
 
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -9206,7 +9208,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_EQUAL|ZEND_IS_IDENTICAL, (op1_info == MAY_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -9218,7 +9220,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_EQUAL|ZEND_IS_IDENTICAL, (op1_info == MAY_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -9230,7 +9232,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_NOT_EQUAL|ZEND_IS_NOT_IDENTICAL, (op1_info
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -9242,7 +9244,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_NOT_EQUAL|ZEND_IS_NOT_IDENTICAL, (op1_info
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -9283,7 +9285,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_SMALLER, (op1_info == MAY_BE_LONG && op2_i
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -9295,7 +9297,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_SMALLER, (op1_info == MAY_BE_DOUBLE && op2
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -9307,7 +9309,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_SMALLER_OR_EQUAL, (op1_info == MAY_BE_LONG
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -9319,7 +9321,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_SMALLER_OR_EQUAL, (op1_info == MAY_BE_DOUB
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	int result;
+	bool result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);

@@ -344,6 +344,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 	zend_hash_index_add_new(&wm->ht, (zend_ulong) obj_key, value);
 }
 
+/* int return and check_empty due to Object Handler API */
 static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
@@ -512,6 +513,7 @@ static const zend_object_iterator_funcs zend_weakmap_iterator_funcs = {
 	NULL, /* get_gc */
 };
 
+/* by_ref is int due to Iterator API */
 static zend_object_iterator *zend_weakmap_get_iterator(
 		zend_class_entry *ce, zval *object, int by_ref)
 {

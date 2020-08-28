@@ -42,7 +42,7 @@ ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
 }
 
-ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
+ZEND_API zend_result ZEND_FASTCALL zend_list_delete(zend_resource *res)
 {
 	if (GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
@@ -76,14 +76,13 @@ static void zend_resource_dtor(zend_resource *res)
 }
 
 
-ZEND_API int ZEND_FASTCALL zend_list_close(zend_resource *res)
+ZEND_API void ZEND_FASTCALL zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
 		zend_list_free(res);
 	} else if (res->type >= 0) {
 		zend_resource_dtor(res);
 	}
-	return SUCCESS;
 }
 
 ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type)
@@ -203,18 +202,16 @@ void plist_entry_destructor(zval *zv)
 	free(res);
 }
 
-ZEND_API int zend_init_rsrc_list(void)
+ZEND_API void zend_init_rsrc_list(void)
 {
 	zend_hash_init(&EG(regular_list), 8, NULL, list_entry_destructor, 0);
 	EG(regular_list).nNextFreeElement = 0;
-	return SUCCESS;
 }
 
 
-int zend_init_rsrc_plist(void)
+void zend_init_rsrc_plist(void)
 {
 	zend_hash_init(&EG(persistent_list), 8, NULL, plist_entry_destructor, 1);
-	return SUCCESS;
 }
 
 
@@ -235,6 +232,7 @@ void zend_destroy_rsrc_list(HashTable *ht)
 	zend_hash_graceful_reverse_destroy(ht);
 }
 
+/* int return due to HashTable API */
 static int clean_module_resource(zval *zv, void *arg)
 {
 	int resource_id = *(int *)arg;
@@ -242,7 +240,7 @@ static int clean_module_resource(zval *zv, void *arg)
 	return Z_RES_TYPE_P(zv) == resource_id;
 }
 
-
+/* int return due to HashTable API */
 static int zend_clean_module_rsrc_dtors_cb(zval *zv, void *arg)
 {
 	zend_rsrc_list_dtors_entry *ld = (zend_rsrc_list_dtors_entry *)Z_PTR_P(zv);
@@ -299,11 +297,10 @@ static void list_destructors_dtor(zval *zv)
 	free(Z_PTR_P(zv));
 }
 
-int zend_init_rsrc_list_dtors(void)
+void zend_init_rsrc_list_dtors(void)
 {
 	zend_hash_init(&list_destructors, 64, NULL, list_destructors_dtor, 1);
 	list_destructors.nNextFreeElement=1;	/* we don't want resource type 0 */
-	return SUCCESS;
 }
 
 

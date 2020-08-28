@@ -1250,13 +1250,9 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_FALSE;
 	}
 
-	if (zend_list_close(Z_RES_P(zfilter)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Could not invalidate filter, not removing");
-		RETURN_FALSE;
-	} else {
-		php_stream_filter_remove(filter, 1);
-		RETURN_TRUE;
-	}
+	zend_list_close(Z_RES_P(zfilter));
+	php_stream_filter_remove(filter, 1);
+	RETURN_TRUE;
 }
 /* }}} */
 

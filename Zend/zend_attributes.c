@@ -116,7 +116,7 @@ ZEND_API zend_attribute *zend_get_parameter_attribute_str(HashTable *attributes,
 	return get_attribute_str(attributes, str, len, offset + 1);
 }
 
-ZEND_API int zend_get_attribute_value(zval *ret, zend_attribute *attr, uint32_t i, zend_class_entry *scope)
+ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, uint32_t i, zend_class_entry *scope)
 {
 	if (i >= attr->argc) {
 		return FAILURE;
@@ -175,7 +175,7 @@ ZEND_API zend_bool zend_is_attribute_repeated(HashTable *attributes, zend_attrib
 	return 0;
 }
 
-static zend_always_inline void free_attribute(zend_attribute *attr, int persistent)
+static zend_always_inline void free_attribute(zend_attribute *attr, bool persistent)
 {
 	uint32_t i;
 

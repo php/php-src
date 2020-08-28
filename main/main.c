@@ -268,7 +268,8 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		PG(memory_limit) = Z_L(1)<<30;		/* effectively, no limit */
 	}
-	return zend_set_memory_limit(PG(memory_limit));
+	zend_set_memory_limit(PG(memory_limit));
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1520,13 +1521,13 @@ static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
 }
 /* }}} */
 
-static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
+static zend_result php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
 {
 	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
 }
 /* }}} */
 
-PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
+PHPAPI zend_result php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
 {
 	zend_string *opened_path;
 	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &opened_path);

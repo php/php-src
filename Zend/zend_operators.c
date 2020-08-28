@@ -232,7 +232,7 @@ static zend_never_inline zval* ZEND_FASTCALL _zendi_convert_scalar_to_number_sil
 }
 /* }}} */
 
-static zend_never_inline int ZEND_FASTCALL _zendi_try_convert_scalar_to_number(zval *op, zval *holder) /* {{{ */
+static zend_never_inline zend_result ZEND_FASTCALL _zendi_try_convert_scalar_to_number(zval *op, zval *holder) /* {{{ */
 {
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
@@ -274,7 +274,7 @@ static zend_never_inline int ZEND_FASTCALL _zendi_try_convert_scalar_to_number(z
 }
 /* }}} */
 
-static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval *holder) /* {{{ */
+static zend_always_inline zend_result zendi_try_convert_scalar_to_number(zval *op, zval *holder) /* {{{ */
 {
 	if (Z_TYPE_P(op) == IS_LONG || Z_TYPE_P(op) == IS_DOUBLE) {
 		ZVAL_COPY_VALUE(holder, op);
@@ -559,7 +559,7 @@ ZEND_API void ZEND_FASTCALL convert_to_null(zval *op) /* {{{ */
 
 ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op) /* {{{ */
 {
-	int tmp;
+	bool tmp;
 
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -963,7 +963,7 @@ static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zva
 }
 /* }}} */
 
-static zend_always_inline int add_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_always_inline zend_result add_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -987,7 +987,7 @@ static zend_always_inline int add_function_fast(zval *result, zval *op1, zval *o
 	}
 } /* }}} */
 
-static zend_never_inline int ZEND_FASTCALL add_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_never_inline zend_result ZEND_FASTCALL add_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
@@ -1019,7 +1019,7 @@ static zend_never_inline int ZEND_FASTCALL add_function_slow(zval *result, zval 
 	return FAILURE;
 } /* }}} */
 
-ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	if (add_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
@@ -1029,7 +1029,7 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
-static zend_always_inline int sub_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_always_inline zend_result sub_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -1051,7 +1051,7 @@ static zend_always_inline int sub_function_fast(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-static zend_never_inline int ZEND_FASTCALL sub_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_never_inline zend_result ZEND_FASTCALL sub_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
@@ -1084,7 +1084,7 @@ static zend_never_inline int ZEND_FASTCALL sub_function_slow(zval *result, zval 
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	if (sub_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
@@ -1094,7 +1094,7 @@ ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
-static zend_always_inline int mul_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_always_inline zend_result mul_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -1120,7 +1120,7 @@ static zend_always_inline int mul_function_fast(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-static zend_never_inline int ZEND_FASTCALL mul_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_never_inline zend_result ZEND_FASTCALL mul_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
@@ -1153,7 +1153,7 @@ static zend_never_inline int ZEND_FASTCALL mul_function_slow(zval *result, zval 
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	if (mul_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
@@ -1163,7 +1163,7 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
-static int ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -1220,7 +1220,7 @@ static int ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
@@ -1256,7 +1256,7 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 #ifdef __clang__
 __attribute__((no_sanitize("float-divide-by-zero")))
 #endif
-static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_result ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -1300,7 +1300,7 @@ static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
@@ -1333,7 +1333,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
 
@@ -1367,7 +1367,7 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	int op1_val, op2_val;
 
@@ -1417,7 +1417,7 @@ ZEND_API int ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL boolean_not_function(zval *result, zval *op1) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL boolean_not_function(zval *result, zval *op1) /* {{{ */
 {
 	if (Z_TYPE_P(op1) < IS_TRUE) {
 		ZVAL_TRUE(result);
@@ -1442,7 +1442,7 @@ ZEND_API int ZEND_FASTCALL boolean_not_function(zval *result, zval *op1) /* {{{ 
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL bitwise_not_function(zval *result, zval *op1) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL bitwise_not_function(zval *result, zval *op1) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op1)) {
@@ -1482,7 +1482,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
 
@@ -1564,7 +1564,7 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
 
@@ -1646,7 +1646,7 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
 
@@ -1728,7 +1728,7 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
 
@@ -1765,7 +1765,7 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
 
@@ -1801,7 +1801,7 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
     zval *orig_op1 = op1;
 	zval op1_copy, op2_copy;
@@ -1992,7 +1992,7 @@ ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2) /* {{{
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_LONG(result, zend_compare(op1, op2));
 	return SUCCESS;
@@ -2175,6 +2175,7 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 }
 /* }}} */
 
+/* return int to be compatible with compare_func_t */
 static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 {
 	/* is_identical_function() returns 1 in case of identity and 0 in case
@@ -2217,42 +2218,42 @@ ZEND_API zend_bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ 
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, zend_is_identical(op1, op2));
 	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL is_not_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL is_not_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, !zend_is_identical(op1, op2));
 	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, zend_compare(op1, op2) == 0);
 	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, (zend_compare(op1, op2) != 0));
 	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, (zend_compare(op1, op2) < 0));
 	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, (zend_compare(op1, op2) <= 0));
 	return SUCCESS;
@@ -2395,7 +2396,7 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL increment_function(zval *op1) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL increment_function(zval *op1) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op1)) {
@@ -2460,7 +2461,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
 {
 	zend_long lval;
 	double dval;
@@ -2525,11 +2526,11 @@ try_again:
 
 ZEND_API int ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
 {
-	return i_zend_is_true(op);
+	return (int) i_zend_is_true(op);
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 {
 	zend_object *zobj = Z_OBJ_P(op);
 	zval tmp;
@@ -2537,7 +2538,7 @@ ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 		return Z_TYPE(tmp) == IS_TRUE;
 	}
 	zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to bool", ZSTR_VAL(zobj->ce->name));
-	return 1;
+	return false;
 }
 /* }}} */
 
@@ -2621,7 +2622,7 @@ ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t 
 }
 /* }}} */
 
-ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, int persistent) /* {{{ */
+ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent) /* {{{ */
 {
 	size_t length = ZSTR_LEN(str);
 	unsigned char *p = (unsigned char *) ZSTR_VAL(str);
@@ -2817,9 +2818,9 @@ ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2) /* {{{ */
 {
-	int ret1, ret2;
+	zend_uchar ret1, ret2;
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
@@ -2867,7 +2868,7 @@ string_cmp:
 
 ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
 {
-	int ret1, ret2;
+	zend_uchar ret1, ret2;
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;

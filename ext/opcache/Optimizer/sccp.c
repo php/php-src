@@ -788,7 +788,7 @@ static inline int ct_eval_func_call(
 	uint32_t i;
 	zend_execute_data *execute_data, *prev_execute_data;
 	zend_function *func;
-	int overflow;
+	bool overflow;
 
 	if (num_args == 0) {
 		if (zend_string_equals_literal(name, "php_sapi_name")

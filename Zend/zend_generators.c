@@ -629,7 +629,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 	return root;
 }
 
-static int zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
+static zend_result zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
 {
 	zval *value;
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
@@ -1106,6 +1106,7 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_get_gc,
 };
 
+/* by_ref is int due to Iterator API */
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	zend_object_iterator *iterator;

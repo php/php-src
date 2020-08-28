@@ -119,15 +119,15 @@ zend_bool fallback_process = 0; /* process uses file cache fallback */
 #endif
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
-static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
+static zend_result (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
 static void (*accelerator_orig_zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
-static int (*orig_post_startup_cb)(void);
+static zend_result (*orig_post_startup_cb)(void);
 
 static void accel_gen_system_id(void);
-static int accel_post_startup(void);
+static zend_result accel_post_startup(void);
 static int accel_finish_startup(void);
 
 static void preload_shutdown(void);
@@ -304,7 +304,7 @@ static inline int accel_restart_is_active(void)
 }
 
 /* Creates a read lock for SHM access */
-static inline int accel_activate_add(void)
+static inline zend_result accel_activate_add(void)
 {
 #ifdef ZEND_WIN32
 	SHM_UNPROTECT();
@@ -551,7 +551,7 @@ static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong 
 	return NULL;
 }
 
-static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char *str, size_t size, bool permanent)
 {
 	if (ZCG(counted)) {
 	    zend_ulong h = zend_inline_hash_func(str, size);
@@ -2269,7 +2269,7 @@ static int accel_gen_uname_id(void)
 #endif
 
 /* zend_stream_open_function() replacement for PHP 5.3 and above */
-static int persistent_stream_open_function(const char *filename, zend_file_handle *handle)
+static zend_result persistent_stream_open_function(const char *filename, zend_file_handle *handle)
 {
 	if (ZCG(cache_persistent_script)) {
 		/* check if callback is called from include_once or it's a main request */
@@ -2400,7 +2400,7 @@ static void accel_reset_pcre_cache(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
-int accel_activate(INIT_FUNC_ARGS)
+zend_result accel_activate(INIT_FUNC_ARGS)
 {
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		ZCG(accelerator_enabled) = 0;
@@ -2963,13 +2963,13 @@ static int accel_startup(zend_extension *extension)
 	return SUCCESS;
 }
 
-static int accel_post_startup(void)
+static zend_result accel_post_startup(void)
 {
 	zend_function *func;
 	zend_ini_entry *ini_entry;
 
 	if (orig_post_startup_cb) {
-		int (*cb)(void) = orig_post_startup_cb;
+		zend_result (*cb)(void) = orig_post_startup_cb;
 
 		orig_post_startup_cb = NULL;
 		if (cb() != SUCCESS) {
@@ -4368,7 +4368,7 @@ static void preload_load(void)
 	}
 }
 
-static int preload_autoload(zend_string *filename)
+static zend_result preload_autoload(zend_string *filename)
 {
 	zend_persistent_script *persistent_script;
 	zend_op_array *op_array;

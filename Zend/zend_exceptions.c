@@ -213,7 +213,7 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 }
 /* }}} */
 
-static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, int skip_top_traces) /* {{{ */
+static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, bool skip_top_traces) /* {{{ */
 {
 	zval tmp;
 	zval trace;
@@ -908,11 +908,11 @@ static void zend_error_va(int type, const char *file, uint32_t lineno, const cha
 /* }}} */
 
 /* This function doesn't return if it uses E_ERROR */
-ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{{ */
+ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception, rv;
 	zend_class_entry *ce_exception;
-	int result = FAILURE;
+	zend_result result = FAILURE;
 
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = ex->ce;

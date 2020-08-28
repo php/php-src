@@ -195,7 +195,7 @@ typedef struct _zend_utility_functions {
 	zval *(*get_configuration_directive)(zend_string *name);
 	void (*ticks_function)(int ticks);
 	void (*on_timeout)(int seconds);
-	int (*stream_open_function)(const char *filename, zend_file_handle *handle);
+	zend_result (*stream_open_function)(const char *filename, zend_file_handle *handle);
 	void (*printf_to_smart_string_function)(smart_string *buf, const char *format, va_list ap);
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
 	char *(*getenv_function)(const char *name, size_t name_len);
@@ -227,10 +227,10 @@ typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 #define zend_first_try		EG(bailout)=NULL;	zend_try
 
 BEGIN_EXTERN_C()
-int zend_startup(zend_utility_functions *utility_functions);
+void zend_startup(zend_utility_functions *utility_functions);
 void zend_shutdown(void);
 void zend_register_standard_ini_entries(void);
-int zend_post_startup(void);
+zend_result zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno);
@@ -246,7 +246,7 @@ ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const ch
 ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
 
 ZEND_API const char *get_zend_version(void);
-ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
+ZEND_API bool zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
@@ -283,18 +283,18 @@ extern ZEND_API void (*zend_ticks_function)(int ticks);
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
-extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
+extern ZEND_API zend_result (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
 
 /* These two callbacks are especially for opcache */
-extern ZEND_API int (*zend_post_startup_cb)(void);
+extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
 /* Callback for loading of not preloaded part of the script */
-extern ZEND_API int (*zend_preload_autoload)(zend_string *filename);
+extern ZEND_API zend_result (*zend_preload_autoload)(zend_string *filename);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
