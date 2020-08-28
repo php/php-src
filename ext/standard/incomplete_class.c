@@ -142,12 +142,11 @@ PHPAPI zend_string *php_lookup_class_name(zend_object *object)
 /* }}} */
 
 /* {{{ php_store_class_name */
-PHPAPI void php_store_class_name(zval *object, const char *name, size_t len)
+PHPAPI void php_store_class_name(zval *object, zend_string *name)
 {
 	zval val;
 
-
-	ZVAL_STRINGL(&val, name, len);
+	ZVAL_STR_COPY(&val, name);
 	zend_hash_str_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1, &val);
 }
 /* }}} */
