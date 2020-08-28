@@ -30,6 +30,7 @@
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
+	int observer_show_output;
 	int observer_observe_all;
 	int observer_observe_includes;
 	int observer_observe_functions;
@@ -296,6 +297,7 @@ ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.enabled", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_enabled, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.show_output", "1", PHP_INI_SYSTEM, OnUpdateBool, observer_show_output, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_all", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_all, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_includes", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_includes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_functions", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_functions, zend_zend_test_globals, zend_test_globals)
@@ -390,11 +392,14 @@ PHP_MINIT_FUNCTION(zend_test)
 		attr->validator = zend_attribute_validate_zendtestattribute;
 	}
 
-	REGISTER_INI_ENTRIES();
-
 	// Loading via dl() not supported with the observer API
-	if (ZT_G(observer_enabled) && type != MODULE_TEMPORARY) {
-		zend_observer_fcall_register(observer_fcall_init);
+	if (type != MODULE_TEMPORARY) {
+		REGISTER_INI_ENTRIES();
+		if (ZT_G(observer_enabled)) {
+			zend_observer_fcall_register(observer_fcall_init);
+		}
+	} else {
+		(void)ini_entries;
 	}
 
 	return SUCCESS;
@@ -402,13 +407,19 @@ PHP_MINIT_FUNCTION(zend_test)
 
 PHP_MSHUTDOWN_FUNCTION(zend_test)
 {
-	UNREGISTER_INI_ENTRIES();
+	if (type != MODULE_TEMPORARY) {
+		UNREGISTER_INI_ENTRIES();
+	}
 
 	return SUCCESS;
 }
 
 static void observer_begin(zend_execute_data *execute_data)
 {
+	if (!ZT_G(observer_show_output)) {
+		return;
+	}
+
 	if (execute_data->func && execute_data->func->common.function_name) {
 		if (execute_data->func->common.scope) {
 			php_printf("%*s<%s::%s>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->common.scope->name), ZSTR_VAL(execute_data->func->common.function_name));
@@ -440,6 +451,10 @@ static void get_retval_info(zval *retval, smart_str *buf)
 
 static void observer_end(zend_execute_data *execute_data, zval *retval)
 {
+	if (!ZT_G(observer_show_output)) {
+		return;
+	}
+
 	if (EG(exception)) {
 		php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
 	}
@@ -458,7 +473,7 @@ static void observer_end(zend_execute_data *execute_data, zval *retval)
 	}
 }
 
-static zend_observer_fcall observer_fcall_init(zend_function *fbc)
+static void observer_show_init(zend_function *fbc)
 {
 	if (fbc->common.function_name) {
 		if (fbc->common.scope) {
@@ -468,6 +483,13 @@ static zend_observer_fcall observer_fcall_init(zend_function *fbc)
 		}
 	} else {
 		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
+	}
+}
+
+static zend_observer_fcall observer_fcall_init(zend_function *fbc)
+{
+	if (ZT_G(observer_show_output)) {
+		observer_show_init(fbc);
 	}
 
 	if (ZT_G(observer_observe_all)) {
