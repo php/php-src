@@ -22,6 +22,10 @@
 #define MAX_STEPS 1000
 static uint32_t steps_left;
 
+/* Because the fuzzer is always compiled with clang,
+ * we can assume that we don't use global registers / hybrid VM. */
+typedef int (ZEND_FASTCALL *opcode_handler_t)(zend_execute_data *);
+
 void fuzzer_execute_ex(zend_execute_data *execute_data) {
 	while (1) {
 		int ret;
@@ -32,7 +36,7 @@ void fuzzer_execute_ex(zend_execute_data *execute_data) {
 			zend_bailout();
 		}
 
-		if ((ret = ((user_opcode_handler_t) EX(opline)->handler)(execute_data)) != 0) {
+		if ((ret = ((opcode_handler_t) EX(opline)->handler)(execute_data)) != 0) {
 			if (ret > 0) {
 				execute_data = EG(current_execute_data);
 			} else {
