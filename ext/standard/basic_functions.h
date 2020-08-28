@@ -97,7 +97,6 @@ typedef struct _php_basic_globals {
 	char *syslog_device;
 
 	/* var.c */
-	zend_class_entry *incomplete_class;
 	unsigned serialize_lock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
 	struct {
 		struct php_serialize_data *data;

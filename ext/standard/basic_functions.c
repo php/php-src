@@ -108,8 +108,6 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "basic_functions_arginfo.h"
 
-static zend_class_entry *incomplete_class_entry = NULL;
-
 typedef struct _user_tick_function_entry {
 	zval *arguments;
 	int arg_count;
@@ -220,7 +218,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
 
-	BG(incomplete_class) = incomplete_class_entry;
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
 }
@@ -285,7 +282,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 #endif
 
-	BG(incomplete_class) = incomplete_class_entry = php_create_incomplete_class();
+	php_register_incomplete_class();
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);

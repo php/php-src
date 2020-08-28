@@ -26,6 +26,7 @@
 		"unserialize() gets called or provide an autoloader " \
 		"to load the class definition"
 
+PHPAPI zend_class_entry *php_ce_incomplete_class;
 static zend_object_handlers php_incomplete_object_handlers;
 
 /* {{{ incomplete_class_message */
@@ -104,9 +105,9 @@ static zend_object *php_create_incomplete_object(zend_class_entry *class_type)
 	return object;
 }
 
-PHPAPI zend_class_entry *php_create_incomplete_class(void)
+PHPAPI void php_register_incomplete_class(void)
 {
-	zend_class_entry incomplete_class, *incomplete_class_entry;
+	zend_class_entry incomplete_class;
 
 	INIT_CLASS_ENTRY(incomplete_class, INCOMPLETE_CLASS, NULL);
 
@@ -120,10 +121,8 @@ PHPAPI zend_class_entry *php_create_incomplete_class(void)
 	php_incomplete_object_handlers.get_property_ptr_ptr = incomplete_class_get_property_ptr_ptr;
     php_incomplete_object_handlers.get_method = incomplete_class_get_method;
 
-	incomplete_class_entry = zend_register_internal_class(&incomplete_class);
-	incomplete_class_entry->ce_flags |= ZEND_ACC_FINAL;
-
-	return incomplete_class_entry;
+	php_ce_incomplete_class = zend_register_internal_class(&incomplete_class);
+	php_ce_incomplete_class->ce_flags |= ZEND_ACC_FINAL;
 }
 /* }}} */
 
