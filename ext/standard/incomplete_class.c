@@ -19,8 +19,7 @@
 #include "php_incomplete_class.h"
 
 #define INCOMPLETE_CLASS_MSG \
-		"The script tried to execute a method or "  \
-		"access a property of an incomplete object. " \
+		"The script tried to %s on an incomplete object. " \
 		"Please ensure that the class definition \"%s\" of the object " \
 		"you are trying to operate on was loaded _before_ " \
 		"unserialize() gets called or provide an autoloader " \
@@ -29,20 +28,21 @@
 PHPAPI zend_class_entry *php_ce_incomplete_class;
 static zend_object_handlers php_incomplete_object_handlers;
 
-static void incomplete_class_message(zend_object *object, int error_type)
+static void incomplete_class_message(zend_object *object)
 {
 	zend_string *class_name = php_lookup_class_name(object);
-	php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG,
-		class_name ? ZSTR_VAL(class_name) : "unknown");
+	php_error_docref(NULL, E_WARNING, INCOMPLETE_CLASS_MSG,
+		"access a property", class_name ? ZSTR_VAL(class_name) : "unknown");
 	if (class_name) {
 		zend_string_release_ex(class_name, 0);
 	}
 }
 
-static void throw_incomplete_class_error(zend_object *object)
+static void throw_incomplete_class_error(zend_object *object, const char *what)
 {
 	zend_string *class_name = php_lookup_class_name(object);
-	zend_throw_error(NULL, INCOMPLETE_CLASS_MSG, class_name ? ZSTR_VAL(class_name) : "unknown");
+	zend_throw_error(NULL, INCOMPLETE_CLASS_MSG,
+		what, class_name ? ZSTR_VAL(class_name) : "unknown");
 	if (class_name) {
 		zend_string_release_ex(class_name, 0);
 	}
@@ -50,7 +50,7 @@ static void throw_incomplete_class_error(zend_object *object)
 
 static zval *incomplete_class_get_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
-	incomplete_class_message(object, E_NOTICE);
+	incomplete_class_message(object);
 
 	if (type == BP_VAR_W || type == BP_VAR_RW) {
 		ZVAL_ERROR(rv);
@@ -63,34 +63,34 @@ static zval *incomplete_class_get_property(zend_object *object, zend_string *mem
 
 static zval *incomplete_class_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
 {
-	incomplete_class_message(object, E_NOTICE);
+	throw_incomplete_class_error(object, "modify a property");
 	return value;
 }
 /* }}} */
 
 static zval *incomplete_class_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot) /* {{{ */
 {
-	incomplete_class_message(object, E_NOTICE);
+	throw_incomplete_class_error(object, "modify a property");
 	return &EG(error_zval);
 }
 /* }}} */
 
 static void incomplete_class_unset_property(zend_object *object, zend_string *member, void **cache_slot) /* {{{ */
 {
-	incomplete_class_message(object, E_NOTICE);
+	throw_incomplete_class_error(object, "modify a property");
 }
 /* }}} */
 
 static int incomplete_class_has_property(zend_object *object, zend_string *member, int check_empty, void **cache_slot) /* {{{ */
 {
-	incomplete_class_message(object, E_NOTICE);
+	incomplete_class_message(object);
 	return 0;
 }
 /* }}} */
 
 static zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
 {
-	throw_incomplete_class_error(*object);
+	throw_incomplete_class_error(*object, "call a method");
 	return NULL;
 }
 /* }}} */
