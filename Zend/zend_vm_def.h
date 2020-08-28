@@ -4157,8 +4157,6 @@ ZEND_VM_C_LABEL(fcall_end):
 
 ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED|CACHE_SLOT)
 {
-	USE_OPLINE
-
 	if (OP1_TYPE == IS_UNUSED) {
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
@@ -4166,6 +4164,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 	} else {
 /* prevents "undefined variable opline" errors */
 #if !ZEND_VM_SPEC || (OP1_TYPE != IS_UNUSED)
+		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);

@@ -9032,8 +9032,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (IS_CONST == IS_UNUSED) {
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
@@ -9041,6 +9039,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYP
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_CONST != IS_UNUSED)
+		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = RT_CONSTANT(opline, opline->op1);
@@ -19366,8 +19365,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UN
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (IS_TMP_VAR == IS_UNUSED) {
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
@@ -19375,6 +19372,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_TMP_VAR != IS_UNUSED)
+		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -26960,8 +26958,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (IS_VAR == IS_UNUSED) {
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
@@ -26969,6 +26965,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_VAR != IS_UNUSED)
+		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -34158,8 +34155,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (IS_UNUSED == IS_UNUSED) {
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
@@ -34167,6 +34162,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_UNUSED != IS_UNUSED)
+		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = NULL;
@@ -45832,8 +45828,6 @@ assign_dim_error:
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (IS_CV == IS_UNUSED) {
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
@@ -45841,6 +45835,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_CV != IS_UNUSED)
+		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = EX_VAR(opline->op1.var);
