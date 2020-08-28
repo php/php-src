@@ -29,21 +29,24 @@
 PHPAPI zend_class_entry *php_ce_incomplete_class;
 static zend_object_handlers php_incomplete_object_handlers;
 
-/* {{{ incomplete_class_message */
 static void incomplete_class_message(zend_object *object, int error_type)
 {
-	zend_string *class_name;
-
-	class_name = php_lookup_class_name(object);
-
+	zend_string *class_name = php_lookup_class_name(object);
+	php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG,
+		class_name ? ZSTR_VAL(class_name) : "unknown");
 	if (class_name) {
-		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, ZSTR_VAL(class_name));
 		zend_string_release_ex(class_name, 0);
-	} else {
-		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}
 }
-/* }}} */
+
+static void throw_incomplete_class_error(zend_object *object)
+{
+	zend_string *class_name = php_lookup_class_name(object);
+	zend_throw_error(NULL, INCOMPLETE_CLASS_MSG, class_name ? ZSTR_VAL(class_name) : "unknown");
+	if (class_name) {
+		zend_string_release_ex(class_name, 0);
+	}
+}
 
 static zval *incomplete_class_get_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
@@ -87,7 +90,7 @@ static int incomplete_class_has_property(zend_object *object, zend_string *membe
 
 static zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
 {
-	incomplete_class_message(*object, E_ERROR);
+	throw_incomplete_class_error(*object);
 	return NULL;
 }
 /* }}} */

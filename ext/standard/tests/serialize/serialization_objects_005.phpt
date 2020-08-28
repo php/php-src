@@ -48,7 +48,11 @@ var_dump(isset($incomplete->x));
 unset($incomplete->x);
 var_dump($incomplete->x);
 
-$incomplete->f();
+try {
+    $incomplete->f();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
@@ -105,5 +109,5 @@ Notice: main(): The script tried to execute a method or access a property of an 
 
 Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 NULL
-
-Fatal error: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
+Done
