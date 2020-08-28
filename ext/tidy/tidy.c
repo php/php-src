@@ -76,10 +76,10 @@
             TIDY_OPEN_BASE_DIR_CHECK(Z_STRVAL_P(_val)); \
             switch (tidyLoadConfig(_doc, Z_STRVAL_P(_val))) { \
               case -1: \
-                php_error_docref(NULL, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(_val)); \
+                php_error_docref(NULL, E_WARNING, "Could not load configuration file \"%s\"", Z_STRVAL_P(_val)); \
                 break; \
               case 1: \
-                php_error_docref(NULL, E_NOTICE, "There were errors while parsing the configuration file '%s'", Z_STRVAL_P(_val)); \
+                php_error_docref(NULL, E_NOTICE, "There were errors while parsing the configuration file \"%s\"", Z_STRVAL_P(_val)); \
                 break; \
             } \
         } \
@@ -158,7 +158,7 @@ if (php_check_open_basedir(filename)) { \
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
 		if (tidyLoadConfig(_doc, TG(default_config)) < 0) { \
-			php_error_docref(NULL, E_WARNING, "Unable to load Tidy configuration file at '%s'.", TG(default_config)); \
+			php_error_docref(NULL, E_WARNING, "Unable to load Tidy configuration file at \"%s\"", TG(default_config)); \
 		} \
 	}
 /* }}} */
@@ -289,12 +289,12 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 	zend_long lval;
 
 	if (!opt) {
-		php_error_docref(NULL, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);
+		php_error_docref(NULL, E_WARNING, "Unknown Tidy configuration option \"%s\"", optname);
 		return FAILURE;
 	}
 
 	if (tidyOptIsReadOnly(opt)) {
-		php_error_docref(NULL, E_NOTICE, "Attempting to set read-only option '%s'", optname);
+		php_error_docref(NULL, E_WARNING, "Attempting to set read-only option \"%s\"", optname);
 		return FAILURE;
 	}
 
@@ -356,8 +356,8 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(data))) {
-		php_error_docref(NULL, E_WARNING, "Input string is too long");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 
 	doc = tidyCreate();
@@ -382,7 +382,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 
 	if(enc_len) {
 		if (tidySetCharEncoding(doc, enc) < 0) {
-			php_error_docref(NULL, E_WARNING, "Could not set encoding '%s'", enc);
+			php_error_docref(NULL, E_WARNING, "Could not set encoding \"%s\"", enc);
 			RETVAL_FALSE;
 		}
 	}
@@ -798,7 +798,7 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, uint32_t len, ch
 
 	if(enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
-			php_error_docref(NULL, E_WARNING, "Could not set encoding '%s'", enc);
+			php_error_docref(NULL, E_WARNING, "Could not set encoding \"%s\"", enc);
 			return FAILURE;
 		}
 	}
@@ -995,8 +995,8 @@ PHP_FUNCTION(tidy_parse_string)
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
-		php_error_docref(NULL, E_WARNING, "Input string is too long");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 
 	tidy_instanciate(tidy_ce_doc, return_value);
@@ -1058,13 +1058,13 @@ PHP_FUNCTION(tidy_parse_file)
 	obj = Z_TIDY_P(return_value);
 
 	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
-		php_error_docref(NULL, E_WARNING, "Cannot Load '%s' into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (Using include path)" : "");
+		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 		RETURN_FALSE;
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
-		php_error_docref(NULL, E_WARNING, "Input string is too long");
-		RETURN_FALSE;
+		zend_value_error("Input string is too long");
+		RETURN_THROWS();
 	}
 
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
@@ -1155,8 +1155,8 @@ PHP_FUNCTION(tidy_get_opt_doc)
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		php_error_docref(NULL, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
-		RETURN_FALSE;
+		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
+		RETURN_THROWS();
 	}
 
 	if ( (optval = (char *) tidyOptGetDoc(obj->ptdoc->doc, opt)) ) {
@@ -1299,8 +1299,8 @@ PHP_FUNCTION(tidy_getopt)
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		php_error_docref(NULL, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
-		RETURN_FALSE;
+		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
+    	RETURN_THROWS();
 	}
 
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
@@ -1350,13 +1350,13 @@ PHP_METHOD(tidy, __construct)
 
 	if (inputfile) {
 		if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
-			php_error_docref(NULL, E_WARNING, "Cannot Load '%s' into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (Using include path)" : "");
+			php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 			return;
 		}
 
 		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
-			php_error_docref(NULL, E_WARNING, "Input string is too long");
-			RETURN_FALSE;
+			zend_value_error("Input string is too long");
+    		RETURN_THROWS();
 		}
 
 		TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
@@ -1386,13 +1386,13 @@ PHP_METHOD(tidy, parseFile)
 	}
 
 	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
-		php_error_docref(NULL, E_WARNING, "Cannot Load '%s' into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (Using include path)" : "");
+		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 		RETURN_FALSE;
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
-		php_error_docref(NULL, E_WARNING, "Input string is too long");
-		RETURN_FALSE;
+		zend_value_error("Input string is too long");
+    	RETURN_THROWS();
 	}
 
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
@@ -1421,8 +1421,8 @@ PHP_METHOD(tidy, parseString)
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
-		php_error_docref(NULL, E_WARNING, "Input string is too long");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 
 	obj = Z_TIDY_P(object);
