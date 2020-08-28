@@ -65,8 +65,7 @@ typedef struct _php_basic_globals {
 	zend_bool locale_changed;   /* locale was changed and has to be restored */
 	char *strtok_last;
 	char strtok_table[256];
-	zend_ulong strtok_len;
-	char str_ebuf[40];
+	size_t strtok_len;
 	zend_fcall_info array_walk_fci;
 	zend_fcall_info_cache array_walk_fci_cache;
 	zend_fcall_info user_compare_fci;
