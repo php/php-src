@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #79968 (DOMChildNode API crash on unattached nodes). (Benjamin)
 
+- Fileinfo:
+  . Upgrade to libmagic 5.39. (Anatol)
 
 20 Aug 2020, PHP 8.0.0beta2
 
