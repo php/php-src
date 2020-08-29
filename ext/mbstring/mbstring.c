@@ -3856,69 +3856,35 @@ PHP_FUNCTION(mb_get_info)
 /* }}} */
 
 
-static inline mbfl_buffer_converter *php_mb_init_convd(const mbfl_encoding *encoding)
-{
-	mbfl_buffer_converter *convd;
-
-	convd = mbfl_buffer_converter_new(encoding, encoding, 0);
-	if (convd == NULL) {
-		return NULL;
-	}
-	mbfl_buffer_converter_illegal_mode(convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
-	mbfl_buffer_converter_illegal_substchar(convd, 0);
-	return convd;
-}
-
-
-static inline int php_mb_check_encoding_impl(mbfl_buffer_converter *convd, const char *input, size_t length, const mbfl_encoding *encoding) {
-	mbfl_string string, result;
-
-	mbfl_string_init_set(&string, encoding);
-	mbfl_string_init(&result);
-
-	string.val = (unsigned char *) input;
-	string.len = length;
-
-	mbfl_string *ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-	size_t illegalchars = mbfl_buffer_illegalchars(convd);
-
-	if (ret != NULL) {
-		if (illegalchars == 0 && string.len == result.len && memcmp(string.val, result.val, string.len) == 0) {
-			mbfl_string_clear(&result);
-			return 1;
-		}
-		mbfl_string_clear(&result);
-	}
-	return 0;
-}
-
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
 {
-	mbfl_buffer_converter *convd = php_mb_init_convd(encoding);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
+	mbfl_identify_filter *ident = mbfl_identify_filter_new2(encoding);
 
-	int result = php_mb_check_encoding_impl(convd, input, length, encoding);
-	mbfl_buffer_converter_delete(convd);
+	while (length--) {
+		unsigned char c = *input++;
+		(ident->filter_function)(c, ident);
+		if (ident->flag) {
+			mbfl_identify_filter_delete(ident);
+			return 0;
+		}
+	}
+
+	/* String must not end in the middle of a multi-byte character */
+	int result = (ident->status == 0);
+	mbfl_identify_filter_delete(ident);
 	return result;
 }
 
 static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
 {
-	mbfl_buffer_converter *convd;
 	zend_long idx;
 	zend_string *key;
 	zval *entry;
 	int valid = 1;
 
-	(void)(idx);
-
-	convd = php_mb_init_convd(encoding);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
+	(void)(idx); /* Suppress spurious compiler warning that `idx` is not used */
 
 	if (GC_IS_RECURSIVE(vars)) {
-		mbfl_buffer_converter_delete(convd);
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return 0;
 	}
@@ -3926,14 +3892,14 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
-			if (!php_mb_check_encoding_impl(convd, ZSTR_VAL(key), ZSTR_LEN(key), encoding)) {
+			if (!php_mb_check_encoding(ZSTR_VAL(key), ZSTR_LEN(key), encoding)) {
 				valid = 0;
 				break;
 			}
 		}
 		switch (Z_TYPE_P(entry)) {
 			case IS_STRING:
-				if (!php_mb_check_encoding_impl(convd, Z_STRVAL_P(entry), Z_STRLEN_P(entry), encoding)) {
+				if (!php_mb_check_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), encoding)) {
 					valid = 0;
 					break;
 				}
@@ -3957,10 +3923,8 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 		}
 	} ZEND_HASH_FOREACH_END();
 	GC_TRY_UNPROTECT_RECURSION(vars);
-	mbfl_buffer_converter_delete(convd);
 	return valid;
 }
-
 
 /* {{{ Check if the string is valid for the specified encoding */
 PHP_FUNCTION(mb_check_encoding)
