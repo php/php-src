@@ -67,8 +67,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.297 2020/05/09 18:57:15 christos Exp $")
 #else
 #define MAXMAGIC_SIZE        SSIZE_MAX
 #endif
-#include <dirent.h>
-#include <limits.h>
 
 
 #define	EATAB {while (isascii(CAST(unsigned char, *l)) && \
