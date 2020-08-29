@@ -303,7 +303,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql));
 
 #if !defined(MYSQLI_USE_MYSQLND)
-	mysql->mysql->reconnect = MyG(reconnect);
+	char reconnect = MyG(reconnect);
+	mysql_options(mysql->mysql, MYSQL_OPT_RECONNECT, (char *)&reconnect);
 #endif
 	unsigned int allow_local_infile = MyG(allow_local_infile);
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&allow_local_infile);
