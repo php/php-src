@@ -52,7 +52,7 @@ struct mhash_bc_entry {
 	int value;
 };
 
-#define MHASH_NUM_ALGOS 35
+#define MHASH_NUM_ALGOS 38
 
 static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"CRC32", "crc32", 0}, /* used by bzip */
@@ -90,6 +90,9 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"FNV1A64", "fnv1a64", 32},
 	{"JOAAT", "joaat", 33},
 	{"CRC32C", "crc32c", 34}, /* Castagnoli's CRC, used by iSCSI, SCTP, Btrfs, ext4, etc */
+	{"MURMUR3A", "murmur3a", 35},
+	{"MURMUR3C", "murmur3c", 36},
+	{"MURMUR3F", "murmur3f", 37},
 };
 #endif
 
@@ -1586,6 +1589,9 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("fnv164",		&php_hash_fnv164_ops);
 	php_hash_register_algo("fnv1a64",		&php_hash_fnv1a64_ops);
 	php_hash_register_algo("joaat",			&php_hash_joaat_ops);
+	php_hash_register_algo("murmur3a",		&php_hash_murmur3a_ops);
+	php_hash_register_algo("murmur3c",		&php_hash_murmur3c_ops);
+	php_hash_register_algo("murmur3f",		&php_hash_murmur3f_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);
