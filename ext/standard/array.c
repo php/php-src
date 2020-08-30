@@ -745,7 +745,7 @@ PHP_FUNCTION(count)
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
 			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			php_error_docref(NULL, E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", get_active_function_name(), zend_zval_type_name(array));
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
@@ -780,13 +780,13 @@ PHP_FUNCTION(count)
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
 			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			php_error_docref(NULL, E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", get_active_function_name(), zend_zval_type_name(array));
 			RETURN_LONG(1);
 			break;
 		}
 		default:
 			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			php_error_docref(NULL, E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", get_active_function_name(), zend_zval_type_name(array));
 			RETURN_LONG(1);
 			break;
 	}

@@ -25,4 +25,4 @@ bool(true)
 bool(false)
 int(2)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d

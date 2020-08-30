@@ -113,10 +113,10 @@ closedir( $resource2 );
 *** Testing basic functionality of count() function ***
 -- Testing NULL --
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): count(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 COUNT_NORMAL: should be 0, is 0
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): count(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 COUNT_RECURSIVE: should be 0, is 0
 -- Testing arrays --
 COUNT_NORMAL: should be 2, is 2
@@ -126,14 +126,14 @@ COUNT_NORMAL: should be 3, is 3
 COUNT_RECURSIVE: should be 6, is 6
 -- Testing strings --
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): count(): Argument #1 ($var) must be of type Countable|array, string given in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): count(): Argument #1 ($var) must be of type Countable|array, string given in %s on line %d
 COUNT_RECURSIVE: should be 1, is 1
 -- Testing various types with no second argument --
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, string given in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 COUNT_NORMAL: should be 2, is 2
 -- Testing really cool arrays --
@@ -175,18 +175,18 @@ COUNT_RECURSIVE is 7
 
 -- Testing count() on constants with no second argument --
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, int given in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, float given in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 
 -- Testing count() on NULL and Unset variables --
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 COUNT_NORMAL: should be 0, is 0
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, string given in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 COUNT_NORMAL: should be 0, is 0
 

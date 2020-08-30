@@ -63,11 +63,11 @@ function krsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
 function ksort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
-/** @param array|Countable|null $var */
+/** @param Countable|array $var */
 function count($var, int $mode = COUNT_NORMAL): int {}
 
 /**
- * @param array|object|null $var
+ * @param Countable|array $var
  * @alias count
  */
 function sizeof($var, int $mode = COUNT_NORMAL): int {}

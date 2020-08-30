@@ -23,20 +23,20 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, null given in %s on line %d
 int(0)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, string given in %s on line %d
 int(1)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, int given in %s on line %d
 int(1)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, bool given in %s on line %d
 int(1)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, bool given in %s on line %d
 int(1)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, stdClass given in %s on line %d
 int(1)
