@@ -75,40 +75,33 @@ static const mbfl_language *mbfl_language_ptr_table[] = {
 };
 
 /* language resolver */
-const mbfl_language *
-mbfl_name2language(const char *name)
+const mbfl_language *mbfl_name2language(const char *name)
 {
-	const mbfl_language *language;
-	int i, j;
+	const mbfl_language **language;
 
 	if (name == NULL) {
 		return NULL;
 	}
 
-	i = 0;
-	while ((language = mbfl_language_ptr_table[i++]) != NULL){
-		if (strcasecmp(language->name, name) == 0) {
-			return language;
+	for (language = mbfl_language_ptr_table; *language; language++) {
+		if (strcasecmp((*language)->name, name) == 0) {
+			return *language;
 		}
 	}
 
-	i = 0;
-	while ((language = mbfl_language_ptr_table[i++]) != NULL){
-		if (strcasecmp(language->short_name, name) == 0) {
-			return language;
+	for (language = mbfl_language_ptr_table; *language; language++) {
+		if (strcasecmp((*language)->short_name, name) == 0) {
+			return *language;
 		}
 	}
 
 	/* search aliases */
-	i = 0;
-	while ((language = mbfl_language_ptr_table[i++]) != NULL) {
-		if (language->aliases != NULL) {
-			j = 0;
-			while (language->aliases[j]) {
-				if (strcasecmp(language->aliases[j], name) == 0) {
-					return language;
+	for (language = mbfl_language_ptr_table; *language; language++) {
+		if ((*language)->aliases) {
+			for (const char **alias = (*language)->aliases; *alias; alias++) {
+				if (strcasecmp(*alias, name) == 0) {
+					return *language;
 				}
-				j++;
 			}
 		}
 	}
@@ -116,44 +109,27 @@ mbfl_name2language(const char *name)
 	return NULL;
 }
 
-const mbfl_language *
-mbfl_no2language(enum mbfl_no_language no_language)
+const mbfl_language *mbfl_no2language(enum mbfl_no_language no_language)
 {
-	const mbfl_language *language;
-	int i;
+	const mbfl_language **language;
 
-	i = 0;
-	while ((language = mbfl_language_ptr_table[i++]) != NULL){
-		if (language->no_language == no_language) {
-			return language;
+	for (language = mbfl_language_ptr_table; *language; language++) {
+		if ((*language)->no_language == no_language) {
+			return *language;
 		}
 	}
 
 	return NULL;
 }
 
-enum mbfl_no_language
-mbfl_name2no_language(const char *name)
+enum mbfl_no_language mbfl_name2no_language(const char *name)
 {
-	const mbfl_language *language;
-
-	language = mbfl_name2language(name);
-	if (language == NULL) {
-		return mbfl_no_language_invalid;
-	} else {
-		return language->no_language;
-	}
+	const mbfl_language *language = mbfl_name2language(name);
+	return (language == NULL) ? mbfl_no_language_invalid : language->no_language;
 }
 
-const char *
-mbfl_no_language2name(enum mbfl_no_language no_language)
+const char *mbfl_no_language2name(enum mbfl_no_language no_language)
 {
-	const mbfl_language *language;
-
-	language = mbfl_no2language(no_language);
-	if (language == NULL) {
-		return "";
-	} else {
-		return language->name;
-	}
+	const mbfl_language *language = mbfl_no2language(no_language);
+	return (language == NULL) ? "" : language->name;
 }
