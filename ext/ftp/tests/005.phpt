@@ -20,14 +20,40 @@ var_dump(ftp_chdir($ftp, '~'));
 var_dump(ftp_chmod($ftp, 0666, 'x'));
 var_dump(ftp_delete($ftp, 'x'));
 var_dump(ftp_exec($ftp, 'x'));
-var_dump(ftp_fget($ftp, STDOUT, 'x', 0));
-var_dump(ftp_fput($ftp, 'x', fopen(__FILE__, 'r'), 0));
-var_dump(ftp_get($ftp, 'x', 'y', 0));
+try {
+    ftp_fget($ftp, STDOUT, 'x', 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    ftp_fput($ftp, 'x', fopen(__FILE__, 'r'), 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    ftp_get($ftp, 'x', 'y', 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(ftp_mdtm($ftp, 'x'));
 var_dump(ftp_mkdir($ftp, 'x'));
 var_dump(ftp_nb_continue($ftp));
-var_dump(ftp_nb_fget($ftp, STDOUT, 'x', 0));
-var_dump(ftp_nb_fput($ftp, 'x', fopen(__FILE__, 'r'), 0));
+
+try {
+    ftp_nb_fget($ftp, STDOUT, 'x', 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    ftp_nb_fput($ftp, 'x', fopen(__FILE__, 'r'), 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(ftp_systype($ftp));
 var_dump(ftp_pwd($ftp));
 var_dump(ftp_size($ftp, ''));
@@ -52,15 +78,9 @@ bool(false)
 
 Warning: ftp_exec(): Command not implemented (5). in %s005.php on line 15
 bool(false)
-
-Warning: ftp_fget(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 16
-bool(false)
-
-Warning: ftp_fput(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 17
-bool(false)
-
-Warning: ftp_get(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 18
-bool(false)
+ftp_fget(): Argument #4 ($mode) must be either FTP_ASCII or FTP_BINARY
+ftp_fput(): Argument #4 ($mode) must be either FTP_ASCII or FTP_BINARY
+ftp_fget(): Argument #4 ($mode) must be either FTP_ASCII or FTP_BINARY
 int(-1)
 
 Warning: ftp_mkdir(): Command not implemented (7). in %s005.php on line 20
@@ -68,12 +88,8 @@ bool(false)
 
 Warning: ftp_nb_continue(): No nbronous transfer to continue. in %s005.php on line 21
 int(0)
-
-Warning: ftp_nb_fget(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 22
-bool(false)
-
-Warning: ftp_nb_fput(): Mode must be FTP_ASCII or FTP_BINARY in %s005.php on line 23
-bool(false)
+ftp_nb_fget(): Argument #4 ($mode) must be either FTP_ASCII or FTP_BINARY
+ftp_nb_fput(): Argument #4 ($mode) must be either FTP_ASCII or FTP_BINARY
 
 Warning: ftp_systype(): Command not implemented (8). in %s005.php on line 24
 bool(false)
