@@ -61,9 +61,8 @@ ZEND_API void zend_observer_startup(void) {
 }
 
 ZEND_API void zend_observer_activate(void) {
-	/* todo: how to size the arena? */
 	if (ZEND_OBSERVER_ENABLED) {
-		fcall_handlers_arena = zend_arena_create(1024);
+		fcall_handlers_arena = zend_arena_create(4096);
 	}
 }
 
