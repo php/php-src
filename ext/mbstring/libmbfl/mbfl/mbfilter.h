@@ -309,4 +309,9 @@ mbfl_html_numeric_entity_decode(mbfl_string *string, mbfl_string *result, int *c
  */
 MBFLAPI extern mbfl_string* mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, intptr_t mode);
 
+/*
+ * str_split
+ */
+MBFLAPI extern HashTable* mbfl_str_split(mbfl_string *string, unsigned int split_length);
+
 #endif	/* MBFL_MBFILTER_H */

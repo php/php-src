@@ -95,6 +95,8 @@
 #include "eaw_table.h"
 #include "filters/unicode_prop.h"
 
+#include "zend_API.h"
+
 static inline unsigned char *mbfl_filter_feed_data(mbfl_string *string, mbfl_convert_filter *filter)
 {
 	return mbfl_convert_filter_feed_string(filter, string->val, string->len);
@@ -1566,5 +1568,93 @@ not_valid_html_entity:
 	mbfl_convert_filter_flush(decoder);
 	mbfl_memory_device_result(&device, result);
 	mbfl_convert_filter_delete(decoder);
+	return result;
+}
+
+HashTable *mbfl_str_split(mbfl_string *string, unsigned int split_length)
+{
+	HashTable *result = NULL;
+	unsigned int mb_len;
+	size_t chunk_len = 0;
+	zval chunk;
+	unsigned char *p = string->val, *last = p + string->len;
+	const mbfl_encoding *encoding = string->encoding;
+
+	/* first scenario: 1/2/4-byte fixed width encoding */
+	if (encoding->flag & MBFL_ENCTYPE_SBCS) { /* 1 byte */
+		mb_len = string->len;
+		chunk_len = split_length; /* chunk length in bytes */
+	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) { /* 2 bytes */
+		mb_len = string->len / 2;
+		chunk_len = split_length * 2;
+	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) { /* 4 bytes */
+		mb_len = string->len / 4;
+		chunk_len = split_length * 4;
+	} else if (encoding->mblen_table) {
+		/* second scenario: variable width encoding with length table */
+		const unsigned char *mbtab = encoding->mblen_table;
+
+		/* assume that we have 1-byte characters */
+		result = zend_new_array((string->len + split_length - 1) / split_length); /* round up */
+
+		while (p < last) {
+			unsigned char *chunk_p = p; /* pointer to first byte in chunk */
+
+			for (int char_count = 0; char_count < split_length && p < last; char_count++) {
+				p += mbtab[*(unsigned char*)p]; /* character byte length table */
+			}
+			if (p > last) { /* check if chunk is in bounds */
+				p = last;
+			}
+			ZVAL_STRINGL(&chunk, (const char*)chunk_p, p - chunk_p);
+			zend_hash_next_index_insert(result, &chunk);
+		}
+
+		return result;
+	} else {
+		/* third scenario: other multibyte encodings */
+		/* assume that we have 1-byte characters */
+		result = zend_new_array((string->len + split_length - 1) / split_length); /* round up */
+
+		/* decoder filter to decode wchar to encoding */
+		mbfl_memory_device device;
+		mbfl_memory_device_init(&device, split_length + 1, 0);
+		mbfl_convert_filter *decoder = mbfl_convert_filter_new(&mbfl_encoding_wchar, encoding,
+			mbfl_memory_device_output, NULL, &device);
+		ZEND_ASSERT(decoder);
+
+		size_t len;
+		unsigned int *wc_buffer = convert_string_to_wchar(string, &len), *w = wc_buffer, *e = wc_buffer + len;
+
+		while (w < e) {
+			(decoder->filter_function)(*w++, decoder);
+
+			if (split_length == ++chunk_len) { /* if current chunk size reached defined chunk size */
+				mbfl_convert_filter_flush(decoder);
+				ZVAL_STRINGL(&chunk, (const char*)device.buffer, device.pos);
+				zend_hash_next_index_insert(result, &chunk);
+				mbfl_memory_device_reset(&device);
+				chunk_len = 0;
+			}
+		}
+
+		if (chunk_len > 0) {
+			mbfl_convert_filter_flush(decoder);
+			ZVAL_STRINGL(&chunk, (const char*)device.buffer, device.pos);
+			zend_hash_next_index_insert(result, &chunk);
+		}
+
+		efree(wc_buffer);
+		mbfl_memory_device_clear(&device);
+		mbfl_convert_filter_delete(decoder);
+		return result;
+	}
+
+	/* first scenario: 1/2/4-byte fixed width encoding */
+	result = zend_new_array((mb_len + split_length - 1) / split_length); /* round up */
+	for (; p < last; p += chunk_len) {
+		ZVAL_STRINGL(&chunk, (const char*)p, chunk_len);
+		zend_hash_next_index_insert(result, &chunk);
+	}
 	return result;
 }
