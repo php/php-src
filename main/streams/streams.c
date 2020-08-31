@@ -528,6 +528,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
+	if (size > ZEND_LONG_MAX - stream->position) {
+		return FAILURE;
+	}
+
 	/* allocate/fill the buffer */
 
 	if (stream->readfilters.head) {
@@ -1257,6 +1261,9 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		switch(whence) {
 			case SEEK_CUR:
 				if (offset > 0 && offset <= stream->writepos - stream->readpos) {
+					if (offset > ZEND_LONG_MAX - stream->position) {
+						return -1;
+					}
 					stream->readpos += offset; /* if offset = ..., then readpos = writepos */
 					stream->position += offset;
 					stream->eof = 0;
