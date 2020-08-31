@@ -825,7 +825,7 @@ PHP_FUNCTION(ftp_nb_continue)
 	}
 
 	if (!ftp->nb) {
-		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue.");
+		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue");
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 

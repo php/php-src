@@ -29,6 +29,5 @@ Warning: ftp_ssl_connect(): php_network_getaddresses: getaddrinfo failed: %s in 
 bool(false)
 
 -- Testing ftp_ssl_connect() function timeout exception for value 0 --
-
 ftp_ssl_connect(): Argument #3 ($timeout) must be greater than 0
 ===DONE===
