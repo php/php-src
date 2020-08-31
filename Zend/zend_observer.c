@@ -117,7 +117,7 @@ ZEND_API void zend_observer_fcall_install(zend_function *function) {
 	zend_llist_destroy(&handlers_list);
 }
 
-void zend_observe_fcall_begin(
+ZEND_API void zend_observe_fcall_begin(
 	zend_observer_fcall_cache *cache,
 	zend_execute_data *execute_data)
 {
@@ -129,7 +129,7 @@ void zend_observe_fcall_begin(
 	}
 }
 
-void zend_observer_fcall_call_end_helper(
+ZEND_API void zend_observer_fcall_call_end_helper(
 	zend_execute_data *execute_data,
 	zval *return_value)
 {
@@ -144,7 +144,7 @@ void zend_observer_fcall_call_end_helper(
 	}
 }
 
-void zend_observe_fcall_end(
+ZEND_API void zend_observe_fcall_end(
 	zend_observer_fcall_cache *cache,
 	zend_execute_data *execute_data,
 	zval *return_value)
