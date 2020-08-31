@@ -4491,6 +4491,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 				start_fake_frame(call, opline);
 				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
 				end_fake_frame(call);
+				return FAILURE;
 			}
 		}
 

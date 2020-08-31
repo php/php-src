@@ -839,17 +839,6 @@ cleanup_args:
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
-		uint32_t call_info;
-
-		GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
-		call_info = ZEND_CALL_CLOSURE;
-		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-			call_info |= ZEND_CALL_FAKE_CLOSURE;
-		}
-		ZEND_ADD_CALL_FLAG(call, call_info);
-	}
-
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_MAY_HAVE_UNDEF)) {
 		if (zend_handle_undef_args(call) == FAILURE) {
 			zend_vm_stack_free_args(call);
@@ -859,6 +848,17 @@ cleanup_args:
 			}
 			return SUCCESS;
 		}
+	}
+
+	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+		uint32_t call_info;
+
+		GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
+		call_info = ZEND_CALL_CLOSURE;
+		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+			call_info |= ZEND_CALL_FAKE_CLOSURE;
+		}
+		ZEND_ADD_CALL_FLAG(call, call_info);
 	}
 
 	orig_fake_scope = EG(fake_scope);

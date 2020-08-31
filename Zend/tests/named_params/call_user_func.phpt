@@ -12,6 +12,9 @@ $test_variadic = function(...$args) {
 $test_ref = function(&$ref) {
     $ref++;
 };
+$test_required = function($a, $b) {
+    echo "a = $a, b = $b\n";
+};
 
 class Test {
     public function __construct($a = 'a', $b = 'b', $c = 'c') {
@@ -31,6 +34,11 @@ call_user_func($test, c: 'C');
 call_user_func($test_variadic, 'A', c: 'C');
 call_user_func($test_ref, ref: null);
 var_dump(call_user_func('call_user_func', $test, c: 'D'));
+try {
+    call_user_func($test_required, b: 'B');
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
 try {
     var_dump(call_user_func('array_slice', [1, 2, 3, 4, 5], length: 2));
 } catch (ArgumentCountError $e) {
@@ -74,6 +82,7 @@ array(2) {
 Warning: {closure}(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 a = a, b = b, c = D
 NULL
+{closure}(): Argument #1 ($a) not passed
 array_slice(): Argument #2 ($offset) not passed
 array(2) {
   [3]=>
