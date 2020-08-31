@@ -420,6 +420,9 @@ void shutdown_executor(void) /* {{{ */
 	}
 #endif
 
+	/* Check whether anyone is hogging the trampoline. */
+	ZEND_ASSERT(EG(trampoline).common.function_name == NULL || CG(unclean_shutdown));
+
 	EG(ht_iterators_used) = 0;
 
 	zend_shutdown_fpu();
