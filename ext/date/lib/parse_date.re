@@ -1001,7 +1001,7 @@ reltextnumber = 'first'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eig
 reltexttext = 'next'|'last'|'previous'|'this';
 reltextunit = 'ms' | 'µs' | (('msec'|'millisecond'|'µsec'|'microsecond'|'usec'|'sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
 
-relnumber = ([+-]*[ \t]*[0-9]+);
+relnumber = ([+-]*[ \t]*[0-9]{1,13});
 relative = relnumber space? (reltextunit | 'week' );
 relativetext = (reltextnumber|reltexttext) space reltextunit;
 relativetextweek = reltexttext space 'week';

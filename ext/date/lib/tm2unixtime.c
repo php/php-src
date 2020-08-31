@@ -367,6 +367,14 @@ static timelib_sll do_years(timelib_sll year)
 	timelib_sll eras;
 
 	eras = (year - 1970) / 40000;
+
+	/* Hack to make sure we don't overflow. Right now, we can't easily thrown a
+	 * warning in this case, so we'll just return some rubbish. Sucks, but at
+	 * least it doesn't show UBSAN warnings anymore */
+	if (eras < -1000000 || eras > 1000000) {
+		return eras > 0 ? LLONG_MAX/10 : LLONG_MIN/10;
+	}
+
 	if (eras != 0) {
 		year = year - (eras * 40000);
 		res += (SECS_PER_ERA * eras * 100);
