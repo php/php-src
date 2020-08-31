@@ -81,17 +81,21 @@ ZEND_API void zend_observer_fcall_call_end_helper(
 ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_begin(
 	zend_execute_data *execute_data)
 {
-	zend_op_array *op_array = (zend_op_array *)execute_data->func;
-	if (ZEND_OBSERVABLE_FN(op_array->fn_flags) &&
-		!(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
-		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&EX(func)->op_array);
+	ZEND_ASSUME(execute_data->func);
+	zend_op_array *op_array = &execute_data->func->op_array;
+	uint32_t fn_flags = op_array->fn_flags;
+	if (ZEND_OBSERVABLE_FN(fn_flags) && !(fn_flags & ZEND_ACC_GENERATOR)) {
+		void *observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
 		if (!observer_handlers) {
-			zend_observer_fcall_install((zend_function *)&EX(func)->op_array);
-			observer_handlers = ZEND_OBSERVER_HANDLERS(&EX(func)->op_array);
+			zend_observer_fcall_install((zend_function *)op_array);
+			observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
 		}
+
 		ZEND_ASSERT(observer_handlers);
 		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-			zend_observe_fcall_begin(observer_handlers, execute_data);
+			zend_observe_fcall_begin(
+				(zend_observer_fcall_cache *)observer_handlers,
+				execute_data);
 		}
 	}
 }
