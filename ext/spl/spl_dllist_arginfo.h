@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 983510483588b313a0cb290db5c82e825a80be62 */
+ * Stub hash: 26a454261393ea3bdb6252b2d8140434664b5771 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -34,19 +34,17 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplDoublyLinkedList_getIteratorMode arginfo_class_SplDoublyLinkedList_pop
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetExists, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, index, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_SplDoublyLinkedList_offsetGet arginfo_class_SplDoublyLinkedList_offsetExists
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_offsetUnset arginfo_class_SplDoublyLinkedList_offsetGet
+#define arginfo_class_SplDoublyLinkedList_offsetUnset arginfo_class_SplDoublyLinkedList_offsetExists
 
 #define arginfo_class_SplDoublyLinkedList_rewind arginfo_class_SplDoublyLinkedList_pop
 

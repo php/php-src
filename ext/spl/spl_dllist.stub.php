@@ -40,8 +40,11 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     /** @return int */
     public function getIteratorMode() {}
 
-    /** @return bool */
-    public function offsetExists(mixed $index) {}
+    /**
+     * @param int $index
+     * @return bool
+     */
+    public function offsetExists($index) {}
 
     /**
      * @param int $index

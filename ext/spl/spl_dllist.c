@@ -722,16 +722,14 @@ PHP_METHOD(SplDoublyLinkedList, getIteratorMode)
 /* {{{ Returns whether the requested $index exists. */
 PHP_METHOD(SplDoublyLinkedList, offsetExists)
 {
-	zval              *zindex;
 	spl_dllist_object *intern;
-	zend_long               index;
+	zend_long index;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
-	index  = spl_offset_convert_to_long(zindex);
 
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
 } /* }}} */
