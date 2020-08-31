@@ -31,5 +31,5 @@ try {
 Current Value of 'tidy-mark': bool(false)
 Current Value of 'error-file': string(0) ""
 Current Value of 'tab-size': int(8)
-tidy::getOpt(): Argument #1 ($option) is an invalid configuration option
-tidy_getopt(): Argument #2 ($option) is an invalid configuration option
+tidy::getOpt(): Argument #1 ($option) is an invalid configuration option, "bogus-opt" given
+tidy_getopt(): Argument #2 ($option) is an invalid configuration option, "non-ASCII string ���" given

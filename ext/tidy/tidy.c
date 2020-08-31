@@ -1155,7 +1155,7 @@ PHP_FUNCTION(tidy_get_opt_doc)
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option");
+		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
 		RETURN_THROWS();
 	}
 
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(tidy_getopt)
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option");
+		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
     	RETURN_THROWS();
 	}
 
