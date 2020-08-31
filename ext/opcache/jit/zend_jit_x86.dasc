@@ -3654,6 +3654,27 @@ static int zend_jit_update_regs(dasm_State **Dst, zend_jit_addr src, zend_jit_ad
 	return 1;
 }
 
+static int zend_jit_escape_if_undef_r0(dasm_State **Dst, int var, uint32_t flags, const zend_op *opline)
+{
+	zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0);
+
+	|	IF_NOT_ZVAL_TYPE val_addr, IS_UNDEF, >1
+
+	if (flags & ZEND_JIT_EXIT_RESTORE_CALL) {
+		if (!zend_jit_save_call_chain(Dst, -1)) {
+			return 0;
+		}
+	}
+
+	ZEND_ASSERT(opline);
+	zend_jit_set_ip(Dst, opline - 1);
+
+	|	jmp ->trace_escape
+	|1:
+
+	return 1;
+}
+
 static int zend_jit_store_const(dasm_State **Dst, int var, zend_reg reg)
 {
 	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
@@ -5116,7 +5137,10 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					if (op1_info & MAY_BE_ARRAY_HASH) {
 						|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
 					} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
-						|	IF_Z_TYPE r0, IS_UNDEF, &exit_addr
+						/* perform IS_UNDEF check only after result type guard (during deoptimization) */
+						if (!found_exit_addr || (op1_info & MAY_BE_ARRAY_HASH)) {
+							|	IF_Z_TYPE r0, IS_UNDEF, &exit_addr
+						}
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
 						|	IF_Z_TYPE r0, IS_UNDEF, &not_found_exit_addr
 					} else if (type == BP_VAR_IS && found_exit_addr) {
@@ -11457,6 +11481,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 	zend_jit_addr prop_addr;
+	uint32_t res_info = RES_INFO();
 
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
@@ -11570,13 +11595,16 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, prop_info->offset);
 		|	mov edx, dword [FCARG1a + prop_info->offset + 8]
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			if (opline->opcode == ZEND_FETCH_OBJ_W || !(res_info & MAY_BE_GUARD) || !JIT_G(current_frame)) {
+				/* perform IS_UNDEF check only after result type guard (during deoptimization) */
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
-			if (!exit_addr) {
-				return 0;
+				if (!exit_addr) {
+					return 0;
+				}
+				|	IF_UNDEF dl, &exit_addr
 			}
-			|	IF_UNDEF dl, &exit_addr
 		} else {
 			|	IF_UNDEF dl, >5
 		}
@@ -11634,7 +11662,6 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		|	SET_ZVAL_PTR res_addr, FCARG1a
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_INDIRECT
 	} else {
-		uint32_t res_info = RES_INFO();
 		zend_bool result_avoid_refcounting = 0;
 
 		if ((res_info & MAY_BE_GUARD) && JIT_G(current_frame) && prop_info) {

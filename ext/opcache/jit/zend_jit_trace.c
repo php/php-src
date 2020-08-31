@@ -2874,6 +2874,10 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 						return 0;
 					}
 				} else {
+					if (reg == ZREG_ZVAL_COPY_R0
+					 &&!zend_jit_escape_if_undef_r0(Dst, i, flags, opline)) {
+						return 0;
+					}
 					if (!zend_jit_store_const(Dst, i, reg)) {
 						return 0;
 					}
@@ -6020,7 +6024,22 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			} else if (STACK_REG(stack, i) == ZREG_ZVAL_COPY_R0) {
 				zval *val = (zval*)regs->r[0];
 
-				ZVAL_COPY(EX_VAR_NUM(i), val);
+				if (UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
+					/* Undefined array index or property */
+					if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT) {
+						fprintf(stderr, "     TRACE %d exit %d %s() %s:%d\n",
+							trace_num,
+							exit_num,
+							EX(func)->op_array.function_name ?
+								ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
+							ZSTR_VAL(EX(func)->op_array.filename),
+							EX(opline)->lineno);
+					}
+					EX(opline) = t->exit_info[exit_num].opline - 1;
+					return 0;
+				} else {
+					ZVAL_COPY(EX_VAR_NUM(i), val);
+				}
 			} else {
 				ZEND_UNREACHABLE();
 			}
