@@ -667,7 +667,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	if (!required) {
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 			smart_str_appends(str, " = ");
-			if (((zend_internal_arg_info*)arg_info)->default_value) {
+			/* TODO: We don't have a way to fetch the default value for an internal function
+			 * with userland arg info. */
+			if (has_internal_arg_info(fptr)
+					&& ((zend_internal_arg_info*)arg_info)->default_value) {
 				smart_str_appends(str, ((zend_internal_arg_info*)arg_info)->default_value);
 			} else {
 				smart_str_appends(str, "<default>");
