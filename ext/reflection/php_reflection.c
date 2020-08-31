@@ -547,7 +547,10 @@ static void _class_const_string(smart_str *str, char *name, zend_class_constant 
 	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
 	char *type;
 
-	zval_update_constant_ex(&c->value, c->ce);
+	if (zval_update_constant_ex(&c->value, c->ce) == FAILURE) {
+		return;
+	}
+
 	type = zend_zval_type_name(&c->value);
 
 	if (Z_TYPE(c->value) == IS_ARRAY) {
