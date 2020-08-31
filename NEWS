@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #79979 (passing value to by-ref param via CUFA crashes). (cmb,
     Nikita)
+  . Fixed bug #80037 (Typed property must not be accessed before initialization
+    when __get() declared). (Nikita)
 
 - Calendar:
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
