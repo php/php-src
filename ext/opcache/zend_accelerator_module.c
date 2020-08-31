@@ -25,7 +25,7 @@
 #include "ZendAccelerator.h"
 #include "zend_API.h"
 #include "zend_shared_alloc.h"
-#include "zend_accelerator_blacklist.h"
+#include "zend_accelerator_exclude_list.h"
 #include "php_ini.h"
 #include "SAPI.h"
 #include "zend_virtual_cwd.h"
@@ -250,7 +250,8 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.revalidate_freq"       , "2"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.revalidate_freq,           zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_update_protection", "2"   , PHP_INI_ALL   , OnUpdateLong,                accel_directives.file_update_protection,    zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.preferred_memory_model", ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,       accel_directives.memory_model,              zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.blacklist_filename"    , ""    , PHP_INI_SYSTEM, OnUpdateString,	             accel_directives.user_blacklist_filename,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.blacklist_filename"    , ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,	             accel_directives.user_exclude_list_filename,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.exclude_list_filename" , ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,	             accel_directives.user_exclude_list_filename,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_file_size"         , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.max_file_size,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_BOOLEAN("opcache.protect_memory"        , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.protect_memory,            zend_accel_globals, accel_globals)
@@ -465,7 +466,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
 			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZCSG(hits));
 			php_info_print_table_row(2, "Cache hits", buf);
-			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
+			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(exclude_list_misses));
 			php_info_print_table_row(2, "Cache misses", buf);
 			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Used memory", buf);
@@ -633,10 +634,10 @@ ZEND_FUNCTION(opcache_get_status)
 	add_assoc_long(&statistics, "oom_restarts", ZCSG(oom_restarts));
 	add_assoc_long(&statistics, "hash_restarts", ZCSG(hash_restarts));
 	add_assoc_long(&statistics, "manual_restarts", ZCSG(manual_restarts));
-	add_assoc_long(&statistics, "misses", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
-	add_assoc_long(&statistics, "blacklist_misses", ZCSG(blacklist_misses));
+	add_assoc_long(&statistics, "misses", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(exclude_list_misses));
+	add_assoc_long(&statistics, "exclude_list_misses", ZCSG(exclude_list_misses));
 	reqs = ZCSG(hits)+ZCSG(misses);
-	add_assoc_double(&statistics, "blacklist_miss_ratio", reqs?(((double) ZCSG(blacklist_misses))/reqs)*100.0:0);
+	add_assoc_double(&statistics, "exclude_list_miss_ratio", reqs?(((double) ZCSG(exclude_list_misses))/reqs)*100.0:0);
 	add_assoc_double(&statistics, "opcache_hit_rate", reqs?(((double) ZCSG(hits))/reqs)*100.0:0);
 	add_assoc_zval(return_value, "opcache_statistics", &statistics);
 
@@ -694,7 +695,7 @@ ZEND_FUNCTION(opcache_get_status)
 #endif
 }
 
-static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value)
+static int add_exclude_list_path(zend_exclude_list_entry *p, zval *return_value)
 {
 	add_next_index_stringl(return_value, p->path, p->path_length);
 	return 0;
@@ -703,7 +704,7 @@ static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value)
 /* {{{ Obtain configuration information */
 ZEND_FUNCTION(opcache_get_configuration)
 {
-	zval directives, version, blacklist;
+	zval directives, version, exclude_list;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -737,7 +738,8 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives, 	 "opcache.force_restart_timeout",  ZCG(accel_directives).force_restart_timeout);
 	add_assoc_long(&directives, 	 "opcache.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
 	add_assoc_string(&directives, "opcache.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model));
-	add_assoc_string(&directives, "opcache.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename));
+	add_assoc_string(&directives, "opcache.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_exclude_list_filename));
+	add_assoc_string(&directives, "opcache.exclude_list_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_exclude_list_filename));
 	add_assoc_long(&directives,   "opcache.max_file_size",          ZCG(accel_directives).max_file_size);
 	add_assoc_string(&directives, "opcache.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log));
 
@@ -802,10 +804,15 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_string(&version, "opcache_product_name", ACCELERATOR_PRODUCT_NAME);
 	add_assoc_zval(return_value, "version", &version);
 
-	/* blacklist */
-	array_init(&blacklist);
-	zend_accel_blacklist_apply(&accel_blacklist, add_blacklist_path, &blacklist);
-	add_assoc_zval(return_value, "blacklist", &blacklist);
+	/* exclude_list */
+	array_init(&exclude_list);
+	zend_accel_exclude_list_apply(&accel_exclude_list, add_exclude_list_path, &exclude_list);
+	// deprecation, superseeded by "exclude" key
+	add_assoc_zval(return_value, "blacklist", &exclude_list);
+
+	array_init(&exclude_list);
+	zend_accel_exclude_list_apply(&accel_exclude_list, add_exclude_list_path, &exclude_list);
+	add_assoc_zval(return_value, "exclude", &exclude_list);
 }
 
 /* {{{ Request that the contents of the opcode cache to be reset */

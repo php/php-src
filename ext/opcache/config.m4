@@ -300,7 +300,7 @@ int main() {
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
-	zend_accelerator_blacklist.c \
+	zend_accelerator_exclude_list.c \
 	zend_accelerator_debug.c \
 	zend_accelerator_hash.c \
 	zend_accelerator_module.c \

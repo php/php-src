@@ -19,33 +19,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_ACCELERATOR_BLACKLIST_H
-#define ZEND_ACCELERATOR_BLACKLIST_H
+#ifndef ZEND_ACCELERATOR_BLOCKLIST_H
+#define ZEND_ACCELERATOR_BLOCKLIST_H
 
 typedef struct _zend_regexp_list zend_regexp_list;
 
-typedef struct _zend_blacklist_entry {
+typedef struct _zend_exclude_list_entry {
     char *path;
     int   path_length;
 	int   id;
-} zend_blacklist_entry;
+} zend_exclude_list_entry;
 
-typedef struct _zend_blacklist {
-	zend_blacklist_entry *entries;
+typedef struct _zend_exclude_list {
+	zend_exclude_list_entry *entries;
 	int                   size;
 	int                   pos;
 	zend_regexp_list     *regexp_list;
-} zend_blacklist;
+} zend_exclude_list;
 
-typedef int (*blacklist_apply_func_arg_t)(zend_blacklist_entry *, zval *);
+typedef int (*exclude_list_apply_func_arg_t)(zend_exclude_list_entry *, zval *);
 
-extern zend_blacklist accel_blacklist;
+extern zend_exclude_list accel_exclude_list;
 
-void zend_accel_blacklist_init(zend_blacklist *blacklist);
-void zend_accel_blacklist_shutdown(zend_blacklist *blacklist);
+void zend_accel_exclude_list_init(zend_exclude_list *exclude_list);
+void zend_accel_exclude_list_shutdown(zend_exclude_list *exclude_list);
 
-void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename);
-zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len);
-void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument);
+void zend_accel_exclude_list_load(zend_exclude_list *exclude_list, char *filename);
+zend_bool zend_accel_exclude_list_is_excluded(zend_exclude_list *exclude_list, char *verify_path, size_t verify_path_len);
+void zend_accel_exclude_list_apply(zend_exclude_list *exclude_list, exclude_list_apply_func_arg_t func, void *argument);
 
-#endif /* ZEND_ACCELERATOR_BLACKLIST_H */
+#endif /* ZEND_ACCELERATOR_BLOCKLIST_H */
