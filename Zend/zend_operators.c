@@ -1871,6 +1871,9 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		}
 	} else if (UNEXPECTED(Z_STRLEN_P(op2) == 0)) {
 		if (EXPECTED(result != op1)) {
+			if (result == orig_op1) {
+				i_zval_ptr_dtor(result);
+			}
 			ZVAL_COPY(result, op1);
 		}
 	} else {
