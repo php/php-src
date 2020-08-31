@@ -9227,6 +9227,25 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_EQUAL|ZEND_IS_IDENTICAL, (op1_info == MAY_
 	ZEND_VM_SMART_BRANCH(result, 0);
 }
 
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_IDENTICAL|ZEND_IS_EQUAL, op->op1_type != IS_CONST && op->op2_type == IS_CONST && (op2_info == MAY_BE_STRING && (opcode == ZEND_IS_IDENTICAL ? !(op1_info & ~(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_STRING)) : (op1_info == MAY_BE_STRING && !zend_is_numeric_string(Z_STR_P(RT_CONSTANT(op, op->op2)))))), ZEND_IS_IDENTICAL_STRING, TMPVAR|CV, CONST, SPEC(COMMUTATIVE))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	int result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (Z_TYPE_P(op1) == IS_STRING) {
+		result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
+		if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+			zval_ptr_dtor_str(op1);
+		}
+	} else {
+		result = 0;
+	}
+	ZEND_VM_SMART_BRANCH(result, 0);
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_NOT_EQUAL|ZEND_IS_NOT_IDENTICAL, (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_IS_NOT_EQUAL_LONG, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH,NO_CONST_CONST,COMMUTATIVE))
 {
 	USE_OPLINE
@@ -9248,6 +9267,26 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_NOT_EQUAL|ZEND_IS_NOT_IDENTICAL, (op1_info
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 	result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
+	ZEND_VM_SMART_BRANCH(result, 0);
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_NOT_IDENTICAL|ZEND_IS_NOT_EQUAL, op->op1_type != IS_CONST && op->op2_type == IS_CONST && (op2_info == MAY_BE_STRING && (opcode == ZEND_IS_NOT_IDENTICAL ? !(op1_info & ~(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_STRING)) : (op1_info == MAY_BE_STRING && !zend_is_numeric_string(Z_STR_P(RT_CONSTANT(op, op->op2)))))), ZEND_IS_NOT_IDENTICAL_STRING, TMPVAR|CV, CONST, SPEC(COMMUTATIVE))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	int result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (Z_TYPE_P(op1) == IS_STRING) {
+		op2 = RT_CONSTANT(opline, opline->op2);
+		result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
+		if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+			zval_ptr_dtor_str(op1);
+		}
+	} else {
+		result = 1;
+	}
+
 	ZEND_VM_SMART_BRANCH(result, 0);
 }
 
