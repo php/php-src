@@ -373,6 +373,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
 			if (UNEXPECTED(EG(exception))) {
+				zend_string_release(sub_indent);
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();
