@@ -617,6 +617,13 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 
 	dbh->driver_data = H;
 
+	dbh->skip_param_evt =
+		1 << PDO_PARAM_EVT_FREE |
+		1 << PDO_PARAM_EVT_EXEC_POST |
+		1 << PDO_PARAM_EVT_FETCH_PRE |
+		1 << PDO_PARAM_EVT_FETCH_POST |
+		1 << PDO_PARAM_EVT_NORMALIZE;
+
 #ifndef PDO_USE_MYSQLND
 	H->max_buffer_size = 1024*1024;
 #endif

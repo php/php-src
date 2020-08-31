@@ -797,6 +797,9 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 	H->einfo.errmsg = NULL;
 	dbh->driver_data = H;
 
+	/* skip all but this one param event */
+	dbh->skip_param_evt = 0x7F ^ (1 << PDO_PARAM_EVT_EXEC_PRE);
+
 	filename = make_filename_safe(dbh->data_source);
 
 	if (!filename) {

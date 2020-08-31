@@ -1198,6 +1198,11 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
 	dbh->driver_data = H;
 
+	dbh->skip_param_evt =
+		1 << PDO_PARAM_EVT_EXEC_POST |
+		1 << PDO_PARAM_EVT_FETCH_PRE |
+		1 << PDO_PARAM_EVT_FETCH_POST;
+
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
 
