@@ -1679,9 +1679,7 @@ PHP_FUNCTION(mb_str_split)
 {
 	zend_string *str, *encoding = NULL;
 	size_t mb_len, chunks, chunk_len;
-	const char *p, *last; /* pointer for the string cursor and last string char */
 	mbfl_string string, result_string;
-	const mbfl_encoding *mbfl_encoding;
 	zend_long split_length = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -1696,20 +1694,17 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_THROWS();
 	}
 
-	/* fill mbfl_string structure */
 	string.val = (unsigned char *) ZSTR_VAL(str);
 	string.len = ZSTR_LEN(str);
-	string.encoding = php_mb_get_encoding(encoding, 3);
+	const mbfl_encoding *mbfl_encoding = string.encoding = php_mb_get_encoding(encoding, 3);
 	if (!string.encoding) {
 		RETURN_THROWS();
 	}
 
-	p = ZSTR_VAL(str); /* string cursor pointer */
-	last = ZSTR_VAL(str) + ZSTR_LEN(str); /* last string char pointer */
+	const char *p = ZSTR_VAL(str);
+	const char *last = ZSTR_VAL(str) + ZSTR_LEN(str);
 
-	mbfl_encoding = string.encoding;
-
-	/* first scenario: 1,2,4-bytes fixed width encodings (head part) */
+	/* first scenario: 1/2/4-byte fixed width encoding */
 	if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) { /* 1 byte */
 		mb_len = string.len;
 		chunk_len = (size_t)split_length; /* chunk length in bytes */
@@ -1719,46 +1714,37 @@ PHP_FUNCTION(mb_str_split)
 	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) { /* 4 bytes */
 		mb_len = string.len / 4;
 		chunk_len = split_length * 4;
-	} else if (mbfl_encoding->mblen_table != NULL) {
-		/* second scenario: variable width encodings with length table */
-		char unsigned const *mbtab = mbfl_encoding->mblen_table;
+	} else if (mbfl_encoding->mblen_table) {
+		/* second scenario: variable width encoding with length table */
+		const unsigned char *mbtab = mbfl_encoding->mblen_table;
 
-		/* assume that we have 1-bytes characters */
+		/* assume that we have 1-byte characters */
 		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
 
-		while (p < last) { /* split cycle work until the cursor has reached the last byte */
-			char const *chunk_p = p; /* chunk first byte pointer */
-			chunk_len = 0; /* chunk length in bytes */
-			zend_long char_count;
+		while (p < last) {
+			char *chunk_p = p; /* pointer to first byte in chunk */
 
-			for (char_count = 0; char_count < split_length && p < last; ++char_count) {
-				char unsigned const m = mbtab[*(const unsigned char *)p]; /* single character length table */
-				chunk_len += m;
-				p += m;
+			for (int char_count = 0; char_count < split_length && p < last; char_count++) {
+				p += mbtab[*(unsigned char*)p]; /* character byte length table */
 			}
-			if (p >= last) chunk_len -= p - last; /* check if chunk is in bounds */
-			add_next_index_stringl(return_value, chunk_p, chunk_len);
+			if (p > last) { /* check if chunk is in bounds */
+				p = last;
+			}
+			add_next_index_stringl(return_value, chunk_p, p - chunk_p);
 		}
 		return;
 	} else {
 		/* third scenario: other multibyte encodings */
-		mbfl_convert_filter *filter, *decoder;
-
-		/* assume that we have 1-bytes characters */
+		/* assume that we have 1-byte characters */
 		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
 
 		/* decoder filter to decode wchar to encoding */
 		mbfl_memory_device device;
 		mbfl_memory_device_init(&device, split_length + 1, 0);
 
-		decoder = mbfl_convert_filter_new(
-				&mbfl_encoding_wchar,
-				string.encoding,
-				mbfl_memory_device_output,
-				NULL,
-				&device);
-		/* assert that nothing is wrong with the decoder */
-		ZEND_ASSERT(decoder != NULL);
+		mbfl_convert_filter *decoder = mbfl_convert_filter_new(&mbfl_encoding_wchar, string.encoding,
+			mbfl_memory_device_output, NULL, &device);
+		ZEND_ASSERT(decoder);
 
 		/* wchar filter */
 		mbfl_string_init(&result_string); /* mbfl_string to store chunk in the callback */
@@ -1770,14 +1756,9 @@ PHP_FUNCTION(mb_str_split)
 			.next_filter = decoder,
 		};
 
-		filter = mbfl_convert_filter_new(
-				string.encoding,
-				&mbfl_encoding_wchar,
-				mbfl_split_output,
-				NULL,
-				&params);
-		/* assert that nothing is wrong with the filter */
-		ZEND_ASSERT(filter != NULL);
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(string.encoding, &mbfl_encoding_wchar,
+			mbfl_split_output, NULL, &params);
+		ZEND_ASSERT(filter);
 
 		while (p < last - 1) { /* cycle each byte except last with callback function */
 			(*filter->filter_function)(*p++, filter);
@@ -1791,16 +1772,12 @@ PHP_FUNCTION(mb_str_split)
 		return;
 	}
 
-	/* first scenario: 1,2,4-bytes fixed width encodings (tail part) */
-	chunks = (mb_len + split_length - 1) / split_length; /* (round up idiom) */
+	/* first scenario: 1/2/4-byte fixed width encoding */
+	chunks = (mb_len + split_length - 1) / split_length; /* round up */
 	array_init_size(return_value, chunks);
-	if (chunks != 0) {
-		zend_long i;
-
-		for (i = 0; i < chunks - 1; p += chunk_len, ++i) {
-			add_next_index_stringl(return_value, p, chunk_len);
-		}
-		add_next_index_stringl(return_value, p, last - p);
+	while (chunks--) {
+		add_next_index_stringl(return_value, p, chunk_len);
+		p += chunk_len;
 	}
 }
 /* }}} */
