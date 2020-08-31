@@ -458,7 +458,7 @@ PHP_MINFO_FUNCTION(date)
 /* }}} */
 
 /* {{{ Timezone Cache functions */
-static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_tzdb *tzdb)
+static timelib_tzinfo *php_date_parse_tzfile(const char *formal_tzname, const timelib_tzdb *tzdb)
 {
 	timelib_tzinfo *tzi;
 	int dummy_error_code;
@@ -479,7 +479,7 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_
 	return tzi;
 }
 
-timelib_tzinfo *php_date_parse_tzfile_wrapper(char *formal_tzname, const timelib_tzdb *tzdb, int *dummy_error_code)
+timelib_tzinfo *php_date_parse_tzfile_wrapper(const char *formal_tzname, const timelib_tzdb *tzdb, int *dummy_error_code)
 {
 	return php_date_parse_tzfile(formal_tzname, tzdb);
 }
@@ -987,7 +987,7 @@ PHPAPI zend_long php_parse_date(const char *string, zend_long *now)
 	int           error2;
 	zend_long   retval;
 
-	parsed_time = timelib_strtotime((char *) string, strlen(string), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+	parsed_time = timelib_strtotime(string, strlen(string), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (error->error_count) {
 		timelib_time_dtor(parsed_time);
 		timelib_error_container_dtor(error);
@@ -2197,15 +2197,13 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 		if (time_str_len == 0) {
 			time_str = "";
 		}
-		// TODO: drop this const casts
-		dateobj->time = timelib_parse_from_format((char *) format, (char *) time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+		dateobj->time = timelib_parse_from_format(format, time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	} else {
 		if (time_str_len == 0) {
 			time_str = "now";
 			time_str_len = sizeof("now") - 1;
 		}
-		// TODO: drop this const casts
-		dateobj->time = timelib_strtotime((char *) time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+		dateobj->time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	}
 
 	/* update last errors and warnings */
@@ -3349,11 +3347,11 @@ PHP_FUNCTION(date_diff)
 }
 /* }}} */
 
-static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz, size_t tz_len) /* {{{ */
+static int timezone_initialize(php_timezone_obj *tzobj, const char *tz, size_t tz_len) /* {{{ */
 {
 	timelib_time *dummy_t = ecalloc(1, sizeof(timelib_time));
 	int           dst, not_found;
-	char         *orig_tz = tz;
+	const char   *orig_tz = tz;
 
 	if (strlen(tz) != tz_len) {
 		php_error_docref(NULL, E_WARNING, "Timezone must not contain null bytes");
