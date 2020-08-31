@@ -322,9 +322,9 @@ typedef struct _timelib_tzdb {
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 202001
-#define TIMELIB_EXTENDED_VERSION 20201001
-#define TIMELIB_ASCII_VERSION "2020.01"
+#define TIMELIB_VERSION 202002
+#define TIMELIB_EXTENDED_VERSION 20202001
+#define TIMELIB_ASCII_VERSION "2020.02"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01

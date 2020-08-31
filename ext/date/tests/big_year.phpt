@@ -12,6 +12,6 @@ var_dump(date("r", $t));
 
 echo "OK\n";
 ?>
---EXPECT--
+--EXPECTF--
 string(%d) "%s, 01 Jan 2922770265 00:00:00 -0500"
 OK

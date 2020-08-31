@@ -260,8 +260,8 @@ isoweek          = year4 "-"? "W" weekofyear;
 			nr = timelib_get_unsigned_nr(&ptr, 12);
 			switch (*ptr) {
 				case 'Y': s->period->y = nr; break;
-				case 'W': s->period->d = nr * 7; break;
-				case 'D': s->period->d = nr; break;
+				case 'W': s->period->d += nr * 7; break;
+				case 'D': s->period->d += nr; break;
 				case 'H': s->period->h = nr; break;
 				case 'S': s->period->s = nr; break;
 				case 'M':
