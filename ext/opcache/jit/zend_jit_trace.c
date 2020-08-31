@@ -1524,16 +1524,11 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						 && (info->type & MAY_BE_ARRAY_HASH)
 						 && orig_op1_type != IS_UNKNOWN
 						 && !(orig_op1_type & IS_TRACE_REFERENCE)) {
-							/* setup "packed" guards only for loop invariant or reused variables */
-							if ((trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
-							  && tssa->ops[idx].op1_use < trace_buffer->op_array->last_var)
-							 || tssa->ops[idx].op1_use_chain >= 0) {
-								info->type |= MAY_BE_PACKED_GUARD;
-								if (orig_op1_type & IS_TRACE_PACKED) {
-									info->type &= ~MAY_BE_ARRAY_HASH;
-								} else {
-									info->type &= ~MAY_BE_ARRAY_PACKED;
-								}
+							info->type |= MAY_BE_PACKED_GUARD;
+							if (orig_op1_type & IS_TRACE_PACKED) {
+								info->type &= ~MAY_BE_ARRAY_HASH;
+							} else {
+								info->type &= ~MAY_BE_ARRAY_PACKED;
 							}
 						}
 					}
@@ -4229,6 +4224,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[ssa_op->op1_use].avoid_refcounting;
 						if (op1_info & MAY_BE_PACKED_GUARD) {
 							ssa->var_info[ssa_op->op1_use].type &= ~MAY_BE_PACKED_GUARD;
+						} else if ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
+								&& (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY
+								&& (op1_info & MAY_BE_ARRAY_PACKED)
+								&& (op1_info & MAY_BE_ARRAY_HASH)
+								&& orig_op1_type != IS_UNKNOWN) {
+							op1_info |= MAY_BE_PACKED_GUARD;
+							if (orig_op1_type & IS_TRACE_PACKED) {
+								op1_info &= ~MAY_BE_ARRAY_HASH;
+							} else {
+								op1_info &= ~MAY_BE_ARRAY_PACKED;
+							}
 						}
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
 								op1_info, op1_addr, avoid_refcounting,
@@ -4304,6 +4310,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[ssa_op->op1_use].avoid_refcounting;
 						if (op1_info & MAY_BE_PACKED_GUARD) {
 							ssa->var_info[ssa_op->op1_use].type &= ~MAY_BE_PACKED_GUARD;
+						} else if ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
+								&& (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY
+								&& (op1_info & MAY_BE_ARRAY_PACKED)
+								&& (op1_info & MAY_BE_ARRAY_HASH)
+								&& orig_op1_type != IS_UNKNOWN) {
+							op1_info |= MAY_BE_PACKED_GUARD;
+							if (orig_op1_type & IS_TRACE_PACKED) {
+								op1_info &= ~MAY_BE_ARRAY_HASH;
+							} else {
+								op1_info &= ~MAY_BE_ARRAY_PACKED;
+							}
 						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline,
 								op1_info, op1_addr, avoid_refcounting,
