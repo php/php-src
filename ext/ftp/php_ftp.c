@@ -104,12 +104,12 @@ PHP_MINFO_FUNCTION(ftp)
 }
 
 #define	XTYPE(xtype, mode)	{ \
-								if (mode != FTPTYPE_ASCII && mode != FTPTYPE_IMAGE) { \
-									php_error_docref(NULL, E_WARNING, "Mode must be FTP_ASCII or FTP_BINARY"); \
-									RETURN_FALSE; \
-								} \
-								xtype = mode; \
-							}
+	if (mode != FTPTYPE_ASCII && mode != FTPTYPE_IMAGE) { \
+		zend_argument_value_error(4, "must be either FTP_ASCII or FTP_BINARY"); \
+		RETURN_THROWS(); \
+	} \
+	xtype = mode; \
+}
 
 
 /* {{{ Opens a FTP stream */
@@ -126,8 +126,8 @@ PHP_FUNCTION(ftp_connect)
 	}
 
 	if (timeout_sec <= 0) {
-		php_error_docref(NULL, E_WARNING, "Timeout has to be greater than 0");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	/* connect */
@@ -162,8 +162,8 @@ PHP_FUNCTION(ftp_ssl_connect)
 	}
 
 	if (timeout_sec <= 0) {
-		php_error_docref(NULL, E_WARNING, "Timeout has to be greater than 0");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	/* connect */
@@ -825,7 +825,7 @@ PHP_FUNCTION(ftp_nb_continue)
 	}
 
 	if (!ftp->nb) {
-		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue.");
+		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue");
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 
@@ -1257,38 +1257,35 @@ PHP_FUNCTION(ftp_set_option)
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
-				php_error_docref(NULL, E_WARNING, "Option TIMEOUT_SEC expects value of type int, %s given",
-					zend_zval_type_name(z_value));
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type int for the FTP_TIMEOUT_SEC option, %s given", zend_zval_type_name(z_value));
+				RETURN_THROWS();
 			}
 			if (Z_LVAL_P(z_value) <= 0) {
-				php_error_docref(NULL, E_WARNING, "Timeout has to be greater than 0");
-				RETURN_FALSE;
+				zend_argument_value_error(3, "must be greater than 0 for the FTP_TIMEOUT_SEC option");
+				RETURN_THROWS();
 			}
 			ftp->timeout_sec = Z_LVAL_P(z_value);
 			RETURN_TRUE;
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				php_error_docref(NULL, E_WARNING, "Option AUTOSEEK expects value of type bool, %s given",
-					zend_zval_type_name(z_value));
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type bool for the FTP_AUTOSEEK option, %s given", zend_zval_type_name(z_value));
+				RETURN_THROWS();
 			}
 			ftp->autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
 			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				php_error_docref(NULL, E_WARNING, "Option USEPASVADDRESS expects value of type bool, %s given",
-					zend_zval_type_name(z_value));
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type bool for the FTP_USEPASVADDRESS option, %s given", zend_zval_type_name(z_value));
+				RETURN_THROWS();
 			}
 			ftp->usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
+			RETURN_THROWS();
 			break;
 	}
 }
@@ -1320,9 +1317,8 @@ PHP_FUNCTION(ftp_get_option)
 			RETURN_BOOL(ftp->usepasvaddress);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
-			RETURN_FALSE;
-			break;
+			zend_argument_value_error(2, "must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
+			RETURN_THROWS();
 	}
 }
 /* }}} */
