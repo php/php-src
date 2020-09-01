@@ -237,16 +237,18 @@ class mysqli
     public function set_charset(string $charset) {}
 
     /**
+     * @param string|int $value
      * @return bool
      * @alias mysqli_options
      */
-    public function options(int $option, string|int $value) {}
+    public function options(int $option, $value) {}
 
     /**
+     * @param string|int $value
      * @return bool
      * @alias mysqli_options
      */
-    public function set_opt(int $option, string|int $value) {}
+    public function set_opt(int $option, $value) {}
 
     /**
      * @return bool
@@ -628,7 +630,8 @@ function mysqli_num_fields(mysqli_result $mysql_result): int {}
 
 function mysqli_num_rows(mysqli_result $mysqli_result): int|string {}
 
-function mysqli_options(mysqli $mysqli_link, int $option, string|int $value): bool {}
+/** @param string|int $value */
+function mysqli_options(mysqli $mysqli_link, int $option, $value): bool {}
 
 function mysqli_ping(mysqli $mysqli_link): bool {}
 
@@ -749,5 +752,8 @@ function mysqli_refresh(mysqli $mysqli_link, int $options): bool {}
 /** @alias mysqli_real_escape_string */
 function mysqli_escape_string(mysqli $mysqli_link, string $string_to_escape): string {}
 
-/** @alias mysqli_options */
-function mysqli_set_opt(mysqli $mysqli_link, int $option, string|int $value): bool {}
+/**
+ * @param string|int $value
+ * @alias mysqli_options
+ */
+function mysqli_set_opt(mysqli $mysqli_link, int $option, $value): bool {}

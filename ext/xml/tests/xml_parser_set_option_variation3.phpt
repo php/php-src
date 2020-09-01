@@ -5,9 +5,6 @@ Test xml_parser_set_option() function : usage variations
 if (!extension_loaded("xml")) {
 	print "skip - XML extension not loaded";
 }
-if (PHP_INT_SIZE != 8) {
-    die('skip 64-bit only');
-}
 ?>
 --FILE--
 <?php
@@ -80,12 +77,8 @@ $values = array(
 // loop through each element of the array for value
 
 foreach($values as $value) {
-      echo @"\nArg value $value \n";
-      try {
-        var_dump(xml_parser_set_option($parser, $option, $value));
-      } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
-      }
+  echo @"\nArg value $value \n";
+  var_dump(xml_parser_set_option($parser, $option, $value));
 }
 
 fclose($fp);
@@ -123,19 +116,19 @@ Arg value 0.5
 bool(true)
 
 Arg value Array 
-xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
+bool(true)
 
 Arg value Array 
-xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
+bool(true)
 
 Arg value Array 
-xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
+bool(true)
 
 Arg value Array 
-xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
+bool(true)
 
 Arg value Array 
-xml_parser_set_option(): Argument #3 ($value) must be of type string|int, array given
+bool(true)
 
 Arg value  
 bool(true)
@@ -156,20 +149,22 @@ Arg value
 bool(true)
 
 Arg value  
-xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
+bool(true)
 
 Arg value  
-xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
+bool(true)
 
 Arg value string 
-xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
+bool(true)
 
 Arg value string 
-xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
+bool(true)
 
 Arg value Some Ascii Data 
-xml_parser_set_option(): Argument #3 ($value) must be of type int for the chosen option
+
+Notice: Object of class aClass could not be converted to int in %s on line %d
+bool(true)
 
 Arg value Resource id %s
-xml_parser_set_option(): Argument #3 ($value) must be of type string|int, resource given
+bool(true)
 Done

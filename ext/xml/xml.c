@@ -1412,58 +1412,40 @@ PHP_FUNCTION(xml_parser_free)
 PHP_FUNCTION(xml_parser_set_option)
 {
 	xml_parser *parser;
-	zval *pind;
-	zend_long opt, val_long;
-	zend_string *val_str;
+	zval *pind, *val;
+	zend_long opt;
 
-	ZEND_PARSE_PARAMETERS_START(3, 3)
-    	Z_PARAM_OBJECT_OF_CLASS(pind, xml_parser_ce)
-    	Z_PARAM_LONG(opt)
-    	Z_PARAM_STR_OR_LONG(val_str, val_long)
-    ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olz", &pind, xml_parser_ce, &opt, &val) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	parser = Z_XMLPARSER_P(pind);
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
-			if (val_str) {
-				zend_argument_type_error(3, "must be of type int for the chosen option");
-				RETURN_THROWS();
-			}
-
-			parser->case_folding = val_long;
+			parser->case_folding = zval_get_long(val);
 			break;
 		case PHP_XML_OPTION_SKIP_TAGSTART:
-			if (val_str) {
-				zend_argument_type_error(3, "must be of type int for the chosen option");
-				RETURN_THROWS();
-			}
-
-			parser->toffset = val_long;
+			parser->toffset = zval_get_long(val);
 			if (parser->toffset < 0) {
 				php_error_docref(NULL, E_WARNING, "tagstart ignored, because it is out of range");
 				parser->toffset = 0;
 			}
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
-			if (val_str) {
-				zend_argument_type_error(3, "must be of type int for the chosen option");
-				RETURN_THROWS();
-			}
-
-			parser->skipwhite = val_long;
+			parser->skipwhite = zval_get_long(val);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
-			if (!val_str) {
-				zend_argument_type_error(3, "must be of type string for the chosen option");
+			if (!try_convert_to_string(val)) {
 				RETURN_THROWS();
 			}
 
-			enc = xml_get_encoding((XML_Char*) ZSTR_VAL(val_str));
+			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));
 			if (enc == NULL) {
 				zend_argument_value_error(3, "is not a supported target encoding");
 				RETURN_THROWS();
 			}
+
 			parser->target_encoding = enc->name;
 			break;
 		}

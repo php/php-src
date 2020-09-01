@@ -38,12 +38,7 @@ require_once('skipifconnectfailure.inc');
     var_dump("MYSQLI_READ_DEFAULT_FILE",	mysqli_options($link, MYSQLI_READ_DEFAULT_FILE, 'extra_my.cnf'));
     var_dump("MYSQLI_OPT_CONNECT_TIMEOUT",	mysqli_options($link, MYSQLI_OPT_CONNECT_TIMEOUT, 10));
     var_dump("MYSQLI_OPT_LOCAL_INFILE",		mysqli_options($link, MYSQLI_OPT_LOCAL_INFILE, 1));
-    try {
-        var_dump("MYSQLI_INIT_COMMAND");
-        mysqli_options($link, MYSQLI_INIT_COMMAND, array('SET AUTOCOMMIT=0', 'SET AUTOCOMMIT=1'));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
-    }
+    var_dump("MYSQLI_INIT_COMMAND",			mysqli_options($link, MYSQLI_INIT_COMMAND, array('SET AUTOCOMMIT=0', 'SET AUTOCOMMIT=1')));
 
     if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -111,8 +106,10 @@ bool(true)
 bool(true)
 %s(23) "MYSQLI_OPT_LOCAL_INFILE"
 bool(true)
+
+Warning: Array to string conversion in %s on line %d
 %s(19) "MYSQLI_INIT_COMMAND"
-mysqli_options(): Argument #3 ($value) must be of type string|int, array given
+bool(true)
 %s(25) "MYSQLI_READ_DEFAULT_GROUP"
 bool(true)
 %s(24) "MYSQLI_READ_DEFAULT_FILE"

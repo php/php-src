@@ -1675,26 +1675,16 @@ static int mysqli_options_get_option_zval_type(int option)
 PHP_FUNCTION(mysqli_options)
 {
 	MY_MYSQL		*mysql;
-	zval			*mysql_link = getThis();
-	zend_string		*mysql_value_str;
-	zend_long		mysql_value_long;
+	zval			*mysql_link = NULL;
+	zval			*mysql_value;
 	zend_long			mysql_option;
+	unsigned int	l_value;
 	zend_long			ret;
 	int				expected_type;
 
-	if (mysql_link) {
-		ZEND_PARSE_PARAMETERS_START(2, 2)
-			Z_PARAM_LONG(mysql_option)
-			Z_PARAM_STR_OR_LONG(mysql_value_str, mysql_value_long)
-		ZEND_PARSE_PARAMETERS_END();
-	} else {
-		ZEND_PARSE_PARAMETERS_START(3, 3)
-			Z_PARAM_OBJECT_OF_CLASS(mysql_link, mysqli_link_class_entry)
-			Z_PARAM_LONG(mysql_option)
-			Z_PARAM_STR_OR_LONG(mysql_value_str, mysql_value_long)
-		ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Olz", &mysql_link, mysqli_link_class_entry, &mysql_option, &mysql_value) == FAILURE) {
+		RETURN_THROWS();
 	}
-
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
 
 #ifndef MYSQLI_USE_MYSQLND
@@ -1705,34 +1695,31 @@ PHP_FUNCTION(mysqli_options)
 	}
 #endif
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
-	if (expected_type == IS_STRING) {
-		bool is_long_arg = 0;
-		if (!mysql_value_str) {
-			mysql_value_str = zend_long_to_str(mysql_value_long);
-			is_long_arg = 1;
+	if (expected_type != Z_TYPE_P(mysql_value)) {
+		switch (expected_type) {
+			case IS_STRING:
+				if (!try_convert_to_string(mysql_value)) {
+					RETURN_THROWS();
+				}
+				break;
+			case IS_LONG:
+				convert_to_long_ex(mysql_value);
+				break;
+			default:
+				break;
 		}
-		ret = mysql_options(mysql->mysql, mysql_option, ZSTR_VAL(mysql_value_str));
-
-		if (is_long_arg) {
-			zend_string_release(mysql_value_str);
-		}
-	} else if (expected_type == IS_LONG) {
-		if (mysql_value_str) {
-			double rv;
-			zend_long lv;
-			zend_uchar type;
-
-			type = is_numeric_string(ZSTR_VAL(mysql_value_str), ZSTR_LEN(mysql_value_str), &lv, &rv, 0);
-			if (type == IS_LONG) {
-				mysql_value_long = lv;
-			} else {
-				zend_argument_type_error(getThis() ? 1 : 2, "must be a numeric string for the chosen option");
-				RETURN_THROWS();
-			}
-		}
-		ret = mysql_options(mysql->mysql, mysql_option, (char *) &mysql_value_long);
-	} else {
-		ret = 1;
+	}
+	switch (expected_type) {
+		case IS_STRING:
+			ret = mysql_options(mysql->mysql, mysql_option, Z_STRVAL_P(mysql_value));
+			break;
+		case IS_LONG:
+			l_value = Z_LVAL_P(mysql_value);
+			ret = mysql_options(mysql->mysql, mysql_option, (char *)&l_value);
+			break;
+		default:
+			ret = 1;
+			break;
 	}
 
 	RETURN_BOOL(!ret);
