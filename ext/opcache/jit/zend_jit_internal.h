@@ -256,6 +256,15 @@ typedef enum _zend_jit_trace_op {
 #define ZEND_JIT_TRACE_MAX_SSA_VAR       0x7ffffe
 #define ZEND_JIT_TRACE_SSA_VAR_SHIFT     9
 
+#define ZEND_JIT_TRACE_FAKE_LEVEL_MASK   0xffff0000
+#define ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT  16
+
+#define ZEND_JIT_TRACE_FAKE_LEVEL(info) \
+	(((info) & ZEND_JIT_TRACE_FAKE_LEVEL_MASK) >> ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
+
+#define ZEND_JIT_TRACE_FAKE_INFO(level) \
+	(((level) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT) | ZEND_JIT_TRACE_FAKE_INIT_CALL)
+
 #define ZEND_JIT_TRACE_SET_FIRST_SSA_VAR(_info, var) do { \
 		_info |= (var << ZEND_JIT_TRACE_SSA_VAR_SHIFT); \
 	} while (0)

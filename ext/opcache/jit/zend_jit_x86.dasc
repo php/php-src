@@ -8474,7 +8474,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	}
 }
 
-static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_function *func, const zend_op *to_opline)
+static int zend_jit_init_fcall_guard(dasm_State **Dst, uint32_t level, const zend_function *func, const zend_op *to_opline)
 {
 	int32_t exit_point;
 	const void *exit_addr;
@@ -8500,14 +8500,19 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_function *func
 		return 0;
 	}
 
+	|	// call = EX(call);
+	|	mov r1, EX->call
+	while (level > 0) {
+		|	mov r1, EX:r1->prev_execute_data
+		level--;
+	}
+
 	if (func->type == ZEND_USER_FUNCTION &&
 	    (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE) ||
 	     (func->common.fn_flags & ZEND_ACC_CLOSURE) ||
 	     !func->common.function_name)) {
 		const zend_op *opcodes = func->op_array.opcodes;
 
-		|	// call = EX(call);
-		|	mov r1, EX->call
 		|	mov r1, aword EX:r1->func
 		|   .if X64
 		||		if (!IS_SIGNED_32BIT(opcodes)) {
@@ -8521,8 +8526,6 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_function *func
 		|	.endif
 		|	jne &exit_addr
 	} else {
-		|	// call = EX(call);
-		|	mov r1, EX->call
 		|   .if X64
 		||		if (!IS_SIGNED_32BIT(func)) {
 		|			mov64 r0, ((ptrdiff_t)func)
