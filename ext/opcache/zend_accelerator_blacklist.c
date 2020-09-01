@@ -205,8 +205,11 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 
 void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 {
-	zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
+	if (!blacklist->entries) {
+		return;
+	}
 
+	zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
 	while (p<end) {
 		free(p->path);
 		p++;
