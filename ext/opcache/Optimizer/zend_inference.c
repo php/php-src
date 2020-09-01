@@ -3182,6 +3182,10 @@ static zend_always_inline int _zend_update_type_info(
 			} else {
 				tmp = MAY_BE_RC1 | MAY_BE_RCN | (t1 & (MAY_BE_ARRAY | MAY_BE_OBJECT | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF));
 			}
+			/* The result is set to UNDEF for invalid foreach inputs. */
+			if ((t1 & (MAY_BE_ANY | MAY_BE_UNDEF)) & ~(MAY_BE_ARRAY | MAY_BE_OBJECT)) {
+				tmp |= MAY_BE_UNDEF;
+			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->result_def);
 			break;
