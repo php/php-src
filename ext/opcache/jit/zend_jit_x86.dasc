@@ -40,7 +40,7 @@
  |.define FCARG2a, CARG2
  |.define FCARG1d, CARG1d
  |.define FCARG2d, CARG2d
- |.define SPAD,    0x08      // padding for CPU stack alignment
+ |.define SPAD,    0x58      // padding for CPU stack alignment
  |.define NR_SPAD, 0x58      // padding for CPU stack alignment
  |.define T3,      [r4+0x50] // Used to store old value of IP
  |.define T2,      [r4+0x48] // Used to store old value of FP
@@ -68,10 +68,10 @@
  |.define FCARG2a, CARG2
  |.define FCARG1d, CARG1d
  |.define FCARG2d, CARG2d
- |.define SPAD,    0x08      // padding for CPU stack alignment
- |.define NR_SPAD, 0x18      // padding for CPU stack alignment
- |.define T3,      [r4+0x10] // Used to store old value of IP (CALL VM only)
- |.define T2,      [r4+0x08] // Used to store old value of FP (CALL VM only)
+ |.define SPAD,    0x18      // padding for CPU stack alignment
+ |.define NR_SPAD, 0x28      // padding for CPU stack alignment
+ |.define T3,      [r4+0x20] // Used to store old value of IP (CALL VM only)
+ |.define T2,      [r4+0x18] // Used to store old value of FP (CALL VM only)
  |.define T1,      [r4]
 |.else
  |.define FP,      esi
@@ -82,14 +82,20 @@
  |.define FCARG2a, edx
  |.define FCARG1d, ecx
  |.define FCARG2d, edx
- |.define SPAD,    12        // padding for CPU stack alignment
- |.define NR_SPAD, 12        // padding for CPU stack alignment
- |.define T3,      [r4+0x10] // Used to store old value of IP (CALL VM only)
- |.define T2,      [r4+0x08] // Used to store old value of FP (CALL VM only)
+ |.define SPAD,    0x1c      // padding for CPU stack alignment
+ |.define NR_SPAD, 0x1c      // padding for CPU stack alignment
+ |.define T3,      [r4+0x18] // Used to store old value of IP (CALL VM only)
+ |.define T2,      [r4+0x14] // Used to store old value of FP (CALL VM only)
  |.define T1,      [r4]
 |.endif
 
 |.define HYBRID_SPAD, 16     // padding for stack alignment
+
+#ifdef _WIN64
+# define TMP_ZVAL_OFFSET 0x20
+#else
+# define TMP_ZVAL_OFFSET 0
+#endif
 
 #define DASM_ALIGNMENT 16
 
@@ -8730,13 +8736,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	if (RETURN_VALUE_USED(opline)) {
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	} else {
-#ifdef _WIN64
-		/* Reuse reserved arguments stack */
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 0x20);
-#else
 		/* CPU stack allocated temporary zval */
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 8);
-#endif
+		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, TMP_ZVAL_OFFSET);
 	}
 
 	if ((opline-1)->opcode == ZEND_SEND_UNPACK || (opline-1)->opcode == ZEND_SEND_ARRAY ||
@@ -9161,12 +9162,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 		}
 
-		if (!RETURN_VALUE_USED(opline)) {
-			|.if not(X64WIN)
-			|	sub r4, 16 /* alloca() */
-			|.endif
-		}
-
 		|	// ZVAL_NULL(EX_VAR(opline->result.var));
 		|	LOAD_ZVAL_ADDR FCARG2a, res_addr
 		|	SET_Z_TYPE_INFO FCARG2a, IS_NULL
@@ -9257,9 +9252,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 				|	ZVAL_PTR_DTOR res_addr, func_info, 1, 1, opline
 			}
-			|.if not(X64WIN)
-			|	add r4, 16 /* revert alloca() */
-			|.endif
 		}
 
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
