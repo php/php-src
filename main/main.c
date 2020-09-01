@@ -71,6 +71,7 @@
 #include "zend_extensions.h"
 #include "zend_ini.h"
 #include "zend_dtrace.h"
+#include "zend_observer.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -2199,6 +2200,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
+	zend_observer_startup();
 
 	/* startup extensions statically compiled in */
 	if (php_register_internal_extensions_func() == FAILURE) {
@@ -2416,6 +2418,8 @@ void php_module_shutdown(void)
 		_set_invalid_parameter_handler(old_invalid_parameter_handler);
 	}
 #endif
+
+	zend_observer_shutdown();
 }
 /* }}} */
 

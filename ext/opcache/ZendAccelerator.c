@@ -44,6 +44,7 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 #include "zend_file_cache.h"
+#include "zend_observer.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/md5.h"
 #include "ext/hash/php_hash.h"
@@ -2976,6 +2977,15 @@ static zend_result accel_post_startup(void)
 			return FAILURE;
 		}
 	}
+
+#ifdef HAVE_JIT
+	/* TODO Observer support for JIT */
+	if (ZEND_OBSERVER_ENABLED) {
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		zend_accel_error(ACCEL_LOG_INFO, "Observer extension present. Disabling JIT.");
+	}
+#endif
 
 	/* Initialize zend_func_info_rid */
 	zend_optimizer_startup();

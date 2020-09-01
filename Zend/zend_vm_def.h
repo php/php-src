@@ -3940,7 +3940,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	ZEND_VM_CONTINUE();
 }
 
-ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL))
+ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
@@ -3958,12 +3958,13 @@ ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL))
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	OBSERVER_FCALL_BEGIN_HANDLERS(execute_data);
 	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }
 
-ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
+ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL,OBSERVER))
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
@@ -3982,6 +3983,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+		OBSERVER_FCALL_BEGIN_HANDLERS(execute_data);
 		LOAD_OPLINE_EX();
 
 		ZEND_VM_ENTER_EX();
@@ -4053,7 +4055,7 @@ ZEND_VM_C_LABEL(fcall_by_name_end):
 	ZEND_VM_CONTINUE();
 }
 
-ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
+ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
@@ -4072,6 +4074,7 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
+		OBSERVER_FCALL_BEGIN_HANDLERS(execute_data);
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
@@ -4220,7 +4223,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 	}
 }
 
-ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
+ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	zval *retval_ptr;
@@ -4289,10 +4292,11 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 			}
 		}
 	}
+	OBSERVER_FCALL_END_HANDLERS(execute_data, return_value);
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
-ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC)
+ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	zval *retval_ptr;
@@ -4349,6 +4353,7 @@ ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC)
 		FREE_OP1_VAR_PTR();
 	} while (0);
 
+	OBSERVER_FCALL_END_HANDLERS(execute_data, EX(return_value));
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
@@ -4428,7 +4433,7 @@ ZEND_VM_HANDLER(139, ZEND_GENERATOR_CREATE, ANY, ANY)
 	}
 }
 
-ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY)
+ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	zval *retval;
@@ -4463,6 +4468,8 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY)
 			ZVAL_COPY_VALUE(&generator->retval, retval);
 		}
 	}
+
+	OBSERVER_FCALL_END_HANDLERS(generator->execute_data, &generator->retval);
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
@@ -6134,7 +6141,7 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
+ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	zend_op_array *new_op_array;
@@ -6143,8 +6150,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 	SAVE_OPLINE();
 	inc_filename = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
-	FREE_OP1();
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		FREE_OP1();
 		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
 			destroy_op_array(new_op_array);
 			efree_size(new_op_array, sizeof(zend_op_array));
@@ -6178,7 +6185,9 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
+		OBSERVER_FCALL_BEGIN_HANDLERS(call);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			FREE_OP1();
 			ZEND_VM_ENTER();
 		} else {
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
@@ -6190,12 +6199,14 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_rethrow_exception(execute_data);
+			FREE_OP1();
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
 	} else if (RETURN_VALUE_USED(opline)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 	}
+	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -7688,7 +7699,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 	}
 }
 
-ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
+ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY, SPEC(OBSERVER))
 {
 	const zend_op *throw_op = EG(opline_before_exception);
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
@@ -7717,6 +7728,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		}
 	}
 
+	OBSERVER_FCALL_END_HANDLERS(execute_data, EX(return_value));
 	cleanup_unfinished_calls(execute_data, throw_op_num);
 
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
@@ -8420,7 +8432,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, CV|TMPVAR|UNUSED|CLASS_FETCH, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
+ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY, SPEC(OBSERVER))
 {
 	zend_array *args = NULL;
 	zend_function *fbc = EX(func);
@@ -8478,6 +8490,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+		OBSERVER_FCALL_BEGIN_HANDLERS(execute_data);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();

@@ -1458,7 +1458,8 @@ PHP_ADD_SOURCES(Zend, \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c, \
+    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
+    zend_observer.c, \
 	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_BUILD_DIR(main main/streams)

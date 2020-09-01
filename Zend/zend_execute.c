@@ -40,6 +40,7 @@
 #include "zend_inheritance.h"
 #include "zend_type_info.h"
 #include "zend_smart_str.h"
+#include "zend_observer.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
