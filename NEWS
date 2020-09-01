@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0beta3
+03 Sep 2020, PHP 8.0.0beta3
 
 - Calendar:
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
