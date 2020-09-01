@@ -60,14 +60,12 @@ typedef int32_t php_int32;
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
-	zval  strtok_zval;
-	char *strtok_string;
+	zend_string *strtok_string;
 	zend_string *ctype_string; /* current LC_CTYPE locale (or NULL for 'C') */
 	zend_bool locale_changed;   /* locale was changed and has to be restored */
 	char *strtok_last;
 	char strtok_table[256];
-	zend_ulong strtok_len;
-	char str_ebuf[40];
+	size_t strtok_len;
 	zend_fcall_info array_walk_fci;
 	zend_fcall_info_cache array_walk_fci_cache;
 	zend_fcall_info user_compare_fci;
@@ -98,7 +96,6 @@ typedef struct _php_basic_globals {
 	char *syslog_device;
 
 	/* var.c */
-	zend_class_entry *incomplete_class;
 	unsigned serialize_lock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
 	struct {
 		struct php_serialize_data *data;

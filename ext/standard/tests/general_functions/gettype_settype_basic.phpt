@@ -348,11 +348,11 @@ float(0)
 string(6) "double"
 -- Iteration 12 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 13 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 14 --
 8: Object of class point could not be converted to float
@@ -407,11 +407,11 @@ float(0)
 string(6) "double"
 -- Iteration 12 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 13 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 14 --
 8: Object of class point could not be converted to float

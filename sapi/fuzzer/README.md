@@ -25,7 +25,8 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-unserializehash`: Fuzzing unserialize() for HashContext objects
 * `php-fuzz-json`: Fuzzing JSON parser (requires --enable-json)
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
-* `php-fuzz-mbstring`: fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
+* `php-fuzz-mbstring`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
+* `php-fuzz-execute`: Fuzzing the executor
 
 Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
 

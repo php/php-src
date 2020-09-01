@@ -22,10 +22,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_cp5022x.h"
 #include "mbfilter_jis.h"
@@ -54,7 +50,7 @@ const mbfl_encoding mbfl_encoding_jis_ms = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_jis_ms_wchar,
 	&vtbl_wchar_jis_ms
 };
@@ -65,7 +61,7 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50220_wchar,
 	&vtbl_wchar_cp50220
 };
@@ -76,7 +72,7 @@ const mbfl_encoding mbfl_encoding_cp50220raw = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50220raw_wchar,
 	&vtbl_wchar_cp50220raw
 };
@@ -87,7 +83,7 @@ const mbfl_encoding mbfl_encoding_cp50221 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50221_wchar,
 	&vtbl_wchar_cp50221
 };
@@ -98,7 +94,7 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50222_wchar,
 	&vtbl_wchar_cp50222
 };
@@ -587,7 +583,7 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 
 	mbfl_filt_conv_common_ctor(filt);
 
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	ctx->tl_param.mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
 
 	ctx->last = *filt;
@@ -608,7 +604,7 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
 
 	*dest = *src;
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	dest->opaque = ctx;
 	dest->data = &ctx->last;
 }
@@ -619,7 +615,7 @@ mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 	vtbl_tl_jisx0201_jisx0208.filter_dtor(filt);
 
 	if (filt->opaque != NULL) {
-		mbfl_free(filt->opaque);
+		efree(filt->opaque);
 	}
 
 	mbfl_filt_conv_common_dtor(filt);

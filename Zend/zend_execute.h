@@ -43,14 +43,15 @@ ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
+ZEND_API zend_bool zend_is_valid_class_name(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);
 ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex);
-ZEND_API int zend_eval_string(const char *str, zval *retval_ptr, const char *string_name);
-ZEND_API int zend_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name);
-ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *string_name, int handle_exceptions);
-ZEND_API int zend_eval_stringl_ex(const char *str, size_t str_len, zval *retval_ptr, const char *string_name, int handle_exceptions);
+ZEND_API zend_result zend_eval_string(const char *str, zval *retval_ptr, const char *string_name);
+ZEND_API zend_result zend_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name);
+ZEND_API zend_result zend_eval_string_ex(const char *str, zval *retval_ptr, const char *string_name, bool handle_exceptions);
+ZEND_API zend_result zend_eval_stringl_ex(const char *str, size_t str_len, zval *retval_ptr, const char *string_name, bool handle_exceptions);
 
 /* export zend_pass_function to allow comparisons against it */
 extern ZEND_API const zend_internal_function zend_pass_function;
@@ -64,15 +65,14 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_propert
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv);
-ZEND_API ZEND_COLD int ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval);
-ZEND_API ZEND_COLD int ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset);
+ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval);
+ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset);
 
 ZEND_API zend_bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, zend_bool strict, zend_bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info,
-		int arg_num, void **cache_slot, zval *value);
+		const zend_function *zf, const zend_arg_info *arg_info, int arg_num, zval *value);
 ZEND_API ZEND_COLD void zend_verify_return_error(
-		const zend_function *zf, void **cache_slot, zval *value);
+		const zend_function *zf, zval *value);
 ZEND_API zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API zend_bool zend_value_instanceof_static(zval *zv);
 
@@ -155,8 +155,8 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 	return variable_ptr;
 }
 
-ZEND_API int zval_update_constant(zval *pp);
-ZEND_API int zval_update_constant_ex(zval *pp, zend_class_entry *scope);
+ZEND_API zend_result zval_update_constant(zval *pp);
+ZEND_API zend_result zval_update_constant_ex(zval *pp, zend_class_entry *scope);
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {
@@ -317,7 +317,7 @@ ZEND_API uint32_t zend_get_executed_lineno(void);
 ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API zend_bool zend_is_executing(void);
 
-ZEND_API void zend_set_timeout(zend_long seconds, int reset_signals);
+ZEND_API void zend_set_timeout(zend_long seconds, bool reset_signals);
 ZEND_API void zend_unset_timeout(void);
 ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type);

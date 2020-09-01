@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso2022_kr.h"
 #include "unicode_table_uhc.h"
@@ -43,7 +39,7 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	"ISO-2022-KR",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022kr_wchar,
 	&vtbl_wchar_2022kr
 };

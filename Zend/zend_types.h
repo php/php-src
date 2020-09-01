@@ -55,6 +55,8 @@ typedef enum {
   FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
 } ZEND_RESULT_CODE;
 
+typedef ZEND_RESULT_CODE zend_result;
+
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 # ifdef ZEND_WIN32
 #  define ZEND_SIZE_MAX  _UI64_MAX

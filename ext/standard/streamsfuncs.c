@@ -419,6 +419,11 @@ PHP_FUNCTION(stream_get_contents)
 		Z_PARAM_LONG(desiredpos)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (maxlen < 0 && maxlen != PHP_STREAM_COPY_ALL) {
+		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero, or -1");
+		RETURN_FALSE;
+	}
+
 	php_stream_from_zval(stream, zsrc);
 
 	if (desiredpos >= 0) {
@@ -1245,13 +1250,9 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_FALSE;
 	}
 
-	if (zend_list_close(Z_RES_P(zfilter)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Could not invalidate filter, not removing");
-		RETURN_FALSE;
-	} else {
-		php_stream_filter_remove(filter, 1);
-		RETURN_TRUE;
-	}
+	zend_list_close(Z_RES_P(zfilter));
+	php_stream_filter_remove(filter, 1);
+	RETURN_TRUE;
 }
 /* }}} */
 

@@ -1,3 +1,14 @@
+/* East Asian Width table
+ *
+ * Some characters in East Asian languages are intended to be displayed in a space
+ * which is roughly square. (This contrasts with others such as the Latin alphabet,
+ * which are taller than they are wide.) To display these East Asian characters
+ * properly, twice the horizontal space is used. This must be taken into account
+ * when doing things like wrapping text to a specific width.
+ *
+ * Each pair of numbers in the below table is a range of Unicode codepoints
+ * which should be displayed as double-width. */
+
 static const struct {
 	int begin;
 	int end;

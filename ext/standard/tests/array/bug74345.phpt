@@ -13,6 +13,11 @@ $name = "foo" . ($x = "bar");
 $cb = [new Test, $name];
 array_map($cb, []);
 array_map($cb, [], []);
+try {
+    array_map($cb, null);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 array_filter([], $cb);
 array_reduce([], $cb);
 
@@ -24,4 +29,5 @@ usort($array, $cb);
 ?>
 ===DONE===
 --EXPECT--
+array_map(): Argument #2 ($array1) must be of type array, null given
 ===DONE===

@@ -149,9 +149,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(ZEND_THIS),"service", sizeof("service")-1)) != NULL) { \
 			ss = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service); \
 		} else { \
-	                php_error_docref(NULL, E_WARNING, "Can not fetch service object"); \
+			zend_throw_error(NULL, "Cannot fetch SoapServer object"); \
 			SOAP_SERVER_END_CODE(); \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	}
 
@@ -525,9 +525,10 @@ PHP_METHOD(SoapParam, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &data, &name, &name_length) == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	if (name_length == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid parameter name");
-		return;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	this_ptr = ZEND_THIS;
@@ -559,12 +560,12 @@ PHP_METHOD(SoapHeader, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ns_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid namespace");
-		return;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 	if (name_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid header name");
-		return;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	this_ptr = ZEND_THIS;
@@ -579,13 +580,15 @@ PHP_METHOD(SoapHeader, __construct)
 		if (ZSTR_LEN(actor_str) > 2) {
 			add_property_stringl(this_ptr, "actor", ZSTR_VAL(actor_str), ZSTR_LEN(actor_str));
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid actor");
+			zend_argument_value_error(2, "must be longer than 2 characters");
+			RETURN_THROWS();
 		}
 	} else if (!actor_is_null) {
 		if ((actor_long == SOAP_ACTOR_NEXT || actor_long == SOAP_ACTOR_NONE || actor_long == SOAP_ACTOR_UNLIMATERECEIVER)) {
 			add_property_long(this_ptr, "actor", actor_long);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid actor");
+			zend_argument_value_error(5, "must be either SOAP_ACTOR_NEXT, SOAP_ACTOR_NONE or SOAP_ACTOR_UNLIMATERECEIVER");
+			RETURN_THROWS();
 		}
 	}
 }
@@ -624,9 +627,10 @@ PHP_METHOD(SoapFault, __construct)
 	}
 
 	if ((code_str || code_ht) && (fault_code == NULL || fault_code_len == 0)) {
-		php_error_docref(NULL, E_WARNING, "Invalid fault code");
-		return;
+		zend_argument_value_error(1, "is not a valid fault code");
+		RETURN_THROWS();
 	}
+
 	if (name != NULL && name_len == 0) {
 		name = NULL;
 	}
@@ -700,8 +704,8 @@ PHP_METHOD(SoapVar, __construct)
 		if (zend_hash_index_exists(&SOAP_GLOBAL(defEncIndex), type)) {
 			add_property_long(this_ptr, "enc_type", type);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid type ID");
-			return;
+			zend_argument_value_error(2, "is not a valid encoding");
+			RETURN_THROWS();
 		}
 	}
 
@@ -739,7 +743,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 		zend_string *name;
 
 		if (Z_TYPE_P(tmp) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Wrong 'typemap' option");
+			zend_type_error("SoapHeader::__construct(): \"typemap\" option must be of type array, %s given", zend_zval_type_name(tmp));
 			return NULL;
 		}
 		ht2 = Z_ARRVAL_P(tmp);
@@ -971,12 +975,14 @@ PHP_METHOD(SoapServer, setPersistence)
 			value == SOAP_PERSISTENCE_REQUEST) {
 			service->soap_class.persistence = value;
 		} else {
-			php_error_docref(NULL, E_WARNING, "Tried to set persistence with bogus value (" ZEND_LONG_FMT ")", value);
-			return;
+			zend_argument_value_error(
+				1, "must be either SOAP_PERSISTENCE_SESSION or SOAP_PERSISTENCE_REQUEST when the SOAP server is used in class mode"
+			);
+			RETURN_THROWS();
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "Tried to set persistence when you are using you SOAP SERVER in function mode, no persistence needed");
-		return;
+		zend_throw_error(NULL, "SoapServer::setPersistence(): Persistence cannot be set when the SOAP server is used in function mode");
+		RETURN_THROWS();
 	}
 
 	SOAP_SERVER_END_CODE();
@@ -988,12 +994,11 @@ PHP_METHOD(SoapServer, setPersistence)
 PHP_METHOD(SoapServer, setClass)
 {
 	soapServicePtr service;
-	zend_string *classname;
-	zend_class_entry *ce;
+	zend_class_entry *ce = NULL;
 	int num_args = 0;
 	zval *argv = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S*", &classname, &argv, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C*", &ce, &argv, &num_args) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1001,24 +1006,17 @@ PHP_METHOD(SoapServer, setClass)
 
 	FETCH_THIS_SERVICE(service);
 
-	ce = zend_lookup_class(classname);
+	service->type = SOAP_CLASS;
+	service->soap_class.ce = ce;
 
-	if (ce) {
-		service->type = SOAP_CLASS;
-		service->soap_class.ce = ce;
-
-		service->soap_class.persistence = SOAP_PERSISTENCE_REQUEST;
-		service->soap_class.argc = num_args;
-		if (service->soap_class.argc > 0) {
-			int i;
-			service->soap_class.argv = safe_emalloc(sizeof(zval), service->soap_class.argc, 0);
-			for (i = 0;i < service->soap_class.argc;i++) {
-				ZVAL_COPY(&service->soap_class.argv[i], &argv[i]);
-			}
+	service->soap_class.persistence = SOAP_PERSISTENCE_REQUEST;
+	service->soap_class.argc = num_args;
+	if (service->soap_class.argc > 0) {
+		int i;
+		service->soap_class.argv = safe_emalloc(sizeof(zval), service->soap_class.argc, 0);
+		for (i = 0;i < service->soap_class.argc;i++) {
+			ZVAL_COPY(&service->soap_class.argv[i], &argv[i]);
 		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Tried to set a non existent class (%s)", ZSTR_VAL(classname));
-		return;
 	}
 
 	SOAP_SERVER_END_CODE();
@@ -1122,15 +1120,15 @@ PHP_METHOD(SoapServer, addFunction)
 				zend_function *f;
 
 				if (Z_TYPE_P(tmp_function) != IS_STRING) {
-					php_error_docref(NULL, E_WARNING, "Tried to add a function that isn't a string");
-					return;
+					zend_argument_type_error(1, "must contain only strings");
+					RETURN_THROWS();
 				}
 
 				key = zend_string_tolower(Z_STR_P(tmp_function));
 
 				if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
-					php_error_docref(NULL, E_WARNING, "Tried to add a non existent function '%s'", Z_STRVAL_P(tmp_function));
-					return;
+					zend_type_error("SoapServer::addFunction(): Function \"%s\" not found", Z_STRVAL_P(tmp_function));
+					RETURN_THROWS();
 				}
 
 				ZVAL_STR_COPY(&function_copy, f->common.function_name);
@@ -1146,8 +1144,8 @@ PHP_METHOD(SoapServer, addFunction)
 		key = zend_string_tolower(Z_STR_P(function_name));
 
 		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Tried to add a non existent function '%s'", Z_STRVAL_P(function_name));
-			return;
+			zend_argument_type_error(1, "must be a valid function name, function \"%s\" not found", Z_STRVAL_P(function_name));
+			RETURN_THROWS();
 		}
 		if (service->soap_functions.ft == NULL) {
 			service->soap_functions.functions_all = FALSE;
@@ -1166,9 +1164,12 @@ PHP_METHOD(SoapServer, addFunction)
 			}
 			service->soap_functions.functions_all = TRUE;
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid value passed");
-			return;
+			zend_argument_value_error(1, "must be SOAP_FUNCTIONS_ALL when an integer is passed");
+			RETURN_THROWS();
 		}
+	} else {
+		zend_argument_type_error(1, "must be of type array|string|int, %s given", zend_zval_type_name(function_name));
+		RETURN_THROWS();
 	}
 
 	SOAP_SERVER_END_CODE();
@@ -1217,7 +1218,7 @@ PHP_METHOD(SoapServer, handle)
 	int old_features;
 	zval tmp_soap;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1226,7 +1227,7 @@ PHP_METHOD(SoapServer, handle)
 	FETCH_THIS_SERVICE(service);
 	SOAP_GLOBAL(soap_version) = service->version;
 
-	if (ZEND_NUM_ARGS() > 0 && ZEND_SIZE_T_INT_OVFL(arg_len)) {
+	if (arg && ZEND_SIZE_T_INT_OVFL(arg_len)) {
 		soap_server_fault("Server", "Input string is too long", NULL, NULL, NULL);
 		return;
 	}
@@ -1281,7 +1282,7 @@ PHP_METHOD(SoapServer, handle)
 		php_error_docref(NULL, E_ERROR,"ob_start failed");
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (!arg) {
 		if (SG(request_info).request_body && 0 == php_stream_rewind(SG(request_info).request_body)) {
 			zval *server_vars, *encoding;
 			php_stream_filter *zf = NULL;
@@ -1741,8 +1742,8 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	FETCH_THIS_SERVICE(service);
 
 	if (!service || !service->soap_headers_ptr) {
-		php_error_docref(NULL, E_WARNING, "The SoapServer::addSoapHeader function may be called only during SOAP request processing");
-		return;
+		zend_throw_error(NULL, "SoapServer::addSoapHeader() may be called only during SOAP request processing");
+		RETURN_THROWS();
 	}
 
 	p = service->soap_headers_ptr;
@@ -2567,9 +2568,9 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_soap_call)
 		zend_hash_next_index_insert(soap_headers, headers);
 		Z_ADDREF_P(headers);
 		free_soap_headers = 1;
-	} else{
-		php_error_docref(NULL, E_WARNING, "Invalid SOAP header");
-		return;
+	} else {
+		zend_argument_type_error(4, "must be of type SoapHeader|array|null, %s given", zend_zval_type_name(headers));
+		RETURN_THROWS();
 	}
 
 	/* Add default headers */
@@ -2875,8 +2876,9 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 		add_next_index_zval(&default_headers, headers);
 		add_property_zval(this_ptr, "__default_headers", &default_headers);
 		Z_DELREF_P(&default_headers);
-	} else{
-		php_error_docref(NULL, E_WARNING, "Invalid SOAP header");
+	} else {
+		zend_argument_type_error(1, "must be of type SoapHeader|array|null, %s given", zend_zval_type_name(headers));
+		RETURN_THROWS();
 	}
 	RETURN_TRUE;
 }

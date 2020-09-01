@@ -218,7 +218,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 	HT_HASH_RESET(ht);
 }
 
-static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, int packed)
+static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, bool packed)
 {
 	HT_ASSERT_RC1(ht);
 	ZEND_ASSERT(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED);
@@ -1360,7 +1360,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p)
 	_zend_hash_del_el(ht, HT_IDX_TO_HASH(p - ht->arData), p);
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1390,7 +1390,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 	return FAILURE;
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1438,7 +1438,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 	return FAILURE;
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str, size_t len)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1482,7 +1482,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str,
 	return FAILURE;
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *str, size_t len)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -1512,7 +1512,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *str, siz
 	return FAILURE;
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h)
 {
 	uint32_t nIndex;
 	uint32_t idx;
@@ -1964,7 +1964,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_copy(HashTable *target, HashTable *source,
 }
 
 
-static zend_always_inline int zend_array_dup_element(HashTable *source, HashTable *target, uint32_t idx, Bucket *p, Bucket *q, int packed, int static_keys, int with_holes)
+static zend_always_inline bool zend_array_dup_element(HashTable *source, HashTable *target, uint32_t idx, Bucket *p, Bucket *q, bool packed, bool static_keys, bool with_holes)
 {
 	zval *data = &p->val;
 
@@ -2018,7 +2018,7 @@ static zend_always_inline int zend_array_dup_element(HashTable *source, HashTabl
 	return 1;
 }
 
-static zend_always_inline void zend_array_dup_packed_elements(HashTable *source, HashTable *target, int with_holes)
+static zend_always_inline void zend_array_dup_packed_elements(HashTable *source, HashTable *target, bool with_holes)
 {
 	Bucket *p = source->arData;
 	Bucket *q = target->arData;
@@ -2034,7 +2034,7 @@ static zend_always_inline void zend_array_dup_packed_elements(HashTable *source,
 	} while (p != end);
 }
 
-static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, HashTable *target, int static_keys, int with_holes)
+static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, HashTable *target, bool static_keys, bool with_holes)
 {
 	uint32_t idx = 0;
 	Bucket *p = source->arData;
@@ -2325,7 +2325,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Has
 }
 
 
-ZEND_API int ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 {
 	uint32_t idx;
 
@@ -2350,7 +2350,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 {
 	uint32_t idx = *pos;
 
@@ -2707,7 +2707,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, bucket_compar
 	return &res->val;
 }
 
-ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx)
+ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx)
 {
 	register const char *tmp = key;
 

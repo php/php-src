@@ -119,9 +119,11 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
 	if (tag != ZEND_WEAKREF_TAG_HT) {
 		ZEND_ASSERT(tagged_ptr == payload);
-		zend_weakref_unref_single(ptr, tag, obj_addr);
 		zend_hash_index_del(&EG(weakrefs), obj_addr);
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
+
+		/* Do this last, as it may destroy the object. */
+		zend_weakref_unref_single(ptr, tag, obj_addr);
 		return;
 	}
 
@@ -129,8 +131,6 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 	tagged_ptr = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
 	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
 	ZEND_ASSERT(tagged_ptr == payload);
-	zend_weakref_unref_single(
-		ZEND_WEAKREF_GET_PTR(payload), ZEND_WEAKREF_GET_TAG(payload), obj_addr);
 	zend_hash_index_del(ht, (zend_ulong) payload);
 	if (zend_hash_num_elements(ht) == 0) {
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
@@ -138,6 +138,10 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 		FREE_HASHTABLE(ht);
 		zend_hash_index_del(&EG(weakrefs), obj_addr);
 	}
+
+	/* Do this last, as it may destroy the object. */
+	zend_weakref_unref_single(
+		ZEND_WEAKREF_GET_PTR(payload), ZEND_WEAKREF_GET_TAG(payload), obj_addr);
 }
 
 void zend_weakrefs_init(void) {
@@ -340,6 +344,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 	zend_hash_index_add_new(&wm->ht, (zend_ulong) obj_key, value);
 }
 
+/* int return and check_empty due to Object Handler API */
 static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
@@ -368,6 +373,11 @@ static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_object *obj_key = Z_OBJ_P(offset);
+	if (!zend_hash_index_exists(&wm->ht, (zend_ulong) Z_OBJ_P(offset))) {
+		/* Object not in WeakMap, do nothing. */
+		return;
+	}
+
 	zend_weakref_unregister(obj_key, ZEND_WEAKREF_ENCODE(wm, ZEND_WEAKREF_TAG_MAP));
 }
 
@@ -503,6 +513,7 @@ static const zend_object_iterator_funcs zend_weakmap_iterator_funcs = {
 	NULL, /* get_gc */
 };
 
+/* by_ref is int due to Iterator API */
 static zend_object_iterator *zend_weakmap_get_iterator(
 		zend_class_entry *ce, zval *object, int by_ref)
 {

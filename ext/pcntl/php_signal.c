@@ -48,9 +48,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 		act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
 #endif
 	}
-	if (zend_sigaction(signo, &act, &oact) < 0) {
-		return (void*)SIG_ERR;
-	}
+	zend_sigaction(signo, &act, &oact);
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 	return oact.sa_sigaction;

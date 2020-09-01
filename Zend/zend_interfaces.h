@@ -61,7 +61,7 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 	zend_class_implements(zend_ce_ ## class_name, 1, zend_ce_ ## interface_name)
 
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter);
-ZEND_API int zend_user_it_valid(zend_object_iterator *_iter);
+ZEND_API zend_result zend_user_it_valid(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key);
 ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter);
@@ -78,7 +78,7 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
 
-ZEND_API int zend_create_internal_iterator_zval(zval *return_value, zval *obj);
+ZEND_API zend_result zend_create_internal_iterator_zval(zval *return_value, zval *obj);
 
 END_EXTERN_C()
 

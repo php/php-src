@@ -269,7 +269,8 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		PG(memory_limit) = Z_L(1)<<30;		/* effectively, no limit */
 	}
-	return zend_set_memory_limit(PG(memory_limit));
+	zend_set_memory_limit(PG(memory_limit));
+	return SUCCESS;
 }
 /* }}} */
 
@@ -296,43 +297,6 @@ static PHP_INI_MH(OnSetLogFilter)
 	}
 
 	return FAILURE;
-}
-/* }}} */
-
-/* {{{ php_disable_functions */
-static void php_disable_functions(void)
-{
-	char *s = NULL, *e;
-
-	if (!*(INI_STR("disable_functions"))) {
-		return;
-	}
-
-	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));
-	if (e == NULL) {
-		return;
-	}
-	while (*e) {
-		switch (*e) {
-			case ' ':
-			case ',':
-				if (s) {
-					*e = '\0';
-					zend_disable_function(s, e-s);
-					s = NULL;
-				}
-				break;
-			default:
-				if (!s) {
-					s = e;
-				}
-				break;
-		}
-		e++;
-	}
-	if (s) {
-		zend_disable_function(s, e-s);
-	}
 }
 /* }}} */
 
@@ -1521,13 +1485,13 @@ static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
 }
 /* }}} */
 
-static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
+static zend_result php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
 {
 	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
 }
 /* }}} */
 
-PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
+PHPAPI zend_result php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
 {
 	zend_string *opened_path;
 	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &opened_path);
@@ -1924,9 +1888,6 @@ static void core_globals_dtor(php_core_globals *core_globals)
 	ZEND_ASSERT(!core_globals->last_error_message);
 	ZEND_ASSERT(!core_globals->last_error_file);
 
-	if (core_globals->disable_functions) {
-		free(core_globals->disable_functions);
-	}
 	if (core_globals->disable_classes) {
 		free(core_globals->disable_classes);
 	}
@@ -2275,7 +2236,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	/* disable certain classes and functions as requested by php.ini */
-	php_disable_functions();
+	zend_disable_functions(INI_STR("disable_functions"));
 	php_disable_classes();
 
 	/* make core report what it should */

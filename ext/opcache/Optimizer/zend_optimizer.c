@@ -377,6 +377,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_STATIC_PROP_UNSET:
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 		case ZEND_UNSET_STATIC_PROP:
+		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
 		case ZEND_PRE_INC_STATIC_PROP:
 		case ZEND_PRE_DEC_STATIC_PROP:
 		case ZEND_POST_INC_STATIC_PROP:

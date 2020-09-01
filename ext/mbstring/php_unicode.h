@@ -31,8 +31,6 @@
 #ifndef PHP_UNICODE_H
 #define PHP_UNICODE_H
 
-#ifdef HAVE_MBSTRING
-
 #define UC_MN  0 /* Mark, Non-Spacing          */
 #define UC_MC  1 /* Mark, Spacing Combining    */
 #define UC_ME  2 /* Mark, Enclosing            */
@@ -189,9 +187,5 @@ static inline int php_unicode_is_upper(unsigned long code) {
 
 #define php_unicode_is_cased(cc) php_unicode_is_prop1(cc, UC_CASED)
 #define php_unicode_is_case_ignorable(cc) php_unicode_is_prop1(cc, UC_CASE_IGNORABLE)
-
-
-#endif
-
 
 #endif /* PHP_UNICODE_H */

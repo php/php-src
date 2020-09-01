@@ -65,7 +65,7 @@ function ftp_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $r
  * @param resource $ftp
  * @param resource $fp
  */
-function ftp_nb_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0): int|false {}
+function ftp_nb_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0): int {}
 
 /** @param resource $ftp */
 function ftp_pasv($ftp, bool $pasv): bool {}
@@ -89,7 +89,7 @@ function ftp_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $s
  * @param resource $ftp
  * @param resource $fp
  */
-function ftp_nb_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): int|false {}
+function ftp_nb_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): int {}
 
 /** @param resource $ftp */
 function ftp_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): bool {}

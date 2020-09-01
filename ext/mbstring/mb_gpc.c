@@ -16,10 +16,6 @@
  */
 
 /* {{{ includes */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "php.h"
 #include "php_ini.h"
 #include "php_variables.h"
@@ -40,8 +36,6 @@
 
 #include "mb_gpc.h"
 /* }}} */
-
-#ifdef HAVE_MBSTRING
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
@@ -377,5 +371,3 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	}
 }
 /* }}} */
-
-#endif /* HAVE_MBSTRING */

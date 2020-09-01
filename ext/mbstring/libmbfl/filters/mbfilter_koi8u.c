@@ -24,10 +24,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_koi8u.h"
 #include "unicode_table_koi8u.h"

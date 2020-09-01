@@ -67,7 +67,7 @@ ZEND_API zend_object *zend_throw_error_exception(zend_class_entry *exception_ce,
 extern ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
-ZEND_API ZEND_COLD int zend_exception_error(zend_object *exception, int severity);
+ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *exception, int severity);
 
 ZEND_API ZEND_COLD void zend_throw_unwind_exit(void);
 ZEND_API zend_bool zend_is_unwind_exit(zend_object *ex);

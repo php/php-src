@@ -108,8 +108,6 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "basic_functions_arginfo.h"
 
-static zend_class_entry *incomplete_class_entry = NULL;
-
 typedef struct _user_tick_function_entry {
 	zval *arguments;
 	int arg_count;
@@ -220,7 +218,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
 
-	BG(incomplete_class) = incomplete_class_entry;
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
 }
@@ -285,7 +282,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 #endif
 
-	BG(incomplete_class) = incomplete_class_entry = php_create_incomplete_class();
+	php_register_incomplete_class();
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);
@@ -458,7 +455,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
 	BG(strtok_string) = NULL;
-	ZVAL_UNDEF(&BG(strtok_zval));
 	BG(strtok_last) = NULL;
 	BG(ctype_string) = NULL;
 	BG(locale_changed) = 0;
@@ -497,9 +493,10 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 {
-	zval_ptr_dtor(&BG(strtok_zval));
-	ZVAL_UNDEF(&BG(strtok_zval));
-	BG(strtok_string) = NULL;
+	if (BG(strtok_string)) {
+		zend_string_release(BG(strtok_string));
+		BG(strtok_string) = NULL;
+	}
 #ifdef HAVE_PUTENV
 	tsrm_env_lock();
 	zend_hash_destroy(&BG(putenv_ht));
@@ -1989,14 +1986,7 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	if (highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description) == FAILURE) {
-		efree(hicompiled_string_description);
-		EG(error_reporting) = old_error_reporting;
-		if (i) {
-			php_output_end();
-		}
-		RETURN_FALSE;
-	}
+	highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description);
 	efree(hicompiled_string_description);
 
 	EG(error_reporting) = old_error_reporting;
@@ -2006,6 +1996,7 @@ PHP_FUNCTION(highlight_string)
 		php_output_discard();
 		ZEND_ASSERT(Z_TYPE_P(return_value) == IS_STRING);
 	} else {
+		// TODO Make this function void?
 		RETURN_TRUE;
 	}
 }

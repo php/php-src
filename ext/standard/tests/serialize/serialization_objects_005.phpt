@@ -34,21 +34,41 @@ var_dump($incomplete);
 var_dump(is_object($incomplete));
 var_dump($incomplete->p);
 
-$ref2 = "ref1.original";
-$incomplete->p = &$ref2;
+try {
+    $ref2 = "ref1.original";
+    $incomplete->p = &$ref2;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($incomplete->p);
 $ref2 = "ref1.changed";
 var_dump($incomplete->p);
-$incomplete->p = "p.changed";
+try {
+    $incomplete->p = "p.changed";
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($ref1);
 
 var_dump(isset($incomplete->x));
-$incomplete->x = "x.new";
+try {
+    $incomplete->x = "x.new";
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(isset($incomplete->x));
-unset($incomplete->x);
+try {
+    unset($incomplete->x);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($incomplete->x);
 
-$incomplete->f();
+try {
+    $incomplete->f();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
@@ -79,31 +99,27 @@ object(__PHP_Incomplete_Class)#%d (2) {
 }
 bool(true)
 
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+NULL
+The script tried to modify a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
+
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 NULL
 
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
-
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 NULL
-
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
-NULL
-
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+The script tried to modify a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
 string(9) "p.changed"
 
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 bool(false)
+The script tried to modify a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
 
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
-
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 bool(false)
+The script tried to modify a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
 
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
-
-Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 NULL
-
-Fatal error: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+The script tried to call a method on an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
+Done

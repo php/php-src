@@ -57,7 +57,7 @@ zend_module_entry zend_builtin_module = { /* {{{ */
 };
 /* }}} */
 
-int zend_startup_builtin_functions(void) /* {{{ */
+zend_result zend_startup_builtin_functions(void) /* {{{ */
 {
 	zend_builtin_module.module_number = 0;
 	zend_builtin_module.type = MODULE_PERSISTENT;
@@ -420,9 +420,9 @@ ZEND_FUNCTION(error_reporting)
 }
 /* }}} */
 
-static int validate_constant_array_argument(HashTable *ht, int argument_number) /* {{{ */
+static bool validate_constant_array_argument(HashTable *ht, int argument_number) /* {{{ */
 {
-	int ret = 1;
+	bool ret = 1;
 	zval *val;
 
 	GC_PROTECT_RECURSION(ht);
@@ -698,7 +698,7 @@ ZEND_FUNCTION(is_a)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int statics, zval *return_value)
+static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool statics, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -865,10 +865,10 @@ ZEND_FUNCTION(get_mangled_object_vars)
 }
 /* }}} */
 
-static int same_name(zend_string *key, zend_string *name) /* {{{ */
+static bool same_name(zend_string *key, zend_string *name) /* {{{ */
 {
 	zend_string *lcname;
-	int ret;
+	bool ret;
 
 	if (key == name) {
 		return 1;
@@ -2112,7 +2112,7 @@ ZEND_FUNCTION(get_extension_funcs)
 {
 	zend_string *extension_name;
 	zend_string *lcname;
-	int array;
+	bool array;
 	zend_module_entry *module;
 	zend_function *zif;
 

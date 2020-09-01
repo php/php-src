@@ -293,7 +293,7 @@ SINCE:               7.4.0
 -------------------------------------------------------------------------------
 EXTENSION:           fileinfo
 PRIMARY MAINTAINER:  Derick Rethans <derick@php.net> (2004 - 2008)
-                     Anatol Belski <ab@php.net> (2012 - 2019)
+                     Anatol Belski <ab@php.net> (2012 - 2020)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3

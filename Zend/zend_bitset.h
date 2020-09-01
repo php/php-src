@@ -102,7 +102,7 @@ static inline void zend_bitset_clear(zend_bitset set, uint32_t len)
 	memset(set, 0, len * ZEND_BITSET_ELM_SIZE);
 }
 
-static inline int zend_bitset_empty(zend_bitset set, uint32_t len)
+static inline bool zend_bitset_empty(zend_bitset set, uint32_t len)
 {
 	uint32_t i;
 	for (i = 0; i < len; i++) {

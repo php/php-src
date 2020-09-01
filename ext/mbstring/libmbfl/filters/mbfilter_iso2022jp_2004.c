@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso2022jp_2004.h"
 #include "mbfilter_sjis_2004.h"
@@ -46,7 +42,7 @@ const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	"ISO-2022-JP-2004",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_2004_wchar,
 	&vtbl_wchar_2022jp_2004
 };

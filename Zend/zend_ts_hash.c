@@ -186,9 +186,9 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 	end_write(ht);
 }
 
-ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key)
+ZEND_API zend_result zend_ts_hash_del(TsHashTable *ht, zend_string *key)
 {
-	int retval;
+	zend_result retval;
 
 	begin_write(ht);
 	retval = zend_hash_del(TS_HASH(ht), key);
@@ -197,9 +197,9 @@ ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h)
+ZEND_API zend_result zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h)
 {
-	int retval;
+	zend_result retval;
 
 	begin_write(ht);
 	retval = zend_hash_index_del(TS_HASH(ht), h);
@@ -246,7 +246,7 @@ ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, 
 	end_read(source);
 }
 
-ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, int overwrite)
+ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite)
 {
 	begin_read(source);
 	begin_write(target);
@@ -264,7 +264,7 @@ ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, co
 	end_read(source);
 }
 
-ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, int renumber)
+ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber)
 {
 	begin_write(ht);
 	zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);

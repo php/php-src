@@ -39,6 +39,12 @@
 # endif
 #endif
 
+#if (defined(__BYTE_ORDER) && defined(__BIG_ENDIAN))
+# if __BYTE_ORDER == __BIG_ENDIAN
+#  define WORDS_BIGENDIAN
+# endif
+#endif
+
 #if defined(__s390__)
 # if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #  define WORDS_BIGENDIAN
@@ -412,7 +418,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	}
 }
 
-static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
+static int seek_to_tz_position(const unsigned char **tzf, const char *timezone, const timelib_tzdb *tzdb)
 {
 	int left = 0, right = tzdb->index_size - 1;
 
@@ -449,7 +455,7 @@ const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(const timelib_
 	return tzdb->index;
 }
 
-int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb)
+int timelib_timezone_id_is_valid(const char *timezone, const timelib_tzdb *tzdb)
 {
 	const unsigned char *tzf;
 	return (seek_to_tz_position(&tzf, timezone, tzdb));
@@ -482,7 +488,7 @@ static void read_64bit_header(const unsigned char **tzf, timelib_tzinfo *tz)
 	*tzf += sizeof(buffer);
 }
 
-static timelib_tzinfo* timelib_tzinfo_ctor(char *name)
+static timelib_tzinfo* timelib_tzinfo_ctor(const char *name)
 {
 	timelib_tzinfo *t;
 	t = timelib_calloc(1, sizeof(timelib_tzinfo));
@@ -491,7 +497,7 @@ static timelib_tzinfo* timelib_tzinfo_ctor(char *name)
 	return t;
 }
 
-timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb, int *error_code)
+timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *tzdb, int *error_code)
 {
 	const unsigned char *tzf;
 	timelib_tzinfo *tmp;

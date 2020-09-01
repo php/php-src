@@ -287,7 +287,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 	}
 
 	if ((type == BP_VAR_W || type == BP_VAR_RW) && intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return &EG(error_zval);
 	}
 
@@ -456,7 +456,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -524,7 +524,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -1285,7 +1285,7 @@ PHP_METHOD(ArrayObject, exchangeArray)
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -1675,7 +1675,7 @@ PHP_METHOD(ArrayObject, unserialize)
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 

@@ -383,6 +383,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
 			if (UNEXPECTED(EG(exception))) {
+				zend_string_release(sub_indent);
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -557,7 +558,10 @@ static void _class_const_string(smart_str *str, char *name, zend_class_constant 
 	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
 	const char *type;
 
-	zval_update_constant_ex(&c->value, c->ce);
+	if (zval_update_constant_ex(&c->value, c->ce) == FAILURE) {
+		return;
+	}
+
 	type = zend_zval_type_name(&c->value);
 
 	if (Z_TYPE(c->value) == IS_ARRAY) {
@@ -667,7 +671,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	if (!required) {
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 			smart_str_appends(str, " = ");
-			if (((zend_internal_arg_info*)arg_info)->default_value) {
+			/* TODO: We don't have a way to fetch the default value for an internal function
+			 * with userland arg info. */
+			if (has_internal_arg_info(fptr)
+					&& ((zend_internal_arg_info*)arg_info)->default_value) {
 				smart_str_appends(str, ((zend_internal_arg_info*)arg_info)->default_value);
 			} else {
 				smart_str_appends(str, "<default>");

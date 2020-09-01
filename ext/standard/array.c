@@ -6092,6 +6092,7 @@ PHP_FUNCTION(array_map)
 		int ret;
 
 		if (Z_TYPE(arrays[0]) != IS_ARRAY) {
+			zend_release_fcall_info_cache(&fci_cache);
 			zend_argument_type_error(2, "must be of type array, %s given", zend_zval_type_name(&arrays[0]));
 			RETURN_THROWS();
 		}

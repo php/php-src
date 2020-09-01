@@ -98,12 +98,10 @@ void clean_module_constants(int module_number)
 	zend_hash_apply_with_argument(EG(zend_constants), clean_module_constant, (void *) &module_number);
 }
 
-
-int zend_startup_constants(void)
+void zend_startup_constants(void)
 {
 	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(EG(zend_constants), 128, NULL, ZEND_CONSTANT_DTOR, 1);
-	return SUCCESS;
 }
 
 
@@ -144,11 +142,10 @@ void zend_register_standard_constants(void)
 }
 
 
-int zend_shutdown_constants(void)
+void zend_shutdown_constants(void)
 {
 	zend_hash_destroy(EG(zend_constants));
 	free(EG(zend_constants));
-	return SUCCESS;
 }
 
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
@@ -266,7 +263,7 @@ ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t len) /*
 }
 /* }}} */
 
-ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
+ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
 {
 	if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PUBLIC) {
 		return 1;
@@ -396,7 +393,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		}
 
 		if (ret_constant && Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
-			int ret;
+			zend_result ret;
 
 			if (IS_CONSTANT_VISITED(ret_constant)) {
 				zend_throw_error(NULL, "Cannot declare self-referencing constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
@@ -480,11 +477,11 @@ static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_consta
 	return ret;
 }
 
-ZEND_API int zend_register_constant(zend_constant *c)
+ZEND_API zend_result zend_register_constant(zend_constant *c)
 {
 	zend_string *lowercase_name = NULL;
 	zend_string *name;
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 	zend_bool persistent = (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) != 0;
 
 #if 0

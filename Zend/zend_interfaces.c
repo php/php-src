@@ -124,7 +124,7 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
 		zval *object = &iter->it.data;
 		zval more;
-		int result;
+		bool result;
 
 		zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_valid, "valid", &more);
 		result = i_zend_is_true(&more);
@@ -203,6 +203,7 @@ static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator =
 };
 
 /* {{{ zend_user_it_get_iterator */
+/* by_ref is int due to Iterator API */
 static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	zend_user_iterator *iterator;
@@ -225,6 +226,7 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 /* }}} */
 
 /* {{{ zend_user_it_get_new_iterator */
+/* by_ref is int due to Iterator API */
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	zval iterator;
@@ -356,7 +358,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval retval;
-	int result;
+	zend_result result;
 
 	zend_call_method_with_0_params(
 		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
@@ -458,7 +460,7 @@ static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	return &intern->std;
 }
 
-ZEND_API int zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
+ZEND_API zend_result zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
 	zend_class_entry *scope = EG(current_execute_data)->func->common.scope;
 	ZEND_ASSERT(scope->get_iterator != zend_user_it_get_new_iterator);
 	zend_object_iterator *iter = scope->get_iterator(Z_OBJCE_P(obj), obj, /* by_ref */ 0);
@@ -492,7 +494,7 @@ static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 }
 
 /* Many iterators will not behave correctly if rewind() is not called, make sure it happens. */
-static int zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
+static zend_result zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
 	if (!intern->rewind_called) {
 		zend_object_iterator *iter = intern->iter;
 		intern->rewind_called = 1;

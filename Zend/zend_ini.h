@@ -61,24 +61,24 @@ struct _zend_ini_entry {
 };
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_ini_startup(void);
-ZEND_API int zend_ini_shutdown(void);
-ZEND_API int zend_ini_global_shutdown(void);
-ZEND_API int zend_ini_deactivate(void);
+ZEND_API void zend_ini_startup(void);
+ZEND_API void zend_ini_shutdown(void);
+ZEND_API void zend_ini_global_shutdown(void);
+ZEND_API void zend_ini_deactivate(void);
 ZEND_API void zend_ini_dtor(HashTable *ini_directives);
 
-ZEND_API int zend_copy_ini_directives(void);
+ZEND_API void zend_copy_ini_directives(void);
 
 ZEND_API void zend_ini_sort_entries(void);
 
-ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number);
+ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number);
 ZEND_API void zend_unregister_ini_entries(int module_number);
 ZEND_API void zend_ini_refresh_caches(int stage);
-ZEND_API int zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage);
-ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, int force_change);
-ZEND_API int zend_alter_ini_entry_chars(zend_string *name, const char *value, size_t value_length, int modify_type, int stage);
-ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, int force_change);
-ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
+ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage);
+ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change);
+ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *value, size_t value_length, int modify_type, int stage);
+ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, int force_change);
+ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
 ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig);
@@ -88,7 +88,7 @@ ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
 ZEND_API zend_bool zend_ini_parse_bool(zend_string *str);
 
-ZEND_API int zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
+ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
 ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);

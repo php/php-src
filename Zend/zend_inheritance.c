@@ -633,7 +633,7 @@ static inheritance_status zend_do_perform_implementation_check(
 /* }}} */
 
 static ZEND_COLD void zend_append_type_hint(
-		smart_str *str, zend_class_entry *scope, zend_arg_info *arg_info, int return_hint) /* {{{ */
+		smart_str *str, zend_class_entry *scope, zend_arg_info *arg_info, bool return_hint) /* {{{ */
 {
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope);
@@ -2390,7 +2390,7 @@ static void check_unrecoverable_load_failure(zend_class_entry *ce) {
 	}
 }
 
-ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
+ZEND_API zend_result zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
 {
 	/* Load parent/interface dependencies first, so we can still gracefully abort linking
 	 * with an exception and remove the class from the class table. This is only possible

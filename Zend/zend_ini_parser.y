@@ -212,7 +212,7 @@ static ZEND_COLD void ini_error(const char *msg)
 /* }}} */
 
 /* {{{ zend_parse_ini_file() */
-ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
@@ -240,7 +240,7 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 /* }}} */
 
 /* {{{ zend_parse_ini_string() */
-ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+ZEND_API zend_result zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;

@@ -907,12 +907,12 @@ ZEND_API void zend_recalc_live_ranges(
 	zend_calc_live_ranges(op_array, needs_live_range);
 }
 
-ZEND_API int pass_two(zend_op_array *op_array)
+ZEND_API void pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
 
 	if (!ZEND_USER_CODE(op_array->type)) {
-		return 0;
+		return;
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) {
 		zend_update_extended_stmts(op_array);
@@ -1074,7 +1074,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 
 	zend_calc_live_ranges(op_array, NULL);
 
-	return 0;
+	return;
 }
 
 ZEND_API unary_op_type get_unary_op(int opcode)

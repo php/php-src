@@ -273,7 +273,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 }
 /* }}} */
 
-static int zend_create_closure_from_callable(zval *return_value, zval *callable, char **error) /* {{{ */ {
+static zend_result zend_create_closure_from_callable(zval *return_value, zval *callable, char **error) /* {{{ */ {
 	zend_fcall_info_cache fcc;
 	zend_function *mptr;
 	zval instance;
@@ -361,6 +361,7 @@ static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object
 }
 /* }}} */
 
+/* int return due to Object Handler API */
 static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 {
 	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
@@ -513,6 +514,7 @@ int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_f
 }
 /* }}} */
 
+/* *is_temp is int due to Object Handler API */
 static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)object;

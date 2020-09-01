@@ -129,6 +129,7 @@ typedef struct _zend_ssa_var_info {
 	unsigned int           use_as_double : 1;
 	unsigned int           delayed_fetch_this : 1;
 	unsigned int           avoid_refcounting : 1;
+	unsigned int           guarded_reference : 1;
 } zend_ssa_var_info;
 
 typedef struct _zend_ssa {

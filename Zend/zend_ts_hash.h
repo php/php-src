@@ -56,8 +56,8 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 
 
 /* Deletes */
-ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
+ZEND_API zend_result zend_ts_hash_del(TsHashTable *ht, zend_string *key);
+ZEND_API zend_result zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
 
 /* Data retrieval */
 ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key);
@@ -66,10 +66,10 @@ ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong);
 /* Copying, merging and sorting */
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
 ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
-ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, int overwrite);
+ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite);
 ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
-ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, int renumber);
-ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered);
+ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
+ZEND_API int  zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered);
 ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, bucket_compare_func_t compar, int flag);
 
 ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht);
@@ -112,12 +112,12 @@ static zend_always_inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const 
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static zend_always_inline int zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
+static zend_always_inline bool zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
 {
 	return zend_ts_hash_find(ht, key) != NULL;
 }
 
-static zend_always_inline int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
+static zend_always_inline bool zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
 {
 	return zend_ts_hash_index_find(ht, h) != NULL;
 }

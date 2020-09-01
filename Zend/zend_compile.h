@@ -133,7 +133,7 @@ typedef union _zend_parser_stack_elem {
 void zend_compile_top_stmt(zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
-zend_op *zend_compile_var(znode *node, zend_ast *ast, uint32_t type, int by_ref);
+zend_op *zend_compile_var(znode *node, zend_ast *ast, uint32_t type, bool by_ref);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
@@ -751,14 +751,14 @@ const char *zend_get_zendtext(void);
 int zend_get_zendleng(void);
 #endif
 
-typedef int (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
-typedef int (ZEND_FASTCALL *binary_op_type)(zval *, zval *, zval *);
+typedef zend_result (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
+typedef zend_result (ZEND_FASTCALL *binary_op_type)(zval *, zval *, zval *);
 
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
 void zend_stop_lexing(void);
-void zend_emit_final_return(int return_one);
+void zend_emit_final_return(bool return_one);
 
 /* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
@@ -770,8 +770,8 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast);
 /* parser-driven code generators */
 void zend_do_free(znode *op1);
 
-ZEND_API int do_bind_function(zval *lcname);
-ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name);
+ZEND_API zend_result do_bind_function(zval *lcname);
+ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
 ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t first_early_binding_opline);
 
@@ -823,10 +823,10 @@ ZEND_API void zend_function_dtor(zval *zv);
 ZEND_API void destroy_zend_class(zval *zv);
 void zend_class_add_ref(zval *zv);
 
-ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_length, const char *src2, size_t src2_length, int internal);
+ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_length, const char *src2, size_t src2_length, bool internal);
 #define zend_unmangle_property_name(mangled_property, class_name, prop_name) \
         zend_unmangle_property_name_ex(mangled_property, class_name, prop_name, NULL)
-ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
+ZEND_API zend_result zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
 
 static zend_always_inline const char *zend_get_unmangled_property_name(const zend_string *mangled_prop) {
 	const char *class_name, *prop_name;
@@ -841,13 +841,13 @@ typedef zend_bool (*zend_needs_live_range_cb)(zend_op_array *op_array, zend_op *
 ZEND_API void zend_recalc_live_ranges(
 	zend_op_array *op_array, zend_needs_live_range_cb needs_live_range);
 
-ZEND_API int pass_two(zend_op_array *op_array);
+ZEND_API void pass_two(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
-ZEND_API int zend_is_smart_branch(const zend_op *opline);
+ZEND_API bool zend_is_smart_branch(const zend_op *opline);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
@@ -857,7 +857,7 @@ typedef struct _zend_auto_global {
 	zend_bool armed;
 } zend_auto_global;
 
-ZEND_API int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback);
+ZEND_API zend_result zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback);
 ZEND_API void zend_activate_auto_globals(void);
 ZEND_API zend_bool zend_is_auto_global(zend_string *name);
 ZEND_API zend_bool zend_is_auto_global_str(const char *name, size_t len);
@@ -974,7 +974,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define IS_CONSTANT_CLASS                    0x400 /* __CLASS__ in trait */
 #define IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE 0x800
 
-static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
+static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
 	arg_num--;
 	if (UNEXPECTED(arg_num >= zf->common.num_args)) {
