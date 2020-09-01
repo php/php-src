@@ -3,8 +3,8 @@ Hash: MurmurHash3 test
 --FILE--
 <?php
 
-$h = hash("murmur3a", "foo", true);
-echo ((ord($h[0]) << 24) | (ord($h[1]) << 16) | (ord($h[2]) << 8) | (ord($h[3]) << 0)), "\n";
+$h = hash("murmur3a", "foo");
+echo $h, "\n";
 
 $h = hash("murmur3c", "Two hashes meet in a bar", false);
 echo $h, "\n";
@@ -39,7 +39,7 @@ echo $h0, " ", $h1, "\n";
 
 ?>
 --EXPECT--
-4138058784
+f6a5c420
 8036c2707453c6f37348142be7eaf75c
 c7009299985a5627a9280372a9280372
 40256ed26fa6ece7785092ed33c8b659
