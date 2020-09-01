@@ -636,7 +636,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				  We do transformation here, which will be used later when sending types. The code later relies on this.
 				*/
-				if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+				if (d >= (double) ZEND_LONG_MAX || d < (double) ZEND_LONG_MIN) {
 					stmt->send_types_to_server = *resend_types_next_time = 1;
 					convert_to_string_ex(tmp_data);
 				} else {
