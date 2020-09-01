@@ -1388,7 +1388,7 @@ void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 	for (phi = next_ssa_block->phis; phi; phi = phi->next) {
 		if (phi->pi >= 0) {
 			if (phi->pi == from) {
-				zend_ssa_remove_uses_of_var(ssa, phi->ssa_var);
+				zend_ssa_rename_var_uses(ssa, phi->ssa_var, phi->sources[0], /* update_types */ 0);
 				zend_ssa_remove_phi(ssa, phi);
 			}
 		} else {
