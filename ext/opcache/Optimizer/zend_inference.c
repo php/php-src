@@ -4331,6 +4331,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		if (t2 & MAY_BE_UNDEF) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN_REF:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
 					break;
 				default:
 					/* undefined variable warning */
@@ -4342,6 +4344,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		 && (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
 					break;
 				default:
 					/* destructor may be called */
@@ -4608,6 +4612,22 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 				return 1;
 			}
 			if ((t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				return 1;
+			}
+			return 0;
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+			if ((t1 & (MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+				return 1;
+			}
+			return 0;
+		case ZEND_FE_FETCH_R:
+			if ((t1 & (MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+				return 1;
+			}
+			if (opline->op2_type == IS_CV
+			 && (t2 & MAY_BE_RC1)
+			 && (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 				return 1;
 			}
 			return 0;
