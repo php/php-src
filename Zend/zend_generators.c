@@ -435,9 +435,8 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 
 static zend_generator *zend_generator_get_child(zend_generator_node *node, zend_generator *leaf)
 {
-	if (node->children == 0) {
-		return NULL;
-	} else if (node->children == 1) {
+	ZEND_ASSERT(node->children != 0);
+	if (node->children == 1) {
 		return node->child.single.child;
 	} else {
 		return zend_hash_index_find_ptr(node->child.ht, (zend_ulong) leaf);
