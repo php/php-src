@@ -30,6 +30,7 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
 * `php-fuzz-mbstring`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
 * `php-fuzz-execute`: Fuzzing the executor
+* `php-fuzz-jit`: Fuzzing the function JIT (requires --enable-opcache)
 
 Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
 

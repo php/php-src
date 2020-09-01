@@ -2811,6 +2811,7 @@ static inline int accel_find_sapi(void)
 		"apache2handler",
 		"litespeed",
 		"uwsgi",
+		"fuzzer",
 		NULL
 	};
 	const char **sapi_name;
