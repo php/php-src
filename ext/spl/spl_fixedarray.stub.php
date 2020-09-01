@@ -24,8 +24,11 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable
     /** @return bool */
     public function setSize(int $size) {}
 
-    /** @return bool */
-    public function offsetExists(mixed $index) {}
+    /**
+     * @param int $index
+     * @return bool
+     */
+    public function offsetExists($index) {}
 
     /**
      * @param int $index

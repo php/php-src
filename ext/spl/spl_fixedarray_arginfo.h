@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 90b8a23bd4968039522f0b8a6c2034a3784fe78a */
+ * Stub hash: 4b6c37c54416ee46f610baba2a8b2be45d1db96f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -24,19 +24,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_setSize, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_offsetExists, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, index, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_SplFixedArray_offsetGet arginfo_class_SplFixedArray_offsetExists
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFixedArray_offsetUnset arginfo_class_SplFixedArray_offsetGet
+#define arginfo_class_SplFixedArray_offsetUnset arginfo_class_SplFixedArray_offsetExists
 
 #define arginfo_class_SplFixedArray_rewind arginfo_class_SplFixedArray___wakeup
 

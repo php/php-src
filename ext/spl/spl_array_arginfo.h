@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 93e4c96c631badd30f847fb24636cb881563a949 */
+ * Stub hash: bedd13338707177e28a021722df64be2f74a7945 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, input, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")

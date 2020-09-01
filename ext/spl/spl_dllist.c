@@ -758,8 +758,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetGet)
 		RETURN_THROWS();
 	}
 
-	zval *value = &element->data;
-	ZVAL_COPY_DEREF(return_value, value);
+	ZVAL_COPY_DEREF(return_value, &element->data);
 } /* }}} */
 
 /* {{{ Sets the value at the specified $index to $newval. */
@@ -770,10 +769,9 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 	zval *value;
 	spl_dllist_object *intern;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_LONG_OR_NULL(index, index_is_null)
-		Z_PARAM_ZVAL(value)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l!z", &index, &index_is_null, &value) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 
@@ -1066,9 +1064,7 @@ PHP_METHOD(SplDoublyLinkedList, current)
 	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
 	} else {
-		zval *value = &element->data;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		ZVAL_COPY_DEREF(return_value, &element->data);
 	}
 }
 /* }}} */

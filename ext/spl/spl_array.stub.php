@@ -96,28 +96,28 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
     public function __construct(array|object $array = [], int $flags = 0) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return bool
      * @alias ArrayObject::offsetExists
      */
     public function offsetExists($index) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return mixed
      * @alias ArrayObject::offsetGet
      */
     public function offsetGet($index) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return void
      * @alias ArrayObject::offsetSet
      */
     public function offsetSet($index, mixed $value) {}
 
     /**
-     * @param array|string|float|int|bool|null $index
+     * @param string|int $index
      * @return void
      * @alias ArrayObject::offsetUnset
      */
