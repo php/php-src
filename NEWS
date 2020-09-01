@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-04 Nov 2021, PHP 8.0.13RC1
+18 Nov 2021, PHP 8.0.13
 
 - Core:
   . Fixed bug #81518 (Header injection via default_mimetype / default_charset).
@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
+
+- XML:
+  . Fixed bug #79971 (special character is breaking the path in xml function).
+    (CVE-2021-21707) (cmb)
 
 - XMLReader:
   . Fixed bug #81521 (XMLReader::getParserProperty may throw with a valid
