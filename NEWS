@@ -22,7 +22,9 @@ PHP                                                                        NEWS
 
 - PDO:
   . Fixed bug #80027 (Terrible performance using $query->fetch on queries with
-    many bind parameters (Matteo)
+    many bind parameters) (Matteo)
+  . Fixed bug #79914 (PHP PDO mysqlnd ignores InnoDB deadlock errors).
+    (houxiaoxian)
 
 - Standard:
   . Fixed bug #79986 (str_ireplace bug with diacritics characters). (cmb)
@@ -73,10 +75,6 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
     "Transfer-Encoding: chunked"). (Matteo)
-
-- PDO:
-  . Fixed bug #79914 (PHP PDO mysqlnd ignores InnoDB deadlock errors).
-    (houxiaoxian)
 
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array

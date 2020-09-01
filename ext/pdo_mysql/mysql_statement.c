@@ -128,7 +128,9 @@ static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
 			S->result = mysql_store_result(H->server);
 		}
 
-		pdo_mysql_error_stmt_emulate_false(stmt);
+		S->stmt = NULL;
+		stmt->dbh->methods = NULL;
+		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_VOID_RETURN;
 	}
 }
