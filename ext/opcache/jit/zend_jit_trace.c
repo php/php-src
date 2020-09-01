@@ -4058,7 +4058,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									}
 								}
 							}
-							if (!zend_jit_leave_func(&dasm_state, op_array, p + 1, &zend_jit_traces[ZEND_JIT_TRACE_NUM], may_throw)) {
+							if (!zend_jit_leave_func(&dasm_state, op_array, p + 1, &zend_jit_traces[ZEND_JIT_TRACE_NUM],
+									(op_array_ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, may_throw)) {
 								goto jit_failure;
 							}
 						}
@@ -4875,6 +4876,17 @@ done:
 			call->prev = frame->call;
 			if (!(p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 				TRACE_FRAME_SET_LAST_SEND_BY_VAL(call);
+			}
+			if (init_opline
+			 && init_opline->opcode != ZEND_NEW
+			 && (init_opline->opcode != ZEND_INIT_METHOD_CALL
+			  || init_opline->op1_type == IS_UNDEF)
+			 && (init_opline->opcode != ZEND_INIT_USER_CALL
+			  || init_opline->op2_type == IS_CONST) /* no closure */
+			 && (init_opline->opcode != ZEND_INIT_DYNAMIC_CALL
+			  || init_opline->op2_type == IS_CONST) /* no closure */
+			) {
+				TRACE_FRAME_SET_NO_NEED_RELEASE_THIS(call);
 			}
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);

@@ -10194,66 +10194,88 @@ static int zend_jit_free_op(dasm_State **Dst, const zend_op *opline, uint32_t in
 	return 1;
 }
 
-static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info, int may_throw)
+static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info, int indirect_var_access, int may_throw)
 {
-	/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
-	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
-	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
-	if (trace && trace->op != ZEND_JIT_TRACE_END) {
-		|	jnz >1
-		|.cold_code
-		|1:
-		if (!GCC_GLOBAL_REGS) {
-			|	mov FCARG2a, FP
-		}
-		|	EXT_CALL zend_jit_leave_func_helper, r0
+	zend_bool may_be_top_frame =
+		JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+		!JIT_G(current_frame) ||
+		!TRACE_FRAME_IS_NESTED(JIT_G(current_frame));
+	zend_bool may_need_call_helper =
+		indirect_var_access || /* may have symbol table */
+		!op_array->function_name || /* may have symbol table */
+		may_be_top_frame ||
+		(op_array->fn_flags & ZEND_ACC_VARIADIC) || /* may have extra named args */
+		JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+		!JIT_G(current_frame) ||
+		TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)) == -1 || /* unknown number of args */
+		(uint32_t)TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)) > op_array->num_args; /* extra args */
+	zend_bool may_need_release_this =
+		!(op_array->fn_flags & ZEND_ACC_CLOSURE) &&
+		op_array->scope &&
+		!(op_array->fn_flags & ZEND_ACC_STATIC) &&
+		(JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+		 !JIT_G(current_frame) ||
+		 !TRACE_FRAME_NO_NEED_REKEASE_THIS(JIT_G(current_frame)));
 
-		if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
-		    !JIT_G(current_frame) ||
-		    !TRACE_FRAME_IS_NESTED(JIT_G(current_frame))) {
-			// TODO: try to avoid this check ???
-			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-				|	cmp IP, zend_jit_halt_op
-				|	je ->trace_halt
-			} else if (GCC_GLOBAL_REGS) {
-				|	test IP, IP
-				|	je ->trace_halt
-			} else {
-				|	test eax, eax
-				|	jl ->trace_halt
+	if (may_need_call_helper || may_need_release_this) {
+		|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
+	}
+	if (may_need_call_helper) {
+		/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
+		|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
+		if (trace && trace->op != ZEND_JIT_TRACE_END) {
+			|	jnz >1
+			|.cold_code
+			|1:
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG2a, FP
 			}
-		}
+			|	EXT_CALL zend_jit_leave_func_helper, r0
 
-		if (!GCC_GLOBAL_REGS) {
-			|	// execute_data = EG(current_execute_data)
-			|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
+			if (may_be_top_frame) {
+				// TODO: try to avoid this check ???
+				if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+					|	cmp IP, zend_jit_halt_op
+					|	je ->trace_halt
+				} else if (GCC_GLOBAL_REGS) {
+					|	test IP, IP
+					|	je ->trace_halt
+				} else {
+					|	test eax, eax
+					|	jl ->trace_halt
+				}
+			}
+
+			if (!GCC_GLOBAL_REGS) {
+				|	// execute_data = EG(current_execute_data)
+				|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
+			}
+			|	jmp >8
+			|.code
+		} else {
+			|	jnz ->leave_function_handler
 		}
-		|	jmp >8
-		|.code
-	} else {
-		|	jnz ->leave_function_handler
 	}
 
-	if ((op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) ||
-	    (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
-		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
-			|	mov FCARG1a, EX->func
-			|	sub FCARG1a, sizeof(zend_object)
-			|	OBJ_RELEASE ZREG_FCARG1a, >4
-		} else if (op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) {
-			|	// if (call_info & ZEND_CALL_RELEASE_THIS)
-			|	test FCARG1d, ZEND_CALL_RELEASE_THIS
-			|	je >4
-			|	// zend_object *object = Z_OBJ(execute_data->This);
-			|	mov FCARG1a, EX->This.value.obj
-			|	// OBJ_RELEASE(object);
-			|	OBJ_RELEASE ZREG_FCARG1a, >4
-			// TODO: avoid EG(excption) check for $this->foo() calls
-			may_throw = 1;
-		}
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
+		|	mov FCARG1a, EX->func
+		|	sub FCARG1a, sizeof(zend_object)
+		|	OBJ_RELEASE ZREG_FCARG1a, >4
 		|4:
+	} else if (may_need_release_this) {
+		|	// if (call_info & ZEND_CALL_RELEASE_THIS)
+		|	test FCARG1d, ZEND_CALL_RELEASE_THIS
+		|	je >4
+		|	// zend_object *object = Z_OBJ(execute_data->This);
+		|	mov FCARG1a, EX->This.value.obj
+		|	// OBJ_RELEASE(object);
+		|	OBJ_RELEASE ZREG_FCARG1a, >4
+		|4:
+		// TODO: avoid EG(excption) check for $this->foo() calls
+		may_throw = 1;
 	}
+
 	|	// EG(vm_stack_top) = (zval*)execute_data;
 	|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
 	|	// execute_data = EX(prev_execute_data);
