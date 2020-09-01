@@ -466,7 +466,8 @@ extern "C++" {
 
 /* Memory sanitizer is incompatible with ifunc resolvers. Even if the resolver
  * is marked as no_sanitize("memory") it will still be instrumented and crash. */
-#if __has_feature(memory_sanitizer) || __has_feature(thread_sanitizer)
+#if __has_feature(memory_sanitizer) || __has_feature(thread_sanitizer) || \
+	__has_feature(dataflow_sanitizer)
 # undef HAVE_FUNC_ATTRIBUTE_IFUNC
 #endif
 
