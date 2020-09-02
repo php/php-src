@@ -278,9 +278,9 @@ static zend_always_inline int _zend_quick_get_constant(
 	return SUCCESS;
 }
 
-void ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags)
+int ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags)
 {
-	_zend_quick_get_constant(key, flags, 0);
+	return _zend_quick_get_constant(key, flags, 0);
 }
 
 int ZEND_FASTCALL zend_jit_check_constant(const zval *key)

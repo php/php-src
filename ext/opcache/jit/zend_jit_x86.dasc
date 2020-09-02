@@ -12651,11 +12651,46 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, const zend
 		} else {
 			|	// ZVAL_COPY(res, value);
 			|	ZVAL_COPY_VALUE var_addr, -1, val_addr, val_info, ZREG_R0, ZREG_FCARG1a
-			if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-				|	TRY_ADDREF op1_info, ah, FCARG1a
-			}
+			|	TRY_ADDREF val_info, ah, FCARG1a
 		}
 	}
+
+	return 1;
+}
+
+static int zend_jit_fetch_constant(dasm_State **Dst, const zend_op *opline)
+{
+	zval *zv = RT_CONSTANT(opline, opline->op2) + 1;
+	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+	zend_jit_addr const_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+
+	|	// c = CACHED_PTR(opline->extended_value);
+	|	mov FCARG1a, EX->run_time_cache
+	|	mov FCARG1a, aword [FCARG1a + opline->extended_value]
+	|	// if (c != NULL)
+	|	test FCARG1a, FCARG1a
+	|	jz >9
+	|	// if (!IS_SPECIAL_CACHE_VAL(c))
+	|	test FCARG1a, CACHE_SPECIAL
+	|	jnz >9
+	|	// ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value); (no dup)
+	|	ZVAL_COPY_VALUE res_addr, MAY_BE_ANY, const_addr, MAY_BE_ANY, ZREG_R0, ZREG_FCARG2a
+	|	TRY_ADDREF MAY_BE_ANY, ah, FCARG2a
+	|8:
+
+	|.cold_code
+	|9:
+	|	// SAVE_OPLINE();
+	|	SAVE_VALID_OPLINE opline, r0
+	|	// zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num OPLINE_CC EXECUTE_DATA_CC);
+	|	LOAD_ADDR FCARG1a, zv
+	|	mov FCARG2a, opline->op1.num
+	|	EXT_CALL zend_jit_get_constant, r0
+	|	// ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	|	test r0, r0
+	|	jz <8
+	|	jmp ->exception_handler
+	|.code
 
 	return 1;
 }
