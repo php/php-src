@@ -704,7 +704,7 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 	return SUCCESS;
 
 exception:
-	zend_rethrow_exception(generator->execute_data);
+	zend_generator_throw_exception(generator, NULL);
 
 failure:
 	zval_ptr_dtor(&generator->values);
