@@ -1977,7 +1977,7 @@ file_strncmp16(const char *a, const char *b, size_t len, size_t maxlen,
 	return file_strncmp(a, b, len, maxlen, flags);
 }
 
-public zend_string* convert_libmagic_pattern(char *val, size_t len, uint32_t options)
+public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options)
 {
 	int i, j;
 	zend_string *t;

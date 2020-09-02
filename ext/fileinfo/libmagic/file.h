@@ -525,7 +525,7 @@ protected void buffer_init(struct buffer *, int, const zend_stat_t *,
 protected void buffer_fini(struct buffer *);
 protected int buffer_fill(const struct buffer *);
 
-public zend_string* convert_libmagic_pattern(char *val, size_t len, uint32_t options);
+public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options);
 
 typedef struct {
 	char *buf;
