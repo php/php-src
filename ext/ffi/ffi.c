@@ -4427,6 +4427,27 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 }
 /* }}} */
 
+
+ZEND_METHOD(CType, getStructName) /* {{{ */
+{
+	zend_ffi_type *zend_ffi_type = (zend_ffi_ctype*) (Z_OBJ_P(ZEND_THIS));
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zend_ffi_ctype_name_buf buf;
+	
+	buf.start = buf.end = buf.buf + ((MAX_TYPE_NAME_LEN * 3) / 4);
+	if (!zend_ffi_ctype_name(&buf, ZEND_FFI_TYPE(zend_ffi_type)->type)) {
+		RETURN_STR_COPY(Z_OBJ_P(ZEND_THIS)->ce->name);
+	} else {
+		size_t len = buf.end - buf.start;
+		zend_string *res = zend_string_alloc(len,  0);
+		memcpy(ZSTR_VAL(res), buf.start, len);
+		RETURN_STR_COPY(res);
+	}
+}
+
 static char *zend_ffi_parse_directives(const char *filename, char *code_pos, char **scope_name, char **lib, zend_bool preload) /* {{{ */
 {
 	char *p;

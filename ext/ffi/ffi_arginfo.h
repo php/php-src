@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c5ad08a2c62988e2b50468c1c5b941b5c28f23b5 */
+ * Stub hash: 5c223158d8a6b66e198f78ec6cd999d648fb8991 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -79,6 +79,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_isNull, 0, 1, _IS_BOOL
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CType_getStructName, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(FFI, cdef);
 ZEND_METHOD(FFI, load);
@@ -97,6 +100,7 @@ ZEND_METHOD(FFI, memcmp);
 ZEND_METHOD(FFI, memset);
 ZEND_METHOD(FFI, string);
 ZEND_METHOD(FFI, isNull);
+ZEND_METHOD(CType, getStructName);
 
 
 static const zend_function_entry class_FFI_methods[] = {
@@ -117,5 +121,11 @@ static const zend_function_entry class_FFI_methods[] = {
 	ZEND_ME(FFI, memset, arginfo_class_FFI_memset, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, string, arginfo_class_FFI_string, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, isNull, arginfo_class_FFI_isNull, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_CType_methods[] = {
+	ZEND_ME(CType, getStructName, arginfo_class_CType_getStructName, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
