@@ -2951,6 +2951,16 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_FE_FETCH_R:
+						op1_info = OP1_INFO();
+						if ((op1_info & MAY_BE_ANY) != MAY_BE_ARRAY) {
+							break;
+						}
+						if (!zend_jit_fe_fetch(&dasm_state, opline, op_array, ssa, ssa_op,
+								op1_info, ssa->cfg.blocks[b].successors[0], opline->opcode, NULL)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_VERIFY_RETURN_TYPE:
 						if (opline->op1_type == IS_UNUSED) {
 							/* Always throws */

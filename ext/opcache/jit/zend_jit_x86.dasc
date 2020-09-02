@@ -12530,6 +12530,136 @@ static int zend_jit_isset_isempty_cv(dasm_State **Dst, const zend_op *opline, ui
 	return 1;
 }
 
+static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op, uint32_t op1_info, unsigned int target_label, zend_uchar exit_opcode, const void *exit_addr)
+{
+	zend_jit_addr op1_addr = OP1_ADDR();
+
+	|	// array = EX_VAR(opline->op1.var);
+	|	// fe_ht = Z_ARRVAL_P(array);
+	|	GET_ZVAL_PTR FCARG2a, op1_addr
+	|	// pos = Z_FE_POS_P(array);
+	|	mov FCARG1d, dword [FP + opline->op1.var + offsetof(zval, u2.fe_pos)]
+	|	// p = fe_ht->arData + pos;
+	|.if X64
+		|	movsxd r0, FCARG1d
+		|	shl r0, 5
+	|.else
+		|	imul r0, FCARG1a, sizeof(Bucket)
+	|.endif
+	|	add r0, aword [FCARG2a + offsetof(zend_array, arData)]
+	|1:
+	|	// if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
+	|	cmp dword [FCARG2a + offsetof(zend_array, nNumUsed)], FCARG1d
+	|	// ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+	|   // ZEND_VM_CONTINUE();
+	if (exit_addr) {
+		if (exit_opcode == ZEND_JMP) {
+			|	jbe &exit_addr
+		} else {
+			|	jbe >3
+		}
+	} else {
+		|	jbe =>target_label
+	}
+	|	// pos++;
+	|	add FCARG1d, 1
+	|	// value_type = Z_TYPE_INFO_P(value);
+	|	// if (EXPECTED(value_type != IS_UNDEF)) {
+	|	IF_Z_TYPE r0, IS_UNDEF, >2
+	if (!exit_addr || exit_opcode == ZEND_JMP) {
+		|	IF_NOT_Z_TYPE r0, IS_INDIRECT, >3
+	} else {
+		|	IF_NOT_Z_TYPE r0, IS_INDIRECT, &exit_addr
+	}
+	|	// value = Z_INDIRECT_P(value);
+	|	GET_Z_PTR FCARG2a, r0
+	|	// value_type = Z_TYPE_INFO_P(value);
+	|	// if (EXPECTED(value_type != IS_UNDEF)) {
+	if (!exit_addr || exit_opcode == ZEND_JMP) {
+		|	IF_NOT_Z_TYPE FCARG2a, IS_UNDEF, >4
+	} else {
+		|	IF_NOT_Z_TYPE r0, IS_UNDEF, &exit_addr
+	}
+	|	GET_ZVAL_PTR FCARG2a, op1_addr // reload
+	|2:
+	|	// p++;
+	|	add r0, sizeof(Bucket)
+	|	jmp <1
+	|3:
+
+	if (!exit_addr || exit_opcode == ZEND_JMP) {
+		zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG2a, 0);
+		zend_jit_addr var_addr = OP2_ADDR();
+		uint32_t val_info;
+
+		|	mov	FCARG2a, r0
+		|4:
+		|	// Z_FE_POS_P(array) = pos + 1;
+		|	mov dword [FP + opline->op1.var + offsetof(zval, u2.fe_pos)], FCARG1d
+
+		if (RETURN_VALUE_USED(opline)) {
+			zend_jit_addr res_addr = RES_ADDR();
+
+			if ((op1_info & MAY_BE_ARRAY_KEY_LONG)
+			 && (op1_info & MAY_BE_ARRAY_KEY_STRING)) {
+				|	// if (!p->key) {
+				|	cmp aword [r0 + offsetof(Bucket, key)], 0
+				|	jz >2
+			}
+			if (op1_info & MAY_BE_ARRAY_KEY_STRING) {
+				|	// ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+				|	mov FCARG1a, aword [r0 + offsetof(Bucket, key)]
+				|	SET_ZVAL_PTR res_addr, FCARG1a
+				|	test dword [FCARG1a + offsetof(zend_refcounted, gc.u.type_info)], IS_STR_INTERNED
+				|	jz >1
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING
+				|	jmp >3
+				|1:
+				|	GC_ADDREF FCARG1a
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING_EX
+
+				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+				    |	jmp >3
+					|2:
+				}
+			}
+			if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+				|	// ZVAL_LONG(EX_VAR(opline->result.var), p->h);
+				|	mov FCARG1a, aword [r0 + offsetof(Bucket, h)]
+				|	SET_ZVAL_LVAL res_addr, FCARG1a
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
+			}
+			|3:
+		}
+
+		val_info = ((op1_info & MAY_BE_ARRAY_OF_ANY) >> MAY_BE_ARRAY_SHIFT);
+		if (val_info & MAY_BE_ARRAY) {
+			val_info |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+		}
+		if (op1_info & MAY_BE_ARRAY_OF_REF) {
+			val_info |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY |
+				MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+		} else if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			val_info |= MAY_BE_RC1 | MAY_BE_RCN;
+		}
+
+		if (opline->op2_type == IS_CV) {
+			|	// zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
+			if (!zend_jit_assign_to_variable(Dst, opline, var_addr, var_addr, OP2_INFO(), -1, IS_CV, opline->op2, val_addr, val_info, 0, 1)) {
+				return 0;
+			}
+		} else {
+			|	// ZVAL_COPY(res, value);
+			|	ZVAL_COPY_VALUE var_addr, -1, val_addr, val_info, ZREG_R0, ZREG_FCARG1a
+			if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+				|	TRY_ADDREF op1_info, ah, FCARG1a
+			}
+		}
+	}
+
+	return 1;
+}
+
 static zend_bool zend_jit_noref_guard(dasm_State **Dst, const zend_op *opline, zend_jit_addr var_addr)
 {
 	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);

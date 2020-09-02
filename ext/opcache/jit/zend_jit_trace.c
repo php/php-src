@@ -1445,6 +1445,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_ECHO:
 				case ZEND_STRLEN:
 				case ZEND_QM_ASSIGN:
+				case ZEND_FE_FETCH_R:
 					ADD_OP1_TRACE_GUARD();
 					break;
 				case ZEND_VERIFY_RETURN_TYPE:
@@ -4537,6 +4538,39 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						if (!zend_jit_verify_return_type(&dasm_state, opline, op_array, op1_info)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_FE_FETCH_R:
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
+						if ((op1_info & MAY_BE_ANY) != MAY_BE_ARRAY) {
+							break;
+						}
+						if ((p+1)->op == ZEND_JIT_TRACE_VM || (p+1)->op == ZEND_JIT_TRACE_END) {
+							const zend_op *exit_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
+							uint32_t exit_point;
+
+							if ((p+1)->opline == exit_opline) {
+								/* taken branch (exit from loop) */
+								exit_opline = opline;
+								smart_branch_opcode = ZEND_NOP;
+							} else if ((p+1)->opline == opline + 1) {
+								/* not taken branch (loop) */
+								smart_branch_opcode = ZEND_JMP;
+							} else {
+								ZEND_UNREACHABLE();
+							}
+							exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
+							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+							if (!exit_addr) {
+								goto jit_failure;
+							}
+						} else  {
+							ZEND_UNREACHABLE();
+						}
+						if (!zend_jit_fe_fetch(&dasm_state, opline, op_array, ssa, ssa_op,
+								op1_info, -1, smart_branch_opcode, exit_addr)) {
 							goto jit_failure;
 						}
 						goto done;
