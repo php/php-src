@@ -91,6 +91,7 @@ $urls = array(
 '',
 '/',
 '/rest/Users?filter={"id":"123"}',
+'%:x',
 
 // Severely malformed URLs that do not parse:
 'http:///blah.com',
