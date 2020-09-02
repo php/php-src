@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5c223158d8a6b66e198f78ec6cd999d648fb8991 */
+ * Stub hash: 7c334e2d2e5356cd7510d96f5351eb49e0f4ffe6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -79,7 +79,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_isNull, 0, 1, _IS_BOOL
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CType_getStructName, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CType_getName, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -100,7 +100,7 @@ ZEND_METHOD(FFI, memcmp);
 ZEND_METHOD(FFI, memset);
 ZEND_METHOD(FFI, string);
 ZEND_METHOD(FFI, isNull);
-ZEND_METHOD(CType, getStructName);
+ZEND_METHOD(CType, getName);
 
 
 static const zend_function_entry class_FFI_methods[] = {
@@ -126,6 +126,6 @@ static const zend_function_entry class_FFI_methods[] = {
 
 
 static const zend_function_entry class_CType_methods[] = {
-	ZEND_ME(CType, getStructName, arginfo_class_CType_getStructName, ZEND_ACC_PUBLIC)
+	ZEND_ME(CType, getName, arginfo_class_CType_getName, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

@@ -63,5 +63,5 @@ final class FFI
 }
 
 final class CType {
-    public function getStructName() : string {}
+    public function getName() : string {}
 }
