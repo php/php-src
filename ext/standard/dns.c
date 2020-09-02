@@ -212,8 +212,8 @@ PHP_FUNCTION(gethostbyname)
 
 	if (hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		zend_argument_value_error(1, "cannot be longer than %d characters", MAXFQDNLEN);
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Host name cannot be longer than %d characters", MAXFQDNLEN);
+		RETURN_STRINGL(hostname, hostname_len);
 	}
 
 	RETURN_STR(php_gethostbyname(hostname));
@@ -234,10 +234,10 @@ PHP_FUNCTION(gethostbynamel)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len > MAXFQDNLEN) {
-    	/* name too long, protect from CVE-2015-0235 */
-    	zend_argument_value_error(1, "cannot be longer than %d characters", MAXFQDNLEN);
-    	RETURN_THROWS();
-    }
+		/* name too long, protect from CVE-2015-0235 */
+		php_error_docref(NULL, E_WARNING, "Host name cannot be longer than %d characters", MAXFQDNLEN);
+		RETURN_FALSE;
+	}
 
 	hp = php_network_gethostbyname(hostname);
 	if (!hp) {
