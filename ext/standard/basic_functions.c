@@ -33,6 +33,7 @@
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/php_mt_rand.h"
+#include "ext/standard/crc32_x86.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -361,6 +362,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 #if ZEND_INTRIN_SSE4_2_FUNC_PTR
 	BASIC_MINIT_SUBMODULE(string_intrin)
+#endif
+
+#if ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
+	BASIC_MINIT_SUBMODULE(crc32_x86_intrin)
 #endif
 
 #if ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR

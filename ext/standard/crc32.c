@@ -17,6 +17,7 @@
 #include "php.h"
 #include "basic_functions.h"
 #include "crc32.h"
+#include "crc32_x86.h"
 
 #if HAVE_AARCH64_CRC32
 # include <arm_acle.h>
@@ -74,7 +75,7 @@ PHP_FUNCTION(crc32)
 	char *p;
 	size_t nr;
 	uint32_t crcinit = 0;
-	register uint32_t crc;
+	uint32_t crc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(p, nr)
@@ -87,6 +88,12 @@ PHP_FUNCTION(crc32)
 		crc = crc32_aarch64(crc, p, nr);
 		RETURN_LONG(crc^0xFFFFFFFF);
 	}
+#endif
+
+#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+	size_t nr_simd = crc32_x86_simd_update(X86_CRC32B, &crc, (const unsigned char *)p, nr);
+	nr -= nr_simd;
+	p += nr_simd;
 #endif
 
 	for (; nr--; ++p) {
