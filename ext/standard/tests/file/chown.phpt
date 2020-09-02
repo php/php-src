@@ -7,11 +7,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-try {
-    chown("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
+chown("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
 echo "ALIVE\n";
 ?>
 --EXPECTF--
