@@ -2984,10 +2984,10 @@ static void zend_compile_list_assign(
 			zend_handle_numeric_dim(opline, &dim_node);
 		}
 
+		if (elem_ast->attr) {
+			zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
+		}
 		if (var_ast->kind == ZEND_AST_ARRAY) {
-			if (elem_ast->attr) {
-				zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
-			}
 			zend_compile_list_assign(NULL, var_ast, &fetch_result, var_ast->attr);
 		} else if (elem_ast->attr) {
 			zend_emit_assign_ref_znode(var_ast, &fetch_result);
@@ -3180,6 +3180,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	if ((target_ast->kind != ZEND_AST_VAR
 	  || target_ast->child[0]->kind != ZEND_AST_ZVAL)
+	 && source_ast->kind != ZEND_AST_ZNODE
 	 && source_node.op_type != IS_CV) {
 		/* Both LHS and RHS expressions may modify the same data structure,
 		 * and the modification during RHS evaluation may dangle the pointer
