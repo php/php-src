@@ -487,6 +487,10 @@ extern "C++" {
 #  define PHP_HAVE_SSE4_2
 # endif
 
+# if defined(HAVE_WMMINTRIN_H)
+#  define PHP_HAVE_PCLMUL
+# endif
+
 /*
  * AVX2 support was added in gcc 4.7, but AVX2 intrinsics don't work in
  * __attribute__((target("avx2"))) functions until gcc 4.9.
@@ -545,6 +549,58 @@ extern "C++" {
 # endif
 #else
 # define ZEND_INTRIN_SSE4_2_FUNC_DECL(func)
+#endif
+
+#ifdef __PCLMUL__
+/* Instructions compiled directly. */
+# define ZEND_INTRIN_PCLMUL_NATIVE 1
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_PCLMUL)) || defined(ZEND_WIN32)
+/* Function resolved by ifunc or MINIT. */
+# define ZEND_INTRIN_PCLMUL_RESOLVER 1
+#endif
+
+/* Do not use for conditional declaration of API functions! */
+#if defined(ZEND_INTRIN_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
+/* __builtin_cpu_supports has pclmul from gcc9 */
+# define ZEND_INTRIN_PCLMUL_FUNC_PROTO 1
+#elif defined(ZEND_INTRIN_PCLMUL_RESOLVER)
+# define ZEND_INTRIN_PCLMUL_FUNC_PTR 1
+#endif
+
+#ifdef ZEND_INTRIN_PCLMUL_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
+#  define ZEND_INTRIN_PCLMUL_FUNC_DECL(func) ZEND_API func __attribute__((target("pclmul")))
+# else
+#  define ZEND_INTRIN_PCLMUL_FUNC_DECL(func) func
+# endif
+#else
+# define ZEND_INTRIN_PCLMUL_FUNC_DECL(func)
+#endif
+
+#if defined(ZEND_INTRIN_SSE4_2_NATIVE) && defined(ZEND_INTRIN_PCLMUL_NATIVE)
+/* Instructions compiled directly. */
+# define ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE 1
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2) && defined(PHP_HAVE_PCLMUL)) || defined(ZEND_WIN32)
+/* Function resolved by ifunc or MINIT. */
+# define ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER 1
+#endif
+
+/* Do not use for conditional declaration of API functions! */
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
+/* __builtin_cpu_supports has pclmul from gcc9 */
+# define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PROTO 1
+#elif defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
+# define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR 1
+#endif
+
+#ifdef ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
+#  define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_DECL(func) ZEND_API func __attribute__((target("sse4.2,pclmul")))
+# else
+#  define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_DECL(func) func
+# endif
+#else
+# define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_DECL(func)
 #endif
 
 #ifdef __AVX2__
