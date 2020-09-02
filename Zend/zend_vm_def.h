@@ -6637,6 +6637,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 				ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 				ZEND_VM_CONTINUE();
 			}
+			pos++;
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
 			if (EXPECTED(value_type != IS_UNDEF)) {
@@ -6650,10 +6651,9 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 					break;
 				}
 			}
-			pos++;
 			p++;
 		}
-		Z_FE_POS_P(array) = pos + 1;
+		Z_FE_POS_P(array) = pos;
 		if (RETURN_VALUE_USED(opline)) {
 			if (!p->key) {
 				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
@@ -6676,7 +6676,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 					/* reached end of iteration */
 					ZEND_VM_C_GOTO(fe_fetch_r_exit);
 				}
-
+				pos++;
 				value = &p->val;
 				value_type = Z_TYPE_INFO_P(value);
 				if (EXPECTED(value_type != IS_UNDEF)) {
@@ -6693,9 +6693,9 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 						break;
 					}
 				}
-				pos++;
 				p++;
 			}
+			EG(ht_iterators)[Z_FE_ITER_P(array)].pos = pos;
 			if (RETURN_VALUE_USED(opline)) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
@@ -6709,7 +6709,6 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 					ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
 				}
 			}
-			EG(ht_iterators)[Z_FE_ITER_P(array)].pos = pos + 1;
 		} else {
 			if (EXPECTED(++iter->index > 0)) {
 				/* This could cause an endless loop if index becomes zero again.
@@ -6790,6 +6789,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 				/* reached end of iteration */
 				ZEND_VM_C_GOTO(fe_fetch_w_exit);
 			}
+			pos++;
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
 			if (EXPECTED(value_type != IS_UNDEF)) {
@@ -6803,9 +6803,9 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 					break;
 				}
 			}
-			pos++;
 			p++;
 		}
+		EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 		if (RETURN_VALUE_USED(opline)) {
 			if (!p->key) {
 				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
@@ -6813,7 +6813,6 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
 			}
 		}
-		EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos + 1;
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
 		zend_object_iterator *iter;
 
@@ -6828,7 +6827,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 					/* reached end of iteration */
 					ZEND_VM_C_GOTO(fe_fetch_w_exit);
 				}
-
+				pos++;
 				value = &p->val;
 				value_type = Z_TYPE_INFO_P(value);
 				if (EXPECTED(value_type != IS_UNDEF)) {
@@ -6854,9 +6853,9 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 						break;
 					}
 				}
-				pos++;
 				p++;
 			}
+			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 			if (RETURN_VALUE_USED(opline)) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
@@ -6870,7 +6869,6 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 					ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
 				}
 			}
-			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos + 1;
 		} else {
 			if (++iter->index > 0) {
 				/* This could cause an endless loop if index becomes zero again.
@@ -9605,6 +9603,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 			ZEND_VM_CONTINUE();
 		}
+		pos++;
 		value = &p->val;
 		value_type = Z_TYPE_INFO_P(value);
 		if (EXPECTED(value_type != IS_UNDEF)) {
@@ -9618,10 +9617,9 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 				break;
 			}
 		}
-		pos++;
 		p++;
 	}
-	Z_FE_POS_P(array) = pos + 1;
+	Z_FE_POS_P(array) = pos;
 	if (RETURN_VALUE_USED(opline)) {
 		if (!p->key) {
 			ZVAL_LONG(EX_VAR(opline->result.var), p->h);
