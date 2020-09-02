@@ -280,6 +280,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_JMP_NULL:
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
 		case ZEND_ASSERT_CHECK:
@@ -4638,6 +4639,7 @@ done:
 					 || opline->opcode == ZEND_QM_ASSIGN
 					 || opline->opcode == ZEND_JMP_SET
 					 || opline->opcode == ZEND_COALESCE
+					 || opline->opcode == ZEND_JMP_NULL
 					 || opline->opcode == ZEND_FE_RESET_R) {
 						/* keep old value */
 						type = STACK_VAR_TYPE(opline->op1.var);

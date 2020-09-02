@@ -2972,8 +2972,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-					case ZEND_JMP_NULL:
-						goto jit_failure;
 					default:
 						break;
 				}
@@ -3062,6 +3060,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
+				case ZEND_JMP_NULL:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
@@ -3112,8 +3111,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 					}
 					break;
-				case ZEND_JMP_NULL:
-					goto jit_failure;
 				default:
 					if (!zend_jit_handler(&dasm_state, opline,
 							zend_may_throw(opline, ssa_op, op_array, ssa))) {
