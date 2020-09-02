@@ -1329,6 +1329,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 					msg = "Cannot create references to/from string offsets";
 					break;
 				}
+				opline++;
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
