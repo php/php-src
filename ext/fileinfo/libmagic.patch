@@ -1702,7 +1702,7 @@ diff -ur libmagic.orig/encoding.c libmagic/encoding.c
  			return 0;
 diff -ur libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2020-06-15 02:01:01.000000000 +0200
-+++ libmagic/file.h	2020-08-29 11:56:12.303522747 +0200
++++ libmagic/file.h	2020-09-02 17:35:51.709611515 +0200
 @@ -33,17 +33,13 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1900,7 +1900,7 @@ diff -ur libmagic.orig/file.h libmagic/file.h
 -    int);
 -protected void file_regfree(file_regex_t *);
 -protected void file_regerror(file_regex_t *, int, struct magic_set *);
-+public zend_string* convert_libmagic_pattern(char *val, size_t len, uint32_t options);
++public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options);
  
  typedef struct {
  	char *buf;
@@ -3333,7 +3333,7 @@ diff -ur libmagic.orig/readcdf.c libmagic/readcdf.c
  	if (i != -1)
 diff -ur libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2020-06-15 02:01:01.000000000 +0200
-+++ libmagic/softmagic.c	2020-08-29 11:56:13.219516523 +0200
++++ libmagic/softmagic.c	2020-09-02 20:04:00.794667114 +0200
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3495,7 +3495,7 @@ diff -ur libmagic.orig/softmagic.c libmagic/softmagic.c
  	return file_strncmp(a, b, len, maxlen, flags);
  }
  
-+public zend_string* convert_libmagic_pattern(char *val, size_t len, uint32_t options)
++public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options)
 +{
 +	int i, j;
 +	zend_string *t;
