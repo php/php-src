@@ -75,19 +75,13 @@ array(1) {
   }
 }
 
-Warning: Illegal string offset 'foo' in %s on line %d
+Warning: Array to string conversion in %s on line %d
+Cannot access offset of type string on string
+string(0) ""
 
 Warning: Array to string conversion in %s on line %d
-
-Warning: Only the first byte will be assigned to the string offset in %s on line %d
-string(1) "A"
-
-Warning: Illegal string offset 'foo' in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Only the first byte will be assigned to the string offset in %s on line %d
-string(1) "A"
+Cannot access offset of type string on string
+string(1) " "
 Cannot use a scalar value as an array
 float(0.1)
 array(1) {

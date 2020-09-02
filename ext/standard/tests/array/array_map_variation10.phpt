@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - anonymous callback function
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing anonymous callback function with following variations
  */
@@ -32,7 +27,7 @@ var_dump( array_map( function() { return NULL; }, $array1));
 echo "-- anonymous function with NULL body --\n";
 var_dump( array_map( function($a) { }, $array1));
 
-echo "-- passing NULL as 'arr1' --\n";
+echo "-- passing NULL as 'array1' --\n";
 try {
     var_dump( array_map( function($a) { return array($a); }, NULL));
 } catch (TypeError $e) {
@@ -87,6 +82,6 @@ array(3) {
   [2]=>
   NULL
 }
--- passing NULL as 'arr1' --
-array_map(): Argument #2 ($arr1) must be of type array, null given
+-- passing NULL as 'array1' --
+array_map(): Argument #2 ($array1) must be of type array, null given
 Done

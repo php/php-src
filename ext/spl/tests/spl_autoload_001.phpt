@@ -64,13 +64,10 @@ var_dump(class_exists("TestClass", true));
 
 echo "===NOFUNCTION===\n";
 
-try
-{
+try {
     spl_autoload_register("unavailable_autoload_function");
-}
-catch(Exception $e)
-{
-    echo 'Exception: ' . $e->getMessage() . "\n";
+} catch(\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 
 ?>
@@ -103,4 +100,4 @@ TestFunc2(TestClass)
 %stestclass.class.inc
 bool(true)
 ===NOFUNCTION===
-Exception: Function 'unavailable_autoload_function' not found (function 'unavailable_autoload_function' not found or invalid function name)
+spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, function "unavailable_autoload_function" not found or invalid function name

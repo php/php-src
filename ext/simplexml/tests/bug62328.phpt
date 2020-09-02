@@ -14,6 +14,7 @@ $xml = new UberSimpleXML('<xml/>');
 
 var_dump((string) $xml);
 var_dump($xml->__toString());
+?>
 --EXPECT--
 string(15) "stringification"
 string(15) "stringification"

@@ -194,6 +194,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
 			&ustr, &ustr_len,
 			Z_STRVAL_P( utf8_zval ), Z_STRLEN_P( utf8_zval ),
 			&status );
+	// FIXME Or throw error or use intl internal error handler
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_zstr_utf8_to_utf16()" );
 
@@ -224,16 +225,13 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	}
 
 	/* Try object's handlers. */
-	if( Z_OBJ_HT_P(obj)->cast_object )
-	{
-		zstr = rv;
+	zstr = rv;
 
-		if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
-		{
-			/* cast_object failed => bail out. */
-			zval_ptr_dtor( zstr );
-			COLLATOR_CONVERT_RETURN_FAILED( obj );
-		}
+	if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
+	{
+		/* cast_object failed => bail out. */
+		zval_ptr_dtor( zstr );
+		COLLATOR_CONVERT_RETURN_FAILED( obj );
 	}
 
 	/* Object wasn't successfully converted => bail out. */
@@ -247,6 +245,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 			&ustr, &ustr_len,
 			Z_STRVAL_P( zstr ), Z_STRLEN_P( zstr ),
 			&status );
+	// FIXME Or throw error or use intl internal error handler
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
 

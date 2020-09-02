@@ -23,14 +23,14 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	int status;
 
 	if (!option_array || !zend_is_callable(option_array, 0, NULL)) {
-		php_error_docref(NULL, E_WARNING, "First argument is expected to be a valid callback");
+		zend_type_error("%s(): Option must be a valid callback", get_active_function_name());
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 		return;
 	}
 
 	ZVAL_COPY(&args[0], value);
-	status = call_user_function_ex(NULL, NULL, option_array, &retval, 1, args, 0, NULL);
+	status = call_user_function(NULL, NULL, option_array, &retval, 1, args);
 
 	if (status == SUCCESS && !Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(value);

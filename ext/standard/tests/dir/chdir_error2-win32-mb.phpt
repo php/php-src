@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass a directory that does not exist as $directory to chdir() to test behaviour
  */

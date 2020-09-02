@@ -2,12 +2,6 @@
 Test DateTime::setISODate() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : public DateTime DateTime::setISODate  ( int $year  , int $week  [, int $day  ] )
- * Description: Set a date according to the ISO 8601 standard - using weeks and day offsets rather than specific dates.
- * Source code: ext/date/php_date.c
- * Alias to functions: date_isodate_set
- */
-
 echo "*** Testing DateTime::setISODate() : basic functionality ***\n";
 
 //Set the default time zone

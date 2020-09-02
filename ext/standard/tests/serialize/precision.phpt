@@ -33,6 +33,7 @@ foreach ($numbers as $ns) {
     else
         echo "mismatch\n\twas:    $ns\n\tbecame: $repr\n";
 }
+?>
 --EXPECT--
 number: 0.00000000000000000e+0... OK
 number: 2.00000000000000010e-4... OK

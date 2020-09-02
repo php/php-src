@@ -19,14 +19,9 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_compare.h"
 #include "intl_convert.h"
 
-/* {{{ proto int Collator::compare( string $str1, string $str2 )
- * Compare two strings. }}} */
-/* {{{ proto int collator_compare( Collator $coll, string $str1, string $str2 )
- * Compare two strings.
- */
+/* {{{ Compare two strings. */
 PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;

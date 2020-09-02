@@ -8,10 +8,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: mixed end ( array &$array );
-   Description: Advances internal pointer of array to last element, and returns its value.
-*/
-
 $arrays = array (
   array( 0 ),
   range(1, 100 ),

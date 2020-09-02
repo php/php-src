@@ -21,5 +21,6 @@ var_dump(openssl_get_publickey($key));
 var_dump(openssl_verify($data, base64_decode($sig), $key));
 ?>
 --EXPECTF--
-resource(%d) of type (OpenSSL key)
+object(OpenSSLAsymmetricKey)#%d (0) {
+}
 int(1)

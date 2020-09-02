@@ -17,6 +17,12 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/head.h"
@@ -64,8 +70,7 @@ static request_rec *php_apache_lookup_uri(char *filename)
 	return ap_sub_req_lookup_uri(filename, ctx->r, ctx->r->output_filters);
 }
 
-/* {{{ proto bool virtual(string uri)
- Perform an apache sub-request */
+/* {{{ Perform an apache sub-request */
 PHP_FUNCTION(virtual)
 {
 	char *filename;
@@ -165,8 +170,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	RETURN_FALSE;
 }
 
-/* {{{ proto array getallheaders(void)
-   Fetch all HTTP request headers */
+/* {{{ Fetch all HTTP request headers */
 PHP_FUNCTION(apache_request_headers)
 {
 	php_struct *ctx;
@@ -189,8 +193,7 @@ PHP_FUNCTION(apache_request_headers)
 }
 /* }}} */
 
-/* {{{ proto array apache_response_headers(void)
-   Fetch all HTTP response headers */
+/* {{{ Fetch all HTTP response headers */
 PHP_FUNCTION(apache_response_headers)
 {
 	php_struct *ctx;
@@ -213,8 +216,7 @@ PHP_FUNCTION(apache_response_headers)
 }
 /* }}} */
 
-/* {{{ proto string apache_note(string note_name [, string note_value])
-   Get and set Apache request notes */
+/* {{{ Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
 	php_struct *ctx;
@@ -243,8 +245,7 @@ PHP_FUNCTION(apache_note)
 /* }}} */
 
 
-/* {{{ proto bool apache_setenv(string variable, string value [, bool walk_to_top])
-   Set an Apache subprocess_env variable */
+/* {{{ Set an Apache subprocess_env variable */
 /*
  * XXX this doesn't look right. shouldn't it be the parent ?*/
 PHP_FUNCTION(apache_setenv)
@@ -277,8 +278,7 @@ PHP_FUNCTION(apache_setenv)
 }
 /* }}} */
 
-/* {{{ proto bool apache_getenv(string variable [, bool walk_to_top])
-   Get an Apache subprocess_env variable */
+/* {{{ Get an Apache subprocess_env variable */
 /*
  * XXX: shouldn't this be the parent not the 'prev'
  */
@@ -326,8 +326,7 @@ static char *php_apache_get_version()
 #endif
 }
 
-/* {{{ proto string apache_get_version(void)
-   Fetch Apache version */
+/* {{{ Fetch Apache version */
 PHP_FUNCTION(apache_get_version)
 {
 	char *apv = php_apache_get_version();
@@ -340,8 +339,7 @@ PHP_FUNCTION(apache_get_version)
 }
 /* }}} */
 
-/* {{{ proto array apache_get_modules(void)
-   Get a list of loaded Apache modules */
+/* {{{ Get a list of loaded Apache modules */
 PHP_FUNCTION(apache_get_modules)
 {
 	int n;
@@ -476,24 +474,10 @@ PHP_MINFO_FUNCTION(apache)
 	}
 }
 
-static const zend_function_entry apache_functions[] = {
-	PHP_FE(apache_lookup_uri, 		arginfo_apache_lookup_uri)
-	PHP_FE(virtual, 				arginfo_virtual)
-	PHP_FE(apache_request_headers, 	arginfo_apache_request_headers)
-	PHP_FE(apache_response_headers, arginfo_apache_response_headers)
-	PHP_FE(apache_setenv, 		arginfo_apache_setenv)
-	PHP_FE(apache_getenv, 		arginfo_apache_getenv)
-	PHP_FE(apache_note, 		arginfo_apache_note)
-	PHP_FE(apache_get_version, 	arginfo_apache_get_version)
-	PHP_FE(apache_get_modules, 	arginfo_apache_get_modules)
-	PHP_FALIAS(getallheaders, 	apache_request_headers, arginfo_getallheaders)
-	{NULL, NULL, NULL}
-};
-
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
 PHP_INI_END()
 
 static PHP_MINIT_FUNCTION(apache)
@@ -514,7 +498,7 @@ static PHP_MSHUTDOWN_FUNCTION(apache)
 zend_module_entry php_apache_module = {
 	STANDARD_MODULE_HEADER,
 	"apache2handler",
-	apache_functions,
+	ext_functions,
 	PHP_MINIT(apache),
 	PHP_MSHUTDOWN(apache),
 	NULL,

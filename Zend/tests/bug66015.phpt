@@ -23,7 +23,6 @@ class Test
 
 $test = new Test();
 ?>
-
 --EXPECT--
 array (
   1 => 'first',

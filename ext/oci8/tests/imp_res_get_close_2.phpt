@@ -40,14 +40,18 @@ echo "Test 1\n";
 $s = oci_parse($c, $plsql);
 oci_execute($s);
 
-while (($s1 = oci_get_implicit_resultset($s))) {
-    while (($row = oci_fetch_array($s1, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
-        foreach ($row as $item) {
-            echo "  ".$item;
+try {
+    while (($s1 = oci_get_implicit_resultset($s))) {
+        while (($row = oci_fetch_array($s1, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
+            foreach ($row as $item) {
+                echo "  ".$item;
+            }
+            echo "\n";
+            oci_free_statement($s);  // close parent
         }
-        echo "\n";
-        oci_free_statement($s);  // close parent
     }
+} catch(\TypeError $exception) {
+    var_dump($exception->getMessage());
 }
 
 ?>
@@ -56,5 +60,4 @@ Test 1
   1
 
 Warning: oci_fetch_array(): OCI_INVALID_HANDLE in %s on line %d
-
-Warning: oci_get_implicit_resultset(): supplied resource is not a valid oci8 statement resource in %s on line %d
+string(%d) "oci_get_implicit_resultset(): supplied resource is not a valid oci8 statement resource"

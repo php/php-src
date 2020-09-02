@@ -15,9 +15,7 @@
 
 #include "collator_is_numeric.h"
 
-/* {{{ collator_u_strtod
- * Taken from PHP6:zend_u_strtod()
- */
+/* {{{ Taken from PHP6:zend_u_strtod() */
 static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 {
 	const UChar *u = nptr, *nstart;
@@ -69,7 +67,7 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 		char buf[64], *numbuf, *bufpos;
 		size_t length = u - nstart;
 		double value;
-		ALLOCA_FLAG(use_heap);
+		ALLOCA_FLAG(use_heap = 0);
 
 		if (length < sizeof(buf)) {
 			numbuf = buf;

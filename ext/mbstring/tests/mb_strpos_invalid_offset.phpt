@@ -81,13 +81,13 @@ try {
 --EXPECT--
 String len: 42
 == INVALID OFFSET ==
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

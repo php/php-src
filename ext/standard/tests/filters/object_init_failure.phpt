@@ -16,4 +16,4 @@ try {
 Warning: file_get_contents(): Unable to create or locate filter "sample.filter" in %s on line %d
 
 Warning: file_get_contents(): Unable to create filter (sample.filter) in %s on line %d
-Undefined constant 'FOO'
+Undefined constant "FOO"

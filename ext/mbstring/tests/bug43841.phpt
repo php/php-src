@@ -7,11 +7,6 @@ function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_strrpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of last occurrence of a string within another
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test that mb_strrpos offset is byte count for negative values (should be character count)
  */
@@ -47,21 +42,21 @@ foreach ($offsets as $i) {
 --EXPECT--
 -- Offset is -25 --
 Multibyte String:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 ASCII String:
 mb_strrpos:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos:
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is -24 --
 Multibyte String:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 ASCII String:
 mb_strrpos:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos:
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is -13 --
 Multibyte String:

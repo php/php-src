@@ -81,7 +81,7 @@ $foo = new SubFoo;
 $fn = $foo->getSelfColonParentPublicInstanceMethod();
 echo $fn(" OK".PHP_EOL);
 
-echo 'Access proteced instance method of parent object through "self::" to parent method';
+echo 'Access protected instance method of parent object through "self::" to parent method';
 $foo = new SubFoo;
 $fn = $foo->getSelfColonParentProtectedInstanceMethod();
 echo $fn(" OK".PHP_EOL);
@@ -114,6 +114,6 @@ Subclass closure over parent class static protected method OK
 Access public instance method of parent object through "parent::"  OK
 Access public instance method of self object through "self::"  OK
 Access public instance method of parent object through "self::" to parent method OK
-Access proteced instance method of parent object through "self::" to parent method OK
+Access protected instance method of parent object through "self::" to parent method OK
 MagicCall __call instance method __call,nonExistentMethod, OK
 MagicCall __callStatic static method __callStatic,nonExistentMethod, OK

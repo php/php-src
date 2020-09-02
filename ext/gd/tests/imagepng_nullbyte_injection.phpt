@@ -17,5 +17,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 imagepng(): Argument #2 ($to) must not contain null bytes

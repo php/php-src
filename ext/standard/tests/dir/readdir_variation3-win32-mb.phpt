@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass a directory handle pointing to a directory that has a sub-directory
  * to test behaviour of readdir()

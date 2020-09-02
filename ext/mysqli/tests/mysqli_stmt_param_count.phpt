@@ -56,7 +56,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 mysqli_stmt object is not fully initialized
 mysqli_stmt object is already closed
 done!

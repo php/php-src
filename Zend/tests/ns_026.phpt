@@ -25,6 +25,7 @@ $x = new \Foo\Foo;
 \Foo\Foo::Bar();
 \Foo\Bar();
 Foo\Bar();
+?>
 --EXPECTF--
 Method - Foo\Foo::__construct
 Func   - Foo\Bar

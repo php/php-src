@@ -65,7 +65,7 @@ Reflecting on class pubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for doesNotExist(): Method doesNotExist does not exist
+  --> Check for doesNotExist(): Method pubf::doesNotExist() does not exist
 Reflecting on class subpubf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -85,7 +85,7 @@ Reflecting on class subpubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for doesNotExist(): Method doesNotExist does not exist
+  --> Check for doesNotExist(): Method subpubf::doesNotExist() does not exist
 Reflecting on class protf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -105,7 +105,7 @@ Reflecting on class protf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for doesNotExist(): Method doesNotExist does not exist
+  --> Check for doesNotExist(): Method protf::doesNotExist() does not exist
 Reflecting on class subprotf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -125,7 +125,7 @@ Reflecting on class subprotf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for doesNotExist(): Method doesNotExist does not exist
+  --> Check for doesNotExist(): Method subprotf::doesNotExist() does not exist
 Reflecting on class privf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -145,7 +145,7 @@ Reflecting on class privf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for doesNotExist(): Method doesNotExist does not exist
+  --> Check for doesNotExist(): Method privf::doesNotExist() does not exist
 Reflecting on class subprivf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -165,4 +165,4 @@ Reflecting on class subprivf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for doesNotExist(): Method doesNotExist does not exist
+  --> Check for doesNotExist(): Method subprivf::doesNotExist() does not exist

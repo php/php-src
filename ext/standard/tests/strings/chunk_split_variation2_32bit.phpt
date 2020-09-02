@@ -6,12 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 echo "*** Testing chunk_split() : unexpected large 'end' string argument variation 2 ***\n";
 
 $a=str_repeat("B", 65537);

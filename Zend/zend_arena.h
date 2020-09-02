@@ -78,7 +78,7 @@ static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t 
 
 static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t count, size_t unit_size)
 {
-	int overflow;
+	bool overflow;
 	size_t size;
 	void *ret;
 
@@ -174,7 +174,7 @@ static zend_always_inline void *zend_arena_alloc(zend_arena **arena_ptr, size_t 
 
 static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t count, size_t unit_size)
 {
-	int overflow;
+	bool overflow;
 	size_t size;
 	void *ret;
 

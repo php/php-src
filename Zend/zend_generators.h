@@ -55,8 +55,6 @@ struct _zend_generator_node {
 struct _zend_generator {
 	zend_object std;
 
-	zend_object_iterator *iterator;
-
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
@@ -89,9 +87,6 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
-
-	zval *gc_buffer;
-	uint32_t gc_buffer_size;
 };
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;

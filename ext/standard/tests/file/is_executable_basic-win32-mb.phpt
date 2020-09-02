@@ -8,9 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_executable ( string $filename );
-   Description: Tells whether the filename is executable
-*/
 require __DIR__.'/file.inc';
 
 echo "*** Testing is_executable(): basic functionality ***\n";

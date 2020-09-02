@@ -2,11 +2,6 @@
 Test array_change_key_case() function : usage variations - multidimensional arrays
 --FILE--
 <?php
-/* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Returns an array with all string keys lowercased [or uppercased]
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how array_change_key_case() converts keys in multi-dimensional arrays
  */

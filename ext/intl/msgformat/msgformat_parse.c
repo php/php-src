@@ -20,7 +20,6 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_parse.h"
 #include "msgformat_data.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
@@ -51,11 +50,7 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, size_t s
 }
 /* }}} */
 
-/* {{{ proto array MessageFormatter::parse( string $source )
- * Parse a message }}} */
-/* {{{ proto array msgfmt_parse( MessageFormatter $nf, string $source )
- * Parse a message.
- */
+/* {{{ Parse a message */
 PHP_FUNCTION( msgfmt_parse )
 {
 	char *source;
@@ -77,11 +72,7 @@ PHP_FUNCTION( msgfmt_parse )
 }
 /* }}} */
 
-/* {{{ proto array MessageFormatter::formatMessage( string $locale, string $pattern, string $source )
- * Parse a message. }}} */
-/* {{{ proto array msgfmt_parse_message( string $locale, string $pattern, string $source )
- * Parse a message.
- */
+/* {{{ Parse a message. */
 PHP_FUNCTION( msgfmt_parse_message )
 {
 	UChar      *spattern = NULL;

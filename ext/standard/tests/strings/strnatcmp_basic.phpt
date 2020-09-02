@@ -2,10 +2,6 @@
 Test strnatcmp() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : int strnatcmp  ( string $str1  , string $str2  )
- * Description: String comparisons using a "natural order" algorithm
- * Source code: ext/standard/string.c
-*/
 echo "*** Testing strnatcmp() : basic functionality ***\n";
 
 $a1 = "abc1";

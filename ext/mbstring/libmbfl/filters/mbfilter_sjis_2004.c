@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_sjis_2004.h"
 
@@ -508,7 +504,7 @@ retry:
 
 	/* check for 2nd char of combining characters */
 	if ((filter->status & 0xf) == 1 &&
-		filter->cache >= 0 && filter->cache <= jisx0213_u2_tbl_len) {
+		filter->cache >= 0 && filter->cache < jisx0213_u2_tbl_len) {
 		k = filter->cache;
 		filter->status &= ~0xf;
 		filter->cache = 0;

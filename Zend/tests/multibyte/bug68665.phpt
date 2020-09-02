@@ -13,6 +13,5 @@ internal_encoding=big5
 <?php
 echo '\'hello';
 ?>
-
 --EXPECT--
 'hello

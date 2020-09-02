@@ -12,12 +12,6 @@ session.save_handler=files
 
 ob_start();
 
-/*
- * Prototype : string session_save_path([string $path])
- * Description : Get and/or set the current session save path
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_save_path() : variation ***\n";
 
 $directory = __DIR__;
@@ -44,7 +38,7 @@ string(%d) "%stests"
 bool(true)
 string(%d) "%stests"
 
-Warning: session_save_path(): Cannot change save path when session is active in %s on line 20
+Warning: session_save_path(): Cannot change save path when session is active in %s on line %d
 bool(false)
 string(%d) "%stests"
 bool(true)

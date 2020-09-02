@@ -2,11 +2,6 @@
 Test chdir() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of chdir() with absolute and relative paths
  */

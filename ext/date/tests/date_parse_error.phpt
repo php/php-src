@@ -2,11 +2,6 @@
 Test date_parse() function : error conditions
 --FILE--
 <?php
-/* Prototype  : array date_parse  ( string $date  )
- * Description: Returns associative array with detailed info about given date.
- * Source code: ext/date/php_date.c
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
@@ -17,7 +12,7 @@ $invalid_date = "2OO9-02--27 10:00?00.5";
 var_dump( date_parse($invalid_date) );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing date_parse() : error conditions ***
 
 -- Testing date_parse() function with unexpected characters in $date argument --

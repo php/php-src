@@ -8,7 +8,7 @@ $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
 --EXPECT--
-array(18) {
+array(19) {
   ["ReflectionException"]=>
   object(ReflectionClass)#2 (1) {
     ["name"]=>
@@ -98,5 +98,10 @@ array(18) {
   object(ReflectionClass)#19 (1) {
     ["name"]=>
     string(19) "ReflectionReference"
+  }
+  ["ReflectionAttribute"]=>
+  object(ReflectionClass)#20 (1) {
+    ["name"]=>
+    string(19) "ReflectionAttribute"
   }
 }

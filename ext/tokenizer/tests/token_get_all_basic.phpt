@@ -4,11 +4,6 @@ Test token_get_all() function : basic functionality
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description : splits the given source into an array of PHP language tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 echo "*** Testing token_get_all() : basic functionality ***\n";
 
 // with php open/close tags

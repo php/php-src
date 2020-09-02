@@ -12,12 +12,6 @@ require_once(__DIR__.'/mail_skipif.inc');
 max_execution_time = 120
 --FILE--
 <?php
-/* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- * Description: Send an email message
- * Source code: ext/standard/mail.c
- * Alias to functions:
- */
-
 ini_set("SMTP", "localhost");
 ini_set("smtp_port", 25);
 

@@ -13,7 +13,7 @@ STDOUT
 require __DIR__.'/stream_isatty.inc';
 testToStdOut();
 ?>
---EXPECTF--
+--EXPECT--
 STDIN (constant): bool(true)
 STDIN (fopen): bool(true)
 STDIN (php://fd/0): bool(true)

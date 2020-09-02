@@ -7,12 +7,6 @@ Test session_gc() function : basic functionality
 
 ob_start();
 
-/*
- * Prototype : int session_gc(void)
- * Description : Perform GC
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_gc() : basic functionality ***\n";
 
 var_dump(session_gc());

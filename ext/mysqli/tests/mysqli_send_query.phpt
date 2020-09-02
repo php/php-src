@@ -47,6 +47,6 @@ if (!$TEST_EXPERIMENTAL)
     }
     print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 mysqli object is already closed
 done!

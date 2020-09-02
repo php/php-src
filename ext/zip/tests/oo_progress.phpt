@@ -31,7 +31,7 @@ var_dump($zip->close());
 unlink($file);
 ?>
 Done
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 start

@@ -32,4 +32,3 @@ Function [ <user> function ReflectionParameterTest ] {
     Parameter #1 [ <optional> $test2 = NULL ]
   }
 }
-

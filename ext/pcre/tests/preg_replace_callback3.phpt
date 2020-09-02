@@ -3,20 +3,26 @@ preg_replace_callback() 3
 --FILE--
 <?php
 
-var_dump(preg_replace_callback(1,2,3));
-var_dump(preg_replace_callback(1,2,3,4));
+try {
+    var_dump(preg_replace_callback(1,2,3));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(preg_replace_callback(1,2,3,4));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 $a = 5;
-var_dump(preg_replace_callback(1,2,3,4,$a));
+try {
+    var_dump(preg_replace_callback(1,2,3,4,$a));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done\n";
 ?>
---EXPECTF--
-Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
-string(1) "3"
-
-Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
-string(1) "3"
-
-Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
-string(1) "3"
-Done
+--EXPECT--
+preg_replace_callback(): Argument #2 ($callback) must be a valid callback, no array or string given
+preg_replace_callback(): Argument #2 ($callback) must be a valid callback, no array or string given
+preg_replace_callback(): Argument #2 ($callback) must be a valid callback, no array or string given

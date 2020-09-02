@@ -21,7 +21,20 @@ $a = [
 ];
 
 var_dump(array_column($a, null, 'a'));
+
+try {
+    var_dump(array_column([['a' => new stdClass]], null, 'a'));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(array_column([['a' => []]], null, 'a'));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
 --EXPECTF--
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 array(8) {
   [10]=>
   array(1) {
@@ -64,3 +77,5 @@ array(8) {
     NULL
   }
 }
+Illegal offset type
+Illegal offset type

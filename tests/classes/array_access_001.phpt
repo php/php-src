@@ -134,11 +134,11 @@ ObjectOne::offsetGet(4th)
 int(4)
 ObjectOne::offsetGet(5th)
 
-Notice: Undefined index: 5th in %sarray_access_001.php on line %d
+Warning: Undefined array key "5th" in %s on line %d
 NULL
 ObjectOne::offsetGet(6)
 
-Notice: Undefined offset: 6 in %sarray_access_001.php on line %d
+Warning: Undefined array key 6 in %s on line %d
 NULL
 ===offsetSet===
 WRITE 1

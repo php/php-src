@@ -1,7 +1,5 @@
 --TEST--
 An error is thrown when INF or NaN are encoded
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 

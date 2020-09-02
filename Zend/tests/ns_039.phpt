@@ -17,6 +17,7 @@ echo A . "\n";
 echo B . "\n";
 foo();
 bar();
+?>
 --EXPECT--
 ok
 ok

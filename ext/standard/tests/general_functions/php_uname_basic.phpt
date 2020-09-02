@@ -2,9 +2,6 @@
 Test php_uname() function - basic test
 --FILE--
 <?php
-/* Prototype: string php_uname  ([ string $mode  ] )
- * Description:  Returns information about the operating system PHP is running on
-*/
 
 echo "*** Testing php_uname() - basic test\n";
 

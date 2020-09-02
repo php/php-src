@@ -34,11 +34,4 @@ extern zend_module_entry fileinfo_module_entry;
 
 PHP_MINFO_FUNCTION(fileinfo);
 
-PHP_FUNCTION(finfo_open);
-PHP_FUNCTION(finfo_close);
-PHP_FUNCTION(finfo_set_flags);
-PHP_FUNCTION(finfo_file);
-PHP_FUNCTION(finfo_buffer);
-PHP_FUNCTION(mime_content_type);
-
 #endif	/* PHP_FILEINFO_H */

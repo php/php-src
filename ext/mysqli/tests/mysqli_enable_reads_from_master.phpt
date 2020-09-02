@@ -42,6 +42,6 @@ if (!function_exists('mysqli_enable_reads_from_master')) {
 
     print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 mysqli object is already closed
 done!

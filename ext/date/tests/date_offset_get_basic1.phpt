@@ -2,12 +2,6 @@
 Test date_offset_get() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : int date_offset_get  ( DateTime $object  )
- * Description: Returns the daylight saving time offset
- * Source code: ext/date/php_date.c
- * Alias to functions:  DateTime::getOffset
- */
-
 //Set the default time zone
 date_default_timezone_set('Europe/London');
 

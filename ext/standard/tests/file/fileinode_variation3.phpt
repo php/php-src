@@ -4,11 +4,6 @@ Test fileinode() function: usage variations - diff. path notations
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 /* Passing file names with different notations, using slashes, wild-card chars */
 
 $file_path = __DIR__;

@@ -3,7 +3,6 @@ Test preg_replace() function : error conditions - wrong arg types
 --FILE--
 <?php
 /*
-* proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -29,7 +28,7 @@ try {
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_replace() : error conditions ***
 
 Arg value is: this is a string
@@ -37,5 +36,5 @@ string(64) "this is a stringthis is a stringthis is a stringthis is a string"
 
 Arg value is: Array
 preg_replace(): Argument #1 ($regex) must be of type array when argument #2 ($replace) is an array, string given
-Object of class stdClass could not be converted to string
+preg_replace(): Argument #2 ($replace) must be of type string|array, stdClass given
 Done

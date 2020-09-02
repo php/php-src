@@ -464,7 +464,7 @@ PS_GC_FUNC(mm)
 
 	mm_unlock(data->mm);
 
-	return nrdels;
+	return *nrdels;
 }
 
 PS_CREATE_SID_FUNC(mm)

@@ -2,10 +2,6 @@
 Testing floatval() and its alias doubleval() Functions
 --FILE--
 <?php
-/* Prototype: float floatval( mixed $var );
- * Description: Returns the float value of var.
- */
-
 echo "*** Testing floatval() with valid float values ***\n";
 // different valid  float values
 $valid_floats = array(
@@ -144,13 +140,13 @@ float(-5000000)
 
 *** Testing floatval() on non floating types ***
 
-Notice: A non well formed numeric value encountered in %s on line 69
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line 70
+Warning: A non-numeric value encountered in %s on line %d
 float(-2147483648)
 float(2147483648)
-float(%d)
-float(%d)
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
@@ -167,8 +163,8 @@ float(0)
 *** Testing doubleval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-float(%d)
-float(%d)
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)

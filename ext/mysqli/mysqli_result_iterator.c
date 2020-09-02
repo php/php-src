@@ -117,7 +117,7 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-#if MYSQLI_USE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 		if (result->unbuf->eof_reached) {
 #else
 		if (result->eof) {
@@ -150,6 +150,7 @@ const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_current_key,
 	php_mysqli_result_iterator_move_forward,
 	php_mysqli_result_iterator_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 /* }}} */

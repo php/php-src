@@ -6,11 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays containing different numeric data to rsort() to test behaviour
  */

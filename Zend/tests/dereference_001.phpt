@@ -12,7 +12,7 @@ var_dump(a()[1][0]); // int(5)
 function b() {
     return array();
 }
-var_dump(b()[0]); // Notice: Undefined offset: 0
+var_dump(b()[0]); // Notice: Undefined array key 0
 
 class foo {
     public $y = 1;
@@ -44,7 +44,7 @@ var_dump(e()['b']); // string(3) "bar"
 --EXPECTF--
 int(5)
 
-Notice: Undefined offset: 0 in %s on line %d
+Warning: Undefined array key 0 in %s on line %d
 NULL
 int(1)
 string(1) "b"

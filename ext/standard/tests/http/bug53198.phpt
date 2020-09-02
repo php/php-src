@@ -12,7 +12,7 @@ require 'server.inc';
 function do_test() {
 
     $responses = array(
-        "data://text/plain,HTTP/1.0 200 OK\r\n\r\n",
+        "data://text/plain,HTTP/1.1 200 OK\r\n\r\n",
     );
 
     $pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
@@ -43,14 +43,14 @@ do_test();
 ?>
 --EXPECTF--
 -- Test: leave default --
-string(%d) "GET / HTTP/1.0
+string(%d) "GET / HTTP/1.1
 From: teste@teste.pt
 Host: 127.0.0.1:12342
 Connection: close
 
 "
 -- Test: after ini_set --
-string(%d) "GET / HTTP/1.0
+string(%d) "GET / HTTP/1.1
 From: junk@junk.com
 Host: 127.0.0.1:12342
 Connection: close

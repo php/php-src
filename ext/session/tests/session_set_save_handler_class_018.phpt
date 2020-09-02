@@ -10,12 +10,6 @@ session.name=PHPSESSID
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(SessionHandlerInterface $handler [, bool $register_shutdown_function = true])
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() function: class with validate_sid ***\n";
 
 class MySession2 extends SessionHandler {
@@ -79,6 +73,7 @@ var_dump($_SESSION);
 --CLEAN--
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_class_018');
+?>
 --EXPECT--
 *** Testing session_set_save_handler() function: class with validate_sid ***
 string(34) "session_set_save_handler_class_018"

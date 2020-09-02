@@ -4,12 +4,6 @@ Test finfo_buffer() function : basic functionality
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
- * Description: Return information about a string buffer.
- * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions:
- */
-
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic私はガラスを食べられます';
 
 $options = array(
@@ -22,7 +16,7 @@ $buffers = array(
     "\177ELF",
     "\000\000\0001\000\000\0000\000\000\0000\000\000\0002\000\000\0000\000\000\0000\000\000\0003",
     "\x55\x7A\x6E\x61",
-    "id=ImageMagick",
+    "id=ImageMagick\x0a\x0c\x0a:\x1a",
     "RIFFüîò^BAVI LISTv",
 );
 
@@ -49,5 +43,5 @@ string(28) "text/plain; charset=us-ascii"
 string(26) "text/plain; charset=ebcdic"
 string(40) "application/octet-stream; charset=binary"
 string(28) "text/plain; charset=us-ascii"
-string(28) "text/plain; charset=us-ascii"
+string(28) "image/x-miff; charset=binary"
 string(25) "text/plain; charset=utf-8"

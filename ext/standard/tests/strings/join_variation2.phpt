@@ -2,12 +2,6 @@
 Test join() function : usage variations - unexpected values for 'pieces' argument(Bug#42789)
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
- * Source code: ext/standard/string.c
- * Alias of function: implode()
-*/
-
 /*
  * test join() by passing different unexpected value for pieces argument
 */
@@ -138,7 +132,7 @@ join(): Argument #2 ($pieces) must be of type array, string given
 -- Iteration 15 --
 join(): Argument #2 ($pieces) must be of type array, string given
 -- Iteration 16 --
-join(): Argument #2 ($pieces) must be of type array, object given
+join(): Argument #2 ($pieces) must be of type array, test given
 -- Iteration 17 --
 join(): Argument #2 ($pieces) must be of type array, string given
 -- Iteration 18 --

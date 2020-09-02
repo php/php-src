@@ -2,13 +2,6 @@
 Test sizeof() function : object functionality - objects without Countable interface
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode] )
- * Description: Counts an elements in an array. If Standard PHP library is installed,
- * it will return the properties of an object.
- * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
- */
-
 echo "*** Testing sizeof() : object functionality ***\n";
 
 echo "--- Testing sizeof() with objects which doesn't implement Countable interface ---\n";

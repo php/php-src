@@ -60,4 +60,4 @@ int(0)
 bool(true)
 int(0)
 bool(true)
-Illegal operation argument
+flock(): Argument #2 ($operation) must be either LOCK_SH, LOCK_EX, or LOCK_UN

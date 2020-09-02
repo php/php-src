@@ -49,7 +49,7 @@ static inline int fpm_use_error_log() {  /* {{{ */
 	 * - SysV init launch php-fpm as a daemon
 	 * - Systemd launch php-fpm in foreground
 	 */
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 	if (fpm_global_config.daemonize || (!isatty(STDERR_FILENO) && !fpm_globals.force_stderr)) {
 #else
 	if (fpm_global_config.daemonize) {

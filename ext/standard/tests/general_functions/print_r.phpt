@@ -4,12 +4,7 @@ Test print_r() function
 precision=14
 --FILE--
 <?php
-/* Prototype: bool print_r ( mixed $expression [, bool $return] );
-   Description: Prints human-readable information about a variable
-*/
 
-/* Prototype: void check_printr( $variables )
-   Description: use print_r() to print variables */
 function check_printr( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {
@@ -276,7 +271,7 @@ closedir($dir_handle);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing print_r() on integer variables ***
 
 -- Iteration 1 --

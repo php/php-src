@@ -322,9 +322,9 @@ typedef struct _timelib_tzdb {
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 201803
-#define TIMELIB_EXTENDED_VERSION 20180301
-#define TIMELIB_ASCII_VERSION "2018.03"
+#define TIMELIB_VERSION 202002
+#define TIMELIB_EXTENDED_VERSION 20202001
+#define TIMELIB_ASCII_VERSION "2020.02"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -401,7 +401,7 @@ typedef struct _timelib_format_config {
 } timelib_format_config;
 
 /* Function pointers */
-typedef timelib_tzinfo* (*timelib_tz_get_wrapper)(char *tzname, const timelib_tzdb *tzdb, int *error_code);
+typedef timelib_tzinfo* (*timelib_tz_get_wrapper)(const char *tzname, const timelib_tzdb *tzdb, int *error_code);
 
 /* From dow.c */
 /* Calculates the day of the week from y, m, and d. 0=Sunday..6=Saturday */
@@ -459,7 +459,7 @@ int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d);
  * The returned timelib_time* value is dynamically allocated and should be
  * freed with timelib_time_dtor().
  */
-timelib_time *timelib_strtotime(char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
+timelib_time *timelib_strtotime(const char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
 
 /* Parses the date/time string in 's' with length 'len' into the constituent
  * parts of timelib_time* according to the format in 'format'.
@@ -480,7 +480,7 @@ timelib_time *timelib_strtotime(char *s, size_t len, timelib_error_container **e
  * The returned timelib_time* value is dynamically allocated and should be
  * freed with timelib_time_dtor().
  */
-timelib_time *timelib_parse_from_format(char *format, char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
+timelib_time *timelib_parse_from_format(const char *format, const char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
 
 /* Parses the date/time string in 's' with length 'len' into the constituent
  * parts of timelib_time* according to the format in 'format' with format
@@ -494,7 +494,7 @@ timelib_time *timelib_parse_from_format(char *format, char *s, size_t len, timel
  * Note: 'format_map' must be terminated with specifier '\0' to indicate to the
  * parser that there are no more format specifiers in the list.
  */
-timelib_time *timelib_parse_from_format_with_map(char *format, char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper, const timelib_format_config* format_config);
+timelib_time *timelib_parse_from_format_with_map(const char *format, const char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper, const timelib_format_config* format_config);
 
 /* Fills the gaps in the parsed timelib_time with information from the reference date/time in 'now'
  *
@@ -552,7 +552,7 @@ const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
 /**
  * DEPRECATED, but still used by PHP.
  */
-timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper);
+timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper);
 
 /* From parse_iso_intervals.re */
 
@@ -566,7 +566,7 @@ timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_n
  * occurred, inspect errors->errors_count. To see whether warnings have occurred,
  * inspect errors->warnings_count.
  */
-void timelib_strtointerval(char *s, size_t len,
+void timelib_strtointerval(const char *s, size_t len,
                            timelib_time **begin, timelib_time **end,
                            timelib_rel_time **period, int *recurrences,
                            timelib_error_container **errors);
@@ -665,7 +665,7 @@ void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);
  * Returns whether the time zone ID 'timezone' is available in the time zone
  * database as pointed to be 'tzdb'.
  */
-int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb);
+int timelib_timezone_id_is_valid(const char *timezone, const timelib_tzdb *tzdb);
 
 /**
  * Converts the binary stored time zone information from 'tzdb' for the time
@@ -682,7 +682,7 @@ int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb);
  * be freed after use. Although it is recommended that a cache of each used
  * time zone is kept.
  */
-timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb, int *error_code);
+timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *tzdb, int *error_code);
 
 /**
  * Frees up the resources allocated by 'timelib_parse_tzfile'.
@@ -754,7 +754,7 @@ const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(const timelib_
  * Unlike 'timelib_builtin_db', the return value of this function must be freed
  * with the 'timelib_zoneinfo_dtor' function.
  */
-timelib_tzdb *timelib_zoneinfo(char *directory);
+timelib_tzdb *timelib_zoneinfo(const char *directory);
 
 /**
  * Frees up the resources as created through 'timelib_zoneinfo'.

@@ -37,49 +37,11 @@ zend_class_entry
    	*php_com_exception_class_entry,
 	*php_com_saproxy_class_entry;
 
-static const zend_function_entry com_dotnet_functions[] = {
-	PHP_FE(variant_set, arginfo_variant_set)
-	PHP_FE(variant_add, arginfo_variant_add)
-	PHP_FE(variant_cat, arginfo_variant_add)
-	PHP_FE(variant_sub, arginfo_variant_add)
-	PHP_FE(variant_mul, arginfo_variant_add)
-	PHP_FE(variant_and, arginfo_variant_add)
-	PHP_FE(variant_div, arginfo_variant_add)
-	PHP_FE(variant_eqv, arginfo_variant_add)
-	PHP_FE(variant_idiv, arginfo_variant_add)
-	PHP_FE(variant_imp, arginfo_variant_add)
-	PHP_FE(variant_mod, arginfo_variant_add)
-	PHP_FE(variant_or, arginfo_variant_add)
-	PHP_FE(variant_pow, arginfo_variant_add)
-	PHP_FE(variant_xor, arginfo_variant_add)
-	PHP_FE(variant_abs, arginfo_variant_abs)
-	PHP_FE(variant_fix, arginfo_variant_fix)
-	PHP_FE(variant_int, arginfo_variant_int)
-	PHP_FE(variant_neg, arginfo_variant_neg)
-	PHP_FE(variant_not, arginfo_variant_not)
-	PHP_FE(variant_round, arginfo_variant_round)
-	PHP_FE(variant_cmp, arginfo_variant_cmp)
-	PHP_FE(variant_date_to_timestamp, arginfo_variant_date_to_timestamp)
-	PHP_FE(variant_date_from_timestamp, arginfo_variant_date_from_timestamp)
-	PHP_FE(variant_get_type, arginfo_variant_get_type)
-	PHP_FE(variant_set_type, arginfo_variant_set_type)
-	PHP_FE(variant_cast, arginfo_variant_cast)
-	/* com_com.c */
-	PHP_FE(com_create_guid, arginfo_com_create_guid)
-	PHP_FE(com_event_sink, arginfo_com_event_sink)
-	PHP_FE(com_print_typeinfo, arginfo_com_print_typeinfo)
-	PHP_FE(com_message_pump, arginfo_com_message_pump)
-	PHP_FE(com_load_typelib, arginfo_com_load_typelib)
-	PHP_FE(com_get_active_object, arginfo_com_get_active_object)
-	PHP_FE_END
-};
-
-/* {{{ com_dotnet_module_entry
- */
+/* {{{ com_dotnet_module_entry */
 zend_module_entry com_dotnet_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"com_dotnet",
-	com_dotnet_functions,
+	ext_functions,
 	PHP_MINIT(com_dotnet),
 	PHP_MSHUTDOWN(com_dotnet),
 	PHP_RINIT(com_dotnet),
@@ -101,8 +63,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(com_dotnet)
 #endif
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 
 /* com.typelib_file is the path to a file containing a
  * list of typelibraries to register *persistently*.
@@ -114,7 +75,6 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	FILE *typelib_file;
 	char *typelib_name_buffer;
 	char *strtok_buf = NULL;
-	int cached;
 
 	if (NULL == new_value || !new_value->val[0] || (typelib_file = VCWD_FOPEN(new_value->val, "r"))==NULL) {
 		return FAILURE;
@@ -153,10 +113,8 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 			ptr--;
 		}
 
-		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page), &cached)) != NULL) {
-			if (!cached) {
-				php_com_import_typelib(pTL, mode, COMG(code_page));
-			}
+		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page))) != NULL) {
+			php_com_import_typelib(pTL, mode, COMG(code_page));
 			ITypeLib_Release(pTL);
 		}
 	}
@@ -177,17 +135,17 @@ static ZEND_INI_MH(OnAutoregisterCasesensitive)
 }
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_ENTRY("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_ENTRY("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
+    STD_PHP_INI_BOOLEAN("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
+    STD_PHP_INI_BOOLEAN("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
+    STD_PHP_INI_BOOLEAN("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
     STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnAutoregisterCasesensitive, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
 	STD_PHP_INI_ENTRY("com.code_page", "", PHP_INI_ALL, OnUpdateLong, code_page, zend_com_dotnet_globals, com_dotnet_globals)
 	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypeLibFileUpdate)
+	PHP_INI_ENTRY("com.dotnet_version", NULL, PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
 /* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(com_dotnet)
 {
 #if defined(COMPILE_DL_COM_DOTNET) && defined(ZTS)
@@ -198,8 +156,7 @@ static PHP_GINIT_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(com_dotnet)
 {
 	zend_class_entry ce, *tmp;
@@ -218,14 +175,14 @@ PHP_MINIT_FUNCTION(com_dotnet)
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 
-	INIT_CLASS_ENTRY(ce, "variant", NULL);
+	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
 	ce.create_object = php_com_object_new;
 	php_com_variant_class_entry = zend_register_internal_class(&ce);
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 	php_com_variant_class_entry->serialize = zend_class_serialize_deny;
 	php_com_variant_class_entry->unserialize = zend_class_unserialize_deny;
 
-	INIT_CLASS_ENTRY(ce, "com", NULL);
+	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
 	ce.create_object = php_com_object_new;
 	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
 	tmp->get_iterator = php_com_iter_get;
@@ -233,7 +190,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	tmp->unserialize = zend_class_unserialize_deny;
 
 #if HAVE_MSCOREE_H
-	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
+	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
 	ce.create_object = php_com_object_new;
 	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
 	tmp->get_iterator = php_com_iter_get;
@@ -300,6 +257,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	COM_CONST(VARCMP_EQ);
 	COM_CONST(VARCMP_GT);
 	COM_CONST(VARCMP_NULL);
+	COM_CONST(LOCALE_SYSTEM_DEFAULT);
 
 	COM_CONST(NORM_IGNORECASE);
 	COM_CONST(NORM_IGNORENONSPACE);
@@ -325,8 +283,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -342,8 +299,7 @@ PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(com_dotnet)
 {
 	COMG(rshutdown_started) = 0;
@@ -351,8 +307,7 @@ PHP_RINIT_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 {
 #if HAVE_MSCOREE_H
@@ -365,8 +320,7 @@ PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(com_dotnet)
 {
 	php_info_print_table_start();

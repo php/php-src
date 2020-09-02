@@ -1,29 +1,33 @@
 <?php
 
-function class_implements($what, bool $autoload = true): array|false {}
+/** @generate-function-entries */
 
-function class_parents($instance, bool $autoload = true): array|false {}
+/** @param object|string $object_or_class */
+function class_implements($object_or_class, bool $autoload = true): array|false {}
 
-function class_uses($what, bool $autoload = true): array|false {}
+/** @param object|string $object_or_class */
+function class_parents($object_or_class, bool $autoload = true): array|false {}
 
-function spl_autoload(string $class_name, string $file_extensions = UNKNOWN): void {}
+/** @param object|string $object_or_class */
+function class_uses($object_or_class, bool $autoload = true): array|false {}
 
-// This silently ignores non-string class names
-function spl_autoload_call($class_name): void {}
+function spl_autoload(string $class, ?string $file_extensions = null): void {}
 
-function spl_autoload_extensions(string $file_extensions = UNKNOWN): string {}
+function spl_autoload_call(string $class): void {}
 
-function spl_autoload_functions(): array|false {}
+function spl_autoload_extensions(?string $file_extensions = null): string {}
 
-function spl_autoload_register($autoload_function = null, bool $throw = true, bool $prepend = false): bool {}
+function spl_autoload_functions(): array {}
 
-function spl_autoload_unregister($autoload_function): bool {}
+function spl_autoload_register(?callable $autoload_function = null, bool $throw = true, bool $prepend = false): bool {}
+
+function spl_autoload_unregister(callable $autoload_function): bool {}
 
 function spl_classes(): array {}
 
-function spl_object_hash(object $obj): string {}
+function spl_object_hash(object $object): string {}
 
-function spl_object_id(object $obj): int {}
+function spl_object_id(object $object): int {}
 
 function iterator_apply(Traversable $iterator, callable $function, ?array $args = null): int {}
 

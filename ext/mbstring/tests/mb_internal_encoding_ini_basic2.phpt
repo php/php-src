@@ -20,6 +20,7 @@ echo ini_get('mbstring.internal_encoding')."\n";
 
 ?>
 --EXPECT--
+Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
 *** Testing INI mbstring.internal_encoding : basic functionality ***
 ISO-8859-7
 ISO-8859-7

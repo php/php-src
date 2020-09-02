@@ -25,8 +25,8 @@ Class [ <user> class C extends A ] {
   }
 
   - Static properties [2] {
-    Property [ protected static $b ]
-    Property [ public static $c ]
+    Property [ protected static $b = 1 ]
+    Property [ public static $c = 2 ]
   }
 
   - Static methods [0] {

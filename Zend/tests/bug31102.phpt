@@ -43,7 +43,7 @@ Caught: Test1::__construct
 Caught: {closure}
 {closure}(Test3,3)
 
-Fatal error: Uncaught Error: Class 'Test3' not found in %sbug31102.php(%d) : eval()'d code:1
+Fatal error: Uncaught Error: Class "Test3" not found in %s:%d
 Stack trace:
 #0 %s(%d): eval()
 #1 {main}

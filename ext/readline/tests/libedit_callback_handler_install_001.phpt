@@ -4,6 +4,8 @@ readline_callback_handler_install(): Basic test
 <?php if (!extension_loaded("readline") || !function_exists('readline_callback_handler_install')) die("skip");
 if (READLINE_LIB != "libedit") die("skip libedit only");
 ?>
+--INI--
+zend.signal_check=0
 --FILE--
 <?php
 
@@ -12,11 +14,13 @@ function foo() {
 }
 
 var_dump(readline_callback_handler_install('testing: ', 'foo'));
-var_dump(readline_callback_handler_install('testing: ', 'foobar!'));
+try {
+    var_dump(readline_callback_handler_install('testing: ', 'foobar!'));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
-
-Warning: readline_callback_handler_install(): foobar! is not callable in %s on line %d
-bool(false)
+readline_callback_handler_install(): Argument #2 ($callback) must be a valid callback, function "foobar!" not found or invalid function name

@@ -4,11 +4,6 @@ Test ctype_lower() function : usage variations - different integers
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_lower(mixed $c)
- * Description: Checks for lowercase character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different integers to ctype_lower() to test which character codes are considered
  * valid lowercase characters

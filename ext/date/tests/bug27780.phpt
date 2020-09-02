@@ -1,10 +1,5 @@
 --TEST--
 Bug #27780 (strtotime(+1 xxx) returns a wrong date/time)
---SKIPIF--
-<?php
-if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
-	die("skip. Not the same TZ on windows.");
-}
 --FILE--
 <?php
 $timezones = array (
@@ -35,7 +30,7 @@ foreach ($timezones as $timezone) {
     foreach ($timestrings as $timestring) {
         $time = strtotime($timestring);
 
-        echo $time, strftime(" [%Y-%m-%d %H:%M:%S %Z]", $time), " [$timestring]\n";
+        echo $time, date(" [Y-m-d H:i:s T]", $time), " [$timestring]\n";
     }
 
     echo "\n";

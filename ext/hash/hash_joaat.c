@@ -22,10 +22,14 @@
 #include "php_hash_joaat.h"
 
 const php_hash_ops php_hash_joaat_ops = {
+	"joaat",
 	(php_hash_init_func_t) PHP_JOAATInit,
 	(php_hash_update_func_t) PHP_JOAATUpdate,
 	(php_hash_final_func_t) PHP_JOAATFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_JOAAT_SPEC,
 	4,
 	4,
 	sizeof(PHP_JOAAT_CTX),
@@ -44,17 +48,22 @@ PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *i
 
 PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[4], PHP_JOAAT_CTX * context)
 {
+	uint32_t hval = context->state;
+	hval += (hval << 3);
+	hval ^= (hval >> 11);
+	hval += (hval << 15);
+
 #ifdef WORDS_BIGENDIAN
-	memcpy(digest, &context->state, 4);
+	memcpy(digest, &hval, 4);
 #else
 	int i = 0;
-	unsigned char *c = (unsigned char *) &context->state;
+	unsigned char *c = (unsigned char *) &hval;
 
 	for (i = 0; i < 4; i++) {
 		digest[i] = c[3 - i];
 	}
 #endif
-    context->state = 0;
+	context->state = 0;
 }
 
 /*
@@ -78,10 +87,6 @@ joaat_buf(void *buf, size_t len, uint32_t hval)
         hval += (hval << 10);
         hval ^= (hval >> 6);
     }
-
-    hval += (hval << 3);
-    hval ^= (hval >> 11);
-    hval += (hval << 15);
 
     return hval;
 }

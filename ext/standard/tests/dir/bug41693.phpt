@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-Directory name cannot be empty
+scandir(): Argument #1 ($directory) cannot be empty

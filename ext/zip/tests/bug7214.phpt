@@ -18,5 +18,14 @@ if (strlen($contents) == zip_entry_filesize($entry)) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function zip_open() is deprecated in %s on line %d
+
+Deprecated: Function zip_read() is deprecated in %s on line %d
+
+Deprecated: Function zip_entry_filesize() is deprecated in %s on line %d
+
+Deprecated: Function zip_entry_read() is deprecated in %s on line %d
+
+Deprecated: Function zip_entry_filesize() is deprecated in %s on line %d
 Ok

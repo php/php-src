@@ -2,11 +2,6 @@
 Test fputcsv() : usage variations - with enclosure & delimiter of two chars(read only modes)
 --FILE--
 <?php
-/*
- Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
- Description: Format line as CSV and write to the file pointer
-*/
-
 /* Testing fputcsv() to write to a file when default enclosure value and delimiter
    of two chars is provided and file is opened in read only mode */
 

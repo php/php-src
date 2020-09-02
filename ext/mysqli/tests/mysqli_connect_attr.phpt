@@ -74,5 +74,5 @@ mysqli_close($link);
 
     printf("done!");
 ?>
---EXPECTF--
+--EXPECT--
 done!

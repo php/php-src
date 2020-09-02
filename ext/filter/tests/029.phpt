@@ -13,9 +13,24 @@ function test($var) {
 var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test")));
 var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test")));
 var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test")));
-var_dump(filter_var("qwe", FILTER_CALLBACK, array("options"=>"no such func")));
-var_dump(filter_var("qwe", FILTER_CALLBACK, array("options"=>"")));
-var_dump(filter_var("qwe", FILTER_CALLBACK));
+
+try {
+    filter_var("qwe", FILTER_CALLBACK, array("options"=>"no such func"));
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    filter_var("qwe", FILTER_CALLBACK, array("options"=>""));
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    filter_var("qwe", FILTER_CALLBACK);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 /* Simple class method callback */
 class test_class {
@@ -45,30 +60,13 @@ var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test2")));
 var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test2")));
 var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test2")));
 
-/* unsetting data */
-function test3(&$var) {
-    unset($var);
-}
-
-var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test3")));
-var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test3")));
-var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test3")));
-
-/* unset data and return value */
-function test4(&$var) {
-    unset($var);
-    return 1;
-}
-
-var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test4")));
-
 /* thrown exception in the callback */
-function test5(&$var) {
+function test3($var) {
     throw new Exception("test");
 }
 
 try {
-    var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test5")));
+    var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test3")));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
@@ -79,27 +77,23 @@ echo "Done\n";
 string(4) "DATA"
 string(46) "~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?"}{:"
 string(0) ""
-
-Warning: filter_var(): First argument is expected to be a valid callback in %s on line %d
-NULL
-
-Warning: filter_var(): First argument is expected to be a valid callback in %s on line %d
-NULL
-
-Warning: filter_var(): First argument is expected to be a valid callback in %s on line %d
-NULL
+filter_var(): Option must be a valid callback
+filter_var(): Option must be a valid callback
+filter_var(): Option must be a valid callback
 string(4) "data"
 string(46) "~!@#$%^&*()_qwertyuiopasdfghjklzxcvbnm<>>?"}{:"
 string(0) ""
 NULL
 NULL
 NULL
+
+Warning: test2(): Argument #1 ($var) must be passed by reference, value given in %s on line %d
 NULL
+
+Warning: test2(): Argument #1 ($var) must be passed by reference, value given in %s on line %d
 NULL
+
+Warning: test2(): Argument #1 ($var) must be passed by reference, value given in %s on line %d
 NULL
-NULL
-NULL
-NULL
-int(1)
 string(4) "test"
 Done

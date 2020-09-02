@@ -27,6 +27,6 @@ $fo->fwrite("blahlubba");
 $path = __DIR__.DIRECTORY_SEPARATOR.'fileobject_005.txt';
 unlink($path);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(4) "blah"

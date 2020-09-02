@@ -2,11 +2,6 @@
 Test getcwd() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed getcwd(void)
- * Description: Gets the current directory
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of getcwd()
  */

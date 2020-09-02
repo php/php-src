@@ -122,7 +122,6 @@ static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw);
 extern int php_openssl_get_ssl_stream_data_index();
-extern int php_openssl_get_x509_list_id(void);
 static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b);
 static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
 static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);
@@ -1149,7 +1148,7 @@ static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 
 			/* Closing the stream inside this callback would segfault! */
 			stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
-			if (FAILURE == call_user_function_ex(NULL, NULL, val, &retval, 1, &param, 0, NULL)) {
+			if (FAILURE == call_user_function(NULL, NULL, val, &retval, 1, &param)) {
 				php_error(E_WARNING, "SSL: failed invoking reneg limit notification callback");
 			}
 			stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
@@ -1709,16 +1708,12 @@ int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	if (GET_VER_OPT("security_level")) {
-#ifdef HAVE_SEC_LEVEL
 		zend_long lval = zval_get_long(val);
 		if (lval < 0 || lval > 5) {
 			php_error_docref(NULL, E_WARNING, "Security level must be between 0 and 5");
 		}
+#ifdef HAVE_SEC_LEVEL
 		SSL_CTX_set_security_level(sslsock->ctx, lval);
-#else
-		php_error_docref(NULL, E_WARNING,
-				"security_level is not supported by the linked OpenSSL library "
-				"- it is supported from version 1.1.0");
 #endif
 	}
 
@@ -1824,13 +1819,17 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock, X509 *peer_cert) /* {{{ */
 {
 	zval *val, zcert;
+	php_openssl_certificate_object *cert_object;
 	int cert_captured = 0;
 
 	if (NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
 			"ssl", "capture_peer_cert")) &&
 		zend_is_true(val)
 	) {
-		ZVAL_RES(&zcert, zend_register_resource(peer_cert, php_openssl_get_x509_list_id()));
+		object_init_ex(&zcert, php_openssl_certificate_ce);
+		cert_object = Z_OPENSSL_CERTIFICATE_P(&zcert);
+		cert_object->x509 = peer_cert;
+
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate", &zcert);
 		zval_ptr_dtor(&zcert);
 		cert_captured = 1;
@@ -1851,7 +1850,10 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 
 			for (i = 0; i < sk_X509_num(chain); i++) {
 				X509 *mycert = X509_dup(sk_X509_value(chain, i));
-				ZVAL_RES(&zcert, zend_register_resource(mycert, php_openssl_get_x509_list_id()));
+
+				object_init_ex(&zcert, php_openssl_certificate_ce);
+				cert_object = Z_OPENSSL_CERTIFICATE_P(&zcert);
+				cert_object->x509 = mycert;
 				add_next_index_zval(&arr, &zcert);
 			}
 
@@ -1910,7 +1912,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		}
 
 		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;
-		has_timeout = !sslsock->s.is_blocked && (timeout->tv_sec || timeout->tv_usec);
+		has_timeout = !sslsock->s.is_blocked && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec));
 		/* gettimeofday is not monotonic; using it here is not strictly correct */
 		if (has_timeout) {
 			gettimeofday(&start_time, NULL);
@@ -2044,7 +2046,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 			sslsock->s.is_blocked = 0;
 		}
 
-		if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec || timeout->tv_usec)) {
+		if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
 			has_timeout = 1;
 			/* gettimeofday is not monotonic; using it here is not strictly correct */
 			gettimeofday(&start_time, NULL);
@@ -2189,8 +2191,8 @@ static struct timeval php_openssl_subtract_timeval(struct timeval a, struct time
 	difference.tv_usec = a.tv_usec - b.tv_usec;
 
 	if (a.tv_usec < b.tv_usec) {
-	  	b.tv_sec  -= 1L;
-	   	b.tv_usec += 1000000L;
+		difference.tv_sec  -= 1L;
+		difference.tv_usec += 1000000L;
 	}
 
 	return difference;

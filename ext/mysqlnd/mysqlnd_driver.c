@@ -80,7 +80,7 @@ PHPAPI void mysqlnd_library_init(void)
 			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;
 			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core);
 		}
-#if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
+#if MYSQLND_DBG_ENABLED == 1
 		mysqlnd_example_plugin_register();
 #endif
 		mysqlnd_debug_trace_plugin_register();

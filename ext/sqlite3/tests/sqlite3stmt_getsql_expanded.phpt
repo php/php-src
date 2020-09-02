@@ -44,7 +44,7 @@ var_dump($db->close());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Getting expanded SQL statement
 string(21) "SELECT 42, 'php', 43;"
 Execute statement

@@ -22,19 +22,22 @@ function b() {
 
 ?>
 --EXPECTF--
-$_main: ; (lines=1, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %s
-L0 (14):    RETURN int(1)
+$_main:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %s
+0000 RETURN int(1)
 
-a: ; (lines=2, args=0, vars=1, tmps=1)
-    ; (after optimizer)
-    ; %s
-L0 (4):     T1 = COALESCE CV0($test) L1
-L1 (5):     RETURN bool(true)
+a:
+     ; (lines=2, args=0, vars=1, tmps=1)
+     ; (after optimizer)
+     ; %s
+0000 T1 = COALESCE CV0($test) 0001
+0001 RETURN bool(true)
 
-b: ; (lines=2, args=0, vars=1, tmps=1)
-    ; (after optimizer)
-    ; %s
-L0 (9):     T1 = COALESCE CV0($test) L1
-L1 (10):    RETURN bool(true)
+b:
+     ; (lines=2, args=0, vars=1, tmps=1)
+     ; (after optimizer)
+     ; %s
+0000 T1 = COALESCE CV0($test) 0001
+0001 RETURN bool(true)

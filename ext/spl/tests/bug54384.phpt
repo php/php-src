@@ -152,6 +152,7 @@ foreach ($o as $a) {
 echo $a,"\n";
 }
 } );
+?>
 --EXPECT--
 IteratorIterator... exception (expected)
 FilterIterator... exception (expected)

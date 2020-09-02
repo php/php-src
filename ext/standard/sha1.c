@@ -21,13 +21,12 @@
 #include "sha1.h"
 #include "md5.h"
 
-PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
+PHPAPI void make_sha1_digest(char *sha1str, const unsigned char *digest)
 {
 	make_digest_ex(sha1str, digest, 20);
 }
 
-/* {{{ proto string sha1(string str [, bool raw_output])
-   Calculate the sha1 hash of a string */
+/* {{{ Calculate the sha1 hash of a string */
 PHP_FUNCTION(sha1)
 {
 	zend_string *arg;
@@ -56,8 +55,7 @@ PHP_FUNCTION(sha1)
 /* }}} */
 
 
-/* {{{ proto string sha1_file(string filename [, bool raw_output])
-   Calculate the sha1 hash of given filename */
+/* {{{ Calculate the sha1 hash of given filename */
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;

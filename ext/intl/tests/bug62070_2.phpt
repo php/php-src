@@ -12,5 +12,6 @@ $coll = collator_create('en_US');
 $res = collator_get_sort_key($coll, $s1);
 
 echo urlencode($res);
+?>
 --EXPECT--
 71%3F%3FE%01%09%01%DC%08

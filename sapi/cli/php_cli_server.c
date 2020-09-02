@@ -91,9 +91,11 @@
 
 #include "php_http_parser.h"
 #include "php_cli_server.h"
+#include "php_cli_server_arginfo.h"
 #include "mime_type_map.h"
 
 #include "php_cli_process_title.h"
+#include "php_cli_process_title_arginfo.h"
 
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY 1
@@ -213,7 +215,7 @@ static php_cli_server_http_response_status_code_pair template_map[] = {
 
 static int php_cli_server_log_level = 3;
 
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H || defined(PHP_WIN32)
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
 #endif
 
@@ -225,7 +227,7 @@ static void php_cli_server_buffer_append(php_cli_server_buffer *buffer, php_cli_
 static void php_cli_server_logf(int type, const char *format, ...);
 static void php_cli_server_log_response(php_cli_server_client *client, int status, const char *message);
 
-ZEND_DECLARE_MODULE_GLOBALS(cli_server);
+ZEND_DECLARE_MODULE_GLOBALS(cli_server)
 
 /* {{{ static char php_cli_server_css[]
  * copied from ext/standard/info.c
@@ -370,7 +372,13 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 
 static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	return (const char*)zend_hash_str_find_ptr(&server->extension_mime_types, ext, ext_len);
+	char *ret;
+	ALLOCA_FLAG(use_heap)
+	char *ext_lower = do_alloca(ext_len + 1, use_heap);
+	zend_str_tolower_copy(ext_lower, ext, ext_len);
+	ret = zend_hash_str_find_ptr(&server->extension_mime_types, ext_lower, ext_len);
+	free_alloca(ext_lower, use_heap);
+	return (const char*)ret;
 } /* }}} */
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
@@ -436,8 +444,7 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 }
 /* }}} */
 
-/* {{{ cli_server module
- */
+/* {{{ cli_server module */
 
 static void cli_server_init_globals(zend_cli_server_globals *cg)
 {
@@ -480,15 +487,12 @@ zend_module_entry cli_server_module_entry = {
 };
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
-ZEND_END_ARG_INFO()
-
 const zend_function_entry server_additional_functions[] = {
-	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
-	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
-	PHP_FE(apache_request_headers, arginfo_no_args)
-	PHP_FE(apache_response_headers, arginfo_no_args)
-	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
+	PHP_FE(cli_set_process_title,	arginfo_cli_set_process_title)
+	PHP_FE(cli_get_process_title,	arginfo_cli_get_process_title)
+	PHP_FE(apache_request_headers,	arginfo_apache_request_headers)
+	PHP_FE(apache_response_headers,	arginfo_apache_response_headers)
+	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_getallheaders)
 	PHP_FE_END
 };
 
@@ -748,7 +752,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 	zend_hash_apply_with_arguments(&client->request.headers, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
 } /* }}} */
 
-static void sapi_cli_server_log_write(int type, char *msg) /* {{{ */
+static void sapi_cli_server_log_write(int type, const char *msg) /* {{{ */
 {
 	char buf[52];
 
@@ -777,13 +781,12 @@ static void sapi_cli_server_log_write(int type, char *msg) /* {{{ */
 #endif
 } /* }}} */
 
-static void sapi_cli_server_log_message(char *msg, int syslog_type_int) /* {{{ */
+static void sapi_cli_server_log_message(const char *msg, int syslog_type_int) /* {{{ */
 {
 	sapi_cli_server_log_write(PHP_CLI_SERVER_LOG_MESSAGE, msg);
 } /* }}} */
 
-/* {{{ sapi_module_struct cli_server_sapi_module
- */
+/* {{{ sapi_module_struct cli_server_sapi_module */
 sapi_module_struct cli_server_sapi_module = {
 	"cli-server",							/* name */
 	"Built-in HTTP server",		/* pretty name */
@@ -1157,6 +1160,14 @@ static int php_cli_is_output_tty() /* {{{ */
 	}
 	return php_cli_output_is_tty;
 } /* }}} */
+#elif defined(PHP_WIN32)
+static int php_cli_is_output_tty() /* {{{ */
+{
+	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
+		php_cli_output_is_tty = php_win32_console_fileno_is_console(STDOUT_FILENO) && php_win32_console_fileno_has_vt100(STDOUT_FILENO);
+	}
+	return php_cli_output_is_tty;
+} /* }}} */
 #endif
 
 static void php_cli_server_log_response(php_cli_server_client *client, int status, const char *message) /* {{{ */
@@ -1182,7 +1193,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 		}
 	}
 
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H || defined(PHP_WIN32)
 	if (CLI_SERVER_G(color) && php_cli_is_output_tty() == OUTPUT_IS_TTY) {
 		if (effective_status >= 500) {
 			/* server error: red */
@@ -1214,7 +1225,8 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 
 	/* error */
 	if (append_error_message) {
-		spprintf(&error_buf, 0, " - %s in %s on line %d", PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
+		spprintf(&error_buf, 0, " - %s in %s on line %d",
+			ZSTR_VAL(PG(last_error_message)), PG(last_error_file), PG(last_error_lineno));
 		if (!error_buf) {
 			efree(basic_buf);
 			if (message) {
@@ -1832,7 +1844,7 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
 	if (nbytes_consumed != (size_t)nbytes_read) {
 		if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
-			if (buf[0] & 0x80 /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
+			if ((buf[0] & 0x80) /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
 				*errstr = estrdup("Unsupported SSL request");
 			} else {
 				*errstr = estrdup("Malformed HTTP request");
@@ -1978,7 +1990,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	php_cli_server_content_sender_ctor(&client->content_sender);
 	client->content_sender_initialized = 1;
 
-	escaped_request_uri = php_escape_html_entities_ex((unsigned char *)client->request.request_uri, client->request.request_uri_len, 0, ENT_QUOTES, NULL, 0);
+	escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) client->request.request_uri, client->request.request_uri_len, 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
 	{
 		static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
@@ -2218,9 +2230,12 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	int is_static_file  = 0;
+	const char *ext = client->request.ext;
 
 	SG(server_context) = client;
-	if (client->request.ext_len != 3 || memcmp(client->request.ext, "php", 3) || !client->request.path_translated) {
+	if (client->request.ext_len != 3
+	 || (ext[0] != 'p' && ext[0] != 'P') || (ext[1] != 'h' && ext[1] != 'H') || (ext[2] != 'p' && ext[2] != 'P')
+	 || !client->request.path_translated) {
 		is_static_file = 1;
 	}
 

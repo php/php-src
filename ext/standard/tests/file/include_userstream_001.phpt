@@ -76,6 +76,7 @@ echo @file_get_contents("test1://hello"),"\n";
 @include "test1://hello";
 echo @file_get_contents("test2://hello"),"\n";
 @include "test2://hello";
+?>
 --EXPECT--
 <?php echo "Hello World\n";?>
 <?php echo "Hello World\n";?>

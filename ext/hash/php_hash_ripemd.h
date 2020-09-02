@@ -24,24 +24,28 @@ typedef struct {
 	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_RIPEMD128_CTX;
+#define PHP_RIPEMD128_SPEC "l4l2b64."
 
 typedef struct {
 	uint32_t state[5];		/* state (ABCD) */
 	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_RIPEMD160_CTX;
+#define PHP_RIPEMD160_SPEC "l5l2b64."
 
 typedef struct {
 	uint32_t state[8];		/* state (ABCD) */
 	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_RIPEMD256_CTX;
+#define PHP_RIPEMD256_SPEC "l8l2b64."
 
 typedef struct {
 	uint32_t state[10];		/* state (ABCD) */
 	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_RIPEMD320_CTX;
+#define PHP_RIPEMD320_SPEC "l10l2b64."
 
 PHP_HASH_API void PHP_RIPEMD128Init(PHP_RIPEMD128_CTX *);
 PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX *, const unsigned char *, size_t);

@@ -69,7 +69,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Non-instance:
 string(72) "Given object is not an instance of the class this method was declared in"
 

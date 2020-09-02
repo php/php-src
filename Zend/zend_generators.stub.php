@@ -1,20 +1,22 @@
 <?php
 
+/** @generate-function-entries */
+
 final class Generator implements Iterator
 {
-    function rewind(): void {}
+    public function rewind(): void {}
 
-    function valid(): bool {}
+    public function valid(): bool {}
 
-    function current() {}
+    public function current(): mixed {}
 
-    function key() {}
+    public function key(): mixed {}
 
-    function next(): void {}
+    public function next(): void {}
 
-    function send($value) {}
+    public function send(mixed $value): mixed {}
 
-    function throw(Throwable $exception) {}
+    public function throw(Throwable $exception): mixed {}
 
-    function getReturn() {}
+    public function getReturn(): mixed {}
 }

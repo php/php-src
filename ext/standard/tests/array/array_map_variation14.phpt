@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - null value for 'callback' argument
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing null values for $callback argument and testing whether shortest
  * array will be extended with empty elements
@@ -123,7 +118,7 @@ array(2) {
   int(2)
 }
 -- with empty string --
-array_map(): Argument #1 ($callback) must be a valid callback, function '' not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
 -- with empty array --
 array_map(): Argument #1 ($callback) must be a valid callback, array must have exactly two members
 Done

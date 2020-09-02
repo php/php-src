@@ -39,7 +39,7 @@ try {
 
 ?>
 --EXPECT--
-Undefined constant 'Foo\bar'
-Undefined constant 'Foo\bar'
-Undefined constant 'Foo\bar'
-Undefined constant 'Foo\bar'
+Undefined constant "Foo\bar"
+Undefined constant "Foo\bar"
+Undefined constant "Foo\bar"
+Undefined constant "Foo\bar"

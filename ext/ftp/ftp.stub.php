@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @return resource|false */
 function ftp_connect(string $host, int $port = 21, int $timeout = 90) {}
 
@@ -35,8 +37,11 @@ function ftp_rmdir($ftp, string $directory): bool {}
 /** @param resource $ftp */
 function ftp_chmod($ftp, int $mode, string $filename): int|false {}
 
-/** @param resource $ftp */
-function ftp_alloc($ftp, int $size, &$response = UNKNOWN): bool {}
+/**
+ * @param resource $ftp
+ * @param string $response
+ */
+function ftp_alloc($ftp, int $size, &$response = null): bool {}
 
 /** @param resource $ftp */
 function ftp_nlist($ftp, string $directory): array|false {}
@@ -60,7 +65,7 @@ function ftp_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $r
  * @param resource $ftp
  * @param resource $fp
  */
-function ftp_nb_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0): int|false {}
+function ftp_nb_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0): int {}
 
 /** @param resource $ftp */
 function ftp_pasv($ftp, bool $pasv): bool {}
@@ -84,7 +89,7 @@ function ftp_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $s
  * @param resource $ftp
  * @param resource $fp
  */
-function ftp_nb_fput($ftp, string $remote_file, $fp, $mode = FTP_BINARY, $startpos = 0): int|false {}
+function ftp_nb_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): int {}
 
 /** @param resource $ftp */
 function ftp_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): bool {}
@@ -113,10 +118,16 @@ function ftp_site($ftp, string $cmd): bool {}
 /** @param resource $ftp */
 function ftp_close($ftp): bool {}
 
-/** @param resource $ftp */
+/**
+ * @param resource $ftp
+ * @alias ftp_close
+ */
 function ftp_quit($ftp): bool {}
 
-/** @param resource $ftp */
+/**
+ * @param resource $ftp
+ * @param int|bool $value
+ */
 function ftp_set_option($ftp, int $option, $value): bool {}
 
 /** @param resource $ftp */

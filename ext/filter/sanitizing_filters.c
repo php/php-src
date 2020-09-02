@@ -98,7 +98,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 {
 	unsigned char *str;
 	size_t i;
-	int c;
+	size_t c;
 	zend_string *buf;
 
 	/* Optimization for if no strip flags are set */
@@ -107,7 +107,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	}
 
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
+	buf = zend_string_alloc(Z_STRLEN_P(value), 0);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((str[i] >= 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
@@ -149,7 +149,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	zend_string *buf;
 
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
+	buf = zend_string_alloc(Z_STRLEN_P(value), 0);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((*map)[str[i]]) {
@@ -251,7 +251,9 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 	} else {
 		quotes = ENT_NOQUOTES;
 	}
-	buf = php_escape_html_entities_ex((unsigned char *) Z_STRVAL_P(value), Z_STRLEN_P(value), 1, quotes, SG(default_charset), 0);
+	buf = php_escape_html_entities_ex(
+		(unsigned char *) Z_STRVAL_P(value), Z_STRLEN_P(value), /* all */ 1, quotes,
+		/* charset_hint */ NULL, /* double_encode */ 0, /* quiet */ 0);
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
 }

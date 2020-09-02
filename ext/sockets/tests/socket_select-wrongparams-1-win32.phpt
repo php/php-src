@@ -18,6 +18,7 @@ $write  = null;
 $except = null;
 $time   = -1;
 var_dump(socket_select($sockets, $write, $except, $time));
+?>
 --EXPECT--
 int(0)
 --CREDITS--

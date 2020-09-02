@@ -26,7 +26,6 @@ typedef struct {
 } php_lcg_globals;
 
 PHPAPI double php_combined_lcg(void);
-PHP_FUNCTION(lcg_value);
 
 PHP_MINIT_FUNCTION(lcg);
 

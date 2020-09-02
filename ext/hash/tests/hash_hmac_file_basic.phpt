@@ -4,12 +4,6 @@ Hash: hash_hmac_file() function : basic functionality
 <?php
 
 
-/* Prototype  : string hash_hmac_file ( string algo, string filename, string key [, bool raw_output] )
- * Description: Generate a keyed hash value using the HMAC method and the contents of a given file
- * Source code: ext/hash/hash.c
- * Alias to functions:
-*/
-
 echo "*** Testing hash_hmac_file() : basic functionality ***\n";
 
 $file = __DIR__ . "hash_hmac_file.txt";
@@ -57,7 +51,7 @@ echo "sha256(raw): " . bin2hex(hash_hmac_file('sha256', $file, $key, TRUE)). "\n
 unlink($file);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hash_hmac_file() : basic functionality ***
 gost: 94c39a40d5db852a8dc3d24e37eebf2d53e3d711457c59cd02b614f792a9d918
 haval128,3: f1cea637451097d790354a86de3f54a3

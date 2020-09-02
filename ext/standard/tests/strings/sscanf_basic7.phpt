@@ -3,11 +3,6 @@ Test sscanf() function : basic functionality - octal format
 --FILE--
 <?php
 
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing sscanf() : basic functionality - using octal format ***\n";
 
 $str = "0123 -0123 +0123 0129 -0129 +0129";

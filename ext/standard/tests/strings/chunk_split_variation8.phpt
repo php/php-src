@@ -6,12 +6,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions:
-*/
-
 /*
 * passing different integer values for 'chunklen' and heredoc string for 'str' to chunk_split()
 */

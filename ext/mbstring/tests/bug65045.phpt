@@ -21,6 +21,7 @@ var_dump(
     $expected === mb_convert_encoding($str, 'UTF-8', 'UTF-8'),
     $expected2 === mb_convert_encoding($str2, 'UTF-8', 'UTF-8')
 );
+?>
 --EXPECT--
 bool(true)
 bool(true)

@@ -13,5 +13,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-imagexbm(): Argument #2 ($filename) must be a valid path, string given
+--EXPECT--
+imagexbm(): Argument #2 ($filename) must be a valid path or null, string given

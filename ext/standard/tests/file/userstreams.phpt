@@ -156,8 +156,11 @@ class mystream
 
 }
 
-if (@stream_wrapper_register("bogus", "class_not_exist")) {
+try {
+    stream_wrapper_register("bogus", "class_not_exist");
     die("Registered a non-existent class!!!???");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 echo "Not Registered\n";
 
@@ -315,6 +318,7 @@ echo $data . "\n";
 
 ?>
 --EXPECT--
+stream_wrapper_register(): Argument #2 ($classname) must be a valid class name, class_not_exist given
 Not Registered
 Registered
 Registered

@@ -2,11 +2,6 @@
 Test readdir() function : usage variations - operate on previously opened directory
 --FILE--
 <?php
-/* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Open two directory handles on the same directory and pass both
  * to readdir() to test behaviour

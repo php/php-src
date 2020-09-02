@@ -27,6 +27,7 @@ typedef struct {
 		unsigned char data[64];
 	} buffer;
 } PHP_WHIRLPOOL_CTX;
+#define PHP_WHIRLPOOL_SPEC "q8b32iib64."
 
 PHP_HASH_API void PHP_WHIRLPOOLInit(PHP_WHIRLPOOL_CTX *);
 PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *, const unsigned char *, size_t);

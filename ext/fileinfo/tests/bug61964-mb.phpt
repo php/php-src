@@ -48,15 +48,15 @@ bool(false)%A
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 bool(false)%A
-Notice: finfo_open(): Warning: offset `string' invalid in %sbug61964-mb.php on line %d
+Warning: finfo_open(): offset `string' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset ` Core' invalid in %sbug61964-mb.php on line %d
+Warning: finfo_open(): offset ` Core' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset ` Me' invalid in %sbug61964-mb.php on line %d
+Warning: finfo_open(): offset ` Me' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset `a' invalid in %sbug61964-mb.php on line %d
+Warning: finfo_open(): offset `a' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset `b' invalid in %sbug61964-mb.php on line %d
+Warning: finfo_open(): offset `b' invalid in %sbug61964-mb.php on line %d
 
 Warning: finfo_open(): Failed to load magic database at '%sbug61964-mb'. in %sbug61964-mb.php on line %d
 DONE: testing dir with files

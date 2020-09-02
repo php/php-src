@@ -2,11 +2,6 @@
 Test ksort() function : usage variations - sort heredoc strings
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing ksort() by providing array of heredoc strings for $array argument with
  * following flag values:

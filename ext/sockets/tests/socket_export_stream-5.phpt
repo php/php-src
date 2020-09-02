@@ -7,6 +7,9 @@ if (!extension_loaded('sockets')) {
 }
 if (!function_exists('zend_leak_variable'))
 	die('SKIP only for debug builds');
+?>
+--INI--
+report_memleaks=0
 --FILE--
 <?php
 
@@ -21,5 +24,6 @@ $stream1 = socket_export_stream($sock1);
 zend_leak_variable($sock1);
 
 echo "Done.\n";
+?>
 --EXPECT--
 Done.

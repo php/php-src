@@ -34,7 +34,7 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 <?php
 	require(__DIR__ .'/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 database handler: flatfile
 2YY
 bool(true)

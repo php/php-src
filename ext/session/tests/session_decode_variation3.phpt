@@ -9,12 +9,6 @@ session.serialize_handler=blah
 
 ob_start();
 
-/*
- * Prototype : string session_decode(void)
- * Description : Decodes session data from a string
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_decode() : variation ***\n";
 
 var_dump(session_start());
@@ -37,7 +31,7 @@ ob_end_flush();
 Warning: session_start(): Cannot find serialization handler 'blah' - session startup failed in %s on line %d
 bool(false)
 
-Warning: Undefined variable: _SESSION in %s on line %d
+Warning: Undefined variable $_SESSION in %s on line %d
 NULL
 array(3) {
   ["foo"]=>

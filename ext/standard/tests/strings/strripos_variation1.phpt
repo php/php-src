@@ -2,11 +2,6 @@
 Test strripos() function : usage variations - double quoted strings for 'haystack' & 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int strripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of last occurrence of a case-insensitive 'needle' in a 'haystack'
- * Source code: ext/standard/string.c
-*/
-
 /* Test strripos() function by passing double quoted strings for 'haystack' & 'needle' arguments */
 
 echo "*** Testing strripos() function: with double quoted strings ***\n";

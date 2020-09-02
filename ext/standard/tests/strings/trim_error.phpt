@@ -3,12 +3,6 @@ Test trim() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : string trim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the beginning and end of a string.
- * Source code: ext/standard/string.c
-*/
-
-
 echo "*** Testing trim() : error conditions ***\n";
 
 $hello = "  Hello World\n";

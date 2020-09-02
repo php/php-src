@@ -3,7 +3,6 @@ ob_start(): ensure multiple buffer initialization with a single call using array
 --FILE--
 <?php
 /*
- * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
 */
 
@@ -72,43 +71,43 @@ var_dump(ob_start(array('f', 'C::g', array(array($c, "g"), array($c, "h")))));
 checkAndClean();
 ?>
 --EXPECTF--
- ---> Test arrays:
+---> Test arrays:
 
-Warning: ob_start(): array must have exactly two members in %s on line 44
+Warning: ob_start(): array must have exactly two members in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 44
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 Array
 (
 )
 
-Warning: ob_start(): class 'f' not found in %s on line 47
+Warning: ob_start(): class "f" not found in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 47
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 Array
 (
 )
 
-Warning: ob_start(): array must have exactly two members in %s on line 50
+Warning: ob_start(): array must have exactly two members in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 50
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 Array
 (
 )
 
-Warning: ob_start(): array must have exactly two members in %s on line 53
+Warning: ob_start(): array must have exactly two members in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 53
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 Array
 (
 )
 
-Warning: ob_start(): array must have exactly two members in %s on line 56
+Warning: ob_start(): array must have exactly two members in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 56
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 Array
 (
@@ -126,9 +125,9 @@ Array
 )
 
 
-Warning: ob_start(): array must have exactly two members in %s on line 68
+Warning: ob_start(): array must have exactly two members in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 68
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 Array
 (

@@ -5,12 +5,6 @@ sendmail_path={MAIL:mailBug69874.out}
 mail.add_x_header = Off
 --FILE--
 <?php
-/* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- * Description: Send an email message
- * Source code: ext/standard/mail.c
- * Alias to functions:
- */
-
 echo "*** Testing mail() : send email without additional headers ***\n";
 
 // Initialise all required variables

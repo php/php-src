@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "microtime.h"
 #include "ext/date/php_date.h"
 
 #define NUL  '\0'
@@ -80,16 +79,14 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 }
 
-/* {{{ proto mixed microtime([bool get_as_float])
-   Returns either a string or a float containing the current time in seconds and microseconds */
+/* {{{ Returns either a string or a float containing the current time in seconds and microseconds */
 PHP_FUNCTION(microtime)
 {
 	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto array gettimeofday([bool get_as_float])
-   Returns the current time as array */
+/* {{{ Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
 {
 	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -98,8 +95,7 @@ PHP_FUNCTION(gettimeofday)
 /* }}} */
 
 #ifdef HAVE_GETRUSAGE
-/* {{{ proto array|false getrusage([int who])
-   Returns an array of usage statistics */
+/* {{{ Returns an array of usage statistics */
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
@@ -129,7 +125,7 @@ PHP_FUNCTION(getrusage)
 #ifdef PHP_WIN32 /* Windows only implements a limited amount of fields from the rusage struct */
 	PHP_RUSAGE_PARA(ru_majflt);
 	PHP_RUSAGE_PARA(ru_maxrss);
-#elif !defined(_OSD_POSIX)
+#elif !defined(_OSD_POSIX) && !defined(__HAIKU__)
 	PHP_RUSAGE_PARA(ru_oublock);
 	PHP_RUSAGE_PARA(ru_inblock);
 	PHP_RUSAGE_PARA(ru_msgsnd);

@@ -2,11 +2,6 @@
 Test stripos() function : usage variations - double quoted strings for 'haystack' & 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 /* Test stripos() function by passing double quoted strings for 'haystack' & 'needle' arguments */
 
 echo "*** Testing stripos() function: with double quoted strings ***\n";

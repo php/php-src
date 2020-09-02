@@ -4,11 +4,6 @@ Test token_get_all() function : usage variations - heredoc string for 'source'
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP language tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Testing token_get_all() with heredoc 'source' string with all different types of token and heredoc string within
  *     <<<EOT - T_START_HEREDOC(371)

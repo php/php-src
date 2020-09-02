@@ -22,7 +22,7 @@ while ($reader->read()) {
     echo $reader->name, "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 books
 books
 books

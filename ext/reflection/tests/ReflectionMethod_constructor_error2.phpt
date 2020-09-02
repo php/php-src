@@ -56,6 +56,6 @@ Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
 
 Too many arguments:
 Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
-Ok - Class InvalidClassName does not exist
-Ok - ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be of type object|string, array given
+Ok - Class "InvalidClassName" does not exist
+Ok - ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be of type object|string, array given
 Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 2 given

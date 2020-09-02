@@ -9,12 +9,6 @@ serialize_precision=100
 
 ob_start();
 
-/*
- * Prototype : string session_encode(void)
- * Description : Encodes the current session data as a string
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_encode() : basic functionality ***\n";
 
 // Get an unset variable

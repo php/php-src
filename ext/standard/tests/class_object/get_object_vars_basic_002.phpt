@@ -2,12 +2,6 @@
 get_object_vars(): visibility from non static methods (target object passed as arg)
 --FILE--
 <?php
-/* Prototype  : proto array get_object_vars(object obj)
- * Description: Returns an array of object properties
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 Class A {
     private $hiddenPriv = 'A::hiddenPriv';
 

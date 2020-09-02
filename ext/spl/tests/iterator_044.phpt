@@ -78,43 +78,43 @@ Exception: MyCachingIterator does not use a full cache (see CachingIterator::__c
 int(0)
 bool(false)
 
-Notice: Undefined index: 0 in %siterator_044.php on line %d
+Notice: Undefined array key "0" in %s on line %d
 NULL
 ===1===
 object(stdClass)#%d (0) {
 }
-CachingIterator::offsetExists(): Argument #1 ($index) must be of type string, object given
-CachingIterator::offsetGet(): Argument #1 ($index) must be of type string, object given
+CachingIterator::offsetExists(): Argument #1 ($index) must be of type string, stdClass given
+CachingIterator::offsetGet(): Argument #1 ($index) must be of type string, stdClass given
 ===2===
 object(MyFoo)#%d (0) {
 }
 bool(false)
 
-Notice: Undefined index: foo in %siterator_044.php on line %d
+Notice: Undefined array key "foo" in %s on line %d
 NULL
 ===3===
 NULL
 bool(false)
 
-Notice: Undefined index:  in %siterator_044.php on line %d
+Notice: Undefined array key "" in %s on line %d
 NULL
 ===4===
 int(2)
 bool(false)
 
-Notice: Undefined index: 2 in %siterator_044.php on line %d
+Notice: Undefined array key "2" in %s on line %d
 NULL
 ===5===
 string(3) "foo"
 bool(false)
 
-Notice: Undefined index: foo in %siterator_044.php on line %d
+Notice: Undefined array key "foo" in %s on line %d
 NULL
 ===6===
 int(3)
 bool(false)
 
-Notice: Undefined index: 3 in %siterator_044.php on line %d
+Notice: Undefined array key "3" in %s on line %d
 NULL
 ===FILL===
 ===0===
@@ -124,8 +124,8 @@ int(0)
 ===1===
 object(stdClass)#1 (0) {
 }
-CachingIterator::offsetExists(): Argument #1 ($index) must be of type string, object given
-CachingIterator::offsetGet(): Argument #1 ($index) must be of type string, object given
+CachingIterator::offsetExists(): Argument #1 ($index) must be of type string, stdClass given
+CachingIterator::offsetGet(): Argument #1 ($index) must be of type string, stdClass given
 ===2===
 object(MyFoo)#2 (0) {
 }
@@ -135,7 +135,7 @@ int(1)
 NULL
 bool(false)
 
-Notice: Undefined index:  in %siterator_044.php on line %d
+Notice: Undefined array key "" in %s on line %d
 NULL
 ===4===
 int(2)
@@ -149,5 +149,5 @@ int(1)
 int(3)
 bool(false)
 
-Notice: Undefined index: 3 in %siterator_044.php on line %d
+Notice: Undefined array key "3" in %s on line %d
 NULL

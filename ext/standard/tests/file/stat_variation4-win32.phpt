@@ -9,11 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects on the stats of dir/file for using is_dir() & is_file() on dir/file */
 
 $file_path = __DIR__;

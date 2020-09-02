@@ -20,9 +20,9 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "zend_interfaces.h"
 
 /*
 * class DOMNamedNodeMap
@@ -30,15 +30,6 @@
 * URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1780488922
 * Since:
 */
-
-const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
-	PHP_ME(domnamednodemap, getNamedItem, arginfo_class_DOMNamedNodeMap_getNamedItem, ZEND_ACC_PUBLIC)
-	PHP_ME(domnamednodemap, item, arginfo_class_DOMNamedNodeMap_item, ZEND_ACC_PUBLIC)
-	PHP_ME(domnamednodemap, getNamedItemNS, arginfo_class_DOMNamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domnamednodemap, count, arginfo_class_DOMNamedNodeMap_count, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
 
 /* {{{ length	int
 readonly=yes
@@ -81,11 +72,10 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto DOMNode dom_namednodemap_get_named_item(string name);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since:
 */
-PHP_METHOD(domnamednodemap, getNamedItem)
+PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 {
 	zval *id;
 	int ret;
@@ -137,11 +127,10 @@ PHP_METHOD(domnamednodemap, getNamedItem)
 }
 /* }}} end dom_namednodemap_get_named_item */
 
-/* {{{ proto DOMNode dom_namednodemap_item(int index);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
 Since:
 */
-PHP_METHOD(domnamednodemap, item)
+PHP_METHOD(DOMNamedNodeMap, item)
 {
 	zval *id;
 	zend_long index;
@@ -201,11 +190,10 @@ PHP_METHOD(domnamednodemap, item)
 }
 /* }}} end dom_namednodemap_item */
 
-/* {{{ proto DOMNode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
 */
-PHP_METHOD(domnamednodemap, getNamedItemNS)
+PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 {
 	zval *id;
 	int ret;
@@ -257,9 +245,8 @@ PHP_METHOD(domnamednodemap, getNamedItemNS)
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
 
-/* {{{ proto int|bool dom_namednodemap_count();
-*/
-PHP_METHOD(domnamednodemap, count)
+/* {{{ */
+PHP_METHOD(DOMNamedNodeMap, count)
 {
 	zval *id;
 	dom_object *intern;
@@ -275,5 +262,14 @@ PHP_METHOD(domnamednodemap, count)
 	}
 }
 /* }}} end dom_namednodemap_count */
+
+PHP_METHOD(DOMNamedNodeMap, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
 
 #endif

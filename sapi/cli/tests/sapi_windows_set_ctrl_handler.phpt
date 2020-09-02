@@ -56,11 +56,13 @@ if ($is_child) {
     $status = proc_get_status($proc);
     if ($status["running"]) {
         echo "Child $child_pid didn't exit after ${max}us\n";
+		foreach ($pipes as $pipe) {
+			fclose($pipe);
+		}
+		proc_terminate($proc);
     } else {
         echo "Child $child_pid exit with status ", $status["exitcode"], " after ${total}us\n";
     }
-
-    proc_close($proc);
 }
 
 function get_evt_name(int $evt) : ?string
@@ -78,8 +80,7 @@ function get_evt_name(int $evt) : ?string
 --EXPECTF--
 Started child %d
 Running `tasklist /FI "PID eq %d" /NH` to check the process indeed exists:
-php.exe%w%d%s1%s
+php.exe%w%d%s
 Sending CTRL+C to child %d
 Successfully sent CTRL+C to child %d
 Child %d exit with status 3 after %dus
-

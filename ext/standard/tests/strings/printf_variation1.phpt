@@ -2,11 +2,6 @@
 Test printf() function : usage variations - unexpected values for format argument
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 /*
 * Testing printf() : with different unexpected values for format argument other than the strings
 */

@@ -4,11 +4,6 @@ Test is_file() function: usage variations - invalid filenames
 obscure_filename
 --FILE--
 <?php
-/* Prototype: bool is_file ( string $filename );
-   Description: Tells whether the filename is a regular file
-     Returns TRUE if the filename exists and is a regular file
-*/
-
 /* Testing is_file() with invalid arguments -int, float, bool, NULL */
 
 function flatten($variable) {
@@ -39,7 +34,7 @@ foreach([
   clearstatcache();
 }
 ?>
---EXPECTF--
+--EXPECT--
 float(-2.34555): 0
 string(1) " ": 0
 string(0) "": 0

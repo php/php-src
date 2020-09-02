@@ -2,9 +2,6 @@
 Test fflush() function: basic functionality
 --FILE--
 <?php
-/*  Prototype: bool fflush ( resource $handle );
-    Description: Flushes the output to a file
-*/
 
 echo "*** Testing fflush(): writing to a file and reading the contents ***\n";
 $data = <<<EOD

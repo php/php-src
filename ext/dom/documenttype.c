@@ -20,19 +20,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-
-/*
-* class DOMDocumentType extends DOMNode
-*
-* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-412266927
-* Since:
-*/
-
-const zend_function_entry php_dom_documenttype_class_functions[] = {
-	PHP_FE_END
-};
 
 /* {{{ name	string
 readonly=yes

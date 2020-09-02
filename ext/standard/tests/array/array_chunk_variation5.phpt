@@ -2,12 +2,6 @@
 Test array_chunk() function : usage variations - different 'size' values
 --FILE--
 <?php
-/* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks
- *            : Chunks an array into size large chunks
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_chunk() function with following conditions
  *   1. -ve size value
@@ -44,14 +38,13 @@ foreach ($sizes as $size){
     }
 }
 ?>
-
 --EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() when size = -1 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
 
 -- Testing array_chunk() when size = 4 --
 array(1) {
@@ -89,9 +82,9 @@ array(1) {
 }
 
 -- Testing array_chunk() when size = 0 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
 
 -- Testing array_chunk() when size = 1.5 --
 array(3) {

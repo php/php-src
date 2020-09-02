@@ -39,7 +39,13 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 Done
 --EXPECTF--
 Procedural
+
+Deprecated: Function zip_open() is deprecated in %s on line %d
+
+Deprecated: Function zip_close() is deprecated in %s on line %d
 NULL
+
+Deprecated: Function zip_close() is deprecated in %s on line %d
 zip_close(): supplied resource is not a valid Zip Directory resource
 Object
 bool(true)

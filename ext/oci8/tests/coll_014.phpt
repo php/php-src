@@ -14,16 +14,16 @@ $ora_sql = "DROP TYPE
                         ".$type_name."
            ";
 
-$statement = OCIParse($c,$ora_sql);
-@OCIExecute($statement);
+$statement = oci_parse($c,$ora_sql);
+@oci_execute($statement);
 
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF VARCHAR(10)";
 
-$statement = OCIParse($c,$ora_sql);
-OCIExecute($statement);
+$statement = oci_parse($c,$ora_sql);
+oci_execute($statement);
 
 
-$coll1 = ocinewcollection($c, $type_name);
+$coll1 = oci_new_collection($c, $type_name);
 
 var_dump($coll1->append("striing"));
 var_dump($coll1->assignElem(0,"blah"));

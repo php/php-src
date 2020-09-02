@@ -35,7 +35,6 @@ include $pname . '/foo/hi';
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(__DIR__ . '/poo'); ?>
 <?php unlink(__DIR__ . '/fopen_edgecases2.txt'); ?>
 --EXPECTF--
 fopen(): Argument #1 ($filename) must be a valid path, array given

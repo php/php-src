@@ -131,5 +131,5 @@ Converted
 object(test3)#2 (0) {
 }
 test3::__toString()
-Return value of test3::__toString() must be of type string, array returned
+test3::__toString(): Return value must be of type string, array returned
 ====DONE====

@@ -20,6 +20,7 @@ if ($stmt->execute()) {
 
 // regular timeout attribute, set after instance created, will affect query timeout, causing this query to fail
 $db = new PDO($dsn, $user, $pass);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $db->setAttribute(PDO::ATTR_TIMEOUT, 1);
 $stmt = $db->prepare($sql);
 if (!$stmt->execute()) {
@@ -33,6 +34,7 @@ if (!$stmt->execute()) {
 
 // pdo_dblib-specific timeout attribute, set after instance created, will control query timeout, causing this query to fail
 $db = new PDO($dsn, $user, $pass);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $db->setAttribute(PDO::DBLIB_ATTR_QUERY_TIMEOUT, 1);
 $stmt = $db->prepare($sql);
 if (!$stmt->execute()) {
@@ -45,7 +47,7 @@ if (!$stmt->execute()) {
 }
 
 // regular timeout attribute will affect query timeout, causing this query to fail
-$db = new PDO($dsn, $user, $pass, [PDO::ATTR_TIMEOUT => 1]);
+$db = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, PDO::ATTR_TIMEOUT => 1]);
 $stmt = $db->prepare($sql);
 if (!$stmt->execute()) {
     echo "OK\n";
@@ -57,7 +59,7 @@ if (!$stmt->execute()) {
 }
 
 // pdo_dblib-specific timeout attribute will control query timeout, causing this query to fail
-$db = new PDO($dsn, $user, $pass, [PDO::DBLIB_ATTR_QUERY_TIMEOUT => 1]);
+$db = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, PDO::DBLIB_ATTR_QUERY_TIMEOUT => 1]);
 $stmt = $db->prepare($sql);
 if (!$stmt->execute()) {
     echo "OK\n";

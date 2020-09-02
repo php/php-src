@@ -8,6 +8,6 @@ readline_list_history(): Basic test
 var_dump(readline_list_history());
 
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }

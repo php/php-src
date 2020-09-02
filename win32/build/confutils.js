@@ -126,6 +126,17 @@ build_dirs = new Array();
 extension_include_code = "";
 extension_module_ptrs = "";
 
+(function () {
+	var wmiservice = GetObject("winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2");
+	var oss = wmiservice.ExecQuery("Select * from Win32_OperatingSystem");
+	var os = oss.ItemIndex(0);
+	AC_DEFINE("PHP_BUILD_SYSTEM", os.Caption + " [" + os.Version + "]", "Windows build system version");
+	var build_provider = WshShell.Environment("Process").Item("PHP_BUILD_PROVIDER");
+	if (build_provider) {
+		AC_DEFINE("PHP_BUILD_PROVIDER", build_provider);
+	}
+}());
+
 if (!MODE_PHPIZE) {
 	get_version_numbers();
 }
@@ -437,7 +448,7 @@ can be built that way. \
 	}
 
 	var snapshot_build_exclusions = new Array(
-		'debug', 'crt-debug', 'lzf-better-compression',
+		'debug', 'lzf-better-compression',
 		 'php-build', 'snapshot-template', 'ereg',
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
@@ -2015,9 +2026,6 @@ function generate_tmp_php_ini()
 		var directive = (extensions_enabled[i][2] ? 'zend_extension' : 'extension');
 
 		var ext_name = extensions_enabled[i][0];
-		if ("gd" == ext_name) {
-			ext_name = "gd2";
-		}
 
 		if (!is_on_exclude_list_for_test_ini(ext_list, ext_name)) {
 			INI.WriteLine(directive + "=php_" + ext_name + ".dll");
@@ -3207,7 +3215,7 @@ function toolset_setup_common_cflags()
 
 	// General CFLAGS for building objects
 	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS /D WINDOWS=1 \
-		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 \
+		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS \
 		/D _USE_MATH_DEFINES");
 
 	if (envCFLAGS) {
@@ -3399,7 +3407,7 @@ function toolset_setup_common_libs()
 function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /D _DEBUG /D ZEND_DEBUG=1 " +
 			(X64?"/Zi":"/ZI"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
@@ -3411,7 +3419,7 @@ function toolset_setup_build_mode()
 			ADD_FLAG("CFLAGS", "/Zi");
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
-		ADD_FLAG("CFLAGS", "/LD /MD /W3");
+		ADD_FLAG("CFLAGS", "/LD /MD");
 		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
 			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
 		} else {

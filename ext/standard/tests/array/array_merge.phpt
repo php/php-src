@@ -4,10 +4,6 @@ Test array_merge() function
 precision=14
 --FILE--
 <?php
-/* Prototype: array array_merge(array $array1 [, array $array2 [, array $...]]);
-   Description: Merge one or more arrays
-*/
-
 echo "\n*** Testing array_merge() basic functionality ***";
 $begin_array = array(
   array(),
@@ -83,7 +79,7 @@ var_dump(array_merge());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() basic functionality ***
 
 --- Iteration 0 ---

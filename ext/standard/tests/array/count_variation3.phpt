@@ -2,11 +2,6 @@
 Test count() function : usage variations - Infinitely recursive array
 --FILE--
 <?php
-/* Prototype  : int count(mixed $var [, int $mode])
- * Description: Count the number of elements in a variable (usually an array)
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass count() an infinitely recursive array as $var argument
  * This will stop the script before it reaches the end.

@@ -355,8 +355,11 @@ PHPDBG_API int phpdbg_get_terminal_height(void) /* {{{ */
 #ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+		lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	} else {
+		lines = 40;
+	}
 #elif defined(HAVE_SYS_IOCTL_H) && defined(TIOCGWINSZ)
 	struct winsize w;
 
@@ -468,11 +471,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 		if (new_index && index_len == 0) {
 			zend_ulong numkey;
 			zend_string *strkey;
-			ZEND_HASH_FOREACH_KEY_PTR(parent, numkey, strkey, zv) {
-				while (Z_TYPE_P(zv) == IS_INDIRECT) {
-					zv = Z_INDIRECT_P(zv);
-				}
-
+			ZEND_HASH_FOREACH_KEY_VAL_IND(parent, numkey, strkey, zv) {
 				if (i == len || (i == len - 1 && input[len - 1] == ']')) {
 					char *key, *propkey;
 					size_t namelen, keylen;
@@ -710,7 +709,6 @@ head_done:
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						element_dump_func(val, key, num);
 					} ZEND_HASH_FOREACH_END();
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) element_dump_func, 0);
 					GC_UNPROTECT_RECURSION(myht);
 					if (Z_TYPE_P(zv) == IS_OBJECT) {
 						zend_release_properties(myht);

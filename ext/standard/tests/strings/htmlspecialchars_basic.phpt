@@ -2,11 +2,6 @@
 Test htmlspecialchars() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string htmlspecialchars  ( string $string  [, int $quote_style  [, string $charset  [, bool $double_encode  ]]] )
- * Description: Convert special characters to HTML entities
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing htmlspecialchars() : basic functionality ***\n";
 
 $s1 = "abc<>\"&\n";

@@ -2,12 +2,6 @@
 Test sort() function : usage variations - sort diff. associative arrays, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array.
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing sort() by providing arrays  with key values for $array argument
  * with following flag values.
@@ -202,17 +196,17 @@ array(6) {
 bool(true)
 array(2) {
   [0]=>
-  string(3) "baz"
-  [1]=>
   int(1)
+  [1]=>
+  string(3) "baz"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(2) {
   [0]=>
-  string(3) "baz"
-  [1]=>
   int(1)
+  [1]=>
+  string(3) "baz"
 }
 
 -- Iteration 5 --

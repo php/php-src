@@ -37,13 +37,6 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len);
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len);
 PHPAPI char *php_replace_controlchars_ex(char *str, size_t len);
 
-PHP_FUNCTION(parse_url);
-PHP_FUNCTION(urlencode);
-PHP_FUNCTION(urldecode);
-PHP_FUNCTION(rawurlencode);
-PHP_FUNCTION(rawurldecode);
-PHP_FUNCTION(get_headers);
-
 #define PHP_URL_SCHEME 0
 #define PHP_URL_HOST 1
 #define PHP_URL_PORT 2

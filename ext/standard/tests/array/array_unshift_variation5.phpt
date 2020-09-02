@@ -4,11 +4,6 @@ Test array_unshift() function : usage variations - assoc. array with diff values
 precision=12
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unshift() by passing different
  * associative arrays having different possible values to $array argument.

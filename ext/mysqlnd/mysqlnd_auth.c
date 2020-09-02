@@ -507,7 +507,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		conn->password.s = tmp;
 
 		if (conn->last_message.s) {
-			mnd_pefree(conn->last_message.s, conn->persistent);
+			mnd_efree(conn->last_message.s);
 			conn->last_message.s = NULL;
 		}
 		UPSERT_STATUS_RESET(conn->upsert_status);
@@ -752,7 +752,7 @@ static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 {
 	BCRYPT_KEY_HANDLE ret = 0;
-	LPCSTR der_buf = NULL;
+	LPSTR der_buf = NULL;
 	DWORD der_len;
 	CERT_PUBLIC_KEY_INFO *key_info = NULL;
 	DWORD key_info_len;

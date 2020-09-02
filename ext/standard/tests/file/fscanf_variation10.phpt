@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - float formats with resource
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan resource type using different float format types */
 
 $file_path = __DIR__;
@@ -82,7 +77,7 @@ $file_path = __DIR__;
 $filename = "$file_path/fscanf_variation10.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): different float format types with resource ***
 
 -- iteration 1 --

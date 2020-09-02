@@ -10,28 +10,28 @@ $rc = new ReflectionClass('A');
 
 echo "\n\nTest bad arguments:\n";
 try {
-    var_dump($rc->isSubclassOf());
-} catch (TypeError $e) {
+    $rc->isSubclassOf();
+} catch (ArgumentCountError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
-    var_dump($rc->isSubclassOf('C', 'C'));
-} catch (TypeError $e) {
+    $rc->isSubclassOf('C', 'C');
+} catch (ArgumentCountError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
-    var_dump($rc->isSubclassOf(null));
-} catch (Exception $e) {
+    $rc->isSubclassOf(null);
+} catch (ReflectionException $e) {
     echo $e->getMessage() . "\n";
 }
 try {
-    var_dump($rc->isSubclassOf('ThisClassDoesNotExist'));
-} catch (Exception $e) {
+    $rc->isSubclassOf('ThisClassDoesNotExist');
+} catch (ReflectionException $e) {
     echo $e->getMessage() . "\n";
 }
 try {
-    var_dump($rc->isSubclassOf(2));
-} catch (Exception $e) {
+    $rc->isSubclassOf(2);
+} catch (ReflectionException $e) {
     echo $e->getMessage() . "\n";
 }
 ?>
@@ -39,6 +39,6 @@ try {
 Test bad arguments:
 ReflectionClass::isSubclassOf() expects exactly 1 parameter, 0 given
 ReflectionClass::isSubclassOf() expects exactly 1 parameter, 2 given
-ReflectionClass::isSubclassOf(): Argument #1 ($class) must be of type ReflectionClass|string, null given
-Class ThisClassDoesNotExist does not exist
-ReflectionClass::isSubclassOf(): Argument #1 ($class) must be of type ReflectionClass|string, int given
+Class "" does not exist
+Class "ThisClassDoesNotExist" does not exist
+Class "2" does not exist

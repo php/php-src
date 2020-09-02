@@ -3,11 +3,6 @@ Test fgetcsv() : usage variations - with default enclosure, file pointer pointin
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
-/*
    Testing fgetcsv() to read a file whose file pointer is pointing to end of file
    and fgetcsv() provided with default enclosure argument
 */

@@ -67,6 +67,7 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
     }
 
     print "done!";
+?>
 --EXPECT--
 my_mysqli object is already closed
 my_mysqli object is already closed

@@ -2,11 +2,6 @@
 Test array_map() function : object functionality - with non-existent class and method
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Testing array_map() for following object functionalities:
  *   1) non-existent class
@@ -44,7 +39,7 @@ echo "Done";
 --EXPECT--
 *** Testing array_map() :  with non-existent class and method ***
 -- with non-existent class --
-array_map(): Argument #1 ($callback) must be a valid callback, class 'non-existent' not found
+array_map(): Argument #1 ($callback) must be a valid callback, class "non-existent" not found
 -- with existent class and non-existent method --
-array_map(): Argument #1 ($callback) must be a valid callback, class 'SimpleClass' does not have a method 'non-existent'
+array_map(): Argument #1 ($callback) must be a valid callback, class SimpleClass does not have a method "non-existent"
 Done

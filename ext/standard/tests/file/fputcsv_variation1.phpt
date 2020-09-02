@@ -2,11 +2,6 @@
 Test fputcsv() : usage variations - with all parameters specified
 --FILE--
 <?php
-/*
- Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
- Description: Format line as CSV and write to the file pointer
-*/
-
 /* Testing fputcsv() to write to a file when all its parameters are provided */
 
 echo "*** Testing fputcsv() : with all parameters specified ***\n";

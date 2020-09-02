@@ -10,6 +10,7 @@ echo hash('sha224', '01234567890123456789012345678901234567890123456789012345678
 echo hash('sha224', 'abc') . "\n";
 echo hash('sha224', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq') . "\n";
 echo hash('sha224', str_repeat('a', 1000000)) . "\n";
+?>
 --EXPECT--
 d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f
 abd37534c7d9a2efb9465de931cd7055ffdb8879563ae98078d6d6d5

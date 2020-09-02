@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - unexpected values for $arr2 argument
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Passing non array values to 'arr2' argument of array_merge_recursive() and see
  * that the function outputs proper warning messages wherever expected.
@@ -151,5 +146,5 @@ echo "Done";
 
 -- Iteration 23 --array_merge_recursive(): Argument #2 must be of type array, resource given
 
--- Iteration 24 --array_merge_recursive(): Argument #2 must be of type array, object given
+-- Iteration 24 --array_merge_recursive(): Argument #2 must be of type array, A given
 Done

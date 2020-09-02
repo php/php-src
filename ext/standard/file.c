@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <wchar.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -109,10 +110,6 @@ php_file_globals file_globals;
 # include <fnmatch.h>
 #endif
 
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
-#endif
-
 /* }}} */
 
 #define PHP_STREAM_TO_ZVAL(stream, arg) \
@@ -130,8 +127,7 @@ PHPAPI int php_le_stream_context(void)
 }
 /* }}} */
 
-/* {{{ Module-Stuff
-*/
+/* {{{ Module-Stuff */
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 {
 	php_stream_context *context = (php_stream_context*)res->ptr;
@@ -161,7 +157,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateString, user_agent, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateString, from_address, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("default_socket_timeout", "60", PHP_INI_ALL, OnUpdateLong, default_socket_timeout, php_file_globals, file_globals)
-	STD_PHP_INI_ENTRY("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateBool, auto_detect_line_endings, php_file_globals, file_globals)
+	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateBool, auto_detect_line_endings, php_file_globals, file_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
@@ -331,8 +327,7 @@ PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
-/* {{{ proto bool flock(resource fp, int operation [, int &wouldblock])
-   Portable file locking */
+/* {{{ Portable file locking */
 PHP_FUNCTION(flock)
 {
 	zval *res, *wouldblock = NULL;
@@ -351,7 +346,7 @@ PHP_FUNCTION(flock)
 
 	act = operation & 3;
 	if (act < 1 || act > 3) {
-		zend_value_error("Illegal operation argument");
+		zend_argument_value_error(2, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
 		RETURN_THROWS();
 	}
 
@@ -373,8 +368,7 @@ PHP_FUNCTION(flock)
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
-/* {{{ proto array|false get_meta_tags(string filename [, bool use_include_path])
-   Extracts all meta tag content attributes from a file and returns an array */
+/* {{{ Extracts all meta tag content attributes from a file and returns an array */
 PHP_FUNCTION(get_meta_tags)
 {
 	char *filename;
@@ -518,8 +512,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 /* }}} */
 
-/* {{{ proto string|false file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
-   Read the entire file into a string */
+/* {{{ Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
@@ -527,7 +520,8 @@ PHP_FUNCTION(file_get_contents)
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = 0;
-	zend_long maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
+	zend_long maxlen;
+	zend_bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
@@ -537,12 +531,14 @@ PHP_FUNCTION(file_get_contents)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 		Z_PARAM_LONG(offset)
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
+	if (maxlen_is_null) {
+		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
+	} else if (maxlen < 0) {
 		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
@@ -576,8 +572,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int|false file_put_contents(string file, mixed data [, int flags [, resource context]])
-   Write/Create a file with contents data and return the number of bytes written */
+/* {{{ Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
 	php_stream *stream;
@@ -596,7 +591,7 @@ PHP_FUNCTION(file_put_contents)
 		Z_PARAM_ZVAL(data)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(data) == IS_RESOURCE) {
@@ -624,7 +619,7 @@ PHP_FUNCTION(file_put_contents)
 		RETURN_FALSE;
 	}
 
-	if (flags & LOCK_EX && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
+	if ((flags & LOCK_EX) && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
 		php_stream_close(stream);
 		php_error_docref(NULL, E_WARNING, "Exclusive locks are not supported for this stream");
 		RETURN_FALSE;
@@ -658,7 +653,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
-				if (numbytes != Z_STRLEN_P(data)) {
+				if (numbytes != -1 && numbytes != Z_STRLEN_P(data)) {
 					php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
@@ -694,7 +689,7 @@ PHP_FUNCTION(file_put_contents)
 
 				if (zend_std_cast_object_tostring(Z_OBJ_P(data), &out, IS_STRING) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
-					if (numbytes != Z_STRLEN(out)) {
+					if (numbytes != -1 && numbytes != Z_STRLEN(out)) {
 						php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
@@ -718,8 +713,7 @@ PHP_FUNCTION(file_put_contents)
 
 #define PHP_FILE_BUF_SIZE	80
 
-/* {{{ proto array|false file(string filename [, int flags[, resource context]])
-   Read entire file into an array */
+/* {{{ Read entire file into an array */
 PHP_FUNCTION(file)
 {
 	char *filename;
@@ -741,11 +735,11 @@ PHP_FUNCTION(file)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		zend_value_error("'" ZEND_LONG_FMT "' flag is not supported", flags);
+		zend_argument_value_error(2, "must be a valid flag value");
 		RETURN_THROWS();
 	}
 
@@ -814,8 +808,7 @@ parse_eol:
 }
 /* }}} */
 
-/* {{{ proto string|false tempnam(string dir, string prefix)
-   Create a unique filename in a directory */
+/* {{{ Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
 	char *dir, *prefix;
@@ -848,8 +841,7 @@ PHP_FUNCTION(tempnam)
 }
 /* }}} */
 
-/* {{{ proto resource tmpfile(void)
-   Create a temporary file that will be deleted automatically after use */
+/* {{{ Create a temporary file that will be deleted automatically after use */
 PHP_FUNCTION(tmpfile)
 {
 	php_stream *stream;
@@ -866,8 +858,7 @@ PHP_FUNCTION(tmpfile)
 }
 /* }}} */
 
-/* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
-   Open a file or a URL and return a file pointer */
+/* {{{ Open a file or a URL and return a file pointer */
 PHP_FUNCTION(fopen)
 {
 	char *filename, *mode;
@@ -882,7 +873,7 @@ PHP_FUNCTION(fopen)
 		Z_PARAM_STRING(mode, mode_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -897,8 +888,7 @@ PHP_FUNCTION(fopen)
 }
 /* }}} */
 
-/* {{{ proto bool fclose(resource fp)
-   Close an open file pointer */
+/* {{{ Close an open file pointer */
 PHPAPI PHP_FUNCTION(fclose)
 {
 	zval *res;
@@ -923,8 +913,7 @@ PHPAPI PHP_FUNCTION(fclose)
 }
 /* }}} */
 
-/* {{{ proto resource|false popen(string command, string mode)
-   Execute a command and open either a read or a write pipe to it */
+/* {{{ Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
 {
 	char *command, *mode;
@@ -944,7 +933,15 @@ PHP_FUNCTION(popen)
 		char *z = memchr(posix_mode, 'b', mode_len);
 		if (z) {
 			memmove(z, z + 1, mode_len - (z - posix_mode));
+			mode_len--;
 		}
+	}
+
+	/* Musl only partially validates the mode. Manually check it to ensure consistent behavior. */
+	if (mode_len != 1 || (*posix_mode != 'r' && *posix_mode != 'w')) {
+		php_error_docref2(NULL, command, posix_mode, E_WARNING, "Invalid mode");
+		efree(posix_mode);
+		RETURN_FALSE;
 	}
 #endif
 
@@ -968,8 +965,7 @@ PHP_FUNCTION(popen)
 }
 /* }}} */
 
-/* {{{ proto int pclose(resource fp)
-   Close a file pointer opened by popen() */
+/* {{{ Close a file pointer opened by popen() */
 PHP_FUNCTION(pclose)
 {
 	zval *res;
@@ -988,8 +984,7 @@ PHP_FUNCTION(pclose)
 }
 /* }}} */
 
-/* {{{ proto bool feof(resource fp)
-   Test for end-of-file on a file pointer */
+/* {{{ Test for end-of-file on a file pointer */
 PHPAPI PHP_FUNCTION(feof)
 {
 	zval *res;
@@ -1009,8 +1004,7 @@ PHPAPI PHP_FUNCTION(feof)
 }
 /* }}} */
 
-/* {{{ proto string fgets(resource fp[, int length])
-   Get a line from file pointer */
+/* {{{ Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *res;
@@ -1061,8 +1055,7 @@ PHPAPI PHP_FUNCTION(fgets)
 }
 /* }}} */
 
-/* {{{ proto string fgetc(resource fp)
-   Get a character from file pointer */
+/* {{{ Get a character from file pointer */
 PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval *res;
@@ -1089,8 +1082,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 }
 /* }}} */
 
-/* {{{ proto mixed fscanf(resource stream, string format [, string ...])
-   Implements a mostly ANSI compatible fscanf() */
+/* {{{ Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
 	int result, argc = 0;
@@ -1131,8 +1123,7 @@ PHP_FUNCTION(fscanf)
 }
 /* }}} */
 
-/* {{{ proto int|false fwrite(resource fp, string str [, int length])
-   Binary-safe file write */
+/* {{{ Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
 {
 	zval *res;
@@ -1173,8 +1164,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 }
 /* }}} */
 
-/* {{{ proto bool fflush(resource fp)
-   Flushes output */
+/* {{{ Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
 {
 	zval *res;
@@ -1195,8 +1185,7 @@ PHPAPI PHP_FUNCTION(fflush)
 }
 /* }}} */
 
-/* {{{ proto bool rewind(resource fp)
-   Rewind the position of a file pointer */
+/* {{{ Rewind the position of a file pointer */
 PHPAPI PHP_FUNCTION(rewind)
 {
 	zval *res;
@@ -1215,8 +1204,7 @@ PHPAPI PHP_FUNCTION(rewind)
 }
 /* }}} */
 
-/* {{{ proto int ftell(resource fp)
-   Get file pointer's read/write position */
+/* {{{ Get file pointer's read/write position */
 PHPAPI PHP_FUNCTION(ftell)
 {
 	zval *res;
@@ -1237,8 +1225,7 @@ PHPAPI PHP_FUNCTION(ftell)
 }
 /* }}} */
 
-/* {{{ proto int fseek(resource fp, int offset [, int whence])
-   Seek on a file pointer */
+/* {{{ Seek on a file pointer */
 PHPAPI PHP_FUNCTION(fseek)
 {
 	zval *res;
@@ -1258,8 +1245,7 @@ PHPAPI PHP_FUNCTION(fseek)
 }
 /* }}} */
 
-/* {{{ php_mkdir
-*/
+/* {{{ php_mkdir */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
 PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options)
@@ -1283,8 +1269,7 @@ PHPAPI int php_mkdir(const char *dir, zend_long mode)
 }
 /* }}} */
 
-/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
-   Create a directory */
+/* {{{ Create a directory */
 PHP_FUNCTION(mkdir)
 {
 	char *dir;
@@ -1299,7 +1284,7 @@ PHP_FUNCTION(mkdir)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(mode)
 		Z_PARAM_BOOL(recursive)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1308,8 +1293,7 @@ PHP_FUNCTION(mkdir)
 }
 /* }}} */
 
-/* {{{ proto bool rmdir(string dirname[, resource context])
-   Remove a directory */
+/* {{{ Remove a directory */
 PHP_FUNCTION(rmdir)
 {
 	char *dir;
@@ -1320,7 +1304,7 @@ PHP_FUNCTION(rmdir)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(dir, dir_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1329,8 +1313,7 @@ PHP_FUNCTION(rmdir)
 }
 /* }}} */
 
-/* {{{ proto int readfile(string filename [, bool use_include_path[, resource context]])
-   Output a file or a URL */
+/* {{{ Output a file or a URL */
 PHP_FUNCTION(readfile)
 {
 	char *filename;
@@ -1345,7 +1328,7 @@ PHP_FUNCTION(readfile)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1361,8 +1344,7 @@ PHP_FUNCTION(readfile)
 }
 /* }}} */
 
-/* {{{ proto int umask([int mask])
-   Return or change the umask */
+/* {{{ Return or change the umask */
 PHP_FUNCTION(umask)
 {
 	zend_long mask = 0;
@@ -1389,8 +1371,7 @@ PHP_FUNCTION(umask)
 }
 /* }}} */
 
-/* {{{ proto int fpassthru(resource fp)
-   Output all remaining data from a file pointer */
+/* {{{ Output all remaining data from a file pointer */
 PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval *res;
@@ -1408,8 +1389,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 }
 /* }}} */
 
-/* {{{ proto bool rename(string old_name, string new_name[, resource context])
-   Rename a file */
+/* {{{ Rename a file */
 PHP_FUNCTION(rename)
 {
 	char *old_name, *new_name;
@@ -1422,7 +1402,7 @@ PHP_FUNCTION(rename)
 		Z_PARAM_PATH(old_name, old_name_len)
 		Z_PARAM_PATH(new_name, new_name_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
@@ -1448,8 +1428,7 @@ PHP_FUNCTION(rename)
 }
 /* }}} */
 
-/* {{{ proto bool unlink(string filename[, context context])
-   Delete a file */
+/* {{{ Delete a file */
 PHP_FUNCTION(unlink)
 {
 	char *filename;
@@ -1461,7 +1440,7 @@ PHP_FUNCTION(unlink)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1481,8 +1460,7 @@ PHP_FUNCTION(unlink)
 }
 /* }}} */
 
-/* {{{ proto bool ftruncate(resource fp, int size)
-   Truncate file to 'size' length */
+/* {{{ Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)
 {
 	zval *fp;
@@ -1495,7 +1473,7 @@ PHP_FUNCTION(ftruncate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 0) {
-		zend_value_error("Negative size is not supported");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1510,8 +1488,7 @@ PHP_FUNCTION(ftruncate)
 }
 /* }}} */
 
-/* {{{ proto array fstat(resource fp)
-   Stat() on a filehandle */
+/* {{{ Stat() on a filehandle */
 PHP_FUNCTION(fstat)
 {
 	zval *fp;
@@ -1593,8 +1570,7 @@ PHP_FUNCTION(fstat)
 }
 /* }}} */
 
-/* {{{ proto bool copy(string source_file, string destination_file [, resource context])
-   Copy a file */
+/* {{{ Copy a file */
 PHP_FUNCTION(copy)
 {
 	char *source, *target;
@@ -1606,10 +1582,10 @@ PHP_FUNCTION(copy)
 		Z_PARAM_PATH(source, source_len)
 		Z_PARAM_PATH(target, target_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(source)) {
+	if (php_stream_locate_url_wrapper(source, NULL, 0) == &php_plain_files_wrapper && php_check_open_basedir(source)) {
 		RETURN_FALSE;
 	}
 
@@ -1623,24 +1599,21 @@ PHP_FUNCTION(copy)
 }
 /* }}} */
 
-/* {{{ php_copy_file
- */
+/* {{{ php_copy_file */
 PHPAPI int php_copy_file(const char *src, const char *dest)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL);
 }
 /* }}} */
 
-/* {{{ php_copy_file_ex
- */
+/* {{{ php_copy_file_ex */
 PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg)
 {
 	return php_copy_file_ctx(src, dest, src_flg, NULL);
 }
 /* }}} */
 
-/* {{{ php_copy_file_ctx
- */
+/* {{{ php_copy_file_ctx */
 PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
@@ -1733,8 +1706,7 @@ safe_to_copy:
 }
 /* }}} */
 
-/* {{{ proto string|false fread(resource fp, int length)
-   Binary-safe file read */
+/* {{{ Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
 {
 	zval *res;
@@ -1804,8 +1776,7 @@ quit_loop:
 
 #define FPUTCSV_FLD_CHK(c) memchr(ZSTR_VAL(field_str), c, ZSTR_LEN(field_str))
 
-/* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure [, string escape_char]]])
-   Format line as CSV and write to file pointer */
+/* {{{ Format line as CSV and write to file pointer */
 PHP_FUNCTION(fputcsv)
 {
 	char delimiter = ',';					/* allow this to be set as parameter */
@@ -1933,8 +1904,7 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 }
 /* }}} */
 
-/* {{{ proto array|false fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
-   Get line from file pointer and parse for CSV fields */
+/* {{{ Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
@@ -1947,7 +1917,8 @@ PHP_FUNCTION(fgetcsv)
 	php_stream *stream;
 
 	{
-		zval *fd, *len_zv = NULL;
+		zval *fd;
+		zend_bool len_is_null = 1;
 		char *delimiter_str = NULL;
 		size_t delimiter_str_len = 0;
 		char *enclosure_str = NULL;
@@ -1958,7 +1929,7 @@ PHP_FUNCTION(fgetcsv)
 		ZEND_PARSE_PARAMETERS_START(1, 5)
 			Z_PARAM_RESOURCE(fd)
 			Z_PARAM_OPTIONAL
-			Z_PARAM_ZVAL(len_zv)
+			Z_PARAM_LONG_OR_NULL(len, len_is_null)
 			Z_PARAM_STRING(delimiter_str, delimiter_str_len)
 			Z_PARAM_STRING(enclosure_str, enclosure_str_len)
 			Z_PARAM_STRING(escape_str, escape_str_len)
@@ -2001,16 +1972,11 @@ PHP_FUNCTION(fgetcsv)
 			}
 		}
 
-		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
-			len = zval_get_long(len_zv);
-			if (len < 0) {
-				zend_argument_value_error(2, "must be a greater than or equal to 0");
-				RETURN_THROWS();
-			} else if (len == 0) {
-				len = -1;
-			}
-		} else {
+		if (len_is_null || len == 0) {
 			len = -1;
+		} else if (len < 0) {
+			zend_argument_value_error(2, "must be a greater than or equal to 0");
+			RETURN_THROWS();
 		}
 
 		PHP_STREAM_TO_ZVAL(stream, fd);
@@ -2293,9 +2259,7 @@ out:
 }
 /* }}} */
 
-#if HAVE_REALPATH || defined(ZTS)
-/* {{{ proto string|false realpath(string path)
-   Return the resolved path */
+/* {{{ Return the resolved path */
 PHP_FUNCTION(realpath)
 {
 	char *filename;
@@ -2322,7 +2286,6 @@ PHP_FUNCTION(realpath)
 	}
 }
 /* }}} */
-#endif
 
 /* See http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2 */
 #define PHP_META_HTML401_CHARS "-_.:"
@@ -2432,8 +2395,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 /* }}} */
 
 #ifdef HAVE_FNMATCH
-/* {{{ proto bool fnmatch(string pattern, string filename [, int flags])
-   Match filename against pattern */
+/* {{{ Match filename against pattern */
 PHP_FUNCTION(fnmatch)
 {
 	char *pattern, *filename;
@@ -2461,8 +2423,7 @@ PHP_FUNCTION(fnmatch)
 /* }}} */
 #endif
 
-/* {{{ proto string sys_get_temp_dir()
-   Returns directory path used for temporary files */
+/* {{{ Returns directory path used for temporary files */
 PHP_FUNCTION(sys_get_temp_dir)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

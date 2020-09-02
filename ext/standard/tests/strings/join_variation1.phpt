@@ -2,12 +2,6 @@
 Test join() function : usage variations - unexpected values for 'glue' argument
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
- * Source code: ext/standard/string.c
- * Alias of function: implode()
-*/
-
 /*
  * testing join() by passing different unexpected value for glue argument
 */

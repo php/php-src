@@ -33,7 +33,6 @@
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/php_mt_rand.h"
-#include "basic_functions_arginfo.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -107,8 +106,7 @@ PHPAPI php_basic_globals basic_globals;
 
 #include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
-
-static zend_class_entry *incomplete_class_entry = NULL;
+#include "basic_functions_arginfo.h"
 
 typedef struct _user_tick_function_entry {
 	zval *arguments;
@@ -119,713 +117,6 @@ typedef struct _user_tick_function_entry {
 /* some prototypes for local functions */
 static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
-
-/* {{{ arginfo */
-
-static const zend_function_entry basic_functions[] = { /* {{{ */
-	PHP_FE(constant,														arginfo_constant)
-	PHP_FE(bin2hex,															arginfo_bin2hex)
-	PHP_FE(hex2bin,															arginfo_hex2bin)
-	PHP_FE(sleep,															arginfo_sleep)
-	PHP_FE(usleep,															arginfo_usleep)
-#if HAVE_NANOSLEEP
-	PHP_FE(time_nanosleep,													arginfo_time_nanosleep)
-	PHP_FE(time_sleep_until,												arginfo_time_sleep_until)
-#endif
-
-#if HAVE_STRPTIME
-	PHP_FE(strptime,														arginfo_strptime)
-#endif
-
-	PHP_FE(flush,															arginfo_flush)
-	PHP_FE(wordwrap,														arginfo_wordwrap)
-	PHP_FE(htmlspecialchars,												arginfo_htmlspecialchars)
-	PHP_FE(htmlentities,													arginfo_htmlentities)
-	PHP_FE(html_entity_decode,												arginfo_html_entity_decode)
-	PHP_FE(htmlspecialchars_decode,											arginfo_htmlspecialchars_decode)
-	PHP_FE(get_html_translation_table,										arginfo_get_html_translation_table)
-	PHP_FE(sha1,															arginfo_sha1)
-	PHP_FE(sha1_file,														arginfo_sha1_file)
-	PHP_FE(md5,																arginfo_md5)
-	PHP_FE(md5_file,														arginfo_md5_file)
-	PHP_FE(crc32,															arginfo_crc32)
-
-	PHP_FE(iptcparse,														arginfo_iptcparse)
-	PHP_FE(iptcembed,														arginfo_iptcembed)
-	PHP_FE(getimagesize,													arginfo_getimagesize)
-	PHP_FE(getimagesizefromstring,											arginfo_getimagesizefromstring)
-	PHP_FE(image_type_to_mime_type,											arginfo_image_type_to_mime_type)
-	PHP_FE(image_type_to_extension,											arginfo_image_type_to_extension)
-
-	PHP_FE(phpinfo,															arginfo_phpinfo)
-	PHP_FE(phpversion,														arginfo_phpversion)
-	PHP_FE(phpcredits,														arginfo_phpcredits)
-	PHP_FE(php_sapi_name,													arginfo_php_sapi_name)
-	PHP_FE(php_uname,														arginfo_php_uname)
-	PHP_FE(php_ini_scanned_files,											arginfo_php_ini_scanned_files)
-	PHP_FE(php_ini_loaded_file,												arginfo_php_ini_loaded_file)
-
-	PHP_FE(strnatcmp,														arginfo_strnatcmp)
-	PHP_FE(strnatcasecmp,													arginfo_strnatcasecmp)
-	PHP_FE(substr_count,													arginfo_substr_count)
-	PHP_FE(strspn,															arginfo_strspn)
-	PHP_FE(strcspn,															arginfo_strcspn)
-	PHP_FE(strtok,															arginfo_strtok)
-	PHP_FE(strtoupper,														arginfo_strtoupper)
-	PHP_FE(strtolower,														arginfo_strtolower)
-	PHP_FE(str_contains,													arginfo_str_contains)
-	PHP_FE(strpos,															arginfo_strpos)
-	PHP_FE(stripos,															arginfo_stripos)
-	PHP_FE(strrpos,															arginfo_strrpos)
-	PHP_FE(strripos,														arginfo_strripos)
-	PHP_FE(strrev,															arginfo_strrev)
-	PHP_FE(hebrev,															arginfo_hebrev)
-	PHP_FE(nl2br,															arginfo_nl2br)
-	PHP_FE(basename,														arginfo_basename)
-	PHP_FE(dirname,															arginfo_dirname)
-	PHP_FE(pathinfo,														arginfo_pathinfo)
-	PHP_FE(stripslashes,													arginfo_stripslashes)
-	PHP_FE(stripcslashes,													arginfo_stripcslashes)
-	PHP_FE(strstr,															arginfo_strstr)
-	PHP_FE(stristr,															arginfo_stristr)
-	PHP_FE(strrchr,															arginfo_strrchr)
-	PHP_FE(str_shuffle,														arginfo_str_shuffle)
-	PHP_FE(str_word_count,													arginfo_str_word_count)
-	PHP_FE(str_split,														arginfo_str_split)
-	PHP_FE(strpbrk,															arginfo_strpbrk)
-	PHP_FE(substr_compare,													arginfo_substr_compare)
-	PHP_FE(utf8_encode, 													arginfo_utf8_encode)
-	PHP_FE(utf8_decode, 													arginfo_utf8_decode)
-	PHP_FE(strcoll,															arginfo_strcoll)
-
-	PHP_FE(substr,															arginfo_substr)
-	PHP_FE(substr_replace,													arginfo_substr_replace)
-	PHP_FE(quotemeta,														arginfo_quotemeta)
-	PHP_FE(ucfirst,															arginfo_ucfirst)
-	PHP_FE(lcfirst,															arginfo_lcfirst)
-	PHP_FE(ucwords,															arginfo_ucwords)
-	PHP_FE(strtr,															arginfo_strtr)
-	PHP_FE(addslashes,														arginfo_addslashes)
-	PHP_FE(addcslashes,														arginfo_addcslashes)
-	PHP_FE(rtrim,															arginfo_rtrim)
-	PHP_FE(str_replace,														arginfo_str_replace)
-	PHP_FE(str_ireplace,													arginfo_str_ireplace)
-	PHP_FE(str_repeat,														arginfo_str_repeat)
-	PHP_FE(count_chars,														arginfo_count_chars)
-	PHP_FE(chunk_split,														arginfo_chunk_split)
-	PHP_FE(trim,															arginfo_trim)
-	PHP_FE(ltrim,															arginfo_ltrim)
-	PHP_FE(strip_tags,														arginfo_strip_tags)
-	PHP_FE(similar_text,													arginfo_similar_text)
-	PHP_FE(explode,															arginfo_explode)
-	PHP_FE(implode,															arginfo_implode)
-	PHP_FALIAS(join,				implode,								arginfo_join)
-	PHP_FE(setlocale,														arginfo_setlocale)
-	PHP_FE(localeconv,														arginfo_localeconv)
-
-#if HAVE_NL_LANGINFO
-	PHP_FE(nl_langinfo,														arginfo_nl_langinfo)
-#endif
-
-	PHP_FE(soundex,															arginfo_soundex)
-	PHP_FE(levenshtein,														arginfo_levenshtein)
-	PHP_FE(chr,																arginfo_chr)
-	PHP_FE(ord,																arginfo_ord)
-	PHP_FE(parse_str,														arginfo_parse_str)
-	PHP_FE(str_getcsv,														arginfo_str_getcsv)
-	PHP_FE(str_pad,															arginfo_str_pad)
-	PHP_FALIAS(chop,				rtrim,									arginfo_chop)
-	PHP_FALIAS(strchr,				strstr,									arginfo_strchr)
-	PHP_FE(sprintf,															arginfo_sprintf)
-	PHP_FE(printf,															arginfo_printf)
-	PHP_FE(vprintf,															arginfo_vprintf)
-	PHP_FE(vsprintf,														arginfo_vsprintf)
-	PHP_FE(fprintf,															arginfo_fprintf)
-	PHP_FE(vfprintf,														arginfo_vfprintf)
-	PHP_FE(sscanf,															arginfo_sscanf)
-	PHP_FE(fscanf,															arginfo_fscanf)
-	PHP_FE(parse_url,														arginfo_parse_url)
-	PHP_FE(urlencode,														arginfo_urlencode)
-	PHP_FE(urldecode,														arginfo_urldecode)
-	PHP_FE(rawurlencode,													arginfo_rawurlencode)
-	PHP_FE(rawurldecode,													arginfo_rawurldecode)
-	PHP_FE(http_build_query,												arginfo_http_build_query)
-
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
-	PHP_FE(readlink,														arginfo_readlink)
-	PHP_FE(linkinfo,														arginfo_linkinfo)
-	PHP_FE(symlink,															arginfo_symlink)
-	PHP_FE(link,															arginfo_link)
-#endif
-
-	PHP_FE(unlink,															arginfo_unlink)
-	PHP_FE(exec,															arginfo_exec)
-	PHP_FE(system,															arginfo_system)
-	PHP_FE(escapeshellcmd,													arginfo_escapeshellcmd)
-	PHP_FE(escapeshellarg,													arginfo_escapeshellarg)
-	PHP_FE(passthru,														arginfo_passthru)
-	PHP_FE(shell_exec,														arginfo_shell_exec)
-#ifdef PHP_CAN_SUPPORT_PROC_OPEN
-	PHP_FE(proc_open,														arginfo_proc_open)
-	PHP_FE(proc_close,														arginfo_proc_close)
-	PHP_FE(proc_terminate,													arginfo_proc_terminate)
-	PHP_FE(proc_get_status,													arginfo_proc_get_status)
-#endif
-
-#ifdef HAVE_NICE
-	PHP_FE(proc_nice,														arginfo_proc_nice)
-#endif
-
-	PHP_FE(rand,															arginfo_rand)
-	PHP_FALIAS(srand, mt_srand,												arginfo_srand)
-	PHP_FALIAS(getrandmax, mt_getrandmax,									arginfo_getrandmax)
-	PHP_FE(mt_rand,															arginfo_mt_rand)
-	PHP_FE(mt_srand,														arginfo_mt_srand)
-	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
-
-	PHP_FE(random_bytes,													arginfo_random_bytes)
-	PHP_FE(random_int,													arginfo_random_int)
-
-#if HAVE_GETSERVBYNAME
-	PHP_FE(getservbyname,													arginfo_getservbyname)
-#endif
-
-#if HAVE_GETSERVBYPORT
-	PHP_FE(getservbyport,													arginfo_getservbyport)
-#endif
-
-#if HAVE_GETPROTOBYNAME
-	PHP_FE(getprotobyname,													arginfo_getprotobyname)
-#endif
-
-#if HAVE_GETPROTOBYNUMBER
-	PHP_FE(getprotobynumber,												arginfo_getprotobynumber)
-#endif
-
-	PHP_FE(getmyuid,														arginfo_getmyuid)
-	PHP_FE(getmygid,														arginfo_getmygid)
-	PHP_FE(getmypid,														arginfo_getmypid)
-	PHP_FE(getmyinode,														arginfo_getmyinode)
-	PHP_FE(getlastmod,														arginfo_getlastmod)
-
-	PHP_FE(base64_decode,													arginfo_base64_decode)
-	PHP_FE(base64_encode,													arginfo_base64_encode)
-
-	PHP_FE(password_hash,													arginfo_password_hash)
-	PHP_FE(password_get_info,												arginfo_password_get_info)
-	PHP_FE(password_needs_rehash,											arginfo_password_needs_rehash)
-	PHP_FE(password_verify,													arginfo_password_verify)
-	PHP_FE(password_algos,													arginfo_password_algos)
-	PHP_FE(convert_uuencode,												arginfo_convert_uuencode)
-	PHP_FE(convert_uudecode,												arginfo_convert_uudecode)
-
-	PHP_FE(abs,																arginfo_abs)
-	PHP_FE(ceil,															arginfo_ceil)
-	PHP_FE(floor,															arginfo_floor)
-	PHP_FE(round,															arginfo_round)
-	PHP_FE(sin,																arginfo_sin)
-	PHP_FE(cos,																arginfo_cos)
-	PHP_FE(tan,																arginfo_tan)
-	PHP_FE(asin,															arginfo_asin)
-	PHP_FE(acos,															arginfo_acos)
-	PHP_FE(atan,															arginfo_atan)
-	PHP_FE(atanh,															arginfo_atanh)
-	PHP_FE(atan2,															arginfo_atan2)
-	PHP_FE(sinh,															arginfo_sinh)
-	PHP_FE(cosh,															arginfo_cosh)
-	PHP_FE(tanh,															arginfo_tanh)
-	PHP_FE(asinh,															arginfo_asinh)
-	PHP_FE(acosh,															arginfo_acosh)
-	PHP_FE(expm1,															arginfo_expm1)
-	PHP_FE(log1p,															arginfo_log1p)
-	PHP_FE(pi,																arginfo_pi)
-	PHP_FE(is_finite,														arginfo_is_finite)
-	PHP_FE(is_nan,															arginfo_is_nan)
-	PHP_FE(is_infinite,														arginfo_is_infinite)
-	PHP_FE(pow,																arginfo_pow)
-	PHP_FE(exp,																arginfo_exp)
-	PHP_FE(log,																arginfo_log)
-	PHP_FE(log10,															arginfo_log10)
-	PHP_FE(sqrt,															arginfo_sqrt)
-	PHP_FE(hypot,															arginfo_hypot)
-	PHP_FE(deg2rad,															arginfo_deg2rad)
-	PHP_FE(rad2deg,															arginfo_rad2deg)
-	PHP_FE(bindec,															arginfo_bindec)
-	PHP_FE(hexdec,															arginfo_hexdec)
-	PHP_FE(octdec,															arginfo_octdec)
-	PHP_FE(decbin,															arginfo_decbin)
-	PHP_FE(decoct,															arginfo_decoct)
-	PHP_FE(dechex,															arginfo_dechex)
-	PHP_FE(base_convert,													arginfo_base_convert)
-	PHP_FE(number_format,													arginfo_number_format)
-	PHP_FE(fmod,															arginfo_fmod)
-	PHP_FE(fdiv,															arginfo_fdiv)
-	PHP_FE(intdiv,															arginfo_intdiv)
-#ifdef HAVE_INET_NTOP
-	PHP_FE(inet_ntop,														arginfo_inet_ntop)
-#endif
-#ifdef HAVE_INET_PTON
-	PHP_FE(inet_pton,														arginfo_inet_pton)
-#endif
-	PHP_FE(ip2long,															arginfo_ip2long)
-	PHP_FE(long2ip,															arginfo_long2ip)
-
-	PHP_FE(getenv,															arginfo_getenv)
-#ifdef HAVE_PUTENV
-	PHP_FE(putenv,															arginfo_putenv)
-#endif
-
-	PHP_FE(getopt,															arginfo_getopt)
-
-#ifdef HAVE_GETLOADAVG
-	PHP_FE(sys_getloadavg,													arginfo_sys_getloadavg)
-#endif
-#ifdef HAVE_GETTIMEOFDAY
-	PHP_FE(microtime,														arginfo_microtime)
-	PHP_FE(gettimeofday,													arginfo_gettimeofday)
-#endif
-
-#ifdef HAVE_GETRUSAGE
-	PHP_FE(getrusage,														arginfo_getrusage)
-#endif
-
-	PHP_FE(hrtime,															arginfo_hrtime)
-
-#ifdef HAVE_GETTIMEOFDAY
-	PHP_FE(uniqid,															arginfo_uniqid)
-#endif
-
-	PHP_FE(quoted_printable_decode,											arginfo_quoted_printable_decode)
-	PHP_FE(quoted_printable_encode,											arginfo_quoted_printable_encode)
-	PHP_FE(get_current_user,												arginfo_get_current_user)
-	PHP_FE(set_time_limit,													arginfo_set_time_limit)
-	PHP_FE(header_register_callback,										arginfo_header_register_callback)
-	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
-
-	PHP_FE(error_log,														arginfo_error_log)
-	PHP_FE(error_get_last,													arginfo_error_get_last)
-	PHP_FE(error_clear_last,													arginfo_error_clear_last)
-	PHP_FE(call_user_func,													arginfo_call_user_func)
-	PHP_FE(call_user_func_array,											arginfo_call_user_func_array)
-	PHP_FE(forward_static_call,											arginfo_forward_static_call)
-	PHP_FE(forward_static_call_array,										arginfo_forward_static_call_array)
-	PHP_FE(serialize,														arginfo_serialize)
-	PHP_FE(unserialize,														arginfo_unserialize)
-
-	PHP_FE(var_dump,														arginfo_var_dump)
-	PHP_FE(var_export,														arginfo_var_export)
-	PHP_FE(debug_zval_dump,													arginfo_debug_zval_dump)
-	PHP_FE(print_r,															arginfo_print_r)
-	PHP_FE(memory_get_usage,												arginfo_memory_get_usage)
-	PHP_FE(memory_get_peak_usage,											arginfo_memory_get_peak_usage)
-
-	PHP_FE(register_shutdown_function,										arginfo_register_shutdown_function)
-	PHP_FE(register_tick_function,											arginfo_register_tick_function)
-	PHP_FE(unregister_tick_function,										arginfo_unregister_tick_function)
-
-	PHP_FE(highlight_file,													arginfo_highlight_file)
-	PHP_FALIAS(show_source,			highlight_file,							arginfo_show_source)
-	PHP_FE(highlight_string,												arginfo_highlight_string)
-	PHP_FE(php_strip_whitespace,											arginfo_php_strip_whitespace)
-
-	PHP_FE(ini_get,															arginfo_ini_get)
-	PHP_FE(ini_get_all,														arginfo_ini_get_all)
-	PHP_FE(ini_set,															arginfo_ini_set)
-	PHP_FALIAS(ini_alter,			ini_set,								arginfo_ini_alter)
-	PHP_FE(ini_restore,														arginfo_ini_restore)
-	PHP_FE(get_include_path,												arginfo_get_include_path)
-	PHP_FE(set_include_path,												arginfo_set_include_path)
-
-	PHP_FE(setcookie,														arginfo_setcookie)
-	PHP_FE(setrawcookie,													arginfo_setrawcookie)
-	PHP_FE(header,															arginfo_header)
-	PHP_FE(header_remove,													arginfo_header_remove)
-	PHP_FE(headers_sent,													arginfo_headers_sent)
-	PHP_FE(headers_list,													arginfo_headers_list)
-	PHP_FE(http_response_code,												arginfo_http_response_code)
-
-	PHP_FE(connection_aborted,												arginfo_connection_aborted)
-	PHP_FE(connection_status,												arginfo_connection_status)
-	PHP_FE(ignore_user_abort,												arginfo_ignore_user_abort)
-	PHP_FE(parse_ini_file,													arginfo_parse_ini_file)
-	PHP_FE(parse_ini_string,												arginfo_parse_ini_string)
-#if ZEND_DEBUG
-	PHP_FE(config_get_hash,													arginfo_config_get_hash)
-#endif
-	PHP_FE(is_uploaded_file,												arginfo_is_uploaded_file)
-	PHP_FE(move_uploaded_file,												arginfo_move_uploaded_file)
-
-	/* functions from dns.c */
-	PHP_FE(gethostbyaddr,													arginfo_gethostbyaddr)
-	PHP_FE(gethostbyname,													arginfo_gethostbyname)
-	PHP_FE(gethostbynamel,													arginfo_gethostbynamel)
-
-#ifdef HAVE_GETHOSTNAME
-	PHP_FE(gethostname,													arginfo_gethostname)
-#endif
-
-#if defined(PHP_WIN32) || HAVE_GETIFADDRS
-	PHP_FE(net_get_interfaces,												arginfo_net_get_interfaces)
-#endif
-
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
-
-	PHP_FE(dns_check_record,												arginfo_dns_check_record)
-	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_checkdnsrr)
-
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
-	PHP_FE(dns_get_mx,														arginfo_dns_get_mx)
-	PHP_FALIAS(getmxrr,				dns_get_mx,					arginfo_getmxrr)
-	PHP_FE(dns_get_record,													arginfo_dns_get_record)
-# endif
-#endif
-
-	/* functions from type.c */
-	PHP_FE(intval,															arginfo_intval)
-	PHP_FE(floatval,														arginfo_floatval)
-	PHP_FALIAS(doubleval,			floatval,								arginfo_doubleval)
-	PHP_FE(strval,															arginfo_strval)
-	PHP_FE(boolval,															arginfo_boolval)
-	PHP_FE(gettype,															arginfo_gettype)
-	PHP_FE(settype,															arginfo_settype)
-	PHP_FE(is_null,															arginfo_is_null)
-	PHP_FE(is_resource,														arginfo_is_resource)
-	PHP_FE(is_bool,															arginfo_is_bool)
-	PHP_FE(is_int,															arginfo_is_int)
-	PHP_FE(is_float,														arginfo_is_float)
-	PHP_FALIAS(is_integer,			is_int,									arginfo_is_integer)
-	PHP_FALIAS(is_long,				is_int,									arginfo_is_long)
-	PHP_FALIAS(is_double,			is_float,								arginfo_is_double)
-	PHP_DEP_FALIAS(is_real,			is_float,								arginfo_is_real)
-	PHP_FE(is_numeric,														arginfo_is_numeric)
-	PHP_FE(is_string,														arginfo_is_string)
-	PHP_FE(is_array,														arginfo_is_array)
-	PHP_FE(is_object,														arginfo_is_object)
-	PHP_FE(is_scalar,														arginfo_is_scalar)
-	PHP_FE(is_callable,														arginfo_is_callable)
-	PHP_FE(is_iterable,														arginfo_is_iterable)
-	PHP_FE(is_countable,													arginfo_is_countable)
-
-	/* functions from file.c */
-	PHP_FE(pclose,															arginfo_pclose)
-	PHP_FE(popen,															arginfo_popen)
-	PHP_FE(readfile,														arginfo_readfile)
-	PHP_FE(rewind,															arginfo_rewind)
-	PHP_FE(rmdir,															arginfo_rmdir)
-	PHP_FE(umask,															arginfo_umask)
-	PHP_FE(fclose,															arginfo_fclose)
-	PHP_FE(feof,															arginfo_feof)
-	PHP_FE(fgetc,															arginfo_fgetc)
-	PHP_FE(fgets,															arginfo_fgets)
-	PHP_FE(fread,															arginfo_fread)
-	PHP_FE(fopen,															arginfo_fopen)
-	PHP_FE(fpassthru,														arginfo_fpassthru)
-	PHP_FE(ftruncate,														arginfo_ftruncate)
-	PHP_FE(fstat,															arginfo_fstat)
-	PHP_FE(fseek,															arginfo_fseek)
-	PHP_FE(ftell,															arginfo_ftell)
-	PHP_FE(fflush,															arginfo_fflush)
-	PHP_FE(fwrite,															arginfo_fwrite)
-	PHP_FALIAS(fputs,				fwrite,									arginfo_fputs)
-	PHP_FE(mkdir,															arginfo_mkdir)
-	PHP_FE(rename,															arginfo_rename)
-	PHP_FE(copy,															arginfo_copy)
-	PHP_FE(tempnam,															arginfo_tempnam)
-	PHP_FE(tmpfile,															arginfo_tmpfile)
-	PHP_FE(file,															arginfo_file)
-	PHP_FE(file_get_contents,												arginfo_file_get_contents)
-	PHP_FE(file_put_contents,												arginfo_file_put_contents)
-	PHP_FE(stream_select,													arginfo_stream_select)
-	PHP_FE(stream_context_create,											arginfo_stream_context_create)
-	PHP_FE(stream_context_set_params,										arginfo_stream_context_set_params)
-	PHP_FE(stream_context_get_params,										arginfo_stream_context_get_params)
-	PHP_FE(stream_context_set_option,										arginfo_stream_context_set_option)
-	PHP_FE(stream_context_get_options,										arginfo_stream_context_get_options)
-	PHP_FE(stream_context_get_default,										arginfo_stream_context_get_default)
-	PHP_FE(stream_context_set_default,										arginfo_stream_context_set_default)
-	PHP_FE(stream_filter_prepend,											arginfo_stream_filter_prepend)
-	PHP_FE(stream_filter_append,											arginfo_stream_filter_append)
-	PHP_FE(stream_filter_remove,											arginfo_stream_filter_remove)
-	PHP_FE(stream_socket_client,											arginfo_stream_socket_client)
-	PHP_FE(stream_socket_server,											arginfo_stream_socket_server)
-	PHP_FE(stream_socket_accept,											arginfo_stream_socket_accept)
-	PHP_FE(stream_socket_get_name,											arginfo_stream_socket_get_name)
-	PHP_FE(stream_socket_recvfrom,											arginfo_stream_socket_recvfrom)
-	PHP_FE(stream_socket_sendto,											arginfo_stream_socket_sendto)
-	PHP_FE(stream_socket_enable_crypto,										arginfo_stream_socket_enable_crypto)
-#ifdef HAVE_SHUTDOWN
-	PHP_FE(stream_socket_shutdown,											arginfo_stream_socket_shutdown)
-#endif
-#if HAVE_SOCKETPAIR
-	PHP_FE(stream_socket_pair,												arginfo_stream_socket_pair)
-#endif
-	PHP_FE(stream_copy_to_stream,											arginfo_stream_copy_to_stream)
-	PHP_FE(stream_get_contents,												arginfo_stream_get_contents)
-	PHP_FE(stream_supports_lock,											arginfo_stream_supports_lock)
-	PHP_FE(stream_isatty,													arginfo_stream_isatty)
-#ifdef PHP_WIN32
-	PHP_FE(sapi_windows_vt100_support,										arginfo_sapi_windows_vt100_support)
-#endif
-	PHP_FE(fgetcsv,															arginfo_fgetcsv)
-	PHP_FE(fputcsv,															arginfo_fputcsv)
-	PHP_FE(flock,															arginfo_flock)
-	PHP_FE(get_meta_tags,													arginfo_get_meta_tags)
-	PHP_FE(stream_set_read_buffer,											arginfo_stream_set_read_buffer)
-	PHP_FE(stream_set_write_buffer,											arginfo_stream_set_write_buffer)
-	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					arginfo_set_file_buffer)
-	PHP_FE(stream_set_chunk_size,											arginfo_stream_set_chunk_size)
-
-	PHP_FE(stream_set_blocking,												arginfo_stream_set_blocking)
-	PHP_FALIAS(socket_set_blocking, stream_set_blocking,					arginfo_socket_set_blocking)
-
-	PHP_FE(stream_get_meta_data,											arginfo_stream_get_meta_data)
-	PHP_FE(stream_get_line,													arginfo_stream_get_line)
-	PHP_FE(stream_wrapper_register,											arginfo_stream_wrapper_register)
-	PHP_FALIAS(stream_register_wrapper, stream_wrapper_register,			arginfo_stream_register_wrapper)
-	PHP_FE(stream_wrapper_unregister,										arginfo_stream_wrapper_unregister)
-	PHP_FE(stream_wrapper_restore,											arginfo_stream_wrapper_restore)
-	PHP_FE(stream_get_wrappers,												arginfo_stream_get_wrappers)
-	PHP_FE(stream_get_transports,											arginfo_stream_get_transports)
-	PHP_FE(stream_resolve_include_path,										arginfo_stream_resolve_include_path)
-	PHP_FE(stream_is_local,												arginfo_stream_is_local)
-	PHP_FE(get_headers,														arginfo_get_headers)
-
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
-	PHP_FE(stream_set_timeout,												arginfo_stream_set_timeout)
-	PHP_FALIAS(socket_set_timeout, stream_set_timeout,						arginfo_socket_set_timeout)
-#endif
-
-	PHP_FALIAS(socket_get_status, stream_get_meta_data,						arginfo_socket_get_status)
-
-#if HAVE_REALPATH || defined(ZTS)
-	PHP_FE(realpath,														arginfo_realpath)
-#endif
-
-#ifdef HAVE_FNMATCH
-	PHP_FE(fnmatch,															arginfo_fnmatch)
-#endif
-
-	/* functions from fsock.c */
-	PHP_FE(fsockopen,														arginfo_fsockopen)
-	PHP_FE(pfsockopen,														arginfo_pfsockopen)
-
-	/* functions from pack.c */
-	PHP_FE(pack,															arginfo_pack)
-	PHP_FE(unpack,															arginfo_unpack)
-
-	/* functions from browscap.c */
-	PHP_FE(get_browser,														arginfo_get_browser)
-
-	/* functions from crypt.c */
-	PHP_FE(crypt,															arginfo_crypt)
-
-	/* functions from dir.c */
-	PHP_FE(opendir,															arginfo_opendir)
-	PHP_FE(closedir,														arginfo_closedir)
-	PHP_FE(chdir,															arginfo_chdir)
-
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
-	PHP_FE(chroot,															arginfo_chroot)
-#endif
-
-	PHP_FE(getcwd,															arginfo_getcwd)
-	PHP_FE(rewinddir,														arginfo_rewinddir)
-	PHP_FE(readdir,															arginfo_readdir)
-	PHP_FALIAS(dir,					getdir,									arginfo_dir)
-	PHP_FE(scandir,															arginfo_scandir)
-#ifdef HAVE_GLOB
-	PHP_FE(glob,															arginfo_glob)
-#endif
-	/* functions from filestat.c */
-	PHP_FE(fileatime,														arginfo_fileatime)
-	PHP_FE(filectime,														arginfo_filectime)
-	PHP_FE(filegroup,														arginfo_filegroup)
-	PHP_FE(fileinode,														arginfo_fileinode)
-	PHP_FE(filemtime,														arginfo_filemtime)
-	PHP_FE(fileowner,														arginfo_fileowner)
-	PHP_FE(fileperms,														arginfo_fileperms)
-	PHP_FE(filesize,														arginfo_filesize)
-	PHP_FE(filetype,														arginfo_filetype)
-	PHP_FE(file_exists,														arginfo_file_exists)
-	PHP_FE(is_writable,														arginfo_is_writable)
-	PHP_FALIAS(is_writeable,		is_writable,							arginfo_is_writeable)
-	PHP_FE(is_readable,														arginfo_is_readable)
-	PHP_FE(is_executable,													arginfo_is_executable)
-	PHP_FE(is_file,															arginfo_is_file)
-	PHP_FE(is_dir,															arginfo_is_dir)
-	PHP_FE(is_link,															arginfo_is_link)
-	PHP_FE(stat,															arginfo_stat)
-	PHP_FE(lstat,															arginfo_lstat)
-	PHP_FE(chown,															arginfo_chown)
-	PHP_FE(chgrp,															arginfo_chgrp)
-#if HAVE_LCHOWN
-	PHP_FE(lchown,															arginfo_lchown)
-#endif
-#if HAVE_LCHOWN
-	PHP_FE(lchgrp,															arginfo_lchgrp)
-#endif
-	PHP_FE(chmod,															arginfo_chmod)
-#if HAVE_UTIME
-	PHP_FE(touch,															arginfo_touch)
-#endif
-	PHP_FE(clearstatcache,													arginfo_clearstatcache)
-	PHP_FE(disk_total_space,												arginfo_disk_total_space)
-	PHP_FE(disk_free_space,													arginfo_disk_free_space)
-	PHP_FALIAS(diskfreespace,		disk_free_space,						arginfo_diskfreespace)
-	PHP_FE(realpath_cache_size,												arginfo_realpath_cache_size)
-	PHP_FE(realpath_cache_get,												arginfo_realpath_cache_get)
-
-	/* functions from mail.c */
-	PHP_FE(mail,															arginfo_mail)
-
-	/* functions from syslog.c */
-#ifdef HAVE_SYSLOG_H
-	PHP_FE(openlog,															arginfo_openlog)
-	PHP_FE(syslog,															arginfo_syslog)
-	PHP_FE(closelog,														arginfo_closelog)
-#endif
-
-	/* functions from lcg.c */
-	PHP_FE(lcg_value,														arginfo_lcg_value)
-
-	/* functions from metaphone.c */
-	PHP_FE(metaphone,														arginfo_metaphone)
-
-	/* functions from output.c */
-	PHP_FE(ob_start,														arginfo_ob_start)
-	PHP_FE(ob_flush,														arginfo_ob_flush)
-	PHP_FE(ob_clean,														arginfo_ob_clean)
-	PHP_FE(ob_end_flush,													arginfo_ob_end_flush)
-	PHP_FE(ob_end_clean,													arginfo_ob_end_clean)
-	PHP_FE(ob_get_flush,													arginfo_ob_get_flush)
-	PHP_FE(ob_get_clean,													arginfo_ob_get_clean)
-	PHP_FE(ob_get_length,													arginfo_ob_get_length)
-	PHP_FE(ob_get_level,													arginfo_ob_get_level)
-	PHP_FE(ob_get_status,													arginfo_ob_get_status)
-	PHP_FE(ob_get_contents,													arginfo_ob_get_contents)
-	PHP_FE(ob_implicit_flush,												arginfo_ob_implicit_flush)
-	PHP_FE(ob_list_handlers,												arginfo_ob_list_handlers)
-
-	/* functions from array.c */
-	PHP_FE(ksort,															arginfo_ksort)
-	PHP_FE(krsort,															arginfo_krsort)
-	PHP_FE(natsort,															arginfo_natsort)
-	PHP_FE(natcasesort,														arginfo_natcasesort)
-	PHP_FE(asort,															arginfo_asort)
-	PHP_FE(arsort,															arginfo_arsort)
-	PHP_FE(sort,															arginfo_sort)
-	PHP_FE(rsort,															arginfo_rsort)
-	PHP_FE(usort,															arginfo_usort)
-	PHP_FE(uasort,															arginfo_uasort)
-	PHP_FE(uksort,															arginfo_uksort)
-	PHP_FE(shuffle,															arginfo_shuffle)
-	PHP_FE(array_walk,														arginfo_array_walk)
-	PHP_FE(array_walk_recursive,											arginfo_array_walk_recursive)
-	PHP_FE(count,															arginfo_count)
-	PHP_FE(end,																arginfo_end)
-	PHP_FE(prev,															arginfo_prev)
-	PHP_FE(next,															arginfo_next)
-	PHP_FE(reset,															arginfo_reset)
-	PHP_FE(current,															arginfo_current)
-	PHP_FE(key,																arginfo_key)
-	PHP_FE(min,																arginfo_min)
-	PHP_FE(max,																arginfo_max)
-	PHP_FE(in_array,														arginfo_in_array)
-	PHP_FE(array_search,													arginfo_array_search)
-	PHP_FE(extract,															arginfo_extract)
-	PHP_FE(compact,															arginfo_compact)
-	PHP_FE(array_fill,														arginfo_array_fill)
-	PHP_FE(array_fill_keys,													arginfo_array_fill_keys)
-	PHP_FE(range,															arginfo_range)
-	PHP_FE(array_multisort,													arginfo_array_multisort)
-	PHP_FE(array_push,														arginfo_array_push)
-	PHP_FE(array_pop,														arginfo_array_pop)
-	PHP_FE(array_shift,														arginfo_array_shift)
-	PHP_FE(array_unshift,													arginfo_array_unshift)
-	PHP_FE(array_splice,													arginfo_array_splice)
-	PHP_FE(array_slice,														arginfo_array_slice)
-	PHP_FE(array_merge,														arginfo_array_merge)
-	PHP_FE(array_merge_recursive,											arginfo_array_merge_recursive)
-	PHP_FE(array_replace,													arginfo_array_replace)
-	PHP_FE(array_replace_recursive,											arginfo_array_replace_recursive)
-	PHP_FE(array_keys,														arginfo_array_keys)
-	PHP_FE(array_key_first,													arginfo_array_key_first)
-	PHP_FE(array_key_last,													arginfo_array_key_last)
-	PHP_FE(array_values,													arginfo_array_values)
-	PHP_FE(array_count_values,												arginfo_array_count_values)
-	PHP_FE(array_column,													arginfo_array_column)
-	PHP_FE(array_reverse,													arginfo_array_reverse)
-	PHP_FE(array_reduce,													arginfo_array_reduce)
-	PHP_FE(array_pad,														arginfo_array_pad)
-	PHP_FE(array_flip,														arginfo_array_flip)
-	PHP_FE(array_change_key_case,											arginfo_array_change_key_case)
-	PHP_FE(array_rand,														arginfo_array_rand)
-	PHP_FE(array_unique,													arginfo_array_unique)
-	PHP_FE(array_intersect,													arginfo_array_intersect)
-	PHP_FE(array_intersect_key,												arginfo_array_intersect_key)
-	PHP_FE(array_intersect_ukey,											arginfo_array_intersect_ukey)
-	PHP_FE(array_uintersect,												arginfo_array_uintersect)
-	PHP_FE(array_intersect_assoc,											arginfo_array_intersect_assoc)
-	PHP_FE(array_uintersect_assoc,											arginfo_array_uintersect_assoc)
-	PHP_FE(array_intersect_uassoc,											arginfo_array_intersect_uassoc)
-	PHP_FE(array_uintersect_uassoc,											arginfo_array_uintersect_uassoc)
-	PHP_FE(array_diff,														arginfo_array_diff)
-	PHP_FE(array_diff_key,													arginfo_array_diff_key)
-	PHP_FE(array_diff_ukey,													arginfo_array_diff_ukey)
-	PHP_FE(array_udiff,														arginfo_array_udiff)
-	PHP_FE(array_diff_assoc,												arginfo_array_diff_assoc)
-	PHP_FE(array_udiff_assoc,												arginfo_array_udiff_assoc)
-	PHP_FE(array_diff_uassoc,												arginfo_array_diff_uassoc)
-	PHP_FE(array_udiff_uassoc,												arginfo_array_udiff_uassoc)
-	PHP_FE(array_sum,														arginfo_array_sum)
-	PHP_FE(array_product,													arginfo_array_product)
-	PHP_FE(array_filter,													arginfo_array_filter)
-	PHP_FE(array_map,														arginfo_array_map)
-	PHP_FE(array_chunk,														arginfo_array_chunk)
-	PHP_FE(array_combine,													arginfo_array_combine)
-	PHP_FE(array_key_exists,												arginfo_array_key_exists)
-
-	/* aliases from array.c */
-	PHP_FALIAS(pos,					current,								arginfo_pos)
-	PHP_FALIAS(sizeof,				count,									arginfo_sizeof)
-	PHP_FALIAS(key_exists,			array_key_exists,						arginfo_key_exists)
-
-	/* functions from assert.c */
-	PHP_FE(assert,															arginfo_assert)
-	PHP_FE(assert_options,													arginfo_assert_options)
-
-	/* functions from versioning.c */
-	PHP_FE(version_compare,													arginfo_version_compare)
-
-	/* functions from ftok.c*/
-#if HAVE_FTOK
-	PHP_FE(ftok,															arginfo_ftok)
-#endif
-
-	PHP_FE(str_rot13,														arginfo_str_rot13)
-	PHP_FE(stream_get_filters,												arginfo_stream_get_filters)
-	PHP_FE(stream_filter_register,											arginfo_stream_filter_register)
-	PHP_FE(stream_bucket_make_writeable,									arginfo_stream_bucket_make_writeable)
-	PHP_FE(stream_bucket_prepend,											arginfo_stream_bucket_prepend)
-	PHP_FE(stream_bucket_append,											arginfo_stream_bucket_append)
-	PHP_FE(stream_bucket_new,												arginfo_stream_bucket_new)
-
-	PHP_FE(output_add_rewrite_var,											arginfo_output_add_rewrite_var)
-	PHP_FE(output_reset_rewrite_vars,										arginfo_output_reset_rewrite_vars)
-
-	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
-
-#ifdef PHP_WIN32
-	PHP_FE(sapi_windows_cp_set, arginfo_sapi_windows_cp_set)
-	PHP_FE(sapi_windows_cp_get, arginfo_sapi_windows_cp_get)
-	PHP_FE(sapi_windows_cp_is_utf8, arginfo_sapi_windows_cp_is_utf8)
-	PHP_FE(sapi_windows_cp_conv, arginfo_sapi_windows_cp_conv)
-	PHP_FE(sapi_windows_set_ctrl_handler, arginfo_sapi_windows_set_ctrl_handler)
-	PHP_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
-#endif
-	PHP_FE_END
-};
-/* }}} */
 
 static const zend_module_dep standard_deps[] = { /* {{{ */
 	ZEND_MOD_OPTIONAL("session")
@@ -838,7 +129,7 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	NULL,
 	standard_deps,
 	"standard",					/* extension name */
-	basic_functions,			/* function list */
+	ext_functions,				/* function list */
 	PHP_MINIT(basic),			/* process startup */
 	PHP_MSHUTDOWN(basic),		/* process shutdown */
 	PHP_RINIT(basic),			/* request startup */
@@ -923,11 +214,10 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
 	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
 
-#if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
+#if defined(_REENTRANT)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
 
-	BG(incomplete_class) = incomplete_class_entry;
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
 }
@@ -992,7 +282,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 #endif
 
-	BG(incomplete_class) = incomplete_class_entry = php_create_incomplete_class();
+	php_register_incomplete_class();
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);
@@ -1165,9 +455,8 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
 	BG(strtok_string) = NULL;
-	ZVAL_UNDEF(&BG(strtok_zval));
 	BG(strtok_last) = NULL;
-	BG(locale_string) = NULL;
+	BG(ctype_string) = NULL;
 	BG(locale_changed) = 0;
 	BG(array_walk_fci) = empty_fcall_info;
 	BG(array_walk_fci_cache) = empty_fcall_info_cache;
@@ -1204,9 +493,10 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 {
-	zval_ptr_dtor(&BG(strtok_zval));
-	ZVAL_UNDEF(&BG(strtok_zval));
-	BG(strtok_string) = NULL;
+	if (BG(strtok_string)) {
+		zend_string_release(BG(strtok_string));
+		BG(strtok_string) = NULL;
+	}
 #ifdef HAVE_PUTENV
 	tsrm_env_lock();
 	zend_hash_destroy(&BG(putenv_ht));
@@ -1223,11 +513,10 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	 * to the value in startup environment */
 	if (BG(locale_changed)) {
 		setlocale(LC_ALL, "C");
-		setlocale(LC_CTYPE, "");
 		zend_update_current_locale();
-		if (BG(locale_string)) {
-			zend_string_release_ex(BG(locale_string), 0);
-			BG(locale_string) = NULL;
+		if (BG(ctype_string)) {
+			zend_string_release_ex(BG(ctype_string), 0);
+			BG(ctype_string) = NULL;
 		}
 	}
 
@@ -1272,8 +561,7 @@ PHP_MINFO_FUNCTION(basic) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed constant(string const_name)
-   Given the name of a constant this function will return the constant's associated value */
+/* {{{ Given the name of a constant this function will return the constant's associated value */
 PHP_FUNCTION(constant)
 {
 	zend_string *const_name;
@@ -1300,8 +588,7 @@ PHP_FUNCTION(constant)
 /* }}} */
 
 #ifdef HAVE_INET_NTOP
-/* {{{ proto string|false inet_ntop(string in_addr)
-   Converts a packed inet address to a human readable IP address string */
+/* {{{ Converts a packed inet address to a human readable IP address string */
 PHP_FUNCTION(inet_ntop)
 {
 	char *address;
@@ -1332,8 +619,7 @@ PHP_FUNCTION(inet_ntop)
 #endif /* HAVE_INET_NTOP */
 
 #ifdef HAVE_INET_PTON
-/* {{{ proto string|false inet_pton(string ip_address)
-   Converts a human readable IP address to a packed binary string */
+/* {{{ Converts a human readable IP address to a packed binary string */
 PHP_FUNCTION(inet_pton)
 {
 	int ret, af = AF_INET;
@@ -1367,8 +653,7 @@ PHP_FUNCTION(inet_pton)
 /* }}} */
 #endif /* HAVE_INET_PTON */
 
-/* {{{ proto int|false ip2long(string ip_address)
-   Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
+/* {{{ Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
 	char *addr;
@@ -1405,8 +690,7 @@ PHP_FUNCTION(ip2long)
 }
 /* }}} */
 
-/* {{{ proto string|false long2ip(int proper_address)
-   Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
+/* {{{ Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
 PHP_FUNCTION(long2ip)
 {
 	zend_ulong ip;
@@ -1440,8 +724,7 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string|array|false getenv([ string varname[, bool local_only]])
-   Get the value of an environment variable or every available environment variable
+/* {{{ Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
@@ -1465,7 +748,7 @@ PHP_FUNCTION(getenv)
 		/* SAPI method returns an emalloc()'d string */
 		ptr = sapi_getenv(str, str_len);
 		if (ptr) {
-			// TODO: avoid realocation ???
+			// TODO: avoid reallocation ???
 			RETVAL_STRING(ptr);
 			efree(ptr);
 			return;
@@ -1483,7 +766,7 @@ PHP_FUNCTION(getenv)
 		}
 
 		SetLastError(0);
-		/*If the given bugger is not large enough to hold the data, the return value is
+		/*If the given buffer is not large enough to hold the data, the return value is
 		the buffer size,  in characters, required to hold the string and its terminating
 		null character. We use this return value to alloc the final buffer. */
 		size = GetEnvironmentVariableW(keyw, &dummybuf, 0);
@@ -1538,8 +821,7 @@ PHP_FUNCTION(getenv)
 /* }}} */
 
 #ifdef HAVE_PUTENV
-/* {{{ proto bool putenv(string setting)
-   Set the value of an environment variable */
+/* {{{ Set the value of an environment variable */
 PHP_FUNCTION(putenv)
 {
 	char *setting;
@@ -1557,7 +839,7 @@ PHP_FUNCTION(putenv)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (setting_len == 0 || setting[0] == '=') {
-		zend_value_error("Invalid parameter syntax");
+		zend_argument_value_error(1, "must have a valid syntax");
 		RETURN_THROWS();
 	}
 
@@ -1616,6 +898,7 @@ PHP_FUNCTION(putenv)
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
 		if (!keyw || !valw && value) {
+			tsrm_env_unlock();
 			efree(pe.putenv_string);
 			efree(pe.key);
 			free(keyw);
@@ -1735,8 +1018,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 }
 /* }}} */
 
-/* {{{ proto array|false getopt(string options [, array longopts [, int &optind]])
-   Get options from the command line argument list */
+/* {{{ Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
 	char *options = NULL, **argv = NULL;
@@ -1917,8 +1199,7 @@ PHP_FUNCTION(getopt)
 }
 /* }}} */
 
-/* {{{ proto void flush(void)
-   Flush the output buffer */
+/* {{{ Flush the output buffer */
 PHP_FUNCTION(flush)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1927,8 +1208,7 @@ PHP_FUNCTION(flush)
 }
 /* }}} */
 
-/* {{{ proto int sleep(int seconds)
-   Delay for a given number of seconds */
+/* {{{ Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
 	zend_long num;
@@ -1946,11 +1226,9 @@ PHP_FUNCTION(sleep)
 }
 /* }}} */
 
-/* {{{ proto void usleep(int micro_seconds)
-   Delay for a given number of micro seconds */
+/* {{{ Delay for a given number of micro seconds */
 PHP_FUNCTION(usleep)
 {
-#if HAVE_USLEEP
 	zend_long num;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1961,19 +1239,15 @@ PHP_FUNCTION(usleep)
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-	if (usleep((unsigned int)num) < 0) {
-#if ZEND_DEBUG
-		php_error_docref(NULL, E_NOTICE, "usleep() failed with errno %d: %s",
-			errno, strerror(errno));
-#endif
-	}
+
+#if HAVE_USLEEP
+	usleep((unsigned int)num);
 #endif
 }
 /* }}} */
 
 #if HAVE_NANOSLEEP
-/* {{{ proto mixed time_nanosleep(int seconds, int nanoseconds)
-   Delay for a number of seconds and nano seconds */
+/* {{{ Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
 	zend_long tv_sec, tv_nsec;
@@ -2011,8 +1285,7 @@ PHP_FUNCTION(time_nanosleep)
 }
 /* }}} */
 
-/* {{{ proto bool time_sleep_until(float timestamp)
-   Make the script sleep until the specified time */
+/* {{{ Make the script sleep until the specified time */
 PHP_FUNCTION(time_sleep_until)
 {
 	double target_secs;
@@ -2054,8 +1327,7 @@ PHP_FUNCTION(time_sleep_until)
 /* }}} */
 #endif
 
-/* {{{ proto string get_current_user(void)
-   Get the name of the owner of the current PHP script */
+/* {{{ Get the name of the owner of the current PHP script */
 PHP_FUNCTION(get_current_user)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2066,8 +1338,7 @@ PHP_FUNCTION(get_current_user)
 
 static void add_config_entries(HashTable *hash, zval *return_value);
 
-/* {{{ add_config_entry
- */
+/* {{{ add_config_entry */
 static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
 {
 	if (Z_TYPE_P(entry) == IS_STRING) {
@@ -2094,8 +1365,7 @@ static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *
 }
 /* }}} */
 
-/* {{{ add_config_entries
- */
+/* {{{ add_config_entries */
 static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 {
 	zend_ulong h;
@@ -2108,8 +1378,7 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string|array|false get_cfg_var(string option_name)
-   Get the value of a PHP configuration option */
+/* {{{ Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
 	char *varname;
@@ -2150,8 +1419,7 @@ error options:
 	4 = send to SAPI logger directly
 */
 
-/* {{{ proto bool error_log(string message [, int message_type [, string destination [, string extra_headers]]])
-   Send an error message somewhere */
+/* {{{ Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
 	char *message, *opt = NULL, *headers = NULL;
@@ -2180,13 +1448,13 @@ PHP_FUNCTION(error_log)
 /* }}} */
 
 /* For BC (not binary-safe!) */
-PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers) /* {{{ */
+PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers) /* {{{ */
 {
 	return _php_error_log_ex(opt_err, message, (opt_err == 3) ? strlen(message) : 0, opt, headers);
 }
 /* }}} */
 
-PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, char *opt, char *headers) /* {{{ */
+PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers) /* {{{ */
 {
 	php_stream *stream = NULL;
 	size_t nbytes;
@@ -2232,8 +1500,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
 }
 /* }}} */
 
-/* {{{ proto array error_get_last()
-   Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet. */
+/* {{{ Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet. */
 PHP_FUNCTION(error_get_last)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2241,15 +1508,15 @@ PHP_FUNCTION(error_get_last)
 	if (PG(last_error_message)) {
 		array_init(return_value);
 		add_assoc_long_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
-		add_assoc_string_ex(return_value, "message", sizeof("message")-1, PG(last_error_message));
+		add_assoc_str_ex(return_value, "message", sizeof("message")-1,
+			zend_string_copy(PG(last_error_message)));
 		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
 		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
 	}
 }
 /* }}} */
 
-/* {{{ proto void error_clear_last(void)
-   Clear the last occurred error. */
+/* {{{ Clear the last occurred error. */
 PHP_FUNCTION(error_clear_last)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2258,7 +1525,7 @@ PHP_FUNCTION(error_clear_last)
 		PG(last_error_type) = 0;
 		PG(last_error_lineno) = 0;
 
-		free(PG(last_error_message));
+		zend_string_release(PG(last_error_message));
 		PG(last_error_message) = NULL;
 
 		if (PG(last_error_file)) {
@@ -2269,8 +1536,7 @@ PHP_FUNCTION(error_clear_last)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func(mixed function_name [, mixed parameter] [, mixed ...])
-   Call a user function which is the first parameter
+/* {{{ Call a user function which is the first parameter
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(call_user_func)
 {
@@ -2280,7 +1546,7 @@ PHP_FUNCTION(call_user_func)
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
+		Z_PARAM_VARIADIC_WITH_NAMED(fci.params, fci.param_count, fci.named_params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	fci.retval = &retval;
@@ -2294,21 +1560,21 @@ PHP_FUNCTION(call_user_func)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func_array(callable function, array parameters)
-   Call a user function which is the first parameter with the arguments contained in array
+/* {{{ Call a user function which is the first parameter with the arguments contained in array
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(call_user_func_array)
 {
-	zval *params, retval;
+	zval retval;
+	HashTable *params;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY(params)
+		Z_PARAM_ARRAY_HT(params)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_fcall_info_args(&fci, params);
+	fci.named_params = params;
 	fci.retval = &retval;
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -2317,13 +1583,10 @@ PHP_FUNCTION(call_user_func_array)
 		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
-
-	zend_fcall_info_args_clear(&fci, 1);
 }
 /* }}} */
 
-/* {{{ proto mixed forward_static_call(mixed function_name [, mixed parameter] [, mixed ...]) U
-   Call a user function which is the first parameter */
+/* {{{ Call a user function which is the first parameter */
 PHP_FUNCTION(forward_static_call)
 {
 	zval retval;
@@ -2358,8 +1621,7 @@ PHP_FUNCTION(forward_static_call)
 }
 /* }}} */
 
-/* {{{ proto mixed forward_static_call_array(callable function, array parameters)
-   Call a static method which is the first parameter with the arguments contained in array */
+/* {{{ Call a static method which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(forward_static_call_array)
 {
 	zval *params, retval;
@@ -2535,8 +1797,7 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto false|null register_shutdown_function(callback function) U
-   Register a user-level function to be called on request termination */
+/* {{{ Register a user-level function to be called on request termination */
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry shutdown_function_entry;
@@ -2577,7 +1838,7 @@ PHP_FUNCTION(register_shutdown_function)
 }
 /* }}} */
 
-PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry) /* {{{ */
+PHPAPI zend_bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry) /* {{{ */
 {
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
@@ -2589,7 +1850,7 @@ PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t fun
 }
 /* }}} */
 
-PHPAPI zend_bool remove_user_shutdown_function(char *function_name, size_t function_len) /* {{{ */
+PHPAPI zend_bool remove_user_shutdown_function(const char *function_name, size_t function_len) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
 		return zend_hash_str_del(BG(user_shutdown_function_names), function_name, function_len) != FAILURE;
@@ -2620,8 +1881,7 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 }
 /* }}} */
 
-/* {{{ proto bool highlight_file(string file_name [, bool return] )
-   Syntax highlight a source file */
+/* {{{ Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
 	char *filename;
@@ -2658,14 +1918,14 @@ PHP_FUNCTION(highlight_file)
 	if (i) {
 		php_output_get_contents(return_value);
 		php_output_discard();
+		ZEND_ASSERT(Z_TYPE_P(return_value) == IS_STRING);
 	} else {
 		RETURN_TRUE;
 	}
 }
 /* }}} */
 
-/* {{{ proto string php_strip_whitespace(string file_name)
-   Return source with stripped comments and whitespace */
+/* {{{ Return source with stripped comments and whitespace */
 PHP_FUNCTION(php_strip_whitespace)
 {
 	char *filename;
@@ -2697,8 +1957,7 @@ PHP_FUNCTION(php_strip_whitespace)
 }
 /* }}} */
 
-/* {{{ proto bool highlight_string(string string [, bool return] )
-   Syntax highlight a string or optionally return it */
+/* {{{ Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
 {
 	zval *expr;
@@ -2727,14 +1986,7 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	if (highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description) == FAILURE) {
-		efree(hicompiled_string_description);
-		EG(error_reporting) = old_error_reporting;
-		if (i) {
-			php_output_end();
-		}
-		RETURN_FALSE;
-	}
+	highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description);
 	efree(hicompiled_string_description);
 
 	EG(error_reporting) = old_error_reporting;
@@ -2742,14 +1994,30 @@ PHP_FUNCTION(highlight_string)
 	if (i) {
 		php_output_get_contents(return_value);
 		php_output_discard();
+		ZEND_ASSERT(Z_TYPE_P(return_value) == IS_STRING);
 	} else {
+		// TODO Make this function void?
 		RETURN_TRUE;
 	}
 }
 /* }}} */
 
-/* {{{ proto string|false ini_get(string varname)
-   Get a configuration option */
+#define INI_RETVAL_STR(val) do { \
+	/* copy to return value here, because alter might free it! */ \
+	if (ZSTR_IS_INTERNED(val)) { \
+		RETVAL_INTERNED_STR(val); \
+	} else if (ZSTR_LEN(val) == 0) { \
+		RETVAL_EMPTY_STRING(); \
+	} else if (ZSTR_LEN(val) == 1) { \
+		RETVAL_CHAR(ZSTR_VAL(val)[0]); \
+	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) { \
+		ZVAL_NEW_STR(return_value, zend_string_copy(val)); \
+	} else { \
+		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0)); \
+	} \
+} while (0)
+
+/* {{{ Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
 	zend_string *varname, *val;
@@ -2764,22 +2032,11 @@ PHP_FUNCTION(ini_get)
 		RETURN_FALSE;
 	}
 
-	if (ZSTR_IS_INTERNED(val)) {
-		RETVAL_INTERNED_STR(val);
-	} else if (ZSTR_LEN(val) == 0) {
-		RETVAL_EMPTY_STRING();
-	} else if (ZSTR_LEN(val) == 1) {
-		RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
-	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
-		ZVAL_NEW_STR(return_value, zend_string_copy(val));
-	} else {
-		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
-	}
+	INI_RETVAL_STR(val);
 }
 /* }}} */
 
-/* {{{ proto array|false ini_get_all([string extension[, bool details = true]])
-   Get all configuration options */
+/* {{{ Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
 	char *extname = NULL;
@@ -2860,8 +2117,7 @@ static int php_ini_check_path(char *option_name, size_t option_len, char *new_op
 }
 /* }}} */
 
-/* {{{ proto string|false ini_set(string varname, string newvalue)
-   Set a configuration option, returns false on error and the old value of the configuration option on success */
+/* {{{ Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
 {
 	zend_string *varname;
@@ -2875,19 +2131,8 @@ PHP_FUNCTION(ini_set)
 
 	val = zend_ini_get_value(varname);
 
-	/* copy to return here, because alter might free it! */
 	if (val) {
-		if (ZSTR_IS_INTERNED(val)) {
-			RETVAL_INTERNED_STR(val);
-		} else if (ZSTR_LEN(val) == 0) {
-			RETVAL_EMPTY_STRING();
-		} else if (ZSTR_LEN(val) == 1) {
-			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
-		} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
-			ZVAL_NEW_STR(return_value, zend_string_copy(val));
-		} else {
-			ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
-		}
+		INI_RETVAL_STR(val);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2916,8 +2161,9 @@ PHP_FUNCTION(ini_set)
 }
 /* }}} */
 
-/* {{{ proto void ini_restore(string varname)
-   Restore the value of a configuration option specified by varname */
+#undef INI_RETVAL_STR
+
+/* {{{ Restore the value of a configuration option specified by varname */
 PHP_FUNCTION(ini_restore)
 {
 	zend_string *varname;
@@ -2930,8 +2176,7 @@ PHP_FUNCTION(ini_restore)
 }
 /* }}} */
 
-/* {{{ proto string|false set_include_path(string new_include_path)
-   Sets the include_path configuration option */
+/* {{{ Sets the include_path configuration option */
 PHP_FUNCTION(set_include_path)
 {
 	zend_string *new_value;
@@ -2960,8 +2205,7 @@ PHP_FUNCTION(set_include_path)
 }
 /* }}} */
 
-/* {{{ proto string|false get_include_path()
-   Get the current include_path configuration option */
+/* {{{ Get the current include_path configuration option */
 PHP_FUNCTION(get_include_path)
 {
 	char *str;
@@ -2978,8 +2222,7 @@ PHP_FUNCTION(get_include_path)
 }
 /* }}} */
 
-/* {{{ proto mixed print_r(mixed var [, bool return])
-   Prints out or returns information about the specified variable */
+/* {{{ Prints out or returns information about the specified variable */
 PHP_FUNCTION(print_r)
 {
 	zval *var;
@@ -3000,8 +2243,7 @@ PHP_FUNCTION(print_r)
 }
 /* }}} */
 
-/* {{{ proto int connection_aborted(void)
-   Returns true if client disconnected */
+/* {{{ Returns true if client disconnected */
 PHP_FUNCTION(connection_aborted)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -3010,8 +2252,7 @@ PHP_FUNCTION(connection_aborted)
 }
 /* }}} */
 
-/* {{{ proto int connection_status(void)
-   Returns the connection status bitfield */
+/* {{{ Returns the connection status bitfield */
 PHP_FUNCTION(connection_status)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -3020,8 +2261,7 @@ PHP_FUNCTION(connection_status)
 }
 /* }}} */
 
-/* {{{ proto int ignore_user_abort([bool value])
-   Set whether we want to ignore a user abort event or not */
+/* {{{ Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
 	zend_bool arg = 0;
@@ -3045,8 +2285,7 @@ PHP_FUNCTION(ignore_user_abort)
 /* }}} */
 
 #if HAVE_GETSERVBYNAME
-/* {{{ proto int|false getservbyname(string service, string protocol)
-   Returns port associated with service. Protocol must be "tcp" or "udp" */
+/* {{{ Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
 	char *name, *proto;
@@ -3088,8 +2327,7 @@ PHP_FUNCTION(getservbyname)
 #endif
 
 #if HAVE_GETSERVBYPORT
-/* {{{ proto string|false getservbyport(int port, string protocol)
-   Returns service name associated with port. Protocol must be "tcp" or "udp" */
+/* {{{ Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
 	char *proto;
@@ -3114,8 +2352,7 @@ PHP_FUNCTION(getservbyport)
 #endif
 
 #if HAVE_GETPROTOBYNAME
-/* {{{ proto int|false getprotobyname(string name)
-   Returns protocol number associated with name as per /etc/protocols */
+/* {{{ Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
 	char *name;
@@ -3138,8 +2375,7 @@ PHP_FUNCTION(getprotobyname)
 #endif
 
 #if HAVE_GETPROTOBYNUMBER
-/* {{{ proto string|false getprotobynumber(int proto)
-   Returns protocol name associated with protocol number proto */
+/* {{{ Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
 	zend_long proto;
@@ -3160,8 +2396,7 @@ PHP_FUNCTION(getprotobynumber)
 /* }}} */
 #endif
 
-/* {{{ proto bool register_tick_function(string function_name [, mixed arg [, mixed ... ]])
-   Registers a tick callback function */
+/* {{{ Registers a tick callback function */
 PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
@@ -3184,7 +2419,7 @@ PHP_FUNCTION(register_tick_function)
 
 	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name)) {
 		efree(tick_fe.arguments);
-		zend_type_error("Invalid tick callback '%s' passed", ZSTR_VAL(function_name));
+		zend_argument_type_error(1, "must be a valid tick callback, \"%s\" given", ZSTR_VAL(function_name));
 		zend_string_release_ex(function_name, 0);
 		RETURN_THROWS();
 	} else if (function_name) {
@@ -3213,47 +2448,42 @@ PHP_FUNCTION(register_tick_function)
 }
 /* }}} */
 
-/* {{{ proto void unregister_tick_function(string function_name)
-   Unregisters a tick callback function */
+/* {{{ Unregisters a tick callback function */
 PHP_FUNCTION(unregister_tick_function)
 {
-	zval *function;
 	user_tick_function_entry tick_fe;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(function)
+		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {
 		return;
 	}
 
-	if (Z_TYPE_P(function) != IS_ARRAY && Z_TYPE_P(function) != IS_OBJECT) {
-		convert_to_string(function);
-	}
-
 	tick_fe.arguments = (zval *) emalloc(sizeof(zval));
-	ZVAL_COPY_VALUE(&tick_fe.arguments[0], function);
+	ZVAL_COPY_VALUE(&tick_fe.arguments[0], &fci.function_name);
 	tick_fe.arg_count = 1;
 	zend_llist_del_element(BG(user_tick_functions), &tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
 	efree(tick_fe.arguments);
 }
 /* }}} */
 
-/* {{{ proto bool is_uploaded_file(string path)
-   Check if file was created by rfc1867 upload */
+/* {{{ Check if file was created by rfc1867 upload */
 PHP_FUNCTION(is_uploaded_file)
 {
 	char *path;
 	size_t path_len;
 
-	if (!SG(rfc1867_uploaded_files)) {
-		RETURN_FALSE;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(path, path_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!SG(rfc1867_uploaded_files)) {
+		RETURN_FALSE;
+	}
 
 	if (zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
 		RETURN_TRUE;
@@ -3263,8 +2493,7 @@ PHP_FUNCTION(is_uploaded_file)
 }
 /* }}} */
 
-/* {{{ proto bool move_uploaded_file(string path, string new_path)
-   Move a file if and only if it was created by an upload */
+/* {{{ Move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
 {
 	char *path, *new_path;
@@ -3275,14 +2504,14 @@ PHP_FUNCTION(move_uploaded_file)
 	int oldmask; int ret;
 #endif
 
-	if (!SG(rfc1867_uploaded_files)) {
-		RETURN_FALSE;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(path, path_len)
 		Z_PARAM_PATH(new_path, new_path_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!SG(rfc1867_uploaded_files)) {
+		RETURN_FALSE;
+	}
 
 	if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
 		RETURN_FALSE;
@@ -3319,8 +2548,7 @@ PHP_FUNCTION(move_uploaded_file)
 }
 /* }}} */
 
-/* {{{ php_simple_ini_parser_cb
- */
+/* {{{ php_simple_ini_parser_cb */
 static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {
 	switch (callback_type) {
@@ -3376,8 +2604,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 }
 /* }}} */
 
-/* {{{ php_ini_parser_cb_with_sections
- */
+/* {{{ php_ini_parser_cb_with_sections */
 static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {
 	if (callback_type == ZEND_INI_PARSER_SECTION) {
@@ -3397,8 +2624,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 }
 /* }}} */
 
-/* {{{ proto array|false parse_ini_file(string filename [, bool process_sections [, int scanner_mode]])
-   Parse configuration file */
+/* {{{ Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
 	char *filename = NULL;
@@ -3439,8 +2665,7 @@ PHP_FUNCTION(parse_ini_file)
 }
 /* }}} */
 
-/* {{{ proto array|false parse_ini_string(string ini_string [, bool process_sections [, int scanner_mode]])
-   Parse configuration string */
+/* {{{ Parse configuration string */
 PHP_FUNCTION(parse_ini_string)
 {
 	char *string = NULL, *str = NULL;
@@ -3498,8 +2723,7 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 #endif
 
 #ifdef HAVE_GETLOADAVG
-/* {{{ proto array|false sys_getloadavg()
-*/
+/* {{{ */
 PHP_FUNCTION(sys_getloadavg)
 {
 	double load[3];

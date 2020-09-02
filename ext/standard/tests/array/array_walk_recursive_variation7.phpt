@@ -2,11 +2,6 @@
 Test array_walk_recursive() function : usage variations - anonymous callback function
 --FILE--
 <?php
-/* Prototype  : proto bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing anonymous(run-time) callback function with following variations:
 *   with one parameter
@@ -33,7 +28,7 @@ echo "-- Anonymous function with null argument --\n";
 var_dump( array_walk_recursive( $input, function() { echo "1\n"; }));
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : anonymous function as callback ***
 -- Anonymous function with one argument --
 int(2)

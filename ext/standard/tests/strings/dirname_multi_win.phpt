@@ -7,10 +7,6 @@ if((substr(PHP_OS, 0, 3) != "WIN"))
 ?>
 --FILE--
 <?php
-/* Prototype: string dirname ( string $path [, int nb]);
-   Description: Returns directory name component of path.
-*/
-
 for ($i=0 ; $i<5 ; $i++) {
     try {
         var_dump(dirname("/foo/bar/baz", $i));

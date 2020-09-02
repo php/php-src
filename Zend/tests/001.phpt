@@ -40,20 +40,23 @@ class test {
 }
 
 test::test1(1);
-var_dump(func_num_args());
+
+try {
+    func_num_args();
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
 --EXPECTF--
 int(0)
 int(1)
-Exception: Too few arguments to function test2(), 0 passed in %s001.php on line 18 and exactly 1 expected
+Exception: Too few arguments to function test2(), 0 passed in %s on line %d and exactly 1 expected
 int(2)
 int(0)
-Exception: Too few arguments to function test3(), 1 passed in %s001.php on line 27 and exactly 2 expected
+Exception: Too few arguments to function test3(), 1 passed in %s on line %d and exactly 2 expected
 int(2)
 int(1)
-
-Warning: func_num_args():  Called from the global scope - no function context in %s on line %d
-int(-1)
+func_num_args() must be called from a function context
 Done

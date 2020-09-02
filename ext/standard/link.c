@@ -49,7 +49,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "php_link.h"
 #include "php_string.h"
 
 #ifndef VOLUME_NAME_NT
@@ -60,8 +59,7 @@
 #define VOLUME_NAME_DOS 0x0
 #endif
 
-/* {{{ proto string|false readlink(string filename)
-   Return the target of a symbolic link */
+/* {{{ Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
 {
 	char *link;
@@ -94,8 +92,7 @@ PHP_FUNCTION(readlink)
 }
 /* }}} */
 
-/* {{{ proto int|false linkinfo(string filename)
-   Returns the st_dev field of the UNIX C stat structure describing the link */
+/* {{{ Returns the st_dev field of the UNIX C stat structure describing the link */
 PHP_FUNCTION(linkinfo)
 {
 	char *link;
@@ -128,8 +125,7 @@ PHP_FUNCTION(linkinfo)
 }
 /* }}} */
 
-/* {{{ proto bool symlink(string target, string link)
-   Create a symbolic link */
+/* {{{ Create a symbolic link */
 PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
@@ -187,8 +183,7 @@ PHP_FUNCTION(symlink)
 }
 /* }}} */
 
-/* {{{ proto bool link(string target, string link)
-   Create a hard link */
+/* {{{ Create a hard link */
 PHP_FUNCTION(link)
 {
 	char *topath, *frompath;

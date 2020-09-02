@@ -3,11 +3,7 @@
 #ifndef FPM_ATOMIC_H
 #define FPM_ATOMIC_H 1
 
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# include <stdint.h>
-#endif
+#include <inttypes.h>
 #include <sched.h>
 
 #ifdef HAVE_BUILTIN_ATOMIC

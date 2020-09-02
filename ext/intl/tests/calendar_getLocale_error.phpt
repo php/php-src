@@ -11,6 +11,7 @@ if (!extension_loaded('intl'))
 ini_set("intl.error_level", E_WARNING);
 
 var_dump(intlcal_get_locale(1));
+?>
 --EXPECTF--
 Fatal error: Uncaught ArgumentCountError: intlcal_get_locale() expects exactly 2 parameters, 1 given in %s:%d
 Stack trace:

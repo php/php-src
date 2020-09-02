@@ -5,7 +5,7 @@ Bug #44660 (Indexed and reference assignment to property of non-object don't tri
 $s = "hello";
 $a = true;
 
-echo "--> read access: ";
+echo "--> read access:";
 echo $a->p;
 
 echo "\n--> direct assignment:\n";
@@ -47,23 +47,23 @@ echo "\n--> Confirm assignments have had no impact:\n";
 var_dump($a);
 ?>
 --EXPECTF--
---> read access: 
-Warning: Trying to get property 'p' of non-object in %s on line %d
+--> read access:
+Warning: Attempt to read property "p" on bool in %s on line %d
 
 --> direct assignment:
-Attempt to assign property 'p' of non-object
+Attempt to assign property "p" on bool
 
 --> increment:
-Attempt to increment/decrement property 'p' of non-object
+Attempt to increment/decrement property "p" on bool
 
 --> reference assignment:
-Attempt to modify property 'p' of non-object
+Attempt to modify property "p" on bool
 
 --> reference assignment:
-Attempt to modify property 'p' of non-object
+Attempt to modify property "p" on bool
 
 --> indexed assignment:
-Attempt to modify property 'p' of non-object
+Attempt to modify property "p" on bool
 
 --> Confirm assignments have had no impact:
 bool(true)

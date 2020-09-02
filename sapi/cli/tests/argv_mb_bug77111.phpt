@@ -35,6 +35,6 @@ $argv_fl = __DIR__ . DIRECTORY_SEPARATOR . "argv_test.php";
 unlink($argv_fl);
 unlink($out_fl);
 ?>
---EXPECTF--
+--EXPECT--
 string(57) "Ästhetik Æstetik Esthétique Estética Эстетика"
 

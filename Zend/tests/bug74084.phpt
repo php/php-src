@@ -31,7 +31,7 @@ try {
 }
 ?>
 --EXPECT--
-Unsupported operand types
-Unsupported operand types
-Unsupported operand types
-Unsupported operand types
+Unsupported operand types: array - array
+Unsupported operand types: array * array
+Unsupported operand types: array / array
+Unsupported operand types: array ** array

@@ -28,19 +28,19 @@ string(1) "a"
 string(1) "b"
 string(1) "c"
 
-Warning: Uninitialized string offset: 3 in %s on line %d
+Warning: Uninitialized string offset 3 in %s on line %d
 string(0) ""
 string(1) "b"
 
-Warning: Uninitialized string offset: 1 in %s on line %d
+Warning: Uninitialized string offset 1 in %s on line %d
 string(0) ""
 string(1) "a"
 string(1) "b"
 string(1) "c"
 
-Warning: Uninitialized string offset: 3 in %s on line %d
+Warning: Uninitialized string offset 3 in %s on line %d
 string(0) ""
 string(1) "b"
 
-Warning: Uninitialized string offset: 1 in %s on line %d
+Warning: Uninitialized string offset 1 in %s on line %d
 string(0) ""

@@ -2,12 +2,6 @@
 Test array_intersect_assoc() function : usage variations - assoc array with diff keys for 'arr2' argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments.
- * Keys are used to do more restrictive check
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_intersect_assoc() by passing different
  * associative arrays having different possible keys to $arr2 argument.

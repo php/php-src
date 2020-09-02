@@ -82,6 +82,6 @@ object(FFI\CData:int32_t[2])#%d (2) {
   [1]=>
   int(0)
 }
-FFI\ParserException: Incomplete 'enum _e' at line 1
-FFI\ParserException: Incomplete 'enum _f' at line 1
+FFI\ParserException: Incomplete enum "_e" at line 1
+FFI\ParserException: Incomplete enum "_f" at line 1
 ok

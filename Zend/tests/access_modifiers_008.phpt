@@ -18,4 +18,4 @@ B2::test();
 
 ?>
 --EXPECTF--
-Fatal error: Call to protected method B1::f() from context 'B2' in %s on line %d
+Fatal error: Call to protected method B1::f() from scope B2 in %s on line %d

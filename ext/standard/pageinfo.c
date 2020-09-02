@@ -51,8 +51,7 @@
 
 #include "ext/standard/basic_functions.h"
 
-/* {{{ php_statpage
- */
+/* {{{ php_statpage */
 PHPAPI void php_statpage(void)
 {
 	zend_stat_t *pstat;
@@ -73,8 +72,7 @@ PHPAPI void php_statpage(void)
 }
 /* }}} */
 
-/* {{{ php_getuid
- */
+/* {{{ php_getuid */
 zend_long php_getuid(void)
 {
 	php_statpage();
@@ -88,8 +86,7 @@ zend_long php_getgid(void)
 	return (BG(page_gid));
 }
 
-/* {{{ proto int getmyuid(void)
-   Get PHP script owner's UID */
+/* {{{ Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
 {
 	zend_long uid;
@@ -105,8 +102,7 @@ PHP_FUNCTION(getmyuid)
 }
 /* }}} */
 
-/* {{{ proto int getmygid(void)
-   Get PHP script owner's GID */
+/* {{{ Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
 {
 	zend_long gid;
@@ -122,8 +118,7 @@ PHP_FUNCTION(getmygid)
 }
 /* }}} */
 
-/* {{{ proto int getmypid(void)
-   Get current process ID */
+/* {{{ Get current process ID */
 PHP_FUNCTION(getmypid)
 {
 	zend_long pid;
@@ -139,8 +134,7 @@ PHP_FUNCTION(getmypid)
 }
 /* }}} */
 
-/* {{{ proto int getmyinode(void)
-   Get the inode of the current script being parsed */
+/* {{{ Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -160,8 +154,7 @@ PHPAPI time_t php_getlastmod(void)
 	return BG(page_mtime);
 }
 
-/* {{{ proto int getlastmod(void)
-   Get time of last page modification */
+/* {{{ Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
 	zend_long lm;

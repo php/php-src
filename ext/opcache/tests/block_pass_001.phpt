@@ -9,4 +9,4 @@ Block pass: Bugs in BOOL/QM_ASSIGN elision
 (bool) new stdClass;
 ?>
 --EXPECTF--
-Warning: Undefined variable: x in %s on line %d
+Warning: Undefined variable $x in %s on line %d

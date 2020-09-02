@@ -46,8 +46,8 @@ local action_names = {
   "SETLABEL", "REL_A",
   -- action arg (1 byte) or int arg, 2 buffer pos (link, offset):
   "REL_LG", "REL_PC",
-  -- action arg (1 byte) or int arg, 1 buffer pos (link):
-  "IMM_LG", "IMM_PC",
+  -- action arg (1 byte) or ptrdiff_t arg, 1 buffer pos (link):
+  "IMM_LG", "IMM_LG64", "IMM_PC", "IMM_PC64",
   -- action arg (1 byte) or int arg, 1 buffer pos (offset):
   "LABEL_LG", "LABEL_PC",
   -- action arg (1 byte), 1 buffer pos (offset):
@@ -438,6 +438,16 @@ local function wputlabel(aprefix, imm, num)
   end
 end
 
+-- Put action for label arg (IMM_LG64, IMM_PC64, REL_LG, REL_PC).
+local function wputlabel64(aprefix, imm, num)
+  if type(imm) == "number" then
+    waction("IMM_LG64", nil, num);
+    wputxb(imm)
+  else
+    waction("IMM_PC64", imm, num)
+  end
+end
+
 -- Put signed byte or arg.
 local function wputsbarg(n)
   if type(n) == "number" then
@@ -467,6 +477,26 @@ local function wputwarg(n)
     end
     wputb(band(n, 255)); wputb(shr(n, 8));
   else waction("IMM_W", n) end
+end
+
+-- Put signed or unsigned qword or arg.
+local function wputqarg(n)
+  local tn = type(n)
+  if tn == "number" then
+    wputb(band(n, 255))
+    wputb(band(shr(n, 8), 255))
+    wputb(band(shr(n, 16), 255))
+    wputb(band(shr(n, 24), 255))
+    wputb(band(shr(n, 32), 255))
+    wputb(band(shr(n, 40), 255))
+    wputb(band(shr(n, 48), 255))
+    wputb(shr(n, 56))
+  elseif tn == "table" then
+    wputlabel64("IMM_", n[1], 1)
+  else
+    waction("IMM_D", format("(unsigned int)(%s)", n))
+    waction("IMM_D", format("(unsigned int)((%s)>>32)", n))
+  end
 end
 
 -- Put signed or unsigned dword or arg.
@@ -2065,9 +2095,17 @@ local function op_data(params)
       werror("bad mode or size in `"..p.."'")
     end
     if a.mode == "iJ" then
-      wputlabel("IMM_", a.imm, 1)
+      if sz == 'q' then
+        wputlabel64("IMM_", a.imm, 1)
+      else
+        wputlabel("IMM_", a.imm, 1)
+      end
     else
-      wputszarg(sz, a.imm)
+      if sz == 'q' then
+        wputqarg(a.imm)
+      else
+        wputszarg(sz, a.imm)
+      end
     end
     if secpos+2 > maxsecpos then wflush() end
   end

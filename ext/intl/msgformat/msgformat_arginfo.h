@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: ffa9513a18a634b034b0490bc712d097dc8d36e8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -40,48 +41,31 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_MessageFormatter_getErrorMessage arginfo_class_MessageFormatter_getPattern
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_msgfmt_create, 0, 2, MessageFormatter, 1)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
-ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_msgfmt_format, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, fmt, MessageFormatter, 0)
-	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+ZEND_METHOD(MessageFormatter, __construct);
+ZEND_FUNCTION(msgfmt_create);
+ZEND_FUNCTION(msgfmt_format);
+ZEND_FUNCTION(msgfmt_format_message);
+ZEND_FUNCTION(msgfmt_parse);
+ZEND_FUNCTION(msgfmt_parse_message);
+ZEND_FUNCTION(msgfmt_set_pattern);
+ZEND_FUNCTION(msgfmt_get_pattern);
+ZEND_FUNCTION(msgfmt_get_locale);
+ZEND_FUNCTION(msgfmt_get_error_code);
+ZEND_FUNCTION(msgfmt_get_error_message);
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_msgfmt_format_message, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_msgfmt_parse, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, fmt, MessageFormatter, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_msgfmt_parse_message, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msgfmt_set_pattern, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, fmt, MessageFormatter, 0)
-	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_msgfmt_get_pattern, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, fmt, MessageFormatter, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msgfmt_get_locale, 0, 1, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, fmt, MessageFormatter, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msgfmt_get_error_code, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, fmt, MessageFormatter, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_msgfmt_get_error_message arginfo_msgfmt_get_locale
+static const zend_function_entry class_MessageFormatter_methods[] = {
+	ZEND_ME(MessageFormatter, __construct, arginfo_class_MessageFormatter___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(create, msgfmt_create, arginfo_class_MessageFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(format, msgfmt_format, arginfo_class_MessageFormatter_format, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(formatMessage, msgfmt_format_message, arginfo_class_MessageFormatter_formatMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(parse, msgfmt_parse, arginfo_class_MessageFormatter_parse, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(parseMessage, msgfmt_parse_message, arginfo_class_MessageFormatter_parseMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(setPattern, msgfmt_set_pattern, arginfo_class_MessageFormatter_setPattern, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getPattern, msgfmt_get_pattern, arginfo_class_MessageFormatter_getPattern, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getLocale, msgfmt_get_locale, arginfo_class_MessageFormatter_getLocale, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getErrorCode, msgfmt_get_error_code, arginfo_class_MessageFormatter_getErrorCode, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getErrorMessage, msgfmt_get_error_message, arginfo_class_MessageFormatter_getErrorMessage, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};

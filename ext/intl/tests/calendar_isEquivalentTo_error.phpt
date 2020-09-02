@@ -48,6 +48,7 @@ try {
 } catch (Error $ex) {
     echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
+?>
 --EXPECT--
 error: 0, IntlCalendar::isEquivalentTo(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 

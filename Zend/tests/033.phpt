@@ -25,7 +25,7 @@ try {
 
 ?>
 --EXPECTF--
-Warning: Undefined variable: arr in %s on line %d
+Warning: Undefined variable $arr in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
@@ -37,7 +37,7 @@ Warning: Trying to access array offset on value of type null in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
-Warning: Undefined variable: arr in %s on line %d
+Warning: Undefined variable $arr in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
@@ -49,7 +49,7 @@ Warning: Trying to access array offset on value of type null in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
-Warning: Undefined variable: arr in %s on line %d
+Warning: Undefined variable $arr in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
@@ -61,6 +61,6 @@ Warning: Trying to access array offset on value of type null in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
-Warning: Trying to get property 'foo' of non-object in %s on line %d
-Attempt to assign property 'foo' of non-object
-Attempt to assign property 'bar' of non-object
+Warning: Attempt to read property "foo" on null in %s on line %d
+Attempt to assign property "foo" on null
+Attempt to assign property "bar" on null

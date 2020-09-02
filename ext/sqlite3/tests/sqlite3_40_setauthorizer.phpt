@@ -69,7 +69,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 Unable to prepare statement: 23, not authorized
 bool(true)

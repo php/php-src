@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-Cannot call func_get_args() dynamically
+func_get_args() expects exactly 0 parameters, 4 given

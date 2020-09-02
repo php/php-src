@@ -74,8 +74,7 @@ int(1)
 int(1)
 
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-int(1)
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying string(1) "a"
 *** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
@@ -104,11 +103,11 @@ int(0)
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#%s (0) {
 }
-*** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, StringCapable given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
 *** Caught {closure}(): Argument #1 ($i) must be of type int, resource given, called in %s on line %d
@@ -128,8 +127,7 @@ float(1)
 float(1.5)
 
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-float(1)
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying string(1) "a"
 *** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
@@ -158,11 +156,11 @@ float(0)
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#%s (0) {
 }
-*** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, StringCapable given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
 *** Caught {closure}(): Argument #1 ($f) must be of type float, resource given, called in %s on line %d
@@ -211,7 +209,7 @@ string(0) ""
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught {closure}(): Argument #1 ($s) must be of type string, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#%s (0) {
 }
@@ -264,11 +262,11 @@ bool(false)
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#%s (0) {
 }
-*** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, StringCapable given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
 *** Caught {closure}(): Argument #1 ($b) must be of type bool, resource given, called in %s on line %d

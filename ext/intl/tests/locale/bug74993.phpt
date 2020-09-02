@@ -18,12 +18,13 @@ $funcs = [
 foreach ($funcs as $func) {
     echo (new ReflectionFunction($func));
 }
+?>
 --EXPECT--
 Function [ <internal:intl> function locale_get_display_language ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $in_locale ]
+    Parameter #1 [ <optional> ?string $in_locale = null ]
   }
   - Return [ string|false ]
 }
@@ -31,7 +32,7 @@ Function [ <internal:intl> function locale_get_display_name ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $in_locale ]
+    Parameter #1 [ <optional> ?string $in_locale = null ]
   }
   - Return [ string|false ]
 }
@@ -39,7 +40,7 @@ Function [ <internal:intl> function locale_get_display_region ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $in_locale ]
+    Parameter #1 [ <optional> ?string $in_locale = null ]
   }
   - Return [ string|false ]
 }
@@ -47,7 +48,7 @@ Function [ <internal:intl> function locale_get_display_script ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $in_locale ]
+    Parameter #1 [ <optional> ?string $in_locale = null ]
   }
   - Return [ string|false ]
 }
@@ -55,7 +56,7 @@ Function [ <internal:intl> function locale_get_display_variant ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $in_locale ]
+    Parameter #1 [ <optional> ?string $in_locale = null ]
   }
   - Return [ string|false ]
 }
@@ -64,7 +65,7 @@ Function [ <internal:intl> function locale_filter_matches ] {
   - Parameters [3] {
     Parameter #0 [ <required> string $langtag ]
     Parameter #1 [ <required> string $locale ]
-    Parameter #2 [ <optional> bool $canonicalize ]
+    Parameter #2 [ <optional> bool $canonicalize = false ]
   }
   - Return [ ?bool ]
 }
@@ -73,8 +74,8 @@ Function [ <internal:intl> function locale_lookup ] {
   - Parameters [4] {
     Parameter #0 [ <required> array $langtag ]
     Parameter #1 [ <required> string $locale ]
-    Parameter #2 [ <optional> bool $canonicalize ]
-    Parameter #3 [ <optional> ?string $def ]
+    Parameter #2 [ <optional> bool $canonicalize = false ]
+    Parameter #3 [ <optional> ?string $def = null ]
   }
   - Return [ ?string ]
 }

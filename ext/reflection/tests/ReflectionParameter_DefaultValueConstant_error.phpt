@@ -12,8 +12,7 @@ $reflect = new ReflectionFunction('ReflectionParameterTest');
 foreach($reflect->getParameters() as $param) {
     try {
         echo $param->getDefaultValueConstantName() . "\n";
-    }
-    catch(ReflectionException $e) {
+    } catch(ReflectionException $e) {
         echo $e->getMessage() . "\n";
     }
 }

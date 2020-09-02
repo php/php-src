@@ -72,33 +72,32 @@ int(1)
 *** Trying float(1.5)
 int(1)
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-int(1)
+*** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
 *** Trying string(1) "a"
-*** Caught Return value of {closure}() must be of type int, string returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
 *** Trying string(0) ""
-*** Caught Return value of {closure}() must be of type int, string returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
 *** Trying int(9223372036854775807)
 int(9223372036854775807)
 *** Trying float(NAN)
-*** Caught Return value of {closure}() must be of type int, float returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, float returned in %s on line %d
 *** Trying bool(true)
 int(1)
 *** Trying bool(false)
 int(0)
 *** Trying NULL
-*** Caught Return value of {closure}() must be of type int, null returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught Return value of {closure}() must be of type int, array returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be of type int, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
-*** Caught Return value of {closure}() must be of type int, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, StringCapable returned in %s on line %d
 *** Trying resource(5) of type (stream)
-*** Caught Return value of {closure}() must be of type int, resource returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, resource returned in %s on line %d
 
 Testing 'float' type:
 *** Trying int(1)
@@ -110,12 +109,11 @@ float(1)
 *** Trying float(1.5)
 float(1.5)
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-float(1)
+*** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
 *** Trying string(1) "a"
-*** Caught Return value of {closure}() must be of type float, string returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
 *** Trying string(0) ""
-*** Caught Return value of {closure}() must be of type float, string returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
 *** Trying int(9223372036854775807)
 float(9.223372036854776E+18)
 *** Trying float(NAN)
@@ -125,18 +123,18 @@ float(1)
 *** Trying bool(false)
 float(0)
 *** Trying NULL
-*** Caught Return value of {closure}() must be of type float, null returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught Return value of {closure}() must be of type float, array returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be of type float, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
-*** Caught Return value of {closure}() must be of type float, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, StringCapable returned in %s on line %d
 *** Trying resource(5) of type (stream)
-*** Caught Return value of {closure}() must be of type float, resource returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, resource returned in %s on line %d
 
 Testing 'string' type:
 *** Trying int(1)
@@ -162,18 +160,18 @@ string(1) "1"
 *** Trying bool(false)
 string(0) ""
 *** Trying NULL
-*** Caught Return value of {closure}() must be of type string, null returned in %s on line %d
+*** Caught {closure}(): Return value must be of type string, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught Return value of {closure}() must be of type string, array returned in %s on line %d
+*** Caught {closure}(): Return value must be of type string, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be of type string, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type string, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
 string(6) "foobar"
 *** Trying resource(5) of type (stream)
-*** Caught Return value of {closure}() must be of type string, resource returned in %s on line %d
+*** Caught {closure}(): Return value must be of type string, resource returned in %s on line %d
 
 Testing 'bool' type:
 *** Trying int(1)
@@ -199,17 +197,17 @@ bool(true)
 *** Trying bool(false)
 bool(false)
 *** Trying NULL
-*** Caught Return value of {closure}() must be of type bool, null returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught Return value of {closure}() must be of type bool, array returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be of type bool, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
-*** Caught Return value of {closure}() must be of type bool, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, StringCapable returned in %s on line %d
 *** Trying resource(5) of type (stream)
-*** Caught Return value of {closure}() must be of type bool, resource returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, resource returned in %s on line %d
 
 Done

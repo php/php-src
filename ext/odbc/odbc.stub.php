@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function odbc_close_all(): void {}
 
 /** @param resource $result_id */
@@ -9,7 +11,7 @@ function odbc_binmode($result_id, int $mode): bool {}
 function odbc_longreadlen($result_id, int $length): bool {}
 
 /**
- * @param resource $result_id
+ * @param resource $connection_id
  * @return resource|false
  */
 function odbc_prepare($connection_id, string $query) {}
@@ -34,6 +36,7 @@ function odbc_exec($connection_id, string $query, int $flags = UNKNOWN) {}
 /**
  * @param resource $connection_id
  * @return resource|false
+ * @alias odbc_exec
  */
 function odbc_do($connection_id, string $query, int $flags = UNKNOWN) {}
 
@@ -45,7 +48,10 @@ function odbc_fetch_object($result, int $rownumber = -1): stdClass|false {}
 function odbc_fetch_array($result, int $rownumber = -1): array|false {}
 #endif
 
-/** @param resource $result_id */
+/**
+ * @param resource $result_id
+ * @param array $result_array
+ */
 function odbc_fetch_into($result_id, &$result_array, int $rownumber = 0): int|false {}
 
 /** @param resource $result_id */
@@ -92,7 +98,10 @@ function odbc_field_type($result_id, int $field_number): string|false {}
 /** @param resource $result_id */
 function odbc_field_len($result_id, int $field_number): int|false {}
 
-/** @param resource $result_id */
+/**
+ * @param resource $result_id
+ * @alias odbc_field_len
+ */
 function odbc_field_precision($result_id, int $field_number): int|false {}
 
 /** @param resource $result_id */

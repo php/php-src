@@ -22,7 +22,7 @@ var_dump($heap->isEmpty());
 $heap->extract();
 var_dump($heap->isEmpty());
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)

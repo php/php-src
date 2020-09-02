@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing readfile() : variation ***\n";
 $mainDir = "readfileVar8";
 $subDir = "readfileVar8Sub";

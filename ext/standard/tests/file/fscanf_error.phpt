@@ -2,11 +2,6 @@
 Test fscanf() function: error conditions
 --FILE--
 <?php
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 echo "*** Testing fscanf() for error conditions ***\n";
 $file_path = __DIR__;
 
@@ -67,7 +62,7 @@ unlink($filename);
 fscanf(): supplied resource is not a valid File-Handle resource
 Different numbers of variable names and field specifiers
 
-Warning: Undefined variable: undefined_var in %s on line %d
+Warning: Undefined variable $undefined_var in %s on line %d
 array(0) {
 }
 Bad scan conversion character "

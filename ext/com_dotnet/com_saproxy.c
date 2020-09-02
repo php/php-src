@@ -105,12 +105,17 @@ static zval *saproxy_read_dimension(zend_object *object, zval *offset, int type,
 		}
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return rv;
+		}
 		VariantInit(&v);
 
 		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
 			   	Z_STRLEN(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
 			   	proxy->dimensions, args, 0);
+
+		efree(args);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(rv, &v, proxy->obj->code_page);
@@ -218,7 +223,10 @@ static void saproxy_write_dimension(zend_object *object, zval *offset, zval *val
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 		ZVAL_COPY_VALUE(&args[i], value);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return;
+		}
 		VariantInit(&v);
 		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
 					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
@@ -372,7 +380,7 @@ static zend_object* saproxy_clone(zend_object *object)
 	memcpy(cloneproxy, proxy, sizeof(*cloneproxy));
 
 	GC_ADDREF(&cloneproxy->obj->zo);
-	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(zval *), 0);
+	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(zval), 0);
 	clone_indices(cloneproxy, proxy, proxy->dimensions);
 
 	return &cloneproxy->std;
@@ -422,7 +430,7 @@ int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index
 	}
 
 	GC_ADDREF(&proxy->obj->zo);
-	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval *), 0);
+	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval), 0);
 
 	if (rel) {
 		clone_indices(proxy, rel, rel->dimensions);
@@ -512,7 +520,8 @@ static const zend_object_iterator_funcs saproxy_iter_funcs = {
 	saproxy_iter_get_data,
 	saproxy_iter_get_key,
 	saproxy_iter_move_forwards,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 

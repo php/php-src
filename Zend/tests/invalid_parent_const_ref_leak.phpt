@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot access parent:: when current class scope has no parent
+Cannot access "parent" when current class scope has no parent

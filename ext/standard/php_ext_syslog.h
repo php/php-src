@@ -28,10 +28,6 @@ PHP_RSHUTDOWN_FUNCTION(syslog);
 #endif
 PHP_MSHUTDOWN_FUNCTION(syslog);
 
-PHP_FUNCTION(openlog);
-PHP_FUNCTION(syslog);
-PHP_FUNCTION(closelog);
-
 #endif
 
 #endif /* PHP_EXT_SYSLOG_H */

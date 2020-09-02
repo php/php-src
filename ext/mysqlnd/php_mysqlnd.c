@@ -24,16 +24,6 @@
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
-/* {{{ mysqlnd_functions[]
- *
- * Every user visible function must have an entry in mysqlnd_functions[].
- */
-static zend_function_entry mysqlnd_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
-
 /* {{{ mysqlnd_minfo_print_hash */
 PHPAPI void
 mysqlnd_minfo_print_hash(zval *values)
@@ -83,8 +73,7 @@ mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
 /* }}} */
 
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mysqlnd)
 {
 	char buf[32];
@@ -143,8 +132,7 @@ PHP_MINFO_FUNCTION(mysqlnd)
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(mysqlnd)
 
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(mysqlnd)
 {
 #if defined(COMPILE_DL_MYSQLND) && defined(ZTS)
@@ -173,8 +161,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 /* }}} */
 
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
 	zend_long long_value;
@@ -190,8 +177,7 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 /* }}} */
 
 
-/* {{{ PHP_INI_BEGIN
-*/
+/* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysqlnd.collect_statistics",	"1", 	PHP_INI_ALL,	OnUpdateBool,	collect_statistics, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_BOOLEAN("mysqlnd.collect_memory_statistics","0",PHP_INI_SYSTEM, OnUpdateBool,	collect_memory_statistics, zend_mysqlnd_globals, mysqlnd_globals)
@@ -217,8 +203,7 @@ PHP_INI_END()
 /* }}} */
 
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(mysqlnd)
 {
 	REGISTER_INI_ENTRIES();
@@ -229,8 +214,7 @@ static PHP_MINIT_FUNCTION(mysqlnd)
 /* }}} */
 
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 {
 	mysqlnd_library_end();
@@ -242,8 +226,7 @@ static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 
 
 #if PHP_DEBUG
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 static PHP_RINIT_FUNCTION(mysqlnd)
 {
 	if (MYSQLND_G(debug)) {
@@ -268,8 +251,7 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 
 
 #if PHP_DEBUG
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 {
 	MYSQLND_DEBUG * dbg = MYSQLND_G(dbg);
@@ -296,14 +278,13 @@ static const zend_module_dep mysqlnd_deps[] = {
 	ZEND_MOD_END
 };
 
-/* {{{ mysqlnd_module_entry
- */
+/* {{{ mysqlnd_module_entry */
 zend_module_entry mysqlnd_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	mysqlnd_deps,
 	"mysqlnd",
-	mysqlnd_functions,
+	NULL,
 	PHP_MINIT(mysqlnd),
 	PHP_MSHUTDOWN(mysqlnd),
 #if PHP_DEBUG

@@ -2,10 +2,6 @@
 Test fgets() function : usage variations - write only modes (Bug #42036)
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets a line from file pointer
-*/
 /* try fgets on files which are opened in non readable modes
     w, wb, wt,
     a, ab, at,

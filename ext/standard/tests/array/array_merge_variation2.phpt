@@ -2,11 +2,6 @@
 Test array_merge() function : usage variations - Pass different data types as $arr2 arg
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass different data types as $arr2 argument to array_merge() to test behaviour
  */
@@ -173,7 +168,7 @@ array_merge(): Argument #2 must be of type array, string given
 array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 22 --
-array_merge(): Argument #2 must be of type array, object given
+array_merge(): Argument #2 must be of type array, classA given
 
 -- Iteration 23 --
 array_merge(): Argument #2 must be of type array, null given

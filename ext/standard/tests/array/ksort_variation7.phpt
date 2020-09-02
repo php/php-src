@@ -2,11 +2,6 @@
 Test ksort() function : usage variations - sort array with diff. sub arrays
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing ksort() by providing arrays containing sub arrays for $array argument
  * with flowing flag values:

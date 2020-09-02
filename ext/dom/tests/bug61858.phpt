@@ -14,6 +14,7 @@ $attr    = $example->getAttributeNode('a');
 
 var_dump($attr);
 print_r($attr);
+?>
 --EXPECTF--
 object(DOMAttr)#%d (%d) {
 %A

@@ -167,8 +167,8 @@ int main() {
 }
 ]])],[dnl
     AC_DEFINE(HAVE_SHM_IPC, 1, [Define if you have SysV IPC SHM support])
-    msg=yes],[msg=no],[msg=no])
-  AC_MSG_RESULT([$msg])
+    have_shm_ipc=yes],[have_shm_ipc=no],[have_shm_ipc=no])
+  AC_MSG_RESULT([$have_shm_ipc])
 
   AC_MSG_CHECKING(for mmap() using MAP_ANON shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -219,10 +219,10 @@ int main() {
 }
 ]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
-    msg=yes],[msg=no],[msg=no])
-  AC_MSG_RESULT([$msg])
+    have_shm_mmap_anon=yes],[have_shm_mmap_anon=no],[have_shm_mmap_anon=no])
+  AC_MSG_RESULT([$have_shm_mmap_anon=yes])
 
-  PHP_CHECK_FUNC_LIB(shm_open, rt)
+  PHP_CHECK_FUNC_LIB(shm_open, rt, root)
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
@@ -290,6 +290,7 @@ int main() {
 ]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
     AC_MSG_RESULT([yes])
+    have_shm_mmap_posix=yes
     PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
   ],[
     AC_MSG_RESULT([no])
@@ -337,6 +338,10 @@ int main() {
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
+
+  if test "$have_shm_ipc" != "yes" && test "$have_shm_mmap_posix" != "yes" && test "$have_shm_mmap_anon" != "yes"; then
+    AC_MSG_ERROR([No supported shared memory caching support was found when configuring opcache. Check config.log for any errors or missing dependencies.])
+  fi
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)

@@ -60,10 +60,10 @@ Static property / too many args:
 ReflectionProperty::getValue() expects at most 1 parameter, 2 given
 
 Protected property:
-Cannot access non-public member TestClass::$prot
+Cannot access non-public property TestClass::$prot
 
 Invalid instance:
 Given object is not an instance of the class this property was declared in
 
 Missing instance:
-No object provided for getValue() on instance property
+ReflectionProperty::getValue(): Argument #1 ($object) must be provided for instance properties

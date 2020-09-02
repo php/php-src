@@ -1,56 +1,84 @@
 <?php
 
+/** @generate-function-entries */
+
 interface Traversable {}
 
 interface IteratorAggregate extends Traversable
 {
     /** @return Traversable */
-    function getIterator();
+    public function getIterator();
 }
 
 interface Iterator extends Traversable
 {
-    function current();
+    /** @return mixed */
+    public function current();
 
     /** @return void */
-    function next();
+    public function next();
 
-    function key();
+    /** @return mixed */
+    public function key();
 
     /** @return bool */
-    function valid();
+    public function valid();
 
     /** @return void */
-    function rewind();
+    public function rewind();
 }
 
 interface ArrayAccess
 {
-    function offsetExists($offset);
+    /** @return bool */
+    public function offsetExists(mixed $offset);
 
-    /* actually this should be return by ref but atm cannot be */
-    function offsetGet($offset);
+    /**
+     * Actually this should be return by ref but atm cannot be.
+     * @return mixed
+     */
+    public function offsetGet(mixed $offset);
 
-    function offsetSet($offset, $value);
+    /** @return void */
+    public function offsetSet(mixed $offset, mixed $value);
 
-    function offsetUnset($offset);
+    /** @return void */
+    public function offsetUnset(mixed $offset);
 }
 
 interface Serializable
 {
     /** @return string */
-    function serialize();
+    public function serialize();
 
-    function unserialize(string $serialized);
+    /** @return void */
+    public function unserialize(string $serialized);
 }
 
 interface Countable
 {
     /** @return int */
-    function count();
+    public function count();
 }
 
 interface Stringable
 {
-    function __toString(): string;
+    public function __toString(): string;
+}
+
+final class InternalIterator implements Iterator
+{
+    private function __construct();
+
+    /** @return mixed */
+    public function current();
+
+    /** @return mixed */
+    public function key();
+
+    public function next(): void;
+
+    public function valid(): bool;
+
+    public function rewind(): void;
 }

@@ -97,8 +97,7 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 #  define PHP_GAI_STRERROR(x) (gai_strerror(x))
 #else
 #  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
-/* {{{ php_gai_strerror
- */
+/* {{{ php_gai_strerror */
 static const char *php_gai_strerror(int code)
 {
         static struct {
@@ -136,8 +135,7 @@ static const char *php_gai_strerror(int code)
 #endif
 #endif
 
-/* {{{ php_network_freeaddresses
- */
+/* {{{ php_network_freeaddresses */
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 {
 	struct sockaddr **sap;
@@ -768,7 +766,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 /* {{{ php_network_connect_socket_to_host */
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
-		int *error_code, char *bindto, unsigned short bindport, long sockopts
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts
 		)
 {
 	int num_addrs, n, fatal = 0;
@@ -918,7 +916,7 @@ skip_bind:
 			if (timeout) {
 				gettimeofday(&time_now, NULL);
 
-				if (timercmp(&time_now, &limit_time, >=)) {
+				if (!timercmp(&time_now, &limit_time, <)) {
 					/* time limit expired; don't attempt any further connections */
 					fatal = 1;
 				} else {
@@ -1307,7 +1305,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 #endif
 #endif
 
-PHPAPI struct hostent*	php_network_gethostbyname(char *name) {
+PHPAPI struct hostent*	php_network_gethostbyname(const char *name) {
 #if !defined(HAVE_GETHOSTBYNAME_R)
 	return gethostbyname(name);
 #else

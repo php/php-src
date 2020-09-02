@@ -2,13 +2,6 @@
 Test in_array() function : usage variations - haystack as resource/multi dimensional array
 --FILE--
 <?php
-/*
- * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns TRUE
- *              if it is found in the array, FALSE otherwise.
- * Source Code: ext/standard/array.c
-*/
-
 /* Test in_array() with haystack as resource and multidimensional arrays */
 
 /* checking for Resources */
@@ -64,14 +57,14 @@ bool(true)
 bool(false)
 
 *** Testing miscelleneos inputs with in_array() ***
-bool(true)
 bool(false)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(false)
 bool(false)
 bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 Done

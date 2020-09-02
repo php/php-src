@@ -2,12 +2,6 @@
 Test base64_decode() function : basic functionality - strict vs non-strict with non-base64 chars.
 --FILE--
 <?php
-/* Prototype  : proto string base64_decode(string str[, bool strict])
- * Description: Decodes string using MIME base64 algorithm
- * Source code: ext/standard/base64.c
- * Alias to functions:
- */
-
 echo "Decode 'hello world!':\n";
 $noWhiteSpace = "aGVsbG8gd29ybGQh";
 var_dump(base64_decode($noWhiteSpace));

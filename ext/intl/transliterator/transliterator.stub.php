@@ -1,42 +1,50 @@
 <?php
 
+/** @generate-function-entries */
+
 class Transliterator
 {
     final private function __construct() {}
 
-    /** @return Transliterator|null */
+    /**
+     * @return Transliterator|null
+     * @alias transliterator_create
+     */
     public static function create(string $id, int $direction = Transliterator::FORWARD) {}
 
-    /** @return Transliterator|null */
+    /**
+     * @return Transliterator|null
+     * @alias transliterator_create_from_rules
+     */
     public static function createFromRules(string $rules, int $direction = Transliterator::FORWARD) {}
 
-    /** @return Transliterator|null */
+    /**
+     * @return Transliterator|null
+     * @alias transliterator_create_inverse
+     */
     public function createInverse() {}
 
-    /** @return array|false */
+    /**
+     * @return array|false
+     * @alias transliterator_list_ids
+     */
     public static function listIDs() {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias transliterator_transliterate
+     */
     public function transliterate(string $subject, int $start = 0, int $end = -1) {}
 
-    /** @return int|false */
+    /**
+     * @return int|false
+     * @alias transliterator_get_error_code
+     */
     public function getErrorCode() {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias transliterator_get_error_message
+     */
     public function getErrorMessage() {}
 }
-
-function transliterator_create(string $id, int $direction = Transliterator::FORWARD): ?Transliterator {}
-
-function transliterator_create_from_rules(string $rules, int $direction = Transliterator::FORWARD): ?Transliterator {}
-
-function transliterator_list_ids(): array|false {}
-
-function transliterator_create_inverse(Transliterator $orig_trans): ?Transliterator {}
-
-/** @param Transliterator|string */
-function transliterator_transliterate($transliterator, string $subject, int $start = 0, int $end = -1): string|false {}
-
-function transliterator_get_error_code(Transliterator $trans): int|false {}
-
-function transliterator_get_error_message(Transliterator $trans): string|false {}

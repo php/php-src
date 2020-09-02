@@ -19,16 +19,11 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_locale.h"
 #include "intl_convert.h"
 
 #include <zend_API.h>
 
-/* {{{ proto string Collator::getLocale( int $type )
- * Gets the locale name of the collator. }}} */
-/* {{{ proto string collator_get_locale( Collator $coll, int $type )
- * Gets the locale name of the collator.
- */
+/* {{{ Gets the locale name of the collator. */
 PHP_FUNCTION( collator_get_locale )
 {
 	zend_long   type        = 0;

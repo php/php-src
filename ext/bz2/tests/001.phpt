@@ -6,46 +6,47 @@ bzopen() and invalid parameters
 <?php
 
 try {
-    var_dump(bzopen("", ""));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
-
- var_dump(bzopen("", "r"));
-var_dump(bzopen("", "w"));
-
-try {
-    var_dump(bzopen("", "x"));
+    var_dump(bzopen("", "r"));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 try {
-    var_dump(bzopen("", "rw"));
+    var_dump(bzopen("", "w"));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 try {
-    var_dump(bzopen("no_such_file", "r"));
+    var_dump(bzopen("no_such_file", ""));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+
+try {
+    var_dump(bzopen("no_such_file", "x"));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(bzopen("no_such_file", "rw"));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+var_dump(bzopen("no_such_file", "r"));
 
 $fp = fopen(__FILE__,"r");
 var_dump(bzopen($fp, "r"));
 
 ?>
 --EXPECTF--
-'' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.
-
-Warning: bzopen(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: bzopen(): Filename cannot be empty in %s on line %d
-bool(false)
-'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.
-'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.
+bzopen(): Argument #1 ($file) cannot be empty
+bzopen(): Argument #1 ($file) cannot be empty
+bzopen(): Argument #2 ($mode) must be either "r" or "w"
+bzopen(): Argument #2 ($mode) must be either "r" or "w"
+bzopen(): Argument #2 ($mode) must be either "r" or "w"
 
 Warning: bzopen(no_such_file): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

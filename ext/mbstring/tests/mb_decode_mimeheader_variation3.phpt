@@ -7,12 +7,6 @@ function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is n
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_decode_mimeheader(string string)
- * Description: Decodes the MIME "encoded-word" in the string
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
-
 echo "*** Testing mb_decode_mimeheader() : variation ***\n";
 mb_internal_encoding('iso-8859-7');
 

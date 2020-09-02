@@ -1,90 +1,108 @@
 <?php
 
+/** @generate-function-entries */
+
 class NumberFormatter
 {
     public function __construct(string $locale, int $style, string $pattern = "") {}
 
-    /** @return NumberFormatter|null */
+    /**
+     * @return NumberFormatter|null
+     * @alias numfmt_create
+     */
     public static function create(string $locale, int $style, string $pattern = "") {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias numfmt_format
+     */
     public function format(int|float $value, int $type = NumberFormatter::TYPE_DEFAULT) {}
 
-    /** @return int|float|false */
+    /**
+     * @param int $position
+     * @return int|float|false
+     * @alias numfmt_parse
+     */
     public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE, &$position = null) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias numfmt_format_currency
+     */
     public function formatCurrency(float $value, string $currency) {}
 
-    /** @return float|false */
+    /**
+     * @param string $currency
+     * @param int $position
+     * @return float|false
+     * @alias numfmt_parse_currency
+     */
     public function parseCurrency(string $value, &$currency, &$position = null) {}
 
     /**
      * @param int|float $value
      * @return bool
+     * @alias numfmt_set_attribute
      */
     public function setAttribute(int $attr, $value) {}
 
-    /** @return int|float|false */
+    /**
+     * @return int|float|false
+     * @alias numfmt_get_attribute
+     */
     public function getAttribute(int $attr) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias numfmt_set_text_attribute
+     */
     public function setTextAttribute(int $attr, string $value) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias numfmt_get_text_attribute
+     */
     public function getTextAttribute(int $attr) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias numfmt_set_symbol
+     */
     public function setSymbol(int $attr, string $value) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias numfmt_get_symbol
+     */
     public function getSymbol(int $attr) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias numfmt_set_pattern
+     */
     public function setPattern(string $pattern) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias numfmt_get_pattern
+     */
     public function getPattern() {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias numfmt_get_locale
+     */
     public function getLocale(int $type = ULOC_ACTUAL_LOCALE) {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @alias numfmt_get_error_code
+     */
     public function getErrorCode() {}
 
-    /** @return string */
+    /**
+     * @return string
+     * @alias numfmt_get_error_message
+     */
     public function getErrorMessage() {}
 }
-
-function numfmt_create(string $locale, int $style, string $pattern = ""): ?NumberFormatter {}
-
-function numfmt_format(NumberFormatter $fmt, int|float $value, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
-
-function numfmt_parse(NumberFormatter $fmt, string $value, int $type = NumberFormatter::TYPE_DOUBLE, &$position = null): int|float|false {}
-
-function numfmt_format_currency(NumberFormatter $fmt, float $value, string $currency): string|false {}
-
-function numfmt_parse_currency(NumberFormatter $fmt, string $value, &$currency, &$position = null): float|false {}
-
-/** @param int|float $value */
-function numfmt_set_attribute(NumberFormatter $fmt, int $attr, $value): bool {}
-
-function numfmt_get_attribute(NumberFormatter $fmt, int $attr): int|double|false {}
-
-function numfmt_set_text_attribute(NumberFormatter $fmt, int $attr, string $value): bool {}
-
-function numfmt_get_text_attribute(NumberFormatter $fmt, int $attr): string|false {}
-
-function numfmt_set_symbol(NumberFormatter $fmt, int $attr, string $value): bool {}
-
-function numfmt_get_symbol(NumberFormatter $fmt, int $attr): string|false {}
-
-function numfmt_set_pattern(NumberFormatter $fmt, string $pattern): bool {}
-
-function numfmt_get_pattern(NumberFormatter $fmt): string|false {}
-
-function numfmt_get_locale(NumberFormatter $fmt, int $type = ULOC_ACTUAL_LOCALE): string|false {}
-
-function numfmt_get_error_code(NumberFormatter $fmt): int {}
-
-function numfmt_get_error_message(NumberFormatter $fmt): string {}

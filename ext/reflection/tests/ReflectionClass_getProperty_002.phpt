@@ -56,9 +56,9 @@ try {
 Check invalid params:
 ReflectionClass::getProperty() expects exactly 1 parameter, 0 given
 ReflectionClass::getProperty() expects exactly 1 parameter, 2 given
-Property  does not exist
-Property 1 does not exist
-Property 1.5 does not exist
-Property 1 does not exist
+Property C::$ does not exist
+Property C::$1 does not exist
+Property C::$1.5 does not exist
+Property C::$1 does not exist
 ReflectionClass::getProperty(): Argument #1 ($name) must be of type string, array given
-ReflectionClass::getProperty(): Argument #1 ($name) must be of type string, object given
+ReflectionClass::getProperty(): Argument #1 ($name) must be of type string, C given

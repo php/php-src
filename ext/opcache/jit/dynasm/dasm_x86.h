@@ -17,11 +17,11 @@
 
 /* Action definitions. DASM_STOP must be 255. */
 enum {
-  DASM_DISP = 233,
+  DASM_DISP = 231,
   DASM_IMM_S, DASM_IMM_B, DASM_IMM_W, DASM_IMM_D, DASM_IMM_WB, DASM_IMM_DB,
   DASM_VREG, DASM_SPACE, DASM_SETLABEL, DASM_REL_A, DASM_REL_LG, DASM_REL_PC,
-  DASM_IMM_LG, DASM_IMM_PC, DASM_LABEL_LG, DASM_LABEL_PC, DASM_ALIGN,
-  DASM_EXTERN, DASM_ESC, DASM_MARK, DASM_SECTION, DASM_STOP
+  DASM_IMM_LG, DASM_IMM_LG64, DASM_IMM_PC, DASM_IMM_PC64, DASM_LABEL_LG, DASM_LABEL_PC,
+  DASM_ALIGN, DASM_EXTERN, DASM_ESC, DASM_MARK, DASM_SECTION, DASM_STOP
 };
 
 /* Maximum number of section buffer positions for a single dasm_put() call. */
@@ -220,6 +220,7 @@ void dasm_put(Dst_DECL, int start, ...)
     } else {
       int *pl, n;
       switch (action) {
+      case DASM_IMM_LG64: ofs += 4;
       case DASM_REL_LG:
       case DASM_IMM_LG:
 	n = *p++; pl = D->lglabels + n;
@@ -228,6 +229,7 @@ void dasm_put(Dst_DECL, int start, ...)
 	pl -= 246; n = *pl;
 	if (n < 0) n = 0;  /* Start new chain for fwd rel if label exists. */
 	goto linkrel;
+	  case DASM_IMM_PC64: ofs += 4;
       case DASM_REL_PC:
       case DASM_IMM_PC: pl = D->pclabels + va_arg(ap, int); CKPL(pc, PC);
       putrel:
@@ -332,10 +334,11 @@ int dasm_link(Dst_DECL, size_t *szp)
 	  pos += 2;
 	  break;
 	}
-	case DASM_SPACE: case DASM_IMM_LG: case DASM_VREG: p++;
+	case DASM_SPACE: case DASM_IMM_LG: case DASM_IMM_LG64: case DASM_VREG: p++;
 	case DASM_DISP: case DASM_IMM_S: case DASM_IMM_B: case DASM_IMM_W:
 	case DASM_IMM_D: case DASM_IMM_WB: case DASM_IMM_DB:
-	case DASM_SETLABEL: case DASM_REL_A: case DASM_IMM_PC: pos++; break;
+	case DASM_SETLABEL: case DASM_REL_A: case DASM_IMM_PC: case DASM_IMM_PC64:
+	  pos++; break;
 	case DASM_LABEL_LG: p++;
 	case DASM_LABEL_PC: b[pos++] += ofs; break; /* Fix label offset. */
 	case DASM_ALIGN: ofs -= (b[pos++]+ofs)&*p++; break; /* Adjust ofs. */
@@ -359,10 +362,13 @@ int dasm_link(Dst_DECL, size_t *szp)
 #ifndef DASM_ALIGNED_WRITES
 typedef ZEND_SET_ALIGNED(1, unsigned short unaligned_short);
 typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_int);
+typedef ZEND_SET_ALIGNED(1, uint64_t unaligned_uint64_t);
 #define dasmw(x) \
   do { *((unaligned_short *)cp) = (unsigned short)(x); cp+=2; } while (0)
 #define dasmd(x) \
   do { *((unaligned_int *)cp) = (unsigned int)(x); cp+=4; } while (0)
+#define dasmq(x) \
+  do { *((unaligned_uint64_t *)cp) = (uint64_t)(x); cp+=8; } while (0)
 #else
 #define dasmw(x)	do { dasmb(x); dasmb((x)>>8); } while (0)
 #define dasmd(x)	do { dasmw(x); dasmw((x)>>16); } while (0)
@@ -441,6 +447,16 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  int *pb = DASM_POS2PTR(D, n);
 	  n = *pb < 0 ? pb[1] : (*pb + (int)(ptrdiff_t)base);
 	  goto wd;
+	}
+	case DASM_IMM_LG64: {
+	  p++;
+	  if (n < 0)
+	    dasmq((ptrdiff_t)D->globals[-n]);
+	}
+	case DASM_IMM_PC64: {
+	  int *pb = DASM_POS2PTR(D, n);
+	  dasmq(*pb < 0 ? pb[1] : (*pb + (ptrdiff_t)base));
+	  break;
 	}
 	case DASM_LABEL_LG: {
 	  int idx = *p++;

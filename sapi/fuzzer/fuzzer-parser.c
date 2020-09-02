@@ -26,20 +26,14 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	char *s;
 	if (Size > 32 * 1024) {
 		/* Large inputs have a large impact on fuzzer performance,
 		 * but are unlikely to be necessary to reach new codepaths. */
 		return 0;
 	}
 
-	s = malloc(Size+1);
-	memcpy(s, Data, Size);
-	s[Size] = '\0';
+	fuzzer_do_request_from_buffer("fuzzer.php", (const char *) Data, Size, /* execute */ 0);
 
-	fuzzer_do_request_from_buffer("fuzzer.php", s, Size);
-
-	/* Do not free s: fuzzer_do_request_from_buffer() takes ownership of the allocation. */
 	return 0;
 }
 

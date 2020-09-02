@@ -29,7 +29,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 mysqli_result object is already closed
 mysqli_result object is already closed
 Done

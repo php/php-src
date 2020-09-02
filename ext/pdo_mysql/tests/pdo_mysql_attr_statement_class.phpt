@@ -79,7 +79,7 @@ $db = MySQLPDOTest::factory();
     $stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 2');
 
     class mystatement5 extends mystatement4 {
-        public function fetchAll($fetch_style = 1, $column_index = 1, $ctor_args = array()) {
+        public function fetchAll($fetch_style = 1, ...$fetch_args) {
             return "no data :)";
         }
     }

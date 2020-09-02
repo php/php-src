@@ -39,7 +39,7 @@ try  {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable: f in %s on line %d
+Warning: Undefined variable $f in %s on line %d
 string(34) "Value of type null is not callable"
 string(31) "Call to undefined method A::y()"
 string(31) "Call to undefined method A::y()"

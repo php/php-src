@@ -2,11 +2,6 @@
 Test next() function : usage variation - Mulit-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : mixed next(array $array_arg)
- * Description: Move array argument's internal pointer to the next element and return it
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test next() when passed:
  * 1. a two-dimensional array

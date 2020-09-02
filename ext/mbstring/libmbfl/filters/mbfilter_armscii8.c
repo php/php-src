@@ -26,10 +26,6 @@
  * "armenian code filter and converter"
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_armscii8.h"
 #include "unicode_table_armscii8.h"

@@ -9,12 +9,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /*
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
-/*
  * Create more than one temporary directory & subdirectory and check if dir() function can open
  * those directories when wildcard characters are used to refer to them.
  */

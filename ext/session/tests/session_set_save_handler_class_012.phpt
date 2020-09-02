@@ -11,12 +11,6 @@ session.gc_probability=0
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(SessionHandler $handler [, bool $register_shutdown_function = true])
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() : incorrect arguments for existing handler open ***\n";
 
 class MySession extends SessionHandler {
@@ -45,6 +39,7 @@ try {
 }
 
 var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i, $_SESSION);
+?>
 --EXPECTF--
 *** Testing session_set_save_handler() : incorrect arguments for existing handler open ***
 Open 
@@ -52,7 +47,7 @@ Open
 Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line %d
 SessionHandler::open() expects exactly 2 parameters, 0 given
 
-Warning: Undefined variable: _SESSION in %s on line %d
+Warning: Undefined variable $_SESSION in %s on line %d
 string(0) ""
 string(5) "files"
 string(4) "user"

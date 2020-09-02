@@ -2,11 +2,6 @@
 Test sscanf() function : basic functionality - integer format
 --FILE--
 <?php
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Testing sscanf() : basic functionality
 */

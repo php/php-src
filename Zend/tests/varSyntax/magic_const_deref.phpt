@@ -19,6 +19,6 @@ test();
 --EXPECTF--
 string(1) "t"
 
-Warning: Trying to get property 'prop' of non-object in %s on line %d
+Warning: Attempt to read property "prop" on string in %s on line %d
 NULL
 Call to a member function method() on string

@@ -2,12 +2,6 @@
 Test sort() function : usage variations - sort octal values
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array.
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing sort() by providing different octal array for $array argument
  * with following flag values

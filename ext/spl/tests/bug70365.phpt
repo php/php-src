@@ -32,6 +32,7 @@ function ptr2str($ptr)
     }
     return $out;
 }
+?>
 --EXPECTF--
 array(5) {
   [0]=>

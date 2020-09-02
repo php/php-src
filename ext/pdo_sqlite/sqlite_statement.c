@@ -284,7 +284,7 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 
 	str = sqlite3_column_name(S->stmt, colno);
 	stmt->columns[colno].name = zend_string_init(str, strlen(str), 0);
-	stmt->columns[colno].maxlen = 0xffffffff;
+	stmt->columns[colno].maxlen = SIZE_MAX;
 	stmt->columns[colno].precision = 0;
 
 	switch (sqlite3_column_type(S->stmt, colno)) {
@@ -339,7 +339,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	if (!S->stmt) {
 		return FAILURE;
 	}
-	if(colno >= sqlite3_data_count(S->stmt)) {
+	if(colno >= sqlite3_column_count(S->stmt)) {
 		/* error invalid column */
 		pdo_sqlite_error_stmt(stmt);
 		return FAILURE;

@@ -26,14 +26,16 @@ function foo() {
 }
 ?>
 --EXPECTF--
-$_main: ; (lines=1, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %ssccp_012.php:1-17
-L0 (17):    RETURN int(1)
+$_main:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %ssccp_012.php:1-17
+0000 RETURN int(1)
 
-foo: ; (lines=3, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %ssccp_012.php:2-15
-L0 (10):    ECHO string("1")
-L1 (14):    ECHO string("4")
-L2 (15):    RETURN null
+foo:
+     ; (lines=3, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %ssccp_012.php:2-15
+0000 ECHO string("1")
+0001 ECHO string("4")
+0002 RETURN null

@@ -32,7 +32,7 @@
 #endif
 #include "zend_exceptions.h"
 
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 #	define pdo_mysql_init(persistent) mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, persistent)
 #else
 #	define pdo_mysql_init(persistent) mysql_init(NULL)
@@ -101,8 +101,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 
 	if (!dbh->methods) {
 		PDO_DBG_INF("Throwing exception");
-		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "SQLSTATE[%s] [%d] %s",
-				*pdo_err, einfo->errcode, einfo->errmsg);
+		pdo_throw_exception(einfo->errcode, einfo->errmsg, pdo_err);
 	}
 
 	PDO_DBG_RETURN(einfo->errcode);
@@ -224,7 +223,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 
 	if (S->num_params) {
 		S->params_given = 0;
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 		S->params = NULL;
 #else
 		S->params = ecalloc(S->num_params, sizeof(MYSQL_BIND));
@@ -444,7 +443,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_STRING(return_value, (char *)mysql_get_host_info(H->server));
 			break;
 		case PDO_ATTR_SERVER_INFO: {
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 			zend_string *tmp;
 
 			if (mysqlnd_stat(H->server, &tmp) == PASS) {
@@ -577,7 +576,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		|CLIENT_MULTI_RESULTS
 #endif
 		;
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 	size_t dbname_len = 0;
 	size_t password_len = 0;
 #endif
@@ -610,13 +609,20 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 	if (dbh->is_persistent) {
 		mysqlnd_restart_psession(H->server);
 	}
 #endif
 
 	dbh->driver_data = H;
+
+	dbh->skip_param_evt =
+		1 << PDO_PARAM_EVT_FREE |
+		1 << PDO_PARAM_EVT_EXEC_POST |
+		1 << PDO_PARAM_EVT_FETCH_PRE |
+		1 << PDO_PARAM_EVT_FETCH_POST |
+		1 << PDO_PARAM_EVT_NORMALIZE;
 
 #ifndef PDO_USE_MYSQLND
 	H->max_buffer_size = 1024*1024;
@@ -628,7 +634,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	/* handle MySQL options */
 	if (driver_options) {
 		zend_long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
-		zend_long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
+		unsigned int local_infile = (unsigned int) pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
 		zend_string *init_cmd = NULL;
 #ifndef PDO_USE_MYSQLND
 		zend_string *default_file = NULL, *default_group = NULL;
@@ -779,7 +785,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	} else {
 #if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
 		// in case there are no driver options disable 'local infile' explicitly
-		zend_long local_infile = 0;
+		unsigned int local_infile = 0;
 		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
 			pdo_mysql_error(dbh);
 			goto cleanup;
@@ -787,12 +793,10 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 	}
 
-#ifdef PDO_MYSQL_HAS_CHARSET
 	if (vars[0].optval && mysql_options(H->server, MYSQL_SET_CHARSET_NAME, vars[0].optval)) {
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
-#endif
 
 	dbname = vars[1].optval;
 	host = vars[2].optval;

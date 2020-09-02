@@ -8,6 +8,7 @@ fopen("php://fd/-2", "w");
 fopen("php://fd/1/", "w");
 
 echo "\nDone.\n";
+?>
 --EXPECTF--
 Warning: fopen(): Invalid php:// URL specified in %s on line %d
 

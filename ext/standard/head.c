@@ -28,38 +28,40 @@
 
 
 /* Implementation of the language Header() function */
-/* {{{ proto void header(string header [, bool replace, [int http_response_code]])
-   Sends a raw HTTP header */
+/* {{{ Sends a raw HTTP header */
 PHP_FUNCTION(header)
 {
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
+	char *line;
 	size_t len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(ctr.line, len)
+		Z_PARAM_STRING(line, len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(rep)
 		Z_PARAM_LONG(ctr.response_code)
 	ZEND_PARSE_PARAMETERS_END();
 
+	ctr.line = line;
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
 /* }}} */
 
-/* {{{ proto void header_remove([string name])
-   Removes an HTTP header previously set using header() */
+/* {{{ Removes an HTTP header previously set using header() */
 PHP_FUNCTION(header_remove)
 {
 	sapi_header_line ctr = {0};
+	char *line = NULL;
 	size_t len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(ctr.line, len)
+		Z_PARAM_STRING(line, len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	ctr.line = line;
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
@@ -223,8 +225,7 @@ static void php_head_parse_cookie_options_array(zval *options, zend_long *expire
 	}
 }
 
-/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
-                  setcookie(string name [, string value [, array options]])
+/* {{{ setcookie(string name [, string value [, array options]])
    Send a cookie */
 PHP_FUNCTION(setcookie)
 {
@@ -278,8 +279,7 @@ PHP_FUNCTION(setcookie)
 }
 /* }}} */
 
-/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
-                  setrawcookie(string name [, string value [, array options]])
+/* {{{ setrawcookie(string name [, string value [, array options]])
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
@@ -334,8 +334,7 @@ PHP_FUNCTION(setrawcookie)
 /* }}} */
 
 
-/* {{{ proto bool headers_sent([string &$file [, int &$line]])
-   Returns true if headers have already been sent, false otherwise */
+/* {{{ Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
 	zval *arg1 = NULL, *arg2 = NULL;
@@ -384,8 +383,7 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg)
 	}
 }
 
-/* {{{ proto array headers_list(void)
-   Return list of headers to be sent / already sent */
+/* {{{ Return list of headers to be sent / already sent */
 PHP_FUNCTION(headers_list)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -395,8 +393,7 @@ PHP_FUNCTION(headers_list)
 }
 /* }}} */
 
-/* {{{ proto int http_response_code([int response_code])
-   Sets a response code, or returns the current HTTP response code */
+/* {{{ Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {
 	zend_long response_code = 0;

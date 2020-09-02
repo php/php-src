@@ -2,11 +2,6 @@
 Test compact() function : usage variations  - arrays containing references.
 --FILE--
 <?php
-/* Prototype  : proto array compact(mixed var_names [, mixed ...])
-* Description: Creates a hash containing variables and their values
-* Source code: ext/standard/array.c
-* Alias to functions:
-*/
 /*
 * compact variations - arrays with references
 */

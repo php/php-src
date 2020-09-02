@@ -271,7 +271,12 @@ END_EXTERN_C()
 #define ZEND_GET_CALLED_CLASS           192
 #define ZEND_GET_TYPE                   193
 #define ZEND_ARRAY_KEY_EXISTS           194
+#define ZEND_MATCH                      195
+#define ZEND_CASE_STRICT                196
+#define ZEND_MATCH_ERROR                197
+#define ZEND_JMP_NULL                   198
+#define ZEND_CHECK_UNDEF_ARGS           199
 
-#define ZEND_VM_LAST_OPCODE             194
+#define ZEND_VM_LAST_OPCODE             199
 
 #endif

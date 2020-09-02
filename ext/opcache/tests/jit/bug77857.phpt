@@ -22,6 +22,6 @@ function test() {
 }
 var_dump(test());
 ?>
---EXPECTF--
+--EXPECT--
 float(1)
 float(1)

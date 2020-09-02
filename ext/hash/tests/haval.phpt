@@ -22,6 +22,7 @@ for($pass=3; $pass<=5; $pass++)
         $algo = sprintf('haval%d,%d',$bits,$pass);
         echo $algo . ': ' . hash($algo,'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789') . "\n";
     }
+?>
 --EXPECT--
 Empty String
 haval128,3: c68f39913f901f3ddf44c707357a7d70

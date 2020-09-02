@@ -2,11 +2,6 @@
 Test base_convert() function :  error conditions - incorrect input
 --FILE--
 <?php
-/* Prototype  : string base_convert  ( string $number  , int $frombase  , int $tobase  )
- * Description: Convert a number between arbitrary bases.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing base_convert() : error conditions ***\n";
 
 // get a class
@@ -34,6 +29,6 @@ try {
 ?>
 --EXPECT--
 *** Testing base_convert() : error conditions ***
-Invalid `from base' (1)
-Invalid `to base' (37)
-Object of class classA could not be converted to string
+base_convert(): Argument #2 ($frombase) must be between 2 and 36 (inclusive)
+base_convert(): Argument #3 ($tobase) must be between 2 and 36 (inclusive)
+base_convert(): Argument #1 ($number) must be of type string, classA given

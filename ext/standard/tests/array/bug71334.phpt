@@ -21,7 +21,7 @@ class myClass
             throw new Exception('Missing Y: "' . $y . '"');
         }
 
-        return $x < $y;
+        return $x <=> $y;
     }
 
     public function __construct()

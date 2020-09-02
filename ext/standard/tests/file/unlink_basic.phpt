@@ -2,9 +2,6 @@
 Testing unlink() function : basic functionality
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 $file_path = __DIR__;
 

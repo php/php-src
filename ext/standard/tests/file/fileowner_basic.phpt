@@ -2,11 +2,6 @@
 Test fileowner() function: basic functionality
 --FILE--
 <?php
-/* Prototype: int fileowner ( string $filename )
- * Description: Returns the user ID of the owner of the file, or
- *              FALSE in case of an error.
- */
-
 echo "*** Testing fileowner(): basic functionality ***\n";
 
 echo "-- Testing with the file or directory created by owner --\n";

@@ -7,15 +7,14 @@
  7. ext/standard/scanf
  8. ext/standard/strnatcmp.c
  9. ext/standard/uuencode
-10. libxmlrpc ext/xmlrpc
-11. main/snprintf.c
-12. main/strlcat
-13. main/strlcpy
-14. libgd (ext/gd)
-15. ext/phar portions of tar implementations
-16. ext/phar/zip.c portion extracted from libzip
-17. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/LICENSE
-18. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
+10. main/snprintf.c
+11. main/strlcat
+12. main/strlcpy
+13. libgd (ext/gd)
+14. ext/phar portions of tar implementations
+15. ext/phar/zip.c portion extracted from libzip
+16. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/LICENSE
+17. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
 
 
 3. pcre2lib (ext/pcre)
@@ -355,32 +354,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
-10. libxmlrpc ext/xmlrpc
-
-Copyright 2000 Epinions, Inc.
-
-Subject to the following 3 conditions, Epinions, Inc.  permits you, free
-of charge, to (a) use, copy, distribute, modify, perform and display this
-software and associated documentation files (the "Software"), and (b)
-permit others to whom the Software is furnished to do so as well.
-
-1) The above copyright notice and this permission notice shall be included
-without modification in all copies or substantial portions of the
-Software.
-
-2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
-ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
-IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE OR NONINFRINGEMENT.
-
-3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
-SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
-OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
-NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
-DAMAGES.
-
-
-11. main/snprintf.c
+10. main/snprintf.c
 
 Copyright (c) 2002, 2006 Todd C. Miller <Todd.Miller@courtesan.com>
 
@@ -455,8 +429,8 @@ SIO stdio-replacement strx_* functions by Panos Tsirigotis
 <panos@alumni.cs.colorado.edu> for xinetd.
 
 
-12. main/strlcat
-13. main/strlcpy
+11. main/strlcat
+12. main/strlcpy
 
 Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
 All rights reserved.
@@ -484,7 +458,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-14. libgd (ext/gd)
+13. libgd (ext/gd)
 
 * Portions copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
   2002, 2003, 2004 by Cold Spring Harbor Laboratory. Funded under
@@ -554,7 +528,7 @@ Avenue Software Corporation for their prior contributions.
 END OF COPYRIGHT STATEMENT
 
 
-15. ext/phar portions of tar implementations
+14. ext/phar portions of tar implementations
 
 portions of tar implementations in ext/phar - phar_tar_octal() are based on an
 implementation by Tim Kientzle from libarchive, licensed with this license:
@@ -583,7 +557,7 @@ implementation by Tim Kientzle from libarchive, licensed with this license:
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-16. ext/phar/zip.c portion extracted from libzip
+15. ext/phar/zip.c portion extracted from libzip
 
 zip_dirent.c -- read directory entry (local or central), clean dirent
 Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
@@ -617,7 +591,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-18. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
+16. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
 
 The OpenLDAP Public License
   Version 2.8, 17 August 2003

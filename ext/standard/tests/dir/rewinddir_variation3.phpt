@@ -2,12 +2,6 @@
 Test rewinddir() function : usage variations - file pointers
 --FILE--
 <?php
-/* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start
- * Source code: ext/standard/dir.c
- * Alias to functions: rewind
- */
-
 /*
  * Pass a file pointer to rewinddir() to test behaviour
  */
@@ -38,7 +32,7 @@ if ($result1 === $result2) {
 
 -- Open a file using fopen --
 resource(%d) of type (stream)
-%d is not a valid Directory resource
+rewinddir(): Argument #1 ($dir_handle) must be a valid Directory resource
 
 -- Check if rewinddir() has repositioned the file pointer --
 rewinddir() does not work on file pointers

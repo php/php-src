@@ -2,15 +2,6 @@
 Test is_callable() function : usage variations - defined functions
 --FILE--
 <?php
-/* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
- * Description: Verify that the contents of a variable can be called as a function
- * Source code: ext/imap/php_imap.c
- */
-
-/* Prototype: void check_iscallable( $functions );
-   Description: use iscallable() on given string to check for valid function name
-                returns true if valid function name, false otherwise
-*/
 function check_iscallable( $functions ) {
   $counter = 1;
   foreach($functions as $func) {

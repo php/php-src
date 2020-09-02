@@ -22,6 +22,4 @@
 
 PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr);
 
-PHP_FUNCTION(net_get_interfaces);
-
 #endif /* PHP_NET_H */

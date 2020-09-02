@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class SplFileInfo
 {
     public function __construct(string $file_name) {}
@@ -16,7 +18,7 @@ class SplFileInfo
     /** @return string */
     public function getBasename(string $suffix = "") {}
 
-    /** @return string|false */
+    /** @return string */
     public function getPathname() {}
 
     /** @return int|false */
@@ -88,8 +90,13 @@ class SplFileInfo
     /** @return void */
     public function setInfoClass(string $class_name = SplFileInfo::class) {}
 
+    /** @alias SplFileInfo::getPathname */
     public function __toString(): string {}
 
+    /** @return array */
+    public function __debugInfo() {}
+
+    /** @return void */
     final public function _bad_state_ex() {}
 }
 
@@ -127,6 +134,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     /** @return void */
     public function seek(int $position) {}
 
+    /** @alias DirectoryIterator::getFilename */
     public function __toString(): string {}
 }
 
@@ -136,9 +144,6 @@ class FilesystemIterator extends DirectoryIterator
 
     /** @return void */
     public function rewind() {}
-
-    /** @return void */
-    public function next() {}
 
     /** @return string */
     public function key() {}
@@ -170,6 +175,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator implements Recursive
     public function getSubPathname() {}
 }
 
+#ifdef HAVE_GLOB
 class GlobIterator extends FilesystemIterator implements Countable
 {
     public function __construct(string $path, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO) {}
@@ -177,6 +183,7 @@ class GlobIterator extends FilesystemIterator implements Countable
     /** @return int */
     public function count() {}
 }
+#endif
 
 class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
 {
@@ -199,7 +206,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fread(int $length) {}
 
     /** @return array|false */
-    public function fgetcsv(string $delimiter = ",", string $enclosure = '"', $escape = "\\") {}
+    public function fgetcsv(string $delimiter = ",", string $enclosure = '"', string $escape = "\\") {}
 
     /** @return int|false */
     public function fputcsv(array $fields, string $delimiter = ',', string $enclosure = '"', string $escape = "\\") {}
@@ -210,7 +217,10 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return array */
     public function getCsvControl() {}
 
-    /** @return bool */
+    /**
+     * @param int $wouldblock
+     * @return bool
+     */
     public function flock(int $operation, &$wouldblock = null) {}
 
     /** @return bool */
@@ -228,11 +238,8 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return int */
     public function fpassthru() {}
 
-    /**
-     * @param string $format
-     * @return array|int
-     */
-    public function fscanf(string $format, &...$params) {}
+    /** @return array|int|false|null */
+    public function fscanf(string $format, mixed &...$params) {}
 
     /** @return int|false */
     public function fwrite(string $str, int $length = 0) {}
@@ -273,9 +280,13 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return void */
     public function seek(int $line_pos) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias SplFileObject::fgets
+     */
     public function getCurrentLine() {}
 
+    /** @alias SplFileObject::fgets */
     public function __toString(): string {}
 }
 

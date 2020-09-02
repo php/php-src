@@ -26,18 +26,7 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 
-#ifdef HAVE_PG_CONFIG_H
-#include <pg_config.h>
-#endif
-
-/* {{{ pdo_pgsql_functions[] */
-static const zend_function_entry pdo_pgsql_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ pdo_sqlite_deps
- */
+/* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
@@ -49,7 +38,7 @@ zend_module_entry pdo_pgsql_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_pgsql_deps,
 	"pdo_pgsql",
-	pdo_pgsql_functions,
+	NULL,
 	PHP_MINIT(pdo_pgsql),
 	PHP_MSHUTDOWN(pdo_pgsql),
 	NULL,
@@ -66,8 +55,7 @@ ZEND_GET_MODULE(pdo_pgsql)
 
 /* true global environment */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_pgsql)
 {
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_DISABLE_PREPARES", PDO_PGSQL_ATTR_DISABLE_PREPARES);
@@ -82,8 +70,7 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo_pgsql)
 {
 	php_pdo_unregister_driver(&pdo_pgsql_driver);
@@ -91,15 +78,15 @@ PHP_MSHUTDOWN_FUNCTION(pdo_pgsql)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo_pgsql)
 {
+	char buf[16];
+
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDO Driver for PostgreSQL", "enabled");
-#ifdef HAVE_PG_CONFIG_H
-	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
-#endif
+	pdo_libpq_version(buf, sizeof(buf));
+	php_info_print_table_row(2, "PostgreSQL(libpq) Version", buf);
 	php_info_print_table_end();
 }
 /* }}} */

@@ -5,7 +5,6 @@ serialize_precision = 10
 --FILE--
 <?php
 /*
- * proto float asinh(float number)
  * Function is implemented in ext/standard/math.c
 */
 
@@ -22,7 +21,6 @@ $values = array(23,
         "23.45",
         "2.345e1",
         "1000",
-        "1000ABC",
         null,
         true,
         false);
@@ -33,7 +31,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 float(3.829113652)
 float(-3.829113652)
 float(3.848471992)
@@ -43,9 +41,6 @@ float(3.829113652)
 float(3.829113652)
 float(3.848471992)
 float(3.848471992)
-float(7.60090271)
-
-Notice: A non well formed numeric value encountered in %s on line %d
 float(7.60090271)
 float(0)
 float(0.881373587)

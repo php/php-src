@@ -10,6 +10,7 @@ function_exists('mb_split') or die("skip mb_split() is not available in this bui
 <?php
 mb_regex_set_options('m');
 var_dump(mb_split('^', "a\nb\nc"));
+?>
 --EXPECT--
 array(3) {
   [0]=>

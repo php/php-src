@@ -2,11 +2,6 @@
 Test array_push() function : usage variations - array keys are different data types
 --FILE--
 <?php
-/* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass array_push arrays where the keys are different data types.
  */

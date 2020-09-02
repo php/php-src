@@ -2,11 +2,6 @@
 Test key() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of key()
  */

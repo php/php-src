@@ -93,11 +93,12 @@
     beta. Do not use dashes, you should `#define PHP_VERSION "7.4.22RC1"` and
     not `#define PHP_VERSION "7.4.22-RC1"`.
 
-    When releasing the first alpha version, bump also API version numbers in
-    `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and `main/php.h`. The API
-    versions between the alpha/beta/.0RCx releases can be left the same or
-    bumped as little as possible because PHP extensions will need to be rebuilt
-    with each bump.
+    When releasing the first release candidate, you must also bump the API
+    version numbers in `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and
+    `main/php.h`. The API versions between the alpha/beta/.0RCx releases can be
+    left the same, or bumped as little as possible because PHP extensions will
+    need to be rebuilt with each bump. Do *not* bump the API versions after
+    RC1.
 
  6. Compile and run `make test`, with and without ZTS, using the right Bison and
     re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
@@ -287,10 +288,16 @@
     * Make sure there are no outdated "notes" or edited "date" keys in the
       `$RELEASES[X][$PHP_X_VERSION]["source"]` array.
 
- 3. Create the release file (`releases/x_y_z.php`)
+ 3. Create the release file (`releases/x_y_z.php`):
 
-    Usually we use the same content as for point 6, but included in php template
-    instead of the release xml.
+    Optionally use `phpweb/bin/createReleaseEntry -v x.y.z -r` to create
+    a standard announcement template for this and step 6.
+    Add `--security` for a security release.
+
+    Usually we use the same content as for point 6, but included in php
+    template instead of the release xml.
+
+    Edit the generated files to expand on the base message if needed.
 
  4. Update `php-qa/include/release-qa.php` and add the next version as an
     QARELEASE (prepare for next RC). Keep `active => true` until there will be
@@ -322,9 +329,8 @@
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
-    * Call `php bin/createNewsEntry` in your local phpweb checkout.
-    * Use the "frontpage" and "releases" category.
-    * Add the content for the news entry.
+    * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
+      local phpweb checkout.
 
  7. Commit and push all the changes to their respective git repos
 
@@ -364,8 +370,8 @@
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
-    * Call `php bin/createNewsEntry` in your local phpweb checkout.
-    * Add the content for the news entry.
+    * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
+      local phpweb checkout.
 
  4. Commit all the changes (`include/version.inc`, `archive/archive.xml`,
     `archive/entries/YYYY-MM-DD-N.xml`).

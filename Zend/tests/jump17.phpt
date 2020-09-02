@@ -18,5 +18,6 @@ c:
     echo "6";
 }
 echo "7\n";
+?>
 --EXPECT--
 4567

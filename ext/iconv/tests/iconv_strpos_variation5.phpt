@@ -9,11 +9,6 @@ function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in 
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
-/* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
- * Description: Find position of first occurrence of a string within another
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Test how iconv_strpos() behaves when passed different integers as $offset argument
  * The character length of $string_ascii and $string_mb is the same,

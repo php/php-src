@@ -2,11 +2,6 @@
 Test parse_ini_string() function
 --FILE--
 <?php
-/* Prototype: array parse_ini_string(string $string [,bool $process_sections]);
-   Description: parse_ini_string() loads in the ini file specified in filename,
-     and returns the settings in it in an associative array.
-*/
-
 $parse_string = <<<EOD
 ; Comment starts with semi-colon(;)
 ; Section starts with [<section name>]

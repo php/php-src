@@ -7,7 +7,7 @@ $a::$b();
 
 ?>
 --EXPECTF--
-Warning: Undefined variable: a in %s on line %d
+Warning: Undefined variable $a in %s on line %d
 
 Fatal error: Uncaught Error: Class name must be a valid object or a string in %s:%d
 Stack trace:

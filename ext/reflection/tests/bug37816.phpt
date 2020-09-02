@@ -23,4 +23,4 @@ catch (Exception $e)
 
 ?>
 --EXPECT--
-Caught: Cannot access non-public member TestClass::$p
+Caught: Cannot access non-public property TestClass::$p

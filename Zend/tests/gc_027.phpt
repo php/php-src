@@ -10,5 +10,6 @@ try {
     gc_collect_cycles();
 }
 echo "ok\n";
+?>
 --EXPECT--
 ok

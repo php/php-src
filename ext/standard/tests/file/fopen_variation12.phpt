@@ -4,12 +4,6 @@ Test fopen() function : variation: use include path (path is bad) create a file 
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 set_include_path("rubbish");
 testme();
 

@@ -2,11 +2,6 @@
 Test fgets() function : error conditions
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets line from file pointer
-*/
-
 echo "*** Testing error conditions ***\n";
 
 $fp = fopen(__FILE__, "r");

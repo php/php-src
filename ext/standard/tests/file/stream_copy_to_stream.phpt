@@ -5,7 +5,7 @@ stream_copy_to_stream() tests
 define('WIN', substr(PHP_OS, 0, 3) == 'WIN');
 
 $initial_file = __DIR__.'/bug38086.txt';
-$new_file = __DIR__.'/bug38086_1.txt';
+$new_file = __DIR__.'/stream_copy_to_stream.txt';
 
 $src = fopen($initial_file, 'r');
 stream_filter_append($src, "string.rot13", STREAM_FILTER_READ);

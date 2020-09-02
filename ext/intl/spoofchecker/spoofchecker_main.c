@@ -19,9 +19,7 @@
 #include "php_intl.h"
 #include "spoofchecker_class.h"
 
-/* {{{ proto bool Spoofchecker::isSuspicious( string text[, int &error_code ] )
- * Checks if a given text contains any suspicious characters
- */
+/* {{{ Checks if a given text contains any suspicious characters */
 PHP_METHOD(Spoofchecker, isSuspicious)
 {
 	int ret;
@@ -51,9 +49,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 }
 /* }}} */
 
-/* {{{ proto bool Spoofchecker::areConfusable( string str1, string str2[, int &error_code ] )
- * Checks if a given text contains any confusable characters
- */
+/* {{{ Checks if a given text contains any confusable characters */
 PHP_METHOD(Spoofchecker, areConfusable)
 {
 	int ret;
@@ -86,9 +82,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 }
 /* }}} */
 
-/* {{{ proto void Spoofchecker::setAllowedLocales( string locales )
- * Locales to use when running checks
- */
+/* {{{ Locales to use when running checks */
 PHP_METHOD(Spoofchecker, setAllowedLocales)
 {
 	char *locales;
@@ -110,9 +104,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 }
 /* }}} */
 
-/* {{{ proto void Spoofchecker::setChecks( int checks )
- * Set the checks to run
- */
+/* {{{ Set the checks to run */
 PHP_METHOD(Spoofchecker, setChecks)
 {
 	zend_long checks;
@@ -133,9 +125,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 /* }}} */
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
-/* {{{ proto void Spoofchecker::setRestrictionLevel( int $restriction_level )
- * Set the loosest restriction level allowed for strings.
- */
+/* {{{ Set the loosest restriction level allowed for strings. */
 PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
 	zend_long level;

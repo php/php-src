@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - octal formats with integer values
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan different integer values using different octal format types */
 
 $file_path = __DIR__;

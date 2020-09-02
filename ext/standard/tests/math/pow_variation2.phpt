@@ -4,11 +4,6 @@ Test pow() function : usage variations - different data types as $exp argument
 serialize_precision = 14
 --FILE--
 <?php
-/* Prototype  : number pow  ( number $base  , number $exp  )
- * Description: Exponential expression.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing pow() : usage variations ***\n";
 
 //get an unset variable
@@ -90,7 +85,7 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing pow() : usage variations ***
 
 -- Iteration 1 --
@@ -142,37 +137,25 @@ float(20.3)
 float(1)
 
 -- Iteration 17 --
-
-Warning: A non-numeric value encountered in %s on line %d
-float(1)
+Unsupported operand types: float ** string
 
 -- Iteration 18 --
-
-Warning: A non-numeric value encountered in %s on line %d
-float(1)
+Unsupported operand types: float ** string
 
 -- Iteration 19 --
-Unsupported operand types
+Unsupported operand types: float ** array
 
 -- Iteration 20 --
-
-Warning: A non-numeric value encountered in %s on line %d
-float(1)
+Unsupported operand types: float ** string
 
 -- Iteration 21 --
-
-Warning: A non-numeric value encountered in %s on line %d
-float(1)
+Unsupported operand types: float ** string
 
 -- Iteration 22 --
-
-Warning: A non-numeric value encountered in %s on line %d
-float(1)
+Unsupported operand types: float ** string
 
 -- Iteration 23 --
-
-Notice: Object of class classA could not be converted to number in %s on line %d
-float(20.3)
+Unsupported operand types: float ** classA
 
 -- Iteration 24 --
 float(1)
@@ -181,4 +164,4 @@ float(1)
 float(1)
 
 -- Iteration 26 --
-%s
+Unsupported operand types: float ** resource

@@ -73,7 +73,11 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 						succ->flags |= ZEND_BB_FOLLOW;
 					}
 				} else {
-					ZEND_ASSERT(opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING);
+					ZEND_ASSERT(
+						opcode == ZEND_SWITCH_LONG
+						|| opcode == ZEND_SWITCH_STRING
+						|| opcode == ZEND_MATCH
+					);
 					if (i == b->successors_count - 1) {
 						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
 					} else {
@@ -296,8 +300,15 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
-			case ZEND_THROW:
+			case ZEND_MATCH_ERROR:
 				if (i + 1 < op_array->last) {
+					BB_START(i + 1);
+				}
+				break;
+			case ZEND_THROW:
+				/* Don't treat THROW as terminator if it's used in expression context,
+				 * as we may lose live ranges when eliminating unreachable code. */
+				if (opline->extended_value != ZEND_THROW_IS_EXPR && i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;
@@ -364,6 +375,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
+			case ZEND_JMP_NULL:
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
@@ -385,6 +397,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 			{
 				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
 				zval *zv;
@@ -501,6 +514,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_THROW:
+			case ZEND_MATCH_ERROR:
 				break;
 			case ZEND_JMP:
 				block->successors_count = 1;
@@ -518,6 +532,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
+			case ZEND_JMP_NULL:
 				block->successors_count = 2;
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
 				block->successors[1] = j + 1;
@@ -551,12 +566,13 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 			{
 				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
 				zval *zv;
 				uint32_t s = 0;
 
-				block->successors_count = 2 + zend_hash_num_elements(jumptable);
+				block->successors_count = (opline->opcode == ZEND_MATCH ? 1 : 2) + zend_hash_num_elements(jumptable);
 				block->successors = zend_arena_calloc(arena, block->successors_count, sizeof(int));
 
 				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
@@ -564,7 +580,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				} ZEND_HASH_FOREACH_END();
 
 				block->successors[s++] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
-				block->successors[s++] = j + 1;
+				if (opline->opcode != ZEND_MATCH) {
+					block->successors[s++] = j + 1;
+				}
 				break;
 			}
 			default:

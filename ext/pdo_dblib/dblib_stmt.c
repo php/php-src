@@ -373,7 +373,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				case SQLCHAR:
 				case SQLVARCHAR:
 				case SQLTEXT: {
-#if ilia_0
+#ifdef ilia_0
 					while (data_len>0 && data[data_len-1] == ' ') { /* nuke trailing whitespace */
 						data_len--;
 					}

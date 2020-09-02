@@ -91,7 +91,7 @@ test('WithCtorWithArgs');
 --EXPECTF--
 ====>Class_does_not_exist
 {closure}(Class_does_not_exist)
-string(41) "Class Class_does_not_exist does not exist"
+string(43) "Class "Class_does_not_exist" does not exist"
 ====>NoCtor
 ====>newInstance()
 object(NoCtor)#%d (0) {
@@ -148,4 +148,3 @@ array(2) {
 }
 object(WithCtorWithArgs)#%d (0) {
 }
-

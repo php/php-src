@@ -11,10 +11,15 @@ $sockets = null;
 $write   = null;
 $except  = null;
 $time    = 0;
-var_dump(socket_select($sockets, $write, $except, $time));
+
+try {
+    socket_select($sockets, $write, $except, $time);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+?>
 --EXPECTF--
-Warning: socket_select(): No resource arrays were passed to select in %s on line %d
-bool(false)
+socket_select(): At least one array argument must be passed
 --CREDITS--
 Till Klampaeckel, till@php.net
 Berlin TestFest 2009

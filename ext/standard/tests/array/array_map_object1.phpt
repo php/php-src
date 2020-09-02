@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - object functionality
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Testing array_map() for object functionalities:
  *   1) simple class with variable and method

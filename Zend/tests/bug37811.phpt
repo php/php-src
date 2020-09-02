@@ -11,19 +11,23 @@ class TestClass
     }
 }
 
-define("Bar",new TestClass);
+define("Bar", new TestClass);
 var_dump(Bar);
-define("Baz",new stdClass);
-var_dump(Baz);
+
+try {
+    define("Baz", new stdClass);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    var_dump(Baz);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 string(3) "Foo"
-
-Warning: Constants may only evaluate to scalar values, arrays or resources in %sbug37811.php on line %d
-
-Fatal error: Uncaught Error: Undefined constant 'Baz' in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+define(): Argument #2 ($value) cannot be an object, stdClass given
+Undefined constant "Baz"

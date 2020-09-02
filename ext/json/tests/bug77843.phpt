@@ -1,7 +1,5 @@
 --TEST--
 Bug #77843: Use after free with json serializer
---SKIPIF--
-<?php if(!extension_loaded('json')) die('skip json extension not loaded') ?>
 --FILE--
 <?php
 

@@ -122,7 +122,7 @@ static char *ErrorMessages[] =
  * Returns NULL on error, or the new char* buffer on success.
  * You have to take care and efree() the buffer on your own.
  */
-static zend_string *php_win32_mail_trim_header(char *header)
+static zend_string *php_win32_mail_trim_header(const char *header)
 {
 	zend_string *result, *result2;
 	zend_string *replace;
@@ -176,14 +176,14 @@ static zend_string *php_win32_mail_trim_header(char *header)
 //
 //  See SendText() for additional args!
 //********************************************************************/
-PHPAPI int TSendMail(char *host, int *error, char **error_message,
-			  char *headers, char *Subject, char *mailTo, char *data,
+PHPAPI int TSendMail(const char *host, int *error, char **error_message,
+			  const char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
 {
 	int ret;
 	char *RPath = NULL;
 	zend_string *headers_lc = NULL, *headers_trim = NULL; /* headers_lc is only created if we've a header at all */
-	char *pos1 = NULL, *pos2 = NULL;
+	const char *pos1 = NULL, *pos2 = NULL;
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
@@ -216,7 +216,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
-		char *lookup = ZSTR_VAL(headers_lc);
+		const char *lookup = ZSTR_VAL(headers_lc);
 
 		while (lookup) {
 			pos1 = strstr(lookup, "from:");
@@ -300,7 +300,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-PHPAPI void TSMClose()
+PHPAPI void TSMClose(void)
 {
 	Post("QUIT\r\n");
 	Ack(NULL);
@@ -352,12 +352,13 @@ PHPAPI char *GetSMErrorText(int index)
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data,
-			 char *headers, char *headers_lc, char **error_message)
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
+			 const char *headers, char *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
-	char *tempMailTo, *token, *pos1, *pos2;
+	char *tempMailTo, *token;
+	const char *pos1, *pos2;
 	char *server_response = NULL;
 	char *stripped_header  = NULL;
 	zend_string *data_cln;
@@ -633,7 +634,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	return (SUCCESS);
 }
 
-static int addToHeader(char **header_buffer, const char *specifier, char *string)
+static int addToHeader(char **header_buffer, const char *specifier, const char *string)
 {
 	*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1);
 	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
@@ -651,7 +652,7 @@ static int addToHeader(char **header_buffer, const char *specifier, char *string
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
+static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */

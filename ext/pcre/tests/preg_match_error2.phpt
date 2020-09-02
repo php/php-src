@@ -2,10 +2,7 @@
 Test preg_match() function : error conditions - wrong arg types
 --FILE--
 <?php
-/*
- *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
- * Function is implemented in ext/pcre/php_pcre.c
-*/
+/* Function is implemented in ext/pcre/php_pcre.c */
 /*
 * Testing how preg_match reacts to being passed the wrong type of subject argument
 */
@@ -36,5 +33,5 @@ int(1)
 
 Arg value is: Array
 preg_match(): Argument #2 ($subject) must be of type string, array given
-preg_match(): Argument #2 ($subject) must be of type string, object given
+preg_match(): Argument #2 ($subject) must be of type string, stdClass given
 Done

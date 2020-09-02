@@ -28,14 +28,9 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stddef.h>
 
 #include "mbfl_encoding.h"
-#include "mbfl_allocators.h"
 #include "mbfl_filter_output.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
@@ -165,7 +160,7 @@ mbfl_convert_filter_new(
     int (*flush_function)(void*),
     void* data)
 {
-	mbfl_convert_filter * filter;
+	mbfl_convert_filter *filter;
 	const struct mbfl_convert_vtbl *vtbl;
 
 	vtbl = mbfl_convert_filter_get_vtbl(from, to);
@@ -173,15 +168,11 @@ mbfl_convert_filter_new(
 		return NULL;
 	}
 
-	/* allocate */
-	filter = (mbfl_convert_filter *)mbfl_malloc(sizeof(mbfl_convert_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
+	filter = emalloc(sizeof(mbfl_convert_filter));
 
 	if (mbfl_convert_filter_common_init(filter, from, to, vtbl,
 			output_function, flush_function, data)) {
-		mbfl_free(filter);
+		efree(filter);
 		return NULL;
 	}
 
@@ -195,7 +186,7 @@ mbfl_convert_filter_new2(
     int (*flush_function)(void*),
     void* data)
 {
-	mbfl_convert_filter * filter;
+	mbfl_convert_filter *filter;
 	const mbfl_encoding *from_encoding, *to_encoding;
 
 	if (vtbl == NULL) {
@@ -205,15 +196,11 @@ mbfl_convert_filter_new2(
 	from_encoding = mbfl_no2encoding(vtbl->from);
 	to_encoding = mbfl_no2encoding(vtbl->to);
 
-	/* allocate */
-	filter = (mbfl_convert_filter *)mbfl_malloc(sizeof(mbfl_convert_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
+	filter = emalloc(sizeof(mbfl_convert_filter));
 
 	if (mbfl_convert_filter_common_init(filter, from_encoding, to_encoding, vtbl,
 			output_function, flush_function, data)) {
-		mbfl_free(filter);
+		efree(filter);
 		return NULL;
 	}
 
@@ -225,14 +212,8 @@ mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 {
 	if (filter) {
 		(*filter->filter_dtor)(filter);
-		mbfl_free((void*)filter);
+		efree((void*)filter);
 	}
-}
-
-int
-mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter)
-{
-	return (*filter->filter_function)(c, filter);
 }
 
 int

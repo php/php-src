@@ -72,5 +72,6 @@ function foo()
 }
 
 foo();
+?>
 --EXPECT--
 12

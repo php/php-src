@@ -19,9 +19,7 @@
 
 #include "TSRM.h"
 #include <windows.h>
-#if HAVE_UTIME
-# include <sys/utime.h>
-#endif
+#include <sys/utime.h>
 #include "win32/ipc.h"
 
 struct ipc_perm {
@@ -91,12 +89,12 @@ TSRMLS_CACHE_EXTERN()
 #define	SHM_RND		FILE_MAP_WRITE
 #define	SHM_REMAP	FILE_MAP_COPY
 
-char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len);
+const char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len);
 
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env);
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, const char *env);
 TSRM_API FILE *popen(const char *command, const char *type);
 TSRM_API int pclose(FILE *stream);
 TSRM_API int tsrm_win32_access(const char *pathname, int mode);

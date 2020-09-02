@@ -20,7 +20,4 @@
 PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t length, int replace_us_by_ws);
 PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t length);
 
-PHP_FUNCTION(quoted_printable_decode);
-PHP_FUNCTION(quoted_printable_encode);
-
 #endif /* QUOT_PRINT_H */

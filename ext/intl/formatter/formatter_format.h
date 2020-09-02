@@ -17,9 +17,6 @@
 
 #include <php.h>
 
-PHP_FUNCTION( numfmt_format );
-PHP_FUNCTION( numfmt_format_currency );
-
 #define FORMAT_TYPE_DEFAULT	0
 #define FORMAT_TYPE_INT32	1
 #define FORMAT_TYPE_INT64	2

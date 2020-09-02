@@ -163,6 +163,7 @@ $obj->__DIR__();
 $obj->__NAMESPACE__();
 
 echo "\nDone\n";
+?>
 --EXPECT--
 Obj::empty
 Obj::callable

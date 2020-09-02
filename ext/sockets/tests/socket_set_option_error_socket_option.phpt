@@ -1,5 +1,5 @@
 --TEST--
-Test if socket_set_option() returns 'unable to set socket option' failure for invalid options
+Test if socket_set_option() returns 'Unable to set socket option' failure for invalid options
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
@@ -28,7 +28,7 @@ socket_set_option( $socket, SOL_SOCKET, 1, 1);
 socket_close($socket);
 ?>
 --EXPECTF--
-Warning: socket_set_option(): unable to set socket option [%d]: Permission denied in %s on line %d
+Warning: socket_set_option(): Unable to set socket option [%d]: Permission denied in %s on line %d
 --CREDITS--
 Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10

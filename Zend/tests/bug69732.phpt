@@ -19,6 +19,7 @@ $wpq = new wpq;
 $wpq->interesting =& ret_assoc();
 $x = $wpq->interesting;
 printf("%s\n", $x);
+?>
 --EXPECTF--
 Warning: Undefined property: wpq::$interesting in %s on line %d
 

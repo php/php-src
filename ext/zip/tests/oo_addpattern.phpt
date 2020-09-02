@@ -27,15 +27,15 @@ if (!$zip->open($file)) {
 $dir = realpath($dirname);
 $options = array('add_path' => 'baz/', 'remove_path' => $dir);
 if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
-	echo "failed 1\n";
+    echo "failed 1\n";
 }
 $options['flags'] = 0; // clean FL_OVERWRITE
 if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
-	var_dump($zip->getStatusString());
+    var_dump($zip->getStatusString());
 }
 $options['flags'] = ZipArchive::FL_OVERWRITE;
 if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
-	echo "failed 2\n";
+    echo "failed 2\n";
 }
 
 if ($zip->status == ZIPARCHIVE::ER_OK) {

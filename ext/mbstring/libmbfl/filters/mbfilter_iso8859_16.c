@@ -27,15 +27,11 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso8859_16.h"
 #include "unicode_table_iso8859_16.h"
 
-static const char *mbfl_encoding_8859_16_aliases[] = {"ISO_8859-16", NULL};
+static const char *mbfl_encoding_8859_16_aliases[] = {"ISO8859-16", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_16 = {
 	mbfl_no_encoding_8859_16,

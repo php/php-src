@@ -20,7 +20,7 @@
 #include "php_version.h"
 #define PHP_CTYPE_VERSION PHP_VERSION
 
-#if HAVE_CTYPE
+#ifdef HAVE_CTYPE
 
 extern zend_module_entry ctype_module_entry;
 #define phpext_ctype_ptr &ctype_module_entry

@@ -2,11 +2,6 @@
 Test array_map() function : object functionality - class methods as callback function
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Testing array_map() for object functionality with following callback function variations:
  *   1) child class method using parent object
@@ -81,7 +76,7 @@ array(3) {
   int(7)
 }
 -- accessing child method from parent class --
-array_map(): Argument #1 ($callback) must be a valid callback, class 'ParentClass' does not have a method 'staticChild'
+array_map(): Argument #1 ($callback) must be a valid callback, class ParentClass does not have a method "staticChild"
 -- accessing parent method using child class object --
 array(3) {
   [0]=>
@@ -92,5 +87,5 @@ array(3) {
   int(7)
 }
 -- accessing child method using parent class object --
-array_map(): Argument #1 ($callback) must be a valid callback, class 'ParentClass' does not have a method 'staticChild'
+array_map(): Argument #1 ($callback) must be a valid callback, class ParentClass does not have a method "staticChild"
 Done

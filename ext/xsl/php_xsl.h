@@ -32,13 +32,12 @@ extern zend_module_entry xsl_module_entry;
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
 #include <libxslt/security.h>
-#if HAVE_XSL_EXSLT
+#ifdef HAVE_XSL_EXSLT
 #include <libexslt/exslt.h>
 #include <libexslt/exsltconfig.h>
 #endif
 
 #include "../dom/xml_common.h"
-#include "xsl_fe.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>

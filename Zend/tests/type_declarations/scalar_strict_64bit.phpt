@@ -98,11 +98,11 @@ int(9223372036854775807)
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }
-*** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, StringCapable given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
 *** Caught {closure}(): Argument #1 ($i) must be of type int, resource given, called in %s on line %d
@@ -151,11 +151,11 @@ float(NAN)
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }
-*** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, StringCapable given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
 *** Caught {closure}(): Argument #1 ($f) must be of type float, resource given, called in %s on line %d
@@ -204,11 +204,11 @@ string(0) ""
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($s) must be of type string, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }
-*** Caught {closure}(): Argument #1 ($s) must be of type string, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, StringCapable given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
 *** Caught {closure}(): Argument #1 ($s) must be of type string, resource given, called in %s on line %d
@@ -257,11 +257,11 @@ bool(false)
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, stdClass given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }
-*** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, StringCapable given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
 *** Caught {closure}(): Argument #1 ($b) must be of type bool, resource given, called in %s on line %d

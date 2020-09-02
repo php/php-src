@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-Zend Extension zend_opcache does not exist
+Zend Extension "zend_opcache" does not exist

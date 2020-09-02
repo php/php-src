@@ -1,7 +1,5 @@
 --TEST--
 Test json_decode() function : error conditions
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 echo "*** Testing json_decode() : error conditions ***\n";
@@ -19,4 +17,4 @@ try {
 *** Testing json_decode() : error conditions ***
 
 -- Testing json_decode() function with depth below 0 --
-Depth must be greater than zero
+json_decode(): Argument #3 ($depth) must be greater than 0

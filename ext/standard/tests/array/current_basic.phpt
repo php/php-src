@@ -2,11 +2,6 @@
 Test current() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed current(array $array_arg)
- * Description: Return the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of current()
  */

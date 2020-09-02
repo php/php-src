@@ -33,7 +33,8 @@ fclose($fp);
 <?php
 @unlink(__DIR__ . '/test.txt.gz');
 ?>
---EXPECT--
+--EXPECTF--
+Notice: fread(): zlib: data error in %s on line %d
 1
 2
 This is quite the thing ain't it

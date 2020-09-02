@@ -154,7 +154,7 @@ bool(false)
 
 **********************************
 
-Fatal error: Uncaught ReflectionException: Class Constant TestClass::BAD_CONST does not exist in %s:%d
+Fatal error: Uncaught ReflectionException: Constant TestClass::BAD_CONST does not exist in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClassConstant->__construct(Object(TestClass), 'BAD_CONST')
 #1 %s(%d): reflectClassConstant(Object(TestClass), 'BAD_CONST')

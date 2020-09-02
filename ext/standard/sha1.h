@@ -25,13 +25,11 @@ typedef struct {
 	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA1_CTX;
+#define PHP_SHA1_SPEC "l5l2b64."
 
 PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX *);
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, size_t);
 PHPAPI void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
-PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest);
-
-PHP_FUNCTION(sha1);
-PHP_FUNCTION(sha1_file);
+PHPAPI void make_sha1_digest(char *sha1str, const unsigned char *digest);
 
 #endif

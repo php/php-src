@@ -6,14 +6,20 @@ sebs@php.net
 Testfest Munich 2009
 --FILE--
 <?php
-define('::', true);
 try {
-    var_dump(constant('::'));
+    define('::', true);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    constant('::');
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECTF--
-Warning: Class constants cannot be defined or redefined in %s on line %d
+define(): Argument #1 ($constant_name) cannot be a class constant
 
-Fatal error: Class '' not found in %s on line %d
+Fatal error: Class "" not found in %s on line %d

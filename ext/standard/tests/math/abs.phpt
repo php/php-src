@@ -19,6 +19,7 @@ $tests = <<<TESTS
 TESTS;
 
 include(__DIR__ . '/../../../../tests/quicktester.inc');
+?>
 --EXPECT--
 1,1,0,0
 OK

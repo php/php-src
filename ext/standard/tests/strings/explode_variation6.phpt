@@ -3,11 +3,6 @@ Test explode() function : usage variations - misc tests
 --FILE--
 <?php
 
-/* Prototype  : array explode  ( string $delimiter  , string $string  [, int $limit  ] )
- * Description: Split a string by string.
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing explode() function: misc tests ***\n";
 
 $str = "one\x00two\x00three\x00four";

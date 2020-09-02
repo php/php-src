@@ -22,6 +22,7 @@
 typedef struct {
 	uint32_t state;
 } PHP_ADLER32_CTX;
+#define PHP_ADLER32_SPEC "l."
 
 PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context);
 PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len);

@@ -25,6 +25,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 var_dump(intlcal_field_difference(1, 0, 1));
+?>
 --EXPECTF--
 IntlCalendar::fieldDifference() expects exactly 2 parameters, 3 given
 

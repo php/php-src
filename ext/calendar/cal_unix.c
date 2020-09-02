@@ -21,21 +21,24 @@
 #include "sdncal.h"
 #include <time.h>
 
-/* {{{ proto int unixtojd([int timestamp])
-   Convert UNIX timestamp to Julian Day */
+/* {{{ Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
-	time_t ts = 0;
+	time_t ts;
+	zend_long tl = 0;
+	zend_bool tl_is_null = 1;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &tl, &tl_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!ts) {
+	if (tl_is_null) {
 		ts = time(NULL);
-	} else if (ts < 0) {
-		zend_value_error("Timestamp must not be negative");
+	} else if (tl >= 0) {
+		ts = (time_t) tl;
+	} else {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -47,8 +50,7 @@ PHP_FUNCTION(unixtojd)
 }
 /* }}} */
 
-/* {{{ proto int jdtounix(int jday)
-   Convert Julian Day to UNIX timestamp */
+/* {{{ Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
 	zend_long uday;

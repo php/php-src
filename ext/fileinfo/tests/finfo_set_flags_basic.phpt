@@ -4,12 +4,6 @@ Test finfo_set_flags() function : basic functionality
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool finfo_set_flags(resource finfo, int options)
- * Description: Set libmagic configuration options.
- * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions:
- */
-
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 $finfo = finfo_open( FILEINFO_MIME, $magicFile );
 
@@ -25,7 +19,7 @@ $finfo = new finfo( FILEINFO_NONE, $magicFile );
 var_dump( $finfo->set_flags( FILEINFO_MIME ) );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing finfo_set_flags() : basic functionality ***
 bool(true)
 bool(true)

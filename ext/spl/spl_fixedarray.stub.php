@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class SplFixedArray implements Iterator, ArrayAccess, Countable
 {
     public function __construct(int $size = 0) {}
@@ -23,23 +25,22 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable
     public function setSize(int $size) {}
 
     /**
-     * @param mixed $index
+     * @param int $index
      * @return bool
      */
     public function offsetExists($index) {}
 
     /**
-     * @param mixed $index
+     * @param int $index
      * @return mixed
      */
     public function offsetGet($index) {}
 
     /**
-     * @param mixed $index
-     * @param mixed $value
+     * @param int $index
      * @return void
      */
-    public function offsetSet($index, $value) {}
+    public function offsetSet($index, mixed $value) {}
 
     /**
      * @param int $index

@@ -31,5 +31,6 @@ class Test
 }
 $x = new Test();
 Test::$mystatic = new DestructorCreator();
+?>
 --EXPECTF--
 Fatal error: Allowed memory size of %s bytes exhausted%s(tried to allocate %s bytes) in %s on line %d

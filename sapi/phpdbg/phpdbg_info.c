@@ -123,7 +123,7 @@ PHPDBG_INFO(constants) /* {{{ */
 		"address=\"%p\" refcount=\"%d\" type=\"%s\" name=\"%.*s\" " attrs, \
 		"%-18p %-7d %-9s %.*s" msg, &data->value, \
 		Z_REFCOUNTED(data->value) ? Z_REFCOUNT(data->value) : 1, \
-		zend_zval_type_name(&data->value), \
+		zend_get_type_by_const(Z_TYPE(data->value)), \
 		(int) ZSTR_LEN(data->name), ZSTR_VAL(data->name), ##__VA_ARGS__)
 
 			switch (Z_TYPE(data->value)) {
@@ -231,7 +231,7 @@ static int phpdbg_print_symbols(zend_bool show_globals) {
 #define VARIABLEINFO(attrs, msg, ...) \
 	phpdbg_writeln("variable", \
 		"address=\"%p\" refcount=\"%d\" type=\"%s\" refstatus=\"%s\" name=\"%.*s\" " attrs, \
-		"%-18p %-7d %-9s %s$%.*s" msg, data, Z_REFCOUNTED_P(data) ? Z_REFCOUNT_P(data) : 1, zend_zval_type_name(data), isref, (int) ZSTR_LEN(var), ZSTR_VAL(var), ##__VA_ARGS__)
+		"%-18p %-7d %-9s %s$%.*s" msg, data, Z_REFCOUNTED_P(data) ? Z_REFCOUNT_P(data) : 1, zend_get_type_by_const(Z_TYPE_P(data)), isref, (int) ZSTR_LEN(var), ZSTR_VAL(var), ##__VA_ARGS__)
 retry_switch:
 				switch (Z_TYPE_P(data)) {
 					case IS_RESOURCE:

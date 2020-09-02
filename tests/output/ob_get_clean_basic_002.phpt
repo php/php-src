@@ -3,7 +3,6 @@ Test basic behaviour of ob_get_clean()
 --FILE--
 <?php
 /*
- * proto bool ob_get_clean(void)
  * Function is implemented in main/output.c
 */
 

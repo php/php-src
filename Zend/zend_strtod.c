@@ -546,6 +546,7 @@ Bigint {
  static Bigint *freelist[Kmax+1];
 
 static void destroy_freelist(void);
+static void free_p5s(void);
 
 #ifdef ZTS
 static MUTEX_T dtoa_mutex;
@@ -564,6 +565,8 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
+	free_p5s();
+
 #ifdef ZTS
 	tsrm_mutex_free(dtoa_mutex);
 	dtoa_mutex = NULL;
@@ -4538,6 +4541,19 @@ static void destroy_freelist(void)
 		freelist[i] = NULL;
 	}
 	FREE_DTOA_LOCK(0)
+}
+
+static void free_p5s(void)
+{
+	Bigint **listp, *tmp;
+
+	ACQUIRE_DTOA_LOCK(1)
+	listp = &p5s;
+	while ((tmp = *listp) != NULL) {
+		*listp = tmp->next;
+		free(tmp);
+	}
+	FREE_DTOA_LOCK(1)
 }
 
 #ifdef __cplusplus

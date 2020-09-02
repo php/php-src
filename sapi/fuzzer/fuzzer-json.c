@@ -28,13 +28,9 @@
 #include <stdlib.h>
 
 #include "fuzzer-sapi.h"
-
-#ifdef HAVE_JSON
 #include "ext/json/php_json_parser.h"
-#endif
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-#ifdef HAVE_JSON
 	char *data = malloc(Size+1);
 	memcpy(data, Data, Size);
 	data[Size] = '\0';
@@ -55,10 +51,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	php_request_shutdown(NULL);
 
 	free(data);
-#else
-	fprintf(stderr, "\n\nERROR:\nPHP built without JSON, recompile with --enable-json to use this fuzzer\n");
-	exit(1);
-#endif
 	return 0;
 }
 

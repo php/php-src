@@ -114,7 +114,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 [006] 3
 [008] 0
 [009] [2014] Commands out of sync; you can't run this command now

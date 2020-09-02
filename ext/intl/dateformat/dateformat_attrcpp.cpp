@@ -21,7 +21,6 @@
 extern "C" {
 #include "../php_intl.h"
 #include "dateformat_class.h"
-#include "dateformat_attrcpp.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
@@ -35,11 +34,7 @@ static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
 	return (DateFormat *)dfo->datef_data.udatf;
 }
 
-/* {{{ proto string IntlDateFormatter::getTimeZoneId()
- * Get formatter timezone_id. }}} */
-/* {{{ proto string datefmt_get_timezone_id(IntlDateFormatter $mf)
- * Get formatter timezone_id.
- */
+/* {{{ Get formatter timezone_id. */
 U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 {
 	zend_string *u8str;
@@ -60,11 +55,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 	RETVAL_STR(u8str);
 }
 
-/* {{{ proto IntlTimeZone IntlDateFormatter::getTimeZone()
- * Get formatter timezone. }}} */
-/* {{{ proto IntlTimeZone datefmt_get_timezone(IntlDateFormatter $mf)
- * Get formatter timezone.
- */
+/* {{{ Get formatter timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -88,8 +79,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 	timezone_object_construct(tz_clone, return_value, 1);
 }
 
-/* {{{ proto boolean IntlDateFormatter::setTimeZone(mixed $timezone)
- * Set formatter's timezone. */
+/* {{{ Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 {
 	zval		*timezone_zv;
@@ -113,11 +103,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 	fetch_datefmt(dfo)->adoptTimeZone(timezone);
 }
 
-/* {{{ proto int IntlDateFormatter::getCalendar( )
- * Get formatter calendar type. }}} */
-/* {{{ proto int datefmt_get_calendar(IntlDateFormatter $mf)
- * Get formatter calendar type.
- */
+/* {{{ Get formatter calendar type. */
 U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -138,11 +124,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
 }
 /* }}} */
 
-/* {{{ proto IntlCalendar IntlDateFormatter::getCalendarObject()
- * Get formatter calendar. }}} */
-/* {{{ proto IntlCalendar datefmt_get_calendar_object(IntlDateFormatter $mf)
- * Get formatter calendar.
- */
+/* {{{ Get formatter calendar. */
 U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -171,11 +153,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 }
 /* }}} */
 
-/* {{{ proto bool IntlDateFormatter::setCalendar(mixed $calendar)
- * Set formatter's calendar. }}} */
-/* {{{ proto bool datefmt_set_calendar(IntlDateFormatter $mf, mixed $calendar)
- * Set formatter's calendar.
- */
+/* {{{ Set formatter's calendar. */
 U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 {
 	zval	*calendar_zv;

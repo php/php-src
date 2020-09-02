@@ -12,7 +12,7 @@ var_dump(imap_utf8_to_mutf7("täst"));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""
 string(1) "1"
 string(8) "t&AOQ-st"

@@ -57,16 +57,10 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	intptr_t     hash_mask_handle;
 	intptr_t     hash_mask_handlers;
 	int          hash_mask_init;
-	int          autoload_running;
 ZEND_END_MODULE_GLOBALS(spl)
 
 ZEND_EXTERN_MODULE_GLOBALS(spl)
 #define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
-
-PHP_FUNCTION(spl_classes);
-PHP_FUNCTION(class_parents);
-PHP_FUNCTION(class_implements);
-PHP_FUNCTION(class_uses);
 
 PHPAPI zend_string *php_spl_object_hash(zval *obj);
 

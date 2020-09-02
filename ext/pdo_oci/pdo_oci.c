@@ -29,12 +29,6 @@
 #include <TSRM/TSRM.h>
 #endif
 
-/* {{{ pdo_oci_functions[] */
-static const zend_function_entry pdo_oci_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_oci_module_entry */
 
 static const zend_module_dep pdo_oci_deps[] = {
@@ -46,7 +40,7 @@ zend_module_entry pdo_oci_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_oci_deps,
 	"PDO_OCI",
-	pdo_oci_functions,
+	NULL,
 	PHP_MINIT(pdo_oci),
 	PHP_MSHUTDOWN(pdo_oci),
 	PHP_RINIT(pdo_oci),
@@ -84,8 +78,7 @@ OCIEnv *pdo_oci_Env = NULL;
 static MUTEX_T pdo_oci_env_mutex;
 #endif
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_oci)
 {
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_ACTION", (zend_long)PDO_OCI_ATTR_ACTION);
@@ -107,8 +100,7 @@ PHP_MINIT_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(pdo_oci)
 {
 	if (!pdo_oci_Env) {
@@ -116,7 +108,7 @@ PHP_RINIT_FUNCTION(pdo_oci)
 		tsrm_mutex_lock(pdo_oci_env_mutex);
 		if (!pdo_oci_Env) { // double-checked locking idiom
 #endif
-#if HAVE_OCIENVCREATE
+#ifdef HAVE_OCIENVCREATE
 		OCIEnvCreate(&pdo_oci_Env, PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL, 0, NULL);
 #else
 		OCIInitialize(PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
@@ -132,8 +124,7 @@ PHP_RINIT_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 {
 	php_pdo_unregister_driver(&pdo_oci_driver);
@@ -150,8 +141,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo_oci)
 {
 	php_info_print_table_start();

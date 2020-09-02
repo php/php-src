@@ -23,6 +23,7 @@ function foo() {
     var_dump($b, $c);
 }
 foo();
+?>
 --EXPECT--
 int(3)
 int(3)

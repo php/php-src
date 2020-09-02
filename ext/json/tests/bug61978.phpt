@@ -1,7 +1,5 @@
 --TEST--
 Bug #61978 (Object recursion not detected for classes that implement JsonSerializable)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 

@@ -23,7 +23,9 @@
 #include "zend.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/info.h"
+#include "ext/standard/head.h"
 #include "lsapilib.h"
+#include "lsapi_main_arginfo.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +53,7 @@
 #include "lscriu.c"
 #endif
 
-#define SAPI_LSAPI_MAX_HEADER_LENGTH 2048
+#define SAPI_LSAPI_MAX_HEADER_LENGTH LSAPI_RESP_HTTP_HEADER_MAX
 
 /* Key for each cache entry is dirname(PATH_TRANSLATED).
  *
@@ -92,8 +94,7 @@ static void init_sapi_from_env(sapi_module_struct *sapi_module)
         sapi_module->php_ini_path_override = p;
 }
 
-/* {{{ php_lsapi_startup
- */
+/* {{{ php_lsapi_startup */
 static int php_lsapi_startup(sapi_module_struct *sapi_module)
 {
     if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
@@ -130,8 +131,7 @@ static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_ub_write
- */
+/* {{{ sapi_lsapi_ub_write */
 static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
 {
     int ret;
@@ -159,8 +159,7 @@ static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_flush
- */
+/* {{{ sapi_lsapi_flush */
 static void sapi_lsapi_flush(void * server_context)
 {
     if ( lsapi_mode ) {
@@ -172,8 +171,7 @@ static void sapi_lsapi_flush(void * server_context)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_deactivate
- */
+/* {{{ sapi_lsapi_deactivate */
 static int sapi_lsapi_deactivate(void)
 {
     if ( SG(request_info).path_translated ) {
@@ -188,9 +186,8 @@ static int sapi_lsapi_deactivate(void)
 
 
 
-/* {{{ sapi_lsapi_getenv
- */
-static char *sapi_lsapi_getenv( char * name, size_t name_len )
+/* {{{ sapi_lsapi_getenv */
+static char *sapi_lsapi_getenv(const char * name, size_t name_len )
 {
     if ( lsapi_mode ) {
         return LSAPI_GetEnv( name );
@@ -259,8 +256,7 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
     }
 }
 
-/* {{{ sapi_lsapi_register_variables
- */
+/* {{{ sapi_lsapi_register_variables */
 static void sapi_lsapi_register_variables(zval *track_vars_array)
 {
     char * php_self = "";
@@ -287,8 +283,7 @@ static void sapi_lsapi_register_variables(zval *track_vars_array)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_read_post
- */
+/* {{{ sapi_lsapi_read_post */
 static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes)
 {
     if ( lsapi_mode ) {
@@ -303,8 +298,7 @@ static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes)
 
 
 
-/* {{{ sapi_lsapi_read_cookies
- */
+/* {{{ sapi_lsapi_read_cookies */
 static char *sapi_lsapi_read_cookies(void)
 {
     if ( lsapi_mode ) {
@@ -462,8 +456,7 @@ static int sapi_lsapi_send_headers_like_cgi(sapi_headers_struct *sapi_headers)
 static int mod_lsapi_mode = 0;
 
 
-/* {{{ sapi_lsapi_send_headers
- */
+/* {{{ sapi_lsapi_send_headers */
 static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 {
     sapi_header_struct  *h;
@@ -506,9 +499,8 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_send_headers
- */
-static void sapi_lsapi_log_message(char *message, int syslog_type_int)
+/* {{{ sapi_lsapi_send_headers */
+static void sapi_lsapi_log_message(const char *message, int syslog_type_int)
 {
     char buf[8192];
     int len = strlen( message );
@@ -520,7 +512,7 @@ static void sapi_lsapi_log_message(char *message, int syslog_type_int)
             len = 8191;
         ++len;
     }
-    LSAPI_Write_Stderr( message, len);
+    LSAPI_Write_Stderr( message, len );
 }
 /* }}} */
 
@@ -596,12 +588,11 @@ static int sapi_lsapi_activate()
     }
     return SUCCESS;
 }
-/* {{{ sapi_module_struct cgi_sapi_module
- */
+/* {{{ sapi_module_struct cgi_sapi_module */
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.6",
+    "LiteSpeed V7.7",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1228,7 +1219,6 @@ static int cli_main( int argc, char * argv[] )
 {
 
     static const char * ini_defaults[] = {
-        "report_zend_debug",    "0",
         "display_errors",       "1",
         "register_argc_argv",   "1",
         "html_errors",          "0",
@@ -1615,28 +1605,12 @@ int main( int argc, char * argv[] )
 
 /*   LiteSpeed PHP module starts here */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_litespeed__void, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
 PHP_FUNCTION(apache_get_modules);
 PHP_FUNCTION(litespeed_finish_request);
 
 PHP_MINFO_FUNCTION(litespeed);
-
-static const zend_function_entry litespeed_functions[] = {
-    PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)
-    PHP_FE(litespeed_response_headers,  arginfo_litespeed__void)
-    PHP_FE(apache_get_modules,          arginfo_litespeed__void)
-    PHP_FE(litespeed_finish_request,    arginfo_litespeed__void)
-    PHP_FALIAS(getallheaders,           litespeed_request_headers,  arginfo_litespeed__void)
-    PHP_FALIAS(apache_request_headers,  litespeed_request_headers,  arginfo_litespeed__void)
-    PHP_FALIAS(apache_response_headers, litespeed_response_headers, arginfo_litespeed__void)
-    {NULL, NULL, NULL}
-};
 
 static PHP_MINIT_FUNCTION(litespeed)
 {
@@ -1675,7 +1649,7 @@ static PHP_MSHUTDOWN_FUNCTION(litespeed)
 zend_module_entry litespeed_module_entry = {
     STANDARD_MODULE_HEADER,
     "litespeed",
-    litespeed_functions,
+    ext_functions,
     PHP_MINIT(litespeed),
     PHP_MSHUTDOWN(litespeed),
     NULL,
@@ -1693,25 +1667,22 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 }
 
 
-/* {{{ proto array litespeed_request_headers(void)
-   Fetch all HTTP request headers */
+/* {{{ Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
-    /* TODO: */
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
+    if (zend_parse_parameters_none() == FAILURE) {
+        RETURN_THROWS();
     }
+
     array_init(return_value);
 
     LSAPI_ForeachOrgHeader( add_associate_array, return_value );
-
 }
 /* }}} */
 
 
 
-/* {{{ proto array litespeed_response_headers(void)
-   Fetch all HTTP response headers */
+/* {{{ Fetch all HTTP response headers */
 PHP_FUNCTION(litespeed_response_headers)
 {
     sapi_header_struct  *h;
@@ -1720,9 +1691,9 @@ PHP_FUNCTION(litespeed_response_headers)
     int          len;
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
-    }
+    if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
     if (!&SG(sapi_headers).headers) {
         RETURN_FALSE;
@@ -1734,7 +1705,7 @@ PHP_FUNCTION(litespeed_response_headers)
         if ( h->header_len > 0 ) {
             p = strchr( h->header, ':' );
             len = p - h->header;
-            if (( p )&&( len > 0 )) {
+            if (p && len > 0 && len < LSAPI_RESP_HTTP_HEADER_MAX) {
                 memmove( headerBuf, h->header, len );
                 while( len > 0 && (isspace( headerBuf[len-1])) ) {
                     --len;
@@ -1753,8 +1724,7 @@ PHP_FUNCTION(litespeed_response_headers)
 /* }}} */
 
 
-/* {{{ proto array apache_get_modules(void)
-   Fetch all loaded module names  */
+/* {{{ Fetch all loaded module names  */
 PHP_FUNCTION(apache_get_modules)
 {
     static const char * mod_names[] =
@@ -1762,10 +1732,11 @@ PHP_FUNCTION(apache_get_modules)
         "mod_rewrite", "mod_mime", "mod_headers", "mod_expires", "mod_auth_basic", NULL
     };
     const char **name = mod_names;
-    /* TODO: */
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
-    }
+
+    if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
     array_init(return_value);
     while( *name )
     {
@@ -1776,13 +1747,12 @@ PHP_FUNCTION(apache_get_modules)
 /* }}} */
 
 
-/* {{{ proto array litespeed_finish_request(void)
-   Flushes all response data to the client */
+/* {{{ Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
 {
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
-    }
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
     php_output_end_all();
     php_header();

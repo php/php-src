@@ -10,4 +10,4 @@ eval("
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected '%s' (T_BAD_CHARACTER) in %s on line %d
+Parse error: syntax error, unexpected character 0x7F in %s on line %d

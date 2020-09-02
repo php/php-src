@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - non existent 'callback' function
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing non existent function for $callback argument
  */
@@ -28,5 +23,5 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing array_map() : non existent 'callback' function ***
-array_map(): Argument #1 ($callback) must be a valid callback, function 'non_existent' not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback, function "non_existent" not found or invalid function name
 Done

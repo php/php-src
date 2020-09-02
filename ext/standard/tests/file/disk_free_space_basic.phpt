@@ -8,13 +8,6 @@ if (getenv("TRAVIS") === "true") die("skip inaccurate on TravisCI");
 memory_limit=32M
 --FILE--
 <?php
-/*
- *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function
- *               will return the number of bytes available on the corresponding
- *               filesystem or disk partition
- */
-
 $file_path = __DIR__;
 
 echo "*** Testing with existing directory ***\n";
@@ -57,18 +50,18 @@ rmdir($file_path."/disk_free_space");
 ?>
 --EXPECTF--
 *** Testing with existing directory ***
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 *** Testing with newly created directory ***
  
  Free Space before writing to a file
-float(%d)
+float(%f)
 
  Free Space after writing to a file
-float(%d)
+float(%f)
 
  Free Space Value Is Correct
 *** Testing with Binary Input ***
-float(%d)
+float(%f)
 
 --- Done ---

@@ -100,7 +100,7 @@ if ($p3) {
 
 
 ?>
---EXPECTF--
+--EXPECT--
 Horizontal: ok
 Vertical: ok
 Diagonal: ok

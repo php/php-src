@@ -11,15 +11,11 @@ var_dump($cmh);
 $multi_close_result = curl_multi_close($cmh);
 var_dump($multi_close_result);
 var_dump($cmh);
-try {
-    $bad_mh_close_result = curl_multi_close($cmh);
-    var_dump($bad_mh_close_result);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+curl_multi_close($cmh);
 ?>
---EXPECTF--
-resource(%d) of type (curl_multi)
+--EXPECT--
+object(CurlMultiHandle)#1 (0) {
+}
 NULL
-resource(%d) of type (Unknown)
-curl_multi_close(): supplied resource is not a valid cURL Multi Handle resource
+object(CurlMultiHandle)#1 (0) {
+}

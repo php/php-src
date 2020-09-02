@@ -176,6 +176,7 @@ MySQLPDOTest::skip();
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 @$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--

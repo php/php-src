@@ -6,20 +6,26 @@ if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 ?>
 --FILE--
 <?php
-var_dump(mb_convert_encoding("", "UTF-8", [0]));
-var_dump(mb_convert_encoding('foo', 'UTF-8', array(['bar'], ['baz'])));
-var_dump(mb_convert_encoding('foo', 'UTF-8', array("foo\0bar")));
+try {
+    var_dump(mb_convert_encoding("", "UTF-8", [0]));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(mb_convert_encoding('foo', 'UTF-8', array(['bar'], ['baz'])));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(mb_convert_encoding('foo', 'UTF-8', array("foo\0bar")));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
 --EXPECTF--
-Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
-string(0) ""
+mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "0"
 
 Warning: Array to string conversion in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
-string(3) "foo"
-
-Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
-string(3) "foo"
+mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "Array"
+mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "foo"

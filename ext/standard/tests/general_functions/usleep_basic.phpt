@@ -6,11 +6,6 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-/* Prototype  : void usleep  ( int $micro_seconds  )
- * Description: Delays program execution for the given number of micro seconds.
- * Source code: ext/standard/basic_functions.c
- */
-
 set_time_limit(20);
 
 echo "*** Testing usleep() : basic functionality ***\n";

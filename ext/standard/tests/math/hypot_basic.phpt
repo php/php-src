@@ -1,14 +1,9 @@
 --TEST--
 Test hypot() - basic function test hypot()
 --INI--
-precision=14
+serialize_precision=15
 --FILE--
 <?php
-
-/* Prototype  : float hypot  ( float $x  , float $y  )
- * Description: Calculate the length of the hypotenuse of a right-angle triangle.
- * Source code: ext/standard/math.c
- */
 
 echo "*** Testing hypot() : basic functionality ***\n";
 
@@ -21,7 +16,6 @@ $valuesy = array(23,
                 "23",
                 "23.45",
                 "2.345e1",
-                "23abc",
                 null,
                 true,
                 false);
@@ -35,7 +29,6 @@ $valuesx = array(33,
                 "33",
                 "43.45",
                 "1.345e1",
-                "33abc",
                 null,
                 true,
                 false);
@@ -48,314 +41,224 @@ for ($i = 0; $i < count($valuesy); $i++) {
     }
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hypot() : basic functionality ***
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:-33 float(40.22437072223753)
+Y:23 X:-33 float(40.2243707222375)
 
-Y:23 X:33.45 float(40.594365372548936)
+Y:23 X:33.45 float(40.5943653725489)
 
-Y:23 X:-33.45 float(40.594365372548936)
+Y:23 X:-33.45 float(40.5943653725489)
 
-Y:23 X:39 float(45.27692569068709)
+Y:23 X:39 float(45.2769256906871)
 
-Y:23 X:31 float(38.600518131237564)
+Y:23 X:31 float(38.6005181312376)
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:43.45 float(49.162002603636886)
+Y:23 X:43.45 float(49.1620026036369)
 
-Y:23 X:1.345e1 float(26.64399557123518)
-
-Y:23 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
+Y:23 X:1.345e1 float(26.6439955712352)
 
 Y:23 X: float(23)
 
-Y:23 X:1 float(23.021728866442675)
+Y:23 X:1 float(23.0217288664427)
 
 Y:23 X: float(23)
 
-Y:-23 X:33 float(40.22437072223753)
+Y:-23 X:33 float(40.2243707222375)
 
-Y:-23 X:-33 float(40.22437072223753)
+Y:-23 X:-33 float(40.2243707222375)
 
-Y:-23 X:33.45 float(40.594365372548936)
+Y:-23 X:33.45 float(40.5943653725489)
 
-Y:-23 X:-33.45 float(40.594365372548936)
+Y:-23 X:-33.45 float(40.5943653725489)
 
-Y:-23 X:39 float(45.27692569068709)
+Y:-23 X:39 float(45.2769256906871)
 
-Y:-23 X:31 float(38.600518131237564)
+Y:-23 X:31 float(38.6005181312376)
 
-Y:-23 X:33 float(40.22437072223753)
+Y:-23 X:33 float(40.2243707222375)
 
-Y:-23 X:43.45 float(49.162002603636886)
+Y:-23 X:43.45 float(49.1620026036369)
 
-Y:-23 X:1.345e1 float(26.64399557123518)
-
-Y:-23 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
+Y:-23 X:1.345e1 float(26.6439955712352)
 
 Y:-23 X: float(23)
 
-Y:-23 X:1 float(23.021728866442675)
+Y:-23 X:1 float(23.0217288664427)
 
 Y:-23 X: float(23)
 
-Y:23.45 X:33 float(40.48336077946099)
+Y:23.45 X:33 float(40.483360779461)
 
-Y:23.45 X:-33 float(40.48336077946099)
+Y:23.45 X:-33 float(40.483360779461)
 
-Y:23.45 X:33.45 float(40.85100977944119)
+Y:23.45 X:33.45 float(40.8510097794412)
 
-Y:23.45 X:-33.45 float(40.85100977944119)
+Y:23.45 X:-33.45 float(40.8510097794412)
 
-Y:23.45 X:39 float(45.50716976477443)
+Y:23.45 X:39 float(45.5071697647744)
 
-Y:23.45 X:31 float(38.87032930140932)
+Y:23.45 X:31 float(38.8703293014093)
 
-Y:23.45 X:33 float(40.48336077946099)
+Y:23.45 X:33 float(40.483360779461)
 
-Y:23.45 X:43.45 float(49.37413290377868)
+Y:23.45 X:43.45 float(49.3741329037787)
 
-Y:23.45 X:1.345e1 float(27.033405260898967)
-
-Y:23.45 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.48336077946099)
+Y:23.45 X:1.345e1 float(27.033405260899)
 
 Y:23.45 X: float(23.45)
 
-Y:23.45 X:1 float(23.47131227690518)
+Y:23.45 X:1 float(23.4713122769052)
 
 Y:23.45 X: float(23.45)
 
-Y:-23.45 X:33 float(40.48336077946099)
+Y:-23.45 X:33 float(40.483360779461)
 
-Y:-23.45 X:-33 float(40.48336077946099)
+Y:-23.45 X:-33 float(40.483360779461)
 
-Y:-23.45 X:33.45 float(40.85100977944119)
+Y:-23.45 X:33.45 float(40.8510097794412)
 
-Y:-23.45 X:-33.45 float(40.85100977944119)
+Y:-23.45 X:-33.45 float(40.8510097794412)
 
-Y:-23.45 X:39 float(45.50716976477443)
+Y:-23.45 X:39 float(45.5071697647744)
 
-Y:-23.45 X:31 float(38.87032930140932)
+Y:-23.45 X:31 float(38.8703293014093)
 
-Y:-23.45 X:33 float(40.48336077946099)
+Y:-23.45 X:33 float(40.483360779461)
 
-Y:-23.45 X:43.45 float(49.37413290377868)
+Y:-23.45 X:43.45 float(49.3741329037787)
 
-Y:-23.45 X:1.345e1 float(27.033405260898967)
-
-Y:-23.45 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.48336077946099)
+Y:-23.45 X:1.345e1 float(27.033405260899)
 
 Y:-23.45 X: float(23.45)
 
-Y:-23.45 X:1 float(23.47131227690518)
+Y:-23.45 X:1 float(23.4713122769052)
 
 Y:-23.45 X: float(23.45)
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:-33 float(40.22437072223753)
+Y:23 X:-33 float(40.2243707222375)
 
-Y:23 X:33.45 float(40.594365372548936)
+Y:23 X:33.45 float(40.5943653725489)
 
-Y:23 X:-33.45 float(40.594365372548936)
+Y:23 X:-33.45 float(40.5943653725489)
 
-Y:23 X:39 float(45.27692569068709)
+Y:23 X:39 float(45.2769256906871)
 
-Y:23 X:31 float(38.600518131237564)
+Y:23 X:31 float(38.6005181312376)
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:43.45 float(49.162002603636886)
+Y:23 X:43.45 float(49.1620026036369)
 
-Y:23 X:1.345e1 float(26.64399557123518)
-
-Y:23 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
+Y:23 X:1.345e1 float(26.6439955712352)
 
 Y:23 X: float(23)
 
-Y:23 X:1 float(23.021728866442675)
+Y:23 X:1 float(23.0217288664427)
 
 Y:23 X: float(23)
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:-33 float(40.22437072223753)
+Y:23 X:-33 float(40.2243707222375)
 
-Y:23 X:33.45 float(40.594365372548936)
+Y:23 X:33.45 float(40.5943653725489)
 
-Y:23 X:-33.45 float(40.594365372548936)
+Y:23 X:-33.45 float(40.5943653725489)
 
-Y:23 X:39 float(45.27692569068709)
+Y:23 X:39 float(45.2769256906871)
 
-Y:23 X:31 float(38.600518131237564)
+Y:23 X:31 float(38.6005181312376)
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:43.45 float(49.162002603636886)
+Y:23 X:43.45 float(49.1620026036369)
 
-Y:23 X:1.345e1 float(26.64399557123518)
-
-Y:23 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
+Y:23 X:1.345e1 float(26.6439955712352)
 
 Y:23 X: float(23)
 
-Y:23 X:1 float(23.021728866442675)
+Y:23 X:1 float(23.0217288664427)
 
 Y:23 X: float(23)
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:-33 float(40.22437072223753)
+Y:23 X:-33 float(40.2243707222375)
 
-Y:23 X:33.45 float(40.594365372548936)
+Y:23 X:33.45 float(40.5943653725489)
 
-Y:23 X:-33.45 float(40.594365372548936)
+Y:23 X:-33.45 float(40.5943653725489)
 
-Y:23 X:39 float(45.27692569068709)
+Y:23 X:39 float(45.2769256906871)
 
-Y:23 X:31 float(38.600518131237564)
+Y:23 X:31 float(38.6005181312376)
 
-Y:23 X:33 float(40.22437072223753)
+Y:23 X:33 float(40.2243707222375)
 
-Y:23 X:43.45 float(49.162002603636886)
+Y:23 X:43.45 float(49.1620026036369)
 
-Y:23 X:1.345e1 float(26.64399557123518)
-
-Y:23 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
+Y:23 X:1.345e1 float(26.6439955712352)
 
 Y:23 X: float(23)
 
-Y:23 X:1 float(23.021728866442675)
+Y:23 X:1 float(23.0217288664427)
 
 Y:23 X: float(23)
 
-Y:23.45 X:33 float(40.48336077946099)
+Y:23.45 X:33 float(40.483360779461)
 
-Y:23.45 X:-33 float(40.48336077946099)
+Y:23.45 X:-33 float(40.483360779461)
 
-Y:23.45 X:33.45 float(40.85100977944119)
+Y:23.45 X:33.45 float(40.8510097794412)
 
-Y:23.45 X:-33.45 float(40.85100977944119)
+Y:23.45 X:-33.45 float(40.8510097794412)
 
-Y:23.45 X:39 float(45.50716976477443)
+Y:23.45 X:39 float(45.5071697647744)
 
-Y:23.45 X:31 float(38.87032930140932)
+Y:23.45 X:31 float(38.8703293014093)
 
-Y:23.45 X:33 float(40.48336077946099)
+Y:23.45 X:33 float(40.483360779461)
 
-Y:23.45 X:43.45 float(49.37413290377868)
+Y:23.45 X:43.45 float(49.3741329037787)
 
-Y:23.45 X:1.345e1 float(27.033405260898967)
-
-Y:23.45 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.48336077946099)
+Y:23.45 X:1.345e1 float(27.033405260899)
 
 Y:23.45 X: float(23.45)
 
-Y:23.45 X:1 float(23.47131227690518)
+Y:23.45 X:1 float(23.4713122769052)
 
 Y:23.45 X: float(23.45)
 
-Y:2.345e1 X:33 float(40.48336077946099)
+Y:2.345e1 X:33 float(40.483360779461)
 
-Y:2.345e1 X:-33 float(40.48336077946099)
+Y:2.345e1 X:-33 float(40.483360779461)
 
-Y:2.345e1 X:33.45 float(40.85100977944119)
+Y:2.345e1 X:33.45 float(40.8510097794412)
 
-Y:2.345e1 X:-33.45 float(40.85100977944119)
+Y:2.345e1 X:-33.45 float(40.8510097794412)
 
-Y:2.345e1 X:39 float(45.50716976477443)
+Y:2.345e1 X:39 float(45.5071697647744)
 
-Y:2.345e1 X:31 float(38.87032930140932)
+Y:2.345e1 X:31 float(38.8703293014093)
 
-Y:2.345e1 X:33 float(40.48336077946099)
+Y:2.345e1 X:33 float(40.483360779461)
 
-Y:2.345e1 X:43.45 float(49.37413290377868)
+Y:2.345e1 X:43.45 float(49.3741329037787)
 
-Y:2.345e1 X:1.345e1 float(27.033405260898967)
-
-Y:2.345e1 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.48336077946099)
+Y:2.345e1 X:1.345e1 float(27.033405260899)
 
 Y:2.345e1 X: float(23.45)
 
-Y:2.345e1 X:1 float(23.47131227690518)
+Y:2.345e1 X:1 float(23.4713122769052)
 
 Y:2.345e1 X: float(23.45)
-
-Y:23abc X:33 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
-
-Y:23abc X:-33 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
-
-Y:23abc X:33.45 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.594365372548936)
-
-Y:23abc X:-33.45 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.594365372548936)
-
-Y:23abc X:39 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(45.27692569068709)
-
-Y:23abc X:31 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(38.600518131237564)
-
-Y:23abc X:33 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
-
-Y:23abc X:43.45 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(49.162002603636886)
-
-Y:23abc X:1.345e1 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(26.64399557123518)
-
-Y:23abc X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-
-Notice: A non well formed numeric value encountered in %s on line %d
-float(40.22437072223753)
-
-Y:23abc X: 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(23)
-
-Y:23abc X:1 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(23.021728866442675)
-
-Y:23abc X: 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(23)
 
 Y: X:33 float(33)
 
@@ -374,10 +277,6 @@ Y: X:33 float(33)
 Y: X:43.45 float(43.45)
 
 Y: X:1.345e1 float(13.45)
-
-Y: X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(33)
 
 Y: X: float(0)
 
@@ -385,31 +284,27 @@ Y: X:1 float(1)
 
 Y: X: float(0)
 
-Y:1 X:33 float(33.015148038438355)
+Y:1 X:33 float(33.0151480384384)
 
-Y:1 X:-33 float(33.015148038438355)
+Y:1 X:-33 float(33.0151480384384)
 
-Y:1 X:33.45 float(33.46494434479161)
+Y:1 X:33.45 float(33.4649443447916)
 
-Y:1 X:-33.45 float(33.46494434479161)
+Y:1 X:-33.45 float(33.4649443447916)
 
-Y:1 X:39 float(39.01281840626232)
+Y:1 X:39 float(39.0128184062623)
 
-Y:1 X:31 float(31.016124838541646)
+Y:1 X:31 float(31.0161248385416)
 
-Y:1 X:33 float(33.015148038438355)
+Y:1 X:33 float(33.0151480384384)
 
-Y:1 X:43.45 float(43.461505956420794)
+Y:1 X:43.45 float(43.4615059564208)
 
-Y:1 X:1.345e1 float(13.48712348872064)
-
-Y:1 X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(33.015148038438355)
+Y:1 X:1.345e1 float(13.4871234887206)
 
 Y:1 X: float(1)
 
-Y:1 X:1 float(1.4142135623730951)
+Y:1 X:1 float(1.4142135623731)
 
 Y:1 X: float(1)
 
@@ -430,10 +325,6 @@ Y: X:33 float(33)
 Y: X:43.45 float(43.45)
 
 Y: X:1.345e1 float(13.45)
-
-Y: X:33abc 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(33)
 
 Y: X: float(0)
 

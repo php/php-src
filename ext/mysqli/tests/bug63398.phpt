@@ -27,6 +27,6 @@ try {
 
 echo "okey";
 ?>
---EXPECTF--
+--EXPECT--
 mysqli object is already closed
 okey

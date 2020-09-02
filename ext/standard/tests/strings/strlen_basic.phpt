@@ -3,11 +3,6 @@ Test strlen() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : int strlen  ( string $string  )
- * Description: Get string length
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing strlen() : basic functionality ***\n";
 var_dump(strlen("abcdef"));
 var_dump(strlen(" ab de "));

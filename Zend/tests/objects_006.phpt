@@ -19,4 +19,4 @@ class test3 extends test {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of test3::foo($arg, $arg2) must be compatible with test::foo($arg, $arg2 = NULL) in %s on line %d
+Fatal error: Declaration of test3::foo($arg, $arg2) must be compatible with test::foo($arg, $arg2 = null) in %s on line %d

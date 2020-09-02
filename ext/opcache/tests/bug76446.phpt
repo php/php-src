@@ -18,5 +18,5 @@ function test()
 var_dump(test());
 ?>
 --EXPECTF--
-Warning: Undefined variable: addlang in %s on line %d
+Warning: Undefined variable $addlang in %s on line %d
 int(0)

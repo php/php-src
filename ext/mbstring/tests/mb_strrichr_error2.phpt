@@ -7,12 +7,6 @@ function_exists('mb_strrichr') or die("skip mb_strrichr() is not available in th
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another, case insensitive
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
-
 echo "*** Testing mb_strrichr() : error conditions ***\n";
 
 
@@ -21,13 +15,16 @@ $haystack = 'Hello, world';
 $needle = 'world';
 $encoding = 'unknown-encoding';
 $part = true;
-var_dump( mb_strrichr($haystack, $needle, $part, $encoding) );
+
+try {
+    var_dump( mb_strrichr($haystack, $needle, $part, $encoding) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strrichr() : error conditions ***
 
 -- Testing mb_strrichr() with unknown encoding --
-
-Warning: mb_strrichr(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
+mb_strrichr(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given

@@ -824,7 +824,7 @@ void gdImageFlipHorizontal(gdImagePtr im);
 void gdImageFlipVertical(gdImagePtr im);
 void gdImageFlipBoth(gdImagePtr im);
 
-#define GD_FLIP_HORINZONTAL 1
+#define GD_FLIP_HORIZONTAL 1
 #define GD_FLIP_VERTICAL 2
 #define GD_FLIP_BOTH 3
 

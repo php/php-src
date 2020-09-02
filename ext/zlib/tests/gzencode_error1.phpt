@@ -8,12 +8,6 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzencode  ( string $data  [, int $level  [, int $encoding_mode  ]] )
- * Description: Gzip-compress a string
- * Source code: ext/zlib/zlib.c
- * Alias to functions:
- */
-
 /*
  * Test error cases for gzencode
  */
@@ -45,7 +39,7 @@ try {
 *** Testing gzencode() : error conditions ***
 
 -- Testing with incorrect compression level --
-Compression level (99) must be within -1..9
+gzencode(): Argument #2 ($level) must be between -1 and 9
 
 -- Testing with incorrect encoding_mode --
-Encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE
+gzencode(): Argument #3 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

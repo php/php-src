@@ -18,10 +18,6 @@
 #ifndef DATETIME_H
 #define DATETIME_H
 
-#if HAVE_STRPTIME
-PHP_FUNCTION(strptime);
-#endif
-
 PHPAPI char *php_std_date(time_t t);
 
 #endif /* DATETIME_H */

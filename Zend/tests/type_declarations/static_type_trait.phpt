@@ -31,7 +31,7 @@ object(P)#2 (0) {
 object(P)#2 (0) {
 }
 
-Fatal error: Uncaught TypeError: Return value of C::test() must be of type P, C returned in %s:%d
+Fatal error: Uncaught TypeError: C::test(): Return value must be of type P, C returned in %s:%d
 Stack trace:
 #0 %s(%d): C->test(Object(C))
 #1 {main}

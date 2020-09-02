@@ -27,11 +27,6 @@ typedef struct _zend_send_arg_info {
 	zend_op                *opline;
 } zend_send_arg_info;
 
-typedef struct _zend_recv_arg_info {
-	int                     ssa_var;
-	zend_ssa_var_info       info;
-} zend_recv_arg_info;
-
 struct _zend_call_info {
 	zend_op_array          *caller_op_array;
 	zend_op                *caller_init_opline;
@@ -39,8 +34,9 @@ struct _zend_call_info {
 	zend_function          *callee_func;
 	zend_call_info         *next_caller;
 	zend_call_info         *next_callee;
-	zend_func_info         *clone;
-	int                     recursive;
+	zend_bool               recursive;
+	zend_bool               send_unpack;  /* Parameters passed by SEND_UNPACK or SEND_ARRAY */
+	zend_bool               named_args;   /* Function has named arguments */
 	int                     num_args;
 	zend_send_arg_info      arg_info[1];
 };
@@ -52,13 +48,7 @@ struct _zend_func_info {
 	zend_call_info         *caller_info;  /* where this function is called from */
 	zend_call_info         *callee_info;  /* which functions are called from this one */
 	zend_call_info        **call_map;     /* Call info associated with init/call/send opnum */
-	int                     num_args;     /* (-1 - unknown) */
-	zend_recv_arg_info     *arg_info;
 	zend_ssa_var_info       return_info;
-	zend_func_info         *clone;
-	int                     clone_num;
-	int                     return_value_used; /* -1 unknown, 0 no, 1 yes */
-	void                   *codegen_data;
 };
 
 typedef struct _zend_call_graph {

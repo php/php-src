@@ -2,11 +2,6 @@
 Test array_walk() function : usage variations - different callback functions
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Passing different types of callback functions to array_walk()
  *   without parameters

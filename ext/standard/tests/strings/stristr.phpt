@@ -14,7 +14,7 @@ stristr() function
     var_dump(md5(stristr("\\\\a\\", "\\a")));
     var_dump(stristr("tEsT sTrInG", " "));
 ?>
---EXPECTF--
+--EXPECT--
 string(11) "tEsT sTrInG"
 string(6) "sTrInG"
 string(6) "sTrInG"

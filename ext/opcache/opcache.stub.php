@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function opcache_reset(): bool {}
 
 function opcache_get_status(bool $fetch_scripts = true): array|false {}

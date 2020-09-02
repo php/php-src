@@ -4,11 +4,6 @@ Test array_reverse() function : usage variations - assoc. array with diff. value
 precision=12
 --FILE--
 <?php
-/* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
- * Description: Return input as a new array with the order of the entries reversed
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_reverse() by giving associative arrays with different
  * values for $array argument

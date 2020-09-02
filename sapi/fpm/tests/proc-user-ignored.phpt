@@ -3,6 +3,7 @@ FPM: Process user setting ignored when FPM is not running as root
 --SKIPIF--
 <?php
 include "skipif.inc";
+FPM\Tester::skipIfRoot();
 ?>
 --FILE--
 <?php

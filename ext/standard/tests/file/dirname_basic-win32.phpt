@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : string dirname(string path)
- * Description: Returns the directory name component of the path
- * Source code: ext/standard/string.c
- * Alias to functions:
- */
-
 echo "*** Testing dirname() : basic functionality ***\n";
 
 

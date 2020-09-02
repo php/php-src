@@ -14,5 +14,5 @@ echo "done\n";
 
 ?>
 --EXPECTF--
-Warning: Undefined variable: undef in %s on line %d
+Warning: Undefined variable $undef in %s on line %d
 done

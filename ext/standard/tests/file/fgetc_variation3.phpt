@@ -3,7 +3,6 @@ Test fgetc() function : usage variations - write only modes (Bug #42036)
 --FILE--
 <?php
 /*
- Prototype: string fgetc ( resource $handle );
  Description: Gets character from file pointer
 */
 

@@ -11,5 +11,6 @@ if (PHP_OS !== 'Darwin' && false === strpos(PHP_OS, 'BSD')) {
 --FILE--
 <?php
 var_dump(defined('SO_REUSEPORT'));
+?>
 --EXPECT--
 bool(true)

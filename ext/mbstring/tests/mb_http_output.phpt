@@ -41,14 +41,18 @@ print "$enc\n";
 // Invalid parameters
 print "== INVALID PARAMETER ==\n";
 
-// Note: Bad string raise Warning. Bad Type raise Notice (Type Conversion) and Warning....
-$r = mb_http_output('BAD_NAME');
-($r === FALSE) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
+// Note: Bad string raise ValueError. Bad Type raise Notice (Type Conversion) and ValueError
+try {
+    $r = mb_http_output('BAD_NAME');
+    print 'NG_BAD_SET' . \PHP_EOL;
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 $enc = mb_http_output();
 print "$enc\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 OK_ASCII_SET
 ASCII
 OK_SJIS_SET
@@ -60,7 +64,5 @@ UTF-8
 OK_EUC-JP_SET
 EUC-JP
 == INVALID PARAMETER ==
-
-Warning: mb_http_output(): Unknown encoding "BAD_NAME" in %s on line %d
-OK_BAD_SET
+mb_http_output(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
 EUC-JP

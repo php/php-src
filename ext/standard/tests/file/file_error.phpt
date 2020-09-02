@@ -2,11 +2,6 @@
 Test file() function : error conditions
 --FILE--
 <?php
-/*
-   Prototype: array file ( string filename [,int use-include_path [,resource context]] );
-   Description: Reads entire file into an array
-                Returns the  file in an array
-*/
 $file_path = __DIR__;
 echo "\n*** Testing error conditions ***\n";
 $file_handle = fopen($file_path."/file.tmp", "w");

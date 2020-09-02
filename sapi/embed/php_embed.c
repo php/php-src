@@ -16,6 +16,7 @@
 
 #include "php_embed.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/dl_arginfo.h"
 
 #ifdef PHP_WIN32
 #include <io.h>
@@ -91,9 +92,9 @@ static void php_embed_send_header(sapi_header_struct *sapi_header, void *server_
 {
 }
 
-static void php_embed_log_message(char *message, int syslog_type_int)
+static void php_embed_log_message(const char *message, int syslog_type_int)
 {
-	fprintf (stderr, "%s\n", message);
+	fprintf(stderr, "%s\n", message);
 }
 
 static void php_embed_register_variables(zval *track_vars_array)
@@ -142,15 +143,9 @@ EMBED_SAPI_API sapi_module_struct php_embed_module = {
 };
 /* }}} */
 
-/* {{{ arginfo ext/standard/dl.c */
-ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
-	ZEND_ARG_INFO(0, extension_filename)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 EMBED_SAPI_API int php_embed_init(int argc, char **argv)

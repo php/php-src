@@ -1,20 +1,21 @@
 <?php
 
-Class Closure
+/** @generate-function-entries */
+
+final class Closure
 {
     private function __construct() {}
 
-    /** @return ?Closure */
-    static function bind(Closure $closure, ?object $newthis, $newscope = UNKNOWN) {}
-
-    /** @return ?Closure */
-    function bindTo(?object $newthis, $newscope = UNKNOWN) {}
-
-    function call(object $newthis, ...$parameters) {}
+    /** @param object|string|null $newScope */
+    public static function bind(Closure $closure, ?object $newThis, $newScope = UNKNOWN): ?Closure {}
 
     /**
-     * @param callable $callable Not a proper type annotation due to bug #78770
-     * @return Closure
+     * @param object|string|null $newScope
+     * @alias Closure::bind
      */
-    function fromCallable($callable) {}
+    public function bindTo(?object $newThis, $newScope = UNKNOWN): ?Closure {}
+
+    public function call(object $newThis, mixed ...$arguments): mixed {}
+
+    public static function fromCallable(callable $callback): Closure {}
 }

@@ -37,15 +37,15 @@ do_test(false);
 ?>
 Done
 --EXPECT--
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 
-GET /foo HTTP/1.0
+GET /foo HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 

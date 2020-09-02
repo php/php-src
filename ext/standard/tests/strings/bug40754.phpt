@@ -71,15 +71,15 @@ substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystac
 
 Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
 bool(false)
-Offset not contained in string
+stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
+strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(2)
 string(8) "abcdeabc"
 bool(false)

@@ -2,17 +2,13 @@
 Test strptime() function : basic functionality
 --SKIPIF--
 <?php
-	if (!function_exists('strptime')) {
-		die("skip - strptime() function not available in this build");
-	}
+if (!function_exists('strptime')) {
+    die("skip - strptime() function not available in this build");
+}
+if (!strftime('%Z')) die('skip strftime does not support %Z');
 ?>
 --FILE--
 <?php
-/* Prototype  : array strptime  ( string $date  , string $format  )
- * Description:  Parse a time/date generated with strftime()
- * Source code: ext/standard/datetime.c
-*/
-
 $orig = setlocale(LC_ALL, 'C');
 date_default_timezone_set("GMT");
 putenv("TZ=GMT");

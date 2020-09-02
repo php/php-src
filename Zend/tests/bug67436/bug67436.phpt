@@ -21,7 +21,8 @@ a::staticTest();
 
 $b = new b();
 $b->test();
---EXPECT--
-string(76) "The magic method __invoke() must have public visibility and cannot be static"
+?>
+--EXPECTF--
+string(%d) "The magic method b::__invoke() must have public visibility"
 b::test()
 a::test(c::TESTCONSTANT)

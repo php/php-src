@@ -21,18 +21,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-#include "dom_arginfo.h"
-
-
-/* {{{ DOMParentNode methods */
-const zend_function_entry php_dom_parent_node_class_functions[] = { /* {{{ */
-	PHP_ABSTRACT_ME(DOMParentNode, append, arginfo_class_DOMParentNode_append)
-	PHP_ABSTRACT_ME(DOMParentNode, prepend, arginfo_class_DOMParentNode_prepend)
-	PHP_FE_END
-};
-/* }}} */
 
 /* {{{ firstElementChild DomParentNode
 readonly=yes
@@ -143,6 +133,11 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 	zend_class_entry *ce;
 	dom_object *newNodeObj;
 	int stricterror;
+
+	if (document == NULL) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, 1);
+		return NULL;
+	}
 
 	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
 		documentNode = (xmlDoc *) contextNode;

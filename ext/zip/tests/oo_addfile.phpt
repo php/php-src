@@ -23,7 +23,7 @@ if (!$zip->addFile($dirname . 'utils.inc', 'test.php')) {
 }
 var_dump($zip->lastId);
 if (!$zip->addFile($dirname . 'utils.inc', 'mini.txt', 12, 34)) {
-	echo "failed\n";
+    echo "failed\n";
 }
 var_dump($zip->lastId);
 if ($zip->status == ZIPARCHIVE::ER_OK) {
@@ -44,7 +44,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
     echo "failed\n";
 }
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 var_dump(strlen($zip->getFromName('test.php')) == filesize($dirname . 'utils.inc'));
 var_dump(strlen($zip->getFromName('mini.txt')) == 34);

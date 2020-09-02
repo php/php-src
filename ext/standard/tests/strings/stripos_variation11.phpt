@@ -2,11 +2,6 @@
 Test stripos() function : usage variations - unexpected inputs for 'haystack' and 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 /* Test stripos() function with unexpected inputs for 'haystack' and 'needle' arguments */
 
 echo "*** Testing stripos() function with unexpected values for haystack and needle ***\n";
@@ -145,35 +140,35 @@ int(0)
 bool(false)
 -- Iteration 16 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 17 --
 int(0)
 bool(false)
 -- Iteration 18 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 19 --
 int(0)
 bool(false)
 -- Iteration 20 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 21 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 22 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 23 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 24 --
 TypeError: stripos(): Argument #1 ($haystack) must be of type string, resource given
 TypeError: stripos(): Argument #1 ($haystack) must be of type string, resource given
 -- Iteration 25 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 26 --
 int(0)
-ValueError: Offset not contained in string
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 *** Done ***

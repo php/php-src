@@ -6,9 +6,6 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 obscure_filename
 --FILE--
 <?php
-/* Prototype: string readlink ( string $path );
-   Description: Returns the target of a symbolic link */
-
 /* Testing readlink() with invalid arguments -int, float, bool, NULL, resource */
 
 $file_path = __DIR__;

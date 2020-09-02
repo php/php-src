@@ -189,11 +189,28 @@ PHP_HASH_API void PHP_SNEFRUFinal(unsigned char digest[32], PHP_SNEFRU_CTX *cont
 	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
+static int php_snefru_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_SNEFRU_CTX *ctx = (PHP_SNEFRU_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_SNEFRU_SPEC)) == SUCCESS
+		&& ctx->length < sizeof(ctx->buffer)) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
+}
+
 const php_hash_ops php_hash_snefru_ops = {
+	"snefru",
 	(php_hash_init_func_t) PHP_SNEFRUInit,
 	(php_hash_update_func_t) PHP_SNEFRUUpdate,
 	(php_hash_final_func_t) PHP_SNEFRUFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_snefru_unserialize,
+	PHP_SNEFRU_SPEC,
 	32,
 	32,
 	sizeof(PHP_SNEFRU_CTX),

@@ -18,7 +18,7 @@
 #ifndef PHP_PDO_DBLIB_H
 #define PHP_PDO_DBLIB_H
 
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 extern zend_module_entry pdo_mssql_module_entry;
 #define phpext_pdo_mssql_ptr &pdo_mssql_module_entry
 #else

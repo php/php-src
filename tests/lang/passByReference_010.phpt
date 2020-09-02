@@ -10,41 +10,41 @@ function f(&$a) {
 
 echo "\n\n---> Pass constant assignment by reference:\n";
 try {
-	f($a="a.original");
-	var_dump($a);
+    f($a="a.original");
+    var_dump($a);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() ."\n";
+    echo "Exception: " . $e->getMessage() ."\n";
 }
 
 echo "\n\n---> Pass variable assignment by reference:\n";
 try {
-	unset($a);
-	$a = "a.original";
-	f($b = $a);
-	var_dump($a);
+    unset($a);
+    $a = "a.original";
+    f($b = $a);
+    var_dump($a);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() ."\n";
+    echo "Exception: " . $e->getMessage() ."\n";
 }
 
 echo "\n\n---> Pass reference assignment by reference:\n";
 try {
-	unset($a, $b);
-	$a = "a.original";
-	f($b =& $a);
-	var_dump($a);
+    unset($a, $b);
+    $a = "a.original";
+    f($b =& $a);
+    var_dump($a);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() ."\n";
+    echo "Exception: " . $e->getMessage() ."\n";
 }
 
 echo "\n\n---> Pass concat assignment by reference:\n";
 try {
-	unset($a, $b);
-	$b = "b.original";
-	$a = "a.original";
-	f($b .= $a);
-	var_dump($a);
+    unset($a, $b);
+    $b = "b.original";
+    $a = "a.original";
+    f($b .= $a);
+    var_dump($a);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() ."\n";
+    echo "Exception: " . $e->getMessage() ."\n";
 }
 
 ?>

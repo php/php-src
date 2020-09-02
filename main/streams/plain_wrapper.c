@@ -133,11 +133,11 @@ typedef struct {
 	int lock_flag;			/* stores the lock state */
 	zend_string *temp_name;	/* if non-null, this is the path to a temporary file that
 							 * is to be deleted when the stream is closed */
-#if HAVE_FLUSHIO
+#ifdef HAVE_FLUSHIO
 	char last_op;
 #endif
 
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 	char *last_mapped_addr;
 	size_t last_mapped_len;
 #endif
@@ -257,6 +257,11 @@ static void detect_is_seekable(php_stdio_stream_data *self) {
 
 		self->is_seekable = !(file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR);
 		self->is_pipe = file_type == FILE_TYPE_PIPE;
+
+		/* Additional check needed to distinguish between pipes and sockets. */
+		if (self->is_pipe && !GetNamedPipeInfo((HANDLE) handle, NULL, NULL, NULL, NULL)) {
+			self->is_pipe = 0;
+		}
 	}
 #endif
 }
@@ -358,7 +363,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 		return bytes_written;
 	} else {
 
-#if HAVE_FLUSHIO
+#ifdef HAVE_FLUSHIO
 		if (data->is_seekable && data->last_op == 'r') {
 			zend_fseek(data->file, 0, SEEK_CUR);
 		}
@@ -392,7 +397,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
 					break;
 				}
-				/* If there's nothing to read, wait in 10ms periods. */
+				/* If there's nothing to read, wait in 10us periods. */
 				if (0 == avail_read) {
 					usleep(10);
 				}
@@ -433,7 +438,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 		}
 
 	} else {
-#if HAVE_FLUSHIO
+#ifdef HAVE_FLUSHIO
 		if (data->is_seekable && data->last_op == 'w')
 			zend_fseek(data->file, 0, SEEK_CUR);
 		data->last_op = 'r';
@@ -453,7 +458,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 
 	assert(data != NULL);
 
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 	if (data->last_mapped_addr) {
 		munmap(data->last_mapped_addr, data->last_mapped_len);
 		data->last_mapped_addr = NULL;
@@ -475,7 +480,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 				errno = 0;
 				ret = pclose(data->file);
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 				if (WIFEXITED(ret)) {
 					ret = WEXITSTATUS(ret);
 				}
@@ -704,7 +709,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			break;
 
 		case PHP_STREAM_OPTION_MMAP_API:
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 			{
 				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
 				int prot, flags;
@@ -882,7 +887,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 
-#if defined(_WIN64)
+#ifdef _WIN64
 					sz.QuadPart = new_size;
 #else
 					sz.HighPart = 0;
@@ -903,6 +908,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #endif
 				}
 			}
+			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
 #ifdef PHP_WIN32
 		case PHP_STREAM_OPTION_PIPE_BLOCKING:
@@ -1029,7 +1035,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 
 	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
 		if (options & REPORT_ERRORS) {
-			zend_value_error("`%s' is not a valid mode for fopen", mode);
+			zend_value_error("\"%s\" is not a valid mode for fopen", mode);
 		}
 		return NULL;
 	}
@@ -1226,7 +1232,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 			if (php_copy_file(url_from, url_to) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
 					success = 1;
-#  if !defined(TSRM_WIN32)
+#  ifndef TSRM_WIN32
 					/*
 					 * Try to set user and permission info on the target.
 					 * If we're not root, then some of these may fail.

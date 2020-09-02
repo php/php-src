@@ -346,7 +346,7 @@ static void fpm_child_resources_use(struct fpm_child_s *child) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-		if (wp == child->wp) {
+		if (wp == child->wp || wp == child->wp->shared) {
 			continue;
 		}
 		fpm_scoreboard_free(wp->scoreboard);

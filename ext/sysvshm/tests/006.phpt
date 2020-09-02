@@ -11,7 +11,11 @@ if (!function_exists('ftok')){ print 'skip'; }
 $key = ftok(__FILE__, 't');
 $s = shm_attach($key, 1024);
 
-shm_put_var($s, 1, "test string");
+try {
+    shm_put_var($s, 1, "test string");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 var_dump(shm_remove_var($s, -10));
 

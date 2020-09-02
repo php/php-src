@@ -17,6 +17,7 @@ var_dump(defined('\\ns\\foo::ok'));
 var_dump(defined('\\ns\\foo::bug'));
 var_dump(defined('ns\\bar::bug'));
 var_dump(defined('\\ns\\bar::bug'));
+?>
 --EXPECT--
 bool(true)
 bool(false)

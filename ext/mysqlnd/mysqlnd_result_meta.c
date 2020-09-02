@@ -309,7 +309,7 @@ mysqlnd_result_meta_init(MYSQLND_RES *result, unsigned int field_count)
 
 /* {{{ mysqlnd_res_meta_get_methods */
 PHPAPI struct st_mysqlnd_res_meta_methods *
-mysqlnd_result_metadata_get_methods()
+mysqlnd_result_metadata_get_methods(void)
 {
 	return &mysqlnd_mysqlnd_res_meta_methods;
 }

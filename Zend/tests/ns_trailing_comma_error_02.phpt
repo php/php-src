@@ -5,4 +5,4 @@ Group use declarations mustn't contain just a comma
 use Baz\{,};
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected ',', expecting identifier (T_STRING) or function (T_FUNCTION) or const (T_CONST) in %s on line %d
+Parse error: syntax error, unexpected token ",", expecting identifier or namespaced name or "function" or "const" in %s on line %d

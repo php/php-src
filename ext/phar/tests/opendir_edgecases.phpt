@@ -18,10 +18,10 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-mkdir(__DIR__ . '/poo');
+mkdir(__DIR__ . '/opendir_edgecases');
 chdir(__DIR__);
 
-$a = opendir('poo');
+$a = opendir('opendir_edgecases');
 
 $arr = array();
 while (false !== ($b = readdir($a))) {
@@ -53,7 +53,7 @@ include $pname . '/foo';
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(__DIR__ . '/poo');
+<?php rmdir(__DIR__ . '/opendir_edgecases');
 --EXPECTF--
 opendir(): Argument #1 ($path) must be a valid path, array given
 .

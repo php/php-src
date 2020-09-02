@@ -4,12 +4,6 @@ Test strnatcasecmp() function : variation
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
 <?php
-/* Prototype  : int strnatcasecmp(string s1, string s2)
- * Description: Returns the result of case-insensitive string comparison using 'natural' algorithm
- * Source code: ext/standard/string.c
- * Alias to functions:
- */
-
 /* Preparation */
 class a
 {

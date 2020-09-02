@@ -22,7 +22,7 @@ var_dump("foo$bar"());
 --EXPECTF--
 string(1) "f"
 
-Warning: Trying to get property 'prop' of non-object in %s on line %d
+Warning: Attempt to read property "prop" on string in %s on line %d
 NULL
 Call to a member function method() on string
 int(42)

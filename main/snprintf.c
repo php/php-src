@@ -27,10 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 
 #include <locale.h>
 #ifdef ZTS

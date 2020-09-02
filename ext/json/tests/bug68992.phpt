@@ -1,9 +1,5 @@
 --TEST--
 Bug #68992 (json_encode stacks exceptions thrown by JsonSerializable classes)
---SKIPIF--
-<?php
-if (!extension_loaded('json')) die('skip');
-?>
 --FILE--
 <?php
 

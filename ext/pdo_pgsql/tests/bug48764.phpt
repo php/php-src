@@ -59,6 +59,7 @@ function bug($db, $options = array()) {
         echo $e->getCode()."\n";
     }
 }
+?>
 --EXPECT--
 Test 1
 42P18

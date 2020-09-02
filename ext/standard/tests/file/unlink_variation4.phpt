@@ -2,9 +2,6 @@
 Test unlink() function : usage variations - unlink deleted file
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 /* Try deleting a file which is already deleted */
 

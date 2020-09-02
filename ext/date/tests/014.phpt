@@ -33,7 +33,7 @@ object(DateTimeZone)#%d (2) {
 }
 int(0)
 
-Fatal error: Uncaught TypeError: timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, object given in %s:%d
+Fatal error: Uncaught TypeError: timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, DateTime given in %s:%d
 Stack trace:
 #0 %s(%d): timezone_offset_get(Object(DateTime), Object(DateTimeZone))
 #1 {main}

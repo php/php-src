@@ -20,9 +20,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-#include "dom_arginfo.h"
 
 /*
 * class DOMCharacterData extends DOMNode
@@ -30,19 +29,6 @@
 * URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
 * Since:
 */
-
-const zend_function_entry php_dom_characterdata_class_functions[] = {
-	PHP_ME(domcharacterdata, substringData, arginfo_class_DOMCharacterData_substringData, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, appendData, arginfo_class_DOMCharacterData_appendData, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, insertData, arginfo_class_DOMCharacterData_insertData, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, deleteData, arginfo_class_DOMCharacterData_deleteData, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, replaceData, arginfo_class_DOMCharacterData_replaceData, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, remove, arginfo_class_DOMChildNode_remove, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, after, arginfo_class_DOMChildNode_after, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, before, arginfo_class_DOMChildNode_before, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, replaceWith, arginfo_class_DOMChildNode_replaceWith, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
 
 /* {{{ data	string
 readonly=no
@@ -122,11 +108,10 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto string dom_characterdata_substring_data(int offset, int count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since:
 */
-PHP_METHOD(domcharacterdata, substringData)
+PHP_METHOD(DOMCharacterData, substringData)
 {
 	zval       *id;
 	xmlChar    *cur;
@@ -172,11 +157,10 @@ PHP_METHOD(domcharacterdata, substringData)
 }
 /* }}} end dom_characterdata_substring_data */
 
-/* {{{ proto void dom_characterdata_append_data(string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since:
 */
-PHP_METHOD(domcharacterdata, appendData)
+PHP_METHOD(DOMCharacterData, appendData)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -195,11 +179,10 @@ PHP_METHOD(domcharacterdata, appendData)
 }
 /* }}} end dom_characterdata_append_data */
 
-/* {{{ proto void dom_characterdata_insert_data(int offset, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since:
 */
-PHP_METHOD(domcharacterdata, insertData)
+PHP_METHOD(DOMCharacterData, insertData)
 {
 	zval *id;
 	xmlChar		*cur, *first, *second;
@@ -245,11 +228,10 @@ PHP_METHOD(domcharacterdata, insertData)
 }
 /* }}} end dom_characterdata_insert_data */
 
-/* {{{ proto void dom_characterdata_delete_data(int offset, int count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since:
 */
-PHP_METHOD(domcharacterdata, deleteData)
+PHP_METHOD(DOMCharacterData, deleteData)
 {
 	zval *id;
 	xmlChar    *cur, *substring, *second;
@@ -301,11 +283,10 @@ PHP_METHOD(domcharacterdata, deleteData)
 }
 /* }}} end dom_characterdata_delete_data */
 
-/* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since:
 */
-PHP_METHOD(domcharacterdata, replaceData)
+PHP_METHOD(DOMCharacterData, replaceData)
 {
 	zval *id;
 	xmlChar		*cur, *substring, *second = NULL;
@@ -365,7 +346,7 @@ PHP_METHOD(domcharacterdata, replaceData)
 }
 /* }}} end dom_characterdata_replace_data */
 
-PHP_METHOD(domcharacterdata, remove)
+PHP_METHOD(DOMCharacterData, remove)
 {
 	zval *id = ZEND_THIS;
 	xmlNodePtr children, child;
@@ -413,7 +394,7 @@ PHP_METHOD(domcharacterdata, remove)
 	RETURN_NULL();
 }
 
-PHP_METHOD(domcharacterdata, after)
+PHP_METHOD(DOMCharacterData, after)
 {
 	int argc;
 	zval *args, *id;
@@ -430,7 +411,7 @@ PHP_METHOD(domcharacterdata, after)
 	dom_parent_node_after(intern, args, argc);
 }
 
-PHP_METHOD(domcharacterdata, before)
+PHP_METHOD(DOMCharacterData, before)
 {
 	int argc;
 	zval *args, *id;
@@ -447,7 +428,7 @@ PHP_METHOD(domcharacterdata, before)
 	dom_parent_node_before(intern, args, argc);
 }
 
-PHP_METHOD(domcharacterdata, replaceWith)
+PHP_METHOD(DOMCharacterData, replaceWith)
 {
 	int argc;
 	zval *args, *id;

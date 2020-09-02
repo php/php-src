@@ -2,9 +2,6 @@
 Test stristr() function : basic functionality
 --FILE--
 <?php
-/* Prototype:  string stristr  ( string $haystack  , mixed $needle  [, bool $before_needle  ] )
-   Description: Case-insensitive strstr().
-*/
 
 echo "*** Testing stristr() : basic functionality ***\n";
 

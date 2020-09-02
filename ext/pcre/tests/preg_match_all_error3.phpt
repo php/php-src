@@ -3,7 +3,6 @@ Test preg_match_all() function : error conditions
 --FILE--
 <?php
 /*
-* proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*

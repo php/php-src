@@ -2,8 +2,6 @@
 session rfc1867 no name
 --INI--
 file_uploads=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1024
 session.save_path=
 session.name=PHPSESSID
@@ -42,7 +40,7 @@ Content-Disposition: form-data; name="file2"; filename="file2.txt"
 session_start();
 var_dump(session_id());
 var_dump($_FILES);
-var_dump($_SESSION["upload_progress_" . basename(__FILE__)]);
+var_dump(isset($_SESSION["upload_progress_" . basename(__FILE__)]));
 session_destroy();
 ?>
 --EXPECTF--
@@ -75,4 +73,4 @@ array(2) {
     int(1)
   }
 }
-NULL
+bool(false)

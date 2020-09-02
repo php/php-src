@@ -4,11 +4,6 @@ Test ctype_alnum() function : basic functionality
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 echo "*** Testing ctype_alnum() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

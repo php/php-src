@@ -35,14 +35,19 @@ $tests = array(
         '$6$rounds=123456$asaltof16chars..$BtCwjqMJGx5hrJhZywWvt0RLE8uZ4oPwcelCjmw2kSYu.Ec6ycULevoBK25fs2xXgMNrCzIMVcgEJAstJeonj1'
     ),
     7 => array(
-        '$6$rounds=10$roundstoolow',
-        'the minimum number is still observed',
-        '$6$rounds=1000$roundstoolow$kUMsbe306n21p9R.FRkW3IGn.S9NPN0x50YhH1xhLsPuWGsUSklZt58jaTfF4ZEQpyUNGc0dqbpBYYBaHHrsX.'
-    ),
-    8 => array(
         '$6$$bar$',
         'foo',
         '$6$$QMXjqd7rHQZPQ1yHsXkQqC1FBzDiVfTHXL.LaeDAeVV.IzMaV9VU4MQ8kPuZa2SOP1A0RPm772EaFYjpEJtdu.'
+    ),
+    8 => array(
+        '$6$rounds=10$roundstoolow',
+        'the number of rounds is too low',
+        '*0'
+    ),
+    8 => array(
+        '$6$rounds=1000000000$roundstoohigh',
+        'the number of rounds is too high',
+        '*0'
     ),
 );
 

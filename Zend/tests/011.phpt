@@ -39,18 +39,40 @@ var_dump(property_exists($foo,"pp2"));
 var_dump(property_exists($foo,"pp3"));
 var_dump(property_exists($foo,"nonexistent"));
 var_dump(property_exists($foo,""));
-var_dump(property_exists(array(),"test"));
-var_dump(property_exists(1,"test"));
-var_dump(property_exists(true,"test"));
+
+try {
+    var_dump(property_exists(array(), "test"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(property_exists(1, "test"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(property_exists(3.14, "test"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(property_exists(true, "test"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(property_exists(null, "test"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $foo->bar();
 
 $bar = new bar;
 $bar->test();
 
-echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)
@@ -64,19 +86,14 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-
-Warning: First parameter must either be an object or the name of an existing class in %s on line %d
-NULL
-
-Warning: First parameter must either be an object or the name of an existing class in %s on line %d
-NULL
-
-Warning: First parameter must either be an object or the name of an existing class in %s on line %d
-NULL
+property_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
+property_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
+property_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
+property_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
+property_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 bool(true)
-Done

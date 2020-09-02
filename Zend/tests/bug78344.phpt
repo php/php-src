@@ -17,7 +17,7 @@ class C extends B {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access protected const A::FOO in %s:%d
+Fatal error: Uncaught Error: Cannot access protected constant A::FOO in %s:%d
 Stack trace:
 #0 %s(%d): C->method()
 #1 {main}

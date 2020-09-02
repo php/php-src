@@ -468,7 +468,7 @@ PHP_MSHUTDOWN_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
-const php_password_algo* php_password_algo_default() {
+const php_password_algo* php_password_algo_default(void) {
 	return &php_password_algo_bcrypt;
 }
 
@@ -560,8 +560,7 @@ const php_password_algo* php_password_algo_identify_ex(const zend_string* hash, 
 	return (!algo || (algo->valid && !algo->valid(hash))) ? default_algo : algo;
 }
 
-/* {{{ proto array|null password_get_info(string $hash)
-Retrieves information about a given hash */
+/* {{{ Retrieves information about a given hash */
 PHP_FUNCTION(password_get_info)
 {
 	const php_password_algo *algo;
@@ -593,16 +592,15 @@ PHP_FUNCTION(password_get_info)
 	add_assoc_string(return_value, "algoName", algo->name);
 	if (algo->get_info &&
 		(FAILURE == algo->get_info(&options, hash))) {
-		zval_dtor(&options);
-		zval_dtor(return_value);
+		zval_ptr_dtor_nogc(&options);
+		zval_ptr_dtor_nogc(return_value);
 		RETURN_NULL();
 	}
 	add_assoc_zval(return_value, "options", &options);
 }
 /** }}} */
 
-/* {{{ proto bool password_needs_rehash(string $hash, mixed $algo[, array $options])
-Determines if a given hash requires re-hashing based upon parameters */
+/* {{{ Determines if a given hash requires re-hashing based upon parameters */
 PHP_FUNCTION(password_needs_rehash)
 {
 	const php_password_algo *old_algo, *new_algo;
@@ -633,8 +631,7 @@ PHP_FUNCTION(password_needs_rehash)
 }
 /* }}} */
 
-/* {{{ proto bool password_verify(string password, string hash)
-Verify a hash created using crypt() or password_hash() */
+/* {{{ Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
 	zend_string *password, *hash;
@@ -650,8 +647,7 @@ PHP_FUNCTION(password_verify)
 }
 /* }}} */
 
-/* {{{ proto string password_hash(string password, mixed algo[, array options = array()])
-Hash a password */
+/* {{{ Hash a password */
 PHP_FUNCTION(password_hash)
 {
 	zend_string *password, *digest = NULL;
@@ -686,7 +682,7 @@ PHP_FUNCTION(password_hash)
 }
 /* }}} */
 
-/* {{{ proto array password_algos() */
+/* {{{ */
 PHP_FUNCTION(password_algos) {
 	zend_string *algo;
 

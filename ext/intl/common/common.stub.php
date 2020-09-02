@@ -1,22 +1,21 @@
 <?php
 
+/** @generate-function-entries */
+
 class IntlIterator implements Iterator
 {
+    /** @return mixed */
     public function current() {}
 
+    /** @return mixed */
     public function key() {}
 
+    /** @return void */
     public function next() {}
 
+    /** @return void */
     public function rewind() {}
 
+    /** @return bool */
     public function valid() {}
 }
-
-function intl_get_error_code(): int {}
-
-function intl_get_error_message(): string {}
-
-function intl_is_failure(int $error_code): bool {}
-
-function intl_error_name(int $error_code): string {}

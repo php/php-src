@@ -88,6 +88,7 @@
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
 ;;;;;;;;;;;;;;;;;;;
+
 ; The following are all the settings which are different in either the production
 ; or development versions of the INIs with respect to PHP's default behavior.
 ; Please see the actual settings later in the document for more details as to why
@@ -152,6 +153,16 @@
 ;   Default Value: "EGPCS"
 ;   Development Value: "GPCS"
 ;   Production Value: "GPCS"
+
+; zend.exception_ignore_args
+;   Default Value: Off
+;   Development Value: Off
+;   Production Value: On
+
+; zend.exception_string_param_max_len
+;   Default Value: 15
+;   Development Value: 15
+;   Production Value: 0
 
 ;;;;;;;;;;;;;;;;;;;;
 ; php.ini Options  ;
@@ -352,18 +363,26 @@ zend.enable_gc = On
 ; If enabled, scripts may be written in encodings that are incompatible with
 ; the scanner.  CP936, Big5, CP949 and Shift_JIS are the examples of such
 ; encodings.  To use this feature, mbstring extension must be enabled.
-; Default: Off
 ;zend.multibyte = Off
 
 ; Allows to set the default encoding for the scripts.  This value will be used
 ; unless "declare(encoding=...)" directive appears at the top of the script.
 ; Only affects if zend.multibyte is set.
-; Default: ""
 ;zend.script_encoding =
 
-; Allows to include or exclude arguments from stack traces generated for exceptions
-; Default: Off
+; Allows to include or exclude arguments from stack traces generated for exceptions.
+; Default Value: Off
+; Development Value: Off
+; Production Value: On
 zend.exception_ignore_args = Off
+
+; Allows setting the maximum string length in an argument of a stringified stack trace
+; to a value between 0 and 1000000.
+; This has no effect when zend.exception_ignore_args is enabled.
+; Default Value: 15
+; Development Value: 15
+; Production Value: 0
+zend.exception_string_param_max_len = 15
 
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
@@ -520,7 +539,7 @@ ignore_repeated_source = Off
 ; http://php.net/report-memleaks
 report_memleaks = On
 
-; This setting is on by default.
+; This setting is off by default.
 ;report_zend_debug = 0
 
 ; Turn off normal error reporting and emit XML-RPC error XML
@@ -901,7 +920,7 @@ default_socket_timeout = 60
 ;extension=ffi
 ;extension=ftp
 ;extension=fileinfo
-;extension=gd2
+;extension=gd
 ;extension=gettext
 ;extension=gmp
 ;extension=intl
@@ -931,7 +950,6 @@ default_socket_timeout = 60
 ;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
-;extension=xmlrpc
 ;extension=xsl
 
 ;zend_extension=opcache
@@ -1596,6 +1614,10 @@ zend.assertions = 1
 ; Default: system ANSI code page
 ;com.code_page=
 
+; The version of the .NET framework to use. The value of the setting are the first three parts
+; of the framework's version number, separated by dots, and prefixed with "v", e.g. "v4.0.30319".
+;com.dotnet_version=
+
 [mbstring]
 ; language for internal character representation.
 ; This affects mb_send_mail() and mbstring.detect_order.
@@ -1645,9 +1667,8 @@ zend.assertions = 1
 ; http://php.net/mbstring.substitute-character
 ;mbstring.substitute_character = none
 
-; enable strict encoding detection.
-; Default: Off
-;mbstring.strict_detection = On
+; Enable strict encoding detection.
+;mbstring.strict_detection = Off
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
@@ -1656,12 +1677,10 @@ zend.assertions = 1
 
 ; This directive specifies maximum stack depth for mbstring regular expressions. It is similar
 ; to the pcre.recursion_limit for PCRE.
-; Default: 100000
 ;mbstring.regex_stack_limit=100000
 
 ; This directive specifies maximum retry count for mbstring regular expressions. It is similar
 ; to the pcre.backtrack_limit for PCRE.
-; Default: 1000000
 ;mbstring.regex_retry_limit=1000000
 
 [gd]
@@ -1775,6 +1794,11 @@ ldap.max_links = -1
 ; If disabled, all PHPDoc comments are dropped from the code to reduce the
 ; size of the optimized code.
 ;opcache.save_comments=1
+
+; If enabled, compilation warnings (including notices and deprecations) will
+; be recorded and replayed each time a file is included. Otherwise, compilation
+; warnings will only be emitted when the file is first cached.
+;opcache.record_warnings=0
 
 ; Allow file existence override (file_exists, etc.) performance feature.
 ;opcache.enable_file_override=0

@@ -2,12 +2,6 @@
 Test flock() function: Variations
 --FILE--
 <?php
-/*
-Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files
-  in an advisory way
-*/
-
 echo "*** Testing flock() fun with the various operation and
     wouldblock values                                ***\n";
 

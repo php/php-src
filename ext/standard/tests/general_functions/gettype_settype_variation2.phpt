@@ -12,13 +12,6 @@ if (PHP_OS_FAMILY === 'Darwin') {
 precision=14
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
-
-   Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type
-*/
-
 /* Test usage variation of gettype() and settype() functions:
          settype() to int/integer type.
    Set type of the data to "int"/"integer" and verify using gettype

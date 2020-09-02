@@ -11,11 +11,11 @@ Ensure "undefined offset" notice formats message correctly when undefined key is
 echo "Done\n";
 ?>
 --EXPECTF--
-Notice: Undefined offset: -1 in %s on line 3
+Warning: Undefined array key -1 in %s on line %d
 
-Notice: Undefined offset: -1 in %s on line 4
+Warning: Undefined array key -1 in %s on line %d
 
-Notice: Undefined offset: -1 in %s on line 5
+Warning: Undefined array key -1 in %s on line %d
 
-Notice: Undefined offset: -1 in %s on line 6
+Warning: Undefined array key -1 in %s on line %d
 Done

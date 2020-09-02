@@ -24,16 +24,6 @@
 #define MYSQL_UNIX_ADDR PHP_MYSQL_UNIX_SOCK_ADDR
 #endif
 
-/* character set support */
-#if defined(MYSQLND_VERSION_ID) || MYSQL_VERSION_ID > 50009
-#define HAVE_MYSQLI_GET_CHARSET
-#endif
-
-#if defined(MYSQLND_VERSION_ID) || MYSQL_VERSION_ID > 50005
-#define HAVE_MYSQLI_SET_CHARSET
-#endif
-
-
 extern const zend_function_entry mysqli_functions[];
 extern const zend_function_entry mysqli_link_methods[];
 extern const zend_function_entry mysqli_stmt_methods[];

@@ -1,11 +1,14 @@
 <?php
 
+/** @generate-function-entries */
+
 function apache_lookup_uri(string $filename): object|false {}
 
 function virtual(string $uri): bool {}
 
 function apache_request_headers(): array {}
 
+/** @alias apache_request_headers */
 function getallheaders(): array {}
 
 function apache_response_headers(): array {}

@@ -46,6 +46,6 @@ PDOTest::skip();
         putenv("PDOTEST_PASS=$orgPass");
     }
 ?>
---EXPECTF--
+--EXPECT--
 using credentials in dsn: done
 ignoring credentials in dsn: done

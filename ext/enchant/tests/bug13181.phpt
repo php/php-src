@@ -15,12 +15,12 @@ if (!$broker) {
 }
 
 if (!enchant_broker_list_dicts($broker)) {
-	enchant_broker_free($broker);
+	@enchant_broker_free($broker);
 
 	echo "skip: No broker dicts installed\n";
 }
 
-enchant_broker_free($broker);
+@enchant_broker_free($broker);
 ?>
 --FILE--
 <?php
@@ -52,9 +52,16 @@ $rDict = get_dict($rbroker);
 var_dump($rDict);
 ?>
 --EXPECTF--
-resource(%d) of type (enchant_dict)
-resource(%d) of type (enchant_dict)
-resource(%d) of type (enchant_broker)
-resource(%d) of type (enchant_broker)
-resource(%d) of type (enchant_dict)
-resource(%d) of type (enchant_dict)
+object(EnchantDictionary)#%d (0) {
+}
+object(EnchantDictionary)#%d (0) {
+}
+object(EnchantBroker)#%d (0) {
+}
+object(EnchantBroker)#%d (0) {
+}
+object(EnchantDictionary)#%d (0) {
+}
+object(EnchantDictionary)#%d (0) {
+}
+

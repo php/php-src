@@ -108,14 +108,16 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_compact_vars(zend_op_array *op_array);
-int zend_optimizer_is_disabled_func(const char *name, size_t len);
 zend_function *zend_optimizer_get_called_func(
-		zend_script *script, zend_op_array *op_array, zend_op *opline);
+		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool *is_prototype);
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args);
 void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, zend_op *opline);
 void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_t *shiftlist);
 int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_arrya, zend_ssa *ssa, zend_call_info **call_map);
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects);
 int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa);
+
+typedef void (*zend_op_array_func_t)(zend_op_array *, void *context);
+void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void *context);
 
 #endif

@@ -110,8 +110,7 @@ U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
 
 	zoi_with_current *zoi_iter = static_cast<zoi_with_current*>(emalloc(sizeof *zoi_iter));
 	zend_iterator_init(&zoi_iter->zoi);
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&zoi_iter->zoi.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&zoi_iter->zoi.data, Z_OBJ_P(object));
 	zoi_iter->zoi.funcs = &breakiterator_iterator_funcs;
 	zoi_iter->zoi.index = 0;
 	zoi_iter->destroy_it = _breakiterator_destroy_it;
@@ -286,17 +285,12 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	ZVAL_COPY_DEREF(return_value, biter_zval);
 }
 
-static const zend_function_entry IntlPartsIterator_class_functions[] = {
-	PHP_ME(IntlPartsIterator,	getBreakIterator,	arginfo_class_IntlPartsIterator_getBreakIterator,	ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
 {
 	zend_class_entry ce;
 
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", IntlPartsIterator_class_functions);
+	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
 	IntlPartsIterator_ce_ptr = zend_register_internal_class_ex(&ce,
 			IntlIterator_ce_ptr);
 	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;

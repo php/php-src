@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file
- * Source code: ext/standard/basic_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing parse_ini_file() : variation ***\n";
 $mainDir = "parseIniFileVar私はガラスを食べられます.dir";
 $subDir = "parseIniFileVar私はガラスを食べられますSub";

@@ -2,11 +2,6 @@
 Test rsort() function : usage variations - Hexadecimal vales
 --FILE--
 <?php
-/* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass rsort() an array of hexadecimal values to test behaviour
  */

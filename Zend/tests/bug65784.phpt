@@ -53,6 +53,7 @@ function foo3() {
 }
 
 $bar = foo3();
+?>
 --EXPECTF--
 string(9) "not catch"
 NULL
@@ -62,7 +63,7 @@ Stack trace:
 #0 %sbug65784.php(52): foo3()
 #1 {main}
 
-Next Error: Class 'NotExists' not found in %sbug65784.php:46
+Next Error: Class "NotExists" not found in %s:%d
 Stack trace:
 #0 %sbug65784.php(52): foo3()
 #1 {main}

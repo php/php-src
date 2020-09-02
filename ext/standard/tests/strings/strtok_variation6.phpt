@@ -2,11 +2,6 @@
 Test strtok() function : usage variations - invalid escape sequences as tokens
 --FILE--
 <?php
-/* Prototype  : string strtok ( str $str, str $token )
- * Description: splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Testing strtok() : with invalid escape sequences in token
 */

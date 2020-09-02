@@ -26,6 +26,7 @@ typedef struct {
 	uint32_t count[2];
 	unsigned char buffer[64];
 } PHP_MD4_CTX;
+#define PHP_MD4_SPEC "l4l2b64."
 
 PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX *);
 PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, size_t);
@@ -36,8 +37,9 @@ typedef struct {
 	unsigned char state[48];
 	unsigned char checksum[16];
 	unsigned char buffer[16];
-	char in_buffer;
+	unsigned char in_buffer;
 } PHP_MD2_CTX;
+#define PHP_MD2_SPEC "b48b16b16b."
 
 PHP_HASH_API void PHP_MD2Init(PHP_MD2_CTX *context);
 PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *, size_t);

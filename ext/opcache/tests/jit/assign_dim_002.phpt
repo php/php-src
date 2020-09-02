@@ -81,6 +81,7 @@ function foo5() {
 }
 var_dump(foo5());
 
+?>
 --EXPECTF--
 array(1) {
   [0]=>

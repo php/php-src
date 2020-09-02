@@ -2,11 +2,6 @@
 Test getimagesize() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array
- * Source code: ext/standard/image.c
- */
-
 $imagetype_filenames = array(
       // GIF file
       "GIF image file" => "200x100.gif",

@@ -2,12 +2,6 @@
 Test date_create() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : DateTime date_create  ([ string $time  [, DateTimeZone $timezone  ]] )
- * Description: Returns new DateTime object
- * Source code: ext/date/php_date.c
- * Alias to functions: DateTime::__construct
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 

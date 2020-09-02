@@ -41,28 +41,22 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+var_dump($map->prop);
+var_dump(isset($map->prop));
+unset($map->prop);
+
 try {
     $map->prop = 1;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    var_dump($map->prop);
+    $map->prop[] = 1;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     $r =& $map->prop;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
-try {
-    isset($map->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
-try {
-    unset($map->prop);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -79,7 +73,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 WeakMap key must be an object
 WeakMap key must be an object
 WeakMap key must be an object
@@ -87,10 +81,12 @@ WeakMap key must be an object
 Cannot append to WeakMap
 Cannot append to WeakMap
 Object stdClass#2 not contained in WeakMap
-WeakMap objects do not support properties
-WeakMap objects do not support properties
-WeakMap objects do not support property references
-WeakMap objects do not support properties
-WeakMap objects do not support properties
+
+Warning: Undefined property: WeakMap::$prop in %s on line %d
+NULL
+bool(false)
+Cannot create dynamic property WeakMap::$prop
+Cannot create dynamic property WeakMap::$prop
+Cannot create dynamic property WeakMap::$prop
 Serialization of 'WeakMap' is not allowed
 Unserialization of 'WeakMap' is not allowed

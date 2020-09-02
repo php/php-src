@@ -18,17 +18,12 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_attr.h"
 #include "msgformat_data.h"
 #include "intl_convert.h"
 
 #include <unicode/ustring.h>
 
-/* {{{ proto string MessageFormatter::getPattern( )
- * Get formatter pattern. }}} */
-/* {{{ proto string msgfmt_get_pattern( MessageFormatter $mf )
- * Get formatter pattern.
- */
+/* {{{ Get formatter pattern. */
 PHP_FUNCTION( msgfmt_get_pattern )
 {
 	MSG_FORMAT_METHOD_INIT_VARS;
@@ -50,11 +45,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 }
 /* }}} */
 
-/* {{{ proto bool MessageFormatter::setPattern( string $pattern )
- * Set formatter pattern. }}} */
-/* {{{ proto bool msgfmt_set_pattern( MessageFormatter $mf, string $pattern )
- * Set formatter pattern.
- */
+/* {{{ Set formatter pattern. */
 PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
@@ -107,11 +98,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 }
 /* }}} */
 
-/* {{{ proto string MessageFormatter::getLocale()
- * Get formatter locale. }}} */
-/* {{{ proto string msgfmt_get_locale(MessageFormatter $mf)
- * Get formatter locale.
- */
+/* {{{ Get formatter locale. */
 PHP_FUNCTION( msgfmt_get_locale )
 {
 	char *loc;

@@ -18,16 +18,6 @@
 #include <php.h>
 #include <unicode/utypes.h>
 
-PHP_FUNCTION(grapheme_strlen);
-PHP_FUNCTION(grapheme_strpos);
-PHP_FUNCTION(grapheme_stripos);
-PHP_FUNCTION(grapheme_strrpos);
-PHP_FUNCTION(grapheme_strripos);
-PHP_FUNCTION(grapheme_substr);
-PHP_FUNCTION(grapheme_strstr);
-PHP_FUNCTION(grapheme_stristr);
-PHP_FUNCTION(grapheme_extract);
-
 void grapheme_register_constants( INIT_FUNC_ARGS );
 void grapheme_close_global_iterator( void );
 

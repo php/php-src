@@ -8,10 +8,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: bool is_int ( mixed $var );
- * Description: Finds whether the given variable is an integer
- */
-
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
 // different valid  integer values
 $valid_ints = array(
@@ -136,7 +132,7 @@ foreach ($not_int_types as $type ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_int(), is_integer() & is_long()  with valid integer values ***
 --Iteration 1--
 bool(true)

@@ -1,7 +1,5 @@
 --TEST--
 Test json_encode() function : basic functionality with UTF8 string input
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 echo "*** Testing json_encode() : basic functionality with UTF-8 input***\n";

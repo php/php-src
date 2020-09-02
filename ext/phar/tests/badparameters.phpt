@@ -246,7 +246,7 @@ Cannot change stub, phar is read-only
 A Phar stub cannot be set in a plain tar archive
 Phar::setStub(): Argument #1 ($newstub) must be of type string, array given
 A Phar stub cannot be set in a plain tar archive
-Phar::setDefaultStub(): Argument #1 ($index) must be of type string, array given
+Phar::setDefaultStub(): Argument #1 ($index) must be of type ?string, array given
 Cannot change stub: phar.readonly=1
 Cannot set signature algorithm, phar is read-only
 Phar::compress(): Argument #1 ($compression_type) must be of type int, array given

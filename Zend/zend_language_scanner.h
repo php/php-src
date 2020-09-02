@@ -30,6 +30,7 @@ typedef struct _zend_lex_state {
 	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
+	zend_stack nest_location_stack; /* for syntax error reporting */
 
 	zend_file_handle *in;
 	uint32_t lineno;
@@ -49,7 +50,9 @@ typedef struct _zend_lex_state {
 	const zend_encoding *script_encoding;
 
 	/* hooks */
-	void (*on_event)(zend_php_scanner_event event, int token, int line, void *context);
+	void (*on_event)(
+		zend_php_scanner_event event, int token, int line,
+		const char *text, size_t length, void *context);
 	void *on_event_context;
 
 	zend_ast *ast;
@@ -63,13 +66,19 @@ typedef struct _zend_heredoc_label {
 	zend_bool indentation_uses_spaces;
 } zend_heredoc_label;
 
+/* Track locations of unclosed {, [, (, etc. for better syntax error reporting */
+typedef struct _zend_nest_location {
+	char text;
+	int  lineno;
+} zend_nest_location;
+
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state);
-ZEND_API int zend_prepare_string_for_scanning(zval *str, const char *filename);
+ZEND_API void zend_prepare_string_for_scanning(zval *str, const char *filename);
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding);
-ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding);
-ZEND_API void zend_lex_tstring(zval *zv);
+ZEND_API zend_result zend_multibyte_set_filter(const zend_encoding *onetime_encoding);
+ZEND_API zend_result zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref);
 
 END_EXTERN_C()
 

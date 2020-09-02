@@ -3,11 +3,6 @@ Test chr() function : usage variations - test values for $ascii argument
 --FILE--
 <?php
 
-/* Prototype  : string chr  ( int $ascii  )
- * Description: Return a specific character
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing chr() function: with unexpected inputs for 'ascii' argument ***\n";
 
 //get an unset variable

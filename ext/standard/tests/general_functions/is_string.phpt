@@ -2,10 +2,6 @@
 Test is_string() function
 --FILE--
 <?php
-/* Prototype: bool is_string ( mixed $var );
- * Description: Finds whether the given variable is a string
- */
-
 echo "*** Testing is_string() with valid string values ***\n";
 // different valid strings
 
@@ -147,7 +143,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_string() with valid string values ***
 -- Iteration 1 --
 bool(true)

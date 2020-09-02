@@ -61,10 +61,11 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uuencode(const char *src, size_t src_len) /* {{{ */
 {
 	size_t len = 45;
-	unsigned char *p, *s, *e, *ee;
+	unsigned char *p;
+	const unsigned char *s, *e, *ee;
 	zend_string *dest;
 
 	/* encoded length is ~ 38% greater than the original
@@ -125,10 +126,11 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 }
 /* }}} */
 
-PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uudecode(const char *src, size_t src_len) /* {{{ */
 {
 	size_t len, total_len=0;
-	char *s, *e, *p, *ee;
+	char *p;
+	const char *s, *e, *ee;
 	zend_string *dest;
 
 	dest = zend_string_alloc((size_t) ceil(src_len * 0.75), 0);
@@ -194,8 +196,7 @@ err:
 }
 /* }}} */
 
-/* {{{ proto string|false convert_uuencode(string data)
-   uuencode a string */
+/* {{{ uuencode a string */
 PHP_FUNCTION(convert_uuencode)
 {
 	zend_string *src;
@@ -209,8 +210,7 @@ PHP_FUNCTION(convert_uuencode)
 }
 /* }}} */
 
-/* {{{ proto string|false convert_uudecode(string data)
-   decode a uuencoded string */
+/* {{{ decode a uuencoded string */
 PHP_FUNCTION(convert_uudecode)
 {
 	zend_string *src;

@@ -50,7 +50,7 @@ if (!oci_execute($s)) {
 
 while ($row = oci_fetch_object($s)) {
     echo $row->COL1 . "\n";
-    echo $row->COL2->load(100) . "\n";
+    echo $row->COL2->load() . "\n";
     echo $row->COL3 . "\n";
 }
 
@@ -69,7 +69,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "123"
   ["COL2"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -80,7 +80,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "456"
   ["COL2"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -91,7 +91,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "789"
   ["COL2"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

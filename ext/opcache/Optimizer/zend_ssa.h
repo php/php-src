@@ -127,6 +127,9 @@ typedef struct _zend_ssa_var_info {
 	unsigned int           is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
 	unsigned int           recursive : 1;
 	unsigned int           use_as_double : 1;
+	unsigned int           delayed_fetch_this : 1;
+	unsigned int           avoid_refcounting : 1;
+	unsigned int           guarded_reference : 1;
 } zend_ssa_var_info;
 
 typedef struct _zend_ssa {
@@ -213,7 +216,10 @@ static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ss
 
 static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
 {
-	if (opline->opcode == ZEND_ASSIGN || opline->opcode == ZEND_UNSET_CV) {
+	if (opline->opcode == ZEND_ASSIGN
+			 || opline->opcode == ZEND_UNSET_CV
+			 || opline->opcode == ZEND_BIND_GLOBAL
+			 || opline->opcode == ZEND_BIND_STATIC) {
 		return ssa_op->op1_use == var && ssa_op->op2_use != var;
 	}
 	if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {

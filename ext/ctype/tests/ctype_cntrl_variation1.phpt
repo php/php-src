@@ -4,11 +4,6 @@ Test ctype_cntrl() function : usage variations - Different data types as $c arg
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_cntrl() to test behaviour
  */

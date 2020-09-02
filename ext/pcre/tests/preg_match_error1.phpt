@@ -2,10 +2,7 @@
 Test preg_match() function : error conditions - bad regular expressions
 --FILE--
 <?php
-/*
- *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
- * Function is implemented in ext/pcre/php_pcre.c
-*/
+/* Function is implemented in ext/pcre/php_pcre.c */
 /*
 * Testing how preg_match reacts to being passed the wrong type of regex argument
 */
@@ -60,4 +57,4 @@ preg_match(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 int(1)
-preg_match(): Argument #1 ($pattern) must be of type string, object given
+preg_match(): Argument #1 ($pattern) must be of type string, stdClass given

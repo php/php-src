@@ -55,11 +55,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#if HAVE_SYS_FILE_H
+#ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
 
-#if HAVE_DIRENT_H
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
 
@@ -71,7 +71,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -243,7 +243,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
-#if defined(HAVE_PWRITE)
+#ifdef HAVE_PWRITE
 	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
@@ -494,7 +494,7 @@ PS_READ_FUNC(files)
 
 	*val = zend_string_alloc(sbuf.st_size, 0);
 
-#if defined(HAVE_PREAD)
+#ifdef HAVE_PREAD
 	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);

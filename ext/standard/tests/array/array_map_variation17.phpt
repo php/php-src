@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - unexpected values for 'callback' argument
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing different scalar/nonscalar values in place of $callback
  */
@@ -120,10 +115,10 @@ array_map(): Argument #1 ($callback) must be a valid callback, no array or strin
 array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
 
 -- Iteration 14 --
-array_map(): Argument #1 ($callback) must be a valid callback, function '' not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 15 --
-array_map(): Argument #1 ($callback) must be a valid callback, function '' not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 16 --
 array_map(): Argument #1 ($callback) must be a valid callback, array must have exactly two members

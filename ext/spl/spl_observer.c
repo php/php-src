@@ -37,23 +37,6 @@
 #include "spl_array.h"
 #include "spl_exceptions.h"
 
-SPL_METHOD(SplObserver, update);
-SPL_METHOD(SplSubject, attach);
-SPL_METHOD(SplSubject, detach);
-SPL_METHOD(SplSubject, notify);
-
-static const zend_function_entry spl_funcs_SplObserver[] = {
-	SPL_ABSTRACT_ME(SplObserver, update,   arginfo_class_SplObserver_update)
-	PHP_FE_END
-};
-
-static const zend_function_entry spl_funcs_SplSubject[] = {
-	SPL_ABSTRACT_ME(SplSubject,  attach,   arginfo_class_SplSubject_attach)
-	SPL_ABSTRACT_ME(SplSubject,  detach,   arginfo_class_SplSubject_detach)
-	SPL_ABSTRACT_ME(SplSubject,  notify,   arginfo_class_SplSubject_notify)
-	PHP_FE_END
-};
-
 PHPAPI zend_class_entry     *spl_ce_SplObserver;
 PHPAPI zend_class_entry     *spl_ce_SplSubject;
 PHPAPI zend_class_entry     *spl_ce_SplObjectStorage;
@@ -67,8 +50,6 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	HashPosition      pos;
 	zend_long         flags;
 	zend_function    *fptr_get_hash;
-	zval             *gcdata;
-	size_t            gcdata_num;
 	zend_object       std;
 } spl_SplObjectStorage; /* }}} */
 
@@ -92,11 +73,6 @@ void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&intern->std);
 
 	zend_hash_destroy(&intern->storage);
-
-	if (intern->gcdata != NULL) {
-		efree(intern->gcdata);
-	}
-
 } /* }}} */
 
 static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zval *obj) {
@@ -262,7 +238,7 @@ static zend_object *spl_object_storage_clone(zend_object *old_object)
 }
 /* }}} */
 
-static HashTable* spl_object_storage_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ */
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(obj);
 	spl_SplObjectStorageElement *element;
@@ -271,8 +247,6 @@ static HashTable* spl_object_storage_debug_info(zend_object *obj, int *is_temp) 
 	zend_string *md5str;
 	zend_string *zname;
 	HashTable *debug_info;
-
-	*is_temp = 1;
 
 	props = obj->handlers->get_properties(obj);
 
@@ -304,23 +278,16 @@ static HashTable* spl_object_storage_debug_info(zend_object *obj, int *is_temp) 
 /* overridden for garbage collection */
 static HashTable *spl_object_storage_get_gc(zend_object *obj, zval **table, int *n) /* {{{ */
 {
-	int i = 0;
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(obj);
 	spl_SplObjectStorageElement *element;
-
-	if (intern->storage.nNumOfElements * 2 > intern->gcdata_num) {
-		intern->gcdata_num = intern->storage.nNumOfElements * 2;
-		intern->gcdata = (zval*)erealloc(intern->gcdata, sizeof(zval) * intern->gcdata_num);
-	}
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 
 	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
-		ZVAL_COPY_VALUE(&intern->gcdata[i++], &element->obj);
-		ZVAL_COPY_VALUE(&intern->gcdata[i++], &element->inf);
+		zend_get_gc_buffer_add_zval(gc_buffer, &element->obj);
+		zend_get_gc_buffer_add_zval(gc_buffer, &element->inf);
 	} ZEND_HASH_FOREACH_END();
 
-	*table = intern->gcdata;
-	*n = i;
-
+	zend_get_gc_buffer_use(gc_buffer, table, n);
 	return zend_std_get_properties(obj);
 }
 /* }}} */
@@ -345,7 +312,7 @@ static int spl_object_storage_compare_objects(zval *o1, zval *o2) /* {{{ */
 	zo2 = (zend_object *)Z_OBJ_P(o2);
 
 	if (zo1->ce != spl_ce_SplObjectStorage || zo2->ce != spl_ce_SplObjectStorage) {
-		return 1;
+		return ZEND_UNCOMPARABLE;
 	}
 
 	return zend_hash_compare(&(Z_SPLOBJSTORAGE_P(o1))->storage, &(Z_SPLOBJSTORAGE_P(o2))->storage, (compare_func_t)spl_object_storage_compare_info, 0);
@@ -376,9 +343,8 @@ int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *obj) /* {{{ 
 	return found;
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::attach(object obj, mixed data = NULL)
- Attaches an object to the storage if not yet contained */
-SPL_METHOD(SplObjectStorage, attach)
+/* {{{ Attaches an object to the storage if not yet contained */
+PHP_METHOD(SplObjectStorage, attach)
 {
 	zval *obj, *inf = NULL;
 
@@ -390,9 +356,8 @@ SPL_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::detach(object obj)
- Detaches an object from the storage */
-SPL_METHOD(SplObjectStorage, detach)
+/* {{{ Detaches an object from the storage */
+PHP_METHOD(SplObjectStorage, detach)
 {
 	zval *obj;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -406,9 +371,8 @@ SPL_METHOD(SplObjectStorage, detach)
 	intern->index = 0;
 } /* }}} */
 
-/* {{{ proto string SplObjectStorage::getHash(object obj)
- Returns the hash of an object */
-SPL_METHOD(SplObjectStorage, getHash)
+/* {{{ Returns the hash of an object */
+PHP_METHOD(SplObjectStorage, getHash)
 {
 	zval *obj;
 
@@ -420,9 +384,8 @@ SPL_METHOD(SplObjectStorage, getHash)
 
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::offsetGet(object obj)
- Returns associated information for a stored object */
-SPL_METHOD(SplObjectStorage, offsetGet)
+/* {{{ Returns associated information for a stored object */
+PHP_METHOD(SplObjectStorage, offsetGet)
 {
 	zval *obj;
 	spl_SplObjectStorageElement *element;
@@ -449,9 +412,8 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	}
 } /* }}} */
 
-/* {{{ proto bool SplObjectStorage::addAll(SplObjectStorage $os)
- Add all elements contained in $os */
-SPL_METHOD(SplObjectStorage, addAll)
+/* {{{ Add all elements contained in $os */
+PHP_METHOD(SplObjectStorage, addAll)
 {
 	zval *obj;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -468,9 +430,8 @@ SPL_METHOD(SplObjectStorage, addAll)
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
-/* {{{ proto bool SplObjectStorage::removeAll(SplObjectStorage $os)
- Remove all elements contained in $os */
-SPL_METHOD(SplObjectStorage, removeAll)
+/* {{{ Remove all elements contained in $os */
+PHP_METHOD(SplObjectStorage, removeAll)
 {
 	zval *obj;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -496,9 +457,8 @@ SPL_METHOD(SplObjectStorage, removeAll)
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
-/* {{{ proto bool SplObjectStorage::removeAllExcept(SplObjectStorage $os)
- Remove elements not common to both this SplObjectStorage instance and $os */
-SPL_METHOD(SplObjectStorage, removeAllExcept)
+/* {{{ Remove elements not common to both this SplObjectStorage instance and $os */
+PHP_METHOD(SplObjectStorage, removeAllExcept)
 {
 	zval *obj;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -524,9 +484,8 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 }
 /* }}} */
 
-/* {{{ proto bool SplObjectStorage::contains(object obj)
- Determine whether an object is contained in the storage */
-SPL_METHOD(SplObjectStorage, contains)
+/* {{{ Determine whether an object is contained in the storage */
+PHP_METHOD(SplObjectStorage, contains)
 {
 	zval *obj;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -537,9 +496,8 @@ SPL_METHOD(SplObjectStorage, contains)
 	RETURN_BOOL(spl_object_storage_contains(intern, obj));
 } /* }}} */
 
-/* {{{ proto int SplObjectStorage::count()
- Determine number of objects in storage */
-SPL_METHOD(SplObjectStorage, count)
+/* {{{ Determine number of objects in storage */
+PHP_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 	zend_long mode = COUNT_NORMAL;
@@ -564,9 +522,8 @@ SPL_METHOD(SplObjectStorage, count)
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::rewind()
- Rewind to first position */
-SPL_METHOD(SplObjectStorage, rewind)
+/* {{{ Rewind to first position */
+PHP_METHOD(SplObjectStorage, rewind)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
@@ -578,9 +535,8 @@ SPL_METHOD(SplObjectStorage, rewind)
 	intern->index = 0;
 } /* }}} */
 
-/* {{{ proto bool SplObjectStorage::valid()
- Returns whether current position is valid */
-SPL_METHOD(SplObjectStorage, valid)
+/* {{{ Returns whether current position is valid */
+PHP_METHOD(SplObjectStorage, valid)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
@@ -591,9 +547,8 @@ SPL_METHOD(SplObjectStorage, valid)
 	RETURN_BOOL(zend_hash_has_more_elements_ex(&intern->storage, &intern->pos) == SUCCESS);
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::key()
- Returns current key */
-SPL_METHOD(SplObjectStorage, key)
+/* {{{ Returns current key */
+PHP_METHOD(SplObjectStorage, key)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
@@ -604,9 +559,8 @@ SPL_METHOD(SplObjectStorage, key)
 	RETURN_LONG(intern->index);
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::current()
- Returns current element */
-SPL_METHOD(SplObjectStorage, current)
+/* {{{ Returns current element */
+PHP_METHOD(SplObjectStorage, current)
 {
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -621,9 +575,8 @@ SPL_METHOD(SplObjectStorage, current)
 	ZVAL_COPY(return_value, &element->obj);
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::getInfo()
- Returns associated information to current element */
-SPL_METHOD(SplObjectStorage, getInfo)
+/* {{{ Returns associated information to current element */
+PHP_METHOD(SplObjectStorage, getInfo)
 {
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -638,9 +591,8 @@ SPL_METHOD(SplObjectStorage, getInfo)
 	ZVAL_COPY(return_value, &element->inf);
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::setInfo(mixed $inf)
- Sets associated information of current element to $inf */
-SPL_METHOD(SplObjectStorage, setInfo)
+/* {{{ Sets associated information of current element to $inf */
+PHP_METHOD(SplObjectStorage, setInfo)
 {
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -657,9 +609,8 @@ SPL_METHOD(SplObjectStorage, setInfo)
 	ZVAL_COPY(&element->inf, inf);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::next()
- Moves position forward */
-SPL_METHOD(SplObjectStorage, next)
+/* {{{ Moves position forward */
+PHP_METHOD(SplObjectStorage, next)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
@@ -671,9 +622,8 @@ SPL_METHOD(SplObjectStorage, next)
 	intern->index++;
 } /* }}} */
 
-/* {{{ proto string SplObjectStorage::serialize()
- Serializes storage */
-SPL_METHOD(SplObjectStorage, serialize)
+/* {{{ Serializes storage */
+PHP_METHOD(SplObjectStorage, serialize)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
@@ -722,9 +672,8 @@ SPL_METHOD(SplObjectStorage, serialize)
 	RETURN_NEW_STR(buf.s);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::unserialize(string serialized)
- Unserializes storage */
-SPL_METHOD(SplObjectStorage, unserialize)
+/* {{{ Unserializes storage */
+PHP_METHOD(SplObjectStorage, unserialize)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
@@ -851,8 +800,8 @@ outexcept:
 
 } /* }}} */
 
-/* {{{ proto auto SplObjectStorage::__serialize() */
-SPL_METHOD(SplObjectStorage, __serialize)
+/* {{{ */
+PHP_METHOD(SplObjectStorage, __serialize)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 	spl_SplObjectStorageElement *elem;
@@ -880,8 +829,8 @@ SPL_METHOD(SplObjectStorage, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::__unserialize(array serialized) */
-SPL_METHOD(SplObjectStorage, __unserialize)
+/* {{{ */
+PHP_METHOD(SplObjectStorage, __unserialize)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 	HashTable *data;
@@ -923,36 +872,16 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 }
 
-static const zend_function_entry spl_funcs_SplObjectStorage[] = {
-	SPL_ME(SplObjectStorage,  attach,      arginfo_class_SplObjectStorage_attach,        0)
-	SPL_ME(SplObjectStorage,  detach,      arginfo_class_SplObjectStorage_detach,        0)
-	SPL_ME(SplObjectStorage,  contains,    arginfo_class_SplObjectStorage_contains,        0)
-	SPL_ME(SplObjectStorage,  addAll,      arginfo_class_SplObjectStorage_addAll,        0)
-	SPL_ME(SplObjectStorage,  removeAll,   arginfo_class_SplObjectStorage_removeAll,        0)
-	SPL_ME(SplObjectStorage,  removeAllExcept,   arginfo_class_SplObjectStorage_removeAllExcept,  0)
-	SPL_ME(SplObjectStorage,  getInfo,     arginfo_class_SplObjectStorage_getInfo,0)
-	SPL_ME(SplObjectStorage,  setInfo,     arginfo_class_SplObjectStorage_setInfo,       0)
-	SPL_ME(SplObjectStorage,  getHash,     arginfo_class_SplObjectStorage_getHash,       0)
-	/* Countable */
-	SPL_ME(SplObjectStorage,  count,       arginfo_class_SplObjectStorage_count,0)
-	/* Iterator */
-	SPL_ME(SplObjectStorage,  rewind,      arginfo_class_SplObjectStorage_rewind,0)
-	SPL_ME(SplObjectStorage,  valid,       arginfo_class_SplObjectStorage_valid,0)
-	SPL_ME(SplObjectStorage,  key,         arginfo_class_SplObjectStorage_key,0)
-	SPL_ME(SplObjectStorage,  current,     arginfo_class_SplObjectStorage_current,0)
-	SPL_ME(SplObjectStorage,  next,        arginfo_class_SplObjectStorage_next,0)
-	/* Serializable */
-	SPL_ME(SplObjectStorage,  unserialize, arginfo_class_SplObjectStorage_unserialize,    0)
-	SPL_ME(SplObjectStorage,  serialize,   arginfo_class_SplObjectStorage_serialize,0)
-	SPL_ME(SplObjectStorage,  __unserialize, arginfo_class_SplObjectStorage___unserialize,    0)
-	SPL_ME(SplObjectStorage,  __serialize,   arginfo_class_SplObjectStorage___serialize,0)
-	/* ArrayAccess */
-	SPL_MA(SplObjectStorage, offsetExists, SplObjectStorage, contains, arginfo_class_SplObjectStorage_offsetExists, 0)
-	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_class_SplObjectStorage_offsetSet, 0)
-	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_class_SplObjectStorage_offsetUnset, 0)
-	SPL_ME(SplObjectStorage, offsetGet,    arginfo_class_SplObjectStorage_offsetGet,     0)
-	PHP_FE_END
-};
+/* {{{ */
+PHP_METHOD(SplObjectStorage, __debugInfo)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_ARR(spl_object_storage_debug_info(Z_OBJ_P(ZEND_THIS)));
+}
+/* }}} */
 
 typedef enum {
 	MIT_NEED_ANY     = 0,
@@ -964,9 +893,8 @@ typedef enum {
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT   1
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_KEY       2
 
-/* {{{ proto MultipleIterator::__construct([int flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC])
-   Iterator that iterates over several iterators one after the other */
-SPL_METHOD(MultipleIterator, __construct)
+/* {{{ Iterator that iterates over several iterators one after the other */
+PHP_METHOD(MultipleIterator, __construct)
 {
 	spl_SplObjectStorage   *intern;
 	zend_long               flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
@@ -980,9 +908,8 @@ SPL_METHOD(MultipleIterator, __construct)
 }
 /* }}} */
 
-/* {{{ proto int MultipleIterator::getFlags()
-   Return current flags */
-SPL_METHOD(MultipleIterator, getFlags)
+/* {{{ Return current flags */
+PHP_METHOD(MultipleIterator, getFlags)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
@@ -993,9 +920,8 @@ SPL_METHOD(MultipleIterator, getFlags)
 }
 /* }}} */
 
-/* {{{ proto int MultipleIterator::setFlags(int flags)
-   Set flags */
-SPL_METHOD(MultipleIterator, setFlags)
+/* {{{ Set flags */
+PHP_METHOD(MultipleIterator, setFlags)
 {
 	spl_SplObjectStorage *intern;
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -1006,9 +932,8 @@ SPL_METHOD(MultipleIterator, setFlags)
 }
 /* }}} */
 
-/* {{{ proto void attachIterator(Iterator iterator[, mixed info]) throws InvalidArgumentException
-   Attach a new iterator */
-SPL_METHOD(MultipleIterator, attachIterator)
+/* {{{ Attach a new iterator */
+PHP_METHOD(MultipleIterator, attachIterator)
 {
 	spl_SplObjectStorage        *intern;
 	zval                        *iterator = NULL, *info = NULL;
@@ -1041,9 +966,8 @@ SPL_METHOD(MultipleIterator, attachIterator)
 }
 /* }}} */
 
-/* {{{ proto void MultipleIterator::detachIterator(Iterator iterator)
- Detaches an iterator */
-SPL_METHOD(MultipleIterator, detachIterator)
+/* {{{ Detaches an iterator */
+PHP_METHOD(MultipleIterator, detachIterator)
 {
 	zval *iterator;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -1057,9 +981,8 @@ SPL_METHOD(MultipleIterator, detachIterator)
 	intern->index = 0;
 } /* }}} */
 
-/* {{{ proto bool MultipleIterator::containsIterator(Iterator iterator)
- Determine whether the iterator exists */
-SPL_METHOD(MultipleIterator, containsIterator)
+/* {{{ Determine whether the iterator exists */
+PHP_METHOD(MultipleIterator, containsIterator)
 {
 	zval *iterator;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -1070,9 +993,19 @@ SPL_METHOD(MultipleIterator, containsIterator)
 	RETURN_BOOL(spl_object_storage_contains(intern, iterator));
 } /* }}} */
 
-/* {{{ proto void MultipleIterator::rewind()
-   Rewind all attached iterator instances */
-SPL_METHOD(MultipleIterator, rewind)
+PHP_METHOD(MultipleIterator, countIterators)
+{
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+}
+
+/* {{{ Rewind all attached iterator instances */
+PHP_METHOD(MultipleIterator, rewind)
 {
 	spl_SplObjectStorage        *intern;
 	spl_SplObjectStorageElement *element;
@@ -1093,9 +1026,8 @@ SPL_METHOD(MultipleIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto void MultipleIterator::next()
-   Move all attached iterator instances forward */
-SPL_METHOD(MultipleIterator, next)
+/* {{{ Move all attached iterator instances forward */
+PHP_METHOD(MultipleIterator, next)
 {
 	spl_SplObjectStorage        *intern;
 	spl_SplObjectStorageElement *element;
@@ -1116,9 +1048,8 @@ SPL_METHOD(MultipleIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool MultipleIterator::valid()
-   Return whether all or one sub iterator is valid depending on flags */
-SPL_METHOD(MultipleIterator, valid)
+/* {{{ Return whether all or one sub iterator is valid depending on flags */
+PHP_METHOD(MultipleIterator, valid)
 {
 	spl_SplObjectStorage        *intern;
 	spl_SplObjectStorageElement *element;
@@ -1228,9 +1159,8 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 }
 /* }}} */
 
-/* {{{ proto array current() throws RuntimeException throws InvalidArgumentException
-   Return an array of all registered Iterator instances current() result */
-SPL_METHOD(MultipleIterator, current)
+/* {{{ Return an array of all registered Iterator instances current() result */
+PHP_METHOD(MultipleIterator, current)
 {
 	spl_SplObjectStorage        *intern;
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -1243,9 +1173,8 @@ SPL_METHOD(MultipleIterator, current)
 }
 /* }}} */
 
-/* {{{ proto array MultipleIterator::key()
-   Return an array of all registered Iterator instances key() result */
-SPL_METHOD(MultipleIterator, key)
+/* {{{ Return an array of all registered Iterator instances key() result */
+PHP_METHOD(MultipleIterator, key)
 {
 	spl_SplObjectStorage *intern;
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -1258,34 +1187,16 @@ SPL_METHOD(MultipleIterator, key)
 }
 /* }}} */
 
-static const zend_function_entry spl_funcs_MultipleIterator[] = {
-	SPL_ME(MultipleIterator,  __construct,            arginfo_class_MultipleIterator___construct,		0)
-	SPL_ME(MultipleIterator,  getFlags,               arginfo_class_MultipleIterator_getFlags,			0)
-	SPL_ME(MultipleIterator,  setFlags,               arginfo_class_MultipleIterator_setFlags,          0)
-	SPL_ME(MultipleIterator,  attachIterator,         arginfo_class_MultipleIterator_attachIterator,    0)
-	SPL_ME(MultipleIterator,  detachIterator,         arginfo_class_MultipleIterator_detachIterator,	0)
-	SPL_ME(MultipleIterator,  containsIterator,       arginfo_class_MultipleIterator_containsIterator,	0)
-	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    arginfo_class_MultipleIterator_countIterators,	0)
-	/* Iterator */
-	SPL_ME(MultipleIterator,  rewind,                 arginfo_class_MultipleIterator_rewind,			0)
-	SPL_ME(MultipleIterator,  valid,                  arginfo_class_MultipleIterator_valid,				0)
-	SPL_ME(MultipleIterator,  key,                    arginfo_class_MultipleIterator_key,				0)
-	SPL_ME(MultipleIterator,  current,                arginfo_class_MultipleIterator_current,			0)
-	SPL_ME(MultipleIterator,  next,                   arginfo_class_MultipleIterator_next,				0)
-	PHP_FE_END
-};
-
 /* {{{ PHP_MINIT_FUNCTION(spl_observer) */
 PHP_MINIT_FUNCTION(spl_observer)
 {
 	REGISTER_SPL_INTERFACE(SplObserver);
 	REGISTER_SPL_INTERFACE(SplSubject);
 
-	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
+	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, class_SplObjectStorage_methods);
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
-	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
 	spl_handler_SplObjectStorage.compare         = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
@@ -1297,7 +1208,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Serializable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, ArrayAccess);
 
-	REGISTER_SPL_STD_CLASS_EX(MultipleIterator, spl_SplObjectStorage_new, spl_funcs_MultipleIterator);
+	REGISTER_SPL_STD_CLASS_EX(MultipleIterator, spl_SplObjectStorage_new, class_MultipleIterator_methods);
 	REGISTER_SPL_ITERATOR(MultipleIterator);
 
 	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ANY",     MIT_NEED_ANY);

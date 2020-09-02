@@ -1319,7 +1319,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 					return NULL;
 				}
 
-				if (ssb.sb.st_mode & S_IFDIR && !dir) {
+				if ((ssb.sb.st_mode & S_IFDIR) && !dir) {
 					efree(test);
 					if (error) {
 						spprintf(error, 4096, "phar error: path \"%s\" is a directory", path);
@@ -1968,21 +1968,11 @@ static int phar_update_cached_entry(zval *data, void *argument) /* {{{ */
 		entry->tmp = estrdup(entry->tmp);
 	}
 
-	entry->metadata_str.s = NULL;
 	entry->filename = estrndup(entry->filename, entry->filename_len);
 	entry->is_persistent = 0;
 
-	if (Z_TYPE(entry->metadata) != IS_UNDEF) {
-		if (entry->metadata_len) {
-			char *buf = estrndup((char *) Z_PTR(entry->metadata), entry->metadata_len);
-			/* assume success, we would have failed before */
-			phar_parse_metadata((char **) &buf, &entry->metadata, entry->metadata_len);
-			efree(buf);
-		} else {
-			zval_copy_ctor(&entry->metadata);
-			entry->metadata_str.s = NULL;
-		}
-	}
+	/* Replace metadata with non-persistent clones of the metadata. */
+	phar_metadata_tracker_clone(&entry->metadata_tracker);
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -2017,16 +2007,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
 		phar->signature = estrdup(phar->signature);
 	}
 
-	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
-		/* assume success, we would have failed before */
-		if (phar->metadata_len) {
-			char *buf = estrndup((char *) Z_PTR(phar->metadata), phar->metadata_len);
-			phar_parse_metadata(&buf, &phar->metadata, phar->metadata_len);
-			efree(buf);
-		} else {
-			zval_copy_ctor(&phar->metadata);
-		}
-	}
+	phar_metadata_tracker_clone(&phar->metadata_tracker);
 
 	zend_hash_init(&newmanifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);

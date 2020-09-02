@@ -6,10 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype: int intval( mixed $var [.int $base] );
- * Description: Returns the integer value of var, using the specified base for the conversion(the default is base 10).
- */
-
 echo "*** Testing intval() with valid integer values ***\n";
 // different valid  integer values
 $valid_ints = array(

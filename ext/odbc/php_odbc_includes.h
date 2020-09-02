@@ -19,7 +19,7 @@
 #ifndef PHP_ODBC_INCLUDES_H
 #define PHP_ODBC_INCLUDES_H
 
-#if HAVE_UODBC
+#ifdef HAVE_UODBC
 
 /* checking in the same order as in configure.ac */
 

@@ -31,32 +31,11 @@
 #include <zend_exceptions.h>
 
 static PHP_MINFO_FUNCTION(json);
-static PHP_FUNCTION(json_encode);
-static PHP_FUNCTION(json_decode);
-static PHP_FUNCTION(json_last_error);
-static PHP_FUNCTION(json_last_error_msg);
 
 PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
-
-/* {{{ json_functions[] */
-static const zend_function_entry json_functions[] = {
-	PHP_FE(json_encode, arginfo_json_encode)
-	PHP_FE(json_decode, arginfo_json_decode)
-	PHP_FE(json_last_error, arginfo_json_last_error)
-	PHP_FE(json_last_error_msg, arginfo_json_last_error_msg)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ JsonSerializable methods */
-static const zend_function_entry json_serializable_interface[] = {
-	PHP_ABSTRACT_ME(JsonSerializable, jsonSerialize, arginfo_class_JsonSerializable_jsonSerialize)
-	PHP_FE_END
-};
-/* }}} */
 
 /* Register constant for options and errors */
 #define PHP_JSON_REGISTER_CONSTANT(_name, _value) \
@@ -67,7 +46,7 @@ static PHP_MINIT_FUNCTION(json)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
+	INIT_CLASS_ENTRY(ce, "JsonSerializable", class_JsonSerializable_methods);
 	php_json_serializable_ce = zend_register_internal_interface(&ce);
 
 	INIT_CLASS_ENTRY(ce, "JsonException", NULL);
@@ -113,8 +92,7 @@ static PHP_MINIT_FUNCTION(json)
 }
 /* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
-*/
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(json)
 {
 #if defined(COMPILE_DL_JSON) && defined(ZTS)
@@ -127,12 +105,11 @@ static PHP_GINIT_FUNCTION(json)
 /* }}} */
 
 
-/* {{{ json_module_entry
- */
+/* {{{ json_module_entry */
 zend_module_entry json_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"json",
-	json_functions,
+	ext_functions,
 	PHP_MINIT(json),
 	NULL,
 	NULL,
@@ -154,8 +131,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(json)
 #endif
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(json)
 {
 	php_info_print_table_start();
@@ -216,7 +192,7 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 }
 /* }}} */
 
-PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
+PHP_JSON_API int php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
 
@@ -237,9 +213,8 @@ PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_le
 }
 /* }}} */
 
-/* {{{ proto string json_encode(mixed data [, int options[, int depth]])
-   Returns the JSON representation of a value */
-static PHP_FUNCTION(json_encode)
+/* {{{ Returns the JSON representation of a value */
+PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
 	php_json_encoder encoder;
@@ -280,9 +255,8 @@ static PHP_FUNCTION(json_encode)
 }
 /* }}} */
 
-/* {{{ proto mixed json_decode(string json [, bool assoc [, int depth]])
-   Decodes the JSON representation into a PHP value */
-static PHP_FUNCTION(json_decode)
+/* {{{ Decodes the JSON representation into a PHP value */
+PHP_FUNCTION(json_decode)
 {
 	char *str;
 	size_t str_len;
@@ -313,12 +287,12 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		zend_value_error("Depth must be greater than zero");
+		zend_argument_value_error(3, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	if (depth > INT_MAX) {
-		zend_value_error("Depth must be lower than %d", INT_MAX);
+		zend_argument_value_error(3, "must be less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
@@ -335,9 +309,8 @@ static PHP_FUNCTION(json_decode)
 }
 /* }}} */
 
-/* {{{ proto int json_last_error()
-   Returns the error code of the last json_encode() or json_decode() call. */
-static PHP_FUNCTION(json_last_error)
+/* {{{ Returns the error code of the last json_encode() or json_decode() call. */
+PHP_FUNCTION(json_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -345,9 +318,8 @@ static PHP_FUNCTION(json_last_error)
 }
 /* }}} */
 
-/* {{{ proto string json_last_error_msg()
-   Returns the error string of the last json_encode() or json_decode() call. */
-static PHP_FUNCTION(json_last_error_msg)
+/* {{{ Returns the error string of the last json_encode() or json_decode() call. */
+PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

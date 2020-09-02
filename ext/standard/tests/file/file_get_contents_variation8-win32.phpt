@@ -12,12 +12,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 obscure_filename
 --FILE--
 <?php
-/* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_get_contents() : variation ***\n";
 
 /* An array of filenames */
@@ -39,12 +33,12 @@ $names_arr = array(
 );
 
 foreach($names_arr as $key =>$value) {
-  echo "\n-- Filename: $key --\n";
-  try {
-    var_dump(file_get_contents($value));
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-  }
+    echo "\n-- Filename: $key --\n";
+    try {
+        var_dump(file_get_contents($value));
+    } catch (\TypeError|\ValueError $e) {
+        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    }
 }
 
 ?>
@@ -62,19 +56,13 @@ Warning: file_get_contents(1): Failed to open stream: No such file or directory 
 bool(false)
 
 -- Filename: FALSE --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+ValueError: Path cannot be empty
 
 -- Filename: NULL --
-
-Warning: file_get_contents(): Filename cannot be empty in %sfile_get_contents_variation8-win32.php on line %d
-bool(false)
+ValueError: Path cannot be empty
 
 -- Filename: "" --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+ValueError: Path cannot be empty
 
 -- Filename: " " --
 
@@ -82,10 +70,10 @@ Warning: file_get_contents( ): Failed to open stream: Permission denied in %s on
 bool(false)
 
 -- Filename: \0 --
-file_get_contents(): Argument #1 ($filename) must be a valid path, string given
+TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, string given
 
 -- Filename: array() --
-file_get_contents(): Argument #1 ($filename) must be a valid path, array given
+TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

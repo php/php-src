@@ -17,14 +17,12 @@ namespace {
     }
     $reflect = new ReflectionFunction('ReflectionParameterTest');
     foreach($reflect->getParameters() as $param) {
-        if($param->isDefaultValueAvailable() && $param->isDefaultValueConstant()) {
-            echo $param->getDefaultValueConstantName() . "\n";
+        if($param->isDefaultValueAvailable() && @$param->isDefaultValueConstant()) {
+            echo @$param->getDefaultValueConstantName() . "\n";
         }
     }
-    echo "==DONE==";
 }
 ?>
 --EXPECT--
 ReflectionTestNamespace\TestClass::TEST_CONST_2
 ReflectionTestNamespace\CONST_TEST_1
-==DONE==

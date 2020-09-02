@@ -1,11 +1,13 @@
 parameters:
   configurationName: ''
   configurationParameters: ''
+  timeoutInMinutes: 75
 
 jobs:
   - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
     steps:
     - template: apt.yml
     - script: |
@@ -39,7 +41,6 @@ jobs:
             --enable-xmlreader \
             --with-xsl \
             --with-tidy \
-            --with-xmlrpc \
             --enable-sysvsem \
             --enable-sysvshm \
             --enable-shmop \
@@ -63,6 +64,7 @@ jobs:
             --enable-zend-test \
             --with-mhash \
             --with-sodium \
+            --enable-dba \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
@@ -83,19 +85,10 @@ jobs:
         set -e
         sudo service mysql start
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-        sudo -u postgres psql -c "CREATE DATABASE test;"
+        #sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        #sudo -u postgres psql -c "CREATE DATABASE test;"
       displayName: 'Setup'
-    - template: test.yml
+    - template: ../tests.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'JIT'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.jit_buffer_size=16M
+        runTestsParameters: ${{ parameters.runTestsParameters }}

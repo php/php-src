@@ -88,7 +88,7 @@ $it->testUnset($unsets);
 $it->show();
 
 ?>
---EXPECTF--
+--EXPECT--
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 MyCachingIterator::testSet()

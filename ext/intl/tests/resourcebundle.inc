@@ -1,5 +1,13 @@
 <?php
-define('BUNDLE', dirname(__FILE__)."/_files/resourcebundle");
+// FIXME Improve Endian check when endian const gets added
+// Check if platform is Big or Little endian
+if (pack('S', 0xABCD) !== pack('v', 0xABCD)) {
+    $endian = 'be';
+} else {
+    $endian = 'le';
+}
+
+define('BUNDLE', __DIR__ . '/_files/resourcebundle_' . $endian);
 
 function debug( $res ) {
     if (is_null( $res )) {

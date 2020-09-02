@@ -2,12 +2,6 @@
 Test number_format() - basic function test number_format()
 --FILE--
 <?php
-/* Prototype  :  string number_format  ( float $number  [, int $decimals  ] )
- *               string number_format ( float $number , int $decimals , string $dec_point , string $thousands_sep )
- * Description: Format a number with grouped thousands
- * Source code: ext/standard/string.c
- */
-
 echo "*** Testing number_format() : basic functionality ***\n";
 
 $values = array(1234.5678,

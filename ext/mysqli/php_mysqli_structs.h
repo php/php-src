@@ -39,28 +39,7 @@
 #include "mysqli_mysqlnd.h"
 #else
 
-/*
-  The libmysql headers (a PITA) also define it and there will be an warning.
-  Undef it and later we might need to define it again.
-*/
-#ifdef HAVE_MBRLEN
-#undef HAVE_MBRLEN
-#define WE_HAD_MBRLEN
-#endif
-#ifdef HAVE_MBSTATE_T
-#undef HAVE_MBSTATE_T
-#define WE_HAD_MBSTATE_T
-#endif
-
 #include <my_global.h>
-
-#if !defined(HAVE_MBRLEN) && defined(WE_HAD_MBRLEN)
-#define HAVE_MBRLEN 1
-#endif
-
-#if !defined(HAVE_MBSTATE_T) && defined(WE_HAD_MBSTATE_T)
-#define HAVE_MBSTATE_T 1
-#endif
 
 /*
   We need more than mysql.h because we need CHARSET_INFO in one place.
@@ -120,7 +99,7 @@ typedef struct {
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	zend_bool		persistent;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	int				async_result_fetch_type;
 #endif
 } MY_MYSQL;
@@ -250,7 +229,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 		RETURN_THROWS();\
   	}\
 	__ptr = (__type)my_res->ptr; \
-	if (__check && my_res->status < __check) { \
+	if (my_res->status < __check) { \
 		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name)); \
 		RETURN_THROWS();\
 	}\
@@ -264,7 +243,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 		return;\
 	}\
 	__ptr = (__type)my_res->ptr; \
-	if (__check && my_res->status < __check) { \
+	if (my_res->status < __check) { \
 		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name)); \
 		return;\
 	}\
@@ -273,7 +252,10 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 #define MYSQLI_FETCH_RESOURCE_CONN(__ptr, __id, __check) \
 { \
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
-	ZEND_ASSERT((__ptr)->mysql && "Missing connection?"); \
+	if (!(__ptr)->mysql) { \
+		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(Z_OBJCE_P(__id)->name)); \
+		RETURN_THROWS(); \
+	} \
 }
 
 #define MYSQLI_FETCH_RESOURCE_STMT(__ptr, __id, __check) \

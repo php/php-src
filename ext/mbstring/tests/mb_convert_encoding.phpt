@@ -96,11 +96,14 @@ $s = mb_convert_encoding('', 'EUC-JP');
 print("EUC-JP: $s\n");  // SJIS
 
 $s = $euc_jp;
-$s = mb_convert_encoding($s, 'BAD');
-print("BAD: $s\n"); // BAD
+try {
+    var_dump( mb_convert_encoding($s, 'BAD') );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 == BASIC TEST ==
 EUC-JP: 日本語テキストです。01234５６７８９。
 EUC-JP: 日本語テキストです。01234５６７８９。
@@ -121,6 +124,4 @@ JIS: GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==
 == INVALID PARAMETER ==
 INT: 1234
 EUC-JP: 
-
-Warning: mb_convert_encoding(): Unknown encoding "BAD" in %s on line %d
-BAD: 
+mb_convert_encoding(): Argument #2 ($to) must be a valid encoding, "BAD" given

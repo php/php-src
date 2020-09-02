@@ -53,6 +53,14 @@
 #define IO_REPARSE_TAG_ONEDRIVE   (0x80000021L)
 #endif
 
+# ifndef IO_REPARSE_TAG_ACTIVISION_HSM
+#  define IO_REPARSE_TAG_ACTIVISION_HSM (0x00000047L)
+# endif
+
+# ifndef IO_REPARSE_TAG_PROJFS
+#  define IO_REPARSE_TAG_PROJFS (0x9000001CL)
+# endif
+
 # ifndef VOLUME_NAME_NT
 #  define VOLUME_NAME_NT 0x2
 # endif
@@ -63,10 +71,6 @@
 
 # include <winioctl.h>
 # include <winnt.h>
-#endif
-
-#ifndef HAVE_REALPATH
-#define realpath(x,y) strcpy(y,x)
 #endif
 
 #define VIRTUAL_CWD_DEBUG 0
@@ -299,8 +303,8 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 {
 	register zend_ulong h;
 	size_t bucket_key_len;
-	char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
-	char *bucket_key = (char *)bucket_key_start;
+	const char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
+	const char *bucket_key = bucket_key_start;
 	const char *e;
 
 	if (!bucket_key) {
@@ -479,7 +483,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void)
 #undef LINK_MAX
 #define LINK_MAX 32
 
-static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, time_t *t, int use_realpath, int is_dir, int *link_is_dir) /* {{{ */
+static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, time_t *t, int use_realpath, bool is_dir, int *link_is_dir) /* {{{ */
 {
 	size_t i, j;
 	int directory = 0, save;
@@ -586,6 +590,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 		}
 
 #ifdef ZEND_WIN32
+retry_reparse_point:
 		if (save) {
 			pathw = php_win32_ioutil_any_to_w(path);
 			if (!pathw) {
@@ -608,7 +613,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 
-retry:
+retry_reparse_tag_cloud:
 		if(save &&
 				!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
                                (dataw.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
@@ -669,7 +674,7 @@ retry:
 					dataw.dwFileAttributes = fileInformation.dwFileAttributes;
 					CloseHandle(hLink);
 					(*ll)--;
-					goto retry;
+					goto retry_reparse_tag_cloud;
 				}
 				free_alloca(tmp, use_heap);
 				CloseHandle(hLink);
@@ -751,7 +756,9 @@ retry:
 			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP ||
 					/* Starting with 1709. */
 					(pbuffer->ReparseTag & ~IO_REPARSE_TAG_CLOUD_MASK) == IO_REPARSE_TAG_CLOUD ||
-					IO_REPARSE_TAG_ONEDRIVE == pbuffer->ReparseTag) {
+					IO_REPARSE_TAG_ONEDRIVE == pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_ACTIVISION_HSM == pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_PROJFS == pbuffer->ReparseTag) {
 				isabsolute = 1;
 				substitutename = malloc((len + 1) * sizeof(char));
 				if (!substitutename) {
@@ -813,6 +820,22 @@ retry:
 #endif
 			free_alloca(pbuffer, use_heap_large);
 			free(substitutename);
+
+			{
+				DWORD attrs;
+
+				FREE_PATHW()
+				pathw = php_win32_ioutil_any_to_w(path);
+				if (!pathw) {
+					return (size_t)-1;
+				}
+				attrs = GetFileAttributesW(pathw);
+				if (!isVolume && attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_REPARSE_POINT)) {
+					free_alloca(tmp, use_heap);
+					FREE_PATHW()
+					goto retry_reparse_point;
+				}
+			}
 
 			if(isabsolute == 1) {
 				if (!((j == 3) && (path[1] == ':') && (path[2] == '\\'))) {
@@ -973,7 +996,7 @@ retry:
 /* }}} */
 
 /* Resolve path relatively to state and put the real path into state */
-/* returns 0 for ok, 1 for error */
+/* returns 0 for ok, 1 for error, -1 if (path_length >= MAXPATHLEN-1) */
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath) /* {{{ */
 {
 	size_t path_length = strlen(path);
@@ -982,7 +1005,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	int ll = 0;
 	time_t t;
 	int ret;
-	int add_slash;
+	bool add_slash;
 	void *tmp;
 
 	if (!path_length || path_length >= MAXPATHLEN-1) {
@@ -1155,12 +1178,14 @@ verify:
 }
 /* }}} */
 
-CWD_API int virtual_chdir(const char *path) /* {{{ */
+CWD_API zend_result virtual_chdir(const char *path) /* {{{ */
 {
-	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok, CWD_REALPATH)?-1:0;
+	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok, CWD_REALPATH) ? FAILURE : SUCCESS;
 }
 /* }}} */
 
+
+/* returns 0 for ok, 1 for empty string, -1 on error */
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path)) /* {{{ */
 {
 	size_t length = strlen(path);
@@ -1232,6 +1257,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 }
 /* }}} */
 
+/* returns 0 for ok, 1 for error, -1 if (path_length >= MAXPATHLEN-1) */
 CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path) /* {{{ */
 {
 	cwd_state new_state;
@@ -1247,6 +1273,7 @@ CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_f
 }
 /* }}} */
 
+/* returns 0 for ok, 1 for error, -1 if (path_length >= MAXPATHLEN-1) */
 CWD_API int virtual_filepath(const char *path, char **filepath) /* {{{ */
 {
 	return virtual_filepath_ex(path, filepath, php_is_file_ok);

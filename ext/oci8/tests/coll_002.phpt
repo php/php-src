@@ -12,9 +12,15 @@ require __DIR__."/connect.inc";
 require __DIR__."/create_type.inc";
 
 var_dump($coll1 = oci_new_collection($c, $type_name));
-
 var_dump($coll1->free());
-var_dump($coll1->size());
+
+try {
+    var_dump($coll1->size());
+} catch (TypeError $error) {
+    var_dump($error->getMessage());
+}
+
+var_dump(oci_new_collection($c, "NONEXISTENT"));
 
 echo "Done\n";
 
@@ -22,12 +28,13 @@ require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECTF--
-object(OCI-Collection)#%d (1) {
+object(OCICollection)#%d (1) {
   ["collection"]=>
   resource(%d) of type (oci8 collection)
 }
 bool(true)
+string(%d) "OCICollection::size(): supplied resource is not a valid oci8 collection resource"
 
-Warning: OCI-Collection::size(): supplied resource is not a valid oci8 collection resource in %s on line %d
+Warning: oci_new_collection(): OCI-22303: type ""."NONEXISTENT" not found in %s on line %d
 bool(false)
 Done

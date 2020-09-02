@@ -1,29 +1,29 @@
 <?php
 
-/** @return resource|false */
-function msg_get_queue(int $key, int $perms = 0666) {}
+/** @generate-function-entries */
+
+final class SysvMessageQueue
+{
+}
+
+function msg_get_queue(int $key, int $perms = 0666): SysvMessageQueue|false {}
 
 /**
- * @param resource $queue
+ * @param string|int|float|bool $message
+ * @param int $errorcode
  */
-function msg_send($queue, int $msgtype, $message, bool $serialize = true, bool $blocking = true, &$errorcode = null): bool {}
+function msg_send(SysvMessageQueue $queue, int $msgtype, $message, bool $serialize = true, bool $blocking = true, &$errorcode = null): bool {}
 
 /**
- * @param resource $queue
+ * @param int $msgtype
+ * @param int $errorcode
  */
-function msg_receive($queue, int $desiredmsgtype, &$msgtype, int $maxsize, &$message, bool $unserialize = true, int $flags = 0, &$errorcode = null): bool {}
+function msg_receive(SysvMessageQueue $queue, int $desiredmsgtype, &$msgtype, int $maxsize, mixed &$message, bool $unserialize = true, int $flags = 0, &$errorcode = null): bool {}
 
-/**
- * @param resource $queue
- */
-function msg_remove_queue($queue): bool {}
+function msg_remove_queue(SysvMessageQueue $queue): bool {}
 
-/** @param resource $queue */
-function msg_stat_queue($queue): array|false {}
+function msg_stat_queue(SysvMessageQueue $queue): array|false {}
 
-/**
- * @param resource $queue
- */
-function msg_set_queue($queue, array $data): bool {}
+function msg_set_queue(SysvMessageQueue $queue, array $data): bool {}
 
 function msg_queue_exists(int $key): bool {}

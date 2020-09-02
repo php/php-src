@@ -101,5 +101,6 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     }
 
     print "done!";
+?>
 --EXPECT--
 done!

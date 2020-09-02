@@ -2,11 +2,6 @@
 Test strrchr() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string strrchr(string $haystack, string $needle);
- * Description: Finds the last occurrence of a character in a string.
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing strrchr() function: basic functionality ***\n";
 var_dump( strrchr("Hello, World", "H") ); //needle as single char
 var_dump( strrchr("Hello, World", "Hello") ); //needle as a first word of haystack

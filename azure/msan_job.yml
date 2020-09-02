@@ -14,8 +14,7 @@ jobs:
     - script: |
         export CC=clang
         export CXX=clang++
-        export CFLAGS="-fsanitize=memory -DZEND_TRACK_ARENA_ALLOC"
-        export LDFLAGS="-fsanitize=memory"
+        export CFLAGS="-DZEND_TRACK_ARENA_ALLOC"
         ./buildconf --force
         # msan requires all used libraries to be instrumented,
         # so we should avoiding linking against anything but libc here
@@ -36,6 +35,7 @@ jobs:
             --enable-fpm \
             --with-pdo-mysql=mysqlnd \
             --with-mysqli=mysqlnd \
+            --disable-mysqlnd-compression-support \
             --without-pear \
             --enable-exif \
             --enable-sysvsem \
@@ -50,6 +50,7 @@ jobs:
             --enable-ftp \
             --enable-zend-test \
             --enable-werror \
+            --enable-memory-sanitizer \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
       displayName: 'Configure Build'

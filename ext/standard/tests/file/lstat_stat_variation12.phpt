@@ -3,19 +3,13 @@ Test lstat() and stat() functions: usage variations - effects of is_link()
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-   die('skip.. lstat() not available on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of is_link() on stats of link */
 
 $file_path = __DIR__;

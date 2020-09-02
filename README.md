@@ -43,7 +43,7 @@ For a minimal PHP build from Git, you will need autoconf, bison, and re2c. For
 a default build, you will additionally need libxml2 and libsqlite3. On Ubuntu,
 you can install these using:
 
-    sudo apt install -y build-essential autoconf bison re2c \
+    sudo apt install -y pkg-config build-essential autoconf bison re2c \
                         libxml2-dev libsqlite3-dev
 
 Generate configure:

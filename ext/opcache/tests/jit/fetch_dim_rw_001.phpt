@@ -15,12 +15,13 @@ function foo() {
     return $a[0];
 }
 var_dump(foo());
+?>
 --EXPECTF--
-Warning: Undefined variable: a in %s on line %d
+Warning: Undefined variable $a in %s on line %d
 
-Notice: Undefined offset: 0 in %sfetch_dim_rw_001.php on line 3
+Warning: Undefined array key 0 in %sfetch_dim_rw_001.php on line 3
 
-Notice: Undefined offset: 0 in %sfetch_dim_rw_001.php on line 3
+Warning: Undefined array key 0 in %sfetch_dim_rw_001.php on line 3
 array(1) {
   [0]=>
   int(2)

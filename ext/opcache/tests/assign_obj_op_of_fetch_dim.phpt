@@ -16,5 +16,5 @@ try {
 
 ?>
 --EXPECTF--
-Notice: Undefined offset: 0 in %s on line %d
-Attempt to assign property 'y' of non-object
+Warning: Undefined array key 0 in %s on line %d
+Attempt to assign property "y" on null

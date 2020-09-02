@@ -12,6 +12,7 @@ function eh()
 
 set_error_handler("eh");
 $a = $empty($b);
+?>
 --EXPECTF--
 Fatal error: Uncaught Exception: error! in %sbug51394.php:%d
 Stack trace:

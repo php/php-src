@@ -5,6 +5,7 @@ Phar: create and modify phar
 --INI--
 phar.readonly=0
 phar.require_hash=1
+opcache.validate_timestamps=1
 --FILE--
 <?php
 

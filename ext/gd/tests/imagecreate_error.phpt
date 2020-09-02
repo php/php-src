@@ -17,5 +17,5 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] Invalid width (x_size)
-!! [ValueError] Invalid height (y_size)
+!! [ValueError] imagecreate(): Argument #1 ($x_size) must be greater than 0
+!! [ValueError] imagecreate(): Argument #2 ($y_size) must be greater than 0

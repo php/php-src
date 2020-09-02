@@ -2,11 +2,6 @@
 Test copy() function: usage variations - non existing src/dest
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Trying to create a copy of non-existing source in an existing destination
      and an existing source in non-existing destination */
 

@@ -2,12 +2,6 @@
 Test array_combine() function : error conditions - empty array
 --FILE--
 <?php
-/* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys
- *              and the elements of the second as the corresponding values
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing array_combine() : error conditions specific to array_combine() ***\n";
 
 // Testing array_combine by passing empty arrays to $keys and $values arguments
@@ -47,8 +41,8 @@ array(0) {
 }
 
 -- Testing array_combine() function with empty array for $keys argument --
-Both parameters should have an equal number of elements
+array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
 -- Testing array_combine() function with empty array for $values argument --
-Both parameters should have an equal number of elements
+array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
 -- Testing array_combine() function by passing array with unequal number of elements --
-Both parameters should have an equal number of elements
+array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements

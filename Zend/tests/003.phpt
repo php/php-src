@@ -40,9 +40,13 @@ class test {
 }
 
 test::test1(1);
-var_dump(func_get_args());
 
-echo "Done\n";
+try {
+    var_dump(func_get_args());
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
 --EXPECTF--
 array(0) {
@@ -75,7 +79,4 @@ array(1) {
   [0]=>
   int(1)
 }
-
-Warning: func_get_args():  Called from the global scope - no function context in %s on line %d
-bool(false)
-Done
+func_get_args() cannot be called from the global scope

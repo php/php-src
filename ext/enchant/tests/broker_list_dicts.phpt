@@ -17,17 +17,17 @@ if (!$broker) {
 }
 
 if (!enchant_broker_list_dicts($broker)) {
-	enchant_broker_free($broker);
+	@enchant_broker_free($broker);
 
 	echo "skip: No broker dicts installed\n";
 }
 
-enchant_broker_free($broker);
+@enchant_broker_free($broker);
 ?>
 --FILE--
 <?php
 $broker = enchant_broker_init();
-if (is_resource($broker)) {
+if (is_object($broker)) {
     echo("OK\n");
     $brokerListDicts = enchant_broker_list_dicts($broker);
 

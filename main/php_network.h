@@ -241,7 +241,7 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
-		int *error_code, char *bindto, unsigned short bindport, long sockopts
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts
 		);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
@@ -315,7 +315,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
 		zend_long addrlen, struct sockaddr *sa, socklen_t *sl);
 
-PHPAPI struct hostent*	php_network_gethostbyname(char *name);
+PHPAPI struct hostent*	php_network_gethostbyname(const char *name);
 
 PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
 END_EXTERN_C()

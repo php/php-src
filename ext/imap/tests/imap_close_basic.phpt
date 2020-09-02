@@ -6,11 +6,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_close(resource $stream_id [, int $options])
- * Description: Close an IMAP stream
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_close() : basic functionality ***\n";
 
 // include file for required variables in imap_open()

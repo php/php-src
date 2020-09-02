@@ -11,7 +11,7 @@ try {
 } catch (PDOException $e) {
     die('skip ' . $e->getMessage());
 }
-if ($db->query('SELECT 1 as "1"') === false) {
+if (@$db->query('SELECT 1 as "1"') === false) {
     die('skip driver does not support quoted numeric identifiers');
 }
 ?>

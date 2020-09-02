@@ -248,8 +248,7 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 }
 
 
-/* {{{ proto bool mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
-   Send an email message */
+/* {{{ Send an email message */
 PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL;
@@ -386,7 +385,7 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 }
 
 
-static int php_mail_detect_multiple_crlf(char *hdr) {
+static int php_mail_detect_multiple_crlf(const char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
 
 	if (!hdr || !strlen(hdr)) {
@@ -423,9 +422,8 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 }
 
 
-/* {{{ php_mail
- */
-PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
+/* {{{ php_mail */
+PHPAPI int php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
 {
 #ifdef PHP_WIN32
 	int tsm_err;
@@ -436,14 +434,15 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
 	char *mail_log = INI_STR("mail.log");
-	char *hdr = headers;
+	const char *hdr = headers;
+	char *ahdr = NULL;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
 #endif
 
 #define MAIL_RET(val) \
-	if (hdr != headers) {	\
-		efree(hdr);	\
+	if (ahdr != NULL) {	\
+		efree(ahdr);	\
 	}	\
 	return val;	\
 
@@ -486,10 +485,11 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), ZSTR_VAL(f), headers);
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\r\n%s", php_getuid(), ZSTR_VAL(f), headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
+		hdr = ahdr;
 		zend_string_release_ex(f, 0);
 	}
 
@@ -559,12 +559,12 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			MAIL_RET(0);
 		}
 #endif
-		fprintf(sendmail, "To: %s\n", to);
-		fprintf(sendmail, "Subject: %s\n", subject);
+		fprintf(sendmail, "To: %s\r\n", to);
+		fprintf(sendmail, "Subject: %s\r\n", subject);
 		if (hdr != NULL) {
-			fprintf(sendmail, "%s\n", hdr);
+			fprintf(sendmail, "%s\r\n", hdr);
 		}
-		fprintf(sendmail, "\n%s\n", message);
+		fprintf(sendmail, "\r\n%s\r\n", message);
 		ret = pclose(sendmail);
 
 #if PHP_SIGCHILD
@@ -603,8 +603,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mail)
 {
 	char *sendmail_path = INI_STR("sendmail_path");

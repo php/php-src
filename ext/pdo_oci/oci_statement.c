@@ -458,12 +458,12 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 
 static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	zend_long offset) /* {{{ */
 {
-#if HAVE_OCISTMTFETCH2
+#ifdef HAVE_OCISTMTFETCH2
 	ub4 ociori;
 #endif
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 
-#if HAVE_OCISTMTFETCH2
+#ifdef HAVE_OCISTMTFETCH2
 	switch (ori) {
 		case PDO_FETCH_ORI_NEXT:	ociori = OCI_FETCH_NEXT; break;
 		case PDO_FETCH_ORI_PRIOR:	ociori = OCI_FETCH_PRIOR; break;

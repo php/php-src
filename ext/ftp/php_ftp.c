@@ -25,7 +25,7 @@
 # include <openssl/ssl.h>
 #endif
 
-#if HAVE_FTP
+#ifdef HAVE_FTP
 
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -37,54 +37,12 @@
 static int le_ftpbuf;
 #define le_ftpbuf_name "FTP Buffer"
 
-static const zend_function_entry php_ftp_functions[] = {
-	PHP_FE(ftp_connect,			arginfo_ftp_connect)
-#ifdef HAVE_FTP_SSL
-	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)
-#endif
-	PHP_FE(ftp_login,			arginfo_ftp_login)
-	PHP_FE(ftp_pwd,				arginfo_ftp_pwd)
-	PHP_FE(ftp_cdup,			arginfo_ftp_cdup)
-	PHP_FE(ftp_chdir,			arginfo_ftp_chdir)
-	PHP_FE(ftp_exec,			arginfo_ftp_exec)
-	PHP_FE(ftp_raw,				arginfo_ftp_raw)
-	PHP_FE(ftp_mkdir,			arginfo_ftp_mkdir)
-	PHP_FE(ftp_rmdir,			arginfo_ftp_rmdir)
-	PHP_FE(ftp_chmod,			arginfo_ftp_chmod)
-	PHP_FE(ftp_alloc,			arginfo_ftp_alloc)
-	PHP_FE(ftp_nlist,			arginfo_ftp_nlist)
-	PHP_FE(ftp_rawlist,			arginfo_ftp_rawlist)
-	PHP_FE(ftp_mlsd,			arginfo_ftp_mlsd)
-	PHP_FE(ftp_systype,			arginfo_ftp_systype)
-	PHP_FE(ftp_pasv,			arginfo_ftp_pasv)
-	PHP_FE(ftp_get,				arginfo_ftp_get)
-	PHP_FE(ftp_fget,			arginfo_ftp_fget)
-	PHP_FE(ftp_put,				arginfo_ftp_put)
-	PHP_FE(ftp_append,			arginfo_ftp_append)
-	PHP_FE(ftp_fput,			arginfo_ftp_fput)
-	PHP_FE(ftp_size,			arginfo_ftp_size)
-	PHP_FE(ftp_mdtm,			arginfo_ftp_mdtm)
-	PHP_FE(ftp_rename,			arginfo_ftp_rename)
-	PHP_FE(ftp_delete,			arginfo_ftp_delete)
-	PHP_FE(ftp_site,			arginfo_ftp_site)
-	PHP_FE(ftp_close,			arginfo_ftp_close)
-	PHP_FE(ftp_set_option,		arginfo_ftp_set_option)
-	PHP_FE(ftp_get_option,		arginfo_ftp_get_option)
-	PHP_FE(ftp_nb_fget,			arginfo_ftp_nb_fget)
-	PHP_FE(ftp_nb_get,			arginfo_ftp_nb_get)
-	PHP_FE(ftp_nb_continue,		arginfo_ftp_nb_continue)
-	PHP_FE(ftp_nb_put,			arginfo_ftp_nb_put)
-	PHP_FE(ftp_nb_fput,			arginfo_ftp_nb_fput)
-	PHP_FALIAS(ftp_quit, ftp_close, arginfo_ftp_quit)
-	PHP_FE_END
-};
-
 zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	NULL,
 	"ftp",
-	php_ftp_functions,
+	ext_functions,
 	PHP_MINIT(ftp),
 	NULL,
 	NULL,
@@ -94,7 +52,7 @@ zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL_FTP
+#ifdef COMPILE_DL_FTP
 ZEND_GET_MODULE(php_ftp)
 #endif
 
@@ -146,16 +104,15 @@ PHP_MINFO_FUNCTION(ftp)
 }
 
 #define	XTYPE(xtype, mode)	{ \
-								if (mode != FTPTYPE_ASCII && mode != FTPTYPE_IMAGE) { \
-									php_error_docref(NULL, E_WARNING, "Mode must be FTP_ASCII or FTP_BINARY"); \
-									RETURN_FALSE; \
-								} \
-								xtype = mode; \
-							}
+	if (mode != FTPTYPE_ASCII && mode != FTPTYPE_IMAGE) { \
+		zend_argument_value_error(4, "must be either FTP_ASCII or FTP_BINARY"); \
+		RETURN_THROWS(); \
+	} \
+	xtype = mode; \
+}
 
 
-/* {{{ proto resource ftp_connect(string host [, int port [, int timeout]])
-   Opens a FTP stream */
+/* {{{ Opens a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
 	ftpbuf_t	*ftp;
@@ -169,8 +126,8 @@ PHP_FUNCTION(ftp_connect)
 	}
 
 	if (timeout_sec <= 0) {
-		php_error_docref(NULL, E_WARNING, "Timeout has to be greater than 0");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	/* connect */
@@ -191,8 +148,7 @@ PHP_FUNCTION(ftp_connect)
 /* }}} */
 
 #ifdef HAVE_FTP_SSL
-/* {{{ proto resource ftp_ssl_connect(string host [, int port [, int timeout]])
-   Opens a FTP-SSL stream */
+/* {{{ Opens a FTP-SSL stream */
 PHP_FUNCTION(ftp_ssl_connect)
 {
 	ftpbuf_t	*ftp;
@@ -206,8 +162,8 @@ PHP_FUNCTION(ftp_ssl_connect)
 	}
 
 	if (timeout_sec <= 0) {
-		php_error_docref(NULL, E_WARNING, "Timeout has to be greater than 0");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	/* connect */
@@ -226,8 +182,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 /* }}} */
 #endif
 
-/* {{{ proto bool ftp_login(resource stream, string username, string password)
-   Logs into the FTP server */
+/* {{{ Logs into the FTP server */
 PHP_FUNCTION(ftp_login)
 {
 	zval 		*z_ftp;
@@ -253,8 +208,7 @@ PHP_FUNCTION(ftp_login)
 }
 /* }}} */
 
-/* {{{ proto string ftp_pwd(resource stream)
-   Returns the present working directory */
+/* {{{ Returns the present working directory */
 PHP_FUNCTION(ftp_pwd)
 {
 	zval 		*z_ftp;
@@ -278,8 +232,7 @@ PHP_FUNCTION(ftp_pwd)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_cdup(resource stream)
-   Changes to the parent directory */
+/* {{{ Changes to the parent directory */
 PHP_FUNCTION(ftp_cdup)
 {
 	zval 		*z_ftp;
@@ -302,8 +255,7 @@ PHP_FUNCTION(ftp_cdup)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_chdir(resource stream, string directory)
-   Changes directories */
+/* {{{ Changes directories */
 PHP_FUNCTION(ftp_chdir)
 {
 	zval		*z_ftp;
@@ -329,8 +281,7 @@ PHP_FUNCTION(ftp_chdir)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_exec(resource stream, string command)
-   Requests execution of a program on the FTP server */
+/* {{{ Requests execution of a program on the FTP server */
 PHP_FUNCTION(ftp_exec)
 {
 	zval		*z_ftp;
@@ -356,8 +307,7 @@ PHP_FUNCTION(ftp_exec)
 }
 /* }}} */
 
-/* {{{ proto array ftp_raw(resource stream, string command)
-   Sends a literal command to the FTP server */
+/* {{{ Sends a literal command to the FTP server */
 PHP_FUNCTION(ftp_raw)
 {
 	zval		*z_ftp;
@@ -378,8 +328,7 @@ PHP_FUNCTION(ftp_raw)
 }
 /* }}} */
 
-/* {{{ proto string ftp_mkdir(resource stream, string directory)
-   Creates a directory and returns the absolute path for the new directory or false on error */
+/* {{{ Creates a directory and returns the absolute path for the new directory or false on error */
 PHP_FUNCTION(ftp_mkdir)
 {
 	zval		*z_ftp;
@@ -406,8 +355,7 @@ PHP_FUNCTION(ftp_mkdir)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_rmdir(resource stream, string directory)
-   Removes a directory */
+/* {{{ Removes a directory */
 PHP_FUNCTION(ftp_rmdir)
 {
 	zval		*z_ftp;
@@ -433,8 +381,7 @@ PHP_FUNCTION(ftp_rmdir)
 }
 /* }}} */
 
-/* {{{ proto int ftp_chmod(resource stream, int mode, string filename)
-   Sets permissions on a file */
+/* {{{ Sets permissions on a file */
 PHP_FUNCTION(ftp_chmod)
 {
 	zval		*z_ftp;
@@ -460,8 +407,7 @@ PHP_FUNCTION(ftp_chmod)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_alloc(resource stream, int size[, &response])
-   Attempt to allocate space on the remote FTP server */
+/* {{{ Attempt to allocate space on the remote FTP server */
 PHP_FUNCTION(ftp_alloc)
 {
 	zval		*z_ftp, *zresponse = NULL;
@@ -491,8 +437,7 @@ PHP_FUNCTION(ftp_alloc)
 }
 /* }}} */
 
-/* {{{ proto array ftp_nlist(resource stream, string directory)
-   Returns an array of filenames in the given directory */
+/* {{{ Returns an array of filenames in the given directory */
 PHP_FUNCTION(ftp_nlist)
 {
 	zval		*z_ftp;
@@ -521,8 +466,7 @@ PHP_FUNCTION(ftp_nlist)
 }
 /* }}} */
 
-/* {{{ proto array ftp_rawlist(resource stream, string directory [, bool recursive])
-   Returns a detailed listing of a directory as an array of output lines */
+/* {{{ Returns a detailed listing of a directory as an array of output lines */
 PHP_FUNCTION(ftp_rawlist)
 {
 	zval		*z_ftp;
@@ -552,8 +496,7 @@ PHP_FUNCTION(ftp_rawlist)
 }
 /* }}} */
 
-/* {{{ proto array ftp_mlsd(resource stream, string directory)
-   Returns a detailed listing of a directory as an array of parsed output lines */
+/* {{{ Returns a detailed listing of a directory as an array of parsed output lines */
 PHP_FUNCTION(ftp_mlsd)
 {
 	zval		*z_ftp;
@@ -589,8 +532,7 @@ PHP_FUNCTION(ftp_mlsd)
 }
 /* }}} */
 
-/* {{{ proto string ftp_systype(resource stream)
-   Returns the system type identifier */
+/* {{{ Returns the system type identifier */
 PHP_FUNCTION(ftp_systype)
 {
 	zval		*z_ftp;
@@ -614,8 +556,7 @@ PHP_FUNCTION(ftp_systype)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_fget(resource stream, resource fp, string remote_file, [, int mode [, int resumepos]])
-   Retrieves a file from the FTP server and writes it to an open file */
+/* {{{ Retrieves a file from the FTP server and writes it to an open file */
 PHP_FUNCTION(ftp_fget)
 {
 	zval		*z_ftp, *z_file;
@@ -660,8 +601,7 @@ PHP_FUNCTION(ftp_fget)
 }
 /* }}} */
 
-/* {{{ proto int ftp_nb_fget(resource stream, resource fp, string remote_file [, int mode [, int resumepos]])
-   Retrieves a file from the FTP server asynchronly and writes it to an open file */
+/* {{{ Retrieves a file from the FTP server asynchronly and writes it to an open file */
 PHP_FUNCTION(ftp_nb_fget)
 {
 	zval		*z_ftp, *z_file;
@@ -710,8 +650,7 @@ PHP_FUNCTION(ftp_nb_fget)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_pasv(resource stream, bool pasv)
-   Turns passive mode on or off */
+/* {{{ Turns passive mode on or off */
 PHP_FUNCTION(ftp_pasv)
 {
 	zval		*z_ftp;
@@ -734,8 +673,7 @@ PHP_FUNCTION(ftp_pasv)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_get(resource stream, string local_file, string remote_file [, int mode [, int resume_pos]])
-   Retrieves a file from the FTP server and writes it to a local file */
+/* {{{ Retrieves a file from the FTP server and writes it to a local file */
 PHP_FUNCTION(ftp_get)
 {
 	zval		*z_ftp;
@@ -799,8 +737,7 @@ PHP_FUNCTION(ftp_get)
 }
 /* }}} */
 
-/* {{{ proto int ftp_nb_get(resource stream, string local_file, string remote_file, [, int mode [, int resume_pos]])
-   Retrieves a file from the FTP server nbhronly and writes it to a local file */
+/* {{{ Retrieves a file from the FTP server nbhronly and writes it to a local file */
 PHP_FUNCTION(ftp_nb_get)
 {
 	zval		*z_ftp;
@@ -872,8 +809,7 @@ PHP_FUNCTION(ftp_nb_get)
 }
 /* }}} */
 
-/* {{{ proto int ftp_nb_continue(resource stream)
-   Continues retrieving/sending a file nbronously */
+/* {{{ Continues retrieving/sending a file nbronously */
 PHP_FUNCTION(ftp_nb_continue)
 {
 	zval		*z_ftp;
@@ -889,7 +825,7 @@ PHP_FUNCTION(ftp_nb_continue)
 	}
 
 	if (!ftp->nb) {
-		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue.");
+		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue");
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 
@@ -912,8 +848,7 @@ PHP_FUNCTION(ftp_nb_continue)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_fput(resource stream, string remote_file, resource fp [, int mode [, int startpos]])
-   Stores a file from an open file to the FTP server */
+/* {{{ Stores a file from an open file to the FTP server */
 PHP_FUNCTION(ftp_fput)
 {
 	zval		*z_ftp, *z_file;
@@ -961,8 +896,7 @@ PHP_FUNCTION(ftp_fput)
 }
 /* }}} */
 
-/* {{{ proto int ftp_nb_fput(resource stream, string remote_file, resource fp [, int mode [, int startpos]])
-   Stores a file from an open file to the FTP server nbronly */
+/* {{{ Stores a file from an open file to the FTP server nbronly */
 PHP_FUNCTION(ftp_nb_fput)
 {
 	zval		*z_ftp, *z_file;
@@ -1016,8 +950,7 @@ PHP_FUNCTION(ftp_nb_fput)
 /* }}} */
 
 
-/* {{{ proto bool ftp_put(resource stream, string remote_file, string local_file [, int mode [, int startpos]])
-   Stores a file on the FTP server */
+/* {{{ Stores a file on the FTP server */
 PHP_FUNCTION(ftp_put)
 {
 	zval		*z_ftp;
@@ -1070,8 +1003,7 @@ PHP_FUNCTION(ftp_put)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_append(resource stream, string remote_file, string local_file [, int mode])
-   Append content of a file a another file on the FTP server */
+/* {{{ Append content of a file a another file on the FTP server */
 PHP_FUNCTION(ftp_append)
 {
 	zval		*z_ftp;
@@ -1106,8 +1038,7 @@ PHP_FUNCTION(ftp_append)
 }
 /* }}} */
 
-/* {{{ proto int ftp_nb_put(resource stream, string remote_file, string local_file [, int mode [, int startpos]])
-   Stores a file on the FTP server */
+/* {{{ Stores a file on the FTP server */
 PHP_FUNCTION(ftp_nb_put)
 {
 	zval		*z_ftp;
@@ -1168,8 +1099,7 @@ PHP_FUNCTION(ftp_nb_put)
 }
 /* }}} */
 
-/* {{{ proto int ftp_size(resource stream, string filename)
-   Returns the size of the file, or -1 on error */
+/* {{{ Returns the size of the file, or -1 on error */
 PHP_FUNCTION(ftp_size)
 {
 	zval		*z_ftp;
@@ -1190,8 +1120,7 @@ PHP_FUNCTION(ftp_size)
 }
 /* }}} */
 
-/* {{{ proto int ftp_mdtm(resource stream, string filename)
-   Returns the last modification time of the file, or -1 on error */
+/* {{{ Returns the last modification time of the file, or -1 on error */
 PHP_FUNCTION(ftp_mdtm)
 {
 	zval		*z_ftp;
@@ -1212,8 +1141,7 @@ PHP_FUNCTION(ftp_mdtm)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_rename(resource stream, string src, string dest)
-   Renames the given file to a new path */
+/* {{{ Renames the given file to a new path */
 PHP_FUNCTION(ftp_rename)
 {
 	zval		*z_ftp;
@@ -1239,8 +1167,7 @@ PHP_FUNCTION(ftp_rename)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_delete(resource stream, string file)
-   Deletes a file */
+/* {{{ Deletes a file */
 PHP_FUNCTION(ftp_delete)
 {
 	zval		*z_ftp;
@@ -1266,8 +1193,7 @@ PHP_FUNCTION(ftp_delete)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_site(resource stream, string cmd)
-   Sends a SITE command to the server */
+/* {{{ Sends a SITE command to the server */
 PHP_FUNCTION(ftp_site)
 {
 	zval		*z_ftp;
@@ -1293,8 +1219,7 @@ PHP_FUNCTION(ftp_site)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_close(resource stream)
-   Closes the FTP stream */
+/* {{{ Closes the FTP stream */
 PHP_FUNCTION(ftp_close)
 {
 	zval		*z_ftp;
@@ -1310,12 +1235,11 @@ PHP_FUNCTION(ftp_close)
 
 	ftp_quit(ftp);
 
-	RETURN_BOOL(zend_list_close(Z_RES_P(z_ftp)) == SUCCESS);
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool ftp_set_option(resource stream, int option, mixed value)
-   Sets an FTP option */
+/* {{{ Sets an FTP option */
 PHP_FUNCTION(ftp_set_option)
 {
 	zval		*z_ftp, *z_value;
@@ -1333,45 +1257,41 @@ PHP_FUNCTION(ftp_set_option)
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
-				php_error_docref(NULL, E_WARNING, "Option TIMEOUT_SEC expects value of type int, %s given",
-					zend_zval_type_name(z_value));
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type int for the FTP_TIMEOUT_SEC option, %s given", zend_zval_type_name(z_value));
+				RETURN_THROWS();
 			}
 			if (Z_LVAL_P(z_value) <= 0) {
-				php_error_docref(NULL, E_WARNING, "Timeout has to be greater than 0");
-				RETURN_FALSE;
+				zend_argument_value_error(3, "must be greater than 0 for the FTP_TIMEOUT_SEC option");
+				RETURN_THROWS();
 			}
 			ftp->timeout_sec = Z_LVAL_P(z_value);
 			RETURN_TRUE;
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				php_error_docref(NULL, E_WARNING, "Option AUTOSEEK expects value of type bool, %s given",
-					zend_zval_type_name(z_value));
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type bool for the FTP_AUTOSEEK option, %s given", zend_zval_type_name(z_value));
+				RETURN_THROWS();
 			}
 			ftp->autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
 			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				php_error_docref(NULL, E_WARNING, "Option USEPASVADDRESS expects value of type bool, %s given",
-					zend_zval_type_name(z_value));
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type bool for the FTP_USEPASVADDRESS option, %s given", zend_zval_type_name(z_value));
+				RETURN_THROWS();
 			}
 			ftp->usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
+			RETURN_THROWS();
 			break;
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed ftp_get_option(resource stream, int option)
-   Gets an FTP option */
+/* {{{ Gets an FTP option */
 PHP_FUNCTION(ftp_get_option)
 {
 	zval		*z_ftp;
@@ -1397,9 +1317,8 @@ PHP_FUNCTION(ftp_get_option)
 			RETURN_BOOL(ftp->usepasvaddress);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
-			RETURN_FALSE;
-			break;
+			zend_argument_value_error(2, "must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
+			RETURN_THROWS();
 	}
 }
 /* }}} */

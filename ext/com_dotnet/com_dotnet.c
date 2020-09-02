@@ -117,6 +117,44 @@ struct dotnet_runtime_stuff {
 	DISPID create_instance;
 };
 
+/* We link dynamically to mscoree.dll to avoid the hard dependency on .NET
+ * framework, which is only required if a dotnet instance is to be created.
+ */
+static HRESULT dotnet_bind_runtime(LPVOID FAR *ppv)
+{
+	HRESULT hr;
+	HMODULE mscoree;
+	typedef HRESULT (STDAPICALLTYPE *cbtr_t)(LPCWSTR pwszVersion, LPCWSTR pwszBuildFlavor, REFCLSID rclsid, REFIID riid, LPVOID FAR *ppv);
+	cbtr_t CorBindToRuntime;
+	OLECHAR *oleversion;
+	char *version;
+
+	mscoree = LoadLibraryA("mscoree.dll");
+	if (mscoree == NULL) {
+		return S_FALSE;
+	}
+
+	CorBindToRuntime = (cbtr_t) GetProcAddress(mscoree, "CorBindToRuntime");
+	if (CorBindToRuntime == NULL) {
+		FreeLibrary(mscoree);
+		return S_FALSE;
+	}
+
+	version = INI_STR("com.dotnet_version");
+	if (version == NULL || *version == '\0') {
+		oleversion = NULL;
+	} else {
+		oleversion = php_com_string_to_olestring(version, strlen(version), COMG(code_page));
+	}
+
+	hr = CorBindToRuntime(oleversion, NULL, &CLSID_CorRuntimeHost, &IID_ICorRuntimeHost, ppv);
+
+	efree(oleversion);
+	FreeLibrary(mscoree);
+
+	return hr;
+}
+
 static HRESULT dotnet_init(char **p_where)
 {
 	HRESULT hr;
@@ -130,10 +168,8 @@ static HRESULT dotnet_init(char **p_where)
 	}
 	memset(stuff, 0, sizeof(*stuff));
 
-	where = "CoCreateInstance";
-	hr = CoCreateInstance(&CLSID_CorRuntimeHost, NULL, CLSCTX_ALL,
-			&IID_ICorRuntimeHost, (LPVOID*)&stuff->dotnet_host);
-
+	where = "dotnet_bind_runtime";
+	hr = dotnet_bind_runtime((LPVOID*)&stuff->dotnet_host);
 	if (FAILED(hr))
 		goto out;
 
@@ -179,7 +215,7 @@ out:
 }
 
 /* {{{ com_dotnet_create_instance - ctor for DOTNET class */
-PHP_FUNCTION(com_dotnet_create_instance)
+PHP_METHOD(dotnet, __construct)
 {
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
@@ -194,6 +230,13 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	IUnknown *unk = NULL;
 	zend_long cp = GetACP();
 	const struct php_win32_cp *cp_it;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
+			&assembly_name, &assembly_name_len,
+			&datatype_name, &datatype_name_len,
+			&cp)) {
+		RETURN_THROWS();
+	}
 
 	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
@@ -236,13 +279,6 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	}
 
 	obj = CDNO_FETCH(object);
-
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
-			&assembly_name, &assembly_name_len,
-			&datatype_name, &datatype_name_len,
-			&cp)) {
-		RETURN_THROWS();
-	}
 
 	cp_it = php_win32_cp_get_by_id((DWORD)cp);
 	if (!cp_it) {

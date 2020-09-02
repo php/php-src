@@ -18,11 +18,11 @@ $zip->open($filename);
 $zip->extractTo($dirname);
 $zip->close();
 
-var_dump(date('Ymd', filemtime($dirname . '/entry1.txt')));
+var_dump(date('Ym', filemtime($dirname . '/entry1.txt')));
 ?>
 Done
 --EXPECT--
-string(8) "20060706"
+string(6) "200607"
 Done
 --CLEAN--
 <?php

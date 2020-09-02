@@ -2,11 +2,6 @@
 Test fgets() function : basic functionality
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets a line from file pointer
-*/
-
 // include the file.inc for common test functions
 include ("file.inc");
 

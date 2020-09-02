@@ -58,6 +58,6 @@ object(FFI\CData:struct _d)#%d (1) {
   ["x"]=>
   int(0)
 }
-FFI\ParserException: Incomplete 'struct _e' at line 1
-FFI\ParserException: Incomplete 'struct _f' at line 1
+FFI\ParserException: Incomplete struct "_e" at line 1
+FFI\ParserException: Incomplete struct "_f" at line 1
 ok

@@ -50,28 +50,6 @@
 #include "php_lmdb.h"
 #include "dba_arginfo.h"
 
-/* {{{ dba_functions[]
- */
-static const zend_function_entry dba_functions[] = {
-	PHP_FE(dba_open, arginfo_dba_open)
-	PHP_FE(dba_popen, arginfo_dba_popen)
-	PHP_FE(dba_close, arginfo_dba_close)
-	PHP_FE(dba_delete, arginfo_dba_delete)
-	PHP_FE(dba_exists, arginfo_dba_exists)
-	PHP_FE(dba_fetch, arginfo_dba_fetch)
-	PHP_FE(dba_insert, arginfo_dba_insert)
-	PHP_FE(dba_replace, arginfo_dba_replace)
-	PHP_FE(dba_firstkey, arginfo_dba_firstkey)
-	PHP_FE(dba_nextkey, arginfo_dba_nextkey)
-	PHP_FE(dba_optimize, arginfo_dba_optimize)
-	PHP_FE(dba_sync, arginfo_dba_sync)
-	PHP_FE(dba_handlers, arginfo_dba_handlers)
-	PHP_FE(dba_list, arginfo_dba_list)
-	PHP_FE(dba_key_split, arginfo_dba_key_split)
-	PHP_FE_END
-};
-/* }}} */
-
 PHP_MINIT_FUNCTION(dba);
 PHP_MSHUTDOWN_FUNCTION(dba);
 PHP_MINFO_FUNCTION(dba);
@@ -90,7 +68,7 @@ static PHP_GINIT_FUNCTION(dba);
 zend_module_entry dba_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"dba",
-	dba_functions,
+	ext_functions,
 	PHP_MINIT(dba),
 	PHP_MSHUTDOWN(dba),
 	NULL,
@@ -129,7 +107,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		size_t len;
 
 		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
-			zend_throw_error(NULL, "Key does not have exactly two elements: (key, name)");
+			zend_argument_error(NULL, 1, "must have exactly two elements: \"key\" and \"name\"");
 			return 0;
 		}
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);
@@ -341,8 +319,7 @@ PHPAPI dba_handler *dba_get_handler(const char* handler_name)
 */
 /* }}} */
 
-/* {{{ dba_close
- */
+/* {{{ dba_close */
 static void dba_close(dba_info *info)
 {
 	if (info->hnd) {
@@ -372,8 +349,7 @@ static void dba_close(dba_info *info)
 }
 /* }}} */
 
-/* {{{ dba_close_rsrc
- */
+/* {{{ dba_close_rsrc */
 static void dba_close_rsrc(zend_resource *rsrc)
 {
 	dba_info *info = (dba_info *)rsrc->ptr;
@@ -407,8 +383,7 @@ static void dba_close_pe_rsrc(zend_resource *rsrc)
 }
 /* }}} */
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 ZEND_INI_MH(OnUpdateDefaultHandler)
 {
 	dba_handler *hptr;
@@ -433,8 +408,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(dba)
 {
 #if defined(COMPILE_DL_DBA) && defined(ZTS)
@@ -445,8 +419,7 @@ static PHP_GINIT_FUNCTION(dba)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(dba)
 {
 	REGISTER_INI_ENTRIES();
@@ -456,8 +429,7 @@ PHP_MINIT_FUNCTION(dba)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(dba)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -467,8 +439,7 @@ PHP_MSHUTDOWN_FUNCTION(dba)
 
 #include "zend_smart_str.h"
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(dba)
 {
 	dba_handler *hptr;
@@ -493,8 +464,7 @@ PHP_MINFO_FUNCTION(dba)
 }
 /* }}} */
 
-/* {{{ php_dba_update
- */
+/* {{{ php_dba_update */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	size_t val_len;
@@ -530,8 +500,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 #define FREENOW if(args) {int i; for (i=0; i<ac; i++) { zval_ptr_dtor(&args[i]); } efree(args);} if(key) efree(key)
 
-/* {{{ php_find_dbm
- */
+/* {{{ php_find_dbm */
 dba_info *php_dba_find(const char* path)
 {
 	zend_resource *le;
@@ -555,8 +524,7 @@ dba_info *php_dba_find(const char* path)
 }
 /* }}} */
 
-/* {{{ php_dba_open
- */
+/* {{{ php_dba_open */
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	zval *args = NULL;
@@ -940,24 +908,21 @@ restart:
 /* }}} */
 #undef FREENOW
 
-/* {{{ proto resource dba_popen(string path, string mode [, string handlername, string ...])
-   Opens path using the specified handler in mode persistently */
+/* {{{ Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto resource dba_open(string path, string mode [, string handlername, string ...])
-   Opens path using the specified handler in mode*/
+/* {{{ Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto void dba_close(resource handle)
-   Closes database */
+/* {{{ Closes database */
 PHP_FUNCTION(dba_close)
 {
 	zval *id;
@@ -973,8 +938,7 @@ PHP_FUNCTION(dba_close)
 }
 /* }}} */
 
-/* {{{ proto bool dba_exists(string key, resource handle)
-   Checks, if the specified key exists */
+/* {{{ Checks, if the specified key exists */
 PHP_FUNCTION(dba_exists)
 {
 	DBA_ID_GET2;
@@ -988,8 +952,7 @@ PHP_FUNCTION(dba_exists)
 }
 /* }}} */
 
-/* {{{ proto string dba_fetch(string key, [int skip ,] resource handle)
-   Fetches the data associated with key */
+/* {{{ Fetches the data associated with key */
 PHP_FUNCTION(dba_fetch)
 {
 	char *val;
@@ -1031,8 +994,7 @@ PHP_FUNCTION(dba_fetch)
 }
 /* }}} */
 
-/* {{{ proto array|false dba_key_split(string key)
-   Splits an inifile key into an array of the form array(0=>group,1=>value_name) but returns false if input is false or null */
+/* {{{ Splits an inifile key into an array of the form array(0=>group,1=>value_name) but returns false if input is false or null */
 PHP_FUNCTION(dba_key_split)
 {
 	zval *zkey;
@@ -1061,8 +1023,7 @@ PHP_FUNCTION(dba_key_split)
 }
 /* }}} */
 
-/* {{{ proto string dba_firstkey(resource handle)
-   Resets the internal key pointer and returns the first key */
+/* {{{ Resets the internal key pointer and returns the first key */
 PHP_FUNCTION(dba_firstkey)
 {
 	char *fkey;
@@ -1088,8 +1049,7 @@ PHP_FUNCTION(dba_firstkey)
 }
 /* }}} */
 
-/* {{{ proto string dba_nextkey(resource handle)
-   Returns the next key */
+/* {{{ Returns the next key */
 PHP_FUNCTION(dba_nextkey)
 {
 	char *nkey;
@@ -1115,8 +1075,7 @@ PHP_FUNCTION(dba_nextkey)
 }
 /* }}} */
 
-/* {{{ proto bool dba_delete(string key, resource handle)
-   Deletes the entry associated with key
+/* {{{ Deletes the entry associated with key
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_delete)
 {
@@ -1134,8 +1093,7 @@ PHP_FUNCTION(dba_delete)
 }
 /* }}} */
 
-/* {{{ proto bool dba_insert(string key, string value, resource handle)
-   If not inifile: Insert value as key, return false, if key exists already
+/* {{{ If not inifile: Insert value as key, return false, if key exists already
    If inifile: Add vakue as key (next instance of key) */
 PHP_FUNCTION(dba_insert)
 {
@@ -1143,8 +1101,7 @@ PHP_FUNCTION(dba_insert)
 }
 /* }}} */
 
-/* {{{ proto bool dba_replace(string key, string value, resource handle)
-   Inserts value as key, replaces key, if key exists already
+/* {{{ Inserts value as key, replaces key, if key exists already
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_replace)
 {
@@ -1152,8 +1109,7 @@ PHP_FUNCTION(dba_replace)
 }
 /* }}} */
 
-/* {{{ proto bool dba_optimize(resource handle)
-   Optimizes (e.g. clean up, vacuum) database */
+/* {{{ Optimizes (e.g. clean up, vacuum) database */
 PHP_FUNCTION(dba_optimize)
 {
 	zval *id;
@@ -1175,8 +1131,7 @@ PHP_FUNCTION(dba_optimize)
 }
 /* }}} */
 
-/* {{{ proto bool dba_sync(resource handle)
-   Synchronizes database */
+/* {{{ Synchronizes database */
 PHP_FUNCTION(dba_sync)
 {
 	zval *id;
@@ -1196,8 +1151,7 @@ PHP_FUNCTION(dba_sync)
 }
 /* }}} */
 
-/* {{{ proto array dba_handlers([bool full_info])
-   List configured database handlers */
+/* {{{ List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
 	dba_handler *hptr;
@@ -1222,8 +1176,7 @@ PHP_FUNCTION(dba_handlers)
 }
 /* }}} */
 
-/* {{{ proto array dba_list()
-   List opened databases */
+/* {{{ List opened databases */
 PHP_FUNCTION(dba_list)
 {
 	zend_ulong numitems, i;

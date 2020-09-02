@@ -8,12 +8,6 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer
- * Source code: ext/zlib/zlib.c
- * Alias to functions:
- */
-
 require_once('gzopen_include_path.inc');
 
 echo "*** Testing gzopen() : variation ***\n";

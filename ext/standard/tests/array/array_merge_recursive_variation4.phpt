@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - associative array with different keys
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_merge_recursive() by passing different
  * associative arrays having different keys to $arr1 argument.

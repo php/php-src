@@ -107,17 +107,23 @@ array(2) {
 bool(true)
 
 closure with array
+
+Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 array(1) {
   ["sum"]=>
   int(42)
 }
+
+Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 array(1) {
   ["sum"]=>
-  int(43)
+  int(42)
 }
+
+Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 array(1) {
   ["sum"]=>
-  int(45)
+  int(42)
 }
 bool(true)
 End result:int(42)
@@ -139,14 +145,20 @@ bool(true)
 End result:int(48)
 
 closure with object
+
+Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 object(stdClass)#1 (1) {
   ["sum"]=>
   int(42)
 }
+
+Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 object(stdClass)#1 (1) {
   ["sum"]=>
   int(43)
 }
+
+Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 object(stdClass)#1 (1) {
   ["sum"]=>
   int(45)
@@ -211,7 +223,7 @@ array(2) {
     ["args"]=>
     array(2) {
       [0]=>
-      &array(3) {
+      array(3) {
         ["one"]=>
         int(1)
         ["two"]=>

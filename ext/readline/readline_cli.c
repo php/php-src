@@ -70,7 +70,7 @@
 
 #define DEFAULT_PROMPT "\\b \\> "
 
-ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
+ZEND_DECLARE_MODULE_GLOBALS(cli_readline)
 
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
@@ -603,7 +603,14 @@ static int readline_shell_run(void) /* {{{ */
 #else
 	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
 #endif
-	rl_attempted_completion_function = cli_code_completion;
+	/* Install the default completion function for 'php -a'.
+	 *
+	 * But if readline_completion_function() was called by PHP code prior to the shell starting
+	 * (e.g. with 'php -d auto_prepend_file=prepend.php -a'),
+	 * then use that instead of PHP's default. */
+	if (rl_attempted_completion_function != php_readline_completion_cb) {
+		rl_attempted_completion_function = cli_code_completion;
+	}
 #ifndef PHP_WIN32
 	rl_special_prefixes = "$";
 #endif

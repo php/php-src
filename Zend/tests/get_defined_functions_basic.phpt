@@ -3,11 +3,6 @@ get_defined_functions() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : array get_defined_functions  ( void  )
- * Description: Gets an array of all defined functions.
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 echo "*** Testing get_defined_functions() : basic functionality ***\n";
 
 function foo() {}

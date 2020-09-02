@@ -6,19 +6,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip Run only on Windows");
-if (!is_writable('c:\\fopen_variation10.tmp')) {
+if (!is_writable('c:\\')) {
 	die('skip. C:\\ not writable.');
 }
 
 ?>
 --FILE--
 <?php
-/* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing fopen() : variation ***\n";
 
 // fopen with interesting windows paths.
@@ -69,9 +63,9 @@ foreach($paths as $path) {
          }
          else {
             fpassthru($h);
+            fclose($h);
             echo "\n";
          }
-         fclose($h);
 };
 
 unlink($firstfile);
@@ -95,21 +89,15 @@ file in root
 Warning: fopen(c\fopen_variation11.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
-Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
-
 --\--
 
-Warning: fopen(\\FOPEN_VARIATION11.TMP): Failed to open stream: Invalid argument in %s on line %d
+Warning: fopen(\\FOPEN_VARIATION11.TMP): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
-
-Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --/--
 
-Warning: fopen(\\FOPEN_VARIATION11.TMP): Failed to open stream: Invalid argument in %s on line %d
+Warning: fopen(\\FOPEN_VARIATION11.TMP): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
-
-Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --c:fopen11.tmpdirTwo--
 file in fopen11.tmpdirTwo
@@ -118,8 +106,6 @@ file in fopen11.tmpdirTwo
 
 Warning: fopen(c:adir\fopen_variation11.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
-
-Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --c:\/--
 file in root
@@ -140,5 +126,3 @@ file in fopen11.tmpDir
 
 Warning: fopen(/sortout\fopen_variation11.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
-
-Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d

@@ -22,6 +22,7 @@ try {
 } catch (Error $ex) {
     echo "Exception: " . $ex->getMessage() . "\n";
 }
+?>
 --EXPECT--
 array(5) {
   [0]=>
@@ -43,4 +44,4 @@ array(3) {
   [2]=>
   int(3)
 }
-Exception: Cannot declare self-referencing constant 'self::B'
+Exception: Cannot declare self-referencing constant self::B

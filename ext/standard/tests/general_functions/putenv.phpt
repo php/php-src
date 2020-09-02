@@ -29,7 +29,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 string(5) "value"
@@ -37,6 +37,6 @@ bool(true)
 string(0) ""
 bool(true)
 bool(false)
-Invalid parameter syntax
-Invalid parameter syntax
+putenv(): Argument #1 ($setting) must have a valid syntax
+putenv(): Argument #1 ($setting) must have a valid syntax
 Done

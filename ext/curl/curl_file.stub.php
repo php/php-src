@@ -1,11 +1,10 @@
 <?php
 
-class CURLFile {
-    public function __construct(
-        string $filename,
-        string $mimetype = UNKNOWN,
-        string $postname = UNKNOWN
-    ) {}
+/** @generate-function-entries */
+
+class CURLFile
+{
+    public function __construct(string $filename, ?string $mimetype = null, ?string $postname = null) {}
 
     /** @return string */
     public function getFilename() {}

@@ -23,6 +23,6 @@ try {
 
 ?>
 --EXPECT--
-Ok - SplFixedArray::__construct(): Argument #1 ($size) must be of type int, object given
+Ok - SplFixedArray::__construct(): Argument #1 ($size) must be of type int, stdClass given
 Ok - SplFixedArray::__construct(): Argument #1 ($size) must be of type int, string given
 Ok - SplFixedArray::__construct(): Argument #1 ($size) must be of type int, string given

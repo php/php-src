@@ -21,13 +21,6 @@
 #include "zend_smart_str_public.h"
 
 PHP_MINIT_FUNCTION(var);
-PHP_FUNCTION(var_dump);
-PHP_FUNCTION(var_export);
-PHP_FUNCTION(debug_zval_dump);
-PHP_FUNCTION(serialize);
-PHP_FUNCTION(unserialize);
-PHP_FUNCTION(memory_get_usage);
-PHP_FUNCTION(memory_get_peak_usage);
 
 PHPAPI void php_var_dump(zval *struc, int level);
 PHPAPI void php_var_export(zval *struc, int level);
@@ -65,6 +58,8 @@ PHPAPI zend_long php_var_unserialize_get_cur_depth(php_unserialize_data_t d);
 
 #define PHP_VAR_UNSERIALIZE_DESTROY(d) \
 	php_var_unserialize_destroy(d)
+
+PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, const size_t buf_len, HashTable *options, const char* function_name);
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);

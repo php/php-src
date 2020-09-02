@@ -8,11 +8,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Trying to create a copy of file in a dir which doesn't have write permissions */
 
 $file_path = __DIR__;

@@ -2,11 +2,6 @@
 Test array_walk() function : error conditions - callback parameters
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_walk() by passing more number of parameters to callback function
  */
@@ -54,7 +49,7 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : error conditions - callback parameters ***
 Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
 Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected

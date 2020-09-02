@@ -11,7 +11,7 @@ error_reporting=2039
 function hexdump($str) {
     $len = strlen($str);
     for ($i = 0; $i < $len; ++$i) {
-        printf("%02x", ord($str{$i}));
+        printf("%02x", ord($str[$i]));
     }
     print "\n";
 }

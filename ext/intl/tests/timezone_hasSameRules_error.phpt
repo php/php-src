@@ -29,6 +29,7 @@ try {
     var_dump($ex->getCode(), $ex->getMessage());
     echo "\n";
 }
+?>
 --EXPECT--
 int(0)
 string(101) "IntlTimeZone::hasSameRules(): Argument #1 ($otherTimeZone) must be of type IntlTimeZone, string given"

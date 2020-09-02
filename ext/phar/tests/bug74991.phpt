@@ -20,4 +20,5 @@ require('phar://sample.phar/some/file');
 unlink('path/needle.php');
 unlink('sample.phar');
 rmdir('path');
+?>
 --EXPECT--

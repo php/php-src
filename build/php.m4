@@ -304,28 +304,8 @@ if test "$PHP_RPATH" = "no"; then
 fi
 ])
 
-dnl
-dnl PHP_CHECK_GCC_ARG(arg, action-if-found, action-if-not-found)
-dnl
 AC_DEFUN([PHP_CHECK_GCC_ARG],[
-  gcc_arg_name=[ac_cv_gcc_arg]translit($1,A-Z-,a-z_)
-  AC_CACHE_CHECK([whether $CC supports $1], [ac_cv_gcc_arg]translit($1,A-Z-,a-z_), [
-  echo 'void somefunc() { };' > conftest.c
-  cmd='$CC $1 -c conftest.c'
-  if eval $cmd 2>&1 | $EGREP -e $1 >/dev/null ; then
-    ac_result=no
-  else
-    ac_result=yes
-  fi
-  eval $gcc_arg_name=$ac_result
-  rm -f conftest.*
-  ])
-  if eval test "\$$gcc_arg_name" = "yes"; then
-    $2
-  else
-    :
-    $3
-  fi
+  AC_MSG_ERROR([[Use AX_CHECK_COMPILE_FLAG instead]])
 ])
 
 dnl
@@ -851,7 +831,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
 	\$(LIBTOOL) --mode=install cp $3/$1.$suffix \$(phplibdir)
 
 $3/$1.$suffix: \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_DEPENDENCIES)
-	\$(LIBTOOL) --mode=link --tag=disable-static ifelse($4,,[\$(CC)],[\$(CXX)]) \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
+	\$(LIBTOOL) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
 
 EOF
 ])
@@ -870,7 +850,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 +--------------------------------------------------------------------+
 |                        *** ATTENTION ***                           |
 |                                                                    |
-| You've configured multiple SAPIs to be build. You can build only   |
+| You've configured multiple SAPIs to be built. You can build only   |
 | one SAPI module plus CGI, CLI and FPM binaries at the same time.   |
 +--------------------------------------------------------------------+
 ])
@@ -1044,9 +1024,7 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
     AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -1384,7 +1362,7 @@ int main(void) {
   ac_cv_ebcdic=no
 ])])
   if test "$ac_cv_ebcdic" = "yes"; then
-    AC_DEFINE(CHARSET_EBCDIC,1, [Define if system uses EBCDIC])
+    AC_MSG_ERROR([PHP does not support EBCDIC targets])
   fi
 ])
 
@@ -1467,16 +1445,16 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdlib.h>
 
 struct cookiedata {
-  __off64_t pos;
+  off64_t pos;
 };
 
-__ssize_t reader(void *cookie, char *buffer, size_t size)
+ssize_t reader(void *cookie, char *buffer, size_t size)
 { return size; }
-__ssize_t writer(void *cookie, const char *buffer, size_t size)
+ssize_t writer(void *cookie, const char *buffer, size_t size)
 { return size; }
 int closer(void *cookie)
 { return 0; }
-int seeker(void *cookie, __off64_t *position, int whence)
+int seeker(void *cookie, off64_t *position, int whence)
 { ((struct cookiedata*)cookie)->pos = *position; return 0; }
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
@@ -1736,7 +1714,7 @@ dnl Search for the sendmail binary.
 dnl
 AC_DEFUN([PHP_PROG_SENDMAIL], [
   PHP_ALT_PATH=/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib:/usr/lib
-  AC_PATH_PROG(PROG_SENDMAIL, sendmail,[], $PATH:$PHP_ALT_PATH)
+  AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/sbin/sendmail, $PATH:$PHP_ALT_PATH)
   PHP_SUBST(PROG_SENDMAIL)
 ])
 
@@ -1786,6 +1764,9 @@ AC_DEFUN([PHP_PROG_BISON], [
     AC_MSG_CHECKING([for bison version])
 
     php_bison_version=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | tr -d a-z)
+    if test -z "$php_bison_version"; then
+      php_bison_version=0.0.0
+    fi
     ac_IFS=$IFS; IFS="."
     set $php_bison_version
     IFS=$ac_IFS
@@ -1850,6 +1831,9 @@ AC_DEFUN([PHP_PROG_RE2C],[
     AC_MSG_CHECKING([for re2c version])
 
     php_re2c_version=$($RE2C --version | cut -d ' ' -f 2 2>/dev/null)
+    if test -z "$php_re2c_version"; then
+      php_re2c_version=0.0.0
+    fi
     ac_IFS=$IFS; IFS="."
     set $php_re2c_version
     IFS=$ac_IFS
@@ -1940,19 +1924,6 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   found_iconv=no
   unset ICONV_DIR
 
-  dnl Create the directories for a VPATH build.
-  $php_shtool mkdir -p ext/iconv
-
-  echo > ext/iconv/php_have_bsd_iconv.h
-  echo > ext/iconv/php_have_ibm_iconv.h
-  echo > ext/iconv/php_have_glibc_iconv.h
-  echo > ext/iconv/php_have_libiconv.h
-  echo > ext/iconv/php_have_iconv.h
-  echo > ext/iconv/php_php_iconv_impl.h
-  echo > ext/iconv/php_iconv_aliased_libiconv.h
-  echo > ext/iconv/php_php_iconv_h_path.h
-  echo > ext/iconv/php_iconv_supports_errno.h
-
   dnl Check libc first if no path is provided in --with-iconv.
   if test "$PHP_ICONV" = "yes"; then
     dnl Reset LIBS temporarily as it may have already been included -liconv in.
@@ -1962,7 +1933,6 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       found_iconv=yes
     ],[
       AC_CHECK_FUNC(libiconv,[
-        PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
         AC_DEFINE(HAVE_LIBICONV, 1, [ ])
         found_iconv=yes
       ])
@@ -1974,13 +1944,14 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   if test "$found_iconv" = "no"; then
 
     for i in $PHP_ICONV /usr/local /usr; do
-      if test -r $i/include/giconv.h; then
-        AC_DEFINE(HAVE_GICONV_H, 1, [ ])
+      if test -r $i/include/gnu-libiconv/iconv.h; then
         ICONV_DIR=$i
-        iconv_lib_name=giconv
+        ICONV_INCLUDE_DIR=$i/include/gnu-libiconv
+        iconv_lib_name=iconv
         break
       elif test -r $i/include/iconv.h; then
         ICONV_DIR=$i
+        ICONV_INCLUDE_DIR=$i/include
         iconv_lib_name=iconv
         break
       fi
@@ -1996,9 +1967,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     then
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
-        PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
         AC_DEFINE(HAVE_LIBICONV,1,[ ])
-        PHP_DEFINE([ICONV_ALIASED_LIBICONV],1,[ext/iconv])
         AC_DEFINE([ICONV_ALIASED_LIBICONV],1,[iconv() is aliased to libiconv() in -liconv])
       ], [
         PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
@@ -2013,11 +1982,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   fi
 
   if test "$found_iconv" = "yes"; then
-    PHP_DEFINE(HAVE_ICONV,1,[ext/iconv])
     AC_DEFINE(HAVE_ICONV,1,[ ])
     if test -n "$ICONV_DIR"; then
       PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/$PHP_LIBDIR, $1)
-      PHP_ADD_INCLUDE($ICONV_DIR/include)
+      PHP_ADD_INCLUDE($ICONV_INCLUDE_DIR)
     fi
     $2
 ifelse([$3],[],,[else $3])
@@ -2030,7 +1998,7 @@ dnl
 dnl Common setup macro for libxml.
 dnl
 AC_DEFUN([PHP_SETUP_LIBXML], [
-  PKG_CHECK_MODULES([LIBXML], [libxml-2.0 >= 2.7.6])
+  PKG_CHECK_MODULES([LIBXML], [libxml-2.0 >= 2.9.0])
 
   PHP_EVAL_INCLINE($LIBXML_CFLAGS)
   PHP_EVAL_LIBLINE($LIBXML_LIBS, $1)
@@ -2218,8 +2186,8 @@ AC_DEFUN([PHP_DETECT_SUNCC],[
 dnl
 dnl PHP_CRYPT_R_STYLE
 dnl
-dnl Detect the style of crypt_r() is any is available see
-dnl APR_CHECK_CRYPT_R_STYLE() for original version.
+dnl Detect the style of crypt_r() if any is available.
+dnl See APR_CHECK_CRYPT_R_STYLE() for original version.
 dnl
 AC_DEFUN([PHP_CRYPT_R_STYLE],
 [
@@ -2252,6 +2220,17 @@ crypt_r("passwd", "hash", &buffer);
 struct crypt_data buffer;
 crypt_r("passwd", "hash", &buffer);
 ]])],[php_cv_crypt_r_style=struct_crypt_data_gnu_source],[])
+    fi
+    ])
+
+    if test "$php_cv_crypt_r_style" = "none"; then
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <stdlib.h>
+#include <unistd.h>
+]],[[
+struct crypt_data buffer;
+crypt_r("passwd", "hash", &buffer);
+]])],[php_cv_crypt_r_style=struct_crypt_data],[])
     fi
     ])
 
@@ -2420,10 +2399,11 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
   AC_CHECK_SIZEOF([long])
   AC_CHECK_SIZEOF([long long])
   AC_CHECK_SIZEOF([size_t])
-  AC_CHECK_TYPES([int8, int16, int32, int64, int8_t, int16_t, int32_t, int64_t, uint8, uint16, uint32, uint64, uint8_t, uint16_t, uint32_t, uint64_t, u_int8_t, u_int16_t, u_int32_t, u_int64_t], [], [], [
-#if HAVE_STDINT_H
-# include <stdint.h>
-#endif
+  AC_CHECK_SIZEOF([off_t])
+  AC_CHECK_TYPES([int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t], [], [
+    AC_MSG_ERROR([One of the intN_t or uintN_t types is not available])
+  ], [
+#include <stdint.h>
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -2670,30 +2650,6 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
 
   AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_SUPPORTS],
    [$have_builtin_cpu_supports], [Whether the compiler supports __builtin_cpu_supports])
-])
-
-dnl
-dnl PHP_CHECK_CPU_SUPPORTS
-dnl
-AC_DEFUN([PHP_CHECK_CPU_SUPPORTS], [
-  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_INIT])
-  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_SUPPORTS])
-  have_ext_instructions=0
-  if test $have_builtin_cpu_supports = 1; then
-    AC_MSG_CHECKING([for $1 instructions supports])
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
-int main() {
-	return __builtin_cpu_supports("$1")? 0 : 1;
-}
-    ]])], [
-      have_ext_instructions=1
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ], [AC_MSG_RESULT([no])])
-  fi
-  AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_$1_INSTRUCTIONS]),
-   [$have_ext_instructions], [Whether the compiler supports $1 instructions])
 ])
 
 dnl

@@ -49,7 +49,7 @@ ZEND_END_MODULE_GLOBALS(com_dotnet)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
-extern ZEND_DECLARE_MODULE_GLOBALS(com_dotnet);
+ZEND_EXTERN_MODULE_GLOBALS(com_dotnet)
 #define COMG(v) ZEND_MODULE_GLOBALS_ACCESSOR(com_dotnet, v)
 
 #endif	/* PHP_COM_DOTNET_H */

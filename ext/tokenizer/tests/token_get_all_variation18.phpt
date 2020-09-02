@@ -4,11 +4,6 @@ Test token_get_all() function : usage variations - with HTML code
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP language tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Testing token_get_all() with source string containing HTML code with PHP
  *   HTML tags are considered to be T_INLINE_HTML(311)

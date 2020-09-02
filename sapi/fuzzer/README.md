@@ -4,12 +4,13 @@ Fuzzing SAPI for PHP
 The following `./configure` options can be used to enable the fuzzing SAPI, as well as all availablefuzzers. If you don't build the exif/json/mbstring extensions, fuzzers for these extensions will not be built.
 
 ```sh
+CC=clang CXX=clang++ \
 ./configure \
+    --disable-all \
     --enable-fuzzer \
     --with-pic \
     --enable-debug-assertions \
     --enable-exif \
-    --enable-json \
     --enable-mbstring
 ```
 
@@ -21,9 +22,11 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 
 * `php-fuzz-parser`: Fuzzing language parser and compiler
 * `php-fuzz-unserialize`: Fuzzing unserialize() function
+* `php-fuzz-unserializehash`: Fuzzing unserialize() for HashContext objects
 * `php-fuzz-json`: Fuzzing JSON parser (requires --enable-json)
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
-* `php-fuzz-mbstring`: fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
+* `php-fuzz-mbstring`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
+* `php-fuzz-execute`: Fuzzing the executor
 
 Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
 
@@ -38,6 +41,14 @@ For the unserialize fuzzer, a dictionary of internal classes should be generated
 sapi/cli/php sapi/fuzzer/generate_unserialize_dict.php
 cp -r sapi/fuzzer/corpus/unserialize ./my-unserialize-corpus
 sapi/fuzzer/php-fuzz-unserialize -dict=$PWD/sapi/fuzzer/dict/unserialize ./my-unserialize-corpus
+```
+
+For the unserializehash fuzzer, generate a corpus of initial hash serializations:
+
+```sh
+sapi/cli/php sapi/fuzzer/generate_unserializehash_corpus.php
+cp -r sapi/fuzzer/corpus/unserializehash ./my-unserialize-corpus
+sapi/fuzzer/php-fuzz-unserializehash ./my-unserialize-corpus
 ```
 
 For the parser fuzzer, a corpus may be generated from Zend test files:

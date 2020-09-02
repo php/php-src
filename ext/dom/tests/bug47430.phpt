@@ -25,8 +25,8 @@ print_r($arr);
 
 ?>
 --EXPECT--
-Attempt to assign property 'nodeValue' of non-object
-Attempt to assign property 'nodeValue' of non-object
+Attempt to assign property "nodeValue" on null
+Attempt to assign property "nodeValue" on null
 Array
 (
     [0] => Value

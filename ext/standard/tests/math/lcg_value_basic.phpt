@@ -24,7 +24,7 @@ if ($i != 100) {
 echo "MATHS test script completed\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 MATHS test script started
 
  lcg_value tests...

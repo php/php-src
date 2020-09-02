@@ -4,12 +4,6 @@ Test feof() function : basic functionality
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : proto bool feof(resource fp)
- * Description: Test for end-of-file on a file pointer
- * Source code: ext/standard/file.c
- * Alias to functions: gzeof
- */
-
 echo "*** Testing feof() : basic functionality ***\n";
 $tmpFile1 = __FILE__.".tmp1";
 $h = fopen($tmpFile1, 'wb');

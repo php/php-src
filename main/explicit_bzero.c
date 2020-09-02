@@ -28,7 +28,7 @@
 
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
-#if HAVE_EXPLICIT_MEMSET
+#ifdef HAVE_EXPLICIT_MEMSET
     explicit_memset(dst, 0, siz);
 #elif defined(PHP_WIN32)
 	RtlSecureZeroMemory(dst, siz);

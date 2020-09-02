@@ -3,11 +3,6 @@ Test sscanf() function : basic functionality - char format
 --FILE--
 <?php
 
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing sscanf() : basic functionality - using char format ***\n";
 
 $str = "X = A + B - C";

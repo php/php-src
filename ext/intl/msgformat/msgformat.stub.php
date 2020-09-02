@@ -1,56 +1,68 @@
 <?php
 
+/** @generate-function-entries */
+
 class MessageFormatter
 {
     public function __construct(string $locale, string $pattern) {}
 
-    /** @return MessageFormatter|null */
+    /**
+     * @return MessageFormatter|null
+     * @alias msgfmt_create
+     */
     public static function create(string $locale, string $pattern) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias msgfmt_format
+     */
     public function format(array $args) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias msgfmt_format_message
+     */
     public static function formatMessage(string $locale, string $pattern, array $args) {}
 
-    /** @return array|false */
+    /**
+     * @return array|false
+     * @alias msgfmt_parse
+     */
     public function parse(string $value) {}
 
-    /** @return array|false */
+    /**
+     * @return array|false
+     * @alias msgfmt_parse_message
+     */
     public static function parseMessage(string $locale, string $pattern, string $source) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias msgfmt_set_pattern
+     */
     public function setPattern(string $pattern) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias msgfmt_get_pattern
+     */
     public function getPattern() {}
 
-    /** @return string */
+    /**
+     * @return string
+     * @alias msgfmt_get_locale
+     */
     public function getLocale() {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @alias msgfmt_get_error_code
+     */
     public function getErrorCode() {}
 
-    /** @return string */
+    /**
+     * @return string
+     * @alias msgfmt_get_error_message
+     */
     public function getErrorMessage() {}
 }
-
-function msgfmt_create(string $locale, string $pattern): ?MessageFormatter {}
-
-function msgfmt_format(MessageFormatter $fmt, array $args): string|false {}
-
-function msgfmt_format_message(string $locale, string $pattern, array $args): string|false {}
-
-function msgfmt_parse(MessageFormatter $fmt, string $value): array|false {}
-
-function msgfmt_parse_message(string $locale, string $pattern, string $source): array|false {}
-
-function msgfmt_set_pattern(MessageFormatter $fmt, string $pattern): bool {}
-
-function msgfmt_get_pattern(MessageFormatter $fmt): string|false {}
-
-function msgfmt_get_locale(MessageFormatter $fmt): string {}
-
-function msgfmt_get_error_code(MessageFormatter $fmt): int {}
-
-function msgfmt_get_error_message(MessageFormatter $fmt): string {}

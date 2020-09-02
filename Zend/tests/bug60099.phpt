@@ -7,4 +7,4 @@ namespace foo {
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected end of file in %s on line %d
+Parse error: Unclosed '{' on line 2 in %s on line %d

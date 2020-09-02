@@ -28,7 +28,7 @@ int(1)
 int(5)
 int(10)
 
-Fatal error: Uncaught Error: Class 'NoSuchClass' not found in %s:%d
+Fatal error: Uncaught Error: Class "NoSuchClass" not found in %s:%d
 Stack trace:
 #0 %s(%d): bar()
 #1 {main}

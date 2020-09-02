@@ -27,11 +27,9 @@ oci_execute($statement, OCI_DEFAULT);
 var_dump($blob);
 
 var_dump($blob->write("test", -1));
-var_dump($blob->write("test", "str"));
 var_dump($blob->write("test", 1000000));
 var_dump($blob->write(str_repeat("test", 10000), 1000000));
 var_dump($blob->tell());
-var_dump($blob->seek("str", -5));
 var_dump($blob->flush());
 
 oci_commit($c);
@@ -54,19 +52,13 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 int(0)
-
-Warning: OCI-Lob::write(): Argument #2 must be of type int%s string given in %slob_002.php on line %d
-NULL
 int(4)
 int(40000)
 int(40004)
-
-Warning: OCI-Lob::seek(): Argument #1 must be of type int%s string given in %slob_002.php on line %d
-NULL
 bool(false)
 int(40004)

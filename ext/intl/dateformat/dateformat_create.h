@@ -16,8 +16,6 @@
 
 #include <php.h>
 
-PHP_FUNCTION( datefmt_create );
-PHP_METHOD( IntlDateFormatter, __construct );
 void dateformat_register_constants( INIT_FUNC_ARGS );
 
 #endif // DATE_FORMATTER_H

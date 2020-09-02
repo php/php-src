@@ -7,10 +7,10 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 $x = "foo";
-$y = &$x["bar"];
+$y = &$x["2bar"];
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: Illegal string offset 'bar' in %sbug76534.php:%d
+Fatal error: Uncaught Exception: Illegal string offset "2bar" in %s:%d
 Stack trace:
 #0 %sbug76534.php(%d): {closure}(2, 'Illegal string ...', '%s', %d)
 #1 {main}

@@ -113,7 +113,7 @@ $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=sapi/phpdbg buil
   sapi/phpdbg/phpdbg_parser.c \
   sapi/phpdbg/phpdbg_lexer.c
 
-echo "genfiles: enerating json extension parser and lexer files"
+echo "genfiles: Generating json extension parser and lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=ext/json builddir=ext/json top_srcdir=. \
   -f ext/json/Makefile.frag \
   ext/json/json_parser.tab.c \

@@ -146,7 +146,7 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill finite sigsetjmp)
+AC_CHECK_FUNCS(getpid kill sigsetjmp)
 
 ZEND_CHECK_FLOAT_PRECISION
 
@@ -196,17 +196,8 @@ AC_ARG_ENABLE([zts],
   [ZEND_ZTS=$enableval],
   [ZEND_ZTS=no])
 
-AC_ARG_ENABLE([inline-optimization],
-  [AS_HELP_STRING([--disable-inline-optimization],
-    [If building zend_execute.lo fails, try this switch])],
-  [ZEND_INLINE_OPTIMIZATION=$enableval],
-  [ZEND_INLINE_OPTIMIZATION=yes])
-
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_ZTS)
-
-AC_MSG_CHECKING(whether to enable inline optimization for GCC)
-AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
@@ -221,7 +212,10 @@ else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
-test -n "$GCC" && CFLAGS="$CFLAGS -Wall -Wno-strict-aliasing"
+test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-strict-aliasing -Wno-implicit-fallthrough -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
+dnl Check if compiler supports -Wno-clobbered (only GCC)
+AX_CHECK_COMPILE_FLAG([-Wno-clobbered], CFLAGS="-Wno-clobbered $CFLAGS", , [-Werror])
+
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 if test "$ZEND_ZTS" = "yes"; then
@@ -229,17 +223,7 @@ if test "$ZEND_ZTS" = "yes"; then
   CFLAGS="$CFLAGS -DZTS"
 fi
 
-changequote({,})
-if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
-  INLINE_CFLAGS=`echo $ac_n "$CFLAGS $ac_c" | sed s/-O[0-9s]*//`
-else
-  INLINE_CFLAGS="$CFLAGS"
-fi
-changequote([,])
-
 AC_C_INLINE
-
-AC_SUBST(INLINE_CFLAGS)
 
 AC_MSG_CHECKING(target system is Darwin)
 if echo "$target" | grep "darwin" > /dev/null; then

@@ -2,8 +2,6 @@
 session rfc1867 sid get 2
 --INI--
 file_uploads=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1024
 session.save_path=
 session.name=PHPSESSID

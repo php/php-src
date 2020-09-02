@@ -7,11 +7,6 @@ function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available i
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_strtoupper(string $sourcestring [, string $encoding]
- * Description: Returns a uppercased version of $sourcestring
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Pass characters from different languages to check that mb_strtoupper is
  * doing a correct case conversion

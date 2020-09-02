@@ -241,10 +241,10 @@ static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
 		array_init(object);
-		return SUCCESS;
 	} else {
-		return object_init(object);
+		object_init(object);
 	}
+	return SUCCESS;
 }
 
 static int php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
@@ -301,7 +301,7 @@ static const php_json_parser_methods default_parser_methods =
 
 PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 		zval *return_value,
-		char *str,
+		const char *str,
 		size_t str_len,
 		int options,
 		int max_depth,
@@ -317,7 +317,7 @@ PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 
 PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 		zval *return_value,
-		char *str,
+		const char *str,
 		size_t str_len,
 		int options,
 		int max_depth)

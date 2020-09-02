@@ -10,11 +10,35 @@ if (!function_exists('ftok')){ print 'skip'; }
 
 $key = ftok(__FILE__, 't');
 
-var_dump(shm_attach(-1, 0));
-var_dump(shm_attach(0, -1));
-var_dump(shm_attach(123, -1));
-var_dump(shm_attach($key, -1));
-var_dump(shm_attach($key, 0));
+try {
+    shm_attach(-1, 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    shm_attach(0, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    shm_attach(123, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    shm_attach($key, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    shm_attach($key, 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 var_dump($s = shm_attach($key, 1024));
 shm_remove($s);
@@ -31,23 +55,19 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
-bool(false)
-
-Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
-bool(false)
-
-Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
-bool(false)
-
-Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
-bool(false)
-
-Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
-bool(false)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
+shm_attach(): Argument #2 ($memsize) must be greater than 0
+shm_attach(): Argument #2 ($memsize) must be greater than 0
+shm_attach(): Argument #2 ($memsize) must be greater than 0
+shm_attach(): Argument #2 ($memsize) must be greater than 0
+shm_attach(): Argument #2 ($memsize) must be greater than 0
+object(SysvSharedMemory)#%d (0) {
+}
+object(SysvSharedMemory)#%d (0) {
+}
+object(SysvSharedMemory)#%d (0) {
+}
+object(SysvSharedMemory)#%d (0) {
+}
+object(SysvSharedMemory)#%d (0) {
+}
 Done

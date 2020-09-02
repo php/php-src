@@ -34,15 +34,15 @@ extern zend_module_entry dom_module_entry;
 #include <libxml/xinclude.h>
 #include <libxml/hash.h>
 #include <libxml/c14n.h>
-#if defined(LIBXML_HTML_ENABLED)
+#ifdef LIBXML_HTML_ENABLED
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
 #endif
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #endif
-#if defined(LIBXML_XPTR_ENABLED)
+#ifdef LIBXML_XPTR_ENABLED
 #include <libxml/xpointer.h>
 #endif
 #ifdef PHP_WIN32
@@ -93,13 +93,13 @@ typedef struct {
 	HashPosition pos;
 } php_dom_iterator;
 
-#include "dom_fe.h"
+#include "domexception.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 zend_object *dom_objects_new(zend_class_entry *class_type);
 zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type);
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type);
 #endif
 int dom_get_strict_error(php_libxml_ref_obj *document);
@@ -140,8 +140,8 @@ entry = zend_register_internal_class_ex(&ce, parent_ce);
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
-  		RETURN_NULL();\
+		zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
+		RETURN_THROWS();\
   	} \
 }
 

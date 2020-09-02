@@ -25,7 +25,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cahce_slot, zval *rv)
+static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -177,7 +177,7 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	}
 }
 
-static zval *com_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot)
+static zval *com_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
 {
 	return NULL;
 }
@@ -224,10 +224,10 @@ static HashTable *com_properties_get(zend_object *object)
 	 * infinite recursion when the hash is displayed via var_dump().
 	 * Perhaps it is best to leave it un-implemented.
 	 */
-	return &zend_empty_array;
+	return (HashTable *) &zend_empty_array;
 }
 
-static HashTable *com_get_gc(zval *object, zval **table, int *n)
+static HashTable *com_get_gc(zend_object *object, zval **table, int *n)
 {
 	*table = NULL;
 	*n = 0;
@@ -387,38 +387,6 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 	return NULL;
 }
 
-static zend_function *com_constructor_get(zend_object *object)
-{
-	php_com_dotnet_object *obj = (php_com_dotnet_object *) object;
-	static zend_internal_function c, d, v;
-
-#define POPULATE_CTOR(f, fn)	\
-	f.type = ZEND_INTERNAL_FUNCTION; \
-	f.function_name = obj->ce->name; \
-	f.scope = obj->ce; \
-	f.arg_info = NULL; \
-	f.num_args = 0; \
-	f.fn_flags = 0; \
-	f.handler = ZEND_FN(fn); \
-	return (zend_function*)&f;
-
-	switch (obj->ce->name->val[0]) {
-#if HAVE_MSCOREE_H
-		case 'd':
-			POPULATE_CTOR(d, com_dotnet_create_instance);
-#endif
-
-		case 'c':
-			POPULATE_CTOR(c, com_create_instance);
-
-		case 'v':
-			POPULATE_CTOR(v, com_variant_create_instance);
-
-		default:
-			return NULL;
-	}
-}
-
 static zend_string* com_class_name_get(const zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
@@ -553,7 +521,7 @@ zend_object_handlers php_com_object_handlers = {
 	com_dimension_delete,
 	com_properties_get,
 	com_method_get,
-	com_constructor_get,
+	zend_std_get_constructor,
 	com_class_name_get,
 	com_object_cast,
 	com_object_count,

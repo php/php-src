@@ -19,6 +19,7 @@ var_dump(empty("string"));
 var_dump(empty(""));
 var_dump(empty(true));
 var_dump(empty(false));
+?>
 --EXPECT--
 bool(true)
 bool(false)

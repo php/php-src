@@ -1,7 +1,5 @@
 --TEST--
 Bug #54058 (json_last_error() invalid UTF-8 produces wrong error)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 

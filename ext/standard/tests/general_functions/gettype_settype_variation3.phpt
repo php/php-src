@@ -6,13 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
-
-   Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type
-*/
-
 /* Test usage variation of gettype() and settype() functions:
          settype() to float/double type.
    Set type of the data to "float"/"double" and verify using gettype

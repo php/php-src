@@ -65,37 +65,37 @@ try {
 ?>
 --EXPECTF--
 Wrong type of argument (bool):
-ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name in %s:%d
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be a valid method name in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('1')
 #1 {main}
 Wrong type of argument (int):
-ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name in %s:%d
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be a valid method name in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('3')
 #1 {main}
 Wrong type of argument (bool, string):
-ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be of type object|string, bool given in %s:%d
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be of type object|string, bool given in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct(true, 'foo')
 #1 {main}
 Wrong type of argument (string, bool):
-ReflectionException: Method TestClass::1() does not exist in %s
+ReflectionException: Method TestClass::1() does not exist in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass', '1')
 #1 {main}
 No method given:
-ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name in %s:%d
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be a valid method name in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass')
 #1 {main}
 Class and Method in same string, bad method name:
-ReflectionException: Method TestClass::foop::dedoop() does not exist in %s
+ReflectionException: Method TestClass::foop::dedoop() does not exist in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass::foop...')
 #1 {main}
 Class and Method in same string, bad class name:
-ReflectionException: Class TestCla does not exist in %s
+ReflectionException: Class "TestCla" does not exist in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestCla::foo')
 #1 {main}

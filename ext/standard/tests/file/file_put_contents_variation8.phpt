@@ -11,12 +11,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 obscure_filename
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
 $dir = __DIR__ . '/file_put_contents_variation8';
@@ -42,19 +36,18 @@ $names_arr = array(
 );
 
 for( $i=0; $i<count($names_arr); $i++ ) {
-  echo "-- Iteration $i --\n";
-  try {
-    $res = file_put_contents($names_arr[$i], "Some data");
-    if ($res !== false && $res != null) {
-       echo "$res bytes written to: $names_arr[$i]\n";
-       unlink($names_arr[$i]);
+    echo "-- Iteration $i --\n";
+    try {
+        $res = file_put_contents($names_arr[$i], "Some data");
+        if ($res !== false && $res != null) {
+            echo "$res bytes written to: '$names_arr[$i]'\n";
+            unlink($names_arr[$i]);
+        } else {
+            echo "Failed to write data to: '$names_arr[$i]'\n";
+        }
+    } catch (\TypeError|\ValueError $e) {
+        echo get_class($e) . ': ' . $e->getMessage(), "\n";
     }
-    else {
-       echo "Failed to write data to: $names_arr[$i]\n";
-    }
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-  }
 }
 rmdir($dir);
 
@@ -63,34 +56,28 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
 -- Iteration 0 --
-9 bytes written to: -1
+9 bytes written to: '-1'
 -- Iteration 1 --
-9 bytes written to: 1
+9 bytes written to: '1'
 -- Iteration 2 --
-
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
-Failed to write data to: 
+ValueError: Path cannot be empty
 -- Iteration 3 --
-
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
-Failed to write data to: 
+ValueError: Path cannot be empty
 -- Iteration 4 --
-
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
-Failed to write data to: 
+ValueError: Path cannot be empty
 -- Iteration 5 --
-9 bytes written to:  
+9 bytes written to: ' '
 -- Iteration 6 --
-file_put_contents(): Argument #1 ($filename) must be a valid path, string given
+TypeError: file_put_contents(): Argument #1 ($filename) must be a valid path, string given
 -- Iteration 7 --
-file_put_contents(): Argument #1 ($filename) must be a valid path, array given
+TypeError: file_put_contents(): Argument #1 ($filename) must be a valid path, array given
 -- Iteration 8 --
 
 Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d
-Failed to write data to: %sir
+Failed to write data to: '%sir'
 -- Iteration 9 --
 
 Warning: file_put_contents(%sphp): Failed to open stream: %s in %s on line %d
-Failed to write data to: %sphp
+Failed to write data to: '%sphp'
 
 *** Done ***

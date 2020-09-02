@@ -69,12 +69,13 @@ jobs:
             CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'
         runTestsParameters: --asan
-        timeoutInMinutes: 150
+        timeoutInMinutes: 310
     - template: azure/msan_job.yml
       parameters:
         configurationName: DEBUG_ZTS_MSAN
         configurationParameters: '--enable-debug --enable-zts'
         runTestsParameters: --asan
+        timeoutInMinutes: 90
     - template: azure/community_job.yml
       parameters:
         configurationName: COMMUNITY
@@ -87,3 +88,7 @@ jobs:
         configurationName: COVERAGE_DEBUG_ZTS
         configurationParameters: '--enable-debug --disable-zts'
         timeoutInMinutes: 90
+    - template: azure/file_cache_job.yml
+      parameters:
+        configurationName: DEBUG_NTS_FILE_CACHE
+        configurationParameters: '--enable-debug --disable-zts'

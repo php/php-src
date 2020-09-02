@@ -28,5 +28,6 @@ $handle=curl_init('http://www.example.com');
 curl_setopt($handle, CURLOPT_STDERR, $s);
 
 echo "Done.";
+?>
 --EXPECT--
 Done.

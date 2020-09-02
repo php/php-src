@@ -2,11 +2,6 @@
 Test usort() function : usage variations - Anonymous comparison function
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass an anonymous comparison function as $cmp_function argument to test behaviour()
  */
@@ -37,7 +32,7 @@ echo "\n-- Anonymous 'cmp_function' with parameters passed by reference --\n";
 var_dump( usort($array_arg, $cmp_function) );
 var_dump($array_arg);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing usort() : usage variation ***
 
 -- Anonymous 'cmp_function' with parameters passed by value --
@@ -56,6 +51,22 @@ array(5) {
 }
 
 -- Anonymous 'cmp_function' with parameters passed by reference --
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
 bool(true)
 array(4) {
   [0]=>

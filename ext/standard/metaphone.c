@@ -19,12 +19,10 @@
 */
 
 #include "php.h"
-#include "php_metaphone.h"
 
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
 
-/* {{{ proto string|false metaphone(string text[, int phones])
-   Break english phrases down into their phonemes */
+/* {{{ Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
 	zend_string *str;
@@ -161,8 +159,7 @@ static char Lookahead(char *word, int how_far)
 /* Note is a letter is a 'break' in the word */
 #define Isbreak(c)  (!isalpha(c))
 
-/* {{{ metaphone
- */
+/* {{{ metaphone */
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */

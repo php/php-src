@@ -15,6 +15,7 @@ var_dump($t->transliterate(""));
 echo $t->getErrorMessage(), "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Warning: Transliterator::transliterate(): String conversion of string to UTF-16 failed in %s on line %d
 bool(false)

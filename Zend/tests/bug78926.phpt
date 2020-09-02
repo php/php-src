@@ -18,5 +18,5 @@ var_dump(class_exists('B', false));
 
 ?>
 --EXPECT--
-Class 'A' not found
+Class "A" not found
 bool(false)

@@ -10,7 +10,11 @@ gmp_setbit($n, 10, -1);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
-var_dump(gmp_setbit($n, -20, 0));
+try {
+    gmp_setbit($n, -20, 0);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
@@ -46,11 +50,9 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "-1"
-
-Warning: gmp_setbit(): Index must be greater than or equal to zero in %s on line %d
-bool(false)
+gmp_setbit(): Argument #2 ($index) must be greater than or equal to 0
 string(1) "5"
 string(1) "1"
 string(1) "7"

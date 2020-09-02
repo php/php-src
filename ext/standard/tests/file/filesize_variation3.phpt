@@ -2,12 +2,6 @@
 Test filesize() function: usage variations - file size after truncate
 --FILE--
 <?php
-/*
- Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE
-   (and generates an error of level E_WARNING) in case of an error.
-*/
-
 $file_path = __DIR__;
 
 echo "*** Testing filesize(): usage variations ***\n";
@@ -63,5 +57,5 @@ bool(true)
 int(1200)
 bool(true)
 int(0)
-Negative size is not supported
+ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)

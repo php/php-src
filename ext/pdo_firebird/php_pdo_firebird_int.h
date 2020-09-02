@@ -37,13 +37,8 @@
 # define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else
-# ifdef PHP_WIN32
-#  define LL_MASK "I64"
-#  define LL_LIT(lit) lit ## I64
-# else
-#  define LL_MASK "ll"
-#  define LL_LIT(lit) lit ## LL
-# endif
+# define LL_MASK "ll"
+# define LL_LIT(lit) lit ## LL
 #endif
 
 /* Firebird API has a couple of missing const decls in its API */

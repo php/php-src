@@ -25,6 +25,7 @@ foreach ($tzs as $tz => $regions) {
     }
   }
 }
+?>
 --EXPECT--
 ** Gnomeregan
 bool(false)

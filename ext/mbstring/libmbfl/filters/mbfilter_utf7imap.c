@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
 
@@ -40,7 +36,7 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	NULL,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE,
+	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf7imap_wchar,
 	&vtbl_wchar_utf7imap
 };

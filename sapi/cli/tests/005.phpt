@@ -16,7 +16,7 @@ var_dump(`"$php" -n --rc exception`);
 echo "Done\n";
 ?>
 --EXPECT--
-string(40) "Exception: Class unknown does not exist
+string(42) "Exception: Class "unknown" does not exist
 "
 string(183) "Class [ <internal:Core> class stdClass ] {
 
@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
+string(2177) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
 
   - Constants [0] {
   }
@@ -49,13 +49,13 @@ string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stri
   }
 
   - Properties [7] {
-    Property [ <default> protected $message ]
-    Property [ <default> private $string ]
-    Property [ <default> protected $code ]
-    Property [ <default> protected $file ]
-    Property [ <default> protected $line ]
-    Property [ <default> private $trace ]
-    Property [ <default> private $previous ]
+    Property [ protected $message = '' ]
+    Property [ private $string = '' ]
+    Property [ protected $code = 0 ]
+    Property [ protected $file = NULL ]
+    Property [ protected $line = NULL ]
+    Property [ private array $trace = Array ]
+    Property [ private ?Throwable $previous = NULL ]
   }
 
   - Methods [11] {
@@ -68,9 +68,9 @@ string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stri
     Method [ <internal:Core, ctor> public method __construct ] {
 
       - Parameters [3] {
-        Parameter #0 [ <optional> string $message ]
-        Parameter #1 [ <optional> int $code ]
-        Parameter #2 [ <optional> ?Throwable $previous ]
+        Parameter #0 [ <optional> string $message = <default> ]
+        Parameter #1 [ <optional> int $code = 0 ]
+        Parameter #2 [ <optional> ?Throwable $previous = null ]
       }
     }
 
@@ -84,6 +84,7 @@ string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stri
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getCode ] {
@@ -96,30 +97,35 @@ string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stri
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getLine ] {
 
       - Parameters [0] {
       }
+      - Return [ int ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getTrace ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getPrevious ] {
 
       - Parameters [0] {
       }
+      - Return [ ?Throwable ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getTraceAsString ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Core, prototype Stringable> public method __toString ] {

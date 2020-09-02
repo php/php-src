@@ -26,13 +26,7 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ pdo_firebird_deps
- */
+/* {{{ pdo_firebird_deps */
 static const zend_module_dep pdo_firebird_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
@@ -43,7 +37,7 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_firebird_deps,
 	"PDO_Firebird",
-	pdo_firebird_functions,
+	NULL,
 	PHP_MINIT(pdo_firebird),
 	PHP_MSHUTDOWN(pdo_firebird),
 	NULL,

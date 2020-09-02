@@ -103,7 +103,7 @@ Snippet no. 5:
 Interactive shell
 
 
-Parse error: syntax error, unexpected ')' in php shell code on line 1
+Parse error: Unmatched ')' in php shell code on line 1
 
 
 Done

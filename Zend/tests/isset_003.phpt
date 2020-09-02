@@ -29,13 +29,13 @@ bool(true)
 bool(false)
 bool(false)
 
-Warning: Undefined variable: c in %s on line %d
+Warning: Undefined variable $c in %s on line %d
 
-Warning: Undefined variable: d in %s on line %d
+Warning: Undefined variable $d in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
-Warning: Trying to get property '' of non-object in %s on line %d
+Warning: Attempt to read property "" on string in %s on line %d
 bool(false)
 bool(true)
 bool(false)

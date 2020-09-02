@@ -599,9 +599,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_message)
 }
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-/* {{{ proto string IntlTimeZone::getWindowsID(string $timezone)
-       proto string intltz_get_windows_id(string $timezone)
-Translate a system timezone (e.g. "America/Los_Angeles" into a
+/* {{{ Translate a system timezone (e.g. "America/Los_Angeles" into a
 Windows Timezone (e.g. "Pacific Standard Time")
  */
 U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
@@ -637,9 +635,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 }
 /* }}} */
 
-/* {{{ proto string IntlTimeZone::getIDForWindowsID(string $timezone[, string $region = NULL])
-       proto string intltz_get_id_for_windows_id(string $timezone[, string $region = NULL])
-Translate a windows timezone (e.g. "Pacific Time Zone" into a
+/* {{{ Translate a windows timezone (e.g. "Pacific Time Zone" into a
 System Timezone (e.g. "America/Los_Angeles")
  */
 U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
@@ -648,7 +644,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	UnicodeString uWinID, uID;
 	UErrorCode error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &winID, &region) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S!", &winID, &region) == FAILURE) {
 		RETURN_THROWS();
 	}
 

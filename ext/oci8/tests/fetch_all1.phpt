@@ -30,14 +30,6 @@ if (!oci_execute($s)) {
 var_dump(oci_fetch_all($s, $all));
 var_dump($all);
 
-/* ocifetchstatement */
-if (!oci_execute($s)) {
-    die("oci_execute(select) failed!\n");
-}
-
-var_dump(ocifetchstatement($s, $all));
-var_dump($all);
-
 // Cleanup
 
 $stmtarray = array(
@@ -49,27 +41,6 @@ oci8_test_sql_execute($c, $stmtarray);
 echo "Done\n";
 ?>
 --EXPECT--
-int(3)
-array(2) {
-  ["ID"]=>
-  array(3) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
-    [2]=>
-    string(1) "1"
-  }
-  ["VALUE"]=>
-  array(3) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
-    [2]=>
-    string(1) "1"
-  }
-}
 int(3)
 array(2) {
   ["ID"]=>

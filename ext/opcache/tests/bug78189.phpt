@@ -10,6 +10,7 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.file_cache="{TMP}"
 opcache.file_cache_only=1
+opcache.jit=0
 --FILE--
 <?php
 $tmpdir = sys_get_temp_dir();

@@ -20,12 +20,6 @@ url_rewriter.hosts=
 
 ob_start();
 
-/*
- * Prototype : session.use_trans_sid=1
- * Description : Test basic functionality.
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing basic session functionality : variation3 use_trans_sid ***\n";
 
 /*

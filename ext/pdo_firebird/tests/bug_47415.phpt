@@ -6,6 +6,7 @@ Bug #47415 PDO_Firebird segfaults when passing lowercased column name to bindCol
 <?php
 require 'testdb.inc';
 
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 @$dbh->exec('DROP TABLE testz');
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 

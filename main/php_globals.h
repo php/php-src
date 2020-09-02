@@ -65,7 +65,7 @@ struct _php_core_globals {
 	zend_long memory_limit;
 	zend_long max_input_time;
 
-	zend_bool display_errors;
+	zend_uchar display_errors;
 	zend_bool display_startup_errors;
 	zend_bool log_errors;
 	zend_long      log_errors_max_len;
@@ -133,13 +133,12 @@ struct _php_core_globals {
 	zend_bool report_zend_debug;
 
 	int last_error_type;
-	char *last_error_message;
+	zend_string *last_error_message;
 	char *last_error_file;
 	int  last_error_lineno;
 
 	char *php_sys_temp_dir;
 
-	char *disable_functions;
 	char *disable_classes;
 	zend_bool allow_url_include;
 #ifdef PHP_WIN32

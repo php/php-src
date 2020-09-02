@@ -23,7 +23,7 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
-#include "basic_functions_arginfo.h"
+#include "dir_arginfo.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -87,13 +87,6 @@ static zend_class_entry *dir_class_entry_ptr;
 		} \
 	}
 
-static const zend_function_entry php_dir_class_functions[] = {
-	PHP_FALIAS(close,	closedir,		arginfo_class_Directory_close)
-	PHP_FALIAS(rewind,	rewinddir,		arginfo_class_Directory_rewind)
-	PHP_FALIAS(read,	readdir,		arginfo_class_Directory_read)
-	PHP_FE_END
-};
-
 
 static void php_set_default_dir(zend_resource *res)
 {
@@ -119,7 +112,7 @@ PHP_MINIT_FUNCTION(dir)
 	static char dirsep_str[2], pathsep_str[2];
 	zend_class_entry dir_class_entry;
 
-	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
+	INIT_CLASS_ENTRY(dir_class_entry, "Directory", class_Directory_methods);
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
 
 #ifdef ZTS
@@ -234,24 +227,21 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 }
 /* }}} */
 
-/* {{{ proto resource|false opendir(string path[, resource context])
-   Open a directory and return a dir_handle */
+/* {{{ Open a directory and return a dir_handle */
 PHP_FUNCTION(opendir)
 {
 	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto object|false dir(string directory[, resource context])
-   Directory class with properties, handle and class and methods read, rewind and close */
+/* {{{ Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdir)
 {
 	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool closedir([resource dir_handle])
-   Close directory connection identified by the dir_handle */
+/* {{{ Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
 	zval *id = NULL, *tmp, *myself;
@@ -261,7 +251,7 @@ PHP_FUNCTION(closedir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
+		zend_argument_type_error(1, "must be a valid Directory resource");
 		RETURN_THROWS();
 	}
 
@@ -275,8 +265,7 @@ PHP_FUNCTION(closedir)
 /* }}} */
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
-/* {{{ proto bool chroot(string directory)
-   Change root directory */
+/* {{{ Change root directory */
 PHP_FUNCTION(chroot)
 {
 	char *str;
@@ -307,8 +296,7 @@ PHP_FUNCTION(chroot)
 /* }}} */
 #endif
 
-/* {{{ proto bool chdir(string directory)
-   Change the current directory */
+/* {{{ Change the current directory */
 PHP_FUNCTION(chdir)
 {
 	char *str;
@@ -342,8 +330,7 @@ PHP_FUNCTION(chdir)
 }
 /* }}} */
 
-/* {{{ proto mixed getcwd(void)
-   Gets the current directory */
+/* {{{ Gets the current directory */
 PHP_FUNCTION(getcwd)
 {
 	char path[MAXPATHLEN];
@@ -365,8 +352,7 @@ PHP_FUNCTION(getcwd)
 }
 /* }}} */
 
-/* {{{ proto void rewinddir([resource dir_handle])
-   Rewind dir_handle back to the start */
+/* {{{ Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
 {
 	zval *id = NULL, *tmp, *myself;
@@ -375,7 +361,7 @@ PHP_FUNCTION(rewinddir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
+		zend_argument_type_error(1, "must be a valid Directory resource");
 		RETURN_THROWS();
 	}
 
@@ -383,8 +369,7 @@ PHP_FUNCTION(rewinddir)
 }
 /* }}} */
 
-/* {{{ proto string|false readdir([resource dir_handle])
-   Read directory entry from dir_handle */
+/* {{{ Read directory entry from dir_handle */
 PHP_FUNCTION(readdir)
 {
 	zval *id = NULL, *tmp, *myself;
@@ -394,7 +379,7 @@ PHP_FUNCTION(readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
+		zend_argument_type_error(1, "must be a valid Directory resource");
 		RETURN_THROWS();
 	}
 
@@ -406,8 +391,7 @@ PHP_FUNCTION(readdir)
 /* }}} */
 
 #ifdef HAVE_GLOB
-/* {{{ proto array|false glob(string pattern [, int flags])
-   Find pathnames matching a pattern */
+/* {{{ Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
 	size_t cwd_skip = 0;
@@ -539,8 +523,7 @@ no_results:
 /* }}} */
 #endif
 
-/* {{{ proto array|false scandir(string dir [, int sorting_order [, resource context]])
-   List files & directories inside the specified path */
+/* {{{ List files & directories inside the specified path */
 PHP_FUNCTION(scandir)
 {
 	char *dirn;
@@ -559,7 +542,7 @@ PHP_FUNCTION(scandir)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
-		zend_value_error("Directory name cannot be empty");
+		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 

@@ -92,7 +92,7 @@ enum {
 	DW_REG_8, DW_REG_9, DW_REG_10, DW_REG_11,
 	DW_REG_12, DW_REG_13, DW_REG_14, DW_REG_15,
 	DW_REG_RA,
-    /* TODO: ARM supports? */
+	/* TODO: ARM supports? */
 #else
 #error "Unsupported target architecture"
 #endif
@@ -144,6 +144,8 @@ static const zend_elf_header zend_elfhdr_template = {
 	.eosabi      = 9,
 #elif defined(__OpenBSD__)
 	.eosabi      = 12,
+#elif defined(__NetBSD__)
+	.eosabi      = 2,
 #elif defined(__DragonFly__)
 	.eosabi      = 0,
 #elif (defined(__sun__) && defined(__svr4__))
@@ -290,48 +292,48 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 #define DSTR(str)   (ctx->p = p, zend_gdbjit_strz(ctx, (str)), p = ctx->p)
 #define DALIGNNOP(s)    while ((uintptr_t)p & ((s)-1)) *p++ = DW_CFA_nop
 #define DSECT(name, stmt) \
-	  { uint32_t *szp_##name = (uint32_t *)p; p += 4; stmt \
-        *szp_##name = (uint32_t)((p-(uint8_t *)szp_##name)-4); }
+	{ uint32_t *szp_##name = (uint32_t *)p; p += 4; stmt \
+		*szp_##name = (uint32_t)((p-(uint8_t *)szp_##name)-4); }
 
 static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
 {
-  uint8_t *p = ctx->p;
-  uint8_t *framep = p;
+	uint8_t *p = ctx->p;
+	uint8_t *framep = p;
 
-  /* DWARF EH CIE (Common Information Entry) */
-  DSECT(CIE,
-    DU32(0);			                           /* CIE ID. */
-    DB(DW_CIE_VERSION);                            /* Version */
-    DSTR("zR");			                           /* Augmentation String. */
-    DUV(1);			                               /* Code alignment factor. */
-    DSV(-(int32_t)sizeof(uintptr_t));              /* Data alignment factor. */
-    DB(DW_REG_RA);		                           /* Return address register. */
-    DB(1); DB(DW_EH_PE_textrel|DW_EH_PE_udata4);   /* Augmentation data. */
-    DB(DW_CFA_def_cfa); DUV(DW_REG_SP); DUV(sizeof(uintptr_t));
-    DB(DW_CFA_offset|DW_REG_RA); DUV(1);
-    DALIGNNOP(sizeof(uintptr_t));
-  )
+	/* DWARF EH CIE (Common Information Entry) */
+	DSECT(CIE,
+		DU32(0);                                       /* CIE ID. */
+		DB(DW_CIE_VERSION);                            /* Version */
+		DSTR("zR");                                    /* Augmentation String. */
+		DUV(1);                                        /* Code alignment factor. */
+		DSV(-(int32_t)sizeof(uintptr_t));              /* Data alignment factor. */
+		DB(DW_REG_RA);                                 /* Return address register. */
+		DB(1); DB(DW_EH_PE_textrel|DW_EH_PE_udata4);   /* Augmentation data. */
+		DB(DW_CFA_def_cfa); DUV(DW_REG_SP); DUV(sizeof(uintptr_t));
+		DB(DW_CFA_offset|DW_REG_RA); DUV(1);
+		DALIGNNOP(sizeof(uintptr_t));
+	)
 
-  /* DWARF EH FDE (Frame Description Entry). */
-  DSECT(FDE,
-    DU32((uint32_t)(p-framep));	/* Offset to CIE Pointer. */
-    DU32(0);                    /* Machine code offset relative to .text. */
-    DU32(ctx->szmcode);		    /* Machine code length. */
-    DB(0);			            /* Augmentation data. */
-    DB(DW_CFA_def_cfa_offset); DUV(sizeof(uintptr_t));
+	/* DWARF EH FDE (Frame Description Entry). */
+	DSECT(FDE,
+		DU32((uint32_t)(p-framep)); /* Offset to CIE Pointer. */
+		DU32(0);                    /* Machine code offset relative to .text. */
+		DU32(ctx->szmcode);         /* Machine code length. */
+		DB(0);                      /* Augmentation data. */
+		DB(DW_CFA_def_cfa_offset); DUV(sizeof(uintptr_t));
 #if defined(__i386__)
-    DB(DW_CFA_advance_loc|3);            /* sub $0xc,%esp */
-    DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
+		DB(DW_CFA_advance_loc|3);            /* sub $0xc,%esp */
+		DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
 #elif defined(__x86_64__)
-    DB(DW_CFA_advance_loc|4);            /* sub $0x8,%rsp */
-    DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
+		DB(DW_CFA_advance_loc|4);            /* sub $0x8,%rsp */
+		DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
 #else
 # error "Unsupported target architecture"
 #endif
-    DALIGNNOP(sizeof(uintptr_t));
-  )
+		DALIGNNOP(sizeof(uintptr_t));
+	)
 
-  ctx->p = p;
+	ctx->p = p;
 }
 
 static void zend_gdbjit_debuginfo(zend_gdbjit_ctx *ctx)
@@ -485,7 +487,7 @@ static void zend_jit_gdb_init(void)
 	/* This might enable registration of all JIT-ed code, but unfortunately,
 	 * in case of many functions, this takes enormous time. */
 	if (zend_gdb_present()) {
-		ZCG(accel_directives).jit_debug |= ZEND_JIT_DEBUG_GDB;
+		JIT_G(debug) |= ZEND_JIT_DEBUG_GDB;
 	}
 #endif
 }

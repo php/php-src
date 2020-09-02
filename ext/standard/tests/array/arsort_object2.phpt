@@ -2,12 +2,6 @@
 Test arsort() function : object functionality - sorting objects with diff. accessibility of member vars
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing arsort() by providing integer/string object arrays with following flag values
  * 1. Default flag value

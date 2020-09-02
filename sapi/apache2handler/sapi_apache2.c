@@ -19,6 +19,12 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "php_main.h"
 #include "php_ini.h"
 #include "php_variables.h"
@@ -237,7 +243,7 @@ php_apache_sapi_read_cookies(void)
 }
 
 static char *
-php_apache_sapi_getenv(char *name, size_t name_len)
+php_apache_sapi_getenv(const char *name, size_t name_len)
 {
 	php_struct *ctx = SG(server_context);
 	const char *env_var;
@@ -299,7 +305,7 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
+static void php_apache_sapi_log_message(const char *msg, int syslog_type_int)
 {
 	php_struct *ctx;
 	int aplog_type = APLOG_ERR;
@@ -348,7 +354,7 @@ static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
 	}
 }
 
-static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
+static void php_apache_sapi_log_message_ex(const char *msg, request_rec *r)
 {
 	if (r) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, msg, r->filename);
@@ -360,7 +366,7 @@ static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
 static double php_apache_sapi_get_request_time(void)
 {
 	php_struct *ctx = SG(server_context);
-	return ((double) apr_time_as_msec(ctx->r->request_time)) / 1000.0;
+	return ((double) ctx->r->request_time) / 1000000.0;
 }
 
 extern zend_module_entry php_apache_module;

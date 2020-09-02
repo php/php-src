@@ -19,6 +19,7 @@ try {
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
+?>
 --EXPECTF--
 NULL
 int(3)

@@ -3,7 +3,6 @@ Test wrong number of arguments and wrong arg types for ob_start()
 --FILE--
 <?php
 /*
- * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
 */
 
@@ -23,7 +22,7 @@ var_dump(ob_start(1.5));
 --EXPECTF--
 Arg 1 wrong type
 
-Warning: ob_start(): no array or string given in %s on line 17
+Warning: ob_start(): no array or string given in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 17
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)

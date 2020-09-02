@@ -3,12 +3,6 @@ Test print() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : int print  ( string $arg  )
- * Description: Output a string
- * Source code: n/a, print is a language construct not an extension function
- * Test based on php.net manual example.
-*/
-
 echo "*** Testing print() : basic functionality ***\n";
 
 echo "\n-- Iteration 1 --\n";

@@ -17,7 +17,7 @@ var_dump(filter_var(1, 0, array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(7) {
   [0]=>
   int(1)

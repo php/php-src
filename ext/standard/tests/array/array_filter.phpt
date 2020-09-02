@@ -28,7 +28,7 @@ var_dump(array_filter($array3, "even"));
 var_dump(array_filter(array()));
 
 ?>
---EXPECTF--
+--EXPECT--
 Odd :
 array(3) {
   ["a"]=>

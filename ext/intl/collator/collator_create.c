@@ -19,7 +19,6 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_create.h"
 #include "intl_data.h"
 
 /* {{{ */
@@ -53,9 +52,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto Collator collator_create( string $locale )
- * Create collator.
- */
+/* {{{ Create collator. */
 PHP_FUNCTION( collator_create )
 {
 	object_init_ex( return_value, Collator_ce_ptr );
@@ -66,9 +63,7 @@ PHP_FUNCTION( collator_create )
 }
 /* }}} */
 
-/* {{{ proto Collator::__construct( string $locale )
- * Collator object constructor.
- */
+/* {{{ Collator object constructor. */
 PHP_METHOD( Collator, __construct )
 {
 	zend_error_handling error_handling;

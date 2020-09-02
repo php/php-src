@@ -2,10 +2,6 @@
 Test krsort() function : object functionality - sort objects
 --FILE--
 <?php
-/* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
 /*
  * testing krsort() by providing array of integer/string objects with following flag values:
  *  1.Default flag value

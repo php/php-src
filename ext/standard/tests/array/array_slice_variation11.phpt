@@ -2,11 +2,6 @@
 Test array_slice() function : usage variations - array has holes in buckets
 --FILE--
 <?php
-/* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length
- * Source code: ext/standard/array.c
- */
-
 /*
  * Check that results of array_slice are correct when there are holes in buckets caused by unset()
  */

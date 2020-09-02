@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 3fd1a8c30695df2089655b1785905381734ac1c1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_break_next, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -35,9 +36,38 @@ ZEND_END_ARG_INFO()
 #define arginfo_phpdbg_start_oplog arginfo_phpdbg_break_next
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_end_oplog, 0, 0, IS_ARRAY, 1)
-	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_get_executable, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(phpdbg_break_next);
+ZEND_FUNCTION(phpdbg_break_file);
+ZEND_FUNCTION(phpdbg_break_method);
+ZEND_FUNCTION(phpdbg_break_function);
+ZEND_FUNCTION(phpdbg_color);
+ZEND_FUNCTION(phpdbg_prompt);
+ZEND_FUNCTION(phpdbg_exec);
+ZEND_FUNCTION(phpdbg_clear);
+ZEND_FUNCTION(phpdbg_start_oplog);
+ZEND_FUNCTION(phpdbg_end_oplog);
+ZEND_FUNCTION(phpdbg_get_executable);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(phpdbg_break_next, arginfo_phpdbg_break_next)
+	ZEND_FE(phpdbg_break_file, arginfo_phpdbg_break_file)
+	ZEND_FE(phpdbg_break_method, arginfo_phpdbg_break_method)
+	ZEND_FE(phpdbg_break_function, arginfo_phpdbg_break_function)
+	ZEND_FE(phpdbg_color, arginfo_phpdbg_color)
+	ZEND_FE(phpdbg_prompt, arginfo_phpdbg_prompt)
+	ZEND_FE(phpdbg_exec, arginfo_phpdbg_exec)
+	ZEND_FE(phpdbg_clear, arginfo_phpdbg_clear)
+	ZEND_FE(phpdbg_start_oplog, arginfo_phpdbg_start_oplog)
+	ZEND_FE(phpdbg_end_oplog, arginfo_phpdbg_end_oplog)
+	ZEND_FE(phpdbg_get_executable, arginfo_phpdbg_get_executable)
+	ZEND_FE_END
+};

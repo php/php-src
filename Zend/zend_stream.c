@@ -73,7 +73,7 @@ ZEND_API void zend_stream_init_filename(zend_file_handle *handle, const char *fi
 	handle->filename = filename;
 }
 
-ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle) /* {{{ */
+ZEND_API zend_result zend_stream_open(const char *filename, zend_file_handle *handle) /* {{{ */
 {
 	zend_string *opened_path;
 	if (zend_stream_open_function) {
@@ -113,7 +113,7 @@ static ssize_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t
 	return file_handle->handle.stream.reader(file_handle->handle.stream.handle, buf, len);
 } /* }}} */
 
-ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len) /* {{{ */
+ZEND_API zend_result zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len) /* {{{ */
 {
 	size_t file_size;
 
@@ -232,12 +232,15 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 }
 /* }}} */
 
+/* return int to be compatible with Zend linked list API */
 ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2) /* {{{ */
 {
 	if (fh1->type != fh2->type) {
 		return 0;
 	}
 	switch (fh1->type) {
+		case ZEND_HANDLE_FILENAME:
+			return strcmp(fh1->filename, fh2->filename) == 0;
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp == fh2->handle.fp;
 		case ZEND_HANDLE_STREAM:

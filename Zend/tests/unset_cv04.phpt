@@ -13,4 +13,4 @@ f();
 --EXPECTF--
 ok
 
-Warning: Undefined variable: x in %s on line %d
+Warning: Undefined variable $x in %s on line %d

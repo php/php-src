@@ -24,5 +24,5 @@ $b->chmod(0666);
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
---EXPECTF--
+--EXPECT--
 Phar entry "a" is a temporary directory (not an actual entry in the archive), cannot chmod

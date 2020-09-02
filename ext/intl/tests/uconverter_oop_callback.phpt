@@ -28,6 +28,7 @@ $c = new MyConverter('ascii', 'utf-8');
 foreach(array("regular", "irregul\xC1\xA1r", "\xC2\xA1unsupported!") as $word) {
   $c->convert($word);
 }
+?>
 --EXPECT--
 toUCallback(REASON_RESET, ...)
 toUCallback(REASON_RESET, ...)

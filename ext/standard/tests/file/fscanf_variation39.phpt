@@ -9,11 +9,6 @@ if (PHP_INT_SIZE != 4) {
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan different integer values using different unsigned int format types */
 
 $file_path = __DIR__;

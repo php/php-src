@@ -23,7 +23,5 @@
 
 #include "php_network.h"
 
-PHP_FUNCTION(fsockopen);
-PHP_FUNCTION(pfsockopen);
 
 #endif /* FSOCK_H */

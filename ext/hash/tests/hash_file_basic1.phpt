@@ -3,12 +3,6 @@ Hash: hash_file() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string hash_file ( string algo, string filename [, bool raw_output] )
- * Description: Generate a hash value using the contents of a given file
- * Source code: ext/hash/hash.c
- * Alias to functions:
-*/
-
 echo "*** Testing hash_file() : basic functionality ***\n";
 
 $file = __DIR__ . "hash_file.txt";

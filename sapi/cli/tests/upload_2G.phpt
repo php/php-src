@@ -8,6 +8,10 @@ if (PHP_INT_SIZE < 8) {
 	die("skip need PHP_INT_SIZE>=8");
 }
 
+if (disk_free_space(sys_get_temp_dir()) < 2300000000) {
+	die("skip need more than 2.15G of free disk space for the uploaded file");
+}
+
 if (!file_exists('/proc/meminfo')) {
 	die('skip Cannot check free RAM from /proc/meminfo on this platform');
 }
@@ -46,15 +50,11 @@ include "php_cli_server.inc";
 php_cli_server_start("var_dump(\$_FILES);", null,
     ["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
 $length = 2150000000;
 $output = "";
 
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 $prev = "----123
 Content-Type: text/plain; charset=UTF-8

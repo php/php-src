@@ -25,12 +25,13 @@ $ca = $a->getIncrementor();
 $cas = $a->getStaticIncrementor();
 
 $ca->bindTo($a, array());
+
 $cas->bindTo($a, 'A');
 
 ?>
 --EXPECTF--
 Warning: Array to string conversion in %s on line %d
 
-Warning: Class 'Array' not found in %s on line %d
+Warning: Class "Array" not found in %s on line %d
 
 Warning: Cannot bind an instance to a static closure in %s on line %d

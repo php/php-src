@@ -179,11 +179,7 @@ error:
 }
 /* }}} */
 
-/* {{{ proto IntlDateFormatter IntlDateFormatter::create(string $locale, long date_type, long time_type[, string $timezone_str, long $calendar, string $pattern] )
- * Create formatter. }}} */
-/* {{{ proto IntlDateFormatter datefmt_create(string $locale, long date_type, long time_type[, string $timezone_str, long $calendar, string $pattern)
- * Create formatter.
- */
+/* {{{ Create formatter. */
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
@@ -194,9 +190,7 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
 }
 /* }}} */
 
-/* {{{ proto void IntlDateFormatter::__construct(string $locale, long date_type, long time_type[, string $timezone_str, long $calendar, string $pattern])
- * IntlDateFormatter object constructor.
- */
+/* {{{ IntlDateFormatter object constructor. */
 U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 {
 	zend_error_handling error_handling;

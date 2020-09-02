@@ -58,6 +58,6 @@ Warning: DOMDocument::loadXML(): Failure to process entity file in Entity, line:
 
 Warning: DOMDocument::loadXML(): Entity 'file' not defined in Entity, line: 4 in %s on line %d
 
-Warning: Trying to get property 'firstChild' of non-object in %s on line %d
+Warning: Attempt to read property "firstChild" on null in %s on line %d
 
-Warning: Trying to get property 'nodeValue' of non-object in %s on line %d
+Warning: Attempt to read property "nodeValue" on null in %s on line %d

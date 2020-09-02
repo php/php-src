@@ -20,7 +20,7 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "dom_ce.h"
 
@@ -250,7 +250,8 @@ static const zend_object_iterator_funcs php_dom_iterator_funcs = {
 	php_dom_iterator_current_key,
 	php_dom_iterator_move_forward,
 	NULL,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
@@ -270,8 +271,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	iterator = emalloc(sizeof(php_dom_iterator));
 	zend_iterator_init(&iterator->intern);
 
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_dom_iterator_funcs;
 
 	ZVAL_UNDEF(&iterator->curobj);

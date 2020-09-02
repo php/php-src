@@ -333,7 +333,7 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
         /*
          * OR in the resolution
          */
-        B |= (Resolution - 1) << 5;
+        B |= (Resolution - 1) << 4;
 
         /*
          * OR in the Bits per Pixel

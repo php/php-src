@@ -10,4 +10,4 @@ $var_1->offsetSet(100,new DateTime('2000-01-01'));
 }
 ?>
 --EXPECT--
-Offset invalid or out of range
+SplDoublyLinkedList::offsetSet(): Argument #1 ($index) is out of range

@@ -2,25 +2,12 @@
 Test symlink(), linkinfo(), link() and is_link() functions : error conditions - link & is_link
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows' && PHP_ZTS) {
+    die('xfail different handling of space as filename with ZTS/NTS on Windows');
 }
 ?>
 --FILE--
 <?php
-/* Prototype: bool symlink ( string $target, string $link );
-   Description: creates a symbolic link to the existing target with the specified name link
-
-   Prototype: bool is_link ( string $filename );
-   Description: Tells whether the given file is a symbolic link.
-
-   Prototype: bool link ( string $target, string $link );
-   Description: Create a hard link
-
-   Prototype: int linkinfo ( string $path );
-   Description: Gets information about a link
-*/
-
 // create temp $filename and create link $linkname to it
 $filename = __DIR__."/symlink_link_linkinfo_is_link_error2.tmp";
 $fp = fopen($filename, "w");  // create temp file

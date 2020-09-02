@@ -17,4 +17,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] Gamma values must be positive
+!! [ValueError] imagegammacorrect(): Argument #2 ($inputgamma) must be greater than 0

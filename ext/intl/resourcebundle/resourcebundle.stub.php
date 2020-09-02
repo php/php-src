@@ -1,43 +1,47 @@
 <?php
 
-class ResourceBundle implements Traversable
+/** @generate-function-entries */
+
+class ResourceBundle implements IteratorAggregate, Countable
 {
     public function __construct(?string $locale, ?string $bundlename, bool $fallback = true) {}
 
-    /** @return ResourceBundle|null */
+    /**
+     * @return ResourceBundle|null
+     * @alias resourcebundle_create
+     */
     public static function create(?string $locale, ?string $bundlename, bool $fallback = true) {}
 
     /**
      * @param string|int $index
      * @return mixed
+     * @alias resourcebundle_get
      */
     public function get($index, bool $fallback = true) {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @alias resourcebundle_count
+     */
     public function count() {}
 
-    /** @return array|false */
+    /**
+     * @return array|false
+     * @alias resourcebundle_locales
+     */
     public static function getLocales(string $bundlename) {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @alias resourcebundle_get_error_code
+     */
     public function getErrorCode() {}
 
-    /** @return string */
+    /**
+     * @return string
+     * @alias resourcebundle_get_error_message
+     */
     public function getErrorMessage() {}
+
+    public function getIterator(): Iterator {}
 }
-
-function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallback = true): ?ResourceBundle {}
-
-/**
- * @param string|int $index
- * @return mixed
- */
-function resourcebundle_get(ResourceBundle $bundle, $index) {}
-
-function resourcebundle_count(ResourceBundle $bundle): int {}
-
-function resourcebundle_locales(string $bundlename): array|false {}
-
-function resourcebundle_get_error_code(ResourceBundle $bundle): int {}
-
-function resourcebundle_get_error_message(ResourceBundle $bundle): string {}

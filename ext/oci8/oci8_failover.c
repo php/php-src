@@ -33,7 +33,7 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
-#if HAVE_OCI8
+#ifdef HAVE_OCI8
 
 #include "php_oci8.h"
 #include "php_oci8_int.h"
@@ -69,7 +69,7 @@ sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_even
 		returnValue = (sb4) Z_LVAL(retval);
 	}
 
-	/* Setting params[0] to null so resource isn't destroyed on zval_dtor */
+	/* Setting params[0] to null so resource isn't destroyed on zval_ptr_dtor */
 	ZVAL_NULL(&params[0]);
 
 	/* Cleanup */

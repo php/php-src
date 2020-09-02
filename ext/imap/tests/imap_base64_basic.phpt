@@ -6,11 +6,6 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_base64  ( string $text  )
- * Description: Decode BASE64 encoded text.
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_base64() : basic functionality ***\n";
 
 $str = 'This is an example string to be base 64 encoded';

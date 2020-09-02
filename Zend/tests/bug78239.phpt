@@ -16,7 +16,7 @@ $r = new _ZendTestClass;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ErrorException: Function _ZendTestClass::__toString() is deprecated in %s:%d
+Fatal error: Uncaught ErrorException: Method _ZendTestClass::__toString() is deprecated in %s:%d
 Stack trace:
 #0 %s(%d): handleError(%s)
 #1 {main}

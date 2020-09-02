@@ -3,11 +3,6 @@ Test rtrim() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string rtrim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the end of a string.
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing rtrim() : basic functionality ***\n";
 
 $text  = "---These are a few words---  \t\r\n\0\x0B  ";

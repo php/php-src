@@ -2,11 +2,6 @@
 Test krsort() function : usage variations - sort array with/without key values
 --FILE--
 <?php
-/* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing krsort() by providing arrays  with/without key values for $array argument
  * with following flag values:

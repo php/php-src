@@ -1,7 +1,5 @@
 --TEST--
 Test json_decode() function : basic functionality
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 echo "*** Testing json_decode() : basic functionality ***\n";

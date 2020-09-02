@@ -2,11 +2,6 @@
 Test date() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string date  ( string $format  [, int $timestamp  ] )
- * Description: Format a local time/date.
- * Source code: ext/date/php_date.c
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 

@@ -127,7 +127,8 @@ static const zend_object_iterator_funcs com_iter_funcs = {
 	com_iter_get_data,
 	com_iter_get_key,
 	com_iter_move_forwards,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref)

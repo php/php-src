@@ -35,12 +35,11 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: ascmagic.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
+FILE_RCSID("@(#)$File: ascmagic.c,v 1.107 2020/06/08 19:58:36 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
 #include <string.h>
-#include <memory.h>
 #include <ctype.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
@@ -51,7 +50,7 @@ FILE_RCSID("@(#)$File: ascmagic.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
 #define ISSPC(x) ((x) == ' ' || (x) == '\t' || (x) == '\r' || (x) == '\n' \
 		  || (x) == 0x85 || (x) == '\f')
 
-private unsigned char *encode_utf8(unsigned char *, size_t, unichar *, size_t);
+private unsigned char *encode_utf8(unsigned char *, size_t, unicodechar *, size_t);
 private size_t trim_nuls(const unsigned char *, size_t);
 
 /*
@@ -70,7 +69,7 @@ trim_nuls(const unsigned char *buf, size_t nbytes)
 protected int
 file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 {
-	unichar *ubuf = NULL;
+	unicodechar *ubuf = NULL;
 	size_t ulen = 0;
 	int rv = 1;
 	struct buffer bb;
@@ -103,7 +102,7 @@ file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 
 protected int
 file_ascmagic_with_encoding(struct magic_set *ms,
-    const struct buffer *b, unichar *ubuf, size_t ulen, const char *code,
+    const struct buffer *b, unicodechar *ubuf, size_t ulen, const char *code,
     const char *type, int text)
 {
 	struct buffer bb;
@@ -116,7 +115,6 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 	int need_separator = 0;
 
 	const char *subtype = NULL;
-	const char *subtype_mime = NULL;
 
 	int has_escapes = 0;
 	int has_backspace = 0;
@@ -165,8 +163,11 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 			goto done;
 		}
 	}
-	if ((ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION)))
-		return 0;
+
+	if ((ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION))) {
+		rv = 0;
+		goto done;
+	}
 
 	/* Now try to discover other details about the file. */
 	for (i = 0; i < ulen; i++) {
@@ -222,10 +223,6 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 					goto done;
 				}
 				if (need_separator && file_separator(ms) == -1)
-					goto done;
-			}
-			if (subtype_mime) {
-				if (file_printf(ms, "%s", subtype_mime) == -1)
 					goto done;
 			} else {
 				if (file_printf(ms, "text/plain") == -1)
@@ -338,7 +335,7 @@ done:
  * after end of string, or NULL if an invalid character is found.
  */
 private unsigned char *
-encode_utf8(unsigned char *buf, size_t len, unichar *ubuf, size_t ulen)
+encode_utf8(unsigned char *buf, size_t len, unicodechar *ubuf, size_t ulen)
 {
 	size_t i;
 	unsigned char *end = buf + len;

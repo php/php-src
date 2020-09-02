@@ -10,10 +10,11 @@ function gen($o)
 
 foreach(gen(new stdClass()) as $value)
     echo $value, "\n";
+?>
 --EXPECTF--
 foo
 
-Fatal error: Uncaught Error: Call to undefined method stdClass::fatalError() in %sbug63066.php:5
+Fatal error: Uncaught Error: Call to undefined method stdClass::fatalError() in %s:%d
 Stack trace:
 #0 %s(%d): gen(Object(stdClass))
 #1 {main}

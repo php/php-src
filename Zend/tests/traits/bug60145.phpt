@@ -13,5 +13,6 @@ interface MyInterface {
     public function b();
 
 }
+?>
 --EXPECTF--
 Fatal error: Cannot use traits inside of interfaces. foo is used in MyInterface in %s on line %d

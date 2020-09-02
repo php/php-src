@@ -2,12 +2,6 @@
 Test strtr() function : usage variations - unexpected inputs for 'replace_pairs' argument
 --FILE--
 <?php
-/* Prototype  : string strtr(string $str, string $from[, string $to]);
-                string strtr(string $str, array $replace_pairs);
- * Description: Translates characters in str using given translation tables
- * Source code: ext/standard/string.c
-*/
-
 /* Test strtr() function: with unexpected inputs for 'replace_pairs'
  *  and expected type for 'str' arguments
 */

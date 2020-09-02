@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_qprint.h"
 #include "unicode_prop.h"
@@ -43,7 +39,7 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	"Quoted-Printable",
 	(const char *(*)[])&mbfl_encoding_qprint_aliases,
 	NULL,
-	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
 	NULL
 };

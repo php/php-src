@@ -2,11 +2,6 @@
 Test array_unique() function : usage variations - associative array with different values
 --FILE--
 <?php
-/* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unique() by passing different
  * associative arrays having different values to $input argument.

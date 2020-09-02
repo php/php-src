@@ -18,12 +18,6 @@ if (version_compare(get_zlib_version(), "1.2.11") < 0) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzencode  ( string $data  [, int $level  [, int $encoding_mode  ]] )
- * Description: Gzip-compress a string
- * Source code: ext/zlib/zlib.c
- * Alias to functions:
- */
-
 echo "*** Testing gzencode() : variation ***\n";
 
 $data = "A small string to encode\n";

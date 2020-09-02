@@ -20,14 +20,16 @@ function foo(int $x) {
 }
 ?>
 --EXPECTF--
-$_main: ; (lines=1, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %ssccp_007.php:1-11
-L0 (11):    RETURN int(1)
+$_main:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %ssccp_007.php:1-11
+0000 RETURN int(1)
 
-foo: ; (lines=3, args=1, vars=1, tmps=0)
-    ; (after optimizer)
-    ; %ssccp_007.php:2-9
-L0 (2):     CV0($x) = RECV 1
-L1 (8):     ECHO string("0")
-L2 (9):     RETURN null
+foo:
+     ; (lines=3, args=1, vars=1, tmps=0)
+     ; (after optimizer)
+     ; %ssccp_007.php:2-9
+0000 CV0($x) = RECV 1
+0001 ECHO string("0")
+0002 RETURN null

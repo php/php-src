@@ -55,7 +55,7 @@ PHP_FUNCTION(pcntl_strerror);
 PHP_FUNCTION(pcntl_sigprocmask);
 #endif
 #ifdef HAVE_STRUCT_SIGINFO_T
-# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+# if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 PHP_FUNCTION(pcntl_sigwaitinfo);
 PHP_FUNCTION(pcntl_sigtimedwait);
 # endif

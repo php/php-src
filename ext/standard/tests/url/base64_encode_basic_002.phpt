@@ -2,12 +2,6 @@
 Test base64_encode() function : basic functionality - check algorithm round trips
 --FILE--
 <?php
-/* Prototype  : proto string base64_encode(string str)
- * Description: Encodes string using MIME base64 algorithm
- * Source code: ext/standard/base64.c
- * Alias to functions:
- */
-
 /*
  * Test base64_encode with single byte values.
  */

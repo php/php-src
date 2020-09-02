@@ -140,7 +140,8 @@ static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 	resourcebundle_iterator_key,
 	resourcebundle_iterator_step,
 	resourcebundle_iterator_reset,
-	resourcebundle_iterator_invalidate
+	resourcebundle_iterator_invalidate,
+	NULL, /* get_gc */
 };
 /* }}} */
 

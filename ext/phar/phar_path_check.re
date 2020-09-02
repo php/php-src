@@ -35,7 +35,7 @@ phar_path_check_result phar_path_check(char **s, size_t *len, const char **error
 #define YYCURSOR        p
 #define YYLIMIT         p+*len
 #define YYMARKER        m
-#define YYFILL(n)
+#define YYFILL(n)       do {} while (0)
 
 loop:
 /*!re2c

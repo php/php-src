@@ -106,6 +106,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
 		case ZEND_CASE:
+		case ZEND_CASE_STRICT:
 		case ZEND_CAST:
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
@@ -139,6 +140,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
+		case ZEND_JMP_NULL:
 			/* For our purposes a jumps and branches are side effects. */
 			return 1;
 		case ZEND_BEGIN_SILENCE:
@@ -146,6 +148,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ECHO:
 		case ZEND_INCLUDE_OR_EVAL:
 		case ZEND_THROW:
+		case ZEND_MATCH_ERROR:
 		case ZEND_EXT_STMT:
 		case ZEND_EXT_FCALL_BEGIN:
 		case ZEND_EXT_FCALL_END:
@@ -391,7 +394,8 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
 			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)
-				&& opline->opcode != ZEND_CASE) {
+				&& opline->opcode != ZEND_CASE
+				&& opline->opcode != ZEND_CASE_STRICT) {
 				free_var = ssa_op->op1_use;
 				free_var_type = opline->op1_type;
 			}

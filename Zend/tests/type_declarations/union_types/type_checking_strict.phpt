@@ -1,9 +1,5 @@
 --TEST--
 Behavior of union type checks (strict)
---SKIPIF--
-<?php
-if (!extension_loaded('json')) die('skip requires json');
-?>
 --FILE--
 <?php
 
@@ -79,8 +75,8 @@ true             => Argument ... must be of type int|float, bool given
 false            => Argument ... must be of type int|float, bool given
 null             => Argument ... must be of type int|float, null given
 []               => Argument ... must be of type int|float, array given
-new stdClass     => Argument ... must be of type int|float, object given
-new WithToString => Argument ... must be of type int|float, object given
+new stdClass     => Argument ... must be of type int|float, stdClass given
+new WithToString => Argument ... must be of type int|float, WithToString given
 
 Type int|float|false:
 42               => 42
@@ -95,8 +91,8 @@ true             => Argument ... must be of type int|float|false, bool given
 false            => false
 null             => Argument ... must be of type int|float|false, null given
 []               => Argument ... must be of type int|float|false, array given
-new stdClass     => Argument ... must be of type int|float|false, object given
-new WithToString => Argument ... must be of type int|float|false, object given
+new stdClass     => Argument ... must be of type int|float|false, stdClass given
+new WithToString => Argument ... must be of type int|float|false, WithToString given
 
 Type int|float|bool:
 42               => 42
@@ -111,8 +107,8 @@ true             => true
 false            => false
 null             => Argument ... must be of type int|float|bool, null given
 []               => Argument ... must be of type int|float|bool, array given
-new stdClass     => Argument ... must be of type int|float|bool, object given
-new WithToString => Argument ... must be of type int|float|bool, object given
+new stdClass     => Argument ... must be of type int|float|bool, stdClass given
+new WithToString => Argument ... must be of type int|float|bool, WithToString given
 
 Type int|bool:
 42               => 42
@@ -127,8 +123,8 @@ true             => true
 false            => false
 null             => Argument ... must be of type int|bool, null given
 []               => Argument ... must be of type int|bool, array given
-new stdClass     => Argument ... must be of type int|bool, object given
-new WithToString => Argument ... must be of type int|bool, object given
+new stdClass     => Argument ... must be of type int|bool, stdClass given
+new WithToString => Argument ... must be of type int|bool, WithToString given
 
 Type int|string|null:
 42               => 42
@@ -143,8 +139,8 @@ true             => Argument ... must be of type string|int|null, bool given
 false            => Argument ... must be of type string|int|null, bool given
 null             => null
 []               => Argument ... must be of type string|int|null, array given
-new stdClass     => Argument ... must be of type string|int|null, object given
-new WithToString => Argument ... must be of type string|int|null, object given
+new stdClass     => Argument ... must be of type string|int|null, stdClass given
+new WithToString => Argument ... must be of type string|int|null, WithToString given
 
 Type string|bool:
 42               => Argument ... must be of type string|bool, int given
@@ -159,8 +155,8 @@ true             => true
 false            => false
 null             => Argument ... must be of type string|bool, null given
 []               => Argument ... must be of type string|bool, array given
-new stdClass     => Argument ... must be of type string|bool, object given
-new WithToString => Argument ... must be of type string|bool, object given
+new stdClass     => Argument ... must be of type string|bool, stdClass given
+new WithToString => Argument ... must be of type string|bool, WithToString given
 
 Type float|array:
 42               => 42.0
@@ -175,8 +171,8 @@ true             => Argument ... must be of type array|float, bool given
 false            => Argument ... must be of type array|float, bool given
 null             => Argument ... must be of type array|float, null given
 []               => []
-new stdClass     => Argument ... must be of type array|float, object given
-new WithToString => Argument ... must be of type array|float, object given
+new stdClass     => Argument ... must be of type array|float, stdClass given
+new WithToString => Argument ... must be of type array|float, WithToString given
 
 Type string|array:
 42               => Argument ... must be of type array|string, int given
@@ -191,8 +187,8 @@ true             => Argument ... must be of type array|string, bool given
 false            => Argument ... must be of type array|string, bool given
 null             => Argument ... must be of type array|string, null given
 []               => []
-new stdClass     => Argument ... must be of type array|string, object given
-new WithToString => Argument ... must be of type array|string, object given
+new stdClass     => Argument ... must be of type array|string, stdClass given
+new WithToString => Argument ... must be of type array|string, WithToString given
 
 Type bool|array:
 42               => Argument ... must be of type array|bool, int given
@@ -207,5 +203,5 @@ true             => true
 false            => false
 null             => Argument ... must be of type array|bool, null given
 []               => []
-new stdClass     => Argument ... must be of type array|bool, object given
-new WithToString => Argument ... must be of type array|bool, object given
+new stdClass     => Argument ... must be of type array|bool, stdClass given
+new WithToString => Argument ... must be of type array|bool, WithToString given

@@ -22,7 +22,7 @@ foreach ($html->body->span as $obj) {
 Warning: DOMDocument::loadHTML(): error parsing attribute name in Entity, line: 1 in %s on line %d
 
 Warning: DOMDocument::loadHTML(): error parsing attribute name in Entity, line: 1 in %s on line %d
-object(SimpleXMLElement)#5 (3) {
+object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
   array(2) {
     ["title"]=>
@@ -31,29 +31,9 @@ object(SimpleXMLElement)#5 (3) {
     string(0) ""
   }
   [0]=>
-  object(SimpleXMLElement)#4 (2) {
-    ["@attributes"]=>
-    array(2) {
-      ["title"]=>
-      string(0) ""
-      ["y"]=>
-      string(0) ""
-    }
-    [0]=>
-    string(1) "x"
-  }
+  string(1) "x"
   [1]=>
-  object(SimpleXMLElement)#6 (2) {
-    ["@attributes"]=>
-    array(2) {
-      ["title"]=>
-      string(0) ""
-      ["z"]=>
-      string(0) ""
-    }
-    [0]=>
-    string(1) "x"
-  }
+  string(1) "x"
 }
 string(0) ""
 string(0) ""

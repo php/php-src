@@ -7,12 +7,6 @@ Test session_set_cookie_params() function : basic functionality
 
 ob_start();
 
-/*
- * Prototype : void session_set_cookie_params(int $lifetime [, string $path [, string $domain [, bool $secure [, bool $httponly]]]])
- * Description : Set the session cookie parameters
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_cookie_params() : basic functionality ***\n";
 
 var_dump(session_set_cookie_params(3600));
@@ -29,7 +23,7 @@ ob_end_flush();
 bool(true)
 bool(true)
 
-Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 15
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line %d
 bool(false)
 bool(true)
 bool(true)

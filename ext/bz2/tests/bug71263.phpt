@@ -1,11 +1,9 @@
 --TEST--
-Bug #71263: fread() does not detects decoding errors from filter bzip2.decompress
+Bug #71263: fread() does not report bzip2.decompress errors
 --SKIPIF--
 <?php if (!extension_loaded("bz2")) print "skip bz2 extension not loaded"; ?>
 --FILE--
 <?php
-
-// Should notices be generated?
 
 function test($case) {
     $plain = "The quick brown fox jumps over the lazy dog.";
@@ -46,10 +44,14 @@ test(1);
 test(2);
 test(3);
 ?>
---EXPECT--
+--EXPECTF--
 Compressed len = 81
+
+Notice: fread(): bzip2 decompression failed in %s on line %d
 read: bool(false)
 Compressed len = 81
 read: string(0) ""
 Compressed len = 81
+
+Notice: fread(): bzip2 decompression failed in %s on line %d
 read: bool(false)

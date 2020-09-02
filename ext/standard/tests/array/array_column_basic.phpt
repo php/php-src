@@ -2,12 +2,6 @@
 Test array_column() function: basic functionality
 --FILE--
 <?php
-/* Prototype:
- *  array array_column(array $input, mixed $column_key[, mixed $index_key]);
- * Description:
- *  Returns an array containing all the values from
- *  the specified "column" in a two-dimensional array.
- */
 
 echo "*** Testing array_column() : basic functionality ***\n";
 /* Array representing a possible record set returned from a database */

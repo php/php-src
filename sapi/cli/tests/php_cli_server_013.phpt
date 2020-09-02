@@ -9,15 +9,10 @@ include "skipif.inc";
 include "php_cli_server.inc";
 php_cli_server_start(NULL, NULL);
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
 $output = '';
 
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
-
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 if(fwrite($fp, <<<HEADER
 POST / HTTP/1.1
@@ -38,10 +33,7 @@ fclose($fp);
 
 
 $output = '';
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$fp = php_cli_server_connect();
 
 if(fwrite($fp, <<<HEADER
 GET /main/style.css HTTP/1.1
@@ -59,10 +51,7 @@ echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\
 fclose($fp);
 
 $output = '';
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$fp = php_cli_server_connect();
 
 if(fwrite($fp, <<<HEADER
 HEAD /main/foo/bar HTTP/1.1

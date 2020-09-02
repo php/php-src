@@ -2,12 +2,6 @@
 Test asort() function : usage variations - sort reference variables
 --FILE--
 <?php
-/* Prototype  : bool asort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association.
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing asort() by providing reference variable array with following flag values
  *  flag value as default

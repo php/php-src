@@ -27,15 +27,11 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso8859_5.h"
 #include "unicode_table_iso8859_5.h"
 
-static const char *mbfl_encoding_8859_5_aliases[] = {"ISO_8859-5", "cyrillic", NULL};
+static const char *mbfl_encoding_8859_5_aliases[] = {"ISO8859-5", "cyrillic", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_5 = {
 	mbfl_no_encoding_8859_5,

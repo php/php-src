@@ -33,7 +33,7 @@ var_dump(ldap_set_option($link, 999999, 999999));
 --EXPECTF--
 bool(false)
 
-Warning: ldap_set_option(): Control must have an oid key in %s on line %d
+Warning: ldap_set_option(): Control must have an "oid" key in %s on line %d
 bool(false)
 
 Warning: ldap_set_option(): The array value must contain only arrays, where each array is a control in %s on line %d

@@ -15,7 +15,7 @@ $file = $dirname . 'tmp.zip';
 @mkdir($dirname);
 $zip = new ZipArchive;
 if (!$zip->open($file, ZipArchive::CREATE)) {
-	exit('failed');
+    exit('failed');
 }
 
 $zip->addEmptyDir('foo');
@@ -27,10 +27,10 @@ $zip->addFromString(chr(0x91), __FILE__, ZipArchive::FL_ENC_CP437);
 $zip->addFromString('€', __FILE__, ZipArchive::FL_ENC_UTF_8);
 
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-	dump_entries_name($zip);
-	$zip->close();
+    dump_entries_name($zip);
+    $zip->close();
 } else {
-	echo "failed\n";
+    echo "failed\n";
 }
 ?>
 --CLEAN--
@@ -39,7 +39,7 @@ $dirname = __DIR__ . '/oo_add_encoding_dir/';
 unlink($dirname . 'tmp.zip');
 rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 0 foo/
 1 é/
 2 è/

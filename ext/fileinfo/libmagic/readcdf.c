@@ -26,7 +26,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readcdf.c,v 1.73 2019/03/12 20:43:05 christos Exp $")
+FILE_RCSID("@(#)$File: readcdf.c,v 1.74 2019/09/11 15:46:30 christos Exp $")
 #endif
 
 #include <assert.h>

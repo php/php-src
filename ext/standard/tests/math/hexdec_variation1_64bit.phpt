@@ -8,11 +8,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number hexdec  ( string $hex_string  )
- * Description: Returns the decimal equivalent of the hexadecimal number represented by the hex_string  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing hexdec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

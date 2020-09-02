@@ -77,6 +77,9 @@ typedef struct {
 #	define PHP_SXE_API ZEND_API
 #endif
 
-PHP_SXE_API zend_class_entry *sxe_get_element_class_entry();
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator;
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
+
+PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void);
 
 #endif

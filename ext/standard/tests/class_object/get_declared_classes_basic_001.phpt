@@ -2,13 +2,6 @@
 Test get_declared_classes() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto array get_declared_classes()
- * Description: Returns an array of all declared classes.
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
-
 echo "*** Testing get_declared_classes() : basic functionality ***\n";
 
 // Zero arguments

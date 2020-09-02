@@ -2,11 +2,6 @@
 Test array_slice() function : usage variations - position of internal array pointer
 --FILE--
 <?php
-/* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length
- * Source code: ext/standard/array.c
- */
-
 /*
  * Check position of internal array pointer after calling array_slice()
  */

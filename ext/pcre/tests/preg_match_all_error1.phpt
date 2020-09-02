@@ -3,7 +3,6 @@ Test preg_match_all() function : error conditions - bad regular expressions
 --FILE--
 <?php
 /*
-* proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -80,5 +79,5 @@ array(1) {
     string(1) "t"
   }
 }
-preg_match_all(): Argument #1 ($pattern) must be of type string, object given
+preg_match_all(): Argument #1 ($pattern) must be of type string, stdClass given
 NULL

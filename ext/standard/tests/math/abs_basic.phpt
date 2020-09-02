@@ -4,11 +4,6 @@ Test abs() function : basic functionality
 precision = 14
 --FILE--
 <?php
-/* Prototype  : number abs  ( mixed $number  )
- * Description: Returns the absolute value of number.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing abs() : basic functionality ***\n";
 
 $values = array(23,

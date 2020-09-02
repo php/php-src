@@ -9,7 +9,7 @@ function f($a=array(Foo::bar)) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Class 'Foo\Foo' not found in %s:%d
+Fatal error: Uncaught Error: Class "Foo\Foo" not found in %s:%d
 Stack trace:
 #0 %s(%d): Foo\f()
 #1 {main}

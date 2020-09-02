@@ -1,9 +1,23 @@
 <?php
 
-/** @return resource|false */
+/** @generate-function-entries */
+
+/**
+ * @param string $path
+ * @param string $mode
+ * @param string $handlername
+ * @param string $handler_parameters
+ * @return resource|false
+ */
 function dba_popen($path, $mode, $handlername = UNKNOWN, ...$handler_parameters) {}
 
-/** @return resource|false */
+/**
+ * @param string $path
+ * @param string $mode
+ * @param string $handlername
+ * @param string $handler_parameters
+ * @return resource|false
+ */
 function dba_open($path, $mode, $handlername = UNKNOWN, ...$handler_parameters) {}
 
 /** @param resource $handle */
@@ -20,7 +34,7 @@ function dba_exists($key, $handle): bool {}
  * @param int|resource $skip actually this parameter is optional, not $handle
  * @param resource $handle
  */
-function dba_fetch($key, $skip, $handle = UNKOWN): string|false {}
+function dba_fetch($key, $skip, $handle = UNKNOWN): string|false {}
 
 function dba_key_split(string $key): array|false {}
 

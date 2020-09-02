@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass a directory containing files with different types of names to test how scandir()
  * reads them

@@ -19,21 +19,23 @@ function foo(int $x) {
 }
 ?>
 --EXPECTF--
-$_main: ; (lines=1, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %ssccp_022.php:1-10
-L0 (10):    RETURN int(1)
+$_main:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %ssccp_022.php:1-10
+0000 RETURN int(1)
 
-foo: ; (lines=10, args=1, vars=2, tmps=1)
-    ; (after optimizer)
-    ; %ssccp_022.php:2-8
-L0 (2):     CV0($x) = RECV 1
-L1 (3):     ASSIGN_DIM CV1($a) int(0)
-L2 (3):     OP_DATA CV0($x)
-L3 (4):     ASSIGN_DIM CV1($a) int(1)
-L4 (4):     OP_DATA int(5)
-L5 (5):     ECHO string("5")
-L6 (6):     ASSIGN_OBJ CV1($a) string("foo")
-L7 (6):     OP_DATA int(5)
-L8 (7):     T2 = FETCH_DIM_R null int(1)
-L9 (8):     RETURN null
+foo:
+     ; (lines=10, args=1, vars=2, tmps=1)
+     ; (after optimizer)
+     ; %ssccp_022.php:2-8
+0000 CV0($x) = RECV 1
+0001 ASSIGN_DIM CV1($a) int(0)
+0002 OP_DATA CV0($x)
+0003 ASSIGN_DIM CV1($a) int(1)
+0004 OP_DATA int(5)
+0005 ECHO string("5")
+0006 ASSIGN_OBJ CV1($a) string("foo")
+0007 OP_DATA int(5)
+0008 T2 = FETCH_DIM_R null int(1)
+0009 RETURN null

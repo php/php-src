@@ -27,6 +27,7 @@ typedef struct {
 	unsigned char buffer[32];
 	const uint32_t (*tables)[4][256];
 } PHP_GOST_CTX;
+#define PHP_GOST_SPEC "l16l2bb32"
 
 PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *);
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *, const unsigned char *, size_t);

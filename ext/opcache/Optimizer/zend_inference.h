@@ -26,6 +26,8 @@
 /* Bitmask for type inference (zend_ssa_var_info.type) */
 #include "zend_type_info.h"
 
+#define MAY_BE_PACKED_GUARD         (1<<27) /* needs packed array guard */
+#define MAY_BE_CLASS_GUARD          (1<<27) /* needs class guard */
 #define MAY_BE_GUARD                (1<<28) /* needs type guard */
 #define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
 
@@ -177,6 +179,9 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 			}
 			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
 		} ZEND_HASH_FOREACH_END();
+		if (HT_IS_PACKED(ht)) {
+			tmp &= ~MAY_BE_ARRAY_HASH;
+		}
 		return tmp;
 	} else {
 		uint32_t tmp = (1 << Z_TYPE_P(zv));
@@ -195,7 +200,7 @@ static zend_always_inline uint32_t get_ssa_var_info(const zend_ssa *ssa, int ssa
 	if (ssa->var_info && ssa_var_num >= 0) {
 		return ssa->var_info[ssa_var_num].type;
 	} else {
-		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_INDIRECT | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 	}
 }
 
@@ -249,7 +254,7 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
 
-uint32_t zend_array_element_type(uint32_t t1, int write, int insert);
+uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert);
 
 int  zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp);
 void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow);
@@ -270,6 +275,7 @@ void zend_func_return_info(const zend_op_array   *op_array,
                            int                    widening,
                            zend_ssa_var_info     *ret);
 
+int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2);
 int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa);
 
 int zend_update_type_info(const zend_op_array *op_array,

@@ -2,12 +2,6 @@
 Test date_timezone_set() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : DateTime date_timezone_set  ( DateTime $object  , DateTimeZone $timezone  )
- * Description: Sets the time zone for the DateTime object
- * Source code: ext/date/php_date.c
- * Alias to functions: DateTime::setTimezone
- */
-
 echo "*** Testing date_timezone_set() : basic functionality ***\n";
 
 //Set the default time zone

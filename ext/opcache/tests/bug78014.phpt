@@ -23,7 +23,7 @@ Warning: Can't preload unlinked class C: Parent with unresolved initializers B i
 
 Warning: Can't preload class B with unresolved initializer for constant X in %s on line %d
 
-Fatal error: Uncaught Error: Class 'C' not found in %sbug78014.php:5
+Fatal error: Uncaught Error: Class "C" not found in %sbug78014.php:5
 Stack trace:
 #0 {main}
   thrown in %sbug78014.php on line 5

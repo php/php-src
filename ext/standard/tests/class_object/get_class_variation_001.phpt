@@ -2,12 +2,6 @@
 Test get_class() function : usage variations  - passing unexpected types.
 --FILE--
 <?php
-/* Prototype  : proto string get_class([object object])
- * Description: Retrieves the class name
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing get_class() : usage variations ***\n";
 
 //  Note: basic use cases in Zend/tests/009.phpt
@@ -80,9 +74,9 @@ echo "Done";
 --EXPECTF--
 *** Testing get_class() : usage variations ***
 
-Warning: Undefined variable: undefined_var in %s on line %d
+Warning: Undefined variable $undefined_var in %s on line %d
 
-Warning: Undefined variable: unset_var in %s on line %d
+Warning: Undefined variable $unset_var in %s on line %d
 
 Arg value: 0 (type: integer)
 get_class(): Argument #1 ($object) must be of type object, int given

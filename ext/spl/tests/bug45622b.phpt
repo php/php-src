@@ -25,9 +25,9 @@ isset($ao->prop4);
 --EXPECTF--
 Doesn't trigger __get.
 
-Notice: Undefined index: prop1 in %s on line 11
+Warning: Undefined array key "prop1" in %s on line %d
 Doesn't trigger __set.
 Doesn't trigger __unset.
 
-Notice: Undefined index: prop3 in %s on line 17
+Warning: Undefined array key "prop3" in %s on line %d
 Shouldn't trigger __isset.

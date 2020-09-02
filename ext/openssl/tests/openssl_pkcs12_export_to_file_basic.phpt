@@ -25,7 +25,7 @@ var_dump(openssl_pkcs12_export_to_file($cert_path, $pkcsfile, $priv_path, $pass)
 var_dump(openssl_pkcs12_read(file_get_contents($pkcsfile), $opts, $pass));
 var_dump(openssl_pkcs12_export_to_file($cert_res, $pkcsfile, $priv_res, $pass));
 var_dump(openssl_pkcs12_read(file_get_contents($pkcsfile), $opts, $pass));
-var_dump(openssl_pkcs12_export_to_file($cert_res, $pkcsfile, $priv_res, $pass, array($cert)));
+var_dump(openssl_pkcs12_export_to_file($cert_res, $pkcsfile, $priv_res, $pass, array('extracerts' => $cert)));
 var_dump(openssl_pkcs12_read(file_get_contents($pkcsfile), $opts, $pass));
 
 var_dump(openssl_pkcs12_export_to_file($invalid, $pkcsfile, $invalid, $pass));
@@ -53,11 +53,9 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: openssl_pkcs12_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
-
-Warning: openssl_pkcs12_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
-openssl_pkcs12_export_to_file(): supplied resource is not a valid OpenSSL X.509 resource
+openssl_pkcs12_export_to_file(): Argument #1 ($x509cert) must be of type OpenSSLCertificate|string, OpenSSLAsymmetricKey given

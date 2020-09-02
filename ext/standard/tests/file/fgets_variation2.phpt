@@ -2,11 +2,6 @@
 Test fgets() function : usage variations - closed handle
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets a line from file pointer
-*/
-
 /* try reading a line using fgets() using invalid handles
     - closed file handle
     - unset file handle

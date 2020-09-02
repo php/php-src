@@ -2,12 +2,6 @@
 Test getimagesize() function : usage variations  - unexpected type for arg 2
 --FILE--
 <?php
-/* Prototype  : proto array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array
- * Source code: ext/standard/image.c
- * Alias to functions:
- */
-
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
     echo "Error: $err_no - $err_msg\n";
 }
@@ -80,8 +74,8 @@ foreach($values as $key => $value) {
 ?>
 --EXPECT--
 *** Testing getimagesize() : usage variations ***
-Error: 2 - Undefined variable: undefined_var
-Error: 2 - Undefined variable: unset_var
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
 -- Arg value 0 --
 string(28) "4a46494600010201006000600000"

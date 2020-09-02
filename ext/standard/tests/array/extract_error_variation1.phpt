@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-Prefix is not a valid identifier
+extract(): Argument #3 ($prefix) must be a valid identifier

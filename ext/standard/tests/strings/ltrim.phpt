@@ -41,7 +41,7 @@ var_dump( ltrim($str, "\nusi") );
 echo "\nDone\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Output for Error Conditions ***
 
  *** Using heredoc string ***

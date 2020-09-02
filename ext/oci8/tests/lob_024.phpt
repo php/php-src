@@ -38,7 +38,6 @@ var_dump($row = oci_fetch_array($s));
 
 var_dump(strlen($row[0]->load()));
 var_dump(strlen(oci_lob_load($row[0])));
-var_dump(oci_lob_load());
 unset($row[0]->descriptor);
 var_dump(oci_lob_load($row[0]));
 
@@ -48,7 +47,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
@@ -57,21 +56,18 @@ int(7000)
 int(7000)
 array(2) {
   [0]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }
 int(7000)
 int(7000)
-
-Warning: oci_lob_load() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
 
 Warning: oci_lob_load(): Unable to find descriptor property in %s on line %d
 bool(false)

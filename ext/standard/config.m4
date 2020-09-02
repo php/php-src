@@ -51,14 +51,10 @@ if test "$ac_cv_flush_io" = "yes"; then
   AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])
 fi
 
-dnl
-dnl Check for crypt() capabilities
-dnl
-if test "$ac_cv_func_crypt" = "no"; then
-  AC_CHECK_LIB(crypt, crypt, [
-    LIBS="-lcrypt $LIBS -lcrypt"
-    AC_DEFINE(HAVE_CRYPT, 1, [ ])
-  ])
+PHP_CHECK_FUNC(crypt, crypt)
+PHP_CHECK_FUNC(crypt_r, crypt)
+if test "$ac_cv_func_crypt_r" = "yes"; then
+  PHP_CRYPT_R_STYLE
 fi
 
 AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
@@ -262,24 +258,8 @@ int main() {
 dnl
 dnl If one of them is missing, use our own implementation, portable code is then possible
 dnl
-if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "x$php_crypt_r" = "x0"; then
-
-  dnl
-  dnl Check for __alignof__ support in the compiler
-  dnl
-  AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-  ]],[[
-    int align = __alignof__(int);
-  ]])],[
-    ac_cv_alignof_exists=yes
-  ],[
-    ac_cv_alignof_exists=no
-  ])])
-  if test "$ac_cv_alignof_exists" = "yes"; then
-    AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
-  fi
-
+dnl TODO This is currently always enabled
+if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes" || true; then
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
 
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
@@ -387,32 +367,6 @@ int strptime(const char *s, const char *format, struct tm *tm);
 if test "$ac_cv_strptime_decl_fails" = "yes"; then
   AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], 1, [whether strptime() declaration fails])
 fi
-
-dnl
-dnl Check for i18n capabilities
-dnl
-AC_CHECK_HEADERS([wchar.h])
-AC_CHECK_FUNCS([mblen])
-AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
-#endif
-]],[[
-mbstate_t a;
-]])],[
-  ac_cv_type_mbstate_t=yes
-],[
-  ac_cv_type_mbstate_t=no
-])])
-if test "$ac_cv_type_mbstate_t" = "yes"; then
-  AC_DEFINE([HAVE_MBSTATE_T], 1, [Define if your system has mbstate_t in wchar.h])
-fi
-
-dnl
-dnl Check for atomic operation API availability in Solaris
-dnl
-AC_CHECK_HEADERS([atomic.h])
 
 dnl
 dnl Check for arc4random on BSD systems

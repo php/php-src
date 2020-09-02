@@ -2,11 +2,6 @@
 Test array_filter() function : usage variations - Different types of 'callback' function
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different types of callback functions to array_filter()
 * with parameters and return
@@ -20,7 +15,6 @@ echo "*** Testing array_filter() : usage variation - different 'callback' functi
 // Initialize variables
 $input = array(0, -1, 2, 3.4E-3, 'hello', "value", "key" => 4, 'null' => NULL);
 
-// callback function without parameters and with return value
 function callback1()
 {
   return 1;
@@ -35,8 +29,6 @@ function callback2($input)
 echo "-- Callback function with parameter and without return --\n";
 var_dump( array_filter($input, "callback2") );
 
-
-// callback function without parameter and without return value
 function callback3()
 {
 }
@@ -86,11 +78,15 @@ array(0) {
 array(0) {
 }
 -- Callback function with parameter and return --
-array(3) {
+array(5) {
   [2]=>
   int(2)
   [3]=>
   float(0.0034)
+  [4]=>
+  string(5) "hello"
+  [5]=>
+  string(5) "value"
   ["key"]=>
   int(4)
 }

@@ -11,12 +11,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 obscure_filename
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
 /* An array of filenames */
@@ -37,44 +31,38 @@ $names_arr = array(
 );
 
 foreach($names_arr as $key =>$value) {
-  echo "\n-- Filename: $key --\n";
-  try {
-    $res = file_put_contents($value, "Some data");
-    if ($res !== false && $res != null) {
-       echo "$res bytes written to: $value\n";
-       unlink($value);
-    } else {
-       echo "Failed to write data to: $key\n";
+    echo "\n-- Filename: $key --\n";
+    try {
+        $res = file_put_contents($value, "Some data");
+        if ($res !== false && $res != null) {
+            echo "$res bytes written to: '$value'\n";
+            unlink($value);
+        } else {
+            echo "Failed to write data to: $key\n";
+        }
+    } catch (\TypeError|\ValueError $e) {
+        echo get_class($e) . ': ' . $e->getMessage(), "\n";
     }
-  } catch (TypeError $e) {
-      echo $e->getMessage(), "\n";
-  }
-};
+}
 
 ?>
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
 
 -- Filename: -1 --
-9 bytes written to: -1
+9 bytes written to: '-1'
 
 -- Filename: TRUE --
-9 bytes written to: 1
+9 bytes written to: '1'
 
 -- Filename: FALSE --
-
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
-Failed to write data to: FALSE
+ValueError: Path cannot be empty
 
 -- Filename: NULL --
-
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
-Failed to write data to: NULL
+ValueError: Path cannot be empty
 
 -- Filename: "" --
-
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
-Failed to write data to: ""
+ValueError: Path cannot be empty
 
 -- Filename: " " --
 
@@ -82,10 +70,10 @@ Warning: file_put_contents( ): Failed to open stream: Permission denied in %s on
 Failed to write data to: " "
 
 -- Filename: \0 --
-file_put_contents(): Argument #1 ($filename) must be a valid path, string given
+TypeError: file_put_contents(): Argument #1 ($filename) must be a valid path, string given
 
 -- Filename: array() --
-file_put_contents(): Argument #1 ($filename) must be a valid path, array given
+TypeError: file_put_contents(): Argument #1 ($filename) must be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

@@ -2,11 +2,6 @@
 Test usort() function : usage variations - referenced variables
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass an array of referenced variables as $array_arg to test behaviour
  */

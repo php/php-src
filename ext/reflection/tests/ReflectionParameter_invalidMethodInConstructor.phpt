@@ -40,7 +40,7 @@ echo "Done.\n";
 
 ?>
 --EXPECT--
-Class A does not exist
+Class "A" does not exist
 Method C::b() does not exist
 Method C::b() does not exist
 Ok - ReflectionParameter::__construct() expects exactly 2 parameters, 1 given

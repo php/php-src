@@ -19,13 +19,10 @@ class MyAutoLoader {
         }
 }
 
-try
-{
+try {
     spl_autoload_register(array('MyAutoLoader', 'autoLoad'), true);
-}
-catch(Exception $e)
-{
-    echo 'Exception: ' . $e->getMessage() . "\n";
+} catch(\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 
 // and
@@ -46,7 +43,7 @@ catch(Exception $e)
 
 ?>
 --EXPECT--
-Exception: Passed array specifies a non static method but no object (non-static method MyAutoLoader::autoLoad() cannot be called statically)
+spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, non-static method MyAutoLoader::autoLoad() cannot be called statically
 MyAutoLoader::autoLoad(TestClass)
 MyAutoLoader::autoThrow(TestClass)
 Exception: Unavailable

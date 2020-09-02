@@ -5,7 +5,6 @@ opcache.optimization_level=0
 --FILE--
 <?php
 /*
- * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
 */
 // In HEAD, $chunk_size value of 1 should not have any special behaviour (http://marc.info/?l=php-internals&m=123476465621346&w=2).

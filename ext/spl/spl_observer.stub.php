@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 interface SplObserver
 {
     /** @return void */
@@ -20,11 +22,8 @@ interface SplSubject
 
 class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 {
-    /**
-     * @param mixed $info
-     * @return void
-     */
-    public function attach(object $object, $info = null) {}
+    /** @return void */
+    public function attach(object $object, mixed $info = null) {}
 
     /** @return void */
     public function detach(object $object) {}
@@ -44,11 +43,8 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /** @return mixed */
     public function getInfo() {}
 
-    /**
-     * @param mixed $info
-     * @return void
-     */
-    public function setInfo($info) {}
+    /** @return void */
+    public function setInfo(mixed $info) {}
 
     /** @return int */
     public function count(int $mode = COUNT_NORMAL) {}
@@ -77,6 +73,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /**
      * @param object $object
      * @return bool
+     * @alias SplObjectStorage::contains
      */
     public function offsetExists($object) {}
 
@@ -88,14 +85,15 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 
     /**
      * @param object $object
-     * @param mixed $info
      * @return void
+     * @alias SplObjectStorage::attach
      */
-    public function offsetSet($object, $info = null) {}
+    public function offsetSet($object, mixed $info = null) {}
 
     /**
      * @param object $object
      * @return void
+     * @alias SplObjectStorage::detach
      */
     public function offsetUnset($object) {}
 
@@ -107,6 +105,9 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 
     /** @return void */
     public function __unserialize(array $data) {}
+
+    /** @return array */
+    public function __debugInfo() {}
 }
 
 class MultipleIterator implements Iterator
@@ -120,7 +121,6 @@ class MultipleIterator implements Iterator
     public function setFlags(int $flags) {}
 
     /**
-    * @param Iterator $iterator
     * @param int|string|null $info
     * @return void
     */
@@ -149,4 +149,10 @@ class MultipleIterator implements Iterator
 
     /** @return void */
     public function next() {}
+
+    /**
+     * @return array
+     * @alias SplObjectStorage::__debugInfo
+     */
+    public function __debugInfo() {}
 }

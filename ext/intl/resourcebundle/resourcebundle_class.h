@@ -49,11 +49,4 @@ static inline ResourceBundle_object *php_intl_resourcebundle_fetch_object(zend_o
 void resourcebundle_register_class( void );
 extern zend_class_entry *ResourceBundle_ce_ptr;
 
-PHP_FUNCTION( resourcebundle_create );
-PHP_FUNCTION( resourcebundle_get );
-PHP_FUNCTION( resourcebundle_count );
-PHP_FUNCTION( resourcebundle_locales );
-PHP_FUNCTION( resourcebundle_get_error_code );
-PHP_FUNCTION( resourcebundle_get_error_message );
-
 #endif // #ifndef RESOURCEBUNDLE_CLASS_H

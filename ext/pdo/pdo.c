@@ -70,17 +70,7 @@ PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
 }
 /* }}} */
 
-PDO_API zend_class_entry *php_pdo_get_exception_base(int root) /* {{{ */
-{
-	if (!root) {
-		return spl_ce_RuntimeException;
-	}
-	return zend_ce_exception;
-}
-/* }}} */
-
-/* {{{ proto array pdo_drivers()
- Return array of available PDO drivers */
+/* {{{ Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
 	pdo_driver_t *pdriver;
@@ -96,13 +86,6 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ pdo_functions[] */
-const zend_function_entry pdo_functions[] = {
-	PHP_FE(pdo_drivers,             arginfo_pdo_drivers)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ pdo_functions[] */
 static const zend_module_dep pdo_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_END
@@ -114,7 +97,7 @@ zend_module_entry pdo_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_deps,
 	"PDO",
-	pdo_functions,
+	ext_functions,
 	PHP_MINIT(pdo),
 	PHP_MSHUTDOWN(pdo),
 	NULL,
@@ -323,7 +306,7 @@ PHP_MINIT_FUNCTION(pdo)
 
 	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
 
- 	pdo_exception_ce = zend_register_internal_class_ex(&ce, php_pdo_get_exception_base(0));
+	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException);
 
 	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC);
 

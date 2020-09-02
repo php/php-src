@@ -2,19 +2,27 @@
 Test readfile() function: error conditions
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
-
 $context = stream_context_create();
 
 echo "*** Test readfile(): error conditions ***\n";
 
 echo "\n-- Testing readfile() with invalid arguments --\n";
 // invalid arguments
-var_dump( readfile(NULL) );  // NULL as $filename
-var_dump( readfile('') );  // empty string as $filename
-var_dump( readfile(false) );  // boolean false as $filename
+try {
+    var_dump( readfile(NULL) );  // NULL as $filename
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump( readfile('') );  // empty string as $filename
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump( readfile(false) );  // boolean false as $filename
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "\n-- Testing readfile() with non-existent file --\n";
 $non_existent_file = __DIR__."/non_existent_file.tmp";
@@ -26,15 +34,9 @@ echo "Done\n";
 *** Test readfile(): error conditions ***
 
 -- Testing readfile() with invalid arguments --
-
-Warning: readfile(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: readfile(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: readfile(): Filename cannot be empty in %s on line %d
-bool(false)
+Path cannot be empty
+Path cannot be empty
+Path cannot be empty
 
 -- Testing readfile() with non-existent file --
 

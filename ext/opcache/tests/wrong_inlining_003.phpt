@@ -19,5 +19,5 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable: undef in %s on line %d
+Warning: Undefined variable $undef in %s on line %d
 int(42)

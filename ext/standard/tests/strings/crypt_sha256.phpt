@@ -41,8 +41,13 @@ $tests = array(
     ),
     8 => array(
         '$5$rounds=10$roundstoolow',
-        'the minimum number is still observed',
-        '$5$rounds=1000$roundstoolow$yfvwcWrQ8l/K0DAWyuPMDNHpIVlTQebY9l/gL972bIC'
+        'the number of rounds is too low',
+        '*0'
+    ),
+    9 => array(
+        '$5$rounds=1000000000$roundstoohigh',
+        'the number of rounds is too high',
+        '*0'
     )
 );
 

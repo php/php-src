@@ -4,6 +4,7 @@ Phar: create and modify tar-based phar
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.readonly=0
+opcache.validate_timestamps=1
 --FILE--
 <?php
 

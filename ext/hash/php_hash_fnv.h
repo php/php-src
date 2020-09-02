@@ -44,10 +44,12 @@ enum php_fnv_type {
 typedef struct {
 	uint32_t state;
 } PHP_FNV132_CTX;
+#define PHP_FNV132_SPEC "l."
 
 typedef struct {
 	uint64_t state;
 } PHP_FNV164_CTX;
+#define PHP_FNV164_SPEC "q."
 
 
 PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context);

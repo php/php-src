@@ -44,10 +44,11 @@ try {
 } catch (Error $ex) {
     echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
+?>
 --EXPECT--
 error: 0, IntlCalendar::equals() expects exactly 1 parameter, 0 given
 
-error: 0, IntlCalendar::equals(): Argument #1 ($calendar) must be of type IntlCalendar, object given
+error: 0, IntlCalendar::equals(): Argument #1 ($calendar) must be of type IntlCalendar, stdClass given
 
 error: 0, IntlCalendar::equals() expects exactly 1 parameter, 2 given
 

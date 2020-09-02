@@ -14,5 +14,6 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECT--
 Not Found Error

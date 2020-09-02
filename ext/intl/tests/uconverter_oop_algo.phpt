@@ -11,6 +11,7 @@ var_dump(UConverter::UTF8    === $c->getDestinationType());
 $c = new UConverter('koi8-r', 'utf-32be');
 var_dump(UConverter::UTF32_BigEndian === $c->getSourceType());
 var_dump(UConverter::SBCS            === $c->getDestinationType());
+?>
 --EXPECT--
 bool(true)
 bool(true)

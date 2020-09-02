@@ -565,7 +565,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	RETCODE rc;
 	SWORD	colnamelen;
 	SQLULEN	colsize;
-	SQLLEN displaysize;
+	SQLLEN displaysize = 0;
 
 	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,
 			sizeof(S->cols[colno].colname)-1, &colnamelen,

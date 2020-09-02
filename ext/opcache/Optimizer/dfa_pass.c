@@ -372,8 +372,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 			if (call_info->caller_call_opline
 			 && call_info->caller_call_opline->opcode == ZEND_DO_ICALL
 			 && call_info->callee_func
-			 && ZSTR_LEN(call_info->callee_func->common.function_name) == sizeof("in_array")-1
-			 && memcmp(ZSTR_VAL(call_info->callee_func->common.function_name), "in_array", sizeof("in_array")-1) == 0
+			 && zend_string_equals_literal(call_info->callee_func->common.function_name, "in_array")
 			 && (call_info->caller_init_opline->extended_value == 2
 			  || (call_info->caller_init_opline->extended_value == 3
 			   && (call_info->caller_call_opline - 1)->opcode == ZEND_SEND_VAL
@@ -623,6 +622,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
+			case ZEND_JMP_NULL:
 				if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, op_array->opcodes + dst->start);
 				}
@@ -642,6 +642,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 				{
 					HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 					zval *zv;
@@ -895,49 +896,52 @@ optimize_jmpnz:
 					}
 					break;
 				}
-				case ZEND_SWITCH_LONG:
-					if (opline->op1_type == IS_CONST) {
-						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
-						if (Z_TYPE_P(zv) != IS_LONG) {
-							removed_ops++;
-							MAKE_NOP(opline);
-							opline->extended_value = 0;
-							take_successor_ex(ssa, block_num, block, block->successors[0]);
-							goto optimize_nop;
-						} else {
-							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
-							zval *jmp_zv = zend_hash_index_find(jmptable, Z_LVAL_P(zv));
-							uint32_t target;
-
-							if (jmp_zv) {
-								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
-							} else {
-								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
-							}
+				case ZEND_JMP_NULL:
+				{
+					zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
+					if (opline->op1_type == IS_CONST
+							&& var->use_chain < 0 && var->phi_use_chain == NULL) {
+						if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op1.constant)) == IS_NULL) {
 							opline->opcode = ZEND_JMP;
-							opline->extended_value = 0;
-							SET_UNUSED(opline->op1);
-							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
-							SET_UNUSED(opline->op2);
-							take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+							opline->result_type = IS_UNUSED;
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							COPY_NODE(opline->op1, opline->op2);
+							take_successor_0(ssa, block_num, block);
 							goto optimize_jmp;
+						} else {
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							MAKE_NOP(opline);
+							removed_ops++;
+							take_successor_1(ssa, block_num, block);
+							goto optimize_nop;
 						}
 					}
 					break;
+				}
+				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
+				case ZEND_MATCH:
 					if (opline->op1_type == IS_CONST) {
 						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
-						if (Z_TYPE_P(zv) != IS_STRING) {
+						zend_uchar type = Z_TYPE_P(zv);
+						zend_bool correct_type =
+							(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
+							|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
+							|| (opline->opcode == ZEND_MATCH && (type == IS_LONG || type == IS_STRING));
+
+						if (!correct_type) {
 							removed_ops++;
 							MAKE_NOP(opline);
 							opline->extended_value = 0;
-							take_successor_ex(ssa, block_num, block, block->successors[0]);
+							take_successor_ex(ssa, block_num, block, block->successors[block->successors_count - 1]);
 							goto optimize_nop;
 						} else {
 							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
-							zval *jmp_zv = zend_hash_find(jmptable, Z_STR_P(zv));
-							uint32_t target;
+							zval *jmp_zv = type == IS_LONG
+								? zend_hash_index_find(jmptable, Z_LVAL_P(zv))
+								: zend_hash_find(jmptable, Z_STR_P(zv));
 
+							uint32_t target;
 							if (jmp_zv) {
 								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
 							} else {

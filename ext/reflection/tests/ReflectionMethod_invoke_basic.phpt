@@ -103,7 +103,7 @@ NULL
 
 Static method:
 ReflectionMethod::invoke() expects at least 1 parameter, 0 given
-ReflectionMethod::invoke(): Argument #1 ($object) must be of type object, bool given
+ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, bool given
 Called staticMethod()
 Exception: Using $this when not in object context
 NULL

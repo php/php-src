@@ -2,12 +2,6 @@
 Test timezone_abbreviations_list() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array timezone_abbreviations_list  ( void  )
- * Description: Returns associative array containing dst, offset and the timezone name
- * Source code: ext/date/php_date.c
- * Alias to functions: DateTimeZone::listAbbreviations
- */
-
 echo "*** Testing timezone_abbreviations_list() : basic functionality ***\n";
 
 //Set the default time zone
@@ -22,7 +16,7 @@ echo "\n-- Format a sample entry --\n";
 var_dump( $abbr["acst"] );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing timezone_abbreviations_list() : basic functionality ***
 string(5) "array"
 int(144)

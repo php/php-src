@@ -4,13 +4,11 @@ Test fopen and fclose() functions - usage variations - "xt" mode
 <?php
 /*
  fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
+
  Description: Opens file or URL.
 */
 /*
  fclose() function:
- Prototype: bool fclose ( resource $handle );
  Description: Closes an open file pointer
 */
 

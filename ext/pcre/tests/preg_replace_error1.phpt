@@ -3,7 +3,6 @@ Test preg_replace() function : error - bad regular expressions
 --FILE--
 <?php
 /*
-* proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -57,4 +56,4 @@ string(1) "a"
 
 Arg value is /[a-zA-Z]/
 string(1) "1"
-Object of class stdClass could not be converted to string
+preg_replace(): Argument #1 ($regex) must be of type string|array, stdClass given

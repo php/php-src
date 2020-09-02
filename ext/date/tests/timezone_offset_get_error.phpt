@@ -2,12 +2,6 @@
 Test timezone_offset_get() function : error conditions
 --FILE--
 <?php
-/* Prototype  : int timezone_offset_get  ( DateTimeZone $object  , DateTime $datetime  )
- * Description: Returns the timezone offset from GMT
- * Source code: ext/date/php_date.c
- * Alias to functions: DateTimeZone::getOffset
- */
-
 //Set the default time zone
 date_default_timezone_set("GMT");
 $tz = timezone_open("Europe/London");
@@ -65,7 +59,7 @@ try {
 *** Testing timezone_offset_get() : error conditions ***
 
 -- Testing timezone_offset_get() function with an invalid values for $object argument --
-string(87) "timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, object given"
+string(89) "timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, stdClass given"
 
 string(84) "timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, int given"
 
@@ -73,7 +67,7 @@ string(85) "timezone_offset_get(): Argument #1 ($object) must be of type DateTim
 
 
 -- Testing timezone_offset_get() function with an invalid values for $datetime argument --
-string(94) "timezone_offset_get(): Argument #2 ($datetime) must be of type DateTimeInterface, object given"
+string(96) "timezone_offset_get(): Argument #2 ($datetime) must be of type DateTimeInterface, stdClass given"
 
 string(91) "timezone_offset_get(): Argument #2 ($datetime) must be of type DateTimeInterface, int given"
 

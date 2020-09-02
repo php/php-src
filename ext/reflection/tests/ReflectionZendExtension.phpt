@@ -13,7 +13,7 @@ var_dump($reflection->getName());
 var_dump($reflection->getURL());
 var_dump($reflection->getVersion() === PHP_VERSION);
 ?>
---EXPECTF--
+--EXPECT--
 string(17) "Zend Technologies"
 string(13) "Copyright (c)"
 string(12) "Zend OPcache"

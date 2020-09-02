@@ -2,11 +2,6 @@
 Test is_file() function: usage variations - diff. files
 --FILE--
 <?php
-/* Prototype: bool is_file ( string $filename );
-   Description: Tells whether the filename is a regular file
-     Returns TRUE if the filename exists and is a regular file
-*/
-
 /* Testing is_file() with file containing data, truncating its size
      and the file created by touch() */
 

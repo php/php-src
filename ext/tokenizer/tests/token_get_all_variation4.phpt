@@ -4,11 +4,6 @@ Test token_get_all() function : usage variations - with comparison operators
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP language tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Passing 'source' argument with different comparison operators to test them for tokens
  *  == - T_IS_EQUAL(283), === - T_IS_IDENTICAL(281),
@@ -80,7 +75,7 @@ array(88) {
   [5]=>
   array(3) {
     [0]=>
-    int(286)
+    int(%d)
     [1]=>
     string(2) "=="
     [2]=>

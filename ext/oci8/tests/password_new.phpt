@@ -37,7 +37,7 @@ require __DIR__."/connect.inc";
 
 $new_password = "test";
 var_dump(oci_password_change($dbase, $user, $password, $new_password));
-var_dump($new_c = ocilogon($user,$new_password,$dbase));
+var_dump($new_c = oci_connect($user,$new_password,$dbase));
 var_dump(oci_password_change($dbase, $user, $new_password, $password));
 
 

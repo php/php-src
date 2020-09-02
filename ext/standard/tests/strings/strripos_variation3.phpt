@@ -2,11 +2,6 @@
 Test strripos() function : usage variations - multi line heredoc string for 'haystack' argument
 --FILE--
 <?php
-/* Prototype  : int strripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of last occurrence of a case-insensitive 'needle' in a 'haystack'
- * Source code: ext/standard/string.c
-*/
-
 /* Test strripos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */

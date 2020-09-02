@@ -23,6 +23,7 @@ var_dump($intlcal->getTimeZone()->getID());
 $offsetdate = new DateTime('2012-01-01 00:00:00 -02:30');
 $intlcal->setTimeZone($offsetdate->getTimeZone());
 var_dump($intlcal->getTimeZone()->getID());
+?>
 --EXPECTF--
 string(12) "Europe/Paris"
 string(13) "Europe/Madrid"

@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function sodium_crypto_aead_aes256gcm_is_available(): bool {}
 
 #ifdef HAVE_AESGCM
@@ -76,7 +78,7 @@ function sodium_crypto_generichash_init(string $key = "", int $length = SODIUM_C
 
 function sodium_crypto_generichash_update(string &$state, string $string): bool {}
 
-function sodium_crypto_generichash_final(string &$state, $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
+function sodium_crypto_generichash_final(string &$state, int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
 function sodium_crypto_kdf_derive_from_key(int $subkey_len, int $subkey_id, string $context, string $key): string {}
 
@@ -174,7 +176,7 @@ function sodium_unpad(string $string, int $block_size): string {}
 
 function sodium_bin2hex(string $string): string {}
 
-function sodium_hex2bin(string $string, $ignore  = ""): string {}
+function sodium_hex2bin(string $string, string $ignore = ""): string {}
 
 #ifdef sodium_base64_VARIANT_ORIGINAL
 function sodium_bin2base64(string $string, int $id): string {}
@@ -182,4 +184,5 @@ function sodium_bin2base64(string $string, int $id): string {}
 function sodium_base642bin(string $string, int $id, string $ignore  = ""): string {}
 #endif
 
+/** @alias sodium_crypto_box_publickey_from_secretkey */
 function sodium_crypto_scalarmult_base(string $key): string {}

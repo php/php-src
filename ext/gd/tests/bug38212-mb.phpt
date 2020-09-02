@@ -21,5 +21,5 @@ trycatch_dump(
 unlink($file);
 ?>
 --EXPECT--
-!! [ValueError] Width must be at least 1
-!! [ValueError] Height must be at least 1
+!! [ValueError] imagecreatefromgd2part(): Argument #4 ($width) must be greater than or equal to 1
+!! [ValueError] imagecreatefromgd2part(): Argument #5 ($height) must be greater than or equal to 1

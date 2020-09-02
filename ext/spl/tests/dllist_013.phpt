@@ -31,7 +31,7 @@ echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 ?>
 --EXPECT--
-Exception: Offset invalid or out of range
+Exception: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range
 7
 7
 6
