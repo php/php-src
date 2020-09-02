@@ -1447,6 +1447,21 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_QM_ASSIGN:
 					ADD_OP1_TRACE_GUARD();
 					break;
+				case ZEND_VERIFY_RETURN_TYPE:
+					if (opline->op1_type == IS_UNUSED) {
+						/* Always throws */
+						break;
+					}
+					if (opline->op1_type == IS_CONST) {
+						/* TODO Different instruction format, has return value */
+						break;
+					}
+					if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+						/* Not worth bothering with */
+						break;
+					}
+					ADD_OP1_TRACE_GUARD();
+					break;
 				case ZEND_FETCH_DIM_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -4499,6 +4514,29 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_SWITCH_STRING:
 					case ZEND_MATCH:
 						if (!zend_jit_switch(&dasm_state, opline, op_array, op_array_ssa, p+1, &zend_jit_traces[ZEND_JIT_TRACE_NUM])) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_VERIFY_RETURN_TYPE:
+						if (opline->op1_type == IS_UNUSED) {
+							/* Always throws */
+							break;
+						}
+						if (opline->op1_type == IS_CONST) {
+							/* TODO Different instruction format, has return value */
+							break;
+						}
+						if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+							/* Not worth bothering with */
+							break;
+						}
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
+						if (op1_info & MAY_BE_REF) {
+							/* TODO May need reference unwrapping. */
+							break;
+						}
+						if (!zend_jit_verify_return_type(&dasm_state, opline, op_array, op1_info)) {
 							goto jit_failure;
 						}
 						goto done;
