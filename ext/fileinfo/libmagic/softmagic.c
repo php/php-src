@@ -479,11 +479,12 @@ check_fmt(struct magic_set *ms, const char *fmt)
 	pcre_cache_entry *pce;
 	int rv = -1;
 	zend_string *pattern;
+	ALLOCA_FLAG(use_heap)
 
 	if (strchr(fmt, '%') == NULL)
 		return 0;
 
-	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
+	ZSTR_ALLOCA_INIT(pattern, "~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, use_heap);
 	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
 		rv = -1;
 	} else {
@@ -494,7 +495,7 @@ check_fmt(struct magic_set *ms, const char *fmt)
 			php_pcre_free_match_data(match_data);
 		}
 	}
-	zend_string_release(pattern);
+	ZSTR_ALLOCA_FREE(pattern, use_heap);
 	return rv;
 }
 
