@@ -81,10 +81,10 @@ PHP 8.0 UPGRADE NOTES
     Additionally, care should be taken that error messages are not displayed in
     production environments, which can result in information leaks. Please
     ensure that display_errors=Off is used in conjunction with error logging.
-  . Adding more than one @ operator to an expression is no longer supported,
-    since this syntax is now used for attributes (previously extra @ operators
-    had no effect).
-    RFC: https://wiki.php.net/rfc/shorter_attribute_syntax
+  . Following the hash comment operator # immediately with an opening bracket
+    is not supported as a comment anymore since this syntax is now used for
+    attributes.
+    RFC: https://wiki.php.net/rfc/shorter_attribute_syntax_change
   . Inheritance errors due to incompatible method signatures (LSP violations)
     will now always generate a fatal error. Previously a warning was generated
     in some cases.
@@ -687,6 +687,7 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/attributes_v2
     RFC: https://wiki.php.net/rfc/attribute_amendments
     RFC: https://wiki.php.net/rfc/shorter_attribute_syntax
+    RFC: https://wiki.php.net/rfc/shorter_attribute_syntax_change
   . Added support for constructor property promotion (declaring properties in
     the constructor signature).
     RFC: https://wiki.php.net/rfc/constructor_promotion

@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0rc1
 
+- Core:
+  . Implement #[Attr] Attribute syntax as per final vote in RFC
+    https://wiki.php.net/rfc/shorter_attribute_syntax_change
 
 03 Sep 2020, PHP 8.0.0beta3
 
