@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #80037 (Typed property must not be accessed before initialization
     when __get() declared). (Nikita)
   . Fixed bug #80048 (Bug #69100 has not been fixed for Windows). (cmb)
+  . Fixed bug #80049 (Memleak when coercing integers to string via variadic
+    argument). (Nikita)
 
 - Calendar:
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
