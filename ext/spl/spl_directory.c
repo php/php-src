@@ -732,7 +732,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 	intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	if (intern->_path) {
 		/* object is already initialized */
-		php_error_docref(NULL, E_WARNING, "Directory object is already initialized");
+		zend_throw_error(NULL, "Directory object is already initialized");
 		return;
 	}
 	intern->flags = flags;
@@ -1232,10 +1232,10 @@ PHP_METHOD(SplFileInfo, getLinkTarget)
 	}
 #if defined(PHP_WIN32) || defined(HAVE_SYMLINK)
 	if (intern->file_name == NULL) {
-		zend_restore_error_handling(&error_handling);
-		php_error_docref(NULL, E_WARNING, "Empty filename");
-		RETURN_FALSE;
-	} else if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
+		zend_value_error("Filename cannot be empty");
+		RETURN_THROWS();
+	}
+	if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
 		char expanded_path[MAXPATHLEN];
 		if (!expand_filepath_with_mode(intern->file_name, expanded_path, NULL, 0, CWD_EXPAND )) {
 			zend_restore_error_handling(&error_handling);
@@ -1577,6 +1577,7 @@ PHP_METHOD(GlobIterator, count)
 		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 	} else {
 		/* should not happen */
+		// TODO ZEND_ASSERT ?
 		php_error_docref(NULL, E_ERROR, "GlobIterator lost glob state");
 	}
 }
@@ -2330,6 +2331,7 @@ PHP_METHOD(SplFileObject, fgetcsv)
 
 		CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
+		// TODO Align behaviour on normal fgetcsv()
 		switch(ZEND_NUM_ARGS())
 		{
 		case 3:
@@ -2377,6 +2379,8 @@ PHP_METHOD(SplFileObject, fputcsv)
 	zval *fields = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sss", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
+
+		// TODO Align behaviour on normal fputcsv()
 		switch(ZEND_NUM_ARGS())
 		{
 		case 4:
@@ -2429,6 +2433,7 @@ PHP_METHOD(SplFileObject, setCsvControl)
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
+		// TODO Align behaviour on normal fgetcsv()
 		switch(ZEND_NUM_ARGS())
 		{
 		case 3:
@@ -2685,8 +2690,8 @@ PHP_METHOD(SplFileObject, fread)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (length <= 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	str = php_stream_read_to_str(intern->u.file.stream, length);
