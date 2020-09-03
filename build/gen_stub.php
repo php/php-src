@@ -112,6 +112,8 @@ class SimpleType {
             return "IS_VOID";
         case "callable":
             return "IS_CALLABLE";
+        case "iterable":
+            return "IS_ITERABLE";
         case "mixed":
             return "IS_MIXED";
         default:
