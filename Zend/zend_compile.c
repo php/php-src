@@ -437,6 +437,7 @@ void shutdown_compiler(void) /* {{{ */
 		FREE_HASHTABLE(CG(delayed_autoloads));
 		CG(delayed_autoloads) = NULL;
 	}
+	zend_restore_compiled_filename(NULL);
 }
 /* }}} */
 
