@@ -43,6 +43,7 @@ PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk);
 PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx);
 PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
 PHPAPI int php_mkdir(const char *dir, zend_long mode);
+PHPAPI void php_fstat(php_stream *stream, zval *return_value);
 
 #define PHP_CSV_NO_ESCAPE EOF
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value);
