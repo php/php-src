@@ -40,8 +40,8 @@ PHP_FUNCTION(ftok)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (pathname_len == 0){
-		php_error_docref(NULL, E_WARNING, "Pathname is invalid");
-		RETURN_LONG(-1);
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (proj_len != 1){

@@ -1698,8 +1698,8 @@ PHP_FUNCTION(stream_socket_shutdown)
 	if (how != STREAM_SHUT_RD &&
 	    how != STREAM_SHUT_WR &&
 	    how != STREAM_SHUT_RDWR) {
-		php_error_docref(NULL, E_WARNING, "Second parameter $how needs to be one of STREAM_SHUT_RD, STREAM_SHUT_WR or STREAM_SHUT_RDWR");
-		RETURN_FALSE;
+	    zend_argument_value_error(2, "must be one of STREAM_SHUT_RD, STREAM_SHUT_WR, or STREAM_SHUT_RDWR");
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zstream);
