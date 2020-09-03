@@ -25,20 +25,19 @@ $controls = array(
 
 var_dump(ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, 10));
 
-foreach ($controls as $control)
-    var_dump(ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $control));
+foreach ($controls as $control) {
+    try {
+        var_dump(ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $control));
+    } catch (Error $exception) {
+        echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+    }
+}
 
 var_dump(ldap_set_option($link, 999999, 999999));
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
-
-Warning: ldap_set_option(): Control must have an "oid" key in %s on line %d
-bool(false)
-
-Warning: ldap_set_option(): The array value must contain only arrays, where each array is a control in %s on line %d
-bool(false)
-
-Warning: ldap_set_option(): Expected array value for this option in %s on line %d
-bool(false)
+ValueError: ldap_set_option(): Control must have an "oid" key
+TypeError: ldap_set_option(): Argument #3 ($newval) must contain only arrays, where each array is a control
+TypeError: ldap_set_option(): Argument #3 ($newval) must be of type array for the LDAP_OPT_CLIENT_CONTROLS option, string given
 bool(false)
