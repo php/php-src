@@ -107,16 +107,12 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte2le = {
 
 int mbfl_filt_conv_byte2be_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = (c & 0xff) << 8;
-		filter->cache = n;
+		filter->cache = (c & 0xff) << 8;
 	} else {
 		filter->status = 0;
-		n = (c & 0xff) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		CK((*filter->output_function)((c & 0xff) | filter->cache, filter->data));
 	}
 	return c;
 }
@@ -130,16 +126,12 @@ int mbfl_filt_conv_wchar_byte2be(int c, mbfl_convert_filter *filter)
 
 int mbfl_filt_conv_byte2le_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = c & 0xff;
-		filter->cache = n;
+		filter->cache = c & 0xff;
 	} else {
 		filter->status = 0;
-		n = ((c & 0xff) << 8) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		CK((*filter->output_function)(((c & 0xff) << 8) | filter->cache, filter->data));
 	}
 	return c;
 }
