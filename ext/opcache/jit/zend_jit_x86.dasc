@@ -397,8 +397,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	if (GCC_GLOBAL_REGS) {
 |		LOAD_ADDR IP, addr
 ||	} else {
-|		LOAD_ADDR RX, addr
-|		mov aword EX->opline, RX
+|		ADDR_OP2_2 mov, aword EX->opline, addr, RX
 ||	}
 |.endmacro
 
