@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug #80002 (calc free space for new interned string is wrong).
     (t-matsuno)
+  . Fixed bug #80046 (FREE for SWITCH_STRING optimized away). (Nikita)
 
 - PDO:
   . Fixed bug #80027 (Terrible performance using $query->fetch on queries with
