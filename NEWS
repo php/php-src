@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #80048 (Bug #69100 has not been fixed for Windows). (cmb)
+  . Fixed bug #80049 (Memleak when coercing integers to string via variadic
+    argument). (Nikita)
 
 - Calendar:
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
