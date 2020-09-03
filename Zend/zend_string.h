@@ -186,12 +186,13 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 			ZSTR_LEN(ret) = len;
 			zend_string_forget_hash_val(ret);
 			return ret;
-		} else {
-			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
 	memcpy(ZSTR_VAL(ret), ZSTR_VAL(s), MIN(len, ZSTR_LEN(s)) + 1);
+	if (!ZSTR_IS_INTERNED(s)) {
+		GC_DELREF(s);
+	}
 	return ret;
 }
 
@@ -206,12 +207,13 @@ static zend_always_inline zend_string *zend_string_extend(zend_string *s, size_t
 			ZSTR_LEN(ret) = len;
 			zend_string_forget_hash_val(ret);
 			return ret;
-		} else {
-			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
 	memcpy(ZSTR_VAL(ret), ZSTR_VAL(s), ZSTR_LEN(s) + 1);
+	if (!ZSTR_IS_INTERNED(s)) {
+		GC_DELREF(s);
+	}
 	return ret;
 }
 
@@ -226,12 +228,13 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 			ZSTR_LEN(ret) = len;
 			zend_string_forget_hash_val(ret);
 			return ret;
-		} else {
-			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
 	memcpy(ZSTR_VAL(ret), ZSTR_VAL(s), len + 1);
+	if (!ZSTR_IS_INTERNED(s)) {
+		GC_DELREF(s);
+	}
 	return ret;
 }
 
@@ -245,12 +248,13 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 			ZSTR_LEN(ret) = (n * m) + l;
 			zend_string_forget_hash_val(ret);
 			return ret;
-		} else {
-			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_safe_alloc(n, m, l, persistent);
 	memcpy(ZSTR_VAL(ret), ZSTR_VAL(s), MIN((n * m) + l, ZSTR_LEN(s)) + 1);
+	if (!ZSTR_IS_INTERNED(s)) {
+		GC_DELREF(s);
+	}
 	return ret;
 }
 
