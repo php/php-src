@@ -91,7 +91,7 @@ struct _zend_module_entry {
 #endif
 	void (*globals_ctor)(void *global);
 	void (*globals_dtor)(void *global);
-	int (*post_deactivate_func)(void);
+	zend_result (*post_deactivate_func)(void);
 	int module_started;
 	unsigned char type;
 	void *handle;
