@@ -3141,12 +3141,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		parent_trace ? &zend_jit_traces[parent_trace] : NULL, exit_num);
 
 	if (!parent_trace) {
-		zend_jit_set_opline(opline);
+		zend_jit_set_last_valid_opline(opline);
 	} else {
 		if (zend_jit_traces[parent_trace].exit_info[exit_num].opline == NULL) {
 			zend_jit_trace_opline_guard(&dasm_state, opline);
 		} else {
-			zend_jit_reset_opline();
+			zend_jit_reset_last_valid_opline();
 		}
 	}
 
@@ -5078,7 +5078,7 @@ done:
 	 || p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 	 || p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 		if (p->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
-			if (!zend_jit_set_valid_ip(&dasm_state, p->opline)) {
+			if (!zend_jit_set_ip(&dasm_state, p->opline)) {
 				goto jit_failure;
 			}
 		}
@@ -5097,7 +5097,7 @@ done:
 			goto jit_failure;
 		}
 		if (p->stop == ZEND_JIT_TRACE_STOP_LINK) {
-			if (!zend_jit_set_valid_ip(&dasm_state, p->opline)) {
+			if (!zend_jit_set_ip(&dasm_state, p->opline)) {
 				goto jit_failure;
 			}
 			t->link = zend_jit_find_trace(p->opline->handler);
