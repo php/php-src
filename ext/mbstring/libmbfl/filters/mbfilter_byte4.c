@@ -107,24 +107,18 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
 
 int mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = (c & 0xff) << 24;
-		filter->cache = n;
+		filter->cache = (c & 0xff) << 24;
 	} else if (filter->status == 1) {
 		filter->status = 2;
-		n = (c & 0xff) << 16;
-		filter->cache |= n;
+		filter->cache |= (c & 0xff) << 16;
 	} else if (filter->status == 2) {
 		filter->status = 3;
-		n = (c & 0xff) << 8;
-		filter->cache |= n;
+		filter->cache |= (c & 0xff) << 8;
 	} else {
 		filter->status = 0;
-		n = (c & 0xff) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		CK((*filter->output_function)((c & 0xff) | filter->cache, filter->data));
 	}
 	return c;
 }
@@ -140,24 +134,18 @@ int mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter)
 
 int mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = (c & 0xff);
-		filter->cache = n;
+		filter->cache = c & 0xff;
 	} else if (filter->status == 1) {
 		filter->status = 2;
-		n = (c & 0xff) << 8;
-		filter->cache |= n;
+		filter->cache |= (c & 0xff) << 8;
 	} else if (filter->status == 2) {
 		filter->status = 3;
-		n = (c & 0xff) << 16;
-		filter->cache |= n;
+		filter->cache |= (c & 0xff) << 16;
 	} else {
 		filter->status = 0;
-		n = ((c & 0xff) << 24) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		CK((*filter->output_function)(((c & 0xff) << 24) | filter->cache, filter->data));
 	}
 	return c;
 }
