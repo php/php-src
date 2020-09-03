@@ -10194,7 +10194,7 @@ static int zend_jit_free_op(dasm_State **Dst, const zend_op *opline, uint32_t in
 	return 1;
 }
 
-static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info, int indirect_var_access, int may_throw)
+static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, const zend_op *opline, uint32_t op1_info, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info, int indirect_var_access, int may_throw)
 {
 	zend_bool may_be_top_frame =
 		JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
@@ -10293,50 +10293,49 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, 
 
 		|8:
 
-		if ((trace->op != ZEND_JIT_TRACE_END ||
-				trace->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) &&
-					may_throw) {
-			|	// if (EG(exception))
-			|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
-			|	jne ->leave_throw_handler
-		}
-
 		if (trace->op == ZEND_JIT_TRACE_BACK
 		 && (!JIT_G(current_frame) || TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame)))) {
 			const zend_op *next_opline = trace->opline;
-			uint32_t exit_point;
-			const void *exit_addr;
-			zend_jit_trace_stack_frame *current_frame;
 
+			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+			 && (op1_info & MAY_BE_RC1)
+			 && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
+				/* exception might be thrown during destruction of unused return value */
+				|	// if (EG(exception))
+				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
+				|	jne ->leave_throw_handler
+			}
 			do {
 				trace++;
 			} while (trace->op == ZEND_JIT_TRACE_INIT_CALL);
 			ZEND_ASSERT(trace->op == ZEND_JIT_TRACE_VM || trace->op == ZEND_JIT_TRACE_END);
 			next_opline = trace->opline;
 			ZEND_ASSERT(next_opline != NULL);
-			current_frame = JIT_G(current_frame);
-			JIT_G(current_frame) = NULL;
-			exit_point = zend_jit_trace_get_exit_point(NULL, 0);
-			JIT_G(current_frame) = current_frame;
-			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-			if (!exit_addr) {
-				return 0;
-			}
+
 			if (trace->op == ZEND_JIT_TRACE_END
 			 && trace->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 				trace_info->flags |= ZEND_JIT_TRACE_LOOP;
 				|	CMP_IP next_opline
 				|	je =>0 // LOOP
-				|	jmp &exit_addr
+				|	jmp ->trace_escape
 			} else {
 				|	CMP_IP next_opline
-				|	jne &exit_addr
+				|	jne ->trace_escape
 			}
 
 			last_valid_opline = trace->opline;
 
 			return 1;
+		} else if (may_throw ||
+				(((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+				  && (op1_info & MAY_BE_RC1)
+				  && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)))
+				 && (!JIT_G(current_frame) || TRACE_FRAME_IS_RETURN_VALUE_UNUSED(JIT_G(current_frame))))) {
+			|	// if (EG(exception))
+			|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
+			|	jne ->leave_throw_handler
 		}
+
 		return 1;
 	} else {
 		|	// if (EG(exception))

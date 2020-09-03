@@ -2740,7 +2740,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									}
 								}
 							}
-							if (!zend_jit_leave_func(&dasm_state, op_array, NULL, NULL,
+							if (!zend_jit_leave_func(&dasm_state, op_array, opline, op1_info, NULL, NULL,
 									(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, 1)) {
 								goto jit_failure;
 							}
