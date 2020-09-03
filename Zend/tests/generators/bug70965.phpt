@@ -1,5 +1,5 @@
 --TEST--
-Bug #70965 (yield from with a common iterator primes too much)
+Bug #70965 (yield from with a common iterator primes too much) (no longer supported)
 --FILE--
 <?php
 
@@ -23,10 +23,12 @@ do {
 } while ($gen->valid());
 
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
-int(2)
-int(3)
-int(4)
-int(5)
-int(5)
+
+Fatal error: Uncaught Error: A different generator already yields from this generator in %s:%d
+Stack trace:
+#0 [internal function]: bar(Object(Generator))
+#1 %s(%d): Generator->current()
+#2 {main}
+  thrown in %s on line %d

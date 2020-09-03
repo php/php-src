@@ -1,5 +1,5 @@
 --TEST--
-yield from on multiple trees needing merge
+yield from on multiple trees needing merge (no longer supported)
 --FILE--
 <?php
 
@@ -49,29 +49,10 @@ for ($i = 0; $i < 2; $i++) {
 
 int(0)
 int(1)
-int(2)
-int(3)
-int(4)
-int(5)
-int(6)
-int(7)
-int(8)
-int(9)
-int(10)
-int(11)
-int(12)
-int(13)
-int(14)
-Exception in %s:%d
-Stack trace:
-#0 %s(%d): from(5)
-#1 %s(%d): gen(Object(Generator), 1)
-#2 %s(%d): gen(Object(Generator), 2)
-#3 [internal function]: gen(Object(Generator), 3)
-#4 %s(%d): Generator->next()
-#5 {main}
-ClosedGeneratorException: Generator yielded from aborted, no return value available in %s:%d
+
+Fatal error: Uncaught Error: A different generator already yields from this generator in %s:%d
 Stack trace:
 #0 [internal function]: gen(Object(Generator), 1)
 #1 %s(%d): Generator->current()
 #2 {main}
+  thrown in %s on line %d

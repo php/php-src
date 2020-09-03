@@ -1,5 +1,5 @@
 --TEST--
-Bug #74954 (crash after update of generator yielding from finished generator)
+Bug #74954 (crash after update of generator yielding from finished generator) (no longer supported)
 --FILE--
 <?php
 
@@ -30,16 +30,9 @@ do {
 
 ?>
 --EXPECTF--
-Caught exception!
-Exception in %s:%d
-Stack trace:
-#0 %s(%d): from()
-#1 [internal function]: gen(Object(Generator))
-#2 %s(%d): Generator->next()
-#3 {main}
-Caught exception!
-ClosedGeneratorException: Generator yielded from aborted, no return value available in %s:%d
+Fatal error: Uncaught Error: A different generator already yields from this generator in %s:%d
 Stack trace:
 #0 [internal function]: gen(Object(Generator))
-#1 %s(%d): Generator->next()
+#1 %s(%d): Generator->current()
 #2 {main}
+  thrown in %s on line %d

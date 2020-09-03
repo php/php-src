@@ -8041,6 +8041,12 @@ ZEND_VM_C_LABEL(yield_from_try_again):
 					UNDEF_RESULT();
 					HANDLE_EXCEPTION();
 				} else {
+					if (new_gen->node.children > 0) {
+						zend_throw_error(NULL, "A different generator already yields from this generator");
+						zval_ptr_dtor(val);
+						UNDEF_RESULT();
+						HANDLE_EXCEPTION();
+					}
 					zend_generator_yield_from(generator, new_gen);
 				}
 			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {

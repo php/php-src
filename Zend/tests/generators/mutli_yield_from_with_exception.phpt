@@ -1,5 +1,5 @@
 --TEST--
-Multiple yield from on a same Generator throwing an Exception
+Multiple yield from on a same Generator throwing an Exception (no longer supported)
 --FILE--
 <?php
 function from() {
@@ -30,20 +30,9 @@ do {
 } while($gens[0]->valid());
 ?>
 --EXPECTF--
-Generator 0
-int(1)
-Caught exception!
-Exception in %s:%d
-Stack trace:
-#0 %s(%d): from()
-#1 [internal function]: gen(Object(Generator))
-#2 %s(%d): Generator->next()
-#3 {main}
-Generator 1
-Caught exception!
-ClosedGeneratorException: Generator yielded from aborted, no return value available in %s:%d
+Fatal error: Uncaught Error: A different generator already yields from this generator in %s:%d
 Stack trace:
 #0 [internal function]: gen(Object(Generator))
 #1 %s(%d): Generator->current()
 #2 {main}
-NULL
+  thrown in %s on line %d

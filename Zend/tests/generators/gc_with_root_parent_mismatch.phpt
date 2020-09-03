@@ -1,5 +1,5 @@
 --TEST--
-Generator GC when the yield from parent chain does not reach the root
+Generator GC when the yield from parent chain does not reach the root (no longer supported)
 --FILE--
 <?php
 
@@ -22,6 +22,13 @@ $gen1->next();
 gc_collect_cycles();
 
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
-int(1)
+
+Fatal error: Uncaught Error: A different generator already yields from this generator in %s:%d
+Stack trace:
+#0 %s(%d): delegate(Object(Generator))
+#1 [internal function]: delegate(Object(Generator))
+#2 %s(%d): Generator->current()
+#3 {main}
+  thrown in %s on line %d
