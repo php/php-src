@@ -204,9 +204,9 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		parent = parent->parent;
 		inherited = 1;
 	}
-	if (!parent) { /* this must never happen */
-		php_error_docref(NULL, E_COMPILE_ERROR, "Internal compiler error, Class is not child of ArrayObject or ArrayIterator");
-	}
+
+	ZEND_ASSERT(parent);
+
 	if (inherited) {
 		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
 		if (intern->fptr_offset_get->common.scope == parent) {

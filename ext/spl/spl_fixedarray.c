@@ -234,9 +234,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 		inherited = 1;
 	}
 
-	if (!parent) { /* this must never happen */
-		php_error_docref(NULL, E_COMPILE_ERROR, "Internal compiler error, Class is not child of SplFixedArray");
-	}
+	ZEND_ASSERT(parent);
 
 	funcs_ptr = class_type->iterator_funcs_ptr;
 	if (!funcs_ptr->zf_current) {
