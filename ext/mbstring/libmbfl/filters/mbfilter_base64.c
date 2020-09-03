@@ -89,9 +89,13 @@ static const unsigned char mbfl_base64_table[] = {
 
 int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
-	n = (filter->status & 0xff);
+	int n = (filter->status & 0xff);
+	/* 1st (low) byte of `n` is the number of bytes already cached (0, 1, or 2)
+	 *
+	 * 2nd byte of `n` is the number of characters already emitted on the current
+	 * line, _if_ this filter is not being used for MIME header encoding
+	 *
+	 * 4th byte of `n` is 1 if this filter is being used for MIME header encoding */
 	if (n == 0) {
 		filter->status++;
 		filter->cache = (c & 0xff) << 16;
@@ -101,11 +105,10 @@ int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 	} else {
 		filter->status &= ~0xff;
 		if ((filter->status & MBFL_BASE64_STS_MIME_HEADER) == 0) {
-			n = (filter->status & 0xff00) >> 8;
-			if (n > 72) {
+			if ((filter->status & 0xff00) > (72 << 8)) {
 				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
 				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
-				filter->status &= ~0xff00;
+				filter->status = 0;
 			}
 			filter->status += 0x400;
 		}
@@ -115,36 +118,32 @@ int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 		CK((*filter->output_function)(mbfl_base64_table[(n >> 6) & 0x3f], filter->data));
 		CK((*filter->output_function)(mbfl_base64_table[n & 0x3f], filter->data));
 	}
-
 	return c;
 }
 
 void mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 {
-	int status, cache, len;
-
-	status = filter->status & 0xff;
-	cache = filter->cache;
-	len = (filter->status & 0xff00) >> 8;
+	int status = filter->status & 0xff;
+	int cache = filter->cache;
+	int len = (filter->status & 0xff00) >> 8;
 	filter->status &= ~0xffff;
 	filter->cache = 0;
 	/* flush fragments */
 	if (status >= 1) {
 		if ((filter->status & MBFL_BASE64_STS_MIME_HEADER) == 0) {
 			if (len > 72){
-				(*filter->output_function)(0x0d, filter->data);		/* CR */
-				(*filter->output_function)(0x0a, filter->data);		/* LF */
+				(*filter->output_function)('\r', filter->data);
+				(*filter->output_function)('\n', filter->data);
 			}
 		}
 		(*filter->output_function)(mbfl_base64_table[(cache >> 18) & 0x3f], filter->data);
 		(*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data);
 		if (status == 1) {
-			(*filter->output_function)(0x3d, filter->data);		/* '=' */
-			(*filter->output_function)(0x3d, filter->data);		/* '=' */
+			(*filter->output_function)('=', filter->data);
 		} else {
 			(*filter->output_function)(mbfl_base64_table[(cache >> 6) & 0x3f], filter->data);
-			(*filter->output_function)(0x3d, filter->data);		/* '=' */
 		}
+		(*filter->output_function)('=', filter->data);
 	}
 }
 
@@ -202,12 +201,9 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 
 void mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 {
-	int status, cache;
-
-	status = filter->status;
-	cache = filter->cache;
-	filter->status = 0;
-	filter->cache = 0;
+	int status = filter->status;
+	int cache = filter->cache;
+	filter->status = filter->cache = 0;
 	/* flush fragments */
 	if (status >= 2) {
 		(*filter->output_function)((cache >> 16) & 0xff, filter->data);
