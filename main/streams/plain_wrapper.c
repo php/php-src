@@ -808,15 +808,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						}
 
 						size = GetFileSize(hfile, NULL);
-						if (range->length == 0 && range->offset > 0 && range->offset < size) {
-							range->length = size - range->offset;
-						}
-						if (range->length == 0 || range->length > size) {
-							range->length = size;
-						}
-						if (range->offset >= size) {
+						if (range->offset > size) {
 							range->offset = size;
-							range->length = 0;
+						}
+						if (range->length == 0 || range->length > size - range->offset) {
+							range->length = size - range->offset;
 						}
 
 						/* figure out how big a chunk to map to be able to view the part that we need */
