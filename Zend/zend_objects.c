@@ -247,7 +247,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 	if (old_object->ce->clone) {
 		GC_ADDREF(new_object);
-		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
+		zval old_object_param;
+		ZVAL_OBJ(&old_object_param, old_object);
+		zend_call_known_instance_method_with_1_params(new_object->ce->clone, new_object, NULL, &old_object_param);
 		OBJ_RELEASE(new_object);
 	}
 }
