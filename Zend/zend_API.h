@@ -1375,22 +1375,19 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_ARRAY_OR_OBJECT(dest) \
 	Z_PARAM_ARRAY_OR_OBJECT_EX(dest, 0, 0)
 
-#define Z_PARAM_ITERABLE_EX2(dest, check_null, deref, separate) \
-	Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_ITERABLE_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_iterable(_arg, &dest, check_null))) { \
 		_expected_type = check_null ? Z_EXPECTED_ITERABLE_OR_NULL : Z_EXPECTED_ITERABLE; \
 		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
-#define Z_PARAM_ITERABLE_EX(dest, check_null, separate) \
-	Z_PARAM_ITERABLE_EX2(dest, check_null, separate, separate)
-
 #define Z_PARAM_ITERABLE(dest) \
-	Z_PARAM_ITERABLE_EX(dest, 0, 0)
+	Z_PARAM_ITERABLE_EX(dest, 0)
 
 #define Z_PARAM_ITERABLE_OR_NULL(dest) \
-	Z_PARAM_ITERABLE_EX(dest, 1, 0)
+	Z_PARAM_ITERABLE_EX(dest, 1)
 
 /* old "b" */
 #define Z_PARAM_BOOL_EX2(dest, is_null, check_null, deref, separate) \
