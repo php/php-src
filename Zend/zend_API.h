@@ -1209,6 +1209,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_STRING_OR_NULL,	"of type ?string") \
 	_(Z_EXPECTED_ARRAY,				"of type array") \
 	_(Z_EXPECTED_ARRAY_OR_NULL,		"of type ?array") \
+	_(Z_EXPECTED_ITERABLE,				"of type iterable") \
+	_(Z_EXPECTED_ITERABLE_OR_NULL,		"of type ?iterable") \
 	_(Z_EXPECTED_FUNC,				"a valid callback") \
 	_(Z_EXPECTED_FUNC_OR_NULL,		"a valid callback or null") \
 	_(Z_EXPECTED_RESOURCE,			"of type resource") \
@@ -1372,6 +1374,20 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 
 #define Z_PARAM_ARRAY_OR_OBJECT(dest) \
 	Z_PARAM_ARRAY_OR_OBJECT_EX(dest, 0, 0)
+
+#define Z_PARAM_ITERABLE_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_iterable(_arg, &dest, check_null))) { \
+		_expected_type = check_null ? Z_EXPECTED_ITERABLE_OR_NULL : Z_EXPECTED_ITERABLE; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_ITERABLE(dest) \
+	Z_PARAM_ITERABLE_EX(dest, 0)
+
+#define Z_PARAM_ITERABLE_OR_NULL(dest) \
+	Z_PARAM_ITERABLE_EX(dest, 1)
 
 /* old "b" */
 #define Z_PARAM_BOOL_EX2(dest, is_null, check_null, deref, separate) \
@@ -1901,6 +1917,21 @@ static zend_always_inline bool zend_parse_arg_path(zval *arg, char **dest, size_
 		*dest_len = ZSTR_LEN(str);
 	}
 	return 1;
+}
+
+static zend_always_inline bool zend_parse_arg_iterable(zval *arg, zval **dest, bool check_null)
+{
+	if (EXPECTED(zend_is_iterable(arg))) {
+		*dest = arg;
+		return 1;
+	}
+
+	if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+		return 1;
+	}
+
+	return 0;
 }
 
 static zend_always_inline bool zend_parse_arg_array(zval *arg, zval **dest, bool check_null, bool or_object)
