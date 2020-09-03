@@ -121,8 +121,8 @@ function array_search(mixed $needle, array $haystack, bool $strict = false): int
 function extract(array &$array, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
 
 /**
- * @param string|array $var_name
- * @param string|array $var_names
+ * @param array|string $var_name
+ * @param array|string $var_names
  */
 function compact($var_name, ...$var_names): array {}
 
@@ -131,11 +131,10 @@ function array_fill(int $start_key, int $num, mixed $val): array {}
 function array_fill_keys(array $keys, mixed $val): array {}
 
 /**
- * @param int|float|string $low
- * @param int|float|string $high
- * @param int|float $step
+ * @param string|int|float $low
+ * @param string|int|float $high
  */
-function range($low, $high, $step = 1): array {}
+function range($low, $high, int|float $step = 1): array {}
 
 function shuffle(array &$array): bool {}
 
@@ -245,11 +244,11 @@ function array_filter(array $array, ?callable $callback = null, int $use_keys = 
 
 function array_map(?callable $callback, array $array1, array ...$arrays): array {}
 
-/** @param int|string $key */
+/** @param string|int $key */
 function array_key_exists($key, array $search): bool {}
 
 /**
- * @param int|string $key
+ * @param string|int $key
  * @alias array_key_exists
  */
 function key_exists($key, array $search): bool {}
@@ -507,10 +506,10 @@ function header(string $string, bool $replace = true, int $http_response_code = 
 
 function header_remove(string $name = UNKNOWN): void {}
 
-/** @param int|array $expires_or_options */
+/** @param array|int $expires_or_options */
 function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
-/** @param int|array $expires_or_options */
+/** @param array|int $expires_or_options */
 function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
 function http_response_code(int $response_code = 0): int|bool {}
@@ -621,8 +620,7 @@ function substr(string $str, int $start, ?int $length = null): string|false {}
  * @param mixed $start
  * @param mixed $length
  */
-function substr_replace(
-    string|array $str, string|array $replace, $start, $length = UNKNOWN): string|array|false {}
+function substr_replace(array|string $str, string|array $replace, $start, $length = UNKNOWN): string|array|false {}
 
 function quotemeta(string $str): string {}
 
@@ -651,21 +649,11 @@ function stripcslashes(string $str): string {}
 
 function stripslashes(string $str): string {}
 
-/**
- * @param string|array $search
- * @param string|array $replace
- * @param int $replace_count
- */
-function str_replace(
-    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+/** @param int $replace_count */
+function str_replace(array|string $search, array|string $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
 
-/**
- * @param string|array $search
- * @param string|array $replace
- * @param int $replace_count
- */
-function str_ireplace(
-    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+/** @param int $replace_count */
+function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
@@ -1166,11 +1154,9 @@ function unpack(string $format, string $data, int $offset = 0): array|false {}
 
 function password_get_info(string $hash): ?array {}
 
-/** @param string|int $algo */
-function password_hash(string $password, $algo, array $options = []): string {}
+function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
-/** @param string|int $algo */
-function password_needs_rehash(string $hash, $algo, array $options = []): bool {}
+function password_needs_rehash(string $hash, string|int $algo, array $options = []): bool {}
 
 function password_verify(string $password, string $hash): bool {}
 
@@ -1240,12 +1226,8 @@ function stream_context_set_params($context, array $params): bool {}
 /** @param resource $context */
 function stream_context_get_params($context): array {}
 
-/**
- * @param resource $context
- * @param array|string $param2
- * @param mixed $value
- */
-function stream_context_set_option($context, $param2, string $option_name = UNKNOWN, mixed $value = UNKNOWN): bool {}
+/** @param resource $context */
+function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
 
 /** @param resource $stream_or_context */
 function stream_context_get_options($stream_or_context): array {}

@@ -4083,8 +4083,10 @@ PHPAPI void php_stripslashes(zend_string *str)
 #define _isnewline(c) (((((unsigned char) c) == '\n' || ((unsigned char) c) == '\r')) ? 1 : 0)
 
 /* {{{ php_str_replace_in_subject */
-static zend_long php_str_replace_in_subject(zval *search, zval *replace, zend_string *subject_str, zval *result, int case_sensitivity)
-{
+static zend_long php_str_replace_in_subject(
+	zend_string *search_str, HashTable *search_ht, zend_string *replace_str, HashTable *replace_ht,
+	zend_string *subject_str, zval *result, int case_sensitivity
+) {
 	zval		*search_entry;
 	zend_string	*tmp_result;
 	char		*replace_value = NULL;
@@ -4099,37 +4101,37 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zend_st
 	}
 
 	/* If search is an array */
-	if (Z_TYPE_P(search) == IS_ARRAY) {
+	if (search_ht) {
 		/* Duplicate subject string for repeated replacement */
 		zend_string_addref(subject_str);
 
-		if (Z_TYPE_P(replace) == IS_ARRAY) {
+		if (replace_ht) {
 			replace_idx = 0;
 		} else {
 			/* Set replacement value to the passed one */
-			replace_value = Z_STRVAL_P(replace);
-			replace_len = Z_STRLEN_P(replace);
+			replace_value = ZSTR_VAL(replace_str);
+			replace_len = ZSTR_LEN(replace_str);
 		}
 
 		/* For each entry in the search array, get the entry */
-		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(search), search_entry) {
+		ZEND_HASH_FOREACH_VAL_IND(search_ht, search_entry) {
 			/* Make sure we're dealing with strings. */
 			zend_string *tmp_search_str;
 			zend_string *search_str = zval_get_tmp_string(search_entry, &tmp_search_str);
 			zend_string *replace_entry_str, *tmp_replace_entry_str = NULL;
 
 			/* If replace is an array. */
-			if (Z_TYPE_P(replace) == IS_ARRAY) {
+			if (replace_ht) {
 				/* Get current entry */
 				zval *replace_entry = NULL;
-				while (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
-					replace_entry = &Z_ARRVAL_P(replace)->arData[replace_idx].val;
+				while (replace_idx < replace_ht->nNumUsed) {
+					replace_entry = &replace_ht->arData[replace_idx].val;
 					if (Z_TYPE_P(replace_entry) != IS_UNDEF) {
 						break;
 					}
 					replace_idx++;
 				}
-				if (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
+				if (replace_idx < replace_ht->nNumUsed) {
 					/* Make sure we're dealing with strings. */
 					replace_entry_str = zval_get_tmp_string(replace_entry, &tmp_replace_entry_str);
 
@@ -4205,25 +4207,24 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zend_st
 			zend_string_release_ex(lc_subject_str, 0);
 		}
 	} else {
-		ZEND_ASSERT(Z_TYPE_P(search) == IS_STRING);
-		if (Z_STRLEN_P(search) == 1) {
+		ZEND_ASSERT(search_str);
+		if (ZSTR_LEN(search_str) == 1) {
 			ZVAL_STR(result,
 				php_char_to_str_ex(subject_str,
-							Z_STRVAL_P(search)[0],
-							Z_STRVAL_P(replace),
-							Z_STRLEN_P(replace),
+							ZSTR_VAL(search_str)[0],
+							ZSTR_VAL(replace_str),
+							ZSTR_LEN(replace_str),
 							case_sensitivity,
 							&replace_count));
-		} else if (Z_STRLEN_P(search) > 1) {
+		} else if (ZSTR_LEN(search_str) > 1) {
 			if (case_sensitivity) {
 				ZVAL_STR(result, php_str_to_str_ex(subject_str,
-						Z_STRVAL_P(search), Z_STRLEN_P(search),
-						Z_STRVAL_P(replace), Z_STRLEN_P(replace), &replace_count));
+						ZSTR_VAL(search_str), ZSTR_LEN(search_str),
+						ZSTR_VAL(replace_str), ZSTR_LEN(replace_str), &replace_count));
 			} else {
 				lc_subject_str = php_string_tolower(subject_str);
 				ZVAL_STR(result, php_str_to_str_i_ex(subject_str, ZSTR_VAL(lc_subject_str),
-						Z_STR_P(search),
-						Z_STRVAL_P(replace), Z_STRLEN_P(replace), &replace_count));
+						search_str, ZSTR_VAL(replace_str), ZSTR_LEN(replace_str), &replace_count));
 				zend_string_release_ex(lc_subject_str, 0);
 			}
 		} else {
@@ -4237,9 +4238,13 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zend_st
 /* {{{ php_str_replace_common */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
+	zend_string *search_str;
+	HashTable *search_ht;
+	zend_string *replace_str;
+	HashTable *replace_ht;
 	zend_string *subject_str;
 	HashTable *subject_ht;
-	zval *search, *replace, *subject_entry, *zcount = NULL;
+	zval *subject_entry, *zcount = NULL;
 	zval result;
 	zend_string *string_key;
 	zend_ulong num_key;
@@ -4247,24 +4252,18 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_ZVAL(search)
-		Z_PARAM_ZVAL(replace)
+		Z_PARAM_STR_OR_ARRAY_HT(search_str, search_ht)
+		Z_PARAM_STR_OR_ARRAY_HT(replace_str, replace_ht)
 		Z_PARAM_STR_OR_ARRAY_HT(subject_str, subject_ht)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(zcount)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Make sure we're dealing with strings and do the replacement. */
-	if (Z_TYPE_P(search) != IS_ARRAY) {
-		convert_to_string_ex(search);
-		if (Z_TYPE_P(replace) != IS_STRING) {
-			convert_to_string_ex(replace);
-		}
-	} else if (Z_TYPE_P(replace) != IS_ARRAY) {
-		convert_to_string_ex(replace);
-	}
-
-	if (EG(exception)) {
+	if (search_str && replace_ht) {
+		zend_argument_type_error(2, "must be of type %s when argument #1 ($search) is %s",
+			search_str ? "string" : "array", search_str ? "a string" : "an array"
+		);
 		RETURN_THROWS();
 	}
 
@@ -4278,7 +4277,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			zend_string *tmp_subject_str;
 			ZVAL_DEREF(subject_entry);
 			subject_str = zval_get_tmp_string(subject_entry, &tmp_subject_str);
-			count += php_str_replace_in_subject(search, replace, subject_str, &result, case_sensitivity);
+			count += php_str_replace_in_subject(search_str, search_ht, replace_str, replace_ht, subject_str, &result, case_sensitivity);
 			zend_tmp_string_release(tmp_subject_str);
 
 			/* Add to return array */
@@ -4289,7 +4288,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {	/* if subject is not an array */
-		count = php_str_replace_in_subject(search, replace, subject_str, return_value, case_sensitivity);
+		count = php_str_replace_in_subject(search_str, search_ht, replace_str, replace_ht, subject_str, return_value, case_sensitivity);
 	}
 	if (argc > 3) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, count);

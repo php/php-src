@@ -119,7 +119,7 @@ string(6) "012atm"
 -- Iteration 16 --
 string(6) "012ttm"
 -- Iteration 17 --
-strtr(): Argument #2 ($from) must be of type string|array, resource given
+strtr(): Argument #2 ($from) must be of type array|string, resource given
 -- Iteration 18 --
 string(6) "012atm"
 -- Iteration 19 --
