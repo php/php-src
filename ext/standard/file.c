@@ -325,28 +325,15 @@ PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 }
 /* }}} */
 
-static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
-
-/* {{{ Portable file locking */
-PHP_FUNCTION(flock)
+PHPAPI void php_flock_common(php_stream *stream, zend_long operation,
+	uint32_t operation_arg_num, zval *wouldblock, zval *return_value)
 {
-	zval *res, *wouldblock = NULL;
+	int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 	int act;
-	php_stream *stream;
-	zend_long operation = 0;
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_RESOURCE(res)
-		Z_PARAM_LONG(operation)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(wouldblock)
-	ZEND_PARSE_PARAMETERS_END();
-
-	PHP_STREAM_TO_ZVAL(stream, res);
 
 	act = operation & PHP_LOCK_UN;
 	if (act < 1 || act > 3) {
-		zend_argument_value_error(2, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
+		zend_argument_value_error(operation_arg_num, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
 		RETURN_THROWS();
 	}
 
@@ -363,6 +350,25 @@ PHP_FUNCTION(flock)
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
+}
+
+/* {{{ Portable file locking */
+PHP_FUNCTION(flock)
+{
+	zval *res, *wouldblock = NULL;
+	php_stream *stream;
+	zend_long operation = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_RESOURCE(res)
+		Z_PARAM_LONG(operation)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(wouldblock)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	php_flock_common(stream, operation, 2, wouldblock, return_value);
 }
 /* }}} */
 

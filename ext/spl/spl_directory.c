@@ -2498,15 +2498,11 @@ PHP_METHOD(SplFileObject, getCsvControl)
 }
 /* }}} */
 
-static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
-
-/* {{{ Portable file locking, copy pasted from ext/standard/file.c flock() function.
- * This is done to prevent this to fail if flock is disabled via disable_functions */
+/* {{{ Portable file locking */
 PHP_METHOD(SplFileObject, flock)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zval *wouldblock = NULL;
-	int act;
 	zend_long operation = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z", &operation, &wouldblock) == FAILURE) {
@@ -2515,25 +2511,7 @@ PHP_METHOD(SplFileObject, flock)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	act = operation & PHP_LOCK_UN;
-	if (act < 1 || act > 3) {
-		zend_argument_value_error(1, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
-		RETURN_THROWS();
-	}
-
-	if (wouldblock) {
-		ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 0);
-	}
-
-	/* flock_values contains all possible actions if (operation & PHP_LOCK_NB) we won't block on the lock */
-	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
-	if (php_stream_lock(intern->u.file.stream, act)) {
-		if (operation && errno == EWOULDBLOCK && wouldblock) {
-			ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 1);
-		}
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	php_flock_common(intern->u.file.stream, operation, 1, wouldblock, return_value);
 }
 /* }}} */
 
