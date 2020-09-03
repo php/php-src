@@ -180,6 +180,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         - zend_stack_init()
         - zend_stack_del_top()
         - zend_stack_destroy()
+        - _zend_module_entry module_shutdown_func, request_shutdown_func,
+            and post_deactivate_func function pointers
      2. Argument int to uint32_t in Zend Engine 4.0:
         - _zend_get_parameters_array_ex()
         - zend_copy_parameters_array()
@@ -308,8 +310,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         - zend_create_internal_iterator_zval()
         - zend_multibyte_set_filter()
         - zend_lex_tstring()
-        - _zend_module_entry module_startup_func, module_shutdown_func,
-          request_startup_func, request_shutdown_func, and post_deactivate_func function pointers
+        - _zend_module_entry module_startup_func, and request_startup_func function pointers
         - (*zend_encoding_list_parser) typedef
         - (*zend_encoding_internal_encoding_setter) typedef
         - zend_multibyte_set_functions()
