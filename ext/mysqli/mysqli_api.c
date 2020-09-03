@@ -2243,6 +2243,9 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
 	zend_long	mode_in;
+#if MYSQL_VERSION_ID >= 50107
+	my_bool	mode_b;
+#endif
 	unsigned long	mode;
 	zend_long	attr;
 	void	*mode_p;
@@ -2256,16 +2259,13 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	switch (attr) {
 #if MYSQL_VERSION_ID >= 50107
 	case STMT_ATTR_UPDATE_MAX_LENGTH:
-	{
-		//my_bool mode_b;
 		if (mode_in != 0 && mode_in != 1) {
 			zend_argument_value_error(ERROR_ARG_POS(3), "must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH");
 			RETURN_THROWS();
 		}
-		mode = mode_in;//(my_bool) mode_in;
-		mode_p = &mode;
+		mode_b = (my_bool) mode_in;
+		mode_p = &mode_b;
 		break;
-	}
 #endif
 	case STMT_ATTR_CURSOR_TYPE: {
 		switch (mode_in) {
@@ -2301,12 +2301,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		RETURN_THROWS();
 	}
 
-// TODO Can unify this?
-#ifndef MYSQLI_USE_MYSQLND
-	if (mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
-#else
-	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
-#endif
+	if (0 != mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;

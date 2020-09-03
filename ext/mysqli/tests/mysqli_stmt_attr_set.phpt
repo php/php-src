@@ -71,8 +71,10 @@ require_once("connect.inc");
     $stmt->prepare("SELECT label FROM test");
     var_dump($stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1));
     $res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
-    if ($res !== 1)
-        printf("[007.1] max_length should be 1, got %s\n", $res);
+    if ($res !== 1) {
+        printf("[007.1] max_length should be int 1, got\n");
+        var_dump($res);
+    }
     $stmt->execute();
     $stmt->store_result();
     $res = $stmt->result_metadata();
