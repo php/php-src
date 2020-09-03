@@ -2547,7 +2547,7 @@ void accel_deactivate(void)
 }
 #endif
 
-int accel_post_deactivate(void)
+zend_result accel_post_deactivate(void)
 {
 	if (ZCG(cwd)) {
 		zend_string_release_ex(ZCG(cwd), 0);
