@@ -2134,7 +2134,10 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_no_return_type(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
-		zend_check_magic_method_args(0, ce, fptr, error_type);
+        if (fptr->common.num_args > 1) {
+            zend_error(error_type, "Method %s::__clone() cannot take more than 1 argument",
+                ZSTR_VAL(ce->name));
+        }
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_VOID);
 	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
