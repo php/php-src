@@ -12530,9 +12530,35 @@ static int zend_jit_isset_isempty_cv(dasm_State **Dst, const zend_op *opline, ui
 	return 1;
 }
 
-static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op, uint32_t op1_info, unsigned int target_label, zend_uchar exit_opcode, const void *exit_addr)
+static int zend_jit_fe_reset(dasm_State **Dst, const zend_op *opline, uint32_t op1_info)
 {
-	zend_jit_addr op1_addr = OP1_ADDR();
+	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, opline->op1);
+
+		|	ZVAL_COPY_CONST res_addr, MAY_BE_ANY, MAY_BE_ANY, zv, ZREG_R0
+		if (Z_REFCOUNTED_P(zv)) {
+			|	ADDREF_CONST zv, r0
+		}
+	} else {
+		zend_jit_addr op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+
+		|	// ZVAL_COPY(res, value);
+		|	ZVAL_COPY_VALUE res_addr, -1, op1_addr, op1_info, ZREG_R0, ZREG_FCARG1a
+		if (opline->op1_type == IS_CV) {
+			|	TRY_ADDREF op1_info, ah, FCARG1a
+		}
+	}
+	|	// Z_FE_POS_P(res) = 0;
+	|	mov dword [FP + opline->result.var + offsetof(zval, u2.fe_pos)], 0
+
+	return 1;
+}
+
+static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, unsigned int target_label, zend_uchar exit_opcode, const void *exit_addr)
+{
+	zend_jit_addr op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
 
 	|	// array = EX_VAR(opline->op1.var);
 	|	// fe_ht = Z_ARRVAL_P(array);
@@ -12589,7 +12615,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, const zend
 
 	if (!exit_addr || exit_opcode == ZEND_JMP) {
 		zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG2a, 0);
-		zend_jit_addr var_addr = OP2_ADDR();
+		zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
 		uint32_t val_info;
 
 		|	mov	FCARG2a, r0
@@ -12645,7 +12671,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, const zend
 
 		if (opline->op2_type == IS_CV) {
 			|	// zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
-			if (!zend_jit_assign_to_variable(Dst, opline, var_addr, var_addr, OP2_INFO(), -1, IS_CV, opline->op2, val_addr, val_info, 0, 1)) {
+			if (!zend_jit_assign_to_variable(Dst, opline, var_addr, var_addr, op2_info, -1, IS_CV, opline->op2, val_addr, val_info, 0, 1)) {
 				return 0;
 			}
 		} else {

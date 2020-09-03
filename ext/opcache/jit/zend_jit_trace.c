@@ -1445,6 +1445,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_ECHO:
 				case ZEND_STRLEN:
 				case ZEND_QM_ASSIGN:
+				case ZEND_FE_RESET_R:
 				case ZEND_FE_FETCH_R:
 					ADD_OP1_TRACE_GUARD();
 					break;
@@ -4541,6 +4542,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_FE_RESET_R:
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
+						if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+							break;
+						}
+						if (!zend_jit_fe_reset(&dasm_state, opline, op1_info)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_FE_FETCH_R:
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
@@ -4569,8 +4580,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						} else  {
 							ZEND_UNREACHABLE();
 						}
-						if (!zend_jit_fe_fetch(&dasm_state, opline, op_array, ssa, ssa_op,
-								op1_info, -1, smart_branch_opcode, exit_addr)) {
+						if (!zend_jit_fe_fetch(&dasm_state, opline, op1_info, OP2_INFO(),
+								-1, smart_branch_opcode, exit_addr)) {
 							goto jit_failure;
 						}
 						goto done;
