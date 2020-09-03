@@ -1580,6 +1580,23 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_OBJECT_OR_NULL(dest) \
 	Z_PARAM_OBJECT_EX(dest, 1, 0)
 
+#define Z_PARAM_OBJ_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, NULL, check_null))) { \
+			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_OBJ_EX(dest, check_null, separate) \
+	Z_PARAM_OBJ_EX2(dest, check_null, separate, separate)
+
+#define Z_PARAM_OBJ(dest) \
+	Z_PARAM_OBJ_EX(dest, 0, 0)
+
+#define Z_PARAM_OBJ_OR_NULL(dest) \
+	Z_PARAM_OBJ_EX(dest, 1, 0)
+
 /* old "O" */
 #define Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1947,6 +1964,19 @@ static zend_always_inline bool zend_parse_arg_object(zval *arg, zval **dest, zen
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
 	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce) != 0))) {
 		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline bool zend_parse_arg_obj(zval *arg, zend_object **dest, zend_class_entry *ce, bool check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
+	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce) != 0))) {
+		*dest = Z_OBJ_P(arg);
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;
 	} else {

@@ -1445,6 +1445,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		Z_PARAM_LONG(attrsonly)
 		Z_PARAM_LONG(sizelimit)
 		Z_PARAM_LONG(timelimit)
+		Z_PARAM_LONG(deref)
 		Z_PARAM_ARRAY_EX(serverctrls, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1523,10 +1524,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		} else {
 			nfilters = 0; /* this means string, not array */
 			ldap_filter = zend_string_copy(filter_str);
-			if (EG(exception)) {
-				ret = 0;
-				goto cleanup;
-			}
 		}
 
 		lds = safe_emalloc(nlinks, sizeof(ldap_linkdata), 0);
@@ -1597,23 +1594,21 @@ cleanup_parallel:
 		efree(lds);
 		efree(rcs);
 	} else {
-		ldap_filter = zval_get_string(filter);
-		if (EG(exception)) {
-			ret = 0;
-			goto cleanup;
-		}
-
-		ldap_base_dn = zval_get_string(base_dn);
-		if (EG(exception)) {
-			ret = 0;
-			goto cleanup;
-		}
-
 		ld = (ldap_linkdata *) zend_fetch_resource_ex(link, "ldap link", le_link);
 		if (ld == NULL) {
 			ret = 0;
 			goto cleanup;
 		}
+
+		if (!base_dn_str) {
+			zend_argument_type_error(2, "must be of type string when argument #1 ($link_identifier) is a resource");
+		}
+		ldap_base_dn = zend_string_copy(base_dn_str);
+
+		if (!filter_str) {
+			zend_argument_type_error(3, "must be of type string when argument #1 ($link_identifier) is a resource");
+		}
+		ldap_filter = zend_string_copy(filter_str);
 
 		if (argcount > 8) {
 			lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
