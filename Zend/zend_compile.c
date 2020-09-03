@@ -442,14 +442,17 @@ void shutdown_compiler(void) /* {{{ */
 
 ZEND_API zend_string *zend_set_compiled_filename(zend_string *new_compiled_filename) /* {{{ */
 {
-	new_compiled_filename = zend_new_interned_string(zend_string_copy(new_compiled_filename));
-	CG(compiled_filename) = new_compiled_filename;
+	CG(compiled_filename) = zend_string_copy(new_compiled_filename);
 	return new_compiled_filename;
 }
 /* }}} */
 
 ZEND_API void zend_restore_compiled_filename(zend_string *original_compiled_filename) /* {{{ */
 {
+	if (CG(compiled_filename)) {
+		zend_string_release(CG(compiled_filename));
+		CG(compiled_filename) = NULL;
+	}
 	CG(compiled_filename) = original_compiled_filename;
 }
 /* }}} */
@@ -7345,7 +7348,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 	}
 
 	ce->ce_flags |= decl->flags;
-	ce->info.user.filename = zend_get_compiled_filename();
+	ce->info.user.filename = zend_string_copy(zend_get_compiled_filename());
 	ce->info.user.line_start = decl->start_lineno;
 	ce->info.user.line_end = decl->end_lineno;
 

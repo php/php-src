@@ -233,8 +233,9 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 
 	lex_state->in = SCNG(yy_in);
 	lex_state->yy_state = YYSTATE;
-	lex_state->filename = zend_get_compiled_filename();
+	lex_state->filename = CG(compiled_filename);
 	lex_state->lineno = CG(zend_lineno);
+	CG(compiled_filename) = NULL;
 
 	lex_state->script_org = SCNG(script_org);
 	lex_state->script_org_size = SCNG(script_org_size);

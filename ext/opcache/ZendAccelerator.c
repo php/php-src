@@ -4528,7 +4528,6 @@ static int accel_preload(const char *config, zend_bool in_child)
 
 	if (ret == SUCCESS) {
 		zend_persistent_script *script;
-		zend_string *filename;
 		int ping_auto_globals_mask;
 		int i;
 		zend_class_entry *ce;
@@ -4668,7 +4667,7 @@ static int accel_preload(const char *config, zend_bool in_child)
 		script->ping_auto_globals_mask = ping_auto_globals_mask;
 
 		/* Store all functions and classes in a single pseudo-file */
-		filename = zend_string_init("$PRELOAD$", sizeof("$PRELOAD$") - 1, 0);
+		CG(compiled_filename) = zend_string_init("$PRELOAD$", sizeof("$PRELOAD$") - 1, 0);
 #if ZEND_USE_ABS_CONST_ADDR
 		init_op_array(&script->script.main_op_array, ZEND_USER_FUNCTION, 1);
 #else
@@ -4690,8 +4689,8 @@ static int accel_preload(const char *config, zend_bool in_child)
 		ZEND_PASS_TWO_UPDATE_CONSTANT(&script->script.main_op_array, script->script.main_op_array.opcodes, script->script.main_op_array.opcodes[0].op1);
 		zend_vm_set_opcode_handler(script->script.main_op_array.opcodes);
 
-		script->script.main_op_array.filename = filename;
-		script->script.filename = zend_string_copy(filename);
+		script->script.filename = CG(compiled_filename);
+		CG(compiled_filename) = NULL;
 
 		script->script.first_early_binding_opline = (uint32_t)-1;
 
@@ -4727,8 +4726,6 @@ static int accel_preload(const char *config, zend_bool in_child)
 
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();
-
-		zend_string_release(filename);
 
 		ZEND_ASSERT(ZCSG(preload_script)->arena_size == 0);
 
