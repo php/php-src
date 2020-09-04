@@ -75,6 +75,14 @@ const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
 /*
  * any => Quoted-Printable
  */
+static inline int nibble2hex(int nibble)
+{
+	if (nibble < 10) {
+		return nibble + '0';
+	} else {
+		return nibble + 'A' - 10;
+	}
+}
 
 int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 {
@@ -90,48 +98,36 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 		filter->cache = c;
 		n = (filter->status & 0xff00) >> 8;
 
-		if (s == 0) {		/* null */
+		if (s == 0) { /* null */
 			CK((*filter->output_function)(s, filter->data));
 			filter->status &= ~0xff00;
 			break;
 		}
 
 		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-			if (s == 0x0a || (s == 0x0d && c != 0x0a)) {	/* line feed */
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+			if (s == '\n' || (s == '\r' && c != '\n')) { /* line feed */
+				CK((*filter->output_function)('\r', filter->data));
+				CK((*filter->output_function)('\n', filter->data));
 				filter->status &= ~0xff00;
 				break;
-			} else if (s == 0x0d) {
+			} else if (s == '\r') {
 				break;
 			}
 		}
 
-		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0  && n >= 72) {	/* soft line feed */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-			CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0 && n >= 72) { /* soft line feed */
+			CK((*filter->output_function)('=', filter->data));
+			CK((*filter->output_function)('\r', filter->data));
+			CK((*filter->output_function)('\n', filter->data));
 			filter->status &= ~0xff00;
 		}
 
-		if (s <= 0 || s >= 0x80 || s == 0x3d		/* not ASCII or '=' */
+		if (s <= 0 || s >= 0x80 || s == '=' /* not ASCII or '=' */
 		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) && mime_char_needs_qencode[s])) {
 			/* hex-octet */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			n = (s >> 4) & 0xf;
-			if (n < 10) {
-				n += 48;		/* '0' */
-			} else {
-				n += 55;		/* 'A' - 10 */
-			}
-			CK((*filter->output_function)(n, filter->data));
-			n = s & 0xf;
-			if (n < 10) {
-				n += 48;
-			} else {
-				n += 55;
-			}
-			CK((*filter->output_function)(n, filter->data));
+			CK((*filter->output_function)('=', filter->data));
+			CK((*filter->output_function)(nibble2hex((s >> 4) & 0xf), filter->data));
+			CK((*filter->output_function)(nibble2hex(s & 0xf), filter->data));
 			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
 				filter->status += 0x300;
 			}
@@ -185,12 +181,12 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 		if (hex2code_map[c & 0xff] >= 0) {
 			filter->cache = c;
 			filter->status = 2;
-		} else if (c == 0x0d) {	/* soft line feed */
+		} else if (c == '\r') {	/* soft line feed */
 			filter->status = 3;
-		} else if (c == 0x0a) {	/* soft line feed */
+		} else if (c == '\n') {	/* soft line feed */
 			filter->status = 0;
 		} else {
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+			CK((*filter->output_function)('=', filter->data));
 			CK((*filter->output_function)(c, filter->data));
 			filter->status = 0;
 		}
@@ -198,7 +194,7 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 	case 2:
 		m = hex2code_map[c & 0xff];
 		if (m < 0) {
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+			CK((*filter->output_function)('=', filter->data));
 			CK((*filter->output_function)(filter->cache, filter->data));
 			n = c;
 		} else {
@@ -208,13 +204,13 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	case 3:
-		if (c != 0x0a) {		/* LF */
+		if (c != '\n') {
 			CK((*filter->output_function)(c, filter->data));
 		}
 		filter->status = 0;
 		break;
 	default:
-		if (c == 0x3d) {		/* '=' */
+		if (c == '=') {
 			filter->status = 1;
 		} else {
 			CK((*filter->output_function)(c, filter->data));
@@ -227,17 +223,14 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 
 void mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 {
-	int status, cache;
-
-	status = filter->status;
-	cache = filter->cache;
-	filter->status = 0;
-	filter->cache = 0;
+	int status = filter->status;
+	int cache = filter->cache;
+	filter->status = filter->cache = 0;
 	/* flush fragments */
 	if (status == 1) {
-		(*filter->output_function)(0x3d, filter->data);		/* '=' */
+		(*filter->output_function)('=', filter->data);
 	} else if (status == 2) {
-		(*filter->output_function)(0x3d, filter->data);		/* '=' */
+		(*filter->output_function)('=', filter->data);
 		(*filter->output_function)(cache, filter->data);
 	}
 }
