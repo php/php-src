@@ -1340,11 +1340,12 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SET_EX_OPLINE, op, tmp_reg
 ||	if (op == last_valid_opline) {
+||		zend_jit_use_last_valid_opline();
 |		SAVE_IP
 ||	} else {
 |		ADDR_OP2_2 mov, aword EX->opline, op, tmp_reg
 ||		if (!GCC_GLOBAL_REGS) {
-||			last_valid_opline = NULL;
+||			zend_jit_reset_last_valid_opline();
 ||		}
 ||	}
 |.endmacro
@@ -1578,6 +1579,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro UNDEFINED_OFFSET, opline
 ||	if (opline == last_valid_opline) {
+||		zend_jit_use_last_valid_opline();
 |		call ->undefined_offset_ex
 ||	} else {
 |		SET_EX_OPLINE  opline, r0
@@ -1587,6 +1589,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro UNDEFINED_INDEX, opline
 ||	if (opline == last_valid_opline) {
+||		zend_jit_use_last_valid_opline();
 |		call ->undefined_index_ex
 ||	} else {
 |		SET_EX_OPLINE opline, r0
@@ -1596,6 +1599,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro CANNOT_ADD_ELEMENT, opline
 ||	if (opline == last_valid_opline) {
+||		zend_jit_use_last_valid_opline();
 |		call ->cannot_add_element_ex
 ||	} else {
 |		SET_EX_OPLINE opline, r0
@@ -1603,31 +1607,56 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-static zend_bool reuse_ip;
-static zend_bool delayed_call_chain;
-static uint32_t  delayed_call_level;
-static const zend_op *last_valid_opline;
-static int jit_return_label;
-static uint32_t current_trace_num;
+static zend_bool reuse_ip = 0;
+static zend_bool delayed_call_chain = 0;
+static uint32_t  delayed_call_level = 0;
+static const zend_op *last_valid_opline = NULL;
+static zend_bool use_last_vald_opline = 0;
+static zend_bool track_last_valid_opline = 0;
+static int jit_return_label = -1;
+static uint32_t current_trace_num = 0;
+
+static void zend_jit_track_last_valid_opline(void)
+{
+	use_last_vald_opline = 0;
+	track_last_valid_opline = 1;
+}
+
+static void zend_jit_use_last_valid_opline(void)
+{
+	if (track_last_valid_opline) {
+		use_last_vald_opline = 1;
+		track_last_valid_opline = 0;
+	}
+}
+
+static zend_bool zend_jit_trace_uses_initial_ip(void)
+{
+	return use_last_vald_opline;
+}
 
 static void zend_jit_set_last_valid_opline(const zend_op *target_opline)
 {
 	if (!reuse_ip) {
+		track_last_valid_opline = 0;
 		last_valid_opline = target_opline;
 	}
 }
 
 static void zend_jit_reset_last_valid_opline(void)
 {
+	track_last_valid_opline = 0;
 	last_valid_opline = NULL;
 }
 
-static void zend_jit_start_reuse_ip(void) {
-	last_valid_opline = NULL;
+static void zend_jit_start_reuse_ip(void)
+{
+	zend_jit_reset_last_valid_opline();
 	reuse_ip = 1;
 }
 
-static void zend_jit_stop_reuse_ip(void) {
+static void zend_jit_stop_reuse_ip(void)
+{
 	reuse_ip = 0;
 }
 
@@ -2804,6 +2833,8 @@ static int zend_jit_align_func(dasm_State **Dst)
 	reuse_ip = 0;
 	delayed_call_chain = 0;
 	last_valid_opline = NULL;
+	use_last_vald_opline = 0;
+	track_last_valid_opline = 0;
 	jit_return_label = -1;
 	|.align 16
 	return 1;
@@ -2849,16 +2880,15 @@ static int zend_jit_save_call_chain(dasm_State **Dst, uint32_t call_level)
 
 static int zend_jit_set_ip(dasm_State **Dst, const zend_op *opline)
 {
-	if (!last_valid_opline) {
+	if (last_valid_opline == opline) {
+		zend_jit_use_last_valid_opline();
+	} else if (GCC_GLOBAL_REGS && last_valid_opline) {
+		zend_jit_use_last_valid_opline();
+		|	ADD_IP (opline - last_valid_opline) * sizeof(zend_op);
+	} else {
 		|	LOAD_IP_ADDR opline
-	} else if (last_valid_opline != opline) {
-		if (GCC_GLOBAL_REGS) {
-			|	ADD_IP (opline - last_valid_opline) * sizeof(zend_op);
-		} else {
-			|	LOAD_IP_ADDR opline
-		}
 	}
-	last_valid_opline = opline;
+	zend_jit_set_last_valid_opline(opline);
 
 	return 1;
 }
@@ -2890,6 +2920,7 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const
 	if (exit_addr) {
 		|	jne &exit_addr
 	} else if (last_valid_opline == opline) {
+		||		zend_jit_use_last_valid_opline();
 		|	jne ->interrupt_handler
 	} else {
 		|	jne >1
@@ -3154,7 +3185,7 @@ static int zend_jit_link_side_trace(const void *code, size_t size, uint32_t jmp_
 	return zend_jit_patch(code, size, jmp_table_size, zend_jit_trace_get_exit_addr(exit_num), addr);
 }
 
-static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t, zend_bool check_interrupt)
+static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t, const void *timeout_exit_addr)
 {
 	const void *link_addr;
 	size_t prologue_size;
@@ -3188,11 +3219,11 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t,
 	}
 	link_addr = (const void*)((const char*)t->code_start + prologue_size);
 
-	if (check_interrupt) {
+	if (timeout_exit_addr) {
 		/* Check timeout for links to LOOP */
 		|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
 		|	je &link_addr
-		|	jmp ->interrupt_handler
+		|	jmp &timeout_exit_addr
 	} else {
 		|	jmp &link_addr
 	}

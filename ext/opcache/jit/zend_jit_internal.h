@@ -348,6 +348,7 @@ typedef union _zend_jit_trace_stack {
 /* trace info flags */
 #define ZEND_JIT_TRACE_CHECK_INTERRUPT (1<<0)
 #define ZEND_JIT_TRACE_LOOP            (1<<1)
+#define ZEND_JIT_TRACE_USES_INITIAL_IP (1<<2)
 
 typedef struct _zend_jit_trace_info {
 	uint32_t                  id;            /* trace id */
