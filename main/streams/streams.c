@@ -1584,7 +1584,7 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 				ssize_t didwrite;
 
 				if (php_stream_seek(src, mapped, SEEK_CUR) != 0) {
-					php_stream_mmap_unmap(src, mapped);
+					php_stream_mmap_unmap(src);
 					break;
 				}
 
@@ -1594,7 +1594,7 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 					return FAILURE;
 				}
 
-				php_stream_mmap_unmap(src, mapped);
+				php_stream_mmap_unmap(src);
 
 				*len = haveread += didwrite;
 
