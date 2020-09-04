@@ -487,46 +487,40 @@ const php_password_algo* php_password_algo_find(const zend_string *ident) {
 	return Z_PTR_P(tmp);
 }
 
-static const php_password_algo* php_password_algo_find_zval_ex(zval *arg, const php_password_algo* default_algo) {
-	if (!arg || (Z_TYPE_P(arg) == IS_NULL)) {
-		return default_algo;
+static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str, zend_long arg_long, zend_bool arg_is_null) {
+	if (arg_is_null) {
+		return php_password_algo_default();
 	}
 
-	if (Z_TYPE_P(arg) == IS_LONG) {
-		switch (Z_LVAL_P(arg)) {
-			case 0: return default_algo;
-			case 1: return &php_password_algo_bcrypt;
+	if (arg_str) {
+		return php_password_algo_find(arg_str);
+	}
+
+	switch (arg_long) {
+		case 0: return php_password_algo_default();
+		case 1: return &php_password_algo_bcrypt;
 #if HAVE_ARGON2LIB
-			case 2: return &php_password_algo_argon2i;
-			case 3: return &php_password_algo_argon2id;
+		case 2: return &php_password_algo_argon2i;
+		case 3: return &php_password_algo_argon2id;
 #else
-			case 2:
-				{
-				zend_string *n = zend_string_init("argon2i", sizeof("argon2i")-1, 0);
-				const php_password_algo* ret = php_password_algo_find(n);
-				zend_string_release(n);
-				return ret;
-				}
-			case 3:
-				{
-				zend_string *n = zend_string_init("argon2id", sizeof("argon2id")-1, 0);
-				const php_password_algo* ret = php_password_algo_find(n);
-				zend_string_release(n);
-				return ret;
-				}
+		case 2:
+			{
+			zend_string *n = zend_string_init("argon2i", sizeof("argon2i")-1, 0);
+			const php_password_algo* ret = php_password_algo_find(n);
+			zend_string_release(n);
+			return ret;
+			}
+		case 3:
+			{
+			zend_string *n = zend_string_init("argon2id", sizeof("argon2id")-1, 0);
+			const php_password_algo* ret = php_password_algo_find(n);
+			zend_string_release(n);
+			return ret;
+			}
 #endif
-		}
-		return NULL;
 	}
 
-	if (Z_TYPE_P(arg) != IS_STRING) {
-		return NULL;
-	}
-
-	return php_password_algo_find(Z_STR_P(arg));
-}
-static const php_password_algo* php_password_algo_find_zval(zval *arg) {
-	return php_password_algo_find_zval_ex(arg, php_password_algo_default());
+	return NULL;
 }
 
 zend_string *php_password_algo_extract_ident(const zend_string* hash) {
@@ -605,17 +599,19 @@ PHP_FUNCTION(password_needs_rehash)
 {
 	const php_password_algo *old_algo, *new_algo;
 	zend_string *hash;
-	zval *znew_algo;
+	zend_string *new_algo_str;
+	zend_long new_algo_long;
+	zend_bool new_algo_is_null;
 	zend_array *options = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(hash)
-		Z_PARAM_ZVAL(znew_algo)
+		Z_PARAM_STR_OR_LONG_OR_NULL(new_algo_str, new_algo_long, new_algo_is_null)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	new_algo = php_password_algo_find_zval(znew_algo);
+	new_algo = php_password_algo_find_zval(new_algo_str, new_algo_long, new_algo_is_null);
 	if (!new_algo) {
 		/* Unknown new algorithm, never prompt to rehash. */
 		RETURN_FALSE;
@@ -651,22 +647,22 @@ PHP_FUNCTION(password_verify)
 PHP_FUNCTION(password_hash)
 {
 	zend_string *password, *digest = NULL;
-	zval *zalgo;
+	zend_string *algo_str;
+	zend_long algo_long;
+	zend_bool algo_is_null;
 	const php_password_algo *algo;
 	zend_array *options = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(password)
-		Z_PARAM_ZVAL(zalgo)
+		Z_PARAM_STR_OR_LONG_OR_NULL(algo_str, algo_long, algo_is_null)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	algo = php_password_algo_find_zval(zalgo);
+	algo = php_password_algo_find_zval(algo_str, algo_long, algo_is_null);
 	if (!algo) {
-		zend_string *algostr = zval_get_string(zalgo);
 		zend_argument_value_error(2, "must be a valid password hashing algorithm");
-		zend_string_release(algostr);
 		RETURN_THROWS();
 	}
 

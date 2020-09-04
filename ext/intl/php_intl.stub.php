@@ -223,8 +223,7 @@ function numfmt_format_currency(NumberFormatter $fmt, float $value, string $curr
  */
 function numfmt_parse_currency(NumberFormatter $fmt, string $value, &$currency, &$position = null): float|false {}
 
-/** @param int|float $value */
-function numfmt_set_attribute(NumberFormatter $fmt, int $attr, $value): bool {}
+function numfmt_set_attribute(NumberFormatter $fmt, int $attr, int|float $value): bool {}
 
 function numfmt_get_attribute(NumberFormatter $fmt, int $attr): int|float|false {}
 

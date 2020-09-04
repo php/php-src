@@ -40,11 +40,10 @@ class NumberFormatter
     public function parseCurrency(string $value, &$currency, &$position = null) {}
 
     /**
-     * @param int|float $value
      * @return bool
      * @alias numfmt_set_attribute
      */
-    public function setAttribute(int $attr, $value) {}
+    public function setAttribute(int $attr, int|float $value) {}
 
     /**
      * @return int|float|false

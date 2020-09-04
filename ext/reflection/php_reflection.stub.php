@@ -202,8 +202,7 @@ class ReflectionClass implements Reflector
 {
     final private function __clone() {}
 
-    /** @param object|string $objectOrClass */
-    public function __construct($objectOrClass) {}
+    public function __construct(object|string $objectOrClass) {}
 
     public function __toString(): string {}
 
