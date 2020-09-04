@@ -532,7 +532,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 			size_t open_mode_len = 1;
 			zval *resource = NULL;
 
-			if (zend_parse_parameters(num_args, "|sbr",
+			if (zend_parse_parameters(num_args, "|sbr!",
 				&open_mode, &open_mode_len, &use_include_path, &resource) == FAILURE
 			) {
 				return NULL;
@@ -1350,7 +1350,7 @@ PHP_METHOD(SplFileInfo, getFileInfo)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = intern->info_class;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C!", &ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1366,7 +1366,7 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 	size_t path_len;
 	char *path;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C!", &ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 

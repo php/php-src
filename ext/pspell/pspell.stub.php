@@ -2,9 +2,9 @@
 
 /** @generate-function-entries */
 
-function pspell_new(string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, int $mode = 0): int|false {}
+function pspell_new(string $language, string $spelling = "", string $jargon = "", string $encoding = "", int $mode = 0): int|false {}
 
-function pspell_new_personal(string $personal, string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, int $mode = 0): int|false {}
+function pspell_new_personal(string $personal, string $language, string $spelling = "", string $jargon = "", string $encoding = "", int $mode = 0): int|false {}
 
 function pspell_new_config(int $config): int|false {}
 
@@ -22,7 +22,7 @@ function pspell_clear_session(int $pspell): bool {}
 
 function pspell_save_wordlist(int $pspell): bool {}
 
-function pspell_config_create(string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN): int {}
+function pspell_config_create(string $language, string $spelling = "", string $jargon = "", string $encoding = ""): int {}
 
 function pspell_config_runtogether(int $conf, bool $runtogether): bool {}
 

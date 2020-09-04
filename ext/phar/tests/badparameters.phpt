@@ -229,7 +229,7 @@ try {
 ?>
 --EXPECTF--
 Phar::mungServer(): Argument #1 ($munglist) must be of type array, string given
-Phar::createDefaultStub(): Argument #1 ($index) must be a valid path, array given
+Phar::createDefaultStub(): Argument #1 ($index) must be a valid path or null, array given
 Phar::loadPhar(): Argument #1 ($filename) must be a valid path, array given
 Phar::canCompress(): Argument #1 ($method) must be of type int, string given
 Phar::__construct(): Argument #1 ($filename) must be a valid path, array given
