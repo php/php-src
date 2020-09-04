@@ -215,13 +215,15 @@ function imagesetclip(GdImage $im, int $x1, int $x2, int $y1, int $y2): bool {}
 function imagegetclip(GdImage $im): array {}
 
 #ifdef HAVE_GD_FREETYPE
-function imageftbbox(float $size, float $angle, string $font_file, string $text, ?array $extrainfo = null): array|false {}
+function imageftbbox(float $size, float $angle, string $font_file, string $text, array $extrainfo = []): array|false {}
 
-function imagefttext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text, ?array $extrainfo = null): array|false {}
+function imagefttext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text, array $extrainfo = []): array|false {}
 
-function imagettfbbox(float $size, float $angle, string $font_file, string $text): array|false {}
+/** @alias imageftbbox */
+function imagettfbbox(float $size, float $angle, string $font_file, string $text, array $extrainfo = []): array|false {}
 
-function imagettftext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text): array|false {}
+/** @alias imagefttext */
+function imagettftext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text, array $extrainfo = []): array|false {}
 #endif
 
 /** @param array|int|float|bool $filter_args */
