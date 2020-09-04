@@ -1113,8 +1113,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 								octal_buf[2] = *(++s);
 							}
 						}
-						if (octal_buf[2] &&
-						    (octal_buf[0] > '3')) {
+						if (octal_buf[2] && (octal_buf[0] > '3') && !SCNG(heredoc_scan_ahead)) {
 							/* 3 octit values must not overflow 0xFF (\377) */
 							zend_error(E_COMPILE_WARNING, "Octal escape sequence overflow \\%s is greater than \\377", octal_buf);
 						}
