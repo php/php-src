@@ -323,8 +323,13 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(crc32_x86_intrin)
 #endif
 
+#ifdef ZEND_INTRIN_AVX2_FUNC_PTR
+	BASIC_MINIT_SUBMODULE(str_rot13_intrin)
+#endif
+
 #if defined(ZEND_INTRIN_AVX2_FUNC_PTR) || defined(ZEND_INTRIN_SSSE3_FUNC_PTR)
 	BASIC_MINIT_SUBMODULE(base64_intrin)
+	BASIC_MINIT_SUBMODULE(strrev_intrin)
 #endif
 
 	BASIC_MINIT_SUBMODULE(crypt)

@@ -3129,11 +3129,132 @@ PHP_FUNCTION(strtr)
 /* }}} */
 
 /* {{{ Reverse a string */
-#ifdef ZEND_INTRIN_SSSE3_NATIVE
+#if ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER
 #include <tmmintrin.h>
-#elif defined(__aarch64__) || defined(_M_ARM64)
+ZEND_INTRIN_SSSE3_FUNC_DECL(size_t strrev_ssse3(const char *s, const char *e, char *p));
+size_t strrev_ssse3(const char *s, const char *e, char *p)
+{
+	size_t nr = 0;
+
+	if (e - s > 15) {
+		const __m128i map = _mm_set_epi8(
+				0, 1, 2, 3, 4, 5, 6, 7,
+				8, 9, 10, 11, 12, 13, 14, 15);
+		do {
+			const __m128i str = _mm_loadu_si128((__m128i *)(e - 15));
+			_mm_storeu_si128((__m128i *)p, _mm_shuffle_epi8(str, map));
+			p += 16;
+			e -= 16;
+			nr += 16;
+		} while (e - s > 15);
+	}
+
+	return nr;
+}
+#endif
+
+#if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
+#include <immintrin.h>
+ZEND_INTRIN_AVX2_FUNC_DECL(size_t strrev_avx2(const char *s, const char *e, char *p));
+size_t strrev_avx2(const char *s, const char *e, char *p)
+{
+	size_t nr = 0;
+
+	if (e - s > 31) {
+		const __m256i map = _mm256_set_epi8(
+				0, 1, 2, 3, 4, 5, 6, 7,
+				8, 9, 10, 11, 12, 13, 14, 15,
+				0, 1, 2, 3, 4, 5, 6, 7,
+				8, 9, 10, 11, 12, 13, 14, 15);
+		do {
+			const __m256i str = _mm256_shuffle_epi8(_mm256_loadu_si256((__m256i *)(e - 31)), map);
+			_mm_storeu_si128((__m128i *)p, _mm256_extracti128_si256(str, 1));
+			_mm_storeu_si128((__m128i *)(p + 16), _mm256_extracti128_si256(str, 0));
+			p += 32;
+			e -= 32;
+			nr += 32;
+		} while (e - s > 32);
+	}
+
+#if ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER
+	if (e - s > 15) { /* The trailing parts can be processed by SSSE3 */
+		nr += strrev_ssse3(s, e, p);
+	}
+#endif
+
+	return nr;
+}
+#endif
+
+#if ZEND_INTRIN_AVX2_NATIVE
+static zend_always_inline size_t strrev_simd(const char *s, const char *e, char *p)
+{
+	return strrev_avx2(s, e, p);
+}
+#elif ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_RESOLVER
+# include "Zend/zend_cpuinfo.h"
+
+static size_t strrev_simd_fallback(const char *s, const char *e, char *p)
+{
+	return 0;
+}
+
+# if (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO)
+static size_t strrev_simd(const char *s, const char *e, char *p) __attribute__((ifunc("resolve_strrev_simd")));
+typedef size_t (*strrev_simd_func_t)(const char *s, const char *e, char *p);
+
+ZEND_NO_SANITIZE_ADDRESS
+ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
+static strrev_simd_func_t resolve_strrev_simd() {
+#  if ZEND_INTRIN_AVX2_FUNC_PROTO
+	if (zend_cpu_supports_avx2()) {
+		return strrev_avx2;
+	} else
+#  endif
+#  if ZEND_INTRIN_SSSE3_FUNC_PROTO || ZEND_INTRIN_SSSE3_NATIVE
+	if (zend_cpu_supports_ssse3()) {
+		return strrev_ssse3;
+	}
+#  endif
+	return strrev_simd_fallback;
+}
+# else /* ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR */
+static size_t (*strrev_simd_ptr)(const char *s, const char *e, char *p) = NULL;
+
+static size_t strrev_simd(const char *s, const char *e, char *p)
+{
+	return strrev_simd_ptr(s, e, p);
+}
+
+PHP_MINIT_FUNCTION(strrev_intrin)
+{
+#  if ZEND_INTRIN_AVX2_FUNC_PTR
+	if (zend_cpu_supports_avx2()) {
+		strrev_simd_ptr = strrev_avx2;
+	} else
+#  endif
+#  if ZEND_INTRIN_SSSE3_FUNC_PTR || ZEND_INTRIN_SSSE3_NATIVE
+	if (zend_cpu_supports_ssse3()) {
+		strrev_simd_ptr = strrev_ssse3;
+	} else
+#  endif
+	{
+		strrev_simd_ptr = strrev_simd_fallback;
+	}
+	return SUCCESS;
+}
+# endif
+#elif ZEND_INTRIN_SSSE3_NATIVE
+static zend_always_inline size_t strrev_simd(const char *s, const char *e, char *p)
+{
+        return strrev_ssse3(s, e, p);
+}
+#endif
+
+#if defined(__aarch64__) || defined(_M_ARM64)
 #include <arm_neon.h>
 #endif
+
 PHP_FUNCTION(strrev)
 {
 	zend_string *str;
@@ -3151,20 +3272,10 @@ PHP_FUNCTION(strrev)
 	s = ZSTR_VAL(str);
 	e = s + ZSTR_LEN(str);
 	--e;
-#ifdef ZEND_INTRIN_SSSE3_NATIVE
-	if (e - s > 15) {
-		const __m128i map = _mm_set_epi8(
-				0, 1, 2, 3,
-				4, 5, 6, 7,
-				8, 9, 10, 11,
-				12, 13, 14, 15);
-		do {
-			const __m128i str = _mm_loadu_si128((__m128i *)(e - 15));
-			_mm_storeu_si128((__m128i *)p, _mm_shuffle_epi8(str, map));
-			p += 16;
-			e -= 16;
-		} while (e - s > 15);
-	}
+#if defined(ZEND_INTRIN_SSSE3_NATIVE) || defined(ZEND_INTRIN_SSSE3_RESOLVER) || defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
+	size_t nr = strrev_simd(s, e, p);
+	p += nr;
+	e -= nr;
 #elif defined(__aarch64__)
 	if (e - s > 15) {
 		do {
@@ -5406,6 +5517,120 @@ PHP_FUNCTION(sscanf)
 /* }}} */
 
 /* static zend_string *php_str_rot13(zend_string *str) {{{ */
+#if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
+#include <immintrin.h>
+ZEND_INTRIN_AVX2_FUNC_DECL(size_t str_rot13_avx2(const char *p, const char *e, char *target));
+size_t str_rot13_avx2(const char *p, const char *e, char *target)
+{
+	size_t nr = 0;
+
+	if (e - p > 31) {
+		const __m256i a_minus_1 = _mm256_set1_epi8('a' - 1);
+		const __m256i m_plus_1 = _mm256_set1_epi8('m' + 1);
+		const __m256i n_minus_1 = _mm256_set1_epi8('n' - 1);
+		const __m256i z_plus_1 = _mm256_set1_epi8('z' + 1);
+		const __m256i A_minus_1 = _mm256_set1_epi8('A' - 1);
+		const __m256i M_plus_1 = _mm256_set1_epi8('M' + 1);
+		const __m256i N_minus_1 = _mm256_set1_epi8('N' - 1);
+		const __m256i Z_plus_1 = _mm256_set1_epi8('Z' + 1);
+		const __m256i add = _mm256_set1_epi8(13);
+		const __m256i sub = _mm256_set1_epi8(-13);
+
+		do {
+			__m256i in, gt, lt, cmp, delta;
+
+			delta = _mm256_setzero_si256();
+			in = _mm256_loadu_si256((__m256i *)p);
+
+			gt = _mm256_cmpgt_epi8(in, a_minus_1);
+			lt = _mm256_cmpgt_epi8(m_plus_1, in);
+			cmp = _mm256_and_si256(lt, gt);
+			if (_mm256_movemask_epi8(cmp)) {
+				cmp = _mm256_and_si256(cmp, add);
+				delta = _mm256_or_si256(delta, cmp);
+			}
+
+			gt = _mm256_cmpgt_epi8(in, n_minus_1);
+			lt = _mm256_cmpgt_epi8(z_plus_1, in);
+			cmp = _mm256_and_si256(lt, gt);
+			if (_mm256_movemask_epi8(cmp)) {
+				cmp = _mm256_and_si256(cmp, sub);
+				delta = _mm256_or_si256(delta, cmp);
+			}
+
+			gt = _mm256_cmpgt_epi8(in, A_minus_1);
+			lt = _mm256_cmpgt_epi8(M_plus_1, in);
+			cmp = _mm256_and_si256(lt, gt);
+			if (_mm256_movemask_epi8(cmp)) {
+				cmp = _mm256_and_si256(cmp, add);
+				delta = _mm256_or_si256(delta, cmp);
+			}
+
+			gt = _mm256_cmpgt_epi8(in, N_minus_1);
+			lt = _mm256_cmpgt_epi8(Z_plus_1, in);
+			cmp = _mm256_and_si256(lt, gt);
+			if (_mm256_movemask_epi8(cmp)) {
+				cmp = _mm256_and_si256(cmp, sub);
+				delta = _mm256_or_si256(delta, cmp);
+			}
+
+			in = _mm256_add_epi8(in, delta);
+			_mm256_storeu_si256((__m256i *)target, in);
+
+			p += 32;
+			target += 32;
+			nr += 32;
+		} while (e - p > 31);
+	}
+
+	return nr;
+}
+#endif
+
+#if ZEND_INTRIN_AVX2_NATIVE
+static zend_always_inline size_t str_rot13_simd(const char *p, const char *e, char *target)
+{
+	return str_rot13_avx2(p, e, target);
+}
+#elif ZEND_INTRIN_AVX2_RESOLVER
+# include "Zend/zend_cpuinfo.h"
+
+static size_t str_rot13_fallback(const char *p, const char *e, char *target)
+{
+        return 0;
+}
+
+# if ZEND_INTRIN_AVX2_FUNC_PROTO
+static size_t str_rot13_simd(const char *p, const char *e, char *target) __attribute__((ifunc("resolve_str_rot13_simd")));
+typedef size_t (*str_rot13_simd_func_t)(const char *p, const char *e, char *target);
+
+ZEND_NO_SANITIZE_ADDRESS
+ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
+static str_rot13_simd_func_t resolve_str_rot13_simd() {
+	if (zend_cpu_supports_avx2()) {
+		return str_rot13_avx2;
+	} else {
+		return str_rot13_fallback;
+	}
+}
+# else /* ZEND_INTRIN_AVX2_FUNC_PTR */
+static size_t (*str_rot13_simd_ptr)(const char *p, const char *e, char *target) = str_rot13_fallback;
+
+static size_t str_rot13_simd(const char *p, const char *e, char *target)
+{
+	return str_rot13_simd_ptr(p, e, target);
+}
+
+PHP_MINIT_FUNCTION(str_rot13_intrin)
+{
+	if (zend_cpu_supports_avx2()) {
+		str_rot13_simd_ptr = str_rot13_avx2;
+	}
+	return SUCCESS;
+}
+# endif
+#endif
+
 static zend_string *php_str_rot13(zend_string *str)
 {
 	zend_string *ret;
@@ -5422,7 +5647,13 @@ static zend_string *php_str_rot13(zend_string *str)
 	e = p + ZSTR_LEN(str);
 	target = ZSTR_VAL(ret);
 
-#ifdef __SSE2__
+#if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
+	size_t nr = str_rot13_simd(p, e, target);
+	p += nr;
+	target += nr;
+#endif
+
+#ifdef __SSE2__ /* All x86 complier default enable SSE2 option */
 	if (e - p > 15) {
 		const __m128i a_minus_1 = _mm_set1_epi8('a' - 1);
 		const __m128i m_plus_1 = _mm_set1_epi8('m' + 1);
