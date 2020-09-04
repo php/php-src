@@ -2004,6 +2004,10 @@ static zend_always_inline bool zend_parse_arg_func(zval *arg, zend_fcall_info *d
 	} else if (UNEXPECTED(zend_fcall_info_init(arg, 0, dest_fci, dest_fcc, NULL, error) != SUCCESS)) {
 		return 0;
 	}
+	/* Release call trampolines: The function may not get called, in which case
+	 * the trampoline will leak. Force it to be refetched during
+	 * zend_call_function instead. */
+	zend_release_fcall_info_cache(dest_fcc);
 	return 1;
 }
 

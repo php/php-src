@@ -1198,7 +1198,6 @@ ZEND_FUNCTION(set_error_handler)
 
 	ZVAL_COPY(&EG(user_error_handler), &(fci.function_name));
 	EG(user_error_handler_error_reporting) = (int)error_type;
-	zend_release_fcall_info_cache(&fcc);
 }
 /* }}} */
 
@@ -1254,7 +1253,6 @@ ZEND_FUNCTION(set_exception_handler)
 	}
 
 	ZVAL_COPY(&EG(user_exception_handler), &(fci.function_name));
-	zend_release_fcall_info_cache(&fcc);
 }
 /* }}} */
 

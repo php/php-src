@@ -825,6 +825,10 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 
 				if (zend_fcall_info_init(arg, 0, fci, fcc, NULL, &is_callable_error) == SUCCESS) {
 					ZEND_ASSERT(!is_callable_error);
+					/* Release call trampolines: The function may not get called, in which case
+					 * the trampoline will leak. Force it to be refetched during
+					 * zend_call_function instead. */
+					zend_release_fcall_info_cache(fcc);
 					break;
 				}
 
@@ -2979,8 +2983,8 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 			zend_string_release_ex(fcc->function_handler->common.function_name, 0);
 		}
 		zend_free_trampoline(fcc->function_handler);
+		fcc->function_handler = NULL;
 	}
-	fcc->function_handler = NULL;
 }
 
 static zend_always_inline bool zend_is_callable_check_func(int check_flags, zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error) /* {{{ */

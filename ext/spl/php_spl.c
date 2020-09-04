@@ -519,6 +519,13 @@ PHP_FUNCTION(spl_autoload_register)
 
 	/* If first arg is not null */
 	if (ZEND_FCI_INITIALIZED(fci)) {
+		if (!fcc.function_handler) {
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+			zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
+		}
+
 		if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
 			fcc.function_handler->internal_function.handler == zif_spl_autoload_call) {
 			zend_argument_value_error(1, "must not be the spl_autoload_call() function");
@@ -566,7 +573,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		RETURN_THROWS();
 	}
 
-	if (zend_string_equals_literal(
+	if (fcc.function_handler && zend_string_equals_literal(
 			fcc.function_handler->common.function_name, "spl_autoload_call")) {
 		/* Don't destroy the hash table, as we might be iterating over it right now. */
 		zend_hash_clean(SPL_G(autoload_functions));
