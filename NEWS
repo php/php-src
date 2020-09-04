@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #80045 (memleak after two set_exception_handler calls with
     __call). (Nikita)
 
+- Date:
+  . Fixed bug #80057 (DateTimeImmutable::createFromFormat() does not populate
+    time). (Derick)
+
 03 Sep 2020, PHP 8.0.0beta3
 
 - Calendar:
