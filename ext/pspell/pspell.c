@@ -110,6 +110,7 @@ PHP_FUNCTION(pspell_new)
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	zend_long mode = Z_L(0),  speed = Z_L(0);
+	zend_bool mode_is_null = 1;
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
@@ -125,8 +126,8 @@ PHP_FUNCTION(pspell_new)
 	PspellManager *manager;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(argc, "s|sssl", &language, &language_len, &spelling, &spelling_len,
-		&jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(argc, "s|sssl!", &language, &language_len, &spelling, &spelling_len,
+		&jargon, &jargon_len, &encoding, &encoding_len, &mode, &mode_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -167,7 +168,7 @@ PHP_FUNCTION(pspell_new)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 4) {
+	if (!mode_is_null) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
@@ -206,6 +207,7 @@ PHP_FUNCTION(pspell_new_personal)
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	zend_long mode = Z_L(0),  speed = Z_L(0);
+	zend_bool mode_is_null = 1;
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
@@ -222,7 +224,7 @@ PHP_FUNCTION(pspell_new_personal)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(argc, "ps|sssl", &personal, &personal_len, &language, &language_len,
-		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
+		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode, &mode_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -271,7 +273,7 @@ PHP_FUNCTION(pspell_new_personal)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 5) {
+	if (!mode_is_null) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */

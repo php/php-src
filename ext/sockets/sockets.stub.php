@@ -32,13 +32,13 @@ function socket_read(Socket $socket, int $length, int $type = PHP_BINARY_READ): 
  * @param string $addr
  * @param int $port
  */
-function socket_getsockname(Socket $socket, &$addr, &$port = UNKNOWN): bool {}
+function socket_getsockname(Socket $socket, &$addr, &$port = null): bool {}
 
 /**
  * @param string $addr
  * @param int $port
  */
-function socket_getpeername(Socket $socket, &$addr, &$port = UNKNOWN): bool {}
+function socket_getpeername(Socket $socket, &$addr, &$port = null): bool {}
 
 function socket_create(int $domain, int $type, int $protocol): Socket|false {}
 
@@ -58,7 +58,7 @@ function socket_send(Socket $socket, string $buf, int $len, int $flags): int|fal
  * @param string $name
  * @param int $port
  */
-function socket_recvfrom(Socket $socket, &$buf, int $len, int $flags, &$name, &$port = UNKNOWN): int|false {}
+function socket_recvfrom(Socket $socket, &$buf, int $len, int $flags, &$name, &$port = null): int|false {}
 
 function socket_sendto(Socket $socket, string $buf, int $len, int $flags, string $addr, ?int $port = null): int|false {}
 

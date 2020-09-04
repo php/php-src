@@ -1392,7 +1392,7 @@ SXE_METHOD(asXML)
 	char               *filename = NULL;
 	size_t                 filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p!", &filename, &filename_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 

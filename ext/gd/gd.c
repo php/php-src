@@ -3135,19 +3135,18 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	double ptsize, angle;
 	char *str = NULL, *fontname = NULL;
 	char *error = NULL;
-	int argc = ZEND_NUM_ARGS();
 	gdFTStringExtra strex = {0};
 
 	if (mode == TTFTEXT_BBOX) {
-		if (argc < 4 || argc > ((extended) ? 5 : 4)) {
-			ZEND_WRONG_PARAM_COUNT();
-		} else if (zend_parse_parameters(argc, "ddss|a", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+		if (extended && zend_parse_parameters(ZEND_NUM_ARGS(), "ddss|a!", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+			RETURN_THROWS();
+		} else if (zend_parse_parameters(ZEND_NUM_ARGS(), "ddss", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (argc < 8 || argc > ((extended) ? 9 : 8)) {
-			ZEND_WRONG_PARAM_COUNT();
-		} else if (zend_parse_parameters(argc, "Oddlllss|a", &IM, gd_image_ce, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+		if (extended && zend_parse_parameters(ZEND_NUM_ARGS(), "Oddlllss|a!", &IM, gd_image_ce, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+			RETURN_THROWS();
+		} else if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oddlllss", &IM, gd_image_ce, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		im = php_gd_libgdimageptr_from_zval_p(IM);
@@ -3819,7 +3818,7 @@ PHP_FUNCTION(imageaffinematrixget)
 	zval *tmp;
 	int res = GD_FALSE, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z", &type, &options) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz", &type, &options) == FAILURE)  {
 		RETURN_THROWS();
 	}
 
@@ -3827,7 +3826,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
+			if (Z_TYPE_P(options) != IS_ARRAY) {
 				zend_argument_type_error(1, "must be of type array when using translate or scale");
 				RETURN_THROWS();
 			}
@@ -3858,11 +3857,6 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_HORIZONTAL:
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
-
-			if (!options) {
-				zend_argument_type_error(2, "must be of type int|float when using rotate or shear");
-				RETURN_THROWS();
-			}
 
 			angle = zval_get_double(options);
 

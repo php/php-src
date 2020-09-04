@@ -855,7 +855,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	size_t pubid_len, sysid_len, ndataid_len;
 	zval *self;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|bsss", &self, xmlwriter_class_entry_ce,
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|bs!s!s!", &self, xmlwriter_class_entry_ce,
 		&name, &name_len, &content, &content_len, &pe, &pubid, &pubid_len,
 		&sysid, &sysid_len, &ndataid, &ndataid_len) == FAILURE) {
 		RETURN_THROWS();
