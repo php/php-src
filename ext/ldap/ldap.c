@@ -655,7 +655,7 @@ static LDAPControl** _php_ldap_controls_from_array(LDAP *ld, zval* array, uint32
 	ctrlp = ctrls;
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), ctrlarray) {
 		if (Z_TYPE_P(ctrlarray) != IS_ARRAY) {
-			zend_argument_type_error(arg_num, "must contain only arrays where each array is a control");
+			zend_argument_type_error(arg_num, "must contain only arrays, where each array is a control");
 			error = 1;
 			break;
 		}
@@ -1129,13 +1129,13 @@ PHP_FUNCTION(ldap_bind)
 
 	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
 		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(2, "cannot contain any null-bytes");
+		zend_argument_type_error(2, "must not contain null bytes");
 		RETURN_THROWS();
 	}
 
 	if (ldap_bind_pw != NULL && memchr(ldap_bind_pw, '\0', ldap_bind_pwlen) != NULL) {
 		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(3, "cannot contain any null-bytes");
+		zend_argument_type_error(3, "must not contain null bytes");
 		RETURN_THROWS();
 	}
 
@@ -1185,13 +1185,13 @@ PHP_FUNCTION(ldap_bind_ext)
 
 	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
 		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(2, "cannot contain any null-bytes");
+		zend_argument_type_error(2, "must not contain null bytes");
 		RETURN_THROWS();
 	}
 
 	if (ldap_bind_pw != NULL && memchr(ldap_bind_pw, '\0', ldap_bind_pwlen) != NULL) {
 		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(3, "cannot contain any null-bytes");
+		zend_argument_type_error(3, "must not contain null bytes");
 		RETURN_THROWS();
 	}
 
@@ -2573,7 +2573,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		/* make sure the DN contains no NUL bytes */
 		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
-			zend_argument_type_error(2, "cannot contain any null-bytes");
+			zend_argument_type_error(2, "must not contain null bytes");
 			RETURN_THROWS();
 		}
 
@@ -2596,7 +2596,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 			/* is it an array? */
 			if (Z_TYPE_P(mod) != IS_ARRAY) {
-				zend_argument_value_error(3, "must contain only array items");
+				zend_argument_value_error(3, "must only contain arrays");
 				RETURN_THROWS();
 			}
 
