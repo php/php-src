@@ -1223,8 +1223,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_DOUBLE_OR_NULL,	"of type ?float") \
 	_(Z_EXPECTED_NUMBER,			"of type int|float") \
 	_(Z_EXPECTED_NUMBER_OR_NULL,	"of type int|float|null") \
-	_(Z_EXPECTED_STRING_OR_ARRAY,	"of type string|array") \
-	_(Z_EXPECTED_STRING_OR_ARRAY_OR_NULL, "of type string|array|null") \
+	_(Z_EXPECTED_STRING_OR_ARRAY,	"of type array|string") \
+	_(Z_EXPECTED_STRING_OR_ARRAY_OR_NULL, "of type array|string|null") \
 	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
 	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
 	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT,	"a valid class name or object") \

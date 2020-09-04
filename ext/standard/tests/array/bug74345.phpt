@@ -42,5 +42,5 @@ try {
 --EXPECT--
 array_map(): Argument #2 ($array1) must be of type array, null given
 array_map(): Argument #2 ($array1) must be of type array, null given
-preg_replace_callback(): Argument #3 ($subject) must be of type string|array, stdClass given
+preg_replace_callback(): Argument #3 ($subject) must be of type array|string, stdClass given
 ===DONE===
