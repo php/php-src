@@ -1319,6 +1319,7 @@ PHP_FUNCTION(mb_http_input)
 	char *type = NULL;
 	size_t type_len = 0, n;
 	const mbfl_encoding **entry;
+	const mbfl_encoding *encoding;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -1326,34 +1327,34 @@ PHP_FUNCTION(mb_http_input)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (type == NULL) {
-		RETVAL_STRING(MBSTRG(http_input_identify)->name);
+		encoding = MBSTRG(http_input_identify);
 	} else {
 		switch (*type) {
 		case 'G':
 		case 'g':
-			RETVAL_STRING(MBSTRG(http_input_identify_get)->name);
+			encoding = MBSTRG(http_input_identify_get);
 			break;
 		case 'P':
 		case 'p':
-			RETVAL_STRING(MBSTRG(http_input_identify_post)->name);
+			encoding = MBSTRG(http_input_identify_post);
 			break;
 		case 'C':
 		case 'c':
-			RETVAL_STRING(MBSTRG(http_input_identify_cookie)->name);
+			encoding = MBSTRG(http_input_identify_cookie);
 			break;
 		case 'S':
 		case 's':
-			RETVAL_STRING(MBSTRG(http_input_identify_string)->name);
+			encoding = MBSTRG(http_input_identify_string);
 			break;
 		case 'I':
 		case 'i':
 			entry = MBSTRG(http_input_list);
 			n = MBSTRG(http_input_list_size);
 			array_init(return_value);
-			for (int i = 0; i < n; i++, entry++) {
+			for (size_t i = 0; i < n; i++, entry++) {
 				add_next_index_string(return_value, (*entry)->name);
 			}
-			break;
+			return;
 		case 'L':
 		case 'l':
 			entry = MBSTRG(http_input_list);
@@ -1362,10 +1363,11 @@ PHP_FUNCTION(mb_http_input)
 				// TODO should return empty string?
 				RETURN_FALSE;
 			}
+			// TODO Use smart_str instead.
 			mbfl_string result;
 			mbfl_memory_device device;
 			mbfl_memory_device_init(&device, n * 12, 0);
-			for (int i = 0; i < n; i++, entry++) {
+			for (size_t i = 0; i < n; i++, entry++) {
 				mbfl_memory_device_strcat(&device, (*entry)->name);
 				mbfl_memory_device_output(',', &device);
 			}
@@ -1373,12 +1375,18 @@ PHP_FUNCTION(mb_http_input)
 			mbfl_memory_device_result(&device, &result);
 			RETVAL_STRINGL((const char*)result.val, result.len);
 			mbfl_string_clear(&result);
-			break;
+			return;
 		default:
 			// TODO ValueError
-			RETVAL_STRING(MBSTRG(http_input_identify)->name);
+			encoding = MBSTRG(http_input_identify);
 			break;
 		}
+	}
+
+	if (encoding) {
+		RETURN_STRING(encoding->name);
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
