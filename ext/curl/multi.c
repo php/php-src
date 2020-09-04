@@ -50,7 +50,7 @@
 
 /* CurlMultiHandle class */
 
-static zend_class_entry *curl_multi_ce;
+zend_class_entry *curl_multi_ce;
 
 static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
 	return (php_curlm *)((char *)(obj) - XtOffsetOf(php_curlm, std));

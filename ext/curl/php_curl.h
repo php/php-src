@@ -171,6 +171,7 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 
 PHP_CURL_API extern zend_class_entry *curl_ce;
+PHP_CURL_API extern zend_class_entry *curl_multi_ce;
 PHP_CURL_API extern zend_class_entry *curl_share_ce;
 
 void curl_multi_register_class(const zend_function_entry *method_entries);
