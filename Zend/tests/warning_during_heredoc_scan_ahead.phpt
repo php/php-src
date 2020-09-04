@@ -6,12 +6,15 @@ No warnings should be thrown during heredoc scan-ahead
 <<<TEST
 ${x}
 \400
+${"\400"}
 ${/*}
 TEST;
 
 ?>
 --EXPECTF--
 Warning: Unexpected character in input:  '' (ASCII=1) state=0 in %s on line %d
+
+Warning: Octal escape sequence overflow \400 is greater than \377 in %s on line %d
 
 Warning: Octal escape sequence overflow \400 is greater than \377 in %s on line %d
 
