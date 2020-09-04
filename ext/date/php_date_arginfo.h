@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fee95924adec03c89fdd677ec26bb6eea34d4b3c */
+ * Stub hash: 67182d27266e8618e555e7617882166661f803b8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -409,10 +409,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DateInterval___set_state arginfo_class_DateTime___set_state
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DatePeriod___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, interval)
-	ZEND_ARG_INFO(0, end)
-	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_OBJ_TYPE_MASK(0, start, DateTimeInterface, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, interval, DateInterval, MAY_BE_LONG|MAY_BE_NULL, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, end, DateTimeInterface, MAY_BE_LONG|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DatePeriod_getStartDate arginfo_class_DateTimeInterface_getTimezone

@@ -10,20 +10,41 @@ var_dump(filter_var_array(array()));
 var_dump(filter_var_array(array(1,"blah"=>"hoho")));
 var_dump(filter_var_array(array(), -1));
 var_dump(filter_var_array(array(), 1000000));
-var_dump(filter_var_array(array(), ""));
+
+try {
+    filter_var_array(array(), "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "-- (2)\n";
 var_dump(filter_var_array(array(""=>""), -1));
 var_dump(filter_var_array(array(""=>""), 1000000));
-var_dump(filter_var_array(array(""=>""), ""));
+
+try {
+    filter_var_array(array(""=>""), "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "-- (3)\n";
 var_dump(filter_var_array(array("aaa"=>"bbb"), -1));
 var_dump(filter_var_array(array("aaa"=>"bbb"), 1000000));
-var_dump(filter_var_array(array("aaa"=>"bbb"), ""));
+
+try {
+    filter_var_array(array("aaa"=>"bbb"), "");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "-- (4)\n";
-var_dump(filter_var_array(array(), new stdclass));
+
+try {
+    filter_var_array(array(), new stdclass);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(filter_var_array(array(), array()));
 var_dump(filter_var_array(array(), array("var_name"=>1)));
 var_dump(filter_var_array(array(), array("var_name"=>-1)));
@@ -50,7 +71,11 @@ var_dump(filter_var_array($a, $b));
 var_dump($a, $b);
 
 $a = array(""=>""); $b = "";
-var_dump(filter_var_array($a, $b));
+try {
+    filter_var_array($a, $b);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump($a, $b);
 
 echo "Done\n";
@@ -67,17 +92,17 @@ array(2) {
 }
 bool(false)
 bool(false)
-bool(false)
+filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
 -- (2)
 bool(false)
 bool(false)
-bool(false)
+filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
 -- (3)
 bool(false)
 bool(false)
-bool(false)
+filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
 -- (4)
-bool(false)
+filter_var_array(): Argument #2 ($options) must be of type array|int|null, stdClass given
 array(0) {
 }
 array(1) {
@@ -107,7 +132,7 @@ array(1) {
   string(0) ""
 }
 int(100000)
-bool(false)
+filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
 array(1) {
   [""]=>
   string(0) ""

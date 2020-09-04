@@ -10,29 +10,11 @@
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
-*/
+ */
 
-#ifndef DATEFORMAT_HELPERS_H
-#define	DATEFORMAT_HELPERS_H
+#ifndef CALENDAR_CLASS_H
+#define CALENDAR_CLASS_H
 
-#ifndef __cplusplus
-#error For C++ only
-#endif
+extern zend_class_entry *Calendar_ce_ptr, *GregorianCalendar_ce_ptr;
 
-#include <unicode/calendar.h>
-#include <unicode/datefmt.h>
-
-extern "C" {
-#include "../php_intl.h"
-}
-
-using icu::Locale;
-using icu::Calendar;
-using icu::DateFormat;
-
-int datefmt_process_calendar_arg(
-	zend_object *calendar_obj, zend_long calendar_long, zend_bool calendar_is_null, Locale const& locale,
-	const char *func_name, intl_error *err, Calendar*& cal, zend_long& cal_int_type, bool& calendar_owned
-);
-
-#endif	/* DATEFORMAT_HELPERS_H */
+#endif /* #ifndef CALENDAR_CLASS_H */

@@ -1674,7 +1674,8 @@ PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, s
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
 {
-	zval *lifetime_or_options = NULL;
+	HashTable *options_ht;
+	zend_long lifetime_long;
 	zend_string *lifetime = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	zend_bool secure = 0, secure_null = 1;
 	zend_bool httponly = 0, httponly_null = 1;
@@ -1687,7 +1688,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	}
 
 	ZEND_PARSE_PARAMETERS_START(1, 5)
-		Z_PARAM_ZVAL(lifetime_or_options)
+		Z_PARAM_ARRAY_HT_OR_LONG(options_ht, lifetime_long)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(path)
 		Z_PARAM_STR(domain)
@@ -1705,7 +1706,7 @@ PHP_FUNCTION(session_set_cookie_params)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(lifetime_or_options) == IS_ARRAY) {
+	if (options_ht) {
 		zend_string *key;
 		zval *value;
 
@@ -1718,7 +1719,7 @@ PHP_FUNCTION(session_set_cookie_params)
 			RETURN_FALSE;
 		}
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(lifetime_or_options), key, value) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, key, value) {
 			if (key) {
 				ZVAL_DEREF(value);
 				if(!strcasecmp("lifetime", ZSTR_VAL(key))) {
@@ -1754,7 +1755,7 @@ PHP_FUNCTION(session_set_cookie_params)
 			RETURN_THROWS();
 		}
 	} else {
-		lifetime = zval_get_string(lifetime_or_options);
+		lifetime = zend_long_to_str(lifetime_long);
 	}
 
 	/* Exception during string conversion */

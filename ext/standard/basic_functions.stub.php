@@ -502,11 +502,9 @@ function header(string $string, bool $replace = true, int $http_response_code = 
 
 function header_remove(?string $name = null): void {}
 
-/** @param array|int $expires_or_options */
-function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setrawcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
-/** @param array|int $expires_or_options */
-function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
 function http_response_code(int $response_code = 0): int|bool {}
 
@@ -612,11 +610,7 @@ function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): 
 
 function substr(string $str, int $start, ?int $length = null): string|false {}
 
-/**
- * @param array|int $start
- * @param array|int|null $length
- */
-function substr_replace(array|string $str, string|array $replace, $start, $length = null): string|array|false {}
+function substr_replace(array|string $str, array|string $replace, array|int $start, array|int|null $length = null): string|array|false {}
 
 function quotemeta(string $str): string {}
 
@@ -1151,7 +1145,7 @@ function password_get_info(string $hash): ?array {}
 
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
-function password_needs_rehash(string $hash, string|int $algo, array $options = []): bool {}
+function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
 
 function password_verify(string $password, string $hash): bool {}
 
@@ -1349,7 +1343,7 @@ function stream_get_wrappers(): array|false {}
 
 function stream_get_transports(): array|false {}
 
-/** @param mixed $stream */
+/** @param resource|string $stream */
 function stream_is_local($stream): bool {}
 
 /** @param resource $stream */

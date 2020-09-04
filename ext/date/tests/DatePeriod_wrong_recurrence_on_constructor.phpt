@@ -15,5 +15,5 @@ try {
 }
 ?>
 --EXPECT--
-DatePeriod::__construct(): The recurrence count '0' is invalid. Needs to be > 0
-DatePeriod::__construct(): The recurrence count '-1' is invalid. Needs to be > 0
+DatePeriod::__construct(): Argument #3 ($end) must be greater than 0
+DatePeriod::__construct(): Argument #3 ($end) must be greater than 0

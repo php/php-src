@@ -61,14 +61,13 @@ static inline Calendar_object *php_intl_calendar_fetch_object(zend_object *obj) 
 
 void calendar_object_create(zval *object, Calendar *calendar);
 
-Calendar *calendar_fetch_native_calendar(zval *object);
+Calendar *calendar_fetch_native_calendar(zend_object *object);
 
 void calendar_object_construct(zval *object, Calendar *calendar);
 
 void calendar_register_IntlCalendar_class(void);
 
-extern zend_class_entry *Calendar_ce_ptr,
-						*GregorianCalendar_ce_ptr;
+extern zend_class_entry *Calendar_ce_ptr, *GregorianCalendar_ce_ptr;
 
 extern zend_object_handlers Calendar_handlers;
 

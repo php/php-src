@@ -221,6 +221,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_WRONG_CLASS_OR_NULL:
 			zend_wrong_parameter_class_or_null_error(num, name, arg);
 			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_LONG:
+			zend_wrong_parameter_class_or_long_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL:
+			zend_wrong_parameter_class_or_long_or_null_error(num, name, arg);
+			break;
 		case ZPP_ERROR_WRONG_ARG:
 			zend_wrong_parameter_type_error(num, expected_type, arg);
 			break;
@@ -277,6 +283,26 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(u
 	}
 
 	zend_argument_type_error(num, "must be of type ?%s, %s given", name, zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_error(uint32_t num, const char *name, zval *arg) /* {{{ */
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_argument_type_error(num, "must be of type %s|int, %s given", name, zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_or_null_error(uint32_t num, const char *name, zval *arg) /* {{{ */
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_argument_type_error(num, "must be of type %s|int|null, %s given", name, zend_zval_type_name(arg));
 }
 /* }}} */
 
