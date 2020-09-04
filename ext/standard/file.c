@@ -325,16 +325,16 @@ PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 }
 /* }}} */
 
-/* Returns FAILURE when the action is not one of LOCK_SH, LOCK_EX, or LOCK_UN */
-PHPAPI zend_result php_flock_common(php_stream *stream, zend_long operation,
-	zval *wouldblock, zval *return_value)
+PHPAPI void php_flock_common(php_stream *stream, zend_long operation,
+	uint32_t operation_arg_num, zval *wouldblock, zval *return_value)
 {
 	int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 	int act;
 
 	act = operation & PHP_LOCK_UN;
 	if (act < 1 || act > 3) {
-		return FAILURE;
+		zend_argument_value_error(operation_arg_num, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
+		RETURN_THROWS();
 	}
 
 	if (wouldblock) {
@@ -347,11 +347,9 @@ PHPAPI zend_result php_flock_common(php_stream *stream, zend_long operation,
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
 			ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 1);
 		}
-		RETVAL_FALSE;
-		return SUCCESS;
+		RETURN_FALSE;
 	}
-	RETVAL_TRUE;
-	return SUCCESS;
+	RETURN_TRUE;
 }
 
 /* {{{ Portable file locking */
@@ -370,11 +368,7 @@ PHP_FUNCTION(flock)
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	if (FAILURE == php_flock_common(stream, operation, wouldblock, return_value)) {
-		zend_argument_value_error(2, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
-		RETURN_THROWS();
-	}
-	/* return_value is already set by php_parse_flock_arguments */
+	php_flock_common(stream, operation, 2, wouldblock, return_value);
 }
 /* }}} */
 

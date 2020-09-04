@@ -2511,11 +2511,7 @@ PHP_METHOD(SplFileObject, flock)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (FAILURE == php_flock_common(intern->u.file.stream, operation, wouldblock, return_value)) {
-		zend_argument_value_error(1, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
-		RETURN_THROWS();
-	}
-	/* return_value is already set by php_parse_flock_arguments */
+	php_flock_common(intern->u.file.stream, operation, 1, wouldblock, return_value);
 }
 /* }}} */
 
