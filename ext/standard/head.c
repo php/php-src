@@ -192,43 +192,35 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 	return result;
 }
 
-static void php_head_parse_cookie_options_array(zval *options, zend_long *expires, zend_string **path, zend_string **domain, zend_bool *secure, zend_bool *httponly, zend_string **samesite) {
-	int found = 0;
+static zend_result php_head_parse_cookie_options_array(zval *options, zend_long *expires, zend_string **path,
+		zend_string **domain, zend_bool *secure, zend_bool *httponly, zend_string **samesite)
+{
 	zend_string *key;
 	zval *value;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), key, value) {
-		if (key) {
-			if (zend_string_equals_literal_ci(key, "expires")) {
-				*expires = zval_get_long(value);
-				found++;
-			} else if (zend_string_equals_literal_ci(key, "path")) {
-				*path = zval_get_string(value);
-				found++;
-			} else if (zend_string_equals_literal_ci(key, "domain")) {
-				*domain = zval_get_string(value);
-				found++;
-			} else if (zend_string_equals_literal_ci(key, "secure")) {
-				*secure = zval_is_true(value);
-				found++;
-			} else if (zend_string_equals_literal_ci(key, "httponly")) {
-				*httponly = zval_is_true(value);
-				found++;
-			} else if (zend_string_equals_literal_ci(key, "samesite")) {
-				*samesite = zval_get_string(value);
-				found++;
-			} else {
-				php_error_docref(NULL, E_WARNING, "Unrecognized key '%s' found in the options array", ZSTR_VAL(key));
-			}
+		if (!key) {
+			zend_value_error("%s(): option array cannot have numeric keys", get_active_function_name());
+			return FAILURE;
+		}
+		if (zend_string_equals_literal_ci(key, "expires")) {
+			*expires = zval_get_long(value);
+		} else if (zend_string_equals_literal_ci(key, "path")) {
+			*path = zval_get_string(value);
+		} else if (zend_string_equals_literal_ci(key, "domain")) {
+			*domain = zval_get_string(value);
+		} else if (zend_string_equals_literal_ci(key, "secure")) {
+			*secure = zval_is_true(value);
+		} else if (zend_string_equals_literal_ci(key, "httponly")) {
+			*httponly = zval_is_true(value);
+		} else if (zend_string_equals_literal_ci(key, "samesite")) {
+			*samesite = zval_get_string(value);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Numeric key found in the options array");
+			zend_value_error("%s(): option \"%s\" is invalid", get_active_function_name(), ZSTR_VAL(key));
+			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	/* Array is not empty but no valid keys were found */
-	if (found == 0 && zend_hash_num_elements(Z_ARRVAL_P(options)) > 0) {
-		php_error_docref(NULL, E_WARNING, "No valid options were found in the given array");
-	}
+	return SUCCESS;
 }
 
 static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
@@ -257,22 +249,23 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 					"($expires_or_options) is an array", get_active_function_name());
 				RETURN_THROWS();
 			}
-			php_head_parse_cookie_options_array(expires_or_options, &expires, &path,
-				&domain, &secure, &httponly, &samesite);
+			if (FAILURE == php_head_parse_cookie_options_array(expires_or_options, &expires, &path,
+					&domain, &secure, &httponly, &samesite)) {
+				goto cleanup;
+			}
 		} else {
 			expires = zval_get_long(expires_or_options);
 		}
 	}
 
-	if (!EG(exception)) {
-		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, !is_raw) == SUCCESS) {
-			RETVAL_TRUE;
-		} else {
-			RETVAL_FALSE;
-		}
+	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, !is_raw) == SUCCESS) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
 	}
 
 	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
+		cleanup:
 		if (path) {
 			zend_string_release(path);
 		}
