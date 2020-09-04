@@ -17,6 +17,6 @@ try {
 ===DONE===
 --EXPECTHEADERS--
 --EXPECT--
-setcookie(): Argument #4 ($path) cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
-setcookie(): Argument #5 ($domain) cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
+setcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
+setcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
 ===DONE===

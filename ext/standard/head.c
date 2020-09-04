@@ -76,12 +76,41 @@ PHPAPI int php_header(void)
 	}
 }
 
-PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int httponly, zend_string *samesite, int url_encode)
+#define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", and \"\\014\""
+PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
+	zend_string *path, zend_string *domain, bool secure, bool httponly,
+	zend_string *samesite, bool url_encode)
 {
 	zend_string *dt;
 	sapi_header_line ctr = {0};
-	int result;
+	zend_result result;
 	smart_str buf = {0};
+
+	if (!ZSTR_LEN(name)) {
+		zend_argument_value_error(1, "cannot be empty");
+		return FAILURE;
+	}
+	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
+		zend_argument_value_error(1, "cannot contain \"=\", " ILLEGAL_COOKIE_CHARACTER);
+		return FAILURE;
+	}
+	if (!url_encode && value &&
+			strpbrk(ZSTR_VAL(value), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+		zend_argument_value_error(2, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
+		return FAILURE;
+	}
+
+	if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+		zend_value_error("%s(): \"path\" option cannot contain " ILLEGAL_COOKIE_CHARACTER,
+			get_active_function_name());
+		return FAILURE;
+	}
+	if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+		zend_value_error("%s(): \"domain\" option cannot contain " ILLEGAL_COOKIE_CHARACTER,
+			get_active_function_name());
+		return FAILURE;
+	}
+	/* Should check value of SameSite? */
 
 	if (value == NULL || ZSTR_LEN(value) == 0) {
 		/*
@@ -118,7 +147,8 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 			if (!p || *(p + 5) != ' ') {
 				zend_string_free(dt);
 				smart_str_free(&buf);
-				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
+				zend_value_error("%s(): \"expires\" option cannot have a year greater than 9999",
+					get_active_function_name());
 				return FAILURE;
 			}
 
@@ -201,7 +231,6 @@ static void php_head_parse_cookie_options_array(zval *options, zend_long *expire
 	}
 }
 
-#define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", and \"\\014\""
 static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 {
 	/* to handle overloaded function array|int */
@@ -228,45 +257,11 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 					"($expires_or_options) is an array", get_active_function_name());
 				RETURN_THROWS();
 			}
-			php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite);
-			if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-				zend_value_error("%s(): Argument #3 ($expires_or_options[\"path\"]) cannot contain "
-					ILLEGAL_COOKIE_CHARACTER, get_active_function_name());
-				goto cleanup;
-				RETURN_THROWS();
-			}
-			if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-				zend_value_error("%s(): Argument #3 ($expires_or_options[\"domain\"]) cannot contain "
-					ILLEGAL_COOKIE_CHARACTER, get_active_function_name());
-				goto cleanup;
-				RETURN_THROWS();
-			}
-			/* Should check value of SameSite? */
+			php_head_parse_cookie_options_array(expires_or_options, &expires, &path,
+				&domain, &secure, &httponly, &samesite);
 		} else {
 			expires = zval_get_long(expires_or_options);
-			if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-				zend_argument_value_error(4, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
-				RETURN_THROWS();
-			}
-			if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-				zend_argument_value_error(5, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
-				RETURN_THROWS();
-			}
 		}
-	}
-
-	if (!ZSTR_LEN(name)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
-		zend_argument_value_error(1, "cannot contain \"=\", " ILLEGAL_COOKIE_CHARACTER);
-		RETURN_THROWS();
-	}
-	if (is_raw && value &&
-		strpbrk(ZSTR_VAL(value), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-		zend_argument_value_error(2, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
-		RETURN_THROWS();
 	}
 
 	if (!EG(exception)) {
@@ -278,7 +273,6 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 	}
 
 	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
-		cleanup:
 		if (path) {
 			zend_string_release(path);
 		}

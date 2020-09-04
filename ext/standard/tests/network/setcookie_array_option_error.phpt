@@ -13,6 +13,13 @@ setcookie('name', 'value', ['unknown_key' => 'only']);
 setcookie('name2', 'value2', [0 => 'numeric_key']);
 // Unrecognized key
 setcookie('name3', 'value3', ['path' => '/path/', 'foo' => 'bar']);
+// Invalid expiration date
+// To go above year 9999: 60 * 60 * 24 * 365 * 9999
+try {
+    setcookie('name', 'value', ['expires' => 315328464000]);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
 // Invalid path key content
 try {
     setcookie('name', 'value', ['path' => '/;/']);
@@ -46,8 +53,9 @@ Warning: setcookie(): Numeric key found in the options array in %s
 Warning: setcookie(): No valid options were found in the given array in %s
 
 Warning: setcookie(): Unrecognized key 'foo' found in the options array in %s
-setcookie(): Argument #3 ($expires_or_options["path"]) cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
-setcookie(): Argument #3 ($expires_or_options["domain"]) cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
+setcookie(): "expires" option cannot have a year greater than 9999
+setcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
+setcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", and "\014"
 setcookie(): Expects exactly 3 arguments when argument #3 ($expires_or_options) is an array
 array(4) {
   [0]=>
