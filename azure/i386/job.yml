@@ -31,6 +31,7 @@ jobs:
             --enable-gd \
             --with-jpeg \
             --with-webp \
+            --with-freetype \
             --with-xpm \
             --enable-exif \
             --with-zip \
