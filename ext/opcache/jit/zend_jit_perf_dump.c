@@ -36,7 +36,7 @@
 // avoiding thread.h inclusion as it conflicts with vtunes types.
 extern unsigned int thr_self(void);
 #elif defined(__HAIKU__)
-#include <kernel/image.h>
+#include <FindDirectory.h>
 #endif
 
 #include "zend_elf.h"
@@ -136,20 +136,13 @@ static void zend_jit_perf_jitdump_open(void)
 	const char *path = getexecname();
 	fd = open(path, O_RDONLY);
 #elif defined(__HAIKU__)
-	image_info ii;
-	int32_t ic = 0;
-
-	while (get_next_image_info(0, &ic, &ii) == B_OK) {
-		if (ii.type == B_APP_IMAGE) {
-			break;
-		}
-	}
-
-	if (ii.type != B_APP_IMAGE) {
+	char path[PATH_MAX];
+	if (find_path(B_APP_IMAGE_SYMBOL, B_FIND_PATH_IMAGE_PATH,
+		NULL, path, sizeof(path)) != B_OK) {
 		return;
 	}
 
-	fd = open(ii.name, O_RDONLY);
+	fd = open(path, O_RDONLY);
 #else
 	fd = -1;
 #endif
