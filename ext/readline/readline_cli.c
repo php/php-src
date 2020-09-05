@@ -518,7 +518,7 @@ TODO:
 	}
 	if (text[0] == '$') {
 		retval = cli_completion_generator_var(text, textlen, &cli_completion_state);
-	} else if (text[0] == '#') {
+	} else if (text[0] == '#' && text[1] != '[') {
 		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
 		char *lc_text, *class_name_end;
@@ -630,7 +630,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		len = strlen(line);
 
-		if (line[0] == '#') {
+		if (line[0] == '#' && line[1] != '[') {
 			char *param = strstr(&line[1], "=");
 			if (param) {
 				zend_string *cmd;
