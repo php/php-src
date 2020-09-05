@@ -3063,6 +3063,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W, 0);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
+			CG(zend_lineno) = zend_ast_get_lineno(var_ast);
 			zend_emit_op_tmp(result, ZEND_ASSIGN, &var_node, &expr_node);
 			return;
 		case ZEND_AST_STATIC_PROP:
