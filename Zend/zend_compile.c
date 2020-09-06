@@ -4501,7 +4501,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
 		/* anon class declaration */
-		 zend_compile_class_decl(&class_node, class_ast, 0);
+		zend_compile_class_decl(&class_node, class_ast, 0);
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
@@ -7370,8 +7370,8 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 
 	CG(active_class_entry) = ce;
 
-	if (decl->child[4]) {
-		zend_compile_attributes(&ce->attributes, decl->child[4], 0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	if (decl->child[3]) {
+		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS);
 	}
 
 	if (implements_ast) {
