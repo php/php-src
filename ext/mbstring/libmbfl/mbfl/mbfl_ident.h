@@ -62,9 +62,7 @@ MBFLAPI extern void mbfl_identify_filter_init(mbfl_identify_filter *filter, enum
 MBFLAPI extern void mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding);
 
 MBFLAPI extern void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter);
-MBFLAPI extern void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter);
 
-MBFLAPI extern int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter);
 MBFLAPI extern int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter);
 
 #endif /* MBFL_IDENT_H */

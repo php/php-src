@@ -76,12 +76,6 @@
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
 
-static const struct mbfl_identify_vtbl vtbl_identify_false = {
-	mbfl_no_encoding_pass,
-	mbfl_filt_ident_false_ctor,
-	mbfl_filt_ident_false
-};
-
 static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf8,
 	&vtbl_identify_utf7,
@@ -168,7 +162,6 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_qprint,
 	&vtbl_identify_base64,
 	&vtbl_identify_wchar,
-	&vtbl_identify_false,
 	NULL
 };
 
@@ -212,9 +205,7 @@ void mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encodin
 
 	/* setup the function table */
 	const struct mbfl_identify_vtbl *vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
-	if (vtbl == NULL) {
-		vtbl = &vtbl_identify_false;
-	}
+	ZEND_ASSERT(vtbl);
 	filter->filter_ctor = vtbl->filter_ctor;
 	filter->filter_function = vtbl->filter_function;
 
@@ -229,20 +220,6 @@ void mbfl_identify_filter_delete(mbfl_identify_filter *filter)
 void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter)
 {
 	filter->status = filter->flag = 0;
-}
-
-/* A (useless) filter which says that _every_ string is invalid in a certain encoding.
- * Obviously, that cannot be true. Remove after all encodings have proper identify filters */
-int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter)
-{
-	filter->flag = 1;	/* bad */
-	return c;
-}
-
-void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter)
-{
-	filter->status = 0;
-	filter->flag = 1;
 }
 
 /* For encodings in which _every_ possible input string is valid */
