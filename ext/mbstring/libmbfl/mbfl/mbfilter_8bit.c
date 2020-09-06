@@ -50,6 +50,12 @@ const mbfl_encoding mbfl_encoding_8bit = {
 	&vtbl_wchar_8bit
 };
 
+const struct mbfl_identify_vtbl vtbl_identify_8bit = {
+	mbfl_no_encoding_8bit,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_true
+};
+
 const struct mbfl_convert_vtbl vtbl_8bit_wchar = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_wchar,
