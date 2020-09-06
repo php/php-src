@@ -1553,8 +1553,8 @@ tail_call:
 			break;
 		case ZEND_AST_CLASS:
 			decl = (zend_ast_decl *) ast;
-			if (decl->child[4]) {
-				zend_ast_export_attributes(str, decl->child[4], indent, 1);
+			if (decl->child[3]) {
+				zend_ast_export_attributes(str, decl->child[3], indent, 1);
 			}
 			if (decl->flags & ZEND_ACC_INTERFACE) {
 				smart_str_appends(str, "interface ");
@@ -1889,8 +1889,8 @@ simple_list:
 			smart_str_appends(str, "new ");
 			if (ast->child[0]->kind == ZEND_AST_CLASS) {
 				zend_ast_decl *decl = (zend_ast_decl *) ast->child[0];
-				if (decl->child[4]) {
-					zend_ast_export_attributes(str, decl->child[4], indent, 0);
+				if (decl->child[3]) {
+					zend_ast_export_attributes(str, decl->child[3], indent, 0);
 				}
 				smart_str_appends(str, "class");
 				if (zend_ast_get_list(ast->child[1])->children) {
@@ -2260,9 +2260,11 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 	case ZEND_AST_FUNC_DECL:
 	case ZEND_AST_CLOSURE:
 	case ZEND_AST_METHOD:
-	case ZEND_AST_CLASS:
 	case ZEND_AST_ARROW_FUNC:
 		((zend_ast_decl *) ast)->child[4] = attr;
+		break;
+	case ZEND_AST_CLASS:
+		((zend_ast_decl *) ast)->child[3] = attr;
 		break;
 	case ZEND_AST_PROP_GROUP:
 		ast->child[2] = attr;
