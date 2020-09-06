@@ -250,6 +250,10 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 						code_type = dstring;
 						break;
 					case '#':
+						if (code[i+1] == '[') {
+							valid_end = 0;
+							break;
+						}
 						code_type = comment_line;
 						break;
 					case '/':
