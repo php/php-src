@@ -30,6 +30,10 @@
 #include "mbfilter.h"
 #include "mbfilter_utf16.h"
 
+static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter);
+
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
 
 const mbfl_encoding mbfl_encoding_utf16 = {
@@ -63,6 +67,24 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	MBFL_ENCTYPE_MWC2LE,
 	&vtbl_utf16le_wchar,
 	&vtbl_wchar_utf16le
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_utf16 = {
+	mbfl_no_encoding_utf16,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_utf16
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_utf16le = {
+	mbfl_no_encoding_utf16le,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_utf16le
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_utf16be = {
+	mbfl_no_encoding_utf16be,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_utf16be
 };
 
 const struct mbfl_convert_vtbl vtbl_utf16_wchar = {
@@ -316,6 +338,111 @@ int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter)
 		CK((*filter->output_function)((n >> 8) & 0xff, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
+	}
+
+	return c;
+}
+
+static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter)
+{
+	if (filter->status == 0) {
+		if (c >= 0xfe) { /* could be a byte-order mark */
+			filter->status = c;
+		} else {
+			/* no byte-order mark at beginning of input; assume UTF-16BE */
+			filter->filter_function = mbfl_filt_ident_utf16be;
+			return (filter->filter_function)(c, filter);
+		}
+	} else {
+		unsigned short n = (filter->status << 8) | c;
+		filter->status = 0;
+
+		if (n == 0xfeff) {
+			/* it was a big-endian byte-order mark */
+			filter->filter_function = mbfl_filt_ident_utf16be;
+		} else if (n == 0xfffe) {
+			/* it was a little-endian byte-order mark */
+			filter->filter_function = mbfl_filt_ident_utf16le;
+		} else {
+			/* it wasn't a byte-order mark */
+			filter->filter_function = mbfl_filt_ident_utf16be;
+			(filter->filter_function)(n >> 8, filter);
+			return (filter->filter_function)(c, filter);
+		}
+	}
+	return c;
+}
+
+static int mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter)
+{
+	switch (filter->status) {
+	case 0: /* 1st byte */
+		filter->status = 1;
+		break;
+
+	case 1: /* 2nd byte */
+		if ((c & 0xfc) == 0xd8) {
+			/* Looks like a surrogate pair */
+			filter->status = 2;
+		} else if ((c & 0xfc) == 0xdc) {
+			/* This is wrong; the second part of the surrogate pair has come first */
+			filter->flag = 1;
+		} else {
+			filter->status = 0; /* Just an ordinary 2-byte character */
+		}
+		break;
+
+	case 2: /* 3rd byte */
+		filter->status = 3;
+		break;
+
+	case 3: /* 4th byte */
+		if ((c & 0xfc) == 0xdc) {
+			filter->status = 0;
+		} else {
+			filter->flag = 1; /* Surrogate pair wrongly encoded */
+		}
+		break;
+	}
+
+	return c;
+}
+
+static int mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter)
+{
+	switch (filter->status) {
+	case 0: /* 1st byte */
+		if ((c & 0xfc) == 0xd8) {
+			/* Looks like a surrogate pair */
+			filter->status = 2;
+		} else if ((c & 0xfc) == 0xdc) {
+			/* This is wrong; the second part of the surrogate pair has come first */
+			filter->flag = 1;
+		} else {
+			/* Just an ordinary 2-byte character */
+			filter->status = 1;
+		}
+		break;
+
+	case 1: /* 2nd byte, not surrogate pair */
+		filter->status = 0;
+		break;
+
+	case 2: /* 2nd byte, surrogate pair */
+		filter->status = 3;
+		break;
+
+	case 3: /* 3rd byte, surrogate pair */
+		if ((c & 0xfc) == 0xdc) {
+			filter->status = 4;
+		} else {
+			filter->flag = 1; /* Surrogate pair wrongly encoded */
+		}
+		break;
+
+	case 4: /* 4th byte, surrogate pair */
+		filter->status = 0;
+		break;
 	}
 
 	return c;

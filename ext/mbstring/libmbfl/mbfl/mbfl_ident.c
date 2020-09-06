@@ -160,6 +160,9 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_cp50222,
 	&vtbl_identify_gb18030,
 	&vtbl_identify_7bit,
+	&vtbl_identify_utf16,
+	&vtbl_identify_utf16le,
+	&vtbl_identify_utf16be,
 	&vtbl_identify_false,
 	NULL
 };

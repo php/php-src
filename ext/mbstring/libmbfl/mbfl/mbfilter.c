@@ -396,18 +396,6 @@ const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd
 			}
 			n--;
 		}
-
-		/* fallback judge */
-		if (!encoding) {
-			n = identd->filter_list_size - 1;
-			while (n >= 0) {
-				filter = identd->filter_list[n];
-				if (!filter->flag) {
-					encoding = filter->encoding;
-				}
-				n--;
- 			}
-		}
 	}
 
 	return encoding;
