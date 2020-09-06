@@ -290,11 +290,7 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 	case 3:
 		filter->status = 0;
 		int n = filter->cache + ((c & 0x3) << 8) + 0x10000;
-		if (n >= MBFL_WCSPLANE_SUPMIN && n < MBFL_WCSPLANE_SUPMAX) {
-			CK((*filter->output_function)(n, filter->data));
-		} else { /* illegal character */
-			CK((*filter->output_function)((n & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data));
-		}
+		CK((*filter->output_function)(n, filter->data));
 		break;
 	}
 
