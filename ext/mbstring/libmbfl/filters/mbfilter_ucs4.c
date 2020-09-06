@@ -30,6 +30,11 @@
 #include "mbfilter.h"
 #include "mbfilter_ucs4.h"
 
+static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter);
+static int mbfl_filt_ident_ucs4(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_ucs4be(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_ucs4le(int c, mbfl_identify_filter *filter);
+
 static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
 
 const mbfl_encoding mbfl_encoding_ucs4 = {
@@ -65,13 +70,31 @@ const mbfl_encoding mbfl_encoding_ucs4le = {
 	&vtbl_wchar_ucs4le
 };
 
+const struct mbfl_identify_vtbl vtbl_identify_ucs4 = {
+	mbfl_no_encoding_ucs4,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_ucs4
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_ucs4be = {
+	mbfl_no_encoding_ucs4be,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_ucs4be
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_ucs4le = {
+	mbfl_no_encoding_ucs4le,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_ucs4le
+};
+
 const struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
 	mbfl_no_encoding_ucs4,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_ucs4_wchar_flush,
 	NULL,
 };
 
@@ -91,7 +114,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4be_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_ucs4_wchar_flush,
 	NULL,
 };
 
@@ -111,7 +134,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4le_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_ucs4_wchar_flush,
 	NULL,
 };
 
@@ -125,106 +148,68 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
 	NULL,
 };
 
-
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-/*
- * UCS-4 => wchar
- */
+static int emit_wchar_if_valid(unsigned int w, mbfl_convert_filter *filter)
+{
+	/* FIXME: UCS-4 should actually accept code unit values up to 0x7FFFFFFF
+	 * This is a hack to get around the fact that values of 0x70000000 and up
+	 * are being used to represent illegal characters, which are passed through
+	 * for error handling by a later conversion filter stage
+	 * After we adjust the range of values used for such, change this to 0x7FFFFFFF */
+	if (w < MBFL_WCSGROUP_UCS4MAX) {
+		CK((*filter->output_function)(w, filter->data));
+	} else {
+		CK(mbfl_filt_conv_illegal_output(w, filter));
+	}
+	return 0;
+}
+
 int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n, endian;
+	/* We start out with the assumption that the string is big-endian
+	 * If we find a little-endian BOM, then we will change that assumption */
+	filter->cache = (filter->cache << 8) | (c & 0xFF);
 
-	endian = filter->status & 0xff00;
-	switch (filter->status & 0xff) {
-	case 0:
-		if (endian) {
-			n = c & 0xff;
-		} else {
-			n = (c & 0xffu) << 24;
-		}
-		filter->cache = n;
+	if (filter->status < 3) {
 		filter->status++;
-		break;
-	case 1:
-		if (endian) {
-			n = (c & 0xff) << 8;
+	} else {
+		if (filter->cache == 0xFFFE0000) {
+			/* If we had the endianness right, the byte-order mark should be 0x0000feff,
+			 * but we got 0xfffe0000, meaning that we are currently using the wrong
+			 * endianness and should switch to little-endian mode */
+			filter->filter_function = mbfl_filt_conv_ucs4le_wchar;
 		} else {
-			n = (c & 0xff) << 16;
-		}
-		filter->cache |= n;
-		filter->status++;
-		break;
-	case 2:
-		if (endian) {
-			n = (c & 0xff) << 16;
-		} else {
-			n = (c & 0xff) << 8;
-		}
-		filter->cache |= n;
-		filter->status++;
-		break;
-	default:
-		if (endian) {
-			n = (c & 0xffu) << 24;
-		} else {
-			n = c & 0xff;
-		}
-		n |= filter->cache;
-		if ((n & 0xffff) == 0 && ((n >> 16) & 0xffff) == 0xfffe) {
-			if (endian) {
-				filter->status = 0;		/* big-endian */
-			} else {
-				filter->status = 0x100;		/* little-endian */
+			if (filter->cache != 0xFEFF) {
+				CK(emit_wchar_if_valid(filter->cache, filter));
 			}
-			CK((*filter->output_function)(0xfeff, filter->data));
-		} else {
-			filter->status &= ~0xff;
-			CK((*filter->output_function)(n, filter->data));
+			filter->filter_function = mbfl_filt_conv_ucs4be_wchar;
 		}
-		break;
+		filter->status = filter->cache = 0;
 	}
 
 	return c;
 }
 
-/*
- * UCS-4BE => wchar
- */
 int mbfl_filt_conv_ucs4be_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
-	if (filter->status == 0) {
-		filter->status = 1;
-		n = (c & 0xffu) << 24;
-		filter->cache = n;
-	} else if (filter->status == 1) {
-		filter->status = 2;
-		n = (c & 0xff) << 16;
-		filter->cache |= n;
-	} else if (filter->status == 2) {
-		filter->status = 3;
-		n = (c & 0xff) << 8;
-		filter->cache |= n;
+	filter->cache = (filter->cache << 8) | (c & 0xFF);
+	if (filter->status < 3) {
+		filter->status++;
 	} else {
-		filter->status = 0;
-		n = (c & 0xff) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		CK(emit_wchar_if_valid(filter->cache, filter));
+		filter->status = filter->cache = 0;
 	}
 	return c;
 }
 
-/*
- * wchar => UCS-4BE
- */
 int mbfl_filt_conv_wchar_ucs4be(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < MBFL_WCSGROUP_UCS4MAX) {
-		CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)(c & 0xff, filter->data));
+		CK((*filter->output_function)((c >> 24) & 0xFF, filter->data));
+		CK((*filter->output_function)((c >> 16) & 0xFF, filter->data));
+		CK((*filter->output_function)((c >> 8) & 0xFF, filter->data));
+		CK((*filter->output_function)(c & 0xFF, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
@@ -232,46 +217,92 @@ int mbfl_filt_conv_wchar_ucs4be(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-/*
- * UCS-4LE => wchar
- */
 int mbfl_filt_conv_ucs4le_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
-	if (filter->status == 0) {
-		filter->status = 1;
-		n = (c & 0xff);
-		filter->cache = n;
-	} else if (filter->status == 1) {
-		filter->status = 2;
-		n = (c & 0xff) << 8;
-		filter->cache |= n;
-	} else if (filter->status == 2) {
-		filter->status = 3;
-		n = (c & 0xff) << 16;
-		filter->cache |= n;
+	filter->cache = (filter->cache >> 8) | ((c & 0xFF) << 24);
+	if (filter->status < 3) {
+		filter->status++;
 	} else {
-		filter->status = 0;
-		n = ((c & 0xffu) << 24) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		CK(emit_wchar_if_valid(filter->cache, filter));
+		filter->status = filter->cache = 0;
 	}
 	return c;
 }
 
-/*
- * wchar => UCS-4LE
- */
 int mbfl_filt_conv_wchar_ucs4le(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < MBFL_WCSGROUP_UCS4MAX) {
-		CK((*filter->output_function)(c & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
+		CK((*filter->output_function)(c & 0xFF, filter->data));
+		CK((*filter->output_function)((c >> 8) & 0xFF, filter->data));
+		CK((*filter->output_function)((c >> 16) & 0xFF, filter->data));
+		CK((*filter->output_function)((c >> 24) & 0xFF, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
+	return c;
+}
+
+static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status) {
+		/* Input string was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
+}
+
+static int mbfl_filt_ident_ucs4be(int c, mbfl_identify_filter *filter)
+{
+	int n = filter->status & 0xFF; /* # of bytes already consumed in code unit */
+	if (n < 3) {
+		filter->status = (filter->status + 1) | (c << (8 * (3 - n)));
+	} else {
+		int value = (filter->status & 0xFFFFFF00) | c;
+		if (value >= MBFL_WCSGROUP_UCS4MAX) {
+			filter->flag = 1;
+		}
+		filter->status = 0;
+	}
+	return c;
+}
+
+static int mbfl_filt_ident_ucs4le(int c, mbfl_identify_filter *filter)
+{
+	int n = filter->status & 0xFF; /* # of bytes already consumed in code unit */
+	if (n < 3) {
+		filter->status = (filter->status + 1) | (c << (8 * (1 + n)));
+	} else {
+		int value = (filter->status >> 8) | (c << 24);
+		if (value >= MBFL_WCSGROUP_UCS4MAX) {
+			filter->flag = 1;
+		}
+		filter->status = 0;
+	}
+	return c;
+}
+
+static int mbfl_filt_ident_ucs4(int c, mbfl_identify_filter *filter)
+{
+	int n = filter->status & 0xFF; /* # of bytes already consumed in code unit */
+	if (n < 3) {
+		filter->status = (filter->status + 1) | (c << (8 * (3 - n)));
+	} else {
+		int value = (filter->status & 0xFFFFFF00) | c;
+		if (value == 0xFFFE0000) {
+			filter->filter_function = mbfl_filt_ident_ucs4le;
+		} else {
+			filter->filter_function = mbfl_filt_ident_ucs4be;
+			if (value >= MBFL_WCSGROUP_UCS4MAX) {
+				filter->flag = 1;
+			}
+		}
+		filter->status = 0;
+	}
 	return c;
 }

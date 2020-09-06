@@ -176,6 +176,9 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf32le,
 	&vtbl_identify_sjis2004,
 	&vtbl_identify_sjis_mac,
+	&vtbl_identify_ucs4,
+	&vtbl_identify_ucs4be,
+	&vtbl_identify_ucs4le,
 	&vtbl_identify_false,
 	NULL
 };

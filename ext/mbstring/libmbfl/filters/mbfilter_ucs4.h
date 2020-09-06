@@ -33,6 +33,9 @@
 extern const mbfl_encoding mbfl_encoding_ucs4;
 extern const mbfl_encoding mbfl_encoding_ucs4le;
 extern const mbfl_encoding mbfl_encoding_ucs4be;
+extern const struct mbfl_identify_vtbl vtbl_identify_ucs4;
+extern const struct mbfl_identify_vtbl vtbl_identify_ucs4be;
+extern const struct mbfl_identify_vtbl vtbl_identify_ucs4le;
 extern const struct mbfl_convert_vtbl vtbl_ucs4_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_ucs4;
 extern const struct mbfl_convert_vtbl vtbl_ucs4be_wchar;
