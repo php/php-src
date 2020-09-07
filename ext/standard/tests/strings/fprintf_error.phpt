@@ -31,7 +31,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 *** Testing Error Conditions ***
-fprintf(): At least 2 arguments are expected, 0 given
-fprintf(): At least 2 arguments are expected, 1 given
-fprintf(): At least 2 arguments are expected, 1 given
+fprintf() expects at least 2 arguments, 0 given
+fprintf() expects at least 2 arguments, 1 given
+fprintf() expects at least 2 arguments, 1 given
 Done

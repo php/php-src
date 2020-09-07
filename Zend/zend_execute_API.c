@@ -499,26 +499,25 @@ ZEND_API const char *get_function_name(const zend_function *func) /* {{{ */
 }
 /* }}} */
 
-ZEND_API char *get_active_function_or_method_name(void) /* {{{ */
+ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
 {
 	if (!zend_is_executing()) {
-		return "";
+		return zend_string_init("", 0, 0);
 	}
 
 	return get_function_or_method_name(EG(current_execute_data)->func);
 }
 /* }}} */
 
-ZEND_API char *get_function_or_method_name(const zend_function *func) /* {{{ */
+ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* {{{ */
 {
-	char *name = NULL;
-	const char *class_name, *space;
+	const char *name = get_function_name(func);
 
-	class_name = get_class_name(func, &space);
+	if (func->common.scope) {
+		return zend_create_member_string(func->common.scope->name, zend_string_init(name, strlen(name), 1));
+	}
 
-	zend_spprintf(&name, 0, "%s%s%s", class_name, space, get_function_name(func));
-
-	return name;
+	return zend_string_init(name, strlen(name), 0);
 }
 /* }}} */
 

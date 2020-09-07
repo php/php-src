@@ -37,8 +37,8 @@ try {
 ?>
 --EXPECT--
 Test bad arguments:
-ReflectionClass::isSubclassOf(): Exactly 1 argument is expected, 0 given
-ReflectionClass::isSubclassOf(): Exactly 1 argument is expected, 2 given
+ReflectionClass::isSubclassOf() expects exactly 1 argument, 0 given
+ReflectionClass::isSubclassOf() expects exactly 1 argument, 2 given
 Class "" does not exist
 Class "ThisClassDoesNotExist" does not exist
 Class "2" does not exist

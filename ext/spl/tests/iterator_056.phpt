@@ -56,9 +56,9 @@ try {
 
 ?>
 --EXPECT--
-FilterIterator::__construct(): Exactly 1 argument is expected, 0 given
-CachingIterator::__construct(): At least 1 argument is expected, 0 given
-RecursiveCachingIterator::__construct(): At least 1 argument is expected, 0 given
-ParentIterator::__construct(): Exactly 1 argument is expected, 0 given
-LimitIterator::__construct(): At least 1 argument is expected, 0 given
-NoRewindIterator::__construct(): Exactly 1 argument is expected, 0 given
+FilterIterator::__construct() expects exactly 1 argument, 0 given
+CachingIterator::__construct() expects at least 1 argument, 0 given
+RecursiveCachingIterator::__construct() expects at least 1 argument, 0 given
+ParentIterator::__construct() expects exactly 1 argument, 0 given
+LimitIterator::__construct() expects at least 1 argument, 0 given
+NoRewindIterator::__construct() expects exactly 1 argument, 0 given

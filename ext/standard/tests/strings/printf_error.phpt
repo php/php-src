@@ -60,7 +60,7 @@ try {
 *** Testing printf() : error conditions ***
 
 -- Testing printf() function with Zero arguments --
-printf(): At least 1 argument is expected, 0 given
+printf() expects at least 1 argument, 0 given
 
 -- Testing printf() function with less than expected no. of arguments --
 

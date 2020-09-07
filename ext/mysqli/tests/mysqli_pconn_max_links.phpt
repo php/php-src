@@ -208,7 +208,7 @@ mysqli_query($link, 'DROP USER pcontest');
 mysqli_close($link);
 ?>
 --EXPECT--
-mysqli_get_links_stats() expects exactly 0 parameters, 1 given
+mysqli_get_links_stats() expects exactly 0 arguments, 1 given
 Before pconnect:array(3) {
   ["total"]=>
   int(1)
@@ -261,7 +261,7 @@ array(2) {
   ["label"]=>
   string(1) "a"
 }
-[015] Can open more persistent connections than allowed, [0] 
+[015] Can open more persistent connections than allowed, [0]
 array(3) {
   ["total"]=>
   int(3)

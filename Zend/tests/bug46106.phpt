@@ -23,5 +23,5 @@ try {
 ?>
 DONE
 --EXPECT--
-str_pad(): At least 2 arguments are expected, 1 given
+str_pad() expects at least 2 arguments, 1 given
 DONE

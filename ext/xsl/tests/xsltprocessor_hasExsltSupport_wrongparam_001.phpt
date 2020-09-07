@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-XSLTProcessor::hasExsltSupport() expects exactly 0 parameters, 1 given
+XSLTProcessor::hasExsltSupport() expects exactly 0 arguments, 1 given

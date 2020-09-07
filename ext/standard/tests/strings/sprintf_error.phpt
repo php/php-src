@@ -73,7 +73,7 @@ echo "Done";
 *** Testing sprintf() : error conditions ***
 
 -- Testing sprintf() function with Zero arguments --
-sprintf(): At least 1 argument is expected, 0 given
+sprintf() expects at least 1 argument, 0 given
 
 -- Testing sprintf() function with less than expected no. of arguments --
 2 parameters are required, 1 given

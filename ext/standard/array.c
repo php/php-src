@@ -4637,7 +4637,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	}
 
 	if (argc < req_args) {
-		zend_argument_count_error("At least %d parameters are required, %d given", req_args, argc);
+		zend_argument_count_error("At least %d arguments are required, %d given", req_args, argc);
 		RETURN_THROWS();
 	}
 
@@ -4731,7 +4731,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 
@@ -4783,7 +4783,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 
@@ -5130,7 +5130,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 
@@ -5182,7 +5182,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_argument_count_error("At least %d arguments are required, %d given", req_args, ZEND_NUM_ARGS());
 			RETURN_THROWS();
 		}
 

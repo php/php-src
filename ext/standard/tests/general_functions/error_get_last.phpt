@@ -19,7 +19,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 NULL
-error_get_last() expects exactly 0 parameters, 1 given
+error_get_last() expects exactly 0 arguments, 1 given
 NULL
 
 Warning: Undefined variable $b in %s on line %d

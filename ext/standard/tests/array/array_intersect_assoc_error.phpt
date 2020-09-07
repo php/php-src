@@ -27,8 +27,8 @@ echo "Done";
 *** Testing array_intersect_assoc() : error conditions ***
 
 -- Testing array_intersect_assoc() function with Zero arguments --
-At least 2 parameters are required, 0 given
+At least 2 arguments are required, 0 given
 
 -- Testing array_intersect_assoc() function with less than expected no. of arguments --
-At least 2 parameters are required, 1 given
+At least 2 arguments are required, 1 given
 Done

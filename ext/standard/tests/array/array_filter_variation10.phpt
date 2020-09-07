@@ -87,5 +87,5 @@ array(2) {
   ["b"]=>
   int(2)
 }
-is_numeric(): Exactly 1 argument is expected, 2 given
+is_numeric() expects exactly 1 argument, 2 given
 Done

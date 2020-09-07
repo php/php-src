@@ -15,4 +15,4 @@ try {
 }
 ?>
 --EXPECT--
-RecursiveIteratorIterator::__construct(): At least 1 argument is expected, 0 given
+RecursiveIteratorIterator::__construct() expects at least 1 argument, 0 given

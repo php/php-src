@@ -238,10 +238,10 @@ printf("%d", $tempstring);
 ?>
 --EXPECTF--
 *** Output for zero argument ***
-printf(): At least %d argument is expected, %d given
+printf() expects at least %d parameter, %d given
 
 *** Output for insufficient number of arguments ***
-Error found: 5 parameters are required, 3 given
+Error found: arguments are required,  given
 *** Output for scalar argument ***
 3
 *** Output for NULL as argument ***
@@ -314,14 +314,14 @@ Float Iteration 4
 -1234567%d.00
 
 Float Iteration 5
-0.00   
-1.00   
--1.00  
-0.32   
--0.32  
-3.40   
-2.54   
--2.54  
+0.00
+1.00
+-1.00
+0.32
+-0.32
+3.40
+2.54
+-2.54
 1234567%d.00
 -1234567%d.00
 
@@ -418,14 +418,14 @@ Integer Iteration 4
    1234
 
 Integer Iteration 5
-0      
-1      
--1     
-2      
--2     
+0
+1
+-1
+2
+-2
 23333333
 -23333333
-1234   
+1234
 
 Integer Iteration 6
 0000000
@@ -438,14 +438,14 @@ Integer Iteration 6
 0001234
 
 Integer Iteration 7
-0      
-1      
--1     
-2      
--2     
+0
+1
+-1
+2
+-2
 23333333
 -23333333
-1234   
+1234
 
 Integer Iteration 8
 ######0
@@ -496,7 +496,7 @@ Array
  
  
 C
-½
+ï¿½
 c
 
 *** Output for scientific type ***
@@ -609,17 +609,17 @@ Array
  Input strings variation array is:
 Array
 (
-    [0] => 
+    [0] =>
     [1] => abc
     [2] => aaa
 )
 
-     
+
   abc
   aaa
-     
-abc  
-aaa  
+
+abc
+aaa
 00000
 00abc
 00aaa

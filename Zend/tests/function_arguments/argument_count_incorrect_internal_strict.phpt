@@ -19,6 +19,6 @@ try {
 ?>
 --EXPECT--
 ArgumentCountError
-substr(): At least 2 arguments are expected, 1 given
+substr() expects at least 2 arguments, 1 given
 ArgumentCountError
 At least 2 parameters are required, 1 given

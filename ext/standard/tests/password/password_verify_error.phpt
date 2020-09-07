@@ -12,4 +12,4 @@ try {
 
 ?>
 --EXPECT--
-password_verify(): Exactly 2 arguments are expected, 1 given
+password_verify() expects exactly 2 arguments, 1 given
