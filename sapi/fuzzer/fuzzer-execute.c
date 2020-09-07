@@ -20,7 +20,7 @@
 #include "fuzzer-sapi.h"
 
 #define MAX_STEPS 1000
-#define MAX_SIZE (16 * 1024)
+#define MAX_SIZE (8 * 1024)
 static uint32_t steps_left;
 
 /* Because the fuzzer is always compiled with clang,

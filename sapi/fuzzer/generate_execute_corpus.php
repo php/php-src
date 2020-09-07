@@ -13,7 +13,7 @@ if ($argc >= 3) {
 if ($argc >= 4) {
     $maxLen = (int) $argv[3];
 } else {
-    $maxLen = 16 * 1024;
+    $maxLen = 8 * 1024;
 }
 
 $it = new RecursiveIteratorIterator(
