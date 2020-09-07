@@ -23,7 +23,6 @@
 #include "Zend/zend_interfaces.h"
 #include "php_curl.h"
 #include "curl_file_arginfo.h"
-#ifdef HAVE_CURL
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 
@@ -132,5 +131,3 @@ void curlfile_register_class(void)
 	zend_declare_property_string(curl_CURLFile_class, "mime", sizeof("mime")-1, "", ZEND_ACC_PUBLIC);
 	zend_declare_property_string(curl_CURLFile_class, "postname", sizeof("postname")-1, "", ZEND_ACC_PUBLIC);
 }
-
-#endif

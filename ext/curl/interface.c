@@ -24,8 +24,6 @@
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_exceptions.h"
 
-#ifdef HAVE_CURL
-
 #include <stdio.h>
 #include <string.h>
 
@@ -3537,5 +3535,3 @@ PHP_FUNCTION(curl_pause)
 	RETURN_LONG(curl_easy_pause(ch->cp, bitmask));
 }
 /* }}} */
-
-#endif /* HAVE_CURL */

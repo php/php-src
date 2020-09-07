@@ -21,13 +21,6 @@
 #include "php.h"
 #include "zend_smart_str.h"
 
-#ifdef COMPILE_DL_CURL
-#undef HAVE_CURL
-#define HAVE_CURL 1
-#endif
-
-#ifdef HAVE_CURL
-
 #define PHP_CURL_DEBUG 0
 
 #ifdef PHP_WIN32
@@ -45,7 +38,7 @@
 #include <curl/multi.h>
 
 extern zend_module_entry curl_module_entry;
-#define curl_module_ptr &curl_module_entry
+#define phpext_curl_ptr &curl_module_entry
 
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914 /* For Backward compatibility */
@@ -180,8 +173,4 @@ int curl_cast_object(zend_object *obj, zval *result, int type);
 
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 
-#else
-#define curl_module_ptr NULL
-#endif /* HAVE_CURL */
-#define phpext_curl_ptr curl_module_ptr
 #endif  /* _PHP_CURL_H */

@@ -23,8 +23,6 @@
 #include "php.h"
 #include "Zend/zend_interfaces.h"
 
-#ifdef HAVE_CURL
-
 #include "php_curl.h"
 
 #include <curl/curl.h>
@@ -179,5 +177,3 @@ void curl_share_register_class(const zend_function_entry *method_entries) {
 	curl_share_handlers.get_constructor = curl_share_get_constructor;
 	curl_share_handlers.clone_obj = NULL;
 }
-
-#endif

@@ -23,8 +23,6 @@
 #include "php.h"
 #include "Zend/zend_interfaces.h"
 
-#ifdef HAVE_CURL
-
 #include "php_curl.h"
 
 #include <curl/curl.h>
@@ -599,5 +597,3 @@ void curl_multi_register_class(const zend_function_entry *method_entries) {
 	curl_multi_handlers.clone_obj = NULL;
 	curl_multi_handlers.cast_object = curl_cast_object;
 }
-
-#endif
