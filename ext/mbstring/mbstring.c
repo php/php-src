@@ -1377,9 +1377,9 @@ PHP_FUNCTION(mb_http_input)
 			mbfl_string_clear(&result);
 			return;
 		default:
-			// TODO ValueError
-			encoding = MBSTRG(http_input_identify);
-			break;
+			zend_argument_value_error(1,
+				"must be one of \"G\", \"P\", \"C\", \"S\", \"I\" or \"L\"");
+			RETURN_THROWS();
 		}
 	}
 
