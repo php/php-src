@@ -400,11 +400,19 @@ function ut_main()
         $arg0 = urlencode($test[0]);
         $res_str .= "substring of \"$arg0\" from \"$test[1]\" - grapheme_substr";
         if ( 3 == count( $test ) ) {
-            $result = grapheme_substr($test[0], $test[1]);
+            try {
+                $result = grapheme_substr($test[0], $test[1]);
+            } catch (ValueError $exception) {
+                echo $exception->getMessage() . "\n";
+            }
         }
         else {
             $res_str .= " with length $test[2]";
-            $result = grapheme_substr($test[0], $test[1], $test[2]);
+            try {
+                $result = grapheme_substr($test[0], $test[1], $test[2]);
+            } catch (ValueError $exception) {
+                echo $exception->getMessage() . "\n";
+            }
         }
         $res_str .= " = ";
         if ( $result === false ) {
@@ -465,11 +473,19 @@ function ut_main()
         $arg0 = urlencode($test[0]);
         $res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_strstr";
         if ( 3 == count( $test ) ) {
-            $result = grapheme_strstr($test[0], $test[1]);
+            try {
+                $result = grapheme_strstr($test[0], $test[1]);
+            } catch (ValueError $exception) {
+                echo $exception->getMessage() . "\n";
+            }
         }
         else {
             $res_str .= " before flag is " . ( $test[2] ? "TRUE" : "FALSE" );
-            $result = grapheme_strstr($test[0], $test[1], $test[2]);
+            try {
+                $result = grapheme_strstr($test[0], $test[1], $test[2]);
+            } catch (ValueError $exception) {
+                echo $exception->getMessage() . "\n";
+            }
         }
         $res_str .= " = ";
         if ( $result === false ) {
