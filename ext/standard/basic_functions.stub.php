@@ -391,7 +391,7 @@ function crc32(string $str): int {}
 
 /* crypt.c */
 
-function crypt(string $str, string $salt = UNKNOWN): string {}
+function crypt(string $str, string $salt): string {}
 
 /* datetime.c */
 
