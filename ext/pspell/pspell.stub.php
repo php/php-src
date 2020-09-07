@@ -2,9 +2,9 @@
 
 /** @generate-function-entries */
 
-function pspell_new(string $language, string $spelling = "", string $jargon = "", string $encoding = "", ?int $mode = null): int|false {}
+function pspell_new(string $language, string $spelling = "", string $jargon = "", string $encoding = "", int $mode = 0): int|false {}
 
-function pspell_new_personal(string $personal, string $language, string $spelling = "", string $jargon = "", string $encoding = "", ?int $mode = null): int|false {}
+function pspell_new_personal(string $personal, string $language, string $spelling = "", string $jargon = "", string $encoding = "", int $mode = 0): int|false {}
 
 function pspell_new_config(int $config): int|false {}
 
