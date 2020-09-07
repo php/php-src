@@ -21,7 +21,7 @@
 #include "php.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
-#include "php_curl.h"
+#include "curl_private.h"
 #include "curl_file_arginfo.h"
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
