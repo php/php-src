@@ -877,7 +877,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 		Z_PARAM_STRING(username, username_len)
 		Z_PARAM_STRING(password, password_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(dbname, dbname_len)
+		Z_PARAM_STRING_OR_NULL(dbname, dbname_len)
 		Z_PARAM_STRING(charset, charset_len)
 		Z_PARAM_LONG(session_mode)
 	ZEND_PARSE_PARAMETERS_END();
