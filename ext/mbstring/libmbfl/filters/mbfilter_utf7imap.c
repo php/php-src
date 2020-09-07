@@ -78,6 +78,8 @@
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
 
+static int mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter);
+
 static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
 
 const mbfl_encoding mbfl_encoding_utf7imap = {
@@ -89,6 +91,12 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf7imap_wchar,
 	&vtbl_wchar_utf7imap
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_utf7imap = {
+	mbfl_no_encoding_utf7imap,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_utf7imap
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
@@ -441,4 +449,176 @@ int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
 		break;
 	}
 	return 0;
+}
+
+/* IMAP has its own crazy variation on Base64 encoding where / is replaced by , */
+static inline int decode_modified_base64(int c)
+{
+	if (c >= 'A' && c <= 'Z') {
+		return c - 'A';
+	} else if (c >= 'a' && c <= 'z') {
+		return c - 'a' + 26;
+	} else if (c >= '0' && c <= '9') {
+		return c - '0' + 52;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == ',') {
+		return 63;
+	}
+	return -1;
+}
+
+/* After finishing a Base64-encoded block, UTF7imap does not allow another one
+ * to start immediately; use this function in such places */
+static int mbfl_filt_ident_utf7imap_finished_base64(int c, mbfl_identify_filter *filter)
+{
+	/* Another modified Base64-encoded section may not begin immediately after
+	 * one has just finished */
+	if (c == '&' || c <= 0x1F || c >= 0x7F) {
+		filter->flag = 1;
+	}
+	filter->filter_function = mbfl_filt_ident_utf7imap;
+	return c;
+}
+
+/* Make sure that decoded codepoint is one which is legal for Base64-encoded section
+ * Base64-encoding printable ASCII characters is verboten, except for '&' */
+static void check_legal_codepoint_for_base64(int cp, mbfl_identify_filter *filter)
+{
+	if (cp >= 0x20 && cp <= 0x7E && cp != '&') {
+		filter->flag = 1;
+	}
+}
+
+static int mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter)
+{
+	if (filter->status == 0) { /* Decoding ASCII characters */
+		if (c == '&') {
+			/* Enter modified Base64-encoded block
+			 * After reversing modified Base64 encoding, characters in such blocks
+			 * are interpreted using UTF-16BE
+			 * `status = 1` means we will be beginning a new UTF-16BE character */
+			filter->status = 1;
+		} else if (c <= 0x1F || c >= 0x7F) {
+			filter->flag = 1;
+		}
+		return c;
+	}
+
+	/* Decoding modified Base64 */
+	if (c == '-') {
+		int cached_bits = filter->status >> 8;
+		if (cached_bits != 0) {
+			/* Data in Base64-encoded block truncated (ended in the middle of an incomplete character) */
+			filter->flag = 1;
+		}
+		filter->status = 0; /* End modified Base64-encoded block */
+		filter->filter_function = mbfl_filt_ident_utf7imap_finished_base64;
+		return c;
+	}
+
+	int six_bits = decode_modified_base64(c);
+	if (six_bits < 0) {
+		filter->flag = 1; /* Not valid modified Base64 character */
+		return c;
+	}
+
+	/* The following state machine has 23 possible states, depending on:
+	 * - How many bits we have already consumed of the current 16-bit code unit
+	 *   (0/2/4/6/8/10/12/14)
+	 * - Whether or not we are in the 2nd 16 bits of a surrogate pair
+	 * - If not, whether the bits already consumed appear to be part of the
+	 *   1st 16 bits of a surrogate pair */
+
+/* Get `n` low-order bits from `i` */
+#define EXTRACT_BITS(i,n) ((i) & ((1 << (n)) - 1))
+/* We might be in the 1st 16 bits of a surrogate pair; check if that's true
+ *
+ * Depending on where we are in the sequence of 6-bit chunks, we may need to compare
+ * the last part of `six_bits` with the first part of the mask which identifies
+ * surrogate pairs, or the first part of `six_bits` with the last part of the
+ * mask... or just take both of them straight up
+ *
+ * `shift1` is the number of low-order bits which should not be examined from
+ * the decoded 6 bits; `shift2` is the number of low-order bits which should
+ * not be examined from the (0xD8 >> 2) mask which identifies a surrogate pair */
+#define CHECK_SURROGATE_FIRST_PART(bits, shift1, shift2, offset_if_true, offset_if_false) \
+	if (((bits >> shift1) & (0x3F >> shift2)) == (((0xD8 >> 2) >> shift2) & (0x3F >> shift1))) { \
+		filter->status = (EXTRACT_BITS(bits, 6 - shift2) << 8) | (state + offset_if_true); \
+	} else if (((bits >> shift1) & (0x3F >> shift2)) == (((0xDC >> 2) >> shift2) & (0x3F >> shift1))) { \
+		filter->flag = 1; \
+	} else { \
+		filter->status = (EXTRACT_BITS(bits, 6 - shift2) << 8) | (state + offset_if_false); \
+	} \
+	break;
+/* We are in the 2nd 16 bits of a surrogate pair; make sure the right 'magic bits' are there */
+#define CHECK_SURROGATE_SECOND_PART(bits, shift1, shift2, offset) \
+	if (((bits >> shift1) & (0x3F >> shift2)) != (((0xDC >> 2) >> shift2) & (0x3F >> shift1))) { \
+		filter->flag = 1; \
+	} \
+	filter->status = (cache << (8 + shift1)) | (EXTRACT_BITS(bits, shift1) << 8) | (state + offset); \
+	break;
+
+	int cache = filter->status >> 8, state = filter->status & 0xFF;
+	switch (state) {
+		/* 1st 16 bits of a UTF-16 code unit, might be surrogate pair */
+		case 1: /* 0 bits consumed already */
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 0, 3, 10);
+		case 2: /* 2 bits consumed already */
+			CHECK_SURROGATE_FIRST_PART(six_bits, 2, 0, 3, 10);
+		case 3: /* 4 bits... */
+			CHECK_SURROGATE_FIRST_PART(six_bits, 4, 0, 3, 10);
+		case 4: /* 6 bits... */
+			/* We have definitely found a surrogate pair
+			 * Remove the top 6 cached bits which have the 'tag' for a surrogate pair */
+			filter->status = (six_bits << 8) | (state + 3); break;
+		case 5: /* 8 bits... */
+			/* Likewise */
+			filter->status = ((cache & 0x3) << 14) | (six_bits << 8) | (state + 3); break;
+		case 6: /* 10 bits... */
+			filter->status = ((cache & 0xF) << 14) | (six_bits << 8) | (state + 10); break;
+		case 7: /* 12 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 0, 4, 10);
+		case 8: /* 14 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 0, 2, 10);
+
+		/* 1st 16 bits of a UTF-16 code unit; definitely not a surrogate pair */
+		case 9: /* 2 bits consumed already */
+		case 10: /* 4 bits... */
+		case 11: /* 6 bits... */
+		case 12: /* 8 bits... */
+			filter->status = (cache << 14) | (six_bits << 8) | (state + 3); break;
+		case 13: /* 10 bits... */
+			check_legal_codepoint_for_base64((cache << 6) | six_bits, filter);
+			/* We will end exactly at a character boundary, so there is no need to keep cached bits */
+			filter->status = 1; break;
+		case 14: /* 12 bits... */
+			check_legal_codepoint_for_base64((cache << 4) | (six_bits >> 2), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 4, -12, -5);
+		case 15: /* 14 bits... */
+			check_legal_codepoint_for_base64((cache << 2) | (six_bits >> 4), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 2, -12, -5);
+
+		/* 2nd 16 bits of a surrogate pair */
+		case 16: /* 0 bits consumed already */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 0, 0, 3);
+		case 17: /* 2 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 2, 0, 3);
+		case 18: /* 4 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 4, 0, 3);
+		case 19: /* 6 bits... */
+		case 20: /* 8 bits... */
+			filter->status = (cache << 14) | (six_bits << 8) | (state + 3); break;
+		case 21: /* 10 bits... */
+			check_legal_codepoint_for_base64((cache << 6) | six_bits, filter);
+			/* We will end exactly at a character boundary, so there is no need to keep cached bits */
+			filter->status = 1; break;
+		case 22: /* 12 bits... */
+			check_legal_codepoint_for_base64((cache << 4) | (six_bits >> 2), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 4, -20, -13);
+		case 23: /* 14 bits... */
+			check_legal_codepoint_for_base64((cache << 2) | (six_bits >> 4), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 2, -20, -13);
+	}
+	return c;
 }
