@@ -138,6 +138,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_cp850,
 	&vtbl_identify_jis_ms,
 	&vtbl_identify_cp50220,
+	&vtbl_identify_cp50220raw,
 	&vtbl_identify_cp50221,
 	&vtbl_identify_cp50222,
 	&vtbl_identify_gb18030,
