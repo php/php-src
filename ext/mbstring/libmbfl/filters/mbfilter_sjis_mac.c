@@ -27,6 +27,8 @@
  *
  */
 
+/* Ref: https://unicode.org/Public/MAPPINGS/VENDORS/APPLE/JAPANESE.TXT */
+
 #include "mbfilter.h"
 #include "mbfilter_sjis_mac.h"
 
@@ -35,9 +37,9 @@
 
 #include "sjis_mac2uni.h"
 
-extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_sjis[];
 
+static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_sjis_mac_aliases[] = {"MacJapanese", "x-Mac-Japanese", NULL};
@@ -56,7 +58,7 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_sjis
+	mbfl_filt_ident_sjis_mac
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
@@ -691,4 +693,67 @@ mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+/* MacJapanese doesn't use all the 2-byte sequences which would otherwise be legal;
+ * many are not mapped to any character */
+static int in_reserved_range(unsigned char byte1, unsigned char byte2)
+{
+	if (byte1 == 0x81) {
+		return (byte2 >= 0xAD && byte2 <= 0xB7) || (byte2 >= 0xC0 && byte2 <= 0xC7) || (byte2 >= 0xCF && byte2 <= 0xD9) || (byte2 >= 0xE9 && byte2 <= 0xEF) || (byte2 >= 0xF8 && byte2 <= 0xFB);
+	} else if (byte1 == 0x82) {
+		return byte2 <= 0x4E || (byte2 >= 0x59 && byte2 <= 0x5F) || (byte2 >= 0x7A && byte2 <= 0x80) || (byte2 >= 0x9B && byte2 <= 0x9E) || byte2 >= 0xF2;
+	} else if (byte1 == 0x83) {
+		return (byte2 >= 0x97 && byte2 <= 0x9E) || (byte2 >= 0xB7 && byte2 <= 0xBE) || byte2 >= 0xD7;
+	} else if (byte1 == 0x84) {
+		return (byte2 >= 0x61 && byte2 <= 0x6F) || byte2 == 0x7F || (byte2 >= 0x92 && byte2 <= 0x9E) || byte2 >= 0xBF;
+	} else if (byte1 == 0x85) {
+		return (byte2 >= 0x54 && byte2 <= 0x5D) || (byte2 >= 0x72 && byte2 <= 0x7B) || (byte2 >= 0x86 && byte2 <= 0x90) || (byte2 >= 0x9B && byte2 <= 0x9E) || (byte2 >= 0xAE && byte2 <= 0xB2) || (byte2 >= 0xC2 && byte2 <= 0xDA) || byte2 >= 0xF5;
+	} else if (byte1 == 0x86) {
+		return (byte2 >= 0x5E && byte2 <= 0x9A) || (byte2 >= 0xA7 && byte2 <= 0xB2) || (byte2 >= 0xB6 && byte2 <= 0xC6) || byte2 >= 0xD7;
+	} else if (byte1 == 0x87) {
+		return (byte2 >= 0x59 && byte2 <= 0x90) || (byte2 >= 0xB6 && byte2 <= 0xBC) || (byte2 >= 0xC2 && byte2 <= 0xE4) || (byte2 >= 0xE9 && byte2 <= 0xF9);
+	} else if (byte1 == 0x88) {
+		return (byte2 >= 0x43 && byte2 <= 0x53) || (byte2 >= 0x56 && byte2 <= 0x67) || byte2 == 0x69 || (byte2 >= 0x6E && byte2 <= 0x9E);
+	} else if (byte1 == 0x98) {
+		return (byte2 >= 0x73 && byte2 <= 0x9E);
+	} else if (byte1 == 0xEA) {
+		return byte2 >= 0xA5;
+	} else if (byte1 == 0xEB) {
+		return byte2 == 0x40 || (byte2 >= 0x43 && byte2 <= 0x4F) || (byte2 >= 0x52 && byte2 <= 0x5A) || byte2 == 0x5E || byte2 == 0x5F || (byte2 >= 0x65 && byte2 <= 0x68) || (byte2 >= 0x7B && byte2 <= 0x80) || byte2 >= 0x82;
+	} else if (byte1 == 0xEC) {
+		return byte2 != 0x9F && byte2 != 0xA1 && byte2 != 0xA3 && byte2 != 0xA5 && byte2 != 0xA7 && byte2 != 0xC1 &&
+			byte2 != 0xE1 && byte2 != 0xE3 && byte2 != 0xE5 && byte2 != 0xEC;
+	} else if (byte1 == 0xED) {
+		return byte2 != 0x40 && byte2 != 0x42 && byte2 != 0x44 && byte2 != 0x46 && byte2 != 0x48 && byte2 != 0x62 &&
+			byte2 != 0x83 && byte2 != 0x85 && byte2 != 0x87 && byte2 != 0x8E && byte2 != 0x95 && byte2 != 0x96;
+	} else {
+		return 0;
+	}
+}
+
+static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter)
+{
+	if (filter->status) { /* Kanji, second byte */
+		if (c < 0x40 || c > 0xfc || c == 0x7f || in_reserved_range(filter->status, c)) {
+		    filter->flag = 1;
+		}
+		filter->status = 0;
+	} else if (c >= 0 && c <= 0x80) {
+		/* ASCII characters are OK, and Apple added REVERSE SOLIDUS at 0x80 */
+		;
+	} else if (c >= 0xA0 && c < 0xE0) {
+		/* Halfwidth kana are OK, and Apple added NO-BREAK SPACE at 0xA0 */
+		;
+	} else if (c >= 0xFD) {
+		/* Apple also added COPYRIGHT SIGN, TRADEMARK SIGN, and HALFWIDTH HORIZONTAL
+		 * ELLIPSIS at 0xFD-0xFF */
+		;
+	} else if (c >= 0x81 && c <= 0xED) { /* Kanji, first byte */
+		filter->status = c;
+	} else {
+		filter->flag = 1;
+	}
+
+	return c;
 }

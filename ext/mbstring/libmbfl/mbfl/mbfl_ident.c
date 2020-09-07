@@ -46,6 +46,7 @@
 #include "filters/mbfilter_sjis_open.h"
 #include "filters/mbfilter_sjis_mobile.h"
 #include "filters/mbfilter_sjis_2004.h"
+#include "filters/mbfilter_sjis_mac.h"
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_iso2022jp_2004.h"
@@ -174,6 +175,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf32be,
 	&vtbl_identify_utf32le,
 	&vtbl_identify_sjis2004,
+	&vtbl_identify_sjis_mac,
 	&vtbl_identify_false,
 	NULL
 };
