@@ -48,7 +48,7 @@
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char *rcsid = "$OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $";
+static const char *rcsid = "$OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 #include <sys/types.h>

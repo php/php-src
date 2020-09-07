@@ -940,7 +940,7 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 
 static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	static char hexconvtab[] = "0123456789ABCDEF";
+	static const char hexconvtab[] = "0123456789ABCDEF";
 	xmlNodePtr ret, text;
 	unsigned char *str;
 	zval tmp;

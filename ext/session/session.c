@@ -260,7 +260,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
  * into URLs.
  */
 
-static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
+static const char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
 static void bin_to_readable(unsigned char *in, size_t inlen, char *out, size_t outlen, char nbits) /* {{{ */
 {
@@ -1102,12 +1102,12 @@ typedef struct {
 #define ADD_HEADER(a) sapi_add_header(a, strlen(a), 1);
 #define MAX_STR 512
 
-static char *month_names[] = {
+static const char *month_names[] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-static char *week_days[] = {
+static const char *week_days[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
 };
 

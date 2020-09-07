@@ -88,7 +88,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 int php_tag_find(char *tag, size_t len, const char *set);
 
 /* this is read-only, so it's ok */
-ZEND_SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
+ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
 
 /* localeconv mutex */
 #ifdef ZTS

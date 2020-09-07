@@ -83,7 +83,7 @@ void _crypt_extended_init_r(void)
 #define MD5_MAGIC "$1$"
 #define MD5_MAGIC_LEN 3
 
-static unsigned char itoa64[] =		/* 0 ... 63 => ascii - 64 */
+static const unsigned char itoa64[] =		/* 0 ... 63 => ascii - 64 */
 	"./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 /* Convert a 16/32 bit integer to Base64 string representation */

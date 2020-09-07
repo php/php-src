@@ -442,7 +442,7 @@ static int php_htoi(char *s)
    For added safety, we only leave -_. unencoded.
  */
 
-static unsigned char hexchars[] = "0123456789ABCDEF";
+static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, zend_bool raw) /* {{{ */ {
 	register unsigned char c;
