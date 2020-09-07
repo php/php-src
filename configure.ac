@@ -465,6 +465,10 @@ dnl Check __builtin_expect
 PHP_CHECK_BUILTIN_EXPECT
 dnl Check __builtin_clz
 PHP_CHECK_BUILTIN_CLZ
+dnl Check __builtin_clzl
+PHP_CHECK_BUILTIN_CLZL
+dnl Check __builtin_clzll
+PHP_CHECK_BUILTIN_CLZLL
 dnl Check __builtin_ctzl
 PHP_CHECK_BUILTIN_CTZL
 dnl Check __builtin_ctzll
