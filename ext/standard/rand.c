@@ -43,26 +43,18 @@ PHPAPI zend_long php_rand(void)
 /* {{{ Returns a random number from Mersenne Twister */
 PHP_FUNCTION(rand)
 {
-	zend_long min, max;
-	zend_bool min_is_null = 1, max_is_null = 1;
+	zend_long min;
+	zend_long max;
+	int argc = ZEND_NUM_ARGS();
 
-	ZEND_PARSE_PARAMETERS_START(0, 2)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(min, min_is_null)
-		Z_PARAM_LONG_OR_NULL(max, max_is_null)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (min_is_null && max_is_null) {
+	if (argc == 0) {
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
 
-	if (min_is_null) {
-		min = 0;
-	}
-
-	if (max_is_null) {
-		max = PHP_MT_RAND_MAX;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (max < min) {
 		RETURN_LONG(php_mt_rand_common(max, min));

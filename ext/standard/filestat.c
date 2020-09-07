@@ -621,8 +621,8 @@ PHP_FUNCTION(touch)
 	} else if (!filetime_is_null && fileatime_is_null) {
 		newtime->modtime = newtime->actime = filetime;
 	} else if (filetime_is_null && !fileatime_is_null) {
-		newtime->modtime = fileatime;
-		newtime->actime = fileatime;
+		zend_argument_value_error(2, "cannot be null when argument #3 ($atime) is an integer");
+		RETURN_THROWS();
 	} else {
 		newtime->modtime = filetime;
 		newtime->actime = fileatime;

@@ -1043,7 +1043,7 @@ function link(string $target, string $link): bool {}
 
 /* mail.c */
 
-function mail(string $to, string $subject, string $message, array|string|null $additional_headers = null, string $additional_parameters = ""): bool {}
+function mail(string $to, string $subject, string $message, array|string $additional_headers = [], string $additional_parameters = ""): bool {}
 
 /* math.c */
 
@@ -1193,9 +1193,9 @@ function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
 /** @alias mt_srand */
 function srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
 
-function rand(?int $min = null, ?int $max = null): int {}
+function rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
-function mt_rand(?int $min = null, ?int $max = null): int {}
+function mt_rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
 function mt_getrandmax(): int {}
 
