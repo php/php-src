@@ -20,13 +20,14 @@
 #include "fuzzer-sapi.h"
 
 #define MAX_STEPS 1000
+#define MAX_SIZE (16 * 1024)
 static uint32_t steps_left;
 
 /* Because the fuzzer is always compiled with clang,
  * we can assume that we don't use global registers / hybrid VM. */
 typedef int (ZEND_FASTCALL *opcode_handler_t)(zend_execute_data *);
 
-void fuzzer_execute_ex(zend_execute_data *execute_data) {
+static void fuzzer_execute_ex(zend_execute_data *execute_data) {
 	while (1) {
 		int ret;
 		if (--steps_left == 0) {
@@ -46,8 +47,19 @@ void fuzzer_execute_ex(zend_execute_data *execute_data) {
 	}
 }
 
+static zend_op_array *(*orig_compile_string)(zend_string *source_string, const char *filename);
+
+static zend_op_array *fuzzer_compile_string(zend_string *str, const char *filename) {
+	if (ZSTR_LEN(str) > MAX_SIZE) {
+		/* Avoid compiling huge inputs via eval(). */
+		zend_bailout();
+	}
+
+	return orig_compile_string(str, filename);
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	if (Size > 16 * 1024) {
+	if (Size > MAX_SIZE) {
 		/* Large inputs have a large impact on fuzzer performance,
 		 * but are unlikely to be necessary to reach new codepaths. */
 		return 0;
@@ -68,7 +80,10 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	signal(SIGPIPE, SIG_IGN);
 
 	fuzzer_init_php();
+
 	zend_execute_ex = fuzzer_execute_ex;
+	orig_compile_string = zend_compile_string;
+	zend_compile_string = fuzzer_compile_string;
 
 	/* fuzzer_shutdown_php(); */
 	return 0;
