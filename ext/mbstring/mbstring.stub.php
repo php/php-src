@@ -77,7 +77,7 @@ function mb_encode_numericentity(string $string, array $convmap, ?string $encodi
 
 function mb_decode_numericentity(string $string, array $convmap, ?string $encoding = null): string {}
 
-function mb_send_mail(string $to, string $subject, string $message, array|string|null $additional_headers = null, ?string $additional_parameters = null): bool {}
+function mb_send_mail(string $to, string $subject, string $message, array|string $additional_headers = [], ?string $additional_parameters = null): bool {}
 
 function mb_get_info(string $type = "all"): array|string|int|false {}
 
