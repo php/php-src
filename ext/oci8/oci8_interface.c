@@ -630,19 +630,23 @@ PHP_FUNCTION(oci_lob_erase)
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
 	ub4 bytes_erased;
-	zend_long offset = -1, length = -1;
+	zend_long offset, length;
 	zend_bool offset_is_null = 1, length_is_null = 1;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l!l!", &z_descriptor, oci_lob_class_entry_ptr, &offset, &offset_is_null, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!offset_is_null && offset < 0) {
+	if (offset_is_null) {
+		offset = -1;
+	} else if (offset < 0) {
 		php_error_docref(NULL, E_WARNING, "Offset must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
 
-	if (!length_is_null && length < 0) {
+	if (length_is_null) {
+		length = -1;
+	} else if (length < 0) {
 		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
