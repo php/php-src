@@ -27,6 +27,8 @@
  *
  */
 
+/* Ref: http://x0213.org/codetable/sjis-0213-2004-std.txt */
+
 #include "mbfilter.h"
 #include "mbfilter_sjis_2004.h"
 
@@ -35,9 +37,10 @@
 
 extern const unsigned char mblen_table_sjis[];
 
-extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern int mbfl_bisec_srch(int w, const unsigned short *tbl, int n);
 extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
+
+static int mbfl_filt_ident_sjis_2004(int c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_sjis2004_aliases[] = {"SJIS2004","Shift_JIS-2004", NULL};
 
@@ -55,7 +58,7 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis2004 = {
 	mbfl_no_encoding_sjis2004,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_sjis
+	mbfl_filt_ident_sjis_2004
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
@@ -719,4 +722,35 @@ mbfl_filt_conv_jis2004_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+/* SJIS-2004 doesn't use all the 2-byte sequences which would otherwise be legal;
+ * many are not mapped to any character */
+static int in_reserved_range(unsigned char byte1, unsigned char byte2)
+{
+	int s1, s2;
+	SJIS_DECODE(byte1, byte2, s1, s2);
+	unsigned int s = (s1 - 0x21)*94 + s2 - 0x21;
+	if (s < jisx0213_ucs_table_size && jisx0213_ucs_table[s]) {
+		return 0;
+	}
+	s = (s1 << 8) | s2;
+	return mbfl_bisec_srch2(s, jisx0213_jis_u5_key, jisx0213_u5_tbl_len) == -1 &&
+		mbfl_bisec_srch2(s, jisx0213_u2_key, jisx0213_u2_tbl_len) == -1;
+}
+
+static int mbfl_filt_ident_sjis_2004(int c, mbfl_identify_filter *filter)
+{
+	if (filter->status) { /* Kanji, second byte */
+		if (c < 0x40 || c > 0xFC || c == 0x7F || in_reserved_range(filter->status, c)) {
+		    filter->flag = 1; /* bad */
+		}
+		filter->status = 0;
+	} else if ((c >= 0x81 && c <= 0x9F) || (c >= 0xE0 && c <= 0xFC)) {
+		/* 2-byte character */
+		filter->status = c;
+	} else if (c == 0x80 || c == 0xA0 || c >= 0xF0) {
+		filter->flag = 1;
+	}
+	return c;
 }
