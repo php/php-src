@@ -78,6 +78,7 @@
 #include "filters/mbfilter_iso8859_13.h"
 #include "filters/mbfilter_iso8859_14.h"
 #include "filters/mbfilter_iso8859_15.h"
+#include "filters/mbfilter_iso8859_16.h"
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_uuencode.h"
@@ -152,6 +153,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_8859_13,
 	&vtbl_identify_8859_14,
 	&vtbl_identify_8859_15,
+	&vtbl_identify_8859_16,
 	&vtbl_identify_armscii8,
 	&vtbl_identify_cp850,
 	&vtbl_identify_jis_ms,
