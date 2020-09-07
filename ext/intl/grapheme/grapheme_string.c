@@ -792,7 +792,7 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_THROWS();
 	}
 
-	if ( size > INT32_MAX) {
+	if (size > INT32_MAX) {
 		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
