@@ -804,22 +804,17 @@ ZEND_API size_t zend_get_scanned_file_offset(void)
 	return offset;
 }
 
-zend_op_array *compile_string(zval *source_string, const char *filename)
+zend_op_array *compile_string(zend_string *source_string, const char *filename)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
 	zval tmp;
 
-	if (UNEXPECTED(Z_TYPE_P(source_string) != IS_STRING)) {
-		ZVAL_STR(&tmp, zval_get_string_func(source_string));
-	} else {
-		ZVAL_COPY(&tmp, source_string);
-	}
-
-	if (Z_STRLEN(tmp)==0) {
-		zval_ptr_dtor(&tmp);
+	if (ZSTR_LEN(source_string) == 0) {
 		return NULL;
 	}
+
+	ZVAL_STR_COPY(&tmp, source_string);
 
 	zend_save_lexical_state(&original_lex_state);
 	zend_prepare_string_for_scanning(&tmp, filename);

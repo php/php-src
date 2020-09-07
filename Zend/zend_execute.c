@@ -4217,7 +4217,9 @@ already_compiled:
 			break;
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code");
-				new_op_array = zend_compile_string(inc_filename, eval_desc);
+				zend_string *code = zval_get_string(inc_filename);
+				new_op_array = zend_compile_string(code, eval_desc);
+				zend_string_release(code);
 				efree(eval_desc);
 			}
 			break;

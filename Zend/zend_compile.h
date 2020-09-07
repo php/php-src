@@ -732,7 +732,7 @@ void zend_file_context_begin(zend_file_context *prev_context);
 void zend_file_context_end(zend_file_context *prev_context);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
-extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, const char *filename);
+extern ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename);
 
 ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem);
 void startup_scanner(void);
@@ -792,7 +792,7 @@ ZEND_API void function_add_ref(zend_function *function);
 struct _zend_arena;
 
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
-ZEND_API zend_op_array *compile_string(zval *source_string, const char *filename);
+ZEND_API zend_op_array *compile_string(zend_string *source_string, const char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, const char *filename);
