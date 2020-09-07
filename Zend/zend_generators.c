@@ -1159,7 +1159,7 @@ void zend_register_generator_ce(void) /* {{{ */
 
 	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
 	zend_ce_generator = zend_register_internal_class(&ce);
-	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	zend_ce_generator->create_object = zend_generator_create;
 	zend_ce_generator->serialize = zend_class_serialize_deny;
 	zend_ce_generator->unserialize = zend_class_unserialize_deny;
