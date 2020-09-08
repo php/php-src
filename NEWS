@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79986 (str_ireplace bug with diacritics characters). (cmb)
   . Fixed bug #80077 (getmxrr test bug). (Rainer Jung)
+  . Fixed bug #72941 (Modifying bucket->data by-ref has no effect any longer).
+    (cmb)
 
 03 Sep 2020, PHP 7.3.22
 
