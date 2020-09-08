@@ -1679,7 +1679,6 @@ static int mbfl_split_output(int c, void *data)
 	return 0;
 }
 
-/* TODO Document this function on php.net */
 PHP_FUNCTION(mb_str_split)
 {
 	zend_string *str, *encoding = NULL;
