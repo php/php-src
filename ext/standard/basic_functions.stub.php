@@ -178,26 +178,26 @@ function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
-function array_intersect_key(array $array1, array $array2, array ...$arrays): array {}
+function array_intersect_key(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_intersect_ukey(array $array1, array $array2, ...$rest): array {}
+function array_intersect_ukey(array $array, ...$rest): array {}
 
-function array_intersect(array $array1, array $array2, array ...$arrays): array {}
-
-/** @param array|callable $rest */
-function array_uintersect(array $array1, array $array2, ...$rest): array {}
-
-function array_intersect_assoc(array $array1, array $array2, array ...$arrays): array {}
+function array_intersect(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_uintersect_assoc(array $array1, array $array2, ...$rest): array {}
+function array_uintersect(array $array, ...$rest): array {}
+
+function array_intersect_assoc(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_intersect_uassoc(array $array1, array $array2, ...$rest): array {}
+function array_uintersect_assoc(array $array, ...$rest): array {}
 
 /** @param array|callable $rest */
-function array_uintersect_uassoc(array $array1, array $array2, ...$rest): array {}
+function array_intersect_uassoc(array $array, ...$rest): array {}
+
+/** @param array|callable $rest */
+function array_uintersect_uassoc(array $array, ...$rest): array {}
 
 function array_diff_key(array $array, array ...$arrays): array {}
 
