@@ -794,7 +794,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
-	int force_ipv6 = FALSE;
+	int force_ipv6 = FALSE; (void) force_ipv6;
 	int n;
 	struct sockaddr **psal;
 	struct sockaddr **res;
