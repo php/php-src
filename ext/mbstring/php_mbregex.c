@@ -1303,8 +1303,7 @@ PHP_FUNCTION(mb_ereg_match)
 	}
 
 	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype_encoding())) {
-		zend_argument_value_error(2, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
-		RETURN_THROWS();
+		RETURN_FALSE;
 	}
 
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
