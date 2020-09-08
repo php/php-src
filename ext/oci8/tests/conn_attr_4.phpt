@@ -15,7 +15,7 @@ if (!(isset($matches[0]) &&
        ($matches[1] >= 12)
        ))) {
     // Bug fixed in 11.2 prevents client_info being reset
-	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
+    die("skip expected output only valid when using Oracle 11gR2 or greater database server");
 }
 ?>
 --FILE--
@@ -30,20 +30,32 @@ $attr_array = array('MODULE','ACTION','CLIENT_INFO','CLIENT_IDENTIFIER');
 
 echo"**Test  Negative cases************\n";
 
-echo "\nInvalid Connection resource\n";
+echo "\nInvalid Connection resource 1\n";
 $nc1=NULL;
 // Invalid connection handle.
-var_dump(oci_set_action($nc1,$nc1));
+try {
+    oci_set_action($nc1,$nc1);
+} catch (TypeError $e) {
+    var_dump($e->getMessage());
+}
 
 // Variable instead of a connection resource.
 echo "\nInvalid Connection resource 2\n";
 $str1= 'not a conn';
-var_dump(oci_set_client_info($str1,$str1));
+try {
+    oci_set_client_info($str1,$str1);
+} catch (TypeError $e) {
+    var_dump($e->getMessage());
+}
 
 // Setting an Invalid value.
-echo "\nInvalid Value \n";
+echo "\nInvalid Action value \n";
 $c1=oci_connect($testuser,$testpassword,$dbase);
-var_dump(oci_set_action($c1,$c1));
+try {
+    oci_set_action($c1,$c1);
+} catch (TypeError $e) {
+    var_dump($e->getMessage());
+}
 
 // Setting values multiple times.
 echo "\nSet Values multiple times \n";
@@ -77,39 +89,33 @@ echo "Done\n";
 --EXPECTF--
 **Test  Negative cases************
 
-Invalid Connection resource
-
-Warning: oci_set_action(): Argument #1 must be of type resource, null given in %s on line %d
-NULL
+Invalid Connection resource 1
+string(89) "oci_set_action(): Argument #1 ($connection_resource) must be of type resource, null given"
 
 Invalid Connection resource 2
+string(96) "oci_set_client_info(): Argument #1 ($connection_resource) must be of type resource, string given"
 
-Warning: oci_set_client_info(): Argument #1 must be of type resource, %s given in %s on line %d
-NULL
+Invalid Action value 
+string(78) "oci_set_action(): Argument #2 ($action) must be of type string, resource given"
 
-Invalid Value
-
-Warning: oci_set_action(): Argument #2 must be of type %s, resource given in %s on line %d
-NULL
-
-Set Values multiple times
+Set Values multiple times 
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 The value of ACTION is ACTION1
 
-Setting to different values
+Setting to different values 
 Values set successfully to 1000
 The value of MODULE is 1000
 The value of ACTION is 1000
 The value of CLIENT_INFO is 1000
 The value of CLIENT_IDENTIFIER is 1000
-Values set successfully to
-The value of MODULE is
-The value of ACTION is
-The value of CLIENT_INFO is
-The value of CLIENT_IDENTIFIER is
+Values set successfully to 
+The value of MODULE is 
+The value of ACTION is 
+The value of CLIENT_INFO is 
+The value of CLIENT_IDENTIFIER is 
 
 Warning: oci_set_module_name(): ORA-24960: %s OCI_ATTR_MODULE %s on line %d
 
