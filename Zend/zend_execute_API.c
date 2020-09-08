@@ -511,13 +511,11 @@ ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
 
 ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* {{{ */
 {
-	const char *name = get_function_name(func);
-
 	if (func->common.scope) {
-		return zend_create_member_string(func->common.scope->name, zend_string_init(name, strlen(name), 1));
+		return zend_create_member_string(func->common.scope->name, func->common.function_name);
 	}
 
-	return zend_string_init(name, strlen(name), 0);
+	return func->common.function_name ? zend_string_copy(func->common.function_name) : zend_string_init("main", sizeof("main") - 1, 0);
 }
 /* }}} */
 

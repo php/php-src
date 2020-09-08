@@ -261,7 +261,7 @@ array(2) {
   ["label"]=>
   string(1) "a"
 }
-[015] Can open more persistent connections than allowed, [0]
+[015] Can open more persistent connections than allowed, [0] 
 array(3) {
   ["total"]=>
   int(3)
