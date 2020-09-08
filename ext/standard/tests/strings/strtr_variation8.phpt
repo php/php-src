@@ -136,7 +136,7 @@ strtr(): Argument #2 ($from) must be of type array, string given
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 17 --
-strtr(): Argument #2 ($from) must be of type string|array, resource given
+strtr(): Argument #2 ($from) must be of type array|string, resource given
 
 -- Iteration 18 --
 strtr(): Argument #2 ($from) must be of type array, string given

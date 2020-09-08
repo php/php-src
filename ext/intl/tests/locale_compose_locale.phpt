@@ -113,14 +113,17 @@ function ut_main()
             $res_str .=  $valKey ."->".$valValue."  " ;
         }
 */
-
-        $locale = ut_loc_locale_compose( $value);
-        $res_str .= "\n\nComposed Locale: ";
-        if( $locale){
-            $res_str .= "$locale";
-        }else{
-            $res_str .= "No values found from Locale compose due to the following error:\n";
-            $res_str .= intl_get_error_message() ;
+        try {
+            $locale = ut_loc_locale_compose( $value);
+            $res_str .= "\n\nComposed Locale: ";
+            if( $locale){
+                $res_str .= "$locale";
+            }else{
+                $res_str .= "No values found from Locale compose due to the following error:\n";
+                $res_str .= intl_get_error_message() ;
+            }
+        } catch (ValueError $exception) {
+            echo $exception->getMessage() . "\n";
         }
     }
 
@@ -135,6 +138,9 @@ ut_run();
 
 ?>
 --EXPECT--
+Locale::composeLocale(): Argument #1 ($subtags) must contain a "language" key
+locale_compose(): Argument #1 ($subtags) must contain a "language" key
+
 ------------
 Input Array name is : loc1
 
@@ -169,9 +175,6 @@ Input Array name is : loc8
 Composed Locale: en_lng_ing_Hans_CN_nedis_rozaj_x_prv1_prv2
 ------------
 Input Array name is : loc9
-
-Composed Locale: No values found from Locale compose due to the following error:
-locale_compose: parameter array does not contain 'language' tag.: U_ILLEGAL_ARGUMENT_ERROR
 ------------
 Input Array name is : loc10
 

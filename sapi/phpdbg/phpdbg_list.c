@@ -316,7 +316,7 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 	return op_array;
 }
 
-zend_op_array *phpdbg_compile_string(zval *source_string, const char *filename) {
+zend_op_array *phpdbg_compile_string(zend_string *source_string, const char *filename) {
 	zend_string *fake_name;
 	zend_op_array *op_array;
 	phpdbg_file_source *dataptr;
@@ -327,9 +327,9 @@ zend_op_array *phpdbg_compile_string(zval *source_string, const char *filename) 
 		return PHPDBG_G(compile_string)(source_string, filename);
 	}
 
-	dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint32_t) * Z_STRLEN_P(source_string));
-	dataptr->buf = estrndup(Z_STRVAL_P(source_string), Z_STRLEN_P(source_string));
-	dataptr->len = Z_STRLEN_P(source_string);
+	dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint32_t) * ZSTR_LEN(source_string));
+	dataptr->buf = estrndup(ZSTR_VAL(source_string), ZSTR_LEN(source_string));
+	dataptr->len = ZSTR_LEN(source_string);
 	dataptr->line[0] = 0;
 	for (line = 0, bufptr = dataptr->buf - 1, endptr = dataptr->buf + dataptr->len; ++bufptr < endptr;) {
 		if (*bufptr == '\n') {

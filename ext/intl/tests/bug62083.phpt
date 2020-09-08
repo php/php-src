@@ -7,7 +7,11 @@ if (!extension_loaded('intl'))
 --FILE--
 <?php
 $arr1 = array();
-var_dump(grapheme_extract(-1, -1, -1,-1, $arr1));
+try {
+    grapheme_extract(-1, -1, -1,-1, $arr1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
 --EXPECT--
-bool(false)
+grapheme_extract(): Argument #3 ($extract_type) must be either GRAPHEME_EXTR_COUNT, GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS

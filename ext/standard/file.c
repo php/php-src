@@ -325,13 +325,37 @@ PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 }
 /* }}} */
 
-static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
+PHPAPI void php_flock_common(php_stream *stream, zend_long operation,
+	uint32_t operation_arg_num, zval *wouldblock, zval *return_value)
+{
+	int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
+	int act;
+
+	act = operation & PHP_LOCK_UN;
+	if (act < 1 || act > 3) {
+		zend_argument_value_error(operation_arg_num, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
+		RETURN_THROWS();
+	}
+
+	if (wouldblock) {
+		ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 0);
+	}
+
+	/* flock_values contains all possible actions if (operation & PHP_LOCK_NB) we won't block on the lock */
+	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
+	if (php_stream_lock(stream, act)) {
+		if (operation && errno == EWOULDBLOCK && wouldblock) {
+			ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 1);
+		}
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
 
 /* {{{ Portable file locking */
 PHP_FUNCTION(flock)
 {
 	zval *res, *wouldblock = NULL;
-	int act;
 	php_stream *stream;
 	zend_long operation = 0;
 
@@ -344,25 +368,7 @@ PHP_FUNCTION(flock)
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	act = operation & 3;
-	if (act < 1 || act > 3) {
-		zend_argument_value_error(2, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
-		RETURN_THROWS();
-	}
-
-	if (wouldblock) {
-		ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 0);
-	}
-
-	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
-	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
-	if (php_stream_lock(stream, act)) {
-		if (operation && errno == EWOULDBLOCK && wouldblock) {
-			ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 1);
-		}
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	php_flock_common(stream, operation, 2, wouldblock, return_value);
 }
 /* }}} */
 
@@ -1009,8 +1015,8 @@ PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *res;
 	zend_long len = 1024;
+	zend_bool len_is_null = 1;
 	char *buf = NULL;
-	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	zend_string *str;
 	php_stream *stream;
@@ -1018,12 +1024,12 @@ PHPAPI PHP_FUNCTION(fgets)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(len)
+		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	if (argc == 1) {
+	if (len_is_null) {
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL) {
@@ -1032,7 +1038,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		// TODO: avoid reallocation ???
 		RETVAL_STRINGL(buf, line_len);
 		efree(buf);
-	} else if (argc > 1) {
+	} else {
 		if (len <= 0) {
 			zend_argument_value_error(2, "must be greater than 0");
 			RETURN_THROWS();
@@ -1132,16 +1138,17 @@ PHPAPI PHP_FUNCTION(fwrite)
 	ssize_t ret;
 	size_t num_bytes;
 	zend_long maxlen = 0;
+	zend_bool maxlen_is_null = 1;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_STRING(input, inputlen)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 2) {
+	if (maxlen_is_null) {
 		num_bytes = inputlen;
 	} else if (maxlen <= 0) {
 		num_bytes = 0;
@@ -1348,7 +1355,13 @@ PHP_FUNCTION(readfile)
 PHP_FUNCTION(umask)
 {
 	zend_long mask = 0;
+	zend_bool mask_is_null = 1;
 	int oldumask;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(mask, mask_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	oldumask = umask(077);
 
@@ -1356,12 +1369,7 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	ZEND_PARSE_PARAMETERS_START(0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(mask)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (ZEND_NUM_ARGS() == 0) {
+	if (mask_is_null) {
 		umask(oldumask);
 	} else {
 		umask((int) mask);
@@ -1487,25 +1495,15 @@ PHP_FUNCTION(ftruncate)
 	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, size));
 }
 /* }}} */
-
-/* {{{ Stat() on a filehandle */
-PHP_FUNCTION(fstat)
+PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 {
-	zval *fp;
+	php_stream_statbuf stat_ssb;
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
-	php_stream *stream;
-	php_stream_statbuf stat_ssb;
 	char *stat_sb_names[13] = {
 		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_RESOURCE(fp)
-	ZEND_PARSE_PARAMETERS_END();
-
-	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;
@@ -1567,6 +1565,21 @@ PHP_FUNCTION(fstat)
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+}
+
+/* {{{ Stat() on a filehandle */
+PHP_FUNCTION(fstat)
+{
+	zval *fp;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(fp)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, fp);
+
+	php_fstat(stream, return_value);
 }
 /* }}} */
 

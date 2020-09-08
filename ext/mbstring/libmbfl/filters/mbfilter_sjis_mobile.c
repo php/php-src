@@ -79,21 +79,18 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis_docomo = {
 	mbfl_no_encoding_sjis_docomo,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis_kddi = {
 	mbfl_no_encoding_sjis_kddi,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis_sb = {
 	mbfl_no_encoding_sjis_sb,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
@@ -101,7 +98,7 @@ const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar = {
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_no_encoding_wchar,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
  	mbfl_filt_conv_common_flush,
  	NULL,
@@ -111,7 +108,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
  	mbfl_no_encoding_wchar,
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
  	mbfl_filt_conv_sjis_mobile_flush,
  	NULL,
@@ -121,7 +118,7 @@ const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_no_encoding_wchar,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
  	mbfl_filt_conv_common_flush,
  	NULL,
@@ -131,7 +128,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
  	mbfl_no_encoding_wchar,
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
 	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,
@@ -141,7 +138,7 @@ const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
  	mbfl_no_encoding_sjis_sb,
  	mbfl_no_encoding_wchar,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
  	mbfl_filt_conv_common_flush,
  	NULL,
@@ -151,7 +148,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
  	mbfl_no_encoding_wchar,
  	mbfl_no_encoding_sjis_sb,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
 	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,

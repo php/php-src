@@ -178,7 +178,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_NS_C            "'__NAMESPACE__'"
 
 %token END 0 "end of file"
-%token T_ATTRIBUTE    "'@@'"
+%token T_ATTRIBUTE    "'#['"
 %token T_PLUS_EQUAL   "'+='"
 %token T_MINUS_EQUAL  "'-='"
 %token T_MUL_EQUAL    "'*='"
@@ -266,7 +266,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> identifier type_expr_without_static union_type_without_static
 %type <ast> inline_function union_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
-%type <ast> attribute_decl attribute attributes namespace_declaration_name
+%type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
@@ -345,8 +345,15 @@ attribute_decl:
 			{ $$ = zend_ast_create(ZEND_AST_ATTRIBUTE, $1, $2); }
 ;
 
+attribute_group:
+		attribute_decl
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ATTRIBUTE_GROUP, $1); }
+	|	attribute_group ',' attribute_decl
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
 attribute:
-		T_ATTRIBUTE attribute_decl	{ $$ = $2; }
+		T_ATTRIBUTE attribute_group possible_comma ']'	{ $$ = $2; }
 ;
 
 attributes:

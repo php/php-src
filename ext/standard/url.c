@@ -81,6 +81,17 @@ PHPAPI php_url *php_url_parse(char const *str)
 	return php_url_parse_ex(str, strlen(str));
 }
 
+static const char *binary_strcspn(const char *s, const char *e, const char *chars) {
+	while (*chars) {
+		const char *p = memchr(s, *chars, e - s);
+		if (p) {
+			e = p;
+		}
+		chars++;
+	}
+	return e;
+}
+
 /* {{{ php_url_parse */
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 {
@@ -98,7 +109,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
 			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-				if (e + 1 < ue && e < s + strcspn(s, "?#")) {
+				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 					s += 2;
@@ -198,18 +209,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		goto just_path;
 	}
 
-	parse_host:
-	/* Binary-safe strcspn(s, "/?#") */
-	e = ue;
-	if ((p = memchr(s, '/', e - s))) {
-		e = p;
-	}
-	if ((p = memchr(s, '?', e - s))) {
-		e = p;
-	}
-	if ((p = memchr(s, '#', e - s))) {
-		e = p;
-	}
+parse_host:
+	e = binary_strcspn(s, ue, "/?#");
 
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
@@ -441,7 +442,7 @@ static int php_htoi(char *s)
    For added safety, we only leave -_. unencoded.
  */
 
-static unsigned char hexchars[] = "0123456789ABCDEF";
+static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, zend_bool raw) /* {{{ */ {
 	register unsigned char c;

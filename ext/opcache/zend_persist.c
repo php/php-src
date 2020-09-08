@@ -565,8 +565,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	if (op_array->filename) {
-		/* do not free! PHP has centralized filename storage, compiler will free it */
-		zend_accel_memdup_string(op_array->filename);
+		zend_accel_store_string(op_array->filename);
 	}
 
 	if (op_array->arg_info) {
@@ -864,8 +863,7 @@ static void zend_persist_class_entry(zval *zv)
 		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->info.user.filename) {
-			/* do not free! PHP has centralized filename storage, compiler will free it */
-			zend_accel_memdup_string(ce->info.user.filename);
+			zend_accel_store_string(ce->info.user.filename);
 		}
 		if (ce->info.user.doc_comment) {
 			if (ZCG(accel_directives).save_comments) {

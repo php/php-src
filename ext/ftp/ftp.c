@@ -21,8 +21,6 @@
 
 #include "php.h"
 
-#ifdef HAVE_FTP
-
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -2266,5 +2264,3 @@ bail:
 	return PHP_FTP_FAILED;
 }
 /* }}} */
-
-#endif /* HAVE_FTP */

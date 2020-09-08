@@ -11,15 +11,60 @@ require __DIR__ . '/func.inc';
 
 for($i=0;$i<7;$i++) {
     trycatch_dump(
-        fn() => imageaffinematrixget($i)
+        fn() => imageaffinematrixget($i, new stdClass())
     );
 }
 ?>
---EXPECT--
+--EXPECTF--
 !! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
 !! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
-!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|float when using rotate or shear
-!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|float when using rotate or shear
-!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|float when using rotate or shear
+
+Notice: Object of class stdClass could not be converted to float in %s on line %d
+array(6) {
+  [0]=>
+  float(%f)
+  [1]=>
+  float(%f)
+  [2]=>
+  float(%f)
+  [3]=>
+  float(%f)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+
+Notice: Object of class stdClass could not be converted to float in %s on line %d
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(%f)
+  [3]=>
+  float(1)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+
+Notice: Object of class stdClass could not be converted to float in %s on line %d
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(%f)
+  [2]=>
+  float(0)
+  [3]=>
+  float(1)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
 !! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type
 !! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type

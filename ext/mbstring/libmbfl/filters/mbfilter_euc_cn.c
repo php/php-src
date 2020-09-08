@@ -69,7 +69,6 @@ const mbfl_encoding mbfl_encoding_euc_cn = {
 const struct mbfl_identify_vtbl vtbl_identify_euccn = {
 	mbfl_no_encoding_euc_cn,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_euccn
 };
 
@@ -77,7 +76,7 @@ const struct mbfl_convert_vtbl vtbl_euccn_wchar = {
 	mbfl_no_encoding_euc_cn,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_euccn_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -87,7 +86,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_euccn = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_cn,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_euccn,
 	mbfl_filt_conv_common_flush,
 	NULL,

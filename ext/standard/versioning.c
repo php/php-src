@@ -211,7 +211,7 @@ PHP_FUNCTION(version_compare)
 		Z_PARAM_STRING(v1, v1_len)
 		Z_PARAM_STRING(v2, v2_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(op, op_len)
+		Z_PARAM_STRING_OR_NULL(op, op_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	compare = php_version_compare(v1, v2);

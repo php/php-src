@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 540beb37f18b81102e7977447399757e865285c2 */
+ * Stub hash: 20849891a4907e348f1a509388ab08b0b7f6633d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -459,7 +459,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageftbbox, 0, 4, MAY_BE_ARRAY|
 	ZEND_ARG_TYPE_INFO(0, angle, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, font_file, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, extrainfo, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extrainfo, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -473,30 +473,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagefttext, 0, 8, MAY_BE_ARRAY|
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, font_file, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, extrainfo, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extrainfo, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GD_FREETYPE)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagettfbbox, 0, 4, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, size, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, angle, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, font_file, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_imagettfbbox arginfo_imageftbbox
 #endif
 
 #if defined(HAVE_GD_FREETYPE)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagettftext, 0, 8, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
-	ZEND_ARG_TYPE_INFO(0, size, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, angle, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, font_file, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_imagettftext arginfo_imagefttext
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilter, 0, 2, _IS_BOOL, 0)
@@ -547,7 +533,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imageaffine, 0, 2, GdImage, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, clip, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageaffinematrixget, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageaffinematrixget, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
@@ -690,12 +676,6 @@ ZEND_FUNCTION(imageftbbox);
 #if defined(HAVE_GD_FREETYPE)
 ZEND_FUNCTION(imagefttext);
 #endif
-#if defined(HAVE_GD_FREETYPE)
-ZEND_FUNCTION(imagettfbbox);
-#endif
-#if defined(HAVE_GD_FREETYPE)
-ZEND_FUNCTION(imagettftext);
-#endif
 ZEND_FUNCTION(imagefilter);
 ZEND_FUNCTION(imageconvolution);
 ZEND_FUNCTION(imageflip);
@@ -832,10 +812,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagefttext, arginfo_imagefttext)
 #endif
 #if defined(HAVE_GD_FREETYPE)
-	ZEND_FE(imagettfbbox, arginfo_imagettfbbox)
+	ZEND_FALIAS(imagettfbbox, imageftbbox, arginfo_imagettfbbox)
 #endif
 #if defined(HAVE_GD_FREETYPE)
-	ZEND_FE(imagettftext, arginfo_imagettftext)
+	ZEND_FALIAS(imagettftext, imagefttext, arginfo_imagettftext)
 #endif
 	ZEND_FE(imagefilter, arginfo_imagefilter)
 	ZEND_FE(imageconvolution, arginfo_imageconvolution)

@@ -16,8 +16,8 @@ $jis = base64_decode('GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4Iz
 // EUC-JP string
 $euc_jp = '日本語テキストです。01234５６７８９。';
 
-// Test with sigle "form encoding"
-// Note: For some reason it complains, results are differ. Not reserched.
+// Test with single "form encoding"
+// Note: For some reason it complains, results are different. Not researched.
 echo "== BASIC TEST ==\n";
 $s = $sjis;
 $s = mb_convert_encoding($s, 'EUC-JP', 'SJIS');

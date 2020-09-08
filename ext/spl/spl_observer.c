@@ -935,34 +935,43 @@ PHP_METHOD(MultipleIterator, setFlags)
 /* {{{ Attach a new iterator */
 PHP_METHOD(MultipleIterator, attachIterator)
 {
-	spl_SplObjectStorage        *intern;
-	zval                        *iterator = NULL, *info = NULL;
+	spl_SplObjectStorage *intern;
+	zval *iterator = NULL;
+	zval zinfo;
+	zend_string *info_str;
+	zend_long info_long;
+	zend_bool info_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!", &iterator, zend_ce_iterator, &info) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OF_CLASS(iterator, zend_ce_iterator)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG_OR_NULL(info_str, info_long, info_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
-	if (info != NULL) {
+	if (!info_is_null) {
 		spl_SplObjectStorageElement *element;
 
-		if (Z_TYPE_P(info) != IS_LONG && Z_TYPE_P(info) != IS_STRING) {
-			zend_throw_exception(spl_ce_InvalidArgumentException, "Info must be NULL, integer or string", 0);
-			RETURN_THROWS();
+		if (info_str) {
+			ZVAL_STR(&zinfo, info_str);
+		} else {
+			ZVAL_LONG(&zinfo, info_long);
 		}
 
 		zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 		while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) != NULL) {
-			if (fast_is_identical_function(info, &element->inf)) {
+			if (fast_is_identical_function(&zinfo, &element->inf)) {
 				zend_throw_exception(spl_ce_InvalidArgumentException, "Key duplication error", 0);
 				RETURN_THROWS();
 			}
 			zend_hash_move_forward_ex(&intern->storage, &intern->pos);
 		}
-	}
 
-	spl_object_storage_attach(intern, iterator, info);
+		spl_object_storage_attach(intern, iterator, &zinfo);
+	} else {
+		spl_object_storage_attach(intern, iterator, NULL);
+	}
 }
 /* }}} */
 

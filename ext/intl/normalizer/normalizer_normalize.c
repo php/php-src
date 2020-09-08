@@ -121,9 +121,8 @@ PHP_FUNCTION( normalizer_normalize )
 #endif
 			break;
 		default:
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"normalizer_normalize: illegal normalization form", 0 );
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a a valid normalization form");
+			RETURN_THROWS();
 	}
 
 	/*
@@ -248,9 +247,8 @@ PHP_FUNCTION( normalizer_is_normalized )
 #endif
 			break;
 		default:
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"normalizer_normalize: illegal normalization form", 0 );
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a a valid normalization form");
+			RETURN_THROWS();
 	}
 
 

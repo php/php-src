@@ -79,7 +79,7 @@ static inline uint32_t zend_alloc_cache_slot(void) {
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
-ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, const char *filename);
+ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename);
 
 #ifndef ZTS
 ZEND_API zend_compiler_globals compiler_globals;
@@ -412,7 +412,6 @@ void init_compiler(void) /* {{{ */
 	memset(&CG(context), 0, sizeof(CG(context)));
 	zend_init_compiler_data_structures();
 	zend_init_rsrc_list();
-	zend_hash_init(&CG(filenames_table), 8, NULL, ZVAL_PTR_DTOR, 0);
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 
@@ -426,7 +425,6 @@ void shutdown_compiler(void) /* {{{ */
 	zend_stack_destroy(&CG(loop_var_stack));
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_stack_destroy(&CG(short_circuiting_opnums));
-	zend_hash_destroy(&CG(filenames_table));
 	zend_arena_destroy(CG(arena));
 
 	if (CG(delayed_variance_obligations)) {
@@ -439,30 +437,23 @@ void shutdown_compiler(void) /* {{{ */
 		FREE_HASHTABLE(CG(delayed_autoloads));
 		CG(delayed_autoloads) = NULL;
 	}
+	zend_restore_compiled_filename(NULL);
 }
 /* }}} */
 
 ZEND_API zend_string *zend_set_compiled_filename(zend_string *new_compiled_filename) /* {{{ */
 {
-	zval *p, rv;
-
-	if ((p = zend_hash_find(&CG(filenames_table), new_compiled_filename))) {
-		ZEND_ASSERT(Z_TYPE_P(p) == IS_STRING);
-		CG(compiled_filename) = Z_STR_P(p);
-		return Z_STR_P(p);
-	}
-
-	new_compiled_filename = zend_new_interned_string(zend_string_copy(new_compiled_filename));
-	ZVAL_STR(&rv, new_compiled_filename);
-	zend_hash_add_new(&CG(filenames_table), new_compiled_filename, &rv);
-
-	CG(compiled_filename) = new_compiled_filename;
+	CG(compiled_filename) = zend_string_copy(new_compiled_filename);
 	return new_compiled_filename;
 }
 /* }}} */
 
 ZEND_API void zend_restore_compiled_filename(zend_string *original_compiled_filename) /* {{{ */
 {
+	if (CG(compiled_filename)) {
+		zend_string_release(CG(compiled_filename));
+		CG(compiled_filename) = NULL;
+	}
 	CG(compiled_filename) = original_compiled_filename;
 }
 /* }}} */
@@ -2984,10 +2975,10 @@ static void zend_compile_list_assign(
 			zend_handle_numeric_dim(opline, &dim_node);
 		}
 
+		if (elem_ast->attr) {
+			zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
+		}
 		if (var_ast->kind == ZEND_AST_ARRAY) {
-			if (elem_ast->attr) {
-				zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
-			}
 			zend_compile_list_assign(NULL, var_ast, &fetch_result, var_ast->attr);
 		} else if (elem_ast->attr) {
 			zend_emit_assign_ref_znode(var_ast, &fetch_result);
@@ -3072,6 +3063,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W, 0);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
+			CG(zend_lineno) = zend_ast_get_lineno(var_ast);
 			zend_emit_op_tmp(result, ZEND_ASSIGN, &var_node, &expr_node);
 			return;
 		case ZEND_AST_STATIC_PROP:
@@ -3180,6 +3172,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	if ((target_ast->kind != ZEND_AST_VAR
 	  || target_ast->child[0]->kind != ZEND_AST_ZVAL)
+	 && source_ast->kind != ZEND_AST_ZNODE
 	 && source_node.op_type != IS_CV) {
 		/* Both LHS and RHS expressions may modify the same data structure,
 		 * and the modification during RHS evaluation may dangle the pointer
@@ -6213,51 +6206,57 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 	zend_internal_attribute *config;
 
 	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i, j;
+	uint32_t g, i, j;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ATTRIBUTE_LIST);
 
-	for (i = 0; i < list->children; i++) {
-		ZEND_ASSERT(list->child[i]->kind == ZEND_AST_ATTRIBUTE);
+	for (g = 0; g < list->children; g++) {
+		zend_ast_list *group = zend_ast_get_list(list->child[g]);
 
-		zend_ast *el = list->child[i];
-		zend_string *name = zend_resolve_class_name_ast(el->child[0]);
-		zend_ast_list *args = el->child[1] ? zend_ast_get_list(el->child[1]) : NULL;
+		ZEND_ASSERT(group->kind == ZEND_AST_ATTRIBUTE_GROUP);
 
-		attr = zend_add_attribute(attributes, 0, offset, name, args ? args->children : 0);
-		zend_string_release(name);
+		for (i = 0; i < group->children; i++) {
+			ZEND_ASSERT(group->child[i]->kind == ZEND_AST_ATTRIBUTE);
 
-		/* Populate arguments */
-		if (args) {
-			ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
+			zend_ast *el = group->child[i];
+			zend_string *name = zend_resolve_class_name_ast(el->child[0]);
+			zend_ast_list *args = el->child[1] ? zend_ast_get_list(el->child[1]) : NULL;
 
-			zend_bool uses_named_args = 0;
-			for (j = 0; j < args->children; j++) {
-				zend_ast *arg_ast = args->child[j];
+			attr = zend_add_attribute(attributes, 0, offset, name, args ? args->children : 0);
+			zend_string_release(name);
 
-				if (arg_ast->kind == ZEND_AST_UNPACK) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use unpacking in attribute argument list");
-				}
+			/* Populate arguments */
+			if (args) {
+				ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
 
-				if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
-					attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
-					arg_ast = arg_ast->child[1];
-					uses_named_args = 1;
+				zend_bool uses_named_args = 0;
+				for (j = 0; j < args->children; j++) {
+					zend_ast *arg_ast = args->child[j];
 
-					for (uint32_t k = 0; k < j; k++) {
-						if (attr->args[k].name &&
-								zend_string_equals(attr->args[k].name, attr->args[j].name)) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Duplicate named parameter $%s",
-								ZSTR_VAL(attr->args[j].name));
-						}
+					if (arg_ast->kind == ZEND_AST_UNPACK) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Cannot use unpacking in attribute argument list");
 					}
-				} else if (uses_named_args) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use positional argument after named argument");
-				}
 
-				zend_const_expr_to_zval(&attr->args[j].value, arg_ast);
+					if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
+						attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
+						arg_ast = arg_ast->child[1];
+						uses_named_args = 1;
+
+						for (uint32_t k = 0; k < j; k++) {
+							if (attr->args[k].name &&
+									zend_string_equals(attr->args[k].name, attr->args[j].name)) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Duplicate named parameter $%s",
+									ZSTR_VAL(attr->args[j].name));
+							}
+						}
+					} else if (uses_named_args) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Cannot use positional argument after named argument");
+					}
+
+					zend_const_expr_to_zval(&attr->args[j].value, arg_ast);
+				}
 			}
 		}
 	}
@@ -7351,7 +7350,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 	}
 
 	ce->ce_flags |= decl->flags;
-	ce->info.user.filename = zend_get_compiled_filename();
+	ce->info.user.filename = zend_string_copy(zend_get_compiled_filename());
 	ce->info.user.line_start = decl->start_lineno;
 	ce->info.user.line_end = decl->end_lineno;
 

@@ -89,28 +89,24 @@ const mbfl_encoding mbfl_encoding_utf8_sb = {
 const struct mbfl_identify_vtbl vtbl_identify_utf8_docomo = {
 	mbfl_no_encoding_utf8_docomo,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi_a = {
 	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi_b = {
 	mbfl_no_encoding_utf8_kddi_b,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_utf8_sb = {
 	mbfl_no_encoding_utf8_sb,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
@@ -118,7 +114,7 @@ const struct mbfl_convert_vtbl vtbl_utf8_docomo_wchar = {
 	mbfl_no_encoding_utf8_docomo,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
 	mbfl_filt_conv_utf8_wchar_flush,
 	NULL,
@@ -128,7 +124,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_docomo = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_docomo,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -138,7 +134,7 @@ const struct mbfl_convert_vtbl vtbl_utf8_kddi_a_wchar = {
 	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
 	mbfl_filt_conv_utf8_wchar_flush,
 	NULL,
@@ -148,7 +144,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi_a = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -158,7 +154,7 @@ const struct mbfl_convert_vtbl vtbl_utf8_kddi_b_wchar = {
 	mbfl_no_encoding_utf8_kddi_b,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
 	mbfl_filt_conv_utf8_wchar_flush,
 	NULL,
@@ -168,7 +164,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi_b = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_kddi_b,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -178,7 +174,7 @@ const struct mbfl_convert_vtbl vtbl_utf8_sb_wchar = {
 	mbfl_no_encoding_utf8_sb,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
 	mbfl_filt_conv_utf8_wchar_flush,
 	NULL,
@@ -188,7 +184,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_sb = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_sb,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
 	mbfl_filt_conv_common_flush,
 	NULL,

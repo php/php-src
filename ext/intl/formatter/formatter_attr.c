@@ -129,7 +129,7 @@ PHP_FUNCTION( numfmt_set_attribute )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Olz",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oln",
 		&object, NumberFormatter_ce_ptr, &attribute, &value ) == FAILURE)
 	{
 		RETURN_THROWS();

@@ -15,7 +15,8 @@ class FooBar implements Iterator {
 
 function gen() {
     try {
-        yield from new FooBar;
+        // the fact that the yield from result is used is relevant.
+        var_dump(yield from new FooBar);
     } catch (Exception $e) {
         echo $e->getMessage(), "\n";
     }

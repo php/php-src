@@ -49,7 +49,6 @@ const mbfl_encoding mbfl_encoding_cp1254 = {
 const struct mbfl_identify_vtbl vtbl_identify_cp1254 = {
 	mbfl_no_encoding_cp1254,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp1254
 };
 
@@ -57,7 +56,7 @@ const struct mbfl_convert_vtbl vtbl_cp1254_wchar = {
 	mbfl_no_encoding_cp1254,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_cp1254_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -67,7 +66,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp1254 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp1254,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp1254,
 	mbfl_filt_conv_common_flush,
 	NULL,

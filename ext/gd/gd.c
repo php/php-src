@@ -86,7 +86,7 @@ static int le_gd_font;
 #endif
 
 #ifdef HAVE_GD_FREETYPE
-static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
+static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
 #endif
 
 #include "gd_arginfo.h"
@@ -3099,33 +3099,19 @@ PHP_FUNCTION(imagegetclip)
 /* {{{ Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
 {
-	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 1);
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX);
 }
 /* }}} */
 
 /* {{{ Write text to the image using fonts via freetype2 */
 PHP_FUNCTION(imagefttext)
 {
-	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 1);
-}
-/* }}} */
-
-/* {{{ Give the bounding box of a text using TrueType fonts */
-PHP_FUNCTION(imagettfbbox)
-{
-	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 0);
-}
-/* }}} */
-
-/* {{{ Write text to the image using a TrueType font */
-PHP_FUNCTION(imagettftext)
-{
-	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 0);
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW);
 }
 /* }}} */
 
 /* {{{ php_imagettftext_common */
-static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extended)
+static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval *IM, *EXT = NULL;
 	gdImagePtr im=NULL;
@@ -3135,19 +3121,14 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	double ptsize, angle;
 	char *str = NULL, *fontname = NULL;
 	char *error = NULL;
-	int argc = ZEND_NUM_ARGS();
 	gdFTStringExtra strex = {0};
 
 	if (mode == TTFTEXT_BBOX) {
-		if (argc < 4 || argc > ((extended) ? 5 : 4)) {
-			ZEND_WRONG_PARAM_COUNT();
-		} else if (zend_parse_parameters(argc, "ddss|a", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "ddss|a", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (argc < 8 || argc > ((extended) ? 9 : 8)) {
-			ZEND_WRONG_PARAM_COUNT();
-		} else if (zend_parse_parameters(argc, "Oddlllss|a", &IM, gd_image_ce, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oddlllss|a", &IM, gd_image_ce, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
 			RETURN_THROWS();
 		}
 		im = php_gd_libgdimageptr_from_zval_p(IM);
@@ -3156,7 +3137,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	/* convert angle to radians */
 	angle = angle * (M_PI/180);
 
-	if (extended && EXT) {	/* parse extended info */
+	if (EXT) {	/* parse extended info */
 		zval *item;
 		zend_string *key;
 
@@ -3184,7 +3165,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
 
-	if (extended) {
+	if (EXT) {
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
 	} else {
 		error = gdImageStringFT(im, brect, col, fontname, ptsize, angle, x, y, str);
@@ -3819,7 +3800,7 @@ PHP_FUNCTION(imageaffinematrixget)
 	zval *tmp;
 	int res = GD_FALSE, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z", &type, &options) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz", &type, &options) == FAILURE)  {
 		RETURN_THROWS();
 	}
 
@@ -3827,7 +3808,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
+			if (Z_TYPE_P(options) != IS_ARRAY) {
 				zend_argument_type_error(1, "must be of type array when using translate or scale");
 				RETURN_THROWS();
 			}
@@ -3858,11 +3839,6 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_HORIZONTAL:
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
-
-			if (!options) {
-				zend_argument_type_error(2, "must be of type int|float when using rotate or shear");
-				RETURN_THROWS();
-			}
 
 			angle = zval_get_double(options);
 

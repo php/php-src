@@ -120,11 +120,8 @@ class MultipleIterator implements Iterator
     /** @return void */
     public function setFlags(int $flags) {}
 
-    /**
-    * @param int|string|null $info
-    * @return void
-    */
-    public function attachIterator(Iterator $iterator, $info = null) {}
+    /** @return void */
+    public function attachIterator(Iterator $iterator, string|int|null $info = null) {}
 
     /** @return void */
     public function detachIterator(Iterator $iterator) {}

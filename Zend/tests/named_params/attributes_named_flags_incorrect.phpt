@@ -4,11 +4,11 @@ Named flags parameter for Attribute attribute (incorrect parameter name)
 <?php
 
 // TODO: This should error at compile-time.
-@@Attribute(not_flags: Attribute::TARGET_CLASS)
+#[Attribute(not_flags: Attribute::TARGET_CLASS)]
 class MyAttribute {
 }
 
-@@MyAttribute
+#[MyAttribute]
 function test() {}
 
 (new ReflectionFunction('test'))->getAttributes()[0]->newInstance();

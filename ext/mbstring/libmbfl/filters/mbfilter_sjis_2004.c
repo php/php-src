@@ -55,7 +55,6 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis2004 = {
 	mbfl_no_encoding_sjis2004,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
@@ -63,7 +62,7 @@ const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
 	mbfl_no_encoding_sjis2004,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis2004_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -73,7 +72,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis2004 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_sjis2004,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_jis2004,
 	mbfl_filt_conv_jis2004_flush,
 	NULL,

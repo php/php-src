@@ -3684,38 +3684,35 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 /* {{{ reflection_class_object_ctor */
 static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_object)
 {
-	zval *argument;
 	zval *object;
+	zend_string *arg_class = NULL;
+	zend_object *arg_obj;
 	reflection_object *intern;
 	zend_class_entry *ce;
 
 	if (is_object) {
 		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_OBJECT(argument)
+			Z_PARAM_OBJ(arg_obj)
 		ZEND_PARSE_PARAMETERS_END();
 	} else {
 		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_ZVAL(argument)
+			Z_PARAM_STR_OR_OBJ(arg_class, arg_obj)
 		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
-	if (Z_TYPE_P(argument) == IS_OBJECT) {
-		ZVAL_STR_COPY(reflection_prop_name(object), Z_OBJCE_P(argument)->name);
-		intern->ptr = Z_OBJCE_P(argument);
+	if (arg_obj) {
+		ZVAL_STR_COPY(reflection_prop_name(object), arg_obj->ce->name);
+		intern->ptr = arg_obj->ce;
 		if (is_object) {
-			ZVAL_COPY(&intern->obj, argument);
+			ZVAL_OBJ_COPY(&intern->obj, arg_obj);
 		}
 	} else {
-		if (!try_convert_to_string(argument)) {
-			RETURN_THROWS();
-		}
-
-		if ((ce = zend_lookup_class(Z_STR_P(argument))) == NULL) {
+		if ((ce = zend_lookup_class(arg_class)) == NULL) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class \"%s\" does not exist", Z_STRVAL_P(argument));
+				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class \"%s\" does not exist", ZSTR_VAL(arg_class));
 			}
 			RETURN_THROWS();
 		}

@@ -117,21 +117,20 @@ mbfl_buffer_converter_new(
     size_t buf_initsz)
 {
 	mbfl_buffer_converter *convd = emalloc(sizeof(mbfl_buffer_converter));
-	convd->from = from;
 	convd->to = to;
 
 	/* create convert filter */
 	convd->filter1 = NULL;
 	convd->filter2 = NULL;
-	if (mbfl_convert_filter_get_vtbl(convd->from, convd->to) != NULL) {
-		convd->filter1 = mbfl_convert_filter_new(convd->from, convd->to, mbfl_memory_device_output, NULL, &convd->device);
+	if (mbfl_convert_filter_get_vtbl(from, to) != NULL) {
+		convd->filter1 = mbfl_convert_filter_new(from, to, mbfl_memory_device_output, NULL, &convd->device);
 	} else {
-		convd->filter2 = mbfl_convert_filter_new(&mbfl_encoding_wchar, convd->to, mbfl_memory_device_output, NULL, &convd->device);
+		convd->filter2 = mbfl_convert_filter_new(&mbfl_encoding_wchar, to, mbfl_memory_device_output, NULL, &convd->device);
 		if (convd->filter2 != NULL) {
-			convd->filter1 = mbfl_convert_filter_new(convd->from,
+			convd->filter1 = mbfl_convert_filter_new(from,
 					&mbfl_encoding_wchar,
 					(int (*)(int, void*))convd->filter2->filter_function,
-					(int (*)(void*))convd->filter2->filter_flush,
+					convd->filter2->filter_flush,
 					convd->filter2);
 			if (convd->filter1 == NULL) {
 				mbfl_convert_filter_delete(convd->filter2);
@@ -552,13 +551,6 @@ mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int eli
 				break;
 			}
 		}
-	}
-
-	/* cleanup */
-	/* dtors should be called in reverse order */
-	i = num;
-	while (--i >= 0) {
-		mbfl_identify_filter_cleanup(&flist[i]);
 	}
 
 	efree((void *)flist);
@@ -1205,7 +1197,7 @@ mbfl_strcut(
 
 		/* switch the drain direction */
 		encoder->output_function = (int(*)(int,void *))decoder->filter_function;
-		encoder->flush_function = (int(*)(void *))decoder->filter_flush;
+		encoder->flush_function = decoder->filter_flush;
 		encoder->data = decoder;
 
 		q = string->val + string->len;
@@ -1232,8 +1224,10 @@ mbfl_strcut(
 			if (device.pos > length) {
 				p = _bk.p;
 				device.pos = _bk.pos;
-				decoder->filter_dtor(decoder);
-				encoder->filter_dtor(encoder);
+				if (decoder->filter_dtor)
+					decoder->filter_dtor(decoder);
+				if (encoder->filter_dtor)
+					encoder->filter_dtor(encoder);
 				mbfl_convert_filter_copy(&_bk.decoder, decoder);
 				mbfl_convert_filter_copy(&_bk.encoder, encoder);
 				bk = _bk;
@@ -1250,24 +1244,32 @@ mbfl_strcut(
 				/* if the offset of the resulting string exceeds the length,
 				 * then restore the state */
 				if (device.pos > length) {
-					bk.decoder.filter_dtor(&bk.decoder);
-					bk.encoder.filter_dtor(&bk.encoder);
+					if (bk.decoder.filter_dtor)
+						bk.decoder.filter_dtor(&bk.decoder);
+					if (bk.encoder.filter_dtor)
+						bk.encoder.filter_dtor(&bk.encoder);
 
 					p = _bk.p;
 					device.pos = _bk.pos;
-					decoder->filter_dtor(decoder);
-					encoder->filter_dtor(encoder);
+					if (decoder->filter_dtor)
+						decoder->filter_dtor(decoder);
+					if (encoder->filter_dtor)
+						encoder->filter_dtor(encoder);
 					mbfl_convert_filter_copy(&_bk.decoder, decoder);
 					mbfl_convert_filter_copy(&_bk.encoder, encoder);
 					bk = _bk;
 				} else {
-					_bk.decoder.filter_dtor(&_bk.decoder);
-					_bk.encoder.filter_dtor(&_bk.encoder);
+					if (_bk.decoder.filter_dtor)
+						_bk.decoder.filter_dtor(&_bk.decoder);
+					if (_bk.encoder.filter_dtor)
+						_bk.encoder.filter_dtor(&_bk.encoder);
 
 					p = bk.p;
 					device.pos = bk.pos;
-					decoder->filter_dtor(decoder);
-					encoder->filter_dtor(encoder);
+					if (decoder->filter_dtor)
+						decoder->filter_dtor(decoder);
+					if (encoder->filter_dtor)
+						encoder->filter_dtor(encoder);
 					mbfl_convert_filter_copy(&bk.decoder, decoder);
 					mbfl_convert_filter_copy(&bk.encoder, encoder);
 				}
@@ -1284,8 +1286,10 @@ mbfl_strcut(
 				/* restore filter */
 				p = bk.p;
 				device.pos = bk.pos;
-				decoder->filter_dtor(decoder);
-				encoder->filter_dtor(encoder);
+				if (decoder->filter_dtor)
+					decoder->filter_dtor(decoder);
+				if (encoder->filter_dtor)
+					encoder->filter_dtor(encoder);
 				mbfl_convert_filter_copy(&bk.decoder, decoder);
 				mbfl_convert_filter_copy(&bk.encoder, encoder);
 				break;
@@ -1302,26 +1306,34 @@ mbfl_strcut(
 			(*encoder->filter_flush)(encoder);
 
 			if (device.pos > length) {
-				_bk.decoder.filter_dtor(&_bk.decoder);
-				_bk.encoder.filter_dtor(&_bk.encoder);
+				if (_bk.decoder.filter_dtor)
+					_bk.decoder.filter_dtor(&_bk.decoder);
+				if (_bk.encoder.filter_dtor)
+					_bk.encoder.filter_dtor(&_bk.encoder);
 
 				/* restore filter */
 				p = bk.p;
 				device.pos = bk.pos;
-				decoder->filter_dtor(decoder);
-				encoder->filter_dtor(encoder);
+				if (decoder->filter_dtor)
+					decoder->filter_dtor(decoder);
+				if (encoder->filter_dtor)
+					encoder->filter_dtor(encoder);
 				mbfl_convert_filter_copy(&bk.decoder, decoder);
 				mbfl_convert_filter_copy(&bk.encoder, encoder);
 				break;
 			}
 
-			bk.decoder.filter_dtor(&bk.decoder);
-			bk.encoder.filter_dtor(&bk.encoder);
+			if (bk.decoder.filter_dtor)
+				bk.decoder.filter_dtor(&bk.decoder);
+			if (bk.encoder.filter_dtor)
+				bk.encoder.filter_dtor(&bk.encoder);
 
 			p = _bk.p;
 			device.pos = _bk.pos;
-			decoder->filter_dtor(decoder);
-			encoder->filter_dtor(encoder);
+			if (decoder->filter_dtor)
+				decoder->filter_dtor(decoder);
+			if (encoder->filter_dtor)
+				encoder->filter_dtor(encoder);
 			mbfl_convert_filter_copy(&_bk.decoder, decoder);
 			mbfl_convert_filter_copy(&_bk.encoder, encoder);
 
@@ -1330,8 +1342,10 @@ mbfl_strcut(
 
 		(*encoder->filter_flush)(encoder);
 
-		bk.decoder.filter_dtor(&bk.decoder);
-		bk.encoder.filter_dtor(&bk.encoder);
+		if (bk.decoder.filter_dtor)
+			bk.decoder.filter_dtor(&bk.decoder);
+		if (bk.encoder.filter_dtor)
+			bk.encoder.filter_dtor(&bk.encoder);
 
 		result = mbfl_memory_device_result(&device, result);
 
@@ -1591,7 +1605,7 @@ mbfl_ja_jp_hantozen(
 	tl_filter = mbfl_convert_filter_new2(
 		&vtbl_tl_jisx0201_jisx0208,
 		(int(*)(int, void*))next_filter->filter_function,
-		(int(*)(void*))next_filter->filter_flush,
+		next_filter->filter_flush,
 		next_filter);
 	if (tl_filter == NULL) {
 		efree(param);
@@ -1605,7 +1619,7 @@ mbfl_ja_jp_hantozen(
 		string->encoding,
 		&mbfl_encoding_wchar,
 		(int(*)(int, void*))next_filter->filter_function,
-		(int(*)(void*))next_filter->filter_flush,
+		next_filter->filter_flush,
 		next_filter);
 	if (encoder == NULL) {
 		goto out;
@@ -2623,7 +2637,7 @@ mbfl_html_numeric_entity(
 		    string->encoding,
 		    &mbfl_encoding_wchar,
 		    collector_decode_htmlnumericentity,
-			(int (*)(void*))mbfl_filt_decode_htmlnumericentity_flush, &pc);
+		    mbfl_filt_decode_htmlnumericentity_flush, &pc);
 	}
 	if (pc.decoder == NULL || encoder == NULL) {
 		mbfl_convert_filter_delete(encoder);

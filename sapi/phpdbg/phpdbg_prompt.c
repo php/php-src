@@ -519,12 +519,7 @@ exec_code:
 } /* }}} */
 
 int phpdbg_compile_stdin(zend_string *code) {
-	zval zv;
-
-	ZVAL_STR(&zv, code);
-
-	PHPDBG_G(ops) = zend_compile_string(&zv, "Standard input code");
-
+	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code");
 	zend_string_release(code);
 
 	if (EG(exception)) {

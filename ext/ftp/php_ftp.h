@@ -18,10 +18,8 @@
 #ifndef	_INCLUDED_FTP_H
 #define	_INCLUDED_FTP_H
 
-#ifdef HAVE_FTP
-
 extern zend_module_entry php_ftp_module_entry;
-#define php_ftp_module_ptr &php_ftp_module_entry
+#define phpext_ftp_ptr &php_ftp_module_entry
 
 #include "php_version.h"
 #define PHP_FTP_VERSION PHP_VERSION
@@ -33,11 +31,5 @@ extern zend_module_entry php_ftp_module_entry;
 
 PHP_MINIT_FUNCTION(ftp);
 PHP_MINFO_FUNCTION(ftp);
-
-#define phpext_ftp_ptr php_ftp_module_ptr
-
-#else
-#define php_ftp_module_ptr NULL
-#endif	/* HAVE_FTP */
 
 #endif

@@ -59,6 +59,7 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 #define PCRE_JIT_STACK_MAX_SIZE (192 * 1024)
 ZEND_TLS pcre2_jit_stack *jit_stack = NULL;
 #endif
+/* General context using (infallible) system allocator. */
 ZEND_TLS pcre2_general_context *gctx = NULL;
 /* These two are global per thread for now. Though it is possible to use these
  	per pattern. Either one can copy it and use in pce, or one does no global
@@ -173,15 +174,24 @@ static void php_efree_pcre_cache(zval *data) /* {{{ */
 /* }}} */
 
 static void *php_pcre_malloc(PCRE2_SIZE size, void *data)
-{/*{{{*/
-	void *p = pemalloc(size, 1);
-	return p;
-}/*}}}*/
+{
+	return pemalloc(size, 1);
+}
 
 static void php_pcre_free(void *block, void *data)
-{/*{{{*/
+{
 	pefree(block, 1);
-}/*}}}*/
+}
+
+static void *php_pcre_emalloc(PCRE2_SIZE size, void *data)
+{
+	return emalloc(size);
+}
+
+static void php_pcre_efree(void *block, void *data)
+{
+	efree(block);
+}
 
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
@@ -476,6 +486,11 @@ static PHP_RINIT_FUNCTION(pcre)
 	mdata_used = 0;
 #endif
 
+	PCRE_G(gctx_zmm) = pcre2_general_context_create(php_pcre_emalloc, php_pcre_efree, NULL);
+	if (!PCRE_G(gctx_zmm)) {
+		return FAILURE;
+	}
+
 	if (PCRE_G(per_request_cache)) {
 		zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_efree_pcre_cache, 0);
 	}
@@ -486,6 +501,9 @@ static PHP_RINIT_FUNCTION(pcre)
 
 static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
+	pcre2_general_context_free(PCRE_G(gctx_zmm));
+	PCRE_G(gctx_zmm) = NULL;
+
 	if (PCRE_G(per_request_cache)) {
 		zend_hash_destroy(&PCRE_G(pcre_cache));
 	}
@@ -1246,7 +1264,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
-		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 			if (subpat_names) {
@@ -1617,7 +1635,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
-		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 			return NULL;
@@ -1871,7 +1889,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 		mdata_used = 1;
 		match_data = mdata;
 	} else {
-		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 			if (subpat_names) {
@@ -2519,7 +2537,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
-		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 			zval_ptr_dtor(return_value);
@@ -2853,7 +2871,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
-		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 			return;

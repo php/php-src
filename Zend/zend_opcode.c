@@ -61,7 +61,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->T = 0;
 
 	op_array->function_name = NULL;
-	op_array->filename = zend_get_compiled_filename();
+	op_array->filename = zend_string_copy(zend_get_compiled_filename());
 	op_array->doc_comment = NULL;
 	op_array->attributes = NULL;
 
@@ -354,6 +354,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				efree(ce->interfaces);
 			}
+			zend_string_release_ex(ce->info.user.filename, 0);
 			if (ce->info.user.doc_comment) {
 				zend_string_release_ex(ce->info.user.doc_comment, 0);
 			}
@@ -496,6 +497,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 	efree(op_array->opcodes);
 
+	zend_string_release_ex(op_array->filename, 0);
 	if (op_array->doc_comment) {
 		zend_string_release_ex(op_array->doc_comment, 0);
 	}

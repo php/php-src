@@ -147,7 +147,7 @@ string(16) "element1element2"
 -- Iteration 23 --
 string(16) "element1element2"
 -- Iteration 24 --
-join(): Argument #1 ($glue) must be of type string|array, resource given
+join(): Argument #1 ($glue) must be of type array|string, resource given
 -- Iteration 25 --
 string(16) "element1element2"
 -- Iteration 26 --

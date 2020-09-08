@@ -928,7 +928,7 @@ PHP_METHOD(Phar, createDefaultStub)
 	zend_string *stub;
 	size_t index_len = 0, webindex_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|pp", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p!p!", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1833,7 +1833,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	char *base = NULL;
 	struct _phar_t pass;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s", &obj, zend_ce_traversable, &base, &base_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!", &obj, zend_ce_traversable, &base, &base_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2339,7 +2339,7 @@ PHP_METHOD(Phar, convertToExecutable)
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday, so there) */
 	zend_long format = 9021976, method = 9021976;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls", &format, &method, &ext, &ext_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls!", &format, &method, &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2443,7 +2443,7 @@ PHP_METHOD(Phar, convertToData)
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday so there) */
 	zend_long format = 9021976, method = 9021976;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls", &format, &method, &ext, &ext_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls!", &format, &method, &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2992,7 +2992,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 	char *error, *key = NULL;
 	size_t key_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s", &algo, &key, &key_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!", &algo, &key, &key_len) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3155,7 +3155,7 @@ PHP_METHOD(Phar, compress)
 	uint32_t flags;
 	zend_object *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s", &method, &ext, &ext_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!", &method, &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3221,7 +3221,7 @@ PHP_METHOD(Phar, decompress)
 	size_t ext_len = 0;
 	zend_object *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &ext, &ext_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3804,7 +3804,7 @@ PHP_METHOD(Phar, addFile)
 	php_stream *resource;
 	zval zresource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s", &fname, &fname_len, &localname, &localname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s!", &fname, &fname_len, &localname, &localname_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 

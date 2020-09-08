@@ -1,5 +1,5 @@
 --TEST--
-JIT CMP: 003 Comparisoin with NaN
+JIT CMP: 003 Comparison with NaN
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

@@ -161,11 +161,8 @@ class ZipArchive
     /** @return bool */
     public function unchangeName(string $name) {}
 
-    /**
-     * @param array|string|null $files
-     * @return bool
-     */
-    public function extractTo(string $pathto, $files = null) {}
+    /** @return bool */
+    public function extractTo(string $pathto, array|string|null $files = null) {}
 
     /** @return string|false */
     public function getFromName(string $entryname, int $len = 0, int $flags = 0) {}

@@ -17,13 +17,13 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     public function registerXPathNamespace(string $prefix, string $namespace) {}
 
     /** @return string|bool */
-    public function asXML(string $filename = UNKNOWN) {}
+    public function asXML(?string $filename = null) {}
 
     /**
      * @return string|bool
      * @alias SimpleXMLElement::asXML
      */
-    public function saveXML(string $filename = UNKNOWN) {}
+    public function saveXML(?string $filename = null) {}
 
     /** @return array */
     public function getNamespaces(bool $recursive = false) {}
