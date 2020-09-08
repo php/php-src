@@ -31,7 +31,7 @@ try {
 }
 try {
     var_dump(new SNMP(7, $hostname, $community));
-} catch (Exception $e) {
+} catch (ValueError $e) {
     print $e->getMessage() . "\n";
 }
 
@@ -70,8 +70,8 @@ var_dump($session->max_oids);
 ?>
 --EXPECTF--
 SNMP::__construct() expects at least 3 parameters, 2 given
-SNMP::__construct(): Argument #4 must be of type int, string given
-SNMP::__construct(): Argument #5 must be of type int, string given
+SNMP::__construct(): Argument #4 ($timeout) must be of type int, string given
+SNMP::__construct(): Argument #5 ($retries) must be of type int, string given
 SNMP::__construct(): Argument #1 ($version) must be a valid SNMP protocol version
 Exception handling
 

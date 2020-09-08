@@ -184,7 +184,7 @@ string(11) "param_value"
 bool(true)
 Error handling
 
-Notice: Undefined property: SNMP::$there is no such parameter in %s on line %d
+Warning: Undefined property: SNMP::$there is no such parameter in %s on line %d
 NULL
 bool(false)
 
