@@ -16,8 +16,14 @@ $type1 = FFI::typeof(FFI::new('char'));
 var_dump($type1->getName());
 $type2 = FFI::typeof(FFI::new("int32_t*"));
 var_dump($type2->getName());
+var_dump(FFI::type('char')->getName());
+var_dump(FFI::type('int32_t*')->getName());
+var_dump($ffi->type('struct timezone')->getName());
 ?>
 --EXPECT--
 string(15) "struct timezone"
 string(4) "char"
 string(8) "int32_t*"
+string(4) "char"
+string(8) "int32_t*"
+string(15) "struct timezone"
