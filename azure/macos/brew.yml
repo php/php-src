@@ -7,7 +7,8 @@ steps:
   - script: |
       brew install pkg-config \
                    autoconf \
-                   bison
+                   bison \
+                   re2c
     displayName: 'Install Build Tools'
   - script: |
       brew install openssl@1.1 \
@@ -33,11 +34,3 @@ steps:
       brew upgrade libzip
       brew link icu4c gettext --force
     displayName: 'Install Build Dependencies'
-  - script: |
-      wget https://github.com/skvadrik/re2c/releases/download/2.0.1/re2c-2.0.1.tar.xz
-      tar -xf re2c-2.0.1.tar.xz
-      cd re2c-2.0.1
-      ./configure
-      make -j$(sysctl -n hw.ncpu)
-      make install
-    displayName: 'Build re2c'
