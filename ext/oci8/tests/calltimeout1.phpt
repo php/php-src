@@ -45,4 +45,4 @@ $r = mysleep($c, 8);             // seconds
 ?>
 --EXPECTF--
 Test 1
-Execute error was ORA-03136: %s
+Execute error was ORA-%r(03136|03156)%r: %s
