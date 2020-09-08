@@ -69,11 +69,9 @@ var_dump($session->max_oids);
 Check working
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -96,11 +94,9 @@ object(SNMP)#%d (%d) {
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -123,11 +119,9 @@ object(SNMP)#%d (%d) {
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -153,11 +147,9 @@ bool(true)
 bool(false)
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -195,11 +187,9 @@ Warning: main(): Unknown SNMP output print format '78' in %s on line %d
 int(3)
 
 Warning: main(): info property is read-only in %s on line %d
-array(4) {
+array(3) {
   ["hostname"]=>
   string(%d) "%s"
-  ["port"]=>
-  int(%d)
   ["timeout"]=>
   int(%i)
   ["retries"]=>

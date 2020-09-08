@@ -798,6 +798,8 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	int n;
 	struct sockaddr **psal;
 	struct sockaddr **res;
+	// TODO: Do not strip and re-add the port in peername?
+	unsigned remote_port = SNMP_PORT;
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -806,7 +808,6 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	snmp_sess_init(session);
 
 	session->version = version;
-	session->remote_port = SNMP_PORT;
 
 	session->peername = emalloc(MAX_NAME_LEN);
 	/* we copy original hostname for further processing */
@@ -819,7 +820,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		host_ptr++;
 		if ((pptr = strchr(host_ptr, ']'))) {
 			if (pptr[1] == ':') {
-				session->remote_port = atoi(pptr + 2);
+				remote_port = atoi(pptr + 2);
 			}
 			*pptr = '\0';
 		} else {
@@ -828,7 +829,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		}
 	} else { /* IPv4 address */
 		if ((pptr = strchr(host_ptr, ':'))) {
-			session->remote_port = atoi(pptr + 1);
+			remote_port = atoi(pptr + 1);
 			*pptr = '\0';
 		}
 	}
@@ -880,9 +881,9 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	*/
 
 	/* put back non-standard SNMP port */
-	if (session->remote_port != SNMP_PORT) {
+	if (remote_port != SNMP_PORT) {
 		pptr = session->peername + strlen(session->peername);
-		sprintf(pptr, ":%d", session->remote_port);
+		sprintf(pptr, ":%d", remote_port);
 	}
 
 	php_network_freeaddresses(psal);
@@ -1777,9 +1778,6 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 
 	ZVAL_STRINGL(&val, snmp_object->session->peername, strlen(snmp_object->session->peername));
 	add_assoc_zval(retval, "hostname", &val);
-
-	ZVAL_LONG(&val, snmp_object->session->remote_port);
-	add_assoc_zval(retval, "port", &val);
 
 	ZVAL_LONG(&val, snmp_object->session->timeout);
 	add_assoc_zval(retval, "timeout", &val);
