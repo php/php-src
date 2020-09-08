@@ -80,11 +80,12 @@ jobs:
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1
+    - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+      - template: test.yml
+        parameters:
+          configurationName: ${{ parameters.configurationName }}
+          runTestsName: 'OpCache'
+          runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1
     - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
       - template: test.yml
         parameters:
