@@ -22,12 +22,6 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
-// To go above year 9999: 60 * 60 * 24 * 365 * 9999
-try {
-    setrawcookie('name', 'value', 315328464000);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
 try {
     setrawcookie('name', 'value', 100, 'invalid;');
 } catch (\ValueError $e) {
@@ -59,7 +53,6 @@ var_dump(headers_list());
 setrawcookie(): Argument #1 ($name) cannot be empty
 setrawcookie(): Argument #1 ($name) cannot contain "=", ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setrawcookie(): Argument #2 ($value) cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
-setrawcookie(): "expires" option cannot have a year greater than 9999
 setrawcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setrawcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 bool(true)

@@ -48,7 +48,7 @@ try {
 if (PHP_INT_SIZE == 8) {
     try {
         // To go above year 9999: 60 * 60 * 24 * 365 * 9999
-        setrawcookie('name', 'value', ['expires' => 315328464000]);
+        setcookie('name', 'value', ['expires' => 315328464000]);
     } catch (\ValueError $e) {
         var_dump($e->getMessage() == 'setcookie(): "expires" option cannot have a year greater than 9999');
     }
@@ -66,7 +66,7 @@ setcookie(): option "foo" is invalid
 setcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setcookie(): Expects exactly 3 arguments when argument #3 ($expires_or_options) is an array
-bool(false)
+bool(true)
 array(1) {
   [0]=>
   string(%s) "X-Powered-By: PHP/%s"
