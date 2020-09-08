@@ -1912,12 +1912,8 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 	|	mov EX->call, RX
 	|1:
 	|	mov RX, r0
-	|.if X64
-	|	mov CARG1d, dword OP:r0->op2.num
-	|.else
-	|	mov r1, dword OP:r0->op2.num
-	|.endif
-	|	EXT_CALL zend_jit_cannot_pass_by_reference, r0
+	|	mov FCARG1d, dword OP:r0->op2.num
+	|	EXT_CALL zend_cannot_pass_by_reference, r0
 	|	cmp byte OP:RX->op1_type, IS_TMP_VAR
 	|	jne >9
 	|.if X64

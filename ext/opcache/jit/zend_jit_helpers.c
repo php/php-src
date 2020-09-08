@@ -1769,19 +1769,6 @@ static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 	zend_error(E_NOTICE, "Only variables should be passed by reference");
 }
 
-static void ZEND_FASTCALL zend_jit_cannot_pass_by_reference(uint32_t arg_num)
-{
-	const zend_execute_data *execute_data = EG(current_execute_data);
-	zend_string *func_name = get_function_or_method_name(EX(call)->func);
-	const char *param_name = get_function_arg_name(EX(call)->func, arg_num);
-
-	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s cannot be passed by reference",
-		ZSTR_VAL(func_name), arg_num, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : ""
-	);
-
-	zend_string_release(func_name);
-}
-
 static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
 {
 	zend_error(E_WARNING, "Trying to access array offset on value of type %s", zend_zval_type_name(container));

@@ -719,7 +719,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 		if (nb_additional_parameters == -1) {
 			zend_value_error("The arguments array must contain %d items, %d given", max_missing_argnum + 1, argc);
 		} else {
-			zend_argument_count_error("%d parameters are required, %d given", max_missing_argnum + nb_additional_parameters + 1, argc + nb_additional_parameters);
+			zend_argument_count_error("%d arguments are required, %d given", max_missing_argnum + nb_additional_parameters + 1, argc + nb_additional_parameters);
 		}
 		goto fail;
 	}
