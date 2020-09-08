@@ -10950,6 +10950,199 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 	return 1;
 }
 
+static int zend_jit_fetch_dim(dasm_State    **Dst,
+                              const zend_op  *opline,
+                              uint32_t        op1_info,
+                              zend_jit_addr   op1_addr,
+                              uint32_t        op2_info,
+                              zend_jit_addr   res_addr,
+                              int             may_throw)
+{
+	zend_jit_addr op2_addr;
+
+	ZEND_ASSERT(opline->op1_type == IS_CV);
+
+	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
+
+	if (op1_info & MAY_BE_REF) {
+		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+		|	IF_NOT_Z_TYPE FCARG1a, IS_REFERENCE, >1
+		|	GET_Z_PTR FCARG2a, FCARG1a
+		|	IF_NOT_TYPE byte [FCARG2a + offsetof(zend_reference, val) + offsetof(zval, u1.v.type)], IS_ARRAY, >2
+		|	lea FCARG1a, [FCARG2a + offsetof(zend_reference, val)]
+		|	jmp >3
+		|.cold_code
+		|2:
+		|	SET_EX_OPLINE opline, r0
+		|	EXT_CALL zend_jit_prepare_assign_dim_ref, r0
+		|	test r0, r0
+		|	mov FCARG1a, r0
+		|	jne >1
+		|	jmp ->exception_handler_undef
+		|.code
+		|1:
+		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+	}
+
+	if (op1_info & MAY_BE_ARRAY) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_ARRAY, >7
+		}
+		|3:
+		|	SEPARATE_ARRAY op1_addr, op1_info, 1
+	}
+	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
+		if (op1_info & MAY_BE_ARRAY) {
+			|.cold_code
+			|7:
+		}
+		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
+			|	CMP_ZVAL_TYPE op1_addr, IS_FALSE
+			|	jg >7
+		}
+		if ((op1_info & MAY_BE_UNDEF)
+		 && opline->opcode == ZEND_FETCH_DIM_RW) {
+			if (op1_info & (MAY_BE_NULL|MAY_BE_FALSE)) {
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
+			}
+			|	SET_EX_OPLINE opline, r0
+			|	mov FCARG1a, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|1:
+		}
+		|	// ZVAL_ARR(container, zend_new_array(8));
+		if (Z_REG(op1_addr) != ZREG_FP) {
+			|	mov T1, Ra(Z_REG(op1_addr)) // save
+		}
+		|	EXT_CALL _zend_new_array_0, r0
+		if (Z_REG(op1_addr) != ZREG_FP) {
+			|	mov Ra(Z_REG(op1_addr)), T1 // restore
+		}
+		|	SET_ZVAL_LVAL op1_addr, r0
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_ARRAY_EX
+		|	mov FCARG1a, r0
+		if (op1_info & MAY_BE_ARRAY) {
+			|	jmp >1
+			|.code
+			|1:
+		}
+	}
+
+	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
+		|6:
+		if (opline->op2_type == IS_UNUSED) {
+			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
+			|	LOAD_ADDR_ZTS FCARG2a, executor_globals, uninitialized_zval
+			|	EXT_CALL zend_hash_next_index_insert, r0
+			|	// if (UNEXPECTED(!var_ptr)) {
+			|	test r0, r0
+			|	jz >1
+			|.cold_code
+			|1:
+			|	// zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
+			|	CANNOT_ADD_ELEMENT opline
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_UNDEF
+			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
+			|	jmp >8
+			|.code
+			|	SET_ZVAL_PTR res_addr, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_INDIRECT
+		} else {
+			uint32_t type;
+
+			switch (opline->opcode) {
+				case ZEND_FETCH_DIM_W:
+				case ZEND_FETCH_LIST_W:
+					type = BP_VAR_W;
+					break;
+				case ZEND_FETCH_DIM_RW:
+					type = BP_VAR_RW;
+					break;
+				case ZEND_FETCH_DIM_UNSET:
+					type = BP_VAR_UNSET;
+					break;
+				default:
+					ZEND_UNREACHABLE();
+			}
+
+			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, type, op1_info, op2_info, NULL, NULL, NULL)) {
+				return 0;
+			}
+
+			|8:
+			|	SET_ZVAL_PTR res_addr, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_INDIRECT
+
+			if (type == BP_VAR_RW || (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING)))) {
+				|.cold_code
+				|9:
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL
+				|	jmp >8
+				|.code
+			}
+		}
+	}
+
+	if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
+			|.cold_code
+			|7:
+		}
+
+		|	SET_EX_OPLINE opline, r0
+		if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+		}
+	    if (opline->op2_type == IS_UNUSED) {
+			|	xor FCARG2a, FCARG2a
+		} else if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+			ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+			|	LOAD_ADDR FCARG2a, (Z_ZV(op2_addr) + 1)
+		} else {
+			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+		}
+		|.if X64
+			|	LOAD_ZVAL_ADDR CARG3, res_addr
+		|.else
+			|	sub r4, 12
+			|	PUSH_ZVAL_ADDR res_addr, r0
+		|.endif
+		switch (opline->opcode) {
+			case ZEND_FETCH_DIM_W:
+			case ZEND_FETCH_LIST_W:
+				|	EXT_CALL zend_jit_fetch_dim_obj_w_helper, r0
+				break;
+			case ZEND_FETCH_DIM_RW:
+				|	EXT_CALL zend_jit_fetch_dim_obj_rw_helper, r0
+				break;
+//			case ZEND_FETCH_DIM_UNSET:
+//				|	EXT_CALL zend_jit_fetch_dim_obj_unset_helper, r0
+//				break;
+			default:
+				ZEND_UNREACHABLE();
+			}
+		|.if not(X64)
+		|	add r4, 12
+		|.endif
+
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
+			|	jmp >8 // END
+			|.code
+		}
+	}
+
+	|8:
+	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+
+	if (may_throw) {
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
                                       const zend_op  *opline,
                                       uint32_t        op1_info,

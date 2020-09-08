@@ -1558,6 +1558,16 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
+				case ZEND_FETCH_DIM_W:
+				case ZEND_FETCH_DIM_RW:
+//				case ZEND_FETCH_DIM_UNSET:
+				case ZEND_FETCH_LIST_W:
+					if (opline->op1_type != IS_CV) {
+						break;
+					}
+					ADD_OP1_TRACE_GUARD();
+					ADD_OP2_TRACE_GUARD();
+					break;
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_VAR_NO_REF_EX:
@@ -4308,6 +4318,37 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									((opline->op2_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
 										(op2_info & MAY_BE_RC1) &&
 										(op2_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0)))) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_FETCH_DIM_W:
+					case ZEND_FETCH_DIM_RW:
+//					case ZEND_FETCH_DIM_UNSET:
+					case ZEND_FETCH_LIST_W:
+						if (opline->op1_type != IS_CV) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						op1_addr = OP1_REG_ADDR();
+						if (orig_op1_type != IS_UNKNOWN
+						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
+									!ssa->var_info[ssa_op->op1_use].guarded_reference, 1)) {
+								goto jit_failure;
+							}
+							if (opline->op1_type == IS_CV
+							 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
+								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+							}
+						} else {
+							CHECK_OP1_TRACE_TYPE();
+						}
+						op2_info = OP2_INFO();
+						CHECK_OP2_TRACE_TYPE();
+						op1_def_info = OP1_DEF_INFO();
+						if (!zend_jit_fetch_dim(&dasm_state, opline,
+								op1_info, op1_addr, op2_info, RES_REG_ADDR(),
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
 						goto done;

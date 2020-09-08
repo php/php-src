@@ -2853,6 +2853,22 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_FETCH_DIM_W:
+					case ZEND_FETCH_DIM_RW:
+//					case ZEND_FETCH_DIM_UNSET:
+					case ZEND_FETCH_LIST_W:
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						if (opline->op1_type != IS_CV) {
+							break;
+						}
+						if (!zend_jit_fetch_dim(&dasm_state, opline,
+								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), RES_REG_ADDR(),
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 						if ((opline->extended_value & ZEND_ISEMPTY)) {
 							// TODO: support for empty() ???
