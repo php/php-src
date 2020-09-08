@@ -707,7 +707,7 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 
 			/* timezone */
 			case 'I': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->is_dst : 0); break;
-			case 'p': 
+			case 'p':
 				if (!localtime || strcmp(offset->abbr, "UTC") == 0 || strcmp(offset->abbr, "Z") == 0) {
 					length = slprintf(buffer, sizeof(buffer), "%s", "Z");
 					break;
@@ -2179,7 +2179,7 @@ static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *us
 #endif
 }
 
-PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int ctor) /* {{{ */
+PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags) /* {{{ */
 {
 	timelib_time   *now;
 	timelib_tzinfo *tzi = NULL;
@@ -2189,6 +2189,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 	timelib_sll new_offset = 0;
 	time_t sec;
 	suseconds_t usec;
+	int options = 0;
 
 	if (dateobj->time) {
 		timelib_time_dtor(dateobj->time);
@@ -2210,7 +2211,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 	update_errors_warnings(err);
 
 
-	if (ctor && err && err->error_count) {
+	if ((flags & PHP_DATE_INIT_CTOR) && err && err->error_count) {
 		/* spit out the first library error message, at least */
 		php_error_docref(NULL, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
@@ -2263,7 +2264,13 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 	php_date_get_current_time_with_fraction(&sec, &usec);
 	timelib_unixtime2local(now, (timelib_sll) sec);
 	php_date_set_time_fraction(now, usec);
-	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
+
+	options = TIMELIB_NO_CLONE;
+	if (flags & PHP_DATE_INIT_FORMAT) {
+		options |= TIMELIB_OVERRIDE_TIME;
+	}
+	timelib_fill_holes(dateobj->time, now, options);
+
 	timelib_update_ts(dateobj->time, tzi);
 	timelib_update_from_sse(dateobj->time);
 
@@ -2331,7 +2338,7 @@ PHP_FUNCTION(date_create_from_format)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
-	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, 0)) {
+	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, PHP_DATE_INIT_FORMAT)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -2353,7 +2360,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
-	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, 0)) {
+	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, PHP_DATE_INIT_FORMAT)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -2375,7 +2382,7 @@ PHP_METHOD(DateTime, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	php_date_initialize(Z_PHPDATE_P(ZEND_THIS), time_str, time_str_len, NULL, timezone_object, 1);
+	php_date_initialize(Z_PHPDATE_P(ZEND_THIS), time_str, time_str_len, NULL, timezone_object, PHP_DATE_INIT_CTOR);
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
@@ -2395,7 +2402,7 @@ PHP_METHOD(DateTimeImmutable, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	php_date_initialize(Z_PHPDATE_P(ZEND_THIS), time_str, time_str_len, NULL, timezone_object, 1);
+	php_date_initialize(Z_PHPDATE_P(ZEND_THIS), time_str, time_str_len, NULL, timezone_object, PHP_DATE_INIT_CTOR);
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */

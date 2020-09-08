@@ -797,7 +797,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
  */
 PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
 {
-	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	char buf[(sizeof(zend_ulong) << 3) + 1];
 	char *ptr, *end;
 	zend_ulong value;
@@ -828,7 +828,7 @@ PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
  */
 PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 {
-	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
 		return ZSTR_EMPTY_ALLOC();

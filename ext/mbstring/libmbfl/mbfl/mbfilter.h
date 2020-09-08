@@ -137,7 +137,6 @@ struct _mbfl_buffer_converter {
 	mbfl_convert_filter *filter1;
 	mbfl_convert_filter *filter2;
 	mbfl_memory_device device;
-	const mbfl_encoding *from;
 	const mbfl_encoding *to;
 };
 

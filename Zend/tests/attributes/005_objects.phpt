@@ -3,7 +3,7 @@ Attributes can be converted into objects.
 --FILE--
 <?php
 
-@@Attribute(Attribute::TARGET_FUNCTION)
+#[Attribute(Attribute::TARGET_FUNCTION)]
 class A1
 {
 	public string $name;
@@ -16,7 +16,7 @@ class A1
 	}
 }
 
-$ref = new \ReflectionFunction(@@A1('test') function () { });
+$ref = new \ReflectionFunction(#[A1('test')] function () { });
 
 foreach ($ref->getAttributes() as $attr) {
 	$obj = $attr->newInstance();
@@ -26,7 +26,7 @@ foreach ($ref->getAttributes() as $attr) {
 
 echo "\n";
 
-$ref = new \ReflectionFunction(@@A1 function () { });
+$ref = new \ReflectionFunction(#[A1] function () { });
 
 try {
 	$ref->getAttributes()[0]->newInstance();
@@ -36,7 +36,7 @@ try {
 
 echo "\n";
 
-$ref = new \ReflectionFunction(@@A1([]) function () { });
+$ref = new \ReflectionFunction(#[A1([])] function () { });
 
 try {
 	$ref->getAttributes()[0]->newInstance();
@@ -46,7 +46,7 @@ try {
 
 echo "\n";
 
-$ref = new \ReflectionFunction(@@A2 function () { });
+$ref = new \ReflectionFunction(#[A2] function () { });
 
 try {
 	$ref->getAttributes()[0]->newInstance();
@@ -56,13 +56,13 @@ try {
 
 echo "\n";
 
-@@Attribute
+#[Attribute]
 class A3
 {
 	private function __construct() { }
 }
 
-$ref = new \ReflectionFunction(@@A3 function () { });
+$ref = new \ReflectionFunction(#[A3] function () { });
 
 try {
 	$ref->getAttributes()[0]->newInstance();
@@ -72,10 +72,10 @@ try {
 
 echo "\n";
 
-@@Attribute
+#[Attribute]
 class A4 { }
 
-$ref = new \ReflectionFunction(@@A4(1) function () { });
+$ref = new \ReflectionFunction(#[A4(1)] function () { });
 
 try {
 	$ref->getAttributes()[0]->newInstance();
@@ -87,7 +87,7 @@ echo "\n";
 
 class A5 { }
 
-$ref = new \ReflectionFunction(@@A5 function () { });
+$ref = new \ReflectionFunction(#[A5] function () { });
 
 try {
 	$ref->getAttributes()[0]->newInstance();

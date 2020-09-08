@@ -44,13 +44,13 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
+	if (zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
 
-	if(zposition) {
+	if (zposition) {
 		position = (int32_t) zval_get_long(zposition);
 		position_p = &position;
 	}
@@ -86,17 +86,20 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
-			RETVAL_FALSE;
-			break;
+			zend_argument_value_error(3, "must be a NumberFormatter::TYPE_* constant");
+			goto cleanup;
 	}
+
+	if (zposition) {
+		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
+	}
+
+cleanup:
+
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	setlocale(LC_NUMERIC, oldlocale);
 	efree(oldlocale);
 #endif
-	if(zposition) {
-		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
-	}
 
 	if (sstr) {
 		efree(sstr);

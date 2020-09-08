@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8d03ee514902490691aa4a9b8801fbc10b5b9c26 */
+ * Stub hash: f2d1b412bf2e07c3e607aa6ebad25b19d882b98e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read_fds, IS_ARRAY, 1)
@@ -48,7 +48,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_getsockname, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
 	ZEND_ARG_INFO(1, addr)
-	ZEND_ARG_INFO(1, port)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, port, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_socket_getpeername arginfo_socket_getsockname
@@ -95,7 +95,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_recvfrom, 0, 5, MAY_BE_LO
 	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 	ZEND_ARG_INFO(1, name)
-	ZEND_ARG_INFO(1, port)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, port, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_sendto, 0, 5, MAY_BE_LONG|MAY_BE_FALSE)

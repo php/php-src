@@ -77,9 +77,9 @@ $values = array(
 // loop through each element of the array for value
 
 foreach($values as $value) {
-      echo @"\nArg value $value \n";
-      var_dump( xml_parser_set_option($parser, $option, $value) );
-};
+  echo @"\nArg value $value \n";
+  var_dump(xml_parser_set_option($parser, $option, $value));
+}
 
 fclose($fp);
 xml_parser_free($parser);

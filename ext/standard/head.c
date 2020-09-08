@@ -58,12 +58,12 @@ PHP_FUNCTION(header_remove)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(line, len)
+		Z_PARAM_STRING_OR_NULL(line, len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line = line;
 	ctr.line_len = (uint32_t)len;
-	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
+	sapi_header_op(line == NULL ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
 /* }}} */
 

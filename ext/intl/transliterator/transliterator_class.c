@@ -179,8 +179,7 @@ err:
 	else
 	{
 		/* We shouldn't have unconstructed objects in the first place */
-		php_error_docref( NULL, E_WARNING,
-			"Cloning unconstructed transliterator." );
+		zend_throw_error(NULL, "Unconstructed Transliterator object cannot be cloned");
 	}
 
 	return ret_val;
@@ -215,7 +214,7 @@ static zval *Transliterator_read_property( zend_object *object, zend_string *nam
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 ) )
 	{
-		php_error_docref(NULL, E_WARNING, "The property \"id\" is read-only" );
+		zend_throw_error(NULL, "Transliterator::$id is read-only");
 		retval = &EG( uninitialized_zval );
 	}
 	else
@@ -243,7 +242,7 @@ static zval *Transliterator_write_property( zend_object *object, zend_string *na
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 ) )
 	{
-		php_error_docref(NULL, E_WARNING, "The property \"id\" is read-only" );
+		zend_throw_error(NULL, "Transliterator::$id is read-only");
 	}
 	else
 	{

@@ -22,10 +22,9 @@
 
 #include "php.h"
 #include "Zend/zend_interfaces.h"
+#include "Zend/zend_smart_str.h"
 
-#ifdef HAVE_CURL
-
-#include "php_curl.h"
+#include "curl_private.h"
 
 #include <curl/curl.h>
 #include <curl/multi.h>
@@ -50,7 +49,7 @@
 
 /* CurlMultiHandle class */
 
-static zend_class_entry *curl_multi_ce;
+zend_class_entry *curl_multi_ce;
 
 static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
 	return (php_curlm *)((char *)(obj) - XtOffsetOf(php_curlm, std));
@@ -599,5 +598,3 @@ void curl_multi_register_class(const zend_function_entry *method_entries) {
 	curl_multi_handlers.clone_obj = NULL;
 	curl_multi_handlers.cast_object = curl_cast_object;
 }
-
-#endif

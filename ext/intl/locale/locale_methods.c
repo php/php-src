@@ -882,10 +882,9 @@ PHP_FUNCTION(locale_compose)
 	/* Not grandfathered */
 	result = append_key_value(loc_name, hash_arr , LOC_LANG_TAG);
 	if( result == LOC_NOT_FOUND ){
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		"locale_compose: parameter array does not contain 'language' tag.", 0 );
+		zend_argument_value_error(1, "must contain a \"%s\" key", LOC_LANG_TAG);
 		smart_str_free(loc_name);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	if( !handleAppendResult( result, loc_name)){
 		RETURN_FALSE;
@@ -1348,7 +1347,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
 		if(Z_TYPE_P(ele_value)!= IS_STRING) {
 			/* element value is not a string */
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: locale array element is not a string", 0);
+			zend_argument_type_error(2, "must only contain string values");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
 		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));

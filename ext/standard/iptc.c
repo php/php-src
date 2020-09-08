@@ -193,8 +193,8 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (iptcdata_len >= SIZE_MAX - sizeof(psheader) - 1025) {
-		php_error_docref(NULL, E_WARNING, "IPTC data too large");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too large");
+		RETURN_THROWS();
 	}
 
 	if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {

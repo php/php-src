@@ -56,7 +56,6 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
@@ -64,7 +63,7 @@ const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
 	mbfl_no_encoding_sjis_mac,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_sjis_mac_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -74,7 +73,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_sjis_mac,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_sjis_mac,
 	mbfl_filt_conv_sjis_mac_flush,
 	NULL,

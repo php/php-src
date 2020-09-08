@@ -1319,6 +1319,7 @@ PHP_FUNCTION(mb_http_input)
 	char *type = NULL;
 	size_t type_len = 0, n;
 	const mbfl_encoding **entry;
+	const mbfl_encoding *encoding;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -1326,34 +1327,34 @@ PHP_FUNCTION(mb_http_input)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (type == NULL) {
-		RETVAL_STRING(MBSTRG(http_input_identify)->name);
+		encoding = MBSTRG(http_input_identify);
 	} else {
 		switch (*type) {
 		case 'G':
 		case 'g':
-			RETVAL_STRING(MBSTRG(http_input_identify_get)->name);
+			encoding = MBSTRG(http_input_identify_get);
 			break;
 		case 'P':
 		case 'p':
-			RETVAL_STRING(MBSTRG(http_input_identify_post)->name);
+			encoding = MBSTRG(http_input_identify_post);
 			break;
 		case 'C':
 		case 'c':
-			RETVAL_STRING(MBSTRG(http_input_identify_cookie)->name);
+			encoding = MBSTRG(http_input_identify_cookie);
 			break;
 		case 'S':
 		case 's':
-			RETVAL_STRING(MBSTRG(http_input_identify_string)->name);
+			encoding = MBSTRG(http_input_identify_string);
 			break;
 		case 'I':
 		case 'i':
 			entry = MBSTRG(http_input_list);
 			n = MBSTRG(http_input_list_size);
 			array_init(return_value);
-			for (int i = 0; i < n; i++, entry++) {
+			for (size_t i = 0; i < n; i++, entry++) {
 				add_next_index_string(return_value, (*entry)->name);
 			}
-			break;
+			return;
 		case 'L':
 		case 'l':
 			entry = MBSTRG(http_input_list);
@@ -1362,10 +1363,11 @@ PHP_FUNCTION(mb_http_input)
 				// TODO should return empty string?
 				RETURN_FALSE;
 			}
+			// TODO Use smart_str instead.
 			mbfl_string result;
 			mbfl_memory_device device;
 			mbfl_memory_device_init(&device, n * 12, 0);
-			for (int i = 0; i < n; i++, entry++) {
+			for (size_t i = 0; i < n; i++, entry++) {
 				mbfl_memory_device_strcat(&device, (*entry)->name);
 				mbfl_memory_device_output(',', &device);
 			}
@@ -1373,12 +1375,18 @@ PHP_FUNCTION(mb_http_input)
 			mbfl_memory_device_result(&device, &result);
 			RETVAL_STRINGL((const char*)result.val, result.len);
 			mbfl_string_clear(&result);
-			break;
+			return;
 		default:
-			// TODO ValueError
-			RETVAL_STRING(MBSTRG(http_input_identify)->name);
-			break;
+			zend_argument_value_error(1,
+				"must be one of \"G\", \"P\", \"C\", \"S\", \"I\" or \"L\"");
+			RETURN_THROWS();
 		}
+	}
+
+	if (encoding) {
+		RETURN_STRING(encoding->name);
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -3513,8 +3521,8 @@ PHP_FUNCTION(mb_send_mail)
 	size_t message_len;
 	char *subject;
 	size_t subject_len;
-	zval *headers = NULL;
 	zend_string *extra_cmd = NULL;
+	HashTable *headers_ht = NULL;
 	zend_string *str_headers = NULL, *tmp_headers;
 	size_t n, i;
 	char *to_r = NULL;
@@ -3560,30 +3568,24 @@ PHP_FUNCTION(mb_send_mail)
 		Z_PARAM_STRING(subject, subject_len)
 		Z_PARAM_STRING(message, message_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(headers)
-		Z_PARAM_STR(extra_cmd)
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(str_headers, headers_ht)
+		Z_PARAM_STR_OR_NULL(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* ASCIIZ check */
 	MAIL_ASCIIZ_CHECK_MBSTRING(to, to_len);
 	MAIL_ASCIIZ_CHECK_MBSTRING(subject, subject_len);
 	MAIL_ASCIIZ_CHECK_MBSTRING(message, message_len);
-	if (headers) {
-		switch(Z_TYPE_P(headers)) {
-			case IS_STRING:
-				tmp_headers = zend_string_init(Z_STRVAL_P(headers), Z_STRLEN_P(headers), 0);
-				MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
-				str_headers = php_trim(tmp_headers, NULL, 0, 2);
-				zend_string_release_ex(tmp_headers, 0);
-				break;
-			case IS_ARRAY:
-				str_headers = php_mail_build_headers(Z_ARRVAL_P(headers));
-				break;
-			default:
-				zend_argument_value_error(4, "must be of type string|array|null, %s given", zend_zval_type_name(headers));
-				RETURN_THROWS();
-		}
+
+	if (str_headers) {
+		tmp_headers = zend_string_init(ZSTR_VAL(str_headers), ZSTR_LEN(str_headers), 0);
+		MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
+		str_headers = php_trim(tmp_headers, NULL, 0, 2);
+		zend_string_release_ex(tmp_headers, 0);
+	} else if (headers_ht) {
+		str_headers = php_mail_build_headers(headers_ht);
 	}
+
 	if (extra_cmd) {
 		MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
 	}
@@ -4110,7 +4112,7 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 		/* If this assertion fails this means some memory allocation failure which is a bug */
 		ZEND_ASSERT(filter != NULL);
 
-		mbfl_convert_filter_feed_string(filter, (const unsigned char *) str, str_len);
+		mbfl_convert_filter_feed_string(filter, (unsigned char*)str, str_len);
 		mbfl_convert_filter_flush(filter);
 
 		if (dev.pos < 1 || filter->num_illegalchar || dev.buffer[0] >= MBFL_WCSGROUP_UCS4MAX) {

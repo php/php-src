@@ -37,7 +37,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection, ctor> public method __construct ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $objectOrClass ]
+        Parameter #0 [ <required> object|string $objectOrClass ]
       }
     }
 

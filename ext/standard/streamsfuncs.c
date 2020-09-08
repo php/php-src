@@ -88,7 +88,8 @@ PHP_FUNCTION(stream_socket_client)
 {
 	zend_string *host;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
-	double timeout = (double)FG(default_socket_timeout);
+	double timeout;
+	zend_bool timeout_is_null = 1;
 	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
@@ -98,17 +99,21 @@ PHP_FUNCTION(stream_socket_client)
 	zend_string *errstr = NULL;
 	php_stream_context *context = NULL;
 
-	RETVAL_FALSE;
-
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_STR(host)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(zerrno)
 		Z_PARAM_ZVAL(zerrstr)
-		Z_PARAM_DOUBLE(timeout)
+		Z_PARAM_DOUBLE_OR_NULL(timeout, timeout_is_null)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_FALSE;
+
+	if (timeout_is_null) {
+		timeout = (double)FG(default_socket_timeout);
+	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
@@ -238,7 +243,8 @@ PHP_FUNCTION(stream_socket_server)
 /* {{{ Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)
 {
-	double timeout = (double)FG(default_socket_timeout);
+	double timeout;
+	zend_bool timeout_is_null = 1;
 	zval *zpeername = NULL;
 	zend_string *peername = NULL;
 	php_timeout_ull conv;
@@ -250,9 +256,13 @@ PHP_FUNCTION(stream_socket_accept)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_DOUBLE(timeout)
+		Z_PARAM_DOUBLE_OR_NULL(timeout, timeout_is_null)
 		Z_PARAM_ZVAL(zpeername)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (timeout_is_null) {
+		timeout = (double)FG(default_socket_timeout);
+	}
 
 	php_stream_from_zval(stream, zstream);
 
@@ -406,21 +416,23 @@ PHP_FUNCTION(stream_socket_recvfrom)
 /* {{{ Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
-	php_stream	*stream;
-	zval		*zsrc;
-	zend_long		maxlen		= (ssize_t) PHP_STREAM_COPY_ALL,
-				desiredpos	= -1L;
+	php_stream *stream;
+	zval *zsrc;
+	zend_long maxlen, desiredpos = -1L;
+	zend_bool maxlen_is_null = 1;
 	zend_string *contents;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_RESOURCE(zsrc)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 		Z_PARAM_LONG(desiredpos)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (maxlen < 0 && maxlen != PHP_STREAM_COPY_ALL) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero, or -1");
+	if (maxlen_is_null) {
+		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
+	} else if (maxlen < 0 && maxlen != PHP_STREAM_COPY_ALL) {
+		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0, or -1");
 		RETURN_FALSE;
 	}
 
@@ -463,7 +475,8 @@ PHP_FUNCTION(stream_copy_to_stream)
 {
 	php_stream *src, *dest;
 	zval *zsrc, *zdest;
-	zend_long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
+	zend_long maxlen, pos = 0;
+	zend_bool maxlen_is_null = 1;
 	size_t len;
 	int ret;
 
@@ -471,9 +484,13 @@ PHP_FUNCTION(stream_copy_to_stream)
 		Z_PARAM_RESOURCE(zsrc)
 		Z_PARAM_RESOURCE(zdest)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 		Z_PARAM_LONG(pos)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (maxlen_is_null) {
+		maxlen = PHP_STREAM_COPY_ALL;
+	}
 
 	php_stream_from_zval(src, zsrc);
 	php_stream_from_zval(dest, zdest);
@@ -868,13 +885,13 @@ static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 	}
 }
 
-static int parse_context_options(php_stream_context *context, zval *options)
+static int parse_context_options(php_stream_context *context, HashTable *options)
 {
 	zval *wval, *oval;
 	zend_string *wkey, *okey;
 	int ret = SUCCESS;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), wkey, wval) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(options, wkey, wval) {
 		ZVAL_DEREF(wval);
 		if (wkey && Z_TYPE_P(wval) == IS_ARRAY) {
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
@@ -891,12 +908,12 @@ static int parse_context_options(php_stream_context *context, zval *options)
 	return ret;
 }
 
-static int parse_context_params(php_stream_context *context, zval *params)
+static int parse_context_params(php_stream_context *context, HashTable *params)
 {
 	int ret = SUCCESS;
 	zval *tmp;
 
-	if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(params), "notification", sizeof("notification")-1))) {
+	if (NULL != (tmp = zend_hash_str_find(params, "notification", sizeof("notification")-1))) {
 
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
@@ -908,9 +925,9 @@ static int parse_context_params(php_stream_context *context, zval *params)
 		ZVAL_COPY(&context->notifier->ptr, tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
-	if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(params), "options", sizeof("options")-1))) {
+	if (NULL != (tmp = zend_hash_str_find(params, "options", sizeof("options")-1))) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
-			return parse_context_options(context, tmp);
+			return parse_context_options(context, Z_ARRVAL_P(tmp));
 		} else {
 			zend_type_error("Invalid stream/context parameter");
 			return FAILURE;
@@ -975,41 +992,45 @@ PHP_FUNCTION(stream_context_set_option)
 {
 	zval *zcontext = NULL;
 	php_stream_context *context;
+	zend_string *wrappername;
+	HashTable *options;
+	char *optionname = NULL;
+	size_t optionname_len;
+	zval *zvalue = NULL;
 
-	if (ZEND_NUM_ARGS() == 2) {
-		zval *options;
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_STR_OR_ARRAY_HT(wrappername, options)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(optionname, optionname_len)
+		Z_PARAM_ZVAL(zvalue)
+	ZEND_PARSE_PARAMETERS_END();
 
-		ZEND_PARSE_PARAMETERS_START(2, 2)
-			Z_PARAM_RESOURCE(zcontext)
-			Z_PARAM_ARRAY(options)
-		ZEND_PARSE_PARAMETERS_END();
+	/* figure out where the context is coming from exactly */
+	if (!(context = decode_context_param(zcontext))) {
+		zend_argument_type_error(1, "must be a valid stream/context");
+		RETURN_THROWS();
+	}
 
-		/* figure out where the context is coming from exactly */
-		if (!(context = decode_context_param(zcontext))) {
-			zend_argument_type_error(1, "must be a valid stream/context");
+	if (options) {
+		if (optionname) {
+			zend_argument_value_error(3, "must be null when argument #2 ($wrapper_or_options) is an array");
+			RETURN_THROWS();
+		}
+
+		if (zvalue) {
+			zend_argument_value_error(4, "cannot be provided when argument #2 ($wrapper_or_options) is an array");
 			RETURN_THROWS();
 		}
 
 		RETURN_BOOL(parse_context_options(context, options) == SUCCESS);
 	} else {
-		zval *zvalue;
-		char *wrappername, *optionname;
-		size_t wrapperlen, optionlen;
-
-		ZEND_PARSE_PARAMETERS_START(4, 4)
-			Z_PARAM_RESOURCE(zcontext)
-			Z_PARAM_STRING(wrappername, wrapperlen)
-			Z_PARAM_STRING(optionname, optionlen)
-			Z_PARAM_ZVAL(zvalue)
-		ZEND_PARSE_PARAMETERS_END();
-
-		/* figure out where the context is coming from exactly */
-		if (!(context = decode_context_param(zcontext))) {
-			zend_argument_type_error(1, "must be a valid stream/context");
+		if (!optionname) {
+			zend_argument_value_error(3, "cannot be null when argument #2 ($wrapper_or_options) is a string");
 			RETURN_THROWS();
 		}
 
-		RETURN_BOOL(php_stream_context_set_option(context, wrappername, optionname, zvalue) == SUCCESS);
+		RETURN_BOOL(php_stream_context_set_option(context, ZSTR_VAL(wrappername), optionname, zvalue) == SUCCESS);
 	}
 }
 /* }}} */
@@ -1017,12 +1038,13 @@ PHP_FUNCTION(stream_context_set_option)
 /* {{{ Set parameters for a file context */
 PHP_FUNCTION(stream_context_set_params)
 {
-	zval *params, *zcontext;
+	HashTable *params;
+	zval *zcontext;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(zcontext)
-		Z_PARAM_ARRAY(params)
+		Z_PARAM_ARRAY_HT(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = decode_context_param(zcontext);
@@ -1064,12 +1086,12 @@ PHP_FUNCTION(stream_context_get_params)
 /* {{{ Get a handle on the default file/stream context and optionally set parameters */
 PHP_FUNCTION(stream_context_get_default)
 {
-	zval *params = NULL;
+	HashTable *params = NULL;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY(params)
+		Z_PARAM_ARRAY_HT_OR_NULL(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (FG(default_context) == NULL) {
@@ -1090,11 +1112,11 @@ PHP_FUNCTION(stream_context_get_default)
 /* {{{ Set default file/stream context, returns the context as a resource */
 PHP_FUNCTION(stream_context_set_default)
 {
-	zval *options = NULL;
+	HashTable *options;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(options)
+		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (FG(default_context) == NULL) {
@@ -1113,13 +1135,14 @@ PHP_FUNCTION(stream_context_set_default)
 /* {{{ Create a file context and optionally set parameters */
 PHP_FUNCTION(stream_context_create)
 {
-	zval *options = NULL, *params = NULL;
+	HashTable *options = NULL;
+	HashTable *params = NULL;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_OR_NULL(options)
-		Z_PARAM_ARRAY_OR_NULL(params)
+		Z_PARAM_ARRAY_HT_OR_NULL(options)
+		Z_PARAM_ARRAY_HT_OR_NULL(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_alloc();
@@ -1698,8 +1721,8 @@ PHP_FUNCTION(stream_socket_shutdown)
 	if (how != STREAM_SHUT_RD &&
 	    how != STREAM_SHUT_WR &&
 	    how != STREAM_SHUT_RDWR) {
-		php_error_docref(NULL, E_WARNING, "Second parameter $how needs to be one of STREAM_SHUT_RD, STREAM_SHUT_WR or STREAM_SHUT_RDWR");
-		RETURN_FALSE;
+	    zend_argument_value_error(2, "must be one of STREAM_SHUT_RD, STREAM_SHUT_WR, or STREAM_SHUT_RDWR");
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zstream);

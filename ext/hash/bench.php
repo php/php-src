@@ -74,6 +74,9 @@ error_reporting(E_ALL&~E_NOTICE);
 
 $data = file_get_contents(__FILE__);
 $time = array();
+foreach (hash_algos() as $algo) {
+        $time[$algo] = 0;
+}
 
 for ($j = 0; $j < 10; $j++) {
     foreach (hash_algos() as $algo) {

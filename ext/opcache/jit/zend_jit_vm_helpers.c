@@ -272,15 +272,22 @@ static zend_always_inline int _zend_quick_get_constant(
 
 	if (!check_defined_only) {
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
+		if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
+			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(c->name));
+			if (EG(exception)) {
+				return FAILURE;
+			}
+			return SUCCESS;
+		}
 	}
 
 	CACHE_PTR(opline->extended_value, c);
 	return SUCCESS;
 }
 
-void ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags)
+int ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags)
 {
-	_zend_quick_get_constant(key, flags, 0);
+	return _zend_quick_get_constant(key, flags, 0);
 }
 
 int ZEND_FASTCALL zend_jit_check_constant(const zval *key)

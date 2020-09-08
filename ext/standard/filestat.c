@@ -598,7 +598,8 @@ PHP_FUNCTION(touch)
 	char *filename;
 	size_t filename_len;
 	zend_long filetime = 0, fileatime = 0;
-	int ret, argc = ZEND_NUM_ARGS();
+	zend_bool filetime_is_null = 1, fileatime_is_null = 1;
+	int ret;
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
@@ -607,28 +608,24 @@ PHP_FUNCTION(touch)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(filetime)
-		Z_PARAM_LONG(fileatime)
+		Z_PARAM_LONG_OR_NULL(filetime, filetime_is_null)
+		Z_PARAM_LONG_OR_NULL(fileatime, fileatime_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!filename_len) {
 		RETURN_FALSE;
 	}
 
-	switch (argc) {
-		case 1:
-			newtime = NULL;
-			break;
-		case 2:
-			newtime->modtime = newtime->actime = filetime;
-			break;
-		case 3:
-			newtime->modtime = filetime;
-			newtime->actime = fileatime;
-			break;
-		default:
-			/* Never reached */
-			WRONG_PARAM_COUNT;
+	if (filetime_is_null && fileatime_is_null) {
+		newtime = NULL;
+	} else if (!filetime_is_null && fileatime_is_null) {
+		newtime->modtime = newtime->actime = filetime;
+	} else if (filetime_is_null && !fileatime_is_null) {
+		zend_argument_value_error(2, "cannot be null when argument #3 ($atime) is an integer");
+		RETURN_THROWS();
+	} else {
+		newtime->modtime = filetime;
+		newtime->actime = fileatime;
 	}
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -641,7 +638,7 @@ PHP_FUNCTION(touch)
 			}
 		} else {
 			php_stream *stream;
-			if(argc > 1) {
+			if(!filetime_is_null || !fileatime_is_null) {
 				php_error_docref(NULL, E_WARNING, "Can not call touch() for a non-standard stream");
 				RETURN_FALSE;
 			}

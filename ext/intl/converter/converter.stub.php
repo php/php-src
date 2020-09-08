@@ -45,7 +45,7 @@ class UConverter
     /** @return string|false|null */
     public function getSubstChars() {}
 
-    /** @return string|false */
+    /** @return string */
     public static function reasonText(int $reason) {}
 
     /** @return bool */

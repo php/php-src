@@ -7,8 +7,11 @@ if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
 <?php
-
-var_dump(ftok("",""));
+try {
+    var_dump(ftok("",""));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(ftok(-1, -1));
 var_dump(ftok("qwertyu","qwertyu"));
 
@@ -19,8 +22,7 @@ var_dump(ftok(__FILE__,"q"));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: ftok(): Pathname is invalid in %s on line %d
-int(-1)
+ftok(): Argument #1 ($pathname) cannot be empty
 
 Warning: ftok(): Project identifier is invalid in %s on line %d
 int(-1)

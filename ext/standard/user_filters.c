@@ -299,11 +299,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			}
 			efree(wildcard);
 		}
-		if (fdat == NULL) {
-			php_error_docref(NULL, E_WARNING,
-					"Err, filter \"%s\" is not in the user-filter map, but somehow the user-filter-factory was invoked for it!?", filtername);
-			return NULL;
-		}
+		ZEND_ASSERT(fdat);
 	}
 
 	/* bind the classname to the actual class */

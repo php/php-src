@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 82fd97d4985448884141842955a4bee2c90ba338 */
+ * Stub hash: 87c9d71b08c538c28b4f9bad01d7a7a3a3b191ef */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -46,6 +46,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_string_or_stdclass_or_n
 	ZEND_ARG_INFO(0, param)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_is_object, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -68,6 +73,7 @@ ZEND_FUNCTION(zend_string_or_object);
 ZEND_FUNCTION(zend_string_or_object_or_null);
 ZEND_FUNCTION(zend_string_or_stdclass);
 ZEND_FUNCTION(zend_string_or_stdclass_or_null);
+ZEND_FUNCTION(zend_iterable);
 ZEND_METHOD(_ZendTestClass, is_object);
 ZEND_METHOD(_ZendTestClass, __toString);
 ZEND_METHOD(_ZendTestTrait, testMethod);
@@ -86,6 +92,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null)
 	ZEND_FE(zend_string_or_stdclass, arginfo_zend_string_or_stdclass)
 	ZEND_FE(zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null)
+	ZEND_FE(zend_iterable, arginfo_zend_iterable)
 	ZEND_FE_END
 };
 

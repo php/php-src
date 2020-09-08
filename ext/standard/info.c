@@ -1263,7 +1263,7 @@ PHP_FUNCTION(phpversion)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(ext_name, ext_name_len)
+		Z_PARAM_STRING_OR_NULL(ext_name, ext_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ext_name) {

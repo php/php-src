@@ -3,10 +3,10 @@ Named params in attributes: Positional after named error
 --FILE--
 <?php
 
-@@Attribute
+#[Attribute]
 class MyAttribute { }
 
-@@MyAttribute(a: 'A', 'B')
+#[MyAttribute(a: 'A', 'B')]
 class Test {}
 
 ?>

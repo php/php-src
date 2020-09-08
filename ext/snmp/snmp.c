@@ -659,8 +659,10 @@ retry:
 * OID parser (and type, value for SNMP_SET command)
 */
 
-static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_query, zend_string *oid_str, HashTable *oid_ht, zval *type, zval *value)
-{
+static int php_snmp_parse_oid(
+	zval *object, int st, struct objid_query *objid_query, zend_string *oid_str, HashTable *oid_ht,
+	zend_string *type_str, HashTable *type_ht, zend_string *value_str, HashTable *value_ht
+) {
 	char *pptr;
 	uint32_t idx_type = 0, idx_value = 0;
 	zval *tmp_oid, *tmp_type, *tmp_value;
@@ -671,15 +673,15 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 		objid_query->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg));
 		objid_query->vars[objid_query->count].oid = ZSTR_VAL(oid_str);
 		if (st & SNMP_CMD_SET) {
-			if (Z_TYPE_P(type) == IS_STRING && Z_TYPE_P(value) == IS_STRING) {
-				if (Z_STRLEN_P(type) != 1) {
-					php_error_docref(NULL, E_WARNING, "Bogus type '%s', should be single char, got %zu", Z_STRVAL_P(type), Z_STRLEN_P(type));
+			if (type_str && value_str) {
+				if (ZSTR_LEN(type_str) != 1) {
+					php_error_docref(NULL, E_WARNING, "Bogus type '%s', should be single char, got %zu", ZSTR_VAL(type_str), ZSTR_LEN(type_str));
 					efree(objid_query->vars);
 					return FALSE;
 				}
-				pptr = Z_STRVAL_P(type);
+				pptr = ZSTR_VAL(type_str);
 				objid_query->vars[objid_query->count].type = *pptr;
-				objid_query->vars[objid_query->count].value = Z_STRVAL_P(value);
+				objid_query->vars[objid_query->count].value = ZSTR_VAL(value_str);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Single objid and multiple type or values are not supported");
 				efree(objid_query->vars);
@@ -698,18 +700,18 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 			convert_to_string_ex(tmp_oid);
 			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
 			if (st & SNMP_CMD_SET) {
-				if (Z_TYPE_P(type) == IS_STRING) {
-					pptr = Z_STRVAL_P(type);
+				if (type_str) {
+					pptr = ZSTR_VAL(type_str);
 					objid_query->vars[objid_query->count].type = *pptr;
-				} else if (Z_TYPE_P(type) == IS_ARRAY) {
-					while (idx_type < Z_ARRVAL_P(type)->nNumUsed) {
-						tmp_type = &Z_ARRVAL_P(type)->arData[idx_type].val;
+				} else if (type_ht) {
+					while (idx_type < type_ht->nNumUsed) {
+						tmp_type = &type_ht->arData[idx_type].val;
 						if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
 							break;
 						}
 						idx_type++;
 					}
-					if (idx_type < Z_ARRVAL_P(type)->nNumUsed) {
+					if (idx_type < type_ht->nNumUsed) {
 						convert_to_string_ex(tmp_type);
 						if (Z_STRLEN_P(tmp_type) != 1) {
 							php_error_docref(NULL, E_WARNING, "'%s': bogus type '%s', should be single char, got %zu", Z_STRVAL_P(tmp_oid), Z_STRVAL_P(tmp_type), Z_STRLEN_P(tmp_type));
@@ -726,17 +728,17 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 					}
 				}
 
-				if (Z_TYPE_P(value) == IS_STRING) {
-					objid_query->vars[objid_query->count].value = Z_STRVAL_P(value);
-				} else if (Z_TYPE_P(value) == IS_ARRAY) {
-					while (idx_value < Z_ARRVAL_P(value)->nNumUsed) {
-						tmp_value = &Z_ARRVAL_P(value)->arData[idx_value].val;
+				if (value_str) {
+					objid_query->vars[objid_query->count].value = ZSTR_VAL(value_str);
+				} else if (value_ht) {
+					while (idx_value < value_ht->nNumUsed) {
+						tmp_value = &value_ht->arData[idx_value].val;
 						if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
 							break;
 						}
 						idx_value++;
 					}
-					if (idx_value < Z_ARRVAL_P(value)->nNumUsed) {
+					if (idx_value < value_ht->nNumUsed) {
 						convert_to_string_ex(tmp_value);
 						objid_query->vars[objid_query->count].value = Z_STRVAL_P(tmp_value);
 						idx_value++;
@@ -1077,15 +1079,13 @@ static int netsnmp_session_set_security(struct snmp_session *session, char *sec_
 */
 static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
-	zend_string *oid_str;
-	HashTable *oid_ht;
-	zval *value = NULL, *type = NULL;
+	zend_string *oid_str, *type_str = NULL, *value_str = NULL;
+	HashTable *oid_ht, *type_ht = NULL, *value_ht = NULL;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
 	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
-	int argc = ZEND_NUM_ARGS();
 	struct objid_query objid_query;
 	php_snmp_session *session;
 	int session_less_mode = (getThis() == NULL);
@@ -1109,8 +1109,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_STRING(a6, a6_len)
 					Z_PARAM_STRING(a7, a7_len)
 					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-					Z_PARAM_ZVAL(type)
-					Z_PARAM_ZVAL(value)
+					Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
+					Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1140,8 +1140,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_STRING(a1, a1_len)
 					Z_PARAM_STRING(a2, a2_len)
 					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-					Z_PARAM_ZVAL(type)
-					Z_PARAM_ZVAL(value)
+					Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
+					Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1165,8 +1165,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		if (st & SNMP_CMD_SET) {
 			ZEND_PARSE_PARAMETERS_START(3, 3)
 				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-				Z_PARAM_ZVAL(type)
-				Z_PARAM_ZVAL(value)
+				Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
+				Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
 			ZEND_PARSE_PARAMETERS_END();
 		} else if (st & SNMP_CMD_WALK) {
 			ZEND_PARSE_PARAMETERS_START(1, 4)
@@ -1197,7 +1197,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		}
 	}
 
-	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid_str, oid_ht, type, value)) {
+	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid_str, oid_ht, type_str, type_ht, value_str, value_ht)) {
 		RETURN_FALSE;
 	}
 

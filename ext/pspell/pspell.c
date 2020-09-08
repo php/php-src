@@ -109,7 +109,7 @@ PHP_FUNCTION(pspell_new)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	zend_long mode = Z_L(0),  speed = Z_L(0);
+	zend_long mode = Z_L(0), speed = Z_L(0);
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
@@ -167,7 +167,7 @@ PHP_FUNCTION(pspell_new)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 4) {
+	if (mode) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
@@ -205,7 +205,7 @@ PHP_FUNCTION(pspell_new_personal)
 {
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	zend_long mode = Z_L(0),  speed = Z_L(0);
+	zend_long mode = Z_L(0), speed = Z_L(0);
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
@@ -271,7 +271,7 @@ PHP_FUNCTION(pspell_new_personal)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 5) {
+	if (mode) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */

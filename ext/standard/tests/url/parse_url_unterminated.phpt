@@ -876,6 +876,11 @@ echo "Done";
   string(19) "filter={"id":"123"}"
 }
 
+--> %:x: array(1) {
+  ["path"]=>
+  string(3) "%:x"
+}
+
 --> http:///blah.com: bool(false)
 
 --> http://:80: bool(false)

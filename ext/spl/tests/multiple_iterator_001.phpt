@@ -79,8 +79,8 @@ echo "-- Associate with invalid value --\n";
 
 try {
     $m->attachIterator($iter3, new stdClass());
-} catch(InvalidArgumentException $e) {
-    echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
+} catch(TypeError $e) {
+    echo "TypeError thrown: " . $e->getMessage() . "\n";
 }
 
 echo "-- Associate with duplicate value --\n";
@@ -297,7 +297,7 @@ array(3) {
   int(3)
 }
 -- Associate with invalid value --
-InvalidArgumentException thrown: Info must be NULL, integer or string
+TypeError thrown: MultipleIterator::attachIterator(): Argument #2 ($info) must be of type string|int|null, stdClass given
 -- Associate with duplicate value --
 InvalidArgumentException thrown: Key duplication error
 -- Count, contains, detach, count, contains, iterate --

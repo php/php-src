@@ -221,6 +221,18 @@ ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 }
 /* }}} */
 
+/* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
+ZEND_FUNCTION(zend_iterable)
+{
+	zval *arg1, *arg2;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(arg1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ITERABLE_OR_NULL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
 	zend_object *obj = zend_objects_new(class_type);
 	object_properties_init(obj, class_type);
@@ -275,7 +287,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
-		zend_error(E_COMPILE_ERROR, "Only classes can be marked with @@ZendTestAttribute");
+		zend_error(E_COMPILE_ERROR, "Only classes can be marked with #[ZendTestAttribute]");
 	}
 }
 

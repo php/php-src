@@ -69,7 +69,6 @@ const mbfl_encoding mbfl_encoding_uhc = {
 const struct mbfl_identify_vtbl vtbl_identify_uhc = {
 	mbfl_no_encoding_uhc,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_uhc
 };
 
@@ -77,7 +76,7 @@ const struct mbfl_convert_vtbl vtbl_uhc_wchar = {
 	mbfl_no_encoding_uhc,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_uhc_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -87,7 +86,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_uhc,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_uhc,
 	mbfl_filt_conv_common_flush,
 	NULL,

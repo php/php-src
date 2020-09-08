@@ -15,7 +15,7 @@ function bzread($bz, int $length = 1024): string|false {}
  * @param resource $bz
  * @alias fwrite
  */
-function bzwrite($bz, string $str, int $length = UNKNOWN): int|false {}
+function bzwrite($bz, string $str, ?int $length = null): int|false {}
 
 /**
  * @param resource $bz

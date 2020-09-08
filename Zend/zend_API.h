@@ -1209,6 +1209,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_STRING_OR_NULL,	"of type ?string") \
 	_(Z_EXPECTED_ARRAY,				"of type array") \
 	_(Z_EXPECTED_ARRAY_OR_NULL,		"of type ?array") \
+	_(Z_EXPECTED_ITERABLE,				"of type iterable") \
+	_(Z_EXPECTED_ITERABLE_OR_NULL,		"of type ?iterable") \
 	_(Z_EXPECTED_FUNC,				"a valid callback") \
 	_(Z_EXPECTED_FUNC_OR_NULL,		"a valid callback or null") \
 	_(Z_EXPECTED_RESOURCE,			"of type resource") \
@@ -1221,8 +1223,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_DOUBLE_OR_NULL,	"of type ?float") \
 	_(Z_EXPECTED_NUMBER,			"of type int|float") \
 	_(Z_EXPECTED_NUMBER_OR_NULL,	"of type int|float|null") \
-	_(Z_EXPECTED_STRING_OR_ARRAY,	"of type string|array") \
-	_(Z_EXPECTED_STRING_OR_ARRAY_OR_NULL, "of type string|array|null") \
+	_(Z_EXPECTED_STRING_OR_ARRAY,	"of type array|string") \
+	_(Z_EXPECTED_STRING_OR_ARRAY_OR_NULL, "of type array|string|null") \
 	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
 	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
 	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT,	"a valid class name or object") \
@@ -1373,6 +1375,20 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_ARRAY_OR_OBJECT(dest) \
 	Z_PARAM_ARRAY_OR_OBJECT_EX(dest, 0, 0)
 
+#define Z_PARAM_ITERABLE_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_iterable(_arg, &dest, check_null))) { \
+		_expected_type = check_null ? Z_EXPECTED_ITERABLE_OR_NULL : Z_EXPECTED_ITERABLE; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_ITERABLE(dest) \
+	Z_PARAM_ITERABLE_EX(dest, 0)
+
+#define Z_PARAM_ITERABLE_OR_NULL(dest) \
+	Z_PARAM_ITERABLE_EX(dest, 1)
+
 /* old "b" */
 #define Z_PARAM_BOOL_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1511,6 +1527,9 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_ARRAY_HT(dest) \
 	Z_PARAM_ARRAY_HT_EX(dest, 0, 0)
 
+#define Z_PARAM_ARRAY_HT_OR_NULL(dest) \
+	Z_PARAM_ARRAY_HT_EX(dest, 1, 0)
+
 /* old "H" */
 #define Z_PARAM_ARRAY_OR_OBJECT_HT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1576,6 +1595,24 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 
 #define Z_PARAM_OBJECT_OR_NULL(dest) \
 	Z_PARAM_OBJECT_EX(dest, 1, 0)
+
+/* The same as Z_PARAM_OBJECT_EX2 except that dest is a zend_object rather than a zval */
+#define Z_PARAM_OBJ_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, NULL, check_null))) { \
+			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_OBJ_EX(dest, check_null, separate) \
+	Z_PARAM_OBJ_EX2(dest, check_null, separate, separate)
+
+#define Z_PARAM_OBJ(dest) \
+	Z_PARAM_OBJ_EX(dest, 0, 0)
+
+#define Z_PARAM_OBJ_OR_NULL(dest) \
+	Z_PARAM_OBJ_EX(dest, 1, 0)
 
 /* old "O" */
 #define Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
@@ -1903,6 +1940,21 @@ static zend_always_inline bool zend_parse_arg_path(zval *arg, char **dest, size_
 	return 1;
 }
 
+static zend_always_inline bool zend_parse_arg_iterable(zval *arg, zval **dest, bool check_null)
+{
+	if (EXPECTED(zend_is_iterable(arg))) {
+		*dest = arg;
+		return 1;
+	}
+
+	if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+		return 1;
+	}
+
+	return 0;
+}
+
 static zend_always_inline bool zend_parse_arg_array(zval *arg, zval **dest, bool check_null, bool or_object)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY) ||
@@ -1952,6 +2004,19 @@ static zend_always_inline bool zend_parse_arg_object(zval *arg, zval **dest, zen
 	return 1;
 }
 
+static zend_always_inline bool zend_parse_arg_obj(zval *arg, zend_object **dest, zend_class_entry *ce, bool check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
+	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce) != 0))) {
+		*dest = Z_OBJ_P(arg);
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
 static zend_always_inline bool zend_parse_arg_resource(zval *arg, zval **dest, bool check_null)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
@@ -1973,6 +2038,10 @@ static zend_always_inline bool zend_parse_arg_func(zval *arg, zend_fcall_info *d
 	} else if (UNEXPECTED(zend_fcall_info_init(arg, 0, dest_fci, dest_fcc, NULL, error) != SUCCESS)) {
 		return 0;
 	}
+	/* Release call trampolines: The function may not get called, in which case
+	 * the trampoline will leak. Force it to be refetched during
+	 * zend_call_function instead. */
+	zend_release_fcall_info_cache(dest_fcc);
 	return 1;
 }
 

@@ -73,16 +73,16 @@ class SplFileInfo
     public function getRealPath() {}
 
     /** @return SplFileInfo */
-    public function getFileInfo(string $class_name = UNKNOWN) {}
+    public function getFileInfo(?string $class_name = null) {}
 
     /** @return SplFileInfo|null */
-    public function getPathInfo(string $class_name = UNKNOWN) {}
+    public function getPathInfo(?string $class_name = null) {}
 
     /**
-     * @param resource $context
+     * @param resource|null $context
      * @return SplFileObject
      */
-    public function openFile(string $open_mode = 'r', bool $use_include_path = false, $context = UNKNOWN) {}
+    public function openFile(string $open_mode = 'r', bool $use_include_path = false, $context = null) {}
 
     /** @return void */
     public function setFileClass(string $class_name = SplFileObject::class) {}

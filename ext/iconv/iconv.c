@@ -1182,7 +1182,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 						smart_str_appendc(pretval, *(char *)p);
 						char_cnt--;
 					} else {
-						static char qp_digits[] = "0123456789ABCDEF";
+						static const char qp_digits[] = "0123456789ABCDEF";
 						smart_str_appendc(pretval, '=');
 						smart_str_appendc(pretval, qp_digits[(*p >> 4) & 0x0f]);
 						smart_str_appendc(pretval, qp_digits[(*p & 0x0f)]);

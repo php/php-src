@@ -5,7 +5,7 @@ Attributes can deal with AST nodes.
 
 define('V1', strtoupper(php_sapi_name()));
 
-@@A1([V1 => V1])
+#[A1([V1 => V1])]
 class C1
 {
 	public const BAR = 'bar';
@@ -20,7 +20,7 @@ var_dump(count($args), $args[0][V1] === V1);
 
 echo "\n";
 
-@@A1(V1, 1 + 2, C1::class)
+#[A1(V1, 1 + 2, C1::class)]
 class C2 { }
 
 $ref = new \ReflectionClass(C2::class);
@@ -35,7 +35,7 @@ var_dump($args[2] === C1::class);
 
 echo "\n";
 
-@@A1(self::FOO, C1::BAR)
+#[A1(self::FOO, C1::BAR)]
 class C3
 {
 	private const FOO = 'foo';
@@ -52,20 +52,20 @@ var_dump($args[1] === C1::BAR);
 
 echo "\n";
 
-@@ExampleWithShift(4 >> 1)
+#[ExampleWithShift(4 >> 1)]
 class C4 {}
 $ref = new \ReflectionClass(C4::class);
 var_dump($ref->getAttributes()[0]->getArguments());
 
 echo "\n";
 
-@@Attribute
+#[Attribute]
 class C5
 {
 	public function __construct() { }
 }
 
-$ref = new \ReflectionFunction(@@C5(MissingClass::SOME_CONST) function () { });
+$ref = new \ReflectionFunction(#[C5(MissingClass::SOME_CONST)] function () { });
 $attr = $ref->getAttributes();
 var_dump(count($attr));
 

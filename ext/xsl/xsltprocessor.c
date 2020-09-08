@@ -666,21 +666,35 @@ PHP_METHOD(XSLTProcessor, setParameter)
 {
 
 	zval *id = ZEND_THIS;
-	zval *array_value, *entry, new_string;
+	zval *entry, new_string;
+	HashTable *array_value;
 	xsl_object *intern;
 	char *namespace;
 	size_t namespace_len;
-	zend_string *string_key, *name, *value;
+	zend_string *string_key, *name, *value = NULL;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
-		intern = Z_XSL_P(id);
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_value), string_key, entry) {
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(namespace, namespace_len)
+		Z_PARAM_STR_OR_ARRAY_HT(name, array_value)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	intern = Z_XSL_P(id);
+
+	if (array_value) {
+		if (value) {
+			zend_argument_value_error(3, "must be null when argument #2 ($name) is an array");
+			RETURN_THROWS();
+		}
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(array_value, string_key, entry) {
 			zval tmp;
 			zend_string *str;
 
 			if (string_key == NULL) {
-				php_error_docref(NULL, E_WARNING, "Invalid parameter array");
-				RETURN_FALSE;
+				zend_argument_type_error(2, "must contain only string keys");
+				RETURN_THROWS();
 			}
 			str = zval_try_get_string(entry);
 			if (UNEXPECTED(!str)) {
@@ -690,18 +704,17 @@ PHP_METHOD(XSLTProcessor, setParameter)
 			zend_hash_update(intern->parameter, string_key, &tmp);
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "sSS", &namespace, &namespace_len, &name, &value) == SUCCESS) {
-
-		intern = Z_XSL_P(id);
+	} else {
+		if (!value) {
+			zend_argument_value_error(3, "cannot be null when argument #2 ($name) is a string");
+			RETURN_THROWS();
+		}
 
 		ZVAL_STR_COPY(&new_string, value);
 
 		zend_hash_update(intern->parameter, name, &new_string);
 		RETURN_TRUE;
-	} else {
-		WRONG_PARAM_COUNT;
 	}
-
 }
 /* }}} end XSLTProcessor::setParameter */
 

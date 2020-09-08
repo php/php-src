@@ -61,7 +61,6 @@ static const char *mbfl_encoding_cp51932_aliases[] = {"cp51932", NULL};
 const struct mbfl_identify_vtbl vtbl_identify_cp51932 = {
 	mbfl_no_encoding_cp51932,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp51932
 };
 
@@ -80,7 +79,7 @@ const struct mbfl_convert_vtbl vtbl_cp51932_wchar = {
 	mbfl_no_encoding_cp51932,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_cp51932_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -90,7 +89,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp51932,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp51932,
 	mbfl_filt_conv_common_flush,
 	NULL,

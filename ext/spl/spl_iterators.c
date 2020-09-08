@@ -454,8 +454,8 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	iterator = emalloc(sizeof(spl_recursive_it_iterator));
 	object   = Z_SPLRECURSIVE_IT_P(zobject);
 	if (object->iterators == NULL) {
-		zend_error(E_ERROR, "The object to be iterated is in an invalid state: "
-				"the parent constructor has not been called");
+		zend_throw_error(NULL, "Object is not initialized");
+		return NULL;
 	}
 
 	zend_iterator_init((zend_object_iterator*)iterator);
@@ -2486,7 +2486,7 @@ PHP_METHOD(CachingIterator, offsetGet)
 	}
 
 	if ((value = zend_symtable_find(Z_ARRVAL(intern->u.caching.zcache), key)) == NULL) {
-		zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(key));
+		zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(key));
 		return;
 	}
 

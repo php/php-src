@@ -13,11 +13,7 @@ function snmprealwalk(string $host, string $community, array|string $object_id, 
 /** @alias snmprealwalk */
 function snmpwalkoid(string $host, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|bool {}
 
-/**
- * @param array|string $type
- * @param array|string $value
- */
-function snmpset(string $host, string $community, array|string $object_id, $type, $value, int $timeout = -1, int $retries = -1): array|bool {}
+function snmpset(string $host, string $community, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): array|bool {}
 
 function snmp_get_quick_print(): bool {}
 
@@ -38,11 +34,7 @@ function snmp2_walk(string $host, string $community, array|string $object_id, in
 
 function snmp2_real_walk(string $host, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|bool {}
 
-/**
- * @param array|string $type
- * @param array|string $value
- */
-function snmp2_set(string $host, string $community, array|string $object_id, $type, $value, int $timeout = -1, int $retries = -1): array|bool {}
+function snmp2_set(string $host, string $community, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): array|bool {}
 
 function snmp3_get(string $host, string $sec_name, string $sec_level, string $auth_protocol, string $auth_passphrase, string $priv_protocol, string $priv_passphrase, array|string $object_id, int $timeout = -1, int $retries = -1): array|bool {}
 
@@ -52,11 +44,7 @@ function snmp3_walk(string $host, string $sec_name, string $sec_level, string $a
 
 function snmp3_real_walk(string $host, string $sec_name, string $sec_level, string $auth_protocol, string $auth_passphrase, string $priv_protocol, string $priv_passphrase, array|string $object_id, int $timeout = -1, int $retries = -1): array|bool {}
 
-/**
- * @param array|string $type
- * @param array|string $value
- */
-function snmp3_set(string $host, string $sec_name, string $sec_level, string $auth_protocol, string $auth_passphrase, string $priv_protocol, string $priv_passphrase, array|string $object_id, $type, $value, int $timeout = -1, int $retries = -1): array|bool {}
+function snmp3_set(string $host, string $sec_name, string $sec_level, string $auth_protocol, string $auth_passphrase, string $priv_protocol, string $priv_passphrase, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): array|bool {}
 
 function snmp_set_valueretrieval(int $method): bool {}
 
@@ -81,14 +69,10 @@ class SNMP
     public function getnext(array|string $object_id) {}
 
     /** @return array|bool */
-    public function walk(array|string $object_id, bool $suffix_keys = false, int $max_repetitions = UNKNOWN, int $non_repeaters = UNKNOWN) {}
+    public function walk(array|string $object_id, bool $suffix_keys = false, int $max_repetitions = -1, int $non_repeaters = -1) {}
 
-    /**
-     * @param array|string $type
-     * @param array|string $value
-     * @return array|bool
-     */
-    public function set(array|string $object_id, $type, $value) {}
+    /** @return array|bool */
+    public function set(array|string $object_id, array|string $type, array|string $value) {}
 
     /** @return int */
     public function getErrno() {}

@@ -208,7 +208,7 @@ typedef struct _php_conv_base64_encode {
 static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
 static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst);
 
-static unsigned char b64_tbl_enc[256] = {
+static const unsigned char b64_tbl_enc[256] = {
 	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
 	'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
 	'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
@@ -656,7 +656,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	unsigned int lb_cnt;
 	unsigned int trail_ws;
 	int opts;
-	static char qp_digits[] = "0123456789ABCDEF";
+	static const char qp_digits[] = "0123456789ABCDEF";
 
 	line_ccnt = inst->line_ccnt;
 	opts = inst->opts;

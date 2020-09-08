@@ -128,6 +128,6 @@ END_EXTERN_C()
 	ZEND_TS_INIT_SYMTABLE_EX(ht, 2, 0)
 
 #define ZEND_TS_INIT_SYMTABLE_EX(ht, n, persistent)			\
-	zend_ts_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
+	zend_ts_hash_init(ht, n, ZVAL_PTR_DTOR, persistent)
 
 #endif							/* ZEND_HASH_H */

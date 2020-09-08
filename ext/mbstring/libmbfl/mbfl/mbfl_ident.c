@@ -98,9 +98,8 @@
 static const struct mbfl_identify_vtbl vtbl_identify_false = {
 	mbfl_no_encoding_pass,
 	mbfl_filt_ident_false_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_false };
-
+	mbfl_filt_ident_false
+};
 
 static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf8,
@@ -163,8 +162,6 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_false,
 	NULL
 };
-
-
 
 /*
  * identify filter
@@ -230,7 +227,6 @@ int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding
 		vtbl = &vtbl_identify_false;
 	}
 	filter->filter_ctor = vtbl->filter_ctor;
-	filter->filter_dtor = vtbl->filter_dtor;
 	filter->filter_function = vtbl->filter_function;
 
 	/* constructor */
@@ -245,24 +241,13 @@ void mbfl_identify_filter_delete(mbfl_identify_filter *filter)
 		return;
 	}
 
-	mbfl_identify_filter_cleanup(filter);
 	efree((void*)filter);
-}
-
-void mbfl_identify_filter_cleanup(mbfl_identify_filter *filter)
-{
-	(*filter->filter_dtor)(filter);
 }
 
 void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter)
 {
 	filter->status = 0;
 	filter->flag = 0;
-}
-
-void mbfl_filt_ident_common_dtor(mbfl_identify_filter *filter)
-{
-	filter->status = 0;
 }
 
 int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter)

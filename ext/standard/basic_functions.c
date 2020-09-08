@@ -33,6 +33,7 @@
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/php_mt_rand.h"
+#include "ext/standard/crc32_x86.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -361,6 +362,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 #if ZEND_INTRIN_SSE4_2_FUNC_PTR
 	BASIC_MINIT_SUBMODULE(string_intrin)
+#endif
+
+#if ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
+	BASIC_MINIT_SUBMODULE(crc32_x86_intrin)
 #endif
 
 #if ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR
@@ -734,7 +739,7 @@ PHP_FUNCTION(getenv)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STRING_OR_NULL(str, str_len)
 		Z_PARAM_BOOL(local_only)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1424,22 +1429,17 @@ PHP_FUNCTION(error_log)
 {
 	char *message, *opt = NULL, *headers = NULL;
 	size_t message_len, opt_len = 0, headers_len = 0;
-	int opt_err = 0, argc = ZEND_NUM_ARGS();
 	zend_long erropt = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(message, message_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(erropt)
-		Z_PARAM_PATH(opt, opt_len)
-		Z_PARAM_STRING(headers, headers_len)
+		Z_PARAM_PATH_OR_NULL(opt, opt_len)
+		Z_PARAM_STRING_OR_NULL(headers, headers_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc > 1) {
-		opt_err = (int)erropt;
-	}
-
-	if (_php_error_log_ex(opt_err, message, message_len, opt, headers) == FAILURE) {
+	if (_php_error_log_ex((int) erropt, message, message_len, opt, headers) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2265,16 +2265,17 @@ PHP_FUNCTION(connection_status)
 PHP_FUNCTION(ignore_user_abort)
 {
 	zend_bool arg = 0;
+	zend_bool arg_is_null = 1;
 	int old_setting;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(arg)
+		Z_PARAM_BOOL_OR_NULL(arg, arg_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	old_setting = (unsigned short)PG(ignore_user_abort);
 
-	if (ZEND_NUM_ARGS()) {
+	if (!arg_is_null) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(key, 0);
@@ -2642,8 +2643,8 @@ PHP_FUNCTION(parse_ini_file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (filename_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Filename cannot be empty!");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	/* Set callback function */

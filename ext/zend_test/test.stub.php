@@ -39,3 +39,5 @@ function zend_string_or_stdclass($param): stdClass|string {}
 
 /** @param stdClass|string|null $param */
 function zend_string_or_stdclass_or_null($param): stdClass|string|null {}
+
+function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
