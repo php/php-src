@@ -4536,9 +4536,13 @@ PHP_FUNCTION(exif_read_data)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");
+			zend_argument_value_error(1, "cannot be empty");
+			RETURN_THROWS();
+		}
 
-			RETURN_FALSE;
+		if (CHECK_NULL_PATH(Z_STRVAL_P(stream), Z_STRLEN_P(stream))) {
+			zend_argument_type_error(1, "cannot contain any null-bytes");
+			RETURN_THROWS();
 		}
 
 		ret = exif_read_from_file(&ImageInfo, Z_STRVAL_P(stream), read_thumbnail, read_all);
@@ -4709,9 +4713,13 @@ PHP_FUNCTION(exif_thumbnail)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");
+			zend_argument_value_error(1, "cannot be empty");
+			RETURN_THROWS();
+		}
 
-			RETURN_FALSE;
+		if (CHECK_NULL_PATH(Z_STRVAL_P(stream), Z_STRLEN_P(stream))) {
+			zend_argument_type_error(1, "cannot contain any null-bytes");
+			RETURN_THROWS();
 		}
 
 		ret = exif_read_from_file(&ImageInfo, Z_STRVAL_P(stream), 1, 0);
