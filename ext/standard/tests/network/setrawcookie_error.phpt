@@ -39,7 +39,20 @@ try {
     echo $e->getMessage() . "\n";
 }
 
+if (PHP_INT_SIZE == 8) {
+    try {
+        // To go above year 9999: 60 * 60 * 24 * 365 * 9999
+        setrawcookie('name', 'value', 315328464000);
+    } catch (\ValueError $e) {
+        var_dump($e->getMessage() == 'setrawcookie(): "expires" option cannot have a year greater than 9999');
+    }
+} else {
+    var_dump(true);
+}
+
 var_dump(headers_list());
+
+?>
 --EXPECTHEADERS--
 
 --EXPECTF--
@@ -49,6 +62,7 @@ setrawcookie(): Argument #2 ($value) cannot contain ",", ";", " ", "\t", "\r", "
 setrawcookie(): "expires" option cannot have a year greater than 9999
 setrawcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setrawcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+bool(true)
 array(1) {
   [0]=>
   string(%d) "X-Powered-By: PHP/%s"

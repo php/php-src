@@ -25,13 +25,6 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
-// Invalid expiration date
-// To go above year 9999: 60 * 60 * 24 * 365 * 9999
-try {
-    setcookie('name', 'value', ['expires' => 315328464000]);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
 // Invalid path key content
 try {
     setcookie('name', 'value', ['path' => '/;/']);
@@ -52,6 +45,17 @@ try {
     echo $e->getMessage() . "\n";
 }
 
+if (PHP_INT_SIZE == 8) {
+    try {
+        // To go above year 9999: 60 * 60 * 24 * 365 * 9999
+        setrawcookie('name', 'value', ['expires' => 315328464000]);
+    } catch (\ValueError $e) {
+        var_dump($e->getMessage() == 'setcookie(): "expires" option cannot have a year greater than 9999');
+    }
+} else {
+    var_dump(true);
+}
+
 var_dump(headers_list());
 --EXPECTHEADERS--
 
@@ -59,10 +63,10 @@ var_dump(headers_list());
 setcookie(): option "unknown_key" is invalid
 setcookie(): option array cannot have numeric keys
 setcookie(): option "foo" is invalid
-setcookie(): "expires" option cannot have a year greater than 9999
 setcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setcookie(): Expects exactly 3 arguments when argument #3 ($expires_or_options) is an array
+bool(false)
 array(1) {
   [0]=>
   string(%s) "X-Powered-By: PHP/%s"
