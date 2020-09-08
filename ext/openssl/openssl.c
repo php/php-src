@@ -6584,7 +6584,7 @@ PHP_FUNCTION(openssl_seal)
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szza|sz", &data, &data_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szzas|z", &data, &data_len,
 				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -6598,14 +6598,10 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_THROWS();
 	}
 
-	if (method) {
-		cipher = EVP_get_cipherbyname(method);
-		if (!cipher) {
-			php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
-			RETURN_FALSE;
-		}
-	} else {
-		cipher = EVP_rc4();
+	cipher = EVP_get_cipherbyname(method);
+	if (!cipher) {
+		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		RETURN_FALSE;
 	}
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
@@ -6715,7 +6711,7 @@ PHP_FUNCTION(openssl_open)
 	size_t method_len = 0, iv_len = 0;
 	const EVP_CIPHER *cipher;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szsz|ss", &data, &data_len, &opendata,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szszs|s", &data, &data_len, &opendata,
 				&ekey, &ekey_len, &privkey, &method, &method_len, &iv, &iv_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -6731,14 +6727,10 @@ PHP_FUNCTION(openssl_open)
 		RETURN_FALSE;
 	}
 
-	if (method) {
-		cipher = EVP_get_cipherbyname(method);
-		if (!cipher) {
-			php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
-			RETURN_FALSE;
-		}
-	} else {
-		cipher = EVP_rc4();
+	cipher = EVP_get_cipherbyname(method);
+	if (!cipher) {
+		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
+		RETURN_FALSE;
 	}
 
 	cipher_iv_len = EVP_CIPHER_iv_length(cipher);

@@ -403,6 +403,8 @@ PHP 8.0 UPGRADE NOTES
   . The openssl_pkey_free() function is deprecated and no longer has an effect,
     instead the OpenSSLAsymmetricKey instance is automatically destroyed if it is no
     longer referenced.
+  . openssl_seal() and openssl_open() now require $method to be passed, as the
+    previous default of "RC4" is considered insecure.
 
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
