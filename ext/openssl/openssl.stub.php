@@ -187,13 +187,13 @@ function openssl_verify(string $data, string $signature, $key, $method = OPENSSL
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $pubkeys
  * @param string $iv
  */
-function openssl_seal(string $data, &$sealdata, &$ekeys, array $pubkeys, string $method = UNKNOWN, &$iv = UNKNOWN): int|false {}
+function openssl_seal(string $data, &$sealdata, &$ekeys, array $pubkeys, string $method, &$iv = UNKNOWN): int|false {}
 
 /**
  * @param string $opendata
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $privkey
  */
-function openssl_open(string $data, &$opendata, string $ekey, $privkey, string $method = UNKNOWN, string $iv = UNKNOWN): bool {}
+function openssl_open(string $data, &$opendata, string $ekey, $privkey, string $method, string $iv = UNKNOWN): bool {}
 
 function openssl_get_md_methods(bool $aliases = false): array {}
 

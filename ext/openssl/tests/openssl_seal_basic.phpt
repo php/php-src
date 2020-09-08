@@ -9,11 +9,12 @@ $a = 1;
 $b = array(1);
 $c = array(1);
 $d = array(1);
+$method = "RC4";
 
-var_dump(openssl_seal($a, $b, $c, $d));
+var_dump(openssl_seal($a, $b, $c, $d, $method));
 
 try {
-    var_dump(openssl_seal($a, $a, $a, array()));
+    var_dump(openssl_seal($a, $a, $a, array(), $method));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
@@ -23,17 +24,17 @@ $data = "openssl_open() test";
 $pub_key = "file://" . __DIR__ . "/public.key";
 $wrong = "wrong";
 
-var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key)));                  // no output
-var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key)));        // no output
-var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key, $wrong)));
+var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key), $method));           // no output
+var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key), $method)); // no output
+var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key, $wrong), $method));
 
 try {
-    var_dump(openssl_seal($data, $sealed, $ekeys, array()));
+    var_dump(openssl_seal($data, $sealed, $ekeys, array(), $method));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-var_dump(openssl_seal($data, $sealed, $ekeys, array($wrong)));
+var_dump(openssl_seal($data, $sealed, $ekeys, array($wrong), $method));
 
 ?>
 --EXPECTF--
