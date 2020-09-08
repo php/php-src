@@ -23,4 +23,4 @@ string(2) "pr"
 string(2) "mr"
 string(3) "imd"
 Option "a" is not supported
-string(1) "r"
+string(2) "mr"

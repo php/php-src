@@ -9,25 +9,17 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 <?php
 $str = "\x80";
 
-try {
-    var_dump(false === mb_eregi('.', $str, $matches));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
+var_dump(false === mb_eregi('.', $str, $matches));
 var_dump([] === $matches);
 
 var_dump(NULL === mb_ereg_replace('.', "\\0", $str));
 
-try {
-    var_dump(false === mb_ereg_search_init("\x80", '.'));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
+var_dump(false === mb_ereg_search_init("\x80", '.'));
 var_dump(false === mb_ereg_search());
 ?>
 --EXPECT--
-mb_eregi(): Argument #2 ($string) must be a valid string in "UTF-8" encoding
 bool(true)
 bool(true)
-mb_ereg_search_init(): Argument #1 ($string) must be a valid string in 'UTF-8'
+bool(true)
+bool(true)
 bool(true)

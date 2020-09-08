@@ -26,7 +26,6 @@
 #include "php_mbregex.h"
 #include "mbstring.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
-#include <stdbool.h>
 
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
 #include <oniguruma.h>
@@ -656,7 +655,7 @@ static bool _php_mb_regex_init_options(const char *parg, size_t narg, OnigOption
 					return false;
 				default:
 					zend_value_error("Option \"%c\" is not supported", c);
-					break;
+					return false;
 			}
 		}
 		if (option != NULL) *option|=optm;
@@ -920,8 +919,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		string_len,
 		php_mb_regex_get_mbctype_encoding()
 	)) {
-		zend_argument_value_error(2, "must be a valid string in \"%s\" encoding", php_mb_regex_get_mbctype());
-		RETURN_THROWS();
+		RETURN_FALSE;
 	}
 
 	options = MBREX(regex_default_options);
@@ -1046,7 +1044,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 		if (option_str != NULL) {
 			/* Initialize option and in case of failure it means there is a value error */
-			if(!_php_mb_regex_init_options(option_str, option_str_len, &options, &syntax, 4)) {
+			if (!_php_mb_regex_init_options(option_str, option_str_len, &options, &syntax, 4)) {
 				RETURN_THROWS();
 			}
 		} else {
@@ -1153,7 +1151,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	}
 	smart_str_free(&eval_buf);
 
-	// Need to investigate if failure in Oniguruma and if should throw.
 	if (err <= -2) {
 		smart_str_free(&out_buf);
 		RETVAL_FALSE;
@@ -1210,8 +1207,7 @@ PHP_FUNCTION(mb_split)
 	}
 
 	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype_encoding())) {
-		zend_argument_value_error(2, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
-		RETURN_THROWS();
+		RETURN_FALSE;
 	}
 
 	/* create regex pattern buffer */
@@ -1519,12 +1515,8 @@ PHP_FUNCTION(mb_ereg_search_init)
 		RETVAL_TRUE;
 	} else {
 		MBREX(search_pos) = ZSTR_LEN(arg_str);
-		zend_argument_value_error(1, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
-		RETURN_THROWS();
+		RETURN_FALSE;
 	}
-
-	MBREX(search_pos) = 0;
-	RETVAL_TRUE;
 
 	if (MBREX(search_regs) != NULL) {
 		onig_region_free(MBREX(search_regs), 1);

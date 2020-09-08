@@ -8,11 +8,7 @@ if (!function_exists('mb_split')) die('skip mb_split() not available');
 --FILE--
 <?php
 mb_regex_encoding('UTF-8');
-try {
-    var_dump(mb_split("\\w", "\xfc"));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
+var_dump(mb_split("\\w", "\xfc"));
 ?>
 --EXPECT--
-mb_split(): Argument #2 ($string) must be a valid string in 'UTF-8'
+bool(false)
