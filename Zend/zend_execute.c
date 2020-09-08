@@ -685,33 +685,29 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 		return;
 	}
 
-	if (value) {
-		zend_verify_type_error_common(
-			zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
+	zend_verify_type_error_common(
+		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
 
-		if (zf->common.type == ZEND_USER_FUNCTION) {
-			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-				zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given, called in %s on line %d",
-					fclass, fsep, fname,
-					arg_num, ZSTR_VAL(arg_info->name),
-					ZSTR_VAL(need_msg), given_msg,
-					ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno
-				);
-			} else {
-				zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given",
-					fclass, fsep, fname, arg_num, ZSTR_VAL(arg_info->name), ZSTR_VAL(need_msg), given_msg
-				);
-			}
+	if (zf->common.type == ZEND_USER_FUNCTION) {
+		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+			zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given, called in %s on line %d",
+				fclass, fsep, fname,
+				arg_num, ZSTR_VAL(arg_info->name),
+				ZSTR_VAL(need_msg), given_msg,
+				ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno
+			);
 		} else {
 			zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given",
-				fclass, fsep, fname, arg_num, ((zend_internal_arg_info*) arg_info)->name, ZSTR_VAL(need_msg), given_msg
+				fclass, fsep, fname, arg_num, ZSTR_VAL(arg_info->name), ZSTR_VAL(need_msg), given_msg
 			);
 		}
-
-		zend_string_release(need_msg);
 	} else {
-		zend_missing_arg_error(ptr);
+		zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given",
+			fclass, fsep, fname, arg_num, ((zend_internal_arg_info*) arg_info)->name, ZSTR_VAL(need_msg), given_msg
+		);
 	}
+
+	zend_string_release(need_msg);
 }
 
 static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
