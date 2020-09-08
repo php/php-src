@@ -95,7 +95,7 @@ static zend_always_inline int zend_ulong_nlz(zend_ulong num)
 		return SIZEOF_ZEND_LONG * 8;
 	}
 
-	return (int) SIZEOF_ZEND_LONG * 8 - index;
+	return (int) (SIZEOF_ZEND_LONG * 8 - 1)- index;
 #else
 	zend_ulong x;
 	int n;
