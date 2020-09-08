@@ -1511,7 +1511,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 		RETVAL_TRUE;
 	} else {
 		MBREX(search_pos) = ZSTR_LEN(arg_str);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
 
 	if (MBREX(search_regs) != NULL) {
