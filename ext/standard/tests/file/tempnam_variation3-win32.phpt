@@ -59,7 +59,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "-- Iteration $i --\n";
     try {
         $file_name = tempnam($file_path, $names_arr[$i]);
-    } catch (TypeError $e) {
+    } catch (Error $e) {
         echo $e->getMessage(), "\n";
         continue;
     }
@@ -106,9 +106,9 @@ Notice: tempnam(): file created in the system's temporary directory in %stempnam
 Failed, not created in the correct directory %s vs %s
 0
 -- Iteration 6 --
-tempnam(): Argument #2 ($prefix) must be a valid path, string given
+tempnam(): Argument #2 ($prefix) must not contain any null bytes
 -- Iteration 7 --
-tempnam(): Argument #2 ($prefix) must be a valid path, array given
+tempnam(): Argument #2 ($prefix) must be of type string, array given
 -- Iteration 8 --
 OK
 -- Iteration 9 --

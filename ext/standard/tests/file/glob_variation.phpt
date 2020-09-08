@@ -51,7 +51,7 @@ foreach($patterns as $pattern) {
     var_dump( glob($pattern, GLOB_NOCHECK) );
     var_dump( glob($pattern, GLOB_NOESCAPE) );
     var_dump( glob($pattern, GLOB_ERR) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   $counter++;
@@ -77,7 +77,7 @@ foreach($patterns as $pattern) {
   echo "-- Iteration $counter --\n";
   try {
     var_dump( glob($pattern, GLOB_ONLYDIR) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   $counter++;
@@ -332,7 +332,7 @@ array(0) {
 }
 
 -- Iteration 8 --
-glob(): Argument #1 ($pattern) must be a valid path, string given
+glob(): Argument #1 ($pattern) must not contain any null bytes
 
 -- Iteration 9 --
 array(0) {
@@ -435,7 +435,7 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-glob(): Argument #1 ($pattern) must be a valid path, string given
+glob(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 9 --
 array(0) {
 }

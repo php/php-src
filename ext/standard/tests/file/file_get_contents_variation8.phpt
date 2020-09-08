@@ -63,9 +63,9 @@ ValueError: Path cannot be empty
 Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
-TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, string given
+ValueError: file_get_contents(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 7 --
-TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, array given
+TypeError: file_get_contents(): Argument #1 ($filename) must be of type string, array given
 -- Iteration 8 --
 
 Warning: file_get_contents(/no/such/file/dir): Failed to open stream: No such file or directory in %s on line %d
