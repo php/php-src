@@ -2812,6 +2812,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_FETCH_DIM_R:
 					case ZEND_FETCH_DIM_IS:
+					case ZEND_FETCH_LIST_R:
 						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 							break;
 						}

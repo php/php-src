@@ -1526,6 +1526,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					/* break missing intentionally */
 				case ZEND_FETCH_DIM_R:
 				case ZEND_FETCH_DIM_IS:
+				case ZEND_FETCH_LIST_R:
 					ADD_OP1_TRACE_GUARD();
 					ADD_OP2_TRACE_GUARD();
 
@@ -4219,6 +4220,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						/* break missing intentionally */
 					case ZEND_FETCH_DIM_R:
 					case ZEND_FETCH_DIM_IS:
+					case ZEND_FETCH_LIST_R:
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN
@@ -4261,8 +4263,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									(op1_info & MAY_BE_ANY) != MAY_BE_ARRAY ||
 									(op2_info & (MAY_BE_ANY - (MAY_BE_LONG|MAY_BE_STRING))) != 0 ||
 									((op1_info & MAY_BE_UNDEF) != 0 &&
-										opline->opcode == ZEND_FETCH_DIM_R) ||
-									((opline->op1_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
+										opline->opcode != ZEND_FETCH_DIM_IS) ||
+									(opline->opcode != ZEND_FETCH_LIST_R &&
+										(opline->op1_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
 										(op1_info & MAY_BE_RC1) &&
 										(op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0) ||
 									(op2_info & MAY_BE_UNDEF) != 0 ||
@@ -6216,6 +6219,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP2) {
 			ZEND_ASSERT((opline-1)->opcode == ZEND_FETCH_DIM_R
 					|| (opline-1)->opcode == ZEND_FETCH_DIM_IS
+					|| (opline-1)->opcode == ZEND_FETCH_LIST_R
 					|| (opline-1)->opcode == ZEND_FETCH_DIM_FUNC_ARG);
 			EX(opline) = opline-1;
 			zval_ptr_dtor_nogc(EX_VAR((opline-1)->op2.var));
