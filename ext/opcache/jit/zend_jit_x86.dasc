@@ -12754,6 +12754,50 @@ static int zend_jit_fetch_constant(dasm_State **Dst, const zend_op *opline)
 	return 1;
 }
 
+static int zend_jit_in_array(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr,  zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+{
+	HashTable *ht = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
+	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+	ZEND_ASSERT(opline->op1_type != IS_VAR && opline->op1_type != IS_TMP_VAR);
+	ZEND_ASSERT((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_STRING);
+
+	|	// result = zend_hash_find_ex(ht, Z_STR_P(op1), OP1_TYPE == IS_CONST);
+	|	LOAD_ADDR FCARG1a, ht
+	|	GET_ZVAL_PTR FCARG2a, op1_addr
+	if (opline->op1_type != IS_CONST) {
+		|	EXT_CALL zend_hash_find, r0
+	} else {
+		|	EXT_CALL _zend_hash_find_known_hash, r0
+	}
+	|	test r0, r0
+	if (exit_addr) {
+		if (smart_branch_opcode == ZEND_JMPZ) {
+			|	jz &exit_addr
+		} else {
+			|	jnz &exit_addr
+		}
+	} else if (smart_branch_opcode) {
+		if (smart_branch_opcode == ZEND_JMPZ) {
+			|	jz =>target_label
+		} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			|	jnz =>target_label
+		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+			|	jz =>target_label
+			|	jmp =>target_label2
+		} else {
+			ZEND_UNREACHABLE();
+		}
+	} else {
+		|	setnz al
+		|	movzx eax, al
+		|	lea eax, [eax + IS_FALSE]
+		|	SET_ZVAL_TYPE_INFO res_addr, eax
+	}
+
+	return 1;
+}
+
 static zend_bool zend_jit_noref_guard(dasm_State **Dst, const zend_op *opline, zend_jit_addr var_addr)
 {
 	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
