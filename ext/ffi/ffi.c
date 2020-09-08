@@ -4442,8 +4442,7 @@ ZEND_METHOD(CType, getName) /* {{{ */
 		RETURN_STR_COPY(Z_OBJ_P(ZEND_THIS)->ce->name);
 	} else {
 		size_t len = buf.end - buf.start;
-		zend_string *res = zend_string_alloc(len,  0);
-		memcpy(ZSTR_VAL(res), buf.start, len);
+		zend_string *res = zend_string_init(buf.start, len, 1);
 		RETURN_STR_COPY(res);
 	}
 }
