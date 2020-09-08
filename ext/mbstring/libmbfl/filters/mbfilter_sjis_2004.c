@@ -67,7 +67,7 @@ const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis2004_wchar_flush,
 	NULL,
 };
 
@@ -77,7 +77,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis2004 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_jis2004_flush,
+	mbfl_filt_conv_wchar_jis2004_flush,
 	NULL,
 };
 
@@ -212,6 +212,9 @@ retry:
 		} else if (filter->from->no_encoding == mbfl_no_encoding_sjis2004) {
 			if (c >= 0x40 && c <= 0xfc && c != 0x7f) {
 				SJIS_DECODE(c1, c, s1, s2);
+			} else {
+				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+				break;
 			}
 		} else {
 			s1 = c1;
@@ -481,6 +484,15 @@ retry:
 	return c;
 }
 
+int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
+{
+	int status = filter->status & 0xF;
+	if (status == 1 || status == 4 || status == 5) {
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+	return 0;
+}
+
 int
 mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter) {
 	int k;
@@ -675,7 +687,7 @@ retry:
 }
 
 int
-mbfl_filt_conv_jis2004_flush(mbfl_convert_filter *filter)
+mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
 {
 	int k, c1, c2, s1, s2;
 
