@@ -35,9 +35,9 @@ var_dump($r);
 --EXPECTF--
 Test 1: Import
 
-Warning: OCILob::savefile(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
-NULL
+Warning: OCILob::savefile(): filename must not contain null bytes in /Users/cjones/php-src/ext/oci8/tests/null_byte_1.php on line %d
+bool(false)
 Test 2: Export
 
-Warning: OCILob::export(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
-NULL
+Warning: OCILob::export(): filename must not contain null bytes in /Users/cjones/php-src/ext/oci8/tests/null_byte_1.php on line %d
+bool(false)

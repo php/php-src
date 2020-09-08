@@ -284,12 +284,17 @@ PHP_FUNCTION(oci_lob_import)
 	char *filename;
 	size_t filename_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Op", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
+		RETURN_FALSE;
+	}
+
+	if (CHECK_NULL_PATH(filename, filename_len)) {
+		php_error_docref(NULL, E_WARNING, "filename must not contain null bytes");
 		RETURN_FALSE;
 	}
 
@@ -835,7 +840,7 @@ PHP_FUNCTION(oci_lob_export)
 	php_stream *stream;
 	ub4 lob_length;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Op|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -861,6 +866,11 @@ PHP_FUNCTION(oci_lob_export)
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
+		RETURN_FALSE;
+	}
+
+	if (CHECK_NULL_PATH(filename, filename_len)) {
+		php_error_docref(NULL, E_WARNING, "filename must not contain null bytes");
 		RETURN_FALSE;
 	}
 
