@@ -592,7 +592,7 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 
 /* {{{ _php_mb_regex_init_options */
 static bool _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option,
-	OnigSyntaxType **syntax, uint32_t option_arg_num)
+	OnigSyntaxType **syntax)
 {
 	size_t n;
 	char c;
@@ -1044,7 +1044,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 		if (option_str != NULL) {
 			/* Initialize option and in case of failure it means there is a value error */
-			if (!_php_mb_regex_init_options(option_str, option_str_len, &options, &syntax, 4)) {
+			if (!_php_mb_regex_init_options(option_str, option_str_len, &options, &syntax)) {
 				RETURN_THROWS();
 			}
 		} else {
@@ -1293,7 +1293,7 @@ PHP_FUNCTION(mb_ereg_match)
 		}
 
 		if (option_str != NULL) {
-			if(!_php_mb_regex_init_options(option_str, option_str_len, &option, &syntax, 3)) {
+			if(!_php_mb_regex_init_options(option_str, option_str_len, &option, &syntax)) {
 				RETURN_THROWS();
 			}
 		} else {
@@ -1348,7 +1348,7 @@ static void _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mod
 	}
 
 	if (arg_options) {
-		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, 2);
+		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax);
 	} else {
 		option |= MBREX(regex_default_options);
 		syntax = MBREX(regex_default_syntax);
@@ -1486,7 +1486,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 
 	if (arg_options) {
 		option = 0;
-		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, 3);
+		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax);
 	} else {
 		option = MBREX(regex_default_options);
 		syntax = MBREX(regex_default_syntax);
@@ -1629,7 +1629,7 @@ PHP_FUNCTION(mb_regex_set_options)
 	if (string != NULL) {
 		opt = 0;
 		syntax = NULL;
-		if(!_php_mb_regex_init_options(string, string_len, &opt, &syntax, 1)) {
+		if(!_php_mb_regex_init_options(string, string_len, &opt, &syntax)) {
 			RETURN_THROWS();
 		}
 		_php_mb_regex_set_options(opt, syntax, &prev_opt, &prev_syntax);
