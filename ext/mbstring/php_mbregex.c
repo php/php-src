@@ -1212,7 +1212,6 @@ PHP_FUNCTION(mb_split)
 
 	/* create regex pattern buffer */
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, MBREX(regex_default_options), MBREX(regex_default_syntax))) == NULL) {
-		// TODO throw as invalid regex?
 		RETURN_FALSE;
 	}
 
@@ -1309,7 +1308,6 @@ PHP_FUNCTION(mb_ereg_match)
 	}
 
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
-		// TODO throw as invalid regex?
 		RETURN_FALSE;
 	}
 
@@ -1365,7 +1363,6 @@ static void _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mod
 	if (arg_pattern) {
 		/* create regex pattern buffer */
 		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
-			// TODO throw as invalid regex?
 			RETURN_FALSE;
 		}
 	}
@@ -1499,7 +1496,6 @@ PHP_FUNCTION(mb_ereg_search_init)
 	if (arg_pattern) {
 		/* create regex pattern buffer */
 		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
-			// TODO throw as invalid regex?
 			RETURN_FALSE;
 		}
 	}
