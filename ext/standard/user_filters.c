@@ -448,15 +448,19 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (NULL != (pzdata = zend_hash_str_find(Z_OBJPROP_P(zobject), "data", sizeof("data")-1)) && Z_TYPE_P(pzdata) == IS_STRING) {
-		if (!bucket->own_buf) {
-			bucket = php_stream_bucket_make_writeable(bucket);
+	if (NULL != (pzdata = zend_hash_str_find(Z_OBJPROP_P(zobject), "data", sizeof("data")-1))) {
+		zval zdata;
+		ZVAL_COPY_DEREF(&zdata, pzdata);
+		if (Z_TYPE_P(&zdata) == IS_STRING) {
+			if (!bucket->own_buf) {
+				bucket = php_stream_bucket_make_writeable(bucket);
+			}
+			if (bucket->buflen != Z_STRLEN_P(&zdata)) {
+				bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(&zdata), bucket->is_persistent);
+				bucket->buflen = Z_STRLEN_P(&zdata);
+			}
+			memcpy(bucket->buf, Z_STRVAL_P(&zdata), bucket->buflen);
 		}
-		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
-			bucket->buflen = Z_STRLEN_P(pzdata);
-		}
-		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
 	}
 
 	if (append) {
