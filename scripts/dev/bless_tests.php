@@ -77,8 +77,15 @@ function normalizeOutput(string $out): string {
 
 function formatToRegex(string $format): string {
     $result = preg_quote($format, '/');
-    $result = str_replace('%d', '\d+', $result);
+    $result = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $result);
     $result = str_replace('%s', '[^\r\n]+', $result);
+    $result = str_replace('%S', '[^\r\n]*', $result);
+    $result = str_replace('%w', '\s*', $result);
+    $result = str_replace('%i', '[+-]?\d+', $result);
+    $result = str_replace('%d', '\d+', $result);
+    $result = str_replace('%x', '[0-9a-fA-F]+', $result);
+    $result = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $result);
+    $result = str_replace('%c', '.', $result);
     return "/^$result$/s";
 }
 
@@ -105,10 +112,10 @@ function generateMinimallyDifferingOutput(string $out, string $oldExpect) {
 }
 
 function insertOutput(string $phpt, string $out): string {
-    return preg_replace_callback('/--EXPECTF?--.*$/s', function($matches) use($out) {
+    return preg_replace_callback('/--EXPECTF?--.*?(--CLEAN--|$)/sD', function($matches) use($out) {
         $hasWildcard = preg_match('/%[resSaAwidxfc]/', $out);
         $F = $hasWildcard ? 'F' : '';
-        return "--EXPECT$F--\n" . $out . "\n";
+        return "--EXPECT$F--\n" . $out . "\n" . $matches[1];
     }, $phpt);
 }
 
