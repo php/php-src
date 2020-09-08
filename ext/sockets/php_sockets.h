@@ -52,6 +52,18 @@ typedef int PHP_SOCKET;
 typedef SOCKET PHP_SOCKET;
 #endif
 
+#ifdef PHP_WIN32
+#	ifdef PHP_SOCKETS_EXPORTS
+#		define PHP_SOCKETS_API __declspec(dllexport)
+#	else
+#		define PHP_SOCKETS_API __declspec(dllimport)
+#	endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_SOCKETS_API __attribute__ ((visibility("default")))
+#else
+#	define PHP_SOCKETS_API
+#endif
+
 /* Socket class */
 
 typedef struct {
@@ -63,7 +75,7 @@ typedef struct {
 	zend_object std;
 } php_socket;
 
-extern PHPAPI zend_class_entry *socket_ce;
+extern PHP_SOCKETS_API zend_class_entry *socket_ce;
 
 static inline php_socket *socket_from_obj(zend_object *obj) {
 	return (php_socket *)((char *)(obj) - XtOffsetOf(php_socket, std));
@@ -104,7 +116,7 @@ ZEND_BEGIN_MODULE_GLOBALS(sockets)
 #endif
 ZEND_END_MODULE_GLOBALS(sockets)
 
-PHPAPI ZEND_EXTERN_MODULE_GLOBALS(sockets)
+PHP_SOCKETS_API ZEND_EXTERN_MODULE_GLOBALS(sockets)
 #define SOCKETS_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(sockets, v)
 
 enum sockopt_return {
@@ -113,8 +125,8 @@ enum sockopt_return {
 	SOCKOPT_SUCCESS
 };
 
-PHPAPI char *sockets_strerror(int error);
-PHPAPI int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock);
+PHP_SOCKETS_API char *sockets_strerror(int error);
+PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock);
 
 #else
 #define phpext_sockets_ptr NULL
