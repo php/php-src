@@ -771,6 +771,14 @@ PHP 8.0 UPGRADE NOTES
   . Sorting functions are now stable, which means that equal-comparing elements
     will retain their original order.
     RFC: https://wiki.php.net/rfc/stable_sorting
+  . array_diff(), array_intersect() and their variations can now be used with
+    a single array as argument. This means that usages like the following are
+    now possible:
+
+        // OK even if $excludes is empty.
+        array_diff($array, ...$excludes);
+        // OK even if $arrays only contains a single array.
+        array_intersect(...$arrays);
 
 - Zip:
   . Extension updated to version 1.19.0

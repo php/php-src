@@ -11,7 +11,7 @@ try {
 }
 
 try {
-    array_diff([]);
+    array_diff();
 } catch (ArgumentCountError $e) {
     echo get_class($e) . PHP_EOL;
     echo $e->getMessage(), "\n";
@@ -21,4 +21,4 @@ try {
 ArgumentCountError
 substr() expects at least 2 arguments, 1 given
 ArgumentCountError
-At least 2 arguments are required, 1 given
+array_diff() expects at least 1 argument, 0 given
