@@ -29,6 +29,7 @@
 #include "ext/standard/url.h"
 #include "main/php_output.h"
 #include "ext/standard/info.h"
+#include "ext/pcre/php_pcre.h"
 
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
@@ -52,23 +53,6 @@
 
 #ifdef HAVE_MBREGEX
 # include "php_mbregex.h"
-# include "php_onig_compat.h"
-# include <oniguruma.h>
-# undef UChar
-# if !defined(ONIGURUMA_VERSION_INT) || ONIGURUMA_VERSION_INT < 60800
-typedef void OnigMatchParam;
-#define onig_new_match_param() (NULL)
-#define onig_initialize_match_param(x) (void)(x)
-#define onig_set_match_stack_limit_size_of_match_param(x, y)
-#define onig_set_retry_limit_in_match_of_match_param(x, y)
-#define onig_free_match_param(x)
-#define onig_search_with_param(reg, str, end, start, range, region, option, mp) \
-onig_search(reg, str, end, start, range, region, option)
-#define onig_match_with_param(re, str, end, at, region, option, mp) \
-onig_match(re, str, end, at, region, option)
-# endif
-#else
-# include "ext/pcre/php_pcre.h"
 #endif
 
 #include "zend_multibyte.h"
@@ -513,60 +497,6 @@ static zend_multibyte_functions php_mb_zend_multibyte_functions = {
 };
 /* }}} */
 
-static void *_php_mb_compile_regex(const char *pattern);
-static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len);
-static void _php_mb_free_regex(void *opaque);
-
-#ifdef HAVE_MBREGEX
-/* {{{ _php_mb_compile_regex */
-static void *_php_mb_compile_regex(const char *pattern)
-{
-	php_mb_regex_t *retval;
-	OnigErrorInfo err_info;
-	int err_code;
-
-	if ((err_code = onig_new(&retval,
-			(const OnigUChar *)pattern,
-			(const OnigUChar *)pattern + strlen(pattern),
-			ONIG_OPTION_IGNORECASE | ONIG_OPTION_DONT_CAPTURE_GROUP,
-			ONIG_ENCODING_ASCII, &OnigSyntaxPerl, &err_info))) {
-		OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
-		onig_error_code_to_str(err_str, err_code, err_info);
-		php_error_docref(NULL, E_WARNING, "%s: %s", pattern, err_str);
-		retval = NULL;
-	}
-	return retval;
-}
-/* }}} */
-
-/* {{{ _php_mb_match_regex */
-static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
-{
-	OnigMatchParam *mp = onig_new_match_param();
-	int err;
-	onig_initialize_match_param(mp);
-	if (!ZEND_LONG_UINT_OVFL(MBSTRG(regex_stack_limit))) {
-		onig_set_match_stack_limit_size_of_match_param(mp, (unsigned int)MBSTRG(regex_stack_limit));
-	}
-	if (!ZEND_LONG_UINT_OVFL(MBSTRG(regex_retry_limit))) {
-		onig_set_retry_limit_in_match_of_match_param(mp, (unsigned int)MBSTRG(regex_retry_limit));
-	}
-	/* search */
-	err = onig_search_with_param((php_mb_regex_t *)opaque, (const OnigUChar *)str,
-		(const OnigUChar*)str + str_len, (const OnigUChar *)str,
-		(const OnigUChar*)str + str_len, NULL, ONIG_OPTION_NONE, mp);
-	onig_free_match_param(mp);
-	return err >= 0;
-}
-/* }}} */
-
-/* {{{ _php_mb_free_regex */
-static void _php_mb_free_regex(void *opaque)
-{
-	onig_free((php_mb_regex_t *)opaque);
-}
-/* }}} */
-#else
 /* {{{ _php_mb_compile_regex */
 static void *_php_mb_compile_regex(const char *pattern)
 {
@@ -608,7 +538,6 @@ static void _php_mb_free_regex(void *opaque)
 	pcre2_code_free(opaque);
 }
 /* }}} */
-#endif
 
 /* {{{ php_mb_nls_get_default_detect_order_list */
 static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, enum mbfl_no_encoding **plist, size_t *plist_size)
