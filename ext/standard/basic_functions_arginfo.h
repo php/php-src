@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c51ad7a5f254f8d28f2b2c0b46e214c44f0f96cf */
+ * Stub hash: 07205773da4b7c010ed6c9119e3d0b2650bee544 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -297,21 +297,27 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_array_uintersect_uassoc arginfo_array_intersect_ukey
 
-#define arginfo_array_diff_key arginfo_array_intersect_key
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_key, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, arrays, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_array_diff_ukey arginfo_array_intersect_ukey
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_ukey, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_INFO(0, rest)
+ZEND_END_ARG_INFO()
 
-#define arginfo_array_diff arginfo_array_intersect_key
+#define arginfo_array_diff arginfo_array_diff_key
 
-#define arginfo_array_udiff arginfo_array_intersect_ukey
+#define arginfo_array_udiff arginfo_array_diff_ukey
 
-#define arginfo_array_diff_assoc arginfo_array_intersect_key
+#define arginfo_array_diff_assoc arginfo_array_diff_key
 
-#define arginfo_array_diff_uassoc arginfo_array_intersect_ukey
+#define arginfo_array_diff_uassoc arginfo_array_diff_ukey
 
-#define arginfo_array_udiff_assoc arginfo_array_intersect_ukey
+#define arginfo_array_udiff_assoc arginfo_array_diff_ukey
 
-#define arginfo_array_udiff_uassoc arginfo_array_intersect_ukey
+#define arginfo_array_udiff_uassoc arginfo_array_diff_ukey
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_multisort, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, array1)

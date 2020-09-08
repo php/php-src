@@ -199,26 +199,26 @@ function array_intersect_uassoc(array $array1, array $array2, ...$rest): array {
 /** @param array|callable $rest */
 function array_uintersect_uassoc(array $array1, array $array2, ...$rest): array {}
 
-function array_diff_key(array $array1, array $array2, array ...$arrays): array {}
+function array_diff_key(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_diff_ukey(array $array1, array $array2, ...$rest): array {}
+function array_diff_ukey(array $array, ...$rest): array {}
 
-function array_diff(array $array1, array $array2, array ...$arrays): array {}
-
-/** @param array|callable $rest */
-function array_udiff(array $array1, array $array2, ...$rest): array {}
-
-function array_diff_assoc(array $array1, array $array2, array ...$arrays): array {}
+function array_diff(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_diff_uassoc(array $array1, array $array2, ...$rest): array {}
+function array_udiff(array $array, ...$rest): array {}
+
+function array_diff_assoc(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_udiff_assoc(array $array1, array $array2, ...$rest): array {}
+function array_diff_uassoc(array $array, ...$rest): array {}
 
 /** @param array|callable $rest */
-function array_udiff_uassoc(array $array1, array $array2, ...$rest): array {}
+function array_udiff_assoc(array $array, ...$rest): array {}
+
+/** @param array|callable $rest */
+function array_udiff_uassoc(array $array, ...$rest): array {}
 
 /**
  * @param array $array1
