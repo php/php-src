@@ -749,7 +749,7 @@ PHP_FUNCTION(oci_lob_copy)
 {
 	zval *tmp_dest, *tmp_from, *z_descriptor_dest, *z_descriptor_from;
 	php_oci_descriptor *descriptor_dest, *descriptor_from;
-	zend_long length = -1;
+	zend_long length;
 	zend_bool length_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO|l!", &z_descriptor_dest, oci_lob_class_entry_ptr, &z_descriptor_from, oci_lob_class_entry_ptr, &length, &length_is_null) == FAILURE) {
@@ -769,7 +769,9 @@ PHP_FUNCTION(oci_lob_copy)
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_dest, descriptor_dest);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_from, descriptor_from);
 
-	if (!length_is_null && length < 0) {
+	if (length_is_null) {
+		length = -1;
+	} else if (length < 0) {
 		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
@@ -824,7 +826,7 @@ PHP_FUNCTION(oci_lob_export)
 	char *filename;
 	char *buffer;
 	size_t filename_len;
-	zend_long start = -1, length = -1, block_length;
+	zend_long start, length, block_length;
 	zend_bool start_is_null = 1, length_is_null = 1;
 	php_stream *stream;
 	ub4 lob_length;
@@ -833,12 +835,16 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_THROWS();
 	}
 
-	if (!start_is_null && start < 0) {
+	if (start_is_null) {
+		start = -1;
+	} else if (start < 0) {
 		php_error_docref(NULL, E_WARNING, "Start parameter must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
 
-	if (!length_is_null && length < 0) {
+	if (length_is_null) {
+		length = -1;
+	} else if (length < 0) {
 		php_error_docref(NULL, E_WARNING, "length parameter must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
