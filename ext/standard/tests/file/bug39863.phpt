@@ -9,9 +9,9 @@ $filename = __FILE__ . chr(0). ".ridiculous";
 
 try {
     var_dump(file_exists($filename));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-file_exists(): Argument #1 ($filename) must be a valid path, string given
+file_exists(): Argument #1 ($filename) must not contain any null bytes

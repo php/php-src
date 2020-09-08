@@ -12,12 +12,12 @@ $ch = curl_init();
 
 try {
     curl_setopt($ch, CURLOPT_URL, $url);
-} catch (TypeError $exception) {
+} catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 ?>
 Done
 --EXPECT--
-curl_setopt(): cURL option cannot contain any null-bytes
+curl_setopt(): cURL option must not contain any null bytes
 Done

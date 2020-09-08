@@ -1215,8 +1215,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_FUNC_OR_NULL,		"a valid callback or null") \
 	_(Z_EXPECTED_RESOURCE,			"of type resource") \
 	_(Z_EXPECTED_RESOURCE_OR_NULL,	"of type resource or null") \
-	_(Z_EXPECTED_PATH,				"a valid path") \
-	_(Z_EXPECTED_PATH_OR_NULL,		"a valid path or null") \
+	_(Z_EXPECTED_PATH,				"of type string") \
+	_(Z_EXPECTED_PATH_OR_NULL,		"of type ?string") \
 	_(Z_EXPECTED_OBJECT,			"of type object") \
 	_(Z_EXPECTED_OBJECT_OR_NULL,	"of type ?object") \
 	_(Z_EXPECTED_DOUBLE,			"of type float") \

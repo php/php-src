@@ -37,7 +37,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
   try {
     $file_name = tempnam("$file_path", $names_arr[$i]);
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
     continue;
   }
@@ -102,9 +102,9 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 6 --
-tempnam(): Argument #2 ($prefix) must be a valid path, string given
+tempnam(): Argument #2 ($prefix) must not contain any null bytes
 -- Iteration 7 --
-tempnam(): Argument #2 ($prefix) must be a valid path, array given
+tempnam(): Argument #2 ($prefix) must be of type string, array given
 -- Iteration 8 --
 File name is => %s/dir%s
 File permissions are => 100600

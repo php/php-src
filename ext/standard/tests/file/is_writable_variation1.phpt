@@ -47,12 +47,12 @@ foreach($files_arr as $file) {
   echo "-- Iteration $counter --\n";
   try {
     var_dump( is_writable($file) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   try {
     var_dump( is_writeable($file) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   $counter++;
@@ -87,14 +87,14 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 7 --
-is_writable(): Argument #1 ($filename) must be a valid path, string given
-is_writeable(): Argument #1 ($filename) must be a valid path, string given
+is_writable(): Argument #1 ($filename) must not contain any null bytes
+is_writeable(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 8 --
-is_writable(): Argument #1 ($filename) must be a valid path, string given
-is_writeable(): Argument #1 ($filename) must be a valid path, string given
+is_writable(): Argument #1 ($filename) must not contain any null bytes
+is_writeable(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 9 --
-is_writable(): Argument #1 ($filename) must be a valid path, string given
-is_writeable(): Argument #1 ($filename) must be a valid path, string given
+is_writable(): Argument #1 ($filename) must not contain any null bytes
+is_writeable(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 10 --
 bool(true)
 bool(true)

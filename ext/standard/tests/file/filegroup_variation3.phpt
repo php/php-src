@@ -38,7 +38,7 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( filegroup( $file_path."/".$file ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   clearstatcache();
@@ -75,8 +75,8 @@ bool(false)
 Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-filegroup(): Argument #1 ($filename) must be a valid path, string given
+filegroup(): Argument #1 ($filename) must not contain any null bytes
 - Iteration 8 -
-filegroup(): Argument #1 ($filename) must be a valid path, string given
+filegroup(): Argument #1 ($filename) must not contain any null bytes
 
 *** Done ***

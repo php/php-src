@@ -4541,7 +4541,7 @@ PHP_FUNCTION(exif_read_data)
 		}
 
 		if (CHECK_NULL_PATH(Z_STRVAL_P(stream), Z_STRLEN_P(stream))) {
-			zend_argument_type_error(1, "cannot contain any null-bytes");
+			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 
@@ -4718,7 +4718,7 @@ PHP_FUNCTION(exif_thumbnail)
 		}
 
 		if (CHECK_NULL_PATH(Z_STRVAL_P(stream), Z_STRLEN_P(stream))) {
-			zend_argument_type_error(1, "cannot contain any null-bytes");
+			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 

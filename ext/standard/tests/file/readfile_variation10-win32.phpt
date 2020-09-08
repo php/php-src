@@ -65,10 +65,10 @@ ValueError: Path cannot be empty
 Warning: readfile( ): Failed to open stream: Permission denied in %s on line %d
 
 -- Filename: \0 --
-TypeError: readfile(): Argument #1 ($filename) must be a valid path, string given
+ValueError: readfile(): Argument #1 ($filename) must not contain any null bytes
 
 -- Filename: array() --
-TypeError: readfile(): Argument #1 ($filename) must be a valid path, array given
+TypeError: readfile(): Argument #1 ($filename) must be of type string, array given
 
 -- Filename: /no/such/file/dir --
 

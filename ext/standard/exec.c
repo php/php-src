@@ -224,7 +224,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_THROWS();
 	}
 	if (strlen(cmd) != cmd_len) {
-		zend_argument_type_error(1, "must not contain any null bytes");
+		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
 
@@ -480,7 +480,7 @@ PHP_FUNCTION(escapeshellcmd)
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
-			zend_argument_type_error(1, "must not contain any null bytes");
+			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 		RETVAL_STR(php_escape_shell_cmd(command));
@@ -501,7 +501,7 @@ PHP_FUNCTION(escapeshellarg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argument_len != strlen(argument)) {
-		zend_argument_type_error(1, "must not contain any null bytes");
+		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
 
@@ -527,7 +527,7 @@ PHP_FUNCTION(shell_exec)
 		RETURN_THROWS();
 	}
 	if (strlen(command) != command_len) {
-		zend_argument_type_error(1, "must not contain any null bytes");
+		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
 
