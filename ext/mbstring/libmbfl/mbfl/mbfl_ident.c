@@ -159,6 +159,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_ucs4be,
 	&vtbl_identify_ucs4le,
 	&vtbl_identify_utf7imap,
+	&vtbl_identify_html_ent,
 	&vtbl_identify_false,
 	NULL
 };

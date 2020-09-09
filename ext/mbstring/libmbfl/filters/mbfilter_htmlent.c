@@ -31,6 +31,7 @@
 #include "mbfilter.h"
 #include "mbfilter_htmlent.h"
 #include "html_entities.h"
+#include "mbfilter_ascii.h"
 
 static const int htmlentitifieds[256] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -62,6 +63,12 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_html_wchar,
 	&vtbl_wchar_html
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_html_ent = {
+	mbfl_no_encoding_html_ent,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_ascii
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_html = {
