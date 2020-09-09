@@ -2982,7 +2982,7 @@ ZEND_METHOD(ReflectionMethod, __construct)
 
 	zend_object *orig_obj = NULL;
 	zend_class_entry *ce = NULL;
-	zend_string *class_name;
+	zend_string *class_name = NULL;
 	char *method_name;
 	size_t method_name_len;
 	char *lcname;
@@ -2999,12 +2999,12 @@ ZEND_METHOD(ReflectionMethod, __construct)
 		Z_PARAM_STR_OR_NULL(arg2_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (arg1_obj && !arg2_str) {
-		zend_argument_value_error(2, "cannot be null when argument #1 ($objectOrMethod) is an object");
-		RETURN_THROWS();
-	}
-
 	if (arg1_obj) {
+		if (!arg2_str) {
+			zend_argument_value_error(2, "cannot be null when argument #1 ($objectOrMethod) is an object");
+			RETURN_THROWS();
+		}
+
 		orig_obj = arg1_obj;
 		ce = arg1_obj->ce;
 		method_name = ZSTR_VAL(arg2_str);
@@ -3023,17 +3023,20 @@ ZEND_METHOD(ReflectionMethod, __construct)
 
 		class_name = zend_string_init(name, tmp_len, 0);
 		method_name = tmp + 2;
-		method_name_len = name - tmp - 2;
+		method_name_len = ZSTR_LEN(arg1_str) - tmp_len - 2;
 	}
 
-	if (!ce && (ce = zend_lookup_class(class_name)) == NULL) {
-		if (!EG(exception)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Class \"%s\" does not exist", ZSTR_VAL(class_name));
+	if (class_name) {
+		if ((ce = zend_lookup_class(class_name)) == NULL) {
+			if (!EG(exception)) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0, "Class \"%s\" does not exist", ZSTR_VAL(class_name));
+			}
+			zend_string_release(class_name);
+			RETURN_THROWS();
 		}
+
 		zend_string_release(class_name);
-		RETURN_THROWS();
 	}
-	zend_string_release(class_name);
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
