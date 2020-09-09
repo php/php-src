@@ -701,23 +701,16 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 	zend_verify_type_error_common(
 		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
 
-	if (zf->common.type == ZEND_USER_FUNCTION) {
-		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-			zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given, called in %s on line %d",
-				fclass, fsep, fname,
-				arg_num, ZSTR_VAL(arg_info->name),
-				ZSTR_VAL(need_msg), given_msg,
-				ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno
-			);
-		} else {
-			zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given",
-				fclass, fsep, fname, arg_num, ZSTR_VAL(arg_info->name), ZSTR_VAL(need_msg), given_msg
-			);
-		}
-	} else {
-		zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given",
-			fclass, fsep, fname, arg_num, ((zend_internal_arg_info*) arg_info)->name, ZSTR_VAL(need_msg), given_msg
+	ZEND_ASSERT(zf->common.type == ZEND_USER_FUNCTION
+		&& "Arginfo verification is not performed for internal functions");
+	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+		zend_argument_type_error(arg_num, "must be of type %s, %s given, called in %s on line %d",
+			ZSTR_VAL(need_msg), given_msg,
+			ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno
 		);
+	} else {
+		zend_argument_type_error(arg_num,
+			"must be of type %s, %s given", ZSTR_VAL(need_msg), given_msg);
 	}
 
 	zend_string_release(need_msg);
