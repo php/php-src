@@ -4631,6 +4631,18 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 				return 1;
 			}
 			return 0;
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_LIST_W:
+			if ((t1 & (MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+				return 1;
+			}
+			if (t2 & (MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+				return 1;
+			}
+			if (opline->op2_type == IS_UNUSED) {
+				return 1;
+			}
+			return 0;
 		default:
 			return 1;
 	}
