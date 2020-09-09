@@ -150,10 +150,9 @@ entry = zend_register_internal_class_ex(&ce, parent_ce);
 		RETURN_THROWS(); \
 	}
 
-// Make this an error?
 #define DOM_NOT_IMPLEMENTED() \
-	php_error_docref(NULL, E_WARNING, "Not yet implemented"); \
-	return;
+	zend_throw_error(NULL, "Not yet implemented"); \
+	RETURN_THROWS();
 
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1

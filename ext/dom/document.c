@@ -136,7 +136,7 @@ int dom_document_encoding_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_document_encoding_write(dom_object *obj, zval *newval)
+zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	zend_string *str;
@@ -161,8 +161,8 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		}
 		docp->encoding = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
     } else {
-    	// Todo convert to error?
-		php_error_docref(NULL, E_WARNING, "Invalid Document Encoding");
+		zend_value_error("Invalid Document Encoding");
+		return FAILURE;
     }
 
 	zend_string_release_ex(str, 0);

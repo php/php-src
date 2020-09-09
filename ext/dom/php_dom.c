@@ -317,8 +317,9 @@ zval *dom_read_property(zend_object *object, zend_string *name, int type, void *
 	if (obj->prop_handler != NULL) {
 		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	} else if (instanceof_function(obj->std.ce, dom_node_class_entry)) {
-		// Should this be an error?
-		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", ZSTR_VAL(obj->std.ce->name));
+		zend_throw_error(NULL, "Couldn't fetch %s. Node no longer exists", ZSTR_VAL(obj->std.ce->name));
+		retval = &EG(uninitialized_zval);
+		return retval;
 	}
 
 	if (hnd) {
@@ -467,9 +468,8 @@ PHP_FUNCTION(dom_import_simplexml)
 	if (nodep && nodeobj && (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE)) {
 		DOM_RET_OBJ((xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
 	} else {
-		// Should this be an error?
-		php_error_docref(NULL, E_WARNING, "Invalid Nodetype to import");
-		RETURN_NULL();
+		zend_argument_value_error(1, "cannot import invalid node type");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -1210,8 +1210,8 @@ PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval *return_valu
 			break;
 		}
 		default:
-			// Todo convert to value error?
-			php_error_docref(NULL, E_WARNING, "Unsupported node type: %d", obj->type);
+			/* TODO Convert to a ZEND assertion? */
+			zend_throw_error(NULL, "Unsupported node type: %d", obj->type);
 			ZVAL_NULL(return_value);
 			return 0;
 	}

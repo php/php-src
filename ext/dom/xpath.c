@@ -136,8 +136,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
-		// Todo convert to type error?
-		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
+		zend_type_error("Handler name must be a string");
 		xmlXPathFreeObject(obj);
 		if (fci.param_count > 0) {
 			for (i = 0; i < nargs - 1; i++) {
@@ -155,13 +154,11 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	fci.retval = &retval;
 
 	if (!zend_make_callable(&fci.function_name, &callable)) {
-		// TODO make this an error?
-		php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));
+		zend_throw_error(NULL, "Unable to call handler %s()", ZSTR_VAL(callable));
+		return;
 	} else if (intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
-		// TODO make this an error?
-		php_error_docref(NULL, E_WARNING, "Not allowed to call handler '%s()'.", ZSTR_VAL(callable));
-		/* Push an empty string, so that we at least have an xslt result... */
-		valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
+		zend_throw_error(NULL, "Not allowed to call handler '%s()'.", ZSTR_VAL(callable));
+		return;
 	} else {
 		result = zend_call_function(&fci, NULL);
 		if (result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -179,9 +176,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			} else if (Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE) {
 				valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
 			} else if (Z_TYPE(retval) == IS_OBJECT) {
-				// TODO make this an error?
-				php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
-				valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
+				zend_type_error("A PHP Object cannot be converted to a XPath-string");
+				return;
 			} else {
 				zend_string *str = zval_get_string(&retval);
 				valuePush(ctxt, xmlXPathNewString((xmlChar *) ZSTR_VAL(str)));
@@ -312,9 +308,8 @@ PHP_METHOD(DOMXPath, registerNamespace)
 
 	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
 	if (ctxp == NULL) {
-		// Todo convert to error?
-		php_error_docref(NULL, E_WARNING, "Invalid XPath Context");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Invalid XPath Context");
+		RETURN_THROWS();
 	}
 
 	if (xmlXPathRegisterNs(ctxp, prefix, ns_uri) != 0) {
@@ -357,9 +352,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
 	if (ctxp == NULL) {
-		// Todo convert to error?
-		php_error_docref(NULL, E_WARNING, "Invalid XPath Context");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Invalid XPath Context");
+		RETURN_THROWS();
 	}
 
 	docp = (xmlDocPtr) ctxp->doc;
@@ -378,9 +372,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 	if (nodep && docp != nodep->doc) {
-		// Todo convert to error?
-		php_error_docref(NULL, E_WARNING, "Node From Wrong Document");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Node From Wrong Document");
+		RETURN_THROWS();
 	}
 
 	ctxp->node = nodep;

@@ -35,7 +35,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
 Since:
 */
-int dom_node_node_name_read(dom_object *obj, zval *retval)
+zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep;
 	xmlNsPtr ns;
@@ -98,8 +98,8 @@ int dom_node_node_name_read(dom_object *obj, zval *retval)
 			str = "#text";
 			break;
 		default:
-			// Todo convert to error?
-			php_error_docref(NULL, E_WARNING, "Invalid Node Type");
+			zend_value_error("XML Node type must be one of XML_*_NODE");
+			return FAILURE;
 	}
 
 	if (str != NULL) {
@@ -984,9 +984,8 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (NULL == new_child) {
-		// Todo convert to error?
-		php_error_docref(NULL, E_WARNING, "Couldn't add newnode as the previous sibling of refnode");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot add newnode as the previous sibling of refnode");
+		RETURN_THROWS();
 	}
 
 	dom_reconcile_ns(parentp->doc, new_child);
@@ -1227,6 +1226,7 @@ PHP_METHOD(DOMNode, appendChild)
 	if (new_child == NULL) {
 		new_child = xmlAddChild(nodep, child);
 		if (new_child == NULL) {
+			// TODO Convert to Error?
 			php_error_docref(NULL, E_WARNING, "Couldn't append node");
 			RETURN_FALSE;
 		}
@@ -1577,9 +1577,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	docp = nodep->doc;
 
 	if (! docp) {
-		// TOdo convert to error?
-		php_error_docref(NULL, E_WARNING, "Node must be associated with a document");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Node must be associated with a document");
+		RETURN_THROWS();
 	}
 
 	if (xpath_array == NULL) {
@@ -1595,9 +1594,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 					xmlXPathFreeObject(xpathobjp);
 				}
 				xmlXPathFreeContext(ctxp);
-				// Todo convert to error?
-				php_error_docref(NULL, E_WARNING, "XPath query did not return a nodeset.");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "XPath query did not return a nodeset.");
+				RETURN_THROWS();
 			}
 		}
 	} else {
@@ -1607,13 +1605,16 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		char *xquery;
 
 		tmp = zend_hash_str_find(ht, "query", sizeof("query")-1);
-		if (tmp && Z_TYPE_P(tmp) == IS_STRING) {
-			xquery = Z_STRVAL_P(tmp);
-		} else {
-			// Todo convert to error?
-			php_error_docref(NULL, E_WARNING, "'query' missing from xpath array or is not a string");
-			RETURN_FALSE;
+		if (!tmp) {
+			// TODO Use argument version after checking which num arg it is
+			zend_value_error("\"query\" option must be in XPath array");
+			RETURN_THROWS();
 		}
+		if (Z_TYPE_P(tmp) != IS_STRING) {
+			zend_type_error("\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
+			RETURN_THROWS();
+		}
+		xquery = Z_STRVAL_P(tmp);
 
 		ctxp = xmlXPathNewContext(docp);
 		ctxp->node = nodep;

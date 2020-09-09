@@ -295,9 +295,8 @@ PHP_METHOD(DOMElement, setAttribute)
 		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
 	}
 	if (!attr) {
-		// TODO Convert to error?
-		php_error_docref(NULL, E_WARNING, "No such attribute '%s'", name);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a valid XML attribute");
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ(attr, &ret, intern);
@@ -426,9 +425,8 @@ PHP_METHOD(DOMElement, setAttributeNode)
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
-		// Todo convert to a ValueError?
-		php_error_docref(NULL, E_WARNING, "Attribute node is required");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must have the node attribute");
+		RETURN_THROWS();
 	}
 
 	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
@@ -878,9 +876,8 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
-		// Todo convert to error?
-		php_error_docref(NULL, E_WARNING, "Attribute node is required");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must have node attribute");
+		RETURN_THROWS();
 	}
 
 	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
