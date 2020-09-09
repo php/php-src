@@ -10960,8 +10960,6 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 {
 	zend_jit_addr op2_addr;
 
-	ZEND_ASSERT(opline->op1_type == IS_CV);
-
 	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
 
 	if (op1_info & MAY_BE_REF) {

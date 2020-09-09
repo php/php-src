@@ -1562,7 +1562,9 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_FETCH_DIM_RW:
 //				case ZEND_FETCH_DIM_UNSET:
 				case ZEND_FETCH_LIST_W:
-					if (opline->op1_type != IS_CV) {
+					if (opline->op1_type != IS_CV
+					 && (orig_op1_type == IS_UNKNOWN
+					  || !(orig_op1_type & IS_TRACE_INDIRECT))) {
 						break;
 					}
 					ADD_OP1_TRACE_GUARD();
@@ -4325,11 +4327,23 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_DIM_RW:
 //					case ZEND_FETCH_DIM_UNSET:
 					case ZEND_FETCH_LIST_W:
-						if (opline->op1_type != IS_CV) {
+						if (opline->op1_type != IS_CV
+						 && (orig_op1_type == IS_UNKNOWN
+						  || !(orig_op1_type & IS_TRACE_INDIRECT))) {
 							break;
 						}
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
+						if (opline->op1_type == IS_VAR) {
+							if (orig_op1_type != IS_UNKNOWN
+							 && (orig_op1_type & IS_TRACE_INDIRECT)) {
+								if (!zend_jit_fetch_indirect_var(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr)) {
+									goto jit_failure;
+								}
+							} else {
+								break;
+							}
+						}
 						if (orig_op1_type != IS_UNKNOWN
 						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
 							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
