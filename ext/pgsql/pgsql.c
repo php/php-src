@@ -3298,12 +3298,6 @@ PHP_FUNCTION(pg_lo_import)
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	}
-	/* old calling convention, deprecated since PHP 4.2 */
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-									  "pr", &file_in, &name_len, &pgsql_link ) == SUCCESS) {
-		php_error_docref(NULL, E_NOTICE, "Old API is used");
-		link = Z_RES_P(pgsql_link);
-	}
 	else {
 		WRONG_PARAM_COUNT;
 	}
@@ -3384,7 +3378,7 @@ PHP_FUNCTION(pg_lo_export)
 		link = Z_RES_P(pgsql_link);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "rss", &pgsql_link, &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
+								 "rsp", &pgsql_link, &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -3413,26 +3407,6 @@ PHP_FUNCTION(pg_lo_export)
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "spr", &oid_string, &oid_strlen, &file_out, &name_len, &pgsql_link) == SUCCESS) {
-		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
-		if ((oid_string+oid_strlen) != end_ptr) {
-			/* wrong integer format */
-			php_error_docref(NULL, E_NOTICE, "Wrong OID value passed");
-			RETURN_FALSE;
-		}
-		link = Z_RES_P(pgsql_link);
-	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-									  "lpr", &oid_long, &file_out, &name_len, &pgsql_link) == SUCCESS) {
-		php_error_docref(NULL, E_NOTICE, "Old API is used");
-		if (oid_long <= (zend_long)InvalidOid) {
-			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
-			RETURN_FALSE;
-		}
-		oid = (Oid)oid_long;
-		link = Z_RES_P(pgsql_link);
 	}
 	else {
 		zend_argument_count_error("Requires 2 or 3 arguments, %d given", ZEND_NUM_ARGS());

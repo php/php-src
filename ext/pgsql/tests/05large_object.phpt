@@ -61,7 +61,7 @@ $oid = pg_lo_import($db, $path . 'php.gif');
 pg_query($db, 'commit');
 pg_query($db, 'begin');
 @unlink($path . 'php.gif.exported');
-pg_lo_export($oid, $path . 'php.gif.exported', $db);
+pg_lo_export($db, $oid, $path . 'php.gif.exported');
 if (!file_exists($path . 'php.gif.exported')) {
     echo "Export failed\n";
 }

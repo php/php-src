@@ -428,6 +428,9 @@ PHP 8.0 UPGRADE NOTES
 - pgsql:
   . The deprecated pg_connect() syntax using multiple parameters instead of a
     connection string is no longer supported.
+  . The deprecated pg_lo_import() and pg_lo_export() signature that passes the
+    connection as the last argument is no longer supported. The connection
+    should be passed as first argument instead.
 
 - Phar:
   . Metadata associated with a phar will no longer be automatically unserialized,
