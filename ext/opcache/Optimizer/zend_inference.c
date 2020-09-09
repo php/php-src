@@ -4292,6 +4292,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 				case ZEND_UNSET_CV:
 				case ZEND_ISSET_ISEMPTY_CV:
 				case ZEND_MAKE_REF:
+				case ZEND_FETCH_DIM_W:
 					break;
 				default:
 					/* undefined variable warning */
@@ -4633,7 +4634,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			return 0;
 		case ZEND_FETCH_DIM_W:
 		case ZEND_FETCH_LIST_W:
-			if ((t1 & (MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+			if (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 				return 1;
 			}
 			if (t2 & (MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
