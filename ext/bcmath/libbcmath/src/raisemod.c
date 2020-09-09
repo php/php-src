@@ -62,7 +62,7 @@ _bc_truncate (bc_num *num)
 int
 bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
 {
-  bc_num parity, temp;
+  bc_num power, exponent, modulus, parity, temp;
   int rscale;
 
   /* Check for correct numbers. */
@@ -88,33 +88,39 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
     }
 
   /* Set initial values.  */
+  power = bc_copy_num (base);
+  exponent = bc_copy_num (expo);
+  modulus = bc_copy_num (mod);
   temp = bc_copy_num (BCG(_one_));
   bc_init_num(&parity);
 
   /* Do the calculation. */
-  rscale = MAX(scale, base->n_scale);
-  if ( !bc_compare(mod, BCG(_one_)) )
+  rscale = MAX(scale, power->n_scale);
+  if ( !bc_compare(modulus, BCG(_one_)) )
     {
       bc_free_num (&temp);
       temp = bc_new_num (1, scale);
     }
   else
     {
-      while ( !bc_is_zero(expo) )
+      while ( !bc_is_zero(exponent) )
 	{
-	  (void) bc_divmod (expo, BCG(_two_), &expo, &parity, 0);
+	  (void) bc_divmod (exponent, BCG(_two_), &exponent, &parity, 0);
 	  if ( !bc_is_zero(parity) )
 	    {
-	      bc_multiply (temp, base, &temp, rscale);
-	      (void) bc_modulo (temp, mod, &temp, scale);
+	      bc_multiply (temp, power, &temp, rscale);
+	      (void) bc_modulo (temp, modulus, &temp, scale);
 	    }
 
-	  bc_multiply (base, base, &base, rscale);
-	  (void) bc_modulo (base, mod, &base, scale);
+	  bc_multiply (power, power, &power, rscale);
+	  (void) bc_modulo (power, modulus, &power, scale);
 	}
     }
 
   /* Assign the value. */
+  bc_free_num (&power);
+  bc_free_num (&exponent);
+  bc_free_num (&modulus);
   bc_free_num (result);
   bc_free_num (&parity);
   *result = temp;
