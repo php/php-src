@@ -425,6 +425,10 @@ PHP 8.0 UPGRADE NOTES
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
 
+- pgsql:
+  . The deprecated pg_connect() syntax using multiple parameters instead of a
+    connection string is no longer supported.
+
 - Phar:
   . Metadata associated with a phar will no longer be automatically unserialized,
     to fix potential security vulnerabilities due to object instantiation, autoloading, etc.

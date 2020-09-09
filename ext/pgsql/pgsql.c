@@ -1108,65 +1108,24 @@ PHP_MINFO_FUNCTION(pgsql)
 /* {{{ php_pgsql_do_connect */
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char *host=NULL,*port=NULL,*options=NULL,*tty=NULL,*dbname=NULL,*connstring=NULL;
+	char *connstring;
+	size_t connstring_len;
 	PGconn *pgsql;
 	smart_str str = {0};
-	zval *args;
-	uint32_t i;
-	int connect_type = 0;
+	zend_long connect_type = 0;
 	PGresult *pg_result;
 
-	args = (zval *)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval), 0);
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 5
-			|| zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &connstring, &connstring_len, &connect_type) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	smart_str_appends(&str, "pgsql");
-
-	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
-		/* make sure that the PGSQL_CONNECT_FORCE_NEW bit is not part of the hash so that subsequent connections
-		 * can re-use this connection. Bug #39979
-		 */
-		if (i == 1 && ZEND_NUM_ARGS() == 2 && Z_TYPE(args[i]) == IS_LONG) {
-			if (Z_LVAL(args[1]) == PGSQL_CONNECT_FORCE_NEW) {
-				continue;
-			} else if (Z_LVAL(args[1]) & PGSQL_CONNECT_FORCE_NEW) {
-				smart_str_append_long(&str, Z_LVAL(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
-			}
-		}
-		ZVAL_STR(&args[i], zval_get_string(&args[i]));
-		smart_str_appendc(&str, '_');
-		smart_str_appendl(&str, Z_STRVAL(args[i]), Z_STRLEN(args[i]));
-	}
-
-	/* Exception thrown during a string conversion. */
-	if (EG(exception)) {
-		goto cleanup;
-	}
-
+	smart_str_appendl(&str, connstring, connstring_len);
+	smart_str_appendc(&str, '_');
+	/* make sure that the PGSQL_CONNECT_FORCE_NEW bit is not part of the hash so that subsequent
+	 * connections can re-use this connection. See bug #39979. */
+	smart_str_append_long(&str, connect_type & ~PGSQL_CONNECT_FORCE_NEW);
 	smart_str_0(&str);
-
-	if (ZEND_NUM_ARGS() == 1) { /* new style, using connection string */
-		connstring = Z_STRVAL(args[0]);
-	} else if (ZEND_NUM_ARGS() == 2 ) { /* Safe to add conntype_option, since 2 args was illegal */
-		connstring = Z_STRVAL(args[0]);
-		connect_type = (int)zval_get_long(&args[1]);
-	} else {
-		host = Z_STRVAL(args[0]);
-		port = Z_STRVAL(args[1]);
-		dbname = Z_STRVAL(args[ZEND_NUM_ARGS()-1]);
-
-		switch (ZEND_NUM_ARGS()) {
-		case 5:
-			tty = Z_STRVAL(args[3]);
-			/* fall through */
-		case 4:
-			options = Z_STRVAL(args[2]);
-			break;
-		}
-	}
 
 	if (persistent && PGG(allow_persistent)) {
 		zend_resource *le;
@@ -1185,11 +1144,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			/* create the link */
-			if (connstring) {
-				pgsql = PQconnectdb(connstring);
-			} else {
-				pgsql = PQsetdb(host, port, options, tty, dbname);
-			}
+			pgsql = PQconnectdb(connstring);
 			if (pgsql == NULL || PQstatus(pgsql) == CONNECTION_BAD) {
 				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql)
 				if (pgsql) {
@@ -1218,11 +1173,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			if (PQstatus(le->ptr) == CONNECTION_BAD) { /* the link died */
 				if (le->ptr == NULL) {
-					if (connstring) {
-						le->ptr = PQconnectdb(connstring);
-					} else {
-						le->ptr = PQsetdb(host,port,options,tty,dbname);
-					}
+					le->ptr = PQconnectdb(connstring);
 				}
 				else {
 					PQreset(le->ptr);
@@ -1270,25 +1221,16 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* Non-blocking connect */
 		if (connect_type & PGSQL_CONNECT_ASYNC) {
-			if (connstring) {
-				pgsql = PQconnectStart(connstring);
-				if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-					PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
-					if (pgsql) {
-						PQfinish(pgsql);
-					}
-					goto err;
+			pgsql = PQconnectStart(connstring);
+			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
+				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+				if (pgsql) {
+					PQfinish(pgsql);
 				}
-			} else {
-				php_error_docref(NULL, E_WARNING, "Connection string required for async connections");
 				goto err;
 			}
 		} else {
-			if (connstring) {
-				pgsql = PQconnectdb(connstring);
-			} else {
-				pgsql = PQsetdb(host,port,options,tty,dbname);
-			}
+			pgsql = PQconnectdb(connstring);
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
 				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
 				if (pgsql) {
@@ -1324,18 +1266,10 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	php_pgsql_set_default_link(Z_RES_P(return_value));
 
 cleanup:
-	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
-		zval_ptr_dtor(&args[i]);
-	}
-	efree(args);
 	smart_str_free(&str);
 	return;
 
 err:
-	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
-		zval_ptr_dtor(&args[i]);
-	}
-	efree(args);
 	smart_str_free(&str);
 	RETURN_FALSE;
 }
