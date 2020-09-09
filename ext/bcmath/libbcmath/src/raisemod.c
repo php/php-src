@@ -37,30 +37,8 @@
 #include "bcmath.h"
 #include "private.h"
 
-
-/* Truncate a number to zero scale.  To avoid sharing issues (refcount and
-   shared n_value) the number is copied, this copy is truncated, and the
-   original number is "freed". */
-
-static void
-_bc_truncate (bc_num *num)
-{
-  bc_num temp;
-
-  temp = bc_new_num ((*num)->n_len, 0);
-  temp->n_sign = (*num)->n_sign;
-  memcpy (temp->n_value, (*num)->n_value, (*num)->n_len);
-  bc_free_num (num);
-  *num = temp;
-}
-
-
-/* Raise BASE to the EXPO power, reduced modulo MOD.  The result is
-   placed in RESULT.  If a EXPO is not an integer,
-   only the integer part is used.  */
-
-int
-bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
+/* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
+int bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
 {
   bc_num power, exponent, modulus, parity, temp;
   int rscale;
