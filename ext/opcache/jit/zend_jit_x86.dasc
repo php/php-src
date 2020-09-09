@@ -6274,6 +6274,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 	}
 
 	|9:
+	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
 
 	return 1;
 }
