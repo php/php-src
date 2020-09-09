@@ -45,8 +45,8 @@ _bc_new_num_ex (length, scale, persistent)
 {
   bc_num temp;
   /* PHP Change:  add length check */
-  if ((size_t)length+(size_t)scale > INT_MAX) {
-   zend_error(E_ERROR, "Result too long, max is %d", INT_MAX);
+  if ((size_t)length + (size_t)scale > INT_MAX) {
+   zend_throw_error(NULL, "Result exceeds the length a PHP string can hold");
   }
   /* PHP Change:  malloc() -> pemalloc(), removed free_list code */
   temp = (bc_num) safe_pemalloc (1, sizeof(bc_struct)+length, scale, persistent);
