@@ -2439,9 +2439,7 @@ int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, 
 
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 
-	while (len--) {
-		CRC32(crc, php_stream_getc(fp));
-	}
+	crc = crc32_stream_bulk_update(crc, fp, len);
 
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 
@@ -2539,7 +2537,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	zend_off_t manifest_ftell;
 	zend_long offset;
 	size_t wrote;
-	uint32_t manifest_len, mytime, loc, new_manifest_count;
+	uint32_t manifest_len, mytime, new_manifest_count;
 	uint32_t newcrc32;
 	php_stream *file, *oldfile, *newfile, *stubfile;
 	php_stream_filter *filter;
@@ -2796,10 +2794,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			return EOF;
 		}
 		newcrc32 = ~0;
-		mytime = entry->uncompressed_filesize;
-		for (loc = 0;loc < mytime; ++loc) {
-			CRC32(newcrc32, php_stream_getc(file));
-		}
+		newcrc32 = crc32_stream_bulk_update(newcrc32, file, entry->uncompressed_filesize);
 		entry->crc32 = ~newcrc32;
 		entry->is_crc_checked = 1;
 		if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
