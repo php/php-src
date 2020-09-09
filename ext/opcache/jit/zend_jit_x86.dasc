@@ -12104,6 +12104,9 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		}
 		|	SET_ZVAL_PTR res_addr, FCARG1a
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_INDIRECT
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_info) {
+			ssa->var_info[ssa_op->result_def].indirect_reference = 1;
+		}
 	} else {
 		zend_bool result_avoid_refcounting = 0;
 
@@ -13245,19 +13248,35 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 	return 1;
 }
 
-static zend_bool zend_jit_fetch_indirect_var(dasm_State **Dst, const zend_op *opline, uint8_t var_type, uint32_t *var_info_ptr, zend_jit_addr *var_addr_ptr)
+static zend_bool zend_jit_fetch_indirect_var(dasm_State **Dst, const zend_op *opline, uint8_t var_type, uint32_t *var_info_ptr, zend_jit_addr *var_addr_ptr, zend_bool add_indirect_guard)
 {
 	zend_jit_addr var_addr = *var_addr_ptr;
 	uint32_t var_info = *var_info_ptr;
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
-	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+	int32_t exit_point;
+	const void *exit_addr;
 
-	if (!exit_addr) {
-		return 0;
+	if (add_indirect_guard) {
+		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+		if (!exit_addr) {
+			return 0;
+		}
+		|	IF_NOT_ZVAL_TYPE var_addr, IS_INDIRECT, &exit_addr
+		|	GET_ZVAL_PTR FCARG1a, var_addr
+	} else {
+		/* May be already loaded into FCARG1a or RAX by previus FETCH_OBJ_W/DIM_W */
+		if (opline->op1_type != IS_VAR ||
+				(opline-1)->result_type != IS_VAR  ||
+				(opline-1)->result.var != opline->op1.var ||
+				(opline-1)->op2_type == IS_VAR ||
+				(opline-1)->op2_type == IS_TMP_VAR) {
+			|	GET_ZVAL_PTR FCARG1a, var_addr
+		} else if ((opline-1)->opcode == ZEND_FETCH_DIM_W || (opline-1)->opcode == ZEND_FETCH_DIM_RW) {
+			|	mov FCARG1a, r0
+		}
 	}
-
-	|	IF_NOT_ZVAL_TYPE var_addr, IS_INDIRECT, &exit_addr
-	|	GET_ZVAL_PTR FCARG1a, var_addr
+	*var_info_ptr &= ~MAY_BE_INDIRECT;
 	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 	*var_addr_ptr = var_addr;
 
