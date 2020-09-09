@@ -164,7 +164,6 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_1(zend_ast_kind kind, zend_ast
 		lineno = CG(zend_lineno);
 	}
 	ast->lineno = lineno;
-	ast->lineno = lineno;
 
 	return ast;
 }
