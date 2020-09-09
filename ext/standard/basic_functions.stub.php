@@ -222,15 +222,11 @@ function array_udiff_uassoc(array $array, ...$rest): array {}
 
 /**
  * @param array $array1
- * @param int $sort_order
- * @param int $sort_flags
- * @param array $arrays
+ * @param array|int $rest
  * @prefer-ref $array1
- * @prefer-ref $sort_order
- * @prefer-ref $sort_flags
- * @prefer-ref $arrays
+ * @prefer-ref $rest
  */
-function array_multisort(&$array1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arrays): bool {}
+function array_multisort(&$array1, &...$rest): bool {}
 
 function array_rand(array $array, int $num_req = 1): int|string|array {}
 

@@ -41,15 +41,7 @@ Name: array1
 Is passed by reference: yes
 Can be passed by value: yes
 
-Name: sort_order
-Is passed by reference: yes
-Can be passed by value: yes
-
-Name: sort_flags
-Is passed by reference: yes
-Can be passed by value: yes
-
-Name: arrays
+Name: rest
 Is passed by reference: yes
 Can be passed by value: yes
 
