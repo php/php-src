@@ -10,7 +10,7 @@ date.timezone=UTC
 new DatePeriod();
 ?>
 --EXPECTF--
-Fatal error: Uncaught ArgumentCountError: DatePeriod::__construct() expects at least 1 parameter, 0 given in %s:%d
+Fatal error: Uncaught ArgumentCountError: DatePeriod::__construct() expects at least 1 argument, 0 given in %s:%d
 Stack trace:
 #0 %s(%d): DatePeriod->__construct()
 #1 {main}

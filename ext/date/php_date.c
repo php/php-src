@@ -4124,7 +4124,6 @@ PHP_METHOD(DatePeriod, __construct)
 	timelib_time *clone;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR_OR_OBJ_OF_CLASS(start_str, start_obj, date_ce_interface)
 		Z_PARAM_OPTIONAL
@@ -4139,28 +4138,32 @@ PHP_METHOD(DatePeriod, __construct)
 	if (start_str) {
 		if (interval_obj) {
 			zend_argument_type_error(2, "must be of type ?int when argument #1 ($start) is a string");
-			zend_restore_error_handling(&error_handling);
 			RETURN_THROWS();
 		}
 
 		if (!end_is_null) {
 			zend_argument_value_error(3, "must be null when argument #1 ($start) is a string");
-			zend_restore_error_handling(&error_handling);
 			RETURN_THROWS();
 		}
 
 		isostr = ZSTR_VAL(start_str);
 		isostr_len = ZSTR_LEN(start_str);
 
+		zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len);
+		zend_restore_error_handling(&error_handling);
+
 		if (dpobj->start == NULL) {
 			zend_argument_error(zend_ce_exception, 1, "must contain a start date, \"%s\" given", isostr);
+			RETURN_THROWS();
 		}
 		if (dpobj->interval == NULL) {
 			zend_argument_error(zend_ce_exception, 1, "must contain an interval, \"%s\" given", isostr);
+			RETURN_THROWS();
 		}
 		if (dpobj->end == NULL && recurrences == 0) {
 			zend_argument_error(zend_ce_exception, 1, "must contain an end date or a recurrence count, \"%s\" given", isostr);
+			RETURN_THROWS();
 		}
 
 		if (dpobj->start) {
@@ -4173,13 +4176,11 @@ PHP_METHOD(DatePeriod, __construct)
 	} else {
 		if (!interval_obj) {
 			zend_argument_type_error(2, "must be of type DateInterval when argument #1 ($start) is a DateTimeInterface");
-			zend_restore_error_handling(&error_handling);
 			RETURN_THROWS();
 		}
 
 		if (end_is_null) {
 			zend_argument_type_error(2, "must be of type DateTimeInterface|int when argument #1 ($start) is a DateTimeInterface");
-			zend_restore_error_handling(&error_handling);
 			RETURN_THROWS();
 		}
 
@@ -4212,6 +4213,7 @@ PHP_METHOD(DatePeriod, __construct)
 
 	if (dpobj->end == NULL && recurrences < 1) {
 		zend_argument_error(zend_ce_exception, 3, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	/* options */
@@ -4221,8 +4223,6 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->recurrences = recurrences + dpobj->include_start_date;
 
 	dpobj->initialized = 1;
-
-	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 
