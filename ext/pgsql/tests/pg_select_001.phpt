@@ -31,6 +31,11 @@ var_dump(pg_select($conn, 'phptests.bar', array('id' => 1)));
 /* Existent column */
 var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4)));
 
+/* Empty array */
+var_dump(pg_select($conn, 'phptests.bar', array()));
+
+/* No array */
+var_dump(pg_select($conn, 'phptests.bar'));
 
 pg_query('DROP TABLE phptests.foo');
 pg_query('DROP TABLE phptests.bar');
@@ -59,5 +64,37 @@ array(1) {
     string(1) "4"
     ["id3"]=>
     string(1) "5"
+  }
+}
+array(2) {
+  [0]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "4"
+    ["id3"]=>
+    string(1) "5"
+  }
+  [1]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "6"
+    ["id3"]=>
+    string(1) "7"
+  }
+}
+array(2) {
+  [0]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "4"
+    ["id3"]=>
+    string(1) "5"
+  }
+  [1]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "6"
+    ["id3"]=>
+    string(1) "7"
   }
 }
