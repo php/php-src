@@ -462,7 +462,7 @@ function pg_send_execute($connection, string $query, array $params): int|bool {}
 function pg_get_result($connection) {}
 
 /** @param resource $result */
-function pg_result_status($result, int $result_type = PGSQL_RESULT_LONG): string|int|false {}
+function pg_result_status($result, int $result_type = PGSQL_STATUS_LONG): string|int|false {}
 
 /** @param resource $result */
 function pg_get_notify($result, int $result_type = PGSQL_ASSOC): array|false {}
