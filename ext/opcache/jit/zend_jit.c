@@ -2865,7 +2865,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_fetch_dim(&dasm_state, opline,
 								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), RES_REG_ADDR(),
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, OP1_INFO(),
+								OP2_INFO()))) {
 							goto jit_failure;
 						}
 						goto done;
