@@ -74,7 +74,11 @@
 #define PGSQL_RETURN_OID(oid) RETURN_LONG((zend_long)oid)
 #endif
 
-#define CHECK_DEFAULT_LINK(x) if ((x) == NULL) { php_error_docref(NULL, E_WARNING, "No PostgreSQL link opened yet"); RETURN_FALSE; }
+#define CHECK_DEFAULT_LINK(x) \
+	if ((x) == NULL) { \
+		zend_throw_error(NULL, "No PostgreSQL link opened yet"); \
+		RETURN_THROWS(); \
+	}
 #define FETCH_DEFAULT_LINK()  PGG(default_link)
 
 #ifndef HAVE_PQFREEMEM
