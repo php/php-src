@@ -147,8 +147,7 @@ final class ReflectionGenerator
 
 class ReflectionMethod extends ReflectionFunctionAbstract
 {
-    /** @param object|string $objectOrMethod */
-    public function __construct($objectOrMethod, string $method = UNKNOWN) {}
+    public function __construct(object|string $objectOrMethod, ?string $method = null) {}
 
     public function __toString(): string {}
 
