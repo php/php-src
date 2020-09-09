@@ -2655,6 +2655,9 @@ static void accel_gen_system_id(void)
 {
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
+	zend_module_entry *module;
+	zend_extension *extension;
+	zend_llist_position pos;
 
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
@@ -2664,6 +2667,19 @@ static void accel_gen_system_id(void)
 		/* Development versions may be changed from build to build */
 		PHP_MD5Update(&context, __DATE__, sizeof(__DATE__)-1);
 		PHP_MD5Update(&context, __TIME__, sizeof(__TIME__)-1);
+	}
+	/* Modules may have changed after restart which can cause dangling pointers from
+     * custom opcode handlers in the second-level cache files
+     */
+	ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+		PHP_MD5Update(&context, module->name, strlen(module->name));
+		PHP_MD5Update(&context, module->version, strlen(module->version));
+	} ZEND_HASH_FOREACH_END();
+	extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
+	while (extension) {
+		PHP_MD5Update(&context, extension->name, strlen(extension->name));
+		PHP_MD5Update(&context, extension->version, strlen(extension->version));
+		extension = (zend_extension *) zend_llist_get_next_ex(&zend_extensions, &pos);
 	}
 	PHP_MD5Final(digest, &context);
 	php_hash_bin2hex(accel_system_id, digest, sizeof digest);

@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fixed bug #80002 (calc free space for new interned string is wrong).
     (t-matsuno)
   . Fixed bug #80046 (FREE for SWITCH_STRING optimized away). (Nikita)
+  . Fixed bug #79825 (opcache.file_cache causes SIGSEGV when custom opcode
+    handlers changed). (SammyK)
 
 - PDO:
   . Fixed bug #80027 (Terrible performance using $query->fetch on queries with
