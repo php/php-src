@@ -1120,18 +1120,13 @@ PHP_FUNCTION(pg_query_params)
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
-				zval tmp_val;
-
-				ZVAL_COPY(&tmp_val, tmp);
-				convert_to_string(&tmp_val);
-				if (Z_TYPE(tmp_val) != IS_STRING) {
-					php_error_docref(NULL, E_WARNING,"Error converting parameter");
-					zval_ptr_dtor(&tmp_val);
+				zend_string *param_str = zval_try_get_string(tmp);
+				if (!param_str) {
 					_php_pgsql_free_params(params, num_params);
-					RETURN_FALSE;
+					RETURN_THROWS();
 				}
-				params[i] = estrndup(Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
-				zval_ptr_dtor(&tmp_val);
+				params[i] = estrndup(ZSTR_VAL(param_str), ZSTR_LEN(param_str));
+				zend_string_release(param_str);
 			}
 			i++;
 		} ZEND_HASH_FOREACH_END();
@@ -1796,17 +1791,18 @@ PHP_FUNCTION(pg_fetch_result)
 /* {{{ void php_pgsql_fetch_hash */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_type, int into_object)
 {
-	zval                *result, *zrow = NULL;
+	zval                *result;
 	PGresult            *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int             i, num_fields, pgsql_row, use_row;
-	zend_long            row = -1;
+	int             i, num_fields, pgsql_row;
+	zend_long            row;
+	bool row_is_null = 1;
 	char            *field_name;
 	zval            *ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!Cz", &result, &zrow, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l!Cz", &result, &row, &row_is_null, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (!ce) {
@@ -1814,21 +1810,15 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		}
 		result_type = PGSQL_ASSOC;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!l", &result, &zrow, &result_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l!l", &result, &row, &row_is_null, &result_type) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
-	if (zrow == NULL) {
-		row = -1;
-	} else {
-		convert_to_long(zrow);
-		row = Z_LVAL_P(zrow);
-		if (row < 0) {
-			php_error_docref(NULL, E_WARNING, "The row parameter must be greater or equal to zero");
-			RETURN_FALSE;
-		}
+
+	if (!row_is_null && row < 0) {
+		php_error_docref(NULL, E_WARNING, "The row parameter must be greater or equal to zero");
+		RETURN_FALSE;
 	}
-	use_row = ZEND_NUM_ARGS() > 1 && row != -1;
 
 	if (!(result_type & PGSQL_BOTH)) {
 		php_error_docref(NULL, E_WARNING, "Invalid result type");
@@ -1841,7 +1831,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 
 	pgsql_result = pg_result->result;
 
-	if (use_row) {
+	if (!row_is_null) {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));

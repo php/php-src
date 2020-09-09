@@ -169,28 +169,24 @@ function pg_result($result, $row_number, $field = UNKNOWN): string|false|null {}
 
 /**
  * @param resource $result
- * @param int|null $row_number
  */
-function pg_fetch_row($result, $row_number = null, int $result_type = PGSQL_NUM): array|false {}
+function pg_fetch_row($result, ?int $row_number = null, int $result_type = PGSQL_NUM): array|false {}
 
 /**
  * @param resource $result
- * @param int|null $row_number
  */
-function pg_fetch_assoc($result, $row_number = null): array|false {}
+function pg_fetch_assoc($result, ?int $row_number = null): array|false {}
 
 /**
  * @param resource $result
- * @param int|null $row_number
  */
-function pg_fetch_array($result, $row_number = null, int $result_type = PGSQL_BOTH): array|false {}
+function pg_fetch_array($result, ?int $row_number = null, int $result_type = PGSQL_BOTH): array|false {}
 
 /**
  * @param resource $result
- * @param int|null $row_number
  * @param array|null $ctor_params
  */
-function pg_fetch_object($result, $row_number = null, string $class_name = "stdClass", $ctor_params = null): object|false {}
+function pg_fetch_object($result, ?int $row_number = null, string $class_name = "stdClass", $ctor_params = null): object|false {}
 
 /** @param resource $result */
 function pg_fetch_all($result, int $result_type = PGSQL_ASSOC): array|false {}
