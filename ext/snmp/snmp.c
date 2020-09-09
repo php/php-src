@@ -1082,7 +1082,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
 	zend_string *oid_str, *type_str = NULL, *value_str = NULL;
 	HashTable *oid_ht, *type_ht = NULL, *value_ht = NULL;
-	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
+	char *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
 	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
