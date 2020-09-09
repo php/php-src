@@ -68,6 +68,24 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   /* Check for correct numbers. */
   if (bc_is_zero(mod)) return -1;
   if (bc_is_neg(expo)) return -2;
+	/* Check the base for scale digits. */
+	if (base->n_scale != 0) {
+		/* 1st argument from PHP_FUNCTION(bcpowmod) */
+		zend_argument_value_error(1, "must be an integer");
+		return -3;
+    }
+	/* Check the exponent for scale digits. */
+	if (expo->n_scale != 0) {
+		/* 2nd argument from PHP_FUNCTION(bcpowmod) */
+		zend_argument_value_error(2, "must be an integer");
+		return -3;
+    }
+	/* Check the modulus for scale digits. */
+	if (mod->n_scale != 0) {
+		/* 3rd argument from PHP_FUNCTION(bcpowmod) */
+		zend_argument_value_error(3, "must be an integer");
+		return -3;
+    }
 
   /* Set initial values.  */
   power = bc_copy_num (base);
@@ -75,27 +93,6 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   modulus = bc_copy_num (mod);
   temp = bc_copy_num (BCG(_one_));
   bc_init_num(&parity);
-
-  /* Check the base for scale digits. */
-  if (power->n_scale != 0)
-    {
-      php_error_docref (NULL, E_WARNING, "Non-zero scale in base");
-      _bc_truncate (&power);
-    }
-
-  /* Check the exponent for scale digits. */
-  if (exponent->n_scale != 0)
-    {
-      php_error_docref (NULL, E_WARNING, "Non-zero scale in exponent");
-      _bc_truncate (&exponent);
-    }
-
-  /* Check the modulus for scale digits. */
-  if (modulus->n_scale != 0)
-    {
-      php_error_docref (NULL, E_WARNING, "Non-zero scale in modulus");
-      _bc_truncate (&modulus);
-    }
 
   /* Do the calculation. */
   rscale = MAX(scale, power->n_scale);

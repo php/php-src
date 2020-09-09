@@ -403,6 +403,9 @@ PHP_FUNCTION(bcpowmod)
 		case -2:
 			zend_argument_value_error(2, "must be greater than 0");
 			break;
+		case -3:
+			/* ValueError thrown in bc_raisemod() */
+			break;
 	}
 
 	bc_free_num(&first);
