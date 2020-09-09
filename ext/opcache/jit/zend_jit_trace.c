@@ -1415,11 +1415,17 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					/* break missing intentionally */
 				case ZEND_ASSIGN_DIM:
-					if (opline->op1_type != IS_CV) {
-						break;
+					if (opline->op1_type == IS_CV) {
+						ADD_OP1_DATA_TRACE_GUARD();
+						ADD_OP2_TRACE_GUARD();
+						ADD_OP1_TRACE_GUARD();
+					} else if (orig_op1_type != IS_UNKNOWN
+					        && (orig_op1_type & IS_TRACE_INDIRECT)
+					        && opline->result_type == IS_UNUSED) {
+//						ADD_OP1_DATA_TRACE_GUARD();
+						ADD_OP2_TRACE_GUARD();
 					}
-					ADD_OP1_DATA_TRACE_GUARD();
-					/* break missing intentionally */
+					break;
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
@@ -3661,11 +3667,21 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							// TODO: check for division by zero ???
 							break;
 						}
-						if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
+						if (opline->result_type != IS_UNUSED) {
 							break;
 						}
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
+						if (opline->op1_type == IS_VAR) {
+							if (orig_op1_type != IS_UNKNOWN
+							 && (orig_op1_type & IS_TRACE_INDIRECT)) {
+								if (!zend_jit_fetch_indirect_var(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr)) {
+									goto jit_failure;
+								}
+							} else {
+								break;
+							}
+						}
 						if (orig_op1_type != IS_UNKNOWN
 						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
 							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
@@ -3692,11 +3708,19 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_ASSIGN_DIM:
-						if (opline->op1_type != IS_CV) {
-							break;
-						}
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
+						if (opline->op1_type == IS_VAR) {
+							if (orig_op1_type != IS_UNKNOWN
+							 && (orig_op1_type & IS_TRACE_INDIRECT)
+							 && opline->result_type == IS_UNUSED) {
+								if (!zend_jit_fetch_indirect_var(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr)) {
+									goto jit_failure;
+								}
+							} else {
+								break;
+							}
+						}
 						if (orig_op1_type != IS_UNKNOWN
 						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
 							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
