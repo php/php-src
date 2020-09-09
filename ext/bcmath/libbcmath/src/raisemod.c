@@ -36,34 +36,41 @@
 #include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
+#include "zend_exceptions.h"
 
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
-int bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
+zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
 {
   bc_num power, exponent, modulus, parity, temp;
   int rscale;
 
-  /* Check for correct numbers. */
-  if (bc_is_zero(mod)) return -1;
-  if (bc_is_neg(expo)) return -2;
 	/* Check the base for scale digits. */
 	if (base->n_scale != 0) {
 		/* 1st argument from PHP_FUNCTION(bcpowmod) */
 		zend_argument_value_error(1, "must be an integer");
-		return -3;
+		return FAILURE;
     }
 	/* Check the exponent for scale digits. */
 	if (expo->n_scale != 0) {
 		/* 2nd argument from PHP_FUNCTION(bcpowmod) */
 		zend_argument_value_error(2, "must be an integer");
-		return -3;
+		return FAILURE;
     }
+	if (bc_is_neg(expo)) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		return FAILURE;
+	}
 	/* Check the modulus for scale digits. */
 	if (mod->n_scale != 0) {
 		/* 3rd argument from PHP_FUNCTION(bcpowmod) */
 		zend_argument_value_error(3, "must be an integer");
-		return -3;
+		return FAILURE;
     }
+    /* Modulus cannot be 0 */
+	if (bc_is_zero(mod)) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		return FAILURE;
+	}
 
   /* Set initial values.  */
   power = bc_copy_num (base);
@@ -102,5 +109,5 @@ int bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale
   bc_free_num (result);
   bc_free_num (&parity);
   *result = temp;
-  return 0;	/* Everything is OK. */
+  return SUCCESS;	/* Everything is OK. */
 }

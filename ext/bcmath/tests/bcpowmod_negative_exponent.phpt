@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-bcpowmod(): Argument #2 ($exponent) must be greater than 0
+bcpowmod(): Argument #2 ($exponent) must be greater than or equal to 0
