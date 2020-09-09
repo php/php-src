@@ -1572,15 +1572,7 @@ PHP_FUNCTION(pg_field_table)
 	}
 
 	if (return_oid) {
-#if UINT_MAX > ZEND_LONG_MAX /* Oid is unsigned int, we don't need this code, where LONG is wider */
-		if (oid > ZEND_LONG_MAX) {
-			smart_str oidstr = {0};
-			smart_str_append_unsigned(&oidstr, oid);
-			smart_str_0(&oidstr);
-			RETURN_NEW_STR(oidstr.s);
-		} else
-#endif
-			RETURN_LONG((zend_long)oid);
+		PGSQL_RETURN_OID(oid);
 	}
 
 	/* try to lookup the table name in the resource list */
@@ -1675,17 +1667,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 		case PHP_PG_FIELD_TYPE_OID:
 
 			oid = PQftype(pgsql_result, (int)field);
-#if UINT_MAX > ZEND_LONG_MAX
-			if (oid > ZEND_LONG_MAX) {
-				smart_str s = {0};
-				smart_str_append_unsigned(&s, oid);
-				smart_str_0(&s);
-				RETURN_NEW_STR(s.s);
-			} else
-#endif
-			{
-				RETURN_LONG((zend_long)oid);
-			}
+			PGSQL_RETURN_OID(oid);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
