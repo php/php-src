@@ -754,12 +754,14 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 
 static void sapi_cli_server_log_write(int type, const char *msg) /* {{{ */
 {
+    FILE *out;
 	char buf[52];
 
 	if (php_cli_server_log_level < type) {
 		return;
 	}
 
+    out = type==PHP_CLI_SERVER_LOG_ERROR ? stderr : stdout;
 	if (php_cli_server_get_system_time(buf) != 0) {
 		memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
 	} else {
@@ -772,12 +774,12 @@ static void sapi_cli_server_log_write(int type, const char *msg) /* {{{ */
 	}
 #ifdef HAVE_FORK
 	if (php_cli_server_workers_max > 1) {
-		fprintf(stderr, "[%ld] [%s] %s\n", (long) getpid(), buf, msg);
+		fprintf(out, "[%ld] [%s] %s\n", (long) getpid(), buf, msg);
 	} else {
-		fprintf(stderr, "[%s] %s\n", buf, msg);
+		fprintf(out, "[%s] %s\n", buf, msg);
 	}
 #else
-	fprintf(stderr, "[%s] %s\n", buf, msg);
+	fprintf(out, "[%s] %s\n", buf, msg);
 #endif
 } /* }}} */
 
