@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-Square root of negative number
+bcsqrt(): Argument #1 ($operand) cannot take square root of a negative number

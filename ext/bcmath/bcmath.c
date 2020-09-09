@@ -481,7 +481,7 @@ PHP_FUNCTION(bcsqrt)
 	if (bc_sqrt (&result, scale) != 0) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
 	} else {
-		zend_value_error("Square root of negative number");
+		zend_argument_value_error(1, "cannot take square root of a negative number");
 	}
 
 	bc_free_num(&result);
