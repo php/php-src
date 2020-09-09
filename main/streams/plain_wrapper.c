@@ -787,14 +787,17 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						}
 
 						if (!GetFileSizeEx(hfile, &file_size)) {
+							CloseHandle(data->file_mapping);
+							data->file_mapping = NULL;
 							return PHP_STREAM_OPTION_RETURN_ERR;
 						}
 # if defined(_WIN64)
 						size = file_size.QuadPart;
 # else
 						if (file_size.HighPart) {
-							/* file is too large; process as much as possible */
-							size = SIZE_MAX;
+							CloseHandle(data->file_mapping);
+							data->file_mapping = NULL;
+							return PHP_STREAM_OPTION_RETURN_ERR;
 						} else {
 							size = file_size.LowPart;
 						}
