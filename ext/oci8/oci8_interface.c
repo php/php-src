@@ -831,7 +831,7 @@ PHP_FUNCTION(oci_lob_export)
 	php_stream *stream;
 	ub4 lob_length;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|l!l!", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|l!l!", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &start_is_null, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
