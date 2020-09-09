@@ -48,20 +48,20 @@ function openssl_pkcs12_export(OpenSSLCertificate|string $certificate, &$output,
 /** @param array $certificates */
 function openssl_pkcs12_read(string $pkcs12, &$certificates, string $passphrase): bool {}
 
-function openssl_csr_export_to_file(OpenSSLCertificateSigningRequest|string $request, string $output_filename, bool $no_text = true): bool {}
+function openssl_csr_export_to_file(OpenSSLCertificateSigningRequest|string $csr, string $output_filename, bool $no_text = true): bool {}
 
 /** @param OpenSSLAsymmetricKey $output */
-function openssl_csr_export(OpenSSLCertificateSigningRequest|string $request, &$output, bool $no_text = true): bool {}
+function openssl_csr_export(OpenSSLCertificateSigningRequest|string $csr, &$output, bool $no_text = true): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key */
-function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $request, OpenSSLCertificate|string|null $ca_certificate, $private_key, int $days, ?array $options = null, int $serial = 0): OpenSSLCertificate|false {}
+function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLCertificate|string|null $ca_certificate, $private_key, int $days, ?array $options = null, int $serial = 0): OpenSSLCertificate|false {}
 
 /** @param OpenSSLAsymmetricKey $private_key */
 function openssl_csr_new(array $distinguished_names, &$private_key, ?array $options = null, ?array $extra_options = null): OpenSSLCertificateSigningRequest|false {}
 
-function openssl_csr_get_subject(OpenSSLCertificateSigningRequest|string $request, bool $short_names = true): array|false {}
+function openssl_csr_get_subject(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): array|false {}
 
-function openssl_csr_get_public_key(OpenSSLCertificateSigningRequest|string $request, bool $short_names = true): OpenSSLAsymmetricKey|false {}
+function openssl_csr_get_public_key(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): OpenSSLAsymmetricKey|false {}
 
 function openssl_pkey_new(?array $options = null): OpenSSLAsymmetricKey|false {}
 
@@ -200,7 +200,7 @@ function openssl_digest(string $data, string $digest_algorithm, bool $raw_output
 /** @param string $tag */
 function openssl_encrypt(string $data, string $cipher_algorithm, string $passphrase, int $options = 0, string $initialization_vector = "", &$tag = null, string $additional_authentication_data = "", int $tag_length = 16): string|false {}
 
-function openssl_decrypt(string $data, string $cipher_algorithm, string $passphrase, int $options = 0, string $initialization_vector = "", ?string $tag = null, string $additional_authentication_data = ""): string|false {}
+function openssl_decrypt(string $data, string $cipher_algorithm, string $passphrase, int $options = 0, string $initialization_vector = "", string $tag = "", string $additional_authentication_data = ""): string|false {}
 
 function openssl_cipher_iv_length(string $cipher_algorithm): int|false {}
 
@@ -217,10 +217,10 @@ function openssl_random_pseudo_bytes(int $length, &$strong_result = null): strin
 
 function openssl_spki_new(OpenSSLAsymmetricKey $private_key, string $challenge, int $digest_algorithm = OPENSSL_ALGO_MD5): string|false {}
 
-function openssl_spki_verify(string $signed_public_key_and_challenge): bool {}
+function openssl_spki_verify(string $spki): bool {}
 
-function openssl_spki_export(string $signed_public_key_and_challenge): string|false {}
+function openssl_spki_export(string $spki): string|false {}
 
-function openssl_spki_export_challenge(string $signed_public_key_and_challenge): string|false {}
+function openssl_spki_export_challenge(string $spki): string|false {}
 
 function openssl_get_cert_locations(): array {}

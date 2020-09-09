@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3a2f2302110e99bec8f5d254aa2fc9702d34bcf1 */
+ * Stub hash: 1020153737b4c71f5811c0228fbcabb4c236e397 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -72,19 +72,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs12_read, 0, 3, _IS_B
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_csr_export_to_file, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, request, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, output_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, no_text, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_csr_export, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, request, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(1, output)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, no_text, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_sign, 0, 4, OpenSSLCertificate, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_TYPE_MASK(0, request, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_OBJ_TYPE_MASK(0, ca_certificate, OpenSSLCertificate, MAY_BE_STRING|MAY_BE_NULL, NULL)
 	ZEND_ARG_INFO(0, private_key)
 	ZEND_ARG_TYPE_INFO(0, days, IS_LONG, 0)
@@ -100,12 +100,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_new, 0, 2, OpenS
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_csr_get_subject, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_TYPE_MASK(0, request, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, short_names, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_get_public_key, 0, 1, OpenSSLAsymmetricKey, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_TYPE_MASK(0, request, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, csr, OpenSSLCertificateSigningRequest, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, short_names, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
@@ -329,7 +329,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_decrypt, 0, 3, MAY_BE_ST
 	ZEND_ARG_TYPE_INFO(0, passphrase, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, initialization_vector, IS_STRING, 0, "\"\"")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tag, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tag, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, additional_authentication_data, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
@@ -360,11 +360,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_spki_new, 0, 2, MAY_BE_S
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_spki_verify, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, signed_public_key_and_challenge, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, spki, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_spki_export, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, signed_public_key_and_challenge, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, spki, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_openssl_spki_export_challenge arginfo_openssl_spki_export
