@@ -11,13 +11,15 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 <?php
 echo "*** Testing glob() : error condition - pattern too long. ***\n";
 
-var_dump(glob(str_repeat('x', 3000)));
+try {
+    glob(str_repeat('x', 3000));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing glob() : error condition - pattern too long. ***
-
-Warning: glob(): Pattern exceeds the maximum allowed length of %d characters in %s on line %d
-bool(false)
+glob(): Argument #1 ($pattern) must have a length less than 2048 bytes
 Done

@@ -54,8 +54,8 @@ PHPAPI PHP_FUNCTION(dl)
 	}
 
 	if (filename_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be shorter than %d bytes", MAXPATHLEN);
+		RETURN_THROWS();
 	}
 
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0);

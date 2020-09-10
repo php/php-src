@@ -7,12 +7,20 @@ if (!function_exists('fnmatch')) die('skip fnmatch() function is not available')
 --FILE--
 <?php
 $longstring = str_pad('blah', PHP_MAXPATHLEN);
-var_dump(fnmatch('blah', $longstring));
-var_dump(fnmatch($longstring, 'blah'));
+
+try {
+    fnmatch('blah', $longstring);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    fnmatch($longstring, 'blah');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 ?>
 --EXPECTF--
-Warning: fnmatch(): Filename exceeds the maximum allowed length of %d characters in %s on line %d
-bool(false)
-
-Warning: fnmatch(): Pattern exceeds the maximum allowed length of %d characters in %s on line %d
-bool(false)
+fnmatch(): Argument #1 ($pattern) must have a length less than %d bytes
+fnmatch(): Argument #2 ($filename) must have a length less than %d bytes

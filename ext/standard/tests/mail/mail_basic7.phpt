@@ -29,10 +29,13 @@ $outFile = "mailBasic7.out";
 
 echo "-- All Mail Content Parameters --\n";
 // Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
-echo file_get_contents($outFile);
-unlink($outFile);
-
+try {
+    var_dump(mail($to, $subject, $message, $additional_headers));
+    echo file_get_contents($outFile);
+    unlink($outFile);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
 echo "\n\n************* TEST ******************\n";
 // Should fail all
@@ -56,10 +59,13 @@ $outFile = "mailBasic7.out";
 
 echo "-- All Mail Content Parameters --\n";
 // Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
-echo file_get_contents($outFile);
-unlink($outFile);
-
+try {
+    var_dump(mail($to, $subject, $message, $additional_headers));
+    echo file_get_contents($outFile);
+    unlink($outFile);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
 echo "\n\n************* TEST ******************\n";
 // Should fail all
@@ -81,10 +87,13 @@ $outFile = "mailBasic7.out";
 
 echo "-- All Mail Content Parameters --\n";
 // Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
-echo file_get_contents($outFile);
-unlink($outFile);
-
+try {
+    var_dump(mail($to, $subject, $message, $additional_headers));
+    echo file_get_contents($outFile);
+    unlink($outFile);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
 echo "\n\n************* TEST ******************\n";
 // Should fail most
@@ -109,9 +118,13 @@ $outFile = "mailBasic7.out";
 
 echo "-- All Mail Content Parameters --\n";
 // Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
-echo file_get_contents($outFile);
-unlink($outFile);
+try {
+    var_dump(mail($to, $subject, $message, $additional_headers));
+    echo file_get_contents($outFile);
+    unlink($outFile);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
@@ -135,27 +148,7 @@ A Message
 
 ************* TEST ******************
 -- All Mail Content Parameters --
-
-Warning: mail(): 'orig-date' header must be at most one header. Array is passed for 'orig-date' in %s on line %d
-
-Warning: mail(): 'from' header must be at most one header. Array is passed for 'from' in %s on line %d
-
-Warning: mail(): 'sender' header must be at most one header. Array is passed for 'sender' in %s on line %d
-
-Warning: mail(): 'reply-to' header must be at most one header. Array is passed for 'reply-to' in %s on line %d
-
-Warning: mail(): Extra header cannot contain 'To' header in %s on line %d
-
-Warning: mail(): 'bcc' header must be at most one header. Array is passed for 'bcc' in %s on line %d
-
-Warning: mail(): 'message-id' header must be at most one header. Array is passed for 'message-id' in %s on line %d
-
-Warning: mail(): 'in-reply-to' header must be at most one header. Array is passed for 'in-reply-to' in %s on line %d
-bool(true)
-To: user@example.com
-Subject: Test Subject
-
-A Message
+TypeError: Header "orig-date" must be of type string, array given
 
 
 ************* TEST ******************
@@ -184,22 +177,4 @@ A Message
 
 ************* TEST ******************
 -- All Mail Content Parameters --
-
-Warning: mail(): Header field name (*:foo1) contains invalid chars in %s on line %d
-
-Warning: mail(): Header field name (foo2:::) contains invalid chars in %s on line %d
-
-Warning: mail(): Header field name () contains invalid chars in %s on line %d
-
-Warning: mail(): Header field name (foo7) contains invalid chars in %s on line %d
-
-Warning: mail(): Header field value (foo10 => abc) contains invalid chars or format in %s on line %d
-bool(true)
-To: user@example.com
-Subject: Test Subject
-foo3(): bar1
-foo4@: bar1
-foo5|: bar1
-foo9: %&$#!
-
-A Message
+ValueError: Header name "*:foo1" contains invalid characters

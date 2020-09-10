@@ -81,9 +81,9 @@ echo "Done\n";
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 12 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -93,9 +93,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 12 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -105,9 +105,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 12 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -117,9 +117,9 @@ string(0) ""
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 15 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -129,21 +129,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-
-Notice: fputcsv(): Write of 15 bytes failed with errno=9 Bad file descriptor in %s on line %d
-bool(false)
-int(0)
-bool(false)
-string(0) ""
-
--- file opened in rt --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 15 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -151,11 +139,23 @@ int(0)
 bool(false)
 string(0) ""
 
+-- file opened in rt --
+
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
+
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
+
+Notice: fputcsv(): Write of 15 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -165,9 +165,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -177,9 +177,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -189,9 +189,9 @@ string(0) ""
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 18 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -201,9 +201,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 18 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -213,9 +213,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 18 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -225,9 +225,9 @@ string(0) ""
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -237,9 +237,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -249,9 +249,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -261,9 +261,9 @@ string(0) ""
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -273,9 +273,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -285,9 +285,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 16 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -297,9 +297,9 @@ string(0) ""
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 18 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -309,9 +309,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 18 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -321,9 +321,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 18 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -333,9 +333,9 @@ string(0) ""
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 22 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -345,9 +345,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 22 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -357,9 +357,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 22 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -369,9 +369,9 @@ string(0) ""
 
 -- file opened in r --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 24 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -381,9 +381,9 @@ string(0) ""
 
 -- file opened in rb --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 24 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
@@ -393,9 +393,9 @@ string(0) ""
 
 -- file opened in rt --
 
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
+Warning: fputcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
+Warning: fputcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 
 Notice: fputcsv(): Write of 24 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)

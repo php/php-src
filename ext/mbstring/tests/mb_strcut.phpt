@@ -28,8 +28,11 @@ print MBStringChars(mb_strcut($euc_jp,  6,   5,'EUC-JP'), 'EUC-JP') . "\n";
 print MBStringChars(mb_strcut($euc_jp,  5,   5,'EUC-JP'), 'EUC-JP') . "\n";
 print MBStringChars(mb_strcut($euc_jp,  0, 100,'EUC-JP'), 'EUC-JP') . "\n";
 
-$str = mb_strcut($euc_jp, 100, 10,'EUC-JP');
-($str === false) ? print "OK\n" : print "No good\n";
+try {
+    mb_strcut($euc_jp, 100, 10,'EUC-JP');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 $str = mb_strcut($euc_jp, -100, 10,'EUC-JP');
 ($str !== "") ?	print "OK\n" : print "No good\n";
@@ -60,7 +63,7 @@ print MBStringChars(mb_strcut($utf16le, 1, 4, 'UTF-16LE'), 'UTF-16LE') . "\n";
 [a4ce cab8]
 [a4b3 a4ce]
 [30 31 32 33 a4b3 a4ce cab8 bbfa cef3 a4cf c6fc cbdc b8ec a4c7 a4b9 a1a3 45 55 43 2d 4a 50 a4f2 bbc8 a4c3 a4c6 a4a4 a4de a4b9 a1a3 c6fc cbdc b8ec a4cf cccc c5dd bdad a4a4 a1a3]
-OK
+mb_strcut(): Argument #3 ($length) must be contained in argument #1 ($str)
 OK
 == UTF-8 ==
 []

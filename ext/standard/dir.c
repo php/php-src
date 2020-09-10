@@ -415,8 +415,8 @@ PHP_FUNCTION(glob)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (pattern_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must have a length less than %d bytes", MAXPATHLEN);
+		RETURN_THROWS();
 	}
 
 	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {

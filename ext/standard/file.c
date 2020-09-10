@@ -945,9 +945,9 @@ PHP_FUNCTION(popen)
 
 	/* Musl only partially validates the mode. Manually check it to ensure consistent behavior. */
 	if (mode_len != 1 || (*posix_mode != 'r' && *posix_mode != 'w')) {
-		php_error_docref2(NULL, command, posix_mode, E_WARNING, "Invalid mode");
+		zend_argument_value_error(2, "must be either \"r\" or \"w\"");
 		efree(posix_mode);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 #endif
 
@@ -1816,7 +1816,7 @@ PHP_FUNCTION(fputcsv)
 			zend_argument_value_error(3, "must be a single character");
 			RETURN_THROWS();
 		} else if (delimiter_str_len > 1) {
-			php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
+			php_error_docref(NULL, E_WARNING, "Argument #3 ($delimiter) must be a single character");
 		}
 
 		/* use first character from string */
@@ -1828,7 +1828,7 @@ PHP_FUNCTION(fputcsv)
 			zend_argument_value_error(4, "must be a single character");
 			RETURN_THROWS();
 		} else if (enclosure_str_len > 1) {
-			php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
+			php_error_docref(NULL, E_WARNING, "Argument #4 ($enclosure) must be a single character");
 		}
 		/* use first character from string */
 		enclosure = *enclosure_str;
@@ -1836,7 +1836,7 @@ PHP_FUNCTION(fputcsv)
 
 	if (escape_str != NULL) {
 		if (escape_str_len > 1) {
-			php_error_docref(NULL, E_NOTICE, "escape must be empty or a single character");
+			php_error_docref(NULL, E_WARNING, "Argument #5 ($escape) must be empty or a single character");
 		}
 		if (escape_str_len < 1) {
 			escape_char = PHP_CSV_NO_ESCAPE;
@@ -1954,7 +1954,7 @@ PHP_FUNCTION(fgetcsv)
 				zend_argument_value_error(3, "must be a single character");
 				RETURN_THROWS();
 			} else if (delimiter_str_len > 1) {
-				php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
+				php_error_docref(NULL, E_WARNING, "Argument #3 ($delimiter) must be a single character");
 			}
 
 			/* use first character from string */
@@ -1966,7 +1966,7 @@ PHP_FUNCTION(fgetcsv)
 				zend_argument_value_error(4, "must be a single character");
 				RETURN_THROWS();
 			} else if (enclosure_str_len > 1) {
-				php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
+				php_error_docref(NULL, E_WARNING, "Argument #4 ($enclosure) must be a single character");
 			}
 
 			/* use first character from string */
@@ -1975,7 +1975,7 @@ PHP_FUNCTION(fgetcsv)
 
 		if (escape_str != NULL) {
 			if (escape_str_len > 1) {
-				php_error_docref(NULL, E_NOTICE, "escape must be empty or a single character");
+				php_error_docref(NULL, E_WARNING, "Argument #5 ($enclosure) must be empty or a single character");
 			}
 
 			if (escape_str_len < 1) {
@@ -2423,12 +2423,12 @@ PHP_FUNCTION(fnmatch)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (filename_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must have a length less than %d bytes", MAXPATHLEN);
+		RETURN_THROWS();
 	}
 	if (pattern_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must have a length less than %d bytes", MAXPATHLEN);
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL( ! fnmatch( pattern, filename, (int)flags ));

@@ -45,7 +45,7 @@ function mb_substr_count(string $haystack, string $needle, ?string $encoding = n
 
 function mb_substr(string $str, int $start, ?int $length = null, ?string $encoding = null): string {}
 
-function mb_strcut(string $str, int $start, ?int $length = null, ?string $encoding = null): string|false {}
+function mb_strcut(string $str, int $start, ?int $length = null, ?string $encoding = null): string {}
 
 function mb_strwidth(string $str, ?string $encoding = null): int {}
 
