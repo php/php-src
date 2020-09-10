@@ -544,7 +544,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SSE_AVX_INS, sse_ins, avx_ins, op1, op2
-||	if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+||	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 |		avx_ins op1, op2
 ||	} else {
 |		sse_ins op1, op2
@@ -586,7 +586,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SSE_GET_LONG, reg, lval
 ||		if (lval == 0) {
-||			if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+||			if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 |				vxorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 ||			} else {
 |				xorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
@@ -601,7 +601,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.else
 |			mov r0, lval
 |.endif
-||			if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+||			if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 |				vcvtsi2sd, xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), r0
 ||			} else {
 |				cvtsi2sd, xmm(reg-ZREG_XMM0), r0
@@ -613,13 +613,13 @@ static void* dasm_labels[zend_lb_MAX];
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
 |		SSE_GET_LONG reg, Z_LVAL_P(Z_ZV(addr))
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
-||		if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+||		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 |			vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||		} else {
 |			cvtsi2sd xmm(reg-ZREG_XMM0), aword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||		}
 ||	} else if (Z_MODE(addr) == IS_REG) {
-||		if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+||		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 |			vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), Ra(Z_REG(addr))
 ||		} else {
 |			cvtsi2sd xmm(reg-ZREG_XMM0), Ra(Z_REG(addr))
@@ -897,7 +897,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		if (Z_TYPE_P(zv) == IS_DOUBLE) {
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ? Z_REG(dst_addr) : ZREG_XMM0;
 ||			if (Z_DVAL_P(zv) == 0.0 && !is_signed(Z_DVAL_P(zv))) {
-||				if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+||				if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 |					vxorps xmm(dst_reg-ZREG_XMM0), xmm(dst_reg-ZREG_XMM0), xmm(dst_reg-ZREG_XMM0)
 ||				} else {
 |					xorps xmm(dst_reg-ZREG_XMM0), xmm(dst_reg-ZREG_XMM0)
@@ -951,7 +951,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ?
 ||				Z_REG(dst_addr) : ((Z_MODE(res_addr) == IS_REG) ? Z_MODE(res_addr) : ZREG_XMM0);
 ||			if (Z_DVAL_P(zv) == 0.0 && !is_signed(Z_DVAL_P(zv))) {
-||				if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+||				if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 |					vxorps xmm(dst_reg-ZREG_XMM0), xmm(dst_reg-ZREG_XMM0), xmm(dst_reg-ZREG_XMM0)
 ||				} else {
 |					xorps xmm(dst_reg-ZREG_XMM0), xmm(dst_reg-ZREG_XMM0)
@@ -1615,6 +1615,7 @@ static zend_bool use_last_vald_opline = 0;
 static zend_bool track_last_valid_opline = 0;
 static int jit_return_label = -1;
 static uint32_t current_trace_num = 0;
+static uint32_t allowed_opt_flags = 0;
 
 static void zend_jit_track_last_valid_opline(void)
 {
@@ -2850,10 +2851,9 @@ static int zend_jit_setup(void)
 		zend_error(E_CORE_ERROR, "CPU doesn't support SSE2");
 		return FAILURE;
 	}
-	if (JIT_G(opt_flags)) {
-		if (!zend_cpu_supports(ZEND_CPU_FEATURE_AVX)) {
-			JIT_G(opt_flags) &= ~ZEND_JIT_CPU_AVX;
-		}
+	allowed_opt_flags = 0;
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_AVX)) {
+		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
 	}
 
 #if ZTS
@@ -4120,13 +4120,13 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 			}
 			|	SSE_GET_ZVAL_DVAL tmp_reg, op1_addr
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-				if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+				if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 					|	vaddsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
 				} else {
 					|	addsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
 				}
 			} else {
-				if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+				if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 					|	vsubsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
 				} else {
 					|	subsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
@@ -4285,7 +4285,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 
 			|	SSE_GET_ZVAL_LVAL tmp_reg1, op1_addr
 			|	SSE_GET_ZVAL_LVAL tmp_reg2, op2_addr
-			if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+			if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 				|	AVX_MATH_REG opcode, tmp_reg1, tmp_reg1, tmp_reg2
 			} else {
 				|	SSE_MATH_REG opcode, tmp_reg1, tmp_reg2
@@ -4315,7 +4315,7 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
 		(Z_MODE(res_addr) == IS_REG) ? Z_REG(res_addr) : ZREG_XMM0;
 
 	|	SSE_GET_ZVAL_LVAL result_reg, op1_addr
-	if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 		|	AVX_MATH opcode, result_reg, result_reg, op2_addr
 	} else {
 		|	SSE_MATH opcode, result_reg, op2_addr
@@ -4348,7 +4348,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			result_reg = ZREG_XMM0;
 		}
 		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr
-		if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 			|	AVX_MATH opcode, result_reg, result_reg, op1_addr
 		} else {
 			|	SSE_MATH opcode, result_reg, op1_addr
@@ -4366,7 +4366,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			result_reg = ZREG_XMM0;
 			tmp_reg = ZREG_XMM1;
 		}
-		if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 			zend_reg op1_reg;
 
 			if (Z_MODE(op1_addr) == IS_REG) {
@@ -4426,7 +4426,7 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 		result_reg = ZREG_XMM0;
 	}
 
-	if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 		zend_reg op1_reg;
 		zend_jit_addr val_addr;
 
@@ -8200,7 +8200,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	}
 
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-		if (JIT_G(opt_flags) & ZEND_JIT_CPU_AVX) {
+		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 			|	vxorps xmm0, xmm0, xmm0
 		} else {
 			|	xorps xmm0, xmm0
