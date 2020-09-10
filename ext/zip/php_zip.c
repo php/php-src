@@ -2724,7 +2724,7 @@ PHP_METHOD(ZipArchive, extractTo)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(pathto, pathto_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(files_str, files_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(files_ht, files_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZIP_FROM_OBJECT(intern, self);

@@ -1487,7 +1487,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	size_t filename_len;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(notext)
@@ -1795,7 +1795,7 @@ PHP_FUNCTION(openssl_x509_export)
 	BIO * bio_out;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zout)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(notext)
@@ -1875,7 +1875,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 	zend_string *fingerprint;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(method, method_len)
 		Z_PARAM_BOOL(raw_output)
@@ -1909,7 +1909,7 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 	EVP_PKEY * key = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zkey)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1943,7 +1943,7 @@ PHP_FUNCTION(openssl_x509_verify)
 	int err = -1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zkey)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -2064,7 +2064,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	char buf[256];
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(useshortnames)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2310,7 +2310,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_LONG(purpose)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_OR_NULL(zcainfo)
@@ -2434,7 +2434,7 @@ PHP_FUNCTION(openssl_x509_read)
 	zend_string *cert_str;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	cert = php_openssl_x509_from_param(cert_obj, cert_str);
@@ -2546,7 +2546,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	STACK_OF(X509) *ca = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(4, 5)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_ZVAL(zpkey)
 		Z_PARAM_STRING(pass, pass_len)
@@ -2645,7 +2645,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	STACK_OF(X509) *ca = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(4, 5)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zout)
 		Z_PARAM_ZVAL(zpkey)
 		Z_PARAM_STRING(pass, pass_len)
@@ -3050,7 +3050,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	BIO * bio_out;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(csr_str, csr_obj, php_openssl_request_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(notext)
@@ -3102,7 +3102,7 @@ PHP_FUNCTION(openssl_csr_export)
 	BIO * bio_out;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(csr_str, csr_obj, php_openssl_request_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
 		Z_PARAM_ZVAL(zout)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(notext)
@@ -3160,8 +3160,8 @@ PHP_FUNCTION(openssl_csr_sign)
 	struct php_x509_request req;
 
 	ZEND_PARSE_PARAMETERS_START(4, 6)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(csr_str, csr_obj, php_openssl_request_ce)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS_OR_NULL(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zpkey)
 		Z_PARAM_LONG(num_days)
 		Z_PARAM_OPTIONAL
@@ -3389,7 +3389,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 	X509_NAME *subject;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(csr_str, csr_obj, php_openssl_request_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_shortnames)
 	ZEND_PARSE_PARAMETERS_END();
@@ -3422,7 +3422,7 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	EVP_PKEY *tpubkey;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(csr_str, csr_obj, php_openssl_request_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_shortnames)
 	ZEND_PARSE_PARAMETERS_END();
@@ -5231,7 +5231,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	ZEND_PARSE_PARAMETERS_START(5, 7)
 		Z_PARAM_PATH(infilename, infilename_len)
 		Z_PARAM_PATH(outfilename, outfilename_len)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zprivkey)
 		Z_PARAM_ARRAY_OR_NULL(zheaders)
 		Z_PARAM_OPTIONAL
@@ -5902,7 +5902,7 @@ PHP_FUNCTION(openssl_cms_sign)
 	ZEND_PARSE_PARAMETERS_START(5, 8)
 		Z_PARAM_PATH(infilename, infilename_len)
 		Z_PARAM_PATH(outfilename, outfilename_len)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zprivkey)
 		Z_PARAM_ARRAY_OR_NULL(zheaders)
 		Z_PARAM_OPTIONAL

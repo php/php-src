@@ -4307,7 +4307,7 @@ PHP_METHOD(Phar, extractTo)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(pathto, pathto_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(filename, files_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(files_ht, filename)
 		Z_PARAM_BOOL(overwrite)
 	ZEND_PARSE_PARAMETERS_END();
 

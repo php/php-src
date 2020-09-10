@@ -1110,9 +1110,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_STRING(a5, a5_len)
 					Z_PARAM_STRING(a6, a6_len)
 					Z_PARAM_STRING(a7, a7_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
+					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
+					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1130,7 +1130,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_STRING(a5, a5_len)
 					Z_PARAM_STRING(a6, a6_len)
 					Z_PARAM_STRING(a7, a7_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1141,9 +1141,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_START(5, 7)
 					Z_PARAM_STRING(a1, a1_len)
 					Z_PARAM_STRING(a2, a2_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
+					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
+					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1156,7 +1156,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_START(3, 5)
 					Z_PARAM_STRING(a1, a1_len)
 					Z_PARAM_STRING(a2, a2_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1166,13 +1166,13 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	} else {
 		if (st & SNMP_CMD_SET) {
 			ZEND_PARSE_PARAMETERS_START(3, 3)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-				Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
-				Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
+				Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
+				Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 			ZEND_PARSE_PARAMETERS_END();
 		} else if (st & SNMP_CMD_WALK) {
 			ZEND_PARSE_PARAMETERS_START(1, 4)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 				Z_PARAM_OPTIONAL
 				Z_PARAM_BOOL(suffix_keys)
 				Z_PARAM_LONG(objid_query.max_repetitions)
@@ -1183,7 +1183,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			}
 		} else if (st & SNMP_CMD_GET) {
 			ZEND_PARSE_PARAMETERS_START(1, 2)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 				Z_PARAM_OPTIONAL
 				Z_PARAM_BOOL(use_orignames)
 			ZEND_PARSE_PARAMETERS_END();
@@ -1194,7 +1194,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			/* SNMP_CMD_GETNEXT
 			 */
 			ZEND_PARSE_PARAMETERS_START(1, 1)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 			ZEND_PARSE_PARAMETERS_END();
 		}
 	}

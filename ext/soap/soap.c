@@ -604,7 +604,7 @@ PHP_METHOD(SoapFault, __construct)
 	HashTable *code_ht;
 
 	ZEND_PARSE_PARAMETERS_START(2, 6)
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(code_str, code_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(code_ht, code_str)
 		Z_PARAM_STRING(fault_string, fault_string_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(fault_actor, fault_actor_len)

@@ -87,90 +87,90 @@ Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
 Arg value 0
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, int given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
 Arg value 1
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, int given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
 Arg value 12345
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, int given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
 Arg value -2345
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, int given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
 Arg value 10.5
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, float given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
 Arg value -10.5
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, float given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
 Arg value 101234567000
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, float given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
 Arg value 1.07654321E-9
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, float given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
 Arg value 0.5
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, float given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, array given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, array given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, array given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, array given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, array given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, null given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, null given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 
 Arg value 1
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
 
 Arg value 1
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, string given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, string given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
 Arg value string
 In autoload(string)
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, string given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
 Arg value String
 In autoload(String)
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, string given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
 Arg value stdClass
 bool(false)
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, null given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 
 Arg value 
-get_parent_class(): Argument #1 ($object_or_class) must be a valid class name or object, null given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 Done

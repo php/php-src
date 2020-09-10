@@ -54,7 +54,7 @@ PHP_METHOD(com, __construct)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(module_name, module_name_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(server_name, server_params)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(server_params, server_name)
 		Z_PARAM_LONG(cp)
 		Z_PARAM_STRING(typelib_name, typelib_name_len)
 	ZEND_PARSE_PARAMETERS_END();
@@ -695,7 +695,7 @@ PHP_FUNCTION(com_event_sink)
 		Z_PARAM_OBJECT_OF_CLASS(object, php_com_variant_class_entry)
 		Z_PARAM_OBJECT(sinkobject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(sink_str, sink_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(sink_ht, sink_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;

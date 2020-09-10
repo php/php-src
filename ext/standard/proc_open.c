@@ -1034,7 +1034,7 @@ PHP_FUNCTION(proc_open)
 	php_process_handle *proc;
 
 	ZEND_PARSE_PARAMETERS_START(3, 6)
-		Z_PARAM_STR_OR_ARRAY_HT(command_str, command_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(command_ht, command_str)
 		Z_PARAM_ARRAY(descriptorspec)
 		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
