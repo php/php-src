@@ -33,8 +33,8 @@ session_destroy();
 --EXPECTF--
 <a href="/link">
 
-Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d
+Warning: ini_set(): Session ini settings cannot be changed when a session is active in %s on line %d
 <a href="/link">
 
-Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d
+Warning: ini_set(): Session ini settings cannot be changed when a session is active in %s on line %d
 <a href="/link">

@@ -168,12 +168,12 @@ static void ps_files_open(ps_files *data, const char *key)
 		ps_files_close(data);
 
 		if (php_session_valid_key(key) == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
+			php_error_docref(NULL, E_WARNING, "Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			return;
 		}
 
 		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
-			php_error_docref(NULL, E_WARNING, "Failed to create session data file path. Too short session ID, invalid save_path or path lentgth exceeds MAXPATHLEN(%d)", MAXPATHLEN);
+			php_error_docref(NULL, E_WARNING, "Failed to create session data file path. Too short session ID, invalid save_path or path length exceeds %d characters", MAXPATHLEN);
 			return;
 		}
 
