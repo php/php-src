@@ -583,7 +583,7 @@ static zend_never_inline ZEND_COLD bool zend_wrong_assign_to_variable_reference(
 	return 1;
 }
 
-ZEND_API ZEND_COLD void zend_cannot_pass_by_reference(uint32_t arg_num)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
 {
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	zend_string *func_name = get_function_or_method_name(EX(call)->func);
