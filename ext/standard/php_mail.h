@@ -28,12 +28,12 @@ do { \
 		php_mail_build_headers_elem(&s, key, val); \
 	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
 		if (!strncasecmp(target, ZSTR_VAL(key), ZSTR_LEN(key))) { \
-			php_error_docref(NULL, E_WARNING, "'%s' header must be at most one header. Array is passed for '%s'", target, target); \
-			continue; \
+			zend_type_error("Header \"%s\" must be of type string, array given", target); \
+			break; \
 		} \
 		php_mail_build_headers_elems(&s, key, val); \
 	} else { \
-		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than string or array.", ZSTR_VAL(key)); \
+		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_type_name(val)); \
 	} \
 } while(0)
 
@@ -45,7 +45,7 @@ do { \
 	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
 		php_mail_build_headers_elems(&s, key, val); \
 	} else { \
-		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than string or array.", ZSTR_VAL(key)); \
+		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_type_name(val)); \
 	} \
 } while(0)
 

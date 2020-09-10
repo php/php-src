@@ -29,10 +29,10 @@ $outFile = "mailBasic7.out";
 
 echo "-- All Mail Content Parameters --\n";
 // Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
+
+var_dump(mail($to, $subject, $message, $additional_headers));
 echo file_get_contents($outFile);
 unlink($outFile);
-
 
 echo "\n\n************* TEST ******************\n";
 // Should fail all
@@ -40,26 +40,54 @@ echo "\n\n************* TEST ******************\n";
 $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
-// Headers should not have array values
-$additional_headers = array(
-    'orig-date' => array('foo1'),
-    'from' => array('foo2'),
-    'sender' => array('foo3'),
-    'reply-to' => array('foo4'),
-    'to' => array('foo5'),
-    'bcc' => array('foo6'),
-    'message-id' => array('foo7'),
-    'in-reply-to'=> array('foo8'),
-);
-$outFile = "mailBasic7.out";
-@unlink($outFile);
 
-echo "-- All Mail Content Parameters --\n";
-// Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
-echo file_get_contents($outFile);
-unlink($outFile);
+try {
+    mail($to, $subject, $message, ['orig-date' => array('foo1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
+try {
+    mail($to, $subject, $message, ['from' => array('foo2')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['sender' => array('foo3')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['reply-to' => array('foo4')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['to' => array('foo5')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['bcc' => array('foo6')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['message-id' => array('foo7')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['in-reply-to'=> array('foo8')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
 echo "\n\n************* TEST ******************\n";
 // Should fail all
@@ -67,24 +95,48 @@ echo "\n\n************* TEST ******************\n";
 $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
-$additional_headers = array(
-    'foo1' => array('foo1'=>'bar1'),
-    'foo2' => array('foo2', array('foo3')),
-    'foo3' => array(123),
-    'foo4' => array(123.456),
-    'foo5' => array(FALSE),
-    'foo6' => array(NULL),
-    'foo7' => array(new StdClass),
-);
-$outFile = "mailBasic7.out";
-@unlink($outFile);
 
-echo "-- All Mail Content Parameters --\n";
-// Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
-echo file_get_contents($outFile);
-unlink($outFile);
+try {
+    mail($to, $subject, $message, ['foo1' => array('foo2'=>'bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
+try {
+    mail($to, $subject, $message, ['foo2' => array('foo2', array('foo3'))]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo3' => array(123)]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo4' => array(123.456)]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo5' => array(FALSE)]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo6' => array(NULL)]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo7' => array(new StdClass)]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
 echo "\n\n************* TEST ******************\n";
 // Should fail most
@@ -92,26 +144,67 @@ echo "\n\n************* TEST ******************\n";
 $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
-$additional_headers = array(
-    '*:foo1' => array('bar1'),
-    'foo2:::' => array('bar1'),
-    'foo3()' => array('bar1'),
-    'foo4@' => array('bar1'),
-    'foo5|' => array('bar1'),
-    "\0foo6" => array('bar1'),
-    "foo7\0" => array('bar1'),
-    "foo8" => array(),
-    "foo9" => '%&$#!',
-    "foo10" => "abc\0\tdef",
-);
+
 $outFile = "mailBasic7.out";
 @unlink($outFile);
 
-echo "-- All Mail Content Parameters --\n";
-// Calling mail() with all additional headers
-var_dump( mail($to, $subject, $message, $additional_headers) );
+try {
+    mail($to, $subject, $message, ['*:foo1' => array('bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo2:::' => array('bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo3()' => array('bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo4@' => array('bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ['foo5|' => array('bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ["\0foo6" => array('bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ["foo7\0" => array('bar1')]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+try {
+    mail($to, $subject, $message, ["foo8" => array()]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
+
+var_dump(mail($to, $subject, $message, ["foo9" => '%&$#!']));
 echo file_get_contents($outFile);
 unlink($outFile);
+
+try {
+    mail($to, $subject, $message, ["foo10" => "abc\0\tdef"]);
+} catch (TypeError|ValueError $exception) {
+    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
@@ -134,72 +227,35 @@ A Message
 
 
 ************* TEST ******************
--- All Mail Content Parameters --
-
-Warning: mail(): 'orig-date' header must be at most one header. Array is passed for 'orig-date' in %s on line %d
-
-Warning: mail(): 'from' header must be at most one header. Array is passed for 'from' in %s on line %d
-
-Warning: mail(): 'sender' header must be at most one header. Array is passed for 'sender' in %s on line %d
-
-Warning: mail(): 'reply-to' header must be at most one header. Array is passed for 'reply-to' in %s on line %d
-
-Warning: mail(): Extra header cannot contain 'To' header in %s on line %d
-
-Warning: mail(): 'bcc' header must be at most one header. Array is passed for 'bcc' in %s on line %d
-
-Warning: mail(): 'message-id' header must be at most one header. Array is passed for 'message-id' in %s on line %d
-
-Warning: mail(): 'in-reply-to' header must be at most one header. Array is passed for 'in-reply-to' in %s on line %d
-bool(true)
-To: user@example.com
-Subject: Test Subject
-
-A Message
+TypeError: Header "orig-date" must be of type string, array given
+TypeError: Header "from" must be of type string, array given
+TypeError: Header "sender" must be of type string, array given
+TypeError: Header "reply-to" must be of type string, array given
+ValueError: The additional headers cannot contain the "To" header
+TypeError: Header "bcc" must be of type string, array given
+TypeError: Header "message-id" must be of type string, array given
+TypeError: Header "in-reply-to" must be of type string, array given
 
 
 ************* TEST ******************
--- All Mail Content Parameters --
-
-Warning: mail(): Multiple header key must be numeric index (foo1) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo2) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo3) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo4) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo5) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo6) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo7) in %s on line %d
-bool(true)
-To: user@example.com
-Subject: Test Subject
-foo2: foo2
-
-A Message
+TypeError: Header "foo1" must only contain numeric keys, "foo2" found
+TypeError: Header "foo2" must only contain values of type string, array found
+TypeError: Header "foo3" must only contain values of type string, int found
+TypeError: Header "foo4" must only contain values of type string, float found
+TypeError: Header "foo5" must only contain values of type string, bool found
+TypeError: Header "foo6" must only contain values of type string, null found
+TypeError: Header "foo7" must only contain values of type string, stdClass found
 
 
 ************* TEST ******************
--- All Mail Content Parameters --
-
-Warning: mail(): Header field name (*:foo1) contains invalid chars in %s on line %d
-
-Warning: mail(): Header field name (foo2:::) contains invalid chars in %s on line %d
-
-Warning: mail(): Header field name () contains invalid chars in %s on line %d
-
-Warning: mail(): Header field name (foo7) contains invalid chars in %s on line %d
-
-Warning: mail(): Header field value (foo10 => abc) contains invalid chars or format in %s on line %d
+ValueError: Header name "*:foo1" contains invalid characters
+ValueError: Header name "foo2:::" contains invalid characters
+ValueError: Header name "" contains invalid characters
+ValueError: Header name "foo7" contains invalid characters
 bool(true)
 To: user@example.com
 Subject: Test Subject
-foo3(): bar1
-foo4@: bar1
-foo5|: bar1
 foo9: %&$#!
 
 A Message
+ValueError: Header "foo10" has invalid format, or contains invalid characters

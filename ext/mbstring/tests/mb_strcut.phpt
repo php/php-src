@@ -29,7 +29,7 @@ print MBStringChars(mb_strcut($euc_jp,  5,   5,'EUC-JP'), 'EUC-JP') . "\n";
 print MBStringChars(mb_strcut($euc_jp,  0, 100,'EUC-JP'), 'EUC-JP') . "\n";
 
 $str = mb_strcut($euc_jp, 100, 10,'EUC-JP');
-($str === false) ? print "OK\n" : print "No good\n";
+($str === "") ? print "OK\n" : print "No good\n";
 
 $str = mb_strcut($euc_jp, -100, 10,'EUC-JP');
 ($str !== "") ?	print "OK\n" : print "No good\n";

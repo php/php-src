@@ -533,7 +533,7 @@ static const func_info_t func_infos[] = {
 	F1("mb_stristr",                            MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mb_strrichr",                           MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mb_substr",                             MAY_BE_STRING),
-	F1("mb_strcut",                             MAY_BE_FALSE | MAY_BE_STRING),
+	F1("mb_strcut",                             MAY_BE_STRING),
 	F1("mb_strimwidth",                         MAY_BE_STRING),
 	F1("mb_convert_encoding",                   MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("mb_detect_encoding",                    MAY_BE_FALSE | MAY_BE_STRING),

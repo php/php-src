@@ -734,7 +734,7 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 		ZEND_ASSERT(Z_TYPE_P(struc) == IS_OBJECT);
 		ce = Z_OBJCE_P(struc);
 		zval_ptr_dtor(retval);
-		php_error_docref(NULL, E_NOTICE, "%s::__sleep should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(ce->name));
+		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(ce->name));
 		return FAILURE;
 	}
 
@@ -785,7 +785,7 @@ static int php_var_serialize_try_add_sleep_prop(
 
 	if (!zend_hash_add(ht, name, val)) {
 		php_error_docref(NULL, E_NOTICE,
-			"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(error_name));
+			"\"%s\" is returned from __sleep() multiple times", ZSTR_VAL(error_name));
 		return SUCCESS;
 	}
 
@@ -810,8 +810,8 @@ static int php_var_serialize_get_sleep_props(
 
 		ZVAL_DEREF(name_val);
 		if (Z_TYPE_P(name_val) != IS_STRING) {
-			php_error_docref(NULL, E_NOTICE,
-					"%s::__sleep should return an array only containing the names of instance-variables to serialize",
+			php_error_docref(NULL, E_WARNING,
+					"%s::__sleep() should return an array only containing the names of instance-variables to serialize",
 					ZSTR_VAL(ce->name));
 		}
 
@@ -858,7 +858,7 @@ static int php_var_serialize_get_sleep_props(
 			break;
 		}
 
-		php_error_docref(NULL, E_NOTICE,
+		php_error_docref(NULL, E_WARNING,
 			"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
 		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
@@ -1195,8 +1195,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 
 		classes = zend_hash_str_find_deref(options, "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
-			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
-			RETVAL_FALSE;
+			zend_type_error("%s(): Option \"allowed_classes\" must be of type array|bool, %s given", function_name, zend_zval_type_name(classes));
 			goto cleanup;
 		}
 
@@ -1225,11 +1224,11 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 		max_depth = zend_hash_str_find_deref(options, "max_depth", sizeof("max_depth") - 1);
 		if (max_depth) {
 			if (Z_TYPE_P(max_depth) != IS_LONG) {
-				zend_type_error("%s(): \"max_depth\" option must be of type int, %s given", function_name, zend_zval_type_name(max_depth));
+				zend_type_error("%s(): Option \"max_depth\" must be of type int, %s given", function_name, zend_zval_type_name(max_depth));
 				goto cleanup;
 			}
 			if (Z_LVAL_P(max_depth) < 0) {
-				zend_value_error("%s(): \"max_depth\" option must be greater than or equal to 0", function_name);
+				zend_value_error("%s(): Option \"max_depth\" must be greater than or equal to 0", function_name);
 				goto cleanup;
 			}
 

@@ -6,11 +6,14 @@ stream_get_contents() with negative max length
 $tmp = tmpfile();
 fwrite($tmp, "abcd");
 var_dump(stream_get_contents($tmp, 2, 1));
-var_dump(stream_get_contents($tmp, -2));
+
+try {
+    stream_get_contents($tmp, -2);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
 string(2) "bc"
-
-Warning: stream_get_contents(): Length must be greater than or equal to 0, or -1 in %s on line %d
-bool(false)
+stream_get_contents(): Argument #2 ($maxlength) must be greater than or equal to -1

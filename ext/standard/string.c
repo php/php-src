@@ -5421,7 +5421,7 @@ PHP_FUNCTION(substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
-		zend_argument_value_error(2, "must be a non-empty string");
+		zend_argument_value_error(2, "cannot be empty");
 		RETURN_THROWS();
 	}
 
@@ -5443,8 +5443,8 @@ PHP_FUNCTION(substr_count)
 			length += (haystack_len - offset);
 		}
 		if (length < 0 || ((size_t)length > (haystack_len - offset))) {
-			php_error_docref(NULL, E_WARNING, "Invalid length value");
-			RETURN_FALSE;
+			zend_argument_value_error(4, "must be contained in argument #1 ($haystack)");
+			RETURN_THROWS();
 		}
 		endp = p + length;
 	}
@@ -5908,8 +5908,8 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if ((size_t)offset > ZSTR_LEN(s1)) {
-		php_error_docref(NULL, E_WARNING, "The start position cannot exceed initial string length");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #1 ($main_str)");
+		RETURN_THROWS();
 	}
 
 	cmp_len = len ? (size_t)len : MAX(ZSTR_LEN(s2), (ZSTR_LEN(s1) - offset));

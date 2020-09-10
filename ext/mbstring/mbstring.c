@@ -2233,8 +2233,7 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	if (from > string.len) {
-		// TODO Out of bounds ValueError
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);
@@ -3500,6 +3499,9 @@ PHP_FUNCTION(mb_send_mail)
 		str_headers = php_trim(str_headers, NULL, 0, 2);
 	} else if (headers_ht) {
 		str_headers = php_mail_build_headers(headers_ht);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 	}
 
 	zend_hash_init(&ht_headers, 0, NULL, ZVAL_PTR_DTOR, 0);

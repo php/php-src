@@ -962,22 +962,6 @@ static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 }
 /* }}} */
 
-/* check if comparison function is valid */
-#define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
-	if (!zend_is_callable(*func_name, 0, NULL)) {	\
-		php_error_docref(NULL, E_WARNING, "Invalid comparison function");	\
-		BG(user_compare_fci) = old_user_compare_fci; \
-		BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
-		RETURN_FALSE;	\
-	}	\
-
-	/* Clear FCI cache otherwise : for example the same or other array with
-	 * (partly) the same key values has been sorted with uasort() or
-	 * other sorting function the comparison is cached, however the name
-	 * of the function for comparison is not respected. see bug #28739 AND #33295
-	 *
-	 * Following defines will assist in backup / restore values. */
-
 #define PHP_ARRAY_CMP_FUNC_VARS \
 	zend_fcall_info old_user_compare_fci; \
 	zend_fcall_info_cache old_user_compare_fci_cache \
@@ -2567,7 +2551,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			}
 		} else {
-			php_error_docref(NULL, E_NOTICE, "Undefined variable $%s", ZSTR_VAL(Z_STR_P(entry)));
+			php_error_docref(NULL, E_WARNING, "Undefined variable $%s", ZSTR_VAL(Z_STR_P(entry)));
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 	    if (Z_REFCOUNTED_P(entry)) {

@@ -3067,7 +3067,7 @@ PHP_FUNCTION(sodium_unpad)
 		RETURN_THROWS();
 	}
 	if (padded_len < blocksize) {
-		zend_argument_error(sodium_exception_ce, 1, "must not be shorter than the block size");
+		zend_argument_error(sodium_exception_ce, 1, "must be at least as long as the block size");
 		RETURN_THROWS();
 	}
 

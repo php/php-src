@@ -672,7 +672,7 @@ function localeconv(): array {}
 
 function strnatcasecmp(string $s1, string $s2): int {}
 
-function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int|false {}
+function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int {}
 
 function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
 
