@@ -1228,7 +1228,7 @@ PHP_FUNCTION(implode)
 	zend_array *pieces = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR_OR_ARRAY_HT(arg1_str, arg1_array)
+		Z_PARAM_ARRAY_HT_OR_STR(arg1_array, arg1_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_NULL(pieces)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2246,8 +2246,8 @@ PHP_FUNCTION(substr_replace)
 	zval *tmp_str = NULL, *tmp_repl, *tmp_from = NULL, *tmp_len= NULL;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_STR_OR_ARRAY_HT(str, str_ht)
-		Z_PARAM_STR_OR_ARRAY_HT(repl_str, repl_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(str_ht, str)
+		Z_PARAM_ARRAY_HT_OR_STR(repl_ht, repl_str)
 		Z_PARAM_ZVAL(from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL_OR_NULL(len)
@@ -3208,7 +3208,7 @@ PHP_FUNCTION(strtr)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
-		Z_PARAM_STR_OR_ARRAY_HT(from_str, from_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(from_ht, from_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(to, to_len)
 	ZEND_PARSE_PARAMETERS_END();
@@ -4251,9 +4251,9 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	zend_long count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_STR_OR_ARRAY_HT(search_str, search_ht)
-		Z_PARAM_STR_OR_ARRAY_HT(replace_str, replace_ht)
-		Z_PARAM_STR_OR_ARRAY_HT(subject_str, subject_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(search_ht, search_str)
+		Z_PARAM_ARRAY_HT_OR_STR(replace_ht, replace_str)
+		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(zcount)
 	ZEND_PARSE_PARAMETERS_END();
@@ -4570,7 +4570,7 @@ PHP_FUNCTION(strip_tags)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(allow_str, allow_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(allow_ht, allow_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (allow_ht) {

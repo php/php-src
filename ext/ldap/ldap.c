@@ -1438,8 +1438,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 	ZEND_PARSE_PARAMETERS_START(3, 9)
 		Z_PARAM_ZVAL(link)
-		Z_PARAM_STR_OR_ARRAY_HT(base_dn_str, base_dn_ht)
-		Z_PARAM_STR_OR_ARRAY_HT(filter_str, filter_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(base_dn_ht, base_dn_str)
+		Z_PARAM_ARRAY_HT_OR_STR(filter_ht, filter_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_EX(attrs, 0, 1)
 		Z_PARAM_LONG(attrsonly)

@@ -2285,9 +2285,9 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_STR_OR_ARRAY_HT(regex_str, regex_ht)
-		Z_PARAM_STR_OR_ARRAY_HT(replace_str, replace_ht)
-		Z_PARAM_STR_OR_ARRAY_HT(subject_str, subject_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(regex_ht, regex_str)
+		Z_PARAM_ARRAY_HT_OR_STR(replace_ht, replace_str)
+		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)
@@ -2377,9 +2377,9 @@ PHP_FUNCTION(preg_replace_callback)
 
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(3, 6)
-		Z_PARAM_STR_OR_ARRAY_HT(regex_str, regex_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(regex_ht, regex_str)
 		Z_PARAM_FUNC(fci, fcc)
-		Z_PARAM_STR_OR_ARRAY_HT(subject_str, subject_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)

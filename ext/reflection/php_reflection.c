@@ -1496,7 +1496,7 @@ ZEND_METHOD(ReflectionFunction, __construct)
 	intern = Z_REFLECTION_P(object);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(fname, closure_obj, zend_ce_closure)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(closure_obj, zend_ce_closure, fname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (closure_obj) {
@@ -2992,7 +2992,7 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	zend_function *mptr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR_OR_OBJ(arg1_str, arg1_obj)
+		Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(arg2_str)
 	ZEND_PARSE_PARAMETERS_END();
@@ -3513,7 +3513,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	zend_class_constant *constant = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR_OR_OBJ(classname_str, classname_obj)
+		Z_PARAM_OBJ_OR_STR(classname_obj, classname_str)
 		Z_PARAM_STR(constname)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3698,7 +3698,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		ZEND_PARSE_PARAMETERS_END();
 	} else {
 		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_STR_OR_OBJ(arg_class, arg_obj)
+			Z_PARAM_OBJ_OR_STR(arg_obj, arg_class)
 		ZEND_PARSE_PARAMETERS_END();
 	}
 
@@ -4922,7 +4922,7 @@ ZEND_METHOD(ReflectionClass, isSubclassOf)
 	zend_object *class_obj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(class_str, class_obj, reflection_class_ptr)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(class_obj, reflection_class_ptr, class_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (class_obj) {
@@ -4955,7 +4955,7 @@ ZEND_METHOD(ReflectionClass, implementsInterface)
 	zend_object *interface_obj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(interface_str, interface_obj, reflection_class_ptr)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(interface_obj, reflection_class_ptr, interface_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (interface_obj) {
@@ -5124,7 +5124,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	property_reference *reference;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR_OR_OBJ(classname_str, classname_obj)
+		Z_PARAM_OBJ_OR_STR(classname_obj, classname_str)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 

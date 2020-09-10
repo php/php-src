@@ -3601,7 +3601,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(type_def, type_obj, zend_ffi_ctype_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(type_obj, zend_ffi_ctype_ce, type_def)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(owned)
 		Z_PARAM_BOOL(persistent)
@@ -3752,7 +3752,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(type_def, ztype, zend_ffi_ctype_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(ztype, zend_ffi_ctype_ce, type_def)
 		Z_PARAM_ZVAL(zv)
 	ZEND_PARSE_PARAMETERS_END();
 

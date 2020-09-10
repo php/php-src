@@ -1000,7 +1000,7 @@ PHP_FUNCTION(stream_context_set_option)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_RESOURCE(zcontext)
-		Z_PARAM_STR_OR_ARRAY_HT(wrappername, options)
+		Z_PARAM_ARRAY_HT_OR_STR(options, wrappername)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(optionname, optionname_len)
 		Z_PARAM_ZVAL(zvalue)

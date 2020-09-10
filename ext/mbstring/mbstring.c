@@ -1357,7 +1357,7 @@ PHP_FUNCTION(mb_detect_order)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(order_str, order_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(order_ht, order_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!order_str && !order_ht) {
@@ -2508,10 +2508,10 @@ PHP_FUNCTION(mb_convert_encoding)
 	zend_bool free_from_encodings;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR_OR_ARRAY_HT(input_str, input_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(input_ht, input_str)
 		Z_PARAM_STR(to_encoding_name)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(from_encodings_str, from_encodings_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(from_encodings_ht, from_encodings_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const mbfl_encoding *to_encoding = php_mb_get_encoding(to_encoding_name, 2);
@@ -2689,7 +2689,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(encoding_str, encoding_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(encoding_ht, encoding_str)
 		Z_PARAM_BOOL(strict)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3063,7 +3063,7 @@ PHP_FUNCTION(mb_convert_variables)
 
 	ZEND_PARSE_PARAMETERS_START(3, -1)
 		Z_PARAM_STR(to_enc_str)
-		Z_PARAM_STR_OR_ARRAY_HT(from_enc_str, from_enc_ht)
+		Z_PARAM_ARRAY_HT_OR_STR(from_enc_ht, from_enc_str)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3488,7 +3488,7 @@ PHP_FUNCTION(mb_send_mail)
 		Z_PARAM_PATH(subject, subject_len)
 		Z_PARAM_PATH(message, message_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(str_headers, headers_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(headers_ht, str_headers)
 		Z_PARAM_PATH_STR_OR_NULL(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3974,7 +3974,7 @@ PHP_FUNCTION(mb_check_encoding)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(input_str, input_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(input_ht, input_str)
 		Z_PARAM_STR_OR_NULL(enc)
 	ZEND_PARSE_PARAMETERS_END();
 
