@@ -1,15 +1,24 @@
 --TEST--
-timezone_identifiers_list: Test that correct notice is given when timezone_identifiers_list is given 4096 as parameter
+timezone_identifiers_list: ValueError when timezoneGroup is DateTimeZone::PER_COUNTRY
 --CREDITS--
 Havard Eide <nucleuz@gmail.com>
 #PHPTestFest2009 Norway 2009-06-09 \o/
 --INI--
-error_reporting=E_ALL
 date.timezone=UTC
 --FILE--
 <?php
-print_r(timezone_identifiers_list(4096));
+try {
+    var_dump(timezone_identifiers_list(DateTimeZone::PER_COUNTRY));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(timezone_identifiers_list(DateTimeZone::PER_COUNTRY, 'A'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Notice: timezone_identifiers_list(): A two-letter ISO 3166-1 compatible country code is expected in %s on line %d
+timezone_identifiers_list(): Argument #2 ($countryCode) must be a two-letter ISO 3166-1 compatible country code when argument #1 ($timezoneGroup) is DateTimeZone::PER_COUNTRY
+timezone_identifiers_list(): Argument #2 ($countryCode) must be a two-letter ISO 3166-1 compatible country code when argument #1 ($timezoneGroup) is DateTimeZone::PER_COUNTRY

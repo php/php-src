@@ -4358,9 +4358,9 @@ PHP_FUNCTION(timezone_identifiers_list)
 
 	/* Extra validation */
 	if (what == PHP_DATE_TIMEZONE_PER_COUNTRY && option_len != 2) {
-		// Promoto to ValueError?
-		php_error_docref(NULL, E_NOTICE, "A two-letter ISO 3166-1 compatible country code is expected");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a two-letter ISO 3166-1 compatible country code "
+			"when argument #1 ($timezoneGroup) is DateTimeZone::PER_COUNTRY");
+		RETURN_THROWS();
 	}
 
 	tzdb = DATE_TIMEZONEDB;

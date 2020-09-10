@@ -88,7 +88,7 @@ function timezone_transitions_get(
 
 function timezone_location_get(DateTimeZone $object): array|false {}
 
-function timezone_identifiers_list(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array|false {}
+function timezone_identifiers_list(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array {}
 
 function timezone_abbreviations_list(): array {}
 
