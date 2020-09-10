@@ -78,9 +78,13 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
-    var_dump(session_set_save_handler($input, NULL, NULL, NULL, NULL, NULL));
+    try {
+        session_set_save_handler($input, NULL, NULL, NULL, NULL, NULL);
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
     $iterator++;
-};
+}
 
 fclose($fp);
 echo "Done";
@@ -90,122 +94,74 @@ ob_end_flush();
 *** Testing session_set_save_handler() : error functionality ***
 
 -- Iteration 1 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "0" not found or invalid function name
 
 -- Iteration 2 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "1" not found or invalid function name
 
 -- Iteration 3 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "12345" not found or invalid function name
 
 -- Iteration 4 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "-2345" not found or invalid function name
 
 -- Iteration 5 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "10.5" not found or invalid function name
 
 -- Iteration 6 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "-10.5" not found or invalid function name
 
 -- Iteration 7 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "123456789000" not found or invalid function name
 
 -- Iteration 8 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "1.23456789E-9" not found or invalid function name
 
 -- Iteration 9 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "0.5" not found or invalid function name
 
 -- Iteration 10 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 11 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 12 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "1" not found or invalid function name
 
 -- Iteration 13 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 14 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "1" not found or invalid function name
 
 -- Iteration 15 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 16 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 17 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 18 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "Nothing" not found or invalid function name
 
 -- Iteration 19 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "Nothing" not found or invalid function name
 
 -- Iteration 20 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "Hello World!" not found or invalid function name
 
 -- Iteration 21 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "classA::__invoke" not found or invalid function name
 
 -- Iteration 22 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 23 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 24 --
-
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
-bool(false)
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "Resource id #%d" not found or invalid function name
 Done

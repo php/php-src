@@ -29,7 +29,7 @@ string(4) "test"
 string(10) "1234567890"
 bool(true)
 
-Warning: session_id(): Cannot change session id when session is active in %s on line %d
+Warning: session_id(): Session ID cannot be changed when a session is active in %s on line %d
 bool(false)
 bool(true)
 string(0) ""

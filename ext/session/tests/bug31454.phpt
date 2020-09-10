@@ -5,16 +5,21 @@ Bug #31454 (session_set_save_handler crashes PHP when supplied non-existent obje
 --FILE--
 <?php
 
-session_set_save_handler(
-    array(&$arf, 'open'),
-    array(&$arf, 'close'),
-    array(&$arf, 'read'),
-    array(&$arf, 'write'),
-    array(&$arf, 'destroy'),
-    array(&$arf, 'gc'));
+try {
+    session_set_save_handler(
+        array(&$arf, 'open'),
+        array(&$arf, 'close'),
+        array(&$arf, 'read'),
+        array(&$arf, 'write'),
+        array(&$arf, 'destroy'),
+        array(&$arf, 'gc')
+    );
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: session_set_save_handler(): Argument 1 is not a valid callback in %sbug31454.php on line %d
+--EXPECT--
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "Array" not found or invalid function name
 Done

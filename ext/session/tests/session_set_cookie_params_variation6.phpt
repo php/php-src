@@ -34,7 +34,7 @@ string(7) "nothing"
 bool(true)
 string(7) "nothing"
 
-Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line %d
+Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in %s on line %d
 bool(false)
 string(7) "nothing"
 bool(true)
