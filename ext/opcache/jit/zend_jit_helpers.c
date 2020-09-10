@@ -1858,6 +1858,13 @@ static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, const
 		property_name, zend_zval_type_name(container));
 }
 
+static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, const char *property_name)
+{
+	zend_throw_error(NULL,
+		"Attempt to assign property \"%s\" on %s",
+		property_name, zend_zval_type_name(container));
+}
+
 static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 	zval *val = Z_REFVAL_P(ref);
 	if (Z_TYPE_P(val) <= IS_FALSE) {
@@ -1926,4 +1933,35 @@ static zend_array *ZEND_FASTCALL zend_jit_add_arrays_helper(zend_array *op1, zen
 	res = zend_array_dup(op1);
 	zend_hash_merge(res, op2, zval_add_ref, 0);
 	return res;
+}
+
+static void ZEND_FASTCALL zend_jit_assign_obj_helper(zend_object *zobj, zend_string *name, zval *value, void **cache_slot, zval *result)
+{
+	ZVAL_DEREF(value);
+	value = zobj->handlers->write_property(zobj, name, value, cache_slot);
+	if (result) {
+		ZVAL_COPY_DEREF(result, value);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend_property_info *info, zval *value, zval *result)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval tmp;
+
+	ZVAL_DEREF(value);
+	ZVAL_COPY(&tmp, value);
+
+	if (UNEXPECTED(!zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(&tmp);
+		if (result) {
+			ZVAL_NULL(result);
+		}
+		return;
+	}
+
+	value = zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	if (result) {
+		ZVAL_COPY_DEREF(result, value);
+	}
 }
