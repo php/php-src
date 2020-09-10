@@ -1190,30 +1190,22 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	/* according to error handling mode, throw exception or show it */
 	if (EG(error_handling) == EH_THROW) {
 		switch (type) {
-			case E_ERROR:
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-			case E_PARSE:
-				/* fatal errors are real errors and cannot be made exceptions */
-				break;
-			case E_STRICT:
-			case E_DEPRECATED:
-			case E_USER_DEPRECATED:
-				/* for the sake of BC to old damaged code */
-				break;
-			case E_NOTICE:
-			case E_USER_NOTICE:
-				/* notices are no errors and are not treated as such like E_WARNINGS */
-				break;
-			default:
-				/* throw an exception if we are in EH_THROW mode
-				 * but DO NOT overwrite a pending exception
+			case E_WARNING:
+			case E_CORE_WARNING:
+			case E_COMPILE_WARNING:
+			case E_USER_WARNING:
+				/* throw an exception if we are in EH_THROW mode and the type is warning.
+				 * fatal errors are real errors and cannot be made exceptions.
+				 * exclude deprecated for the sake of BC to old damaged code.
+				 * notices are no errors and are not treated as such like E_WARNINGS.
+				 * DO NOT overwrite a pending exception.
 				 */
 				if (!EG(exception)) {
 					zend_throw_error_exception(EG(exception_class), message, 0, type);
 				}
 				return;
+			default:
+				break;
 		}
 	}
 

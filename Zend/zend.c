@@ -1311,30 +1311,21 @@ static ZEND_COLD void zend_error_impl(
 		zend_execute_data *ex;
 		const zend_op *opline;
 
-		switch (type) {
-			case E_CORE_ERROR:
-			case E_ERROR:
-			case E_RECOVERABLE_ERROR:
-			case E_PARSE:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-				ex = EG(current_execute_data);
-				opline = NULL;
-				while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
-					ex = ex->prev_execute_data;
-				}
-				if (ex && ex->opline->opcode == ZEND_HANDLE_EXCEPTION &&
-				    EG(opline_before_exception)) {
-					opline = EG(opline_before_exception);
-				}
-				zend_exception_error(EG(exception), E_WARNING);
-				EG(exception) = NULL;
-				if (opline) {
-					ex->opline = opline;
-				}
-				break;
-			default:
-				break;
+		if (type & E_FATAL_ERRORS) {
+			ex = EG(current_execute_data);
+			opline = NULL;
+			while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+				ex = ex->prev_execute_data;
+			}
+			if (ex && ex->opline->opcode == ZEND_HANDLE_EXCEPTION &&
+			    EG(opline_before_exception)) {
+				opline = EG(opline_before_exception);
+			}
+			zend_exception_error(EG(exception), E_WARNING);
+			EG(exception) = NULL;
+			if (opline) {
+				ex->opline = opline;
+			}
 		}
 	}
 

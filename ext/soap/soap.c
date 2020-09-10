@@ -1843,12 +1843,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		     use_exceptions = 1;
 		}
 
-		if ((error_num == E_USER_ERROR ||
-		     error_num == E_COMPILE_ERROR ||
-		     error_num == E_CORE_ERROR ||
-		     error_num == E_ERROR ||
-		     error_num == E_PARSE) &&
-		    use_exceptions) {
+		if ((error_num & E_FATAL_ERRORS) && use_exceptions) {
 			zval fault;
 			char *code = SOAP_GLOBAL(error_code);
 			if (code == NULL) {
@@ -1870,12 +1865,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		int fault = 0;
 		zval fault_obj;
 
-		if (error_num == E_USER_ERROR ||
-		    error_num == E_COMPILE_ERROR ||
-		    error_num == E_CORE_ERROR ||
-		    error_num == E_ERROR ||
-		    error_num == E_PARSE) {
-
+		if (error_num & E_FATAL_ERRORS) {
 			char* code = SOAP_GLOBAL(error_code);
 			zend_string *buffer;
 			zval outbuf;
