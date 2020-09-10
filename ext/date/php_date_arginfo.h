@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 88ffa20bdb76b268afd12d1499fa13173045567e */
+ * Stub hash: eae561b0424a4837d35239b66be8c545d7ac2b04 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -151,9 +151,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_date_timestamp_set, 0, 2, DateTim
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_date_timestamp_get, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_date_timestamp_get arginfo_date_offset_get
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_timezone_open, 0, 1, DateTimeZone, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezone, IS_STRING, 0)

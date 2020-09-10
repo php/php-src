@@ -73,7 +73,7 @@ function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1):
 
 function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
-function date_timestamp_get(DateTimeInterface $object): int|false {}
+function date_timestamp_get(DateTimeInterface $object): int {}
 
 function timezone_open(string $timezone): DateTimeZone|false {}
 
@@ -230,7 +230,7 @@ class DateTime implements DateTimeInterface
     public function setTimestamp(int $timestamp) {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias date_timestamp_get
      */
     public function getTimestamp() {}
@@ -282,7 +282,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function getOffset() {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias date_timestamp_get
      */
     public function getTimestamp() {}

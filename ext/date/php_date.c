@@ -3339,8 +3339,8 @@ PHP_FUNCTION(date_timestamp_get)
 
 	/* Seconds since epoch must fit in a zend_long */
 	if (epoch_does_not_fit_in_zend_long) {
-		php_error_docref(NULL, E_WARNING, "Epoch doesn't fit in a PHP integer");
-		RETURN_FALSE;
+		zend_value_error("Epoch doesn't fit in a PHP integer");
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(timestamp);
