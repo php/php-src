@@ -1241,7 +1241,6 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		ta.tm_zone = offset->abbr;
 #endif
 	}
-	// TODO Cleanup as bug is not present anymore? (Need to update link as MS retired connect.microsoft.com)
 	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
 	   initial buffer is too small. See
 	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code */
