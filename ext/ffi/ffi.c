@@ -4427,6 +4427,26 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 }
 /* }}} */
 
+
+ZEND_METHOD(CType, getName) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zend_ffi_ctype_name_buf buf;
+
+	buf.start = buf.end = buf.buf + ((MAX_TYPE_NAME_LEN * 3) / 4);
+	if (!zend_ffi_ctype_name(&buf, ZEND_FFI_TYPE(ctype->type))) {
+		RETURN_STR_COPY(Z_OBJ_P(ZEND_THIS)->ce->name);
+	} else {
+		size_t len = buf.end - buf.start;
+		zend_string *res = zend_string_init(buf.start, len, 0);
+		RETURN_STR(res);
+	}
+}
+
 static char *zend_ffi_parse_directives(const char *filename, char *code_pos, char **scope_name, char **lib, zend_bool preload) /* {{{ */
 {
 	char *p;
@@ -4984,7 +5004,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_free_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_cdata_free_handlers.get_gc               = zend_fake_get_gc;
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "CType", NULL);
+	INIT_NS_CLASS_ENTRY(ce, "FFI", "CType", class_CType_methods);
 	zend_ffi_ctype_ce = zend_register_internal_class(&ce);
 	zend_ffi_ctype_ce->ce_flags |= ZEND_ACC_FINAL;
 	zend_ffi_ctype_ce->create_object = zend_ffi_ctype_new;
@@ -5004,7 +5024,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.unset_property       = zend_fake_unset_property;
 	zend_ffi_ctype_handlers.has_dimension        = zend_fake_has_dimension;
 	zend_ffi_ctype_handlers.unset_dimension      = zend_fake_unset_dimension;
-	zend_ffi_ctype_handlers.get_method           = zend_fake_get_method;
+	//zend_ffi_ctype_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_ctype_handlers.get_class_name       = zend_ffi_ctype_get_class_name;
 	zend_ffi_ctype_handlers.compare              = zend_ffi_ctype_compare_objects;
 	zend_ffi_ctype_handlers.cast_object          = zend_fake_cast_object;
