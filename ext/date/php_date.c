@@ -3409,7 +3409,7 @@ PHP_FUNCTION(timezone_open)
 	php_timezone_obj *tzobj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR(tz) /* To prevent nul bytes */
+		Z_PARAM_PATH_STR(tz) /* To prevent null bytes */
 	ZEND_PARSE_PARAMETERS_END();
 
 	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value));
@@ -3428,7 +3428,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	zend_error_handling error_handling;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR(tz) /* To prevent nul bytes */
+		Z_PARAM_PATH_STR(tz) /* To prevent null bytes */
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
