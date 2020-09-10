@@ -1009,7 +1009,7 @@ PHPAPI zend_long php_parse_date(const char *string, zend_long *now)
 PHP_FUNCTION(strtotime)
 {
 	zend_string *times;
-	int error1, error2;
+	int error1, epoch_does_not_fit_in_zend_long;
 	timelib_error_container *error;
 	zend_long preset_ts, ts;
 	zend_bool preset_ts_is_null = 1;
@@ -1024,7 +1024,6 @@ PHP_FUNCTION(strtotime)
 
 	/* timelib_strtotime() expects the string to not be empty */
 	if (ZSTR_LEN(times) == 0) {
-		/* TODO Add a Warning? */
 		RETURN_FALSE;
 	}
 
@@ -1048,14 +1047,14 @@ PHP_FUNCTION(strtotime)
 
 	timelib_fill_holes(t, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(t, tzi);
-	ts = timelib_date_to_int(t, &error2);
+	ts = timelib_date_to_int(t, &epoch_does_not_fit_in_zend_long);
 
 	timelib_time_dtor(now);
 	timelib_time_dtor(t);
 
 	/* Seconds since epoch must fit in a zend_long */
-	if (error2) {
-		/* TODO Add warning? */
+	if (epoch_does_not_fit_in_zend_long) {
+		php_error_docref(NULL, E_WARNING, "Epoch doesn't fit in a PHP integer");
 		RETURN_FALSE;
 	}
 
@@ -1071,7 +1070,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
 	zend_long ts, adjust_seconds = 0;
-	int error;
+	int epoch_does_not_fit_in_zend_long;
 
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
@@ -1129,12 +1128,12 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 
 	/* Clean up and return */
-	ts = timelib_date_to_int(now, &error);
+	ts = timelib_date_to_int(now, &epoch_does_not_fit_in_zend_long);
 
 	/* Seconds since epoch must fit in a zend_long */
-	if (error) {
+	if (epoch_does_not_fit_in_zend_long) {
 		timelib_time_dtor(now);
-		/* TODO Add warning? */
+		php_error_docref(NULL, E_WARNING, "Epoch doesn't fit in a PHP integer");
 		RETURN_FALSE;
 	}
 
@@ -1198,7 +1197,6 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) == 0) {
-		/* TODO Add a warning? */
 		RETURN_FALSE;
 	}
 
@@ -3328,7 +3326,7 @@ PHP_FUNCTION(date_timestamp_get)
 	zval         *object;
 	php_date_obj *dateobj;
 	zend_long          timestamp;
-	int           error;
+	int           epoch_does_not_fit_in_zend_long;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, date_ce_interface) == FAILURE) {
 		RETURN_THROWS();
@@ -3337,11 +3335,11 @@ PHP_FUNCTION(date_timestamp_get)
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	timelib_update_ts(dateobj->time, NULL);
 
-	timestamp = timelib_date_to_int(dateobj->time, &error);
+	timestamp = timelib_date_to_int(dateobj->time, &epoch_does_not_fit_in_zend_long);
 
 	/* Seconds since epoch must fit in a zend_long */
-	if (error) {
-		/* TODO Add warning? */
+	if (epoch_does_not_fit_in_zend_long) {
+		php_error_docref(NULL, E_WARNING, "Epoch doesn't fit in a PHP integer");
 		RETURN_FALSE;
 	}
 
