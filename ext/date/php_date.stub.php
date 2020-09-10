@@ -73,7 +73,7 @@ function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1):
 
 function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
-function date_timestamp_get(DateTimeInterface $object): int {}
+function date_timestamp_get(DateTimeInterface $object): int|false {}
 
 function timezone_open(string $timezone): DateTimeZone|false {}
 
