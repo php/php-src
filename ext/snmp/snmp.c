@@ -490,6 +490,7 @@ retry:
 				if (st & SNMP_CMD_SET) {
 					if (objid_query->offset < objid_query->count) { /* we have unprocessed OIDs */
 						keepwalking = 1;
+						snmp_free_pdu(response);
 						continue;
 					}
 					snmp_free_pdu(response);
