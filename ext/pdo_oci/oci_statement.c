@@ -459,7 +459,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	zend_long offset) /* {{{ */
 {
 #ifdef HAVE_OCISTMTFETCH2
-	ub4 ociori;
+	ub4 ociori = OCI_FETCH_NEXT;
 #endif
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 
@@ -652,7 +652,7 @@ static ssize_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
 	return amt;
 }
 
-static size_t oci_blob_read(php_stream *stream, char *buf, size_t count)
+static ssize_t oci_blob_read(php_stream *stream, char *buf, size_t count)
 {
 	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
 	ub4 amt;
@@ -990,5 +990,7 @@ const struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_param_hook,
 	NULL, /* set_attr */
 	NULL, /* get_attr */
-	oci_stmt_col_meta
+	oci_stmt_col_meta,
+	NULL,
+	NULL
 };

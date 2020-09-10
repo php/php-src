@@ -705,7 +705,9 @@ static const struct pdo_dbh_methods oci_methods = {
 	pdo_oci_fetch_error_func,
 	oci_handle_get_attribute,
 	pdo_oci_check_liveness,	/* check_liveness */
-	NULL	/* get_driver_methods */
+	NULL,	/* get_driver_methods */
+	NULL,
+	NULL
 };
 
 static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
