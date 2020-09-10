@@ -27,6 +27,54 @@
  *
  */
 
+/* Modified UTF-7 used for 'international mailbox names' in the IMAP protocol
+ * Also known as mUTF-7
+ * Defined in RFC 3501 5.1.3 (https://tools.ietf.org/html/rfc3501)
+ *
+ * Quoting from the RFC:
+ *
+ ***********************************************************************
+ * In modified UTF-7, printable US-ASCII characters, except for "&",
+ * represent themselves; that is, characters with octet values 0x20-0x25
+ * and 0x27-0x7e. The character "&" (0x26) is represented by the
+ * two-octet sequence "&-".
+ *
+ * All other characters (octet values 0x00-0x1f and 0x7f-0xff) are
+ * represented in modified BASE64, with a further modification from
+ * UTF-7 that "," is used instead of "/". Modified BASE64 MUST NOT be
+ * used to represent any printing US-ASCII character which can represent
+ * itself.
+ *
+ * "&" is used to shift to modified BASE64 and "-" to shift back to
+ * US-ASCII. There is no implicit shift from BASE64 to US-ASCII, and
+ * null shifts ("-&" while in BASE64; note that "&-" while in US-ASCII
+ * means "&") are not permitted.  However, all names start in US-ASCII,
+ * and MUST end in US-ASCII; that is, a name that ends with a non-ASCII
+ * ISO-10646 character MUST end with a "-").
+ ***********************************************************************
+ *
+ * The purpose of all this is: 1) to keep all parts of IMAP messages 7-bit clean,
+ * 2) to avoid giving special treatment to +, /, \, and ~, since these are
+ * commonly used in mailbox names, and 3) to ensure there is only one
+ * representation of any mailbox name (vanilla UTF-7 does allow multiple
+ * representations of the same string, by Base64-encoding characters which
+ * could have been included as ASCII literals.)
+ *
+ * RFC 2152 also applies, since it defines vanilla UTF-7 (minus IMAP modifications)
+ * The following paragraph is notable:
+ *
+ ***********************************************************************
+ * Unicode is encoded using Modified Base64 by first converting Unicode
+ * 16-bit quantities to an octet stream (with the most significant octet first).
+ * Surrogate pairs (UTF-16) are converted by treating each half of the pair as
+ * a separate 16 bit quantity (i.e., no special treatment). Text with an odd
+ * number of octets is ill-formed. ISO 10646 characters outside the range
+ * addressable via surrogate pairs cannot be encoded.
+ ***********************************************************************
+ *
+ * So after reversing the modified Base64 encoding on an encoded section,
+ * the contents are interpreted as UTF-16BE. */
+
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
 
