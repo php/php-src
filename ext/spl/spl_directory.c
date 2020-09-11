@@ -52,10 +52,9 @@ PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
-// TODO Use standard Error
 #define CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(spl_filesystem_object_pointer) \
 	if (!(spl_filesystem_object_pointer)->u.file.stream) { \
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized"); \
+		zend_throw_error(NULL, "Object not initialized"); \
 		RETURN_THROWS(); \
 	}
 
@@ -209,7 +208,7 @@ static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *int
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
 			if (!intern->file_name) {
-				zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+				zend_throw_error(NULL, "Object not initialized");
 				return FAILURE;
 			}
 			break;
@@ -1393,9 +1392,7 @@ PHP_METHOD(SplFileInfo, __debugInfo)
 /* {{{ */
 PHP_METHOD(SplFileInfo, _bad_state_ex)
 {
-	zend_throw_exception_ex(spl_ce_LogicException, 0,
-		"The parent constructor was not called: the object is in an "
-		"invalid state ");
+	zend_throw_error(NULL, "The parent constructor was not called: the object is in an invalid state");
 }
 /* }}} */
 
@@ -2021,7 +2018,7 @@ static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object 
 static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
 	if (!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		return;
 	}
 	if (-1 == php_stream_rewind(intern->u.file.stream)) {

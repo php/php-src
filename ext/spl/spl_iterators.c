@@ -125,8 +125,7 @@ static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *ob
 	do { 																						\
 		spl_dual_it_object *it = Z_SPLDUAL_IT_P(objzval); 										\
 		if (it->dit_type == DIT_Unknown) { 														\
-			zend_throw_exception_ex(spl_ce_LogicException, 0, 						\
-				"The object is in an invalid state as the parent constructor was not called"); 	\
+			zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called"); 	\
 			RETURN_THROWS(); 																			\
 		} 																						\
 		(var) = it; 																			\
@@ -135,8 +134,7 @@ static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *ob
 #define SPL_FETCH_SUB_ELEMENT(var, object, element) \
 	do { \
 		if(!(object)->iterators) { \
-			zend_throw_exception_ex(spl_ce_LogicException, 0, \
-				"The object is in an invalid state as the parent constructor was not called"); \
+			zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called"); \
 			return; \
 		} \
 		(var) = (object)->iterators[(object)->level].element; \
@@ -145,8 +143,7 @@ static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *ob
 #define SPL_FETCH_SUB_ELEMENT_ADDR(var, object, element) \
 	do { \
 		if(!(object)->iterators) { \
-			zend_throw_exception_ex(spl_ce_LogicException, 0, \
-				"The object is in an invalid state as the parent constructor was not called"); \
+			zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called"); \
 			RETURN_THROWS(); \
 		} \
 		(var) = &(object)->iterators[(object)->level].element; \
@@ -698,8 +695,7 @@ PHP_METHOD(RecursiveIteratorIterator, getSubIterator)
 	}
 
 	if(!object->iterators) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0,
-			"The object is in an invalid state as the parent constructor was not called");
+		zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called");
 		RETURN_THROWS();
 	}
 
@@ -1059,8 +1055,7 @@ PHP_METHOD(RecursiveTreeIterator, getPrefix)
 	}
 
 	if(!object->iterators) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0,
-			"The object is in an invalid state as the parent constructor was not called");
+		zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called");
 		RETURN_THROWS();
 	}
 
@@ -1092,8 +1087,7 @@ PHP_METHOD(RecursiveTreeIterator, getEntry)
 	}
 
 	if(!object->iterators) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0,
-			"The object is in an invalid state as the parent constructor was not called");
+		zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called");
 		RETURN_THROWS();
 	}
 
@@ -1110,8 +1104,7 @@ PHP_METHOD(RecursiveTreeIterator, getPostfix)
 	}
 
 	if(!object->iterators) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0,
-			"The object is in an invalid state as the parent constructor was not called");
+		zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called");
 		RETURN_THROWS();
 	}
 
@@ -1131,8 +1124,7 @@ PHP_METHOD(RecursiveTreeIterator, current)
 	}
 
 	if(!object->iterators) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0,
-			"The object is in an invalid state as the parent constructor was not called");
+		zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called");
 		RETURN_THROWS();
 	}
 
