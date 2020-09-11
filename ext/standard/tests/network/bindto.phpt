@@ -13,4 +13,6 @@ $fp = stream_socket_client(
 );
 ?>
 --EXPECTF--
-Warning: stream_socket_client(): unable to connect to tcp://%s:80 (Failed to parse address "invalid") in %s on line %d
+Warning: stream_socket_client(): php_network_getaddresses: getaddrinfo failed: %s in %s on line %d
+
+Warning: stream_socket_client(): unable to connect to tcp://www.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.com:80 (php_network_getaddresses: getaddrinfo failed: %s) in %s on line %d

@@ -35,6 +35,7 @@ PHP                                                                        NEWS
   . Fixed bug #80077 (getmxrr test bug). (Rainer Jung)
   . Fixed bug #72941 (Modifying bucket->data by-ref has no effect any longer).
     (cmb)
+  . Fixed bug #80067 (Omitting the port in bindto setting errors). (cmb)
 
 03 Sep 2020, PHP 7.4.10
 
