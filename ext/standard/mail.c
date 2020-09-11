@@ -55,13 +55,6 @@
 		continue;																						\
 	}																									\
 
-#define MAIL_ASCIIZ_CHECK(str, len)				\
-	p = str;									\
-	e = p + len;								\
-	while ((p = memchr(p, '\0', (e - p)))) {	\
-		*p = ' ';								\
-	}											\
-
 extern zend_long php_getuid(void);
 
 static zend_bool php_mail_build_headers_check_field_value(zval *val)
@@ -260,30 +253,24 @@ PHP_FUNCTION(mail)
 	size_t subject_len, i;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
-	char *p, *e;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_STRING(to, to_len)
-		Z_PARAM_STRING(subject, subject_len)
-		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_PATH(to, to_len)
+		Z_PARAM_PATH(subject, subject_len)
+		Z_PARAM_PATH(message, message_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_STR(headers_ht, headers_str)
-		Z_PARAM_STR(extra_cmd)
+		Z_PARAM_PATH_STR(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* ASCIIZ check */
-	MAIL_ASCIIZ_CHECK(to, to_len);
-	MAIL_ASCIIZ_CHECK(subject, subject_len);
-	MAIL_ASCIIZ_CHECK(message, message_len);
 	if (headers_str) {
-		MAIL_ASCIIZ_CHECK(ZSTR_VAL(headers_str), ZSTR_LEN(headers_str));
+		if (strlen(ZSTR_VAL(headers_str)) != ZSTR_LEN(headers_str)) {
+			zend_argument_value_error(4, "must not contain any null bytes");
+			RETURN_THROWS();
+		}
 		headers_str = php_trim(headers_str, NULL, 0, 2);
 	} else if (headers_ht) {
 		headers_str = php_mail_build_headers(headers_ht);
-	}
-
-	if (extra_cmd) {
-		MAIL_ASCIIZ_CHECK(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
 	}
 
 	if (to_len > 0) {
