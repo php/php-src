@@ -2253,7 +2253,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oll", &mysql_stmt, mysqli_stmt_class_entry, &attr, &mode_in) == FAILURE) {
 		RETURN_THROWS();
 	}
-
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	switch (attr) {
