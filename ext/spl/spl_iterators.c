@@ -448,7 +448,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	spl_recursive_it_object *object;
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 	iterator = emalloc(sizeof(spl_recursive_it_iterator));
