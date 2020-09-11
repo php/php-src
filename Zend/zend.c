@@ -1323,6 +1323,16 @@ static ZEND_COLD void zend_error_impl(
 
 	zend_observer_error_notify(type, error_filename, error_lineno, message);
 
+	/* Call all the observer end handlers for fatal errors */
+	if (ZEND_OBSERVER_ENABLED && (type & E_FATAL_ERRORS) && EG(current_execute_data)) {
+		zend_execute_data *ex = EG(current_execute_data);
+		do {
+			if (ex->func->type != ZEND_INTERNAL_FUNCTION) {
+				zend_observer_fcall_end(ex, NULL);
+			}
+		} while ((ex = ex->prev_execute_data) != NULL);
+	}
+
 	/* if we don't have a user defined error handler */
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
 		|| !(EG(user_error_handler_error_reporting) & type)
