@@ -56,7 +56,7 @@ try
 {
     $ap->append($it);
 }
-catch(LogicException $e)
+catch(\Error $e)
 {
     echo $e->getMessage() . "\n";
 }
