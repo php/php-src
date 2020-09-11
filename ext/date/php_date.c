@@ -4109,49 +4109,34 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 /* {{{ Creates new DatePeriod object. */
 PHP_METHOD(DatePeriod, __construct)
 {
-	php_period_obj *dpobj;
-	php_date_obj *dateobj;
-	zend_object *start_obj;
-	zend_string *start_str;
-	zend_object *interval_obj = NULL;
-	zend_bool interval_is_null = 1;
-	zend_object *end_obj = NULL;
-	zend_long recurrences = 0;
-	zend_bool end_is_null = 1;
-	zend_long options = 0;
-	char *isostr;
-	size_t isostr_len;
+	php_period_obj   *dpobj;
+	php_date_obj     *dateobj;
+	zval *start, *end = NULL, *interval;
+	zend_long  recurrences = 0, options = 0;
+	char *isostr = NULL;
+	size_t   isostr_len = 0;
 	timelib_time *clone;
 	zend_error_handling error_handling;
 
-	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(start_str, start_obj, date_ce_interface)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(interval_obj, date_ce_interval, options, interval_is_null)
-		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(end_obj, date_ce_interface, recurrences, end_is_null)
-		Z_PARAM_LONG(options)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
+				zend_type_error("DatePeriod::__construct() accepts either (DateTimeInterface, DateInterval, int [, int]) OR (DateTimeInterface, DateInterval, DateTime [, int]) OR (string [, int]) as arguments");
+				RETURN_THROWS();
+			}
+		}
+	}
 
 	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 	dpobj->current = NULL;
 
-	if (start_str) {
-		if (interval_obj) {
-			zend_argument_type_error(2, "must be of type ?int when argument #1 ($start) is a string");
-			RETURN_THROWS();
-		}
-
-		if (!end_is_null) {
-			zend_argument_value_error(3, "must be null when argument #1 ($start) is a string");
-			RETURN_THROWS();
-		}
-
-		isostr = ZSTR_VAL(start_str);
-		isostr_len = ZSTR_LEN(start_str);
-
+	if (isostr) {
 		zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len);
 		zend_restore_error_handling(&error_handling);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 
 		if (dpobj->start == NULL) {
 			zend_argument_error(zend_ce_exception, 1, "must contain a start date, \"%s\" given", isostr);
@@ -4174,21 +4159,11 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 		dpobj->start_ce = date_ce_date;
 	} else {
-		if (!interval_obj) {
-			zend_argument_type_error(2, "must be of type DateInterval when argument #1 ($start) is a DateTimeInterface");
-			RETURN_THROWS();
-		}
-
-		if (end_is_null) {
-			zend_argument_type_error(2, "must be of type DateTimeInterface|int when argument #1 ($start) is a DateTimeInterface");
-			RETURN_THROWS();
-		}
-
 		/* init */
-		php_interval_obj *intobj = php_interval_obj_from_obj(interval_obj);
+		php_interval_obj *intobj = Z_PHPINTERVAL_P(interval);
 
 		/* start date */
-		dateobj = php_date_obj_from_obj(start_obj);
+		dateobj = Z_PHPDATE_P(start);
 		clone = timelib_time_ctor();
 		memcpy(clone, dateobj->time, sizeof(timelib_time));
 		if (dateobj->time->tz_abbr) {
@@ -4198,14 +4173,14 @@ PHP_METHOD(DatePeriod, __construct)
 			clone->tz_info = dateobj->time->tz_info;
 		}
 		dpobj->start = clone;
-		dpobj->start_ce = start_obj->ce;
+		dpobj->start_ce = Z_OBJCE_P(start);
 
 		/* interval */
 		dpobj->interval = timelib_rel_time_clone(intobj->diff);
 
 		/* end date */
-		if (end_obj) {
-			dateobj = php_date_obj_from_obj(end_obj);
+		if (end) {
+			dateobj = Z_PHPDATE_P(end);
 			clone = timelib_time_clone(dateobj->time);
 			dpobj->end = clone;
 		}
