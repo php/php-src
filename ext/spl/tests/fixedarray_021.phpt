@@ -46,7 +46,7 @@ try {
     foreach ($e as $k=>&$v) {
         var_dump($v);
     }
-} catch (Exception $e) {
+} catch (\Error $e) {
     var_dump($e->getMessage());
 }
 
