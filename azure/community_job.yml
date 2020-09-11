@@ -92,6 +92,7 @@ jobs:
         sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
         php vendor/bin/phpunit
       displayName: 'Test Amphp'
+      condition: or(succeeded(), failed())
     - script: |
         git clone https://github.com/sebastianbergmann/phpunit.git --branch=master --depth=1
         cd phpunit
