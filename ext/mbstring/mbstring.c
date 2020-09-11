@@ -3268,13 +3268,6 @@ PHP_FUNCTION(mb_decode_numericentity)
 		continue;											\
 	}
 
-#define MAIL_ASCIIZ_CHECK_MBSTRING(str, len)			\
-	pp = str;					\
-	ee = pp + len;					\
-	while ((pp = memchr(pp, '\0', (ee - pp)))) {	\
-		*pp = ' ';				\
-	}						\
-
 static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t str_len)
 {
 	const char *ps;
@@ -3451,7 +3444,7 @@ PHP_FUNCTION(mb_send_mail)
 	size_t subject_len;
 	zend_string *extra_cmd = NULL;
 	HashTable *headers_ht = NULL;
-	zend_string *str_headers = NULL, *tmp_headers;
+	zend_string *str_headers = NULL;
 	size_t n, i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
@@ -3473,7 +3466,6 @@ PHP_FUNCTION(mb_send_mail)
 	HashTable ht_headers;
 	zval *s;
 	extern void mbfl_memory_device_unput(mbfl_memory_device *device);
-	char *pp, *ee;
 
 	/* initialize */
 	mbfl_memory_device_init(&device, 0, 0);
@@ -3492,30 +3484,22 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_STRING(to, to_len)
-		Z_PARAM_STRING(subject, subject_len)
-		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_PATH(to, to_len)
+		Z_PARAM_PATH(subject, subject_len)
+		Z_PARAM_PATH(message, message_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(str_headers, headers_ht)
-		Z_PARAM_STR_OR_NULL(extra_cmd)
+		Z_PARAM_PATH_STR_OR_NULL(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* ASCIIZ check */
-	MAIL_ASCIIZ_CHECK_MBSTRING(to, to_len);
-	MAIL_ASCIIZ_CHECK_MBSTRING(subject, subject_len);
-	MAIL_ASCIIZ_CHECK_MBSTRING(message, message_len);
-
 	if (str_headers) {
-		tmp_headers = zend_string_init(ZSTR_VAL(str_headers), ZSTR_LEN(str_headers), 0);
-		MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
-		str_headers = php_trim(tmp_headers, NULL, 0, 2);
-		zend_string_release_ex(tmp_headers, 0);
+		if (strlen(ZSTR_VAL(str_headers)) != ZSTR_LEN(str_headers)) {
+			zend_argument_value_error(4, "must not contain any null bytes");
+			RETURN_THROWS();
+		}
+		str_headers = php_trim(str_headers, NULL, 0, 2);
 	} else if (headers_ht) {
 		str_headers = php_mail_build_headers(headers_ht);
-	}
-
-	if (extra_cmd) {
-		MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
 	}
 
 	zend_hash_init(&ht_headers, 0, NULL, ZVAL_PTR_DTOR, 0);
