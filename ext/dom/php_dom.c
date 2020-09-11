@@ -468,7 +468,7 @@ PHP_FUNCTION(dom_import_simplexml)
 	if (nodep && nodeobj && (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE)) {
 		DOM_RET_OBJ((xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
 	} else {
-		zend_argument_value_error(1, "cannot import invalid node type");
+		zend_argument_value_error(1, "is not a valid node type");
 		RETURN_THROWS();
 	}
 }

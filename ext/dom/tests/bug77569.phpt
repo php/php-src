@@ -15,4 +15,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid Document Encoding
+Invalid document encoding

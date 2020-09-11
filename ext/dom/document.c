@@ -161,7 +161,7 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 		}
 		docp->encoding = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
     } else {
-		zend_value_error("Invalid Document Encoding");
+		zend_value_error("Invalid document encoding");
 		return FAILURE;
     }
 

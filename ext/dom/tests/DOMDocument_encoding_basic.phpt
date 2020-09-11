@@ -44,7 +44,7 @@ echo "UTF-16 Encoding Read: {$dom->encoding}\n";
 ?>
 --EXPECT--
 Empty Encoding Read: ''
-Invalid Document Encoding
+Invalid document encoding
 Adding ISO-8859-1 encoding: ISO-8859-1
 ISO-8859-1 Encoding Read: ISO-8859-1
 Adding UTF-8 encoding: UTF-8

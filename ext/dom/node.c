@@ -1594,7 +1594,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 					xmlXPathFreeObject(xpathobjp);
 				}
 				xmlXPathFreeContext(ctxp);
-				zend_throw_error(NULL, "XPath query did not return a nodeset.");
+				zend_throw_error(NULL, "XPath query did not return a nodeset");
 				RETURN_THROWS();
 			}
 		}
@@ -1606,12 +1606,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 		tmp = zend_hash_str_find(ht, "query", sizeof("query")-1);
 		if (!tmp) {
-			// TODO Use argument version after checking which num arg it is
-			zend_value_error("\"query\" option must be in XPath array");
+			zend_argument_value_error(3, "\"query\" option must be in XPath array");
 			RETURN_THROWS();
 		}
 		if (Z_TYPE_P(tmp) != IS_STRING) {
-			zend_type_error("\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
+			zend_argument_type_error(3, "\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
 			RETURN_THROWS();
 		}
 		xquery = Z_STRVAL_P(tmp);

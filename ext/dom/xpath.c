@@ -138,13 +138,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	if (obj->stringval == NULL) {
 		zend_type_error("Handler name must be a string");
 		xmlXPathFreeObject(obj);
-		if (fci.param_count > 0) {
-			for (i = 0; i < nargs - 1; i++) {
-				zval_ptr_dtor(&fci.params[i]);
-			}
-			efree(fci.params);
-		}
-		return;
+		goto cleanup;
 	}
 	ZVAL_STRING(&fci.function_name, (char *) obj->stringval);
 	xmlXPathFreeObject(obj);
@@ -155,10 +149,10 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 
 	if (!zend_make_callable(&fci.function_name, &callable)) {
 		zend_throw_error(NULL, "Unable to call handler %s()", ZSTR_VAL(callable));
-		return;
+		goto cleanup;
 	} else if (intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
 		zend_throw_error(NULL, "Not allowed to call handler '%s()'.", ZSTR_VAL(callable));
-		return;
+		goto cleanup;
 	} else {
 		result = zend_call_function(&fci, NULL);
 		if (result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -186,6 +180,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			zval_ptr_dtor(&retval);
 		}
 	}
+cleanup:
 	zend_string_release_ex(callable, 0);
 	zval_ptr_dtor_str(&fci.function_name);
 	if (fci.param_count > 0) {
@@ -372,7 +367,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 	if (nodep && docp != nodep->doc) {
-		zend_throw_error(NULL, "Node From Wrong Document");
+		zend_throw_error(NULL, "Node from wrong document");
 		RETURN_THROWS();
 	}
 
