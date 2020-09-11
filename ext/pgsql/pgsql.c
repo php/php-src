@@ -1723,20 +1723,24 @@ PHP_FUNCTION(pg_field_num)
 /* {{{ Returns values from a result identifier */
 PHP_FUNCTION(pg_fetch_result)
 {
-	zval *result, *field=NULL;
-	zend_long row;
+	zval *result;
+	zend_string *field_name;
+	zend_long row, field_offset;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int field_offset, pgsql_row, argc = ZEND_NUM_ARGS();
+	int pgsql_row, argc = ZEND_NUM_ARGS();
 
 	if (argc == 2) {
-		if (zend_parse_parameters(argc, "rz", &result, &field) == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_RESOURCE(result)
+			Z_PARAM_STR_OR_LONG(field_name, field_offset)
+		ZEND_PARSE_PARAMETERS_END();
 	} else {
-		if (zend_parse_parameters(argc, "rlz", &result, &row, &field) == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(3, 3)
+			Z_PARAM_RESOURCE(result)
+			Z_PARAM_LONG(row)
+			Z_PARAM_STR_OR_LONG(field_name, field_offset)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -1761,22 +1765,17 @@ PHP_FUNCTION(pg_fetch_result)
 		}
 		pgsql_row = (int)row;
 	}
-	switch (Z_TYPE_P(field)) {
-		case IS_STRING:
-			field_offset = PQfnumber(pgsql_result, Z_STRVAL_P(field));
-			if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
-				php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			convert_to_long_ex(field);
-			if (Z_LVAL_P(field) < 0 || Z_LVAL_P(field) >= PQnfields(pgsql_result)) {
-				php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-				RETURN_FALSE;
-			}
-			field_offset = (int)Z_LVAL_P(field);
-			break;
+	if (field_name) {
+		field_offset = PQfnumber(pgsql_result, ZSTR_VAL(field_name));
+		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
+			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
+			RETURN_FALSE;
+		}
+	} else {
+		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
+			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
+			RETURN_FALSE;
+		}
 	}
 
 	if (PQgetisnull(pgsql_result, pgsql_row, field_offset)) {
@@ -1802,7 +1801,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l!Cz", &result, &row, &row_is_null, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l!Ca!", &result, &row, &row_is_null, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (!ce) {
@@ -1899,7 +1898,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			fci.param_count = 0;
 			fci.named_params = NULL;
 
-			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+			if (ctor_params) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
 					/* Two problems why we throw exceptions here: PHP is typeless
 					 * and hence passing one argument that's not an array could be
@@ -2068,20 +2067,24 @@ PHP_FUNCTION(pg_result_seek)
 /* {{{ php_pgsql_data_info */
 static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
-	zval *result, *field;
-	zend_long row;
+	zval *result;
+	zend_string *field_name;
+	zend_long row, field_offset;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int field_offset, pgsql_row, argc = ZEND_NUM_ARGS();
+	int pgsql_row, argc = ZEND_NUM_ARGS();
 
 	if (argc == 2) {
-		if (zend_parse_parameters(argc, "rz", &result, &field) == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_RESOURCE(result)
+			Z_PARAM_STR_OR_LONG(field_name, field_offset)
+		ZEND_PARSE_PARAMETERS_END();
 	} else {
-		if (zend_parse_parameters(argc, "rlz", &result, &row, &field) == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(3, 3)
+			Z_PARAM_RESOURCE(result)
+			Z_PARAM_LONG(row)
+			Z_PARAM_STR_OR_LONG(field_name, field_offset)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -2106,22 +2109,17 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		pgsql_row = (int)row;
 	}
 
-	switch (Z_TYPE_P(field)) {
-		case IS_STRING:
-			field_offset = PQfnumber(pgsql_result, Z_STRVAL_P(field));
-			if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
-				php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			convert_to_long_ex(field);
-			if (Z_LVAL_P(field) < 0 || Z_LVAL_P(field) >= PQnfields(pgsql_result)) {
-				php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-				RETURN_FALSE;
-			}
-			field_offset = (int)Z_LVAL_P(field);
-			break;
+	if (field_name) {
+		field_offset = PQfnumber(pgsql_result, ZSTR_VAL(field_name));
+		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
+			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
+			RETURN_FALSE;
+		}
+	} else {
+		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
+			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
+			RETURN_FALSE;
+		}
 	}
 
 	switch (entry_type) {

@@ -155,17 +155,15 @@ function pg_fieldnum($result, string $field_name): int {}
 /**
  * @param resource $result
  * @param string|int $row_number
- * @param string|int $field
  */
-function pg_fetch_result($result, $row_number, $field = UNKNOWN): string|false|null {}
+function pg_fetch_result($result, $row_number, string|int $field = UNKNOWN): string|false|null {}
 
 /**
  * @param resource $result
  * @param string|int $row_number
- * @param string|int $field
  * @alias pg_fetch_result
  */
-function pg_result($result, $row_number, $field = UNKNOWN): string|false|null {}
+function pg_result($result, $row_number, string|int $field = UNKNOWN): string|false|null {}
 
 /**
  * @param resource $result
@@ -182,11 +180,8 @@ function pg_fetch_assoc($result, ?int $row_number = null): array|false {}
  */
 function pg_fetch_array($result, ?int $row_number = null, int $result_type = PGSQL_BOTH): array|false {}
 
-/**
- * @param resource $result
- * @param array|null $ctor_params
- */
-function pg_fetch_object($result, ?int $row_number = null, string $class_name = "stdClass", $ctor_params = null): object|false {}
+/** @param resource $result */
+function pg_fetch_object($result, ?int $row_number = null, string $class_name = "stdClass", ?array $ctor_params = null): object|false {}
 
 /** @param resource $result */
 function pg_fetch_all($result, int $result_type = PGSQL_ASSOC): array|false {}
@@ -200,32 +195,28 @@ function pg_result_seek($result, int $row_number): bool {}
 /**
  * @param resource $result
  * @param string|int $row_number
- * @param string|int $field
  */
-function pg_field_prtlen($result, $row_number, $field = UNKNOWN): int|false {}
+function pg_field_prtlen($result, $row_number, string|int $field = UNKNOWN): int|false {}
 
 /**
  * @param resource $result
  * @param string|int $row_number
- * @param string|int $field
  * @alias pg_field_prtlen
  */
-function pg_fieldprtlen($result, $row_number, $field = UNKNOWN): int|false {}
+function pg_fieldprtlen($result, $row_number, string|int $field = UNKNOWN): int|false {}
 
 /**
  * @param resource $result
  * @param string|int $row_number
- * @param string|int $field
  */
-function pg_field_is_null($result, $row_number, $field = UNKNOWN): int|false {}
+function pg_field_is_null($result, $row_number, string|int $field = UNKNOWN): int|false {}
 
 /**
  * @param resource $result
  * @param string|int $row_number
- * @param string|int $field
  * @alias pg_field_is_null
  */
-function pg_fieldisnull($result, $row_number, $field = UNKNOWN): int|false {}
+function pg_fieldisnull($result, $row_number, string|int $field = UNKNOWN): int|false {}
 
 /** @param resource $result */
 function pg_free_result($result): bool {}
@@ -351,7 +342,7 @@ function pg_loimport($connection, $filename = UNKNOWN, $large_object_id = UNKNOW
  * @param string|int $filename
  * @return resource|false
  */
-function pg_lo_export($connection,$large_object_id = UNKNOWN, $filename = UNKNOWN): bool {}
+function pg_lo_export($connection, $large_object_id = UNKNOWN, $filename = UNKNOWN): bool {}
 
 /**
  * @param resource|string|int $connection
@@ -360,7 +351,7 @@ function pg_lo_export($connection,$large_object_id = UNKNOWN, $filename = UNKNOW
  * @return resource|false
  * @alias pg_lo_export
  */
-function pg_loexport($connection,$large_object_id = UNKNOWN, $filename = UNKNOWN): bool {}
+function pg_loexport($connection, $large_object_id = UNKNOWN, $filename = UNKNOWN): bool {}
 
 /** @param resource $large_object */
 function pg_lo_seek($large_object, int $offset, int $whence = SEEK_CUR): bool {}
