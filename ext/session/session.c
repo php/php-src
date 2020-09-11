@@ -160,7 +160,9 @@ PHPAPI int php_session_destroy(void) /* {{{ */
 
 	if (PS(id) && PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
 		retval = FAILURE;
-		php_error_docref(NULL, E_WARNING, "Session object destruction failed");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Session object destruction failed");
+		}
 	}
 
 	php_rshutdown_session_globals();
@@ -393,7 +395,9 @@ static int php_session_initialize(void) /* {{{ */
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
 	) {
 		php_session_abort();
-		php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		return FAILURE;
 	}
 
@@ -405,14 +409,17 @@ static int php_session_initialize(void) /* {{{ */
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
 			php_session_abort();
-			zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			}
 			return FAILURE;
 		}
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
 	} else if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
-		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE) {
+		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE
+	) {
 		if (PS(id)) {
 			zend_string_release_ex(PS(id), 0);
 		}
@@ -435,7 +442,9 @@ static int php_session_initialize(void) /* {{{ */
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, PS(gc_maxlifetime)) == FAILURE) {
 		php_session_abort();
 		/* FYI: Some broken save handlers return FAILURE for non-existent session ID, this is incorrect */
-		php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		return FAILURE;
 	}
 
@@ -2186,7 +2195,9 @@ PHP_FUNCTION(session_regenerate_id)
 		if (PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
-			php_error_docref(NULL, E_WARNING, "Session object destruction failed. ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			if (!EG(exception)) {
+				php_error_docref(NULL, E_WARNING, "Session object destruction failed. ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			}
 			RETURN_FALSE;
 		}
 	} else {
@@ -2217,14 +2228,18 @@ PHP_FUNCTION(session_regenerate_id)
 
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		PS(session_status) = php_session_none;
-		zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		RETURN_THROWS();
 	}
 
 	PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 	if (!PS(id)) {
 		PS(session_status) = php_session_none;
-		zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		RETURN_THROWS();
 	}
 	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
@@ -2234,7 +2249,9 @@ PHP_FUNCTION(session_regenerate_id)
 		if (!PS(id)) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
-			zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			}
 			RETURN_THROWS();
 		}
 	}
@@ -2242,7 +2259,9 @@ PHP_FUNCTION(session_regenerate_id)
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
-		zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		RETURN_THROWS();
 	}
 	if (data) {

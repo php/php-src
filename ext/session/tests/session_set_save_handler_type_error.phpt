@@ -46,14 +46,11 @@ ob_end_flush();
 
 ?>
 --EXPECTF--
-Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line %d
 Session callback must have a return value of type bool, array returned
 
 Deprecated: session_start(): Session callback must have a return value of type bool, int returned in %s on line %d
 
 Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
-
-Warning: session_start(): Failed to read session data: user (path: ) in %s on line %d
 Session callback must have a return value of type bool, array returned
 
 Deprecated: session_start(): Session callback must have a return value of type bool, int returned in %s on line %d
