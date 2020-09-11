@@ -156,7 +156,7 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 	case 0:
 		if (c == 0x26) {	/* '&'  shift character */
 			filter->status++;
-		} else if (c >= 0 && c < 0x80) {	/* ASCII */
+		} else if (c >= 0x20 && c <= 0x7E) {	/* ASCII */
 			CK((*filter->output_function)(c, filter->data));
 		} else {		/* illegal character */
 			s = c & MBFL_WCSGROUP_MASK;
@@ -195,7 +195,15 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			}
 		} else {
 			filter->cache = n;
-			CK((*filter->output_function)(s, filter->data));
+			/* Characters which can be expressed as literal, ASCII characters
+			 * should not be Base64-encoded */
+			if (s < 0x20 || s > 0x7E || s == '&') {
+				CK((*filter->output_function)(s, filter->data));
+			} else {
+				s &= MBFL_WCSGROUP_MASK;
+				s |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(s, filter->data));
+			}
 		}
 		break;
 
@@ -227,7 +235,15 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			}
 		} else {
 			filter->cache = n;
-			CK((*filter->output_function)(s, filter->data));
+			/* Characters which can be expressed as literal, ASCII characters
+			 * should not be Base64-encoded */
+			if (s < 0x20 || s > 0x7E || s == '&') {
+				CK((*filter->output_function)(s, filter->data));
+			} else {
+				s &= MBFL_WCSGROUP_MASK;
+				s |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(s, filter->data));
+			}
 		}
 		break;
 
@@ -254,7 +270,15 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			}
 		} else {
 			filter->cache = 0;
-			CK((*filter->output_function)(s, filter->data));
+			/* Characters which can be expressed as literal, ASCII characters
+			 * should not be Base64-encoded */
+			if (s < 0x20 || s > 0x7E || s == '&') {
+				CK((*filter->output_function)(s, filter->data));
+			} else {
+				s &= MBFL_WCSGROUP_MASK;
+				s |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(s, filter->data));
+			}
 		}
 		break;
 
