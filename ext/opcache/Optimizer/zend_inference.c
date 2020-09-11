@@ -2141,7 +2141,7 @@ static uint32_t assign_dim_result_type(
 
 /* For binary ops that have compound assignment operators */
 static uint32_t binary_op_result_type(
-		zend_ssa *ssa, zend_uchar opcode, uint32_t t1, uint32_t t2, uint32_t result_var,
+		zend_ssa *ssa, zend_uchar opcode, uint32_t t1, uint32_t t2, int result_var,
 		zend_long optimization_level) {
 	uint32_t tmp = 0;
 	uint32_t t1_type = (t1 & MAY_BE_ANY) | (t1 & MAY_BE_UNDEF ? MAY_BE_NULL : 0);
@@ -2159,7 +2159,8 @@ static uint32_t binary_op_result_type(
 	switch (opcode) {
 		case ZEND_ADD:
 			if (t1_type == MAY_BE_LONG && t2_type == MAY_BE_LONG) {
-				if (!ssa->var_info[result_var].has_range ||
+				if (result_var < 0 ||
+					!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
 					/* may overflow */
@@ -2185,7 +2186,8 @@ static uint32_t binary_op_result_type(
 		case ZEND_SUB:
 		case ZEND_MUL:
 			if (t1_type == MAY_BE_LONG && t2_type == MAY_BE_LONG) {
-				if (!ssa->var_info[result_var].has_range ||
+				if (result_var < 0 ||
+					!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
 					/* may overflow */
@@ -2627,7 +2629,8 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 
 			tmp |= binary_op_result_type(
-				ssa, opline->extended_value, t1, t2, ssa_ops[i].op1_def, optimization_level);
+				ssa, opline->extended_value, t1, t2,
+				opline->opcode == ZEND_ASSIGN_OP ? ssa_ops[i].op1_def : -1, optimization_level);
 			if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY)) {
 				tmp |= MAY_BE_RC1;
 			}

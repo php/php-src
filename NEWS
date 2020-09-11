@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #80713 (SegFault when disabling ATTR_EMULATE_PREPARES and
     MySQL 8.0). (Nikita)
 
+- opcache:
+  . Fixed bug #80805 (create simple class and get error in opcache.so). (Nikita)
+
 - phpdbg:
   . Fixed bug #80757 (Exit code is 0 when could not open file). (Felipe)
 
