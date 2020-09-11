@@ -2051,13 +2051,6 @@ PHP_FUNCTION(session_set_save_handler)
 		RETURN_THROWS();
 	}
 
-	if (save_handler_check_session() == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	/* remove shutdown function */
-	remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1);
-
 	/* At this point argc can only be between 6 and PS_NUM_APIS */
 	for (i = 0; i < argc; i++) {
 		if (!zend_is_callable(&args[i], 0, NULL)) {
@@ -2067,6 +2060,13 @@ PHP_FUNCTION(session_set_save_handler)
 			RETURN_THROWS();
 		}
 	}
+
+	if (save_handler_check_session() == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	/* remove shutdown function */
+	remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1);
 
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
@@ -2274,7 +2274,7 @@ PHP_FUNCTION(session_create_id)
 	if (prefix && ZSTR_LEN(prefix)) {
 		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
 			/* E_ERROR raised for security reason. */
-			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only alphanumeric and \",\", \"-\" characters are allowed");
+			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			RETURN_FALSE;
 		} else {
 			smart_str_append(&id, prefix);
@@ -2427,7 +2427,7 @@ static int php_session_start_set_ini(zend_string *varname, zend_string *new_valu
 	return ret;
 }
 
-/* {{{ +   Begin session */
+/* {{{ Begin session */
 PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
@@ -2470,7 +2470,7 @@ PHP_FUNCTION(session_start)
 							zend_string *tmp_val;
 							zend_string *val = zval_get_tmp_string(value, &tmp_val);
 							if (php_session_start_set_ini(str_idx, val) == FAILURE) {
-								php_error_docref(NULL, E_WARNING, "Option \"%s\" cannot be set", ZSTR_VAL(str_idx));
+								php_error_docref(NULL, E_WARNING, "Setting option \"%s\" failed", ZSTR_VAL(str_idx));
 							}
 							zend_tmp_string_release(tmp_val);
 						}
@@ -2479,7 +2479,7 @@ PHP_FUNCTION(session_start)
 						zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
 							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_type_name(value)
 						);
-						break;
+						RETURN_THROWS();
 				}
 			}
 			(void) num_idx;

@@ -168,7 +168,7 @@ static void ps_files_open(ps_files *data, const char *key)
 		ps_files_close(data);
 
 		if (php_session_valid_key(key) == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "Session ID is too long or contains illegal characters. Valid characters are a-z, A-Z, 0-9, and \"-\"");
+			php_error_docref(NULL, E_WARNING, "Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			return;
 		}
 

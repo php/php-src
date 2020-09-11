@@ -69,7 +69,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 			ret = SUCCESS; \
 		} else { \
 			if (!EG(exception)) { \
-				php_error_docref(NULL, E_WARNING, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&retval)); \
+				zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&retval)); \
 			} \
 			ret = FAILURE; \
 			zval_ptr_dtor(&retval); \
