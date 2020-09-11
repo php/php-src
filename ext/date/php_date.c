@@ -4139,15 +4139,21 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 
 		if (dpobj->start == NULL) {
-			zend_argument_error(zend_ce_exception, 1, "must contain a start date, \"%s\" given", isostr);
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(NULL, "%s(): Argument #1 must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->interval == NULL) {
-			zend_argument_error(zend_ce_exception, 1, "must contain an interval, \"%s\" given", isostr);
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(NULL, "%s(): Argument #1 must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->end == NULL && recurrences == 0) {
-			zend_argument_error(zend_ce_exception, 1, "must contain an end date or a recurrence count, \"%s\" given", isostr);
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(NULL, "%s(): Argument #1 must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_string_release(func);
 			RETURN_THROWS();
 		}
 

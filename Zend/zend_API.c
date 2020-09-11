@@ -221,6 +221,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_WRONG_CLASS_OR_NULL:
 			zend_wrong_parameter_class_or_null_error(num, name, arg);
 			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_STRING:
+			zend_wrong_parameter_class_or_string_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL:
+			zend_wrong_parameter_class_or_string_or_null_error(num, name, arg);
+			break;
 		case ZPP_ERROR_WRONG_CLASS_OR_LONG:
 			zend_wrong_parameter_class_or_long_error(num, name, arg);
 			break;
@@ -229,12 +235,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 			break;
 		case ZPP_ERROR_WRONG_ARG:
 			zend_wrong_parameter_type_error(num, expected_type, arg);
-			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_STRING:
-			zend_wrong_parameter_class_or_string_error(num, name, arg);
-			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL:
-			zend_wrong_parameter_class_or_string_or_null_error(num, name, arg);
 			break;
 		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
 			zend_unexpected_extra_named_error();

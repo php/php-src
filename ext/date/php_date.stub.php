@@ -393,7 +393,13 @@ class DateInterval
 
 class DatePeriod implements IteratorAggregate
 {
-    public function __construct(DateTimeInterface|string $start, DateInterval|int|null $interval = null, DateTimeInterface|int|null $end = null, int $options = 0) {}
+    /**
+     * @param DateTimeInterface|string $start
+     * @param DateInterval|int $interval
+     * @param DateTimeInterface|int $end
+     * @param int $options
+     */
+    public function __construct($start, $interval = UNKNOWN, $end = UNKNOWN, $options = UNKNOWN) {}
 
     /** @return DateTimeInterface */
     public function getStartDate() {}

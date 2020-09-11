@@ -25,7 +25,6 @@ extern "C" {
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "../calendar/calendar_class.h"
-#include "../calendar/calendar_ce.h"
 }
 
 #include "../intl_convertcpp.h"

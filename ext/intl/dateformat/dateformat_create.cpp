@@ -26,7 +26,7 @@ extern "C" {
 #include "php_intl.h"
 #include "dateformat_create.h"
 #include "dateformat_class.h"
-#include "../calendar/calendar_ce.h"
+#include "../calendar/calendar_class.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #include "../intl_convert.h"
@@ -44,7 +44,7 @@ extern "C" {
 	 UDAT_PATTERN == (i))
 
 /* {{{ */
-static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
 	char	*locale_str;
@@ -78,28 +78,25 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_ZVAL(timezone_zv)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
 		Z_PARAM_STRING_OR_NULL(pattern_str, pattern_str_len)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: cannot call constructor twice", 0);
-		zval_ptr_dtor(return_value);
-		RETURN_NULL();
+		return FAILURE;
 	}
 
 	if (!INTL_UDATE_FMT_OK(date_type)) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid date format style", 0);
-		zval_ptr_dtor(return_value);
-		RETURN_NULL();
+		return FAILURE;
 	}
 	if (!INTL_UDATE_FMT_OK(time_type)) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid time format style", 0);
-		zval_ptr_dtor(return_value);
-		RETURN_NULL();
+return FAILURE;
 	}
 
-	INTL_CHECK_LOCALE_LEN(locale_len);
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	if (locale_len == 0) {
 		locale_str = (char *) intl_locale_get_default();
 	}
@@ -183,10 +180,7 @@ error:
 		delete cal;
 	}
 
-	if (U_FAILURE(intl_error_get_code(NULL))) {
-		zval_ptr_dtor(return_value);
-		RETURN_NULL();
-	}
+	return U_FAILURE(intl_error_get_code(NULL)) ? FAILURE : SUCCESS;
 }
 /* }}} */
 
@@ -194,9 +188,7 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-    datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-
-	if (Z_TYPE_P(return_value) == IS_NULL) {
+    if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -212,8 +204,7 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = ZEND_THIS;
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (Z_TYPE_P(return_value) == IS_NULL) {
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		if (!EG(exception)) {
 			zend_string *err = intl_error_get_message(NULL);
 			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));

@@ -1265,12 +1265,12 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define ZPP_ERROR_WRONG_CALLBACK                2
 #define ZPP_ERROR_WRONG_CLASS                   3
 #define ZPP_ERROR_WRONG_CLASS_OR_NULL           4
-#define ZPP_ERROR_WRONG_CLASS_OR_LONG           5
-#define ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL   6
-#define ZPP_ERROR_WRONG_ARG                     7
-#define ZPP_ERROR_WRONG_COUNT                   8
-#define ZPP_ERROR_WRONG_CLASS_OR_STRING         9
-#define ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL 10
+#define ZPP_ERROR_WRONG_CLASS_OR_STRING         5
+#define ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL 6
+#define ZPP_ERROR_WRONG_CLASS_OR_LONG           7
+#define ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL   8
+#define ZPP_ERROR_WRONG_ARG                     9
+#define ZPP_ERROR_WRONG_COUNT                   10
 #define ZPP_ERROR_UNEXPECTED_EXTRA_NAMED        11
 
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
