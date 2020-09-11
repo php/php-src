@@ -55,12 +55,14 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
 	/* Check the exponent for scale digits and convert to a long. */
 	if (num2->n_scale != 0) {
 		/* 2nd argument from PHP_FUNCTION(bcpow) */
-		zend_argument_value_error(2, "must be an integer");
+		zend_argument_value_error(2, "cannot have a fractional part");
+		return;
 	}
 	exponent = bc_num2long (num2);
 	if (exponent == 0 && (num2->n_len > 1 || num2->n_value[0] != 0)) {
 		/* 2nd argument from PHP_FUNCTION(bcpow) */
 		zend_argument_value_error(2, "is too large");
+		return;
 	}
 
    /* Special case if exponent is a zero. */

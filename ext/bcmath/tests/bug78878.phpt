@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-bcpowmod(): Argument #3 ($modulus) must be an integer
+bcpowmod(): Argument #3 ($modulus) cannot have a fractional part

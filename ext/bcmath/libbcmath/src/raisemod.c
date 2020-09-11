@@ -47,13 +47,13 @@ zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, i
 	/* Check the base for scale digits. */
 	if (base->n_scale != 0) {
 		/* 1st argument from PHP_FUNCTION(bcpowmod) */
-		zend_argument_value_error(1, "must be an integer");
+		zend_argument_value_error(1, "cannot have a fractional part");
 		return FAILURE;
     }
 	/* Check the exponent for scale digits. */
 	if (expo->n_scale != 0) {
 		/* 2nd argument from PHP_FUNCTION(bcpowmod) */
-		zend_argument_value_error(2, "must be an integer");
+		zend_argument_value_error(2, "cannot have a fractional part");
 		return FAILURE;
     }
 	if (bc_is_neg(expo)) {
@@ -63,7 +63,7 @@ zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, i
 	/* Check the modulus for scale digits. */
 	if (mod->n_scale != 0) {
 		/* 3rd argument from PHP_FUNCTION(bcpowmod) */
-		zend_argument_value_error(3, "must be an integer");
+		zend_argument_value_error(3, "cannot have a fractional part");
 		return FAILURE;
     }
     /* Modulus cannot be 0 */
