@@ -2301,7 +2301,11 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		RETURN_THROWS();
 	}
 
-	if (0 != mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
+#ifndef MYSQLI_USE_MYSQLND
+	if (mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
+#else
+	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
+#endif
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
