@@ -11995,12 +11995,16 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 		prop_info = zend_get_known_property_info(trace_ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
+			ce = trace_ce;
+			ce_is_instanceof = 0;
 			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
 				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
 					return 0;
 				}
 				if (ssa->var_info && ssa_op->op1_use >= 0) {
 					ssa->var_info[ssa_op->op1_use].type |= MAY_BE_CLASS_GUARD;
+					ssa->var_info[ssa_op->op1_use].ce = ce;
+					ssa->var_info[ssa_op->op1_use].is_instanceof = ce_is_instanceof;
 				}
 			}
 		}
@@ -12322,6 +12326,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	zend_jit_addr res_addr = 0;
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 	zend_jit_addr prop_addr;
+	zend_bool needs_slow_path = 0;
 
 	if (RETURN_VALUE_USED(opline)) {
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -12399,12 +12404,21 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 				}
 				if (ssa->var_info && ssa_op->op1_use >= 0) {
 					ssa->var_info[ssa_op->op1_use].type |= MAY_BE_CLASS_GUARD;
+					ssa->var_info[ssa_op->op1_use].ce = ce;
+					ssa->var_info[ssa_op->op1_use].is_instanceof = ce_is_instanceof;
+				}
+				if (ssa->var_info && ssa_op->op1_def >= 0) {
+					ssa->var_info[ssa_op->op1_def].type |= MAY_BE_CLASS_GUARD;
+					ssa->var_info[ssa_op->op1_def].ce = ce;
+					ssa->var_info[ssa_op->op1_def].is_instanceof = ce_is_instanceof;
 				}
 			}
 		}
 	}
 
 	if (!prop_info) {
+		needs_slow_path = 1;
+
 		|	mov r0, EX->run_time_cache
 		|	mov r2, aword [r0 + opline->extended_value]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
@@ -12464,17 +12478,20 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		}
 	} else {
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, prop_info->offset);
-		// Undefined property with magic __get()/__set()
-		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set) {
+			// Undefined property with magic __get()/__set()
+			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
-			if (!exit_addr) {
-				return 0;
+				if (!exit_addr) {
+					return 0;
+				}
+				|	IF_TYPE byte [FCARG1a + prop_info->offset + 8], IS_UNDEF, &exit_addr
+			} else {
+				|	IF_TYPE byte [FCARG1a + prop_info->offset + 8], IS_UNDEF, >5
+				needs_slow_path = 1;
 			}
-			|	IF_TYPE byte [FCARG1a + prop_info->offset + 8], IS_UNDEF, &exit_addr
-		} else {
-			|	IF_TYPE byte [FCARG1a + prop_info->offset + 8], IS_UNDEF, >5
 		}
 		if (ZEND_TYPE_IS_SET(prop_info->type)) {
 			uint32_t info = val_info;
@@ -12536,7 +12553,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		}
 	}
 
-	if (!prop_info || JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
+	if (needs_slow_path) {
 		|.cold_code
 		|5:
 		|	SET_EX_OPLINE opline, r0
