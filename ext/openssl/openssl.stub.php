@@ -57,7 +57,7 @@ function openssl_csr_export(OpenSSLCertificateSigningRequest|string $csr, &$outp
 function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLCertificate|string|null $ca_certificate, $private_key, int $days, ?array $options = null, int $serial = 0): OpenSSLCertificate|false {}
 
 /** @param OpenSSLAsymmetricKey $private_key */
-function openssl_csr_new(array $distinguished_names, &$private_key, ?array $options = null, ?array $extra_options = null): OpenSSLCertificateSigningRequest|false {}
+function openssl_csr_new(array $distinguished_names, &$private_key, ?array $options = null, ?array $extra_attributes = null): OpenSSLCertificateSigningRequest|false {}
 
 function openssl_csr_get_subject(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): array|false {}
 
@@ -105,7 +105,7 @@ function openssl_pkey_get_details(OpenSSLAsymmetricKey $key): array|false {}
 
 function openssl_pbkdf2(string $passphrase, string $salt, int $key_length, int $iterations, string $digest_algorithm = "sha1"): string|false {}
 
-function openssl_pkcs7_verify(string $filename, int $flags, ?string $output_filename = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $pk7_filename = null): bool|int {}
+function openssl_pkcs7_verify(string $filename, int $flags, ?string $output_filename = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $pkcs7_filename = null): bool|int {}
 
 /** @param OpenSSLCertificate|array|string $certificate */
 function openssl_pkcs7_encrypt(string $filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $cipher_algorithm = OPENSSL_CIPHER_RC2_40): bool {}
@@ -177,15 +177,15 @@ function openssl_verify(string $data, string $signature, $public_key, string|int
 /**
  * @param string $sealed_data
  * @param array $encrypted_keys
- * @param string $initialization_vector
+ * @param string $iv
  */
-function openssl_seal(string $data, &$sealed_data, &$encrypted_keys, array $public_key, string $cipher_algorithm, &$initialization_vector = null): int|false {}
+function openssl_seal(string $data, &$sealed_data, &$encrypted_keys, array $public_key, string $cipher_algorithm, &$iv = null): int|false {}
 
 /**
  * @param string $output
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_open(string $data, &$output, string $encrypted_key, $private_key, string $cipher_algorithm, ?string $initialization_vector = null): bool {}
+function openssl_open(string $data, &$output, string $encrypted_key, $private_key, string $cipher_algorithm, ?string $iv = null): bool {}
 
 function openssl_get_md_methods(bool $aliases = false): array {}
 
@@ -198,9 +198,9 @@ function openssl_get_curve_names(): array|false {}
 function openssl_digest(string $data, string $digest_algorithm, bool $raw_output = false): string|false {}
 
 /** @param string $tag */
-function openssl_encrypt(string $data, string $cipher_algorithm, string $passphrase, int $options = 0, string $initialization_vector = "", &$tag = null, string $additional_authentication_data = "", int $tag_length = 16): string|false {}
+function openssl_encrypt(string $data, string $cipher_algorithm, string $passphrase, int $options = 0, string $iv = "", &$tag = null, string $additional_authentication_data = "", int $tag_length = 16): string|false {}
 
-function openssl_decrypt(string $data, string $cipher_algorithm, string $passphrase, int $options = 0, string $initialization_vector = "", string $tag = "", string $additional_authentication_data = ""): string|false {}
+function openssl_decrypt(string $data, string $cipher_algorithm, string $passphrase, int $options = 0, string $iv = "", string $tag = "", string $additional_authentication_data = ""): string|false {}
 
 function openssl_cipher_iv_length(string $cipher_algorithm): int|false {}
 
