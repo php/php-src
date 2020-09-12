@@ -23,6 +23,7 @@ $blob = oci_new_descriptor($c,OCI_D_LOB);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
+echo "Writing blob\n";
 var_dump($blob->write("some string here. string, I said"));
 oci_commit($c);
 
@@ -54,21 +55,34 @@ $row2 = oci_fetch_array($s);
 
 $dummy = oci_new_descriptor($c, OCI_D_LOB);
 
+//--------------------------------------------------
+
+echo "\noci_lob_copy invalid args\n";
+
 var_dump(oci_lob_copy($dummy, $row1[0]));
 var_dump(oci_lob_copy($row2[0], $dummy));
-
 var_dump(oci_lob_copy($row2[0], $row1[0], 0));
-var_dump(oci_lob_copy($row2[0], $row1[0], -1));
 var_dump(oci_lob_copy($row2[0], $row1[0], 100000));
+
+try {
+    var_dump(oci_lob_copy($row2[0], $row1[0], -1));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+//--------------------------------------------------
+
+echo "\noci_lob_size tests\n";
 
 var_dump(oci_lob_size($row2[0]));
 unset($dummy->descriptor);
 var_dump(oci_lob_size($dummy));
 
 oci_rollback($c);
-oci_rollback($c);
-oci_commit($c);
-oci_commit($c);
+
+//--------------------------------------------------
+
+echo "\nQuery test\n";
 
 $select_sql = "SELECT blob FROM ".$schema.$table_name." WHERE id = 2 FOR UPDATE";
 $s = oci_parse($c, $select_sql);
@@ -82,22 +96,27 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Writing blob
 int(32)
 
+oci_lob_copy invalid args
+
 Warning: oci_lob_copy(): OCI_INVALID_HANDLE in %s on line %d
 bool(false)
 
 Warning: oci_lob_copy(): OCI_INVALID_HANDLE in %s on line %d
 bool(false)
-bool(false)
-
-Warning: oci_lob_copy(): Length parameter must be greater than 0 in %s on line %d
 bool(false)
 bool(true)
+oci_lob_copy(): Argument #3 ($length) must be greater than or equal to 0
+
+oci_lob_size tests
 int(0)
 
 Warning: oci_lob_size(): Unable to find descriptor property in %s on line %d
 bool(false)
+
+Query test
 array(2) {
   [0]=>
   string(0) ""

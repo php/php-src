@@ -26,7 +26,11 @@ $stmt = oci_parse($c, "select string from define1_tab");
 $string = '';
 var_dump(oci_define_by_name($stmt, "STRING", $string, 20));
 var_dump(oci_define_by_name($stmt, "STRING", $string, 20));
-var_dump(oci_define_by_name($stmt, "", $string, 20));
+try {
+    var_dump(oci_define_by_name($stmt, "", $string, 20));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 oci_execute($stmt);
 
@@ -48,8 +52,6 @@ echo "Done\n";
 --EXPECTF--
 bool(true)
 bool(false)
-
-Warning: oci_define_by_name(): Column name cannot be empty in %s on line %d
-bool(false)
+oci_define_by_name(): Argument #2 ($column_name) cannot be empty
 string(4) "some"
 Done
