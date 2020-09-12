@@ -1253,18 +1253,14 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-#ifdef __clang__
-__attribute__((no_sanitize("float-divide-by-zero")))
-#endif
 static zend_result ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			zend_error(E_WARNING, "Division by zero");
-			ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1) / (double) Z_LVAL_P(op2)));
-			return SUCCESS;
+			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
+			return FAILURE;
 		} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 			/* Prevent overflow error/crash */
 			ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
@@ -1278,19 +1274,22 @@ static zend_result ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			zend_error(E_WARNING, "Division by zero");
+			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
+			return FAILURE;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			zend_error(E_WARNING, "Division by zero");
+			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
+			return FAILURE;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			zend_error(E_WARNING, "Division by zero");
+			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
+			return FAILURE;
 		}
 		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
@@ -1328,7 +1327,7 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 		return SUCCESS;
 	}
 
-	ZEND_ASSERT(0 && "Operation must succeed");
+	ZEND_ASSERT(EG(exception));
 	return FAILURE;
 }
 /* }}} */
