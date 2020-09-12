@@ -3518,24 +3518,6 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	return SUCCESS;
 }
 
-static int zend_needs_manual_jit(const zend_op_array *op_array)
-{
-	if (op_array->doc_comment) {
-		const char *s = ZSTR_VAL(op_array->doc_comment);
-		const char *p = strstr(s, "@jit");
-
-		if (p) {
-			size_t l = ZSTR_LEN(op_array->doc_comment);
-
-			if ((p == s + 3 || *(p-1) <= ' ') &&
-			    (p + 6 == s + l || *(p+4) <= ' ')) {
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
-
 #include "jit/zend_jit_trace.c"
 
 ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
@@ -3589,12 +3571,6 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		return zend_jit_setup_hot_trace_counters(op_array);
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD) {
 		return zend_real_jit_func(op_array, script, NULL);
-	} else if (JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT) {
-		if (zend_needs_manual_jit(op_array)) {
-			return zend_real_jit_func(op_array, script, NULL);
-		} else {
-			return SUCCESS;
-		}
 	} else {
 		ZEND_UNREACHABLE();
 	}
@@ -3629,21 +3605,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 				goto jit_failure;
 			}
 		}
-	} else if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD ||
-	           JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT) {
-
-		if (JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT) {
-			int do_jit = 0;
-			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				if (zend_needs_manual_jit(call_graph.op_arrays[i])) {
-					do_jit = 1;
-					break;
-				}
-			}
-			if (!do_jit) {
-				goto jit_failure;
-			}
-		}
+	} else if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
@@ -3665,10 +3627,6 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
-			if (JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT &&
-			    !zend_needs_manual_jit(call_graph.op_arrays[i])) {
-				continue;
-			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, ZCG(accel_directives).optimization_level) != SUCCESS) {
@@ -3680,10 +3638,6 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_SSA) {
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				if (JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT &&
-				    !zend_needs_manual_jit(call_graph.op_arrays[i])) {
-					continue;
-				}
 				info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 				if (info) {
 					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &info->ssa);
@@ -3692,10 +3646,6 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
-			if (JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT &&
-			    !zend_needs_manual_jit(call_graph.op_arrays[i])) {
-				continue;
-			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (zend_jit(call_graph.op_arrays[i], &info->ssa, NULL) != SUCCESS) {
@@ -3736,8 +3686,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 	return SUCCESS;
 
 jit_failure:
-	if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD ||
-	    JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT) {
+	if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 		}
