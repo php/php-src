@@ -720,19 +720,19 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 		flags |= SPL_FILE_DIR_UNIXPATHS;
 	}
 	if (parsed == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	if (!len) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Directory name must not be empty.");
-		return;
+	if (len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	if (intern->_path) {
 		/* object is already initialized */
 		zend_throw_error(NULL, "Directory object is already initialized");
-		return;
+		RETURN_THROWS();
 	}
 	intern->flags = flags;
 
@@ -2277,7 +2277,7 @@ PHP_METHOD(SplFileObject, setMaxLineLen)
 	}
 
 	if (max_len < 0) {
-		zend_throw_exception_ex(spl_ce_DomainException, 0, "Maximum line length must be greater than or equal zero");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -2724,7 +2724,7 @@ PHP_METHOD(SplFileObject, seek)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (line_pos < 0) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line " ZEND_LONG_FMT, intern->file_name, line_pos);
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
