@@ -825,7 +825,7 @@ PHP_METHOD(RecursiveIteratorIterator, setMaxDepth)
 		RETURN_THROWS();
 	}
 	if (max_depth < -1) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Parameter max_depth must be >= -1", 0);
+		zend_argument_value_error(1, "must be greater than or equal to -1");
 		RETURN_THROWS();
 	} else if (max_depth > INT_MAX) {
 		max_depth = INT_MAX;
@@ -1037,7 +1037,7 @@ PHP_METHOD(RecursiveTreeIterator, setPrefixPart)
 	}
 
 	if (0 > part || part > 5) {
-		zend_throw_exception_ex(spl_ce_OutOfRangeException, 0, "Use RecursiveTreeIterator::PREFIX_* constant");
+		zend_argument_value_error(1, "must be a RecursiveTreeIterator::PREFIX_* constant");
 		RETURN_THROWS();
 	}
 
@@ -1246,6 +1246,7 @@ static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *
 
 #define SPL_CHECK_CTOR(intern, classname) \
 	if (intern->dit_type == DIT_Unknown) { \
+		/* TODO Normal Error? */ \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Classes derived from %s must call %s::__construct()", \
 				ZSTR_VAL((spl_ce_##classname)->name), ZSTR_VAL((spl_ce_##classname)->name)); \
 		RETURN_THROWS(); \
@@ -1290,11 +1291,11 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			if (intern->u.limit.offset < 0) {
-				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter offset must be >= 0", 0);
+				zend_argument_value_error(2, "must be greater than or equal to 0");
 				return NULL;
 			}
-			if (intern->u.limit.count < 0 && intern->u.limit.count != -1) {
-				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter count must either be -1 or a value greater than or equal 0", 0);
+			if (intern->u.limit.count < -1) {
+				zend_argument_value_error(3, "must be greater than or equal to -1");
 				return NULL;
 			}
 			break;
@@ -1306,7 +1307,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			if (spl_cit_check_flags(flags) != SUCCESS) {
-				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0);
+				zend_argument_value_error(2, "must contain only one of CachingIterator::CALL_TOSTRING, "
+					"CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, "
+					"or CachingIterator::TOSTRING_USE_INNER");
 				return NULL;
 			}
 			intern->u.caching.flags |= flags & CIT_PUBLIC;
@@ -1374,7 +1377,8 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			if (mode < 0 || mode >= REGIT_MODE_MAX) {
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
+				zend_argument_value_error(3, "must be RegexIterator::MATCH, RegexIterator::GET_MATCH, "
+					"RegexIterator::ALL_MATCHES, RegexIterator::SPLIT, or RegexIterator::REPLACE");
 				return NULL;
 			}
 
@@ -1921,7 +1925,8 @@ PHP_METHOD(RegexIterator, setMode)
 	}
 
 	if (mode < 0 || mode >= REGIT_MODE_MAX) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
+		zend_argument_value_error(1, "must be RegexIterator::MATCH, RegexIterator::GET_MATCH, "
+			"RegexIterator::ALL_MATCHES, RegexIterator::SPLIT, or RegexIterator::REPLACE");
 		RETURN_THROWS();
 	}
 
@@ -2576,7 +2581,9 @@ PHP_METHOD(CachingIterator, setFlags)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	if (spl_cit_check_flags(flags) != SUCCESS) {
-		zend_throw_exception(spl_ce_InvalidArgumentException , "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0);
+		zend_argument_value_error(1, "must contain only one of CachingIterator::CALL_TOSTRING, "
+			"CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, "
+			"or CachingIterator::TOSTRING_USE_INNER");
 		RETURN_THROWS();
 	}
 	if ((intern->u.caching.flags & CIT_CALL_TOSTRING) != 0 && (flags & CIT_CALL_TOSTRING) == 0) {

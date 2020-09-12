@@ -12,13 +12,13 @@ var_dump($regexIterator->getMode());
 
 try {
     $regexIterator->setMode(7);
-} catch (InvalidArgumentException $e) {
-    var_dump($e->getMessage());
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
     var_dump($e->getCode());
 }
 
 ?>
 --EXPECT--
 int(0)
-string(14) "Illegal mode 7"
+RegexIterator::setMode(): Argument #1 ($mode) must be RegexIterator::MATCH, RegexIterator::GET_MATCH, RegexIterator::ALL_MATCHES, RegexIterator::SPLIT, or RegexIterator::REPLACE
 int(0)
