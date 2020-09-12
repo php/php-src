@@ -73,92 +73,188 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
 	NULL,
 };
 
-static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter)
+static int mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter);
+
+/* ISO 2022-JP-2004 has different modes, which can be selected by a sequence
+ * starting with ESC (0x1B). In each mode, characters can be selected from a
+ * different character set.
+ *
+ * Handle these escape sequences: */
+static int handle_esc_sequence(int c, mbfl_identify_filter *filter)
 {
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x80:	 X 0212 */
-/*	case 0x90:	 X 0213 plane 1 */
-/*	case 0xa0:	 X 0213 plane 2 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
+	/* If we are on the 2nd byte of a 2-byte character, `filter->status` will
+	 * be `first_byte << 8` */
+
+	switch (filter->status) {
+	case 0: /* Starting new character */
+		if (c == 0x1B) { /* ESC */
+			filter->status = 1;
+			return 1;
 		}
 		break;
 
-/*	case 0x81:	 X 0208 second char */
-	case 1:
-		if (c == 0x1b) {
-			filter->status++;
+	case 1: /* Already saw ESC */
+		if (c == '$') {
+			filter->status = 2;
+		} else if (c == '(') {
+			filter->status = 3;
 		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
-				filter->flag = 1;
-			}
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ ( */
-	case 4:
-		if (c == 0x51) {		/* JIS X 0213 plane 1 */
-			filter->status = 0x90;
-		} else if (c == 0x50) {		/* JIS X 0213 plane 2 */
-			filter->status = 0xa0;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
+			filter->flag = 1;
 			filter->status = 0;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
 		}
-		break;
+		return 1;
 
-	default:
+	case 2: /* Already saw ESC $ */
+		/* According to the ISO standard, ESC $ @ should switch to the
+		 * JIS X 0208-1978 character set, but that is not implemented */
+		if (c == 'B') {
+			/* Switch to JIS X 0208 */
+			filter->filter_function = mbfl_filt_ident_2022jp_2004_0208;
+			filter->status = 0;
+		} else if (c == '(') {
+			filter->status = 4;
+		} else {
+			filter->flag = 1;
+			filter->status = 0;
+		}
+		return 1;
+
+	case 3: /* Already saw ESC ( */
+		/* According to the ISO standard, ESC ( J should switch to
+		 * the JIS X 0201 character set, but that is not implemented.
+		 * Additionally, ISO-2022-JP-2004 includes another added escape sequence
+		 * ESC ( I, which should switch to the JIS X 0201-1976 Kana set */
+		if (c == 'B') {
+			/* Switch to ASCII */
+			filter->filter_function = mbfl_filt_ident_2022jp_2004;
+		} else {
+			filter->flag = 1;
+		}
 		filter->status = 0;
-		break;
+		return 1;
+
+	case 4: /* Already saw ESC $ ( */
+		/* ISO-2022-JP-2004 also includes another escape sequence: ESC ( $ O,
+		 * which should switch to the JIS X 0213-2000 plane 1 character set,
+		 * but that is not implemented */
+		if (c == 'Q') {
+			/* Switch to JIS X 0213-2004 plane 1 */
+			filter->filter_function = mbfl_filt_ident_2022jp_2004_0213_1;
+		} else if (c == 'P') {
+			/* Switch to JIS X 0213-2000 plane 2 */
+			filter->filter_function = mbfl_filt_ident_2022jp_2004_0213_2;
+		} else {
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		return 1;
 	}
 
+	return 0;
+}
+
+#undef IN
+#define IN(c,lo,hi) ((c) >= lo && (c) <= hi)
+
+/* Not all byte sequences in JIS X 0208 which would otherwise be valid are
+ * actually mapped to a character */
+static inline int in_unused_jisx0208_range(int c1, int c2)
+{
+	unsigned int s = (c1 - 0x21)*94 + c2 - 0x21;
+	return s >= jisx0208_ucs_table_size || !jisx0208_ucs_table[s];
+}
+
+/* In JIS X 0208 mode */
+static int mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter)
+{
+	if (!handle_esc_sequence(c, filter)) {
+		if (filter->status == 0) {
+			if (c >= 0x21 && c <= 0x74) {
+				/* First byte of a 2-byte character */
+				filter->status = c << 8;
+			} else if (c > 0x74 && c != 0x7F) {
+				/* In JISX 0208, single bytes from 0x0-0x1F and 0x7F represent
+				 * control characters, 0x20 is space, others are unmapped */
+				filter->flag = 1;
+			}
+		} else if (c < 0x21 || c > 0x7E || in_unused_jisx0208_range(filter->status >> 8, c)) {
+			filter->flag = 1; /* Illegal 2nd byte of a 2-byte character */
+		} else {
+			filter->status = 0; /* Passed by 2-byte character, starting a new one */
+		}
+	}
+	return c;
+}
+
+static inline int is_reserved_jisx0213_plane1_range(int c1, int c2)
+{
+	if (c1 == 0x24)
+		return IN(c2,0x7C,0x7E);
+	else if (c1 == 0x28)
+		return IN(c2,0x5F,0x66) || (c2 == 0x7D) || (c2 == 0x7E);
+	else if (c1 == 0x2C)
+		return IN(c2,0x74,0x7C);
+	else if (c1 == 0x2D)
+		return IN(c2,0x58,0x5E) || IN(c2,0x70,0x72) || IN(c2,0x74,0x77) || IN(c2,0x7A,0x7C);
+	return 0;
+}
+
+/* In JIS X 0213:2004 plane 1 */
+static int mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter)
+{
+	if (!handle_esc_sequence(c, filter)) {
+		if (filter->status == 0) {
+			if (c >= 0x21 && c <= 0x7E) {
+				filter->status = c << 8;
+			} else if (c > 0x7F) {
+				filter->flag = 1;
+			}
+		} else if (c < 0x21 || c > 0x7E || is_reserved_jisx0213_plane1_range(filter->status >> 8, c)) {
+			filter->flag = 1; /* Illegal 2nd byte of a 2-byte character */
+		} else {
+			filter->status = 0;
+		}
+	}
+	return c;
+}
+
+static inline int is_reserved_jisx0213_plane2_range(int c1, int c2)
+{
+	if (c1 == 0x22 || c1 == 0x26 || c1 == 0x27 || IN(c1,0x29,0x2B) || IN(c1,0x30,0x6D))
+		return 1;
+	else if (c1 == 0x7E && c2 >= 0x77)
+		return 1;
+	return 0;
+}
+
+/* In JIS X 0213:2000 plane 2 */
+static int mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter)
+{
+	if (!handle_esc_sequence(c, filter)) {
+		if (filter->status == 0) {
+			if (c >= 0x21 && c <= 0x7E) {
+				filter->status = c << 8;
+			} else if (c > 0x7F) {
+				filter->flag = 1;
+			}
+		} else if (c < 0x21 || c > 0x7E || is_reserved_jisx0213_plane2_range(filter->status >> 8, c)) {
+			filter->flag = 1; /* Illegal 2nd byte of a 2-byte character */
+		} else {
+			filter->status = 0;
+		}
+	}
+	return c;
+}
+
+/* In ASCII mode */
+static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter)
+{
+	if (!handle_esc_sequence(c, filter)) {
+		if (c > 0x7F) { /* non-ASCII */
+			filter->flag = 1;
+		}
+	}
 	return c;
 }
