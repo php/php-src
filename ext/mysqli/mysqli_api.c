@@ -2258,7 +2258,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	switch (attr) {
 #if MYSQL_VERSION_ID >= 50107
 	case STMT_ATTR_UPDATE_MAX_LENGTH:
-		if (mode_in != 0 && mode_in != 1) {
+		if (mode_in < 0) {
 			zend_argument_value_error(ERROR_ARG_POS(3), "must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH");
 			RETURN_THROWS();
 		}
