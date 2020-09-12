@@ -566,8 +566,8 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 	}
 
 	if (!zend_hash_num_elements(Z_ARRVAL_P(pg_rows))) {
-		php_error_docref(NULL, E_WARNING, "Cannot copy from an empty array");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -1061,13 +1061,13 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
 	}
 
 	if (result_type != PDO_FETCH_BOTH && result_type != PDO_FETCH_ASSOC && result_type != PDO_FETCH_NUM) {
-		php_error_docref(NULL, E_WARNING, "Invalid result type");
- 		RETURN_FALSE;
+		zend_argument_value_error(1, "must be one of PDO::FETCH_BOTH, PDO::FETCH_ASSOC, or PDO::FETCH_NUM");
+		RETURN_THROWS();
 	}
 
 	if (ms_timeout < 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid timeout");
- 		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 	} else if (ms_timeout > INT_MAX) {
 		php_error_docref(NULL, E_WARNING, "Timeout was shrunk to %d", INT_MAX);
