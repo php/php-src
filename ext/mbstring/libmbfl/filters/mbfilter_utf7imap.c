@@ -78,11 +78,13 @@
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
 
+static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
+
 const mbfl_encoding mbfl_encoding_utf7imap = {
 	mbfl_no_encoding_utf7imap,
 	"UTF7-IMAP",
 	NULL,
-	NULL,
+	mbfl_encoding_utf7imap_aliases,
 	NULL,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf7imap_wchar,
