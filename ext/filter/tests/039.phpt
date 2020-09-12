@@ -92,17 +92,17 @@ array(2) {
 }
 bool(false)
 bool(false)
-filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
+filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (2)
 bool(false)
 bool(false)
-filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
+filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (3)
 bool(false)
 bool(false)
-filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
+filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (4)
-filter_var_array(): Argument #2 ($options) must be of type array|int|null, stdClass given
+filter_var_array(): Argument #2 ($options) must be of type array|int, stdClass given
 array(0) {
 }
 array(1) {
@@ -132,7 +132,7 @@ array(1) {
   string(0) ""
 }
 int(100000)
-filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
+filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 array(1) {
   [""]=>
   string(0) ""

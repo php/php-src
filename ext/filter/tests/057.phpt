@@ -24,11 +24,12 @@ array(0) {
 }
 bool(false)
 bool(false)
+NULL
+array(0) {
+}
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-filter_input_array(): Argument #2 ($options) must be of type array|int|null, string given
-filter_var_array(): Argument #2 ($options) must be of type array|int|null, string given
-filter_input_array(): Argument #2 ($options) must be of type array|int|null, stdClass given
-filter_var_array(): Argument #2 ($options) must be of type array|int|null, stdClass given
+filter_input_array(): Argument #2 ($options) must be of type array|int, string given
+filter_var_array(): Argument #2 ($options) must be of type array|int, string given
+filter_input_array(): Argument #2 ($options) must be of type array|int, stdClass given
+filter_var_array(): Argument #2 ($options) must be of type array|int, stdClass given
