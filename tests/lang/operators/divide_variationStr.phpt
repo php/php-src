@@ -17,6 +17,8 @@ foreach ($strVals as $strVal) {
             var_dump($strVal/$otherVal);
         } catch (\TypeError $e) {
             echo $e->getMessage() . \PHP_EOL;
+        } catch (\DivisionByZeroError $e) {
+            echo $e->getMessage() . \PHP_EOL;
         }
     }
 }
@@ -25,7 +27,7 @@ foreach ($strVals as $strVal) {
 ?>
 --EXPECT--
 --- testing: '0'/'0' ---
-float(NAN)
+Division by zero
 --- testing: '0'/'65' ---
 int(0)
 --- testing: '0'/'-44' ---
@@ -53,7 +55,7 @@ float(0)
 --- testing: '0'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '65'/'0' ---
-float(INF)
+Division by zero
 --- testing: '65'/'65' ---
 int(1)
 --- testing: '65'/'-44' ---
@@ -81,7 +83,7 @@ float(19.11764705882353)
 --- testing: '65'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '-44'/'0' ---
-float(-INF)
+Division by zero
 --- testing: '-44'/'65' ---
 float(-0.676923076923077)
 --- testing: '-44'/'-44' ---
@@ -109,7 +111,7 @@ float(-12.941176470588236)
 --- testing: '-44'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '1.2'/'0' ---
-float(INF)
+Division by zero
 --- testing: '1.2'/'65' ---
 float(0.01846153846153846)
 --- testing: '1.2'/'-44' ---
@@ -137,7 +139,7 @@ float(0.35294117647058826)
 --- testing: '1.2'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '-7.7'/'0' ---
-float(-INF)
+Division by zero
 --- testing: '-7.7'/'65' ---
 float(-0.11846153846153847)
 --- testing: '-7.7'/'-44' ---
@@ -193,7 +195,7 @@ Unsupported operand types: string / string
 --- testing: 'abc'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '123abc'/'0' ---
-float(INF)
+Division by zero
 --- testing: '123abc'/'65' ---
 float(1.8923076923076922)
 --- testing: '123abc'/'-44' ---
@@ -221,7 +223,7 @@ float(36.1764705882353)
 --- testing: '123abc'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '123e5'/'0' ---
-float(INF)
+Division by zero
 --- testing: '123e5'/'65' ---
 float(189230.76923076922)
 --- testing: '123e5'/'-44' ---
@@ -249,7 +251,7 @@ float(3617647.0588235296)
 --- testing: '123e5'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '123e5xyz'/'0' ---
-float(INF)
+Division by zero
 --- testing: '123e5xyz'/'65' ---
 float(189230.76923076922)
 --- testing: '123e5xyz'/'-44' ---
@@ -277,7 +279,7 @@ float(3617647.0588235296)
 --- testing: '123e5xyz'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: ' 123abc'/'0' ---
-float(INF)
+Division by zero
 --- testing: ' 123abc'/'65' ---
 float(1.8923076923076922)
 --- testing: ' 123abc'/'-44' ---
@@ -305,7 +307,7 @@ float(36.1764705882353)
 --- testing: ' 123abc'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '123 abc'/'0' ---
-float(INF)
+Division by zero
 --- testing: '123 abc'/'65' ---
 float(1.8923076923076922)
 --- testing: '123 abc'/'-44' ---
@@ -333,7 +335,7 @@ float(36.1764705882353)
 --- testing: '123 abc'/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '123abc '/'0' ---
-float(INF)
+Division by zero
 --- testing: '123abc '/'65' ---
 float(1.8923076923076922)
 --- testing: '123abc '/'-44' ---
@@ -361,7 +363,7 @@ float(36.1764705882353)
 --- testing: '123abc '/'a5.9' ---
 Unsupported operand types: string / string
 --- testing: '3.4a'/'0' ---
-float(INF)
+Division by zero
 --- testing: '3.4a'/'65' ---
 float(0.052307692307692305)
 --- testing: '3.4a'/'-44' ---
