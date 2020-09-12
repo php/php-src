@@ -35,6 +35,8 @@
 
 extern const mbfl_encoding mbfl_encoding_byte2be;
 extern const mbfl_encoding mbfl_encoding_byte2le;
+extern const struct mbfl_identify_vtbl vtbl_identify_byte2be;
+extern const struct mbfl_identify_vtbl vtbl_identify_byte2le;
 extern const struct mbfl_convert_vtbl vtbl_byte2be_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_byte2be;
 extern const struct mbfl_convert_vtbl vtbl_byte2le_wchar;
