@@ -197,10 +197,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
 	zval *parameter;
 
-	if (!param) {
-		php_error_docref(NULL, E_WARNING, "param is NULL in oci_bind_input_cb; this should not happen");
-		return OCI_ERROR;
-	}
+	ZEND_ASSERT(param);
 
 	*indpp = &P->indicator;
 
@@ -236,10 +233,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
 	zval *parameter;
 
-	if (!param) {
-		php_error_docref(NULL, E_WARNING, "param is NULL in oci_bind_output_cb; this should not happen");
-		return OCI_ERROR;
-	}
+	ZEND_ASSERT(param);
 
 	if (Z_ISREF(param->parameter))
         parameter = Z_REFVAL(param->parameter);
@@ -509,11 +503,7 @@ static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid 
 			*alenpp = &col->datalen;
 			*indpp = (dvoid *)&col->indicator;
 			break;
-
-		default:
-			php_error_docref(NULL, E_WARNING,
-				"unhandled datatype in oci_define_callback; this should not happen");
-			return OCI_ERROR;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return OCI_CONTINUE;
