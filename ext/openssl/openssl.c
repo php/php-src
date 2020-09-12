@@ -2313,7 +2313,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 		Z_PARAM_STR_OR_OBJ_OF_CLASS(cert_str, cert_obj, php_openssl_certificate_ce)
 		Z_PARAM_LONG(purpose)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_OR_NULL(zcainfo)
+		Z_PARAM_ARRAY(zcainfo)
 		Z_PARAM_STRING_OR_NULL(untrusted, untrusted_len)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -4849,7 +4849,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 	RETVAL_LONG(-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl|p!a!p!p!p!", &filename, &filename_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl|p!ap!p!p!", &filename, &filename_len,
 				&flags, &signersfilename, &signersfilename_len, &cainfo,
 				&extracerts, &extracerts_len, &datafilename, &datafilename_len, &p7bfilename, &p7bfilename_len) == FAILURE) {
 		RETURN_THROWS();
