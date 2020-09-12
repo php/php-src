@@ -22,4 +22,4 @@ try {
 }
 ?>
 --EXPECT--
-The SQLite3 object has not been correctly initialised
+The SQLite3 object has not been correctly initialised or is already closed

@@ -50,5 +50,5 @@ array(2) {
 Closing database
 bool(true)
 Check db was closed
-The SQLite3Result object has not been correctly initialised
+The SQLite3Result object has not been correctly initialised or is already closed
 Done
