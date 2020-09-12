@@ -2449,6 +2449,44 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CLZ], [
 ])
 
 dnl
+dnl PHP_CHECK_BUILTIN_CLZL
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_CLZL], [
+  AC_MSG_CHECKING([for __builtin_clzl])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    return __builtin_clzl(1) ? 1 : 0;
+  ]])], [
+    have_builtin_clzl=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_clzl=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CLZL], [$have_builtin_clzl], [Whether the compiler supports __builtin_clzl])
+])
+
+dnl
+dnl PHP_CHECK_BUILTIN_CLZLL
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_CLZLL], [
+  AC_MSG_CHECKING([for __builtin_clzll])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    return __builtin_clzll(1) ? 1 : 0;
+  ]])], [
+    have_builtin_clzll=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_clzll=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CLZLL], [$have_builtin_clzll], [Whether the compiler supports __builtin_clzll])
+])
+
+dnl
 dnl PHP_CHECK_BUILTIN_CTZL
 dnl
 AC_DEFUN([PHP_CHECK_BUILTIN_CTZL], [

@@ -69,19 +69,19 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : error conditions ***
 
 -- Testing sprintf() function with Zero arguments --
-sprintf() expects at least %d parameter, %d given
+sprintf() expects at least 1 argument, 0 given
 
 -- Testing sprintf() function with less than expected no. of arguments --
-2 parameters are required, 1 given
-3 parameters are required, 2 given
-4 parameters are required, 3 given
-3 parameters are required, 1 given
-4 parameters are required, 2 given
-4 parameters are required, 1 given
-101 parameters are required, 1 given
+2 arguments are required, 1 given
+3 arguments are required, 2 given
+4 arguments are required, 3 given
+3 arguments are required, 1 given
+4 arguments are required, 2 given
+4 arguments are required, 1 given
+101 arguments are required, 1 given
 Missing format specifier at end of string
 Done

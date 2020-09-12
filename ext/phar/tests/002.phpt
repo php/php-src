@@ -17,5 +17,5 @@ try {
 }
 __HALT_COMPILER(); ?>
 --EXPECTF--
-Phar::mapPhar() expects at most 2 parameters, 3 given
+Phar::mapPhar() expects at most 2 arguments, 3 given
 internal corruption of phar "%s002.php" (truncated manifest at manifest length)

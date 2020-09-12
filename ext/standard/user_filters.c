@@ -425,7 +425,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_OBJECT(zobject)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (NULL == (pzbucket = zend_hash_str_find(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
+	if (NULL == (pzbucket = zend_hash_str_find_deref(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
 		zend_argument_value_error(2, "must be an object that has a \"bucket\" property");
 		RETURN_THROWS();
 	}
@@ -439,7 +439,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_THROWS();
 	}
 
-	if (NULL != (pzdata = zend_hash_str_find(Z_OBJPROP_P(zobject), "data", sizeof("data")-1)) && Z_TYPE_P(pzdata) == IS_STRING) {
+	if (NULL != (pzdata = zend_hash_str_find_deref(Z_OBJPROP_P(zobject), "data", sizeof("data")-1)) && Z_TYPE_P(pzdata) == IS_STRING) {
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}

@@ -583,6 +583,19 @@ static zend_never_inline ZEND_COLD bool zend_wrong_assign_to_variable_reference(
 	return 1;
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
+{
+	const zend_execute_data *execute_data = EG(current_execute_data);
+	zend_string *func_name = get_function_or_method_name(EX(call)->func);
+	const char *param_name = get_function_arg_name(EX(call)->func, arg_num);
+
+	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s cannot be passed by reference",
+		ZSTR_VAL(func_name), arg_num, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : ""
+	);
+
+	zend_string_release(func_name);
+}
+
 static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_property_info *prop, const char *type) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error(
@@ -685,33 +698,22 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 		return;
 	}
 
-	if (value) {
-		zend_verify_type_error_common(
-			zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
+	zend_verify_type_error_common(
+		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
 
-		if (zf->common.type == ZEND_USER_FUNCTION) {
-			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-				zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given, called in %s on line %d",
-					fclass, fsep, fname,
-					arg_num, ZSTR_VAL(arg_info->name),
-					ZSTR_VAL(need_msg), given_msg,
-					ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno
-				);
-			} else {
-				zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given",
-					fclass, fsep, fname, arg_num, ZSTR_VAL(arg_info->name), ZSTR_VAL(need_msg), given_msg
-				);
-			}
-		} else {
-			zend_type_error("%s%s%s(): Argument #%d ($%s) must be of type %s, %s given",
-				fclass, fsep, fname, arg_num, ((zend_internal_arg_info*) arg_info)->name, ZSTR_VAL(need_msg), given_msg
-			);
-		}
-
-		zend_string_release(need_msg);
+	ZEND_ASSERT(zf->common.type == ZEND_USER_FUNCTION
+		&& "Arginfo verification is not performed for internal functions");
+	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+		zend_argument_type_error(arg_num, "must be of type %s, %s given, called in %s on line %d",
+			ZSTR_VAL(need_msg), given_msg,
+			ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno
+		);
 	} else {
-		zend_missing_arg_error(ptr);
+		zend_argument_type_error(arg_num,
+			"must be of type %s, %s given", ZSTR_VAL(need_msg), given_msg);
 	}
+
+	zend_string_release(need_msg);
 }
 
 static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
@@ -910,7 +912,7 @@ static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_in
 	return 0;
 }
 
-zend_bool zend_never_inline zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
+ZEND_API zend_bool zend_never_inline zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
 	return i_zend_verify_property_type(info, property, strict);
 }
 

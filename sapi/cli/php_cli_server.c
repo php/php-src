@@ -1177,19 +1177,13 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 	zend_bool append_error_message = 0;
 
 	if (PG(last_error_message)) {
-		switch (PG(last_error_type)) {
-			case E_ERROR:
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-			case E_PARSE:
-				if (status == 200) {
-					/* the status code isn't changed by a fatal error, so fake it */
-					effective_status = 500;
-				}
+		if (PG(last_error_type) & E_FATAL_ERRORS) {
+			if (status == 200) {
+				/* the status code isn't changed by a fatal error, so fake it */
+				effective_status = 500;
+			}
 
-				append_error_message = 1;
-				break;
+			append_error_message = 1;
 		}
 	}
 

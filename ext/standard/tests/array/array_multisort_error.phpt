@@ -25,7 +25,7 @@ try {
 *** Testing array_multisort() : error conditions ***
 
 -- Testing array_multisort() function with repeated flags --
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag that has not already been specified
+array_multisort(): Argument #3 must be an array or a sort flag that has not already been specified
 
 -- Testing array_multisort() function with repeated flags --
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag that has not already been specified
+array_multisort(): Argument #3 must be an array or a sort flag that has not already been specified

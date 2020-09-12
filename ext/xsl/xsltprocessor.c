@@ -675,7 +675,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(namespace, namespace_len)
-		Z_PARAM_STR_OR_ARRAY_HT(name, array_value)
+		Z_PARAM_ARRAY_HT_OR_STR(array_value, name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(value)
 	ZEND_PARSE_PARAMETERS_END();
@@ -772,7 +772,7 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(restrict_str, restrict_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(restrict_ht, restrict_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_XSL_P(id);

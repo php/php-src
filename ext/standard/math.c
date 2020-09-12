@@ -22,6 +22,7 @@
 #include "zend_multiply.h"
 #include "zend_exceptions.h"
 #include "zend_portability.h"
+#include "zend_bitset.h"
 
 #include <math.h>
 #include <float.h>
@@ -821,6 +822,41 @@ PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
 }
 /* }}} */
 
+/* {{{ _php_math_longtobase_pwr2 */
+/*
+ * Convert a long to a string containing a base(2,4,6,16,32) representation of
+ * the number.
+ */
+static zend_always_inline zend_string * _php_math_longtobase_pwr2(zend_long arg, int base_log2)
+{
+	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	zend_ulong value;
+	size_t len;
+	zend_string *ret;
+	char *ptr;
+
+	value = arg;
+
+	if (value == 0) {
+		len = 1;
+	} else {
+		len = ((sizeof(value) * 8 - zend_ulong_nlz(value)) + (base_log2 - 1)) / base_log2;
+	}
+
+	ret = zend_string_alloc(len, 0);
+	ptr = ZSTR_VAL(ret) + len;
+	*ptr = '\0';
+
+	do {
+		ZEND_ASSERT(ptr > ZSTR_VAL(ret));
+		*--ptr = digits[value & ((1 << base_log2) - 1)];
+		value >>= base_log2;
+	} while (value);
+
+	return ret;
+}
+/* }}} */
+
 /* {{{ _php_math_zvaltobase */
 /*
  * Convert a zval to a string containing a base(2-36) representation of
@@ -908,7 +944,7 @@ PHP_FUNCTION(decbin)
 		Z_PARAM_LONG(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase(arg, 2));
+	RETURN_STR(_php_math_longtobase_pwr2(arg, 1));
 }
 /* }}} */
 
@@ -921,7 +957,7 @@ PHP_FUNCTION(decoct)
 		Z_PARAM_LONG(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase(arg, 8));
+	RETURN_STR(_php_math_longtobase_pwr2(arg, 3));
 }
 /* }}} */
 
@@ -934,7 +970,7 @@ PHP_FUNCTION(dechex)
 		Z_PARAM_LONG(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase(arg, 16));
+	RETURN_STR(_php_math_longtobase_pwr2(arg, 4));
 }
 /* }}} */
 

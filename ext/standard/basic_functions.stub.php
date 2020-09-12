@@ -63,11 +63,11 @@ function krsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
 function ksort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
 
-/** @param array|Countable|null $var */
+/** @param Countable|array $var */
 function count($var, int $mode = COUNT_NORMAL): int {}
 
 /**
- * @param array|object|null $var
+ * @param Countable|array $var
  * @alias count
  */
 function sizeof($var, int $mode = COUNT_NORMAL): int {}
@@ -178,59 +178,55 @@ function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
-function array_intersect_key(array $array1, array $array2, array ...$arrays): array {}
+function array_intersect_key(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_intersect_ukey(array $array1, array $array2, ...$rest): array {}
+function array_intersect_ukey(array $array, ...$rest): array {}
 
-function array_intersect(array $array1, array $array2, array ...$arrays): array {}
-
-/** @param array|callable $rest */
-function array_uintersect(array $array1, array $array2, ...$rest): array {}
-
-function array_intersect_assoc(array $array1, array $array2, array ...$arrays): array {}
+function array_intersect(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_uintersect_assoc(array $array1, array $array2, ...$rest): array {}
+function array_uintersect(array $array, ...$rest): array {}
+
+function array_intersect_assoc(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_intersect_uassoc(array $array1, array $array2, ...$rest): array {}
+function array_uintersect_assoc(array $array, ...$rest): array {}
 
 /** @param array|callable $rest */
-function array_uintersect_uassoc(array $array1, array $array2, ...$rest): array {}
-
-function array_diff_key(array $array1, array $array2, array ...$arrays): array {}
+function array_intersect_uassoc(array $array, ...$rest): array {}
 
 /** @param array|callable $rest */
-function array_diff_ukey(array $array1, array $array2, ...$rest): array {}
+function array_uintersect_uassoc(array $array, ...$rest): array {}
 
-function array_diff(array $array1, array $array2, array ...$arrays): array {}
-
-/** @param array|callable $rest */
-function array_udiff(array $array1, array $array2, ...$rest): array {}
-
-function array_diff_assoc(array $array1, array $array2, array ...$arrays): array {}
+function array_diff_key(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_diff_uassoc(array $array1, array $array2, ...$rest): array {}
+function array_diff_ukey(array $array, ...$rest): array {}
+
+function array_diff(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_udiff_assoc(array $array1, array $array2, ...$rest): array {}
+function array_udiff(array $array, ...$rest): array {}
+
+function array_diff_assoc(array $array, array ...$arrays): array {}
 
 /** @param array|callable $rest */
-function array_udiff_uassoc(array $array1, array $array2, ...$rest): array {}
+function array_diff_uassoc(array $array, ...$rest): array {}
+
+/** @param array|callable $rest */
+function array_udiff_assoc(array $array, ...$rest): array {}
+
+/** @param array|callable $rest */
+function array_udiff_uassoc(array $array, ...$rest): array {}
 
 /**
  * @param array $array1
- * @param int $sort_order
- * @param int $sort_flags
- * @param array $arrays
+ * @param array|int $rest
  * @prefer-ref $array1
- * @prefer-ref $sort_order
- * @prefer-ref $sort_flags
- * @prefer-ref $arrays
+ * @prefer-ref $rest
  */
-function array_multisort(&$array1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arrays): bool {}
+function array_multisort(&$array1, &...$rest): bool {}
 
 function array_rand(array $array, int $num_req = 1): int|string|array {}
 

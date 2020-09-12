@@ -84,13 +84,13 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\
-		php_error_docref(NULL, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time");	\
+		php_error_docref(NULL, E_WARNING, "Session ini settings cannot be changed when a session is active");	\
 		return FAILURE;	\
 	}
 
 #define SESSION_CHECK_OUTPUT_STATE										\
 	if (SG(headers_sent) && stage != ZEND_INI_STAGE_DEACTIVATE) {												\
-		php_error_docref(NULL, E_WARNING, "Headers already sent. You cannot change the session module's ini settings at this time");	\
+		php_error_docref(NULL, E_WARNING, "Session ini settings cannot be changed after headers have already been sent");	\
 		return FAILURE;													\
 	}
 
@@ -160,7 +160,9 @@ PHPAPI int php_session_destroy(void) /* {{{ */
 
 	if (PS(id) && PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
 		retval = FAILURE;
-		php_error_docref(NULL, E_WARNING, "Session object destruction failed");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Session object destruction failed");
+		}
 	}
 
 	php_rshutdown_session_globals();
@@ -393,7 +395,9 @@ static int php_session_initialize(void) /* {{{ */
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
 	) {
 		php_session_abort();
-		php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		return FAILURE;
 	}
 
@@ -405,14 +409,17 @@ static int php_session_initialize(void) /* {{{ */
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
 			php_session_abort();
-			zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			}
 			return FAILURE;
 		}
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
 	} else if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
-		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE) {
+		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE
+	) {
 		if (PS(id)) {
 			zend_string_release_ex(PS(id), 0);
 		}
@@ -435,7 +442,9 @@ static int php_session_initialize(void) /* {{{ */
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, PS(gc_maxlifetime)) == FAILURE) {
 		php_session_abort();
 		/* FYI: Some broken save handlers return FAILURE for non-existent session ID, this is incorrect */
-		php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		return FAILURE;
 	}
 
@@ -544,7 +553,7 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "Cannot find save handler '%s'", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "Session save handler \"%s\" cannot be found", ZSTR_VAL(new_value));
 		}
 
 		return FAILURE;
@@ -552,7 +561,7 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 
 	/* "user" save handler should not be set by user */
 	if (!PS(set_handler) &&  tmp == ps_user_ptr) {
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot set 'user' save handler by ini_set() or session_module_name()");
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Session save handler \"user\" cannot be set by ini_set() or session_module_name()");
 		return FAILURE;
 	}
 
@@ -583,7 +592,7 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "Cannot find serialization handler '%s'", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "Serialization handler \"%s\" cannot be found", ZSTR_VAL(new_value));
 		}
 		return FAILURE;
 	}
@@ -660,7 +669,7 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name cannot be a numeric or empty '%s'", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "session.name \"%s\" cannot be numeric or empty", ZSTR_VAL(new_value));
 		}
 		return FAILURE;
 	}
@@ -725,7 +734,7 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 		return SUCCESS;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_length' must be between 22 and 256.");
+	php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_length\" must be between 22 and 256");
 	return FAILURE;
 }
 /* }}} */
@@ -745,7 +754,7 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 		return SUCCESS;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_bits_per_character' must be between 4 and 6.");
+	php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_bits_per_character\" must be between 4 and 6");
 	return FAILURE;
 }
 /* }}} */
@@ -766,12 +775,12 @@ static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 	int tmp;
 	tmp = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	if(tmp < 0) {
-		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to zero");
+		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to 0");
 		return FAILURE;
 	}
 	if(ZSTR_LEN(new_value) > 0 && ZSTR_VAL(new_value)[ZSTR_LEN(new_value)-1] == '%') {
 		if(tmp > 100) {
-			php_error_docref(NULL, E_WARNING, "session.upload_progress.freq cannot be over 100%%");
+			php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be less than or equal to 100%%");
 			return FAILURE;
 		}
 		PS(rfc1867_freq) = -tmp;
@@ -1225,9 +1234,9 @@ static int php_session_cache_limiter(void) /* {{{ */
 
 		php_session_abort();
 		if (output_start_filename) {
-			php_error_docref(NULL, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)", output_start_filename, output_start_lineno);
+			php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be sent after headers have already been sent (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Cannot send session cache limiter - headers already sent");
+			php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be sent after headers have already been sent");
 		}
 		return -2;
 	}
@@ -1303,9 +1312,9 @@ static int php_session_send_cookie(void) /* {{{ */
 		int output_start_lineno = php_output_get_start_lineno();
 
 		if (output_start_filename) {
-			php_error_docref(NULL, E_WARNING, "Cannot send session cookie - headers already sent by (output started at %s:%d)", output_start_filename, output_start_lineno);
+			php_error_docref(NULL, E_WARNING, "Session cookie cannot be sent after headers have already been sent (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Cannot send session cookie - headers already sent");
+			php_error_docref(NULL, E_WARNING, "Session cookie cannot be sent after headers have already been sent");
 		}
 		return FAILURE;
 	}
@@ -1497,7 +1506,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 
 	switch (PS(session_status)) {
 		case php_session_active:
-			php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
+			php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
 			return FAILURE;
 			break;
 
@@ -1506,7 +1515,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 			if (!PS(mod) && value) {
 				PS(mod) = _php_find_ps_module(value);
 				if (!PS(mod)) {
-					php_error_docref(NULL, E_WARNING, "Cannot find save handler '%s' - session startup failed", value);
+					php_error_docref(NULL, E_WARNING, "Cannot find session save handler \"%s\" - session startup failed", value);
 					return FAILURE;
 				}
 			}
@@ -1514,7 +1523,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 			if (!PS(serializer) && value) {
 				PS(serializer) = _php_find_ps_serializer(value);
 				if (!PS(serializer)) {
-					php_error_docref(NULL, E_WARNING, "Cannot find serialization handler '%s' - session startup failed", value);
+					php_error_docref(NULL, E_WARNING, "Cannot find session serialization handler \"%s\" - session startup failed", value);
 					return FAILURE;
 				}
 			}
@@ -1687,12 +1696,12 @@ PHP_FUNCTION(session_set_cookie_params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when session is active");
+		php_error_docref(NULL, E_WARNING, "Session cookie parameters cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
 	if (SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session cookie parameters cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -1733,16 +1742,16 @@ PHP_FUNCTION(session_set_cookie_params)
 					samesite = zval_get_string(value);
 					found++;
 				} else {
-					php_error_docref(NULL, E_WARNING, "Unrecognized key '%s' found in the options array", ZSTR_VAL(key));
+					php_error_docref(NULL, E_WARNING, "Argument #1 ($lifetime_or_options) contains an unrecognized key \"%s\"", ZSTR_VAL(key));
 				}
 			} else {
-				php_error_docref(NULL, E_WARNING, "Numeric key found in the options array");
+				php_error_docref(NULL, E_WARNING, "Argument #1 ($lifetime_or_options) cannot contain numeric keys");
 			}
 		} ZEND_HASH_FOREACH_END();
 
 		if (found == 0) {
-			php_error_docref(NULL, E_WARNING, "No valid keys were found in the options array");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must contain at least 1 valid key");
+			RETURN_THROWS();
 		}
 	} else {
 		lifetime = zval_get_string(lifetime_or_options);
@@ -1849,12 +1858,12 @@ PHP_FUNCTION(session_name)
 	}
 
 	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change session name when session is active");
+		php_error_docref(NULL, E_WARNING, "Session name cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
 	if (name && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change session name when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session name cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -1879,12 +1888,12 @@ PHP_FUNCTION(session_module_name)
 	}
 
 	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save handler module when session is active");
+		php_error_docref(NULL, E_WARNING, "Session save handler module cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
 	if (name && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save handler module when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session save handler module cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -1897,7 +1906,7 @@ PHP_FUNCTION(session_module_name)
 
 	if (name) {
 		if (!_php_find_ps_module(ZSTR_VAL(name))) {
-			php_error_docref(NULL, E_WARNING, "Cannot find named PHP session module (%s)", ZSTR_VAL(name));
+			php_error_docref(NULL, E_WARNING, "Session handler module \"%s\" cannot be found", ZSTR_VAL(name));
 
 			zval_ptr_dtor_str(return_value);
 			RETURN_FALSE;
@@ -1916,12 +1925,12 @@ PHP_FUNCTION(session_module_name)
 
 static int save_handler_check_session() {
 	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save handler when session is active");
+		php_error_docref(NULL, E_WARNING, "Session save handler cannot be changed when a session is active");
 		return FAILURE;
 	}
 
 	if (SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save handler when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session save handler cannot be changed after headers have already been sent");
 		return FAILURE;
 	}
 
@@ -1963,7 +1972,7 @@ PHP_FUNCTION(session_set_save_handler)
 				add_next_index_zval(&PS(mod_user_names).names[i], obj);
 				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
 			} else {
-				php_error_docref(NULL, E_ERROR, "Session handler's function table is corrupt");
+				php_error_docref(NULL, E_ERROR, "Session save handler function table is corrupt");
 				RETURN_FALSE;
 			}
 
@@ -2051,22 +2060,22 @@ PHP_FUNCTION(session_set_save_handler)
 		RETURN_THROWS();
 	}
 
+	/* At this point argc can only be between 6 and PS_NUM_APIS */
+	for (i = 0; i < argc; i++) {
+		if (!zend_is_callable(&args[i], 0, NULL)) {
+			zend_string *name = zend_get_callable_name(&args[i]);
+			zend_argument_type_error(i + 1, "must be a valid callback, function \"%s\" not found or invalid function name", ZSTR_VAL(name));
+			zend_string_release(name);
+			RETURN_THROWS();
+		}
+	}
+
 	if (save_handler_check_session() == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	/* remove shutdown function */
 	remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1);
-
-	/* At this point argc can only be between 6 and PS_NUM_APIS */
-	for (i = 0; i < argc; i++) {
-		if (!zend_is_callable(&args[i], 0, NULL)) {
-			zend_string *name = zend_get_callable_name(&args[i]);
-			php_error_docref(NULL, E_WARNING, "Argument %d is not a valid callback", i+1);
-			zend_string_release_ex(name, 0);
-			RETURN_FALSE;
-		}
-	}
 
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
@@ -2100,12 +2109,12 @@ PHP_FUNCTION(session_save_path)
 	}
 
 	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save path when session is active");
+		php_error_docref(NULL, E_WARNING, "Session save path cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
 	if (name && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save path when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session save path cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2129,13 +2138,13 @@ PHP_FUNCTION(session_id)
 		RETURN_THROWS();
 	}
 
-	if (name && PS(use_cookies) && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change session id when headers already sent");
+	if (name && PS(session_status) == php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
-	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change session id when session is active");
+	if (name && PS(use_cookies) && SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2172,12 +2181,12 @@ PHP_FUNCTION(session_regenerate_id)
 	}
 
 	if (PS(session_status) != php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - session is not active");
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be regenerated when there is no active session");
 		RETURN_FALSE;
 	}
 
 	if (SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be regenerated after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2186,7 +2195,9 @@ PHP_FUNCTION(session_regenerate_id)
 		if (PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
-			php_error_docref(NULL, E_WARNING, "Session object destruction failed.  ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			if (!EG(exception)) {
+				php_error_docref(NULL, E_WARNING, "Session object destruction failed. ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			}
 			RETURN_FALSE;
 		}
 	} else {
@@ -2217,14 +2228,18 @@ PHP_FUNCTION(session_regenerate_id)
 
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		PS(session_status) = php_session_none;
-		zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		RETURN_THROWS();
 	}
 
 	PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 	if (!PS(id)) {
 		PS(session_status) = php_session_none;
-		zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		RETURN_THROWS();
 	}
 	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
@@ -2234,7 +2249,9 @@ PHP_FUNCTION(session_regenerate_id)
 		if (!PS(id)) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
-			zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			}
 			RETURN_THROWS();
 		}
 	}
@@ -2242,7 +2259,9 @@ PHP_FUNCTION(session_regenerate_id)
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
-		zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		}
 		RETURN_THROWS();
 	}
 	if (data) {
@@ -2274,7 +2293,7 @@ PHP_FUNCTION(session_create_id)
 	if (prefix && ZSTR_LEN(prefix)) {
 		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
 			/* E_ERROR raised for security reason. */
-			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only aphanumeric, ',', '-' are allowed");
+			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			RETURN_FALSE;
 		} else {
 			smart_str_append(&id, prefix);
@@ -2325,12 +2344,12 @@ PHP_FUNCTION(session_cache_limiter)
 	}
 
 	if (limiter && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when session is active");
+		php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
 	if (limiter && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2355,12 +2374,12 @@ PHP_FUNCTION(session_cache_expire)
 	}
 
 	if (!expires_is_null && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when session is active");
+		php_error_docref(NULL, E_WARNING, "Session cache expiration cannot be changed when a session is active");
 		RETURN_LONG(PS(cache_expire));
 	}
 
 	if (!expires_is_null && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session cache expiration cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2404,7 +2423,7 @@ PHP_FUNCTION(session_decode)
 	}
 
 	if (PS(session_status) != php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session is not active. You cannot decode session data");
+		php_error_docref(NULL, E_WARNING, "Session data cannot be decoded when there is no active session");
 		RETURN_FALSE;
 	}
 
@@ -2427,7 +2446,7 @@ static int php_session_start_set_ini(zend_string *varname, zend_string *new_valu
 	return ret;
 }
 
-/* {{{ +   Begin session */
+/* {{{ Begin session */
 PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
@@ -2441,7 +2460,7 @@ PHP_FUNCTION(session_start)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_NOTICE, "A session had already been started - ignoring");
+		php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
 		RETURN_TRUE;
 	}
 
@@ -2451,7 +2470,7 @@ PHP_FUNCTION(session_start)
 	 * module is unable to rewrite output.
 	 */
 	if (PS(use_cookies) && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot start session when headers already sent");
+		php_error_docref(NULL, E_WARNING, "Session cannot be started after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2470,14 +2489,16 @@ PHP_FUNCTION(session_start)
 							zend_string *tmp_val;
 							zend_string *val = zval_get_tmp_string(value, &tmp_val);
 							if (php_session_start_set_ini(str_idx, val) == FAILURE) {
-								php_error_docref(NULL, E_WARNING, "Setting option '%s' failed", ZSTR_VAL(str_idx));
+								php_error_docref(NULL, E_WARNING, "Setting option \"%s\" failed", ZSTR_VAL(str_idx));
 							}
 							zend_tmp_string_release(tmp_val);
 						}
 						break;
 					default:
-						php_error_docref(NULL, E_WARNING, "Option(%s) value must be string, boolean or long", ZSTR_VAL(str_idx));
-						break;
+						zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
+							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_type_name(value)
+						);
+						RETURN_THROWS();
 				}
 			}
 			(void) num_idx;
@@ -2547,7 +2568,7 @@ PHP_FUNCTION(session_gc)
 	}
 
 	if (PS(session_status) != php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session is not active");
+		php_error_docref(NULL, E_WARNING, "Session cannot be garbage collected when there is no active session");
 		RETURN_FALSE;
 	}
 
@@ -2647,7 +2668,7 @@ PHP_FUNCTION(session_register_shutdown)
 		 * session then tough luck.
 		 */
 		php_session_flush(1);
-		php_error_docref(NULL, E_WARNING, "Unable to register session flush function");
+		php_error_docref(NULL, E_WARNING, "Session shutdown function cannot be registered");
 	}
 }
 /* }}} */

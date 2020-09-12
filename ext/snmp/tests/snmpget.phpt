@@ -80,15 +80,15 @@ bool(false)
 noSuchName checks
 Single OID
 
-Warning: snmpget(): Error in packet at 'SNMPv2-MIB::sysDescr.110': (noSuchName) There is no such variable name in this MIB. in %s on line %d
+Warning: snmpget(): Error in packet at '%s': (noSuchName) There is no such variable name in this MIB. in %s on line %d
 bool(false)
 Single OID in array
 
-Warning: snmpget(): Error in packet at 'SNMPv2-MIB::sysDescr.110': (noSuchName) There is no such variable name in this MIB. in %s on line %d
+Warning: snmpget(): Error in packet at '%s': (noSuchName) There is no such variable name in this MIB. in %s on line %d
 bool(false)
 Multiple OID
 
-Warning: snmpget(): Error in packet at 'SNMPv2-MIB::sysUpTime.220': (noSuchName) There is no such variable name in this MIB. in %s on line %d
+Warning: snmpget(): Error in packet at '%s': (noSuchName) There is no such variable name in this MIB. in %s on line %d
 array(1) {
   ["%s"]=>
   string(%d) "%s"

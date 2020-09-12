@@ -490,6 +490,7 @@ retry:
 				if (st & SNMP_CMD_SET) {
 					if (objid_query->offset < objid_query->count) { /* we have unprocessed OIDs */
 						keepwalking = 1;
+						snmp_free_pdu(response);
 						continue;
 					}
 					snmp_free_pdu(response);
@@ -794,10 +795,12 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
-	int force_ipv6 = FALSE;
+	int force_ipv6 = FALSE; (void) force_ipv6;
 	int n;
 	struct sockaddr **psal;
 	struct sockaddr **res;
+	// TODO: Do not strip and re-add the port in peername?
+	unsigned remote_port = SNMP_PORT;
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -806,7 +809,6 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	snmp_sess_init(session);
 
 	session->version = version;
-	session->remote_port = SNMP_PORT;
 
 	session->peername = emalloc(MAX_NAME_LEN);
 	/* we copy original hostname for further processing */
@@ -819,7 +821,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		host_ptr++;
 		if ((pptr = strchr(host_ptr, ']'))) {
 			if (pptr[1] == ':') {
-				session->remote_port = atoi(pptr + 2);
+				remote_port = atoi(pptr + 2);
 			}
 			*pptr = '\0';
 		} else {
@@ -828,7 +830,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		}
 	} else { /* IPv4 address */
 		if ((pptr = strchr(host_ptr, ':'))) {
-			session->remote_port = atoi(pptr + 1);
+			remote_port = atoi(pptr + 1);
 			*pptr = '\0';
 		}
 	}
@@ -880,9 +882,9 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	*/
 
 	/* put back non-standard SNMP port */
-	if (session->remote_port != SNMP_PORT) {
+	if (remote_port != SNMP_PORT) {
 		pptr = session->peername + strlen(session->peername);
-		sprintf(pptr, ":%d", session->remote_port);
+		sprintf(pptr, ":%d", remote_port);
 	}
 
 	php_network_freeaddresses(psal);
@@ -1081,7 +1083,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
 	zend_string *oid_str, *type_str = NULL, *value_str = NULL;
 	HashTable *oid_ht, *type_ht = NULL, *value_ht = NULL;
-	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
+	char *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
 	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
@@ -1108,9 +1110,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_STRING(a5, a5_len)
 					Z_PARAM_STRING(a6, a6_len)
 					Z_PARAM_STRING(a7, a7_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
+					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
+					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1128,7 +1130,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_STRING(a5, a5_len)
 					Z_PARAM_STRING(a6, a6_len)
 					Z_PARAM_STRING(a7, a7_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1139,9 +1141,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_START(5, 7)
 					Z_PARAM_STRING(a1, a1_len)
 					Z_PARAM_STRING(a2, a2_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
-					Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
+					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
+					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1154,7 +1156,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_START(3, 5)
 					Z_PARAM_STRING(a1, a1_len)
 					Z_PARAM_STRING(a2, a2_len)
-					Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
@@ -1164,13 +1166,13 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	} else {
 		if (st & SNMP_CMD_SET) {
 			ZEND_PARSE_PARAMETERS_START(3, 3)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
-				Z_PARAM_STR_OR_ARRAY_HT(type_str, type_ht)
-				Z_PARAM_STR_OR_ARRAY_HT(value_str, value_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
+				Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
+				Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 			ZEND_PARSE_PARAMETERS_END();
 		} else if (st & SNMP_CMD_WALK) {
 			ZEND_PARSE_PARAMETERS_START(1, 4)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 				Z_PARAM_OPTIONAL
 				Z_PARAM_BOOL(suffix_keys)
 				Z_PARAM_LONG(objid_query.max_repetitions)
@@ -1181,7 +1183,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			}
 		} else if (st & SNMP_CMD_GET) {
 			ZEND_PARSE_PARAMETERS_START(1, 2)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 				Z_PARAM_OPTIONAL
 				Z_PARAM_BOOL(use_orignames)
 			ZEND_PARSE_PARAMETERS_END();
@@ -1192,7 +1194,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			/* SNMP_CMD_GETNEXT
 			 */
 			ZEND_PARSE_PARAMETERS_START(1, 1)
-				Z_PARAM_STR_OR_ARRAY_HT(oid_str, oid_ht)
+				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 			ZEND_PARSE_PARAMETERS_END();
 		}
 	}
@@ -1777,9 +1779,6 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 
 	ZVAL_STRINGL(&val, snmp_object->session->peername, strlen(snmp_object->session->peername));
 	add_assoc_zval(retval, "hostname", &val);
-
-	ZVAL_LONG(&val, snmp_object->session->remote_port);
-	add_assoc_zval(retval, "port", &val);
 
 	ZVAL_LONG(&val, snmp_object->session->timeout);
 	add_assoc_zval(retval, "timeout", &val);

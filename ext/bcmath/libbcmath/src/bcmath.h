@@ -150,9 +150,6 @@ _PROTOTYPE(void bc_out_num, (bc_num num, int o_base, void (* out_char)(int),
 			     int leading_zero));
 
 /* Prototypes needed for external utility routines. */
-
-_PROTOTYPE(void bc_out_of_memory, (void));
-
 #define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)
 #define bc_free_num(num)			_bc_free_num_ex((num), 0)
 #define bc_num2str(num)				bc_num2str_ex((num), (num->n_scale))

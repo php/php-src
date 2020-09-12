@@ -208,7 +208,7 @@ mysqli_query($link, 'DROP USER pcontest');
 mysqli_close($link);
 ?>
 --EXPECT--
-mysqli_get_links_stats() expects exactly 0 parameters, 1 given
+mysqli_get_links_stats() expects exactly 0 arguments, 1 given
 Before pconnect:array(3) {
   ["total"]=>
   int(1)

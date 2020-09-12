@@ -7,13 +7,14 @@ steps:
     parameters:
       configurationName: ${{ parameters.configurationName }}
       runTestsParameters: ${{ parameters.runTestsParameters }}
-  - template: test.yml
-    parameters:
-      configurationName: ${{ parameters.configurationName }}
-      runTestsName: 'OpCache'
-      runTestsParameters: >-
-        ${{ parameters.runTestsParameters }}
-        -d zend_extension=opcache.so
+  - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
   - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
     - template: test.yml
       parameters:

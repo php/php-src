@@ -36,7 +36,7 @@ try {
 
 ?>
 --EXPECT--
-password_hash() expects at least 2 parameters, 1 given
+password_hash() expects at least 2 arguments, 1 given
 password_hash(): Argument #2 ($algo) must be of type string|int|null, array given
 password_hash(): Argument #3 ($options) must be of type array, stdClass given
 password_hash(): Argument #3 ($options) must be of type array, string given

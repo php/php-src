@@ -38,7 +38,7 @@ try {
 
 try {
     $phar->addFromString(".phar\0", "gotcha");
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
@@ -53,4 +53,4 @@ CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Phar::addFromString(): Argument #1 ($localname) must be a valid path, string given
+CAUGHT: Phar::addFromString(): Argument #1 ($localname) must not contain any null bytes

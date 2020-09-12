@@ -47,7 +47,7 @@ int(2)
 array(0) {
 }
 
-Fatal error: Uncaught ArgumentCountError: SessionHandler::close() expects exactly 0 parameters, 1 given in %s:%d
+Fatal error: Uncaught ArgumentCountError: SessionHandler::close() expects exactly 0 arguments, 1 given in %s:%d
 Stack trace:
 #0 %s(%d): SessionHandler->close(false)
 #1 [internal function]: MySession->close()

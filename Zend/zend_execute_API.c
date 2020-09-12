@@ -443,6 +443,7 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 	}
 
 	func = EG(current_execute_data)->func;
+
 	switch (func->type) {
 		case ZEND_USER_FUNCTION:
 		case ZEND_INTERNAL_FUNCTION:
@@ -470,7 +471,9 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 	if (!zend_is_executing()) {
 		return NULL;
 	}
+
 	func = EG(current_execute_data)->func;
+
 	switch (func->type) {
 		case ZEND_USER_FUNCTION: {
 				zend_string *function_name = func->common.function_name;
@@ -488,6 +491,24 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 		default:
 			return NULL;
 	}
+}
+/* }}} */
+
+ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
+{
+	ZEND_ASSERT(zend_is_executing());
+
+	return get_function_or_method_name(EG(current_execute_data)->func);
+}
+/* }}} */
+
+ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* {{{ */
+{
+	if (func->common.scope) {
+		return zend_create_member_string(func->common.scope->name, func->common.function_name);
+	}
+
+	return func->common.function_name ? zend_string_copy(func->common.function_name) : zend_string_init("main", sizeof("main") - 1, 0);
 }
 /* }}} */
 

@@ -69,13 +69,13 @@ function oci_lob_seek(OCILob $lob_descriptor, int $offset, int $whence = OCI_SEE
 
 function oci_lob_size(OCILob $lob_descriptor): int|false {}
 
-function oci_lob_write(OCILob $lob_descriptor, string $string, int $length = UNKNOWN): int|false {}
+function oci_lob_write(OCILob $lob_descriptor, string $string, ?int $length = null): int|false {}
 
 function oci_lob_append(OCILob $lob_descriptor_to, OCILob $lob_descriptor_from): bool {}
 
 function oci_lob_truncate(OCILob $lob_descriptor, int $length = 0): bool {}
 
-function oci_lob_erase(OCILob $lob_descriptor, int $offset = UNKNOWN, int $length = UNKNOWN): int|false {}
+function oci_lob_erase(OCILob $lob_descriptor, ?int $offset = null, ?int $length = null): int|false {}
 
 function oci_lob_flush(OCILob $lob_descriptor, int $flag = 0): bool {}
 
@@ -83,17 +83,17 @@ function ocisetbufferinglob(OCILob $lob_descriptor, bool $mode): bool {}
 
 function ocigetbufferinglob(OCILob $lob_descriptor): bool {}
 
-function oci_lob_copy(OCILob $lob_descriptor_to, OCILob $lob_descriptor_from, int $length = UNKNOWN): bool {}
+function oci_lob_copy(OCILob $lob_descriptor_to, OCILob $lob_descriptor_from, ?int $length = null): bool {}
 
 function oci_lob_is_equal(OCILob $lob_descriptor_first, OCILob $lob_descriptor_second): bool {}
 
-function oci_lob_export(OCILob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
+function oci_lob_export(OCILob $lob_descriptor, string $path, ?int $start = null, ?int $length = null): bool {}
 
 /**
  * @alias oci_lob_export
  * @deprecated
  */
-function ociwritelobtofile(OCILob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
+function ociwritelobtofile(OCILob $lob_descriptor, string $path, ?int $start = null, ?int $length = null): bool {}
 
 /**
  * @param resource $connection_resource
@@ -332,50 +332,50 @@ function ocilogoff($connection_resource): bool|null {}
 /**
  * @return resource|false
  */
-function oci_new_connect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function oci_new_connect(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_new_connect
  * @deprecated
  */
-function ocinlogon(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function ocinlogon(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  */
-function oci_connect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function oci_connect(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_connect
  * @deprecated
  */
-function ocilogon(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function ocilogon(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  */
-function oci_pconnect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function oci_pconnect(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_pconnect
  * @deprecated
  */
-function ociplogon(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function ociplogon(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
- * @param resource $connection_or_statement_resource
+ * @param resource|null $connection_or_statement_resource
  */
-function oci_error($connection_or_statement_resource = UNKNOWN): array|false {}
+function oci_error($connection_or_statement_resource = null): array|false {}
 
 /**
  * @param resource|null $connection_or_statement_resource
  * @alias oci_error
  * @deprecated
  */
-function ocierror($connection_or_statement_resource = UNKNOWN): array|false {}
+function ocierror($connection_or_statement_resource = null): array|false {}
 
 /**
  * @param resource $statement_resource
@@ -592,14 +592,14 @@ function ocicolltrim(OCICollection $collection, int $number): bool {}
 /**
  * @param resource $connection_resource
  */
-function oci_new_collection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCICollection|false {}
+function oci_new_collection($connection_resource, string $type_name, ?string $schema_name = null): OCICollection|false {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_new_collection
  * @deprecated
  */
-function ocinewcollection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCICollection|false {}
+function ocinewcollection($connection_resource, string $type_name, ?string $schema_name = null): OCICollection|false {}
 
 /**
  * @param resource $connection_resource
@@ -676,7 +676,7 @@ class OCILob {
      * @alias oci_lob_write
      * @return int|false
      */
-    public function write(string $string, int $length = UNKNOWN) {}
+    public function write(string $string, ?int $length = null) {}
 
     /**
      * @alias oci_lob_append
@@ -694,7 +694,7 @@ class OCILob {
      * @alias oci_lob_erase
      * @return int|false
      */
-    public function erase(int $offset = UNKNOWN, int $length = UNKNOWN) {}
+    public function erase(?int $offset = null, ?int $length = null) {}
 
     /**
      * @alias oci_lob_flush
@@ -718,13 +718,13 @@ class OCILob {
      * @alias oci_lob_export
      * @return bool
      */
-    public function writetofile(string $path, int $start = UNKNOWN, int $length = UNKNOWN) {}
+    public function writetofile(string $path, ?int $start = null, ?int $length = null) {}
 
     /**
      * @alias oci_lob_export
      * @return bool
      */
-    public function export(string $path, int $start = UNKNOWN, int $length = UNKNOWN) {}
+    public function export(string $path, ?int $start = null, ?int $length = null) {}
 
     /**
      * @alias oci_lob_write_temporary

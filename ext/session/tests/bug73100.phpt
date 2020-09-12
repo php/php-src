@@ -20,7 +20,7 @@ session_module_name("user");
 --EXPECTF--
 bool(true)
 
-Warning: session_module_name(): Cannot change save handler module when session is active in %s on line 4
+Warning: session_module_name(): Session save handler module cannot be changed when a session is active in %s on line %d
 bool(true)
 
-Recoverable fatal error: session_module_name(): Cannot set 'user' save handler by ini_set() or session_module_name() in %s on line 7
+Recoverable fatal error: session_module_name(): Session save handler "user" cannot be set by ini_set() or session_module_name() in %s on line %d

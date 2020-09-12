@@ -2283,7 +2283,8 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_ca
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Cannot pass parameter %d by reference", _arg_num);
+
+	zend_cannot_pass_by_reference(_arg_num);
 	FREE_OP(opline->op1_type, opline->op1.var);
 	ZVAL_UNDEF(_arg);
 	HANDLE_EXCEPTION();
@@ -3676,11 +3677,8 @@ try_function_name:
 		call = NULL;
 	}
 
-	if (UNEXPECTED(!call)) {
-		HANDLE_EXCEPTION();
-	}
-
 	if (IS_CONST & (IS_VAR|IS_TMP_VAR)) {
+
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
@@ -3691,6 +3689,8 @@ try_function_name:
 			}
 			HANDLE_EXCEPTION();
 		}
+	} else if (!call) {
+		HANDLE_EXCEPTION();
 	}
 
 	call->prev_execute_data = EX(call);
@@ -3843,12 +3843,8 @@ try_function_name:
 		call = NULL;
 	}
 
-	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	if (UNEXPECTED(!call)) {
-		HANDLE_EXCEPTION();
-	}
-
 	if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR)) {
+		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
@@ -3859,6 +3855,8 @@ try_function_name:
 			}
 			HANDLE_EXCEPTION();
 		}
+	} else if (!call) {
+		HANDLE_EXCEPTION();
 	}
 
 	call->prev_execute_data = EX(call);
@@ -3989,11 +3987,8 @@ try_function_name:
 		call = NULL;
 	}
 
-	if (UNEXPECTED(!call)) {
-		HANDLE_EXCEPTION();
-	}
-
 	if (IS_CV & (IS_VAR|IS_TMP_VAR)) {
+
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
@@ -4004,6 +3999,8 @@ try_function_name:
 			}
 			HANDLE_EXCEPTION();
 		}
+	} else if (!call) {
+		HANDLE_EXCEPTION();
 	}
 
 	call->prev_execute_data = EX(call);
@@ -10568,7 +10565,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 
@@ -17881,7 +17878,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDL
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 
@@ -48246,7 +48243,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 

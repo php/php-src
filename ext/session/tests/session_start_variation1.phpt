@@ -23,15 +23,15 @@ ob_end_flush();
 *** Testing session_start() : variation ***
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line %d
+Notice: session_start(): Ignoring session_start() because a session is already active in %s on line %d
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line %d
+Notice: session_start(): Ignoring session_start() because a session is already active in %s on line %d
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line %d
+Notice: session_start(): Ignoring session_start() because a session is already active in %s on line %d
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line %d
+Notice: session_start(): Ignoring session_start() because a session is already active in %s on line %d
 bool(true)
 Done

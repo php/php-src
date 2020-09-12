@@ -41,7 +41,7 @@ var_dump(imap_timeout(IMAP_WRITETIMEOUT));
 --EXPECTF--
 Checking with no parameters
 
-Warning: imap_timeout() expects at least 1 parameter, 0 given in %s on line %d
+Warning: imap_timeout() expects at least 1 argument, 0 given in %s on line %d
 Checking with incorrect parameter type
 
 Warning: imap_timeout(): Argument #1 must be of type int, %s given in %s on line %d

@@ -183,33 +183,29 @@ ZEND_API zend_string *zend_zval_get_legacy_type(const zval *arg) /* {{{ */
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void) /* {{{ */
 {
 	int num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-	zend_function *active_function = EG(current_execute_data)->func;
-	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
+	zend_string *func_name = get_active_function_or_method_name();
 
-	zend_argument_count_error(
-				"%s%s%s() expects exactly 0 parameters, %d given",
-				class_name, \
-				class_name[0] ? "::" : "", \
-				ZSTR_VAL(active_function->common.function_name),
-				num_args);
+	zend_argument_count_error("%s() expects exactly 0 arguments, %d given", ZSTR_VAL(func_name), num_args);
+
+	zend_string_release(func_name);
 }
 /* }}} */
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t min_num_args, uint32_t max_num_args) /* {{{ */
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-	zend_function *active_function = EG(current_execute_data)->func;
-	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
+	zend_string *func_name = get_active_function_or_method_name();
 
 	zend_argument_count_error(
-				"%s%s%s() expects %s %d parameter%s, %d given",
-				class_name, \
-				class_name[0] ? "::" : "", \
-				ZSTR_VAL(active_function->common.function_name),
-				min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-				num_args < min_num_args ? min_num_args : max_num_args,
-				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
-				num_args);
+		"%s() expects %s %d argument%s, %d given",
+		ZSTR_VAL(func_name),
+		min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
+		num_args < min_num_args ? min_num_args : max_num_args,
+		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+		num_args
+	);
+
+	zend_string_release(func_name);
 }
 /* }}} */
 
@@ -228,11 +224,11 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_WRONG_ARG:
 			zend_wrong_parameter_type_error(num, expected_type, arg);
 			break;
-		case ZPP_ERROR_WRONG_STRING_OR_CLASS:
-			zend_wrong_parameter_string_or_class_error(num, name, arg);
+		case ZPP_ERROR_WRONG_CLASS_OR_STRING:
+			zend_wrong_parameter_class_or_string_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_STRING_OR_CLASS_OR_NULL:
-			zend_wrong_parameter_string_or_class_or_null_error(num, name, arg);
+		case ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL:
+			zend_wrong_parameter_class_or_string_or_null_error(num, name, arg);
 			break;
 		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
 			zend_unexpected_extra_named_error();
@@ -251,6 +247,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t n
 	};
 
 	if (EG(exception)) {
+		return;
+	}
+
+	if ((expected_type == Z_EXPECTED_PATH || expected_type == Z_EXPECTED_PATH_OR_NULL)
+			&& Z_TYPE_P(arg) == IS_STRING) {
+		zend_argument_value_error(num, "must not contain any null bytes");
 		return;
 	}
 
@@ -278,7 +280,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(u
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_error(uint32_t num, const char *name, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_error(uint32_t num, const char *name, zval *arg) /* {{{ */
 {
 	if (EG(exception)) {
 		return;
@@ -288,7 +290,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_error
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_or_null_error(uint32_t num, const char *name, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_or_null_error(uint32_t num, const char *name, zval *arg) /* {{{ */
 {
 	if (EG(exception)) {
 		return;
@@ -319,23 +321,23 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void)
 
 static ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entry *error_ce, uint32_t arg_num, const char *format, va_list va) /* {{{ */
 {
-	const char *space;
-	const char *class_name;
+	zend_string *func_name;
 	const char *arg_name;
 	char *message = NULL;
 	if (EG(exception)) {
 		return;
 	}
 
-	class_name = get_active_class_name(&space);
+	func_name = get_active_function_or_method_name();
 	arg_name = get_active_function_arg_name(arg_num);
 
 	zend_vspprintf(&message, 0, format, va);
-	zend_throw_error(error_ce, "%s%s%s(): Argument #%d%s%s%s %s",
-		class_name, space, get_active_function_name(), arg_num,
+	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %s",
+		ZSTR_VAL(func_name), arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
     );
 	efree(message);
+	zend_string_release(func_name);
 }
 /* }}} */
 
@@ -668,10 +670,12 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
 				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
-					zend_spprintf(error, 0, "a valid path%s, %s given",
-						check_null ? " or null" : "", zend_zval_type_name(arg)
-					);
-					return "";
+					if (Z_TYPE_P(arg) == IS_STRING) {
+						zend_spprintf(error, 0, "must not contain any null bytes");
+						return "";
+					} else {
+						return check_null ? "?string" : "string";
+					}
 				}
 			}
 			break;
@@ -680,10 +684,12 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 			{
 				zend_string **str = va_arg(*va, zend_string **);
 				if (!zend_parse_arg_path_str(arg, str, check_null)) {
-					zend_spprintf(error, 0, "a valid path%s, %s given",
-						check_null ? " or null" : "", zend_zval_type_name(arg)
-					);
-					return "";
+					if (Z_TYPE_P(arg) == IS_STRING) {
+						zend_spprintf(error, 0, "must not contain any null bytes");
+						return "";
+					} else {
+						return check_null ? "?string" : "string";
+					}
 				}
 			}
 			break;
@@ -762,7 +768,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				if (!zend_parse_arg_object(arg, p, ce, check_null)) {
 					if (ce) {
 						if (check_null) {
-							zend_spprintf(error, 0, "of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_type_name(arg));
+							zend_spprintf(error, 0, "must be of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_type_name(arg));
 							return "";
 						} else {
 							return ZSTR_VAL(ce->name);
@@ -795,14 +801,14 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				}
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "a class name derived from %s%s, %s given",
+						zend_spprintf(error, 0, "must be a class name derived from %s%s, %s given",
 							ZSTR_VAL(ce_base->name), check_null ? " or null" : "", Z_STRVAL_P(arg));
 						*pce = NULL;
 						return "";
 					}
 				}
 				if (!*pce) {
-					zend_spprintf(error, 0, "a valid class name%s, %s given",
+					zend_spprintf(error, 0, "must be a valid class name%s, %s given",
 						check_null ? " or null" : "", Z_STRVAL_P(arg));
 					return "";
 				}
@@ -833,7 +839,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				}
 
 				if (is_callable_error) {
-					zend_spprintf(error, 0, "a valid callback%s, %s", check_null ? " or null" : "", is_callable_error);
+					zend_spprintf(error, 0, "must be a valid callback%s, %s", check_null ? " or null" : "", is_callable_error);
 					efree(is_callable_error);
 					return "";
 				} else {
@@ -874,7 +880,11 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 		}
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET) && (*expected_type || error)) {
 			if (error) {
-				zend_argument_type_error(arg_num, "must be %s", error);
+				if (strcmp(error, "must not contain any null bytes") == 0) {
+					zend_argument_value_error(arg_num, "%s", error);
+				} else {
+					zend_argument_type_error(arg_num, "%s", error);
+				}
 				efree(error);
 			} else {
 				zend_argument_type_error(arg_num, "must be of type %s, %s given", expected_type, zend_zval_type_name(arg));
@@ -991,16 +1001,17 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 
 	if (num_args < min_num_args || num_args > max_num_args) {
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-			zend_function *active_function = EG(current_execute_data)->func;
-			const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
-			zend_argument_count_error("%s%s%s() expects %s %d parameter%s, %d given",
-					class_name,
-					class_name[0] ? "::" : "",
-					ZSTR_VAL(active_function->common.function_name),
-					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-					num_args < min_num_args ? min_num_args : max_num_args,
-					(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
-					num_args);
+			zend_string *func_name = get_active_function_or_method_name();
+
+			zend_argument_count_error("%s() expects %s %d argument%s, %d given",
+				ZSTR_VAL(func_name),
+				min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
+				num_args < min_num_args ? min_num_args : max_num_args,
+				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+				num_args
+			);
+
+			zend_string_release(func_name);
 		}
 		return FAILURE;
 	}

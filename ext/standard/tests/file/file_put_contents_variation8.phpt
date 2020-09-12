@@ -68,9 +68,9 @@ ValueError: Path cannot be empty
 -- Iteration 5 --
 9 bytes written to: ' '
 -- Iteration 6 --
-TypeError: file_put_contents(): Argument #1 ($filename) must be a valid path, string given
+ValueError: file_put_contents(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 7 --
-TypeError: file_put_contents(): Argument #1 ($filename) must be a valid path, array given
+TypeError: file_put_contents(): Argument #1 ($filename) must be of type string, array given
 -- Iteration 8 --
 
 Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d

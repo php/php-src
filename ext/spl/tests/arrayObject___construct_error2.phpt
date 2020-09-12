@@ -19,4 +19,4 @@ try {
 ?>
 --EXPECT--
 Too many arguments:
-ArrayObject::__construct() expects at most 3 parameters, 4 given(12)
+ArrayObject::__construct() expects at most 3 arguments, 4 given(12)

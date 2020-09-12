@@ -30,4 +30,4 @@ STD
 EXT
 MD5
 BLO
-crypt() expects exactly 2 parameters, 1 given
+crypt() expects exactly 2 arguments, 1 given

@@ -149,7 +149,7 @@ PHP_FUNCTION(assert)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(assertion)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_OBJ_OF_CLASS_OR_NULL(description_str, description_obj, zend_ce_throwable)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(description_obj, zend_ce_throwable, description_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_is_true(assertion)) {

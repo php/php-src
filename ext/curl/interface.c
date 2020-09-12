@@ -102,7 +102,7 @@ static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, 
 	CURLcode error = CURLE_OK;
 
 	if (strlen(str) != len) {
-		zend_type_error("%s(): cURL option cannot contain any null-bytes", get_active_function_name());
+		zend_value_error("%s(): cURL option must not contain any null bytes", get_active_function_name());
 		return FAILURE;
 	}
 

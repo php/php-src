@@ -10,4 +10,10 @@ steps:
     displayName: 'Setup'
   - script: ./azure/setup-slapd.sh
     displayName: 'Configure slapd'
+  - script: |
+      set -e
+      sudo cp ext/snmp/tests/snmpd.conf /etc/snmp
+      sudo cp ext/snmp/tests/bigtest /etc/snmp
+      sudo service snmpd restart
+    displayName: 'Configure snmpd'
 

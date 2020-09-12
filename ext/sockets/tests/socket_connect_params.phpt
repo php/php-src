@@ -31,7 +31,7 @@ $s_w = socket_connect($s_c, '0.0.0.0', $port);
 socket_close($s_c);
 ?>
 --EXPECTF--
-socket_connect() expects at least 2 parameters, 1 given
+socket_connect() expects at least 2 arguments, 1 given
 socket_connect(): Argument #3 ($port) cannot be null when the socket type is AF_INET
 
 Warning: socket_connect(): unable to connect [%i]: %a in %s on line %d

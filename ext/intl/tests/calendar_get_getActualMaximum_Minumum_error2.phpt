@@ -76,15 +76,15 @@ try {
 }
 ?>
 --EXPECT--
-ArgumentCountError: 0, intlcal_get() expects exactly 2 parameters, 1 given
-ArgumentCountError: 0, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given
-ArgumentCountError: 0, intlcal_get_actual_minimum() expects exactly 2 parameters, 1 given
+ArgumentCountError: 0, intlcal_get() expects exactly 2 arguments, 1 given
+ArgumentCountError: 0, intlcal_get_actual_maximum() expects exactly 2 arguments, 1 given
+ArgumentCountError: 0, intlcal_get_actual_minimum() expects exactly 2 arguments, 1 given
 ValueError: 0, intlcal_get(): Argument #2 ($field) must be a valid field
 ValueError: 0, intlcal_get_actual_maximum(): Argument #2 ($field) must be a valid field
 ValueError: 0, intlcal_get_actual_minimum(): Argument #2 ($field) must be a valid field
 TypeError: 0, intlcal_get(): Argument #2 ($field) must be of type int, string given
 TypeError: 0, intlcal_get_actual_maximum(): Argument #2 ($field) must be of type int, string given
 TypeError: 0, intlcal_get_actual_minimum(): Argument #2 ($field) must be of type int, string given
-ArgumentCountError: 0, intlcal_get() expects exactly 2 parameters, 1 given
-ArgumentCountError: 0, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given
-ArgumentCountError: 0, intlcal_get_actual_minimum() expects exactly 2 parameters, 1 given
+ArgumentCountError: 0, intlcal_get() expects exactly 2 arguments, 1 given
+ArgumentCountError: 0, intlcal_get_actual_maximum() expects exactly 2 arguments, 1 given
+ArgumentCountError: 0, intlcal_get_actual_minimum() expects exactly 2 arguments, 1 given

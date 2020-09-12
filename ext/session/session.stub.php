@@ -42,15 +42,8 @@ function session_commit(): bool {}
 /**
  * @param callable|object $open
  * @param callable|bool $close
- * @param callable $read
- * @param callable $write
- * @param callable $destroy
- * @param callable $gc
- * @param callable $create_sid
- * @param callable $validate_sid
- * @param callable $update_timestamp
  */
-function session_set_save_handler($open, $close = UNKNOWN, $read = UNKNOWN, $write = UNKNOWN, $destroy = UNKNOWN, $gc = UNKNOWN, $create_sid = UNKNOWN, $validate_sid = UNKNOWN, $update_timestamp = UNKNOWN): bool {}
+function session_set_save_handler($open, $close = UNKNOWN, callable $read = UNKNOWN, callable $write = UNKNOWN, callable $destroy = UNKNOWN, callable $gc = UNKNOWN, callable $create_sid = UNKNOWN, callable $validate_sid = UNKNOWN, callable $update_timestamp = UNKNOWN): bool {}
 
 function session_cache_limiter(?string $cache_limiter = null): string|false {}
 

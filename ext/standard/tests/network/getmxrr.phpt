@@ -11,9 +11,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 $domains = array(
-    'mx1.tests.php.net',
-    'mx2.tests.php.net',
-    'qa.php.net',
+    'mx1.tests.php.net.',
+    'mx2.tests.php.net.',
+    'qa.php.net.',
 );
 foreach ($domains as $domain) {
     $result = getmxrr($domain, $hosts, $weights);

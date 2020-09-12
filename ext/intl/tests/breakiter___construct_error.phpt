@@ -46,9 +46,9 @@ try {
 --EXPECTF--
 Exception: IntlRuleBasedBreakIterator::__construct(): unable to create RuleBasedBreakIterator from rules (parse error on line 1, offset 31) in %s on line %d
 
-Exception: IntlRuleBasedBreakIterator::__construct() expects at least 1 parameter, 0 given in %s on line %d
+Exception: IntlRuleBasedBreakIterator::__construct() expects at least 1 argument, 0 given in %s on line %d
 
-Exception: IntlRuleBasedBreakIterator::__construct() expects at most 2 parameters, 3 given in %s on line %d
+Exception: IntlRuleBasedBreakIterator::__construct() expects at most 2 arguments, 3 given in %s on line %d
 
 Exception: IntlRuleBasedBreakIterator::__construct(): Argument #2 ($areCompiled) must be of type bool, array given in %s on line %d
 

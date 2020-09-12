@@ -1,5 +1,5 @@
 --TEST--
-PDO OCI: Fetches 10K records from a table that contains 1 number and 2 LOB columns (stress test)
+PDO OCI: Fetches 1K records from a table that contains 1 number and 2 LOB columns (stress test)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');

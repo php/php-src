@@ -43,7 +43,7 @@ try {
 }
 ?>
 --EXPECT--
-IntlCalendar::set() expects at most 6 parameters, 7 given
+IntlCalendar::set() expects at most 6 arguments, 7 given
 IntlCalendar::set() has no variant with exactly 4 parameters
 IntlCalendar::set(): Argument #1 ($year) must be a valid field
 intlcal_set(): Argument #2 ($year) must be a valid field

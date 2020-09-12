@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-DOMComment::__construct() expects at most 1 parameter, 2 given
+DOMComment::__construct() expects at most 1 argument, 2 given

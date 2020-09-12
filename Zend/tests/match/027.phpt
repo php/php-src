@@ -30,8 +30,8 @@ main();
 usesValue 0
 i is 0
 
-Fatal error: Uncaught Error: Cannot pass parameter 1 by reference in %s027.php:20
+Fatal error: Uncaught Error: Test::usesRef(): Argument #1 ($x) cannot be passed by reference in %s:%d
 Stack trace:
-#0 %s027.php(23): main()
+#0 %s(%d): main()
 #1 {main}
-  thrown in %s027.php on line 20
+  thrown in %s on line %d

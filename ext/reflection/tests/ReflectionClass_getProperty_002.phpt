@@ -54,8 +54,8 @@ try {
 ?>
 --EXPECT--
 Check invalid params:
-ReflectionClass::getProperty() expects exactly 1 parameter, 0 given
-ReflectionClass::getProperty() expects exactly 1 parameter, 2 given
+ReflectionClass::getProperty() expects exactly 1 argument, 0 given
+ReflectionClass::getProperty() expects exactly 1 argument, 2 given
 Property C::$ does not exist
 Property C::$1 does not exist
 Property C::$1.5 does not exist

@@ -81,7 +81,7 @@ array(2) {
 
 
 --> exchangeArray() with no arg:
-Exception: ArrayObject::exchangeArray() expects exactly 1 parameter, 0 given
+Exception: ArrayObject::exchangeArray() expects exactly 1 argument, 0 given
 
 Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#2 (1) {

@@ -11,10 +11,12 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-var_dump(bcpowmod(1, 1.2, 1, 1));
+try {
+    var_dump(bcpowmod(1, 1.2, 1, 1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
---EXPECTF--
+--EXPECT--
 bcpowmod(): Argument #4 ($scale) must be between 0 and 2147483647
-
-Warning: bcpowmod(): Non-zero scale in exponent in %s on line %d
-string(3) "0.0"
+bcpowmod(): Argument #2 ($exponent) cannot have a fractional part

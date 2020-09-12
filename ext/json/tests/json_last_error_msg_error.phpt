@@ -14,4 +14,4 @@ try {
 ?>
 --EXPECT--
 string(8) "No error"
-json_last_error_msg() expects exactly 0 parameters, 1 given
+json_last_error_msg() expects exactly 0 arguments, 1 given

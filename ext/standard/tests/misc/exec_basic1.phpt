@@ -10,17 +10,17 @@ exec, system, passthru  — Basic command execution functions
 $cmd = "echo abc\n\0command";
 try {
     var_dump(exec($cmd, $output));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
     var_dump(system($cmd, $output));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
     var_dump(passthru($cmd, $output));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 ?>

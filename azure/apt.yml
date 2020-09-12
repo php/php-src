@@ -35,8 +35,11 @@ steps:
                        libsodium-dev \
                        libargon2-0-dev \
                        libmm-dev \
+                       libsnmp-dev \
                        postgresql \
                        postgresql-contrib \
+                       snmpd \
+                       snmp-mibs-downloader \
                        llvm \
                        ${{ parameters.packages }}
     displayName: 'APT'

@@ -70,10 +70,10 @@ Warning: file_get_contents( ): Failed to open stream: Permission denied in %s on
 bool(false)
 
 -- Filename: \0 --
-TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, string given
+ValueError: file_get_contents(): Argument #1 ($filename) must not contain any null bytes
 
 -- Filename: array() --
-TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, array given
+TypeError: file_get_contents(): Argument #1 ($filename) must be of type string, array given
 
 -- Filename: /no/such/file/dir --
 

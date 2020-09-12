@@ -3729,12 +3729,8 @@ ZEND_VM_C_LABEL(try_function_name):
 		call = NULL;
 	}
 
-	FREE_OP2();
-	if (UNEXPECTED(!call)) {
-		HANDLE_EXCEPTION();
-	}
-
 	if (OP2_TYPE & (IS_VAR|IS_TMP_VAR)) {
+		FREE_OP2();
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
@@ -3745,6 +3741,8 @@ ZEND_VM_C_LABEL(try_function_name):
 			}
 			HANDLE_EXCEPTION();
 		}
+	} else if (!call) {
+		HANDLE_EXCEPTION();
 	}
 
 	call->prev_execute_data = EX(call);
@@ -4598,7 +4596,8 @@ ZEND_VM_COLD_HELPER(zend_cannot_pass_by_ref_helper, ANY, ANY, uint32_t _arg_num,
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Cannot pass parameter %d by reference", _arg_num);
+
+	zend_cannot_pass_by_reference(_arg_num);
 	FREE_OP1();
 	ZVAL_UNDEF(_arg);
 	HANDLE_EXCEPTION();
@@ -8920,7 +8919,7 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 

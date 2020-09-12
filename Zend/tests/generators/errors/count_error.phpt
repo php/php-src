@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECTF--
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: count(): Argument #1 ($var) must be of type Countable|array, Generator given in %s on line %d

@@ -393,16 +393,8 @@ PHP_FUNCTION(bcpowmod)
 	php_str2num(&second, ZSTR_VAL(right));
 	php_str2num(&mod, ZSTR_VAL(modulus));
 
-	switch (bc_raisemod(first, second, mod, &result, scale)) {
-		case 0:
-			RETVAL_STR(bc_num2str_ex(result, scale));
-			break;
-		case -1:
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-			break;
-		case -2:
-			zend_argument_value_error(2, "must be greater than 0");
-			break;
+	if (bc_raisemod(first, second, mod, &result, scale) == SUCCESS) {
+		RETVAL_STR(bc_num2str_ex(result, scale));
 	}
 
 	bc_free_num(&first);
@@ -481,7 +473,7 @@ PHP_FUNCTION(bcsqrt)
 	if (bc_sqrt (&result, scale) != 0) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
 	} else {
-		zend_value_error("Square root of negative number");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 	}
 
 	bc_free_num(&result);

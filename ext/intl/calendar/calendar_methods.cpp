@@ -953,7 +953,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(date_str, date_obj, php_date_get_date_ce())
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(date_obj, php_date_get_date_ce(), date_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(locale_str, locale_str_len)
 	ZEND_PARSE_PARAMETERS_END();

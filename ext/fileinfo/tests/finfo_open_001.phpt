@@ -7,7 +7,7 @@ finfo_open(): Testing magic_file names
 
 try {
     var_dump(finfo_open(FILEINFO_MIME, "\0"));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -19,7 +19,7 @@ var_dump(finfo_open(FILEINFO_MIME, '/foo/bar/inexistent'));
 
 ?>
 --EXPECTF--
-finfo_open(): Argument #2 ($arg) must be a valid path, string given
+finfo_open(): Argument #2 ($arg) must not contain any null bytes
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 

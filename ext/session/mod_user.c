@@ -58,15 +58,18 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 		} else if (Z_TYPE(retval) == IS_FALSE) { \
 			ret = FAILURE; \
         }  else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == -1)) { \
-			/* BC for clever users - Deprecate me */ \
+			if (!EG(exception)) { \
+				php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&retval)); \
+			} \
 			ret = FAILURE; \
 		} else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == 0)) { \
-			/* BC for clever users - Deprecate me */ \
+			if (!EG(exception)) { \
+				php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&retval)); \
+			} \
 			ret = SUCCESS; \
 		} else { \
 			if (!EG(exception)) { \
-				php_error_docref(NULL, E_WARNING, \
-				                 "Session callback expects true/false return value"); \
+				zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&retval)); \
 			} \
 			ret = FAILURE; \
 			zval_ptr_dtor(&retval); \
@@ -80,8 +83,7 @@ PS_OPEN_FUNC(user)
 	STDVARS;
 
 	if (Z_ISUNDEF(PSF(open))) {
-		php_error_docref(NULL, E_WARNING,
-			"user session functions not defined");
+		php_error_docref(NULL, E_WARNING, "User session functions are not defined");
 
 		return FAILURE;
 	}

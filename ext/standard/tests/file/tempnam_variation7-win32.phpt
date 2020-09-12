@@ -34,7 +34,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "-- Iteration $i --\n";
     try {
         $file_name = tempnam($names_arr[$i], "tempnam_variation3.tmp");
-    } catch (TypeError $e) {
+    } catch (Error $e) {
         echo $e->getMessage(), "\n";
         continue;
     }
@@ -96,9 +96,9 @@ File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 6 --
-tempnam(): Argument #1 ($dir) must be a valid path, string given
+tempnam(): Argument #1 ($dir) must not contain any null bytes
 -- Iteration 7 --
-tempnam(): Argument #1 ($dir) must be a valid path, array given
+tempnam(): Argument #1 ($dir) must be of type string, array given
 -- Iteration 8 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d

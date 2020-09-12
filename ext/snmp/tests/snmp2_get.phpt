@@ -81,15 +81,15 @@ bool(false)
 noSuchName checks
 Single OID
 
-Warning: snmp2_get(): Error in packet at 'SNMPv2-MIB::sysDescr.110': No Such Instance currently exists at this OID in %s on line %d
+Warning: snmp2_get(): Error in packet at '%s': No Such Instance currently exists at this OID in %s on line %d
 bool(false)
 Single OID in array
 
-Warning: snmp2_get(): Error in packet at 'SNMPv2-MIB::sysDescr.110': No Such Instance currently exists at this OID in %s on line %d
+Warning: snmp2_get(): Error in packet at '%s': No Such Instance currently exists at this OID in %s on line %d
 bool(false)
 Multiple OID
 
-Warning: snmp2_get(): Error in packet at 'SNMPv2-MIB::sysUpTime.220': No Such Instance currently exists at this OID in %s on line %d
+Warning: snmp2_get(): Error in packet at '%s': No Such Instance currently exists at this OID in %s on line %d
 array(1) {
   ["%s"]=>
   string(%d) "%s"

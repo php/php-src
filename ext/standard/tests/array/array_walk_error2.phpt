@@ -56,5 +56,5 @@ Exception: Too few arguments to function callback2(), 3 passed and exactly 4 exp
 Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
 Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected
 -- Testing array_walk() function with too many callback parameters --
-Exception: array_walk() expects at most 3 parameters, 4 given
+Exception: array_walk() expects at most 3 arguments, 4 given
 Done

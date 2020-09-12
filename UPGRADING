@@ -135,10 +135,10 @@ PHP 8.0 UPGRADE NOTES
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
   . Compile time fatal error "Only variables can be passed by reference" has
-    been delayed until runtime and converted to "Cannot pass parameter by
+    been delayed until runtime and converted to "Argument cannot be passed by
     reference" exception.
   . Some "Only variables should be passed by reference" notices have been
-    converted to "Cannot pass parameter by reference" exception.
+    converted to "Argument cannot be passed by reference" exception.
   . The generated name for anonymous classes has changed. It will now include
     the name of the first parent or interface:
 
@@ -403,6 +403,8 @@ PHP 8.0 UPGRADE NOTES
   . The openssl_pkey_free() function is deprecated and no longer has an effect,
     instead the OpenSSLAsymmetricKey instance is automatically destroyed if it is no
     longer referenced.
+  . openssl_seal() and openssl_open() now require $method to be passed, as the
+    previous default of "RC4" is considered insecure.
 
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
@@ -422,6 +424,13 @@ PHP 8.0 UPGRADE NOTES
 
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
+
+- pgsql:
+  . The deprecated pg_connect() syntax using multiple parameters instead of a
+    connection string is no longer supported.
+  . The deprecated pg_lo_import() and pg_lo_export() signature that passes the
+    connection as the last argument is no longer supported. The connection
+    should be passed as first argument instead.
 
 - Phar:
   . Metadata associated with a phar will no longer be automatically unserialized,
@@ -769,6 +778,14 @@ PHP 8.0 UPGRADE NOTES
   . Sorting functions are now stable, which means that equal-comparing elements
     will retain their original order.
     RFC: https://wiki.php.net/rfc/stable_sorting
+  . array_diff(), array_intersect() and their variations can now be used with
+    a single array as argument. This means that usages like the following are
+    now possible:
+
+        // OK even if $excludes is empty.
+        array_diff($array, ...$excludes);
+        // OK even if $arrays only contains a single array.
+        array_intersect(...$arrays);
 
 - Zip:
   . Extension updated to version 1.19.0

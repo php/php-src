@@ -2046,7 +2046,7 @@ static uint32_t assign_dim_result_type(
 
 /* For binary ops that have compound assignment operators */
 static uint32_t binary_op_result_type(
-		zend_ssa *ssa, zend_uchar opcode, uint32_t t1, uint32_t t2, uint32_t result_var,
+		zend_ssa *ssa, zend_uchar opcode, uint32_t t1, uint32_t t2, int result_var,
 		zend_long optimization_level) {
 	uint32_t tmp = 0;
 	uint32_t t1_type = (t1 & MAY_BE_ANY) | (t1 & MAY_BE_UNDEF ? MAY_BE_NULL : 0);
@@ -2064,7 +2064,8 @@ static uint32_t binary_op_result_type(
 	switch (opcode) {
 		case ZEND_ADD:
 			if (t1_type == MAY_BE_LONG && t2_type == MAY_BE_LONG) {
-				if (!ssa->var_info[result_var].has_range ||
+				if (result_var < 0 ||
+					!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
 					/* may overflow */
@@ -2090,7 +2091,8 @@ static uint32_t binary_op_result_type(
 		case ZEND_SUB:
 		case ZEND_MUL:
 			if (t1_type == MAY_BE_LONG && t2_type == MAY_BE_LONG) {
-				if (!ssa->var_info[result_var].has_range ||
+				if (result_var < 0 ||
+					!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
 					/* may overflow */
@@ -2534,7 +2536,8 @@ static zend_always_inline int _zend_update_type_info(
 			}
 
 			tmp |= binary_op_result_type(
-				ssa, opline->extended_value, t1, t2, ssa_op->op1_def, optimization_level);
+				ssa, opline->extended_value, t1, t2,
+				opline->opcode == ZEND_ASSIGN_OP ? ssa_op->op1_def : -1, optimization_level);
 			if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY)) {
 				tmp |= MAY_BE_RC1;
 			}
@@ -4292,6 +4295,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 				case ZEND_UNSET_CV:
 				case ZEND_ISSET_ISEMPTY_CV:
 				case ZEND_MAKE_REF:
+				case ZEND_FETCH_DIM_W:
 					break;
 				default:
 					/* undefined variable warning */
@@ -4628,6 +4632,18 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			if (opline->op2_type == IS_CV
 			 && (t2 & MAY_BE_RC1)
 			 && (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
+				return 1;
+			}
+			return 0;
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_LIST_W:
+			if (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+				return 1;
+			}
+			if (t2 & (MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+				return 1;
+			}
+			if (opline->op2_type == IS_UNUSED) {
 				return 1;
 			}
 			return 0;

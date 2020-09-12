@@ -10,6 +10,7 @@ steps:
       sudo apt-get purge -y libxml2
       # TODO: Reenable postgresql + postgresql-contrib packages once they work again.
       sudo apt-get purge -y libpq5
+      sudo apt-get install -y libc6:i386
       sudo apt-get install -y bison \
                               re2c \
                               locales \
