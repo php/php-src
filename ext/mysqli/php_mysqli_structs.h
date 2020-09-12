@@ -67,8 +67,8 @@
 #endif
 
 #include <mysql.h>
-#ifndef my_bool
-typedef char		my_bool;
+#if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
+typedef _Bool		my_bool;
 #endif
 #include <errmsg.h>
 #include <mysqld_error.h>
