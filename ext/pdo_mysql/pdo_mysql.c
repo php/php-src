@@ -68,10 +68,7 @@ static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 			return NULL;
 		}
 
-		if (dbh->driver != &pdo_mysql_driver) {
-			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
-			return NULL;
-		}
+		ZEND_ASSERT(dbh->driver == &pdo_mysql_driver);
 
 		return ((pdo_mysql_db_handle *)dbh->driver_data)->server;
 	}
