@@ -744,8 +744,8 @@ PHP_FUNCTION(mysqli_data_seek)
 	}
 
 	if ((uint64_t)offset >= mysql_num_rows(result)) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be between 0 and the total number of rows - 1");
-		RETURN_THROWS();
+		// TODO Warning/Exception?
+		RETURN_FALSE;
 	}
 
 	mysql_data_seek(result, offset);
@@ -1197,8 +1197,9 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (offset >= (zend_long) mysql_num_fields(result)) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be in the range from 0 to number of fields - 1");
-		RETURN_THROWS();
+		// TODO ValueError?
+		php_error_docref(NULL, E_WARNING, "Field offset is invalid for resultset");
+		RETURN_FALSE;
 	}
 
 	if (!(field = mysql_fetch_field_direct(result,offset))) {
@@ -1283,8 +1284,9 @@ PHP_FUNCTION(mysqli_field_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if ((uint32_t)fieldnr >= mysql_num_fields(result)) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be in the range from 0 to number of fields - 1");
-		RETURN_THROWS();
+		// TODO ValueError?
+		php_error_docref(NULL, E_WARNING, "Invalid field offset");
+		RETURN_FALSE;
 	}
 
 	mysql_field_seek(result, fieldnr);

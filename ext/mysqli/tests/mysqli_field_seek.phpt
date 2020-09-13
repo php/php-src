@@ -91,12 +91,8 @@ require_once('skipifconnectfailure.inc');
             $charsetInfo->max_length, $field->max_length);
     }
 
-	var_dump(mysqli_field_tell($res));
-    try {
-        var_dump(mysqli_field_seek($res, 2));
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
-    }
+    var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_seek($res, 2));
     var_dump(mysqli_fetch_field($res));
 
     mysqli_free_result($res);
@@ -211,7 +207,9 @@ object(stdClass)#%d (13) {
   int(0)
 }
 int(2)
-mysqli_field_seek(): Argument #2 ($field_nr) must be in the range from 0 to number of fields - 1
+
+Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
+bool(false)
 bool(false)
 bool(true)
 object(stdClass)#%d (13) {
