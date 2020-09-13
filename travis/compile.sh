@@ -23,19 +23,29 @@ if [[ -z "$MAKE_LOG_FILE" ]]; then
 else
 	MAKE_QUIET=""
 fi
-
+if [[ -z "$MYSQL_DIR" ]]; then
+        PDOMYSQL=mysqlnd
+        MYSQLI=mysqlnd
+else
+        PDOMYSQL=${MYSQL_DIR}
+        [ -f ${MYSQL_DIR}/bin/mariadb_config ] && MYSQLI=${MYSQL_DIR}/bin/mariadb_config
+        [ -f ${MYSQL_DIR}/bin/mysql_config ] && MYSQLI=${MYSQL_DIR}/bin/mysql_config
+fi
 MAKE_JOBS=${MAKE_JOBS:-2}
 
-./buildconf --force
-./configure \
+if [ ! -f ${TRAVIS_BUILD_DIR}/configure ]; then
+        (cd ${TRAVIS_BUILD_DIR} ; ./buildconf --force )
+fi
+
+${TRAVIS_BUILD_DIR}/configure \
 --prefix="$HOME"/php-install \
 $CONFIG_QUIET \
 $DEBUG \
 $TS \
 --enable-phpdbg \
 --enable-fpm \
---with-pdo-mysql=mysqlnd \
---with-mysqli=mysqlnd \
+--with-pdo-mysql=${PDOMYSQL} \
+--with-mysqli=${MYSQLI} \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
