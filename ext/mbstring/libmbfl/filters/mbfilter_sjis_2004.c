@@ -216,9 +216,16 @@ retry:
 				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 				break;
 			}
-		} else {
-			s1 = c1;
-			s2 = c;
+		} else { /* ISO-2022-JP-2004 */
+			if (c >= 0x21 && c <= 0x7E) {
+				s1 = c1;
+				s2 = c;
+			} else {
+				w = c & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
+				break;
+			}
 		}
 		w1 = (s1 << 8) | s2;
 
@@ -326,6 +333,14 @@ retry:
 		} else {
 			c2 = c;
 		}
+
+		if (c2 < 0x21 || c2 > 0x7E) {
+			w = ((c1 << 8) | c2) & MBFL_WCSGROUP_MASK;
+			w |= MBFL_WCSGROUP_THROUGH;
+			CK((*filter->output_function)(w, filter->data));
+			break;
+		}
+
 		s1 = c1 - 0x21;
 		s2 = c2 - 0x21;
 
