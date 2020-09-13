@@ -2637,9 +2637,8 @@ PHP_FUNCTION(pg_lo_write)
 			RETURN_THROWS();
 		}
 		if (z_len > (zend_long)str_len) {
-			/* TODO Promote to ValueError? */
-			php_error_docref(NULL, E_WARNING, "Cannot write more than buffer size %zu. Tried to write " ZEND_LONG_FMT, str_len, z_len);
-			RETURN_FALSE;
+			zend_argument_value_error(3, "must be less than or equal to the length of argument #2 ($buf)");
+			RETURN_THROWS();
 		}
 		len = z_len;
 	}
