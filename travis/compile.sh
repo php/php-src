@@ -99,7 +99,7 @@ $TS \
 --with-kerberos \
 --enable-sysvmsg \
 --enable-zend-test=shared \
-> "$CONFIG_LOG_FILE"
+> "$CONFIG_LOG_FILE" || (cat config.log; exit 2)
 
 make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
 make install >> "$MAKE_LOG_FILE"
