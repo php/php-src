@@ -1,5 +1,11 @@
 --TEST--
 Bug #77345 (Segmentation faults stack overflow in cyclic garbage collector) (Bug #77427)
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail issues with JIT on Windows');
+}
+?>
 --INI--
 zend.enable_gc = 1
 --FILE--
