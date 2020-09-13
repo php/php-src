@@ -5,7 +5,7 @@ Bug #54283 (new DatePeriod(NULL) causes crash)
 
 try {
     var_dump(new DatePeriod(NULL));
-} catch (Exception $e) {
+} catch (ValueError $e) {
     var_dump($e->getMessage());
 }
 

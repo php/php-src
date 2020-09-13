@@ -4131,7 +4131,7 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->current = NULL;
 
 	if (isostr) {
-		zend_replace_error_handling(EH_THROW, NULL, &error_handling);
+		zend_replace_error_handling(EH_THROW, zend_ce_value_error, &error_handling);
 		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len);
 		zend_restore_error_handling(&error_handling);
 		if (EG(exception)) {
@@ -4140,19 +4140,19 @@ PHP_METHOD(DatePeriod, __construct)
 
 		if (dpobj->start == NULL) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(NULL, "%s(): Argument #1 must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_value_error("%s(): Argument #1 must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->interval == NULL) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(NULL, "%s(): Argument #1 must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_value_error("%s(): Argument #1 must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->end == NULL && recurrences == 0) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(NULL, "%s(): Argument #1 must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_value_error("%s(): Argument #1 must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
@@ -4194,7 +4194,7 @@ PHP_METHOD(DatePeriod, __construct)
 
 	if (dpobj->end == NULL && recurrences < 1) {
 		zend_string *func = get_active_function_or_method_name();
-		zend_throw_error(NULL, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_value_error("%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
 		zend_string_release(func);
 		RETURN_THROWS();
 	}

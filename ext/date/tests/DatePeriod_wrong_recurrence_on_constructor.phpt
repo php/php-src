@@ -4,13 +4,13 @@ DatePeriod: Test wrong recurrence parameter on __construct
 <?php
 try {
     new DatePeriod(new DateTime('yesterday'), new DateInterval('P1D'), 0);
-} catch (Exception $exception) {
+} catch (ValueError $exception) {
     echo $exception->getMessage(), "\n";
 }
 
 try {
     new DatePeriod(new DateTime('yesterday'), new DateInterval('P1D'), -1);
-} catch (Exception $exception) {
+} catch (ValueError $exception) {
     echo $exception->getMessage(), "\n";
 }
 
