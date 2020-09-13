@@ -13,5 +13,5 @@ var_dump(time_sleep_until(time() -1));
 
 ?>
 --EXPECTF--
-Warning: time_sleep_until(): Argument #1 ($timestamp) must be a timestamp greater than or equal to the current time in %s on line %d
+Warning: time_sleep_until(): Argument #1 ($timestamp) must be greater than or equal to the current time in %s on line %d
 bool(false)

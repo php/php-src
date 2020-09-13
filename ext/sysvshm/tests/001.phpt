@@ -34,8 +34,8 @@ echo "Done\n";
 ?>
 --EXPECTF--
 ftok(): Argument #1 ($pathname) cannot be empty
-ftok(): Argument #2 ($proj) must be 1 byte long
-ftok(): Argument #2 ($proj) must be 1 byte long
+ftok(): Argument #2 ($proj) must be a single character
+ftok(): Argument #2 ($proj) must be a single character
 
 Warning: ftok(): ftok() failed - No such file or directory in %s on line %d
 int(-1)

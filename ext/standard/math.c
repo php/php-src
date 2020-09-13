@@ -877,7 +877,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
-			zend_value_error("An infinite value cannot be converted to base " ZEND_LONG_FMT, base);
+			zend_value_error("An infinite value cannot be converted to base %d", base);
 			return NULL;
 		}
 

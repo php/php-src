@@ -10,12 +10,7 @@ var_dump(mb_strcut($crap, 1, 100, 'UTF-8'));
 var_dump(mb_strcut($crap, 2, 100, 'UTF-8'));
 var_dump(mb_strcut($crap, 3, 100, 'UTF-8'));
 var_dump(mb_strcut($crap, 12, 100, 'UTF-8'));
-
-try {
-    mb_strcut($crap, 13, 100, 'UTF-8');
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+var_dump(mb_strcut($crap, 13, 100, 'UTF-8'));
 
 ?>
 --EXPECT--
@@ -24,4 +19,4 @@ string(11) "åBäCöDü"
 string(11) "åBäCöDü"
 string(9) "BäCöDü"
 string(0) ""
-mb_strcut(): Argument #3 ($length) must be contained in argument #1 ($str)
+string(0) ""

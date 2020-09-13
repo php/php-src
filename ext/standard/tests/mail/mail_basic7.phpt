@@ -74,7 +74,7 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = array(
-    'foo1' => array('foo1'=>'bar1'),
+    'foo1' => array('foo2'=>'bar1'),
     'foo2' => array('foo2', array('foo3')),
     'foo3' => array(123),
     'foo4' => array(123.456),
@@ -153,26 +153,7 @@ TypeError: Header "orig-date" must be of type string, array given
 
 ************* TEST ******************
 -- All Mail Content Parameters --
-
-Warning: mail(): Multiple header key must be numeric index (foo1) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo2) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo3) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo4) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo5) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo6) in %s on line %d
-
-Warning: mail(): Multiple header values must be string (foo7) in %s on line %d
-bool(true)
-To: user@example.com
-Subject: Test Subject
-foo2: foo2
-
-A Message
+TypeError: Header "foo1" must only contain numeric keys, "foo2" found
 
 
 ************* TEST ******************
