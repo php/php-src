@@ -25,7 +25,7 @@ try {
 }
 
 // This works fine, as search_value is explicitly specified.
-var_dump(array_keys([41, 42], for_value: 42, strict: true));
+var_dump(array_keys([41, 42], filter_value: 42, strict: true));
 
 ?>
 --EXPECT--
