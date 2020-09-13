@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0rc1
+?? ??? ????, PHP 8.0.0beta4
 
 - Core:
   . Implement #[Attr] Attribute syntax as per final vote in RFC
@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     __call). (Nikita)
   . Fixed bug #80096 (Segmentation fault with named arguments in nested call).
     (Nikita)
+  . Fixed faulty generator cleanup with yield from. (Bob)
 
 - Date:
   . Fixed bug #80057 (DateTimeImmutable::createFromFormat() does not populate
