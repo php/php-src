@@ -4193,7 +4193,9 @@ PHP_METHOD(DatePeriod, __construct)
 	}
 
 	if (dpobj->end == NULL && recurrences < 1) {
-		zend_argument_error(zend_ce_exception, 3, "must be greater than 0");
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_error(NULL, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_string_release(func);
 		RETURN_THROWS();
 	}
 
