@@ -1025,7 +1025,7 @@ PHP_METHOD(mysqli_result, __construct)
 	}
 
 	if (resmode != MYSQLI_STORE_RESULT && resmode != MYSQLI_USE_RESULT) {
-		zend_argument_value_error(2, "must be MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT");
+		zend_argument_value_error(2, "must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT");
 		RETURN_THROWS();
 	}
 

@@ -332,12 +332,12 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 
 	if (types_len != (size_t) argc) {
 		/* number of bind variables doesn't match number of elements in type definition string */
-		zend_argument_count_error("Number of elements in type definition string doesn't match number of bind variables");
+		zend_argument_count_error("The number of elements in the type definition string must match the number of bind variables");
 		RETURN_THROWS();
 	}
 
 	if (types_len != mysql_stmt_param_count(stmt->stmt)) {
-		zend_argument_count_error("Number of variables doesn't match number of parameters in prepared statement");
+		zend_argument_count_error("The number of variables must match the number of parameters in the prepared statement");
 		RETURN_THROWS();
 	}
 
@@ -739,13 +739,12 @@ PHP_FUNCTION(mysqli_data_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-		// TODO Promoto to Exception?
+		// TODO Promote to Exception?
 		php_error_docref(NULL, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
 		RETURN_FALSE;
 	}
 
 	if ((uint64_t)offset >= mysql_num_rows(result)) {
-		// TODO Warning/Exception?
 		RETURN_FALSE;
 	}
 

@@ -26,5 +26,5 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
-mysqli_result::__construct(): Argument #2 ($result_mode) must be MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT
-mysqli_result::__construct(): Argument #2 ($result_mode) must be MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT
+mysqli_result::__construct(): Argument #2 ($result_mode) must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT
+mysqli_result::__construct(): Argument #2 ($result_mode) must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT

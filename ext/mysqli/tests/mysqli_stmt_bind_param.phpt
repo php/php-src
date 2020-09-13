@@ -416,13 +416,13 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Number of variables doesn't match number of parameters in prepared statement
+The number of variables must match the number of parameters in the prepared statement
 mysqli_stmt_bind_param(): Argument #2 ($types) cannot be empty
-Number of elements in type definition string doesn't match number of bind variables
-Number of variables doesn't match number of parameters in prepared statement
-Number of elements in type definition string doesn't match number of bind variables
-Number of variables doesn't match number of parameters in prepared statement
-Number of elements in type definition string doesn't match number of bind variables
+The number of elements in the type definition string must match the number of bind variables
+The number of variables must match the number of parameters in the prepared statement
+The number of elements in the type definition string must match the number of bind variables
+The number of variables must match the number of parameters in the prepared statement
+The number of elements in the type definition string must match the number of bind variables
 
 Warning: mysqli_stmt_bind_param(): Undefined fieldtype a (parameter 3) in %s on line %d
 

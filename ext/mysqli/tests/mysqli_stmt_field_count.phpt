@@ -98,7 +98,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECT--
 mysqli_stmt object is not fully initialized
 mysqli_stmt object is not fully initialized
-Number of variables doesn't match number of parameters in prepared statement
+The number of variables must match the number of parameters in the prepared statement
 mysqli_stmt object is already closed
 mysqli_stmt object is already closed
 done!
