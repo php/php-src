@@ -1247,8 +1247,8 @@ PHP_FUNCTION(odbc_data_source)
 	fetch_type = (SQLSMALLINT) zv_fetch_type;
 
 	if (!(fetch_type == SQL_FETCH_FIRST || fetch_type == SQL_FETCH_NEXT)) {
-		zend_argument_value_error(2, "must be SQL_FETCH_FIRST or SQL_FETCH_NEXT");
-		RETURN_THROWS()
+		zend_argument_value_error(2, "must either be SQL_FETCH_FIRST or SQL_FETCH_NEXT");
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(zv_conn), "ODBC-Link", le_conn, le_pconn))) {
