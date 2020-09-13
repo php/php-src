@@ -4261,6 +4261,7 @@ PHP_FUNCTION(pg_flush)
 /* }}} */
 
 /* {{{ php_pgsql_meta_data
+ * table_name must not be empty
  * TODO: Add meta_data cache for better performance
  */
 PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended)
@@ -4273,11 +4274,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 	int i, num_rows;
 	zval elem;
 
-	if (!*table_name) {
-	// CHeck if can be TODO
-		php_error_docref(NULL, E_WARNING, "The table name must be specified");
-		return FAILURE;
-	}
+	ZEND_ASSERT(*table_name);
 
 	src = estrdup(table_name);
 	tmp_name = php_strtok_r(src, ".", &tmp_name2);
@@ -4393,7 +4390,7 @@ PHP_FUNCTION(pg_meta_data)
 		RETURN_THROWS();
 	}
 
-	/* php_pgsql_meta_data() warns on empty table_name */
+	/* php_pgsql_meta_data() asserts that table_name is not empty */
 	if (table_name_len == 0) {
 		zend_argument_value_error(2, "cannot be empty");
 		RETURN_THROWS();
@@ -4604,6 +4601,8 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 	ZEND_ASSERT(Z_TYPE_P(result) == IS_ARRAY);
 	ZEND_ASSERT(!(opt & ~PGSQL_CONV_OPTS));
 	ZEND_ASSERT(table_name);
+	/* Table name cannot be empty for php_pgsql_meta_data() */
+	ZEND_ASSERT(*table_name);
 
 	array_init(&meta);
 /* table_name is escaped by php_pgsql_meta_data */
