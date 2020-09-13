@@ -40,8 +40,11 @@ require_once('skipifconnectfailure.inc');
     if (1 != $row['id'])
         printf("[010] Expecting record 1/a, got record %s/%s\n", $row['id'], $row['label']);
 
-    if (false !== ($tmp = $res->data_seek(4)))
-        printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->data_seek(4);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     try {
         $res->data_seek(-1);
@@ -54,8 +57,11 @@ require_once('skipifconnectfailure.inc');
     if (!$res = $mysqli->query('SELECT * FROM test ORDER BY id', MYSQLI_USE_RESULT))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (false !== ($tmp = $res->data_seek(3)))
-        printf("[014] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->data_seek(3);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     $res->free_result();
 
@@ -74,8 +80,8 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 mysqli_result object is already closed
+mysqli_result::data_seek(): Argument #1 ($offset) must be between 0 and the total number of rows - 1
 mysqli_result::data_seek(): Argument #1 ($offset) must be greater than or equal to 0
-
-Warning: mysqli_result::data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
+Function cannot be used in MYSQLI_USE_RESULT mode
 mysqli_result object is already closed
 done!

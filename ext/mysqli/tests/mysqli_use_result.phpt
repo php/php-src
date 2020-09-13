@@ -19,9 +19,11 @@ require_once('skipifconnectfailure.inc');
         printf("[004] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
-    if (false !== ($tmp = mysqli_data_seek($res, 2)))
-        printf("[005] Expecting boolean/true, got %s/%s. [%d] %s\n",
-            gettype($tmp), $tmp, mysqli_errno($link), mysqli_error($link));
+    try {
+        mysqli_data_seek($res, 2);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     mysqli_free_result($res);
 
@@ -54,6 +56,6 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
+Function cannot be used in MYSQLI_USE_RESULT mode
 mysqli object is already closed
 done!

@@ -739,14 +739,13 @@ PHP_FUNCTION(mysqli_data_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-		// TODO Promoto to Exception?
-		php_error_docref(NULL, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Function cannot be used in MYSQLI_USE_RESULT mode");
+		RETURN_THROWS();
 	}
 
 	if ((uint64_t)offset >= mysql_num_rows(result)) {
-		// TODO Warning/Exception?
-		RETURN_FALSE;
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be between 0 and the total number of rows - 1");
+		RETURN_THROWS();
 	}
 
 	mysql_data_seek(result, offset);
@@ -1198,9 +1197,8 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (offset >= (zend_long) mysql_num_fields(result)) {
-		// TODO ValueError?
-		php_error_docref(NULL, E_WARNING, "Field offset is invalid for resultset");
-		RETURN_FALSE;
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be in the range from 0 to number of fields - 1");
+		RETURN_THROWS();
 	}
 
 	if (!(field = mysql_fetch_field_direct(result,offset))) {
@@ -1285,9 +1283,8 @@ PHP_FUNCTION(mysqli_field_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if ((uint32_t)fieldnr >= mysql_num_fields(result)) {
-		// TODO ValueError?
-		php_error_docref(NULL, E_WARNING, "Invalid field offset");
-		RETURN_FALSE;
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be in the range from 0 to number of fields - 1");
+		RETURN_THROWS();
 	}
 
 	mysql_field_seek(result, fieldnr);
@@ -1625,9 +1622,8 @@ PHP_FUNCTION(mysqli_num_rows)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered_and_not_everything_is_fetched(result)) {
-		// TODO Exception?
-		php_error_docref(NULL, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
-		RETURN_LONG(0);
+		zend_throw_error(NULL, "Function cannot be used in MYSQLI_USE_RESULT mode");
+		RETURN_THROWS();
 	}
 
 	MYSQLI_RETURN_LONG_INT(mysql_num_rows(result));

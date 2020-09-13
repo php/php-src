@@ -15,9 +15,17 @@ require_once("connect.inc");
 
     var_dump($link->real_query("SELECT 1"));
     $res = $link->use_result();
-    var_dump(mysqli_num_rows($res));
+    try {
+        mysqli_num_rows($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
     var_dump($res->fetch_assoc());
-    var_dump(mysqli_num_rows($res));
+    try {
+        mysqli_num_rows($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
     var_dump($res->fetch_assoc());
     var_dump(mysqli_num_rows($res));
 
@@ -26,16 +34,12 @@ require_once("connect.inc");
 ?>
 --EXPECTF--
 bool(true)
-
-Warning: mysqli_num_rows(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
-int(0)
+Function cannot be used in MYSQLI_USE_RESULT mode
 array(1) {
   [1]=>
   string(1) "1"
 }
-
-Warning: mysqli_num_rows(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
-int(0)
+Function cannot be used in MYSQLI_USE_RESULT mode
 NULL
 int(1)
 done
