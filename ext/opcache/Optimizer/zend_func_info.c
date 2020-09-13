@@ -727,7 +727,7 @@ static const func_info_t func_infos[] = {
 	F1("pg_result_error",						MAY_BE_FALSE | MAY_BE_STRING),
 	F1("pg_result_error_field",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("pg_get_result",							MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("pg_result_status",						MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),
+	F1("pg_result_status",						MAY_BE_LONG | MAY_BE_STRING),
 	F1("pg_get_notify",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("pg_socket",								MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("pg_meta_data",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
