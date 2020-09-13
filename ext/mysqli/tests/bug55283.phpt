@@ -43,7 +43,7 @@ $link->close();
 	$flags = MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT;
 
 	$link = mysqli_init();
-	mysqli_ssl_set($link, null, null, null, null, "RC4-MD5");
+	mysqli_ssl_set($link, null, null, null, null, "DHE-RSA-AES128-SHA");
 	if (my_mysqli_real_connect($link, 'p:' . $host, $user, $passwd, $db, $port, null, $flags)) {
 		$r = $link->query("SHOW STATUS LIKE 'Ssl_cipher'");
 		var_dump($r->fetch_row());
@@ -51,7 +51,7 @@ $link->close();
 
 	/* non-persistent connection */
 	$link2 = mysqli_init();
-	mysqli_ssl_set($link2, null, null, null, null, "RC4-MD5");
+	mysqli_ssl_set($link2, null, null, null, null, "DHE-RSA-AES128-SHA");
 	if (my_mysqli_real_connect($link2, $host, $user, $passwd, $db, $port, null, $flags)) {
 		$r2 = $link2->query("SHOW STATUS LIKE 'Ssl_cipher'");
 		var_dump($r2->fetch_row());
@@ -64,12 +64,12 @@ array(2) {
   [0]=>
   string(10) "Ssl_cipher"
   [1]=>
-  string(7) "RC4-MD5"
+  string(18) "DHE-RSA-AES128-SHA"
 }
 array(2) {
   [0]=>
   string(10) "Ssl_cipher"
   [1]=>
-  string(7) "RC4-MD5"
+  string(18) "DHE-RSA-AES128-SHA"
 }
 done
