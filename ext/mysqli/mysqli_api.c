@@ -2319,20 +2319,18 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	zval	*mysql_stmt;
 	unsigned long	value = 0;
 	zend_long	attr;
+	int		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &attr) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	switch (attr) {
+	if (attr != STMT_ATTR_CURSOR_TYPE && attr != STMT_ATTR_PREFETCH_ROWS
 #if MYSQL_VERSION_ID >= 50107
-	case STMT_ATTR_UPDATE_MAX_LENGTH:
+	&& attr != STMT_ATTR_UPDATE_MAX_LENGTH
 #endif
-	case STMT_ATTR_CURSOR_TYPE:
-	case STMT_ATTR_PREFETCH_ROWS:
-		break;
-	default:
+	) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
 #if MYSQL_VERSION_ID >= 50107
 			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
@@ -2341,9 +2339,12 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 		RETURN_THROWS();
 	}
 
-	/* Success corresponds to 0 return value and a non-zero value
-	 * should only happen if the attr/option is unknown */
-	ZEND_ASSERT(mysql_stmt_attr_get(stmt->stmt, attr, &value) == 0);
+	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {
+		/* Success corresponds to 0 return value and a non-zero value
+		 * should only happen if the attr/option is unknown */
+		ZEND_UNREACHABLE();
+    }
+
 
 #if MYSQL_VERSION_ID >= 50107
 	if (attr == STMT_ATTR_UPDATE_MAX_LENGTH)
