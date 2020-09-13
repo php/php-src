@@ -23,12 +23,23 @@ if [[ -z "$MAKE_LOG_FILE" ]]; then
 else
 	MAKE_QUIET=""
 fi
+if [[ -n "$LIBMYSQL" ]]; then
+	case "$LIBMYSQL" in
+	*.gz) EXTRACT=zxf ;;
+	*.xz) EXTRACT=Jxf ;;
+	esac
+	MYSQL_BASE=${LIBMYSQL%%-linux-*}
+	MYSQL_VERSION=${MYSQL_BASE#*-}
+	MYSQL_DIR=$HOME/$MYSQL_BASE
+        mkdir -p $MYSQL_DIR
+	URL=https://cdn.mysql.com//Downloads/MySQL-${MYSQL_VERSION%.*}/$LIBMYSQL
+	wget $URL -O - | tar -${EXTRACT} - --strip-components=1  -C $MYSQL_DIR
+fi
 if [[ -z "$MYSQL_DIR" ]]; then
         PDOMYSQL=mysqlnd
         MYSQLI=mysqlnd
 else
         PDOMYSQL=${MYSQL_DIR}
-        [ -f ${MYSQL_DIR}/bin/mariadb_config ] && MYSQLI=${MYSQL_DIR}/bin/mariadb_config
         [ -f ${MYSQL_DIR}/bin/mysql_config ] && MYSQLI=${MYSQL_DIR}/bin/mysql_config
 fi
 MAKE_JOBS=${MAKE_JOBS:-2}
