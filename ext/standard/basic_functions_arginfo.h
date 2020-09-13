@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 64466d4a45f1a85e55249893641ebe71a7ca665f */
+ * Stub hash: 26683100d272e35a6318e0eaece65dc3761b7b03 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -141,7 +141,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(1, input, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, arguments, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, argument, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_array_walk_recursive arginfo_array_walk

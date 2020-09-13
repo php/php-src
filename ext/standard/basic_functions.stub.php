@@ -109,9 +109,9 @@ function min(mixed $arg, mixed ...$args): mixed {}
 
 function max(mixed $arg, mixed ...$args): mixed {}
 
-function array_walk(array|object &$input, callable $callback, mixed $arguments = UNKNOWN): bool {}
+function array_walk(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
 
-function array_walk_recursive(array|object &$input, callable $callback, mixed $arguments = UNKNOWN): bool {}
+function array_walk_recursive(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
 
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
