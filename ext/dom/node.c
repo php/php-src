@@ -857,7 +857,6 @@ PHP_METHOD(DOMNode, insertBefore)
 
 	new_child = NULL;
 
-	// Todo should always be strict?
 	stricterror = dom_get_strict_error(intern->document);
 
 	if (dom_node_is_read_only(parentp) == SUCCESS ||
@@ -877,7 +876,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
-		// Todo convert to Error?
+		/* TODO Drop Warning? */
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		RETURN_FALSE;
 	}
@@ -1026,7 +1025,6 @@ PHP_METHOD(DOMNode, replaceChild)
 		RETURN_FALSE;
 	}
 
-	// Todo make alway strict?
 	stricterror = dom_get_strict_error(intern->document);
 
 	if (dom_node_is_read_only(nodep) == SUCCESS ||
@@ -1177,7 +1175,7 @@ PHP_METHOD(DOMNode, appendChild)
 	}
 
 	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
-		// Todo convert to error?
+		/* TODO Drop Warning? */
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		RETURN_FALSE;
 	}
@@ -1468,7 +1466,6 @@ PHP_METHOD(DOMNode, lookupPrefix)
 		}
 	}
 
-	// Todo return empty string?
 	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_prefix */
@@ -1748,7 +1745,7 @@ PHP_METHOD(DOMNode, getNodePath)
 
 	value = (char *) xmlGetNodePath(nodep);
 	if (value == NULL) {
-		// Todo return empty string?
+		/* TODO Research if can return empty string */
 		RETURN_NULL();
 	} else {
 		RETVAL_STRING(value);

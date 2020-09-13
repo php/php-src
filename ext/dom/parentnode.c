@@ -151,7 +151,6 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 		return NULL;
 	}
 
-	// Todo always strict mode?
 	stricterror = dom_get_strict_error(document);
 
 	for (i = 0; i < nodesc; i++) {
@@ -379,7 +378,6 @@ void dom_child_node_remove(dom_object *context)
 		return;
 	}
 
-	// Todo always strict?
 	stricterror = dom_get_strict_error(context->document);
 
 	if (dom_node_is_read_only(child) == SUCCESS ||

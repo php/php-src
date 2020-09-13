@@ -353,7 +353,6 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	docp = (xmlDocPtr) ctxp->doc;
 	if (docp == NULL) {
-		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Invalid XPath Document Pointer");
 		RETURN_FALSE;
 	}
@@ -397,7 +396,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 	if (! xpathobjp) {
-		// Make this an error state?
+		/* TODO Add Warning? */
 		RETURN_FALSE;
 	}
 

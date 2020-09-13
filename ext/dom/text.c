@@ -122,20 +122,25 @@ PHP_METHOD(DOMText, splitText)
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
+	if (offset < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
 	if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
-		// Todo make this throw an error?
+		/* TODO Add warning? */
 		RETURN_FALSE;
 	}
 
 	cur = xmlNodeGetContent(node);
 	if (cur == NULL) {
-		// Todo make this throw an error?
+		/* TODO Add warning? */
 		RETURN_FALSE;
 	}
 	length = xmlUTF8Strlen(cur);
 
-	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length || offset < 0) {
-		// Todo make this throw an error?
+	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
+		/* TODO Add warning? */
 		xmlFree(cur);
 		RETURN_FALSE;
 	}
@@ -152,7 +157,7 @@ PHP_METHOD(DOMText, splitText)
 	xmlFree(second);
 
 	if (nnode == NULL) {
-		// Todo make this throw an error?
+		/* TODO Add warning? */
 		RETURN_FALSE;
 	}
 

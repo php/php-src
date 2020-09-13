@@ -268,7 +268,6 @@ PHP_METHOD(DOMElement, setAttribute)
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		// Todo make it always strict?
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -642,7 +641,6 @@ PHP_METHOD(DOMElement, setAttributeNS)
 		RETURN_NULL();
 	}
 
-	// Todo should always be strict?
 	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
 	if (errorcode == 0) {
