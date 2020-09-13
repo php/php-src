@@ -1994,7 +1994,7 @@ PHP_FUNCTION(pg_fetch_all)
 	}
 
 	if (!(result_type & PGSQL_BOTH)) {
-		zend_argument_value_error(4, "must be one of PGSQL_ASSOC, PGSQL_NUM, or PGSQL_BOTH");
+		zend_argument_value_error(2, "must be one of PGSQL_ASSOC, PGSQL_NUM, or PGSQL_BOTH");
 		RETURN_THROWS();
 	}
 
@@ -2345,7 +2345,7 @@ PHP_FUNCTION(pg_lo_create)
 		default:
 			php_error_docref(NULL, E_NOTICE, "Invalid OID value passed");
 			RETURN_FALSE;
-        }
+		}
 		if ((pgsql_oid = lo_create(pgsql, wanted_oid)) == InvalidOid) {
 			php_error_docref(NULL, E_WARNING, "Unable to create PostgreSQL large object");
 			RETURN_FALSE;
@@ -2741,9 +2741,9 @@ PHP_FUNCTION(pg_lo_import)
 		default:
 			php_error_docref(NULL, E_NOTICE, "Invalid OID value passed");
 			RETURN_FALSE;
-        }
+		}
 
-       returned_oid = lo_import_with_oid(pgsql, file_in, wanted_oid);
+	   returned_oid = lo_import_with_oid(pgsql, file_in, wanted_oid);
 
 	   if (returned_oid == InvalidOid) {
 		   RETURN_FALSE;
@@ -4503,7 +4503,7 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , size_t regex_len, int icase)
 {
 	pcre2_code *re;
-	PCRE2_SIZE           err_offset;
+	PCRE2_SIZE err_offset;
 	int res, errnumber;
 	uint32_t options = PCRE2_NO_AUTO_CAPTURE;
 	size_t i;
@@ -5263,8 +5263,8 @@ PHP_FUNCTION(pg_convert)
 
 	if (option & ~PGSQL_CONV_OPTS) {
 		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_IGNORE_DEFAULT, "
-			"PGSQL_CONV_FORCE_NULL, or PGSQL_CONV_IGNORE_NOT_NULL");
-    	RETURN_THROWS();
+			"PGSQL_CONV_FORCE_NULL, and PGSQL_CONV_IGNORE_NOT_NULL");
+		RETURN_THROWS();
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5477,8 +5477,8 @@ PHP_FUNCTION(pg_insert)
 
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-    		"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC or PGSQL_DML_STRING");
-    	RETURN_THROWS();
+			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+		RETURN_THROWS();
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5694,8 +5694,8 @@ PHP_FUNCTION(pg_update)
 
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		zend_argument_value_error(5, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-    		"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC or PGSQL_DML_STRING");
-    	RETURN_THROWS();
+			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+		RETURN_THROWS();
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5791,8 +5791,8 @@ PHP_FUNCTION(pg_delete)
 
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-    		"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC or PGSQL_DML_STRING");
-    	RETURN_THROWS();
+			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+		RETURN_THROWS();
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5936,7 +5936,7 @@ PHP_FUNCTION(pg_select)
 
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC or PGSQL_DML_STRING");
+			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
 		RETURN_THROWS();
 	}
 	if (!(result_type & PGSQL_BOTH)) {
