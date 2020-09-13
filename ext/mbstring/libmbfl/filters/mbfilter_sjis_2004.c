@@ -83,6 +83,24 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis2004 = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
+static const int uni2jis_tbl_range[][2] = {
+	{0x0000, 0x045f},
+	{0x3000, 0x30ff},
+	{0x4e00, 0x9fff},
+	{0xff00, 0xffe5},
+	{0xfa0f, 0xfa6a},
+};
+
+static const unsigned short *uni2jis_tbl[] = {
+	ucs_a1_jisx0213_table,
+	ucs_hk_jisx0213_table,
+	ucs_i_jisx0213_table,
+	ucs_r_jisx0213_table,
+	ucs_r2_jisx0213_table,
+};
+
+static const int uni2jis_tbl_len = sizeof(uni2jis_tbl_range) / (sizeof(int)*2);
+
 #define SJIS_ENCODE(c1,c2,s1,s2)	\
 		do {						\
 			s1 = c1;				\

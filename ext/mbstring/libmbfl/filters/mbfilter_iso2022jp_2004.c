@@ -32,6 +32,7 @@
 #include "mbfilter_sjis_2004.h"
 
 #include "unicode_table_jis.h"
+#include "unicode_table_jis2004.h"
 
 extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter);
@@ -190,15 +191,8 @@ static int mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter)
 
 static inline int is_reserved_jisx0213_plane1_range(int c1, int c2)
 {
-	if (c1 == 0x24)
-		return IN(c2,0x7C,0x7E);
-	else if (c1 == 0x28)
-		return IN(c2,0x5F,0x66) || (c2 == 0x7D) || (c2 == 0x7E);
-	else if (c1 == 0x2C)
-		return IN(c2,0x74,0x7C);
-	else if (c1 == 0x2D)
-		return IN(c2,0x58,0x5E) || IN(c2,0x70,0x72) || IN(c2,0x74,0x77) || IN(c2,0x7A,0x7C);
-	return 0;
+	unsigned int s = (c1 - 0x21)*94 + c2 - 0x21;
+	return s >= jisx0213_ucs_table_size || !jisx0213_ucs_table[s];
 }
 
 /* In JIS X 0213:2004 plane 1 */
@@ -222,11 +216,8 @@ static int mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filte
 
 static inline int is_reserved_jisx0213_plane2_range(int c1, int c2)
 {
-	if (c1 == 0x22 || c1 == 0x26 || c1 == 0x27 || IN(c1,0x29,0x2B) || IN(c1,0x30,0x6D))
-		return 1;
-	else if (c1 == 0x7E && c2 >= 0x77)
-		return 1;
-	return 0;
+	unsigned int s = (c1 - 0x21)*94 + (94*94) + c2 - 0x21;
+	return s >= jisx0213_ucs_table_size || !jisx0213_ucs_table[s];
 }
 
 /* In JIS X 0213:2000 plane 2 */
