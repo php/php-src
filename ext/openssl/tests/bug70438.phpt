@@ -28,5 +28,5 @@ echo $decrypted;
 --EXPECTF--
 openssl_seal(): Argument #6 ($initialization_vector) cannot be null for the chosen cipher algorithm
 
-Warning: openssl_seal(): Unknown digest algorithm in %s on line %d
+Warning: openssl_seal(): Unknown cipher algorithm in %s on line %d
 openssl_seal() test
