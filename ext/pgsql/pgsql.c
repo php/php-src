@@ -1780,7 +1780,6 @@ PHP_FUNCTION(pg_fetch_result)
 	}
 	if (field_name) {
 		field_offset = PQfnumber(pgsql_result, ZSTR_VAL(field_name));
-		// TODO Split into 2 and ValueError for negative index?
 		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
 			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
 			RETURN_FALSE;
@@ -2120,7 +2119,6 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			pg_result->row = 0;
 		}
 		pgsql_row = pg_result->row;
-		// TODO Split into 2 and ValueError for negative index?
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
 			RETURN_FALSE;
 		}
@@ -2139,7 +2137,6 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 	if (field_name) {
 		field_offset = PQfnumber(pgsql_result, ZSTR_VAL(field_name));
-		// TODO Split into 2 and ValueError for negative index?
 		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
 			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
 			RETURN_FALSE;
@@ -2849,7 +2846,6 @@ PHP_FUNCTION(pg_lo_seek)
 	if (zend_parse_parameters(argc, "rl|l", &pgsql_id, &offset, &whence) == FAILURE) {
 		RETURN_THROWS();
 	}
-	/* TODO Error for < 0 offset? */
 	if (whence != SEEK_SET && whence != SEEK_CUR && whence != SEEK_END) {
 		zend_argument_value_error(3, "must be one of PGSQL_SEEK_SET, PGSQL_SEEK_CUR, or PGSQL_SEEK_END");
 		RETURN_THROWS();
@@ -3386,7 +3382,6 @@ PHP_FUNCTION(pg_unescape_bytea)
 	to = estrndup(tmp, to_len);
 	PQfreemem(tmp);
 	if (!to) {
-		/* TODO Promote to Error? */
 		php_error_docref(NULL, E_WARNING,"Invalid parameter");
 		RETURN_FALSE;
 	}
