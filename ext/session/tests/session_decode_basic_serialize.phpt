@@ -2,6 +2,11 @@
 Test session_decode() function : basic functionality
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail issues with JIT on Windows');
+}
+?>
 --FILE--
 <?php
 
