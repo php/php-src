@@ -1259,8 +1259,7 @@ static zend_result ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
-			return SUCCESS;
+			goto division_by_0;
 		} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 			/* Prevent overflow error/crash */
 			ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
@@ -1274,28 +1273,31 @@ static zend_result ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
-			return SUCCESS;
+			goto division_by_0;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
-			return SUCCESS;
+			goto division_by_0;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
-			return SUCCESS;
+			goto division_by_0;
 		}
 		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else {
 		return FAILURE;
 	}
+division_by_0:
+	if (result != op1) {
+		ZVAL_UNDEF(result);
+	}
+	zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
+	return SUCCESS;
 }
 /* }}} */
 
