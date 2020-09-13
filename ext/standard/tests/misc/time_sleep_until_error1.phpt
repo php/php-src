@@ -9,12 +9,9 @@ Danilo Sanchi sanchi@grupporetina.com
 --FILE--
 <?php
 
-try {
-    time_sleep_until(time() -1 );
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+var_dump(time_sleep_until(time() -1));
 
 ?>
---EXPECT--
-time_sleep_until(): Argument #1 ($timestamp) must be a timestamp greater than or equal to the current time
+--EXPECTF--
+Warning: time_sleep_until(): Argument #1 ($timestamp) must be a timestamp greater than or equal to the current time in %s on line %d
+bool(false)

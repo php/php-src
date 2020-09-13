@@ -133,11 +133,11 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
-			php_error_docref(NULL, E_WARNING, "Multiple header key must be numeric index (%s)", ZSTR_VAL(tmp_key));
+			zend_type_error("Header \"%s\" must only contain numeric keys, \"%s\" found", ZSTR_VAL(key), ZSTR_VAL(tmp_key));
 			continue;
 		}
 		if (Z_TYPE_P(tmp_val) != IS_STRING) {
-			php_error_docref(NULL, E_WARNING, "Multiple header values must be string (%s)", ZSTR_VAL(key));
+			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_type_name(tmp_val));
 			continue;
 		}
 		php_mail_build_headers_elem(s, key, tmp_val);
@@ -189,8 +189,8 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 				break;
 			case sizeof("to")-1: /* "to", "cc" */
 				if (!strncasecmp("to", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					php_error_docref(NULL, E_WARNING, "The additional headers cannot contain the \"To\" header");
-					continue;
+					zend_value_error("The additional headers cannot contain the \"To\" header");
+					break;
 				}
 				if (!strncasecmp("cc", ZSTR_VAL(key), ZSTR_LEN(key))) {
 					PHP_MAIL_BUILD_HEADER_CHECK("cc", s, key, val);
@@ -223,8 +223,8 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 				break;
 			case sizeof("subject")-1:
 				if (!strncasecmp("subject", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					php_error_docref(NULL, E_WARNING, "The additional headers cannot contain the \"Subject\" header");
-					continue;
+					zend_value_error("The additional headers cannot contain the \"Subject\" header");
+					break;
 				}
 				PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
 				break;

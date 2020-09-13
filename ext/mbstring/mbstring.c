@@ -2233,8 +2233,7 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	if (from > string.len) {
-		zend_argument_value_error(3, "must be contained in argument #1 ($str)");
-		RETURN_THROWS();
+		RETURN_EMPTY_STRING();
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);

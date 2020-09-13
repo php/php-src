@@ -2423,12 +2423,12 @@ PHP_FUNCTION(fnmatch)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (filename_len >= MAXPATHLEN) {
-		zend_argument_value_error(1, "must have a length less than %d bytes", MAXPATHLEN);
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		RETURN_FALSE;
 	}
 	if (pattern_len >= MAXPATHLEN) {
-		zend_argument_value_error(2, "must have a length less than %d bytes", MAXPATHLEN);
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		RETURN_FALSE;
 	}
 
 	RETURN_BOOL( ! fnmatch( pattern, filename, (int)flags ));

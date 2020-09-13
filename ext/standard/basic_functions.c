@@ -1310,8 +1310,8 @@ PHP_FUNCTION(time_sleep_until)
 	target_ns = (uint64_t) (target_secs * ns_per_sec);
 	current_ns = ((uint64_t) tm.tv_sec) * ns_per_sec + ((uint64_t) tm.tv_usec) * 1000;
 	if (target_ns < current_ns) {
-		zend_argument_value_error(1, "must be a timestamp greater than or equal to the current time");
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($timestamp) must be greater than or equal to the current time");
+		RETURN_FALSE;
 	}
 
 	diff_ns = target_ns - current_ns;

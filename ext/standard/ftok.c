@@ -45,7 +45,7 @@ PHP_FUNCTION(ftok)
 	}
 
 	if (proj_len != 1){
-		zend_argument_value_error(2, "must be 1 byte long");
+		zend_argument_value_error(2, "must be a single character");
 		RETURN_THROWS();
 	}
 
