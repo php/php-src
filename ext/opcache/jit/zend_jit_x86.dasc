@@ -2665,7 +2665,9 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_const:
-	|.if X64
+	|.if X64WIN
+	|	sub r4, 0x28
+	|.elif X64
 	|	sub r4, 8
 	|.else
 	|	sub r4, 12
@@ -2677,7 +2679,9 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|.if X64
+	|.if X64WIN
+	|	add r4, 0x28
+	|.elif X64
 	|	add r4, 8
 	|.else
 	|	add r4, 12
@@ -2693,7 +2697,9 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_tmp:
-	|.if X64
+	|.if X64WIN
+	|	sub r4, 0x28
+	|.elif X64
 	|	sub r4, 8
 	|.else
 	|	sub r4, 12
@@ -2705,7 +2711,9 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|.if X64
+	|.if X64WIN
+	|	add r4, 0x28
+	|.elif X64
 	|	add r4, 8
 	|.else
 	|	add r4, 12
@@ -2721,7 +2729,9 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF;
 
 	|->assign_var:
-	|.if X64
+	|.if X64WIN
+	|	sub r4, 0x28
+	|.elif X64
 	|	sub r4, 8
 	|.else
 	|	sub r4, 12
@@ -2733,7 +2743,9 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|.if X64
+	|.if X64WIN
+	|	add r4, 0x28
+	|.elif X64
 	|	add r4, 8
 	|.else
 	|	add r4, 12
@@ -2749,7 +2761,9 @@ static int zend_jit_assign_cv_noref_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv_noref:
-	|.if X64
+	|.if X64WIN
+	|	sub r4, 0x28
+	|.elif X64
 	|	sub r4, 8
 	|.else
 	|	sub r4, 12
@@ -2761,7 +2775,9 @@ static int zend_jit_assign_cv_noref_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|.if X64
+	|.if X64WIN
+	|	add r4, 0x28
+	|.elif X64
 	|	add r4, 8
 	|.else
 	|	add r4, 12
@@ -2777,7 +2793,9 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv:
-	|.if X64
+	|.if X64WIN
+	|	sub r4, 0x28
+	|.elif X64
 	|	sub r4, 8
 	|.else
 	|	sub r4, 12
@@ -2789,7 +2807,9 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|.if X64
+	|.if X64WIN
+	|	add r4, 0x28
+	|.elif X64
 	|	add r4, 8
 	|.else
 	|	add r4, 12
