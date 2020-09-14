@@ -488,4 +488,4 @@ function pg_update($connection, string $table_name, array $values, array $ids, i
 function pg_delete($connection, string $table_name, array $ids, int $options = 0): string|bool {}
 
 /** @param resource $connection */
-function pg_select($connection, string $table_name, array $ids, int $options = 0): array|string|false {}
+function pg_select($connection, string $table_name, array $ids, int $options = 0, int $result_type = PGSQL_ASSOC): array|string|false {}

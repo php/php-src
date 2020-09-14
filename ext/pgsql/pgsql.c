@@ -2742,13 +2742,13 @@ PHP_FUNCTION(pg_lo_import)
 			RETURN_FALSE;
 		}
 
-	   returned_oid = lo_import_with_oid(pgsql, file_in, wanted_oid);
+		returned_oid = lo_import_with_oid(pgsql, file_in, wanted_oid);
 
-	   if (returned_oid == InvalidOid) {
-		   RETURN_FALSE;
-	   }
+		if (returned_oid == InvalidOid) {
+			RETURN_FALSE;
+		}
 
-	   PGSQL_RETURN_OID(returned_oid);
+		PGSQL_RETURN_OID(returned_oid);
 	}
 
 	returned_oid = lo_import(pgsql, file_in);
