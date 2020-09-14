@@ -672,9 +672,9 @@ PHP_FUNCTION(filter_input)
 	if (!input || (tmp = zend_hash_find(Z_ARRVAL_P(input), var)) == NULL) {
 		zend_long filter_flags = 0;
 		zval *option, *opt, *def;
-		if (filter_args_long) {
+		if (!filter_args_ht) {
 			filter_flags = filter_args_long;
-		} else if (filter_args_ht) {
+		} else {
 			if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
 				filter_flags = zval_get_long(option);
 			}
