@@ -2734,12 +2734,16 @@ static void accel_gen_system_id(void)
      */
 	ZEND_HASH_FOREACH_PTR(&module_registry, module) {
 		PHP_MD5Update(&context, module->name, strlen(module->name));
-		PHP_MD5Update(&context, module->version, strlen(module->version));
+		if (module->version != NULL) {
+			PHP_MD5Update(&context, module->version, strlen(module->version));
+		}
 	} ZEND_HASH_FOREACH_END();
 	extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
 	while (extension) {
 		PHP_MD5Update(&context, extension->name, strlen(extension->name));
-		PHP_MD5Update(&context, extension->version, strlen(extension->version));
+		if (extension->version != NULL) {
+			PHP_MD5Update(&context, extension->version, strlen(extension->version));
+		}
 		extension = (zend_extension *) zend_llist_get_next_ex(&zend_extensions, &pos);
 	}
 	PHP_MD5Final(digest, &context);
