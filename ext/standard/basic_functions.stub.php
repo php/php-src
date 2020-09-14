@@ -1151,7 +1151,7 @@ function password_get_info(string $hash): ?array {}
 
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
-function password_needs_rehash(string $hash, string|int $algo, array $options = []): bool {}
+function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
 
 function password_verify(string $password, string $hash): bool {}
 
@@ -1349,7 +1349,7 @@ function stream_get_wrappers(): array|false {}
 
 function stream_get_transports(): array|false {}
 
-/** @param mixed $stream */
+/** @param resource|string $stream */
 function stream_is_local($stream): bool {}
 
 /** @param resource $stream */
