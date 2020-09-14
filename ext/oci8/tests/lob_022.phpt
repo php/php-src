@@ -34,11 +34,15 @@ $clob = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($statement, ":mylob", $clob, -1, OCI_B_CLOB);
 oci_execute($statement, OCI_DEFAULT);
 $clob->save("long data");
-$clob->save("long data", -1);
 $clob->save("long data", 0);
 
-oci_commit($c);
+try {
+    $clob->save("long data", -1);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}    
 
+oci_commit($c);
 
 $query = 'SELECT * FROM lob_test ORDER BY mykey ASC';
 $statement = oci_parse ($c, $query);
@@ -67,7 +71,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 
-Warning: OCILob::save(): Offset parameter must be greater than or equal to 0 in %s on line %d
+OCILob::save(): Argument #2 ($offset) must be greater than or equal to 0
 string(4) "data"
 string(9) "long data"
 string(9) "long data"

@@ -258,7 +258,7 @@ PHP_FUNCTION(oci_lob_save)
 	}
 
 	if (offset < 0) {
-		zend_argument_value_error(3, "must be greater than or equal to 0");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -350,7 +350,7 @@ PHP_FUNCTION(oci_lob_read)
 	}
 
 	if (length <= 0) {
-		zend_argument_value_error(2, "must be greater than 0");
+		zend_argument_value_error(1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -600,7 +600,7 @@ PHP_FUNCTION(oci_lob_truncate)
 	}
 
 	if (trim_length < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to zero");
+		zend_argument_value_error(1, "must be greater than or equal to zero");
 		RETURN_THROWS();
 	}
 
@@ -635,14 +635,14 @@ PHP_FUNCTION(oci_lob_erase)
 	if (offset_is_null) {
 		offset = -1;
 	} else if (offset < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
 	if (length_is_null) {
 		length = -1;
 	} else if (length < 0) {
-		zend_argument_value_error(3, "must be greater than or equal to 0");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -833,14 +833,14 @@ PHP_FUNCTION(oci_lob_export)
 	if (start_is_null) {
 		start = -1;
 	} else if (start < 0) {
-		zend_argument_value_error(3, "must be greater than or equal to 0");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
 	if (length_is_null) {
 		length = -1;
 	} else if (length < 0) {
-		zend_argument_value_error(4, "must be greater than or equal to 0");
+		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
