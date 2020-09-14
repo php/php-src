@@ -350,15 +350,6 @@ ZEND_API void zend_save_error_handling(zend_error_handling *current);
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current);
 ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
 
-typedef void (*zend_error_notify_cb)(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
-
-BEGIN_EXTERN_C()
-ZEND_API void zend_register_error_notify_callback(zend_error_notify_cb callback);
-void zend_startup_error_notify_callbacks(void);
-void zend_shutdown_error_notify_callbacks(void);
-void zend_error_notify_all_callbacks(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
-END_EXTERN_C()
-
 #define DEBUG_BACKTRACE_PROVIDE_OBJECT (1<<0)
 #define DEBUG_BACKTRACE_IGNORE_ARGS    (1<<1)
 

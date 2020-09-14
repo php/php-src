@@ -2045,7 +2045,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_update_current_locale();
 
 #if ZEND_DEBUG
-	zend_register_error_notify_callback(report_zend_debug_error_notify_cb);
+	zend_observer_error_register(report_zend_debug_error_notify_cb);
 #endif
 
 #if HAVE_TZSET

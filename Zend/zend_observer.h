@@ -110,6 +110,11 @@ ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_end(
 	}
 }
 
+typedef void (*zend_observer_error_cb)(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
+
+ZEND_API void zend_observer_error_register(zend_observer_error_cb callback);
+void zend_observer_error_notify(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
+
 END_EXTERN_C()
 
 #endif /* ZEND_OBSERVER_H */
