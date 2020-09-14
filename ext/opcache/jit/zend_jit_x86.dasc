@@ -13396,7 +13396,7 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 	return 1;
 }
 
-static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, uint32_t op1_info)
+static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr)
 {
 	zend_jit_addr res_addr = RES_ADDR();
 
@@ -13411,17 +13411,13 @@ static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, uint32_t op1
 		|	SET_ZVAL_LVAL res_addr, len
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
 	} else {
-		zend_jit_addr op1_addr = OP1_ADDR();
-
 		ZEND_ASSERT((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_STRING);
 
 		|	GET_ZVAL_PTR r0, op1_addr
 		|	mov r0, aword [r0 + offsetof(zend_string, len)]
 		|	SET_ZVAL_LVAL res_addr, r0
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
-		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			|	ZVAL_PTR_DTOR op1_addr, op1_info, 0, 0, opline
-		}
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
 	}
 	return 1;
 }
