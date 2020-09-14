@@ -6084,20 +6084,20 @@ static zend_bool is_ignorable_reference(HashTable *ht, zval *ref) {
 ZEND_METHOD(ReflectionReference, fromArrayElement)
 {
 	HashTable *ht;
-	zval *key, *item;
+	zval *item;
+	zend_string *string_key = NULL;
+	zend_long int_key = 0;
 	reflection_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "hz", &ht, &key) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_HT(ht)
+		Z_PARAM_STR_OR_LONG(string_key, int_key)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(key) == IS_LONG) {
-		item = zend_hash_index_find(ht, Z_LVAL_P(key));
-	} else if (Z_TYPE_P(key) == IS_STRING) {
-		item = zend_symtable_find(ht, Z_STR_P(key));
+	if (string_key) {
+		item = zend_hash_find(ht, string_key);
 	} else {
-		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(key));
-		RETURN_THROWS();
+		item = zend_hash_index_find(ht, int_key);
 	}
 
 	if (!item) {

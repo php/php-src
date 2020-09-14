@@ -643,8 +643,7 @@ class ReflectionZendExtension implements Reflector
 
 final class ReflectionReference
 {
-    /** @param int|string $key */
-    public static function fromArrayElement(array $array, $key): ?ReflectionReference {}
+    public static function fromArrayElement(array $array, int|string $key): ?ReflectionReference {}
 
     public function getId(): string {}
 
