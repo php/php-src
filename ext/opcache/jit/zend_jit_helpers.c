@@ -1858,6 +1858,13 @@ static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, const
 		property_name, zend_zval_type_name(container));
 }
 
+static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, const char *property_name)
+{
+	zend_throw_error(NULL,
+		"Attempt to increment/decrement property \"%s\" on %s",
+		property_name, zend_zval_type_name(container));
+}
+
 static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, const char *property_name)
 {
 	zend_throw_error(NULL,
@@ -2058,5 +2065,427 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 		}
 	} else {
 		_zend_jit_assign_op_overloaded_property(zobj, name, cache_slot, value, binary_op);
+	}
+}
+
+static ZEND_COLD zend_long _zend_jit_throw_inc_prop_error(zend_property_info *prop)
+{
+	zend_string *type_str = zend_type_to_string(prop->type);
+	zend_type_error("Cannot increment property %s::$%s of type %s past its maximal value",
+		ZSTR_VAL(prop->ce->name),
+		zend_get_unmangled_property_name(prop->name),
+		ZSTR_VAL(type_str));
+	zend_string_release(type_str);
+	return ZEND_LONG_MAX;
+}
+
+static ZEND_COLD zend_long _zend_jit_throw_dec_prop_error(zend_property_info *prop)
+{
+	zend_string *type_str = zend_type_to_string(prop->type);
+	zend_type_error("Cannot decrement property %s::$%s of type %s past its minimal value",
+		ZSTR_VAL(prop->ce->name),
+		zend_get_unmangled_property_name(prop->name),
+		ZSTR_VAL(type_str));
+	zend_string_release(type_str);
+	return ZEND_LONG_MIN;
+}
+
+static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval tmp;
+
+	ZVAL_COPY(&tmp, var_ptr);
+
+	increment_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE(tmp) == IS_LONG) {
+		if (!(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+			zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
+			ZVAL_LONG(var_ptr, val);
+		}
+	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, &tmp);
+	} else {
+		zval_ptr_dtor(&tmp);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval tmp;
+
+	ZVAL_COPY(&tmp, var_ptr);
+
+	decrement_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE(tmp) == IS_LONG) {
+		if (!(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+			zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
+			ZVAL_LONG(var_ptr, val);
+		}
+	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, &tmp);
+	} else {
+		zval_ptr_dtor(&tmp);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_pre_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval tmp;
+
+	if (!result) {
+		result = &tmp;
+	}
+
+	ZVAL_COPY(result, var_ptr);
+
+	increment_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(result) == IS_LONG) {
+		if (!(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+			zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
+			ZVAL_LONG(var_ptr, val);
+		}
+	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, result);
+		ZVAL_UNDEF(result);
+	} else if (result == &tmp) {
+		zval_ptr_dtor(&tmp);
+	}
+	if (UNEXPECTED(result)) {
+		ZVAL_COPY(result, var_ptr);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_pre_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval tmp;
+
+	if (!result) {
+		result = &tmp;
+	}
+
+	ZVAL_COPY(result, var_ptr);
+
+	decrement_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(result) == IS_LONG) {
+		if (!(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+			zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
+			ZVAL_LONG(var_ptr, val);
+		}
+	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, result);
+		ZVAL_UNDEF(result);
+	} else if (result == &tmp) {
+		zval_ptr_dtor(&tmp);
+	}
+	if (UNEXPECTED(result)) {
+		ZVAL_COPY(result, var_ptr);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+
+	ZVAL_COPY(result, var_ptr);
+
+	increment_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(result) == IS_LONG) {
+		if (!(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+			zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
+			ZVAL_LONG(var_ptr, val);
+		}
+	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, result);
+		ZVAL_UNDEF(result);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_post_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+
+	ZVAL_COPY(result, var_ptr);
+
+	decrement_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(result) == IS_LONG) {
+		if (!(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+			zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
+			ZVAL_LONG(var_ptr, val);
+		}
+	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, result);
+		ZVAL_UNDEF(result);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_string *name, void **cache_slot, zval *result)
+{
+	zval *prop;
+
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		if (UNEXPECTED(Z_ISERROR_P(prop))) {
+			if (UNEXPECTED(result)) {
+				ZVAL_NULL(result);
+			}
+		} else {
+			zend_property_info *prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
+
+			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
+				fast_long_increment_function(prop);
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+					zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
+					ZVAL_LONG(prop, val);
+				}
+			} else {
+				do {
+					if (Z_ISREF_P(prop)) {
+						zend_reference *ref = Z_REF_P(prop);
+						prop = Z_REFVAL_P(prop);
+						if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+							zend_jit_pre_inc_typed_ref(&ref->val, ref, result);
+							break;
+						}
+					}
+
+					if (UNEXPECTED(prop_info)) {
+						zend_jit_pre_inc_typed_prop(prop, prop_info, result);
+						return;
+					} else {
+						increment_function(prop);
+					}
+				} while (0);
+			}
+			if (UNEXPECTED(result)) {
+				ZVAL_COPY(result, prop);
+			}
+		}
+	} else {
+		zval rv;
+		zval *z;
+		zval z_copy;
+
+		GC_ADDREF(zobj);
+		z = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, &rv);
+		if (UNEXPECTED(EG(exception))) {
+			OBJ_RELEASE(zobj);
+			if (UNEXPECTED(result)) {
+				ZVAL_NULL(result);
+			}
+			return;
+		}
+
+		ZVAL_COPY_DEREF(&z_copy, z);
+		increment_function(&z_copy);
+		if (UNEXPECTED(result)) {
+			ZVAL_COPY(result, &z_copy);
+		}
+		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
+		OBJ_RELEASE(zobj);
+		zval_ptr_dtor(&z_copy);
+		zval_ptr_dtor(z);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_string *name, void **cache_slot, zval *result)
+{
+	zval *prop;
+
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		if (UNEXPECTED(Z_ISERROR_P(prop))) {
+			if (UNEXPECTED(result)) {
+				ZVAL_NULL(result);
+			}
+		} else {
+			zend_property_info *prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
+
+			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
+				fast_long_decrement_function(prop);
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+					zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
+					ZVAL_LONG(prop, val);
+				}
+			} else {
+				do {
+					if (Z_ISREF_P(prop)) {
+						zend_reference *ref = Z_REF_P(prop);
+						prop = Z_REFVAL_P(prop);
+						if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+							zend_jit_pre_dec_typed_ref(&ref->val, ref, result);
+							break;
+						}
+					}
+
+					if (UNEXPECTED(prop_info)) {
+						zend_jit_pre_dec_typed_prop(prop, prop_info, result);
+						return;
+					} else {
+						decrement_function(prop);
+					}
+				} while (0);
+			}
+			if (UNEXPECTED(result)) {
+				ZVAL_COPY(result, prop);
+			}
+		}
+	} else {
+		zval rv;
+		zval *z;
+		zval z_copy;
+
+		GC_ADDREF(zobj);
+		z = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, &rv);
+		if (UNEXPECTED(EG(exception))) {
+			OBJ_RELEASE(zobj);
+			if (UNEXPECTED(result)) {
+				ZVAL_NULL(result);
+			}
+			return;
+		}
+
+		ZVAL_COPY_DEREF(&z_copy, z);
+		decrement_function(&z_copy);
+		if (UNEXPECTED(result)) {
+			ZVAL_COPY(result, &z_copy);
+		}
+		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
+		OBJ_RELEASE(zobj);
+		zval_ptr_dtor(&z_copy);
+		zval_ptr_dtor(z);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_string *name, void **cache_slot, zval *result)
+{
+	zval *prop;
+
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		if (UNEXPECTED(Z_ISERROR_P(prop))) {
+			ZVAL_NULL(result);
+		} else {
+			zend_property_info *prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+
+			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
+				ZVAL_LONG(result, Z_LVAL_P(prop));
+				fast_long_increment_function(prop);
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+					zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
+					ZVAL_LONG(prop, val);
+				}
+			} else {
+				if (Z_ISREF_P(prop)) {
+					zend_reference *ref = Z_REF_P(prop);
+					prop = Z_REFVAL_P(prop);
+					if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
+						zend_jit_post_inc_typed_ref(&ref->val, ref, result);
+						return;
+					}
+				}
+
+				if (UNEXPECTED(prop_info)) {
+					zend_jit_post_inc_typed_prop(prop, prop_info, result);
+				} else {
+					ZVAL_COPY(result, prop);
+					increment_function(prop);
+				}
+			}
+		}
+	} else {
+		zval rv;
+		zval *z;
+		zval z_copy;
+
+		GC_ADDREF(zobj);
+		z = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, &rv);
+		if (UNEXPECTED(EG(exception))) {
+			OBJ_RELEASE(zobj);
+			ZVAL_UNDEF(result);
+			return;
+		}
+
+		ZVAL_COPY_DEREF(&z_copy, z);
+		ZVAL_COPY(result, &z_copy);
+		increment_function(&z_copy);
+		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
+		OBJ_RELEASE(zobj);
+		zval_ptr_dtor(&z_copy);
+		zval_ptr_dtor(z);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_string *name, void **cache_slot, zval *result)
+{
+	zval *prop;
+
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		if (UNEXPECTED(Z_ISERROR_P(prop))) {
+			ZVAL_NULL(result);
+		} else {
+			zend_property_info *prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+
+			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
+				ZVAL_LONG(result, Z_LVAL_P(prop));
+				fast_long_decrement_function(prop);
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
+					zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
+					ZVAL_LONG(prop, val);
+				}
+			} else {
+				if (Z_ISREF_P(prop)) {
+					zend_reference *ref = Z_REF_P(prop);
+					prop = Z_REFVAL_P(prop);
+					if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
+						zend_jit_post_dec_typed_ref(&ref->val, ref, result);
+						return;
+					}
+				}
+
+				if (UNEXPECTED(prop_info)) {
+					zend_jit_post_dec_typed_prop(prop, prop_info, result);
+				} else {
+					ZVAL_COPY(result, prop);
+					decrement_function(prop);
+				}
+			}
+		}
+	} else {
+		zval rv;
+		zval *z;
+		zval z_copy;
+
+		GC_ADDREF(zobj);
+		z = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, &rv);
+		if (UNEXPECTED(EG(exception))) {
+			OBJ_RELEASE(zobj);
+			ZVAL_UNDEF(result);
+			return;
+		}
+
+		ZVAL_COPY_DEREF(&z_copy, z);
+		ZVAL_COPY(result, &z_copy);
+		decrement_function(&z_copy);
+		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
+		OBJ_RELEASE(zobj);
+		zval_ptr_dtor(&z_copy);
+		zval_ptr_dtor(z);
 	}
 }

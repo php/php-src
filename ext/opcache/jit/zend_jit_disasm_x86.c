@@ -456,6 +456,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_invalid_array_access);
 	REGISTER_HELPER(zend_jit_invalid_property_read);
 	REGISTER_HELPER(zend_jit_invalid_property_write);
+	REGISTER_HELPER(zend_jit_invalid_property_incdec);
 	REGISTER_HELPER(zend_jit_invalid_property_assign);
 	REGISTER_HELPER(zend_jit_invalid_property_assign_op);
 	REGISTER_HELPER(zend_jit_prepare_assign_dim_ref);
@@ -472,6 +473,16 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_assign_obj_op_helper);
 	REGISTER_HELPER(zend_jit_assign_to_typed_prop);
 	REGISTER_HELPER(zend_jit_assign_op_to_typed_prop);
+	REGISTER_HELPER(zend_jit_inc_typed_prop);
+	REGISTER_HELPER(zend_jit_dec_typed_prop);
+	REGISTER_HELPER(zend_jit_pre_inc_typed_prop);
+	REGISTER_HELPER(zend_jit_pre_dec_typed_prop);
+	REGISTER_HELPER(zend_jit_post_inc_typed_prop);
+	REGISTER_HELPER(zend_jit_post_dec_typed_prop);
+	REGISTER_HELPER(zend_jit_pre_inc_obj_helper);
+	REGISTER_HELPER(zend_jit_pre_dec_obj_helper);
+	REGISTER_HELPER(zend_jit_post_inc_obj_helper);
+	REGISTER_HELPER(zend_jit_post_dec_obj_helper);
 #undef  REGISTER_HELPER
 
 #ifndef _WIN32
