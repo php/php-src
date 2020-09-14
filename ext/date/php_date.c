@@ -24,6 +24,7 @@
 #include "ext/standard/php_math.h"
 #include "php_date.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 #include "lib/timelib.h"
 #include "lib/timelib_private.h"
 #ifndef PHP_WIN32
@@ -4117,13 +4118,11 @@ PHP_METHOD(DatePeriod, __construct)
 	timelib_time *clone;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) OR (string) as arguments.");
-				zend_restore_error_handling(&error_handling);
-				return;
+				zend_type_error("DatePeriod::__construct() accepts (DateTimeInterface, DateInterval, int [, int]), or (DateTimeInterface, DateInterval, DateTime [, int]), or (string [, int]) as arguments");
+				RETURN_THROWS();
 			}
 		}
 	}
@@ -4132,15 +4131,30 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->current = NULL;
 
 	if (isostr) {
+		zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len);
+		zend_restore_error_handling(&error_handling);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+
 		if (dpobj->start == NULL) {
-			php_error_docref(NULL, E_WARNING, "The ISO interval '%s' did not contain a start date.", isostr);
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_string_release(func);
+			RETURN_THROWS();
 		}
 		if (dpobj->interval == NULL) {
-			php_error_docref(NULL, E_WARNING, "The ISO interval '%s' did not contain an interval.", isostr);
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_string_release(func);
+			RETURN_THROWS();
 		}
 		if (dpobj->end == NULL && recurrences == 0) {
-			php_error_docref(NULL, E_WARNING, "The ISO interval '%s' did not contain an end date or a recurrence count.", isostr);
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_string_release(func);
+			RETURN_THROWS();
 		}
 
 		if (dpobj->start) {
@@ -4179,7 +4193,10 @@ PHP_METHOD(DatePeriod, __construct)
 	}
 
 	if (dpobj->end == NULL && recurrences < 1) {
-		php_error_docref(NULL, E_WARNING, "The recurrence count '%d' is invalid. Needs to be > 0", (int) recurrences);
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_error(zend_ce_exception, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_string_release(func);
+		RETURN_THROWS();
 	}
 
 	/* options */
@@ -4189,8 +4206,6 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->recurrences = recurrences + dpobj->include_start_date;
 
 	dpobj->initialized = 1;
-
-	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 
