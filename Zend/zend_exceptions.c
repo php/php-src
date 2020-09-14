@@ -28,6 +28,7 @@
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions_arginfo.h"
+#include "zend_observer.h"
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
