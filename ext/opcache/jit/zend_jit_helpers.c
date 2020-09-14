@@ -1748,8 +1748,9 @@ static ZEND_COLD void zend_jit_throw_incdec_ref_error(zend_reference *ref, zend_
 		inc ? "max" : "min");
 }
 
-static void ZEND_FASTCALL zend_jit_pre_inc_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+static void ZEND_FASTCALL zend_jit_pre_inc_typed_ref(zend_reference *ref, zval *ret)
 {
+	zval *var_ptr = &ref->val;
 	zval tmp;
 
 	ZVAL_COPY(&tmp, var_ptr);
@@ -1770,8 +1771,9 @@ static void ZEND_FASTCALL zend_jit_pre_inc_typed_ref(zval *var_ptr, zend_referen
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_pre_dec_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+static void ZEND_FASTCALL zend_jit_pre_dec_typed_ref(zend_reference *ref, zval *ret)
 {
+	zval *var_ptr = &ref->val;
 	zval tmp;
 
 	ZVAL_COPY(&tmp, var_ptr);
@@ -1792,8 +1794,9 @@ static void ZEND_FASTCALL zend_jit_pre_dec_typed_ref(zval *var_ptr, zend_referen
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_post_inc_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+static void ZEND_FASTCALL zend_jit_post_inc_typed_ref(zend_reference *ref, zval *ret)
 {
+	zval *var_ptr = &ref->val;
 	ZVAL_COPY(ret, var_ptr);
 
 	increment_function(var_ptr);
@@ -1807,8 +1810,9 @@ static void ZEND_FASTCALL zend_jit_post_inc_typed_ref(zval *var_ptr, zend_refere
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_post_dec_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+static void ZEND_FASTCALL zend_jit_post_dec_typed_ref(zend_reference *ref, zval *ret)
 {
+	zval *var_ptr = &ref->val;
 	ZVAL_COPY(ret, var_ptr);
 
 	decrement_function(var_ptr);
@@ -2259,7 +2263,7 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 						zend_reference *ref = Z_REF_P(prop);
 						prop = Z_REFVAL_P(prop);
 						if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-							zend_jit_pre_inc_typed_ref(&ref->val, ref, result);
+							zend_jit_pre_inc_typed_ref(ref, result);
 							break;
 						}
 					}
@@ -2328,7 +2332,7 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 						zend_reference *ref = Z_REF_P(prop);
 						prop = Z_REFVAL_P(prop);
 						if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-							zend_jit_pre_dec_typed_ref(&ref->val, ref, result);
+							zend_jit_pre_dec_typed_ref(ref, result);
 							break;
 						}
 					}
@@ -2395,7 +2399,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 					zend_reference *ref = Z_REF_P(prop);
 					prop = Z_REFVAL_P(prop);
 					if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
-						zend_jit_post_inc_typed_ref(&ref->val, ref, result);
+						zend_jit_post_inc_typed_ref(ref, result);
 						return;
 					}
 				}
@@ -2454,7 +2458,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 					zend_reference *ref = Z_REF_P(prop);
 					prop = Z_REFVAL_P(prop);
 					if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
-						zend_jit_post_dec_typed_ref(&ref->val, ref, result);
+						zend_jit_post_dec_typed_ref(ref, result);
 						return;
 					}
 				}

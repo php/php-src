@@ -4064,24 +4064,14 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 			|	// ZVAL_DEREF(var_ptr);
 			if (op1_info & MAY_BE_REF) {
 				|	IF_NOT_Z_TYPE, FCARG1a, IS_REFERENCE, >2
-				|	GET_Z_PTR FCARG2a, FCARG1a
-				|	cmp aword [FCARG2a + offsetof(zend_reference, sources.ptr)], 0
-				|	lea FCARG1a, [FCARG2a + offsetof(zend_reference, val)]
-				|	jz >2
-				|.if X64
-					if (RETURN_VALUE_USED(opline)) {
-						|	LOAD_ZVAL_ADDR CARG3, res_addr
-					} else {
-						|	mov CARG3, 0
-					}
-				|.else
-					|	sub r4, 12
-					if (RETURN_VALUE_USED(opline)) {
-						|	PUSH_ZVAL_ADDR res_addr, r0
-					} else {
-						|	push 0
-					}
-				|.endif
+				|	GET_Z_PTR FCARG1a, FCARG1a
+				|	cmp aword [FCARG1a + offsetof(zend_reference, sources.ptr)], 0
+				|	jz >1
+				if (RETURN_VALUE_USED(opline)) {
+					|	LOAD_ZVAL_ADDR FCARG2a, res_addr
+				} else {
+					|	xor FCARG2a, FCARG2a
+				}
 				if (opline->opcode == ZEND_PRE_INC) {
 					|	EXT_CALL zend_jit_pre_inc_typed_ref, r0
 				} else if (opline->opcode == ZEND_PRE_DEC) {
@@ -4093,11 +4083,10 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 				} else {
 					ZEND_UNREACHABLE();
 				}
-				|.if not(X64)
-					|	add r4, 12
-				|.endif
 				zend_jit_check_exception(Dst);
 				|	jmp >3
+				|1:
+				|	lea FCARG1a, [FCARG1a + offsetof(zend_reference, val)]
 				|2:
 			}
 
@@ -12516,33 +12505,24 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
 		zend_jit_addr var_addr = prop_addr;
 
-		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0);
-		|	LOAD_ZVAL_ADDR r0, prop_addr
+		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+		|	LOAD_ZVAL_ADDR FCARG1a, prop_addr
 
 		|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, >2
-		|	GET_ZVAL_PTR FCARG2a, var_addr
-		|	cmp aword [FCARG2a + offsetof(zend_reference, sources.ptr)], 0
+		|	GET_ZVAL_PTR FCARG1a, var_addr
+		|	cmp aword [FCARG1a + offsetof(zend_reference, sources.ptr)], 0
 		|	jnz >1
-		|	lea r0, aword [FCARG2a + offsetof(zend_reference, val)]
+		|	lea FCARG1a, aword [FCARG1a + offsetof(zend_reference, val)]
 		|.cold_code
 		|1:
-		|	lea FCARG1a, [FCARG2a + offsetof(zend_reference, val)]
 		if (opline) {
 			|	SET_EX_OPLINE opline, r0
 		}
-		|.if X64
-			if (opline->result_type == IS_UNUSED) {
-				|	xor CARG3, CARG3
-			} else {
-				|	LOAD_ZVAL_ADDR CARG3, res_addr
-			}
-		|.else
-			if (opline->result_type == IS_UNUSED) {
-				|	push 0
-			} else {
-				|	PUSH_ZVAL_ADDR res_addr, r0
-			}
-		|.endif
+		if (opline->result_type == IS_UNUSED) {
+			|	xor FCARG2a, FCARG2a
+		} else {
+			|	LOAD_ZVAL_ADDR FCARG2a, res_addr
+		}
 		switch (opline->opcode) {
 			case ZEND_PRE_INC_OBJ:
 				|	EXT_CALL zend_jit_pre_inc_typed_ref, r0
@@ -12559,9 +12539,6 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 			default:
 				ZEND_UNREACHABLE();
 		}
-		|.if not(X64)
-			|	add r4, 12
-		|.endif
 		|	jmp >9
 		|.code
 
@@ -12580,16 +12557,13 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 		|	jo	>3
 		if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
 			if (opline->result_type != IS_UNUSED) {
-				|	ZVAL_COPY_VALUE res_addr, -1, var_addr, MAY_BE_LONG, ZREG_R1, ZREG_R2
+				|	ZVAL_COPY_VALUE res_addr, -1, var_addr, MAY_BE_LONG, ZREG_R0, ZREG_R2
 			}
 		}
 		|.cold_code
 		|2:
-		|	LOAD_ZVAL_ADDR FCARG1a, var_addr
 		if (opline->opcode == ZEND_POST_INC_OBJ || opline->opcode == ZEND_POST_DEC_OBJ) {
-			zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
-
-			|	ZVAL_COPY_VALUE res_addr, -1, val_addr, MAY_BE_ANY, ZREG_R0, ZREG_R2
+			|	ZVAL_COPY_VALUE res_addr, -1, var_addr, MAY_BE_ANY, ZREG_R0, ZREG_R2
 			|	TRY_ADDREF MAY_BE_ANY, ah, r2
 		}
 		if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_POST_INC_OBJ) {
