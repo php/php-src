@@ -2353,6 +2353,65 @@ static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
 	pefree(p, 1);
 } /* }}} */
 
+/**
+ * Parse the host and port portions of an address specifier in
+ * one of the following forms:
+ * - hostOrIP:port
+ * - [hostOrIP]:port
+ */
+static char *php_cli_server_parse_addr(const char *addr, int *pport) {
+	const char *p, *end;
+	long port;
+
+	if (addr[0] == '[') {
+		/* Encapsulated [hostOrIP]:port */
+		const char *start = addr + 1;
+		end = strchr(start, ']');
+		if (!end) {
+			/* No ending ] delimiter to match [ */
+			return NULL;
+		}
+
+		p = end + 1;
+		if (*p != ':') {
+			/* Invalid char following address/missing port */
+			return NULL;
+		}
+
+		port = strtol(p + 1, (char**)&p, 10);
+		if (p && *p) {
+			/* Non-numeric in port */
+			return NULL;
+		}
+		if (port < 0 || port > 65535) {
+			/* Invalid port */
+			return NULL;
+		}
+
+		/* Full [hostOrIP]:port provided */
+		*pport = (int)port;
+		return pestrndup(start, end - start, 1);
+	}
+
+	end = strchr(addr, ':');
+	if (!end) {
+		/* Missing port */
+		return NULL;
+	}
+
+	port = strtol(end + 1, (char**)&p, 10);
+	if (p && *p) {
+		/* Non-numeric port */
+		return NULL;
+	}
+	if (port < 0 || port > 65535) {
+		/* Invalid port */
+		return NULL;
+	}
+	*pport = (int)port;
+	return pestrndup(addr, end - addr, 1);
+}
+
 static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
 {
 	int retval = SUCCESS;
@@ -2363,40 +2422,9 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	int err = 0;
 	int port = 3000;
 	php_socket_t server_sock = SOCK_ERR;
-	char *p = NULL;
 
-	if (addr[0] == '[') {
-		host = pestrdup(addr + 1, 1);
-		if (!host) {
-			return FAILURE;
-		}
-		p = strchr(host, ']');
-		if (p) {
-			*p++ = '\0';
-			if (*p == ':') {
-				port = strtol(p + 1, &p, 10);
-				if (port <= 0 || port > 65535) {
-					p = NULL;
-				}
-			} else if (*p != '\0') {
-				p = NULL;
-			}
-		}
-	} else {
-		host = pestrdup(addr, 1);
-		if (!host) {
-			return FAILURE;
-		}
-		p = strchr(host, ':');
-		if (p) {
-			*p++ = '\0';
-			port = strtol(p, &p, 10);
-			if (port <= 0 || port > 65535) {
-				p = NULL;
-			}
-		}
-	}
-	if (!p) {
+	host = php_cli_server_parse_addr(addr, &port);
+	if (!host) {
 		fprintf(stderr, "Invalid address: %s\n", addr);
 		retval = FAILURE;
 		goto out;
@@ -2720,10 +2748,12 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	sapi_module.phpinfo_as_text = 0;
 
 	{
+		zend_bool ipv6 = strchr(server.host, ':');
 		php_cli_server_logf(
 			PHP_CLI_SERVER_LOG_PROCESS,
-			"PHP %s Development Server (http://%s) started",
-			PHP_VERSION, server_bind_address);
+			"PHP %s Development Server (http://%s%s%s:%d) started",
+			PHP_VERSION, ipv6 ? "[" : "", server.host,
+			ipv6 ? "]" : "", server.port);
 	}
 
 #if defined(SIGINT)

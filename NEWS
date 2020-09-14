@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0RC1
 
+- CLI:
+  . Allow debug server binding to an ephemeral port via `-S localhost:0`. (Sara)
 - Core:
   . Fixed bug #80109 (Cannot skip arguments when extended debug is enabled).
     (Nikita)
