@@ -1,8 +1,8 @@
-const union {
+static const union {
   uint8_t u8[2];
   uint16_t u16;
 } EndianMix = {{ 1, 0 }};
-FORCE_INLINE bool IsBigEndian()
+FORCE_INLINE int IsBigEndian()
 {
   // Constant-folded by the compiler.
   return EndianMix.u16 != 1;
@@ -55,7 +55,7 @@ FORCE_INLINE uint64_t BSWAP64(uint64_t u)
 }
 #endif
 
-FORCE_INLINE uint32_t getblock32 ( const uint32_t * const p, const int i = 0L )
+FORCE_INLINE uint32_t getblock32 ( const uint32_t * const p, const int i)
 {
   if (IsBigEndian()) {
     return BSWAP32(p[i]);
@@ -64,7 +64,7 @@ FORCE_INLINE uint32_t getblock32 ( const uint32_t * const p, const int i = 0L )
   }
 }
 
-FORCE_INLINE uint64_t getblock64 ( const uint64_t * const p, const int i = 0L )
+FORCE_INLINE uint64_t getblock64 ( const uint64_t * const p, const int i)
 {
   if (IsBigEndian()) {
     return BSWAP64(p[i]);

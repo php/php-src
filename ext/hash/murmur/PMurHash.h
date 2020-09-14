@@ -29,5 +29,3 @@ typedef unsigned int uint32_t;
 
 void PMurHash32_Process(uint32_t *ph1, uint32_t *pcarry, const void *key, int len);
 uint32_t PMurHash32_Result(uint32_t h1, uint32_t carry, uint32_t total_length);
-uint32_t PMurHash32(const void * key, int len, uint32_t seed);
-void PMurHash32(const void * key, int len, uint32_t seed, void * out);

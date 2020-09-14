@@ -7,7 +7,7 @@
  */
 
 /*-----------------------------------------------------------------------------
- 
+
 If you want to understand the MurmurHash algorithm you would be much better
 off reading the original source. Just point your browser at:
 http://code.google.com/p/smhasher/source/browse/trunk/MurmurHash3.cpp
@@ -61,13 +61,13 @@ on big endian machines.
 
 /* Find best way to ROTL */
 #if defined(_MSC_VER)
-  #define FORCE_INLINE  __forceinline
+  #define FORCE_INLINE  static __forceinline
   #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
   #define ROTL32(x,y)  _rotl(x,y)
   #define ROTL64(x,y)  _rotl64(x,y)
   #define BIG_CONSTANT(x) (x)
 #else
-  #define FORCE_INLINE inline __attribute__((always_inline))
+  #define FORCE_INLINE static inline __attribute__((always_inline))
   /* gcc recognises this code and generates a rotate instruction for CPUs with one */
   #define ROTL32(x,r)  (((uint32_t)x << r) | ((uint32_t)x >> (32 - r)))
   #define ROTL64(x,r)  (((uint64_t)x << r) | ((uint64_t)x >> (64 - r)))
@@ -119,57 +119,55 @@ static const uint32_t kC4 = 0xa1e38b93;
 
 /* This is the main processing body of the algorithm. It operates
  * on each full 128-bits of input. */
-FORCE_INLINE void doblock128x86(uint32_t &h1, uint32_t &h2, uint32_t &h3, uint32_t &h4,
-                                uint32_t &k1, uint32_t &k2, uint32_t &k3, uint32_t &k4)
-{
-  k1 *= kC1; k1  = ROTL32(k1,15); k1 *= kC2; h1 ^= k1;
-
-  h1 = ROTL32(h1,19); h1 += h2; h1 = h1*5+0x561ccd1b;
-
-  k2 *= kC2; k2  = ROTL32(k2,16); k2 *= kC3; h2 ^= k2;
-
-  h2 = ROTL32(h2,17); h2 += h3; h2 = h2*5+0x0bcaa747;
-
-  k3 *= kC3; k3  = ROTL32(k3,17); k3 *= kC4; h3 ^= k3;
-
-  h3 = ROTL32(h3,15); h3 += h4; h3 = h3*5+0x96cd1c35;
-
-  k4 *= kC4; k4  = ROTL32(k4,18); k4 *= kC1; h4 ^= k4;
-
-  h4 = ROTL32(h4,13); h4 += h1; h4 = h4*5+0x32ac3b17;
-}
+#define doblock128x86(h1, h2, h3, h4, k1, k2, k3,k4)\
+do {\
+  k1 *= kC1; k1  = ROTL32(k1,15); k1 *= kC2; h1 ^= k1;\
+\
+  h1 = ROTL32(h1,19); h1 += h2; h1 = h1*5+0x561ccd1b;\
+\
+  k2 *= kC2; k2  = ROTL32(k2,16); k2 *= kC3; h2 ^= k2;\
+\
+  h2 = ROTL32(h2,17); h2 += h3; h2 = h2*5+0x0bcaa747;\
+\
+  k3 *= kC3; k3  = ROTL32(k3,17); k3 *= kC4; h3 ^= k3;\
+\
+  h3 = ROTL32(h3,15); h3 += h4; h3 = h3*5+0x96cd1c35;\
+\
+  k4 *= kC4; k4  = ROTL32(k4,18); k4 *= kC1; h4 ^= k4;\
+\
+  h4 = ROTL32(h4,13); h4 += h1; h4 = h4*5+0x32ac3b17;\
+} while(0)
 
 /* Append unaligned bytes to carry, forcing hash churn if we have 16 bytes */
 /* cnt=bytes to process, h1-h4=hash k1-k4=carry, n=bytes in carry, ptr/len=payload */
-FORCE_INLINE void dobytes128x86(int cnt, uint32_t &h1, uint32_t &h2, uint32_t &h3, uint32_t &h4,
-                                         uint32_t &k1, uint32_t &k2, uint32_t &k3, uint32_t &k4,
-                                         int &n, const uint8_t *&ptr, int &len)
-{
-  for(;cnt--; len--) {
-    switch(n) {
-      case  0: case  1: case  2: case  3:
-        k1 = k1>>8 | (uint32_t)*ptr++<<24;
-        ++n; break;
-
-      case  4: case  5: case  6: case  7:
-        k2 = k2>>8 | (uint32_t)*ptr++<<24;
-        ++n; break;
-
-      case  8: case  9: case 10: case 11:
-        k3 = k3>>8 | (uint32_t)*ptr++<<24;
-        ++n; break;
-
-      case 12: case 13: case 14:
-        k4 = k4>>8 | (uint32_t)*ptr++<<24;
-        ++n; break;
-
-      case 15:
-        k4 = k4>>8 | (uint32_t)*ptr++<<24;
-        doblock128x86(h1, h2, h3, h4, k1, k2, k3, k4);
-        n = 0; break;
-    }
-  }
-}
+#define dobytes128x86(cnt, h1, h2, h3, h4, k1, k2, k3, k4, n, ptr, len)\
+do {\
+  unsigned __cnt = cnt;\
+  for(;__cnt--; len--) {\
+    switch(n) {\
+      case  0: case  1: case  2: case  3:\
+        k1 = k1>>8 | (uint32_t)*ptr++<<24;\
+        ++n; break;\
+\
+      case  4: case  5: case  6: case  7:\
+        k2 = k2>>8 | (uint32_t)*ptr++<<24;\
+        ++n; break;\
+\
+      case  8: case  9: case 10: case 11:\
+        k3 = k3>>8 | (uint32_t)*ptr++<<24;\
+        ++n; break;\
+\
+      case 12: case 13: case 14:\
+        k4 = k4>>8 | (uint32_t)*ptr++<<24;\
+        ++n; break;\
+\
+      case 15:\
+        k4 = k4>>8 | (uint32_t)*ptr++<<24;\
+        doblock128x86(h1, h2, h3, h4, k1, k2, k3, k4);\
+        n = 0; break;\
+    }\
+  }\
+} while(0)
 
 /* Finalize a hash. To match the original Murmur3_128x86 the total_length must be provided */
 void PMurHash128x86_Result(const uint32_t *ph, const uint32_t *pcarry, uint32_t total_length, uint32_t *out)
@@ -248,7 +246,7 @@ void PMurHash128x86_Process(uint32_t * const ph, uint32_t * const pcarry, const 
   uint32_t h2 = ph[1];
   uint32_t h3 = ph[2];
   uint32_t h4 = ph[3];
-  
+
   uint32_t k1 = pcarry[0];
   uint32_t k2 = pcarry[1];
   uint32_t k3 = pcarry[2];
@@ -409,7 +407,7 @@ void PMurHash128x86_Process(uint32_t * const ph, uint32_t * const pcarry, const 
 
   /* Append any remaining bytes into carry */
   dobytes128x86(len, h1, h2, h3, h4, k1, k2, k3, k4, n, ptr, len);
- 
+
   /* Copy out new running hash and carry */
   ph[0] = h1;
   ph[1] = h2;
@@ -419,7 +417,7 @@ void PMurHash128x86_Process(uint32_t * const ph, uint32_t * const pcarry, const 
   pcarry[1] = k2;
   pcarry[2] = k3;
   pcarry[3] = (k4 & ~0xff) | n;
-} 
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -445,41 +443,41 @@ static const uint64_t kC2L = BIG_CONSTANT(0x4cf5ad432745937f);
 
 /* This is the main processing body of the algorithm. It operates
  * on each full 128-bits of input. */
-FORCE_INLINE void doblock128x64(uint64_t &h1, uint64_t &h2, uint64_t &k1, uint64_t &k2)
-{
-  k1 *= kC1L; k1  = ROTL64(k1,31); k1 *= kC2L; h1 ^= k1;
-
-  h1 = ROTL64(h1,27); h1 += h2; h1 = h1*5+0x52dce729;
-
-  k2 *= kC2L; k2  = ROTL64(k2,33); k2 *= kC1L; h2 ^= k2;
-
-  h2 = ROTL64(h2,31); h2 += h1; h2 = h2*5+0x38495ab5;
-}
+#define doblock128x64(h1, h2, k1, k2)\
+do {\
+  k1 *= kC1L; k1  = ROTL64(k1,31); k1 *= kC2L; h1 ^= k1;\
+\
+  h1 = ROTL64(h1,27); h1 += h2; h1 = h1*5+0x52dce729;\
+\
+  k2 *= kC2L; k2  = ROTL64(k2,33); k2 *= kC1L; h2 ^= k2;\
+\
+  h2 = ROTL64(h2,31); h2 += h1; h2 = h2*5+0x38495ab5;\
+} while(0)
 
 /* Append unaligned bytes to carry, forcing hash churn if we have 16 bytes */
 /* cnt=bytes to process, h1,h2=hash k1,k2=carry, n=bytes in carry, ptr/len=payload */
-FORCE_INLINE void dobytes128x64(int cnt, uint64_t &h1, uint64_t &h2, uint64_t &k1, uint64_t &k2,
-                                int &n, const uint8_t *&ptr, int &len)
-{
-  for(;cnt--; len--) {
-    switch(n) {
-      case  0: case  1: case  2: case  3:
-      case  4: case  5: case  6: case  7:
-        k1 = k1>>8 | (uint64_t)*ptr++<<56;
-        n++; break;
-
-      case  8: case  9: case 10: case 11:
-      case 12: case 13: case 14:
-        k2 = k2>>8 | (uint64_t)*ptr++<<56;
-        n++; break;
-
-      case 15:
-        k2 = k2>>8 | (uint64_t)*ptr++<<56;
-        doblock128x64(h1, h2, k1, k2);
-        n = 0; break;
-    }
-  }
-}
+#define dobytes128x64(cnt, h1, h2, k1, k2, n, ptr, len) \
+do {\
+  unsigned __cnt = cnt;\
+  for(;__cnt--; len--) {\
+    switch(n) {\
+      case  0: case  1: case  2: case  3:\
+      case  4: case  5: case  6: case  7:\
+        k1 = k1>>8 | (uint64_t)*ptr++<<56;\
+        n++; break;\
+\
+      case  8: case  9: case 10: case 11:\
+      case 12: case 13: case 14:\
+        k2 = k2>>8 | (uint64_t)*ptr++<<56;\
+        n++; break;\
+\
+      case 15:\
+        k2 = k2>>8 | (uint64_t)*ptr++<<56;\
+        doblock128x64(h1, h2, k1, k2);\
+        n = 0; break;\
+    }\
+  }\
+} while(0)
 
 /* Finalize a hash. To match the original Murmur3_128x64 the total_length must be provided */
 void PMurHash128x64_Result(const uint64_t * const ph, const uint64_t * const pcarry,
@@ -529,7 +527,7 @@ void PMurHash128x64_Process(uint64_t * const ph, uint64_t * const pcarry, const 
 {
   uint64_t h1 = ph[0];
   uint64_t h2 = ph[1];
-  
+
   uint64_t k1 = pcarry[0];
   uint64_t k2 = pcarry[1];
 
@@ -620,13 +618,13 @@ void PMurHash128x64_Process(uint64_t * const ph, uint64_t * const pcarry, const 
 
   /* Append any remaining bytes into carry */
   dobytes128x64(len, h1, h2, k1, k2, n, ptr, len);
- 
+
   /* Copy out new running hash and carry */
   ph[0] = h1;
   ph[1] = h2;
   pcarry[0] = k1;
   pcarry[1] = (k2 & ~0xff) | n;
-} 
+}
 
 /*---------------------------------------------------------------------------*/
 

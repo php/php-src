@@ -14,15 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-extern "C" {
 #include "php_hash.h"
 #include "php_hash_murmur.h"
-}
 
-#include "PMurHash.h"
-#include "PMurHash128.h"
+#include "murmur/PMurHash.h"
+#include "murmur/PMurHash128.h"
 #define FORCE_INLINE zend_always_inline
-#include "endianness.h"
+#include "murmur/endianness.h"
 
 
 const php_hash_ops php_hash_murmur3a_ops = {/*{{{*/
@@ -188,4 +186,3 @@ PHP_HASH_API int PHP_MURMUR3FCopy(const php_hash_ops *ops, PHP_MURMUR3F_CTX *ori
 	copy_context->len = orig_context->len;
 	return SUCCESS;
 }/*}}}*/
-

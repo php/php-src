@@ -9,7 +9,7 @@
  */
 
 /*-----------------------------------------------------------------------------
- 
+
 If you want to understand the MurmurHash algorithm you would be much better
 off reading the original source. Just point your browser at:
 http://code.google.com/p/smhasher/source/browse/trunk/MurmurHash3.cpp
@@ -69,18 +69,18 @@ on big endian machines, or a byte-by-byte read if the endianess is unknown.
 
 /* Find best way to ROTL */
 #if defined(_MSC_VER)
-  #define FORCE_INLINE  __forceinline
+  #define FORCE_INLINE  static __forceinline
   #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
   #define ROTL32(x,y)  _rotl(x,y)
 #else
-  #define FORCE_INLINE inline __attribute__((always_inline))
+  #define FORCE_INLINE static inline __attribute__((always_inline))
   /* gcc recognises this code and generates a rotate instruction for CPUs with one */
   #define ROTL32(x,r)  (((uint32_t)x << r) | ((uint32_t)x >> (32 - r)))
 #endif
 
 #include "endianness.h"
 
-#define READ_UINT32(ptr) getblock32((uint32_t *)ptr)
+#define READ_UINT32(ptr) getblock32((uint32_t *)ptr, 0)
 
 /*-----------------------------------------------------------------------------
  * Core murmurhash algorithm macros */
@@ -90,31 +90,31 @@ static const uint32_t kC2 = 0x1b873593;
 
 /* This is the main processing body of the algorithm. It operates
  * on each full 32-bits of input. */
-FORCE_INLINE void doblock(uint32_t &h1, uint32_t &k1)
-{
-  k1 *= kC1;
-  k1 = ROTL32(k1,15);
-  k1 *= kC2;
-
-  h1 ^= k1;
-  h1 = ROTL32(h1,13);
-  h1 = h1*5+0xe6546b64;
-}
+#define doblock(h1, k1) \
+do {\
+  k1 *= kC1;\
+  k1 = ROTL32(k1,15);\
+  k1 *= kC2;\
+\
+  h1 ^= k1;\
+  h1 = ROTL32(h1,13);\
+  h1 = h1*5+0xe6546b64;\
+} while(0)
 
 /* Append unaligned bytes to carry, forcing hash churn if we have 4 bytes */
 /* cnt=bytes to process, h1=name of h1 var, c=carry, n=bytes in c, ptr/len=payload */
-FORCE_INLINE void dobytes(int cnt, uint32_t &h1, uint32_t &c, int &n,
-                          const uint8_t *&ptr, int &len)
-{
-  while(cnt--) {
-    c = c>>8 | (uint32_t)*ptr++<<24;
-    n++; len--;
-    if(n==4) {
-        doblock(h1, c);
-        n = 0;
-    }
-  }
-}
+#define dobytes(cnt, h1, c, n, ptr, len) \
+do {\
+  unsigned __cnt = cnt;\
+  while(__cnt--) {\
+    c = c>>8 | (uint32_t)*ptr++<<24;\
+    n++; len--;\
+    if(n==4) {\
+        doblock(h1, c);\
+        n = 0;\
+    }\
+  }\
+} while(0)
 
 /*---------------------------------------------------------------------------*/
 
@@ -200,7 +200,7 @@ void PMurHash32_Process(uint32_t *ph1, uint32_t *pcarry, const void *key, int le
   /* Copy out new running hash and carry */
   *ph1 = h1;
   *pcarry = (c & ~0xff) | n;
-} 
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -223,24 +223,4 @@ uint32_t PMurHash32_Result(uint32_t h, uint32_t carry, uint32_t total_length)
   h ^= h >> 16;
 
   return h;
-}
-
-
-/*---------------------------------------------------------------------------*/
-
-/* All in one go */
-
-uint32_t PMurHash32(const void * key, int len, uint32_t seed)
-{
-  uint32_t carry = 0;
-  PMurHash32_Process(&seed, &carry, key, len);
-  return PMurHash32_Result(seed, carry, (uint32_t) len);
-}
-
-/* MurmurHash3_x86_32 api */
-void PMurHash32(const void * key, int len, uint32_t seed, void * out)
-{
-  uint32_t carry = 0;
-  PMurHash32_Process(&seed, &carry, key, len);
-  *(uint32_t*)out = PMurHash32_Result(seed, carry, (uint32_t) len);
 }
