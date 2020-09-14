@@ -2237,8 +2237,11 @@ PHP_FUNCTION(substr_replace)
 {
 	zend_string *str, *repl_str;
 	HashTable *str_ht, *repl_ht;
-	zval *from;
-	zval *len = NULL;
+	HashTable *from_ht;
+	zend_long from_long;
+	HashTable *len_ht = NULL;
+	zend_long len_long;
+	zend_bool len_is_null = 1;
 	zend_long l = 0;
 	zend_long f;
 	zend_string *result;
@@ -2248,39 +2251,26 @@ PHP_FUNCTION(substr_replace)
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_ARRAY_HT_OR_STR(str_ht, str)
 		Z_PARAM_ARRAY_HT_OR_STR(repl_ht, repl_str)
-		Z_PARAM_ZVAL(from)
+		Z_PARAM_ARRAY_HT_OR_LONG(from_ht, from_long)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_OR_NULL(len)
+		Z_PARAM_ARRAY_HT_OR_LONG_OR_NULL(len_ht, len_long, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(from) != IS_ARRAY) {
-		convert_to_long_ex(from);
-		if (EG(exception)) {
-			RETURN_THROWS();
-		}
-	}
-
-	if (len) {
-		if (Z_TYPE_P(len) != IS_ARRAY) {
-			convert_to_long_ex(len);
-			l = Z_LVAL_P(len);
-		}
-	} else {
+	if (len_is_null) {
 		if (str) {
 			l = ZSTR_LEN(str);
 		}
+	} else if (!len_ht) {
+		l = len_long;
 	}
 
 	if (str) {
-		if (
-			(!len && Z_TYPE_P(from) == IS_ARRAY) ||
-			(len && Z_TYPE_P(from) != Z_TYPE_P(len))
-		) {
+		if ((len_is_null && from_ht) || (!len_is_null && (from_ht == NULL) != (len_ht == NULL))) {
 			php_error_docref(NULL, E_WARNING, "'start' and 'length' should be of same type - numerical or array ");
 			RETURN_STR_COPY(str);
 		}
-		if (len && Z_TYPE_P(from) == IS_ARRAY) {
-			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
+		if (!len_is_null && from_ht) {
+			if (zend_hash_num_elements(from_ht) != zend_hash_num_elements(len_ht)) {
 				php_error_docref(NULL, E_WARNING, "'start' and 'length' should have the same number of elements");
 				RETURN_STR_COPY(str);
 			}
@@ -2288,8 +2278,8 @@ PHP_FUNCTION(substr_replace)
 	}
 
 	if (str) {
-		if (Z_TYPE_P(from) != IS_ARRAY) {
-			f = Z_LVAL_P(from);
+		if (!from_ht) {
+			f = from_long;
 
 			/* if "from" position is negative, count start position from the end
 			 * of the string
@@ -2364,15 +2354,15 @@ PHP_FUNCTION(substr_replace)
 			zend_string *tmp_orig_str;
 			zend_string *orig_str = zval_get_tmp_string(tmp_str, &tmp_orig_str);
 
-			if (Z_TYPE_P(from) == IS_ARRAY) {
-				while (from_idx < Z_ARRVAL_P(from)->nNumUsed) {
-					tmp_from = &Z_ARRVAL_P(from)->arData[from_idx].val;
+			if (from_ht) {
+				while (from_idx < from_ht->nNumUsed) {
+					tmp_from = &from_ht->arData[from_idx].val;
 					if (Z_TYPE_P(tmp_from) != IS_UNDEF) {
 						break;
 					}
 					from_idx++;
 				}
-				if (from_idx < Z_ARRVAL_P(from)->nNumUsed) {
+				if (from_idx < from_ht->nNumUsed) {
 					f = zval_get_long(tmp_from);
 
 					if (f < 0) {
@@ -2388,7 +2378,7 @@ PHP_FUNCTION(substr_replace)
 					f = 0;
 				}
 			} else {
-				f = Z_LVAL_P(from);
+				f = from_long;
 				if (f < 0) {
 					f = (zend_long)ZSTR_LEN(orig_str) + f;
 					if (f < 0) {
@@ -2399,22 +2389,22 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (len && Z_TYPE_P(len) == IS_ARRAY) {
-				while (len_idx < Z_ARRVAL_P(len)->nNumUsed) {
-					tmp_len = &Z_ARRVAL_P(len)->arData[len_idx].val;
+			if (len_ht) {
+				while (len_idx < len_ht->nNumUsed) {
+					tmp_len = &len_ht->arData[len_idx].val;
 					if (Z_TYPE_P(tmp_len) != IS_UNDEF) {
 						break;
 					}
 					len_idx++;
 				}
-				if (len_idx < Z_ARRVAL_P(len)->nNumUsed) {
+				if (len_idx < len_ht->nNumUsed) {
 					l = zval_get_long(tmp_len);
 					len_idx++;
 				} else {
 					l = ZSTR_LEN(orig_str);
 				}
-			} else if (len) {
-				l = Z_LVAL_P(len);
+			} else if (!len_is_null) {
+				l = len_long;
 			} else {
 				l = ZSTR_LEN(orig_str);
 			}

@@ -153,11 +153,8 @@ function intl_error_name(int $error_code): string {}
 
 /* dateformat */
 
-/**
- * @param IntlTimeZone|DateTimeZone|string|null $timezone
- * @param IntlCalendar|int|null $calendar
- */
-function datefmt_create(?string $locale, int $datetype, int $timetype, $timezone = null, $calendar = null, string $pattern = ""): ?IntlDateFormatter {}
+/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
+function datefmt_create(?string $locale, int $datetype, int $timetype, $timezone = null, IntlCalendar|int|null $calendar = null, string $pattern = ""): ?IntlDateFormatter {}
 
 function datefmt_get_datetype(IntlDateFormatter $df): int|false {}
 
@@ -165,8 +162,7 @@ function datefmt_get_timetype(IntlDateFormatter $df): int|false {}
 
 function datefmt_get_calendar(IntlDateFormatter $df): int|false {}
 
-/** @param IntlCalendar|int|null $which */
-function datefmt_set_calendar(IntlDateFormatter $df, $which): bool {}
+function datefmt_set_calendar(IntlDateFormatter $df, IntlCalendar|int|null $which): bool {}
 
 function datefmt_get_timezone_id(IntlDateFormatter $df): string|false {}
 

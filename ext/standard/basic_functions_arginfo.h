@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 251fc9f272492ab76c4a1a1dabcd768269cf1bde */
+ * Stub hash: d1bcbdfe71bdc57680abe391d1ef2859538615c2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -746,7 +746,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_setrawcookie, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_STRING, 0, "\'\'")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, expires_or_options, "0")
+	ZEND_ARG_TYPE_MASK(0, expires_or_options, MAY_BE_ARRAY|MAY_BE_LONG, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, path, IS_STRING, 0, "\'\'")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_STRING, 0, "\'\'")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, secure, _IS_BOOL, 0, "false")
@@ -935,9 +935,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_substr_replace, 0, 3, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_MASK(0, str, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
-	ZEND_ARG_TYPE_MASK(0, replace, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
-	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, length, "null")
+	ZEND_ARG_TYPE_MASK(0, replace, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_MASK(0, start, MAY_BE_ARRAY|MAY_BE_LONG, NULL)
+	ZEND_ARG_TYPE_MASK(0, length, MAY_BE_ARRAY|MAY_BE_LONG|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_quotemeta arginfo_base64_encode
