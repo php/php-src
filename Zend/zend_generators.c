@@ -232,7 +232,9 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 				child = (zend_generator *) Z_PTR_P(zend_hash_get_current_data(generator->node.child.ht));
 			}
 			GC_ADD_FLAGS(&child->std, IS_OBJ_DESTRUCTOR_CALLED);
+			GC_ADDREF(&child->std); /* must not be released during destructor */
 			zend_generator_dtor_storage(&child->std);
+			OBJ_RELEASE(&child->std);
 		}
 	}
 	if (EXPECTED(generator->node.children == 0)) {
