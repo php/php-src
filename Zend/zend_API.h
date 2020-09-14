@@ -1530,6 +1530,20 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_ARRAY_HT_OR_NULL(dest) \
 	Z_PARAM_ARRAY_HT_EX(dest, 1, 0)
 
+#define Z_PARAM_ARRAY_HT_OR_LONG_EX(dest_ht, dest_long, is_null, allow_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_array_ht_or_long(_arg, &dest_ht, &dest_long, &is_null, allow_null))) { \
+		_expected_type = allow_null ? Z_EXPECTED_ARRAY_OR_LONG_OR_NULL : Z_EXPECTED_ARRAY_OR_LONG; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_ARRAY_HT_OR_LONG(dest_ht, dest_long) \
+	Z_PARAM_ARRAY_HT_OR_LONG_EX(dest_ht, dest_long, _dummy, 0)
+
+#define Z_PARAM_ARRAY_HT_OR_LONG_OR_NULL(dest_ht, dest_long, is_null) \
+	Z_PARAM_ARRAY_HT_OR_LONG_EX(dest_ht, dest_long, is_null, 1)
+
 /* old "H" */
 #define Z_PARAM_ARRAY_OR_OBJECT_HT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1638,6 +1652,29 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_OBJECT_OF_CLASS_OR_NULL(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 1, 0)
 
+/* The same as Z_PARAM_OBJECT_OF_CLASS_EX2 except that dest is a zend_object rather than a zval */
+#define Z_PARAM_OBJ_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, _ce, check_null))) { \
+			if (_ce) { \
+				_error = ZSTR_VAL((_ce)->name); \
+				_error_code = check_null ? ZPP_ERROR_WRONG_CLASS_OR_NULL : ZPP_ERROR_WRONG_CLASS; \
+				break; \
+			} else { \
+				_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
+				_error_code = ZPP_ERROR_WRONG_ARG; \
+				break; \
+			} \
+		}
+
+#define Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, check_null, separate) \
+	Z_PARAM_OBJ_OF_CLASS_EX2(dest, _ce, check_null, separate, separate)
+
+#define Z_PARAM_OBJ_OF_CLASS(dest, _ce) \
+	Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, 0, 0)
+
+#define Z_PARAM_OBJ_OF_CLASS_OR_NULL(dest, _ce) \
+	Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, 1, 0)
 /* old "p" */
 #define Z_PARAM_PATH_EX2(dest, dest_len, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
