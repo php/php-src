@@ -788,7 +788,7 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	if (pv_num < 1) {
-		zend_argument_value_error(2, "must be greater than or equal to 1");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -2486,7 +2486,7 @@ PHP_FUNCTION(odbc_field_name)
 	}
 
 	if (pv_num < 1) {
-		zend_argument_value_error(2, "must be greater than or equal to 1");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -2522,7 +2522,7 @@ PHP_FUNCTION(odbc_field_type)
 	}
 
 	if (pv_num < 1) {
-		zend_argument_value_error(2, "must be greater than or equal to 1");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
