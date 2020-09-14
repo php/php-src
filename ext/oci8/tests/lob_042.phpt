@@ -71,5 +71,5 @@ bool(false)
 
 Warning: OCILob::savefile(): Can't open file %s in %s on line %d
 bool(false)
-OCILob::truncate(): Argument #1 ($length) must be greater than or equal to zero
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 Done

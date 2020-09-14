@@ -104,8 +104,8 @@ bool(true)
 string(10) "this is a "
 bool(true)
 string(0) ""
-OCILob::truncate(): Argument #1 ($length) must be greater than or equal to zero
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 string(0) ""
 bool(true)
-OCILob::truncate(): Argument #1 ($length) must be greater than or equal to zero
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 Done
