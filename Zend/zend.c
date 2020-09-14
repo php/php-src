@@ -830,7 +830,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
-	zend_observer_error_startup();
 
 	/* Set up utility functions and values */
 	zend_error_cb = utility_functions->error_function;
@@ -1091,7 +1090,6 @@ void zend_shutdown(void) /* {{{ */
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 
-	zend_observer_error_shutdown();
 	zend_shutdown_extensions();
 	free(zend_version_info);
 

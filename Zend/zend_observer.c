@@ -60,6 +60,7 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 // Called by engine before MINITs
 ZEND_API void zend_observer_startup(void) {
 	zend_llist_init(&zend_observers_fcall_list, sizeof(zend_observer_fcall_init), NULL, 1);
+	zend_llist_init(&zend_observer_error_callbacks, sizeof(zend_observer_error_cb), NULL, 1);
 }
 
 ZEND_API void zend_observer_activate(void) {
@@ -76,6 +77,7 @@ ZEND_API void zend_observer_deactivate(void) {
 
 ZEND_API void zend_observer_shutdown(void) {
 	zend_llist_destroy(&zend_observers_fcall_list);
+	zend_llist_destroy(&zend_observer_error_callbacks);
 }
 
 ZEND_API void zend_observer_fcall_install(zend_function *function) {
@@ -173,14 +175,4 @@ void zend_observer_error_notify(int type, const char *error_filename, uint32_t e
 		callback = *(zend_observer_error_cb *) (element->data);
 		callback(type, error_filename, error_lineno, message);
 	}
-}
-
-void zend_observer_error_startup(void)
-{
-	zend_llist_init(&zend_observer_error_callbacks, sizeof(zend_observer_error_cb), NULL, 1);
-}
-
-void zend_observer_error_shutdown(void)
-{
-	zend_llist_destroy(&zend_observer_error_callbacks);
 }

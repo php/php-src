@@ -114,8 +114,6 @@ typedef void (*zend_observer_error_cb)(int type, const char *error_filename, uin
 
 ZEND_API void zend_observer_error_register(zend_observer_error_cb callback);
 void zend_observer_error_notify(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
-void zend_observer_error_startup(void);
-void zend_observer_error_shutdown(void);
 
 END_EXTERN_C()
 
