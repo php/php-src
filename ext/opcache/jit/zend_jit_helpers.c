@@ -1865,6 +1865,16 @@ static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, cons
 		property_name, zend_zval_type_name(container));
 }
 
+static void ZEND_FASTCALL zend_jit_invalid_property_assign_op(zval *container, const char *property_name)
+{
+	if (Z_TYPE_P(container) == IS_UNDEF) {
+		const zend_execute_data *execute_data = EG(current_execute_data);
+
+		zend_jit_undefined_op_helper(EX(opline)->op1.var);
+	}
+	zend_jit_invalid_property_assign(container, property_name);
+}
+
 static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 	zval *val = Z_REFVAL_P(ref);
 	if (Z_TYPE_P(val) <= IS_FALSE) {
@@ -1963,5 +1973,90 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 	value = zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	if (result) {
 		ZVAL_COPY_DEREF(result, value);
+	}
+}
+
+static zend_never_inline void _zend_jit_assign_op_overloaded_property(zend_object *object, zend_string *name, void **cache_slot, zval *value, binary_op_type binary_op)
+{
+	zval *z;
+	zval rv, res;
+
+	GC_ADDREF(object);
+	z = object->handlers->read_property(object, name, BP_VAR_R, cache_slot, &rv);
+	if (UNEXPECTED(EG(exception))) {
+		OBJ_RELEASE(object);
+//???		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//???			ZVAL_UNDEF(EX_VAR(opline->result.var));
+//???		}
+		return;
+	}
+	if (binary_op(&res, z, value) == SUCCESS) {
+		object->handlers->write_property(object, name, &res, cache_slot);
+	}
+//???	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//???		ZVAL_COPY(EX_VAR(opline->result.var), &res);
+//???	}
+	zval_ptr_dtor(z);
+	zval_ptr_dtor(&res);
+	OBJ_RELEASE(object);
+}
+
+static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_property_info *prop_info, zval *value, binary_op_type binary_op)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval z_copy;
+
+	binary_op(&z_copy, zptr, value);
+	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(zptr);
+		ZVAL_COPY_VALUE(zptr, &z_copy);
+	} else {
+		zval_ptr_dtor(&z_copy);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_string *name, zval *value, void **cache_slot, binary_op_type binary_op)
+{
+	zval *zptr;
+	zend_property_info *prop_info;
+
+	if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+//???			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//???				ZVAL_NULL(EX_VAR(opline->result.var));
+//???			}
+		} else {
+//???			zval *orig_zptr = zptr;
+			zend_reference *ref;
+
+			do {
+				if (UNEXPECTED(Z_ISREF_P(zptr))) {
+					ref = Z_REF_P(zptr);
+					zptr = Z_REFVAL_P(zptr);
+					if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+						zend_jit_assign_op_to_typed_ref(ref, value, binary_op);
+						break;
+					}
+				}
+
+//???				if (OP2_TYPE == IS_CONST) {
+				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+//???				} else {
+//???					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), orig_zptr);
+//???				}
+				if (UNEXPECTED(prop_info)) {
+					/* special case for typed properties */
+					zend_jit_assign_op_to_typed_prop(zptr, prop_info, value, binary_op);
+				} else {
+					binary_op(zptr, zptr, value);
+				}
+			} while (0);
+
+//???			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//???				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+//???			}
+		}
+	} else {
+		_zend_jit_assign_op_overloaded_property(zobj, name, cache_slot, value, binary_op);
 	}
 }

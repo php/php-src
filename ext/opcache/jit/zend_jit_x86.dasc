@@ -6451,7 +6451,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 						IS_CV, opline->op1, var_addr, var_info, NULL,
 						(opline+1)->op1_type, (opline+1)->op1, op3_addr, op1_data_info,
 						op1_data_range,
-						0, var_addr, op1_def_info, var_info, may_throw)) {
+						0, var_addr, var_def_info, var_info, may_throw)) {
 					return 0;
 				}
 				break;
@@ -12313,6 +12313,313 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	 && opline->op1_type != IS_VAR
 	 && opline->op1_type != IS_TMP_VAR) {
 		may_throw = 0;
+	}
+
+	if (may_throw) {
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int zend_jit_assign_obj_op(dasm_State          **Dst,
+                                  const zend_op        *opline,
+                                  const zend_op_array  *op_array,
+                                  zend_ssa             *ssa,
+                                  const zend_ssa_op    *ssa_op,
+                                  uint32_t              op1_info,
+                                  zend_jit_addr         op1_addr,
+                                  uint32_t              val_info,
+                                  zend_ssa_range       *val_range,
+                                  zend_bool             op1_indirect,
+                                  zend_class_entry     *ce,
+                                  zend_bool             ce_is_instanceof,
+                                  zend_bool             use_this,
+                                  zend_class_entry     *trace_ce,
+                                  int                   may_throw)
+{
+	zval *member;
+	zend_string *name;
+	zend_property_info *prop_info;
+	zend_jit_addr val_addr = OP1_DATA_ADDR();
+	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
+	zend_jit_addr prop_addr;
+	zend_bool needs_slow_path = 0;
+	binary_op_type binary_op = get_binary_op(opline->extended_value);
+
+	ZEND_ASSERT(opline->op2_type == IS_CONST);
+	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
+	ZEND_ASSERT(opline->result_type == IS_UNUSED);
+
+	member = RT_CONSTANT(opline, opline->op2);
+	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
+	name = Z_STR_P(member);
+	prop_info = zend_get_known_property_info(ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+
+	if (opline->op1_type == IS_UNUSED || use_this) {
+		|	GET_ZVAL_PTR FCARG1a, this_addr
+	} else {
+		if (opline->op1_type == IS_VAR
+		 && (op1_info & MAY_BE_INDIRECT)
+		 && Z_REG(op1_addr) == ZREG_FP) {
+			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+			|	IF_NOT_Z_TYPE FCARG1a, IS_INDIRECT, >1
+			|	GET_Z_PTR FCARG1a, FCARG1a
+			|1:
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+		}
+		if (op1_info & MAY_BE_REF) {
+			if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
+				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+			}
+			|	ZVAL_DEREF FCARG1a, op1_info
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+		}
+		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
+			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+				if (!exit_addr) {
+					return 0;
+				}
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_OBJECT, &exit_addr
+			} else {
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_OBJECT, >1
+				|.cold_code
+				|1:
+				|	SET_EX_OPLINE opline, r0
+				if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
+					|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+				}
+				|	LOAD_ADDR FCARG2a, ZSTR_VAL(name)
+				if (op1_info & MAY_BE_UNDEF) {
+					|	EXT_CALL zend_jit_invalid_property_assign_op, r0
+				} else {
+					|	EXT_CALL zend_jit_invalid_property_assign, r0
+				}
+				if (((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))
+				 && (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					|	jmp >8
+				} else {
+					|	jmp ->exception_handler
+				}
+				|.code
+			}
+		}
+		|	GET_ZVAL_PTR FCARG1a, op1_addr
+	}
+
+	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		prop_info = zend_get_known_property_info(trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		if (prop_info) {
+			ce = trace_ce;
+			ce_is_instanceof = 0;
+			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
+				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
+					return 0;
+				}
+				if (ssa->var_info && ssa_op->op1_use >= 0) {
+					ssa->var_info[ssa_op->op1_use].type |= MAY_BE_CLASS_GUARD;
+					ssa->var_info[ssa_op->op1_use].ce = ce;
+					ssa->var_info[ssa_op->op1_use].is_instanceof = ce_is_instanceof;
+				}
+				if (ssa->var_info && ssa_op->op1_def >= 0) {
+					ssa->var_info[ssa_op->op1_def].type |= MAY_BE_CLASS_GUARD;
+					ssa->var_info[ssa_op->op1_def].ce = ce;
+					ssa->var_info[ssa_op->op1_def].is_instanceof = ce_is_instanceof;
+				}
+			}
+		}
+	}
+
+	if (!prop_info) {
+		needs_slow_path = 1;
+
+		|	mov r0, EX->run_time_cache
+		|	mov r2, aword [r0 + (opline+1)->extended_value]
+		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
+		|	jne >7
+		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			|	cmp aword [r0 + ((opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2], 0
+			|	jnz >7
+		}
+		|	mov r0, aword [r0 + (opline+1)->extended_value + sizeof(void*)]
+		|	test r0, r0
+		|	jl >7
+		|	IF_TYPE byte [FCARG1a + r0 + 8], IS_UNDEF, >7
+		|	add FCARG1a, r0
+		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+	} else {
+		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, prop_info->offset);
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			if (!exit_addr) {
+				return 0;
+			}
+			|	IF_TYPE byte [FCARG1a + prop_info->offset + 8], IS_UNDEF, &exit_addr
+		} else {
+			|	IF_TYPE byte [FCARG1a + prop_info->offset + 8], IS_UNDEF, >7
+			needs_slow_path = 1;
+		}
+		if (ZEND_TYPE_IS_SET(prop_info->type)) {
+			uint32_t info = val_info;
+
+			|	// value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
+			|	SET_EX_OPLINE opline, r0
+			if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+				|	LOAD_ADDR FCARG2a, prop_info
+			} else {
+				int prop_info_offset =
+					(((prop_info->offset - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
+
+				|	mov r0, aword [FCARG1a + offsetof(zend_object, ce)]
+				|	mov	r0, aword [r0 + offsetof(zend_class_entry, properties_info_table)]
+				|	mov FCARG2a, aword[r0 + prop_info_offset]
+			}
+			|	LOAD_ZVAL_ADDR FCARG1a, prop_addr
+			|.if X64
+				|	LOAD_ZVAL_ADDR CARG3, val_addr
+				|	LOAD_ADDR CARG4, binary_op
+			|.else
+				|	sub r4, 8
+				|	PUSH_ADDR binary_op, r0
+				|	PUSH_ZVAL_ADDR val_addr, r0
+			|.endif
+
+			|	EXT_CALL zend_jit_assign_op_to_typed_prop, r0
+
+			|.if not(X64)
+				|	add r4, 8
+			|.endif
+
+			if (info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+				info |= MAY_BE_RC1|MAY_BE_RCN;
+			}
+
+			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, info, 0, opline
+		}
+	}
+
+	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
+		zend_jit_addr var_addr = prop_addr;
+		uint32_t var_info = MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
+		uint32_t var_def_info = MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
+
+		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0);
+		|	LOAD_ZVAL_ADDR r0, prop_addr
+
+		|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, >2
+		|	GET_ZVAL_PTR FCARG1a, var_addr
+		|	cmp aword [FCARG1a + offsetof(zend_reference, sources.ptr)], 0
+		|	jnz >1
+		|	lea r0, aword [FCARG1a + offsetof(zend_reference, val)]
+		|.cold_code
+		|1:
+		if (Z_MODE(val_addr) != IS_MEM_ZVAL || Z_REG(val_addr) != ZREG_FCARG2a || Z_OFFSET(val_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG2a, val_addr
+		}
+		if (opline) {
+			|	SET_EX_OPLINE opline, r0
+		}
+		|.if X64
+			|	LOAD_ADDR CARG3, binary_op
+		|.else
+			|	sub r4, 12
+			|	PUSH_ADDR binary_op, r0
+		|.endif
+		|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+		|.if not(X64)
+			|	add r4, 12
+		|.endif
+		|	jmp >9
+		|.code
+		|2:
+
+		switch (opline->extended_value) {
+			case ZEND_ADD:
+			case ZEND_SUB:
+			case ZEND_MUL:
+			case ZEND_DIV:
+				if (!zend_jit_math_helper(Dst, opline, opline->extended_value, IS_CV, opline->op1, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, val_addr, val_info, 0, var_addr, var_def_info, var_info,
+						1 /* may overflow */, 0)) {
+					return 0;
+				}
+				break;
+			case ZEND_BW_OR:
+			case ZEND_BW_AND:
+			case ZEND_BW_XOR:
+			case ZEND_SL:
+			case ZEND_SR:
+			case ZEND_MOD:
+				if (!zend_jit_long_math_helper(Dst, opline, opline->extended_value,
+						IS_CV, opline->op1, var_addr, var_info, NULL,
+						(opline+1)->op1_type, (opline+1)->op1, val_addr, val_info,
+						val_range,
+						0, var_addr, var_def_info, var_info, 0)) {
+					return 0;
+				}
+				break;
+			case ZEND_CONCAT:
+				if (!zend_jit_concat_helper(Dst, opline, IS_CV, opline->op1, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, val_addr, val_info, var_addr,
+						0)) {
+					return 0;
+				}
+				break;
+			default:
+				ZEND_UNREACHABLE();
+		}
+	}
+
+	if (needs_slow_path) {
+		|.cold_code
+		|7:
+		|	SET_EX_OPLINE opline, r0
+		|	// value = zobj->handlers->write_property(zobj, name, value, CACHE_ADDR(opline->extended_value));
+		|	LOAD_ADDR FCARG2a, name
+		|.if X64
+			|	LOAD_ZVAL_ADDR CARG3, val_addr
+			|	mov CARG4, EX->run_time_cache
+			|	add CARG4, (opline+1)->extended_value
+			|.if X64WIN
+			|	LOAD_ADDR r0, binary_op
+			|	mov aword A5, r0
+			|.else
+			|	LOAD_ADDR CARG5, binary_op
+			|.endif
+		|.else
+			|	sub r4, 4
+			|	PUSH_ADDR binary_op, r0
+			|	mov r0, EX->run_time_cache
+			|	add r0, (opline+1)->extended_value
+			|	push r0
+			|	PUSH_ZVAL_ADDR val_addr, r0
+		|.endif
+
+		|	EXT_CALL zend_jit_assign_obj_op_helper, r0
+
+		|.if not(X64)
+			|	add r4, 4
+		|.endif
+
+		if (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			val_info |= MAY_BE_RC1|MAY_BE_RCN;
+		}
+
+		|8:
+		|	// FREE_OP_DATA();
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, 0, opline
+		|	jmp >9
+		|.code
+	}
+
+	|9:
+	if (opline->op1_type != IS_UNUSED && !use_this && !op1_indirect) {
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 	}
 
 	if (may_throw) {
