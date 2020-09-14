@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     https://wiki.php.net/rfc/shorter_attribute_syntax_change
   . Fixed bug #80045 (memleak after two set_exception_handler calls with
     __call). (Nikita)
+  . Fixed bug #80096 (Segmentation fault with named arguments in nested call).
+    (Nikita)
 
 - Date:
   . Fixed bug #80057 (DateTimeImmutable::createFromFormat() does not populate
