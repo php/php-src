@@ -101,5 +101,5 @@ if (!have_innodb($link))
 ?>
 --EXPECT--
 NULL
-mysqli_begin_transaction(): Argument #2 ($flags) must be one of MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT, MYSQLI_TRANS_START_READ_ONLY, or MYSQLI_TRANS_START_READ_WRITE
+mysqli_begin_transaction(): Argument #2 ($flags) must be one of the MYSQLI_TRANS_* constant
 done!

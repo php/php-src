@@ -1024,11 +1024,6 @@ PHP_METHOD(mysqli_result, __construct)
 		RETURN_THROWS();
 	}
 
-	if (resmode != MYSQLI_STORE_RESULT && resmode != MYSQLI_USE_RESULT) {
-		zend_argument_value_error(2, "must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT");
-		RETURN_THROWS();
-	}
-
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	switch (resmode) {
@@ -1038,7 +1033,9 @@ PHP_METHOD(mysqli_result, __construct)
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default:
+			zend_argument_value_error(2, "must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT");
+			RETURN_THROWS();
 	}
 
 	if (!result) {

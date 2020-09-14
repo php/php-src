@@ -34,7 +34,12 @@ require_once('skipifconnectfailure.inc');
     }
 
     var_dump($res->fetch_field_direct(0));
-    var_dump($res->fetch_field_direct(2));
+
+    try {
+        var_dump($res->fetch_field_direct(2));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     $res->free_result();
 
@@ -82,8 +87,6 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(%d)
 }
-
-Warning: mysqli_result::fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
-bool(false)
+mysqli_result::fetch_field_direct(): Argument #1 ($field_nr) must be less than the number of fields for this result set
 mysqli_result object is already closed
 done!

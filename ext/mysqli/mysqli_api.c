@@ -739,9 +739,8 @@ PHP_FUNCTION(mysqli_data_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-		// TODO Promote to Exception?
-		php_error_docref(NULL, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Function cannot be used with MYSQL_USE_RESULT");
+		RETURN_THROWS();
 	}
 
 	if ((uint64_t)offset >= mysql_num_rows(result)) {
@@ -1197,9 +1196,8 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (offset >= (zend_long) mysql_num_fields(result)) {
-		// TODO ValueError?
-		php_error_docref(NULL, E_WARNING, "Field offset is invalid for resultset");
-		RETURN_FALSE;
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be less than the number of fields for this result set");
+		RETURN_THROWS();
 	}
 
 	if (!(field = mysql_fetch_field_direct(result,offset))) {
@@ -1624,9 +1622,8 @@ PHP_FUNCTION(mysqli_num_rows)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered_and_not_everything_is_fetched(result)) {
-		// TODO Exception?
-		php_error_docref(NULL, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
-		RETURN_LONG(0);
+		zend_throw_error(NULL, "Function cannot be used with MYSQL_USE_RESULT");
+		RETURN_THROWS();
 	}
 
 	MYSQLI_RETURN_LONG_INT(mysql_num_rows(result));
@@ -2323,25 +2320,18 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &attr) == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (attr != STMT_ATTR_CURSOR_TYPE && attr != STMT_ATTR_PREFETCH_ROWS
-#if MYSQL_VERSION_ID >= 50107
-	&& attr != STMT_ATTR_UPDATE_MAX_LENGTH
-#endif
-	) {
+	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {
+		/* Success corresponds to 0 return value and a non-zero value
+		 * should only happen if the attr/option is unknown */
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
 #if MYSQL_VERSION_ID >= 50107
 			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
 #endif
 			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
-	}
-
-	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {
-		/* Success corresponds to 0 return value and a non-zero value
-		 * should only happen if the attr/option is unknown */
-		ZEND_UNREACHABLE();
     }
 
 
