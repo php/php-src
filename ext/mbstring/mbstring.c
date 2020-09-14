@@ -3488,7 +3488,7 @@ PHP_FUNCTION(mb_send_mail)
 		Z_PARAM_PATH(subject, subject_len)
 		Z_PARAM_PATH(message, message_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(headers_ht, str_headers)
+		Z_PARAM_ARRAY_HT_OR_STR(headers_ht, str_headers)
 		Z_PARAM_PATH_STR_OR_NULL(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
