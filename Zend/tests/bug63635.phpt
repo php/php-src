@@ -1,11 +1,5 @@
 --TEST--
 Bug #63635 (Segfault in gc_collect_cycles)
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
-    die('xfail issues with JIT on Windows');
-}
-?>
 --FILE--
 <?php
 class Node {
