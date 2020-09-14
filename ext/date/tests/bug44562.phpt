@@ -6,7 +6,7 @@ date_default_timezone_set('Europe/Oslo');
 
 try {
     $dp = new DatePeriod('2D');
-} catch (ValueError $e) {
+} catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
 

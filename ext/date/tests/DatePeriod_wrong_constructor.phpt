@@ -15,4 +15,4 @@ try {
 }
 ?>
 --EXPECT--
-DatePeriod::__construct() accepts either (DateTimeInterface, DateInterval, int [, int]) OR (DateTimeInterface, DateInterval, DateTime [, int]) OR (string [, int]) as arguments
+DatePeriod::__construct() accepts (DateTimeInterface, DateInterval, int [, int]), or (DateTimeInterface, DateInterval, DateTime [, int]), or (string [, int]) as arguments

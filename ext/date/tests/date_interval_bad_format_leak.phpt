@@ -11,13 +11,13 @@ try {
 
 try {
     $perid = new DatePeriod('P3"D');
-} catch (ValueError $e) {
+} catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     new DatePeriod('2008-03-01T12:00:00Z1');
-} catch (ValueError $e) {
+} catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
 
