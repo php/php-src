@@ -24,6 +24,8 @@
 #include "zend_vm.h"
 
 zend_llist zend_observers_fcall_list;
+zend_llist zend_observer_error_callbacks;
+
 int zend_observer_fcall_op_array_extension = -1;
 
 ZEND_TLS zend_arena *fcall_handlers_arena = NULL;
@@ -157,4 +159,28 @@ ZEND_API void zend_observe_fcall_end(
 	}
 }
 
+ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
+{
+	zend_llist_add_element(&zend_observer_error_callbacks, &cb);
+}
 
+void zend_observer_error_notify(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	zend_llist_element *element;
+	zend_observer_error_cb callback;
+
+	for (element = zend_observer_error_callbacks.head; element; element = element->next) {
+		callback = *(zend_observer_error_cb *) (element->data);
+		callback(type, error_filename, error_lineno, message);
+	}
+}
+
+void zend_observer_error_startup(void)
+{
+	zend_llist_init(&zend_observer_error_callbacks, sizeof(zend_observer_error_cb), NULL, 1);
+}
+
+void zend_observer_error_shutdown(void)
+{
+	zend_llist_destroy(&zend_observer_error_callbacks);
+}
