@@ -45,8 +45,10 @@ zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval 
 	php_mysqli_result_iterator *iterator;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
+
 	iterator = ecalloc(1, sizeof(php_mysqli_result_iterator));
 	zend_iterator_init(&iterator->intern);
 
