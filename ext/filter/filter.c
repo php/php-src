@@ -532,20 +532,18 @@ static void php_filter_call(
 	zval *option;
 	char *charset = NULL;
 
-	if (filter_args_long) {
-		zend_long lval = filter_args_long;
-
+	if (!filter_args_ht) {
 		if (filter != -1) { /* handler for array apply */
 			/* filter_args is the filter_flags */
-			filter_flags = lval;
+			filter_flags = filter_args_long;
 
 			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
 				filter_flags |= FILTER_REQUIRE_SCALAR;
 			}
 		} else {
-			filter = lval;
+			filter = filter_args_long;
 		}
-	} else if (filter_args_ht) {
+	} else {
 		if ((option = zend_hash_str_find(filter_args_ht, "filter", sizeof("filter") - 1)) != NULL) {
 			filter = zval_get_long(option);
 		}
@@ -609,12 +607,9 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
 
-	if (!op_long && !op_ht) {
+	if (!op_ht) {
 		ZVAL_DUP(return_value, input);
-		php_filter_call(return_value, FILTER_DEFAULT, NULL, 0, 0, FILTER_REQUIRE_ARRAY);
-	} else if (op_long) {
-		ZVAL_DUP(return_value, input);
-		php_filter_call(return_value, op_long, NULL, 0, 0, FILTER_REQUIRE_ARRAY);
+		php_filter_call(return_value, -1, NULL, op_long, 0, FILTER_REQUIRE_ARRAY);
 	} else {
 		array_init(return_value);
 
@@ -665,6 +660,7 @@ PHP_FUNCTION(filter_input)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, filter);
 		RETURN_FALSE;
 	}
 
@@ -726,6 +722,7 @@ PHP_FUNCTION(filter_var)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, filter);
 		RETURN_FALSE;
 	}
 
@@ -742,7 +739,7 @@ PHP_FUNCTION(filter_input_array)
 	zval   *array_input = NULL;
 	zend_bool add_empty = 1;
 	HashTable *op_ht = NULL;
-	zend_long op_long = 0;
+	zend_long op_long = FILTER_DEFAULT;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_LONG(fetch_from)
@@ -751,7 +748,8 @@ PHP_FUNCTION(filter_input_array)
 		Z_PARAM_BOOL(add_empty)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (op_long && !PHP_FILTER_ID_EXISTS(op_long)) {
+	if (!op_ht && !PHP_FILTER_ID_EXISTS(op_long)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, op_long);
 		RETURN_FALSE;
 	}
 
@@ -791,7 +789,7 @@ PHP_FUNCTION(filter_var_array)
 	zval *array_input = NULL;
 	zend_bool add_empty = 1;
 	HashTable *op_ht = NULL;
-	zend_long op_long = 0;
+	zend_long op_long = FILTER_DEFAULT;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ARRAY(array_input)
@@ -800,7 +798,8 @@ PHP_FUNCTION(filter_var_array)
 		Z_PARAM_BOOL(add_empty)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (op_long && !PHP_FILTER_ID_EXISTS(op_long)) {
+	if (!op_ht && !PHP_FILTER_ID_EXISTS(op_long)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, op_long);
 		RETURN_FALSE;
 	}
 

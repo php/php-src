@@ -80,7 +80,7 @@ var_dump($a, $b);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 -- (1)
 array(0) {
 }
@@ -90,15 +90,27 @@ array(2) {
   ["blah"]=>
   string(4) "hoho"
 }
+
+Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
 bool(false)
+
+Warning: filter_var_array(): Unknown filter with ID 1000000 in %s on line %d
 bool(false)
 filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (2)
+
+Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
 bool(false)
+
+Warning: filter_var_array(): Unknown filter with ID 1000000 in %s on line %d
 bool(false)
 filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (3)
+
+Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
 bool(false)
+
+Warning: filter_var_array(): Unknown filter with ID 1000000 in %s on line %d
 bool(false)
 filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (4)
@@ -120,12 +132,16 @@ array(1) {
 -- (5)
 filter_var_array(): Argument #2 ($options) cannot contain empty keys
 filter_var_array(): Argument #2 ($options) cannot contain empty keys
+
+Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
 bool(false)
 array(1) {
   [""]=>
   string(0) ""
 }
 int(-1)
+
+Warning: filter_var_array(): Unknown filter with ID 100000 in %s on line %d
 bool(false)
 array(1) {
   [""]=>

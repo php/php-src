@@ -18,16 +18,29 @@ foreach (array(null, true, false, 1, "", new stdClass) as $invalid) {
     }
 }
 ?>
---EXPECT--
-NULL
-array(0) {
-}
+--EXPECTF--
+Warning: filter_input_array(): Unknown filter with ID 0 in %s on line %d
 bool(false)
+
+Warning: filter_var_array(): Unknown filter with ID 0 in %s on line %d
 bool(false)
-NULL
-array(0) {
-}
+
+Warning: filter_input_array(): Unknown filter with ID 1 in %s on line %d
 bool(false)
+
+Warning: filter_var_array(): Unknown filter with ID 1 in %s on line %d
+bool(false)
+
+Warning: filter_input_array(): Unknown filter with ID 0 in %s on line %d
+bool(false)
+
+Warning: filter_var_array(): Unknown filter with ID 0 in %s on line %d
+bool(false)
+
+Warning: filter_input_array(): Unknown filter with ID 1 in %s on line %d
+bool(false)
+
+Warning: filter_var_array(): Unknown filter with ID 1 in %s on line %d
 bool(false)
 filter_input_array(): Argument #2 ($options) must be of type array|int, string given
 filter_var_array(): Argument #2 ($options) must be of type array|int, string given
