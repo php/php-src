@@ -1392,7 +1392,7 @@ PHP_METHOD(SplFileInfo, __debugInfo)
 /* {{{ */
 PHP_METHOD(SplFileInfo, _bad_state_ex)
 {
-	zend_throw_error(NULL, "The parent constructor was not called: the object is in an invalid state ");
+	zend_throw_error(NULL, "The parent constructor was not called: the object is in an invalid state");
 }
 /* }}} */
 
