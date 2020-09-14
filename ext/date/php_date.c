@@ -951,8 +951,8 @@ PHP_FUNCTION(idate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) != 1) {
-		zend_argument_value_error(1, "must be one character");
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "idate format is one char");
+		RETURN_FALSE;
 	}
 
 	if (ts_is_null) {
@@ -961,8 +961,8 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
 	if (ret == -1) {
-		zend_argument_value_error(1, "must be a valid date format token");
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Unrecognized date format token");
+		RETURN_FALSE;
 	}
 	RETURN_LONG(ret);
 }

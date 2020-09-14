@@ -6,7 +6,7 @@ function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
 
 function date(string $format, ?int $timestamp = null): string {}
 
-function idate(string $format, ?int $timestamp = null): int {}
+function idate(string $format, ?int $timestamp = null): int|false {}
 
 function gmdate(string $format, ?int $timestamp = null): string {}
 
