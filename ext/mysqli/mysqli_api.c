@@ -2242,6 +2242,9 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
 	zend_long	mode_in;
+#if MYSQL_VERSION_ID >= 50107
+	my_bool mode_b;
+#endif
 	unsigned long	mode;
 	zend_long	attr;
 	void	*mode_p;
@@ -2255,8 +2258,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	switch (attr) {
 #if MYSQL_VERSION_ID >= 50107
 	case STMT_ATTR_UPDATE_MAX_LENGTH:
-	{
-		my_bool mode_b;
 		if (mode_in != 0 && mode_in != 1) {
 			zend_argument_value_error(ERROR_ARG_POS(3), "must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH");
 			RETURN_THROWS();
@@ -2264,9 +2265,8 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		mode_b = (my_bool) mode_in;
 		mode_p = &mode_b;
 		break;
-	}
 #endif
-	case STMT_ATTR_CURSOR_TYPE: {
+	case STMT_ATTR_CURSOR_TYPE:
 		switch (mode_in) {
 			case CURSOR_TYPE_NO_CURSOR:
 			case CURSOR_TYPE_READ_ONLY:
@@ -2282,7 +2282,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		mode = mode_in;
 		mode_p = &mode;
 		break;
-	}
 	case STMT_ATTR_PREFETCH_ROWS:
 		if (mode_in < 1) {
 			zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS");
