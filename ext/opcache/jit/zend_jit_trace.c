@@ -1361,13 +1361,15 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	level = 0;
 	for (;;p++) {
 		if (p->op == ZEND_JIT_TRACE_VM) {
-			uint8_t orig_op1_type, op1_type, op2_type, op3_type;
+			uint8_t orig_op1_type, orig_op2_type, op1_type, op2_type, op3_type;
+//			zend_class_entry *op1_ce = NULL;
+			zend_class_entry *op2_ce = NULL;
 
 			// TODO: range inference ???
 			opline = p->opline;
 
 			op1_type = orig_op1_type = p->op1_type;
-			op2_type = p->op2_type;
+			op2_type = orig_op2_type = p->op2_type;
 			op3_type = p->op3_type;
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
 				op1_type = IS_UNKNOWN;
@@ -1383,11 +1385,11 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 
 			if ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE) {
-				// TODO: support for recorded classes ???
+//				op1_ce = (zend_class_entry*)(p+1)->ce;
 				p++;
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
-				// TODO: support for recorded classes ???
+				op2_ce = (zend_class_entry*)(p+1)->ce;
 				p++;
 			}
 
@@ -1700,6 +1702,11 @@ propagate_arg:
 						break;
 					}
 					ADD_OP1_TRACE_GUARD();
+					break;
+				case ZEND_INIT_DYNAMIC_CALL:
+					if (orig_op2_type == IS_OBJECT && op2_ce == zend_ce_closure) {
+						ADD_OP2_TRACE_GUARD();
+					}
 					break;
 				default:
 					break;
@@ -3361,8 +3368,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			uint8_t op2_type = p->op2_type;
 			uint8_t op3_type = p->op3_type;
 			uint8_t orig_op1_type = op1_type;
+			uint8_t orig_op2_type = op2_type;
 			zend_bool op1_indirect;
 			zend_class_entry *op1_ce = NULL;
+			zend_class_entry *op2_ce = NULL;
 
 			opline = p->opline;
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
@@ -3383,7 +3392,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				p++;
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
-				// TODO: support for recorded classes ???
+				op2_ce = (zend_class_entry*)(p+1)->ce;
 				p++;
 			}
 
@@ -4970,8 +4979,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_DYNAMIC_CALL:
+						if (orig_op2_type == IS_OBJECT && op2_ce == zend_ce_closure) {
+							op2_info = OP2_INFO();
+							CHECK_OP2_TRACE_TYPE();
+							if (!zend_jit_init_closure_call(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1)) {
+								goto jit_failure;
+							}
+							goto done;
+						}
+						/* break missing intentionally */
+					case ZEND_INIT_METHOD_CALL:
 						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
@@ -6058,7 +6076,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
 			fprintf(stderr, "/CALL");
 		}
-		if (t->exit_info[i].flags & ZEND_JIT_EXIT_POLYMORPHISM) {
+		if (t->exit_info[i].flags & (ZEND_JIT_EXIT_POLYMORPHISM|ZEND_JIT_EXIT_DYNAMIC_CALL)) {
 			fprintf(stderr, "/POLY");
 		}
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_FREE_OP1) {
@@ -6398,7 +6416,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	int ret = 0;
 	uint32_t trace_num;
 	zend_jit_trace_rec trace_buffer[ZEND_JIT_TRACE_MAX_LENGTH];
-	zend_bool is_megamorphic = 0;
+	uint32_t is_megamorphic = 0;
 	uint32_t polymorphism = 0;
 
 	trace_num = ZEND_JIT_TRACE_NUM;
@@ -6427,15 +6445,18 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 		goto abort;
 	}
 
-	if (EX(call)
-	 && JIT_G(max_polymorphic_calls) > 0
-	 && (zend_jit_traces[parent_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_POLYMORPHISM)) {
-		if (zend_jit_traces[parent_num].polymorphism >= JIT_G(max_polymorphic_calls) - 1) {
-			is_megamorphic = 1;
-		} else if (!zend_jit_traces[parent_num].polymorphism) {
-			polymorphism = 1;
-		} else if (exit_num == 0) {
-			polymorphism = zend_jit_traces[parent_num].polymorphism + 1;
+	if (JIT_G(max_polymorphic_calls) > 0) {
+		if ((zend_jit_traces[parent_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_DYNAMIC_CALL)
+		 || ((zend_jit_traces[parent_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_POLYMORPHISM)
+		  && EX(call))) {
+			if (zend_jit_traces[parent_num].polymorphism >= JIT_G(max_polymorphic_calls) - 1) {
+				is_megamorphic = zend_jit_traces[parent_num].exit_info[exit_num].flags &
+					(ZEND_JIT_EXIT_DYNAMIC_CALL | ZEND_JIT_EXIT_POLYMORPHISM);
+			} else if (!zend_jit_traces[parent_num].polymorphism) {
+				polymorphism = 1;
+			} else if (exit_num == 0) {
+				polymorphism = zend_jit_traces[parent_num].polymorphism + 1;
+			}
 		}
 	}
 

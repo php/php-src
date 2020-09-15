@@ -22,6 +22,7 @@
 #include "Zend/zend_vm.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_constants.h"
+#include "Zend/zend_closures.h"
 #include "Zend/zend_ini.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
