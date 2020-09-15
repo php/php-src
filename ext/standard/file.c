@@ -947,7 +947,7 @@ PHP_FUNCTION(popen)
 	/* Musl only partially validates the mode. Manually check it to ensure consistent behavior. */
 	if (mode_len > 2 ||
 		(mode_len == 1 && (*posix_mode != 'r' && *posix_mode != 'w')) ||
-		(mode_len == 2 && (memcmp(posix_mode, "rb", 2) || memcmp(posix_mode, "wb", 2)))
+		(mode_len == 2 && (memcmp(posix_mode, "rb", 2) && memcmp(posix_mode, "wb", 2)))
 	) {
 		zend_argument_value_error(2, "must be one of \"r\", \"rb\", \"w\", or \"wb\"");
 		efree(posix_mode);
