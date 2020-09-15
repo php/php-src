@@ -4464,6 +4464,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
 				zval *default_value = RT_CONSTANT(opline, opline->op2);
 				if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
+					if (UNEXPECTED(!RUN_TIME_CACHE(op_array))) {
+						init_func_run_time_cache(op_array);
+					}
+
 					void *run_time_cache = RUN_TIME_CACHE(op_array);
 					zval *cache_val =
 						(zval *) ((char *) run_time_cache + Z_CACHE_SLOT_P(default_value));
