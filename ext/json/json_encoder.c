@@ -113,15 +113,15 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 
 #define PHP_JSON_HASH_PROTECT_RECURSION(_tmp_ht) \
 	do { \
-		if (_tmp_ht && !(GC_FLAGS(_tmp_ht) & GC_IMMUTABLE)) { \
-			GC_PROTECT_RECURSION(_tmp_ht); \
+		if (_tmp_ht) { \
+			GC_TRY_PROTECT_RECURSION(_tmp_ht); \
 		} \
 	} while (0)
 
 #define PHP_JSON_HASH_UNPROTECT_RECURSION(_tmp_ht) \
 	do { \
-		if (_tmp_ht && !(GC_FLAGS(_tmp_ht) & GC_IMMUTABLE)) { \
-			GC_UNPROTECT_RECURSION(_tmp_ht); \
+		if (_tmp_ht) { \
+			GC_TRY_UNPROTECT_RECURSION(_tmp_ht); \
 		} \
 	} while (0)
 

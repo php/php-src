@@ -716,10 +716,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
-		GC_UNPROTECT_RECURSION(ht);
-	}
-
+	GC_TRY_UNPROTECT_RECURSION(ht);
 	return cnt;
 }
 /* }}} */
@@ -3644,12 +3641,12 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 					src_zval = &tmp;
 				}
 				if (Z_TYPE_P(src_zval) == IS_ARRAY) {
-					if (thash && !(GC_FLAGS(thash) & GC_IMMUTABLE)) {
-						GC_PROTECT_RECURSION(thash);
+					if (thash) {
+						GC_TRY_PROTECT_RECURSION(thash);
 					}
 					ret = php_array_merge_recursive(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval));
-					if (thash && !(GC_FLAGS(thash) & GC_IMMUTABLE)) {
-						GC_UNPROTECT_RECURSION(thash);
+					if (thash) {
+						GC_TRY_UNPROTECT_RECURSION(thash);
 					}
 					if (!ret) {
 						return 0;

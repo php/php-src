@@ -612,6 +612,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_DELREF(p)				zend_gc_delref(&(p)->gc)
 #define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
 #define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
+#define GC_TRY_ADDREF(p)			zend_gc_try_addref(&(p)->gc)
 
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
@@ -1158,6 +1159,13 @@ static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, ui
 static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
 	ZEND_RC_MOD_CHECK(p);
 	return ++(p->refcount);
+}
+
+static zend_always_inline void zend_gc_try_addref(zend_refcounted_h *p) {
+	if (!(p->u.type_info & GC_IMMUTABLE)) {
+		ZEND_RC_MOD_CHECK(p);
+		++p->refcount;
+	}
 }
 
 static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {

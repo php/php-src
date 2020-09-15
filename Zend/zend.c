@@ -404,9 +404,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			}
 			print_flat_hash(Z_ARRVAL_P(expr));
 			ZEND_PUTS(")");
-			if (!(GC_FLAGS(Z_ARRVAL_P(expr)) & GC_IMMUTABLE)) {
-				GC_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
-			}
+			GC_TRY_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
 			break;
 		case IS_OBJECT:
 		{
@@ -452,9 +450,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
 			}
 			print_hash(buf, Z_ARRVAL_P(expr), indent, 0);
-			if (!(GC_FLAGS(Z_ARRVAL_P(expr)) & GC_IMMUTABLE)) {
-				GC_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
-			}
+			GC_TRY_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
 			break;
 		case IS_OBJECT:
 			{

@@ -1776,8 +1776,8 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 			if (obj->handlers->get_debug_info) {
 				int is_temp;
 				ht = obj->handlers->get_debug_info(obj, &is_temp);
-				if (ht && !is_temp && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
-					GC_ADDREF(ht);
+				if (ht && !is_temp) {
+					GC_TRY_ADDREF(ht);
 				}
 				return ht;
 			}
@@ -1787,8 +1787,8 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
 			ht = obj->handlers->get_properties(obj);
-			if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
-				GC_ADDREF(ht);
+			if (ht) {
+				GC_TRY_ADDREF(ht);
 			}
 			return ht;
 		default:
