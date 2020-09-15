@@ -198,9 +198,9 @@ Unsupported operand types: int ^ string
 
 Warning: A non-numeric value encountered in %s on line %d
 int(149)
-Unsupported operand types: int * string
+Unsupported operand types: string * int
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 int(-151)
-Unsupported operand types: int * string
+Unsupported operand types: string * int
