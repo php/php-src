@@ -68,6 +68,7 @@ MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new(const mbfl_encoding 
 MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vtbl, output_function_t output_function,
 	flush_function_t flush_function, void *data);
 MBFLAPI extern void mbfl_convert_filter_delete(mbfl_convert_filter *filter);
+MBFLAPI extern int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter);
 MBFLAPI extern unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsigned char *p, size_t len);
 MBFLAPI extern int mbfl_convert_filter_flush(mbfl_convert_filter *filter);
 MBFLAPI extern void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to);

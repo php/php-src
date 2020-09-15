@@ -175,6 +175,12 @@ void mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 	efree(filter);
 }
 
+/* Feed a char, return 0 if ok - used by mailparse ext */
+int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter)
+{
+	return (*filter->filter_function)(c, filter);
+}
+
 /* Feed string into `filter` byte by byte; return pointer to first byte not processed */
 unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsigned char *p, size_t len)
 {
