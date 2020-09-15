@@ -958,7 +958,7 @@ PHP_FUNCTION(popen)
 	if (!fp) {
 		php_error_docref2(NULL, command, posix_mode, E_WARNING, "%s", strerror(errno));
 		efree(posix_mode);
-		RETURN_THROWS();
+		RETURN_FALSE;
 	}
 
 	stream = php_stream_fopen_from_pipe(fp, mode);

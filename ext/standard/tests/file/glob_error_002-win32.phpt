@@ -19,7 +19,7 @@ try {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing glob() : error condition - pattern too long. ***
-glob(): Argument #1 ($pattern) must have a length less than 2048 bytes
+glob(): Argument #1 ($pattern) must have a length less than %d bytes
 Done
