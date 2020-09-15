@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2020, PHP 7.4.11
+?? ??? 2020, PHP 7.4.12
+
+
+01 Oct 2020, PHP 7.4.11
 
 - Core:
   . Fixed bug #79979 (passing value to by-ref param via CUFA crashes). (cmb,
