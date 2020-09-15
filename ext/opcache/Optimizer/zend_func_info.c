@@ -434,7 +434,7 @@ static const func_info_t func_infos[] = {
 	F1("timezone_name_from_abbr",               MAY_BE_FALSE | MAY_BE_STRING),
 	F1("timezone_transitions_get",              MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("timezone_location_get",                 MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING),
-	F1("timezone_identifiers_list",             MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("timezone_identifiers_list",             MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("timezone_abbreviations_list",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("timezone_version_get",                  MAY_BE_STRING),
 	F1("date_interval_create_from_date_string", MAY_BE_FALSE | MAY_BE_OBJECT),
