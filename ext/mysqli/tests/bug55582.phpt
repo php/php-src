@@ -34,12 +34,12 @@ require_once("connect.inc");
 ?>
 --EXPECT--
 bool(true)
-mysqli_num_rows() cannot be used with MYSQL_USE_RESULT
+mysqli_num_rows() cannot be used with MYSQLI_USE_RESULT
 array(1) {
   [1]=>
   string(1) "1"
 }
-mysqli_num_rows() cannot be used with MYSQL_USE_RESULT
+mysqli_num_rows() cannot be used with MYSQLI_USE_RESULT
 NULL
 int(1)
 done
