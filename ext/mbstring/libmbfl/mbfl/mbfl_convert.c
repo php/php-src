@@ -116,7 +116,7 @@ static const struct mbfl_convert_vtbl *mbfl_special_filter_list[] = {
 };
 
 static void mbfl_convert_filter_common_init(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to,
-	const struct mbfl_convert_vtbl *vtbl, filter_output_func output_function, filter_flush_func flush_function, void* data)
+	const struct mbfl_convert_vtbl *vtbl, output_function_t output_function, flush_function_t flush_function, void* data)
 {
 	/* encoding structure */
 	filter->from = from;
@@ -143,8 +143,8 @@ static void mbfl_convert_filter_common_init(mbfl_convert_filter *filter, const m
 }
 
 
-mbfl_convert_filter* mbfl_convert_filter_new(const mbfl_encoding *from, const mbfl_encoding *to, filter_output_func output_function,
-	filter_flush_func flush_function, void* data)
+mbfl_convert_filter* mbfl_convert_filter_new(const mbfl_encoding *from, const mbfl_encoding *to, output_function_t output_function,
+	flush_function_t flush_function, void* data)
 {
 	const struct mbfl_convert_vtbl *vtbl = mbfl_convert_filter_get_vtbl(from, to);
 	if (vtbl == NULL) {
@@ -156,8 +156,8 @@ mbfl_convert_filter* mbfl_convert_filter_new(const mbfl_encoding *from, const mb
 	return filter;
 }
 
-mbfl_convert_filter* mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vtbl, filter_output_func output_function,
-	filter_flush_func flush_function, void* data)
+mbfl_convert_filter* mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vtbl, output_function_t output_function,
+	flush_function_t flush_function, void* data)
 {
 	const mbfl_encoding *from_encoding = mbfl_no2encoding(vtbl->from);
 	const mbfl_encoding *to_encoding = mbfl_no2encoding(vtbl->to);
@@ -173,6 +173,12 @@ void mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 		(*filter->filter_dtor)(filter);
 	}
 	efree(filter);
+}
+
+/* Feed a char, return 0 if ok - used by mailparse ext */
+int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter)
+{
+	return (*filter->filter_function)(c, filter);
 }
 
 /* Feed string into `filter` byte by byte; return pointer to first byte not processed */
