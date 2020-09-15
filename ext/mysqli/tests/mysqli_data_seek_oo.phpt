@@ -78,6 +78,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECT--
 mysqli_result object is already closed
 mysqli_result::data_seek(): Argument #1 ($offset) must be greater than or equal to 0
-mysqli_result::data_seek() cannot be used with MYSQLI_USE_RESULT
+mysqli_result::data_seek() cannot be used in MYSQLI_USE_RESULT mode
 mysqli_result object is already closed
 done!
