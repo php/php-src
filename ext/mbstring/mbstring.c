@@ -3499,7 +3499,7 @@ PHP_FUNCTION(mb_send_mail)
 		str_headers = php_trim(str_headers, NULL, 0, 2);
 	} else if (headers_ht) {
 		str_headers = php_mail_build_headers(headers_ht);
-		if (!str_headers) {
+		if (EG(exception)) {
 			RETURN_THROWS();
 		}
 	}

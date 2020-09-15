@@ -134,11 +134,11 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
 			zend_type_error("Header \"%s\" must only contain numeric keys, \"%s\" found", ZSTR_VAL(key), ZSTR_VAL(tmp_key));
-			continue;
+			break;
 		}
 		if (Z_TYPE_P(tmp_val) != IS_STRING) {
 			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_type_name(tmp_val));
-			continue;
+			break;
 		}
 		php_mail_build_headers_elem(s, key, tmp_val);
 	} ZEND_HASH_FOREACH_END();
@@ -276,7 +276,7 @@ PHP_FUNCTION(mail)
 		headers_str = php_trim(headers_str, NULL, 0, 2);
 	} else if (headers_ht) {
 		headers_str = php_mail_build_headers(headers_ht);
-		if (!headers_str) {
+		if (EG(exception)) {
 			RETURN_THROWS();
 		}
 	}

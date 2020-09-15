@@ -942,20 +942,23 @@ PHP_FUNCTION(popen)
 			mode_len--;
 		}
 	}
+#endif
 
 	/* Musl only partially validates the mode. Manually check it to ensure consistent behavior. */
-	if (mode_len != 1 || (*posix_mode != 'r' && *posix_mode != 'w')) {
-		zend_argument_value_error(2, "must be either \"r\" or \"w\"");
+	if (mode_len > 2 ||
+		(mode_len == 1 && (*posix_mode != 'r' && *posix_mode != 'w')) ||
+		(mode_len == 2 && (memcmp(posix_mode, "rb", 2) || memcmp(posix_mode, "wb", 2)))
+	) {
+		zend_argument_value_error(2, "must be one of \"r\", \"rb\", \"w\", or \"wb\"");
 		efree(posix_mode);
 		RETURN_THROWS();
 	}
-#endif
 
 	fp = VCWD_POPEN(command, posix_mode);
 	if (!fp) {
 		php_error_docref2(NULL, command, posix_mode, E_WARNING, "%s", strerror(errno));
 		efree(posix_mode);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	stream = php_stream_fopen_from_pipe(fp, mode);
