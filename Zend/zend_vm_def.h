@@ -7376,6 +7376,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMPVARCV, JMP_ADDR)
 		zval *result = EX_VAR(opline->result.var);
 
 		if (EXPECTED(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
+			ZVAL_NULL(result);
 			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
 				SAVE_OPLINE();
 				ZVAL_UNDEFINED_OP1();
@@ -7383,8 +7384,6 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMPVARCV, JMP_ADDR)
 					HANDLE_EXCEPTION();
 				}
 			}
-
-			ZVAL_NULL(result);
 		} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 			ZVAL_FALSE(result);
 		} else {
