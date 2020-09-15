@@ -2044,6 +2044,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_startup(&zuf);
 	zend_update_current_locale();
 
+	zend_observer_startup();
 #if ZEND_DEBUG
 	zend_observer_error_register(report_zend_debug_error_notify_cb);
 #endif
@@ -2192,7 +2193,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
-	zend_observer_startup();
 
 	/* startup extensions statically compiled in */
 	if (php_register_internal_extensions_func() == FAILURE) {
