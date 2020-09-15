@@ -32,20 +32,20 @@ class SQLite3
     public function changes() {}
 
     /** @return bool */
-    public function busyTimeout(int $ms) {}
+    public function busyTimeout(int $milliseconds) {}
 
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
     /** @return bool */
-    public function loadExtension(string $shared_library) {}
+    public function loadExtension(string $name) {}
 #endif
 
 #if SQLITE_VERSION_NUMBER >= 3006011
     /** @return bool */
-    public function backup(SQLite3 $destination_db, string $source_dbname = "main", string $destination_dbname = "main") {}
+    public function backup(SQLite3 $sqlite3, string $source_database = "main", string $destination_database = "main") {}
 #endif
 
     /** @return string */
-    public static function escapeString(string $value) {}
+    public static function escapeString(string $string) {}
 
     /** @return SQLite3Stmt|false */
     public function prepare(string $query) {}
@@ -69,10 +69,10 @@ class SQLite3
     public function createCollation(string $name, callable $callback) {}
 
     /** @return resource|false */
-    public function openBlob(string $table, string $column, int $rowid, string $dbname = "main", int $flags = SQLITE3_OPEN_READONLY) {}
+    public function openBlob(string $table, string $column, int $rowid, string $database = "main", int $flags = SQLITE3_OPEN_READONLY) {}
 
     /** @return bool */
-    public function enableExceptions(bool $enableExceptions = false) {}
+    public function enableExceptions(bool $enable = false) {}
 
     /** @return bool */
     public function enableExtendedResultCodes(bool $enable = true) {}
@@ -86,10 +86,10 @@ class SQLite3Stmt
     private function __construct(SQLite3 $sqlite3, string $sql) {}
 
     /** @return bool */
-    public function bindParam(string|int $param_number, mixed &$param, int $type = SQLITE3_TEXT) {}
+    public function bindParam(string|int $param, mixed &$bind_var, int $type = SQLITE3_TEXT) {}
 
     /** @return bool */
-    public function bindValue(string|int $param_number, mixed $param, int $type = SQLITE3_TEXT) {}
+    public function bindValue(string|int $param, mixed $value, int $type = SQLITE3_TEXT) {}
 
     /** @return bool */
     public function clear() {}
@@ -101,7 +101,7 @@ class SQLite3Stmt
     public function execute() {}
 
     /** @return string|false */
-    public function getSQL(bool $expanded = false) {}
+    public function getSQL(bool $expand = false) {}
 
     /** @return int */
     public function paramCount() {}
@@ -121,10 +121,10 @@ class SQLite3Result
     public function numColumns() {}
 
     /** @return string|false */
-    public function columnName(int $column_number) {}
+    public function columnName(int $index) {}
 
     /** @return int|false */
-    public function columnType(int $column_number) {}
+    public function columnType(int $index) {}
 
     /** @return array|false */
     public function fetchArray(int $mode = SQLITE3_BOTH) {}
