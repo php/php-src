@@ -87,13 +87,13 @@ function oci_lob_copy(OCILob $lob_descriptor_to, OCILob $lob_descriptor_from, ?i
 
 function oci_lob_is_equal(OCILob $lob_descriptor_first, OCILob $lob_descriptor_second): bool {}
 
-function oci_lob_export(OCILob $lob_descriptor, string $path, ?int $start = null, ?int $length = null): bool {}
+function oci_lob_export(OCILob $lob_descriptor, string $filename, ?int $start = null, ?int $length = null): bool {}
 
 /**
  * @alias oci_lob_export
  * @deprecated
  */
-function ociwritelobtofile(OCILob $lob_descriptor, string $path, ?int $start = null, ?int $length = null): bool {}
+function ociwritelobtofile(OCILob $lob_descriptor, string $filename, ?int $start = null, ?int $length = null): bool {}
 
 /**
  * @param resource $connection_resource
@@ -718,13 +718,13 @@ class OCILob {
      * @alias oci_lob_export
      * @return bool
      */
-    public function writetofile(string $path, ?int $start = null, ?int $length = null) {}
+    public function writetofile(string $filename, ?int $start = null, ?int $length = null) {}
 
     /**
      * @alias oci_lob_export
      * @return bool
      */
-    public function export(string $path, ?int $start = null, ?int $length = null) {}
+    public function export(string $filename, ?int $start = null, ?int $length = null) {}
 
     /**
      * @alias oci_lob_write_temporary

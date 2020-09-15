@@ -32,11 +32,16 @@ var_dump($blob->write($str));
 var_dump($blob->truncate(1));
 var_dump($blob->truncate(1));
 var_dump($blob->truncate(2));
-var_dump($blob->truncate(-1));
 var_dump($blob->read(2));
 
 var_dump($blob->import("does_not_exist"));
 var_dump($blob->saveFile("does_not_exist"));
+
+try {
+    var_dump($blob->truncate(-1));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 require(__DIR__.'/drop_table.inc');
 
@@ -58,9 +63,6 @@ bool(true)
 Warning: OCILob::truncate(): Size must be less than or equal to the current LOB size in %s on line %d
 bool(false)
 
-Warning: OCILob::truncate(): Length must be greater than or equal to zero in %s on line %d
-bool(false)
-
 Warning: OCILob::read(): Offset must be less than size of the LOB in %s on line %d
 bool(false)
 
@@ -69,4 +71,5 @@ bool(false)
 
 Warning: OCILob::savefile(): Can't open file %s in %s on line %d
 bool(false)
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 Done
