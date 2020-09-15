@@ -35,7 +35,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
 Since:
 */
-zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
+int dom_node_node_name_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep;
 	xmlNsPtr ns;
@@ -97,9 +97,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		case XML_TEXT_NODE:
 			str = "#text";
 			break;
-		default:
-			zend_value_error("XML Node type must be one of XML_*_NODE");
-			return FAILURE;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	if (str != NULL) {
@@ -1603,11 +1601,13 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 		tmp = zend_hash_str_find(ht, "query", sizeof("query")-1);
 		if (!tmp) {
-			zend_argument_value_error(3, "\"query\" option must be in XPath array");
+			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
+			zend_argument_value_error(3 + mode, "must have a \"query\" key");
 			RETURN_THROWS();
 		}
 		if (Z_TYPE_P(tmp) != IS_STRING) {
-			zend_argument_type_error(3, "\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
+			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
+			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
 			RETURN_THROWS();
 		}
 		xquery = Z_STRVAL_P(tmp);
@@ -1638,8 +1638,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				xmlXPathFreeObject(xpathobjp);
 			}
 			xmlXPathFreeContext(ctxp);
-			php_error_docref(NULL, E_WARNING, "XPath query did not return a nodeset.");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "XPath query did not return a nodeset");
+			RETURN_THROWS();
 		}
 	}
 

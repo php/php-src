@@ -873,10 +873,10 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
-	if (attrp->type != XML_ATTRIBUTE_NODE) {
-		zend_argument_value_error(1, "must have node attribute");
-		RETURN_THROWS();
-	}
+	/* ZPP Guarantees that a DOMAttr class is given, as it is converted to a xmlAttr
+	 * to pass to libxml (see http://www.xmlsoft.org/html/libxml-tree.html#xmlAttr)
+	 * if it is not of type XML_ATTRIBUTE_NODE it indicates a bug somewhere */
+	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
 
 	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
