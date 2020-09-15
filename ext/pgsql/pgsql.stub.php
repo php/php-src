@@ -62,7 +62,7 @@ function pg_exec($connection, string $query = UNKNOWN) {}
 
 /**
  * @param resource|string $connection
- * @param string|array $query
+ * @param array|string $query
  * @return resource|false
  */
 function pg_query_params($connection, $query, array $params = UNKNOWN) {}
@@ -75,7 +75,7 @@ function pg_prepare($connection, string $stmt_name, string $query = UNKNOWN) {}
 
 /**
  * @param resource|string $connection
- * @param string|array $stmt_name
+ * @param array|string $stmt_name
  * @return resource|false
  */
 function pg_execute($connection, $stmt_name, array $params = UNKNOWN) {}

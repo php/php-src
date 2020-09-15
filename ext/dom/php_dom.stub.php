@@ -211,13 +211,13 @@ class DOMElement implements DOMParentNode, DOMChildNode
     /** @return DOMAttr|bool */
     public function setAttribute(string $qualifiedName, string $value) {}
 
-    /** @return null|false */
+    /** @return bool|null */
     public function setAttributeNS(?string $namespace, string $qualifiedName, string $value) {}
 
-    /** @return DOMAttr|null|false */
+    /** @return DOMAttr|false|null */
     public function setAttributeNode(DOMAttr $attr) {}
 
-    /** @return DOMAttr|null|false */
+    /** @return DOMAttr|false|null */
     public function setAttributeNodeNS(DOMAttr $attr) {}
 
     /** @return void */
@@ -426,7 +426,7 @@ class DOMXPath
     public function registerNamespace(string $prefix, string $namespace) {}
 
     /** @return void */
-    public function registerPhpFunctions(string|array|null $restrict = null) {}
+    public function registerPhpFunctions(array|string|null $restrict = null) {}
 }
 #endif
 

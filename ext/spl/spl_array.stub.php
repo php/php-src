@@ -4,7 +4,7 @@
 
 class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Countable
 {
-    public function __construct(array|object $input = [], int $flags = 0, string $iterator_class = ArrayIterator::class) {}
+    public function __construct(object|array $input = [], int $flags = 0, string $iterator_class = ArrayIterator::class) {}
 
     /**
      * @param string|int $index
@@ -79,7 +79,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     public function getIterator() {}
 
     /** @return array|null */
-    public function exchangeArray(array|object $input) {}
+    public function exchangeArray(object|array $input) {}
 
     /** @return void */
     public function setIteratorClass(string $iteratorClass) {}
@@ -93,7 +93,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
 
 class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Countable
 {
-    public function __construct(array|object $array = [], int $flags = 0) {}
+    public function __construct(object|array $array = [], int $flags = 0) {}
 
     /**
      * @param string|int $index

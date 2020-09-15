@@ -24,13 +24,13 @@ function dba_open($path, $mode, $handlername = UNKNOWN, ...$handler_parameters) 
 function dba_close($handle): void {}
 
 /**
- * @param string|array $key
+ * @param array|string $key
  * @param resource $handle
  */
 function dba_exists($key, $handle): bool {}
 
 /**
- * @param string|array $key
+ * @param array|string $key
  * @param int|resource $skip actually this parameter is optional, not $handle
  * @param resource $handle
  */
@@ -45,19 +45,19 @@ function dba_firstkey($handle): string|false {}
 function dba_nextkey($handle): string|false {}
 
 /**
- * @param string|array $key
+ * @param array|string $key
  * @param resource $handle
  */
 function dba_delete($key, $handle): bool {}
 
 /**
- * @param string|array $key
+ * @param array|string $key
  * @param resource $handle
  */
 function dba_insert($key, string $value, $handle): bool {}
 
 /**
- * @param string|array $key
+ * @param array|string $key
  * @param resource $handle
  */
 function dba_replace($key, string $value, $handle): bool {}

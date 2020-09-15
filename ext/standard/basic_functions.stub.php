@@ -90,32 +90,32 @@ function uasort(array &$array, callable $callback): bool {}
 
 function uksort(array &$array, callable $callback): bool {}
 
-function end(array|object &$arg): mixed {}
+function end(object|array &$arg): mixed {}
 
-function prev(array|object &$arg): mixed {}
+function prev(object|array &$arg): mixed {}
 
-function next(array|object &$arg): mixed {}
+function next(object|array &$arg): mixed {}
 
-function reset(array|object &$arg): mixed {}
+function reset(object|array &$arg): mixed {}
 
-function current(array|object $arg): mixed {}
+function current(object|array $arg): mixed {}
 
 /** @alias current */
-function pos(array|object $arg): mixed {}
+function pos(object|array $arg): mixed {}
 
-function key(array|object $arg): int|string|null {}
+function key(object|array $arg): string|int|null {}
 
 function min(mixed $arg, mixed ...$args): mixed {}
 
 function max(mixed $arg, mixed ...$args): mixed {}
 
-function array_walk(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
+function array_walk(object|array &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
 
-function array_walk_recursive(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
+function array_walk_recursive(object|array &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
 
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
-function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
+function array_search(mixed $needle, array $haystack, bool $strict = false): string|int|false {}
 
 /** @prefer-ref $array */
 function extract(array &$array, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
@@ -158,15 +158,15 @@ function array_replace_recursive(array $array, array ...$replacements): array {}
 
 function array_keys(array $array, mixed $filter_value = UNKNOWN, bool $strict = false): array {}
 
-function array_key_first(array $array): int|string|null {}
+function array_key_first(array $array): string|int|null {}
 
-function array_key_last(array $array): int|string|null {}
+function array_key_last(array $array): string|int|null {}
 
 function array_values(array $array): array {}
 
 function array_count_values(array $array): array {}
 
-function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
+function array_column(array $array, string|int|null $column_key, string|int|null $index_key = null): array {}
 
 function array_reverse(array $array, bool $preserve_keys = false): array {}
 
@@ -228,7 +228,7 @@ function array_udiff_uassoc(array $array, ...$rest): array {}
  */
 function array_multisort(&$array1, &...$rest): bool {}
 
-function array_rand(array $array, int $num_req = 1): int|string|array {}
+function array_rand(array $array, int $num_req = 1): array|string|int {}
 
 function array_sum(array $array): int|float {}
 
@@ -267,7 +267,7 @@ function ip2long(string $ip_address): int|false {}
 
 function long2ip(int $proper_address): string|false {}
 
-function getenv(?string $variable = null, bool $local_only = false): string|array|false {}
+function getenv(?string $variable = null, bool $local_only = false): array|string|false {}
 
 #ifdef HAVE_PUTENV
 function putenv(string $setting): bool {}
@@ -290,7 +290,7 @@ function time_sleep_until(float $timestamp): bool {}
 
 function get_current_user(): string {}
 
-function get_cfg_var(string $option_name): string|array|false {}
+function get_cfg_var(string $option_name): array|string|false {}
 
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $extra_headers = null): bool {}
 
@@ -502,9 +502,9 @@ function header(string $string, bool $replace = true, int $http_response_code = 
 
 function header_remove(?string $name = null): void {}
 
-function setrawcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setrawcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
 
-function setcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
 
 function http_response_code(int $response_code = 0): int|bool {}
 
@@ -535,7 +535,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_s
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
 /** @param string|callable|null $value */
-function assert_options(int $what, $value = UNKNOWN): array|object|int|string|null {}
+function assert_options(int $what, $value = UNKNOWN): object|array|string|int|null {}
 
 /* string.c */
 
@@ -566,10 +566,10 @@ function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut 
 
 function explode(string $separator, string $str, int $limit = PHP_INT_MAX): array {}
 
-function implode(string|array $glue, ?array $pieces = null): string {}
+function implode(array|string $glue, ?array $pieces = null): string {}
 
 /** @alias implode */
-function join(string|array $glue, ?array $pieces = null): string {}
+function join(array|string $glue, ?array $pieces = null): string {}
 
 function strtok(string $str, ?string $token = null): string|false {}
 
@@ -610,7 +610,7 @@ function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): 
 
 function substr(string $str, int $start, ?int $length = null): string|false {}
 
-function substr_replace(array|string $str, array|string $replace, array|int $start, array|int|null $length = null): string|array|false {}
+function substr_replace(array|string $str, array|string $replace, array|int $start, array|int|null $length = null): array|string|false {}
 
 function quotemeta(string $str): string {}
 
@@ -624,7 +624,7 @@ function lcfirst(string $str): string {}
 
 function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
 
-function strtr(string $str, string|array $from, ?string $to = null): string {}
+function strtr(string $str, array|string $from, ?string $to = null): string {}
 
 function strrev(string $str): string {}
 
@@ -640,10 +640,10 @@ function stripcslashes(string $str): string {}
 function stripslashes(string $str): string {}
 
 /** @param int $replace_count */
-function str_replace(array|string $search, array|string $replace, string|array $subject, &$replace_count = null): string|array {}
+function str_replace(array|string $search, array|string $replace, array|string $subject, &$replace_count = null): array|string {}
 
 /** @param int $replace_count */
-function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$replace_count = null): string|array {}
+function str_ireplace(array|string $search, array|string $replace, array|string $subject, &$replace_count = null): array|string {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
@@ -660,7 +660,7 @@ function setlocale(int $category, $locales, ...$rest): string|false {}
 /** @param array $result */
 function parse_str(string $encoded_string, &$result): void {}
 
-function str_getcsv(string $string, string $delimiter = ',', string $enclosure = '"', string $escape = '\\'): array {}
+function str_getcsv(string $string, string $delimiter = ",", string $enclosure = '"', string $escape = '\\'): array {}
 
 function str_repeat(string $input, int $mult): string {}
 
@@ -745,7 +745,7 @@ function exec(string $command, &$output = null, &$result_code = null): string|fa
 function system(string $command, &$result_code = null): string|false {}
 
 /** @param int $result_code */
-function passthru(string $command, &$result_code = null): bool|null {}
+function passthru(string $command, &$result_code = null): ?bool {}
 
 function escapeshellcmd(string $command): string {}
 
@@ -979,7 +979,7 @@ function pfsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr =
 
 /* http.c */
 
-function http_build_query(array|object $data, string $numeric_prefix = "", ?string $arg_separator = null, int $enc_type = PHP_QUERY_RFC1738): string|false {}
+function http_build_query(object|array $data, string $numeric_prefix = "", ?string $arg_separator = null, int $enc_type = PHP_QUERY_RFC1738): string|false {}
 
 /* image.c */
 
@@ -1494,7 +1494,7 @@ function sapi_windows_cp_set(int $cp): bool {}
 
 function sapi_windows_cp_get(string $kind = ""): int {}
 
-function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage, string $subject): ?string {}
+function sapi_windows_cp_conv(string|int $in_codepage, string|int $out_codepage, string $subject): ?string {}
 
 function sapi_windows_cp_is_utf8(): bool {}
 

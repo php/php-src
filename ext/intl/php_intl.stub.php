@@ -188,7 +188,7 @@ function datefmt_format(IntlDateFormatter $df, $value): string|false {}
 
 /**
  * @param IntlCalendar|DateTimeInterface $object
- * @param array|int|string|null $format
+ * @param array|string|int|null $format
  */
 function datefmt_format_object($object, $format = null, ?string $locale = null): string|false {}
 

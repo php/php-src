@@ -275,7 +275,7 @@ function ocifetchstatement($statement_resource, &$output, int $skip = 0, int $ma
 /**
  * @param resource $statement_resource
  */
-function oci_fetch_object($statement_resource, int $mode = PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS): stdClass|null|false {}
+function oci_fetch_object($statement_resource, int $mode = PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS): stdClass|false|null {}
 
 /**
  * @param resource $statement_resource
@@ -320,50 +320,50 @@ function ocifreecursor($statement_resource): bool {}
 /**
  * @param resource $connection_resource
  */
-function oci_close($connection_resource): bool|null {}
+function oci_close($connection_resource): ?bool {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_close
  * @deprecated
  */
-function ocilogoff($connection_resource): bool|null {}
+function ocilogoff($connection_resource): ?bool {}
 
 /**
  * @return resource|false
  */
-function oci_new_connect(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function oci_new_connect(string $username, string $password, ?string $connection_string = null, string $character_set = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_new_connect
  * @deprecated
  */
-function ocinlogon(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function ocinlogon(string $username, string $password, ?string $connection_string = null, string $character_set = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  */
-function oci_connect(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function oci_connect(string $username, string $password, ?string $connection_string = null, string $character_set = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_connect
  * @deprecated
  */
-function ocilogon(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function ocilogon(string $username, string $password, ?string $connection_string = null, string $character_set = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  */
-function oci_pconnect(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function oci_pconnect(string $username, string $password, ?string $connection_string = null, string $character_set = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_pconnect
  * @deprecated
  */
-function ociplogon(string $username, string $password, ?string $connection_string = null, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
+function ociplogon(string $username, string $password, ?string $connection_string = null, string $character_set = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @param resource|null $connection_or_statement_resource
@@ -547,13 +547,13 @@ function oci_collection_append(OCICollection $collection, string $value): bool {
  */
 function ocicollappend(OCICollection $collection, string $value): bool {}
 
-function oci_collection_element_get(OCICollection $collection, int $index): string|float|null|false {}
+function oci_collection_element_get(OCICollection $collection, int $index): string|float|false|null {}
 
 /**
  * @alias oci_collection_element_get
  * @deprecated
  */
-function ocicollgetelem(OCICollection $collection, int $index): string|float|null|false {}
+function ocicollgetelem(OCICollection $collection, int $index): string|float|false|null {}
 
 function oci_collection_assign(OCICollection $collection_to, OCICollection $collection_from): bool {}
 
@@ -760,7 +760,7 @@ class OCICollection {
 
     /**
      * @alias oci_collection_element_get
-     * @return string|float|null|false
+     * @return string|float|false|null
      */
     public function getElem(int $index) {}
 

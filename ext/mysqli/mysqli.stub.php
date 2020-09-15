@@ -54,7 +54,7 @@ class mysqli
     public function commit(int $flags = -1, ?string $name = null) {}
 
     /**
-     * @return mysqli|null|false
+     * @return mysqli|false|null
      * @alias mysqli_connect
      */
     public function connect(
@@ -348,7 +348,7 @@ class mysqli_result implements IteratorAggregate
 #endif
 
     /**
-     * @return array|null|false
+     * @return array|false|null
      * @alias mysqli_fetch_array
      */
     public function fetch_array(int $result_type = MYSQLI_BOTH) {}
@@ -465,7 +465,7 @@ class mysqli_stmt
 #endif
 
     /**
-     * @return int|string
+     * @return string|int
      * @alias mysqli_stmt_num_rows
      */
     public function num_rows() {}
@@ -520,7 +520,7 @@ final class mysqli_sql_exception extends RuntimeException
 {
 }
 
-function mysqli_affected_rows(mysqli $mysql_link): int|string {}
+function mysqli_affected_rows(mysqli $mysql_link): string|int {}
 
 function mysqli_autocommit(mysqli $mysql_link, bool $mode): bool {}
 
@@ -541,7 +541,7 @@ function mysqli_connect(
     ?string $database = null,
     ?int $port = null,
     ?string $socket = null
-): mysqli|null|false {}
+): mysqli|false|null {}
 
 function mysqli_connect_errno(): int {}
 
@@ -574,7 +574,7 @@ function mysqli_fetch_lengths(mysqli_result $mysql_result): array|false {}
 
 function mysqli_fetch_all(mysqli_result $mysql_result, int $mode = MYSQLI_NUM): array|false {}
 
-function mysqli_fetch_array(mysqli_result $mysql_result, int $fetchtype = MYSQLI_BOTH): array|null|false {}
+function mysqli_fetch_array(mysqli_result $mysql_result, int $fetchtype = MYSQLI_BOTH): array|false|null {}
 
 function mysqli_fetch_assoc(mysqli_result $mysql_result): ?array {}
 
@@ -616,7 +616,7 @@ function mysqli_init(): mysqli|false {}
 
 function mysqli_info(mysqli $mysqli_link): ?string {}
 
-function mysqli_insert_id(mysqli $mysqli_link): int|string {}
+function mysqli_insert_id(mysqli $mysqli_link): string|int {}
 
 function mysqli_kill(mysqli $mysqli_link, int $connection_id): bool {}
 
@@ -628,7 +628,7 @@ function mysqli_next_result(mysqli $mysqli_link): bool {}
 
 function mysqli_num_fields(mysqli_result $mysql_result): int {}
 
-function mysqli_num_rows(mysqli_result $mysqli_result): int|string {}
+function mysqli_num_rows(mysqli_result $mysqli_result): string|int {}
 
 /** @param string|int $value */
 function mysqli_options(mysqli $mysqli_link, int $option, $value): bool {}
@@ -670,7 +670,7 @@ function mysqli_select_db(mysqli $mysqli_link, string $dbname): bool {}
 
 function mysqli_set_charset(mysqli $mysqli_link, string $charset): bool {}
 
-function mysqli_stmt_affected_rows(mysqli_stmt $mysql_stmt): int|string {}
+function mysqli_stmt_affected_rows(mysqli_stmt $mysql_stmt): string|int {}
 
 function mysqli_stmt_attr_get(mysqli_stmt $mysql_stmt, int $attr): int {}
 
@@ -702,13 +702,13 @@ function mysqli_stmt_get_warnings(mysqli_stmt $mysql_stmt): mysqli_warning|false
 
 function mysqli_stmt_init(mysqli $mysql_link): mysqli_stmt|false {}
 
-function mysqli_stmt_insert_id(mysqli_stmt $mysql_stmt): int|string {}
+function mysqli_stmt_insert_id(mysqli_stmt $mysql_stmt): string|int {}
 
 function mysqli_stmt_more_results(mysqli_stmt $mysql_stmt): bool {}
 
 function mysqli_stmt_next_result(mysqli_stmt $mysql_stmt): bool {}
 
-function mysqli_stmt_num_rows(mysqli_stmt $mysql_stmt): int|string {}
+function mysqli_stmt_num_rows(mysqli_stmt $mysql_stmt): string|int {}
 
 function mysqli_stmt_param_count(mysqli_stmt $mysql_stmt): int {}
 

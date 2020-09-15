@@ -5,8 +5,8 @@
 function readline(?string $prompt = null): string|false {}
 
 /**
- * @param int|string|bool|null $newvalue
- * @return array|int|string|bool|null
+ * @param string|int|bool|null $newvalue
+ * @return array|string|int|bool|null
  */
 function readline_info(?string $varname = null, $newvalue = null): mixed {}
 

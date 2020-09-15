@@ -78,7 +78,7 @@ function socket_setopt(Socket $socket, int $level, int $optname, $optval): bool 
 
 #ifdef HAVE_SOCKETPAIR
 /** @param array $fd */
-function socket_create_pair(int $domain, int $type, int $protocol, &$fd): bool|null {}
+function socket_create_pair(int $domain, int $type, int $protocol, &$fd): ?bool {}
 #endif
 
 #ifdef HAVE_SHUTDOWN

@@ -18,7 +18,7 @@ function frenchtojd(int $month, int $day, int $year): int {}
 
 function gregoriantojd(int $month, int $day, int $year): int {}
 
-function jddayofweek(int $juliandaycount, int $mode = CAL_DOW_DAYNO): int|string {}
+function jddayofweek(int $juliandaycount, int $mode = CAL_DOW_DAYNO): string|int {}
 
 function jdmonthname(int $juliandaycount, int $mode): string {}
 

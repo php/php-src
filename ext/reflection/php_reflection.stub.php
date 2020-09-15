@@ -474,8 +474,8 @@ class ReflectionParameter implements Reflector
     /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
-    /** @param string|array|object $function */
-    public function __construct($function, int|string $parameter) {}
+    /** @param object|array|string $function */
+    public function __construct($function, string|int $parameter) {}
 
     public function __toString(): string {}
 
@@ -643,7 +643,7 @@ class ReflectionZendExtension implements Reflector
 
 final class ReflectionReference
 {
-    public static function fromArrayElement(array $array, int|string $key): ?ReflectionReference {}
+    public static function fromArrayElement(array $array, string|int $key): ?ReflectionReference {}
 
     public function getId(): string {}
 

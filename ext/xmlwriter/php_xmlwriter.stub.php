@@ -52,7 +52,7 @@ function xmlwriter_text(XMLWriter $xmlwriter, string $content): bool {}
 
 function xmlwriter_write_raw(XMLWriter $xmlwriter, string $content): bool {}
 
-function xmlwriter_start_document(XMLWriter $xmlwriter, ?string $version = '1.0', ?string $encoding = null, ?string $standalone = null): bool {}
+function xmlwriter_start_document(XMLWriter $xmlwriter, ?string $version = "1.0", ?string $encoding = null, ?string $standalone = null): bool {}
 
 function xmlwriter_end_document(XMLWriter $xmlwriter): bool {}
 
@@ -164,7 +164,7 @@ class XMLWriter
     public function writeRaw(string $content): bool {}
 
     /** @alias xmlwriter_start_document */
-    public function startDocument(?string $version = '1.0', ?string $encoding = null, ?string $standalone = null): bool {}
+    public function startDocument(?string $version = "1.0", ?string $encoding = null, ?string $standalone = null): bool {}
 
     /** @alias xmlwriter_end_document */
     public function endDocument(): bool {}

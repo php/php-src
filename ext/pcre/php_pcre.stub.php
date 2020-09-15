@@ -9,16 +9,16 @@ function preg_match(string $pattern, string $subject, &$subpatterns = null, int 
 function preg_match_all(string $pattern, string $subject, &$subpatterns = null, int $flags = 0, int $offset = 0): int|false|null {}
 
 /** @param int $count */
-function preg_replace(string|array $regex, string|array $replace, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
+function preg_replace(array|string $regex, array|string $replace, array|string $subject, int $limit = -1, &$count = null): array|string|null {}
 
 /** @param int $count */
-function preg_filter(string|array $regex, string|array $replace, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
+function preg_filter(array|string $regex, array|string $replace, array|string $subject, int $limit = -1, &$count = null): array|string|null {}
 
 /** @param int $count */
-function preg_replace_callback(string|array $regex, callable $callback, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
+function preg_replace_callback(array|string $regex, callable $callback, array|string $subject, int $limit = -1, &$count = null, int $flags = 0): array|string|null {}
 
 /** @param int $count */
-function preg_replace_callback_array(array $pattern, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
+function preg_replace_callback_array(array $pattern, array|string $subject, int $limit = -1, &$count = null, int $flags = 0): array|string|null {}
 
 function preg_split(string $pattern, string $subject, int $limit = -1, int $flags = 0): array|false {}
 

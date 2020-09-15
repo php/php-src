@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1ace9d7ae3e505ae2e14323e21fa6ac0a490896d */
+ * Stub hash: c21a281b41f6c12feb52dc8917847f86db8269b3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_cal_days_in_month, 0, 3, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, calendar, IS_LONG, 0)
@@ -38,7 +38,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gregoriantojd arginfo_frenchtojd
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_jddayofweek, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_jddayofweek, 0, 1, MAY_BE_STRING|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, juliandaycount, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "CAL_DOW_DAYNO")
 ZEND_END_ARG_INFO()

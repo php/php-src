@@ -13,7 +13,7 @@ class PhpToken implements Stringable
 
     public final function __construct(int $id, string $text, int $line = -1, int $pos = -1) {}
 
-    /** @param int|string|array $kind */
+    /** @param array|string|int $kind */
     public function is($kind): bool {}
 
     public function isIgnorable(): bool {}

@@ -1,8 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bedd13338707177e28a021722df64be2f74a7945 */
+ * Stub hash: 670603f87c2d908c805b2480533fc40156378dc6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, input, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
+	ZEND_ARG_TYPE_MASK(0, input, MAY_BE_OBJECT|MAY_BE_ARRAY, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, iterator_class, IS_STRING, 0, "ArrayIterator::class")
 ZEND_END_ARG_INFO()
@@ -66,7 +66,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayObject_getIterator arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_exchangeArray, 0, 0, 1)
-	ZEND_ARG_TYPE_MASK(0, input, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
+	ZEND_ARG_TYPE_MASK(0, input, MAY_BE_OBJECT|MAY_BE_ARRAY, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_setIteratorClass, 0, 0, 1)
@@ -78,7 +78,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayObject___debugInfo arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayIterator___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
+	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_OBJECT|MAY_BE_ARRAY, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 

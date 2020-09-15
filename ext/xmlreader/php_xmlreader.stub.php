@@ -13,7 +13,7 @@ class XMLReader
     /** @return string|null */
     public function getAttributeNo(int $index) {}
 
-    /** @return string|null|false */
+    /** @return string|false|null */
     public function getAttributeNs(string $name, string $namespaceURI) {}
 
     /** @return bool */
@@ -49,7 +49,7 @@ class XMLReader
     /** @return bool */
     public function next(?string $localname = null) {}
 
-    /** @return bool|XMLReader */
+    /** @return XMLReader|bool */
     public static function open(string $URI, ?string $encoding = null, int $options = 0) {}
 
     /** @return string */
@@ -73,7 +73,7 @@ class XMLReader
     /** @return bool */
     public function setRelaxNGSchemaSource(?string $source) {}
 
-    /** @return bool|XMLReader */
+    /** @return XMLReader|bool */
     public static function XML(string $source, ?string $encoding = null, int $options = 0) {}
 
     /** @return DOMNode|bool */

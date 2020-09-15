@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 46bde559f165fc53d75690bfb4d86389202bb19e */
+ * Stub hash: 7a12c6f16e2a21c8b57ec963ed7e5fa230e425aa */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -102,7 +102,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_document, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 1, "\'1.0\'")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 1, "\"1.0\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, standalone, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -262,7 +262,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_XMLWriter_writeRaw arginfo_class_XMLWriter_writeCdata
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_startDocument, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 1, "\'1.0\'")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 1, "\"1.0\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, standalone, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()

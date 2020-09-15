@@ -29,7 +29,7 @@ function openssl_x509_verify(OpenSSLCertificate|string $certificate, $public_key
 
 function openssl_x509_parse(OpenSSLCertificate|string $certificate, bool $short_names = true): array|false {}
 
-function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $purpose, array $ca_info = [], ?string $untrusted_certificates_file = null): bool|int {}
+function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $purpose, array $ca_info = [], ?string $untrusted_certificates_file = null): int|bool {}
 
 function openssl_x509_read(OpenSSLCertificate|string $certificate): OpenSSLCertificate|false {}
 
@@ -105,7 +105,7 @@ function openssl_pkey_get_details(OpenSSLAsymmetricKey $key): array|false {}
 
 function openssl_pbkdf2(string $passphrase, string $salt, int $key_length, int $iterations, string $digest_algorithm = "sha1"): string|false {}
 
-function openssl_pkcs7_verify(string $input_filename, int $flags, ?string $signers_certificates_filename = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $output_filename = null): bool|int {}
+function openssl_pkcs7_verify(string $input_filename, int $flags, ?string $signers_certificates_filename = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $output_filename = null): int|bool {}
 
 /** @param OpenSSLCertificate|array|string $certificate */
 function openssl_pkcs7_encrypt(string $input_filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $cipher_algorithm = OPENSSL_CIPHER_RC2_40): bool {}

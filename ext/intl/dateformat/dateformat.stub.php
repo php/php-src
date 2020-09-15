@@ -48,7 +48,7 @@ class IntlDateFormatter
     public function getTimeZoneId() {}
 
     /**
-     * @return IntlCalendar|null|false
+     * @return IntlCalendar|false|null
      * @alias datefmt_get_calendar_object
      */
     public function getCalendarObject() {}
@@ -105,7 +105,7 @@ class IntlDateFormatter
 
     /**
      * @param IntlCalendar|DateTime $object
-     * @param array|int|string|null $format
+     * @param array|string|int|null $format
      * @return string|false
      * @alias datefmt_format_object
      */
