@@ -682,7 +682,7 @@ function mysqli_stmt_bind_result(mysqli_stmt $mysql_stmt, mixed &...$vars): bool
 
 function mysqli_stmt_close(mysqli_stmt $mysql_stmt): bool {}
 
-function mysqli_stmt_data_seek(mysqli_stmt $mysql_stmt, int $offset): ?bool {}
+function mysqli_stmt_data_seek(mysqli_stmt $mysql_stmt, int $offset): void {}
 
 function mysqli_stmt_errno(mysqli_stmt $mysql_stmt): int {}
 

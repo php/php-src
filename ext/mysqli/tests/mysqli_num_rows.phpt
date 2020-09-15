@@ -80,5 +80,5 @@ mysqli_result object is already closed
 mysqli_result object is already closed
 mysqli_result object is already closed
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!
-Function cannot be used with MYSQL_USE_RESULT
+mysqli_num_rows() cannot be used with MYSQL_USE_RESULT
 done!

@@ -739,7 +739,11 @@ PHP_FUNCTION(mysqli_data_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-		zend_throw_error(NULL, "Function cannot be used with MYSQL_USE_RESULT");
+		if (getThis()) {
+			zend_throw_error(NULL, "mysqli_result::data_seek() cannot be used with MYSQL_USE_RESULT");
+		} else {
+			zend_throw_error(NULL, "mysqli_data_seek() cannot be used with MYSQL_USE_RESULT");
+		}
 		RETURN_THROWS();
 	}
 
@@ -1622,7 +1626,7 @@ PHP_FUNCTION(mysqli_num_rows)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered_and_not_everything_is_fetched(result)) {
-		zend_throw_error(NULL, "Function cannot be used with MYSQL_USE_RESULT");
+		zend_throw_error(NULL, "mysqli_num_rows() cannot be used with MYSQL_USE_RESULT");
 		RETURN_THROWS();
 	}
 

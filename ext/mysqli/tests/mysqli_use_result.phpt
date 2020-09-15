@@ -56,6 +56,6 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
-Function cannot be used with MYSQL_USE_RESULT
+mysqli_data_seek() cannot be used with MYSQL_USE_RESULT
 mysqli object is already closed
 done!

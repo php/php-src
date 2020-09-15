@@ -640,7 +640,7 @@ PHP_FUNCTION(mysqli_query)
 	) {
 		zend_argument_value_error(ERROR_ARG_POS(3), "must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT"
 			#ifdef MYSQLI_USE_MYSQLND
-				" with MYSQLI_ASYNC as an optional bitmask flags"
+				" with MYSQLI_ASYNC as an optional bitmask flag"
 			#endif
 		);
 		RETURN_THROWS();
@@ -1167,7 +1167,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (flags < 0) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of the MYSQLI_TRANS_* constant");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of the MYSQLI_TRANS_* constants");
 		RETURN_THROWS();
 	}
 	if (!name_len) {

@@ -101,5 +101,5 @@ if (!have_innodb($link))
 ?>
 --EXPECT--
 NULL
-mysqli_begin_transaction(): Argument #2 ($flags) must be one of the MYSQLI_TRANS_* constant
+mysqli_begin_transaction(): Argument #2 ($flags) must be one of the MYSQLI_TRANS_* constants
 done!
