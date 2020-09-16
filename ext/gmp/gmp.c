@@ -33,7 +33,6 @@
 /* Needed for gmp_random() */
 #include "ext/standard/php_rand.h"
 #include "ext/standard/php_lcg.h"
-#define GMP_ABS(x) ((x) >= 0 ? (x) : -(x))
 
 ZEND_DECLARE_MODULE_GLOBALS(gmp)
 static ZEND_GINIT_FUNCTION(gmp);
