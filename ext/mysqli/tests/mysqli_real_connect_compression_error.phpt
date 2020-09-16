@@ -1,19 +1,25 @@
 --TEST--
 Bug #80107 mysqli_query() fails for ~16 MB long query when compression is enabled
---XFAIL--
-The second INSERT query fails with MySQL server has gone away
 --SKIPIF--
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+require_once("connect.inc");
+$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+if (!$link) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+}
+$result = $link->query("SHOW VARIABLES LIKE 'max_allowed_packet'");
+if ($result->fetch_assoc()['Value'] < 0xffffff) {
+    die('skip max_allowed_packet is less than 0xffffff');
+}
 ?>
---INI--
-mysqli.allow_local_infile=1
 --FILE--
 <?php
 
-include("connect.inc");
+require_once("connect.inc");
+
+$data_size = 16777174;
 
 // Insert with compression disabled:
 
@@ -22,7 +28,7 @@ $result = my_mysqli_real_connect($mysqli, $host, $user, $passwd, $db, $port, $so
 $mysqli->query("DROP TABLE IF EXISTS test");
 $mysqli->query("CREATE TABLE test (`blob` LONGBLOB NOT NULL)");
 
-$data = str_repeat("x", 16777174);
+$data = str_repeat("x", $data_size);
 $mysqli->query("INSERT INTO $db.test(`blob`) VALUE ('$data')");
 
 var_dump(mysqli_error_list($mysqli));
@@ -33,7 +39,7 @@ $mysqli->close();
 $mysqli = mysqli_init();
 $result = my_mysqli_real_connect($mysqli, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_COMPRESS);
 
-$data = str_repeat("x", 16777174);
+$data = str_repeat("x", $data_size);
 $mysqli->query("INSERT INTO $db.test(`blob`) VALUE ('$data')");
 
 var_dump(mysqli_error_list($mysqli));
