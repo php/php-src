@@ -633,7 +633,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 
 		ret = 1;
 	} else {
-		zend_error(E_WARNING, "That's not a dispatchable interface!! type kind = %08x", attr->typekind);
+		zend_throw_error(NULL, "Type kind must be dispatchable, %08x given", attr->typekind);
 	}
 
 	ITypeInfo_ReleaseTypeAttr(typeinfo, attr);

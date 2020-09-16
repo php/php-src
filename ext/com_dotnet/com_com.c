@@ -746,7 +746,8 @@ PHP_FUNCTION(com_event_sink)
 /* {{{ Print out a PHP class definition for a dispatchable interface */
 PHP_FUNCTION(com_print_typeinfo)
 {
-	zval *arg1;
+	zend_object *object_zpp;
+	zend_string *typelib_name_zpp = NULL;
 	char *ifacename = NULL;
 	char *typelibname = NULL;
 	size_t ifacelen;
@@ -754,17 +755,18 @@ PHP_FUNCTION(com_print_typeinfo)
 	php_com_dotnet_object *obj = NULL;
 	ITypeInfo *typeinfo;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z/|s!b", &arg1, &ifacename,
-				&ifacelen, &wantsink)) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(object_zpp, php_com_variant_class_entry, typelib_name_zpp)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(ifacename, ifacelen)
+		Z_PARAM_BOOL(wantsink)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_com_initialize();
-	if (Z_TYPE_P(arg1) == IS_OBJECT) {
-		CDNO_FETCH_VERIFY(obj, arg1);
+	if (object_zpp) {
+		obj = (php_com_dotnet_object*)object_zpp;
 	} else {
-		convert_to_string(arg1);
-		typelibname = Z_STRVAL_P(arg1);
+		typelibname = ZSTR_VAL(typelib_name_zpp);
 	}
 
 	typeinfo = php_com_locate_typeinfo(typelibname, obj, ifacename, wantsink ? 1 : 0);
@@ -772,9 +774,9 @@ PHP_FUNCTION(com_print_typeinfo)
 		php_com_process_typeinfo(typeinfo, NULL, 1, NULL, obj ? obj->code_page : COMG(code_page));
 		ITypeInfo_Release(typeinfo);
 		RETURN_TRUE;
-	} else {
-		zend_error(E_WARNING, "Unable to find typeinfo using the parameters supplied");
 	}
+
+	php_error_docref(NULL, E_WARNING, "Unable to find typeinfo using the parameters supplied");
 	RETURN_FALSE;
 }
 /* }}} */

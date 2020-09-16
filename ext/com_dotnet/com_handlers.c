@@ -203,18 +203,19 @@ static int com_property_exists(zend_object *object, zend_string *member, int che
 
 static int com_dimension_exists(zend_object *object, zval *member, int check_empty)
 {
-	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
+	/* TODO Add support */
+	zend_throw_error(NULL, "Cannot check dimension on a COM object");
 	return 0;
 }
 
 static void com_property_delete(zend_object *object, zend_string *member, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete properties from a COM object");
 }
 
 static void com_dimension_delete(zend_object *object, zval *offset)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete dimension from a COM object");
 }
 
 static HashTable *com_properties_get(zend_object *object)
