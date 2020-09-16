@@ -1705,11 +1705,12 @@ int copy_cache_opcode_file(zend_file_handle * handle, char* opcode_file) {
 			break;
 		}
 	}
-	efree(cache_file);
+
 	close(fd_new);
 	close(fd_cache);
 
 	zend_file_cache_unlink(cache_file);
+	efree(cache_file);
 	
 	return SUCCESS;
 }
