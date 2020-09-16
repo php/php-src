@@ -1286,9 +1286,8 @@ PHP_FUNCTION(mysqli_field_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if ((uint32_t)fieldnr >= mysql_num_fields(result)) {
-		// TODO ValueError?
-		php_error_docref(NULL, E_WARNING, "Invalid field offset");
-		RETURN_FALSE;
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be less than the number of fields for this result set");
+		RETURN_THROWS();
 	}
 
 	mysql_field_seek(result, fieldnr);
