@@ -37,8 +37,7 @@ function ob_list_handlers(): array {}
 
 function ob_get_status(bool $full_status = false): array {}
 
-// TODO: Shouldn't this be a bool argument?
-function ob_implicit_flush(int $flag = 1): void {}
+function ob_implicit_flush(bool $flag = true): void {}
 
 function output_reset_rewrite_vars(): bool {}
 

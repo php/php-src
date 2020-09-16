@@ -598,6 +598,8 @@ PHP 8.0 UPGRADE NOTES
   . sem_get() will now return an SysvSemaphore object rather than a resource.
     Return value checks using is_resource() should be replaced with checks
     for `false`.
+  . The $auto_release parameter of sem_get() was changed to accept bool values
+    rather than int.
 
 - Sysvshm:
   . shm_attach() will now return an SysvSharedMemory object rather than a resource.
@@ -786,6 +788,8 @@ PHP 8.0 UPGRADE NOTES
         array_diff($array, ...$excludes);
         // OK even if $arrays only contains a single array.
         array_intersect(...$arrays);
+  . The $flag parameter of ob_implicit_flush() was changed to accept bool
+    values rather than int.
 
 - Zip:
   . Extension updated to version 1.19.0
