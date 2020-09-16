@@ -1733,18 +1733,25 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		return NULL;
 	}
 
-	fd = zend_file_cache_open(ZSTR_VAL(full_path),  O_RDONLY | O_BINARY);
+	if(ZCG(accel_directives).allow_direct_exec_opcode) {
+		fd = zend_file_cache_open(ZSTR_VAL(full_path),  O_RDONLY | O_BINARY);
 
-	if(fd < 0 || check_jump_opcode_tag(fd) < 0) {
-		close(fd);
-		fd = -1;
+		if(fd < 0 || check_jump_opcode_tag(fd) < 0) {
+			close(fd);
+			fd = -1;
+		} else {
+			is_opfile = 1;
+		}
 	} else {
-		is_opfile = 1;
+		fd = -1;
 	}
+
 	if(fd < 0) {
 		filename = zend_file_cache_get_bin_file_path(full_path);
 		fd = zend_file_cache_open(filename, O_RDONLY | O_BINARY);
-		check_jump_opcode_tag(fd);
+		if(ZCG(accel_directives).allow_direct_exec_opcode) {
+			check_jump_opcode_tag(fd);
+		}
 	}
 	if (fd < 0) {
 		efree(filename);

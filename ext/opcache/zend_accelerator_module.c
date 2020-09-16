@@ -264,6 +264,8 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.error_log"                , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.error_log,                 zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.restrict_api"             , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.restrict_api,              zend_accel_globals, accel_globals)
 
+	STD_PHP_INI_ENTRY("opcache.allow_direct_exec_opcode" , "0"    , PHP_INI_SYSTEM, OnUpdateBool,	         accel_directives.allow_direct_exec_opcode,  zend_accel_globals, accel_globals)
+
 #ifndef ZEND_WIN32
 	STD_PHP_INI_ENTRY("opcache.lockfile_path"             , "/tmp"    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.lockfile_path,              zend_accel_globals, accel_globals)
 #else
@@ -719,6 +721,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 	array_init(&directives);
 	add_assoc_bool(&directives, "opcache.enable",              ZCG(enabled));
 	add_assoc_bool(&directives, "opcache.enable_cli",          ZCG(accel_directives).enable_cli);
+	add_assoc_bool(&directives, "opcache.allow_direct_exec_opcode", ZCG(accel_directives).allow_direct_exec_opcode);
 	add_assoc_bool(&directives, "opcache.use_cwd",             ZCG(accel_directives).use_cwd);
 	add_assoc_bool(&directives, "opcache.validate_timestamps", ZCG(accel_directives).validate_timestamps);
 	add_assoc_bool(&directives, "opcache.validate_permission", ZCG(accel_directives).validate_permission);
