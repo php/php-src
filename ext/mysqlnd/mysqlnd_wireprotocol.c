@@ -2144,7 +2144,9 @@ size_t php_mysqlnd_cached_sha2_result_write(MYSQLND_CONN_DATA * conn, void * _pa
 		int1store(buffer + MYSQLND_HEADER_SIZE, '\2');
 		sent = pfc->data->m.send(pfc, vio, buffer, 1, stats, error_info);
 	} else {
-		memcpy(buffer + MYSQLND_HEADER_SIZE, packet->password, packet->password_len);
+		if (packet->password_len != 0) {
+			memcpy(buffer + MYSQLND_HEADER_SIZE, packet->password, packet->password_len);
+		}
 		sent = pfc->data->m.send(pfc, vio, buffer, packet->password_len, stats, error_info);
 	}
 
