@@ -19,7 +19,7 @@ class PDOStatement implements IteratorAggregate
     /** @return int|false */
     public function columnCount() {}
 
-    /** @return false|null */
+    /** @return bool|null */
     public function debugDumpParams() {}
 
     /** @return string|false|null */

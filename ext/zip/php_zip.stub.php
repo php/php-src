@@ -111,17 +111,17 @@ class ZipArchive
     /** @return string|false */
     public function getArchiveComment(int $flags = 0) {}
 
-    /** @return null|false */
+    /** @return bool|null */
     public function setCommentIndex(int $index, string $comment) {}
 
-    /** @return null|false */
+    /** @return bool|null */
     public function setCommentName(string $name, string $comment) {}
 
 #ifdef HAVE_SET_MTIME
-    /** @return null|false */
+    /** @return bool|null */
     public function setMtimeIndex(int $index, int $timestamp, int $flags = 0) {}
 
-    /** @return null|false */
+    /** @return bool|null */
     public function setMtimeName(string $name, int $timestamp, int $flags = 0) {}
 #endif
 

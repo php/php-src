@@ -35,7 +35,7 @@ function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $sub
  */
 function imap_header($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
 
-function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): \stdClass {}
+function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): stdClass {}
 
 function imap_rfc822_write_address(string $mailbox, string $host, string $personal): string|false {}
 
@@ -52,7 +52,7 @@ function imap_fetchtext($stream_id, int $msg_no, int $options = 0): string|false
 
 /**
  * @param resource $stream_id
- * @return \stdClass|false
+ * @return stdClass|false
  */
 function imap_bodystruct($stream_id, int $msg_no, string $section) {}
 
@@ -166,12 +166,12 @@ function imap_utf8(string $mime_encoded_text): string {}
 
 /**
  * @param resource $stream_id
- * @return \stdClass|false
+ * @return stdClass|false
  */
 function imap_status($stream_id, string $mailbox, int $options) {}
 
 /** @param resource $stream_id */
-function imap_mailboxmsginfo($stream_id): \stdClass {}
+function imap_mailboxmsginfo($stream_id): stdClass {}
 
 /** @param resource $stream_id */
 function imap_setflag_full($stream_id, string $sequence, string $flag, int $options = 0): bool {}
@@ -222,7 +222,7 @@ function imap_errors(): array|false {}
 function imap_last_error(): string|false {}
 
 /** @param resource $stream_id */
-function imap_search($stream_id, string $criteria, int $options = \SE_FREE, string $charset = ''): array|false {}
+function imap_search($stream_id, string $criteria, int $options = SE_FREE, string $charset = ''): array|false {}
 
 function imap_utf7_decode(string $buf): string|false {}
 
@@ -237,7 +237,7 @@ function imap_mutf7_to_utf8(string $in): string|false {}
 function imap_mime_header_decode(string $str): array|false {}
 
 /** @param resource $stream_id */
-function imap_thread($stream_id, int $options = \SE_FREE): array|false {}
+function imap_thread($stream_id, int $options = SE_FREE): array|false {}
 
 function imap_timeout(int $timeout_type, int $timeout = -1): int|bool {}
 

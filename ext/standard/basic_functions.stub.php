@@ -745,7 +745,7 @@ function exec(string $command, &$output = null, &$result_code = null): string|fa
 function system(string $command, &$result_code = null): string|false {}
 
 /** @param int $result_code */
-function passthru(string $command, &$result_code = null): bool|null {}
+function passthru(string $command, &$result_code = null): ?bool {}
 
 function escapeshellcmd(string $command): string {}
 

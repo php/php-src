@@ -320,14 +320,14 @@ function ocifreecursor($statement_resource): bool {}
 /**
  * @param resource $connection_resource
  */
-function oci_close($connection_resource): bool|null {}
+function oci_close($connection_resource): ?bool {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_close
  * @deprecated
  */
-function ocilogoff($connection_resource): bool|null {}
+function ocilogoff($connection_resource): ?bool {}
 
 /**
  * @return resource|false
