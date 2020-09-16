@@ -14605,10 +14605,12 @@ static int zend_jit_in_array(dasm_State **Dst, const zend_op *opline, uint32_t o
 
 	|	// result = zend_hash_find_ex(ht, Z_STR_P(op1), OP1_TYPE == IS_CONST);
 	|	LOAD_ADDR FCARG1a, ht
-	|	GET_ZVAL_PTR FCARG2a, op1_addr
 	if (opline->op1_type != IS_CONST) {
+		|	GET_ZVAL_PTR FCARG2a, op1_addr
 		|	EXT_CALL zend_hash_find, r0
 	} else {
+		zend_string *str = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+		|	LOAD_ADDR FCARG2a, str
 		|	EXT_CALL _zend_hash_find_known_hash, r0
 	}
 	|	test r0, r0
