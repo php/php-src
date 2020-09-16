@@ -1703,6 +1703,13 @@ propagate_arg:
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
+				case ZEND_INIT_METHOD_CALL:
+					if (opline->op2_type != IS_CONST
+					 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING) {
+						break;
+					}
+					ADD_OP1_TRACE_GUARD();
+					break;
 				case ZEND_INIT_DYNAMIC_CALL:
 					if (orig_op2_type == IS_OBJECT && op2_ce == zend_ce_closure) {
 						ADD_OP2_TRACE_GUARD();
@@ -4979,31 +4986,76 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-					case ZEND_INIT_DYNAMIC_CALL:
-						if (orig_op2_type == IS_OBJECT && op2_ce == zend_ce_closure) {
-							op2_info = OP2_INFO();
-							CHECK_OP2_TRACE_TYPE();
-							if (!zend_jit_init_closure_call(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1)) {
-								goto jit_failure;
-							}
-							goto done;
-						}
-						/* break missing intentionally */
 					case ZEND_INIT_METHOD_CALL:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
+						if (opline->op2_type != IS_CONST
+						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING) {
+							goto generic_dynamic_call;
+						}
+						delayed_fetch_this = 0;
+						ce = NULL;
+						ce_is_instanceof = 0;
+						if (opline->op1_type == IS_UNUSED) {
+							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
+							ce = op_array->scope;
+							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							op1_addr = 0;
+						} else {
+							op1_info = OP1_INFO();
+							if (!(op1_info & MAY_BE_OBJECT)) {
+									goto generic_dynamic_call;
+							}
+							op1_addr = OP1_REG_ADDR();
+							if (orig_op1_type != IS_UNKNOWN
+							 && (orig_op1_type & IS_TRACE_REFERENCE)) {
+								if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
+										!ssa->var_info[ssa_op->op1_use].guarded_reference, 1)) {
+									goto jit_failure;
+								}
+								if (opline->op1_type == IS_CV
+								 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) == NO_ALIAS) {
+									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+								}
+							} else {
+								CHECK_OP1_TRACE_TYPE();
+							}
+							if (ssa->var_info && ssa->ops) {
+								if (ssa_op->op1_use >= 0) {
+									zend_ssa_var_info *op1_ssa = ssa->var_info + ssa_op->op1_use;
+									if (op1_ssa->ce && !op1_ssa->ce->create_object) {
+										ce = op1_ssa->ce;
+										ce_is_instanceof = op1_ssa->is_instanceof;
+									}
+								}
+							}
+							if (ssa_op->op1_use >= 0) {
+								delayed_fetch_this = ssa->var_info[ssa_op->op1_use].delayed_fetch_this;
+							}
+						}
+						if (!zend_jit_init_method_call(&dasm_state, opline,
+								op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1,
+								op_array, ssa, ssa_op, frame->call_level,
+								op1_info, op1_addr, ce, ce_is_instanceof, delayed_fetch_this, op1_ce,
+								p + 1)) {
 							goto jit_failure;
 						}
-						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
-							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
-								goto jit_failure;
-							}
+						goto done;
+					case ZEND_INIT_DYNAMIC_CALL:
+						if (orig_op2_type != IS_OBJECT || op2_ce != zend_ce_closure) {
+							goto generic_dynamic_call;
+						}
+						op2_info = OP2_INFO();
+						CHECK_OP2_TRACE_TYPE();
+						if (!zend_jit_init_closure_call(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1)) {
+							goto jit_failure;
 						}
 						goto done;
 					case ZEND_INIT_STATIC_METHOD_CALL:
+generic_dynamic_call:
 						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
-						if ((opline->op1_type != IS_CONST
+						if ((opline->opcode != ZEND_INIT_STATIC_METHOD_CALL
+						  || opline->op1_type != IS_CONST
 						  || opline->op2_type != IS_CONST)
 						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
 							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {

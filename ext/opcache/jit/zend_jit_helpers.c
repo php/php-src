@@ -90,6 +90,109 @@ static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name
 	return fbc;
 }
 
+static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = EX(opline);
+	zval *function_name = function_name = RT_CONSTANT(opline, opline->op2);;
+
+	if (Z_TYPE_P(object) == IS_UNDEF && opline->op1_type == IS_CV) {
+		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
+
+		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			return;
+		}
+		object = &EG(uninitialized_zval);
+	}
+	zend_throw_error(NULL, "Call to a member function %s() on %s",
+		Z_STRVAL_P(function_name), zend_zval_type_name(object));
+	if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	}
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
+{
+	zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
+}
+
+static void ZEND_FASTCALL zend_jit_unref_helper(zval *zv)
+{
+	zend_reference *ref;
+
+	ZEND_ASSERT(Z_ISREF_P(zv));
+	ref = Z_REF_P(zv);
+	ZVAL_COPY_VALUE(zv, &ref->val);
+	if (GC_DELREF(ref) == 0) {
+		efree_size(ref, sizeof(zend_reference));
+	} else {
+		Z_TRY_ADDREF_P(zv);
+	}
+}
+
+static zend_function* ZEND_FASTCALL zend_jit_find_method_helper(zend_object *obj, zval *function_name, zend_object **obj_ptr)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = EX(opline);
+	zend_class_entry *called_scope = obj->ce;
+	zend_object *orig_obj = obj;
+	zend_function *fbc;
+
+	fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), function_name + 1);
+	if (UNEXPECTED(fbc == NULL)) {
+		if (EXPECTED(!EG(exception))) {
+			zend_undefined_method(called_scope, Z_STR_P(function_name));
+		}
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
+			zend_objects_store_del(orig_obj);
+		}
+		return NULL;
+	}
+
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		zend_init_func_run_time_cache(&fbc->op_array);
+	}
+
+	if (UNEXPECTED(obj != orig_obj)) {
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			GC_ADDREF(obj);
+			if (GC_DELREF(orig_obj) == 0) {
+				zend_objects_store_del(orig_obj);
+			}
+		}
+		*obj_ptr = obj;
+		return fbc;
+	}
+
+	if (EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)))) {
+		CACHE_POLYMORPHIC_PTR(opline->result.num, called_scope, fbc);
+	}
+
+	return fbc;
+}
+
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_metod_call_frame(zend_object *obj, zend_function *fbc, uint32_t num_args)
+{
+	zend_class_entry *scope = obj->ce;
+
+	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, num_args, scope);
+}
+
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_metod_call_frame_tmp(zend_object *obj, zend_function *fbc, uint32_t num_args)
+{
+	zend_class_entry *scope = obj->ce;
+
+	if (GC_DELREF(obj) == 0) {
+		zend_objects_store_del(obj);
+		if (UNEXPECTED(EG(exception))) {
+			return NULL;
+		}
+	}
+
+	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, num_args, scope);
+}
+
 static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t used_stack, zend_function *fbc)
 {
 	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
