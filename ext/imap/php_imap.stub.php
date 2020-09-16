@@ -35,7 +35,7 @@ function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $sub
  */
 function imap_header($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
 
-function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): stdClass {}
+function imap_rfc822_parse_headers(string $headers, string $default_host = "UNKNOWN"): stdClass {}
 
 function imap_rfc822_write_address(string $mailbox, string $host, string $personal): string|false {}
 
@@ -66,7 +66,7 @@ function imap_fetchmime($stream_id, int $msg_no, string $section, int $options =
  * @param resource $stream_id
  * @param resource|string|int $file
  */
-function imap_savebody($stream_id, $file, int $msg_no, string $section = '', int $options = 0): bool {}
+function imap_savebody($stream_id, $file, int $msg_no, string $section = "", int $options = 0): bool {}
 
 /** @param resource $stream_id */
 function imap_fetchheader($stream_id, int $msg_no, int $options = 0): string|false {}
@@ -222,7 +222,7 @@ function imap_errors(): array|false {}
 function imap_last_error(): string|false {}
 
 /** @param resource $stream_id */
-function imap_search($stream_id, string $criteria, int $options = SE_FREE, string $charset = ''): array|false {}
+function imap_search($stream_id, string $criteria, int $options = SE_FREE, string $charset = ""): array|false {}
 
 function imap_utf7_decode(string $buf): string|false {}
 

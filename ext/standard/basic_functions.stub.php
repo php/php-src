@@ -502,9 +502,9 @@ function header(string $string, bool $replace = true, int $http_response_code = 
 
 function header_remove(?string $name = null): void {}
 
-function setrawcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setrawcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
 
-function setcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
 
 function http_response_code(int $response_code = 0): int|bool {}
 
@@ -660,7 +660,7 @@ function setlocale(int $category, $locales, ...$rest): string|false {}
 /** @param array $result */
 function parse_str(string $encoded_string, &$result): void {}
 
-function str_getcsv(string $string, string $delimiter = ',', string $enclosure = '"', string $escape = '\\'): array {}
+function str_getcsv(string $string, string $delimiter = ",", string $enclosure = "\"", string $escape = '\\'): array {}
 
 function str_repeat(string $input, int $mult): string {}
 
@@ -865,7 +865,7 @@ function file_put_contents(string $filename, mixed $content, int $flags = 0, $co
 function fputcsv($handle, array $fields, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
 
 /** @param resource $handle */
-function fgetcsv($handle, ?int $length = null, string $delimiter = ",", string $enclosure = '"', string $escape = "\\"): array|false {}
+function fgetcsv($handle, ?int $length = null, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
 
 function realpath(string $path): string|false {}
 

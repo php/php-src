@@ -4,7 +4,7 @@
 
 function xml_parser_create(?string $encoding = null): XmlParser {}
 
-function xml_parser_create_ns(?string $encoding = null, string $sep = ':'): XmlParser {}
+function xml_parser_create_ns(?string $encoding = null, string $sep = ":"): XmlParser {}
 
 function xml_set_object(XmlParser $parser, object $obj): bool {}
 
