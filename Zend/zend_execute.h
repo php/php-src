@@ -311,14 +311,14 @@ ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
 ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
-ZEND_API zend_string *get_active_function_or_method_name();
+ZEND_API zend_string *get_active_function_or_method_name(void);
 ZEND_API zend_string *get_function_or_method_name(const zend_function *func);
 ZEND_API const char *zend_get_executed_filename(void);
 ZEND_API zend_string *zend_get_executed_filename_ex(void);
 ZEND_API uint32_t zend_get_executed_lineno(void);
 ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API zend_bool zend_is_executing(void);
-ZEND_API ZEND_COLD void zend_cannot_pass_by_reference(uint32_t arg_num);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num);
 
 ZEND_API void zend_set_timeout(zend_long seconds, bool reset_signals);
 ZEND_API void zend_unset_timeout(void);
@@ -418,7 +418,7 @@ ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 
-zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
+ZEND_API zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
 ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
 
 #define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \

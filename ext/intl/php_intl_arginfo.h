@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fdc7c500ddc5bc560ec54b7ce12d5961a4697a63 */
+ * Stub hash: 324b7ae3eaab4777117c1c6963bc841088e6b998 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timeZone, "null")
@@ -281,7 +281,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_datefmt_create, 0, 3, IntlDateFor
 	ZEND_ARG_TYPE_INFO(0, datetype, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, timetype, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, calendar, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
@@ -295,7 +295,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_calendar, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
-	ZEND_ARG_INFO(0, which)
+	ZEND_ARG_OBJ_TYPE_MASK(0, which, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_get_timezone_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)

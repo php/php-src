@@ -156,12 +156,22 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 /* {{{ Set formatter's calendar. */
 U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 {
-	zval	*calendar_zv;
+	zend_object *calendar_obj;
+	zend_long calendar_long;
+	zend_bool calendar_is_null;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz",
-			&object, IntlDateFormatter_ce_ptr, &calendar_zv) == FAILURE) {
-		RETURN_THROWS();
+	object = getThis();
+
+	if (object) {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_OBJECT_OF_CLASS(object, IntlDateFormatter_ce_ptr)
+			Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -174,9 +184,9 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	// because we would have lost modifiers such as @calendar. We
 	// must store the requested locale on object creation
 
-	if (datefmt_process_calendar_arg(calendar_zv, locale,
-			"datefmt_set_calendar",	INTL_DATA_ERROR_P(dfo), cal, cal_type,
-			cal_owned) == FAILURE) {
+	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale,
+			"datefmt_set_calendar",	INTL_DATA_ERROR_P(dfo), cal, cal_type, cal_owned) == FAILURE
+	) {
 		RETURN_FALSE;
 	}
 

@@ -57,5 +57,5 @@ gmp_pow(): Argument #2 ($exp) must be greater than or equal to 0
 string(14) "10240000000000"
 string(14) "10240000000000"
 gmp_pow(): Argument #2 ($exp) must be of type int, array given
-gmp_pow(): Argument #1 ($base) must be of type GMP|string|int|bool, array given
+gmp_pow(): Argument #1 ($base) must be of type GMP|string|int, array given
 Done

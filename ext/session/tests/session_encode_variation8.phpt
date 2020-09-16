@@ -23,7 +23,7 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_encode() : variation ***
 
-Warning: session_start(): Cannot find serialization handler 'blah' - session startup failed in %s on line %d
+Warning: session_start(): Cannot find session serialization handler "blah" - session startup failed in %s on line %d
 bool(false)
 
 Warning: session_encode(): Cannot encode non-existent session in %s on line %d

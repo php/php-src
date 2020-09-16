@@ -52,10 +52,9 @@ PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
-// TODO Use standard Error
 #define CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(spl_filesystem_object_pointer) \
 	if (!(spl_filesystem_object_pointer)->u.file.stream) { \
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized"); \
+		zend_throw_error(NULL, "Object not initialized"); \
 		RETURN_THROWS(); \
 	}
 
@@ -209,7 +208,7 @@ static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *int
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
 			if (!intern->file_name) {
-				zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+				zend_throw_error(NULL, "Object not initialized");
 				return FAILURE;
 			}
 			break;
@@ -721,19 +720,19 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 		flags |= SPL_FILE_DIR_UNIXPATHS;
 	}
 	if (parsed == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	if (!len) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Directory name must not be empty.");
-		return;
+	if (len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	if (intern->_path) {
 		/* object is already initialized */
 		zend_throw_error(NULL, "Directory object is already initialized");
-		return;
+		RETURN_THROWS();
 	}
 	intern->flags = flags;
 
@@ -1393,9 +1392,7 @@ PHP_METHOD(SplFileInfo, __debugInfo)
 /* {{{ */
 PHP_METHOD(SplFileInfo, _bad_state_ex)
 {
-	zend_throw_exception_ex(spl_ce_LogicException, 0,
-		"The parent constructor was not called: the object is in an "
-		"invalid state ");
+	zend_throw_error(NULL, "The parent constructor was not called: the object is in an invalid state");
 }
 /* }}} */
 
@@ -1612,7 +1609,7 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 	spl_filesystem_object *dir_object;
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
@@ -1819,7 +1816,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	spl_filesystem_object *dir_object;
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
@@ -2021,7 +2018,7 @@ static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object 
 static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
 	if (!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		return;
 	}
 	if (-1 == php_stream_rewind(intern->u.file.stream)) {
@@ -2280,7 +2277,7 @@ PHP_METHOD(SplFileObject, setMaxLineLen)
 	}
 
 	if (max_len < 0) {
-		zend_throw_exception_ex(spl_ce_DomainException, 0, "Maximum line length must be greater than or equal zero");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -2727,7 +2724,7 @@ PHP_METHOD(SplFileObject, seek)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (line_pos < 0) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line " ZEND_LONG_FMT, intern->file_name, line_pos);
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 

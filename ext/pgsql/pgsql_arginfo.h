@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2ae99621cf060e986e354587ec34766d12b89d6c */
+ * Stub hash: 90dd576049fe13617343fe689000b94b20f47655 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -126,7 +126,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_fetch_result, 0, 2, MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row_number)
-	ZEND_ARG_INFO(0, field)
+	ZEND_ARG_TYPE_MASK(0, field, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_result arginfo_pg_fetch_result
@@ -152,7 +152,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_fetch_object, 0, 1, MAY_BE_OB
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row_number, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 0, "\"stdClass\"")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, ctor_params, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ctor_params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_fetch_all, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -173,7 +173,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_field_prtlen, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row_number)
-	ZEND_ARG_INFO(0, field)
+	ZEND_ARG_TYPE_MASK(0, field, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_fieldprtlen arginfo_pg_field_prtlen
@@ -380,7 +380,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_result_status, 0, 1, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_result_status, 0, 1, MAY_BE_STRING|MAY_BE_LONG)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_type, IS_LONG, 0, "PGSQL_STATUS_LONG")
 ZEND_END_ARG_INFO()
@@ -437,6 +437,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_select, 0, 3, MAY_BE_ARRAY|MA
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, ids, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_type, IS_LONG, 0, "PGSQL_ASSOC")
 ZEND_END_ARG_INFO()
 
 

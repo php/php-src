@@ -45,7 +45,11 @@ for ($i = 5; $i >= 0; $i--) {
 
     $row = oci_fetch_array($s);
     var_dump($row['BLOB']->load());
-    var_dump($row['BLOB']->truncate(($i-1)*10));
+    try {
+        var_dump($row['BLOB']->truncate(($i-1)*10));
+    } catch (ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
     oci_commit($c);
 }
@@ -56,8 +60,13 @@ oci_execute($s, OCI_DEFAULT);
 
 $row = oci_fetch_array($s);
 var_dump($row['BLOB']->load());
-var_dump($row['BLOB']->truncate(-1));
 var_dump($row['BLOB']->truncate(0));
+
+try {
+    var_dump($row['BLOB']->truncate(-1));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 oci_commit($c);
 
@@ -95,12 +104,8 @@ bool(true)
 string(10) "this is a "
 bool(true)
 string(0) ""
-
-Warning: OCILob::truncate(): Length must be greater than or equal to zero in %s on line %d
-bool(false)
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 string(0) ""
-
-Warning: OCILob::truncate(): Length must be greater than or equal to zero in %s on line %d
-bool(false)
 bool(true)
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 Done

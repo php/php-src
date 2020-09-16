@@ -4,12 +4,9 @@ Bug #44562 (Creating instance of DatePeriod crashes)
 <?php
 date_default_timezone_set('Europe/Oslo');
 
-try
-{
+try {
     $dp = new DatePeriod('2D');
-}
-catch ( Exception $e )
-{
+} catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
 

@@ -79,9 +79,4 @@ Fatal error: Uncaught Error: Session id must be a string in %s:%d
 Stack trace:
 #0 %s(%d): session_start()
 #1 {main}
-
-Next Error: Failed to create session ID: user (path: %s) in %s:%d
-Stack trace:
-#0 %s(%d): session_start()
-#1 {main}
   thrown in %s on line %d

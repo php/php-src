@@ -41,4 +41,4 @@ array(3) {
   [2]=>
   int(30)
 }
-{closure}(): Argument #2 ($args) must be of type ?int, string given, called in %s on line %d
+{closure}(): Argument #2 must be of type ?int, string given, called in %s on line %d

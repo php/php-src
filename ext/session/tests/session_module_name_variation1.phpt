@@ -20,7 +20,7 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_module_name() : variation ***
 
-Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
+Warning: session_module_name(): Session handler module "blah" cannot be found in %s on line %d
 bool(false)
 bool(true)
 string(%d) "%s"

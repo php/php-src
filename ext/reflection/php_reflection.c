@@ -1496,7 +1496,7 @@ ZEND_METHOD(ReflectionFunction, __construct)
 	intern = Z_REFLECTION_P(object);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(fname, closure_obj, zend_ce_closure)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(closure_obj, zend_ce_closure, fname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (closure_obj) {
@@ -2976,81 +2976,83 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 /* {{{ Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(ReflectionMethod, __construct)
 {
-	zval *classname;
-	zval *object, *orig_obj;
-	reflection_object *intern;
-	char *lcname;
-	zend_class_entry *ce;
-	zend_function *mptr;
-	char *name_str, *tmp;
-	size_t name_len, tmp_len;
-	zval ztmp;
+	zend_object *arg1_obj;
+	zend_string *arg1_str;
+	zend_string *arg2_str = NULL;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+	zend_object *orig_obj = NULL;
+	zend_class_entry *ce = NULL;
+	zend_string *class_name = NULL;
+	char *method_name;
+	size_t method_name_len;
+	char *lcname;
+
+	zval *object;
+	reflection_object *intern;
+	zend_function *mptr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(arg2_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (arg1_obj) {
+		if (!arg2_str) {
+			zend_argument_value_error(2, "cannot be null when argument #1 ($objectOrMethod) is an object");
 			RETURN_THROWS();
 		}
 
-		if ((tmp = strstr(name_str, "::")) == NULL) {
+		orig_obj = arg1_obj;
+		ce = arg1_obj->ce;
+		method_name = ZSTR_VAL(arg2_str);
+		method_name_len = ZSTR_LEN(arg2_str);
+	} else if (arg2_str) {
+		class_name = zend_string_copy(arg1_str);
+		method_name = ZSTR_VAL(arg2_str);
+		method_name_len = ZSTR_LEN(arg2_str);
+	} else {
+		char *tmp;
+		size_t tmp_len;
+		char *name = ZSTR_VAL(arg1_str);
+
+		if ((tmp = strstr(name, "::")) == NULL) {
 			zend_argument_error(reflection_exception_ptr, 1, "must be a valid method name");
 			RETURN_THROWS();
 		}
-		classname = &ztmp;
-		tmp_len = tmp - name_str;
-		ZVAL_STRINGL(classname, name_str, tmp_len);
-		name_len = name_len - (tmp_len + 2);
-		name_str = tmp + 2;
-		orig_obj = NULL;
-	} else if (Z_TYPE_P(classname) == IS_OBJECT) {
-		orig_obj = classname;
-	} else {
-		orig_obj = NULL;
+		tmp_len = tmp - name;
+
+		class_name = zend_string_init(name, tmp_len, 0);
+		method_name = tmp + 2;
+		method_name_len = ZSTR_LEN(arg1_str) - tmp_len - 2;
+	}
+
+	if (class_name) {
+		if ((ce = zend_lookup_class(class_name)) == NULL) {
+			if (!EG(exception)) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0, "Class \"%s\" does not exist", ZSTR_VAL(class_name));
+			}
+			zend_string_release(class_name);
+			RETURN_THROWS();
+		}
+
+		zend_string_release(class_name);
 	}
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
-	switch (Z_TYPE_P(classname)) {
-		case IS_STRING:
-			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
-				if (!EG(exception)) {
-					zend_throw_exception_ex(reflection_exception_ptr, 0,
-							"Class \"%s\" does not exist", Z_STRVAL_P(classname));
-				}
-				if (classname == &ztmp) {
-					zval_ptr_dtor_str(&ztmp);
-				}
-				RETURN_THROWS();
-			}
-			break;
+	lcname = zend_str_tolower_dup(method_name, method_name_len);
 
-		case IS_OBJECT:
-			ce = Z_OBJCE_P(classname);
-			break;
-
-		default:
-			if (classname == &ztmp) {
-				zval_ptr_dtor_str(&ztmp);
-			}
-			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_name(classname));
-			RETURN_THROWS();
-	}
-
-	if (classname == &ztmp) {
-		zval_ptr_dtor_str(&ztmp);
-	}
-
-	lcname = zend_str_tolower_dup(name_str, name_len);
-
-	if (ce == zend_ce_closure && orig_obj && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+	if (ce == zend_ce_closure && orig_obj && (method_name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& (mptr = zend_get_closure_invoke_method(Z_OBJ_P(orig_obj))) != NULL)
+		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
 		/* do nothing, mptr already set */
-	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, name_len)) == NULL) {
+	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), name_str);
+			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), method_name);
 		RETURN_THROWS();
 	}
 	efree(lcname);
@@ -3511,7 +3513,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	zend_class_constant *constant = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR_OR_OBJ(classname_str, classname_obj)
+		Z_PARAM_OBJ_OR_STR(classname_obj, classname_str)
 		Z_PARAM_STR(constname)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3696,7 +3698,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		ZEND_PARSE_PARAMETERS_END();
 	} else {
 		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_STR_OR_OBJ(arg_class, arg_obj)
+			Z_PARAM_OBJ_OR_STR(arg_obj, arg_class)
 		ZEND_PARSE_PARAMETERS_END();
 	}
 
@@ -4920,7 +4922,7 @@ ZEND_METHOD(ReflectionClass, isSubclassOf)
 	zend_object *class_obj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(class_str, class_obj, reflection_class_ptr)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(class_obj, reflection_class_ptr, class_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (class_obj) {
@@ -4953,7 +4955,7 @@ ZEND_METHOD(ReflectionClass, implementsInterface)
 	zend_object *interface_obj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(interface_str, interface_obj, reflection_class_ptr)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(interface_obj, reflection_class_ptr, interface_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (interface_obj) {
@@ -5122,7 +5124,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	property_reference *reference;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR_OR_OBJ(classname_str, classname_obj)
+		Z_PARAM_OBJ_OR_STR(classname_obj, classname_str)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -6082,20 +6084,20 @@ static zend_bool is_ignorable_reference(HashTable *ht, zval *ref) {
 ZEND_METHOD(ReflectionReference, fromArrayElement)
 {
 	HashTable *ht;
-	zval *key, *item;
+	zval *item;
+	zend_string *string_key = NULL;
+	zend_long int_key = 0;
 	reflection_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "hz", &ht, &key) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_HT(ht)
+		Z_PARAM_STR_OR_LONG(string_key, int_key)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(key) == IS_LONG) {
-		item = zend_hash_index_find(ht, Z_LVAL_P(key));
-	} else if (Z_TYPE_P(key) == IS_STRING) {
-		item = zend_symtable_find(ht, Z_STR_P(key));
+	if (string_key) {
+		item = zend_hash_find(ht, string_key);
 	} else {
-		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(key));
-		RETURN_THROWS();
+		item = zend_hash_index_find(ht, int_key);
 	}
 
 	if (!item) {

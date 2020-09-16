@@ -1191,30 +1191,22 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	/* according to error handling mode, throw exception or show it */
 	if (EG(error_handling) == EH_THROW) {
 		switch (type) {
-			case E_ERROR:
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-			case E_PARSE:
-				/* fatal errors are real errors and cannot be made exceptions */
-				break;
-			case E_STRICT:
-			case E_DEPRECATED:
-			case E_USER_DEPRECATED:
-				/* for the sake of BC to old damaged code */
-				break;
-			case E_NOTICE:
-			case E_USER_NOTICE:
-				/* notices are no errors and are not treated as such like E_WARNINGS */
-				break;
-			default:
-				/* throw an exception if we are in EH_THROW mode
-				 * but DO NOT overwrite a pending exception
+			case E_WARNING:
+			case E_CORE_WARNING:
+			case E_COMPILE_WARNING:
+			case E_USER_WARNING:
+				/* throw an exception if we are in EH_THROW mode and the type is warning.
+				 * fatal errors are real errors and cannot be made exceptions.
+				 * exclude deprecated for the sake of BC to old damaged code.
+				 * notices are no errors and are not treated as such like E_WARNINGS.
+				 * DO NOT overwrite a pending exception.
 				 */
 				if (!EG(exception)) {
 					zend_throw_error_exception(EG(exception_class), message, 0, type);
 				}
 				return;
+			default:
+				break;
 		}
 	}
 
@@ -2053,8 +2045,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_startup(&zuf);
 	zend_update_current_locale();
 
+	zend_observer_startup();
 #if ZEND_DEBUG
-	zend_register_error_notify_callback(report_zend_debug_error_notify_cb);
+	zend_observer_error_register(report_zend_debug_error_notify_cb);
 #endif
 
 #if HAVE_TZSET
@@ -2201,7 +2194,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
-	zend_observer_startup();
 
 	/* Begin to fingerprint the process state */
 	zend_startup_system_id();

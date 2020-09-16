@@ -124,8 +124,8 @@ PHP_FUNCTION(dns_check_record)
 		else if (!strcasecmp("NAPTR", rectype)) type = DNS_TYPE_NAPTR;
 		else if (!strcasecmp("A6",    rectype)) type = DNS_TYPE_A6;
 		else {
-			php_error_docref(NULL, E_WARNING, "Type '%s' not supported", rectype);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a valid DNS record type");
+			RETURN_THROWS();
 		}
 	}
 
@@ -373,14 +373,13 @@ PHP_FUNCTION(dns_get_record)
 
 	if (!raw) {
 		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
-			php_error_docref(NULL, E_WARNING, "Type '%ld' not supported", type_param);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a DNS_* constant");
+			RETURN_THROWS();
 		}
 	} else {
 		if ((type_param < 1) || (type_param > 0xFFFF)) {
-			php_error_docref(NULL, E_WARNING,
-				"Numeric DNS record type must be between 1 and 65535, '%ld' given", type_param);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be between 1 and 65535 when argument #5 ($raw) is true");
+			RETURN_THROWS();
 		}
 	}
 

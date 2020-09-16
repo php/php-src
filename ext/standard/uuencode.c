@@ -222,7 +222,7 @@ PHP_FUNCTION(convert_uudecode)
 	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	if ((dest = php_uudecode(ZSTR_VAL(src), ZSTR_LEN(src))) == NULL) {
-		php_error_docref(NULL, E_WARNING, "The given parameter is not a valid uuencoded string");
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($data) is not a valid uuencoded string");
 		RETURN_FALSE;
 	}
 

@@ -413,7 +413,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 
 	zend_stream_init_fp(&fh, VCWD_FOPEN(filename, "r"), filename);
 	if (!fh.handle.fp) {
-		zend_error(E_CORE_WARNING, "Cannot open '%s' for reading", filename);
+		zend_error(E_CORE_WARNING, "Cannot open \"%s\" for reading", filename);
 		return FAILURE;
 	}
 

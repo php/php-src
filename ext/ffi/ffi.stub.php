@@ -61,3 +61,7 @@ final class FFI
     /** @prefer-ref $ptr */
     public static function isNull(FFI\CData $ptr): bool {}
 }
+
+final class CType {
+    public function getName() : string {}
+}

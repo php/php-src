@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8e8fea5b33408e8a1a39c1b1ae71f16fe1bdd391 */
+ * Stub hash: 8270971708afa7fa9d82bec0f84c66cc8283f17d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_preg_match, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -38,7 +38,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_preg_replace_callback_array, 0, 2, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, subject)
+	ZEND_ARG_TYPE_MASK(0, subject, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "-1")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, count, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")

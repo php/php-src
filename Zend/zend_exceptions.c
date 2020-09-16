@@ -28,6 +28,7 @@
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions_arginfo.h"
+#include "zend_observer.h"
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
@@ -900,7 +901,7 @@ static void zend_error_va(int type, const char *file, uint32_t lineno, const cha
 	va_list args;
 	va_start(args, format);
 	zend_string *message = zend_vstrpprintf(0, format, args);
-	zend_error_notify_all_callbacks(type, file, lineno, message);
+	zend_observer_error_notify(type, file, lineno, message);
 	zend_error_cb(type, file, lineno, message);
 	zend_string_release(message);
 	va_end(args);
@@ -923,7 +924,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 		int type = (ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR) | E_DONT_BAIL;
 
-		zend_error_notify_all_callbacks(type, ZSTR_VAL(file), line, message);
+		zend_observer_error_notify(type, ZSTR_VAL(file), line, message);
 		zend_error_cb(type, ZSTR_VAL(file), line, message);
 
 		zend_string_release_ex(file, 0);

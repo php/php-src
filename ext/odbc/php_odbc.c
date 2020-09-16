@@ -787,6 +787,11 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_THROWS();
 	}
 
+	if (pv_num < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
@@ -794,11 +799,6 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	if (pv_num > result->numcols) {
 		php_error_docref(NULL, E_WARNING, "Field index larger than number of fields");
-		RETURN_FALSE;
-	}
-
-	if (pv_num < 1) {
-		php_error_docref(NULL, E_WARNING, "Field numbering starts at 1");
 		RETURN_FALSE;
 	}
 
@@ -963,7 +963,8 @@ PHP_FUNCTION(odbc_prepare)
 /* {{{ Execute a prepared statement */
 PHP_FUNCTION(odbc_execute)
 {
-	zval *pv_res, *pv_param_arr, *tmp;
+	zval *pv_res, *tmp;
+	HashTable *pv_param_ht;
 	typedef struct params_t {
 		SQLLEN vallen;
 		int fp;
@@ -976,7 +977,7 @@ PHP_FUNCTION(odbc_execute)
 	int numArgs = ZEND_NUM_ARGS(), i, ne;
 	RETCODE rc;
 
-	if (zend_parse_parameters(numArgs, "r|a", &pv_res, &pv_param_arr) == FAILURE) {
+	if (zend_parse_parameters(numArgs, "r|h", &pv_res, &pv_param_ht) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -991,19 +992,19 @@ PHP_FUNCTION(odbc_execute)
 	}
 
 	if (result->numparams > 0) {
-		if ((ne = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr))) < result->numparams) {
+		if ((ne = zend_hash_num_elements(pv_param_ht)) < result->numparams) {
 			php_error_docref(NULL, E_WARNING,"Not enough parameters (%d should be %d) given", ne, result->numparams);
 			RETURN_FALSE;
 		}
 
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(pv_param_arr));
+		zend_hash_internal_pointer_reset(pv_param_ht);
 		params = (params_t *)safe_emalloc(sizeof(params_t), result->numparams, 0);
 		for(i = 0; i < result->numparams; i++) {
 			params[i].fp = -1;
 		}
 
 		for(i = 1; i <= result->numparams; i++) {
-			if ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(pv_param_arr))) == NULL) {
+			if ((tmp = zend_hash_get_current_data(pv_param_ht)) == NULL) {
 				php_error_docref(NULL, E_WARNING,"Error getting parameter");
 				SQLFreeStmt(result->stmt,SQL_RESET_PARAMS);
 				for (i = 0; i < result->numparams; i++) {
@@ -1104,7 +1105,7 @@ PHP_FUNCTION(odbc_execute)
 				efree(params);
 				RETURN_FALSE;
 			}
-			zend_hash_move_forward(Z_ARRVAL_P(pv_param_arr));
+			zend_hash_move_forward(pv_param_ht);
 		}
 	}
 	/* Close cursor, needed for doing multiple selects */
@@ -1246,8 +1247,8 @@ PHP_FUNCTION(odbc_data_source)
 	fetch_type = (SQLSMALLINT) zv_fetch_type;
 
 	if (!(fetch_type == SQL_FETCH_FIRST || fetch_type == SQL_FETCH_NEXT)) {
-		php_error_docref(NULL, E_WARNING, "Invalid fetch type (%d)", fetch_type);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be either SQL_FETCH_FIRST or SQL_FETCH_NEXT");
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(zv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -2209,8 +2210,9 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			cur_opt == SQL_CUR_USE_ODBC ||
 			cur_opt == SQL_CUR_USE_DRIVER ||
 			cur_opt == SQL_CUR_DEFAULT) ) {
-			php_error_docref(NULL, E_WARNING, "Invalid Cursor type (%d)", cur_opt);
-			RETURN_FALSE;
+			zend_argument_value_error(4, "must be one of SQL_CUR_USE_IF_NEEDED, "
+				"SQL_CUR_USE_ODBC, or SQL_CUR_USE_DRIVER");
+			RETURN_THROWS();
 		}
 	}
 
@@ -2483,6 +2485,11 @@ PHP_FUNCTION(odbc_field_name)
 		RETURN_THROWS();
 	}
 
+	if (pv_num < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
@@ -2490,11 +2497,6 @@ PHP_FUNCTION(odbc_field_name)
 
 	if (pv_num > result->numcols) {
 		php_error_docref(NULL, E_WARNING, "Field index larger than number of fields");
-		RETURN_FALSE;
-	}
-
-	if (pv_num < 1) {
-		php_error_docref(NULL, E_WARNING, "Field numbering starts at 1");
 		RETURN_FALSE;
 	}
 
@@ -2519,6 +2521,11 @@ PHP_FUNCTION(odbc_field_type)
 		RETURN_THROWS();
 	}
 
+	if (pv_num < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
@@ -2526,11 +2533,6 @@ PHP_FUNCTION(odbc_field_type)
 
 	if (pv_num > result->numcols) {
 		php_error_docref(NULL, E_WARNING, "Field index larger than number of fields");
-		RETURN_FALSE;
-	}
-
-	if (pv_num < 1) {
-		php_error_docref(NULL, E_WARNING, "Field numbering starts at 1");
 		RETURN_FALSE;
 	}
 
@@ -2733,9 +2735,8 @@ PHP_FUNCTION(odbc_setoption)
 			}
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option type");
-			RETURN_FALSE;
-			break;
+			zend_argument_value_error(2, "must be 1 for SQLSetConnectOption(), or 2 for SQLSetStmtOption()");
+			RETURN_THROWS();
 	}
 
 	RETURN_TRUE;

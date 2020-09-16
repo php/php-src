@@ -51,8 +51,12 @@ require_once('skipifconnectfailure.inc');
         printf("[013] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
     $label = null;
-    if (mysqli_stmt_bind_param($stmt, "s", $label))
-        printf("[014] expected error - got ok\n");
+    try {
+        if (mysqli_stmt_bind_param($stmt, "s", $label))
+            printf("[014] expected error - got ok\n");
+    } catch (\ArgumentCountError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     while (mysqli_stmt_fetch($stmt))
         if (1 !== ($tmp = mysqli_stmt_field_count($stmt)))
             printf("[015] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
@@ -91,11 +95,10 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 mysqli_stmt object is not fully initialized
 mysqli_stmt object is not fully initialized
-
-Warning: mysqli_stmt_bind_param(): Number of variables doesn't match number of parameters in prepared statement in %s on line %d
+The number of variables must match the number of parameters in the prepared statement
 mysqli_stmt object is already closed
 mysqli_stmt object is already closed
 done!

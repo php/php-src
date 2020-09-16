@@ -13,7 +13,7 @@ class XMLReader
     /** @return string|null */
     public function getAttributeNo(int $index) {}
 
-    /** @return string|null|false */
+    /** @return string|null */
     public function getAttributeNs(string $name, string $namespaceURI) {}
 
     /** @return bool */
@@ -76,6 +76,6 @@ class XMLReader
     /** @return bool|XMLReader */
     public static function XML(string $source, ?string $encoding = null, int $options = 0) {}
 
-    /** @return DOMNode|bool */
+    /** @return DOMNode|false|null */
     public function expand(?DOMNode $basenode = null) {}
 }

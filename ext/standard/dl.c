@@ -54,7 +54,7 @@ PHPAPI PHP_FUNCTION(dl)
 	}
 
 	if (filename_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		php_error_docref(NULL, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 

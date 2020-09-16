@@ -238,7 +238,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 14, 15, 24...)                    |     |     |     */
+/* Class Flags (unused: 22...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -264,30 +264,30 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_NO_DYNAMIC_PROPERTIES   (1 << 13) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
-#define ZEND_HAS_STATIC_IN_METHODS       (1 << 16) /*  X  |     |     |     */
+#define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Whether all property types are resolved to CEs         |     |     |     */
-#define ZEND_ACC_PROPERTY_TYPES_RESOLVED (1 << 17) /*  X  |     |     |     */
+#define ZEND_ACC_PROPERTY_TYPES_RESOLVED (1 << 15) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Children must reuse parent get_iterator()              |     |     |     */
-#define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 18) /*  X  |     |     |     */
+#define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 16) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Parent class is resolved (CE).                         |     |     |     */
-#define ZEND_ACC_RESOLVED_PARENT         (1 << 19) /*  X  |     |     |     */
+#define ZEND_ACC_RESOLVED_PARENT         (1 << 17) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Interfaces are resolved (CEs).                         |     |     |     */
-#define ZEND_ACC_RESOLVED_INTERFACES     (1 << 20) /*  X  |     |     |     */
+#define ZEND_ACC_RESOLVED_INTERFACES     (1 << 18) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class has unresolved variance obligations.             |     |     |     */
-#define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 21) /*  X  |     |     |     */
+#define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 19) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class is linked apart from variance obligations.       |     |     |     */
-#define ZEND_ACC_NEARLY_LINKED           (1 << 22) /*  X  |     |     |     */
+#define ZEND_ACC_NEARLY_LINKED           (1 << 20) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Whether this class was used in its unlinked state.     |     |     |     */
-#define ZEND_ACC_HAS_UNLINKED_USES       (1 << 23) /*  X  |     |     |     */
+#define ZEND_ACC_HAS_UNLINKED_USES       (1 << 21) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 17, 23, 26, 29)                |     |     |     */
+/* Function Flags (unused: 27-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -309,6 +309,9 @@ typedef struct _zend_oparray_context {
 /* ZEND_DECLARE_CLASS_DELAYED opcodes                     |     |     |     */
 #define ZEND_ACC_EARLY_BINDING           (1 << 16) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* closure uses $this                                     |     |     |     */
+#define ZEND_ACC_USES_THIS               (1 << 17) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* call through user function trampoline. e.g.            |     |     |     */
 /* __call, __callstatic                                   |     |     |     */
 #define ZEND_ACC_CALL_VIA_TRAMPOLINE     (1 << 18) /*     |  X  |     |     */
@@ -316,15 +319,15 @@ typedef struct _zend_oparray_context {
 /* disable inline caching                                 |     |     |     */
 #define ZEND_ACC_NEVER_CACHE             (1 << 19) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* op_array is a clone of trait method                    |     |     |     */
+#define ZEND_ACC_TRAIT_CLONE             (1 << 20) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* functions is a constructor                             |     |     |     */
+#define ZEND_ACC_CTOR                    (1 << 21) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* Closure related                                        |     |     |     */
-#define ZEND_ACC_CLOSURE                 (1 << 20) /*     |  X  |     |     */
-#define ZEND_ACC_FAKE_CLOSURE            (1 << 21) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* run_time_cache allocated on heap (user only)           |     |     |     */
-#define ZEND_ACC_HEAP_RT_CACHE           (1 << 22) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* method flag used by Closure::__invoke() (int only)     |     |     |     */
-#define ZEND_ACC_USER_ARG_INFO           (1 << 22) /*     |  X  |     |     */
+#define ZEND_ACC_CLOSURE                 (1 << 22) /*     |  X  |     |     */
+#define ZEND_ACC_FAKE_CLOSURE            (1 << 23) /*     |  X  |     |     */ /* Same as ZEND_CALL_FAKE_CLOSURE */
 /*                                                        |     |     |     */
 #define ZEND_ACC_GENERATOR               (1 << 24) /*     |  X  |     |     */
 /*                                                        |     |     |     */
@@ -334,14 +337,11 @@ typedef struct _zend_oparray_context {
 /* internal function is allocated at arena (int only)     |     |     |     */
 #define ZEND_ACC_ARENA_ALLOCATED         (1 << 25) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* op_array is a clone of trait method                    |     |     |     */
-#define ZEND_ACC_TRAIT_CLONE             (1 << 27) /*     |  X  |     |     */
+/* run_time_cache allocated on heap (user only)           |     |     |     */
+#define ZEND_ACC_HEAP_RT_CACHE           (1 << 26) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* functions is a constructor                             |     |     |     */
-#define ZEND_ACC_CTOR                    (1 << 28) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* closure uses $this                                     |     |     |     */
-#define ZEND_ACC_USES_THIS               (1 << 30) /*     |  X  |     |     */
+/* method flag used by Closure::__invoke() (int only)     |     |     |     */
+#define ZEND_ACC_USER_ARG_INFO           (1 << 26) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
@@ -526,7 +526,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_HAS_SYMBOL_TABLE   (1 << 20)
 #define ZEND_CALL_RELEASE_THIS       (1 << 21)
 #define ZEND_CALL_CLOSURE            (1 << 22)
-#define ZEND_CALL_FAKE_CLOSURE       (1 << 23)
+#define ZEND_CALL_FAKE_CLOSURE       (1 << 23) /* Same as ZEND_ACC_FAKE_CLOSURE */
 #define ZEND_CALL_GENERATOR          (1 << 24)
 #define ZEND_CALL_DYNAMIC            (1 << 25)
 #define ZEND_CALL_MAY_HAVE_UNDEF     (1 << 26)

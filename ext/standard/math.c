@@ -704,7 +704,7 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 
 		{
 
-			php_error_docref(NULL, E_WARNING, "Number '%s' is too big to fit in long", s);
+			php_error_docref(NULL, E_WARNING, "Number %s is too big to fit in long", s);
 			return ZEND_LONG_MAX;
 		}
 	}
@@ -877,8 +877,8 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
-			php_error_docref(NULL, E_WARNING, "Number too large");
-			return ZSTR_EMPTY_ALLOC();
+			zend_value_error("An infinite value cannot be converted to base %d", base);
+			return NULL;
 		}
 
 		end = ptr = buf + sizeof(buf) - 1;
@@ -999,6 +999,10 @@ PHP_FUNCTION(base_convert)
 
 	_php_math_basetozval(number, (int)frombase, &temp);
 	result = _php_math_zvaltobase(&temp, (int)tobase);
+	if (!result) {
+		RETURN_THROWS();
+	}
+
 	RETVAL_STR(result);
 }
 /* }}} */

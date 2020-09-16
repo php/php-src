@@ -197,10 +197,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
 	zval *parameter;
 
-	if (!param) {
-		php_error_docref(NULL, E_WARNING, "param is NULL in oci_bind_input_cb; this should not happen");
-		return OCI_ERROR;
-	}
+	ZEND_ASSERT(param);
 
 	*indpp = &P->indicator;
 
@@ -236,10 +233,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
 	zval *parameter;
 
-	if (!param) {
-		php_error_docref(NULL, E_WARNING, "param is NULL in oci_bind_output_cb; this should not happen");
-		return OCI_ERROR;
-	}
+	ZEND_ASSERT(param);
 
 	if (Z_ISREF(param->parameter))
         parameter = Z_REFVAL(param->parameter);
@@ -459,7 +453,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	zend_long offset) /* {{{ */
 {
 #ifdef HAVE_OCISTMTFETCH2
-	ub4 ociori;
+	ub4 ociori = OCI_FETCH_NEXT;
 #endif
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 
@@ -509,11 +503,7 @@ static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid 
 			*alenpp = &col->datalen;
 			*indpp = (dvoid *)&col->indicator;
 			break;
-
-		default:
-			php_error_docref(NULL, E_WARNING,
-				"unhandled datatype in oci_define_callback; this should not happen");
-			return OCI_ERROR;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return OCI_CONTINUE;
@@ -652,7 +642,7 @@ static ssize_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
 	return amt;
 }
 
-static size_t oci_blob_read(php_stream *stream, char *buf, size_t count)
+static ssize_t oci_blob_read(php_stream *stream, char *buf, size_t count)
 {
 	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
 	ub4 amt;
@@ -990,5 +980,7 @@ const struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_param_hook,
 	NULL, /* set_attr */
 	NULL, /* get_attr */
-	oci_stmt_col_meta
+	oci_stmt_col_meta,
+	NULL,
+	NULL
 };

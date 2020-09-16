@@ -529,7 +529,7 @@ PHP_METHOD(SplFixedArray, __construct)
 	}
 
 	if (size < 0) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -704,7 +704,7 @@ PHP_METHOD(SplFixedArray, setSize)
 	}
 
 	if (size < 0) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -955,7 +955,7 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 	spl_fixedarray_it *iterator;
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 

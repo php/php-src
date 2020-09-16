@@ -45,8 +45,8 @@ PHP_FUNCTION(ftok)
 	}
 
 	if (proj_len != 1){
-		php_error_docref(NULL, E_WARNING, "Project identifier is invalid");
-		RETURN_LONG(-1);
+		zend_argument_value_error(2, "must be a single character");
+		RETURN_THROWS();
 	}
 
 	if (php_check_open_basedir(pathname)) {

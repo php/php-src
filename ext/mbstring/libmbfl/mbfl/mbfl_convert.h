@@ -37,17 +37,21 @@
 
 typedef struct _mbfl_convert_filter mbfl_convert_filter;
 
-typedef int (*filter_output_func)(int, void*);
-typedef int (*filter_flush_func)(mbfl_convert_filter*);
+/* internal */
+typedef int (*filter_flush_t)(mbfl_convert_filter*);
+
+/* defined by mbfl_convert_filter_{new,new2,init} */
+typedef int (*output_function_t)(int, void*);
+typedef int (*flush_function_t)(void *);
 
 struct _mbfl_convert_filter {
 	void (*filter_ctor)(mbfl_convert_filter *filter);
 	void (*filter_dtor)(mbfl_convert_filter *filter);
 	void (*filter_copy)(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 	int (*filter_function)(int c, mbfl_convert_filter *filter);
-	filter_flush_func  filter_flush;
-	filter_output_func output_function;
-	filter_flush_func  flush_function;
+	filter_flush_t  filter_flush;
+	output_function_t output_function;
+	flush_function_t flush_function;
 	void *data;
 	int status;
 	int cache;
@@ -59,11 +63,12 @@ struct _mbfl_convert_filter {
 	void *opaque;
 };
 
-MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new(const mbfl_encoding *from, const mbfl_encoding *to, filter_output_func output_function,
-	filter_flush_func flush_function, void *data);
-MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vtbl, filter_output_func output_function,
-	filter_flush_func flush_function, void *data);
+MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new(const mbfl_encoding *from, const mbfl_encoding *to, output_function_t output_function,
+	flush_function_t flush_function, void *data);
+MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vtbl, output_function_t output_function,
+	flush_function_t flush_function, void *data);
 MBFLAPI extern void mbfl_convert_filter_delete(mbfl_convert_filter *filter);
+MBFLAPI extern int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter);
 MBFLAPI extern unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsigned char *p, size_t len);
 MBFLAPI extern int mbfl_convert_filter_flush(mbfl_convert_filter *filter);
 MBFLAPI extern void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to);

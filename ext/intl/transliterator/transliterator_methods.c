@@ -287,7 +287,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		zend_object *arg1_obj;
 
 		ZEND_PARSE_PARAMETERS_START(2, 4)
-			Z_PARAM_STR_OR_OBJ_OF_CLASS(arg1_str, arg1_obj, Transliterator_ce_ptr)
+			Z_PARAM_OBJ_OF_CLASS_OR_STR(arg1_obj, Transliterator_ce_ptr, arg1_str)
 			Z_PARAM_STRING(str, str_len)
 			Z_PARAM_OPTIONAL
 			Z_PARAM_LONG(start)

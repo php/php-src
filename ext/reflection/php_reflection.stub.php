@@ -147,8 +147,7 @@ final class ReflectionGenerator
 
 class ReflectionMethod extends ReflectionFunctionAbstract
 {
-    /** @param object|string $objectOrMethod */
-    public function __construct($objectOrMethod, string $method = UNKNOWN) {}
+    public function __construct(object|string $objectOrMethod, ?string $method = null) {}
 
     public function __toString(): string {}
 
@@ -644,8 +643,7 @@ class ReflectionZendExtension implements Reflector
 
 final class ReflectionReference
 {
-    /** @param int|string $key */
-    public static function fromArrayElement(array $array, $key): ?ReflectionReference {}
+    public static function fromArrayElement(array $array, int|string $key): ?ReflectionReference {}
 
     public function getId(): string {}
 

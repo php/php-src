@@ -40,5 +40,5 @@ gmp_neg(): Argument #1 ($a) is not an integer string
 int(0)
 int(0)
 string(21) "-12345678901234567890"
-gmp_neg(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_neg(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

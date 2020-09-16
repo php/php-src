@@ -40,5 +40,5 @@ Warning: openssl_x509_fingerprint(): X.509 Certificate cannot be retrieved in %s
 bool(false)
 ** Testing bad hash method **
 
-Warning: openssl_x509_fingerprint(): Unknown signature algorithm in %s on line %d
+Warning: openssl_x509_fingerprint(): Unknown digest algorithm in %s on line %d
 bool(false)

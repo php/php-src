@@ -145,14 +145,14 @@ ZEND_FUNCTION(zend_leak_variable)
 }
 /* }}} */
 
-/* Tests Z_PARAM_STR_OR_OBJ */
+/* Tests Z_PARAM_OBJ_OR_STR */
 ZEND_FUNCTION(zend_string_or_object)
 {
 	zend_string *str;
 	zend_object *object;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ(str, object)
+		Z_PARAM_OBJ_OR_STR(object, str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
@@ -163,14 +163,14 @@ ZEND_FUNCTION(zend_string_or_object)
 }
 /* }}} */
 
-/* Tests Z_PARAM_STR_OR_OBJ_OR_NULL */
+/* Tests Z_PARAM_OBJ_OR_STR_OR_NULL */
 ZEND_FUNCTION(zend_string_or_object_or_null)
 {
 	zend_string *str;
 	zend_object *object;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OR_NULL(str, object)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(object, str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
@@ -183,14 +183,14 @@ ZEND_FUNCTION(zend_string_or_object_or_null)
 }
 /* }}} */
 
-/* Tests Z_PARAM_STR_OR_OBJ_OF_CLASS */
+/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR */
 ZEND_FUNCTION(zend_string_or_stdclass)
 {
 	zend_string *str;
 	zend_object *object;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS(str, object, zend_standard_class_def)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(object, zend_standard_class_def, str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
@@ -201,14 +201,14 @@ ZEND_FUNCTION(zend_string_or_stdclass)
 }
 /* }}} */
 
-/* Tests Z_PARAM_STR_OR_OBJ_OF_CLASS_OR_NULL */
+/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
 ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 {
 	zend_string *str;
 	zend_object *object;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_OBJ_OF_CLASS_OR_NULL(str, object, zend_standard_class_def)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(object, zend_standard_class_def, str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {

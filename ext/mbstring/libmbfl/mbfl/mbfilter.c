@@ -129,8 +129,8 @@ mbfl_buffer_converter_new(
 		if (convd->filter2 != NULL) {
 			convd->filter1 = mbfl_convert_filter_new(from,
 					&mbfl_encoding_wchar,
-					(int (*)(int, void*))convd->filter2->filter_function,
-					convd->filter2->filter_flush,
+					(output_function_t)convd->filter2->filter_function,
+					(flush_function_t)convd->filter2->filter_flush,
 					convd->filter2);
 			if (convd->filter1 == NULL) {
 				mbfl_convert_filter_delete(convd->filter2);
@@ -1196,8 +1196,8 @@ mbfl_strcut(
 		}
 
 		/* switch the drain direction */
-		encoder->output_function = (int(*)(int,void *))decoder->filter_function;
-		encoder->flush_function = decoder->filter_flush;
+		encoder->output_function = (output_function_t)decoder->filter_function;
+		encoder->flush_function = (flush_function_t)decoder->filter_flush;
 		encoder->data = decoder;
 
 		q = string->val + string->len;
@@ -1605,7 +1605,7 @@ mbfl_ja_jp_hantozen(
 	tl_filter = mbfl_convert_filter_new2(
 		&vtbl_tl_jisx0201_jisx0208,
 		(int(*)(int, void*))next_filter->filter_function,
-		next_filter->filter_flush,
+		(flush_function_t)next_filter->filter_flush,
 		next_filter);
 	if (tl_filter == NULL) {
 		efree(param);
@@ -1619,7 +1619,7 @@ mbfl_ja_jp_hantozen(
 		string->encoding,
 		&mbfl_encoding_wchar,
 		(int(*)(int, void*))next_filter->filter_function,
-		next_filter->filter_flush,
+		(flush_function_t)next_filter->filter_flush,
 		next_filter);
 	if (encoder == NULL) {
 		goto out;
@@ -2637,7 +2637,7 @@ mbfl_html_numeric_entity(
 		    string->encoding,
 		    &mbfl_encoding_wchar,
 		    collector_decode_htmlnumericentity,
-		    mbfl_filt_decode_htmlnumericentity_flush, &pc);
+		    (flush_function_t)mbfl_filt_decode_htmlnumericentity_flush, &pc);
 	}
 	if (pc.decoder == NULL || encoder == NULL) {
 		mbfl_convert_filter_delete(encoder);

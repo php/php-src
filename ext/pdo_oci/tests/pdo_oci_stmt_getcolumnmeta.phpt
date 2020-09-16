@@ -35,29 +35,48 @@ SQL
 
     // execute() has not been called yet
     // NOTE: no warning
-    if (false !== ($tmp = $stmt->getColumnMeta(0)))
-        printf("[002] Expecting false got %s\n", var_export($tmp, true));
+    $tmp = $stmt->getColumnMeta(0);
+    printf(" 1.1 Expecting false got %s\n", var_export($tmp, true));
 
+    echo(" 1.2 ");
     $stmt->execute();
-    // Warning: PDOStatement::getColumnMeta() expects exactly 1 argument, 0 given in
-    if (false !== ($tmp = @$stmt->getColumnMeta()))
-        printf("[003] Expecting false got %s\n", var_export($tmp, true));
+    // PDOStatement::getColumnMeta() expects exactly 1 argument, 0 given in
+    try {
+        $tmp = $stmt->getColumnMeta();
+    } catch (ArgumentCountError $e) {
+        if (false !== $tmp) {
+            printf("[1.2] Expecting false got %s\n", var_export($tmp, true));
+        }
+        echo $e->getMessage(), "\n";
+    }
 
     // invalid offset
-    if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
-        printf("[004] Expecting false got %s\n", var_export($tmp, true));
+    $tmp = @$stmt->getColumnMeta(-1);
+    printf(" 1.3 Expecting false got %s\n", var_export($tmp, true));
 
-    // Warning: PDOStatement::getColumnMeta(): Argument #1 must be of type int, array given in
-    if (false !== ($tmp = @$stmt->getColumnMeta(array())))
-        printf("[005] Expecting false got %s\n", var_export($tmp, true));
+    // PDOStatement::getColumnMeta(): Argument #1 must be of type int, array given in
+    echo " 1.4 ";
+    try {
+        $tmp = $stmt->getColumnMeta(array());
+    } catch (TypeError $e) {
+        if (false !== $tmp)
+            printf("[1.4] Expecting false got %s\n", var_export($tmp, true));
+        echo $e->getMessage(), "\n";
+    }
 
-    // Warning: PDOStatement::getColumnMeta() expects exactly 1 argument, 2 given in
-    if (false !== ($tmp = @$stmt->getColumnMeta(1, 1)))
-        printf("[006] Expecting false got %s\n", var_export($tmp, true));
+    // PDOStatement::getColumnMeta() expects exactly 1 argument, 2 given in
+    echo " 1.5 ";
+    try {
+        $tmp = $stmt->getColumnMeta(1, 1);
+    } catch (ArgumentCountError $e) {
+        if (false !== $tmp)
+            printf("[1.5] Expecting false got %s\n", var_export($tmp, true));
+        echo $e->getMessage(), "\n";
+    }
 
     // invalid offset
-    if (false !== ($tmp = $stmt->getColumnMeta(1)))
-        printf("[007] Expecting false because of invalid offset got %s\n", var_export($tmp, true));
+    $tmp = $stmt->getColumnMeta(1);
+    printf(" 1.6 Expecting false because of invalid offset got %s\n", var_export($tmp, true));
 
     echo "Test 2. testing return values\n";
     echo "Test 2.1 testing array returned\n";
@@ -290,6 +309,12 @@ print "done!";
 --EXPECT--
 Preparations before the test
 Test 1. calling function with invalid parameters
+ 1.1 Expecting false got false
+ 1.2 PDOStatement::getColumnMeta() expects exactly 1 argument, 0 given
+ 1.3 Expecting false got false
+ 1.4 PDOStatement::getColumnMeta(): Argument #1 ($column) must be of type int, array given
+ 1.5 PDOStatement::getColumnMeta() expects exactly 1 argument, 2 given
+ 1.6 Expecting false because of invalid offset got false
 Test 2. testing return values
 Test 2.1 testing array returned
 Test 2.2 testing numeric columns

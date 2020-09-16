@@ -604,7 +604,7 @@ PHP_METHOD(SoapFault, __construct)
 	HashTable *code_ht;
 
 	ZEND_PARSE_PARAMETERS_START(2, 6)
-		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(code_str, code_ht)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(code_ht, code_str)
 		Z_PARAM_STRING(fault_string, fault_string_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(fault_actor, fault_actor_len)
@@ -1843,12 +1843,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		     use_exceptions = 1;
 		}
 
-		if ((error_num == E_USER_ERROR ||
-		     error_num == E_COMPILE_ERROR ||
-		     error_num == E_CORE_ERROR ||
-		     error_num == E_ERROR ||
-		     error_num == E_PARSE) &&
-		    use_exceptions) {
+		if ((error_num & E_FATAL_ERRORS) && use_exceptions) {
 			zval fault;
 			char *code = SOAP_GLOBAL(error_code);
 			if (code == NULL) {
@@ -1870,12 +1865,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		int fault = 0;
 		zval fault_obj;
 
-		if (error_num == E_USER_ERROR ||
-		    error_num == E_COMPILE_ERROR ||
-		    error_num == E_CORE_ERROR ||
-		    error_num == E_ERROR ||
-		    error_num == E_PARSE) {
-
+		if (error_num & E_FATAL_ERRORS) {
 			char* code = SOAP_GLOBAL(error_code);
 			zend_string *buffer;
 			zval outbuf;

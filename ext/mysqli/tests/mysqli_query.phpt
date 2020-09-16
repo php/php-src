@@ -12,8 +12,11 @@ require_once('skipifconnectfailure.inc');
 
     require('table.inc');
 
-    if (false !== ($tmp = @mysqli_query($link, '')))
-        printf("[002a] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_query($link, '');
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     if (false !== ($tmp = mysqli_query($link, 'THIS IS NOT SQL')))
         printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
@@ -82,11 +85,11 @@ require_once('skipifconnectfailure.inc');
         printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     mysqli_free_result($res);
 
-    if (false !== ($res = @mysqli_query($link, "SELECT id FROM test ORDER BY id", 1234)))
-        printf("[013] Invalid mode should return false got %s/%s, [%d] %s\n",
-            gettype($res), (is_object($res)) ? 'object' : $res,
-            mysqli_errno($link), mysqli_error($link));
-
+    try {
+        mysqli_query($link, "SELECT id FROM test ORDER BY id", 1234);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     mysqli_close($link);
 
@@ -113,6 +116,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 mysqli_close($link);
 ?>
 --EXPECT--
+mysqli_query(): Argument #2 ($query) cannot be empty
 array(1) {
   ["valid"]=>
   string(30) "this is sql but with semicolon"
@@ -122,5 +126,6 @@ array(1) {
   string(1) "a"
 }
 string(1) "a"
+mysqli_query(): Argument #3 ($result_mode) must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT with MYSQLI_ASYNC as an optional bitmask flag
 mysqli object is already closed
 done!

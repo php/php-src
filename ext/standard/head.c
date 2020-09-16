@@ -192,13 +192,13 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 	return result;
 }
 
-static zend_result php_head_parse_cookie_options_array(zval *options, zend_long *expires, zend_string **path,
+static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_long *expires, zend_string **path,
 		zend_string **domain, zend_bool *secure, zend_bool *httponly, zend_string **samesite)
 {
 	zend_string *key;
 	zval *value;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), key, value) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(options, key, value) {
 		if (!key) {
 			zend_value_error("%s(): option array cannot have numeric keys", get_active_function_name());
 			return FAILURE;
@@ -225,36 +225,33 @@ static zend_result php_head_parse_cookie_options_array(zval *options, zend_long 
 
 static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 {
-	/* to handle overloaded function array|int */
-	zval *expires_or_options = NULL;
-	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
+	HashTable *options = NULL;
 	zend_long expires = 0;
+	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	zend_bool secure = 0, httponly = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 7)
 		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(value)
-		Z_PARAM_ZVAL(expires_or_options)
+		Z_PARAM_ARRAY_HT_OR_LONG(options, expires)
 		Z_PARAM_STR(path)
 		Z_PARAM_STR(domain)
 		Z_PARAM_BOOL(secure)
 		Z_PARAM_BOOL(httponly)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (expires_or_options) {
-		if (Z_TYPE_P(expires_or_options) == IS_ARRAY) {
-			if (UNEXPECTED(ZEND_NUM_ARGS() > 3)) {
-				zend_argument_count_error("%s(): Expects exactly 3 arguments when argument #3 "
-					"($expires_or_options) is an array", get_active_function_name());
-				RETURN_THROWS();
-			}
-			if (FAILURE == php_head_parse_cookie_options_array(expires_or_options, &expires, &path,
-					&domain, &secure, &httponly, &samesite)) {
-				goto cleanup;
-			}
-		} else {
-			expires = zval_get_long(expires_or_options);
+	if (options) {
+		if (UNEXPECTED(ZEND_NUM_ARGS() > 3)) {
+			zend_argument_count_error("%s(): Expects exactly 3 arguments when argument #3 "
+				"($expires_or_options) is an array", get_active_function_name());
+			RETURN_THROWS();
+		}
+
+		if (FAILURE == php_head_parse_cookie_options_array(options, &expires, &path,
+			&domain, &secure, &httponly, &samesite)
+		) {
+			goto cleanup;
 		}
 	}
 
@@ -264,7 +261,7 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 		RETVAL_FALSE;
 	}
 
-	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
+	if (options) {
 cleanup:
 		if (path) {
 			zend_string_release(path);

@@ -63,10 +63,7 @@ static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce())) {
 		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
 
-		if (!dbh) {
-			php_error_docref(NULL, E_WARNING, "Failed to retrieve handle from object store");
-			return NULL;
-		}
+		ZEND_ASSERT(dbh);
 
 		if (dbh->driver != &pdo_mysql_driver) {
 			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);

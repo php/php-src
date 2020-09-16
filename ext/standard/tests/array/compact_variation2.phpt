@@ -20,7 +20,7 @@ f();
 --EXPECTF--
 *** Testing compact() : usage variations  - variables outside of current scope ***
 
-Notice: compact(): Undefined variable $a in %s on line %d
+Warning: compact(): Undefined variable $a in %s on line %d
 array(2) {
   ["b"]=>
   string(3) "f.b"
@@ -28,7 +28,7 @@ array(2) {
   string(3) "f.c"
 }
 
-Notice: compact(): Undefined variable $a in %s on line %d
+Warning: compact(): Undefined variable $a in %s on line %d
 array(2) {
   ["b"]=>
   string(3) "f.b"

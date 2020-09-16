@@ -47,7 +47,7 @@ string(1) "	"
 bool(true)
 string(1) "	"
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+Warning: session_name(): session.name "" cannot be numeric or empty in %s on line %d
 string(1) "	"
 bool(true)
 string(1) "	"

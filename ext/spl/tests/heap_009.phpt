@@ -11,7 +11,7 @@ function testForException( $heap )
     {
         foreach( $heap as &$item );
     }
-    catch( RuntimeException $e )
+    catch( \Error $e )
     {
         echo $e->getMessage(),"\n";
     }

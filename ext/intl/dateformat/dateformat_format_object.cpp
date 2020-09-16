@@ -158,7 +158,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	zend_class_entry *instance_ce = Z_OBJCE_P(object);
 	if (instanceof_function(instance_ce, Calendar_ce_ptr)) {
-		Calendar *obj_cal = calendar_fetch_native_calendar(object);
+		Calendar *obj_cal = calendar_fetch_native_calendar(Z_OBJ_P(object));
 		if (obj_cal == NULL) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad IntlCalendar instance: "

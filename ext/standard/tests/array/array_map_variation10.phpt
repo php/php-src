@@ -83,5 +83,5 @@ array(3) {
   NULL
 }
 -- passing NULL as 'array1' --
-array_map(): Argument #2 ($array1) must be of type array, null given
+array_map(): Argument #2 ($array) must be of type array, null given
 Done

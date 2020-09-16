@@ -616,7 +616,7 @@ ZEND_FUNCTION(get_parent_class)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_CLASS_NAME_OR_OBJ(ce)
+		Z_PARAM_OBJ_OR_CLASS_NAME(ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ce) {
@@ -892,7 +892,7 @@ ZEND_FUNCTION(get_class_methods)
 	zend_function *mptr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_CLASS_NAME_OR_OBJ(ce)
+		Z_PARAM_OBJ_OR_CLASS_NAME(ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	array_init(return_value);

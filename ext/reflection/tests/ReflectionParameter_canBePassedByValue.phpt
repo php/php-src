@@ -51,7 +51,7 @@ Name: array
 Is passed by reference: yes
 Can be passed by value: no
 
-Name: sort_flags
+Name: flags
 Is passed by reference: no
 Can be passed by value: yes
 

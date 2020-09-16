@@ -54,18 +54,35 @@ var_dump($session->close());
 
 echo "Open normal session\n";
 $session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
-$session->valueretrieval = 67;
-var_dump($session->valueretrieval);
+try {
+    $session->valueretrieval = 67;
+    var_dump($session->valueretrieval);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "Closing session\n";
 var_dump($session->close());
-var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
-var_dump($session->close());
+
+try {
+    var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
+    var_dump($session->close());
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 
 var_dump($session->max_oids);
-$session->max_oids = "ttt";
-$session->max_oids = 0;
+try {
+    $session->max_oids = "ttt";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    $session->max_oids = 0;
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump($session->max_oids);
 ?>
 --EXPECTF--
@@ -81,18 +98,11 @@ int(32)
 string(46) "Invalid object identifier: .1.3.6.1.2.1.1.1..0"
 bool(true)
 Open normal session
-
-Warning: main(): Unknown SNMP value retrieval method '67' in %s on line %d
-int(%d)
+SNMP retrieval method must be a bitmask of SNMP_VALUE_LIBRARY, SNMP_VALUE_PLAIN, and SNMP_VALUE_OBJECT
 Closing session
 bool(true)
-
-Warning: SNMP::get(): Invalid or uninitialized SNMP object in %s on line %d
-bool(false)
-bool(true)
+Invalid or uninitialized SNMP object
 NULL
-
-Warning: main(): max_oids should be positive integer or NULL, got 0 in %s on line %d
-
-Warning: main(): max_oids should be positive integer or NULL, got 0 in %s on line %d
+max_oids must be greater than 0 or null
+max_oids must be greater than 0 or null
 NULL
