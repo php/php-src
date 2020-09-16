@@ -43,7 +43,7 @@ object(GMP)#2 (1) {
   string(1) "0"
 }
 Modulo by zero
-gmp_mod(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_mod(): Argument #1 ($a) must be of type GMP|string|int, array given
 object(GMP)#4 (1) {
   ["num"]=>
   string(5) "31161"

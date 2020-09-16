@@ -50,7 +50,7 @@ string(4) "4544"
 gmp_and(): Argument #1 ($a) is not an integer string
 string(4) "1536"
 string(15) "424703623692768"
-gmp_and(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
-gmp_and(): Argument #2 ($b) must be of type GMP|string|int|bool, array given
-gmp_and(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_and(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_and(): Argument #2 ($b) must be of type GMP|string|int, array given
+gmp_and(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

@@ -159,6 +159,6 @@ array(2) {
     string(2) "10"
   }
 }
-gmp_div_qr(): Argument #1 ($a) must be of type GMP|string|int|bool, resource given
-gmp_div_qr(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_div_qr(): Argument #1 ($a) must be of type GMP|string|int, resource given
+gmp_div_qr(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done
