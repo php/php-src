@@ -40,5 +40,5 @@ string(7) "-874654"
 string(4) "9875"
 string(9) "-98765468"
 string(12) "-98765463338"
-gmp_com(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_com(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

@@ -589,11 +589,8 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t a
 {
 	switch (Z_TYPE_P(val)) {
 	case IS_LONG:
-	case IS_FALSE:
-	case IS_TRUE: {
-		mpz_set_si(gmpnumber, zval_get_long(val));
+		mpz_set_si(gmpnumber, Z_LVAL_P(val));
 		return SUCCESS;
-	}
 	case IS_STRING: {
 		char *numstr = Z_STRVAL_P(val);
 		zend_bool skip_lead = 0;
@@ -623,14 +620,16 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t a
 
 		return SUCCESS;
 	}
-	default:
-		/* if unserializing */
-		if (arg_pos == 0) {
-			php_error_docref(NULL, E_WARNING, "Cannot convert variable of type %s to GMP", zend_zval_type_name(val));
+	default: {
+		zend_long lval;
+		if (!zend_parse_arg_long_slow(val, &lval)) {
+			zend_argument_type_error(arg_pos, "must be of type GMP|string|int, %s given", zend_zval_type_name(val));
 			return FAILURE;
 		}
-		zend_argument_type_error(arg_pos, "must be of type GMP|string|int|bool, %s given", zend_zval_type_name(val));
-		return FAILURE;
+
+		mpz_set_si(gmpnumber, lval);
+		return SUCCESS;
+	}
 	}
 }
 /* }}} */
@@ -992,16 +991,16 @@ ZEND_FUNCTION(gmp_export)
 ZEND_FUNCTION(gmp_intval)
 {
 	zval *gmpnumber_arg;
+	mpz_ptr gmpnum;
+	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &gmpnumber_arg) == FAILURE){
 		RETURN_THROWS();
 	}
 
-	if (IS_GMP(gmpnumber_arg)) {
-		RETVAL_LONG(mpz_get_si(GET_GMP_FROM_ZVAL(gmpnumber_arg)));
-	} else {
-		RETVAL_LONG(zval_get_long(gmpnumber_arg));
-	}
+	FETCH_GMP_ZVAL(gmpnum, gmpnumber_arg, temp_a, 1);
+	RETVAL_LONG(mpz_get_si(gmpnum));
+	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
 
