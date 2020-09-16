@@ -11,7 +11,7 @@ foreach( $it as &$file ) {
 }
 ?>
 --EXPECTF--
-Fatal error: Uncaught RuntimeException: An iterator cannot be used with foreach by reference in %s:%d
+Fatal error: Uncaught Error: An iterator cannot be used with foreach by reference in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -7913,18 +7913,32 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 }
 /* }}} */
 
-static inline void zend_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op) /* {{{ */
+zend_bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
+	if (opcode == ZEND_BW_NOT) {
+		return Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY;
+	}
+
+	return 0;
+}
+
+static inline zend_bool zend_try_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op) /* {{{ */
+{
+	if (zend_unary_op_produces_error(opcode, op)) {
+		return 0;
+	}
+
 	unary_op_type fn = get_unary_op(opcode);
 	fn(result, op);
+	return 1;
 }
 /* }}} */
 
 static inline zend_bool zend_try_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
 {
-	zval left;
-	ZVAL_LONG(&left, (kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
-	return zend_try_ct_eval_binary_op(result, ZEND_MUL, &left, op);
+	zval right;
+	ZVAL_LONG(&right, (kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
+	return zend_try_ct_eval_binary_op(result, ZEND_MUL, op, &right);
 }
 /* }}} */
 
@@ -8185,10 +8199,9 @@ void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
-	if (expr_node.op_type == IS_CONST) {
+	if (expr_node.op_type == IS_CONST
+			&& zend_try_ct_eval_unary_op(&result->u.constant, opcode, &expr_node.u.constant)) {
 		result->op_type = IS_CONST;
-		zend_ct_eval_unary_op(&result->u.constant, opcode,
-			&expr_node.u.constant);
 		zval_ptr_dtor(&expr_node.u.constant);
 		return;
 	}
@@ -8200,8 +8213,7 @@ void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
-	znode expr_node;
-	znode lefthand_node;
+	znode expr_node, right_node;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_UNARY_PLUS || ast->kind == ZEND_AST_UNARY_MINUS);
 
@@ -8214,9 +8226,9 @@ void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	lefthand_node.op_type = IS_CONST;
-	ZVAL_LONG(&lefthand_node.u.constant, (ast->kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
-	zend_emit_op_tmp(result, ZEND_MUL, &lefthand_node, &expr_node);
+	right_node.op_type = IS_CONST;
+	ZVAL_LONG(&right_node.u.constant, (ast->kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
+	zend_emit_op_tmp(result, ZEND_MUL, &expr_node, &right_node);
 }
 /* }}} */
 
@@ -9752,7 +9764,9 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				return;
 			}
 
-			zend_ct_eval_unary_op(&result, ast->attr, zend_ast_get_zval(ast->child[0]));
+			if (!zend_try_ct_eval_unary_op(&result, ast->attr, zend_ast_get_zval(ast->child[0]))) {
+				return;
+			}
 			break;
 		case ZEND_AST_UNARY_PLUS:
 		case ZEND_AST_UNARY_MINUS:

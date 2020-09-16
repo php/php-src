@@ -40,13 +40,13 @@ var_dump(openssl_seal($data, $sealed, $ekeys, array($wrong), $method));
 --EXPECTF--
 Warning: openssl_seal(): Not a public key (1th member of pubkeys) in %s on line %d
 bool(false)
-openssl_seal(): Argument #4 ($pubkeys) cannot be empty
+openssl_seal(): Argument #4 ($public_key) cannot be empty
 int(19)
 int(19)
 
 Warning: openssl_seal(): Not a public key (2th member of pubkeys) in %s on line %d
 bool(false)
-openssl_seal(): Argument #4 ($pubkeys) cannot be empty
+openssl_seal(): Argument #4 ($public_key) cannot be empty
 
 Warning: openssl_seal(): Not a public key (1th member of pubkeys) in %s on line %d
 bool(false)

@@ -63,14 +63,14 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
 
 #define SQLITE3_CHECK_INITIALIZED(db_obj, member, class_name) \
 	if (!(db_obj) || !(member)) { \
-		php_sqlite3_error(db_obj, "The " #class_name " object has not been correctly initialised"); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "The " #class_name " object has not been correctly initialised or is already closed"); \
+		RETURN_THROWS(); \
 	}
 
 #define SQLITE3_CHECK_INITIALIZED_STMT(member, class_name) \
 	if (!(member)) { \
-		php_error_docref(NULL, E_WARNING, "The " #class_name " object has not been correctly initialised"); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "The " #class_name " object has not been correctly initialised or is already closed"); \
+		RETURN_THROWS(); \
 	}
 
 /* {{{ PHP_INI */

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2d553815c21edd58bc29b1ca8d294d5750fd7312 */
+ * Stub hash: 6cdc7c967ce80c39eaef1c860ba8f8aa2cb3c979 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
@@ -124,7 +124,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_export, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCILob, 0)
-	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
@@ -292,7 +292,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_get_implicit_resultset, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_set_prefetch, 0, 2, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_set_prefetch, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_TYPE_INFO(0, number_of_rows, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -498,7 +498,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_OCILob_getbuffering arginfo_class_OCILob_load
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_writetofile, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()

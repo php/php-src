@@ -12,16 +12,16 @@ var_dump($a->count());
 /* negative init value */
 try {
     $b = new SplFixedArray(-10);
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 
 /* resize and negative value */
 $b = new SplFixedArray();
 try {
     $b->setSize(-5);
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 
 /* calling __construct() twice */
@@ -46,7 +46,7 @@ try {
     foreach ($e as $k=>&$v) {
         var_dump($v);
     }
-} catch (Exception $e) {
+} catch (\Error $e) {
     var_dump($e->getMessage());
 }
 
@@ -63,8 +63,8 @@ var_dump(empty($a["3"]));
 --EXPECTF--
 int(0)
 int(0)
-string(35) "array size cannot be less than zero"
-string(35) "array size cannot be less than zero"
+SplFixedArray::__construct(): Argument #1 ($size) must be greater than or equal to 0
+SplFixedArray::setSize(): Argument #1 ($size) must be greater than or equal to 0
 NULL
 int(0)
 int(0)

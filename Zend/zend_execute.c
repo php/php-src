@@ -4016,27 +4016,29 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 	void *object_or_called_scope;
 	zend_class_entry *called_scope;
 	zend_object *object;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
+	uint32_t call_info;
 
 	if (EXPECTED(function->handlers->get_closure) &&
 	    EXPECTED(function->handlers->get_closure(function, &called_scope, &fbc, &object, 0) == SUCCESS)) {
 
-	    object_or_called_scope = called_scope;
-		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
+		object_or_called_scope = called_scope;
+		if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
 			/* Delay closure destruction until its invocation */
 			GC_ADDREF(ZEND_CLOSURE_OBJECT(fbc));
-			call_info |= ZEND_CALL_CLOSURE;
-			if (fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-				call_info |= ZEND_CALL_FAKE_CLOSURE;
-			}
+			ZEND_ASSERT(ZEND_ACC_FAKE_CLOSURE == ZEND_CALL_FAKE_CLOSURE);
+			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
+				(fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
 			if (object) {
 				call_info |= ZEND_CALL_HAS_THIS;
 				object_or_called_scope = object;
 			}
-		} else if (object) {
-			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-			GC_ADDREF(object); /* For $this pointer */
-			object_or_called_scope = object;
+		} else {
+			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
+			if (object) {
+				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
+				GC_ADDREF(object); /* For $this pointer */
+				object_or_called_scope = object;
+			}
 		}
 	} else {
 		zend_throw_error(NULL, "Object of type %s is not callable", ZSTR_VAL(function->ce->name));
@@ -4430,17 +4432,18 @@ zval * ZEND_FASTCALL zend_handle_named_arg(
 	return arg;
 }
 
-static void start_fake_frame(zend_execute_data *call, const zend_op *opline) {
-	zend_execute_data *prev_execute_data = EG(current_execute_data);
-	call->prev_execute_data = prev_execute_data;
+static zend_execute_data *start_fake_frame(zend_execute_data *call, const zend_op *opline) {
+	zend_execute_data *old_prev_execute_data = call->prev_execute_data;
+	call->prev_execute_data = EG(current_execute_data);
 	call->opline = opline;
 	EG(current_execute_data) = call;
+	return old_prev_execute_data;
 }
 
-static void end_fake_frame(zend_execute_data *call) {
+static void end_fake_frame(zend_execute_data *call, zend_execute_data *old_prev_execute_data) {
 	zend_execute_data *prev_execute_data = call->prev_execute_data;
 	EG(current_execute_data) = prev_execute_data;
-	call->prev_execute_data = NULL;
+	call->prev_execute_data = old_prev_execute_data;
 	if (UNEXPECTED(EG(exception)) && ZEND_USER_CODE(prev_execute_data->func->common.type)) {
 		zend_rethrow_exception(prev_execute_data);
 	}
@@ -4461,6 +4464,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
 				zval *default_value = RT_CONSTANT(opline, opline->op2);
 				if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
+					if (UNEXPECTED(!RUN_TIME_CACHE(op_array))) {
+						init_func_run_time_cache(op_array);
+					}
+
 					void *run_time_cache = RUN_TIME_CACHE(op_array);
 					zval *cache_val =
 						(zval *) ((char *) run_time_cache + Z_CACHE_SLOT_P(default_value));
@@ -4473,9 +4480,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 						 * value is not accessible through back traces. */
 						zval tmp;
 						ZVAL_COPY(&tmp, default_value);
-						start_fake_frame(call, opline);
+						zend_execute_data *old = start_fake_frame(call, opline);
 						zend_result ret = zval_update_constant_ex(&tmp, fbc->op_array.scope);
-						end_fake_frame(call);
+						end_fake_frame(call, old);
 						if (UNEXPECTED(ret == FAILURE)) {
 							zval_ptr_dtor_nogc(&tmp);
 							return FAILURE;
@@ -4490,9 +4497,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 				}
 			} else {
 				ZEND_ASSERT(opline->opcode == ZEND_RECV);
-				start_fake_frame(call, opline);
+				zend_execute_data *old = start_fake_frame(call, opline);
 				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
-				end_fake_frame(call);
+				end_fake_frame(call, old);
 				return FAILURE;
 			}
 		}
@@ -4513,25 +4520,25 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 
 			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			if (i < fbc->common.required_num_args) {
-				start_fake_frame(call, NULL);
+				zend_execute_data *old = start_fake_frame(call, NULL);
 				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
-				end_fake_frame(call);
+				end_fake_frame(call, old);
 				return FAILURE;
 			}
 
 			zval default_value;
 			if (zend_get_default_from_internal_arg_info(&default_value, arg_info) == FAILURE) {
-				start_fake_frame(call, NULL);
+				zend_execute_data *old = start_fake_frame(call, NULL);
 				zend_argument_error(zend_ce_argument_count_error, i + 1,
 					"must be passed explicitly, because the default value is not known");
-				end_fake_frame(call);
+				end_fake_frame(call, old);
 				return FAILURE;
 			}
 
 			if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
-				start_fake_frame(call, NULL);
+				zend_execute_data *old = start_fake_frame(call, NULL);
 				zend_result ret = zval_update_constant_ex(&default_value, fbc->common.scope);
-				end_fake_frame(call);
+				end_fake_frame(call, old);
 				if (ret == FAILURE) {
 					return FAILURE;
 				}

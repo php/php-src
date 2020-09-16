@@ -7,13 +7,24 @@ if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
 <?php
+
 try {
-    var_dump(ftok("",""));
+    ftok("","");
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-var_dump(ftok(-1, -1));
-var_dump(ftok("qwertyu","qwertyu"));
+
+try {
+    ftok(-1, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    ftok("qwertyu","qwertyu");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(ftok("nonexistentfile","q"));
 
@@ -23,12 +34,8 @@ echo "Done\n";
 ?>
 --EXPECTF--
 ftok(): Argument #1 ($pathname) cannot be empty
-
-Warning: ftok(): Project identifier is invalid in %s on line %d
-int(-1)
-
-Warning: ftok(): Project identifier is invalid in %s on line %d
-int(-1)
+ftok(): Argument #2 ($proj) must be a single character
+ftok(): Argument #2 ($proj) must be a single character
 
 Warning: ftok(): ftok() failed - No such file or directory in %s on line %d
 int(-1)

@@ -449,7 +449,7 @@ function pg_send_execute($connection, string $query, array $params): int|bool {}
 function pg_get_result($connection) {}
 
 /** @param resource $result */
-function pg_result_status($result, int $result_type = PGSQL_STATUS_LONG): string|int|false {}
+function pg_result_status($result, int $result_type = PGSQL_STATUS_LONG): string|int {}
 
 /** @param resource $result */
 function pg_get_notify($result, int $result_type = PGSQL_ASSOC): array|false {}
@@ -488,4 +488,4 @@ function pg_update($connection, string $table_name, array $values, array $ids, i
 function pg_delete($connection, string $table_name, array $ids, int $options = 0): string|bool {}
 
 /** @param resource $connection */
-function pg_select($connection, string $table_name, array $ids, int $options = 0): array|string|false {}
+function pg_select($connection, string $table_name, array $ids, int $options = 0, int $result_type = PGSQL_ASSOC): array|string|false {}

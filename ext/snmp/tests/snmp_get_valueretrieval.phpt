@@ -11,7 +11,11 @@ require_once(__DIR__.'/skipif.inc');
 require_once(__DIR__.'/snmp_include.inc');
 
 echo "Checking error handling\n";
-var_dump(snmp_set_valueretrieval(67));
+try {
+    var_dump(snmp_set_valueretrieval(67));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Checking working\n";
 var_dump(snmp_get_valueretrieval());
@@ -29,9 +33,7 @@ var_dump(snmp_get_valueretrieval() === (SNMP_VALUE_LIBRARY|SNMP_VALUE_OBJECT));
 ?>
 --EXPECTF--
 Checking error handling
-
-Warning: snmp_set_valueretrieval(): Unknown SNMP value retrieval method '67' in %s on line %d
-bool(false)
+snmp_set_valueretrieval(): Argument #1 ($method) must be a bitmask of SNMP_VALUE_LIBRARY, SNMP_VALUE_PLAIN, and SNMP_VALUE_OBJECT
 Checking working
 int(%d)
 bool(true)

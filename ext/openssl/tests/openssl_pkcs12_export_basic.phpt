@@ -53,4 +53,4 @@ bool(false)
 
 Warning: openssl_pkcs12_export(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
-openssl_pkcs12_export(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, OpenSSLAsymmetricKey given
+openssl_pkcs12_export(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, OpenSSLAsymmetricKey given

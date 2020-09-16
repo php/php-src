@@ -432,8 +432,8 @@ PHP_FUNCTION(stream_get_contents)
 	if (maxlen_is_null) {
 		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
 	} else if (maxlen < 0 && maxlen != PHP_STREAM_COPY_ALL) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0, or -1");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to -1");
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zsrc);
@@ -459,7 +459,7 @@ PHP_FUNCTION(stream_get_contents)
 	}
 
 	if (maxlen > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "maxlen truncated from " ZEND_LONG_FMT " to %d bytes", maxlen, INT_MAX);
+		php_error_docref(NULL, E_WARNING, "Argument #2 ($maxlength) is truncated from " ZEND_LONG_FMT " to %d bytes", maxlen, INT_MAX);
 		maxlen = INT_MAX;
 	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0))) {

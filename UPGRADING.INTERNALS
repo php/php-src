@@ -370,19 +370,19 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
   u. Instead of overwriting zend_error_cb extensions with debugging, monitoring
      use-cases catching Errors/Exceptions are strongly encouraged to use
-	 the new error notification API instead.
+	 the new error observer API instead.
 
-	 Error notification callbacks are guaranteed to be called regardless of
+	 Error observering callbacks are guaranteed to be called regardless of
 	 the users error_reporting setting or userland error handler return values.
 
-     Register notification callbacks during MINIT of an extension:
+     Register observer callbacks during MINIT of an extension:
 
-		void my_error_notify_cb(int type,
+		void my_error_observer_cb(int type,
 			const char *error_filename,
 			uint32_t error_lineno,
 			zend_string *message) {
 		}
-		zend_register_error_notify_callback(my_error_notify_cb);
+		zend_observer_error_register(my_error_observer_cb);
 
   v. The following APIs have been removed from the Zend Engine:
      - zend_ts_hash_init_ex(), drop the last argument and use zend_ts_hash_init() instead

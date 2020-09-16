@@ -44,8 +44,12 @@ if ($IS_MYSQLND) {
         printf("[008] More results: %s\n", (mysqli_more_results($link) ? "yes" : "no"));
         printf("[009] Next results: %s\n", (mysqli_next_result($link) ? "yes" : "no"));
 
-        if (!mysqli_stmt_bind_result($stmt, $ver_out) || !mysqli_stmt_fetch($stmt))
-            printf("[010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        try {
+            if (!mysqli_stmt_bind_result($stmt, $ver_out) || !mysqli_stmt_fetch($stmt))
+                printf("[010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        } catch (\ArgumentCountError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
 
         if ("myversion" !== $ver_out)
             printf("[011] Results seem wrong got '%s'\n", $ver_out);

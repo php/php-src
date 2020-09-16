@@ -63,12 +63,16 @@ mysqlnd.fetch_data_copy=0
     $no_result = 0;
     for ($i = 0; $i < 1000; $i++) {
         $idx = mt_rand(-100, 100);
-        if (true === @mysqli_data_seek($res, $idx)) {
-            $row = $res->fetch_assoc();
-            if (!isset($row['id']) || !isset($row['label'])) {
-                printf("[010] Brute force seek %d returned %d\n", $idx, var_export($row, true));
+        try {
+            if (true === @mysqli_data_seek($res, $idx)) {
+                $row = $res->fetch_assoc();
+                if (!isset($row['id']) || !isset($row['label'])) {
+                    printf("[010] Brute force seek %d returned %d\n", $idx, var_export($row, true));
+                }
+            } else {
+                $no_result++;
             }
-        } else {
+        } catch (\ValueError $e) {
             $no_result++;
         }
     }

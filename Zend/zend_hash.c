@@ -2658,13 +2658,9 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 		zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
 	}
 
-	if (!(GC_FLAGS(ht1) & GC_IMMUTABLE)) {
-		GC_PROTECT_RECURSION(ht1);
-	}
+	GC_TRY_PROTECT_RECURSION(ht1);
 	result = zend_hash_compare_impl(ht1, ht2, compar, ordered);
-	if (!(GC_FLAGS(ht1) & GC_IMMUTABLE)) {
-		GC_UNPROTECT_RECURSION(ht1);
-	}
+	GC_TRY_UNPROTECT_RECURSION(ht1);
 
 	return result;
 }

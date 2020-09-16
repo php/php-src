@@ -164,7 +164,7 @@ class mysqli
      * @return mysqli_result|bool
      * @alias mysqli_query
      */
-    public function query(string $query, int $resultmode = MYSQLI_STORE_RESULT) {}
+    public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT) {}
 
     /**
      * @return bool
@@ -301,7 +301,7 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    public function __construct(object $mysqli_link, int $resmode = MYSQLI_STORE_RESULT) {}
+    public function __construct(object $mysqli_link, int $result_mode = MYSQLI_STORE_RESULT) {}
 
     /**
      * @return void
@@ -421,7 +421,7 @@ class mysqli_stmt
     public function close() {}
 
     /**
-     * @return bool|null
+     * @return void
      * @alias mysqli_stmt_data_seek
      */
     public function data_seek(int $offset) {}
@@ -641,7 +641,7 @@ function mysqli_prepare(mysqli $mysqli_link, string $query): mysqli_stmt|false {
 
 function mysqli_report(int $flags): bool {}
 
-function mysqli_query(mysqli $mysqli_link, string $query, int $resultmode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
+function mysqli_query(mysqli $mysqli_link, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
 function mysqli_real_connect(
     mysqli $mysqli_link,
@@ -672,7 +672,7 @@ function mysqli_set_charset(mysqli $mysqli_link, string $charset): bool {}
 
 function mysqli_stmt_affected_rows(mysqli_stmt $mysql_stmt): int|string {}
 
-function mysqli_stmt_attr_get(mysqli_stmt $mysql_stmt, int $attr): int|false {}
+function mysqli_stmt_attr_get(mysqli_stmt $mysql_stmt, int $attr): int {}
 
 function mysqli_stmt_attr_set(mysqli_stmt $mysql_stmt, int $attr, int $mode_in): bool {}
 
@@ -682,7 +682,7 @@ function mysqli_stmt_bind_result(mysqli_stmt $mysql_stmt, mixed &...$vars): bool
 
 function mysqli_stmt_close(mysqli_stmt $mysql_stmt): bool {}
 
-function mysqli_stmt_data_seek(mysqli_stmt $mysql_stmt, int $offset): ?bool {}
+function mysqli_stmt_data_seek(mysqli_stmt $mysql_stmt, int $offset): void {}
 
 function mysqli_stmt_errno(mysqli_stmt $mysql_stmt): int {}
 

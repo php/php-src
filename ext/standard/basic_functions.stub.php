@@ -57,11 +57,11 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 /* array.c */
 
-function array_push(array &$stack, mixed ...$args): int {}
+function array_push(array &$stack, mixed ...$values): int {}
 
-function krsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
+function krsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-function ksort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
+function ksort(array &$array, int $flags = SORT_REGULAR): bool {}
 
 /** @param Countable|array $var */
 function count($var, int $mode = COUNT_NORMAL): int {}
@@ -76,19 +76,19 @@ function natsort(array &$array): bool {}
 
 function natcasesort(array &$array): bool {}
 
-function asort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
+function asort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-function arsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
+function arsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-function sort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
+function sort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-function rsort(array &$array, int $sort_flags = SORT_REGULAR): bool {}
+function rsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-function usort(array &$array, callable $cmp_function): bool {}
+function usort(array &$array, callable $callback): bool {}
 
-function uasort(array &$array, callable $cmp_function): bool {}
+function uasort(array &$array, callable $callback): bool {}
 
-function uksort(array &$array, callable $cmp_function): bool {}
+function uksort(array &$array, callable $callback): bool {}
 
 function end(array|object &$arg): mixed {}
 
@@ -109,9 +109,9 @@ function min(mixed $arg, mixed ...$args): mixed {}
 
 function max(mixed $arg, mixed ...$args): mixed {}
 
-function array_walk(array|object &$input, callable $funcname, mixed $userdata = UNKNOWN): bool {}
+function array_walk(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
 
-function array_walk_recursive(array|object &$input, callable $funcname, mixed $userdata = UNKNOWN): bool {}
+function array_walk_recursive(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
 
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
@@ -126,9 +126,9 @@ function extract(array &$array, int $extract_type = EXTR_OVERWRITE, string $pref
  */
 function compact($var_name, ...$var_names): array {}
 
-function array_fill(int $start_key, int $num, mixed $val): array {}
+function array_fill(int $start_key, int $count, mixed $value): array {}
 
-function array_fill_keys(array $keys, mixed $val): array {}
+function array_fill_keys(array $keys, mixed $value): array {}
 
 /**
  * @param string|int|float $low
@@ -142,9 +142,9 @@ function array_pop(array &$stack): mixed {}
 
 function array_shift(array &$stack): mixed {}
 
-function array_unshift(array &$stack, mixed ...$vars): int {}
+function array_unshift(array &$stack, mixed ...$values): int {}
 
-function array_splice(array &$array, int $offset, ?int $length = null, mixed $replacement = []): array {}
+function array_splice(array &$array, int $offset, ?int $length = null, mixed $replacements = []): array {}
 
 function array_slice(array $array, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
 
@@ -152,11 +152,11 @@ function array_merge(array ...$arrays): array {}
 
 function array_merge_recursive(array ...$arrays): array {}
 
-function array_replace(array $array1, array ...$arrays): array {}
+function array_replace(array $array, array ...$replacements): array {}
 
-function array_replace_recursive(array $array1, array ...$arrays): array {}
+function array_replace_recursive(array $array, array ...$replacements): array {}
 
-function array_keys(array $array, mixed $search_value = UNKNOWN, bool $strict = false): array {}
+function array_keys(array $array, mixed $filter_value = UNKNOWN, bool $strict = false): array {}
 
 function array_key_first(array $array): int|string|null {}
 
@@ -238,16 +238,16 @@ function array_reduce(array $array, callable $callback, mixed $initial = null): 
 
 function array_filter(array $array, ?callable $callback = null, int $use_keys = 0): array {}
 
-function array_map(?callable $callback, array $array1, array ...$arrays): array {}
+function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
 /** @param string|int $key */
-function array_key_exists($key, array $search): bool {}
+function array_key_exists($key, array $array): bool {}
 
 /**
  * @param string|int $key
  * @alias array_key_exists
  */
-function key_exists($key, array $search): bool {}
+function key_exists($key, array $array): bool {}
 
 function array_chunk(array $array, int $size, bool $preserve_keys = false): array {}
 
@@ -502,11 +502,9 @@ function header(string $string, bool $replace = true, int $http_response_code = 
 
 function header_remove(?string $name = null): void {}
 
-/** @param array|int $expires_or_options */
-function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setrawcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
-/** @param array|int $expires_or_options */
-function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setcookie(string $name, string $value = '', array|int $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
 function http_response_code(int $response_code = 0): int|bool {}
 
@@ -612,11 +610,7 @@ function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): 
 
 function substr(string $str, int $start, ?int $length = null): string|false {}
 
-/**
- * @param array|int $start
- * @param array|int|null $length
- */
-function substr_replace(array|string $str, string|array $replace, $start, $length = null): string|array|false {}
+function substr_replace(array|string $str, array|string $replace, array|int $start, array|int|null $length = null): string|array|false {}
 
 function quotemeta(string $str): string {}
 
@@ -678,7 +672,7 @@ function localeconv(): array {}
 
 function strnatcasecmp(string $s1, string $s2): int {}
 
-function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int|false {}
+function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int {}
 
 function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
 
@@ -1151,7 +1145,7 @@ function password_get_info(string $hash): ?array {}
 
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
-function password_needs_rehash(string $hash, string|int $algo, array $options = []): bool {}
+function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
 
 function password_verify(string $password, string $hash): bool {}
 
@@ -1349,7 +1343,7 @@ function stream_get_wrappers(): array|false {}
 
 function stream_get_transports(): array|false {}
 
-/** @param mixed $stream */
+/** @param resource|string $stream */
 function stream_is_local($stream): bool {}
 
 /** @param resource $stream */

@@ -2398,9 +2398,9 @@ PHP_FUNCTION(preg_replace_callback)
 /* {{{ Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback_array)
 {
-	zval zv, *replace, *subject, *zcount = NULL;
-	HashTable *pattern;
-	zend_string *str_idx_regex;
+	zval zv, *replace, *zcount = NULL;
+	HashTable *pattern, *subject_ht;
+	zend_string *subject_str, *str_idx_regex;
 	zend_long limit = -1, flags = 0;
 	size_t replace_count = 0;
 	zend_fcall_info fci;
@@ -2409,7 +2409,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_ARRAY_HT(pattern)
-		Z_PARAM_ZVAL(subject)
+		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)
@@ -2420,40 +2420,65 @@ PHP_FUNCTION(preg_replace_callback_array)
 	fci.object = NULL;
 	fci.named_params = NULL;
 
+	if (subject_ht) {
+		GC_TRY_ADDREF(subject_ht);
+	} else {
+		GC_TRY_ADDREF(subject_str);
+	}
+
 	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, str_idx_regex, replace) {
 		if (!str_idx_regex) {
 			php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric or backslash");
-			zval_ptr_dtor(return_value);
-			RETURN_NULL();
+			RETVAL_NULL();
+			goto error;
 		}
 
 		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
 			zend_argument_type_error(1, "must contain only valid callbacks");
-			RETURN_THROWS();
+			goto error;
 		}
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 
 		replace_count += preg_replace_func_impl(&zv, str_idx_regex, /* regex_ht */ NULL, &fci, &fcc,
-			Z_STR_P(subject), Z_ARRVAL_P(subject),
-			limit, flags);
-
-		if (subject != return_value) {
-			subject = return_value;
-		} else {
-			zval_ptr_dtor(return_value);
+			subject_str, subject_ht, limit, flags);
+		switch (Z_TYPE(zv)) {
+			case IS_ARRAY:
+				ZEND_ASSERT(subject_ht);
+				zend_array_release(subject_ht);
+				subject_ht = Z_ARR(zv);
+				break;
+			case IS_STRING:
+				ZEND_ASSERT(subject_str);
+				zend_string_release(subject_str);
+				subject_str = Z_STR(zv);
+				break;
+			case IS_NULL:
+				RETVAL_NULL();
+				goto error;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 
-		ZVAL_COPY_VALUE(return_value, &zv);
-
-		if (UNEXPECTED(EG(exception))) {
-			zval_ptr_dtor(return_value);
-			RETURN_NULL();
+		if (EG(exception)) {
+			goto error;
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
+	}
+
+	if (subject_ht) {
+		RETURN_ARR(subject_ht);
+	} else {
+		RETURN_STR(subject_str);
+	}
+
+error:
+	if (subject_ht) {
+		zend_array_release(subject_ht);
+	} else {
+		zend_string_release(subject_str);
 	}
 }
 /* }}} */

@@ -382,7 +382,7 @@ static enum entity_charset determine_charset(const char *charset_hint, zend_bool
 		}
 
 		if (!quiet) {
-			php_error_docref(NULL, E_WARNING, "Charset `%s' not supported, assuming utf-8",
+			php_error_docref(NULL, E_WARNING, "Charset \"%s\" is not supported, assuming UTF-8",
 					charset_hint);
 		}
 	}

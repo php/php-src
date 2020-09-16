@@ -9,7 +9,6 @@ if (PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4))
 ?>
 --INI--
 display_errors = On
-error_reporting = E_WARNING
 --FILE--
 <?php
 
@@ -23,21 +22,23 @@ require(__DIR__.'/connect.inc');
 echo "Test 1: Import\n";
 
 $lob = oci_new_descriptor($c, OCI_D_LOB);
-$r = $lob->savefile("/tmp/abc\0def");
-var_dump($r);
+try {
+    $lob->savefile("/tmp/abc\0def");
+} catch (ValueError $e) {
+       echo $e->getMessage(), "\n";
+}
 
 echo "Test 2: Export\n";
 
-$r = $lob->export("/tmp/abc\0def");
-var_dump($r);
+try {
+    $lob->export("/tmp/abc\0def");
+} catch (ValueError $e) {
+       echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
 Test 1: Import
-
-Warning: OCILob::savefile(): filename must not contain null bytes in %s on line %d
-bool(false)
+OCILob::savefile(): Argument #1 ($filename) must not contain any null bytes
 Test 2: Export
-
-Warning: OCILob::export(): filename must not contain null bytes in %s on line %d
-bool(false)
+OCILob::export(): Argument #1 ($filename) must not contain any null bytes

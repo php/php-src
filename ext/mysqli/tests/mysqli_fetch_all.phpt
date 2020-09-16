@@ -71,12 +71,12 @@ if (!function_exists('mysqli_fetch_all'))
             exit(1);
     }
 
-    do {
-            $illegal_mode = mt_rand(-10000, 10000);
-    } while (in_array($illegal_mode, array(MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH)));
-    // NOTE: for BC reasons with ext/mysql, ext/mysqli accepts invalid result modes.
-
-    mysqli_fetch_all($res, $illegal_mode);
+    // Illegal mode
+    try {
+        mysqli_fetch_all($res, -10);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     mysqli_free_result($res);
 
     function func_mysqli_fetch_all($link, $engine, $sql_type, $sql_value, $php_value, $offset, $regexp_comparison = NULL) {
@@ -315,7 +315,7 @@ if (!function_exists('mysqli_fetch_all'))
 <?php
 	// require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 [005]
 array(2) {
   [0]=>
@@ -443,7 +443,6 @@ array(1) {
     string(1) "1"
   }
 }
-
-Warning: mysqli_fetch_all(): Mode can be only MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC or MYSQLI_FETCH_BOTH in %s on line %d
+mysqli_fetch_all(): Argument #2 ($mode) must be one of MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH
 mysqli_result object is already closed
 done!

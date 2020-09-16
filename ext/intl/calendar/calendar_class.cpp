@@ -57,9 +57,9 @@ U_CFUNC	void calendar_object_create(zval *object,
 	calendar_object_construct(object, calendar);
 }
 
-U_CFUNC Calendar *calendar_fetch_native_calendar(zval *object)
+U_CFUNC Calendar *calendar_fetch_native_calendar(zend_object *object)
 {
-	Calendar_object *co = Z_INTL_CALENDAR_P(object);
+	Calendar_object *co = php_intl_calendar_fetch_object(object);
 
 	return co->ucal;
 }

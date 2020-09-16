@@ -1308,7 +1308,7 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 	spl_dllist_object *dllist_object = Z_SPLDLLIST_P(object);
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 

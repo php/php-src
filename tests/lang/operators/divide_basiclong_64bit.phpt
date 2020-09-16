@@ -23,10 +23,14 @@ $otherVals = array(0, 1, -1, 7, 9, 65, -44, MAX_32Bit, MAX_64Bit);
 error_reporting(E_ERROR);
 
 foreach ($longVals as $longVal) {
-   foreach($otherVals as $otherVal) {
-       echo "--- testing: $longVal / $otherVal ---\n";
-      var_dump($longVal/$otherVal);
-   }
+    foreach($otherVals as $otherVal) {
+        echo "--- testing: $longVal / $otherVal ---\n";
+        try {
+            var_dump($longVal/$otherVal);
+        } catch (\Throwable $e) {
+            echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+        }
+    }
 }
 
 foreach ($otherVals as $otherVal) {
@@ -39,7 +43,7 @@ foreach ($otherVals as $otherVal) {
 ?>
 --EXPECT--
 --- testing: 9223372036854775807 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 9223372036854775807 / 1 ---
 int(9223372036854775807)
 --- testing: 9223372036854775807 / -1 ---
@@ -57,7 +61,7 @@ float(4294967298)
 --- testing: 9223372036854775807 / 9223372036854775807 ---
 int(1)
 --- testing: -9223372036854775808 / 0 ---
-float(-INF)
+DivisionByZeroError: Division by zero
 --- testing: -9223372036854775808 / 1 ---
 int(-9223372036854775808)
 --- testing: -9223372036854775808 / -1 ---
@@ -75,7 +79,7 @@ float(-4294967298)
 --- testing: -9223372036854775808 / 9223372036854775807 ---
 float(-1)
 --- testing: 2147483647 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 2147483647 / 1 ---
 int(2147483647)
 --- testing: 2147483647 / -1 ---
@@ -93,7 +97,7 @@ int(1)
 --- testing: 2147483647 / 9223372036854775807 ---
 float(2.328306435454494E-10)
 --- testing: -2147483648 / 0 ---
-float(-INF)
+DivisionByZeroError: Division by zero
 --- testing: -2147483648 / 1 ---
 int(-2147483648)
 --- testing: -2147483648 / -1 ---
@@ -111,7 +115,7 @@ float(-1.0000000004656613)
 --- testing: -2147483648 / 9223372036854775807 ---
 float(-2.3283064365386963E-10)
 --- testing: 9223372034707292160 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 9223372034707292160 / 1 ---
 int(9223372034707292160)
 --- testing: 9223372034707292160 / -1 ---
@@ -129,7 +133,7 @@ float(4294967297)
 --- testing: 9223372034707292160 / 9223372036854775807 ---
 float(0.9999999997671694)
 --- testing: -9223372034707292160 / 0 ---
-float(-INF)
+DivisionByZeroError: Division by zero
 --- testing: -9223372034707292160 / 1 ---
 int(-9223372034707292160)
 --- testing: -9223372034707292160 / -1 ---
@@ -147,7 +151,7 @@ float(-4294967297)
 --- testing: -9223372034707292160 / 9223372036854775807 ---
 float(-0.9999999997671694)
 --- testing: 2147483648 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 2147483648 / 1 ---
 int(2147483648)
 --- testing: 2147483648 / -1 ---
@@ -165,7 +169,7 @@ float(1.0000000004656613)
 --- testing: 2147483648 / 9223372036854775807 ---
 float(2.3283064365386963E-10)
 --- testing: -2147483649 / 0 ---
-float(-INF)
+DivisionByZeroError: Division by zero
 --- testing: -2147483649 / 1 ---
 int(-2147483649)
 --- testing: -2147483649 / -1 ---
@@ -183,7 +187,7 @@ float(-1.0000000009313226)
 --- testing: -2147483649 / 9223372036854775807 ---
 float(-2.3283064376228985E-10)
 --- testing: 4294967294 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 4294967294 / 1 ---
 int(4294967294)
 --- testing: 4294967294 / -1 ---
@@ -201,7 +205,7 @@ int(2)
 --- testing: 4294967294 / 9223372036854775807 ---
 float(4.656612870908988E-10)
 --- testing: 4294967295 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 4294967295 / 1 ---
 int(4294967295)
 --- testing: 4294967295 / -1 ---
@@ -219,7 +223,7 @@ float(2.0000000004656613)
 --- testing: 4294967295 / 9223372036854775807 ---
 float(4.6566128719931904E-10)
 --- testing: 4294967293 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 4294967293 / 1 ---
 int(4294967293)
 --- testing: 4294967293 / -1 ---
@@ -237,7 +241,7 @@ float(1.9999999995343387)
 --- testing: 4294967293 / 9223372036854775807 ---
 float(4.656612869824786E-10)
 --- testing: 9223372036854775806 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 9223372036854775806 / 1 ---
 int(9223372036854775806)
 --- testing: 9223372036854775806 / -1 ---
@@ -255,7 +259,7 @@ int(4294967298)
 --- testing: 9223372036854775806 / 9223372036854775807 ---
 float(1)
 --- testing: 9.2233720368548E+18 / 0 ---
-float(INF)
+DivisionByZeroError: Division by zero
 --- testing: 9.2233720368548E+18 / 1 ---
 float(9.223372036854776E+18)
 --- testing: 9.2233720368548E+18 / -1 ---
@@ -273,7 +277,7 @@ float(4294967298)
 --- testing: 9.2233720368548E+18 / 9223372036854775807 ---
 float(1)
 --- testing: -9223372036854775807 / 0 ---
-float(-INF)
+DivisionByZeroError: Division by zero
 --- testing: -9223372036854775807 / 1 ---
 int(-9223372036854775807)
 --- testing: -9223372036854775807 / -1 ---
@@ -291,7 +295,7 @@ float(-4294967298)
 --- testing: -9223372036854775807 / 9223372036854775807 ---
 int(-1)
 --- testing: -9.2233720368548E+18 / 0 ---
-float(-INF)
+DivisionByZeroError: Division by zero
 --- testing: -9.2233720368548E+18 / 1 ---
 float(-9.223372036854776E+18)
 --- testing: -9.2233720368548E+18 / -1 ---

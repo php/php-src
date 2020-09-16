@@ -6,6 +6,9 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	die('skip non windows test');
 }
 require_once(__DIR__ . '/skipif.inc');
+if (!function_exists('posix_geteui')) {
+    die('SKIP posix_geteuid() not defined so cannot check if run as root');
+}
 if (posix_geteuid() == 0) {
     die('SKIP Cannot run test as root.');
 }

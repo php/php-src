@@ -109,7 +109,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 
 static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_len, HashTable *options) {
 	if (options && zend_hash_str_exists(options, "salt", sizeof("salt") - 1)) {
-		php_error_docref(NULL, E_WARNING, "The 'salt' option is no longer supported. The provided salt has been been ignored");
+		php_error_docref(NULL, E_WARNING, "The \"salt\" option has been ignored, since providing a custom salt is no longer supported");
 	}
 
 	return php_password_make_salt(required_salt_len);

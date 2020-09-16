@@ -49,8 +49,7 @@ function session_cache_limiter(?string $cache_limiter = null): string|false {}
 
 function session_cache_expire(?int $new_cache_expire = null): int|false {}
 
-/** @param int|array $lifetime_or_options */
-function session_set_cookie_params($lifetime_or_options, string $path = UNKNOWN, string $domain  = "", ?bool $secure = null, ?bool $httponly = null): bool {}
+function session_set_cookie_params(array|int $lifetime_or_options, ?string $path = null, ?string $domain  = null, ?bool $secure = null, ?bool $httponly = null): bool {}
 
 function session_start(array $options = []): bool {}
 

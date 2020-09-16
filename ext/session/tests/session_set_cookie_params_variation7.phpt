@@ -40,7 +40,13 @@ var_dump(session_set_cookie_params(["lifetime" => 42]));
 var_dump(ini_get("session.cookie_lifetime"));
 
 var_dump(ini_get("session.cookie_path"));
-var_dump(session_set_cookie_params(["path" => "newpath/"], "arg after options array"));
+
+try {
+    session_set_cookie_params(["path" => "newpath/"], "arg after options array");
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(ini_get("session.cookie_path"));
 
 echo "Done";
@@ -63,8 +69,6 @@ string(1) "0"
 bool(true)
 string(2) "42"
 string(1) "/"
-
-Warning: session_set_cookie_params(): Cannot pass arguments after the options array in %s on line %d
-bool(false)
+session_set_cookie_params(): Argument #2 ($path) must be null when argument #1 ($lifetime_or_options) is an array
 string(1) "/"
 Done

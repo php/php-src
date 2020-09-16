@@ -90,9 +90,9 @@ echo "Done\n";
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -102,9 +102,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -114,9 +114,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -126,9 +126,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -138,9 +138,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -150,9 +150,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -162,9 +162,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -174,9 +174,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -186,9 +186,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -198,9 +198,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -210,9 +210,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -222,9 +222,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -234,9 +234,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -246,9 +246,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -258,9 +258,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -270,9 +270,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -282,9 +282,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -294,9 +294,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -306,9 +306,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -318,9 +318,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -330,9 +330,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -342,9 +342,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -354,9 +354,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -366,9 +366,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -378,9 +378,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -390,9 +390,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -402,9 +402,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -414,9 +414,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -426,9 +426,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -438,9 +438,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -450,9 +450,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -462,9 +462,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -474,9 +474,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -486,9 +486,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -498,9 +498,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -510,9 +510,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -522,9 +522,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -534,9 +534,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -546,9 +546,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -558,9 +558,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -570,9 +570,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -582,9 +582,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -594,9 +594,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -606,9 +606,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -618,9 +618,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -630,9 +630,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -642,9 +642,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -654,9 +654,9 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #3 ($delimiter) must be a single character in %s on line %d
 
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
+Warning: fgetcsv(): Argument #4 ($enclosure) must be a single character in %s on line %d
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"

@@ -76,8 +76,11 @@ if (!have_innodb($link))
         }
     }
 
-    if (!mysqli_begin_transaction($link, -1)) {
-            printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    try {
+        mysqli_begin_transaction($link, -1);
+        printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
     }
 
     if (mysqli_get_server_version($link) >= 50605) {
@@ -96,9 +99,7 @@ if (!have_innodb($link))
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 NULL
-
-Warning: mysqli_begin_transaction(): Invalid value for parameter flags (-1) in %s on line %d
-[019] [%d]%A
+mysqli_begin_transaction(): Argument #2 ($flags) must be one of the MYSQLI_TRANS_* constants
 done!

@@ -12,9 +12,9 @@ var_dump(strlen(password_hash("test", PASSWORD_BCRYPT, array("salt" => "12345678
 echo "OK!";
 ?>
 --EXPECTF--
-Warning: password_hash(): The 'salt' option is no longer supported. The provided salt has been been ignored in %s on line %d
+Warning: password_hash(): The "salt" option has been ignored, since providing a custom salt is no longer supported in %s on line %d
 int(60)
 
-Warning: password_hash(): The 'salt' option is no longer supported. The provided salt has been been ignored in %s on line %d
+Warning: password_hash(): The "salt" option has been ignored, since providing a custom salt is no longer supported in %s on line %d
 int(60)
 OK!

@@ -384,8 +384,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				}
 				break;
 			}
-			default:
-				php_error_docref(NULL, E_WARNING, "Invalid value for has_set_exists");
+			EMPTY_SWITCH_DEFAULT_CASE();
 		}
 	} else {
 		ret = zend_std_has_property(object, name, has_set_exists, cache_slot);
@@ -1035,7 +1034,8 @@ PHP_METHOD(mysqli_result, __construct)
 			result = mysql_use_result(mysql->mysql);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid value for resultmode");
+			zend_argument_value_error(2, "must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT");
+			RETURN_THROWS();
 	}
 
 	if (!result) {
@@ -1052,7 +1052,7 @@ PHP_METHOD(mysqli_result, __construct)
 PHP_METHOD(mysqli_result, getIterator)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
@@ -1130,6 +1130,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 }
 /* }}} */
 
+/* TODO Split this up */
 /* {{{ php_mysqli_fetch_into_hash */
 void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags, int into_object)
 {

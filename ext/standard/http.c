@@ -146,13 +146,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*(p++) = 'B';
 				*p = '\0';
 			}
-			if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
-				GC_PROTECT_RECURSION(ht);
-			}
+			GC_TRY_PROTECT_RECURSION(ht);
 			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, newprefix, newprefix_len, "%5D", 3, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type);
-			if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
-				GC_UNPROTECT_RECURSION(ht);
-			}
+			GC_TRY_UNPROTECT_RECURSION(ht);
 			efree(newprefix);
 		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */

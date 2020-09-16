@@ -61,7 +61,7 @@ for ($i = 0; $i<=500; $i++) {
 }
 
 // Various values for prefetch
-$pref = array(0,1,501,499,250,12345,-12345,-1);
+$pref = array(0,1,501,499,250,12345);
 foreach($pref as $value) {
     echo"-----------------------------------------------\n";
     echo "Test with Prefetch value set to $value \n";
@@ -69,6 +69,21 @@ foreach($pref as $value) {
     $cur1 = oci_new_cursor($c);
     fetch_frm_php($c,$cur1,$value);
     fetch_frm_plsql($c,$cur1);
+}
+
+// Various invalid values for prefetch
+$pref = array(-12345,-1);
+foreach($pref as $value) {
+    try {
+        echo "-----------------------------------------------\n";
+        echo "Test with Prefetch (invalid) value set to $value \n";
+        echo "-----------------------------------------------\n";
+        $cur1 = oci_new_cursor($c);
+        fetch_frm_php($c,$cur1,$value);
+        fetch_frm_plsql($c,$cur1);
+    } catch(ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 
@@ -206,33 +221,11 @@ Fetch Row from PL/SQL
 int(0)
 NULL
 -----------------------------------------------
-Test with Prefetch value set to -12345 
+Test with Prefetch (invalid) value set to -12345 
 -----------------------------------------------
-
-Warning: oci_set_prefetch(): Number of rows to be prefetched has to be greater than or equal to 0 in %s on line %d
-Fetch Row from PHP
-array(2) {
-  [0]=>
-  string(%d) "0"
-  [1]=>
-  string(%d) "test0"
-}
-Fetch Row from PL/SQL
-int(101)
-string(%d) "test101"
+oci_set_prefetch(): Argument #2 ($number_of_rows) must be greater than or equal to 0
 -----------------------------------------------
-Test with Prefetch value set to -1 
+Test with Prefetch (invalid) value set to -1 
 -----------------------------------------------
-
-Warning: oci_set_prefetch(): Number of rows to be prefetched has to be greater than or equal to 0 in %s on line %d
-Fetch Row from PHP
-array(2) {
-  [0]=>
-  string(%d) "0"
-  [1]=>
-  string(%d) "test0"
-}
-Fetch Row from PL/SQL
-int(101)
-string(%d) "test101"
+oci_set_prefetch(): Argument #2 ($number_of_rows) must be greater than or equal to 0
 Done

@@ -12,11 +12,10 @@ class IntlDateFormatter
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
-     * @param IntlCalendar|int|null $calendar
      * @return IntlDateFormatter|null
      * @alias datefmt_create
      */
-    public static function create(?string $locale, int $datetype, int $timetype, $timezone = null, $calendar = null, string $pattern = "") {}
+    public static function create(?string $locale, int $datetype, int $timetype, $timezone = null, IntlCalendar|int|null $calendar = null, string $pattern = "") {}
 
     /**
      * @return int|false
@@ -37,11 +36,10 @@ class IntlDateFormatter
     public function getCalendar() {}
 
     /**
-     * @param IntlCalendar|int|null $which
      * @return bool
      * @alias datefmt_set_calendar
      */
-    public function setCalendar($which) {}
+    public function setCalendar(IntlCalendar|int|null $which) {}
 
     /**
      * @return string|false

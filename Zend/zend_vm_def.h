@@ -7376,6 +7376,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMPVARCV, JMP_ADDR)
 		zval *result = EX_VAR(opline->result.var);
 
 		if (EXPECTED(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
+			ZVAL_NULL(result);
 			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
 				SAVE_OPLINE();
 				ZVAL_UNDEFINED_OP1();
@@ -7383,8 +7384,6 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMPVARCV, JMP_ADDR)
 					HANDLE_EXCEPTION();
 				}
 			}
-
-			ZVAL_NULL(result);
 		} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 			ZVAL_FALSE(result);
 		} else {
@@ -8034,7 +8033,12 @@ ZEND_VM_C_LABEL(yield_from_try_again):
 			Z_ADDREF_P(val);
 			FREE_OP1();
 
-			if (Z_ISUNDEF(new_gen->retval)) {
+			if (UNEXPECTED(new_gen->execute_data == NULL)) {
+				zend_throw_error(NULL, "Generator passed to yield from was aborted without proper return and is unable to continue");
+				zval_ptr_dtor(val);
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			} else if (Z_ISUNDEF(new_gen->retval)) {
 				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {
 					zend_throw_error(NULL, "Impossible to yield from the Generator being currently run");
 					zval_ptr_dtor(val);
@@ -8043,11 +8047,6 @@ ZEND_VM_C_LABEL(yield_from_try_again):
 				} else {
 					zend_generator_yield_from(generator, new_gen);
 				}
-			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {
-				zend_throw_error(NULL, "Generator passed to yield from was aborted without proper return and is unable to continue");
-				zval_ptr_dtor(val);
-				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
 			} else {
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), &new_gen->retval);
