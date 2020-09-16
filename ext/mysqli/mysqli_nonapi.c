@@ -1040,6 +1040,7 @@ PHP_FUNCTION(mysqli_set_charset)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	if (mysql_set_character_set(mysql->mysql, cs_name)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;

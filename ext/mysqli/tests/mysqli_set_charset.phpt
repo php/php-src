@@ -101,6 +101,20 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
     }
     mysqli_free_result($res);
 
+    // Make sure that set_charset throws an exception in exception mode
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    try {
+        $link->set_charset('invalid');
+    } catch (\mysqli_sql_exception $exception) {
+        echo "Exception: " . $exception->getMessage() . "\n";
+    }
+
+    try {
+        $link->set_charset('ucs2');
+    } catch (\mysqli_sql_exception $exception) {
+        echo "Exception: " . $exception->getMessage() . "\n";
+    }
+
     mysqli_close($link);
 
     try {
@@ -115,6 +129,8 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 <?php
     require_once("clean_table.inc");
 ?>
---EXPECT--
+--EXPECTF--
+Exception: %s
+Exception: Variable 'character_set_client' can't be set to the value of 'ucs2'
 mysqli object is already closed
 done!
