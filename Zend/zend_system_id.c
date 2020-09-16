@@ -26,17 +26,14 @@ ZEND_API char zend_system_id[32];
 static PHP_MD5_CTX context;
 static int finalized = 0;
 
-ZEND_API ZEND_RESULT_CODE zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
+ZEND_API void zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
 {
-	if (finalized == 0) {
-		PHP_MD5Update(&context, module_name, strlen(module_name));
-		PHP_MD5Update(&context, hook_name, strlen(hook_name));
-		if (size) {
-			PHP_MD5Update(&context, data, size);
-		}
-		return SUCCESS;
+	ZEND_ASSERT(!finalized);
+	PHP_MD5Update(&context, module_name, strlen(module_name));
+	PHP_MD5Update(&context, hook_name, strlen(hook_name));
+	if (size) {
+		PHP_MD5Update(&context, data, size);
 	}
-	return FAILURE;
 }
 
 #define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
@@ -64,7 +61,6 @@ void zend_finalize_system_id(void)
 {
 	unsigned char digest[16];
 	zend_uchar hooks = 0;
-	int16_t i = 0;
 
 	if (zend_ast_process) {
 		hooks |= ZEND_HOOK_AST_PROCESS;
@@ -78,11 +74,11 @@ void zend_finalize_system_id(void)
 	if (zend_execute_internal) {
 		hooks |= ZEND_HOOK_EXECUTE_INTERNAL;
 	}
-	PHP_MD5Update(&context, &hooks, sizeof(zend_uchar));
+	PHP_MD5Update(&context, &hooks, sizeof hooks);
 
-	for (; i < 256; i++) {
+	for (int16_t i = 0; i < 256; i++) {
 		if (zend_get_user_opcode_handler((zend_uchar) i) != NULL) {
-			PHP_MD5Update(&context, &i, sizeof(int16_t));
+			PHP_MD5Update(&context, &i, sizeof i);
 		}
 	}
 
