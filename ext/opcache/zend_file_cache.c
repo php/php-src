@@ -108,6 +108,7 @@ static int zend_file_cache_flock(int fd, int type)
 #endif
 
 #define SUFFIX ".bin"
+#define T_PHP_OPCODE "<?pho"
 
 #define IS_SERIALIZED_INTERNED(ptr) \
 	((size_t)(ptr) & Z_UL(1))
@@ -1640,6 +1641,79 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	UNSERIALIZE_PTR(script->arena_mem);
 }
 
+static int check_jump_opcode_tag(int fd) {
+	char sep;
+	int tag_buf_len = strlen(T_PHP_OPCODE);
+	char tag[tag_buf_len];
+
+	int rn = read(fd, &tag, tag_buf_len);
+	if(rn <= 0) {
+		return -1;
+	}
+	int ret = strcasecmp(tag, T_PHP_OPCODE); 
+
+	if( ret != 0) {
+		return -1;
+	}
+	
+	if(!read(fd, &sep, 1) || !isspace(sep)) {
+		return -1;
+	}
+
+	return 0;
+}
+
+int copy_cache_opcode_file(zend_file_handle * handle, char* opcode_file) {
+	zend_string *full_path;
+	char *cache_file;
+	int fd_new;
+	int fd_cache;
+	char buf[8192];
+	int buf_len;
+	int chunksize = sizeof(buf);
+
+	full_path = handle->opened_path;
+	cache_file = zend_file_cache_get_bin_file_path(full_path);
+
+	fd_new = zend_file_cache_open(opcode_file, O_CREAT | O_EXCL | O_RDWR | O_BINARY, S_IRUSR | S_IWUSR);
+
+	if(fd_new < 0) {
+		zend_file_cache_unlink(cache_file);
+		zend_file_cache_unlink(opcode_file);
+		efree(cache_file);
+		return FAILURE;
+	}
+	write(fd_new, T_PHP_OPCODE, strlen(T_PHP_OPCODE));
+	write(fd_new, " ", 1);
+
+	fd_cache = zend_file_cache_open(cache_file, O_RDONLY | O_BINARY);
+
+	if(fd_cache < 0) {
+		zend_file_cache_unlink(cache_file);
+		zend_file_cache_unlink(opcode_file);
+		efree(cache_file);
+		return FAILURE;
+	}
+
+	while(1) {
+		buf_len = read(fd_cache, buf, chunksize);
+		if(buf_len <= 0) {
+			break;
+		}
+		write(fd_new, buf, buf_len);
+		if(buf_len < chunksize) {
+			break;
+		}
+	}
+	efree(cache_file);
+	close(fd_new);
+	close(fd_cache);
+
+	zend_file_cache_unlink(cache_file);
+	
+	return SUCCESS;
+}
+
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
 {
 	zend_string *full_path = file_handle->opened_path;
@@ -1652,13 +1726,25 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	int cache_it = 1;
 	unsigned int actual_checksum;
 	int ok;
+	int is_opfile = 0;
 
 	if (!full_path) {
 		return NULL;
 	}
-	filename = zend_file_cache_get_bin_file_path(full_path);
 
-	fd = zend_file_cache_open(filename, O_RDONLY | O_BINARY);
+	fd = zend_file_cache_open(ZSTR_VAL(full_path),  O_RDONLY | O_BINARY);
+
+	if(fd < 0 || check_jump_opcode_tag(fd) < 0) {
+		close(fd);
+		fd = -1;
+	} else {
+		is_opfile = 1;
+	}
+	if(fd < 0) {
+		filename = zend_file_cache_get_bin_file_path(full_path);
+		fd = zend_file_cache_open(filename, O_RDONLY | O_BINARY);
+		check_jump_opcode_tag(fd);
+	}
 	if (fd < 0) {
 		efree(filename);
 		return NULL;
@@ -1688,7 +1774,8 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		efree(filename);
 		return NULL;
 	}
-	if (memcmp(info.system_id, accel_system_id, 32) != 0) {
+
+	if (!is_opfile && memcmp(info.system_id, accel_system_id, 32) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
@@ -1698,7 +1785,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 
 	/* verify timestamp */
-	if (ZCG(accel_directives).validate_timestamps &&
+	if (!is_opfile && ZCG(accel_directives).validate_timestamps &&
 	    zend_get_file_handle_timestamp(file_handle, NULL) != info.timestamp) {
 		if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
@@ -1827,7 +1914,9 @@ use_process_mem:
 
 		zend_arena_release(&CG(arena), checkpoint);
 	}
-	efree(filename);
+	if(!is_opfile) {
+		efree(filename);
+	}
 
 	return script;
 }

@@ -32,7 +32,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 #include "opcache_arginfo.h"
-
+#include "zend_file_cache.h"
 #if HAVE_JIT
 #include "jit/zend_jit.h"
 #endif
@@ -860,18 +860,37 @@ ZEND_FUNCTION(opcache_compile_file)
 {
 	char *script_name;
 	size_t script_name_len;
+	char *opcode_file = NULL;
+	size_t opecode_file_len;
 	zend_file_handle handle;
 	zend_op_array *op_array = NULL;
 	zend_execute_data *orig_execute_data = NULL;
 	uint32_t orig_compiler_options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &script_name, &script_name_len, &opcode_file, &opecode_file_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (!accel_startup_ok) {
 		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has not been properly started, can't compile file");
 		RETURN_FALSE;
+	}
+
+	if(opcode_file != NULL) {
+		if(!file_cache_only) {
+			zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has been disable file_cache_only, can't store opcode to file");
+			RETURN_FALSE;
+		}
+		if(access(opcode_file, F_OK) != -1) {
+			zend_error(E_WARNING, "File %s already exists", opcode_file);
+			RETURN_FALSE;
+		}
+#ifdef HAVE_JIT
+	if (JIT_G(on)) {
+		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has been enabled JIT, can't store opcode to file");
+		RETURN_FALSE;
+	}
+#endif
 	}
 
 	zend_stream_init_filename(&handle, script_name);
@@ -897,6 +916,11 @@ ZEND_FUNCTION(opcache_compile_file)
 	CG(compiler_options) = orig_compiler_options;
 
 	if(op_array != NULL) {
+		if(opcode_file != NULL) {
+			if(copy_cache_opcode_file(&handle, opcode_file) == FAILURE) {
+				RETVAL_FALSE;
+			}
+		}
 		destroy_op_array(op_array);
 		efree(op_array);
 		RETVAL_TRUE;
