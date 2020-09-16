@@ -199,10 +199,17 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	}
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
+		char *p;
 		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == 0) {
 			zlog(ZLOG_ERROR, "Another FPM instance seems to already listen on %s", ((struct sockaddr_un *) sa)->sun_path);
 			close(sock);
 			return -1;
+		}
+		p = strrchr(((struct sockaddr_un *) sa)->sun_path, DEFAULT_SLASH);
+		if (p) {
+			*p = 0;
+			mkdir(((struct sockaddr_un *) sa)->sun_path, 0755);
+			*p = DEFAULT_SLASH;
 		}
 		unlink( ((struct sockaddr_un *) sa)->sun_path);
 		saved_umask = umask(0777 ^ wp->socket_mode);
