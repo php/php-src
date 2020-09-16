@@ -1049,8 +1049,8 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
             }
         }
         if ($op1 != "ANY" || $op2 != "ANY") {
-            if (!isset($used_observer_handlers[$opcode["op"]])) {
-                $used_observer_handlers[$opcode["op"]] = true;
+            if (!isset($used_observer_handlers[$kind][$opcode["op"]])) {
+                $used_observer_handlers[$kind][$opcode["op"]] = true;
                 $op1 = "ANY";
                 $op2 = "ANY";
             } else {
