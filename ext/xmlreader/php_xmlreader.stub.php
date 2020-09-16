@@ -76,6 +76,6 @@ class XMLReader
     /** @return bool|XMLReader */
     public static function XML(string $source, ?string $encoding = null, int $options = 0) {}
 
-    /** @return DOMNode|bool */
+    /** @return DOMNode|false|null */
     public function expand(?DOMNode $basenode = null) {}
 }
