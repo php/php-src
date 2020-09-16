@@ -26,14 +26,17 @@ ZEND_API char zend_system_id[32];
 static PHP_MD5_CTX context;
 static int finalized = 0;
 
-ZEND_API void zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
+ZEND_API ZEND_RESULT_CODE zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
 {
-	ZEND_ASSERT(!finalized);
-	PHP_MD5Update(&context, module_name, strlen(module_name));
-	PHP_MD5Update(&context, hook_name, strlen(hook_name));
-	if (size) {
-		PHP_MD5Update(&context, data, size);
+	if (finalized == 0) {
+		PHP_MD5Update(&context, module_name, strlen(module_name));
+		PHP_MD5Update(&context, hook_name, strlen(hook_name));
+		if (size) {
+			PHP_MD5Update(&context, data, size);
+		}
+		return SUCCESS;
 	}
+	return FAILURE;
 }
 
 #define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
