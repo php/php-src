@@ -1749,9 +1749,6 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if(fd < 0) {
 		filename = zend_file_cache_get_bin_file_path(full_path);
 		fd = zend_file_cache_open(filename, O_RDONLY | O_BINARY);
-		if(ZCG(accel_directives).allow_direct_exec_opcode) {
-			check_jump_opcode_tag(fd);
-		}
 	}
 	if (fd < 0) {
 		efree(filename);
