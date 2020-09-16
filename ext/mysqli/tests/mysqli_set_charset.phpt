@@ -102,6 +102,14 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
     }
     mysqli_free_result($res);
 
+    // Make sure that set_charset throws an exception in exception mode
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    try {
+        $link->set_charset('invalid');
+    } catch (\mysqli_sql_exception $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+
     mysqli_close($link);
 
     try {
@@ -117,5 +125,6 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+Invalid character set was provided
 mysqli object is already closed
 done!
