@@ -13,7 +13,7 @@ class XMLReader
     /** @return string|null */
     public function getAttributeNo(int $index) {}
 
-    /** @return string|null|false */
+    /** @return string|null */
     public function getAttributeNs(string $name, string $namespaceURI) {}
 
     /** @return bool */
