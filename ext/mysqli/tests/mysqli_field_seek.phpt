@@ -92,7 +92,11 @@ require_once('skipifconnectfailure.inc');
     }
 
     var_dump(mysqli_field_tell($res));
-    var_dump(mysqli_field_seek($res, 2));
+    try {
+        var_dump(mysqli_field_seek($res, 2));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     var_dump(mysqli_fetch_field($res));
 
     mysqli_free_result($res);
@@ -207,9 +211,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 int(2)
-
-Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
-bool(false)
+mysqli_field_seek(): Argument #2 ($field_nr) must be less than the number of fields for this result set
 bool(false)
 bool(true)
 object(stdClass)#%d (13) {
