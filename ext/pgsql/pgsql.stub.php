@@ -11,41 +11,41 @@ function pg_pconnect(string $connection_string, int $connection_type = 0) {}
 /** @param resource $connection */
 function pg_connect_poll($connection): int {}
 
-/** @param resource $connection */
-function pg_close($connection = UNKNOWN): bool {}
+/** @param resource|null $connection */
+function pg_close($connection = null): bool {}
 
-/** @param resource $connection */
-function pg_dbname($connection = UNKNOWN): string {}
+/** @param resource|null $connection */
+function pg_dbname($connection = null): string {}
 
-/** @param resource $connection */
-function pg_last_error($connection = UNKNOWN): string {}
+/** @param resource|null $connection */
+function pg_last_error($connection = null): string {}
 
 /**
- * @param resource $connection
+ * @param resource|null $connection
  * @alias pg_last_error
  */
-function pg_errormessage($connection = UNKNOWN): string {}
+function pg_errormessage($connection = null): string {}
 
-/** @param resource $connection */
-function pg_options($connection = UNKNOWN): string {}
+/** @param resource|null $connection */
+function pg_options($connection = null): string {}
 
-/** @param resource $connection */
-function pg_port($connection = UNKNOWN): string {}
+/** @param resource|null $connection */
+function pg_port($connection = null): string {}
 
-/** @param resource $connection */
-function pg_tty($connection = UNKNOWN): string {}
+/** @param resource|null $connection */
+function pg_tty($connection = null): string {}
 
-/** @param resource $connection */
-function pg_host($connection = UNKNOWN): string {}
+/** @param resource|null $connection */
+function pg_host($connection = null): string {}
 
-/** @param resource $connection */
-function pg_version($connection = UNKNOWN): array {}
+/** @param resource|null $connection */
+function pg_version($connection = null): array {}
 
 /** @param resource|string $connection */
 function pg_parameter_status($connection, string $param_name = UNKNOWN): string|false {}
 
-/** @param resource $connection */
-function pg_ping($connection = UNKNOWN): bool {}
+/** @param resource|null $connection */
+function pg_ping($connection = null): bool {}
 
 /**
  * @param resource|string $connection
@@ -236,11 +236,11 @@ function pg_last_oid($result): string|int|false {}
  */
 function pg_getlastoid($result): string|int|false {}
 
-/** @param resource $connection */
-function pg_trace(string $filename, string $mode = "w", $connection = UNKNOWN): bool {}
+/** @param resource|null $connection */
+function pg_trace(string $filename, string $mode = "w", $connection = null): bool {}
 
-/** @param resource $connection */
-function pg_untrace($connection = UNKNOWN): bool {}
+/** @param resource|null $connection */
+function pg_untrace($connection = null): bool {}
 
 /**
  * @param resource $connection
@@ -302,13 +302,13 @@ function pg_lo_read($large_object, int $len = 8192): string|false {}
 function pg_loread($large_object, int $len = 8192): string|false {}
 
 /** @param resource $large_object */
-function pg_lo_write($large_object, string $buf, int $len = UNKNOWN): int|false {}
+function pg_lo_write($large_object, string $buf, ?int $len = null): int|false {}
 
 /**
  * @param resource $large_object
  * @alias pg_lo_write
  */
-function pg_lowrite($large_object, string $buf, int $len = UNKNOWN): int|false {}
+function pg_lowrite($large_object, string $buf, ?int $len = null): int|false {}
 
 /** @param resource $large_object */
 function pg_lo_read_all($large_object): int {}
@@ -374,17 +374,17 @@ function pg_set_client_encoding($connection, string $encoding = UNKNOWN): int {}
  */
 function pg_setclientencoding($connection, string $encoding = UNKNOWN): int {}
 
-/** @param resource $connection */
-function pg_client_encoding($connection = UNKNOWN): string {}
+/** @param resource|null $connection */
+function pg_client_encoding($connection = null): string {}
 
 /**
- * @param resource $connection
+ * @param resource|null $connection
  * @alias pg_client_encoding
  */
-function pg_clientencoding($connection = UNKNOWN): string {}
+function pg_clientencoding($connection = null): string {}
 
-/** @param resource $connection */
-function pg_end_copy($connection = UNKNOWN): bool {}
+/** @param resource|null $connection */
+function pg_end_copy($connection = null): bool {}
 
 /** @param resource|string $connection */
 function pg_put_line($connection, string $query = UNKNOWN): bool {}
@@ -401,7 +401,7 @@ function pg_escape_string($connection, string $data = UNKNOWN): string {}
 /** @param resource|string $connection */
 function pg_escape_bytea($connection, string $data = UNKNOWN): string {}
 
-function pg_unescape_bytea(string $data = UNKNOWN): string|false {}
+function pg_unescape_bytea(?string $data = null): string|false {}
 
 /** @param resource|string $connection */
 function pg_escape_literal($connection, string $data = UNKNOWN): string|false {}
