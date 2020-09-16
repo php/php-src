@@ -2827,7 +2827,10 @@ static zend_bool zend_jit_may_delay_fetch_this(zend_ssa *ssa, const zend_op **ss
 	}
 
 	opline = ssa_opcodes[use];
-	if (opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG) {
+	if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+		return (opline->op2_type == IS_CONST &&
+			Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_STRING);
+	} else if (opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG) {
 		if (!JIT_G(current_frame)
 		 || !JIT_G(current_frame)->call
 		 || !JIT_G(current_frame)->call->func
@@ -2837,7 +2840,12 @@ static zend_bool zend_jit_may_delay_fetch_this(zend_ssa *ssa, const zend_op **ss
 	} else if (opline->opcode != ZEND_FETCH_OBJ_R
 			&& opline->opcode != ZEND_FETCH_OBJ_IS
 			&& opline->opcode != ZEND_FETCH_OBJ_W
-			&& opline->opcode != ZEND_ASSIGN_OBJ) {
+			&& opline->opcode != ZEND_ASSIGN_OBJ
+			&& opline->opcode != ZEND_ASSIGN_OBJ_OP
+			&& opline->opcode != ZEND_PRE_INC_OBJ
+			&& opline->opcode != ZEND_PRE_DEC_OBJ
+			&& opline->opcode != ZEND_POST_INC_OBJ
+			&& opline->opcode != ZEND_POST_DEC_OBJ) {
 		return 0;
 	}
 
@@ -5001,9 +5009,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							op1_addr = 0;
 						} else {
 							op1_info = OP1_INFO();
-							if (!(op1_info & MAY_BE_OBJECT)) {
-									goto generic_dynamic_call;
-							}
 							op1_addr = OP1_REG_ADDR();
 							if (orig_op1_type != IS_UNKNOWN
 							 && (orig_op1_type & IS_TRACE_REFERENCE)) {
