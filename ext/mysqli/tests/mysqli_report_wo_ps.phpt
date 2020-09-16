@@ -48,7 +48,11 @@ if (mysqli_get_server_version($link) >= 50600)
     mysqli_multi_query($link, "BAR; FOO;");
     mysqli_query($link, "FOO");
     mysqli_change_user($link, "0123456789-10-456789-20-456789-30-456789-40-456789-50-456789-60-456789-70-456789-80-456789-90-456789", "password", $db);
-    mysqli_kill($link, -1);
+    try {
+        mysqli_kill($link, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     // mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
     mysqli_real_query($link, "FOO");
@@ -64,7 +68,11 @@ if (mysqli_get_server_version($link) >= 50600)
     mysqli_multi_query($link, "BAR; FOO;");
     mysqli_query($link, "FOO");
     mysqli_change_user($link, "This might work if you accept anonymous users in your setup", "password", $db);
-    mysqli_kill($link, -1);
+    try {
+        mysqli_kill($link, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     mysqli_real_query($link, "FOO");
     mysqli_select_db($link, "Oh lord, let this be an unknown database name");
 
@@ -106,12 +114,10 @@ Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; ch
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_change_user(): (%d/%d): Access denied for user '%s'@'%s' (using password: %s) in %s on line %d
-
-Warning: mysqli_kill(): processid should have positive value in %s on line %d
+mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
 
 Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
-
-Warning: mysqli_kill(): processid should have positive value in %s on line %d
+mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
 [011] Access denied for user '%s'@'%s' (using password: YES)
 [014] Access denied for user '%s'@'%s' (using password: YES)
 done!
