@@ -48,6 +48,7 @@ MySQLPDOTest::skip();
                 } catch (PDOException $e) {
                     $expected = array(
                         "SQLSTATE[HY000] [1049] Unknown database 'letshopeinvalid'",
+                        "SQLSTATE[42000] [1049] Unknown database 'letshopeinvalid'",
                         "SQLSTATE[HY000] [2002] No such file or directory"
                     );
                     printf("[003] URI=%s, DSN=%s, File=%s (%d bytes, '%s'), chr(0) test, %s\n",

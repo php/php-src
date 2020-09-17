@@ -95,7 +95,7 @@ object(mysqli)#%d (%d) {
   ["connect_error"]=>
   NULL
   ["errno"]=>
-  int(2006)
+  int(%d)
   ["error"]=>
   string(%d) "%s"
   ["error_list"]=>
@@ -103,7 +103,7 @@ object(mysqli)#%d (%d) {
     [0]=>
     array(3) {
       ["errno"]=>
-      int(2006)
+      int(%d)
       ["sqlstate"]=>
       string(5) "%s"
       ["error"]=>
