@@ -1941,7 +1941,7 @@ PHP_FUNCTION(ldap_next_attribute)
 	ldap_resultentry *resultentry;
 	char *attribute;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|l", &link, &result_entry) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &link, &result_entry) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
