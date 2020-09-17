@@ -4,10 +4,10 @@
 
 #ifdef HAVE_ORALDAP
 /** @return resource|false */
-function ldap_connect(string $hostname = UNKNOWN, int $port = 389, string $wallet = UNKNOWN, string $wallet_passwd = UNKNOWN, int $authmode = GSLC_SSL_NO_AUTH) {}
+function ldap_connect(string $uri = NULL, int $port = 389, string $wallet = UNKNOWN, string $wallet_passwd = UNKNOWN, int $authmode = GSLC_SSL_NO_AUTH) {}
 #else
 /** @return resource|false */
-function ldap_connect(string $hostname = UNKNOWN, int $port = 389) {}
+function ldap_connect(string $uri = NULL, int $port = 389) {}
 #endif
 
 /** @param resource $link_identifier */
