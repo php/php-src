@@ -108,6 +108,12 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
         $link->set_charset('invalid');
     } catch (\mysqli_sql_exception $exception) {
         echo $exception->getMessage() . "\n";
+	}
+	
+    try {
+        $link->set_charset('ucs2');
+    } catch (\mysqli_sql_exception $exception) {
+        echo $exception->getMessage() . "\n";
     }
 
     mysqli_close($link);
@@ -126,5 +132,6 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 ?>
 --EXPECT--
 Invalid character set was provided
+Variable 'character_set_client' can't be set to the value of 'ucs2'
 mysqli object is already closed
 done!
