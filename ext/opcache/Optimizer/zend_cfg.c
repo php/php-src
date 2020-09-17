@@ -112,6 +112,10 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 	zend_basic_block *blocks = cfg->blocks;
 
 	blocks[start].flags = ZEND_BB_START;
+	if (op_array->opcodes[0].opcode == ZEND_EXT_NOP
+	 && (cfg->flags & ZEND_CFG_RECV_ENTRY)) {
+		blocks[1].flags |= ZEND_BB_RECV_ENTRY;
+	}
 	zend_mark_reachable(op_array->opcodes, cfg, blocks + start);
 
 	if (op_array->last_try_catch) {
@@ -287,6 +291,10 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	/* Build CFG, Step 1: Find basic blocks starts, calculate number of blocks */
 	BB_START(0);
+	if (op_array->opcodes[0].opcode == ZEND_EXT_NOP
+	 && (build_flags & ZEND_CFG_RECV_ENTRY)) {
+		BB_START(1);
+	}
 	for (i = 0; i < op_array->last; i++) {
 		zend_op *opline = op_array->opcodes + i;
 		switch (opline->opcode) {
