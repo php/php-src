@@ -30,7 +30,7 @@ function ldap_bind_ext($link_identifier, string $bind_rdn = NULL, string $bind_p
 
 #ifdef HAVE_LDAP_SASL
 /** @param resource $link */
-function ldap_sasl_bind($link, string $binddn = UNKNOWN, string $password = UNKNOWN, string $sasl_mech = UNKNOWN, string $sasl_realm = UNKNOWN, string $sasl_authc_id = UNKNOWN, string $sasl_authz_id = UNKNOWN, string $props = UNKNOWN): bool {}
+function ldap_sasl_bind($link, string $binddn = NULL, string $password = NULL, string $sasl_mech = NULL, string $sasl_realm = NULL, string $sasl_authc_id = NULL, string $sasl_authz_id = NULL, string $props = NULL): bool {}
 #endif
 
 /**
