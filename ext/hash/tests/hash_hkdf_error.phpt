@@ -48,19 +48,19 @@ trycatch_dump(
 *** Testing hash_hkdf(): error conditions ***
 
 -- Testing hash_hkdf() function with invalid hash algorithm --
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with non-cryptographic hash algorithm --
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with invalid parameters --
-[ValueError] hash_hkdf(): Argument #2 ($ikm) cannot be empty
+[ValueError] hash_hkdf(): Argument #2 ($input_key_material) cannot be empty
 [ValueError] hash_hkdf(): Argument #3 ($length) must be greater than or equal to 0
 [ValueError] hash_hkdf(): Argument #3 ($length) must be less than or equal to 5100

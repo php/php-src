@@ -37,10 +37,10 @@ catch (ValueError $e) {
 *** Testing hash() : error conditions ***
 
 -- Testing hash_hmac_file() function with invalid hash algorithm --
-hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+hash_hmac_file(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with non-cryptographic hash algorithm --
-hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+hash_hmac_file(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with bad path --
 hash_hmac_file(): Argument #2 ($data) must not contain any null bytes
