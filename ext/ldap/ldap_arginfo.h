@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b4dc34ec9daecb904236e487fd4cf736f5f3fc44 */
+ * Stub hash: 93ddab4ae5660ed25b4a69f7aa900368f43e81e8 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
@@ -88,7 +88,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_first_attribute, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_entry_identifier)
-	ZEND_ARG_TYPE_INFO(0, dummy_ber, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ldap_next_attribute arginfo_ldap_first_attribute
@@ -106,10 +105,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ldap_get_values arginfo_ldap_get_values_len
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_get_dn, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_entry_identifier)
-ZEND_END_ARG_INFO()
+#define arginfo_ldap_get_dn arginfo_ldap_first_attribute
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_explode_dn, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
