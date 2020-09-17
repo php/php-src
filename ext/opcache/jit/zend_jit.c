@@ -120,8 +120,17 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);
 
+static zend_bool dominates(const zend_basic_block *blocks, int a, int b) {
+	while (blocks[b].level > blocks[a].level) {
+		b = blocks[b].idom;
+	}
+	return a == b;
+}
+
 static zend_bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
 {
+	int next_use;
+
 	if (ssa->vars[var].phi_use_chain) {
 		zend_ssa_phi *phi = ssa->vars[var].phi_use_chain;
 		do {
@@ -132,8 +141,24 @@ static zend_bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_
 		} while (phi);
 	}
 
-	use = zend_ssa_next_use(ssa->ops, var, use);
-	return use < 0 || zend_ssa_is_no_val_use(op_array->opcodes + use, ssa->ops + use, var);
+	next_use = zend_ssa_next_use(ssa->ops, var, use);
+	if (next_use < 0) {
+		int b = ssa->cfg.map[use];
+		int prev_use = ssa->vars[var].use_chain;
+
+		while (prev_use >= 0 && prev_use != use) {
+			if (b != ssa->cfg.map[prev_use]
+			 && dominates(ssa->cfg.blocks, b, ssa->cfg.map[prev_use])
+			 && !zend_ssa_is_no_val_use(op_array->opcodes + prev_use, ssa->ops + prev_use, var)) {
+				return 0;
+			}
+			prev_use = zend_ssa_next_use(ssa->ops, var, prev_use);
+		}
+		return 1;
+	} else if (zend_ssa_is_no_val_use(op_array->opcodes + next_use, ssa->ops + next_use, var)) {
+		return 1;
+	}
+	return 0;
 }
 
 static zend_bool zend_ival_is_last_use(const zend_lifetime_interval *ival, int use)
