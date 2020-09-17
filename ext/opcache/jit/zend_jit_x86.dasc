@@ -15185,6 +15185,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 				regset = ZEND_REGSET_EMPTY;
+				if (!(opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ))) {
+					ZEND_REGSET_INCL(regset, ZREG_R0);
+				}
 				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) &&
 				    opline->op1_type != IS_CONST && opline->op2_type != IS_CONST) {
 					if (ssa_op->op1_use != current_var &&
