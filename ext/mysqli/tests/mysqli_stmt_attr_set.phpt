@@ -13,16 +13,12 @@ require_once("connect.inc");
     require('table.inc');
 
     $valid_attr = array(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
-    if ((mysqli_get_client_version() > 50003) || $IS_MYSQLND) {
-        $valid_attr[] = MYSQLI_STMT_ATTR_CURSOR_TYPE;
-        $valid_attr[] =	MYSQLI_CURSOR_TYPE_NO_CURSOR;
-        $valid_attr[] =	MYSQLI_CURSOR_TYPE_READ_ONLY;
-        $valid_attr[] =	MYSQLI_CURSOR_TYPE_FOR_UPDATE;
-        $valid_attr[] =	MYSQLI_CURSOR_TYPE_SCROLLABLE;
-    }
-
-    if ((mysqli_get_client_version() > 50007) || $IS_MYSQLND)
-        $valid_attr[] = MYSQLI_STMT_ATTR_PREFETCH_ROWS;
+    $valid_attr[] = MYSQLI_STMT_ATTR_CURSOR_TYPE;
+    $valid_attr[] =	MYSQLI_CURSOR_TYPE_NO_CURSOR;
+    $valid_attr[] =	MYSQLI_CURSOR_TYPE_READ_ONLY;
+    $valid_attr[] =	MYSQLI_CURSOR_TYPE_FOR_UPDATE;
+    $valid_attr[] =	MYSQLI_CURSOR_TYPE_SCROLLABLE;
+    $valid_attr[] = MYSQLI_STMT_ATTR_PREFETCH_ROWS;
 
 
     $stmt = mysqli_stmt_init($link);
@@ -110,78 +106,75 @@ require_once("connect.inc");
     // Cursors
     //
 
-    if (mysqli_get_client_version() > 50003) {
 
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT id, label FROM test");
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT id, label FROM test");
 
-        // Invalid cursor type
-        try {
-            $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, -1);
-        } catch (\ValueError $e) {
-            echo $e->getMessage() . \PHP_EOL;
-        }
+    // Invalid cursor type
+    try {
+        $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
-        if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE)))
-            printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE)))
+        printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-        if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_SCROLLABLE)))
-            printf("[012] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_SCROLLABLE)))
+        printf("[012] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-        if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_NO_CURSOR)))
-            printf("[013] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_NO_CURSOR)))
+        printf("[013] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-        if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY)))
-            printf("[014] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY)))
+        printf("[014] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-        $stmt->close();
+    $stmt->close();
 
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT id, label FROM test");
-        $stmt->execute();
-        $id = $label = NULL;
-        $stmt->bind_result($id, $label);
-        $results = array();
-        while ($stmt->fetch())
-            $results[$id] = $label;
-        $stmt->close();
-        if (empty($results))
-            printf("[015] Results should not be empty, subsequent tests will probably fail!\n");
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT id, label FROM test");
+    $stmt->execute();
+    $id = $label = NULL;
+    $stmt->bind_result($id, $label);
+    $results = array();
+    while ($stmt->fetch())
+        $results[$id] = $label;
+    $stmt->close();
+    if (empty($results))
+        printf("[015] Results should not be empty, subsequent tests will probably fail!\n");
 
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT id, label FROM test");
-        if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_NO_CURSOR)))
-            printf("[016] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-        $stmt->execute();
-        $id = $label = NULL;
-        $stmt->bind_result($id, $label);
-        $results2 = array();
-        while ($stmt->fetch())
-            $results2[$id] = $label;
-        $stmt->close();
-        if ($results != $results2) {
-            printf("[017] Results should not differ. Dumping both result sets.\n");
-            var_dump($results);
-            var_dump($results2);
-        }
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT id, label FROM test");
+    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_NO_CURSOR)))
+        printf("[016] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    $stmt->execute();
+    $id = $label = NULL;
+    $stmt->bind_result($id, $label);
+    $results2 = array();
+    while ($stmt->fetch())
+        $results2[$id] = $label;
+    $stmt->close();
+    if ($results != $results2) {
+        printf("[017] Results should not differ. Dumping both result sets.\n");
+        var_dump($results);
+        var_dump($results2);
+    }
 
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT id, label FROM test");
-        if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY)))
-            printf("[018] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-        $stmt->execute();
-        $id = $label = NULL;
-        $stmt->bind_result($id, $label);
-        $results2 = array();
-        while ($stmt->fetch())
-            $results2[$id] = $label;
-        $stmt->close();
-        if ($results != $results2) {
-            printf("[019] Results should not differ. Dumping both result sets.\n");
-            var_dump($results);
-            var_dump($results2);
-        }
-
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT id, label FROM test");
+    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY)))
+        printf("[018] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    $stmt->execute();
+    $id = $label = NULL;
+    $stmt->bind_result($id, $label);
+    $results2 = array();
+    while ($stmt->fetch())
+        $results2[$id] = $label;
+    $stmt->close();
+    if ($results != $results2) {
+        printf("[019] Results should not differ. Dumping both result sets.\n");
+        var_dump($results);
+        var_dump($results2);
     }
 
 
@@ -189,61 +182,57 @@ require_once("connect.inc");
     // MYSQLI_STMT_ATTR_PREFETCH_ROWS
     //
 
-    if (mysqli_get_client_version() > 50007) {
-
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT id, label FROM test");
-        // Invalid prefetch value
-        try {
-            $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 0);
-        } catch (\ValueError $e) {
-            echo $e->getMessage() . \PHP_EOL;
-        }
-
-        if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 1)))
-            printf("[020] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-        $stmt->execute();
-        $id = $label = NULL;
-        $stmt->bind_result($id, $label);
-        $results = array();
-        while ($stmt->fetch())
-            $results[$id] = $label;
-        $stmt->close();
-        if (empty($results))
-            printf("[021] Results should not be empty, subsequent tests will probably fail!\n");
-
-        /* prefetch is not supported
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT label FROM test");
-        if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, -1)))
-            printf("[022] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-        $stmt->close();
-
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT label FROM test");
-        if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, PHP_INT_MAX)))
-                printf("[023] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-        $stmt->close();
-
-        $stmt = mysqli_stmt_init($link);
-        $stmt->prepare("SELECT id, label FROM test");
-        if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 2)))
-            printf("[024] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-        $stmt->execute();
-        $id = $label = NULL;
-        $stmt->bind_result($id, $label);
-        $results2 = array();
-        while ($stmt->fetch())
-            $results2[$id] = $label;
-        $stmt->close();
-        if ($results != $results2) {
-            printf("[025] Results should not differ. Dumping both result sets.\n");
-            var_dump($results);
-            var_dump($results2);
-        }
-        */
-
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT id, label FROM test");
+    // Invalid prefetch value
+    try {
+        $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 0);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
     }
+
+    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 1)))
+        printf("[020] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    $stmt->execute();
+    $id = $label = NULL;
+    $stmt->bind_result($id, $label);
+    $results = array();
+    while ($stmt->fetch())
+        $results[$id] = $label;
+    $stmt->close();
+    if (empty($results))
+        printf("[021] Results should not be empty, subsequent tests will probably fail!\n");
+
+    /* prefetch is not supported
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT label FROM test");
+    if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, -1)))
+        printf("[022] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    $stmt->close();
+
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT label FROM test");
+    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, PHP_INT_MAX)))
+            printf("[023] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    $stmt->close();
+
+    $stmt = mysqli_stmt_init($link);
+    $stmt->prepare("SELECT id, label FROM test");
+    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 2)))
+        printf("[024] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    $stmt->execute();
+    $id = $label = NULL;
+    $stmt->bind_result($id, $label);
+    $results2 = array();
+    while ($stmt->fetch())
+        $results2[$id] = $label;
+    $stmt->close();
+    if ($results != $results2) {
+        printf("[025] Results should not differ. Dumping both result sets.\n");
+        var_dump($results);
+        var_dump($results2);
+    }
+    */
 
     mysqli_close($link);
     print "done!";

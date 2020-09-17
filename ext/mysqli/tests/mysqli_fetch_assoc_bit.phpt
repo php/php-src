@@ -11,9 +11,6 @@ mysqli_fetch_assoc() - BIT
 	if (mysqli_get_server_version($link) < 50003)
 		// b'001' syntax not supported before 5.0.3
 		die("skip Syntax used for test not supported with MySQL Server before 5.0.3");
-	if (!$IS_MYSQLND && (mysqli_get_client_version() < 50003))
-		// better don't trust libmysql before 5.0.3
-		die("skip Syntax used for test not supported with MySQL Server before 5.0.3");
 ?>
 --FILE--
 <?php

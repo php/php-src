@@ -12,12 +12,11 @@ require_once('skipifconnectfailure.inc');
 
     require('table.inc');
 
-    $valid_attr = array("max_length" => MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
-    if (mysqli_get_client_version() > 50003)
-        $valid_attr["cursor_type"] = MYSQLI_STMT_ATTR_CURSOR_TYPE;
-
-    if ($IS_MYSQLND && mysqli_get_client_version() > 50007)
-        $valid_attr["prefetch_rows"] = MYSQLI_STMT_ATTR_PREFETCH_ROWS;
+    $valid_attr = array(
+        "max_length" => MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH,
+        "cursor_type" => MYSQLI_STMT_ATTR_CURSOR_TYPE,
+        "prefetch_rows" => MYSQLI_STMT_ATTR_PREFETCH_ROWS,
+    );
 
     $stmt = mysqli_stmt_init($link);
     mysqli_stmt_prepare($stmt, 'SELECT * FROM test');

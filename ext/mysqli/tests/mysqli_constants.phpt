@@ -139,9 +139,7 @@ mysqli.allow_local_infile=1
         $expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
     }
 
-    if ($version >= 50033 || $IS_MYSQLND) {
-        $expected_constants['MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT'] = true;
-    }
+    $expected_constants['MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT'] = true;
     if ($IS_MYSQLND) {
         $expected_constants['MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'] = true;
     }
@@ -151,36 +149,26 @@ mysqli.allow_local_infile=1
         $expected_constants['MYSQLI_SERVER_PUBLIC_KEY'] = true;
     }
 
-    if ($version > 50002) {
-        $expected_constants = array_merge($expected_constants, array(
-            "MYSQLI_TYPE_NEWDECIMAL"	=> true,
-            "MYSQLI_TYPE_BIT"			=> true,
-        ));
-    }
+    $expected_constants = array_merge($expected_constants, array(
+        "MYSQLI_TYPE_NEWDECIMAL"	=> true,
+        "MYSQLI_TYPE_BIT"			=> true,
+    ));
 
-    if ($version > 50002 || $IS_MYSQLND) {
-        $expected_constants['MYSQLI_NO_DEFAULT_VALUE_FLAG'] = true;
-    }
+    $expected_constants['MYSQLI_NO_DEFAULT_VALUE_FLAG'] = true;
 
-    if ($version > 50003) {
-        $expected_constants = array_merge($expected_constants, array(
-            "MYSQLI_STMT_ATTR_CURSOR_TYPE"		=> true,
-            "MYSQLI_CURSOR_TYPE_NO_CURSOR"		=> true,
-            "MYSQLI_CURSOR_TYPE_READ_ONLY"		=> true,
-            "MYSQLI_CURSOR_TYPE_FOR_UPDATE"		=> true,
-            "MYSQLI_CURSOR_TYPE_SCROLLABLE"		=> true,
-        ));
-    }
+    $expected_constants = array_merge($expected_constants, array(
+        "MYSQLI_STMT_ATTR_CURSOR_TYPE"		=> true,
+        "MYSQLI_CURSOR_TYPE_NO_CURSOR"		=> true,
+        "MYSQLI_CURSOR_TYPE_READ_ONLY"		=> true,
+        "MYSQLI_CURSOR_TYPE_FOR_UPDATE"		=> true,
+        "MYSQLI_CURSOR_TYPE_SCROLLABLE"		=> true,
+    ));
 
-    if ($version > 50007) {
-        $expected_constants = array_merge($expected_constants, array(
-            "MYSQLI_STMT_ATTR_PREFETCH_ROWS"	=> true,
-        ));
-    }
+    $expected_constants = array_merge($expected_constants, array(
+        "MYSQLI_STMT_ATTR_PREFETCH_ROWS"	=> true,
+    ));
 
-    if ($version > 50110 || $IS_MYSQLND) {
-        $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
-    }
+    $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
 
     /* pretty dump test, but that is the best way to mimic mysql.c */
     if (defined('MYSQLI_DATA_TRUNCATED'))

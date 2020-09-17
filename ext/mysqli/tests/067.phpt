@@ -9,11 +9,10 @@ function test: nested selects (cursors)
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		die("skip Cannot connect to check required version");
 
-	/* skip cursor test for versions < 50004 */
-	if ((!$IS_MYSQLND && (mysqli_get_client_version() < 50009)) ||
-			(mysqli_get_server_version($link) < 50009)) {
-			die(sprintf("skip Client library doesn't support cursors (%s/%s)",
-					mysqli_get_client_version(), mysqli_get_server_version($link)));
+	/* skip cursor test for server versions < 50009 */
+	if (mysqli_get_server_version($link) < 50009) {
+			die(sprintf("skip Server doesn't support cursors (%s)",
+					mysqli_get_server_version($link)));
 	}
 	mysqli_close($link);
 ?>
@@ -32,8 +31,7 @@ function test: nested selects (cursors)
     require_once("connect.inc");
     $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
-    if ((!$IS_MYSQLND && mysqli_get_client_version() < 50009) ||
-        (mysqli_get_server_version($mysql) < 50009)) {
+    if (mysqli_get_server_version($mysql) < 50009) {
         /* we really want to skip it... */
         die(var_dump(63));
     }
