@@ -39,22 +39,12 @@
 #include "mysqli_mysqlnd.h"
 #else
 
-#include <my_global.h>
-
-/*
-  We need more than mysql.h because we need CHARSET_INFO in one place.
-  This order has been borrowed from the ODBC driver. Nothing can be removed
-  from the list of headers :(
-*/
-
-#include <my_sys.h>
 #include <mysql.h>
+#if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
+typedef _Bool		my_bool;
+#endif
 #include <errmsg.h>
-#include <my_list.h>
-#include <m_string.h>
 #include <mysqld_error.h>
-#include <my_list.h>
-#include <m_ctype.h>
 #include "mysqli_libmysql.h"
 #endif /* MYSQLI_USE_MYSQLND */
 
