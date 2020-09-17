@@ -20,7 +20,7 @@ function ldap_unbind($link_identifier): bool {}
 function ldap_close($link_identifier): bool {}
 
 /** @param resource $link_identifier */
-function ldap_bind($link_identifier, string $bind_rdn = UNKNOWN, string $bind_password = UNKNOWN): bool {}
+function ldap_bind($link_identifier, string $bind_rdn = NULL, string $bind_password = NULL): bool {}
 
 /**
  * @param resource $link_identifier
