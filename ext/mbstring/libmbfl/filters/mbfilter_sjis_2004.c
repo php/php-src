@@ -555,6 +555,7 @@ retry:
 
 			CK((*filter->output_function)(s1, filter->data));
 			CK((*filter->output_function)(s2, filter->data));
+			s1 = 0;
 			goto retry;
 		}
 	}
