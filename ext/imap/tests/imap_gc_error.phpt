@@ -13,8 +13,13 @@ require_once(__DIR__.'/skipif.inc');
 require_once(__DIR__.'/imap_include.inc');
 $stream_id = imap_open($default_mailbox, $username, $password) or
     die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
-imap_gc($stream_id, -1);
+
+try {
+    imap_gc($stream_id, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: imap_gc(): Invalid value for the flags parameter in %s on line %d
+--EXPECT--
+imap_gc(): Argument #2 ($flags) must be a bitmask of IMAP_GC_TEXTS, IMAP_GC_ELT, and IMAP_GC_ENV

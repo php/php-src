@@ -21,9 +21,10 @@ $sequences = [0, /* out of range */ 4, 1];
 
 foreach($sequences as $msg_no) {
     echo "\n-- \$msg_no is $msg_no --\n";
-    var_dump($overview = imap_fetchheader($stream_id, $msg_no));
-    if (!$overview) {
-        echo imap_last_error() . "\n";
+    try {
+        var_dump(imap_fetchheader($stream_id, $msg_no));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
     }
 }
 
@@ -40,16 +41,12 @@ Create a temporary mailbox and add 3 msgs
 .. mailbox '{%s}%s' created
 
 -- $msg_no is 0 --
-
-Warning: imap_fetchheader(): Bad message number in %s on line %d
-bool(false)
-
+imap_fetchheader(): Argument #2 ($msg_no) must be greater than 0
 
 -- $msg_no is 4 --
 
 Warning: imap_fetchheader(): Bad message number in %s on line %d
 bool(false)
-
 
 -- $msg_no is 1 --
 string(%d) "From: foo@anywhere.com

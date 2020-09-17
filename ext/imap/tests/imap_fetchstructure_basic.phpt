@@ -12,7 +12,11 @@ require_once(__DIR__.'/skipif.inc');
 require_once(__DIR__.'/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
-imap_fetchstructure($stream_id,0);
+try {
+    imap_fetchstructure($stream_id,0);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $z = imap_fetchstructure($stream_id,1);
 
@@ -39,6 +43,7 @@ require_once('clean.inc');
 --EXPECTF--
 Create a temporary mailbox and add 1 msgs
 .. mailbox '{127.0.0.1:143/norsh}INBOX.phpttest' created
+imap_fetchstructure(): Argument #2 ($msg_no) must be greater than 0
 bool(true)
 bool(true)
 bool(true)

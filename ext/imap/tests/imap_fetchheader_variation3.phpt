@@ -30,11 +30,15 @@ $iterator = 1;
 imap_check($stream_id);
 foreach($options as $option) {
     echo "\n-- Iteration $iterator --\n";
-    if(is_string(imap_fetchheader($stream_id, $msg_uid, $option))) {
-        echo "FT_UID valid\n";
-    } else {
-                echo "FT_UID not valid\n";
+    try {
+        if (is_string(imap_fetchheader($stream_id, $msg_uid, $option))) {
+            echo "FT_UID valid\n";
+        } else {
+            echo "FT_UID not valid\n";
         }
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     $iterator++;
 }
 ?>
@@ -42,10 +46,10 @@ foreach($options as $option) {
 <?php
 require_once(__DIR__.'/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing imap_fetchheader() : usage variations ***
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+.. mailbox '{127.0.0.1:143/norsh}INBOX.phpttest' created
 
 -- Iteration 1 --
 FT_UID valid
@@ -60,11 +64,7 @@ FT_UID valid
 FT_UID valid
 
 -- Iteration 5 --
-
-Warning: imap_fetchheader(): Invalid value for the options parameter in %s on line %d
-FT_UID not valid
+imap_fetchheader(): Argument #3 ($options) must be a bitmask of FT_UID, FT_PREFETCHTEXT, and FT_INTERNAL
 
 -- Iteration 6 --
-
-Warning: imap_fetchheader(): Invalid value for the options parameter in %s on line %d
-FT_UID not valid
+imap_fetchheader(): Argument #3 ($options) must be a bitmask of FT_UID, FT_PREFETCHTEXT, and FT_INTERNAL
