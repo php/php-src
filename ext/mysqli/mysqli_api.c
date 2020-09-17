@@ -614,7 +614,7 @@ PHP_FUNCTION(mysqli_change_user)
 	size_t			user_len, password_len, dbname_len;
 	zend_ulong		rc;
 #if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
-	const		CHARSET_INFO * old_charset;
+	MY_CHARSET_INFO old_charset;
 #endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss!", &mysql_link, mysqli_link_class_entry, &user, &user_len, &password, &password_len, &dbname, &dbname_len) == FAILURE) {
@@ -623,7 +623,7 @@ PHP_FUNCTION(mysqli_change_user)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 #if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
-	old_charset = mysql->mysql->charset;
+	mysql_get_character_set_info(mysql->mysql, &old_charset);
 #endif
 
 #if defined(MYSQLI_USE_MYSQLND)
@@ -643,7 +643,7 @@ PHP_FUNCTION(mysqli_change_user)
 		  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug :
 		  Bug #30472 libmysql doesn't reset charset, insert_id after succ. mysql_change_user() call
 		*/
-		rc = mysql_set_character_set(mysql->mysql, old_charset->csname);
+		rc = mysql_set_character_set(mysql->mysql, old_charset.csname);
 	}
 #endif
 
@@ -1701,10 +1701,12 @@ static int mysqli_options_get_option_zval_type(int option)
 #endif /* MySQL 4.1.0 */
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
+#ifdef MYSQL_OPT_GUESS_CONNECTION /* removed in MySQL-8.0 */
 		case MYSQL_OPT_GUESS_CONNECTION:
 		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
 		case MYSQL_OPT_USE_REMOTE_CONNECTION:
 		case MYSQL_SECURE_AUTH:
+#endif
 #ifdef MYSQL_OPT_RECONNECT
 		case MYSQL_OPT_RECONNECT:
 #endif /* MySQL 5.0.13 */
