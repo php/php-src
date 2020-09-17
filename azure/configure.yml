@@ -57,6 +57,7 @@ steps:
         --with-sodium \
         --enable-dba \
         --with-snmp \
+        --with-unixODBC \
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d
