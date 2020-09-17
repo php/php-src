@@ -3988,6 +3988,9 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL,OBSERVER))
 	} else {
 		zval retval;
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
+		if (IS_OBSERVER) {
+			ret = NULL;
+		}
 
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_deprecated_function(fbc);
@@ -4087,6 +4090,9 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 	} else {
 		zval retval;
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
+		if (IS_OBSERVER) {
+			ret = NULL;
+		}
 
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_deprecated_function(fbc);

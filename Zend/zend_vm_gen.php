@@ -793,6 +793,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
             ($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
             : "\\0",
+        "/IS_OBSERVER/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "1" : "0",
         "/OBSERVER_FCALL_BEGIN_HANDLERS\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
             ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_maybe_fcall_call_begin(\\1)")
             : "",
@@ -1004,6 +1005,8 @@ function is_inline_hybrid_handler($name, $hot, $op1, $op2, $extra_spec) {
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $opcode, $extra_spec = null, &$switch_labels = array()) {
     global $definition_file, $prefix, $opnames, $gen_order;
 
+    static $used_observer_handlers = array();
+
     if (isset($opcode['alias']) && ($spec || $kind != ZEND_VM_KIND_SWITCH)) {
         return;
     }
@@ -1031,6 +1034,26 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
         if ($op2 === "CONST") {
             if ($extra_spec["QUICK_ARG"] == 0) {
                 unset($extra_spec["QUICK_ARG"]);
+            } else {
+                return;
+            }
+        }
+    }
+
+    /* Skip all specialization for OBSERVER handlers */
+    if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1) {
+        if (isset($extra_spec["RETVAL"])) {
+            if ($extra_spec["RETVAL"] == 0) {
+                unset($extra_spec["RETVAL"]);
+            } else {
+                return;
+            }
+        }
+        if ($op1 != "ANY" || $op2 != "ANY") {
+            if (!isset($used_observer_handlers[$kind][$opcode["op"]])) {
+                $used_observer_handlers[$kind][$opcode["op"]] = true;
+                $op1 = "ANY";
+                $op2 = "ANY";
             } else {
                 return;
             }
@@ -1361,6 +1384,17 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                     if (isset($extra_spec["QUICK_ARG"])) {
                         if ($op2 === "CONST") {
                             unset($extra_spec["QUICK_ARG"]);
+                        }
+                    }
+
+                    /* Skip all specialization for OBSERVER handlers */
+                    if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1) {
+                        if (isset($extra_spec["RETVAL"])) {
+                            unset($extra_spec["RETVAL"]);
+                        }
+                        if ($op1 != "ANY" || $op2 != "ANY") {
+                            $op1 = "ANY";
+                            $op2 = "ANY";
                         }
                     }
 
