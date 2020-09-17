@@ -46,6 +46,6 @@ bool(false)
 
 Warning: ldap_search(): Array initialization wrong in %s on line %d
 bool(false)
-ldap_search(): Argument #1 ($link_identifier) cannot be empty
-ldap_search(): Argument #2 ($base_dn) must have the same number of elements as the links array
+ldap_search(): Argument #1 ($link) cannot be empty
+ldap_search(): Argument #2 ($base) must have the same number of elements as the links array
 ldap_search(): Argument #3 ($filter) must have the same number of elements as the links array
