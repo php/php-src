@@ -26,7 +26,7 @@ function ldap_bind($link_identifier, string $bind_rdn = NULL, string $bind_passw
  * @param resource $link_identifier
  * @return resource|false
  */
-function ldap_bind_ext($link_identifier, string $bind_rdn = UNKNOWN, string $bind_password = UNKNOWN, array $servercontrols = []) {}
+function ldap_bind_ext($link_identifier, string $bind_rdn = NULL, string $bind_password = NULL, array $servercontrols = []) {}
 
 #ifdef HAVE_LDAP_SASL
 /** @param resource $link */
