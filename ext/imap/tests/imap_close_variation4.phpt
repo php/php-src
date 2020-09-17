@@ -28,7 +28,12 @@ foreach($inputs as $input) {
         imap_delete($stream_id, $i);
     }
     echo "\n-- Iteration $iterator --\n";
-    var_dump( $check = imap_close($stream_id, $input) );
+    try {
+        var_dump( $check = imap_close($stream_id, $input) );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+        $check = false;
+    }
 
     // check that imap_close was successful, if not call imap_close and explicitly set CL_EXPUNGE
     if(false === $check) {
@@ -71,16 +76,10 @@ bool(true)
 CL_EXPUNGE was set
 
 -- Iteration 3 --
-
-Warning: imap_close(): Invalid value for the flags parameter in %s on line %d
-bool(false)
+imap_close(): Argument #2 ($options) must be CL_EXPUNGE or 0
 
 -- Iteration 4 --
-
-Warning: imap_close(): Invalid value for the flags parameter in %s on line %d
-bool(false)
+imap_close(): Argument #2 ($options) must be CL_EXPUNGE or 0
 
 -- Iteration 5 --
-
-Warning: imap_close(): Invalid value for the flags parameter in %s on line %d
-bool(false)
+imap_close(): Argument #2 ($options) must be CL_EXPUNGE or 0

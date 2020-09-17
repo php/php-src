@@ -1,5 +1,5 @@
 --TEST--
-imap_open() incorrect parameter count
+imap_open() ValueErrors
 --CREDITS--
 Paul Sohier
 #phptestfest utrecht
@@ -12,19 +12,27 @@ require_once(__DIR__.'/skipif.inc');
 
 echo "Checking with incorrect parameters\n" ;
 imap_open('', '', '');
-imap_open('', '', '', -1);
+
+try {
+    imap_open('', '', '', -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 require_once(__DIR__.'/imap_include.inc');
-imap_open($default_mailbox, $username, $password, NIL, -1);
+
+try {
+    imap_open($default_mailbox, $username, $password, NIL, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
 Checking with incorrect parameters
 
 Warning: imap_open(): Couldn't open stream  in %s on line %d
-
-Warning: imap_open(): Couldn't open stream  in %s on line %d
-
-Warning: imap_open(): Retries must be greater or equal to 0 in %s on line %d
+imap_open(): Argument #4 ($options) must be a bitmask of the OP_* constants, and CL_EXPUNGE
+imap_open(): Argument #5 ($n_retries) must be greater than or equal to 0
 
 Notice: Unknown: Can't open mailbox : no such mailbox (errflg=2) in Unknown on line 0
