@@ -177,7 +177,7 @@ static zend_function* ZEND_FASTCALL zend_jit_find_method_tmp_helper(zend_object 
 			zend_objects_store_del(obj);
 		}
 	} else if (obj != *obj_ptr) {
-		GC_ADDREF(obj);
+		GC_ADDREF(*obj_ptr);
 		if (GC_DELREF(obj) == 0) {
 			zend_objects_store_del(obj);
 		}
