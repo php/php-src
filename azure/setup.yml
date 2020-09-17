@@ -16,4 +16,12 @@ steps:
       sudo cp ext/snmp/tests/bigtest /etc/snmp
       sudo service snmpd restart
     displayName: 'Configure snmpd'
+  - script: |
+      set -e
+      sudo groupadd -g 5000 vmail
+      sudo useradd -m -d /var/vmail -s /bin/false -u 5000 -g vmail vmail
+      sudo cp ext/imap/tests/dovecot.conf /etc/dovecot/dovecot.conf
+      sudo cp ext/imap/tests/dovecotpass /etc/dovecot/dovecotpass
+      sudo service dovecot restart
+    displayName: 'Configure IMAP'
 

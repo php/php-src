@@ -42,5 +42,6 @@ steps:
                        snmp-mibs-downloader \
                        unixodbc-dev \
                        llvm \
+                       libc-client-dev libkrb5-dev dovecot-core dovecot-pop3d dovecot-imapd \
                        ${{ parameters.packages }}
     displayName: 'APT'

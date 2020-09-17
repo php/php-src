@@ -60,5 +60,6 @@ steps:
         --with-unixODBC \
         --enable-werror \
         --with-config-file-path=/etc \
-        --with-config-file-scan-dir=/etc/php.d
+        --with-config-file-scan-dir=/etc/php.d \
+        --with-imap --with-kerberos --with-imap-ssl
   displayName: 'Configure Build'
