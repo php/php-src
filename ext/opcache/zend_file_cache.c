@@ -109,6 +109,7 @@ static int zend_file_cache_flock(int fd, int type)
 
 #define SUFFIX ".bin"
 #define T_PHP_OPCODE "<?pho"
+#define T_PHP_OPCODE_LEN 5
 
 #define IS_SERIALIZED_INTERNED(ptr) \
 	((size_t)(ptr) & Z_UL(1))
@@ -1643,10 +1644,9 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 
 static int zend_opcache_check_jump_opcode_tag(int fd) {
 	char sep;
-	int tag_buf_len = sizeof(T_PHP_OPCODE) - 1;
-	char tag[tag_buf_len];
+	char tag[T_PHP_OPCODE_LEN];
 
-	int rn = read(fd, &tag, tag_buf_len);
+	int rn = read(fd, &tag, T_PHP_OPCODE_LEN);
 	if(rn <= 0) {
 		return -1;
 	}
@@ -1676,6 +1676,7 @@ void zend_opcache_copy_file_error(char* msg, char* file1, char *file2, int free)
 
 int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_len, char* opcode_file) {
 	zend_string *full_path;
+	char full_path_buff[MAXPATHLEN];
 	char *cache_file;
 	int fd_new;
 	int fd_cache;
@@ -1684,11 +1685,8 @@ int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_
 	int chunksize = sizeof(buf);
 	int write_size = 0;
 
-	if(accelerator_orig_zend_resolve_path) {
-		full_path = accelerator_orig_zend_resolve_path(src_filename, src_filename_len);
-	} else {
-		full_path = zend_resolve_path(src_filename, src_filename_len);
-	}
+	VCWD_REALPATH(src_filename,full_path_buff);
+	full_path = zend_string_init(full_path_buff, strlen(full_path_buff), 0);
 	cache_file = zend_file_cache_get_bin_file_path(full_path);
 	efree(full_path);
 	fd_new = zend_file_cache_open(opcode_file, O_CREAT | O_EXCL | O_RDWR | O_BINARY, S_IRUSR | S_IWUSR);
@@ -1697,7 +1695,7 @@ int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_
 		return FAILURE;
 	}
 
-	int tag_len = sizeof(T_PHP_OPCODE) - 1;
+	int tag_len = T_PHP_OPCODE_LEN;
 
 	if(write(fd_new, T_PHP_OPCODE, tag_len) != tag_len) {
 		zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
