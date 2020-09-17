@@ -85,13 +85,13 @@ function ldap_get_entries($link_identifier, $result_identifier): array|false {}
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
  */
-function ldap_first_attribute($link_identifier, $result_entry_identifier, int $dummy_ber = UNKNOWN): string|false {}
+function ldap_first_attribute($link_identifier, $result_entry_identifier): string|false {}
 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
  */
-function ldap_next_attribute($link_identifier, $result_entry_identifier, int $dummy_ber = UNKNOWN): string|false {}
+function ldap_next_attribute($link_identifier, $result_entry_identifier): string|false {}
 
 /**
  * @param resource $link_identifier
