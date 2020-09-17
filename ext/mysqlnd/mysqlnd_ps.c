@@ -149,8 +149,14 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 	}
 
 	if (stmt->cursor_exists) {
-		/* Silently convert buffered to unbuffered, for now */
-		DBG_RETURN(s->m->use_result(s));
+		/* Prepared statement cursors are not supported as of yet */
+		char * msg;
+		mnd_sprintf(&msg, 0, "%s() cannot be used with cursors", get_active_function_name());
+		SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+		if (msg) {
+			mnd_sprintf_free(msg);
+		}
+		DBG_RETURN(NULL);
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
