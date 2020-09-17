@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f07138972651411473c34c5ee2d0c2de94e01ada */
+ * Stub hash: 7db7fd320ca8ac2501d22f6cb473a08f47b82ad3 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 0, "NULL")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "389")
 	ZEND_ARG_TYPE_INFO(0, wallet, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, wallet_passwd, IS_STRING, 0)
@@ -13,7 +13,7 @@ ZEND_END_ARG_INFO()
 
 #if !(defined(HAVE_ORALDAP))
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 0, "NULL")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "389")
 ZEND_END_ARG_INFO()
 #endif
