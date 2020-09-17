@@ -1079,6 +1079,8 @@ uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) 
 		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	} else if (zend_string_equals_literal(name, "assert")) {
 		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "db2_execute")) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	} else if (zend_string_equals_literal(name, "func_num_args")) {
 		return ZEND_FUNC_VARARG;
 	} else if (zend_string_equals_literal(name, "func_get_arg")) {
