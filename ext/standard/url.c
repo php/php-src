@@ -261,7 +261,7 @@ parse_host:
 				memcpy(port_buf, p, (e - p));
 				port_buf[e - p] = '\0';
 				port = ZEND_STRTOL(port_buf, NULL, 10);
-				if (port > 0 && port <= 65535) {
+				if ((port > 0 && port <= 65535) || (port == 0 && *port_buf == '0' && e - p == 1)) {
 					ret->port = (unsigned short)port;
 				} else {
 					php_url_free(ret);
