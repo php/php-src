@@ -1261,7 +1261,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (mysqli_savepoint_libmysql(mysql->mysql, name, TRUE)) {
 #else
-	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
+	if (FAIL == mysqlnd_release_savepoint(mysql->mysql, name)) {
 #endif
 		RETURN_FALSE;
 	}

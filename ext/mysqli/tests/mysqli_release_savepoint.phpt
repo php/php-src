@@ -50,7 +50,7 @@ if (!have_innodb($link))
 		printf("[009] Cannot turn off autocommit, expecting true, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* note that there is no savepoint my... */
-	if (true !== ($tmp = mysqli_release_savepoint($link, 'my')))
+	if (false !== ($tmp = mysqli_release_savepoint($link, 'my')))
 		printf("[010] Got %s - [%d] %s\n", var_dump($tmp, true), mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_query($link, 'INSERT INTO test(id) VALUES (1)'))
