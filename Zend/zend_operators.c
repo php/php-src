@@ -1113,6 +1113,8 @@ static zend_always_inline zend_result mul_function_fast(zval *result, zval *op1,
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+		// TODO: if op1 is overflow, we should convert double to long
+		ZVAL_LONG(result, (zend_long) Z_DVAL(*result));
 		return SUCCESS;
 	} else {
 		return FAILURE;
