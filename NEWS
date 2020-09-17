@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     timeout). (Kamil Tekiela, Nikita)
   . Fixed bug #76525 (mysqli::commit does not throw if MYSQLI_REPORT_ERROR
     enabled and mysqlnd used). (Kamil Tekiela)
+  . Fixed bug #72413 (mysqlnd segfault (fetch_row second parameter
+    typemismatch)). (Kamil Tekiela)
 
 - ODBC:
   . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)

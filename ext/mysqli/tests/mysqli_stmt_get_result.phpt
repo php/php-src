@@ -124,32 +124,77 @@ if (!function_exists('mysqli_stmt_get_result'))
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label)))
 		printf("[035] Expecting boolean/true, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
 
-	if (!is_object($tmp = $result = mysqli_stmt_get_result($stmt)))
-		printf("[036] Expecting array, got %s/%s, [%d] %s\n",
-			gettype($tmp), var_export($tmp, 1),
-			mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    // get_result cannot be used in PS cursor mode
+    if (!$stmt = mysqli_stmt_init($link))
+        printf("[030] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[037] Expecting boolean/false, got %s/%s, [%d] %s\n",
-			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
+        printf("[031] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	printf("[038] [%d] [%s]\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-	printf("[039] [%d] [%s]\n", mysqli_errno($link), mysqli_error($link));
-	while ($row = mysqli_fetch_assoc($result)) {
-		var_dump($row);
-	}
-	mysqli_free_result($result);
+    if (!mysqli_stmt_attr_set($stmt, MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY))
+        printf("[032] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+    if (!mysqli_stmt_execute($stmt))
+        printf("[033] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    try {
+        $res = mysqli_stmt_get_result($stmt);
+        // we expect no segfault if we try to fetch a row because get_result should throw an error or return false
+        mysqli_fetch_assoc($res);
+    } catch (\mysqli_sql_exception $e) {
+        echo $e->getMessage() . "\n";
+    }
+
+    try {
+        $res = $stmt->get_result();
+        // we expect no segfault if we try to fetch a row because get_result should throw an error or return false
+        $res->fetch_assoc();
+    } catch (\mysqli_sql_exception $e) {
+        echo $e->getMessage() . "\n";
+    }
+    mysqli_report(MYSQLI_REPORT_OFF);
+
+    if (!$stmt = mysqli_stmt_init($link))
+        printf("[034] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
+        printf("[035] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+    if (!mysqli_stmt_execute($stmt))
+        printf("[036] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+    $id = NULL;
+    $label = NULL;
+    if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label)))
+        printf("[037] Expecting boolean/true, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+
+    if (!is_object($tmp = $result = mysqli_stmt_get_result($stmt)))
+        printf("[038] Expecting array, got %s/%s, [%d] %s\n",
+            gettype($tmp), var_export($tmp, 1),
+            mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+    if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
+        printf("[039] Expecting boolean/false, got %s/%s, [%d] %s\n",
+            gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+    printf("[040] [%d] [%s]\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    printf("[041] [%d] [%s]\n", mysqli_errno($link), mysqli_error($link));
+    while ($row = mysqli_fetch_assoc($result)) {
+        var_dump($row);
+    }
+    mysqli_free_result($result);
 
 	if (!mysqli_kill($link, mysqli_thread_id($link)))
-		printf("[040] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[042] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (false !== ($tmp = mysqli_stmt_get_result($stmt)))
-		printf("[041] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+		printf("[043] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
 
 	mysqli_stmt_close($stmt);
 
 	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[042] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+		printf("[044] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
 
 	mysqli_close($link);
 
@@ -168,8 +213,10 @@ Warning: mysqli_stmt_fetch(): invalid object or resource mysqli_stmt
 
 Warning: mysqli_stmt_get_result(): invalid object or resource mysqli_stmt
  in %s on line %d
-[038] [2014] [Commands out of sync; you can't run this command now]
-[039] [0] []
+mysqli_stmt_get_result() cannot be used with cursors
+get_result() cannot be used with cursors
+[040] [2014] [Commands out of sync; you can't run this command now]
+[041] [0] []
 array(2) {
   ["id"]=>
   int(1)
