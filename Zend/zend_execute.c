@@ -4452,15 +4452,16 @@ static void end_fake_frame(zend_execute_data *call, zend_execute_data *old_prev_
 ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call) {
 	zend_function *fbc = call->func;
 	if (fbc->type == ZEND_USER_FUNCTION) {
+		zend_op_array *op_array = &fbc->op_array;
 		uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
+		uint32_t opline_offset = op_array->opcodes[0].opcode == ZEND_EXT_NOP;
 		for (uint32_t i = 0; i < num_args; i++) {
 			zval *arg = ZEND_CALL_VAR_NUM(call, i);
 			if (!Z_ISUNDEF_P(arg)) {
 				continue;
 			}
 
-			zend_op_array *op_array = &fbc->op_array;
-			zend_op *opline = &op_array->opcodes[i];
+			zend_op *opline = &op_array->opcodes[i + opline_offset];
 			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
 				zval *default_value = RT_CONSTANT(opline, opline->op2);
 				if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {

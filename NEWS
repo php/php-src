@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0RC1
 
+- Core:
+  . Fixed bug #80109 (Cannot skip arguments when extended debug is enabled).
+    (Nikita)
 
 17 Sep 2020, PHP 8.0.0beta4
 
