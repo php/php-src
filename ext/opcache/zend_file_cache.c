@@ -1697,7 +1697,7 @@ int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_
 		return FAILURE;
 	}
 
-	int tag_len = strlen(T_PHP_OPCODE);
+	int tag_len = sizeof(T_PHP_OPCODE) - 1;
 
 	if(write(fd_new, T_PHP_OPCODE, tag_len) != tag_len) {
 		zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
