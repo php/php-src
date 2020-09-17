@@ -1641,9 +1641,9 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	UNSERIALIZE_PTR(script->arena_mem);
 }
 
-static int check_jump_opcode_tag(int fd) {
+static int zend_opcache_check_jump_opcode_tag(int fd) {
 	char sep;
-	int tag_buf_len = strlen(T_PHP_OPCODE);
+	int tag_buf_len = sizeof(T_PHP_OPCODE) - 1;
 	char tag[tag_buf_len];
 
 	int rn = read(fd, &tag, tag_buf_len);
@@ -1663,7 +1663,18 @@ static int check_jump_opcode_tag(int fd) {
 	return 0;
 }
 
-int copy_cache_opcode_file(zend_file_handle * handle, char* opcode_file) {
+void zend_opcache_copy_file_error(char* msg, char* file1, char *file2, int free) {
+	zend_error(E_WARNING, msg, file1);
+	zend_file_cache_unlink(file2);
+	zend_file_cache_unlink(file1);
+	if(free) { 
+		efree(file1);
+	} else {
+		efree(file2);
+	}
+}
+
+int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_len, char* opcode_file) {
 	zend_string *full_path;
 	char *cache_file;
 	int fd_new;
@@ -1671,27 +1682,35 @@ int copy_cache_opcode_file(zend_file_handle * handle, char* opcode_file) {
 	char buf[8192];
 	int buf_len;
 	int chunksize = sizeof(buf);
+	int write_size = 0;
 
-	full_path = handle->opened_path;
+	if(accelerator_orig_zend_resolve_path) {
+		full_path = accelerator_orig_zend_resolve_path(src_filename, src_filename_len);
+	} else {
+		full_path = zend_resolve_path(src_filename, src_filename_len);
+	}
 	cache_file = zend_file_cache_get_bin_file_path(full_path);
-
+	efree(full_path);
 	fd_new = zend_file_cache_open(opcode_file, O_CREAT | O_EXCL | O_RDWR | O_BINARY, S_IRUSR | S_IWUSR);
-
 	if(fd_new < 0) {
-		zend_file_cache_unlink(cache_file);
-		zend_file_cache_unlink(opcode_file);
-		efree(cache_file);
+		zend_opcache_copy_file_error("create file '%s' error\n", opcode_file, cache_file, 0);
 		return FAILURE;
 	}
-	write(fd_new, T_PHP_OPCODE, strlen(T_PHP_OPCODE));
-	write(fd_new, " ", 1);
+
+	int tag_len = strlen(T_PHP_OPCODE);
+
+	if(write(fd_new, T_PHP_OPCODE, tag_len) != tag_len) {
+		zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
+		return FAILURE;
+	}
+	if(write(fd_new, " ", 1) != 1){
+		zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
+		return FAILURE;
+	}
 
 	fd_cache = zend_file_cache_open(cache_file, O_RDONLY | O_BINARY);
-
 	if(fd_cache < 0) {
-		zend_file_cache_unlink(cache_file);
-		zend_file_cache_unlink(opcode_file);
-		efree(cache_file);
+		zend_opcache_copy_file_error("can not open opcode cache file '%s' error\n",cache_file, opcode_file, 1);
 		return FAILURE;
 	}
 
@@ -1700,7 +1719,11 @@ int copy_cache_opcode_file(zend_file_handle * handle, char* opcode_file) {
 		if(buf_len <= 0) {
 			break;
 		}
-		write(fd_new, buf, buf_len);
+		write_size = write(fd_new, buf, buf_len);
+		if(write_size != buf_len) {
+			zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
+			return FAILURE;
+		}
 		if(buf_len < chunksize) {
 			break;
 		}
@@ -1736,7 +1759,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if(ZCG(accel_directives).allow_direct_exec_opcode) {
 		fd = zend_file_cache_open(ZSTR_VAL(full_path),  O_RDONLY | O_BINARY);
 
-		if(fd < 0 || check_jump_opcode_tag(fd) < 0) {
+		if(fd < 0 || zend_opcache_check_jump_opcode_tag(fd) < 0) {
 			close(fd);
 			fd = -1;
 		} else {

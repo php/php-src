@@ -919,14 +919,14 @@ ZEND_FUNCTION(opcache_compile_file)
 	CG(compiler_options) = orig_compiler_options;
 
 	if(op_array != NULL) {
-		if(opcode_file != NULL) {
-			if(copy_cache_opcode_file(&handle, opcode_file) == FAILURE) {
-				RETVAL_FALSE;
-			}
-		}
 		destroy_op_array(op_array);
 		efree(op_array);
-		RETVAL_TRUE;
+		if(opcode_file != NULL &&
+			 zend_opcache_copy_opcode_cache_file(script_name, script_name_len, opcode_file) == FAILURE) {
+				RETVAL_FALSE;
+		} else {
+			RETVAL_TRUE;
+		}
 	} else {
 		RETVAL_FALSE;
 	}
