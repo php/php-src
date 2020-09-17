@@ -370,7 +370,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 		int size;
 		char *p = emalloc(size= var_cnt * (sizeof(char) + sizeof(VAR_BUFFER)));
 		stmt->result.buf = (VAR_BUFFER *) p;
-		stmt->result.is_null = p + var_cnt * sizeof(VAR_BUFFER);
+		stmt->result.is_null = (my_bool *) (p + var_cnt * sizeof(VAR_BUFFER));
 		memset(p, 0, size);
 	}
 
@@ -903,7 +903,6 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 	zval			*mysql_stmt;
 	unsigned int	i;
 	zend_ulong			ret;
-	unsigned int	uval;
 	my_ulonglong	llval;
 
 
@@ -940,8 +939,8 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						    && (stmt->stmt->fields[i].flags & UNSIGNED_FLAG))
 						{
 							/* unsigned int (11) */
-							uval= *(unsigned int *) stmt->result.buf[i].val;
-#if SIZEOF_ZEND_LONG==4
+#if SIZEOF_ZEND_LONG == 4
+							unsigned int uval = *(unsigned int *) stmt->result.buf[i].val;
 							if (uval > INT_MAX) {
 								char *tmp, *p;
 								int j = 10;

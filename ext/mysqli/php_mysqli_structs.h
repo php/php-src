@@ -68,7 +68,7 @@ typedef struct {
 	unsigned int	var_cnt;
 	VAR_BUFFER		*buf;
 	zval			*vars;
-	char			*is_null;
+	my_bool			*is_null;
 } BIND_BUFFER;
 
 typedef struct {
