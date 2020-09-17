@@ -3,7 +3,6 @@ mysqlnd.net_read_timeout > default_socket_timeout
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$IS_MYSQLND) {

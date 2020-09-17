@@ -3,7 +3,6 @@ mysqli_stmt_attr_get() - prefetch
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 die("SKIP: prefetch isn't supported at the moment");
 ?>

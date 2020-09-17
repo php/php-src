@@ -521,7 +521,6 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->report_mode = 0;
 	mysqli_globals->report_ht = 0;
 	mysqli_globals->allow_local_infile = 0;
-	mysqli_globals->embedded = 0;
 	mysqli_globals->rollback_on_cached_plink = FALSE;
 }
 /* }}} */

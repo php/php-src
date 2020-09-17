@@ -289,7 +289,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	zend_long			report_mode;
 	HashTable		*report_ht;
 	zend_ulong	multi_query;
-	zend_ulong	embedded;
 	zend_bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 

@@ -4,7 +4,6 @@ mysqli_real_escape_string() - euckr
 <?php
 
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 

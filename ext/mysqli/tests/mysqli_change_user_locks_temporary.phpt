@@ -3,7 +3,6 @@ mysqli_change_user() - table locks, GET_LOCK(), temporary tables
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 die("skip - is the server still buggy?");
 ?>

@@ -3,7 +3,6 @@ mysqli_stmt_send_long_data() - exceed packet size, mysqlnd
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!stristr(mysqli_get_client_info(), 'mysqlnd'))

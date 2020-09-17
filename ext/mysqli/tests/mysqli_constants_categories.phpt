@@ -3,7 +3,6 @@ Constants exported by ext/mysqli - checking category - PHP bug not mysqli bug (c
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 ?>
 --FILE--
 <?php

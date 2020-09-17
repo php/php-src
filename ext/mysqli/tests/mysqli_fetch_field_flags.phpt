@@ -3,7 +3,6 @@ mysqli_fetch_field() - flags/field->flags
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');

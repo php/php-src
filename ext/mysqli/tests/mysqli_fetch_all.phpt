@@ -3,7 +3,6 @@ mysqli_fetch_all()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_fetch_all'))
 	die("skip: function only available with mysqlnd");

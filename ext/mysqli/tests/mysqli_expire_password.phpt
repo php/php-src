@@ -3,7 +3,6 @@ MySQL 5.6 EXPIRE PASSWORD protocol change
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('connect.inc');
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {

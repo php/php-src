@@ -3,7 +3,6 @@ mysqli_reap_async_query()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('connect.inc');
 require_once('skipifconnectfailure.inc');
 

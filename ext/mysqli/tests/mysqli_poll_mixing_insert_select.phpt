@@ -3,7 +3,6 @@ mysqli_poll() & INSERT SELECT
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('connect.inc');
 require_once('skipifconnectfailure.inc');
 

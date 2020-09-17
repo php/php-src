@@ -3,7 +3,6 @@ mysqli_stmt_fetch - geometry / spatial types
 --SKIPIF--
 <?php
 	require_once('skipif.inc');
-	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
 
 	if (!defined("MYSQLI_TYPE_GEOMETRY"))

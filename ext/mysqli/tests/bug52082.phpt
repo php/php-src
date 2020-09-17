@@ -3,7 +3,6 @@ Bug #52082 (character_set_client & character_set_connection reset after mysqli_c
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
