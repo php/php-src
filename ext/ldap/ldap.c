@@ -1175,7 +1175,7 @@ PHP_FUNCTION(ldap_bind_ext)
 	LDAPMessage *ldap_res;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ssa", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!a", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
