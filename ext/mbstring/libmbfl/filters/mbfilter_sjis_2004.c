@@ -485,10 +485,10 @@ int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
 int
 mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter) {
 	int k;
-	int c1, c2, s1 = 0, s2;
+	int c1, c2, s1, s2;
 
 retry:
-
+	s1 = 0;
 	/* check for 1st char of combining characters */
 	if ((filter->status & 0xf)== 0 && (
 			c == 0x00E6 ||
