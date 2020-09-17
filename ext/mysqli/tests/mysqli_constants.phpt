@@ -168,7 +168,9 @@ mysqli.allow_local_infile=1
         "MYSQLI_STMT_ATTR_PREFETCH_ROWS"	=> true,
     ));
 
-    $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
+    if ($version < 80000 || $version >= 100000 || $IS_MYSQLND) {
+        $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
+    }
 
     /* pretty dump test, but that is the best way to mimic mysql.c */
     if (defined('MYSQLI_DATA_TRUNCATED'))

@@ -115,7 +115,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 
 mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 mysqli_query(): Argument #2 ($query) cannot be empty
 array(1) {
   ["valid"]=>
@@ -126,6 +126,6 @@ array(1) {
   string(1) "a"
 }
 string(1) "a"
-mysqli_query(): Argument #3 ($result_mode) must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT with MYSQLI_ASYNC as an optional bitmask flag
+mysqli_query(): Argument #3 ($result_mode) must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT%S
 mysqli object is already closed
 done!
