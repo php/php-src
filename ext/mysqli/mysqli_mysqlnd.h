@@ -41,6 +41,4 @@
 #define mysqli_async_query(c, q, l)		mysqlnd_async_query((c), (q), (l))
 #define mysqli_change_user_silent(c, u, p, d, p_len)   mysqlnd_change_user_ex((c), (u), (p), (d), TRUE, (size_t)(p_len))
 
-#define HAVE_STMT_NEXT_RESULT
-
 #endif

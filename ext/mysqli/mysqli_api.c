@@ -457,12 +457,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 			case MYSQL_TYPE_NEWDECIMAL:
 #endif
 			{
-#if MYSQL_VERSION_ID >= 50107
-				/* Changed to my_bool in MySQL 5.1. See MySQL Bug #16144 */
 				my_bool tmp;
-#else
-				zend_ulong tmp = 0;
-#endif
 				stmt->result.buf[ofs].type = IS_STRING;
 				/*
 					If the user has called $stmt->store_result() then we have asked
@@ -1567,7 +1562,8 @@ PHP_FUNCTION(mysqli_next_result) {
 }
 /* }}} */
 
-#if defined(HAVE_STMT_NEXT_RESULT) && defined(MYSQLI_USE_MYSQLND)
+/* TODO: Make these available without mysqlnd */
+#if defined(MYSQLI_USE_MYSQLND)
 /* {{{ check if there any more query results from a multi query */
 PHP_FUNCTION(mysqli_stmt_more_results)
 {
@@ -2244,9 +2240,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
 	zend_long	mode_in;
-#if MYSQL_VERSION_ID >= 50107
 	my_bool mode_b;
-#endif
 	unsigned long	mode;
 	zend_long	attr;
 	void	*mode_p;
@@ -2258,7 +2252,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	switch (attr) {
-#if MYSQL_VERSION_ID >= 50107
 	case STMT_ATTR_UPDATE_MAX_LENGTH:
 		if (mode_in != 0 && mode_in != 1) {
 			zend_argument_value_error(ERROR_ARG_POS(3), "must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH");
@@ -2267,7 +2260,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		mode_b = (my_bool) mode_in;
 		mode_p = &mode_b;
 		break;
-#endif
 	case STMT_ATTR_CURSOR_TYPE:
 		switch (mode_in) {
 			case CURSOR_TYPE_NO_CURSOR:
@@ -2294,9 +2286,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		break;
 	default:
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-#if MYSQL_VERSION_ID >= 50107
 			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
-#endif
 			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
 	}
@@ -2332,18 +2322,14 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 		/* Success corresponds to 0 return value and a non-zero value
 		 * should only happen if the attr/option is unknown */
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-#if MYSQL_VERSION_ID >= 50107
 			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
-#endif
 			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
     }
 
 
-#if MYSQL_VERSION_ID >= 50107
 	if (attr == STMT_ATTR_UPDATE_MAX_LENGTH)
 		value = *((my_bool *)&value);
-#endif
 	RETURN_LONG((unsigned long)value);
 }
 /* }}} */
@@ -2488,11 +2474,7 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 				stmt->stmt->fields[i].type == MYSQL_TYPE_LONG_BLOB ||
 				stmt->stmt->fields[i].type == MYSQL_TYPE_GEOMETRY))
 			{
-#if MYSQL_VERSION_ID >= 50107
-				my_bool	tmp=1;
-#else
-				uint32_t tmp=1;
-#endif
+				my_bool	tmp = 1;
 				mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);
 				break;
 			}
