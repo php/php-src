@@ -40,6 +40,7 @@ steps:
                        postgresql-contrib \
                        snmpd \
                        snmp-mibs-downloader \
+                       unixodbc-dev \
                        llvm \
                        ${{ parameters.packages }}
     displayName: 'APT'
