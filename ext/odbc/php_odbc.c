@@ -964,7 +964,7 @@ PHP_FUNCTION(odbc_prepare)
 PHP_FUNCTION(odbc_execute)
 {
 	zval *pv_res, *tmp;
-	HashTable *pv_param_ht;
+	HashTable *pv_param_ht = (HashTable *) &zend_empty_array;
 	typedef struct params_t {
 		SQLLEN vallen;
 		int fp;
@@ -974,10 +974,10 @@ PHP_FUNCTION(odbc_execute)
 	unsigned char otype;
 	SQLSMALLINT ctype;
    	odbc_result *result;
-	int numArgs = ZEND_NUM_ARGS(), i, ne;
+	int i, ne;
 	RETCODE rc;
 
-	if (zend_parse_parameters(numArgs, "r|h", &pv_res, &pv_param_ht) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h", &pv_res, &pv_param_ht) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -985,15 +985,9 @@ PHP_FUNCTION(odbc_execute)
 		RETURN_THROWS();
 	}
 
-	/* XXX check for already bound parameters*/
-	if (result->numparams > 0 && numArgs == 1) {
-		php_error_docref(NULL, E_WARNING, "No parameters to SQL statement given");
-		RETURN_FALSE;
-	}
-
 	if (result->numparams > 0) {
 		if ((ne = zend_hash_num_elements(pv_param_ht)) < result->numparams) {
-			php_error_docref(NULL, E_WARNING,"Not enough parameters (%d should be %d) given", ne, result->numparams);
+			php_error_docref(NULL, E_WARNING, "Not enough parameters (%d should be %d) given", ne, result->numparams);
 			RETURN_FALSE;
 		}
 
@@ -1294,7 +1288,6 @@ PHP_FUNCTION(odbc_data_source)
 PHP_FUNCTION(odbc_exec)
 {
 	zval *pv_conn;
-	zend_long pv_flags;
 	char *query;
 	size_t query_len;
 	odbc_result *result = NULL;
@@ -1304,7 +1297,7 @@ PHP_FUNCTION(odbc_exec)
 	SQLUINTEGER      scrollopts;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pv_conn, &query, &query_len, &pv_flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pv_conn, &query, &query_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1683,21 +1676,19 @@ PHP_FUNCTION(solid_fetch_prev)
 /* {{{ Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
-	SQLLEN rownum;
 	odbc_result *result;
 	RETCODE rc;
 	zval *pv_res;
-	zend_long pv_row = 1;
+	zend_long pv_row;
+	zend_bool pv_row_is_null = 1;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
 	SQLUSMALLINT RowStatus[1];
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pv_res, &pv_row) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l!", &pv_res, &pv_row, &pv_row_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	rownum = pv_row;
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
 		RETURN_THROWS();
@@ -1710,8 +1701,8 @@ PHP_FUNCTION(odbc_fetch_row)
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (result->fetch_abs) {
-		if (ZEND_NUM_ARGS() > 1) {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,rownum,&crow,RowStatus);
+		if (!pv_row_is_null) {
+			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
 		} else {
 			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
 		}
@@ -1723,8 +1714,8 @@ PHP_FUNCTION(odbc_fetch_row)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() > 1) {
-		result->fetched = rownum;
+	if (!pv_row_is_null) {
+		result->fetched = (SQLLEN)pv_row;
 	} else {
 		result->fetched++;
 	}
@@ -2645,14 +2636,14 @@ PHP_FUNCTION(odbc_rollback)
 static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_connection *conn;
-	zval *pv_handle;
+	zval *pv_handle = NULL;
 	char *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pv_handle) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r!", &pv_handle) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (pv_handle) {
 		if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_handle), "ODBC-Link", le_conn, le_pconn))) {
 			RETURN_THROWS();
 		}
@@ -2757,7 +2748,7 @@ PHP_FUNCTION(odbc_tables)
 	size_t cat_len = 0, schema_len = 0, table_len = 0, type_len = 0;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!s!s!", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&table, &table_len, &type, &type_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -2782,7 +2773,7 @@ PHP_FUNCTION(odbc_tables)
 	}
 
 	/* This hack is needed to access table information in Access databases (fmk) */
-	if (table && table_len && schema && schema_len == 0) {
+	if (schema && schema_len == 0 && table && table_len) {
 		schema = NULL;
 	}
 
@@ -2825,7 +2816,7 @@ PHP_FUNCTION(odbc_columns)
 	size_t cat_len = 0, schema_len = 0, table_len = 0, column_len = 0;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!s!s!", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&table, &table_len, &column, &column_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -3161,11 +3152,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	size_t cat_len = 0, schema_len = 0, proc_len = 0, col_len = 0;
 	RETCODE rc;
 
-	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 5) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!s!s!", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&proc, &proc_len, &col, &col_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -3230,11 +3217,7 @@ PHP_FUNCTION(odbc_procedures)
 	size_t cat_len = 0, schema_len = 0, proc_len = 0;
 	RETCODE rc;
 
-	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 4) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!ss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &proc, &proc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!s!", &pv_conn, &cat, &cat_len, &schema, &schema_len, &proc, &proc_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
