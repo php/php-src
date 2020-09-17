@@ -523,7 +523,7 @@ PHP_MINFO_FUNCTION(odbc)
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "ODBC library", PHP_ODBC_TYPE);
 #ifdef ODBCVER
-	snprintf(buf, sizeof(buf), "0x%0.4x", ODBCVER);
+	snprintf(buf, sizeof(buf), "0x%.4x", ODBCVER);
 	php_info_print_table_row(2, "ODBCVER", buf);
 #endif
 #ifndef PHP_WIN32
@@ -560,7 +560,7 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	   while(henv != SQL_NULL_HENV){
 		do {
 	 */
-	rc = SQLError(henv, conn, stmt, ODBCG(laststate), &error, ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1, &errormsgsize);
+	rc = SQLError(henv, conn, stmt, (SQLCHAR *) ODBCG(laststate), &error, (SQLCHAR *) ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1, &errormsgsize);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		snprintf(ODBCG(laststate), sizeof(ODBCG(laststate)), "HY000");
 		snprintf(ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)), "Failed to fetch error message");
@@ -912,7 +912,7 @@ PHP_FUNCTION(odbc_prepare)
 	}
 #endif
 
-	rc = SQLPrepare(result->stmt, query, SQL_NTS);
+	rc = SQLPrepare(result->stmt, (SQLCHAR *) query, SQL_NTS);
 	switch (rc) {
 		case SQL_SUCCESS:
 			break;
@@ -1197,7 +1197,7 @@ PHP_FUNCTION(odbc_cursor)
 
 	if (max_len > 0) {
 		cursorname = emalloc(max_len + 1);
-		rc = SQLGetCursorName(result->stmt,cursorname,(SQLSMALLINT)max_len,&len);
+		rc = SQLGetCursorName(result->stmt, (SQLCHAR *) cursorname, (SQLSMALLINT)max_len, &len);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			char        state[6];     /* Not used */
 	 		SQLINTEGER  error;        /* Not used */
@@ -1205,11 +1205,11 @@ PHP_FUNCTION(odbc_cursor)
 			SQLSMALLINT errormsgsize; /* Not used */
 
 			SQLError( result->conn_ptr->henv, result->conn_ptr->hdbc,
-						result->stmt, state, &error, errormsg,
+						result->stmt, (SQLCHAR *) state, &error, (SQLCHAR *) errormsg,
 						sizeof(errormsg)-1, &errormsgsize);
 			if (!strncmp(state,"S1015",5)) {
 				snprintf(cursorname, max_len+1, "php_curs_" ZEND_ULONG_FMT, (zend_ulong)result->stmt);
-				if (SQLSetCursorName(result->stmt,cursorname,SQL_NTS) != SQL_SUCCESS) {
+				if (SQLSetCursorName(result->stmt, (SQLCHAR *) cursorname, SQL_NTS) != SQL_SUCCESS) {
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLSetCursorName");
 					RETVAL_FALSE;
 				} else {
@@ -1282,8 +1282,8 @@ PHP_FUNCTION(odbc_data_source)
 
 	array_init(return_value);
 
-	add_assoc_string_ex(return_value, "server", sizeof("server")-1, server_name);
-	add_assoc_string_ex(return_value, "description", sizeof("description")-1, desc);
+	add_assoc_string_ex(return_value, "server", sizeof("server")-1, (char *) server_name);
+	add_assoc_string_ex(return_value, "description", sizeof("description")-1, (char *) desc);
 
 }
 /* }}} */
@@ -1343,7 +1343,7 @@ PHP_FUNCTION(odbc_exec)
 	}
 #endif
 
-	rc = SQLExecDirect(result->stmt, query, SQL_NTS);
+	rc = SQLExecDirect(result->stmt, (SQLCHAR *) query, SQL_NTS);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO && rc != SQL_NO_DATA_FOUND) {
 		/* XXX FIXME we should really check out SQLSTATE with SQLError
 		 * in case rc is SQL_SUCCESS_WITH_INFO here.
@@ -2131,7 +2131,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
  * #ifdef HAVE_EMPRESS */
 	{
 		int     direct = 0;
-		char    dsnbuf[1024];
+		SQLCHAR dsnbuf[1024];
 		short   dsnbuflen;
 		char    *ldb = 0;
 		int		ldb_len = 0;
@@ -2148,9 +2148,9 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		}
 
 		if (direct) {
-			rc = SQLDriverConnect((*conn)->hdbc, NULL, ldb, strlen(ldb), dsnbuf, sizeof(dsnbuf) - 1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
+			rc = SQLDriverConnect((*conn)->hdbc, NULL, (SQLCHAR *) ldb, strlen(ldb), dsnbuf, sizeof(dsnbuf) - 1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
 		} else {
-			rc = SQLConnect((*conn)->hdbc, db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
+			rc = SQLConnect((*conn)->hdbc, (SQLCHAR *) db, SQL_NTS, (SQLCHAR *) uid, SQL_NTS, (SQLCHAR *) pwd, SQL_NTS);
 		}
 
 		if (ldb) {
@@ -2158,7 +2158,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		}
 	}
 #else
-	rc = SQLConnect((*conn)->hdbc, db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
+	rc = SQLConnect((*conn)->hdbc, (SQLCHAR *) db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
 #endif
 #endif
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
@@ -2787,10 +2787,10 @@ PHP_FUNCTION(odbc_tables)
 	}
 
 	rc = SQLTables(result->stmt,
-			cat, SAFE_SQL_NTS(cat),
-			schema,	SAFE_SQL_NTS(schema),
-			table, SAFE_SQL_NTS(table),
-			type, SAFE_SQL_NTS(type));
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema,	SAFE_SQL_NTS(schema),
+			(SQLCHAR *) table, SAFE_SQL_NTS(table),
+			(SQLCHAR *) type, SAFE_SQL_NTS(type));
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLTables");
@@ -2857,10 +2857,10 @@ PHP_FUNCTION(odbc_columns)
 	}
 
 	rc = SQLColumns(result->stmt,
-			cat, (SQLSMALLINT) cat_len,
-			schema, (SQLSMALLINT) schema_len,
-			table, (SQLSMALLINT) table_len,
-			column, (SQLSMALLINT) column_len);
+			(SQLCHAR *) cat, (SQLSMALLINT) cat_len,
+			(SQLCHAR *) schema, (SQLSMALLINT) schema_len,
+			(SQLCHAR *) table, (SQLSMALLINT) table_len,
+			(SQLCHAR *) column, (SQLSMALLINT) column_len);
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLColumns");
@@ -2921,10 +2921,10 @@ PHP_FUNCTION(odbc_columnprivileges)
 	}
 
 	rc = SQLColumnPrivileges(result->stmt,
-			cat, SAFE_SQL_NTS(cat),
-			schema, SAFE_SQL_NTS(schema),
-			table, SAFE_SQL_NTS(table),
-			column, SAFE_SQL_NTS(column));
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema, SAFE_SQL_NTS(schema),
+			(SQLCHAR *) table, SAFE_SQL_NTS(table),
+			(SQLCHAR *) column, SAFE_SQL_NTS(column));
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLColumnPrivileges");
@@ -2998,12 +2998,12 @@ PHP_FUNCTION(odbc_foreignkeys)
 	}
 
 	rc = SQLForeignKeys(result->stmt,
-			pcat, SAFE_SQL_NTS(pcat),
-			pschema, SAFE_SQL_NTS(pschema),
-			ptable, SAFE_SQL_NTS(ptable),
-			fcat, SAFE_SQL_NTS(fcat),
-			fschema, SAFE_SQL_NTS(fschema),
-			ftable, SAFE_SQL_NTS(ftable) );
+			(SQLCHAR *) pcat, SAFE_SQL_NTS(pcat),
+			(SQLCHAR *) pschema, SAFE_SQL_NTS(pschema),
+			(SQLCHAR *) ptable, SAFE_SQL_NTS(ptable),
+			(SQLCHAR *) fcat, SAFE_SQL_NTS(fcat),
+			(SQLCHAR *) fschema, SAFE_SQL_NTS(fschema),
+			(SQLCHAR *) ftable, SAFE_SQL_NTS(ftable) );
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLForeignKeys");
@@ -3123,9 +3123,9 @@ PHP_FUNCTION(odbc_primarykeys)
 	}
 
 	rc = SQLPrimaryKeys(result->stmt,
-			cat, SAFE_SQL_NTS(cat),
-			schema, SAFE_SQL_NTS(schema),
-			table, SAFE_SQL_NTS(table) );
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema, SAFE_SQL_NTS(schema),
+			(SQLCHAR *) table, SAFE_SQL_NTS(table) );
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLPrimaryKeys");
@@ -3190,10 +3190,10 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	}
 
 	rc = SQLProcedureColumns(result->stmt,
-			cat, SAFE_SQL_NTS(cat),
-			schema, SAFE_SQL_NTS(schema),
-			proc, SAFE_SQL_NTS(proc),
-			col, SAFE_SQL_NTS(col) );
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema, SAFE_SQL_NTS(schema),
+			(SQLCHAR *) proc, SAFE_SQL_NTS(proc),
+			(SQLCHAR *) col, SAFE_SQL_NTS(col) );
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLProcedureColumns");
@@ -3258,9 +3258,9 @@ PHP_FUNCTION(odbc_procedures)
 	}
 
 	rc = SQLProcedures(result->stmt,
-			cat, SAFE_SQL_NTS(cat),
-			schema, SAFE_SQL_NTS(schema),
-			proc, SAFE_SQL_NTS(proc) );
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema, SAFE_SQL_NTS(schema),
+			(SQLCHAR *) proc, SAFE_SQL_NTS(proc) );
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLProcedures");
@@ -3326,11 +3326,10 @@ PHP_FUNCTION(odbc_specialcolumns)
 		RETURN_FALSE;
 	}
 
-	rc = SQLSpecialColumns(result->stmt,
-			type,
-			cat, SAFE_SQL_NTS(cat),
-			schema, SAFE_SQL_NTS(schema),
-			name, SAFE_SQL_NTS(name),
+	rc = SQLSpecialColumns(result->stmt, type,
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema, SAFE_SQL_NTS(schema),
+			(SQLCHAR *) name, SAFE_SQL_NTS(name),
 			scope,
 			nullable);
 
@@ -3397,9 +3396,9 @@ PHP_FUNCTION(odbc_statistics)
 	}
 
 	rc = SQLStatistics(result->stmt,
-			cat, SAFE_SQL_NTS(cat),
-			schema, SAFE_SQL_NTS(schema),
-			name, SAFE_SQL_NTS(name),
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema, SAFE_SQL_NTS(schema),
+			(SQLCHAR *) name, SAFE_SQL_NTS(name),
 			unique,
 			reserved);
 
@@ -3461,9 +3460,9 @@ PHP_FUNCTION(odbc_tableprivileges)
 	}
 
 	rc = SQLTablePrivileges(result->stmt,
-			cat, SAFE_SQL_NTS(cat),
-			schema, SAFE_SQL_NTS(schema),
-			table, SAFE_SQL_NTS(table));
+			(SQLCHAR *) cat, SAFE_SQL_NTS(cat),
+			(SQLCHAR *) schema, SAFE_SQL_NTS(schema),
+			(SQLCHAR *) table, SAFE_SQL_NTS(table));
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLTablePrivileges");
