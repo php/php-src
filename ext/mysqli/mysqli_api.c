@@ -1885,7 +1885,11 @@ PHP_FUNCTION(mysqli_real_query)
 }
 /* }}} */
 
-/* {{{ Escapes special characters in a string for use in a SQL statement, taking into account the current charset of the connection */
+#if defined(PDO_USE_MYSQLND) || MYSQL_VERSION_ID < 50707 || defined(MARIADB_BASE_VERSION)
+# define mysql_real_escape_string_quote(mysql, to, from, length, quote) \
+	mysql_real_escape_string(mysql, to, from, length)
+#endif
+
 PHP_FUNCTION(mysqli_real_escape_string) {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
@@ -1899,12 +1903,11 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	newstr = zend_string_alloc(2 * escapestr_len, 0);
-	ZSTR_LEN(newstr) = mysql_real_escape_string(mysql->mysql, ZSTR_VAL(newstr), escapestr, escapestr_len);
+	ZSTR_LEN(newstr) = mysql_real_escape_string_quote(mysql->mysql, ZSTR_VAL(newstr), escapestr, escapestr_len, '\'');
 	newstr = zend_string_truncate(newstr, ZSTR_LEN(newstr), 0);
 
 	RETURN_NEW_STR(newstr);
 }
-/* }}} */
 
 /* {{{ Undo actions from current transaction */
 PHP_FUNCTION(mysqli_rollback)

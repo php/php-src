@@ -291,6 +291,11 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 }
 /* }}} */
 
+#if defined(PDO_USE_MYSQLND) || MYSQL_VERSION_ID < 50707 || defined(MARIADB_BASE_VERSION)
+# define mysql_real_escape_string_quote(mysql, to, from, length, quote) \
+	mysql_real_escape_string(mysql, to, from, length)
+#endif
+
 /* {{{ mysql_handle_quoter */
 static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
 {
@@ -313,13 +318,13 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 	*quoted = safe_emalloc(2, unquotedlen, 3 + (use_national_character_set ? 1 : 0));
 
 	if (use_national_character_set) {
-		*quotedlen = mysql_real_escape_string(H->server, *quoted + 2, unquoted, unquotedlen);
+		*quotedlen = mysql_real_escape_string_quote(H->server, *quoted + 2, unquoted, unquotedlen, '\'');
 		(*quoted)[0] = 'N';
 		(*quoted)[1] = '\'';
 
 		++*quotedlen; /* N prefix */
 	} else {
-		*quotedlen = mysql_real_escape_string(H->server, *quoted + 1, unquoted, unquotedlen);
+		*quotedlen = mysql_real_escape_string_quote(H->server, *quoted + 1, unquoted, unquotedlen, '\'');
 		(*quoted)[0] = '\'';
 	}
 
