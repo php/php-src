@@ -1094,6 +1094,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 					case 3:llval = (my_ulonglong)  bit_uint3korr(row[i]);break;
 					case 2:llval = (my_ulonglong)  bit_uint2korr(row[i]);break;
 					case 1:llval = (my_ulonglong)  uint1korr(row[i]);break;
+					EMPTY_SWITCH_DEFAULT_CASE()
 				}
 				/* even though lval is declared as unsigned, the value
 				 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
