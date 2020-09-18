@@ -4,11 +4,10 @@ References to result sets - mysqlnd (no copies but references)
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
-
 require_once('connect.inc');
 if (!$IS_MYSQLND)
     die("skip Test for mysqlnd only");
-require_once('skipifemb.inc'); ?>
+?>
 --FILE--
 <?php
     require_once('connect.inc');

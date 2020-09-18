@@ -3,7 +3,6 @@ Bug #80107 mysqli_query() fails for ~16 MB long query when compression is enable
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once("connect.inc");
 $link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 if (!$link) {
