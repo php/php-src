@@ -1,0 +1,35 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+  runTestsParameters: ''
+  timeoutInMinutes: 60
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    pool:
+      vmImage: 'ubuntu-20.04'
+    steps:
+    - script: |
+        sudo apt-get update -y | true
+        sudo apt install bison re2c
+      displayName: 'APT'
+    - script: |
+        set -o
+        sudo service mysql start
+        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+      displayName: 'Setup MySQL server'
+    # Does not support caching_sha2_auth :(
+    #- template: libmysqlclient_test.yml
+    #  parameters:
+    #    configurationName: ${{ parameters.configurationName }} - MySQL 5.6.49
+    #    libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
+    - template: libmysqlclient_test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }} - MySQL 5.7.31
+        libmysql: mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
+    - template: libmysqlclient_test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }} - MySQL 8.0.21
+        libmysql: mysql-8.0.21-linux-glibc2.12-x86_64.tar.xz
+        configurationParameters: ${{ parameters.configurationParameters }} --enable-werror
