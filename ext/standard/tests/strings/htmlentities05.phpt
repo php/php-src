@@ -5,7 +5,7 @@ output_handler=
 internal_encoding=cp1252
 --SKIPIF--
 <?php
-	extension_loaded("mbstring") or die("skip mbstring not available\n");
+    extension_loaded("mbstring") or die("skip mbstring not available\n");
 --FILE--
 <?php
     print mb_internal_encoding()."\n";

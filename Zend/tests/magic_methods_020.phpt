@@ -4,7 +4,7 @@ __set_state first parameter must be an array
 <?php
 
 class Foo {
-	public static function __set_state(int $properties) {}
+    public static function __set_state(int $properties) {}
 }
 
 ?>

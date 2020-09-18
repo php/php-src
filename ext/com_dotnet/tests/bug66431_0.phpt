@@ -33,7 +33,7 @@ if (!$result) {
 $fpath = str_replace("/", "\\", __DIR__ . "/bug66431.txt");
 
 if (file_exists($fpath)) {
-	unlink($fpath);
+    unlink($fpath);
 }
 ?>
 --EXPECT--

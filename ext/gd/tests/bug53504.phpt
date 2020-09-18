@@ -2,8 +2,8 @@
 Bug #53504 imagettfbbox/imageftbbox gives incorrect values for bounding box
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
 ?>
 --FILE--
 <?php

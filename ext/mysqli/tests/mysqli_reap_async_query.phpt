@@ -7,7 +7,7 @@ require_once('connect.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$IS_MYSQLND)
-	die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
+    die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
 ?>
 --FILE--
 <?php

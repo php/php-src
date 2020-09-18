@@ -3,7 +3,7 @@ msgfmt_format() with named subpatterns
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 

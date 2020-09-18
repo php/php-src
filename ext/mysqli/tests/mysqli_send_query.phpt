@@ -5,11 +5,11 @@ mysqli_send_query()
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_send_query')) {
-	die("skip mysqli_send_query() not available");
+    die("skip mysqli_send_query() not available");
 }
 require_once('connect.inc');
 if (!$TEST_EXPERIMENTAL)
-	die("skip - experimental (= unsupported) feature");
+    die("skip - experimental (= unsupported) feature");
 ?>
 --FILE--
 <?php

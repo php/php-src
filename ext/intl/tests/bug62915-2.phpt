@@ -3,9 +3,9 @@ Bug #62915: cloning of several classes is defective
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	    die('skip intl extension not enabled');
+        die('skip intl extension not enabled');
 if (!class_exists('Spoofchecker'))
-		die('skip intl extension does not have spoof checker');
+        die('skip intl extension does not have spoof checker');
 --FILE--
 <?php
 class A extends IntlDateFormatter {

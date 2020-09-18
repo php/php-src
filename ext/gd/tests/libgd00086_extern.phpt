@@ -2,8 +2,8 @@
 libgd #86 (Possible infinite loop in imagecreatefrompng)
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
-	if (GD_BUNDLED) die("skip requires external GD library\n");
+    if (!extension_loaded('gd')) die("skip gd extension not available\n");
+    if (GD_BUNDLED) die("skip requires external GD library\n");
 ?>
 --FILE--
 <?php

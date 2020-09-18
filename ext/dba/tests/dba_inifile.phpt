@@ -2,8 +2,8 @@
 DBA INIFILE handler test
 --SKIPIF--
 <?php
-	$handler = 'inifile';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'inifile';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
@@ -13,7 +13,7 @@ DBA INIFILE handler test
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 database handler: inifile

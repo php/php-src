@@ -42,7 +42,7 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 int(0)

@@ -8,11 +8,11 @@ require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",
-		mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",
+        mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (!mysqli_set_charset($link, 'big5'))
-	die(sprintf("skip Cannot set charset 'big5'"));
+    die(sprintf("skip Cannot set charset 'big5'"));
 mysqli_close($link);
 ?>
 --FILE--
@@ -71,7 +71,7 @@ mysqli_error($link));
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 bool(true)

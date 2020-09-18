@@ -8,7 +8,7 @@ mysqlnd.collect_memory_statistics="1"
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_client_stats')) {
-	die("skip only available with mysqlnd");
+    die("skip only available with mysqlnd");
 }
 ?>
 --FILE--

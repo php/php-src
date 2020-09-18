@@ -3,7 +3,7 @@ IntlTimeZone::getOffset(): errors
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 
 /* INF being an invalid offset depends on UB in float->int cast behavior. */
 $arch = php_uname('m');

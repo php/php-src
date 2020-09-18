@@ -5,7 +5,7 @@ date.timezone=GMT0
 --SKIPIF--
 <?php
 if (!@putenv("TZ=GMT0") || getenv("TZ") != 'GMT0') {
-	die("skip unable to change TZ environment variable\n");
+    die("skip unable to change TZ environment variable\n");
 }
 ?>
 --FILE--

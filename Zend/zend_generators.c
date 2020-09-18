@@ -262,7 +262,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 			OBJ_RELEASE(&parent->std);
 			/* Reset for resuming in finally */
 			generator->node.parent = NULL;
-			generator->node.ptr.root = generator; 
+			generator->node.ptr.root = generator;
 		}
 	}
 

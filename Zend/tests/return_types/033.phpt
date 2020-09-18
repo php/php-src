@@ -3,7 +3,7 @@ __set can only declare void return
 --FILE--
 <?php
 class Foo {
-	function __set($name, $value) : string {}
+    function __set($name, $value) : string {}
 }
 ?>
 --EXPECTF--

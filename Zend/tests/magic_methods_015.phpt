@@ -3,7 +3,7 @@ __call first parameter should be a string typed
 --FILE--
 <?php
 class Foo {
-	function __call(int $name, array $arguments) {}
+    function __call(int $name, array $arguments) {}
 }
 ?>
 --EXPECTF--

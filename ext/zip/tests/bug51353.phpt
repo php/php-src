@@ -46,7 +46,7 @@ unlink("$base_path/51353.zip");
 
 $a = glob("$base_path/51353_unpack/*.txt");
 foreach($a as $f) {
-	unlink($f);
+    unlink($f);
 }
 rmdir("$base_path/51353_unpack");
 ?>

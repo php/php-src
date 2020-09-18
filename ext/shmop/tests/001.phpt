@@ -2,9 +2,9 @@
 shmop extension test
 --SKIPIF--
 <?php
-	if (!extension_loaded("shmop")) {
-		die("skip shmop() extension not available");
-	}
+    if (!extension_loaded("shmop")) {
+        die("skip shmop() extension not available");
+    }
 ?>
 --FILE--
 <?php

@@ -119,7 +119,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 mysqli_field_seek(): Argument #2 ($field_nr) must be greater than or equal to 0

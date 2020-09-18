@@ -41,8 +41,8 @@ $sources = [
 ];
 
 foreach ($sources as $r) {
-	$attr = $r->getAttributes();
-	var_dump(get_class($r), count($attr));
+    $attr = $r->getAttributes();
+    var_dump(get_class($r), count($attr));
 
     foreach ($attr as $a) {
         var_dump($a->getName(), $a->getArguments());

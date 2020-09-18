@@ -2,8 +2,8 @@
 Interface of the class mysqli_stmt
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifconnectfailure.inc');
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php

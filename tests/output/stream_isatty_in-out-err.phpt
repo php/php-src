@@ -3,7 +3,7 @@ Test stream_isatty with redirected STDIN/STDOUT/STDERR
 --SKIPIF--
 <?php
 if (getenv("SKIP_IO_CAPTURE_TESTS")) {
-	die("skip I/O capture test");
+    die("skip I/O capture test");
 }
 ?>
 --CAPTURE_STDIO--

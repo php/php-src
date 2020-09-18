@@ -3,10 +3,10 @@ Support for paths in the abstract namespace (bind, connect)
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets'))
-	die('skip sockets extension not available.');
+    die('skip sockets extension not available.');
 
 if (PHP_OS != 'Linux') {
-	die('skip For Linux only');
+    die('skip For Linux only');
 }
 ?>
 --FILE--

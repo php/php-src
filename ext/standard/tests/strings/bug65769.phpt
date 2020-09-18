@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip Windows only');
 }
 if (PHP_WINDOWS_VERSION_MAJOR < 10) {
-	die("skip for Windows 10 and above");
+    die("skip for Windows 10 and above");
 }
 ?>
 --FILE--

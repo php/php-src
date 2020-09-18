@@ -2,7 +2,7 @@
 image_type_to_mime_type()
 --SKIPIF--
 <?php
-	require_once('skipif_imagetype.inc');
+    require_once('skipif_imagetype.inc');
 ?>
 --FILE--
 <?php

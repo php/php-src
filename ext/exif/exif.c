@@ -2085,7 +2085,7 @@ static inline zend_bool exif_offset_info_contains(
 	return start >= info->valid_start && end <= info->valid_end;
 }
 
-#ifdef EXIF_DEBUG 
+#ifdef EXIF_DEBUG
 static inline int exif_offset_info_length(const exif_offset_info *info)
 {
 	return info->valid_end - info->valid_start;

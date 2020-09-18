@@ -4,10 +4,10 @@ Trailing comma in attribute argument list
 <?php
 
 #[MyAttribute(
-	"there",
-	"are",
-	"many",
-	"arguments",
+    "there",
+    "are",
+    "many",
+    "arguments",
 )]
 class Foo { }
 

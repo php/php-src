@@ -5,15 +5,15 @@ local infile handler
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_set_local_infile_handler'))
-	die("skip - function not available.");
+    die("skip - function not available.");
 
 $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 if (!$link)
-	die(sprintf("skip Can't connect [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip Can't connect [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 include_once("local_infile_tools.inc");
 if ($msg = check_local_infile_support($link, $engine))
-	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
+    die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
 mysqli_close($link);
 ?>

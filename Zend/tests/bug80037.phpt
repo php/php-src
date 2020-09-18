@@ -5,21 +5,21 @@ Bug #80037: Typed property must not be accessed before initialization when __get
 
 final class A
 {
-	public string $a;
+    public string $a;
 
-	public static function fromArray(array $props): self
-	{
-		$me = new static;
-		foreach ($props as $k => &$v) {
-			$me->{$k} = &$v;  # try to remove &
-		}
-		return $me;
-	}
+    public static function fromArray(array $props): self
+    {
+        $me = new static;
+        foreach ($props as $k => &$v) {
+            $me->{$k} = &$v;  # try to remove &
+        }
+        return $me;
+    }
 
-	public function __get($name)
-	{
-		throw new \LogicException("Property '$name' is not defined.");
-	}
+    public function __get($name)
+    {
+        throw new \LogicException("Property '$name' is not defined.");
+    }
 }
 
 var_dump(A::fromArray(['a' => 'foo']));

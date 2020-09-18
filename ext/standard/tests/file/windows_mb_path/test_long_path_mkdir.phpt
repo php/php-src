@@ -8,7 +8,7 @@ skip_if_not_win();
 
 $start = realpath(__DIR__);
 if (strlen($start) > 260 || strlen($start) > 248) {
-	die("skip the starting path length is unsuitable for this test");
+    die("skip the starting path length is unsuitable for this test");
 }
 
 ?>

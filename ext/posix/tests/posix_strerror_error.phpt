@@ -2,7 +2,7 @@
 Test posix_strerror() function : error conditions
 --SKIPIF--
 <?php
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
+    if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php

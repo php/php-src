@@ -4,9 +4,9 @@ Bug #77632 (FFI Segfaults When Called With Variadics)
 <?php
 require_once('skipif.inc');
 try {
-	$libc = FFI::cdef("int printf(const char *format, ...);", "libc.so.6");
+    $libc = FFI::cdef("int printf(const char *format, ...);", "libc.so.6");
 } catch (Throwable $_) {
-	die('skip libc.so.6 not available');
+    die('skip libc.so.6 not available');
 }
 ?>
 --INI--

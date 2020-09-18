@@ -5,12 +5,12 @@ Chad Sikorra <Chad.Sikorra@gmail.com>
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php
-	require "connect.inc";
-	$link = ldap_connect($host, $port);
-	ldap_get_option($link, LDAP_OPT_X_TLS_PACKAGE, $package);
-	if ($package != 'OpenSSL') {
-		die("skip OpenSSL required for CRL check options, got: $package");
-	}
+    require "connect.inc";
+    $link = ldap_connect($host, $port);
+    ldap_get_option($link, LDAP_OPT_X_TLS_PACKAGE, $package);
+    if ($package != 'OpenSSL') {
+        die("skip OpenSSL required for CRL check options, got: $package");
+    }
 ?>
 --FILE--
 <?php

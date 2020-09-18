@@ -2,9 +2,9 @@
 Test getimagesize() function : variation - For shockwave-flash format
 --SKIPIF--
 <?php
-	if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
-		die("skip zlib extension is not available");
-	}
+    if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
+        die("skip zlib extension is not available");
+    }
 ?>
 --FILE--
 <?php

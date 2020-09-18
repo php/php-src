@@ -6,7 +6,7 @@ require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_stmt_get_result'))
-	die('skip mysqli_stmt_get_result not available');
+    die('skip mysqli_stmt_get_result not available');
 ?>
 --FILE--
 <?php
@@ -128,7 +128,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli_result::data_seek(): Argument #1 ($offset) must be greater than or equal to 0

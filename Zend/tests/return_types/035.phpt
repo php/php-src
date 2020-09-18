@@ -3,7 +3,7 @@ __unset can only declare void return
 --FILE--
 <?php
 class Foo {
-	function __unset($name) : bool {}
+    function __unset($name) : bool {}
 }
 ?>
 --EXPECTF--

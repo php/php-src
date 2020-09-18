@@ -3,7 +3,7 @@ __call second parameter should be an array when typed
 --FILE--
 <?php
 class Foo {
-	function __call(string $name, \Arguments $arguments) {}
+    function __call(string $name, \Arguments $arguments) {}
 }
 ?>
 --EXPECTF--

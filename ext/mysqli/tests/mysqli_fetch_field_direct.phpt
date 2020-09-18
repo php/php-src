@@ -41,7 +41,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 mysqli_fetch_field_direct(): Argument #2 ($offset) must be greater than or equal to 0

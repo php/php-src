@@ -4,10 +4,10 @@ A generator can be yielded from multiple times, testing immediate release of the
 <?php
 
 function gen() {
-	yield 42;
+    yield 42;
 }
 function yield_from($gen) {
-	yield from $gen;
+    yield from $gen;
 }
 $gen = gen();
 var_dump(yield_from($gen)->current());

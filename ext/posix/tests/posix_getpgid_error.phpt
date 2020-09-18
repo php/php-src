@@ -3,7 +3,7 @@ Test posix_getpgid() function : error conditions
 --SKIPIF--
 <?php
 if((!extension_loaded("posix")) || (!function_exists("posix_getpgid"))) {
-	 print "skip - POSIX extension not loaded or posix_getpgid() does not exist";
+     print "skip - POSIX extension not loaded or posix_getpgid() does not exist";
 }
 ?>
 --FILE--

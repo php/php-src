@@ -12,9 +12,9 @@ $stmt = $db->query('SELECT USER() as _user');
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 $tmp = explode('@', $row['_user']);
 if (count($tmp) < 2)
-	die("skip Cannot detect if test is run against local or remote database server");
+    die("skip Cannot detect if test is run against local or remote database server");
 if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
-	die("skip Test cannot be run against remote database server");
+    die("skip Test cannot be run against remote database server");
 
 $stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
 if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {

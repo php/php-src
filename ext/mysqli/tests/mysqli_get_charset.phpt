@@ -5,7 +5,7 @@ mysqli_get_charset()
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_charset'))
-	die("skip: function not available");
+    die("skip: function not available");
 ?>
 --FILE--
 <?php
@@ -98,7 +98,7 @@ if (!function_exists('mysqli_get_charset'))
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli object is already closed

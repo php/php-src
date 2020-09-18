@@ -6,7 +6,7 @@ require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_disable_reads_from_master')) {
-	die("skip mysqli_disable_reads_from_master() not available");
+    die("skip mysqli_disable_reads_from_master() not available");
 }
 ?>
 --FILE--
@@ -39,7 +39,7 @@ if (!function_exists('mysqli_disable_reads_from_master')) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_disable_reads_from_master(): mysqli object is already closed in %s on line %d
