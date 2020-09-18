@@ -19,10 +19,11 @@ jobs:
         sudo service mysql start
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
       displayName: 'Setup MySQL server'
-    - template: libmysqlclient_test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }} - MySQL 5.6.49
-        libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
+    # Does not support caching_sha2_auth :(
+    #- template: libmysqlclient_test.yml
+    #  parameters:
+    #    configurationName: ${{ parameters.configurationName }} - MySQL 5.6.49
+    #    libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
     - template: libmysqlclient_test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }} - MySQL 5.7.31
