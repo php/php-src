@@ -236,7 +236,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 [009] [%d] (error message varies with the MySQL Server version, check the error code)

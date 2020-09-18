@@ -2,8 +2,8 @@
 DBA with array keys
 --SKIPIF--
 <?php
-	require_once(__DIR__ .'/skipif.inc');
-	die("info $HND handler used");
+    require_once(__DIR__ .'/skipif.inc');
+    die("info $HND handler used");
 ?>
 --FILE--
 <?php
@@ -37,7 +37,7 @@ if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

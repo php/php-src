@@ -4,7 +4,7 @@ Bug #79741: curl_setopt CURLOPT_POSTFIELDS asserts on object with declared prope
 <?php
 
 class Test {
-	public $prop = "value";
+    public $prop = "value";
 }
 
 $ch = curl_init();

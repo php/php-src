@@ -3,10 +3,10 @@ mb_send_mail() test 2 (lang=Japanese)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. Not valid for Windows');
+    die('skip.. Not valid for Windows');
 }
 if (!function_exists("mb_send_mail") || !mb_language("japanese")) {
-	die("skip mb_send_mail() not available");
+    die("skip mb_send_mail() not available");
 }
 ?>
 --INI--

@@ -6,7 +6,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     die("skip Test is not valid for Windows");
 }
 if(!setlocale(LC_ALL, "POSIX")) {
-	die("skip Locale POSIX is  needed by test and is not available");
+    die("skip Locale POSIX is  needed by test and is not available");
 }
 ?>
 --FILE--

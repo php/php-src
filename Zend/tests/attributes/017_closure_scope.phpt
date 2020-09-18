@@ -5,17 +5,17 @@ Attributes make use of closure scope.
 
 class Test1
 {
-	private const FOO = 'bar';
+    private const FOO = 'bar';
 }
 
 class C1
 {
-	private const FOO = 'foo';
+    private const FOO = 'foo';
 
-	public static function foo()
-	{
-		return #[A1(self::class, self::FOO)] function (#[A1(self::class, self::FOO)] $p) { };
-	}
+    public static function foo()
+    {
+        return #[A1(self::class, self::FOO)] function (#[A1(self::class, self::FOO)] $p) { };
+    }
 }
 
 $ref = new \ReflectionFunction(C1::foo());

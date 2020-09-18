@@ -3,7 +3,7 @@ SQLite3::open error test
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip non windows test');
+    die('skip non windows test');
 }
 require_once(__DIR__ . '/skipif.inc');
 if (!function_exists('posix_geteui')) {

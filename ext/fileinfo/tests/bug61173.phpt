@@ -3,7 +3,7 @@ Bug #61173: Unable to detect error from finfo constructor
 --SKIPIF--
 <?php
 if (!class_exists('finfo'))
-	die('skip no fileinfo extension');
+    die('skip no fileinfo extension');
 --FILE--
 <?php
 

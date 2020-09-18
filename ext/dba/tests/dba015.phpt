@@ -50,7 +50,7 @@ echo dba_fetch("key2", $db_file1), "\n";
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile

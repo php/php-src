@@ -3,7 +3,7 @@ Test xml_parse_into_struct() function : variation
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded";
+    print "skip - XML extension not loaded";
 }
 ?>
 --FILE--

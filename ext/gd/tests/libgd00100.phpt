@@ -2,8 +2,8 @@
 libgd #100 (spurious horizontal line drawn by gdImageFilledPolygon)
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
-	if (!GD_BUNDLED) die("skip requires bundled GD library\n");
+    if (!extension_loaded('gd')) die("skip gd extension not available\n");
+    if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php

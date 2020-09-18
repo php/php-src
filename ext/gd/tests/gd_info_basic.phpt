@@ -2,9 +2,9 @@
 gd_info()
 --SKIPIF--
 <?php
-	if (!function_exists('gd_info')) {
-		die('skip gd_info() not available');
-	}
+    if (!function_exists('gd_info')) {
+        die('skip gd_info() not available');
+    }
 ?>
 --FILE--
 <?php

@@ -5,7 +5,7 @@ Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
 --SKIPIF--
 <?php
-	if (!extension_loaded("curl")) exit("skip curl extension not loaded");
+    if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 ?>
 --DESCRIPTION--
 the only way to test if a option is setten on a curl handle is using the curl_getinfo() function.

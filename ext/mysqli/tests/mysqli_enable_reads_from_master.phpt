@@ -6,7 +6,7 @@ require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_enable_reads_from_master')) {
-	die("skip function mysqli_enable_reads_from_master() not available\n");
+    die("skip function mysqli_enable_reads_from_master() not available\n");
 }
 ?>
 --FILE--

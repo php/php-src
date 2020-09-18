@@ -2,12 +2,12 @@
 Bug #41442 (imagegd2() under output control)
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-	if (!function_exists("imagegd2")) {
-		die("skip GD2 support unavailable");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available.");
+    }
+    if (!function_exists("imagegd2")) {
+        die("skip GD2 support unavailable");
+    }
 ?>
 --FILE--
 <?php

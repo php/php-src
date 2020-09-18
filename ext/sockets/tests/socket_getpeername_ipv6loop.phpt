@@ -6,7 +6,7 @@ Tatjana Andersen tatjana.andersen@redpill-linpro.com
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
-	die('skip sockets extension not available.');
+    die('skip sockets extension not available.');
 }
 require 'ipv6_skipif.inc';
 ?>

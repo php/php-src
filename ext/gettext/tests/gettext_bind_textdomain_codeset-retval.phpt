@@ -2,9 +2,9 @@
 test if bind_textdomain_codeset() returns correct value
 --SKIPIF--
 <?php
-	if (!extension_loaded("gettext")) {
-		die("skip");
-	}
+    if (!extension_loaded("gettext")) {
+        die("skip");
+    }
 ?>
 --FILE--
 <?php

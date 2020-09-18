@@ -8,21 +8,21 @@ MySQLPDOTest::skip();
 
 $tmp = MySQLPDOTest::getTempDir();
 if (!$tmp)
-	die("skip Can't create temporary file");
+    die("skip Can't create temporary file");
 
 $file = $tmp . DIRECTORY_SEPARATOR . 'pdoblob.tst';
 $fp = fopen($file, 'w');
 if (!$fp)
-	die("skip Can't create temporary file");
+    die("skip Can't create temporary file");
 
 if (4 != fwrite($fp, 'test')) {
-	die("skip Can't create temporary file");
+    die("skip Can't create temporary file");
 }
 fclose($fp);
 clearstatcache();
 
 if (!file_exists($file))
-	die("skip Can't create temporary file");
+    die("skip Can't create temporary file");
 
 unlink($file);
 ?>

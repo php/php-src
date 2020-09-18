@@ -8,7 +8,7 @@ if( substr(PHP_OS, 0, 3) != "WIN" ) {
 }
 
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--

@@ -3,7 +3,7 @@ __callStatic second parameter should be an array typed
 --FILE--
 <?php
 class Foo {
-	static function __callStatic(string $name, \Arguments $args) {}
+    static function __callStatic(string $name, \Arguments $args) {}
 }
 ?>
 --EXPECTF--

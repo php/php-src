@@ -2,8 +2,8 @@
 DBA NDBM handler test
 --SKIPIF--
 <?php
-	$handler = 'ndbm';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'ndbm';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php

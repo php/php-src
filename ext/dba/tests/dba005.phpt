@@ -2,8 +2,8 @@
 DBA FirstKey/NextKey Loop Test With 5 Items
 --SKIPIF--
 <?php
-	require_once(__DIR__ .'/skipif.inc');
-	die("info $HND handler used");
+    require_once(__DIR__ .'/skipif.inc');
+    die("info $HND handler used");
 ?>
 --FILE--
 <?php
@@ -32,7 +32,7 @@ DBA FirstKey/NextKey Loop Test With 5 Items
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

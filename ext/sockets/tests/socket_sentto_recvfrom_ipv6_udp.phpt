@@ -6,7 +6,7 @@ if (!extension_loaded('sockets')) {
     die('SKIP The sockets extension is not loaded.');
 }
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip Not valid for Windows');
+    die('skip Not valid for Windows');
 }
 require 'ipv6_skipif.inc';
 ?>

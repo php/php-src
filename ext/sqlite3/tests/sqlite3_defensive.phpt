@@ -4,7 +4,7 @@ SQLite3 defensive mode ini setting
 <?php require_once(__DIR__ . '/skipif.inc');
 
 if (SQLite3::version()['versionNumber'] < 3026000) {
-	die("skip: sqlite3 library version < 3.26: no support for defensive mode");
+    die("skip: sqlite3 library version < 3.26: no support for defensive mode");
 }
 
 ?>

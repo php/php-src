@@ -2,8 +2,8 @@
 DBA FirstKey/NextKey with 2 deletes
 --SKIPIF--
 <?php
-	require_once(__DIR__ .'/skipif.inc');
-	die("info $HND handler used");
+    require_once(__DIR__ .'/skipif.inc');
+    die("info $HND handler used");
 ?>
 --FILE--
 <?php
@@ -34,7 +34,7 @@ DBA FirstKey/NextKey with 2 deletes
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

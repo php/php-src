@@ -6,7 +6,7 @@ if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
 if (!defined('IPPROTO_IPV6')) {
-	die('skip IPv6 not available.');
+    die('skip IPv6 not available.');
 }
 $s = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
 $br = socket_bind($s, '::', 3000);
@@ -14,29 +14,29 @@ $br = socket_bind($s, '::', 3000);
  * troublesome to send multicast traffic from lo, which we must since
  * we're dealing with interface-local traffic... */
 $so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_GROUP, array(
-	"group"	=> 'ff01::114',
-	"interface" => 0,
+    "group"	=> 'ff01::114',
+    "interface" => 0,
 ));
 if ($so === false) {
     die('skip unable to join multicast group on any interface.');
 }
 $r = socket_sendto($s, $m = "testing packet", strlen($m), 0, 'ff01::114', 3000);
 if ($r === false) {
-	die('skip unable to send multicast packet.');
+    die('skip unable to send multicast packet.');
 }
 $so = @socket_set_option($s, IPPROTO_IPV6, MCAST_LEAVE_GROUP, array(
-	"group"	=> 'ff01::114',
-	"interface" => 0,
+    "group"	=> 'ff01::114',
+    "interface" => 0,
 ));
 if (defined("MCAST_JOIN_SOURCE_GROUP")) {
-	$so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
-		"group"	=> 'ff01::114',
-		"interface" => 0,
-		"source" => '2001::dead:beef',
-	));
-	if ($so !== false) {
-	    die('skip protocol independent multicast API is available.');
-	}
+    $so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
+        "group"	=> 'ff01::114',
+        "interface" => 0,
+        "source" => '2001::dead:beef',
+    ));
+    if ($so !== false) {
+        die('skip protocol independent multicast API is available.');
+    }
 }
 --FILE--
 <?php

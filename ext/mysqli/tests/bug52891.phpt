@@ -5,7 +5,7 @@ Bug #52891 (Wrong data inserted with mysqli/mysqlnd when using bind_param,value 
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!$IS_MYSQLND) {
-	die("skip: test applies only to mysqlnd");
+    die("skip: test applies only to mysqlnd");
 }
 ?>
 --FILE--
@@ -100,16 +100,16 @@ if (!$IS_MYSQLND) {
 require_once('connect.inc');
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-		$host, $user, $db, $port, $socket);
+    printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+        $host, $user, $db, $port, $socket);
 }
 
 if (!mysqli_query($link, 'DROP TABLE IF EXISTS tuint')) {
-	printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 
 if (!mysqli_query($link, 'DROP TABLE IF EXISTS tsint')) {
-	printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 
 mysqli_close($link);

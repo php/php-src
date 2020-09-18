@@ -2,11 +2,11 @@
 SOAP customized Content-Type, eg. SwA use case
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
+    require_once('skipif.inc');
 
-	if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
-		echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
-	}
+    if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
+        echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
+    }
 ?>
 --CONFLICTS--
 server

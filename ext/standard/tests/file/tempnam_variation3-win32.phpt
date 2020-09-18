@@ -3,7 +3,7 @@ Test tempnam() function: usage variations - obscure prefixes
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
-	die("skip run only on Windows");
+    die("skip run only on Windows");
 ?>
 --CONFLICTS--
 obscure_filename

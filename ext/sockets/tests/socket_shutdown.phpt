@@ -9,7 +9,7 @@ if (!extension_loaded('sockets')) {
   die('SKIP sockets extension not available.');
 }
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
+    die('skip not for windows');
 }
 ?>
 --FILE--

@@ -4,9 +4,9 @@ PDO Common: Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NUL
 <?php
 if (!extension_loaded('pdo')) die('skip PDO not available');
 try {
-	$pdo = new PDO("sqlite:".__DIR__."/foo.db");
+    $pdo = new PDO("sqlite:".__DIR__."/foo.db");
 } catch (Exception $e) {
-	die("skip PDP_SQLITE not available");
+    die("skip PDP_SQLITE not available");
 }
 ?>
 --FILE--

@@ -3,7 +3,7 @@ __set first parameter should be a string when typed
 --FILE--
 <?php
 class Foo {
-	function __set(\Countable $name, $value) {}
+    function __set(\Countable $name, $value) {}
 }
 ?>
 --EXPECTF--

@@ -4,9 +4,9 @@ PDO MySQL specific class constants
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
-	/* Need connection to detect library version */
-	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	MySQLPDOTest::skip();
+    /* Need connection to detect library version */
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    MySQLPDOTest::skip();
 }
 ?>
 --FILE--

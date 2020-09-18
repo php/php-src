@@ -5,34 +5,34 @@ proc_open() with socket and pipe
 
 function poll($pipe, $read = true)
 {
-	$r = ($read == true) ? [$pipe] : null;
-	$w = ($read == false) ? [$pipe] : null;
-	$e = null;
-	
-	if (!stream_select($r, $w, $e, null, 0)) {
-		throw new \Error("Select failed");
-	}
+    $r = ($read == true) ? [$pipe] : null;
+    $w = ($read == false) ? [$pipe] : null;
+    $e = null;
+
+    if (!stream_select($r, $w, $e, null, 0)) {
+        throw new \Error("Select failed");
+    }
 }
 
 function read_pipe($pipe): string
 {
-	poll($pipe);
-	
-	if (false === ($chunk = @fread($pipe, 8192))) {
-		throw new Error("Failed to read: " . (error_get_last()['message'] ?? 'N/A'));
-	}
-	
-	return $chunk;
+    poll($pipe);
+
+    if (false === ($chunk = @fread($pipe, 8192))) {
+        throw new Error("Failed to read: " . (error_get_last()['message'] ?? 'N/A'));
+    }
+
+    return $chunk;
 }
 
 $cmd = [
-	getenv("TEST_PHP_EXECUTABLE"),
-	__DIR__ . '/proc_open_sockets2.inc'
+    getenv("TEST_PHP_EXECUTABLE"),
+    __DIR__ . '/proc_open_sockets2.inc'
 ];
 
 $spec = [
-	['pipe', 'r'],
-	['socket']
+    ['pipe', 'r'],
+    ['socket']
 ];
 
 $proc = proc_open($cmd, $spec, $pipes);

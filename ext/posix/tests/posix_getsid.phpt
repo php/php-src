@@ -8,7 +8,7 @@ Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10
 --SKIPIF--
 <?php
-	if(!extension_loaded("posix")) print "SKIP - POSIX extension not loaded";
+    if(!extension_loaded("posix")) print "SKIP - POSIX extension not loaded";
 ?>
 --FILE--
 <?php

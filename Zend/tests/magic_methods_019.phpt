@@ -3,7 +3,7 @@ __unserialize first parameter must be an array
 --FILE--
 <?php
 class Foo {
-	public function __unserialize(string $name) {}
+    public function __unserialize(string $name) {}
 }
 ?>
 --EXPECTF--

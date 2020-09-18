@@ -3,7 +3,7 @@ __wakeup cannot take arguments
 --FILE--
 <?php
 class Foo {
-	public function __wakeup(string $name) {}
+    public function __wakeup(string $name) {}
 }
 ?>
 --EXPECTF--

@@ -7,7 +7,7 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 /* TODO - fix this limitation */
 if (getenv('PDO_MYSQL_TEST_DSN') !== "mysql:dbname=phptest;unix_socket=/tmp/mysql.sock")
-	die("skip Fix test to run in other environments as well!");
+    die("skip Fix test to run in other environments as well!");
 ?>
 --INI--
 pdo.dsn.mysql="mysql:dbname=phptest;socket=/tmp/mysql.sock"

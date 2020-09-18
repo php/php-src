@@ -7,7 +7,7 @@ require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
 if (!$IS_MYSQLND)
-	die("skip Test for mysqlnd only");
+    die("skip Test for mysqlnd only");
 require_once('skipifemb.inc'); ?>
 --FILE--
 <?php

@@ -2,12 +2,12 @@
 gif in/out
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-	if (!function_exists("imagegif") || !function_exists("imagecreatefromgif") || !function_exists('imagecreatefromjpeg')) {
-		die("skip gif support unavailable");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available.");
+    }
+    if (!function_exists("imagegif") || !function_exists("imagecreatefromgif") || !function_exists('imagecreatefromjpeg')) {
+        die("skip gif support unavailable");
+    }
 ?>
 --FILE--
 <?php

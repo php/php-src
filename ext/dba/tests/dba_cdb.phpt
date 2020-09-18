@@ -2,9 +2,9 @@
 DBA CDB handler test
 --SKIPIF--
 <?php
-	$handler = 'cdb';
-	require_once(__DIR__ .'/skipif.inc');
-	die('info CDB does not support replace or delete');
+    $handler = 'cdb';
+    require_once(__DIR__ .'/skipif.inc');
+    die('info CDB does not support replace or delete');
 ?>
 --FILE--
 <?php
@@ -14,7 +14,7 @@ DBA CDB handler test
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 database handler: cdb

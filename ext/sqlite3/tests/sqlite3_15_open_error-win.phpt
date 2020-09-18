@@ -3,7 +3,7 @@ SQLite3::open error test
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
-	die('skip windows only test');
+    die('skip windows only test');
 }
 require_once(__DIR__ . '/skipif.inc');
 ?>

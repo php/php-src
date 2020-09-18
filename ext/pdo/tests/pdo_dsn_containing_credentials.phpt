@@ -8,7 +8,7 @@ if (false == $dir) die('skip no driver');
 
 $driver = substr(getenv('PDOTEST_DSN'), 0, strpos(getenv('PDOTEST_DSN'), ':'));
 if (!in_array($driver, array('mssql','sybase','dblib','firebird','mysql','oci')))
-	die('skip not supported');
+    die('skip not supported');
 
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();

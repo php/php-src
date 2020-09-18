@@ -3,7 +3,7 @@ Test sprintf() function : basic functionality - octal format
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
-	    die("skip this test is for 32bit platform only");
+        die("skip this test is for 32bit platform only");
 }
 ?>
 --FILE--

@@ -61,7 +61,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli_data_seek(): Argument #2 ($offset) must be greater than or equal to 0
