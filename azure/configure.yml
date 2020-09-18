@@ -58,8 +58,10 @@ steps:
         --enable-dba \
         --with-snmp \
         --with-unixODBC \
+        --with-imap \
+        --with-kerberos \
+        --with-imap-ssl \
         --enable-werror \
         --with-config-file-path=/etc \
-        --with-config-file-scan-dir=/etc/php.d \
-        --with-imap --with-kerberos --with-imap-ssl
+        --with-config-file-scan-dir=/etc/php.d
   displayName: 'Configure Build'
