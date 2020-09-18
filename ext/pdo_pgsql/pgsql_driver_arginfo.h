@@ -1,12 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 80c3e9c95db8c68ff3a2c2753aa5e9485af9fe4c */
+ * Stub hash: 6e5758f2ff93c89f3658aa8f6cfb32a60fd85127 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, rows, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, delimiter, IS_STRING, 0, "\"\\t\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, null_as, IS_STRING, 0, "\"\\\\\\\\N\"")
-	ZEND_ARG_TYPE_INFO(0, fields, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fields, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromFile, 0, 0, 2)
@@ -14,14 +14,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromFile, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, delimiter, IS_STRING, 0, "\"\\t\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, null_as, IS_STRING, 0, "\"\\\\\\\\N\"")
-	ZEND_ARG_TYPE_INFO(0, fields, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fields, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyToArray, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, delimiter, IS_STRING, 0, "\"\\t\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, null_as, IS_STRING, 0, "\"\\\\\\\\N\"")
-	ZEND_ARG_TYPE_INFO(0, fields, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fields, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_PDO_PGSql_Ext_pgsqlCopyToFile arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromFile
