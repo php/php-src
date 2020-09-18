@@ -53,6 +53,8 @@ require_once('skipifconnectfailure.inc');
     mysqli_autocommit($link, true);
     mysqli_commit($link);
     mysqli_rollback($link);
+    $stmt = mysqli_stmt_init($link);
+    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
     while(mysqli_more_results($link)) {
         mysqli_next_result($link);
         $res = mysqli_store_result($link);
@@ -81,6 +83,8 @@ require_once('skipifconnectfailure.inc');
     mysqli_autocommit($link, true);
     mysqli_commit($link);
     mysqli_rollback($link);
+    $stmt = mysqli_stmt_init($link);
+    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
     while(mysqli_more_results($link)) {
         mysqli_next_result($link);
         $res = mysqli_store_result($link);
@@ -323,6 +327,8 @@ Warning: mysqli_autocommit(): (%s/%d): Commands out of sync; you can't run this 
 Warning: mysqli_commit(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
 
 Warning: mysqli_rollback(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
+
+Warning: mysqli_stmt_prepare(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
 
 Warning: mysqli_store_result(): (%s/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
