@@ -375,7 +375,9 @@ PHP_FUNCTION(grapheme_substr)
 		RETURN_THROWS();
 	}
 
-	if ( OUTSIDE_STRING(lstart, str_len)) {
+	if (str_len == 0 && lstart == 0) {
+		RETURN_EMPTY_STRING();
+	} else if (OUTSIDE_STRING(lstart, str_len)) {
 		zend_argument_value_error(2, "must be contained in argument #1 ($string)");
 		RETURN_THROWS();
 	}
