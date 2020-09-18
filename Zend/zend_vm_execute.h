@@ -1398,7 +1398,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_OBS
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-	zend_observer_maybe_fcall_call_begin(execute_data);
+	zend_observer_fcall_begin(execute_data);
 	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
@@ -1611,7 +1611,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-		zend_observer_maybe_fcall_call_begin(execute_data);
+		zend_observer_fcall_begin(execute_data);
 		LOAD_OPLINE_EX();
 
 		ZEND_VM_ENTER_EX();
@@ -1915,7 +1915,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
-		zend_observer_maybe_fcall_call_begin(execute_data);
+		zend_observer_fcall_begin(execute_data);
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
@@ -2991,7 +2991,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_OBSERVER
 		}
 	}
 
-	zend_observer_maybe_fcall_call_end(execute_data, EX(return_value));
+	zend_observer_fcall_end(execute_data, EX(return_value));
 	cleanup_unfinished_calls(execute_data, throw_op_num);
 
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
@@ -3322,7 +3322,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_OBSERVER_
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-		zend_observer_maybe_fcall_call_begin(execute_data);
+		zend_observer_fcall_begin(execute_data);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
@@ -4193,7 +4193,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_OBSER
 			}
 		}
 	}
-	zend_observer_maybe_fcall_call_end(execute_data, return_value);
+	zend_observer_fcall_end(execute_data, return_value);
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -4313,7 +4313,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPE
 		if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));};
 	} while (0);
 
-	zend_observer_maybe_fcall_call_end(execute_data, EX(return_value));
+	zend_observer_fcall_end(execute_data, EX(return_value));
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -4396,7 +4396,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_OBSERVER
 		}
 	}
 
-	zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->retval);
+	zend_observer_fcall_end(generator->execute_data, &generator->retval);
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
@@ -4800,7 +4800,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_
 
 		call->prev_execute_data = execute_data;
 		i_init_code_execute_data(call, new_op_array, return_value);
-		zend_observer_maybe_fcall_call_begin(call);
+		zend_observer_fcall_begin(call);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			FREE_OP(opline->op1_type, opline->op1.var);
 			ZEND_VM_ENTER();
@@ -54806,7 +54806,7 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
-	zend_observer_maybe_fcall_call_end(execute_data, return_value);
+	zend_observer_fcall_end(execute_data, return_value);
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -58782,9 +58782,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 	}
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_code_execute_data(execute_data, op_array, return_value);
-	if (ZEND_OBSERVER_ENABLED) {
-		zend_observer_maybe_fcall_call_begin(execute_data);
-	}
+	ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 	zend_execute_ex(execute_data);
 	/* Observer end handlers are called from ZEND_RETURN */
 	zend_vm_stack_free_call_frame(execute_data);

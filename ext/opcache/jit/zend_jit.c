@@ -24,6 +24,7 @@
 #include "Zend/zend_constants.h"
 #include "Zend/zend_closures.h"
 #include "Zend/zend_ini.h"
+#include "Zend/zend_observer.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
 
