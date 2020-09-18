@@ -23,6 +23,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   t. Signature changes
   u. Error Notification callbacks to replace zend_error_cb overwrite use-cases
   v. Removed Zend APIs
+  w. Renamed Zend APIs
+  x. ZEND_EXT_NOP no longer emitted
 
 2. Build system changes
   a. Abstract
@@ -394,6 +396,10 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
   w. The following APIs have been renamed:
      - _zend_ts_hash_init() to zend_ts_hash_init()
+
+  x. In COMPILE_EXTENDED_STMT mode, a ZEND_EXT_NOP opcode will no longer be
+     generated at the start of a function. Use the new observer APIs or hook
+     into zend_execute_ex instead.
 
 ========================
 2. Build system changes

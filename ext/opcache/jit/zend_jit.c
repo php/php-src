@@ -2118,8 +2118,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					}
 					recv_emitted = 1;
 				} else if (opline->opcode == ZEND_RECV) {
-					if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
-					 && op_array->opcodes[0].opcode != ZEND_EXT_NOP) {
+					if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 						/* skip */
 						continue;
 					} else if (recv_emitted) {
@@ -3540,9 +3539,6 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 
 		/* restore original opcode handlers */
 		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (opline->opcode == ZEND_EXT_NOP) {
-				opline++;
-			}
 			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 				opline++;
 			}
@@ -3576,9 +3572,6 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 		op_array = &func->op_array;
 		opline = op_array->opcodes;
 		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (opline->opcode == ZEND_EXT_NOP) {
-				opline++;
-			}
 			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 				opline++;
 			}
@@ -3651,9 +3644,6 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 
 	if (JIT_G(hot_func)) {
 		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (opline->opcode == ZEND_EXT_NOP) {
-				opline++;
-			}
 			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 				opline++;
 			}
@@ -3692,9 +3682,6 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		/* Set run-time JIT handler */
 		ZEND_ASSERT(zend_jit_runtime_jit_handler != NULL);
 		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (opline->opcode == ZEND_EXT_NOP) {
-				opline++;
-			}
 			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 				opline++;
 			}
@@ -3714,9 +3701,6 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		ZEND_ASSERT(zend_jit_profile_jit_handler != NULL);
 		if (op_array->function_name) {
 			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-				if (opline->opcode == ZEND_EXT_NOP) {
-					opline++;
-				}
 				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 					opline++;
 				}
