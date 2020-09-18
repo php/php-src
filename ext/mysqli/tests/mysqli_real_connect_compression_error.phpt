@@ -26,7 +26,7 @@ $data_size = 16777174;
 $mysqli = mysqli_init();
 $result = my_mysqli_real_connect($mysqli, $host, $user, $passwd, $db, $port, $socket);
 $mysqli->query("DROP TABLE IF EXISTS test");
-$mysqli->query("CREATE TABLE test (`blob` LONGBLOB NOT NULL)");
+$mysqli->query("CREATE TABLE test (`blob` LONGBLOB NOT NULL) ENGINE=MyISAM");
 
 $data = str_repeat("x", $data_size);
 $mysqli->query("INSERT INTO $db.test(`blob`) VALUE ('$data')");
