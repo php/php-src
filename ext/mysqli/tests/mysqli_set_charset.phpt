@@ -108,8 +108,8 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
         $link->set_charset('invalid');
     } catch (\mysqli_sql_exception $exception) {
         echo $exception->getMessage() . "\n";
-	}
-	
+    }
+
     try {
         $link->set_charset('ucs2');
     } catch (\mysqli_sql_exception $exception) {
