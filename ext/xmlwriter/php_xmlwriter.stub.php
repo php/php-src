@@ -80,7 +80,7 @@ function xmlwriter_start_dtd_entity(XMLWriter $xmlwriter, string $name, bool $is
 
 function xmlwriter_end_dtd_entity(XMLWriter $xmlwriter): bool {}
 
-function xmlwriter_write_dtd_entity(XMLWriter $xmlwriter, string $name, string $content, bool $isparam = false, string $publicId = UNKNOWN, string $systemId = UNKNOWN, string $ndataid = UNKNOWN): bool {}
+function xmlwriter_write_dtd_entity(XMLWriter $xmlwriter, string $name, string $content, bool $isparam = false, ?string $publicId = null, ?string $systemId = null, ?string $ndataid = null): bool {}
 
 function xmlwriter_output_memory(XMLWriter $xmlwriter, bool $flush = true): string {}
 
