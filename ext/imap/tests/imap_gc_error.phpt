@@ -9,12 +9,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-echo "Checking with no parameters\n";
-imap_gc();
-
-echo  "Checking with incorrect parameter type\n";
-imap_gc('', false);
-imap_gc(false, false);
 
 require_once(__DIR__.'/imap_include.inc');
 $stream_id = imap_open($default_mailbox, $username, $password) or
@@ -23,13 +17,4 @@ imap_gc($stream_id, -1);
 
 ?>
 --EXPECTF--
-Checking with no parameters
-
-Warning: imap_gc() Expects exactly 2 parameters, 0 given in %s on line %d
-Checking with incorrect parameter type
-
-Warning: imap_gc(): Argument #1 must be of type resource, string given in %s on line %d
-
-Warning: imap_gc(): Argument #1 must be of type resource, bool given in %s on line %d
-
 Warning: imap_gc(): Invalid value for the flags parameter in %s on line %d

@@ -8,17 +8,10 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-echo "Checking with no parameters\n";
-imap_fetchstructure();
-
-echo  "Checking with incorrect parameter type\n";
-imap_fetchstructure('');
-imap_fetchstructure(false);
 
 require_once(__DIR__.'/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
-imap_fetchstructure($stream_id);
 imap_fetchstructure($stream_id,0);
 
 $z = imap_fetchstructure($stream_id,1);
@@ -44,18 +37,8 @@ imap_close($stream_id);
 require_once('clean.inc');
 ?>
 --EXPECTF--
-Checking with no parameters
-
-Warning: imap_fetchstructure() expects at least 2 parameters, 0 given in %s on line %d
-Checking with incorrect parameter type
-
-Warning: imap_fetchstructure() expects at least 2 parameters, 1 given in %s on line %d
-
-Warning: imap_fetchstructure() expects at least 2 parameters, 1 given in %s on line %d
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
-
-Warning: imap_fetchstructure() expects at least 2 parameters, 1 given in %s on line %d
+.. mailbox '{127.0.0.1:143/norsh}INBOX.phpttest' created
 bool(true)
 bool(true)
 bool(true)

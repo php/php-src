@@ -8,12 +8,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-echo "Checking with no parameters\n";
-imap_timeout();
-
-echo  "Checking with incorrect parameter type\n";
-imap_timeout('');
-imap_timeout(false);
 
 echo "GET values:\n";
 var_dump(imap_timeout(IMAP_OPENTIMEOUT));
@@ -39,12 +33,6 @@ var_dump(imap_timeout(IMAP_WRITETIMEOUT));
 
 ?>
 --EXPECTF--
-Checking with no parameters
-
-Warning: imap_timeout() expects at least 1 argument, 0 given in %s on line %d
-Checking with incorrect parameter type
-
-Warning: imap_timeout(): Argument #1 must be of type int, %s given in %s on line %d
 GET values:
 int(%d)
 int(%d)
