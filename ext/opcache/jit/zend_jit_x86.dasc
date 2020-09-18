@@ -9689,6 +9689,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 					if (!trace && op_array == &func->op_array) {
 						/* recursive call */
+						if (ZEND_OBSERVER_ENABLED) {
+							|	mov FCARG1a, FP
+							|	EXT_CALL zend_observer_fcall_begin, r0
+						}
 #ifdef CONTEXT_THREADED_JIT
 						|	call >1
 						|.cold_code
@@ -9791,6 +9795,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	lea r1, [r1 + 16]
 			|	jne <2
 			|3:
+		}
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	mov FCARG1a, FP
+			|	EXT_CALL zend_observer_fcall_begin, r0
 		}
 
 		if (trace) {
@@ -11170,6 +11179,30 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 
 	if (return_value_used == 0) {
 		|9:
+		if (ZEND_OBSERVER_ENABLED) {
+			|	mov FCARG1a, FP
+#if 1
+			|	xor FCARG2a, FCARG2a
+#else
+			if (Z_MODE(op1_addr) == IS_REG) {
+				zend_jit_addr tmp_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, TMP_ZVAL_OFFSET);
+
+				if (op1_info & MAY_BE_LONG) {
+					SET_ZVAL_LVAL tmp_addr, Z_REG(op1_addr)
+					SET_ZVAL_TYPE_INFO tmp_addr, IS_LONG
+				} else if (op1_info & MAY_BE_DOUBE) {
+					SET_ZVAL_DVAL tmp_addr, Z_REG(op1_addr)
+					SET_ZVAL_TYPE_INFO tmp_addr, IS_DOUBLE
+				} else {
+					ZEND_UNREACHABLE();
+				}
+				|	LOAD_ZVAL_ADDR FCARG2a, tmp_addr
+			} else {
+				|	LOAD_ZVAL_ADDR FCARG2a, op1_addr
+			}
+#endif
+			|	EXT_CALL zend_observer_fcall_end, r0
+		}
 		return 1;
 	}
 
@@ -11232,6 +11265,11 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	|9:
+	if (ZEND_OBSERVER_ENABLED) {
+		|	mov FCARG1a, FP
+		|	LOAD_ZVAL_ADDR FCARG2a, ret_addr
+		|	EXT_CALL zend_observer_fcall_end, r0
+	}
 	return 1;
 }
 

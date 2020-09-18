@@ -793,12 +793,12 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
             ($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
             : "\\0",
-        "/IS_OBSERVER/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "1" : "0",
-        "/OBSERVER_FCALL_BEGIN_HANDLERS\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
-            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_maybe_fcall_call_begin(\\1)")
+        "/ZEND_OBSERVER_ENABLED/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "1" : "0",
+        "/ZEND_OBSERVER_FCALL_BEGIN\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
+            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_begin(\\1)")
             : "",
-        "/OBSERVER_FCALL_END_HANDLERS\(\s*([^,]*)\s*,\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
-            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_maybe_fcall_call_end(\\1, \\2)")
+        "/ZEND_OBSERVER_FCALL_END\(\s*([^,]*)\s*,\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
+            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_end(\\1, \\2)")
             : "",
     );
     $code = preg_replace(array_keys($specialized_replacements), array_values($specialized_replacements), $code);

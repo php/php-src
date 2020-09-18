@@ -859,20 +859,11 @@ try_again:
 		if (!ZEND_OBSERVER_ENABLED) {
 			zend_execute_ex(generator->execute_data);
 		} else {
-			zend_op_array *op_array = &generator->execute_data->func->op_array;
-			void *observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
-			if (!observer_handlers) {
-				zend_observer_fcall_install((zend_function *)op_array);
-				observer_handlers = ZEND_OBSERVER_HANDLERS(op_array);
-			}
-			ZEND_ASSERT(observer_handlers);
-			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
-				zend_observe_fcall_begin(observer_handlers, generator->execute_data);
-			}
+			zend_observer_generator_resume(generator->execute_data);
 			zend_execute_ex(generator->execute_data);
 			if (generator->execute_data) {
 				/* On the final return, this will be called from ZEND_GENERATOR_RETURN */
-				zend_observer_maybe_fcall_call_end(generator->execute_data, &generator->value);
+				zend_observer_fcall_end(generator->execute_data, &generator->value);
 			}
 		}
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
