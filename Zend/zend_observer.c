@@ -144,8 +144,7 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 	op_array = &execute_data->func->op_array;
 	fn_flags = op_array->fn_flags;
 
-	if (!ZEND_OBSERVABLE_FN(fn_flags)
-	 || (fn_flags & ZEND_ACC_GENERATOR)) {
+	if (!ZEND_OBSERVABLE_FN(fn_flags)) {
 		return;
 	}
 
@@ -197,7 +196,7 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 	fcall_data = (zend_observer_fcall_data*)ZEND_OBSERVER_DATA(&func->op_array);
 	// TODO: Fix exceptions from generators
 	// ZEND_ASSERT(fcall_data);
-	if (fcall_data && fcall_data == ZEND_OBSERVER_NOT_OBSERVED) {
+	if (!fcall_data || fcall_data == ZEND_OBSERVER_NOT_OBSERVED) {
 		return;
 	}
 

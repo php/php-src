@@ -11180,7 +11180,6 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	if (return_value_used == 0) {
 		|9:
 		if (ZEND_OBSERVER_ENABLED) {
-			|	mov FCARG1a, FP
 #if 1
 			|	xor FCARG2a, FCARG2a
 #else
@@ -11201,6 +11200,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	LOAD_ZVAL_ADDR FCARG2a, op1_addr
 			}
 #endif
+			|	mov FCARG1a, FP
 			|	EXT_CALL zend_observer_fcall_end, r0
 		}
 		return 1;
@@ -11266,8 +11266,8 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 
 	|9:
 	if (ZEND_OBSERVER_ENABLED) {
-		|	mov FCARG1a, FP
 		|	LOAD_ZVAL_ADDR FCARG2a, ret_addr
+		|	mov FCARG1a, FP
 		|	EXT_CALL zend_observer_fcall_end, r0
 	}
 	return 1;
