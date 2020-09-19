@@ -372,6 +372,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		if (s2 <= 0 || s1 == -1) {
 			break;
 		}
+		s1 = s2 = 0;
 
 	case 0:
 
