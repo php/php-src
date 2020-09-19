@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 26a454261393ea3bdb6252b2d8140434664b5771 */
+ * Stub hash: 9d17266fba7a05a5fddca0ddf6b64b1c2f683cae */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)

@@ -34,7 +34,7 @@ class RecursiveCallbackFilterIterator extends CallbackFilterIterator implements 
 
     /**
      * @return bool
-     * @alias RecursiveFilterIterator::hasChildren
+     * @implementation-alias RecursiveFilterIterator::hasChildren
      */
     public function hasChildren() {}
 
@@ -168,7 +168,7 @@ class ParentIterator extends RecursiveFilterIterator
 
     /**
      * @return bool
-     * @alias RecursiveFilterIterator::hasChildren
+     * @implementation-alias RecursiveFilterIterator::hasChildren
      */
     public function accept() {}
 }
@@ -357,7 +357,7 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 
     /**
      * @return bool
-     * @alias RecursiveFilterIterator::hasChildren
+     * @implementation-alias RecursiveFilterIterator::hasChildren
      */
     public function hasChildren() {}
 

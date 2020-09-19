@@ -362,6 +362,8 @@ class FuncInfo {
     public $name;
     /** @var int */
     public $flags;
+    /** @var string|null */
+    public $aliasType;
     /** @var FunctionName|null */
     public $alias;
     /** @var bool */
@@ -378,6 +380,7 @@ class FuncInfo {
     public function __construct(
         FunctionName $name,
         int $flags,
+        ?string $aliasType,
         ?FunctionName $alias,
         bool $isDeprecated,
         array $args,
@@ -387,6 +390,7 @@ class FuncInfo {
     ) {
         $this->name = $name;
         $this->flags = $flags;
+        $this->aliasType = $aliasType;
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
         $this->args = $args;
@@ -617,6 +621,7 @@ function parseFunctionLike(
 ): FuncInfo {
     $comment = $func->getDocComment();
     $paramMeta = [];
+    $aliasType = null;
     $alias = null;
     $isDeprecated = false;
     $haveDocReturnType = false;
@@ -631,7 +636,8 @@ function parseFunctionLike(
                     $paramMeta[$varName] = [];
                 }
                 $paramMeta[$varName]['preferRef'] = true;
-            } else if ($tag->name === 'alias') {
+            } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias') {
+                $aliasType = $tag->name;
                 $aliasParts = explode("::", $tag->getValue());
                 if (count($aliasParts) === 1) {
                     $alias = new FunctionName(null, $aliasParts[0]);
@@ -721,6 +727,7 @@ function parseFunctionLike(
     return new FuncInfo(
         $name,
         $flags,
+        $aliasType,
         $alias,
         $isDeprecated,
         $args,

@@ -98,118 +98,118 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
     /**
      * @param string|int $index
      * @return bool
-     * @alias ArrayObject::offsetExists
+     * @implementation-alias ArrayObject::offsetExists
      */
     public function offsetExists($index) {}
 
     /**
      * @param string|int $index
      * @return mixed
-     * @alias ArrayObject::offsetGet
+     * @implementation-alias ArrayObject::offsetGet
      */
     public function offsetGet($index) {}
 
     /**
      * @param string|int $index
      * @return void
-     * @alias ArrayObject::offsetSet
+     * @implementation-alias ArrayObject::offsetSet
      */
     public function offsetSet($index, mixed $value) {}
 
     /**
      * @param string|int $index
      * @return void
-     * @alias ArrayObject::offsetUnset
+     * @implementation-alias ArrayObject::offsetUnset
      */
     public function offsetUnset($index) {}
 
     /**
      * @return void
-     * @alias ArrayObject::append
+     * @implementation-alias ArrayObject::append
      */
     public function append(mixed $value) {}
 
     /**
      * @return array
-     * @alias ArrayObject::getArrayCopy
+     * @implementation-alias ArrayObject::getArrayCopy
      */
     public function getArrayCopy() {}
 
     /**
      * @return int
-     * @alias ArrayObject::count
+     * @implementation-alias ArrayObject::count
      */
     public function count() {}
 
     /**
      * @return int
-     * @alias ArrayObject::getFlags
+     * @implementation-alias ArrayObject::getFlags
      */
     public function getFlags() {}
 
     /**
      * @return void
-     * @alias ArrayObject::setFlags
+     * @implementation-alias ArrayObject::setFlags
      */
     public function setFlags(int $flags) {}
 
     /**
      * @return bool
-     * @alias ArrayObject::asort
+     * @implementation-alias ArrayObject::asort
      */
     public function asort(int $sort_flags = SORT_REGULAR) {}
 
     /**
      * @return bool
-     * @alias ArrayObject::ksort
+     * @implementation-alias ArrayObject::ksort
      */
     public function ksort(int $sort_flags = SORT_REGULAR) {}
 
     /**
      * @return bool
-     * @alias ArrayObject::uasort
+     * @implementation-alias ArrayObject::uasort
      */
     public function uasort(callable $cmp_function) {}
 
     /**
      * @return bool
-     * @alias ArrayObject::uksort
+     * @implementation-alias ArrayObject::uksort
      */
     public function uksort(callable $cmp_function) {}
 
     /**
      * @return bool
-     * @alias ArrayObject::natsort
+     * @implementation-alias ArrayObject::natsort
      */
     public function natsort() {}
 
     /**
      * @return bool
-     * @alias ArrayObject::natcasesort
+     * @implementation-alias ArrayObject::natcasesort
      */
     public function natcasesort() {}
 
     /**
      * @return void
-     * @alias ArrayObject::unserialize
+     * @implementation-alias ArrayObject::unserialize
      */
     public function unserialize(string $serialized) {}
 
     /**
      * @return string
-     * @alias ArrayObject::serialize
+     * @implementation-alias ArrayObject::serialize
      */
     public function serialize() {}
 
     /**
      * @return array
-     * @alias ArrayObject::__serialize
+     * @implementation-alias ArrayObject::__serialize
      */
     public function __serialize() {}
 
     /**
      * @return void
-     * @alias ArrayObject::__unserialize
+     * @implementation-alias ArrayObject::__unserialize
      */
     public function __unserialize(array $data) {}
 
@@ -233,7 +233,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
 
     /**
      * @return array
-     * @alias ArrayObject::__debugInfo
+     * @implementation-alias ArrayObject::__debugInfo
      */
     public function __debugInfo() {}
 }

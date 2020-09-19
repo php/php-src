@@ -1309,7 +1309,8 @@ function stream_set_write_buffer($stream, int $buffer): int {}
 
 /**
  * @param resource $stream
- * @alias stream_set_write_buffer */
+ * @alias stream_set_write_buffer
+ */
 function set_file_buffer($stream, int $buffer): int {}
 
 /** @param resource $stream */

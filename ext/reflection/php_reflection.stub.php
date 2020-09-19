@@ -18,7 +18,7 @@ interface Reflector extends Stringable
 
 abstract class ReflectionFunctionAbstract implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @return bool */
@@ -369,7 +369,7 @@ class ReflectionObject extends ReflectionClass
 
 class ReflectionProperty implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(object|string $class, string $property) {}
@@ -434,7 +434,7 @@ class ReflectionProperty implements Reflector
 
 class ReflectionClassConstant implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(object|string $class, string $constant) {}
@@ -471,7 +471,7 @@ class ReflectionClassConstant implements Reflector
 
 class ReflectionParameter implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @param string|array|object $function */
@@ -550,7 +550,7 @@ class ReflectionParameter implements Reflector
 
 abstract class ReflectionType implements Stringable
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @return bool */
@@ -575,7 +575,7 @@ class ReflectionUnionType extends ReflectionType
 
 class ReflectionExtension implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(string $name) {}
@@ -618,7 +618,7 @@ class ReflectionExtension implements Reflector
 
 class ReflectionZendExtension implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(string $name) {}
@@ -647,7 +647,7 @@ final class ReflectionReference
 
     public function getId(): string {}
 
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     private function __clone() {}
 
     private function __construct() {}

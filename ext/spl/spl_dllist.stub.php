@@ -99,13 +99,13 @@ class SplQueue extends SplDoublyLinkedList
 {
     /**
      * @return void
-     * @alias SplDoublyLinkedList::push
+     * @implementation-alias SplDoublyLinkedList::push
      */
     public function enqueue(mixed $value) {}
 
     /**
      * @return mixed
-     * @alias SplDoublyLinkedList::shift
+     * @implementation-alias SplDoublyLinkedList::shift
      */
     public function dequeue() {}
 }
