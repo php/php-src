@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Updated to PCRE 10.35. (cmb)
+  . Fixed bug #80118 (Erroneous whitespace match with JIT only). (cmb)
 
 - Standard:
   . Fixed bug #80114 (parse_url does not accept URLs with port 0). (cmb, twosee)
