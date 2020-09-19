@@ -21,19 +21,19 @@ class SplPriorityQueue implements Iterator, Countable
 
     /**
      * @return int
-     * @alias SplHeap::count
+     * @implementation-alias SplHeap::count
      */
     public function count() {}
 
     /**
      * @return bool
-     * @alias SplHeap::isEmpty
+     * @implementation-alias SplHeap::isEmpty
      */
     public function isEmpty() {}
 
     /**
      * @return void
-     * @alias SplHeap::rewind
+     * @implementation-alias SplHeap::rewind
      */
     public function rewind() {}
 
@@ -42,31 +42,31 @@ class SplPriorityQueue implements Iterator, Countable
 
     /**
      * @return int
-     * @alias SplHeap::key
+     * @implementation-alias SplHeap::key
      */
     public function key() {}
 
     /**
      * @return void
-     * @alias SplHeap::next
+     * @implementation-alias SplHeap::next
      */
     public function next() {}
 
     /**
      * @return bool
-     * @alias SplHeap::valid
+     * @implementation-alias SplHeap::valid
      */
     public function valid() {}
 
     /**
      * @return bool
-     * @alias SplHeap::recoverFromCorruption
+     * @implementation-alias SplHeap::recoverFromCorruption
      */
     public function recoverFromCorruption() {}
 
     /**
      * @return bool
-     * @alias SplHeap::isCorrupted
+     * @implementation-alias SplHeap::isCorrupted
      */
     public function isCorrupted() {}
 
