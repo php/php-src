@@ -425,8 +425,10 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				s1 |= 0x8080;
 			} else if (c == 0xa0) {
 				s1 = 0x00a0;
-			} else if (c == 0xa5) {		/* YEN SIGN */
-				s1 = 0x216f;	/* FULLWIDTH YEN SIGN */
+			} else if (c == 0xa5) { /* YEN SIGN */
+				/* Unicode has codepoint 0xFFE5 for a fullwidth Yen sign;
+				 * convert codepoint 0xA5 to halfwidth Yen sign */
+				s1 = 0x5c; /* HALFWIDTH YEN SIGN */
 			} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 				s1 = 0x2140;
 			}
