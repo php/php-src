@@ -334,10 +334,10 @@ ZEND_METHOD(ErrorException, __construct)
 {
 	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
+	zend_bool lineno_is_null = 1;
 	zval   tmp, *object, *previous = NULL;
-	int    argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "|SllSlO!", &message, &code, &severity, &filename, &lineno, &previous, zend_ce_throwable) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|SllS!l!O!", &message, &code, &severity, &filename, &lineno, &lineno_is_null, &previous, zend_ce_throwable) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -361,14 +361,17 @@ ZEND_METHOD(ErrorException, __construct)
 	ZVAL_LONG(&tmp, severity);
 	zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
 
-	if (argc >= 4) {
+	if (filename) {
 		ZVAL_STR_COPY(&tmp, filename);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		zval_ptr_dtor(&tmp);
-    	if (argc < 5) {
-    	    lineno = 0; /* invalidate lineno */
-    	}
+	}
+
+	if (!lineno_is_null) {
 		ZVAL_LONG(&tmp, lineno);
+		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+	} else if (filename) {
+		ZVAL_LONG(&tmp, 0);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 	}
 }

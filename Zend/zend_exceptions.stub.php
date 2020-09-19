@@ -24,7 +24,7 @@ class Exception implements Throwable
 {
     final private function __clone() {}
 
-    public function __construct(string $message = UNKNOWN, int $code = 0, ?Throwable $previous = null) {}
+    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
     public function __wakeup() {}
 
@@ -48,7 +48,7 @@ class Exception implements Throwable
 
 class ErrorException extends Exception
 {
-    public function __construct(string $message = UNKNOWN, int $code = 0, int $severity = E_ERROR, string $filename = UNKNOWN, int $lineno = 0, ?Throwable $previous = null) {}
+    public function __construct(string $message = "", int $code = 0, int $severity = E_ERROR, ?string $filename = null, ?int $line = null, ?Throwable $previous = null) {}
 
     final public function getSeverity(): int {}
 }
@@ -59,7 +59,7 @@ class Error implements Throwable
     final private function __clone() {}
 
     /** @implementation-alias Exception::__construct */
-    public function __construct(string $message = UNKNOWN, int $code = 0, ?Throwable $previous = null) {}
+    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
     /** @implementation-alias Exception::__wakeup */
     public function __wakeup() {}
