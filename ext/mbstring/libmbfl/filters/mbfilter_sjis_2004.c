@@ -723,7 +723,9 @@ mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(s2, filter->data));
 	}
 
-	/* back to latin */
+	/* If we had switched to a different charset, go back to ASCII mode
+	 * This makes it possible to concatenate arbitrary valid strings
+	 * together and get a valid string */
 	if ((filter->status & 0xff00) != 0) {
 		CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
