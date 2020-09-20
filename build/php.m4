@@ -1626,7 +1626,7 @@ dnl
 AC_DEFUN([PHP_TEST_BUILD], [
   old_LIBS=$LIBS
   LIBS="$4 $LIBS"
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_LINK_IFELSE([AC_LANG_SOURCE([[
     $5
     char $1();
     int main() {
@@ -1639,8 +1639,6 @@ AC_DEFUN([PHP_TEST_BUILD], [
   ],[
     LIBS=$old_LIBS
     $3
-  ],[
-    LIBS=$old_LIBS
   ])
 ])
 
