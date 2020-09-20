@@ -359,7 +359,7 @@ array(11) {
   ["e"]=>
   string(1) "1"
 }
-mysqli_fetch_array(): Argument #2 ($fetchtype) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
-mysqli_fetch_array(): Argument #2 ($fetchtype) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
+mysqli_fetch_array(): Argument #2 ($mode) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
+mysqli_fetch_array(): Argument #2 ($mode) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
 mysqli_result object is already closed
 done!
