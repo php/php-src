@@ -861,6 +861,15 @@ echo "Done";
   string(3) "%:x"
 }
 
+--> https://example.com:0/: array(3) {
+  ["scheme"]=>
+  string(5) "https"
+  ["host"]=>
+  string(11) "example.com"
+  ["path"]=>
+  string(1) "/"
+}
+
 --> http:///blah.com: bool(false)
 
 --> http://:80: bool(false)
