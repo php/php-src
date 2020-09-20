@@ -1954,7 +1954,7 @@ PHP_FUNCTION(mysqli_real_query)
 }
 /* }}} */
 
-#if defined(PDO_USE_MYSQLND) || MYSQL_VERSION_ID < 50707 || defined(MARIADB_BASE_VERSION)
+#if defined(MYSQLI_USE_MYSQLND) || MYSQL_VERSION_ID < 50707 || defined(MARIADB_BASE_VERSION)
 # define mysql_real_escape_string_quote(mysql, to, from, length, quote) \
 	mysql_real_escape_string(mysql, to, from, length)
 #endif
