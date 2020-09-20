@@ -56,7 +56,7 @@ try {
 bool(true)
 bool(true)
 bool(true)
-mb_ord(): Argument #1 ($str) must not be empty
+mb_ord(): Argument #1 ($string) must not be empty
 mb_ord(): Argument #2 ($encoding) must be a valid encoding, "typo" given
 mb_ord(): Argument #2 ($encoding) must be a valid encoding, "pass" given
 mb_ord() does not support the "JIS" encoding
