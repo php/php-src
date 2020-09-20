@@ -28,4 +28,4 @@ try {
 int(%d)
 bool(true)
 bool(true)
-ftp_get_option(): Argument #2 ($option) must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS
+ftp_get_option(): Argument #2 ($option) must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS

@@ -49,4 +49,4 @@ ftp_set_option(): Argument #3 ($value) must be greater than 0 for the FTP_TIMEOU
 ftp_set_option(): Argument #3 ($value) must be of type int for the FTP_TIMEOUT_SEC option, string given
 ftp_set_option(): Argument #3 ($value) must be of type bool for the FTP_USEPASVADDRESS option, array given
 ftp_set_option(): Argument #3 ($value) must be of type bool for the FTP_AUTOSEEK option, string given
-ftp_set_option(): Argument #2 ($option) must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS
+ftp_set_option(): Argument #2 ($option) must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS

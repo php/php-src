@@ -639,7 +639,7 @@ PHP_FUNCTION(mysqli_query)
 	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT &&
 		MYSQLI_STORE_RESULT != (resultmode & ~(MYSQLI_ASYNC | MYSQLI_STORE_RESULT_COPY_DATA))
 	) {
-		zend_argument_value_error(ERROR_ARG_POS(3), "must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT"
+		zend_argument_value_error(ERROR_ARG_POS(3), "must be either MYSQLI_USE_RESULT or MYSQLI_STORE_RESULT"
 			#ifdef MYSQLI_USE_MYSQLND
 				" with MYSQLI_ASYNC as an optional bitmask flag"
 			#endif

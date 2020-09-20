@@ -1307,7 +1307,7 @@ PHP_FUNCTION(mb_http_input)
 			return;
 		default:
 			zend_argument_value_error(1,
-				"must be one of \"G\", \"P\", \"C\", \"S\", \"I\" or \"L\"");
+				"must be one of \"G\", \"P\", \"C\", \"S\", \"I\", or \"L\"");
 			RETURN_THROWS();
 		}
 	}
@@ -2596,8 +2596,7 @@ PHP_FUNCTION(mb_convert_case)
 	}
 
 	if (case_mode < 0 || case_mode > PHP_UNICODE_CASE_MODE_MAX) {
-		zend_argument_value_error(2, "must be one of MB_CASE_UPPER, MB_CASE_LOWER, MB_CASE_TITLE, MB_CASE_FOLD,"
-			" MB_CASE_UPPER_SIMPLE, MB_CASE_LOWER_SIMPLE, MB_CASE_TITLE_SIMPLE, or MB_CASE_FOLD_SIMPLE");
+		zend_argument_value_error(2, "must be one of the MB_CASE_* constants");
 		RETURN_THROWS();
 	}
 

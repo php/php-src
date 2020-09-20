@@ -56,13 +56,13 @@ unlink($file);
 --EXPECT--
 *** Testing error conditions ***
 --- Iteration 0 ---
-flock(): Argument #2 ($operation) must be either LOCK_SH, LOCK_EX, or LOCK_UN
+flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 --- Iteration 1 ---
-flock(): Argument #2 ($operation) must be either LOCK_SH, LOCK_EX, or LOCK_UN
+flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 --- Iteration 2 ---
-flock(): Argument #2 ($operation) must be either LOCK_SH, LOCK_EX, or LOCK_UN
+flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 --- Iteration 3 ---
-flock(): Argument #2 ($operation) must be either LOCK_SH, LOCK_EX, or LOCK_UN
+flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 --- Iteration 4 ---
 flock(): Argument #2 ($operation) must be of type int, array given
 --- Iteration 5 ---
