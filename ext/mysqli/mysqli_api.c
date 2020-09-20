@@ -2270,8 +2270,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 			case CURSOR_TYPE_SCROLLABLE:
 				break;
 			default:
-				zend_argument_value_error(ERROR_ARG_POS(3), "must be one of MYSQLI_CURSOR_TYPE_NO_CURSOR, "
-					"MYSQLI_CURSOR_TYPE_READ_ONLY, MYSQLI_CURSOR_TYPE_FOR_UPDATE, or MYSQLI_CURSOR_TYPE_SCROLLABLE "
+				zend_argument_value_error(ERROR_ARG_POS(3), "must be one of the MYSQLI_CURSOR_TYPE_* constants "
 					"for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE");
 				RETURN_THROWS();
 		}

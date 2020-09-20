@@ -42,4 +42,4 @@ try {
 gzencode(): Argument #2 ($level) must be between -1 and 9
 
 -- Testing with incorrect encoding_mode --
-gzencode(): Argument #3 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+gzencode(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

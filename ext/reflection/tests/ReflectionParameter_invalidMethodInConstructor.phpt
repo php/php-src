@@ -44,5 +44,5 @@ Class "A" does not exist
 Method C::b() does not exist
 Method C::b() does not exist
 Ok - ReflectionParameter::__construct() expects exactly 2 arguments, 1 given
-Ok - ReflectionParameter::__construct(): Argument #1 ($function) must be either a string, an array(class, method) or a callable object, int given
+Ok - ReflectionParameter::__construct(): Argument #1 ($function) must be a string, an array(class, method), or a callable object, int given
 Done.

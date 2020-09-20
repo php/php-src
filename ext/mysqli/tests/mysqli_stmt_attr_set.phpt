@@ -245,6 +245,6 @@ Error: mysqli_stmt object is not fully initialized
 mysqli_stmt_attr_set(): Argument #2 ($attr) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE
 mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
 bool(true)
-mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be one of MYSQLI_CURSOR_TYPE_NO_CURSOR, MYSQLI_CURSOR_TYPE_READ_ONLY, MYSQLI_CURSOR_TYPE_FOR_UPDATE, or MYSQLI_CURSOR_TYPE_SCROLLABLE for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE
+mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be one of the MYSQLI_CURSOR_TYPE_* constants for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE
 mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS
 done!

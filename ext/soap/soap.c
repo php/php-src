@@ -587,7 +587,7 @@ PHP_METHOD(SoapHeader, __construct)
 		if ((actor_long == SOAP_ACTOR_NEXT || actor_long == SOAP_ACTOR_NONE || actor_long == SOAP_ACTOR_UNLIMATERECEIVER)) {
 			add_property_long(this_ptr, "actor", actor_long);
 		} else {
-			zend_argument_value_error(5, "must be either SOAP_ACTOR_NEXT, SOAP_ACTOR_NONE or SOAP_ACTOR_UNLIMATERECEIVER");
+			zend_argument_value_error(5, "must be one of SOAP_ACTOR_NEXT, SOAP_ACTOR_NONE, or SOAP_ACTOR_UNLIMATERECEIVER");
 			RETURN_THROWS();
 		}
 	}

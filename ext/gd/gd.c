@@ -3521,7 +3521,7 @@ PHP_FUNCTION(imageflip)
 			break;
 
 		default:
-			zend_argument_value_error(2, "must be either IMG_FLIP_VERTICAL, IMG_FLIP_HORIZONTAL, or IMG_FLIP_BOTH");
+			zend_argument_value_error(2, "must be one of IMG_FLIP_VERTICAL, IMG_FLIP_HORIZONTAL, or IMG_FLIP_BOTH");
 			RETURN_THROWS();
 	}
 

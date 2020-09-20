@@ -333,7 +333,7 @@ PHPAPI void php_flock_common(php_stream *stream, zend_long operation,
 
 	act = operation & PHP_LOCK_UN;
 	if (act < 1 || act > 3) {
-		zend_argument_value_error(operation_arg_num, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
+		zend_argument_value_error(operation_arg_num, "must be one of LOCK_SH, LOCK_EX, or LOCK_UN");
 		RETURN_THROWS();
 	}
 

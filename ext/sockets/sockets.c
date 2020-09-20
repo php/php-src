@@ -1137,7 +1137,7 @@ PHP_FUNCTION(socket_getsockname)
 			break;
 
 		default:
-			zend_argument_value_error(1, "must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 }
@@ -1212,7 +1212,7 @@ PHP_FUNCTION(socket_getpeername)
 			break;
 
 		default:
-			zend_argument_value_error(1, "must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 }
@@ -1233,12 +1233,12 @@ PHP_FUNCTION(socket_create)
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_INET) {
-		zend_argument_value_error(1, "must be either AF_UNIX, AF_INET6, or AF_INET");
+		zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET6, or AF_INET");
 		RETURN_THROWS();
 	}
 
 	if (type > 10) {
-		zend_argument_value_error(2, "must be either SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
+		zend_argument_value_error(2, "must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
 			" SOCK_RAW, or SOCK_RDM");
 		RETURN_THROWS();
 	}
@@ -1337,7 +1337,7 @@ PHP_FUNCTION(socket_connect)
 		}
 
 		default:
-			zend_argument_value_error(1, "must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 		}
 
@@ -1431,7 +1431,7 @@ PHP_FUNCTION(socket_bind)
 			}
 #endif
 		default:
-			zend_argument_value_error(1, "must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -1625,7 +1625,7 @@ PHP_FUNCTION(socket_recvfrom)
 			break;
 #endif
 		default:
-			zend_argument_value_error(1, "must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -1705,7 +1705,7 @@ PHP_FUNCTION(socket_sendto)
 			break;
 #endif
 		default:
-			zend_argument_value_error(1, "must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -1987,12 +1987,12 @@ PHP_FUNCTION(socket_create_pair)
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_UNIX) {
-		zend_argument_value_error(1, "must be either AF_UNIX, AF_INET6 or AF_INET");
+		zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET6, or AF_INET");
 		RETURN_THROWS();
 	}
 
 	if (type > 10) {
-		zend_argument_value_error(2, "must be either SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
+		zend_argument_value_error(2, "must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
 			" SOCK_RAW, or SOCK_RDM");
 		RETURN_THROWS();
 	}
@@ -2402,7 +2402,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 		default:
 			close(php_sock->bsd_socket);
 			zval_ptr_dtor(return_value);
-			zend_argument_value_error(1, "must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -2463,7 +2463,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 				break;
 			}
 		default:
-			zend_argument_value_error(1, "socket type must be either AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "socket type must be one of AF_UNIX, AF_INET, or AF_INET6");
 			close(php_sock->bsd_socket);
 			zval_ptr_dtor(return_value);
 			RETURN_THROWS();

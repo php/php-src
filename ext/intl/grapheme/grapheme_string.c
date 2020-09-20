@@ -778,7 +778,7 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( extract_type < GRAPHEME_EXTRACT_TYPE_MIN || extract_type > GRAPHEME_EXTRACT_TYPE_MAX ) {
-		zend_argument_value_error(3, "must be either GRAPHEME_EXTR_COUNT, GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS");
+		zend_argument_value_error(3, "must be one of GRAPHEME_EXTR_COUNT, GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS");
 		RETURN_THROWS();
 	}
 

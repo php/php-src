@@ -2655,7 +2655,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						modtype != LDAP_MODIFY_BATCH_REPLACE &&
 						modtype != LDAP_MODIFY_BATCH_REMOVE_ALL
 					) {
-						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be one of LDAP_MODIFY_BATCH_ADD, LDAP_MODIFY_BATCH_REMOVE, LDAP_MODIFY_BATCH_REPLACE, or LDAP_MODIFY_BATCH_REMOVE_ALL", get_active_function_name());
+						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be one of the LDAP_MODIFY_BATCH_* constants", get_active_function_name());
 						RETURN_THROWS();
 					}
 

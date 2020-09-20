@@ -438,7 +438,7 @@ PHP_FUNCTION(phpdbg_color)
 		break;
 
 		default:
-			zend_argument_value_error(1, "must be either PHPDBG_COLOR_PROMPT, PHPDBG_COLOR_NOTICE, or PHPDBG_COLOR_ERROR");
+			zend_argument_value_error(1, "must be one of PHPDBG_COLOR_PROMPT, PHPDBG_COLOR_NOTICE, or PHPDBG_COLOR_ERROR");
 	}
 } /* }}} */
 
