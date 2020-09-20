@@ -119,9 +119,11 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 		stmt->state = MYSQLND_STMT_USE_OR_STORE_CALLED;
 	} else {
 		COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
+		COPY_CLIENT_ERROR(stmt->error_info, result->stored_data->error_info);
 		stmt->result->m.free_result_contents(stmt->result);
 		stmt->result = NULL;
 		stmt->state = MYSQLND_STMT_PREPARED;
+		DBG_RETURN(NULL);
 	}
 
 	DBG_RETURN(result);
@@ -150,7 +152,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 
 	if (stmt->cursor_exists) {
 		/* Silently convert buffered to unbuffered, for now */
-		DBG_RETURN(s->m->use_result(s));
+		// DBG_RETURN(s->m->use_result(s));
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
