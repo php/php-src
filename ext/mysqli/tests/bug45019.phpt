@@ -3,7 +3,6 @@ Bug #45019 (Segmentation fault with SELECT ? and UNION)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

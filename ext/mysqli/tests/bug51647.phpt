@@ -6,34 +6,37 @@ require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
 
+if (!defined('MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'))
+    die("skip Requires MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT");
+
 if ($IS_MYSQLND && !extension_loaded("openssl"))
-	die("skip PHP streams lack support for SSL. mysqli is compiled to use mysqlnd which uses PHP streams in turn.");
+    die("skip PHP streams lack support for SSL. mysqli is compiled to use mysqlnd which uses PHP streams in turn.");
 
 if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
-	die(sprintf("skip Connect failed, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip Connect failed, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (false === strpos($link->host_info, 'TCP/IP'))
-	die(sprintf("skip SSL only supported on TCP/IP"));
+    die(sprintf("skip SSL only supported on TCP/IP"));
 
 $row = NULL;
 if ($res = $link->query('SHOW VARIABLES LIKE "have_ssl"')) {
-	$row = $res->fetch_row();
+    $row = $res->fetch_row();
 } else {
-	if ($link->errno == 1064 && ($res = $link->query("SHOW VARIABLES"))) {
-		while ($row = $res->fetch_row())
-			if ($row[0] == 'have_ssl')
-				break;
-	} else {
-		die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
-	}
+    if ($link->errno == 1064 && ($res = $link->query("SHOW VARIABLES"))) {
+        while ($row = $res->fetch_row())
+            if ($row[0] == 'have_ssl')
+                break;
+    } else {
+        die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
+    }
 }
 
 
 if (empty($row))
-	die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
+    die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
 
 if (($row[1] == 'NO') || ($row[1] == 'DISABLED'))
-	die(sprintf("skip MySQL has no SSL support, [%d] %s", $link->errno, $link->error));
+    die(sprintf("skip MySQL has no SSL support, [%d] %s", $link->errno, $link->error));
 
 $link->close();
 ?>

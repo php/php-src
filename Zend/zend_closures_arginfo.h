@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 124654da4652ea828875f471a2ddcc4afae147ae */
+ * Stub hash: abbbe7b04323dc44b0675ad58700e996a6d7c43b */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -27,6 +27,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Closure, __construct);
 ZEND_METHOD(Closure, bind);
+ZEND_METHOD(Closure, bindTo);
 ZEND_METHOD(Closure, call);
 ZEND_METHOD(Closure, fromCallable);
 
@@ -34,7 +35,7 @@ ZEND_METHOD(Closure, fromCallable);
 static const zend_function_entry class_Closure_methods[] = {
 	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(Closure, bind, arginfo_class_Closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_MALIAS(Closure, bindTo, bind, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, bindTo, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END

@@ -25,6 +25,9 @@
 #	define PDO_MYSQL_PARAM_BIND MYSQLND_PARAM_BIND
 #else
 #	include <mysql.h>
+#if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
+typedef _Bool       my_bool;
+#endif
 #	define PDO_MYSQL_PARAM_BIND MYSQL_BIND
 #endif
 
@@ -120,7 +123,7 @@ typedef struct {
 #ifdef PDO_USE_MYSQLND
 	const size_t			*current_lengths;
 #else
-	zend_long				*current_lengths;
+	unsigned long			*current_lengths;
 #endif
 	pdo_mysql_error_info 	einfo;
 #ifdef PDO_USE_MYSQLND

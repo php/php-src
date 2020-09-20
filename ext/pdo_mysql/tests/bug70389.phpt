@@ -22,9 +22,9 @@ new PDO(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS, $flags);
 var_dump($flags);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
-  [1005]=>
+  [%d]=>
   bool(true)
   [1001]=>
   bool(true)

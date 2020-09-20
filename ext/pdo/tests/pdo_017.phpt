@@ -16,10 +16,10 @@ try {
 }
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-	require_once(__DIR__ . DIRECTORY_SEPARATOR . '../../pdo_mysql/tests/mysql_pdo_test.inc');
-	if (false === MySQLPDOTest::detect_transactional_mysql_engine($db)) {
-		die('skip your mysql configuration does not support working transactions');
-	}
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . '../../pdo_mysql/tests/mysql_pdo_test.inc');
+    if (false === MySQLPDOTest::detect_transactional_mysql_engine($db)) {
+        die('skip your mysql configuration does not support working transactions');
+    }
 }
 ?>
 --FILE--

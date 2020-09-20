@@ -3,7 +3,7 @@ Bug #61548 (content-type must appear at the end of headers)
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --FILE--
 <?php
 require 'server.inc';
@@ -23,9 +23,9 @@ function do_test($header) {
         "data://text/plain,HTTP/1.1 201\r\nLocation: /foo\r\n\r\n",
         "data://text/plain,HTTP/1.1 200\r\nConnection: close\r\n\r\n",
     ];
-    $pid = http_server('tcp://127.0.0.1:12342', $responses, $output);
+    ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
-    $fd = fopen('http://127.0.0.1:12342/', 'rb', false, $ctx);
+    $fd = fopen($uri, 'rb', false, $ctx);
     fseek($output, 0, SEEK_SET);
     echo stream_get_contents($output);
 
@@ -41,37 +41,37 @@ do_test("First:1\nContent-type:text/plain\nSecond:2\nThird:");
 
 ?>
 Done
---EXPECT--
+--EXPECTF--
 POST / HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
 Content-type: text/plain
 
 GET /foo HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
 
 
 POST / HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
 Content-type: text/plain
 
 GET /foo HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
 
 
 POST / HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
@@ -79,40 +79,40 @@ Content-type: text/plain
 Third:
 
 GET /foo HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
 Third:
 
 POST / HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Content-type:text/plain
 Second:2
 
 GET /foo HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
 
 POST / HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Content-type:text/plain
 Second:2
 
 GET /foo HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2
 
 POST / HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Content-type:text/plain
@@ -120,7 +120,7 @@ Second:2
 Third:
 
 GET /foo HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 First:1
 Second:2

@@ -2,15 +2,14 @@
 mysqli_stmt_get_result - geometry / spatial types
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
 
-	if (!function_exists('mysqli_stmt_get_result'))
-		die("skip mysqli_stmt_get_result() not available");
+    if (!function_exists('mysqli_stmt_get_result'))
+        die("skip mysqli_stmt_get_result() not available");
 
-	if (!defined("MYSQLI_TYPE_GEOMETRY"))
-		die("skip MYSQLI_TYPE_GEOMETRY not defined");
+    if (!defined("MYSQLI_TYPE_GEOMETRY"))
+        die("skip MYSQLI_TYPE_GEOMETRY not defined");
 ?>
 --FILE--
 <?php
@@ -138,7 +137,7 @@ mysqli_stmt_get_result - geometry / spatial types
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

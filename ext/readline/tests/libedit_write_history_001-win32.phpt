@@ -4,7 +4,7 @@ readline_write_history(): Basic test
 <?php if (!extension_loaded("readline") || !function_exists('readline_add_history')) die("skip");
 if (READLINE_LIB != "libedit") die("skip libedit only");
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
-	die('skip windows only test');
+    die('skip windows only test');
 }
 ?>
 --FILE--

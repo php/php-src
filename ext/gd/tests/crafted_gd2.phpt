@@ -2,9 +2,9 @@
 Test max colors for a gd image.
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available\n");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available\n");
+    }
 ?>
 --FILE--
 <?php

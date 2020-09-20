@@ -5,7 +5,7 @@ output_handler=
 internal_encoding=EUC-JP
 --SKIPIF--
 <?php
-	extension_loaded("mbstring") or die("skip mbstring not available\n");
+    extension_loaded("mbstring") or die("skip mbstring not available\n");
 --FILE--
 <?php
     mb_internal_encoding('EUC-JP');

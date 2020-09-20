@@ -3,7 +3,7 @@ __isset first parameter should be a string when typed
 --FILE--
 <?php
 class Foo {
-	function __isset(\stdClass $name) {}
+    function __isset(\stdClass $name) {}
 }
 ?>
 --EXPECTF--

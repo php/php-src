@@ -3,7 +3,7 @@
 --SKIPIF--
 <?php
 if (!extension_loaded("gettext")) {
-	die("skip\n");
+    die("skip\n");
 }
 --FILE--
 <?php

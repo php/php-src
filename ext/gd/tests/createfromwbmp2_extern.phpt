@@ -2,8 +2,8 @@
 imagecreatefromwbmp with invalid wbmp
 --SKIPIF--
 <?php
-	if (!function_exists('imagecreatefromwbmp')) die("skip gd extension not available\n");
-	if (GD_BUNDLED) die("skip requires extern GD\n");
+    if (!function_exists('imagecreatefromwbmp')) die("skip gd extension not available\n");
+    if (GD_BUNDLED) die("skip requires extern GD\n");
 ?>
 --FILE--
 <?php

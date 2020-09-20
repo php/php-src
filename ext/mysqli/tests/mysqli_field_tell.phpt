@@ -3,7 +3,6 @@ mysqli_field_tell()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -21,7 +20,11 @@ require_once('skipifconnectfailure.inc');
     var_dump(mysqli_fetch_field($res));
     var_dump(mysqli_field_tell($res));
 
-    var_dump(mysqli_field_seek($res, 2));
+    try {
+        var_dump(mysqli_field_seek($res, 2));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     var_dump(mysqli_field_tell($res));
 
     try {
@@ -50,7 +53,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 int(0)
@@ -85,9 +88,7 @@ object(stdClass)#%d (13) {
 }
 bool(false)
 int(1)
-
-Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
-bool(false)
+mysqli_field_seek(): Argument #2 ($field_nr) must be less than the number of fields for this result set
 int(1)
 mysqli_field_seek(): Argument #2 ($field_nr) must be greater than or equal to 0
 int(1)

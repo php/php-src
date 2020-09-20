@@ -3,7 +3,7 @@ Bug #42434 (ImageLine w/ antialias = 1px shorter)
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) {
-	die('skip gd extension not available');
+    die('skip gd extension not available');
 }
 ?>
 --FILE--

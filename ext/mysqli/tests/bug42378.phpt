@@ -3,7 +3,6 @@ Bug #42378 (bind_result memory exhaustion, SELECT column, FORMAT(...) AS _format
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

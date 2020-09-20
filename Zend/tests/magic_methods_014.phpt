@@ -3,7 +3,7 @@ __unset first parameter should be a string when typed
 --FILE--
 <?php
 class Foo {
-	function __unset(array $name) {}
+    function __unset(array $name) {}
 }
 ?>
 --EXPECTF--

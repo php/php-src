@@ -8,7 +8,7 @@ define('V1', strtoupper(php_sapi_name()));
 #[A1([V1 => V1])]
 class C1
 {
-	public const BAR = 'bar';
+    public const BAR = 'bar';
 }
 
 $ref = new \ReflectionClass(C1::class);
@@ -38,7 +38,7 @@ echo "\n";
 #[A1(self::FOO, C1::BAR)]
 class C3
 {
-	private const FOO = 'foo';
+    private const FOO = 'foo';
 }
 
 $ref = new \ReflectionClass(C3::class);
@@ -62,7 +62,7 @@ echo "\n";
 #[Attribute]
 class C5
 {
-	public function __construct() { }
+    public function __construct() { }
 }
 
 $ref = new \ReflectionFunction(#[C5(MissingClass::SOME_CONST)] function () { });
@@ -70,15 +70,15 @@ $attr = $ref->getAttributes();
 var_dump(count($attr));
 
 try {
-	$attr[0]->getArguments();
+    $attr[0]->getArguments();
 } catch (\Error $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 try {
-	$attr[0]->newInstance();
+    $attr[0]->newInstance();
 } catch (\Error $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>

@@ -224,7 +224,7 @@ PHP_FUNCTION(apache_note)
 	size_t note_name_len, note_val_len;
 	char *old_note_val=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 

@@ -3,7 +3,7 @@ IntlRuleBasedBreakIterator::__construct: basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.default_locale", "pt_PT");

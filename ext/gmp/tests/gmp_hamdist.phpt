@@ -42,7 +42,7 @@ int(-1)
 int(43)
 int(0)
 int(26)
-gmp_hamdist(): Argument #2 ($b) must be of type GMP|string|int|bool, array given
-gmp_hamdist(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
-gmp_hamdist(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_hamdist(): Argument #2 ($b) must be of type GMP|string|int, array given
+gmp_hamdist(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_hamdist(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

@@ -3,12 +3,11 @@ mysqli_change_user() - LAST_INSERT_ID() - http://bugs.mysql.com/bug.php?id=45184
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 if (!$IS_MYSQLND) {
-	die("skip Might hit known and open bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184");
+    die("skip Might hit known and open bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184");
 }
 ?>
 --FILE--
@@ -59,7 +58,7 @@ if (!$IS_MYSQLND) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

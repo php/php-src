@@ -4,9 +4,9 @@ PDO MySQL specific class constants
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
-	/* Need connection to detect library version */
-	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	MySQLPDOTest::skip();
+    /* Need connection to detect library version */
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    MySQLPDOTest::skip();
 }
 ?>
 --FILE--
@@ -27,7 +27,6 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
         "MYSQL_ATTR_SSL_CIPHER"						=> true,
         "MYSQL_ATTR_COMPRESS"						=> true,
         "MYSQL_ATTR_MULTI_STATEMENTS"					=> true,
-        "MYSQL_ATTR_SSL_VERIFY_SERVER_CERT"				=> true,
     );
 
     if (!MySQLPDOTest::isPDOMySQLnd()) {
@@ -37,6 +36,7 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     }
 
     if (extension_loaded('mysqlnd')) {
+        $expected['MYSQL_ATTR_SSL_VERIFY_SERVER_CERT']  = true;
         $expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
     } else if (extension_loaded('mysqli')) {
         if (mysqli_get_client_version() > 50605) {

@@ -55,9 +55,7 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 	}
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_code_execute_data(execute_data, op_array, return_value);
-	if (ZEND_OBSERVER_ENABLED) {
-		zend_observer_maybe_fcall_call_begin(execute_data);
-	}
+	ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 	zend_{%EXECUTOR_NAME%}_ex(execute_data);
 	/* Observer end handlers are called from ZEND_RETURN */
 	zend_vm_stack_free_call_frame(execute_data);

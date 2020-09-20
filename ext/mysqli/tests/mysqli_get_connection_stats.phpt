@@ -6,10 +6,9 @@ mysqlnd.collect_memory_statistics="1"
 --SKIPIF--
 <?PHP
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_connection_stats')) {
-	die("skip only available with mysqlnd");
+    die("skip only available with mysqlnd");
 }
 ?>
 --FILE--
@@ -74,7 +73,7 @@ if (!function_exists('mysqli_get_connection_stats')) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

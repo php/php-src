@@ -9,7 +9,7 @@ require_once('skipifconnectfailure.inc');
 <?php
     require_once("connect.inc");
 
-    $mysqli = new mysqli("$host:$port", $user, $passwd, $db);
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
     abstract class test {
         public $a;
     }

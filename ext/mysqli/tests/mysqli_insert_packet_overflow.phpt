@@ -6,14 +6,14 @@ require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die(sprintf("SKIP [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("SKIP [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
 
 $max_len = pow(2, 24);
 if (!$res = mysqli_query($link, "SHOW GLOBAL VARIABLES LIKE 'max_allowed_packet'"))
-	die(sprintf("SKIP [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
+    die(sprintf("SKIP [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
 
 if (!mysqli_query($link, "SET NAMES 'latin1'"))
-	die(sprintf("SKIP [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
+    die(sprintf("SKIP [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
 
 mysqli_close($link);
 ?>

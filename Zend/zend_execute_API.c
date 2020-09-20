@@ -891,9 +891,7 @@ cleanup_args:
 		uint32_t orig_jit_trace_num = EG(jit_trace_num);
 
 		zend_init_func_execute_data(call, &func->op_array, fci->retval);
-		if (ZEND_OBSERVER_ENABLED) {
-			zend_observer_maybe_fcall_call_begin(call);
-		}
+		ZEND_OBSERVER_FCALL_BEGIN(call);
 		zend_execute_ex(call);
 		EG(jit_trace_num) = orig_jit_trace_num;
 		EG(opline_before_exception) = current_opline_before_exception;

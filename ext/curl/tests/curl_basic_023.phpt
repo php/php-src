@@ -4,7 +4,7 @@ Test curl_getinfo() function with CURLINFO_HTTP_VERSION parameter
 <?php if (!extension_loaded("curl")) print "skip";
 $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x073200) {
-	    exit("skip: test works only with curl >= 7.50.0");
+        exit("skip: test works only with curl >= 7.50.0");
 }
 ?>
 --FILE--

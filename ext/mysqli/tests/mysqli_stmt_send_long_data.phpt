@@ -3,7 +3,6 @@ mysqli_stmt_send_long_data()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -106,7 +105,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli_stmt_send_long_data(): Argument #2 ($param_nr) must be greater than or equal to 0

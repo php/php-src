@@ -4,12 +4,12 @@ Test imagecolorstotal() function : basic functionality
 Felix De Vliegher <felix.devliegher@gmail.com>
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-	if (!function_exists("imagecolorstotal")) {
-		die("skip imagecolorstotal() not available.");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available.");
+    }
+    if (!function_exists("imagecolorstotal")) {
+        die("skip imagecolorstotal() not available.");
+    }
 ?>
 --FILE--
 <?php

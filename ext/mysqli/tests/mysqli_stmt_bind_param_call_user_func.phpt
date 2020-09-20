@@ -3,7 +3,6 @@ mysqli_stmt_bind_param used with call_user_func_array() (see also bug #43568)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -326,7 +325,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 Regular, procedural, using variables

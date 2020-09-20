@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 324b7ae3eaab4777117c1c6963bc841088e6b998 */
+ * Stub hash: 943baf02eee2f720a45106e379534b3d4adc3072 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timeZone, "null")

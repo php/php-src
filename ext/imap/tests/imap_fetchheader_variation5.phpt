@@ -17,9 +17,7 @@ require_once(__DIR__.'/imap_include.inc');
 
 $stream_id = setup_test_mailbox('', 3, $mailbox, 'notSimple'); // set up temp mailbox with 3 msgs
 
-$sequences = array (0,     4, // out of range
-                    '1,3', '1:3', // message sequences instead of numbers
-                    );
+$sequences = [0, /* out of range */ 4, 1];
 
 foreach($sequences as $msg_no) {
     echo "\n-- \$msg_no is $msg_no --\n";
@@ -53,24 +51,11 @@ Warning: imap_fetchheader(): Bad message number in %s on line %d
 bool(false)
 
 
--- $msg_no is 1,3 --
-
-Notice: A non well formed numeric value encountered in %s on line %d
+-- $msg_no is 1 --
 string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
-To: %s
+To: webmaster@something.com
 MIME-Version: 1.0
-Content-Type: MULTIPART/mixed; BOUNDARY="%s"
-
-"
-
--- $msg_no is 1:3 --
-
-Notice: A non well formed numeric value encountered in %s on line %d
-string(%d) "From: foo@anywhere.com
-Subject: Test msg 1
-To: %s
-MIME-Version: 1.0
-Content-Type: MULTIPART/mixed; BOUNDARY="%s"
+Content-Type: MULTIPART/mixed; BOUNDARY="%s=:%d"
 
 "

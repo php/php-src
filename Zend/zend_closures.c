@@ -192,18 +192,10 @@ ZEND_METHOD(Closure, call)
 }
 /* }}} */
 
-/* {{{ Create a closure from another one and bind to another object and scope */
-ZEND_METHOD(Closure, bind)
+static void do_closure_bind(zval *return_value, zval *zclosure, zval *newthis, zval *scope_arg)
 {
-	zval *newthis, *zclosure, *scope_arg = NULL;
-	zend_closure *closure;
 	zend_class_entry *ce, *called_scope;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	closure = (zend_closure *)Z_OBJ_P(zclosure);
+	zend_closure *closure = (zend_closure *) Z_OBJ_P(zclosure);
 
 	if (scope_arg != NULL) { /* scope argument was given */
 		if (Z_TYPE_P(scope_arg) == IS_OBJECT) {
@@ -238,7 +230,30 @@ ZEND_METHOD(Closure, bind)
 
 	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
 }
-/* }}} */
+
+/* {{{ Create a closure from another one and bind to another object and scope */
+ZEND_METHOD(Closure, bind)
+{
+	zval *newthis, *zclosure, *scope_arg = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	do_closure_bind(return_value, zclosure, newthis, scope_arg);
+}
+
+/* {{{ Create a closure from another one and bind to another object and scope */
+ZEND_METHOD(Closure, bindTo)
+{
+	zval *newthis, *scope_arg = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!|z", &newthis, &scope_arg) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	do_closure_bind(return_value, getThis(), newthis, scope_arg);
+}
 
 static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	zend_fcall_info fci;

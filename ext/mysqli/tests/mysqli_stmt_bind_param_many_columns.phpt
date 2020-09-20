@@ -3,7 +3,6 @@ mysqli_stmt_bind_param() - Binding with very high number of columns
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

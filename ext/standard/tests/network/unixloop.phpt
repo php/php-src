@@ -2,8 +2,8 @@
 Streams Based Unix Domain Loopback test
 --SKIPIF--
 <?php
-	if (array_search("unix",stream_get_transports()) === false)
-		die('SKIP No support for UNIX domain sockets.');
+    if (array_search("unix",stream_get_transports()) === false)
+        die('SKIP No support for UNIX domain sockets.');
 ?>
 --FILE--
 <?php

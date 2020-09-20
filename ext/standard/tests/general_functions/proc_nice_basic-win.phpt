@@ -5,11 +5,11 @@ proc_nice() basic behaviour
 /* No function_exists() check, proc_nice() is always available on Windows */
 
 if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
-	die('skip: Only for Windows');
+    die('skip: Only for Windows');
 }
 
 if (getenv('SKIP_SLOW_TESTS')) {
-	doe('skip: Slow test');
+    doe('skip: Slow test');
 }
 ?>
 --FILE--

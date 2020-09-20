@@ -399,9 +399,11 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_find_func_helper);
 	REGISTER_HELPER(zend_jit_find_ns_func_helper);
 	REGISTER_HELPER(zend_jit_find_method_helper);
+	REGISTER_HELPER(zend_jit_find_method_tmp_helper);
 	REGISTER_HELPER(zend_jit_push_static_metod_call_frame);
 	REGISTER_HELPER(zend_jit_push_static_metod_call_frame_tmp);
 	REGISTER_HELPER(zend_jit_invalid_method_call);
+	REGISTER_HELPER(zend_jit_invalid_method_call_tmp);
 	REGISTER_HELPER(zend_jit_unref_helper);
 	REGISTER_HELPER(zend_jit_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_int_extend_stack_helper);

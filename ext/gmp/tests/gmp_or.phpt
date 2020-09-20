@@ -49,7 +49,7 @@ string(3) "-19"
 gmp_or(): Argument #1 ($a) is not an integer string
 string(15) "987657876576252"
 string(21) "987658441719689394144"
-gmp_or(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
-gmp_or(): Argument #2 ($b) must be of type GMP|string|int|bool, array given
-gmp_or(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_or(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_or(): Argument #2 ($b) must be of type GMP|string|int, array given
+gmp_or(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

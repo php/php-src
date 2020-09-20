@@ -3,7 +3,6 @@ Bug #33263 (mysqli_real_connect in __construct)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

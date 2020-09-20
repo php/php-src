@@ -3,7 +3,7 @@ Test gzdeflate() function : variation
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--

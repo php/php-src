@@ -2,13 +2,13 @@
 xpm --> gd1/gd2 conversion test
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available.");
+    }
 
-	if (!function_exists("imagecreatefromxpm")) {
-		die("skip xpm read support unavailable");
-	}
+    if (!function_exists("imagecreatefromxpm")) {
+        die("skip xpm read support unavailable");
+    }
 ?>
 --FILE--
 <?php

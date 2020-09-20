@@ -152,7 +152,6 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_EXT_STMT:
 		case ZEND_EXT_FCALL_BEGIN:
 		case ZEND_EXT_FCALL_END:
-		case ZEND_EXT_NOP:
 		case ZEND_TICKS:
 		case ZEND_YIELD:
 		case ZEND_YIELD_FROM:

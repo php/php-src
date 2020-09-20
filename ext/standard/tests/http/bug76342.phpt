@@ -3,7 +3,7 @@ Bug #76342 (file_get_contents waits twice specified timeout)
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --FILE--
 <?php
 require 'server.inc';
@@ -17,10 +17,10 @@ $options = [
 
 $ctx = stream_context_create($options);
 
-$pid = http_server_sleep('tcp://127.0.0.1:12342');
+['pid' => $pid, 'uri' => $uri] = http_server_sleep();
 
 $start = microtime(true);
-file_get_contents('http://127.0.0.1:12342/', false, $ctx);
+file_get_contents($uri, false, $ctx);
 $diff = microtime(true) - $start;
 if ($diff >= 2 * $timeout) {
     echo "FAIL: $diff\n";
@@ -31,5 +31,5 @@ http_server_kill($pid);
 ?>
 DONE
 --EXPECTF--
-Warning: file_get_contents(http://127.0.0.1:12342/): Failed to open stream: HTTP request failed! in %s on line %d
+Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP request failed! in %s on line %d
 DONE

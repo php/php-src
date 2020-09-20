@@ -6,8 +6,8 @@ require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 if (!$IS_MYSQLND)
-	/* The libmysql read_timeout limit default is 365 * 24 * 3600 seconds. It cannot be altered through PHP API calls */
-	die("skip mysqlnd only test");
+    /* The libmysql read_timeout limit default is 365 * 24 * 3600 seconds. It cannot be altered through PHP API calls */
+    die("skip mysqlnd only test");
 ?>
 --INI--
 default_socket_timeout=60

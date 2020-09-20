@@ -3,15 +3,15 @@ Magic Methods inheritance rules on a non-trivial class hierarchy
 --FILE--
 <?php
 class A {
-	public function __get(string|array $name): mixed {} // valid
+    public function __get(string|array $name): mixed {} // valid
 }
 
 class B extends A {
-	public function __get(string|array|object $name): int {} // also valid
+    public function __get(string|array|object $name): int {} // also valid
 }
 
 class C extends B {
-	public function __get(string|array|object $name): int|float {} // this is invalid
+    public function __get(string|array|object $name): int|float {} // this is invalid
 }
 ?>
 --EXPECTF--

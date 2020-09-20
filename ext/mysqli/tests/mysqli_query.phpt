@@ -3,7 +3,6 @@ mysqli_query()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -108,14 +107,14 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
-	printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 @mysqli_query($link, "DROP FUNCTION IF EXISTS f");
 @mysqli_query($link, 'DROP PROCEDURE IF EXISTS p');
 
 mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 mysqli_query(): Argument #2 ($query) cannot be empty
 array(1) {
   ["valid"]=>
@@ -126,6 +125,6 @@ array(1) {
   string(1) "a"
 }
 string(1) "a"
-mysqli_query(): Argument #3 ($result_mode) must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT with MYSQLI_ASYNC as an optional bitmask flag
+mysqli_query(): Argument #3 ($result_mode) must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT%S
 mysqli object is already closed
 done!

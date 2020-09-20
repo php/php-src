@@ -2,7 +2,7 @@
 SimpleXML: echo/print
 --SKIPIF--
 <?php
-	if (!extension_loaded('simplexml')) print 'skip';
+    if (!extension_loaded('simplexml')) print 'skip';
 ?>
 --FILE--
 <?php

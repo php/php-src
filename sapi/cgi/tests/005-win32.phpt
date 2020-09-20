@@ -4,7 +4,7 @@ using invalid combinations of cmdline options
 <?php
 
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-	die ("skip Windows only");
+    die ("skip Windows only");
 }
 
 include "skipif.inc";

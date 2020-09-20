@@ -3,7 +3,7 @@ __isset can only declare a boolean return type
 --FILE--
 <?php
 class Foo {
-	function __isset($name) : \stdClass|bool {}
+    function __isset($name) : \stdClass|bool {}
 }
 ?>
 --EXPECTF--

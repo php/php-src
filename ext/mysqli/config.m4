@@ -47,14 +47,8 @@ if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
 elif test "$PHP_MYSQLI" != "no"; then
 
   MYSQL_CONFIG=$PHP_MYSQLI
-
   MYSQL_LIB_NAME='mysqlclient'
-  if test "$enable_zts" = "yes"; then
-    MYSQL_LIB_CFG='--libs_r'
-    MYSQL_LIB_NAME='mysqlclient_r'
-  else
-    MYSQL_LIB_CFG='--libs'
-  fi
+  MYSQL_LIB_CFG='--libs'
 
   if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
     MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
@@ -78,16 +72,6 @@ elif test "$PHP_MYSQLI" != "no"; then
     ],[$MYSQLI_LIBLINE])
   ],[
     AC_MSG_ERROR([wrong mysql library version or lib not found. Check config.log for more information.])
-  ],[
-    $MYSQLI_LIBLINE
-  ])
-  dnl
-  dnl Check the library for mysql_stmt_next_result
-  dnl
-  PHP_CHECK_LIBRARY($MYSQL_LIB_NAME, mysql_stmt_next_result,
-  [
-    AC_DEFINE(HAVE_STMT_NEXT_RESULT,             1, [ ])
-  ],[
   ],[
     $MYSQLI_LIBLINE
   ])

@@ -3,12 +3,12 @@ sendmsg()/recvmsg(): test ability to receive multiple messages (WIN32)
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets'))
-	die('skip sockets extension not available.');
+    die('skip sockets extension not available.');
 
 require 'ipv6_skipif.inc';
 
 if (!defined('IPPROTO_IPV6'))
-	die('skip IPv6 not available.');
+    die('skip IPv6 not available.');
 /* Windows supports IPV6_RECVTCLASS and is able to receive the tclass via
  * WSARecvMsg (though only the top 6 bits seem to reported), but WSASendMsg
  * does not accept IPV6_TCLASS messages. We still test that sendmsg() works

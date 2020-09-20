@@ -9,15 +9,15 @@ $db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
 $matches = array();
 if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-	die(sprintf("skip Cannot determine MySQL Server version\n"));
+    die(sprintf("skip Cannot determine MySQL Server version\n"));
 
 $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 50000)
-	die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
-		$matches[1], $matches[2], $matches[3], $version));
+    die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
+        $matches[1], $matches[2], $matches[3], $version));
 
 if (!MySQLPDOTest::isPDOMySQLnd())
-	die("skip This will not work with libmysql");
+    die("skip This will not work with libmysql");
 ?>
 --FILE--
 <?php

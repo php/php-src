@@ -8,7 +8,7 @@ phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();
 $ov = preg_match('/Compile-time ORACLE_HOME/', $phpinfo);
 if ($ov !== 1) {
-	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
+    die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
 preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
 if (!isset($matches[0]) || !($matches[1] == 10 && $matches[2] == 2)) {

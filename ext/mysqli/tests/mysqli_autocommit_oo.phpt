@@ -2,19 +2,18 @@
 mysqli->autocommit()
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
-	require_once('connect.inc');
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
+    require_once('connect.inc');
 
-	if (!$link = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
-		printf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-			$host, $user, $db, $port, $socket);
-		exit(1);
-	}
+    if (!$link = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
+        printf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
-	if (!have_innodb($link))
-		die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+    if (!have_innodb($link))
+        die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
@@ -134,7 +133,7 @@ mysqli->autocommit()
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 my_mysqli object is already closed

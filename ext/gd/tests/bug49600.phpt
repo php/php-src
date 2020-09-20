@@ -2,9 +2,9 @@
 Bug #49600 (imageTTFText text shifted right)
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imagettftext')) die('skip imagettftext() not available');
-	if(!function_exists('imagettfbbox')) die('skip imagettfbbox() not available');
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!function_exists('imagettftext')) die('skip imagettftext() not available');
+    if(!function_exists('imagettfbbox')) die('skip imagettfbbox() not available');
 ?>
 --FILE--
 <?php

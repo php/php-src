@@ -19,17 +19,17 @@ $pass = 'testpass';
 
 // Assume that if we can't create or drop a user, this test needs to be skipped
 try {
-	$db->exec("DROP USER IF EXISTS $user");
-	$db->exec("CREATE USER $user WITH PASSWORD '$pass'");
+    $db->exec("DROP USER IF EXISTS $user");
+    $db->exec("CREATE USER $user WITH PASSWORD '$pass'");
 } catch (PDOException $e) {
-	die("skip You need CREATEUSER permissions to run the test");
+    die("skip You need CREATEUSER permissions to run the test");
 }
 
 // Peer authentication might prevent the test from properly running
 try {
-	$testConn = new PDO($dsn, $user, $pass);
+    $testConn = new PDO($dsn, $user, $pass);
 } catch (PDOException $e) {
-	echo "skip ".$e->getMessage();
+    echo "skip ".$e->getMessage();
 }
 
 $db->exec("DROP USER $user");

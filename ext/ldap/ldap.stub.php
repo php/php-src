@@ -193,7 +193,7 @@ function ldap_compare($link_identifier, string $dn, string $attribute, string $v
  * @param resource $link
  * @deprecated since 7.4
  */
-function ldap_control_paged_result($link, int $pagesize, bool $iscritical = false, string $cookie = ''): bool {}
+function ldap_control_paged_result($link, int $pagesize, bool $iscritical = false, string $cookie = ""): bool {}
 
 /**
  * @param resource $link
@@ -281,7 +281,7 @@ function ldap_set_rebind_proc($link, ?callable $callback): bool {}
 function ldap_start_tls($link_identifier): bool {}
 #endif
 
-function ldap_escape(string $value, string $ignore = '', int $flags = 0): string {}
+function ldap_escape(string $value, string $ignore = "", int $flags = 0): string {}
 
 #ifdef STR_TRANSLATION
 function ldap_t61_to_8859(string $value): string|false {}
@@ -305,7 +305,7 @@ function ldap_exop($link, string $reqoid, ?string $reqdata = null, ?array $serve
  * @param resource $link
  * @param array $serverctrls
  */
-function ldap_exop_passwd($link, string $user = '', string $oldpw = '', string $newpw = '', &$serverctrls = null): string|bool {}
+function ldap_exop_passwd($link, string $user = "", string $oldpw = "", string $newpw = "", &$serverctrls = null): string|bool {}
 #endif
 
 

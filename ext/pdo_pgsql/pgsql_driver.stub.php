@@ -5,16 +5,16 @@
 // These are extension methods for PDO. This is not a real class.
 class PDO_PGSql_Ext {
     /** @return bool */
-    public function pgsqlCopyFromArray(string $table_name, array $rows, string $delimiter = "\t", string $null_as = "\\\\N", string $fields = UNKNOWN) {}
+    public function pgsqlCopyFromArray(string $table_name, array $rows, string $delimiter = "\t", string $null_as = "\\\\N", ?string $fields = null) {}
 
     /** @return bool */
-    public function pgsqlCopyFromFile(string $table_name, string $filename, string $delimiter = "\t", string $null_as = "\\\\N", string $fields = UNKNOWN) {}
+    public function pgsqlCopyFromFile(string $table_name, string $filename, string $delimiter = "\t", string $null_as = "\\\\N", ?string $fields = null) {}
 
     /** @return array|false */
-    public function pgsqlCopyToArray(string $table_name, string $delimiter = "\t", string $null_as = "\\\\N", string $fields = UNKNOWN) {}
+    public function pgsqlCopyToArray(string $table_name, string $delimiter = "\t", string $null_as = "\\\\N", ?string $fields = null) {}
 
     /** @return bool */
-    public function pgsqlCopyToFile(string $table_name, string $filename, string $delimiter = "\t", string $null_as = "\\\\N", string $fields = UNKNOWN) {}
+    public function pgsqlCopyToFile(string $table_name, string $filename, string $delimiter = "\t", string $null_as = "\\\\N", ?string $fields = null) {}
 
     /** @return string|false */
     public function pgsqlLOBCreate() {}

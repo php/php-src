@@ -3,7 +3,6 @@ mysqli_use_result()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -53,9 +52,9 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
-mysqli_data_seek() cannot be used with MYSQLI_USE_RESULT
+mysqli_data_seek() cannot be used in MYSQLI_USE_RESULT mode
 mysqli object is already closed
 done!

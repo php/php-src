@@ -2,9 +2,9 @@
 Bug #38112 (GIF Invalid Code size ).
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available\n");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available\n");
+    }
 ?>
 --FILE--
 <?php

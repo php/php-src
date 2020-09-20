@@ -7,7 +7,7 @@ if (!function_exists("inet_pton")) die("skip no inet_pton()");
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
-	die("skip no IPv6 support");
+    die("skip no IPv6 support");
 }
 if (stristr(PHP_OS, "darwin") !== false) die("skip MacOS has broken inet_*() funcs");
 ?>

@@ -6,7 +6,7 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())
-	die("skip PDO::MYSQL_ATTR_MAX_BUFFER_SIZE not supported with mysqlnd");
+    die("skip PDO::MYSQL_ATTR_MAX_BUFFER_SIZE not supported with mysqlnd");
 ?>
 --FILE--
 <?php

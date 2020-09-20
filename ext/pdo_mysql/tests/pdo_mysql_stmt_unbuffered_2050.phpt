@@ -7,7 +7,7 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 if (MYSQLPDOTest::isPDOMySQLnd())
-	die("skip libmysql only test");
+    die("skip libmysql only test");
 ?>
 --FILE--
 <?php

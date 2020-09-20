@@ -6936,11 +6936,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	zend_oparray_context_begin(&orig_oparray_context);
 
-	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) {
-		zend_op *opline_ext = zend_emit_op(NULL, ZEND_EXT_NOP, NULL, NULL);
-		opline_ext->lineno = decl->start_lineno;
-	}
-
 	{
 		/* Push a separator to the loop variable stack */
 		zend_loop_var dummy_var;

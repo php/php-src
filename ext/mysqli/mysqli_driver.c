@@ -81,6 +81,7 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 /* {{{ property driver_embedded_read */
 static int driver_embedded_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
+	/* No longer supported */
 	ZVAL_FALSE(retval);
 
 	return SUCCESS;

@@ -55,17 +55,17 @@ echo "\n";
 $ref = new \ReflectionFunction(function () { });
 
 try {
-	$ref->getAttributes(A1::class, 3);
+    $ref->getAttributes(A1::class, 3);
 } catch (\Error $e) {
-	var_dump('ERROR 1', $e->getMessage());
+    var_dump('ERROR 1', $e->getMessage());
 }
 
 $ref = new \ReflectionFunction(function () { });
 
 try {
-	$ref->getAttributes(SomeMissingClass::class, \ReflectionAttribute::IS_INSTANCEOF);
+    $ref->getAttributes(SomeMissingClass::class, \ReflectionAttribute::IS_INSTANCEOF);
 } catch (\Error $e) {
-	var_dump('ERROR 2', $e->getMessage());
+    var_dump('ERROR 2', $e->getMessage());
 }
 
 ?>

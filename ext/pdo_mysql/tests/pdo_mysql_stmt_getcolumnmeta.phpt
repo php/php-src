@@ -11,7 +11,7 @@ $stmt = $db->query('SELECT VERSION() as _version');
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 $version = ((int)substr($row['_version'], 0, 1) * 10) + (int)substr($row['_version'], 2, 1);
 if ($version < 51)
-	die("skip Test needs MySQL 5.1+");
+    die("skip Test needs MySQL 5.1+");
 ?>
 --FILE--
 <?php

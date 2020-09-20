@@ -9,10 +9,10 @@ $domain = AF_INET;
 $level = IPPROTO_IP;
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP);
 if ($s === false) {
-	die("skip unable to create socket");
+    die("skip unable to create socket");
 }
 if (socket_set_option($s, $level, IP_MULTICAST_IF, 1) === false) {
-	die("skip interface 1 either doesn't exist or has no ipv4 address");
+    die("skip interface 1 either doesn't exist or has no ipv4 address");
 }
 --FILE--
 <?php

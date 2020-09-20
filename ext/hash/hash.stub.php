@@ -32,7 +32,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt, int $iteratio
 
 function hash_equals(string $known_string, string $user_string): bool {}
 
-function hash_hkdf(string $algo, string $ikm, int $length = 0, string $info = '', string $salt = ''): string {}
+function hash_hkdf(string $algo, string $ikm, int $length = 0, string $info = "", string $salt = ""): string {}
 
 #ifdef PHP_MHASH_BC
 function mhash_get_block_size(int $hash): int|false {}

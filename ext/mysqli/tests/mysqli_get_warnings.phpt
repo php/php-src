@@ -3,11 +3,10 @@ mysqli_get_warnings() - TODO
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 if (!$TEST_EXPERIMENTAL)
-	die("skip - experimental (= unsupported) feature");
+    die("skip - experimental (= unsupported) feature");
 ?>
 --FILE--
 <?php

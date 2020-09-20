@@ -2,8 +2,8 @@
 DBA Split Test
 --SKIPIF--
 <?php
-	require_once __DIR__ .'/skipif.inc';
-	die("info $HND handler used");
+    require_once __DIR__ .'/skipif.inc';
+    die("info $HND handler used");
 ?>
 --FILE--
 <?php
