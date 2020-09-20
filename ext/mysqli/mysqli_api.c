@@ -1123,7 +1123,8 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (FAIL  == mysqlnd_stmt_fetch(stmt->stmt, &fetched_anything)) {
+	if (FAIL == mysqlnd_stmt_fetch(stmt->stmt, &fetched_anything)) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_BOOL(FALSE);
 	} else if (fetched_anything == TRUE) {
 		RETURN_BOOL(TRUE);

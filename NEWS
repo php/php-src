@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug #79983 (openssl_encrypt / openssl_decrypt fail with OCB mode).
     (Nikita)
 
+- MySQLi:
+  . Fixed bug #79375 (mysqli_store_result does not report error from lock wait
+    timeout). (Kamil Tekiela, Nikita)
+
 29 Oct 2020, PHP 7.4.12
 
 - Core:

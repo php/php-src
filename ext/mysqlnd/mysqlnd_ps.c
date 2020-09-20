@@ -121,9 +121,11 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 		stmt->state = MYSQLND_STMT_USE_OR_STORE_CALLED;
 	} else {
 		COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
+		COPY_CLIENT_ERROR(stmt->error_info, result->stored_data->error_info);
 		stmt->result->m.free_result_contents(stmt->result);
 		stmt->result = NULL;
 		stmt->state = MYSQLND_STMT_PREPARED;
+		DBG_RETURN(NULL);
 	}
 
 	DBG_RETURN(result);
@@ -178,7 +180,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 			break;
 		}
 
-		if ((result = result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY))) {
+		if (result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY)) {
 			UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, result->stored_data->row_count);
 			stmt->state = MYSQLND_STMT_PREPARED;
 			result->type = MYSQLND_RES_PS_BUF;
@@ -881,7 +883,9 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
 			COPY_CLIENT_ERROR(conn->error_info, row_packet->error_info);
-			COPY_CLIENT_ERROR(stmt->error_info, row_packet->error_info);
+			if (stmt) {
+				COPY_CLIENT_ERROR(stmt->error_info, row_packet->error_info);
+			}
 		}
 		SET_CONNECTION_STATE(&conn->state, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */

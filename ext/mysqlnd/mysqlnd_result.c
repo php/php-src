@@ -907,7 +907,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 	result->memory_pool->checkpoint = checkpoint;
 
 	DBG_INF_FMT("ret=%s fetched=%u", ret == PASS? "PASS":"FAIL", *fetched_anything);
-	DBG_RETURN(PASS);
+	DBG_RETURN(ret);
 }
 /* }}} */
 
