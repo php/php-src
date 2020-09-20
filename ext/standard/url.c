@@ -194,10 +194,11 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 		if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/')) {
 			zend_long port;
+			char *end;
 			memcpy(port_buf, p, (pp - p));
 			port_buf[pp - p] = '\0';
-			port = ZEND_STRTOL(port_buf, NULL, 10);
-			if (port > 0 && port <= 65535) {
+			port = ZEND_STRTOL(port_buf, &end, 10);
+			if (port >= 0 && port <= 65535 && end != port_buf) {
 				ret->port = (unsigned short) port;
 				if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 				    s += 2;
@@ -258,10 +259,11 @@ parse_host:
 				return NULL;
 			} else if (e - p > 0) {
 				zend_long port;
+				char *end;
 				memcpy(port_buf, p, (e - p));
 				port_buf[e - p] = '\0';
-				port = ZEND_STRTOL(port_buf, NULL, 10);
-				if (port > 0 && port <= 65535) {
+				port = ZEND_STRTOL(port_buf, &end, 10);
+				if (port >= 0 && port <= 65535 && end != port_buf) {
 					ret->port = (unsigned short)port;
 				} else {
 					php_url_free(ret);

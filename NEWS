@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #80083 (Optimizer pass 6 removes variables used for ibm_db2 data
     binding). (Nikita)
 
+- Standard:
+  . Fixed bug #80114 (parse_url does not accept URLs with port 0). (cmb, twosee)
+
 01 Oct 2020, PHP 7.3.23
 
 - Core:
