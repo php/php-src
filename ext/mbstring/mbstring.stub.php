@@ -21,9 +21,9 @@ function mb_parse_str(string $encoded_string, &$result): bool {}
 
 function mb_output_handler(string $contents, int $status): string {}
 
-function mb_str_split(string $str, int $split_length = 1, ?string $encoding = null): array {}
+function mb_str_split(string $string, int $split_length = 1, ?string $encoding = null): array {}
 
-function mb_strlen(string $str, ?string $encoding = null): int {}
+function mb_strlen(string $string, ?string $encoding = null): int {}
 
 function mb_strpos(string $haystack, string $needle, int $offset = 0, ?string $encoding = null): int|false {}
 
@@ -43,33 +43,33 @@ function mb_strrichr(string $haystack, string $needle, bool $part = false, ?stri
 
 function mb_substr_count(string $haystack, string $needle, ?string $encoding = null): int {}
 
-function mb_substr(string $str, int $start, ?int $length = null, ?string $encoding = null): string {}
+function mb_substr(string $string, int $start, ?int $length = null, ?string $encoding = null): string {}
 
-function mb_strcut(string $str, int $start, ?int $length = null, ?string $encoding = null): string {}
+function mb_strcut(string $string, int $start, ?int $length = null, ?string $encoding = null): string {}
 
-function mb_strwidth(string $str, ?string $encoding = null): int {}
+function mb_strwidth(string $string, ?string $encoding = null): int {}
 
-function mb_strimwidth(string $str, int $start, int $width, string $trim_marker = "", ?string $encoding = null): string {}
+function mb_strimwidth(string $string, int $start, int $width, string $trim_marker = "", ?string $encoding = null): string {}
 
-function mb_convert_encoding(array|string $str, string $to, array|string|null $from = null): array|string|false {}
+function mb_convert_encoding(array|string $string, string $to, array|string|null $from = null): array|string|false {}
 
-function mb_convert_case(string $source_string, int $mode, ?string $encoding = null): string {}
+function mb_convert_case(string $string, int $mode, ?string $encoding = null): string {}
 
-function mb_strtoupper(string $source_string, ?string $encoding = null): string {}
+function mb_strtoupper(string $string, ?string $encoding = null): string {}
 
-function mb_strtolower(string $source_string, ?string $encoding = null): string {}
+function mb_strtolower(string $string, ?string $encoding = null): string {}
 
-function mb_detect_encoding(string $str, array|string|null $encoding_list = null, bool $strict = false): string|false {}
+function mb_detect_encoding(string $string, array|string|null $encoding_list = null, bool $strict = false): string|false {}
 
 function mb_list_encodings(): array {}
 
 function mb_encoding_aliases(string $encoding): array {}
 
-function mb_encode_mimeheader(string $str, ?string $charset = null, ?string $transfer = null, string $linefeed = "\r\n", int $indent = 0): string {}
+function mb_encode_mimeheader(string $string, ?string $charset = null, ?string $transfer = null, string $linefeed = "\r\n", int $indent = 0): string {}
 
 function mb_decode_mimeheader(string $string): string {}
 
-function mb_convert_kana(string $str, string $option = "KV", ?string $encoding = null): string {}
+function mb_convert_kana(string $string, string $option = "KV", ?string $encoding = null): string {}
 
 function mb_convert_variables(string $to, array|string $from, mixed &$var, mixed &...$vars): string|false {}
 
@@ -83,9 +83,9 @@ function mb_get_info(string $type = "all"): array|string|int|false {}
 
 function mb_check_encoding(array|string|null $var = null, ?string $encoding = null): bool {}
 
-function mb_scrub(string $str, ?string $encoding = null): string {}
+function mb_scrub(string $string, ?string $encoding = null): string {}
 
-function mb_ord(string $str, ?string $encoding = null): int|false {}
+function mb_ord(string $string, ?string $encoding = null): int|false {}
 
 function mb_chr(int $cp, ?string $encoding = null): string|false {}
 
