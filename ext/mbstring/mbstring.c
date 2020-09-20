@@ -4118,9 +4118,9 @@ MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *e
 			if (enc->mblen_table != NULL) {
 				if (s != NULL) return enc->mblen_table[*(unsigned char *)s];
 			}
-		} else if (enc->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		} else if (enc->flag & MBFL_ENCTYPE_WCS2) {
 			return 2;
-		} else if (enc->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (enc->flag & MBFL_ENCTYPE_WCS4) {
 			return 4;
 		}
 	}

@@ -43,7 +43,7 @@ const mbfl_encoding mbfl_encoding_ucs4 = {
 	"UCS-4",
 	mbfl_encoding_ucs4_aliases,
 	NULL,
-	MBFL_ENCTYPE_WCS4BE,
+	MBFL_ENCTYPE_WCS4,
 	&vtbl_ucs4_wchar,
 	&vtbl_wchar_ucs4
 };
@@ -54,7 +54,7 @@ const mbfl_encoding mbfl_encoding_ucs4be = {
 	"UCS-4BE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_WCS4BE,
+	MBFL_ENCTYPE_WCS4,
 	&vtbl_ucs4be_wchar,
 	&vtbl_wchar_ucs4be
 };
@@ -65,7 +65,7 @@ const mbfl_encoding mbfl_encoding_ucs4le = {
 	"UCS-4LE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_WCS4LE,
+	MBFL_ENCTYPE_WCS4,
 	&vtbl_ucs4le_wchar,
 	&vtbl_wchar_ucs4le
 };

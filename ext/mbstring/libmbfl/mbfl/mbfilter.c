@@ -130,9 +130,9 @@ static size_t byte_offset_to_char_offset(const mbfl_encoding *encoding, unsigned
 	 * byte offset to character offset */
 	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 		return byte_offset;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 		return byte_offset / 2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 		return byte_offset / 4;
 	} else if (encoding->mblen_table) {
 		/* If not, can we determine the number of bytes for each character just by
@@ -176,9 +176,9 @@ MBFLAPI size_t char_offset_to_byte_offset(const mbfl_encoding *encoding, unsigne
 		}
 		if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 			return MAX((ssize_t)length - char_offset, 0);
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 			return MAX((ssize_t)length - (char_offset * 2), 0);
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 			return MAX((ssize_t)length - (char_offset * 4), 0);
 		} else if (encoding == &mbfl_encoding_utf8) {
 			/* We can easily count backwards from the end of a UTF-8 string
@@ -219,9 +219,9 @@ MBFLAPI size_t char_offset_to_byte_offset(const mbfl_encoding *encoding, unsigne
 	 * The easiest case is when each character takes a constant number of bytes */
 	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 		return MIN(char_offset, length);
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 		return MIN(char_offset * 2, length);
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 		return MIN(char_offset * 4, length);
 	} else if (encoding->mblen_table) {
 		const unsigned char *mbtab = encoding->mblen_table;
@@ -656,9 +656,9 @@ static inline void strcut_const_width(mbfl_string *string, const mbfl_encoding *
 	 *
 	 * It's easiest when each character is encoded with a constant number of bytes: */
 	size_t bytes_per_char;
-	if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+	if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 		bytes_per_char = 2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 		bytes_per_char = 4;
 	} else {
 		bytes_per_char = 1;
@@ -740,7 +740,7 @@ mbfl_string *mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, 
 		from = string->len;
 	}
 
-	if (encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	if (encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4)) {
 		strcut_const_width(string, encoding, from, &start, &length);
 	} else if (encoding == &mbfl_encoding_utf8) {
 		strcut_utf8(string, from, &start, &length);
@@ -1584,10 +1584,10 @@ HashTable *mbfl_str_split(mbfl_string *string, unsigned int split_length)
 	if (encoding->flag & MBFL_ENCTYPE_SBCS) { /* 1 byte */
 		mb_len = string->len;
 		chunk_len = split_length; /* chunk length in bytes */
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) { /* 2 bytes */
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) { /* 2 bytes */
 		mb_len = string->len / 2;
 		chunk_len = split_length * 2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) { /* 4 bytes */
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) { /* 4 bytes */
 		mb_len = string->len / 4;
 		chunk_len = split_length * 4;
 	} else if (encoding->mblen_table) {
