@@ -1801,11 +1801,6 @@ int pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, zval *args, uint
 
 			if (SUCCESS == retval) {
 				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
-#ifdef ilia_0 /* we'll only need this when we have persistent statements, if ever */
-				if (stmt->dbh->is_persistent) {
-					php_error_docref(NULL, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
-				}
-#endif
 				if (num_args == 2) {
 					if (Z_TYPE(args[1]) != IS_NULL && Z_TYPE(args[1]) != IS_ARRAY) {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array");
@@ -1832,11 +1827,6 @@ int pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, zval *args, uint
 			}
 
 			if (SUCCESS == retval) {
-#ifdef ilia_0 /* we'll only need this when we have persistent statements, if ever */
-				if (stmt->dbh->is_persistent) {
-					php_error_docref(NULL, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
-				}
-#endif
 				ZVAL_COPY(&stmt->fetch.into, &args[0]);
 			}
 
