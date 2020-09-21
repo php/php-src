@@ -9092,6 +9092,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 				|	ZVAL_DEREF FCARG1a, op1_info
 				op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 			} else {
+				/* Hack: Convert reference to regular value to simplify JIT code */
 				ZEND_ASSERT(Z_REG(op1_addr) == ZREG_FP);
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >1
 				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
@@ -14707,10 +14708,17 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 	if (add_ref_guard) {
 		|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, &exit_addr
 	}
-	|	GET_ZVAL_PTR FCARG1a, var_addr
-
-	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
-	*var_addr_ptr = var_addr;
+	if (opline->opcode == ZEND_INIT_METHOD_CALL && opline->op1_type == IS_VAR) {
+		/* Hack: Convert reference to regular value to simplify JIT code for INIT_METHOD_CALL */
+		if (Z_REG(var_addr) != ZREG_FCARG1a || Z_OFFSET(var_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1a, var_addr
+		}
+		|	EXT_CALL zend_jit_unref_helper, r0
+	} else {
+		|	GET_ZVAL_PTR FCARG1a, var_addr
+		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
+		*var_addr_ptr = var_addr;
+	}
 
 	if (var_type != IS_UNKNOWN) {
 		var_type &= ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED);
