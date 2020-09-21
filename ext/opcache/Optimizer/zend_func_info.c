@@ -710,7 +710,7 @@ static const func_info_t func_infos[] = {
 	F1("pg_fetch_assoc",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("pg_fetch_array",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("pg_fetch_object",						MAY_BE_FALSE | MAY_BE_OBJECT),
-	F1("pg_fetch_all",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
+	F1("pg_fetch_all",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
 	F1("pg_fetch_all_columns",					MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("pg_last_oid",							MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),
 	F1("pg_lo_create",							MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),

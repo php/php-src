@@ -125,6 +125,7 @@ try {
 
 $result = pg_query($db, "INSERT INTO ".$table_name." VALUES (9999, 'ABC');");
 pg_last_oid($result);
+var_dump(pg_fetch_all($result));
 
 pg_free_result($result);
 pg_close($db);
@@ -144,4 +145,6 @@ pg_field_name(): Argument #2 ($field_number) must be greater than or equal to 0
 pg_field_name(): Argument #2 ($field_number) must be less than the number of fields for this result set
 pg_field_table(): Argument #2 ($field_number) must be greater than or equal to 0
 pg_field_table(): Argument #2 ($field_number) must be less than the number of fields for this result set
+array(0) {
+}
 OK

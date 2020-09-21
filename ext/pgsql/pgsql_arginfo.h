@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3f5e097d572721b42f2ad438c2af8c0d1f9c9086 */
+ * Stub hash: 9735dbc8a4ca642ee825ae8942470ac2dec89f50 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -155,7 +155,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_fetch_object, 0, 1, MAY_BE_OB
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ctor_params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_fetch_all, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_fetch_all, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_type, IS_LONG, 0, "PGSQL_ASSOC")
 ZEND_END_ARG_INFO()
@@ -385,7 +385,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_result_status, 0, 1, MAY_BE_S
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_type, IS_LONG, 0, "PGSQL_STATUS_LONG")
 ZEND_END_ARG_INFO()
 
-#define arginfo_pg_get_notify arginfo_pg_fetch_all
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_get_notify, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_type, IS_LONG, 0, "PGSQL_ASSOC")
+ZEND_END_ARG_INFO()
 
 #define arginfo_pg_get_pid arginfo_pg_connect_poll
 

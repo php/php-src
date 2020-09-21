@@ -182,7 +182,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *val
 PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, zend_ulong opt , zend_string **sql);
 PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, zend_ulong opt, zend_string **sql);
 PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, zend_ulong opt, long fetch_option, zend_string **sql );
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long fetch_option);
+PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long fetch_option);
 
 /* internal functions */
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);

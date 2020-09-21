@@ -2015,10 +2015,7 @@ PHP_FUNCTION(pg_fetch_all)
 
 	pgsql_result = pg_result->result;
 	array_init(return_value);
-	if (php_pgsql_result2array(pgsql_result, return_value, result_type) == FAILURE) {
-		zend_array_destroy(Z_ARR_P(return_value));
-		RETURN_FALSE;
-	}
+	php_pgsql_result2array(pgsql_result, return_value, result_type);
 }
 /* }}} */
 
@@ -5796,7 +5793,7 @@ PHP_FUNCTION(pg_delete)
 /* }}} */
 
 /* {{{ php_pgsql_result2array */
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long result_type)
+PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long result_type)
 {
 	zval row;
 	char *field_name;
@@ -5805,9 +5802,7 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 	uint32_t i;
 	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
 
-	if ((pg_numrows = PQntuples(pg_result)) <= 0) {
-		return FAILURE;
-	}
+	pg_numrows = PQntuples(pg_result);
 	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
 		array_init(&row);
 		for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
@@ -5834,7 +5829,6 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 		}
 		add_index_zval(ret_array, pg_row, &row);
 	}
-	return SUCCESS;
 }
 /* }}} */
 
@@ -5877,7 +5871,8 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 
 	pg_result = PQexec(pg_link, ZSTR_VAL(querystr.s));
 	if (PQresultStatus(pg_result) == PGRES_TUPLES_OK) {
-		ret = php_pgsql_result2array(pg_result, ret_array, result_type);
+		php_pgsql_result2array(pg_result, ret_array, result_type);
+		ret = SUCCESS;
 	} else {
 		php_error_docref(NULL, E_NOTICE, "Failed to execute '%s'", ZSTR_VAL(querystr.s));
 	}

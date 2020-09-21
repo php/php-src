@@ -431,6 +431,8 @@ PHP 8.0 UPGRADE NOTES
   . The deprecated pg_lo_import() and pg_lo_export() signature that passes the
     connection as the last argument is no longer supported. The connection
     should be passed as first argument instead.
+  . pg_fetch_all() will now return an empty array instead of false for result
+    sets with zero rows.
 
 - Phar:
   . Metadata associated with a phar will no longer be automatically unserialized,

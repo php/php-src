@@ -193,7 +193,7 @@ function pg_fetch_array($result, ?int $row_number = null, int $result_type = PGS
 function pg_fetch_object($result, ?int $row_number = null, string $class_name = "stdClass", ?array $ctor_params = null): object|false {}
 
 /** @param resource $result */
-function pg_fetch_all($result, int $result_type = PGSQL_ASSOC): array|false {}
+function pg_fetch_all($result, int $result_type = PGSQL_ASSOC): array {}
 
 /** @param resource $result */
 function pg_fetch_all_columns($result, int $field_number = 0): array {}
