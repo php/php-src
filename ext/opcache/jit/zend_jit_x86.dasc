@@ -10136,13 +10136,16 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 		|2:
 		|	// ZVAL_NEW_REF(arg, varptr);
 		if (opline->op1_type == IS_VAR) {
+			if (Z_REG(op1_addr) != ZREG_R0 || Z_OFFSET(op1_addr) != 0) {
+				|	LOAD_ZVAL_ADDR r0, op1_addr
+			}
 			|	mov aword T1, r0 // save
 		}
 		|	EMALLOC sizeof(zend_reference), op_array, opline
 		|	mov dword [r0], 2
 		|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], GC_REFERENCE
 		|	mov aword [r0 + offsetof(zend_reference, sources.ptr)], 0
-		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 8);
+		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, offsetof(zend_reference, val));
 		if (opline->op1_type == IS_VAR) {
 			zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R1, 0);
 
