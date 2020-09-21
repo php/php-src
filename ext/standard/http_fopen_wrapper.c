@@ -697,8 +697,8 @@ finish:
 			}
 			/* all status codes in the 2xx range are defined by the specification as successful;
 			 * all status codes in the 3xx range are for redirection, and so also should never
-			 * fail */
-			if (response_code >= 200 && response_code < 400) {
+			 * fail, except for 304 if follow_location is requested */
+			if (response_code >= 200 && response_code < 400 && response_code != 304) {
 				reqok = 1;
 			} else {
 				switch(response_code) {
@@ -706,6 +706,16 @@ finish:
 						php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT,
 								tmp_line, response_code);
 						break;
+					case 304:
+						reqok = 1;
+						if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
+							follow_location = zval_is_true(tmpzval);
+							reqok = !follow_location;
+						}
+						if (reqok) {
+							break;
+						}
+						/* fallthrough */
 					default:
 						/* safety net in the event tmp_line == NULL */
 						if (!tmp_line_len) {
