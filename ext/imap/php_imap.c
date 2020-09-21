@@ -702,10 +702,10 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_long retries = 0, flags = NIL, cl_flags = NIL;
 	MAILSTREAM *imap_stream;
 	pils *imap_le_struct;
-	zval *params = NULL;
+	HashTable *params = NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "PSS|lla", &mailbox, &user,
+	if (zend_parse_parameters(argc, "PSS|llh", &mailbox, &user,
 		&passwd, &flags, &retries, &params) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -723,7 +723,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (params) {
 		zval *disabled_auth_method;
 
-		if ((disabled_auth_method = zend_hash_str_find(Z_ARRVAL_P(params), "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR") - 1)) != NULL) {
+		if ((disabled_auth_method = zend_hash_str_find(params, "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR") - 1)) != NULL) {
 			switch (Z_TYPE_P(disabled_auth_method)) {
 				case IS_STRING:
 					if (Z_STRLEN_P(disabled_auth_method) > 1) {

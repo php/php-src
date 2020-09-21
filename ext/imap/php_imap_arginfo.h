@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a1b1cb1bb36085cb43254b9d708585352d3cf72a */
+ * Stub hash: fe7adff9478c5e0e2ad9df6f34dc8a862a537cb3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -7,7 +7,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, n_retries, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_reopen, 0, 2, _IS_BOOL, 0)
