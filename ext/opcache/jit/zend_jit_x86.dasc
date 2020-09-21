@@ -1485,7 +1485,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro EFREE_REG_24
+|.macro EFREE_REG_REFERENCE
 ||#if ZEND_DEBUG
 |		xor FCARG2a, FCARG2a // filename
 |		.if X64WIN
@@ -1508,16 +1508,16 @@ static void* dasm_labels[zend_lb_MAX];
 |		.endif
 ||#else
 ||#ifdef HAVE_BUILTIN_CONSTANT_P
-|		EXT_CALL _efree_24, r0
+|		EXT_CALL _efree_32, r0
 ||#else
 |		EXT_CALL _efree, r0
 ||#endif
 ||#endif
 |.endmacro
 
-|.macro EFREE_24, ptr
+|.macro EFREE_REFERENCE, ptr
 |	mov FCARG1a, ptr
-|	EFREE_REG_24
+|	EFREE_REG_REFERENCE
 |.endmacro
 
 |.macro EMALLOC, size, op_array, opline
@@ -1545,8 +1545,8 @@ static void* dasm_labels[zend_lb_MAX];
 |		.endif
 ||#else
 ||#ifdef HAVE_BUILTIN_CONSTANT_P
-||	if (size == 24) {
-|		EXT_CALL _emalloc_24, r0
+||	if (size > 24 && size <= 32) {
+|		EXT_CALL _emalloc_32, r0
 ||	} else {
 |		mov FCARG1a, size
 |		EXT_CALL _emalloc, r0
@@ -5781,7 +5781,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				if (save_r1) {
 					|	mov aword T1, FCARG1a // save
 				}
-				|	EFREE_24 aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)]
+				|	EFREE_REFERENCE aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)]
 				if (save_r1) {
 					|	mov FCARG1a, aword T1 // restore
 				}
@@ -10366,7 +10366,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				|	GC_ADDREF r2
 				|	jmp >2
 				|1:
-				|	EFREE_REG_24
+				|	EFREE_REG_REFERENCE
 				|	jmp >2
 				|.code
 				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R0, ZREG_R2
@@ -11237,7 +11237,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	jmp >9
 			}
 			|2:
-			|	EFREE_24 r0
+			|	EFREE_REFERENCE r0
 			if (jit_return_label >= 0) {
 				|	jmp =>jit_return_label
 			} else {
