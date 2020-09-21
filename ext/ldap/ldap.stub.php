@@ -4,10 +4,10 @@
 
 #ifdef HAVE_ORALDAP
 /** @return resource|false */
-function ldap_connect(string $uri = null, int $port = 389, string $wallet = UNKNOWN, string $wallet_passwd = UNKNOWN, int $authmode = GSLC_SSL_NO_AUTH) {}
+function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, string $wallet_passwd = UNKNOWN, int $authmode = GSLC_SSL_NO_AUTH) {}
 #else
 /** @return resource|false */
-function ldap_connect(string $uri = null, int $port = 389) {}
+function ldap_connect(?string $uri = null, int $port = 389) {}
 #endif
 
 /** @param resource $link */
@@ -20,17 +20,17 @@ function ldap_unbind($link): bool {}
 function ldap_close($link): bool {}
 
 /** @param resource $link */
-function ldap_bind($link, string $dn = null, string $password = null): bool {}
+function ldap_bind($link, ?string $dn = null, ?string $password = null): bool {}
 
 /**
  * @param resource $link
  * @return resource|false
  */
-function ldap_bind_ext($link, string $dn = null, string $password = null, array $controls = []) {}
+function ldap_bind_ext($link, ?string $dn = null, ?string $password = null, array $controls = []) {}
 
 #ifdef HAVE_LDAP_SASL
 /** @param resource $link */
-function ldap_sasl_bind($link, string $dn = null, string $password = null, string $mech = null, string $realm = null, string $authc_id = null, string $authz_id = null, string $props = null): bool {}
+function ldap_sasl_bind($link, ?string $dn = null, ?string $password = null, ?string $mech = null, ?string $realm = null, ?string $authc_id = null, ?string $authz_id = null, ?string $props = null): bool {}
 #endif
 
 /**
