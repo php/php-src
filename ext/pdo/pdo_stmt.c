@@ -2356,13 +2356,13 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 
 static zval *row_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
+	zend_throw_error(NULL, "Cannot write to PDORow property");
 	return value;
 }
 
 static void row_dim_write(zend_object *object, zval *member, zval *value)
 {
-	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
+	zend_throw_error(NULL, "Cannot write to PDORow offset");
 }
 
 static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
@@ -2439,12 +2439,12 @@ static int row_dim_exists(zend_object *object, zval *member, int check_empty)
 
 static void row_prop_delete(zend_object *object, zend_string *offset, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
+	zend_throw_error(NULL, "Cannot unset PDORow property");
 }
 
 static void row_dim_delete(zend_object *object, zval *offset)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
+	zend_throw_error(NULL, "Cannot unset PDORow offset");
 }
 
 static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose purpose)
