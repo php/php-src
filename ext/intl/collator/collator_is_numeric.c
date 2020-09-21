@@ -212,19 +212,13 @@ zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, dou
 	zend_long local_lval;
 	double local_dval;
 	UChar *end_ptr_long, *end_ptr_double;
-	int conv_base=10;
 
 	if (!length) {
 		return 0;
 	}
 
-	/* handle hex numbers */
-	if (length>=2 && str[0]=='0' && (str[1]=='x' || str[1]=='X')) {
-		conv_base=16;
-	}
-
 	errno=0;
-	local_lval = collator_u_strtol(str, &end_ptr_long, conv_base);
+	local_lval = collator_u_strtol(str, &end_ptr_long, 10);
 	if (errno != ERANGE) {
 		if (end_ptr_long == str+length) { /* integer string */
 			if (lval) {
@@ -236,11 +230,6 @@ zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, dou
 		}
 	} else {
 		end_ptr_long = NULL;
-	}
-
-	if (conv_base == 16) { /* hex string, under UNIX strtod() messes it up */
-		/* UTODO: keep compatibility with is_numeric_string() here? */
-		return 0;
 	}
 
 	local_dval = collator_u_strtod(str, &end_ptr_double);
