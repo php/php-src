@@ -3577,7 +3577,7 @@ PHP_FUNCTION(imap_mail)
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "SSS|SSSS", &to, &subject, &message,
+	if (zend_parse_parameters(argc, "PPP|PPPP", &to, &subject, &message,
 		&headers, &cc, &bcc, &rpath) == FAILURE) {
 		RETURN_THROWS();
 	}
