@@ -9178,12 +9178,12 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	} else {
 		|	EXT_CALL zend_jit_find_method_helper, r0
 	}
-	|	test r0, r0
-	|	jz ->exception_handler
 	|.if not(X64)
 	|	add r4, 12
 	|.endif
-	|	jmp >2
+	|	test r0, r0
+	|	jnz >2
+	|	jmp ->exception_handler
 	|.code
 	|2:
 
