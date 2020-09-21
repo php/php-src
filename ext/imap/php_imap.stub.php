@@ -27,13 +27,7 @@ function imap_num_recent($stream_id): int|false {}
 function imap_headers($stream_id): array|false {}
 
 /** @param resource $stream_id */
-function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
-
-/**
- * @param resource $stream_id
- * @alias imap_headerinfo
- */
-function imap_header($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
+function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0): stdClass|false {}
 
 function imap_rfc822_parse_headers(string $headers, string $default_host = "UNKNOWN"): stdClass {}
 

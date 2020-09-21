@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fe7adff9478c5e0e2ad9df6f34dc8a862a537cb3 */
+ * Stub hash: e501d6869d721ad720a1a7c8b597b96e9591d5ed */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -37,10 +37,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_headerinfo, 0, 2, stdCl
 	ZEND_ARG_TYPE_INFO(0, msg_no, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, from_length, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, subject_length, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO(0, default_host, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-#define arginfo_imap_header arginfo_imap_headerinfo
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_imap_rfc822_parse_headers, 0, 1, stdClass, 0)
 	ZEND_ARG_TYPE_INFO(0, headers, IS_STRING, 0)
@@ -440,7 +437,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imap_num_recent, arginfo_imap_num_recent)
 	ZEND_FE(imap_headers, arginfo_imap_headers)
 	ZEND_FE(imap_headerinfo, arginfo_imap_headerinfo)
-	ZEND_FALIAS(imap_header, imap_headerinfo, arginfo_imap_header)
 	ZEND_FE(imap_rfc822_parse_headers, arginfo_imap_rfc822_parse_headers)
 	ZEND_FE(imap_rfc822_write_address, arginfo_imap_rfc822_write_address)
 	ZEND_FE(imap_rfc822_parse_adrlist, arginfo_imap_rfc822_parse_adrlist)

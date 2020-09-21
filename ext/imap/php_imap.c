@@ -1603,7 +1603,6 @@ PHP_FUNCTION(imap_undelete)
 PHP_FUNCTION(imap_headerinfo)
 {
 	zval *streamind;
-	zend_string *defaulthost = NULL;
 	int argc = ZEND_NUM_ARGS();
 	zend_long msgno, fromlength, subjectlength;
 	pils *imap_le_struct;
@@ -1611,7 +1610,7 @@ PHP_FUNCTION(imap_headerinfo)
 	ENVELOPE *en;
 	char dummy[2000], fulladdress[MAILTMPLEN + 1];
 
-	if (zend_parse_parameters(argc, "rl|llS", &streamind, &msgno, &fromlength, &subjectlength, &defaulthost) == FAILURE) {
+	if (zend_parse_parameters(argc, "rl|ll", &streamind, &msgno, &fromlength, &subjectlength) == FAILURE) {
 		RETURN_THROWS();
 	}
 
