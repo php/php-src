@@ -1590,7 +1590,7 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 				didwrite = php_stream_write(dest, p, mapped);
 				if (didwrite < 0) {
-					*len = 0;
+					*len = haveread;
 					return FAILURE;
 				}
 
