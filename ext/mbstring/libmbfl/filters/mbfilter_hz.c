@@ -32,7 +32,7 @@
 
 #include "unicode_table_cp936.h"
 
-static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_hz = {
 	mbfl_no_encoding_hz,
@@ -222,7 +222,7 @@ void mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter)
 	filter->status &= 0xff;
 }
 
-static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)
 {
 	switch (filter->status & 0xf) {
 /*	case 0x00:	 ASCII */
@@ -264,6 +264,4 @@ static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }

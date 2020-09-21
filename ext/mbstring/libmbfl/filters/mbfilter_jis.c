@@ -33,8 +33,8 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
-static int mbfl_filt_ident_jis7(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_jis7(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_jis = {
 	mbfl_no_encoding_jis,
@@ -473,9 +473,9 @@ void mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter)
 	}
 }
 
-static int mbfl_filt_ident_jis7_0208(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_jis7_0212(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_2022jp_0208(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_jis7_0208(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_jis7_0212(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_0208(int c, mbfl_identify_filter *filter);
 
 /* ISO 2022-JP has different modes, which can be selected by a sequence
  * starting with ESC (0x1B). In each mode, characters can be selected from a
@@ -560,14 +560,13 @@ static int handle_esc_sequence_jis7(int c, mbfl_identify_filter *filter)
 	return 0;
 }
 
-static int mbfl_filt_ident_jis7(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_jis7(int c, mbfl_identify_filter *filter)
 {
 	/* We convert single bytes from 0xA1-0xDF to JIS X 0201 kana, even if
 	 * no escape to shift to JIS X 0201 has been seen */
 	if (!handle_esc_sequence_jis7(c, filter) && ((c >= 0x80 && c <= 0xA0) || c >= 0xE0)) {
 		filter->flag = 1;
 	}
-	return c;
 }
 
 /* Not all byte sequences in JIS X 0208 which would otherwise be valid are
@@ -578,7 +577,7 @@ static inline int in_unused_jisx0208_range(int c1, int c2)
 	return s >= jisx0208_ucs_table_size || !jisx0208_ucs_table[s];
 }
 
-static int handle_jisx_0208(int c, mbfl_identify_filter *filter)
+static void handle_jisx_0208(int c, mbfl_identify_filter *filter)
 {
 	if (filter->status == 0) {
 		if (c >= 0x21 && c <= 0x7E) {
@@ -591,12 +590,13 @@ static int handle_jisx_0208(int c, mbfl_identify_filter *filter)
 	} else {
 		filter->status = 0;
 	}
-	return c;
 }
 
-static int mbfl_filt_ident_jis7_0208(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_jis7_0208(int c, mbfl_identify_filter *filter)
 {
-	return handle_esc_sequence_jis7(c, filter) || handle_jisx_0208(c, filter);
+	if (!handle_esc_sequence_jis7(c, filter)) {
+		handle_jisx_0208(c, filter);
+	}
 }
 
 static inline int in_unused_jisx0212_range(int c1, int c2)
@@ -605,10 +605,10 @@ static inline int in_unused_jisx0212_range(int c1, int c2)
 	return s >= jisx0212_ucs_table_size || !jisx0212_ucs_table[s];
 }
 
-static int mbfl_filt_ident_jis7_0212(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_jis7_0212(int c, mbfl_identify_filter *filter)
 {
 	if (handle_esc_sequence_jis7(c, filter)) {
-		return c;
+		return;
 	} else if (filter->status == 0) {
 		if (c >= 0x21 && c <= 0x7E) {
 			filter->status = c << 8;
@@ -620,7 +620,6 @@ static int mbfl_filt_ident_jis7_0212(int c, mbfl_identify_filter *filter)
 	} else {
 		filter->status = 0;
 	}
-	return c;
 }
 
 static int handle_esc_sequence_2022jp(int c, mbfl_identify_filter *filter)
@@ -662,15 +661,16 @@ static int handle_esc_sequence_2022jp(int c, mbfl_identify_filter *filter)
 	return 0;
 }
 
-static int mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence_2022jp(c, filter) && c > 0x7F) {
 		filter->flag = 1;
 	}
-	return c;
 }
 
-static int mbfl_filt_ident_2022jp_0208(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_0208(int c, mbfl_identify_filter *filter)
 {
-	return handle_esc_sequence_2022jp(c, filter) || handle_jisx_0208(c, filter);
+	if (!handle_esc_sequence_2022jp(c, filter)) {
+		handle_jisx_0208(c, filter);
+	}
 }

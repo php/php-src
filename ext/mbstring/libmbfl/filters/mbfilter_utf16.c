@@ -30,9 +30,9 @@
 #include "mbfilter.h"
 #include "mbfilter_utf16.h"
 
-static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
@@ -339,7 +339,7 @@ static void mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 	}
 }
 
-static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter)
 {
 	if (filter->status == 0) {
 		if (c >= 0xfe) { /* could be a byte-order mark */
@@ -347,7 +347,7 @@ static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter)
 		} else {
 			/* no byte-order mark at beginning of input; assume UTF-16BE */
 			filter->filter_function = mbfl_filt_ident_utf16be;
-			return (filter->filter_function)(c, filter);
+			(filter->filter_function)(c, filter);
 		}
 	} else {
 		unsigned short n = (filter->status << 8) | c;
@@ -363,13 +363,12 @@ static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter)
 			/* it wasn't a byte-order mark */
 			filter->filter_function = mbfl_filt_ident_utf16be;
 			(filter->filter_function)(n >> 8, filter);
-			return (filter->filter_function)(c, filter);
+			(filter->filter_function)(c, filter);
 		}
 	}
-	return c;
 }
 
-static int mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* 1st byte */
@@ -400,11 +399,9 @@ static int mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter)
 		}
 		break;
 	}
-
-	return c;
 }
 
-static int mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* 1st byte */
@@ -440,6 +437,4 @@ static int mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }

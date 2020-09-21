@@ -33,7 +33,7 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
-int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
+void mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
 
 const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -279,7 +279,7 @@ static inline int in_unused_jisx0212_range(int c1, int c2)
 	return s >= jisx0212_ucs_table_size || !jisx0212_ucs_table[s];
 }
 
-int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
+void mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
 {
 	unsigned char ku, ten;
 
@@ -338,6 +338,4 @@ int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }

@@ -39,7 +39,7 @@
 
 extern const unsigned char mblen_table_sjis[];
 
-static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter);
 static void mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter);
 
@@ -744,7 +744,7 @@ static int in_reserved_range(unsigned char byte1, unsigned char byte2)
 	}
 }
 
-static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter)
 {
 	if (filter->status) { /* Kanji, second byte */
 		if (c < 0x40 || c > 0xfc || c == 0x7f || in_reserved_range(filter->status, c)) {
@@ -766,6 +766,4 @@ static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter)
 	} else {
 		filter->flag = 1;
 	}
-
-	return c;
 }

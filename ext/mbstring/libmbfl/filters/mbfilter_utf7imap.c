@@ -78,7 +78,7 @@
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
 
-static int mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
 
@@ -467,7 +467,7 @@ static inline int decode_modified_base64(int c)
 
 /* After finishing a Base64-encoded block, UTF7imap does not allow another one
  * to start immediately; use this function in such places */
-static int mbfl_filt_ident_utf7imap_finished_base64(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7imap_finished_base64(int c, mbfl_identify_filter *filter)
 {
 	/* Another modified Base64-encoded section may not begin immediately after
 	 * one has just finished */
@@ -475,7 +475,6 @@ static int mbfl_filt_ident_utf7imap_finished_base64(int c, mbfl_identify_filter 
 		filter->flag = 1;
 	}
 	filter->filter_function = mbfl_filt_ident_utf7imap;
-	return c;
 }
 
 /* Make sure that decoded codepoint is one which is legal for Base64-encoded section
@@ -487,7 +486,7 @@ static void check_legal_codepoint_for_base64(int cp, mbfl_identify_filter *filte
 	}
 }
 
-static int mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter)
 {
 	if (filter->status == 0) { /* Decoding ASCII characters */
 		if (c == '&') {
@@ -499,7 +498,7 @@ static int mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter)
 		} else if (c <= 0x1F || c >= 0x7F) {
 			filter->flag = 1;
 		}
-		return c;
+		return;
 	}
 
 	/* Decoding modified Base64 */
@@ -511,13 +510,13 @@ static int mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter)
 		}
 		filter->status = 0; /* End modified Base64-encoded block */
 		filter->filter_function = mbfl_filt_ident_utf7imap_finished_base64;
-		return c;
+		return;
 	}
 
 	int six_bits = decode_modified_base64(c);
 	if (six_bits < 0) {
 		filter->flag = 1; /* Not valid modified Base64 character */
-		return c;
+		return;
 	}
 
 	/* The following state machine has 23 possible states, depending on:
@@ -617,5 +616,4 @@ static int mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter)
 			check_legal_codepoint_for_base64((cache << 2) | (six_bits >> 4), filter);
 			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 2, -20, -13);
 	}
-	return c;
 }

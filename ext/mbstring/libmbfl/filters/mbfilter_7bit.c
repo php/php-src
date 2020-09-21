@@ -31,7 +31,7 @@
 #include "mbfilter.h"
 #include "mbfilter_7bit.h"
 
-static int mbfl_filt_ident_7bit(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_7bit(int c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_7bit = {
 	mbfl_no_encoding_7bit,
@@ -87,10 +87,9 @@ int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_7bit(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_7bit(int c, mbfl_identify_filter *filter)
 {
 	if (c >= 0x80) {
 		filter->flag = 1;
 	}
-	return c;
 }

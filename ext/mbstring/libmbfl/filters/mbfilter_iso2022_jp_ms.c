@@ -34,7 +34,7 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
+void mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_2022jpms_aliases[] = {"ISO2022JPMS", NULL};
 
@@ -425,7 +425,7 @@ void mbfl_filt_conv_any_2022jpms_flush(mbfl_convert_filter *filter)
 	}
 }
 
-int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter)
+void mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter)
 {
 retry:
 	switch (filter->status & 0xf) {
@@ -515,6 +515,4 @@ retry:
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }

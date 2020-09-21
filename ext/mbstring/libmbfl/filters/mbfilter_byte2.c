@@ -31,7 +31,7 @@
 #include "mbfilter.h"
 #include "mbfilter_byte2.h"
 
-static int mbfl_filt_ident_byte2(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_byte2(int c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_byte2be = {
 	mbfl_no_encoding_byte2be,
@@ -143,9 +143,8 @@ int mbfl_filt_conv_wchar_byte2le(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_byte2(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_byte2(int c, mbfl_identify_filter *filter)
 {
 	/* Input string must be a multiple of 2 bytes */
 	filter->status = (filter->status + 1) % 2;
-	return c;
 }

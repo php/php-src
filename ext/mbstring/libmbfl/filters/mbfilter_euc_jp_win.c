@@ -34,7 +34,7 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -372,7 +372,7 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case  0:	/* latin */
@@ -420,6 +420,4 @@ static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }

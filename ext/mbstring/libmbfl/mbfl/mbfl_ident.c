@@ -214,7 +214,4 @@ void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter)
 }
 
 /* For encodings in which _every_ possible input string is valid */
-int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter)
-{
-	return c;
-}
+void mbfl_filt_ident_true(int c, mbfl_identify_filter *filter) {}

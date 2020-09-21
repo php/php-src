@@ -35,7 +35,7 @@
 #include "unicode_table_jis2004.h"
 
 extern void mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
-static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	mbfl_no_encoding_2022jp_2004,
@@ -72,9 +72,9 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
 	mbfl_filt_conv_wchar_jis2004_flush
 };
 
-static int mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter);
 
 /* ISO 2022-JP-2004 has different modes, which can be selected by a sequence
  * starting with ESC (0x1B). In each mode, characters can be selected from a
@@ -166,7 +166,7 @@ static inline int in_unused_jisx0208_range(int c1, int c2)
 }
 
 /* In JIS X 0208 mode */
-static int mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (filter->status == 0) {
@@ -184,7 +184,6 @@ static int mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter)
 			filter->status = 0; /* Passed by 2-byte character, starting a new one */
 		}
 	}
-	return c;
 }
 
 static inline int is_reserved_jisx0213_plane1_range(int c1, int c2)
@@ -194,7 +193,7 @@ static inline int is_reserved_jisx0213_plane1_range(int c1, int c2)
 }
 
 /* In JIS X 0213:2004 plane 1 */
-static int mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (filter->status == 0) {
@@ -209,7 +208,6 @@ static int mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filte
 			filter->status = 0;
 		}
 	}
-	return c;
 }
 
 static inline int is_reserved_jisx0213_plane2_range(int c1, int c2)
@@ -219,7 +217,7 @@ static inline int is_reserved_jisx0213_plane2_range(int c1, int c2)
 }
 
 /* In JIS X 0213:2000 plane 2 */
-static int mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (filter->status == 0) {
@@ -234,16 +232,14 @@ static int mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filte
 			filter->status = 0;
 		}
 	}
-	return c;
 }
 
 /* In ASCII mode */
-static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (c > 0x7F) { /* non-ASCII */
 			filter->flag = 1;
 		}
 	}
-	return c;
 }

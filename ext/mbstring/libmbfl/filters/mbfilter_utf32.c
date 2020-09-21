@@ -30,9 +30,9 @@
 #include "mbfilter.h"
 #include "mbfilter_utf32.h"
 
-static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf32_aliases[] = {"utf32", NULL};
@@ -244,7 +244,7 @@ static void mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
 	}
 }
 
-static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
 {
 	/* The largest valid codepoint is 0x10FFFF; we don't want values above that
 	 * Neither do we want to see surrogates
@@ -253,7 +253,7 @@ static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
 	case 0: /* 1st byte */
 		if (c == 0xff) {
 			filter->status = 1;
-			return c;
+			return;
 		}
 		filter->filter_function = mbfl_filt_ident_utf32be;
 		break;
@@ -261,7 +261,7 @@ static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
 	case 1: /* 2nd byte */
 		if (c == 0xfe) {
 			filter->status = 2;
-			return c;
+			return;
 		}
 		filter->filter_function = mbfl_filt_ident_utf32be;
 		(filter->filter_function)(0xff, filter);
@@ -270,7 +270,7 @@ static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
 	case 2: /* 3rd byte */
 		if (c == 0) {
 			filter->status = 3;
-			return c;
+			return;
 		}
 		filter->filter_function = mbfl_filt_ident_utf32be;
 		(filter->filter_function)(0xff, filter);
@@ -282,7 +282,7 @@ static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
 			/* We found a little-endian byte-order mark! */
 			filter->status = 0;
 			filter->filter_function = mbfl_filt_ident_utf32le;
-			return c;
+			return;
 		}
 		filter->filter_function = mbfl_filt_ident_utf32be;
 		(filter->filter_function)(0xff, filter);
@@ -291,10 +291,10 @@ static int mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
 		break;
 	}
 
-	return (filter->filter_function)(c, filter);
+	(filter->filter_function)(c, filter);
 }
 
-static int mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* 1st byte */
@@ -329,10 +329,9 @@ static int mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter)
 		}
 		filter->status = 3;
 	}
-	return c;
 }
 
-static int mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* 1st byte */
@@ -366,5 +365,4 @@ static int mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter)
 	case 4: /* 3rd byte, not in BMP */
 		filter->status = 3;
 	}
-	return c;
 }
