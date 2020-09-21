@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 38fb46070ea48e774343e59de53797969acf4b06 */
+ * Stub hash: 65bcea1c2313ff50b3e15588e1cdba036995c131 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -51,7 +51,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_RecursiveIteratorIterator_getDepth arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveIteratorIterator_getSubIterator, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, level, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveIteratorIterator_getInnerIterator arginfo_class_EmptyIterator_current
@@ -79,8 +79,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_OuterIterator_getInnerIterator arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IteratorIterator___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, iterator)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IteratorIterator_getInnerIterator arginfo_class_EmptyIterator_current

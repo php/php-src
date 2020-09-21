@@ -684,13 +684,17 @@ PHP_METHOD(RecursiveIteratorIterator, getDepth)
 PHP_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
-	zend_long  level = object->level;
+	zend_long level;
+	zend_bool level_is_null = 1;
 	zval *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &level) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &level, &level_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
-	if (level < 0 || level > object->level) {
+
+	if (level_is_null) {
+		level = object->level;
+	} else if (level < 0 || level > object->level) {
 		RETURN_NULL();
 	}
 
@@ -1318,14 +1322,14 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		}
 		case DIT_IteratorIterator: {
 			zend_class_entry *ce_cast;
-			zend_string *class_name;
+			zend_string *class_name = NULL;
 
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S", &zobject, ce_inner, &class_name) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S!", &zobject, ce_inner, &class_name) == FAILURE) {
 				return NULL;
 			}
 			ce = Z_OBJCE_P(zobject);
 			if (!instanceof_function(ce, zend_ce_iterator)) {
-				if (ZEND_NUM_ARGS() > 1) {
+				if (class_name) {
 					if (!(ce_cast = zend_lookup_class(class_name))
 					|| !instanceof_function(ce, ce_cast)
 					|| !ce_cast->get_iterator
