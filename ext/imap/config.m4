@@ -236,7 +236,7 @@ if test "$PHP_IMAP" != "no"; then
     PHP_IMAP_TEST_BUILD(utf8_to_mutf7_php, [
       AC_DEFINE(HAVE_IMAP_MUTF7, 1, [ ])
     ], [], $TST_LIBS, [
-      char utf8_to_mutf7_php(){ return utf8_to_mutf7(""); }
+      char utf8_to_mutf7_php(){ char result; char *out; out = utf8_to_mutf7(""); result = *out; fs_give((void**) &out); return result; }
     ])
 
     AC_MSG_CHECKING(whether rfc822_output_address_list function present)
