@@ -3410,11 +3410,6 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 		RETURN_THROWS();
 	}
 
-	if (pgsql == NULL) {
-		php_error_docref(NULL, E_WARNING,"Cannot get pgsql link");
-		RETURN_FALSE;
-	}
-
 	if (escape_literal) {
 		tmp = PQescapeLiteral(pgsql, from, (size_t)from_len);
 	} else {
