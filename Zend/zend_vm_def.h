@@ -8883,6 +8883,7 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
 			count = zend_array_count(Z_ARRVAL_P(op1));
@@ -8911,20 +8912,15 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 				break;
 			}
 
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
+			/* If There's no handler and it doesn't implement Countable then emit a TypeError */
 		} else if ((OP1_TYPE & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			continue;
-		} else if (Z_TYPE_P(op1) <= IS_NULL) {
-			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-			}
-			count = 0;
-		} else {
-			count = 1;
+		} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
+		count = 0;
+		zend_type_error("%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 

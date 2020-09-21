@@ -10324,6 +10324,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
+
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
 			count = zend_array_count(Z_ARRVAL_P(op1));
@@ -10352,20 +10353,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 				break;
 			}
 
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
+			/* If There's no handler and it doesn't implement Countable then emit a TypeError */
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			continue;
-		} else if (Z_TYPE_P(op1) <= IS_NULL) {
-			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-			}
-			count = 0;
-		} else {
-			count = 1;
+		} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
+		count = 0;
+		zend_type_error("%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 
@@ -17567,6 +17563,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDL
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
 			count = zend_array_count(Z_ARRVAL_P(op1));
@@ -17595,20 +17592,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDL
 				break;
 			}
 
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
+			/* If There's no handler and it doesn't implement Countable then emit a TypeError */
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			continue;
-		} else if (Z_TYPE_P(op1) <= IS_NULL) {
-			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-			}
-			count = 0;
-		} else {
-			count = 1;
+		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
+		count = 0;
+		zend_type_error("%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 
@@ -47327,6 +47319,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 
 	SAVE_OPLINE();
 	op1 = EX_VAR(opline->op1.var);
+
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
 			count = zend_array_count(Z_ARRVAL_P(op1));
@@ -47355,20 +47348,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 				break;
 			}
 
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
+			/* If There's no handler and it doesn't implement Countable then emit a TypeError */
 		} else if ((IS_CV & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			continue;
-		} else if (Z_TYPE_P(op1) <= IS_NULL) {
-			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-			}
-			count = 0;
-		} else {
-			count = 1;
+		} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
+		count = 0;
+		zend_type_error("%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 
