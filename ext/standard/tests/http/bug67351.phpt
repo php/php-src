@@ -20,16 +20,10 @@ function test() {
         'http' => [
             'method' => 'GET',
             'protocol_version' => '1.1',
-            'follow_location' => false,
-            'ignore_errors' => true,
-            'header' => "If-Modified-Since: Thu, 01 Jan 1970 00:00:00 +0000\r\n"
+            'header' => "If-Modified-Since: Tue, 19 Jan 2038 03:14:07 GMT\r\n"
         ]
     ];
-
     var_dump(file_get_contents('http://127.0.0.1:22346/', false, stream_context_create($options)));
-
-    $options['http']['follow_location'] = true;
-
     var_dump(copy('http://127.0.0.1:22346/', __FILE__ . '.txt', stream_context_create($options)));
 }
 test();
@@ -37,7 +31,9 @@ test();
 http_server_kill($pid);
 ?>
 --EXPECTF--
-string(0) ""
+Warning: file_get_contents(http://127.0.0.1:22346/): failed to open stream: HTTP request failed! HTTP/1.0 304 Not Modified
+ in %s on line %d
+bool(false)
 
 Warning: copy(http://127.0.0.1:22346/): failed to open stream: HTTP request failed! HTTP/1.0 304 Not Modified
  in %s on line %d
