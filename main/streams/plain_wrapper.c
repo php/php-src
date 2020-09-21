@@ -829,6 +829,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							delta = (DWORD)range->offset - loffs;
 						}
 
+						/* MapViewOfFile()ing zero bytes would map to the end of the file; match *nix behavior instead */
+						if (range->length + delta == 0) {
+							return PHP_STREAM_OPTION_RETURN_ERR;
+						}
+
 						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, 0, loffs, range->length + delta);
 
 						if (data->last_mapped_addr) {

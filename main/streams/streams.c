@@ -1566,29 +1566,48 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 	if (php_stream_mmap_possible(src)) {
 		char *p;
-		size_t mapped;
 
-		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
+		do {
+			size_t chunk_size = (maxlen == 0 || maxlen > PHP_STREAM_MMAP_MAX) ? PHP_STREAM_MMAP_MAX : maxlen;
+			size_t mapped;
 
-		if (p) {
-			ssize_t didwrite = php_stream_write(dest, p, mapped);
-			if (didwrite < 0) {
-				*len = 0;
-				return FAILURE;
+			p = php_stream_mmap_range(src, php_stream_tell(src), chunk_size, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
+
+			if (p) {
+				ssize_t didwrite;
+
+				if (php_stream_seek(src, mapped, SEEK_CUR) != 0) {
+					php_stream_mmap_unmap(src);
+					break;
+				}
+
+				didwrite = php_stream_write(dest, p, mapped);
+				if (didwrite < 0) {
+					*len = haveread;
+					return FAILURE;
+				}
+
+				php_stream_mmap_unmap(src);
+
+				*len = haveread += didwrite;
+
+				/* we've got at least 1 byte to read
+				 * less than 1 is an error
+				 * AND read bytes match written */
+				if (mapped == 0 || mapped != didwrite) {
+					return FAILURE;
+				}
+				if (mapped < chunk_size) {
+					return SUCCESS;
+				}
+				if (maxlen != 0) {
+					maxlen -= mapped;
+					if (maxlen == 0) {
+						return SUCCESS;
+					}
+				}
 			}
-
-			php_stream_mmap_unmap_ex(src, mapped);
-
-			*len = didwrite;
-
-			/* we've got at least 1 byte to read
-			 * less than 1 is an error
-			 * AND read bytes match written */
-			if (mapped > 0 && mapped == didwrite) {
-				return SUCCESS;
-			}
-			return FAILURE;
-		}
+		} while (p);
 	}
 
 	while(1) {
