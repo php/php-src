@@ -148,7 +148,7 @@ function imap_subscribe($stream_id, string $mailbox): bool {}
 function imap_unsubscribe($stream_id, string $mailbox): bool {}
 
 /** @param resource $stream_id */
-function imap_append($stream_id, string $folder, string $message, string $options = UNKNOWN, string $internal_date = UNKNOWN): bool {}
+function imap_append($stream_id, string $folder, string $message, ?string $options = null, ?string $internal_date = null): bool {}
 
 /** @param resource $stream_id */
 function imap_ping($stream_id): bool {}
@@ -180,7 +180,7 @@ function imap_setflag_full($stream_id, string $sequence, string $flag, int $opti
 function imap_clearflag_full($stream_id, string $sequence, string $flag, int $options = 0): bool {}
 
 /** @param resource $stream_id */
-function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, string $search_criteria = UNKNOWN, string $charset = UNKNOWN): array|false {}
+function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, ?string $search_criteria = null, ?string $charset = null): array|false {}
 
 /** @param resource $stream_id */
 function imap_uid($stream_id, int $msg_no): int|false {}
@@ -258,4 +258,4 @@ function imap_setacl($stream_id, string $mailbox, string $id, string $rights): b
 function imap_getacl($stream_id, string $mailbox): array|false {}
 #endif
 
-function imap_mail(string $to, string $subject, string $message, string $additional_headers = UNKNOWN, string $cc = UNKNOWN, string $bcc = UNKNOWN, string $rpath = UNKNOWN): bool {}
+function imap_mail(string $to, string $subject, string $message, ?string $additional_headers = null, ?string $cc = null, ?string $bcc = null, ?string $rpath = null): bool {}

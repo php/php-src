@@ -866,7 +866,7 @@ PHP_FUNCTION(imap_append)
 	pils *imap_le_struct;
 	STRING st;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|SS", &streamind, &folder, &message, &flags, &internal_date) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|S!S!", &streamind, &folder, &message, &flags, &internal_date) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2647,7 +2647,7 @@ PHP_FUNCTION(imap_sort)
 	SEARCHPGM *spg=NIL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rll|lSS", &streamind, &pgm, &rev, &flags, &criteria, &charset) == FAILURE) {
+	if (zend_parse_parameters(argc, "rll|lS!S!", &streamind, &pgm, &rev, &flags, &criteria, &charset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2665,7 +2665,7 @@ PHP_FUNCTION(imap_sort)
 			RETURN_FALSE;
 		}
 	}
-	if (argc >= 5) {
+	if (criteria) {
 		search_criteria = estrndup(ZSTR_VAL(criteria), ZSTR_LEN(criteria));
 		spg = mail_criteria(search_criteria);
 		efree(search_criteria);
@@ -2678,7 +2678,7 @@ PHP_FUNCTION(imap_sort)
 	mypgm->function = (short) pgm;
 	mypgm->next = NIL;
 
-	slst = mail_sort(imap_le_struct->imap_stream, (argc == 6 ? ZSTR_VAL(charset) : NIL), spg, mypgm, (argc >= 4 ? flags : NIL));
+	slst = mail_sort(imap_le_struct->imap_stream, (charset ? ZSTR_VAL(charset) : NIL), spg, mypgm, (argc >= 4 ? flags : NIL));
 
 	if (spg && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&spg);
@@ -3577,7 +3577,7 @@ PHP_FUNCTION(imap_mail)
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "PPP|PPPP", &to, &subject, &message,
+	if (zend_parse_parameters(argc, "PPP|P!P!P!P!", &to, &subject, &message,
 		&headers, &cc, &bcc, &rpath) == FAILURE) {
 		RETURN_THROWS();
 	}
