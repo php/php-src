@@ -2,20 +2,19 @@
 mysqli_float_handling - ensure 4 byte float is handled correctly
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
-	if (@$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-		if ($link->server_version < 50709) {
-			die("skip MySQL 5.7.9+ needed. Found [".
-				intval(substr($link->server_version."", -5, 1)).
-				".".
-				intval(substr($link->server_version."", -4, 2)).
-				".".
-				intval(substr($link->server_version."", -2, 2)).
-				"]");
-		}
-	}
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
+    if (@$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        if ($link->server_version < 50709) {
+            die("skip MySQL 5.7.9+ needed. Found [".
+                intval(substr($link->server_version."", -5, 1)).
+                ".".
+                intval(substr($link->server_version."", -4, 2)).
+                ".".
+                intval(substr($link->server_version."", -2, 2)).
+                "]");
+        }
+    }
 ?>
 --FILE--
 <?php
@@ -56,7 +55,7 @@ mysqli_float_handling - ensure 4 byte float is handled correctly
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 OK

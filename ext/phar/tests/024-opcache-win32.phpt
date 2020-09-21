@@ -5,8 +5,8 @@ Phar: phar:// include with Opcache
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded('Zend OPcache')) die('skip Zend OPcache extension not available'); ?>
 <?php
-	$cache_dir = dirname(__FILE__) . "/024-file_cache";
-	if (!is_dir($cache_dir) && !mkdir($cache_dir)) die("skip unable to create file_cache dir");
+    $cache_dir = dirname(__FILE__) . "/024-file_cache";
+    if (!is_dir($cache_dir) && !mkdir($cache_dir)) die("skip unable to create file_cache dir");
 ?>
 --INI--
 phar.require_hash=0

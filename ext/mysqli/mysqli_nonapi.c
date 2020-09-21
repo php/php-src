@@ -326,7 +326,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql));
 
 #ifndef MYSQLI_USE_MYSQLND
-	mysql->mysql->reconnect = MyG(reconnect);
+	char reconnect = MyG(reconnect);
+	mysql_options(mysql->mysql, MYSQL_OPT_RECONNECT, (char *)&reconnect);
 #endif
 	unsigned int allow_local_infile = MyG(allow_local_infile);
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&allow_local_infile);
@@ -1039,6 +1040,7 @@ PHP_FUNCTION(mysqli_set_charset)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	if (mysql_set_character_set(mysql->mysql, cs_name)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1108,45 +1110,43 @@ extern char * mysqli_escape_string_for_tx_name_in_comment(const char * const nam
 static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mode, const char * const name)
 {
 	int ret;
-	zend_bool err = FALSE;
 	smart_str tmp_str = {0};
+	char * name_esc;
+	char * query;
+	unsigned int query_len;
 	if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
 		if (tmp_str.s) {
 			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 		}
 		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
 	}
-	if (mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY)) {
-		if (mysql_get_server_version(conn) < 50605L) {
-			php_error_docref(NULL, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
-			err = TRUE;
-		} else if (mode & TRANS_START_READ_WRITE) {
-			if (tmp_str.s) {
-				smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
-			}
-			smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
-		} else if (mode & TRANS_START_READ_ONLY) {
-			if (tmp_str.s) {
-				smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
-			}
-			smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
+	if (mode & TRANS_START_READ_WRITE) {
+		if (tmp_str.s) {
+			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 		}
+		smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+	} else if (mode & TRANS_START_READ_ONLY) {
+		if (tmp_str.s) {
+			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
 	}
 	smart_str_0(&tmp_str);
 
-	if (err == FALSE){
-		char * name_esc = mysqli_escape_string_for_tx_name_in_comment(name);
-		char * query;
-		unsigned int query_len = spprintf(&query, 0, "START TRANSACTION%s %s",
-										  name_esc? name_esc:"", tmp_str.s? ZSTR_VAL(tmp_str.s):"");
+	name_esc = mysqli_escape_string_for_tx_name_in_comment(name);
+	query_len = spprintf(&query, 0, "START TRANSACTION%s %s",
+						 name_esc? name_esc:"", tmp_str.s? ZSTR_VAL(tmp_str.s):"");
 
-		smart_str_free(&tmp_str);
-		if (name_esc) {
-			efree(name_esc);
-		}
+	smart_str_free(&tmp_str);
+	if (name_esc) {
+		efree(name_esc);
+	}
 
-		ret = mysql_real_query(conn, query, query_len);
-		efree(query);
+	ret = mysql_real_query(conn, query, query_len);
+	efree(query);
+
+	if (ret && mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY) && mysql_errno(conn) == 1064) {
+		php_error_docref(NULL, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
 	}
 	return ret;
 }
@@ -1249,7 +1249,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 #ifndef MYSQLI_USE_MYSQLND
 	if (mysqli_savepoint_libmysql(mysql->mysql, name, TRUE)) {
 #else
-	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
+	if (FAIL == mysqlnd_release_savepoint(mysql->mysql, name)) {
 #endif
 		RETURN_FALSE;
 	}

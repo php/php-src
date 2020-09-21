@@ -3,7 +3,7 @@ Bug #27103 (preg_split('//u') incorrectly splits UTF-8 strings into octets)
 --SKIPIF--
 <?php
 if (@preg_match('/./u', '') === false) {
-	die('skip no utf8 support in PCRE library');
+    die('skip no utf8 support in PCRE library');
 }
 ?>
 --FILE--

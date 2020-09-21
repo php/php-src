@@ -3,15 +3,14 @@ mysqli_release_savepoint()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!have_innodb($link))
-	die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+    die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
@@ -39,7 +38,7 @@ if (!have_innodb($link))
         printf("[009] Cannot turn off autocommit, expecting true, got %s/%s\n", gettype($tmp), $tmp);
 
     /* note that there is no savepoint my... */
-    if (true !== ($tmp = mysqli_release_savepoint($link, 'my')))
+    if (false !== ($tmp = mysqli_release_savepoint($link, 'my')))
         printf("[010] Got %s - [%d] %s\n", var_dump($tmp, true), mysqli_errno($link), mysqli_error($link));
 
     if (!mysqli_query($link, 'INSERT INTO test(id) VALUES (1)'))
@@ -62,7 +61,7 @@ if (!have_innodb($link))
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli_release_savepoint(): Argument #2 ($name) cannot be empty

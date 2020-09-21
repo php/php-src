@@ -3,7 +3,7 @@ __sleep cannot take arguments
 --FILE--
 <?php
 class Foo {
-	public function __sleep(string $name) {}
+    public function __sleep(string $name) {}
 }
 ?>
 --EXPECTF--

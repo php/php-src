@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 90dd576049fe13617343fe689000b94b20f47655 */
+ * Stub hash: 907a616e7138369e6e3ccbbb10e6c0f2a380fe93 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -13,11 +13,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_connect_poll, 0, 1, IS_LONG, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_close, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_dbname, 0, 0, IS_STRING, 0)
-	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_last_error arginfo_pg_dbname
@@ -33,7 +33,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_pg_host arginfo_pg_dbname
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_version, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_parameter_status, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -197,7 +197,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_trace, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 0, "\"w\"")
-	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_untrace arginfo_pg_close
@@ -240,7 +240,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_lo_write, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, large_object)
 	ZEND_ARG_TYPE_INFO(0, buf, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, len, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_lowrite arginfo_pg_lo_write
@@ -326,7 +326,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_pg_escape_bytea arginfo_pg_escape_string
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_unescape_bytea, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_escape_literal, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)

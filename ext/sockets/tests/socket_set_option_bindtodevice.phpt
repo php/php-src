@@ -9,10 +9,10 @@ if (!extension_loaded('sockets')) {
         die('SKIP sockets extension not available.');
 }
 if (!defined("SO_BINDTODEVICE")) {
-	die('SKIP SO_BINDTODEVICE not supported on this platform.');
+    die('SKIP SO_BINDTODEVICE not supported on this platform.');
 }
 if (!function_exists("posix_getuid") || posix_getuid() != 0) {
-	die('SKIP SO_BINDTODEVICE requires root permissions.');
+    die('SKIP SO_BINDTODEVICE requires root permissions.');
 }
 ?>
 --FILE--

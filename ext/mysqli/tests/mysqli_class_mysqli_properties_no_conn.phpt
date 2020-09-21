@@ -3,7 +3,6 @@ Interface of the class mysqli
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -285,7 +284,7 @@ Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
 Property access is not allowed yet
-mysqli->client_version = '80000'/integer
+mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed
 mysqli object is already closed
@@ -367,7 +366,7 @@ Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
 Property access is not allowed yet
-mysqli->client_version = '80000'/integer
+mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed
 mysqli object is already closed

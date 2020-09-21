@@ -3,7 +3,6 @@ mysqli_fetch_array() - all datatypes but BIT
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -174,9 +173,7 @@ require_once('skipifconnectfailure.inc');
     func_mysqli_fetch_array($link, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
     func_mysqli_fetch_array($link, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
-    if ($IS_MYSQLND ||
-        ((mysqli_get_server_version($link) >= 51000) &&
-        (mysqli_get_client_version($link) >= 51000))) {
+    if ($IS_MYSQLND || mysqli_get_server_version($link) >= 51000) {
         func_mysqli_fetch_array($link, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
         func_mysqli_fetch_array($link, $engine, "BIGINT", NULL, NULL, 260);
         func_mysqli_fetch_array($link, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 260);

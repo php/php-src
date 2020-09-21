@@ -3,26 +3,25 @@ mysqli_debug() - enabling trace with ini setting
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_debug'))
- 	die("skip mysqli_debug() not available");
+    die("skip mysqli_debug() not available");
 
 if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
-	die("skip: can't say for sure if mysqli_debug works");
+    die("skip: can't say for sure if mysqli_debug works");
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
-	die("skip: debug functionality not enabled");
+    die("skip: debug functionality not enabled");
 
 require_once('connect.inc');
 if (!$IS_MYSQLND)
-	die("skip needs mysqlnd");
+    die("skip needs mysqlnd");
 
 if (!$fp = @fopen('/tmp/mysqli_debug_phpt.trace', 'w'))
-	die("skip PHP cannot create a file in /tmp/mysqli_debug_phpt");
+    die("skip PHP cannot create a file in /tmp/mysqli_debug_phpt");
 else
-	fclose($fp);
+    fclose($fp);
 @unlink("/tmp/mysqli_debug_phpt.trace");
 ?>
 --INI--

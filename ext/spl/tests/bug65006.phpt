@@ -4,17 +4,17 @@ Bug #65006: spl_autoload_register fails with multiple callables using self, same
 <?php
 
 class first {
-	public static function init() {
-		spl_autoload_register(array('self','load'));
-	}
-	public static function load($class) {}
+    public static function init() {
+        spl_autoload_register(array('self','load'));
+    }
+    public static function load($class) {}
 }
 
 class second {
-	public static function init() {
-		spl_autoload_register(array('self','load'));
-	}
-	public static function load($class){}
+    public static function init() {
+        spl_autoload_register(array('self','load'));
+    }
+    public static function load($class){}
 }
 
 first::init();

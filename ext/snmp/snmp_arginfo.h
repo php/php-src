@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 759c8a5e721d1c6c9cb63e59ae14f85831396a4d */
+ * Stub hash: 31a125dde8e52e7849c8cd62ac410be9249a80df */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_snmpget, 0, 3, stdClass, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
@@ -129,12 +129,12 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SNMP_setSecurity, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, sec_level, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_protocol, IS_STRING, 0, "\'\'")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_passphrase, IS_STRING, 0, "\'\'")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, priv_protocol, IS_STRING, 0, "\'\'")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, priv_passphrase, IS_STRING, 0, "\'\'")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, contextName, IS_STRING, 0, "\'\'")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, contextEngineID, IS_STRING, 0, "\'\'")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_protocol, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_passphrase, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, priv_protocol, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, priv_passphrase, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, contextName, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, contextEngineID, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SNMP_get, 0, 0, 1)

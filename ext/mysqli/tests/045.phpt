@@ -2,21 +2,20 @@
 mysqli_stmt_bind_result (SHOW)
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
 
-	require_once("connect.inc");
-	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+    require_once("connect.inc");
+    $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
-	mysqli_stmt_execute($stmt);
+    $stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
+    mysqli_stmt_execute($stmt);
 
-	if (!$stmt->field_count) {
-		printf("skip SHOW command is not supported in prepared statements.");
-	}
-	$stmt->close();
-	mysqli_close($link);
+    if (!$stmt->field_count) {
+        printf("skip SHOW command is not supported in prepared statements.");
+    }
+    $stmt->close();
+    mysqli_close($link);
 ?>
 --FILE--
 <?php

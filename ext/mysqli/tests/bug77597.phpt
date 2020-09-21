@@ -4,6 +4,7 @@ Bug #77597: mysqli_fetch_field hangs scripts
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) die('skip requires mysqlnd');
 ?>
 --FILE--
 <?php

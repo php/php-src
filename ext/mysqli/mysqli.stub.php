@@ -572,7 +572,9 @@ function mysqli_fetch_field_direct(mysqli_result $mysql_result, int $offset): ob
 
 function mysqli_fetch_lengths(mysqli_result $mysql_result): array|false {}
 
+#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_fetch_all(mysqli_result $mysql_result, int $mode = MYSQLI_NUM): array|false {}
+#endif
 
 function mysqli_fetch_array(mysqli_result $mysql_result, int $fetchtype = MYSQLI_BOTH): array|null|false {}
 
@@ -590,9 +592,11 @@ function mysqli_field_tell(mysqli_result $mysqli_result): int {}
 
 function mysqli_free_result(mysqli_result $mysqli_result): void {}
 
+#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_get_connection_stats(mysqli $mysqli_link): array {}
 
 function mysqli_get_client_stats(): array {}
+#endif
 
 function mysqli_get_charset(mysqli $mysqli_link): ?object {}
 
@@ -635,7 +639,9 @@ function mysqli_options(mysqli $mysqli_link, int $option, $value): bool {}
 
 function mysqli_ping(mysqli $mysqli_link): bool {}
 
+#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_poll(?array &$read, ?array &$write, array &$error, int $sec, int $usec = 0): int|false {}
+#endif
 
 function mysqli_prepare(mysqli $mysqli_link, string $query): mysqli_stmt|false {}
 
@@ -658,7 +664,9 @@ function mysqli_real_escape_string(mysqli $mysqli_link, string $string_to_escape
 
 function mysqli_real_query(mysqli $mysqli_link, string $query): bool {}
 
+#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_reap_async_query(mysqli $mysqli_link): mysqli_result|bool {}
+#endif
 
 function mysqli_release_savepoint(mysqli $mysqli_link, string $name): bool {}
 
@@ -696,7 +704,9 @@ function mysqli_stmt_field_count(mysqli_stmt $mysql_stmt): int {}
 
 function mysqli_stmt_free_result(mysqli_stmt $mysql_stmt): void {}
 
+#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_stmt_get_result(mysqli_stmt $mysql_stmt): mysqli_result|false {}
+#endif
 
 function mysqli_stmt_get_warnings(mysqli_stmt $mysql_stmt): mysqli_warning|false {}
 
@@ -704,9 +714,11 @@ function mysqli_stmt_init(mysqli $mysql_link): mysqli_stmt|false {}
 
 function mysqli_stmt_insert_id(mysqli_stmt $mysql_stmt): int|string {}
 
+#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_stmt_more_results(mysqli_stmt $mysql_stmt): bool {}
 
 function mysqli_stmt_next_result(mysqli_stmt $mysql_stmt): bool {}
+#endif
 
 function mysqli_stmt_num_rows(mysqli_stmt $mysql_stmt): int|string {}
 

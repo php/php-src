@@ -3,7 +3,6 @@ mysqli_kill()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -78,7 +77,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
@@ -96,7 +95,7 @@ object(mysqli)#%d (%d) {
   ["connect_error"]=>
   NULL
   ["errno"]=>
-  int(2006)
+  int(%d)
   ["error"]=>
   string(%d) "%s"
   ["error_list"]=>
@@ -104,7 +103,7 @@ object(mysqli)#%d (%d) {
     [0]=>
     array(3) {
       ["errno"]=>
-      int(2006)
+      int(%d)
       ["sqlstate"]=>
       string(5) "%s"
       ["error"]=>

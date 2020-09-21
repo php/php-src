@@ -559,7 +559,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss!",
 					&table_name, &table_name_len, &pg_rows,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
@@ -670,7 +670,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
 	ExecStatusType status;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss!",
 				&table_name, &table_name_len, &filename, &filename_len,
 				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
@@ -770,7 +770,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
 
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss!",
 					&table_name, &table_name_len, &filename, &filename_len,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
@@ -862,7 +862,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss!",
 		&table_name, &table_name_len,
 		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();

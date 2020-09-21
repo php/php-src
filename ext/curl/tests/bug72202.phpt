@@ -3,7 +3,7 @@ Bug #72202 (curl_close doesn't close cURL handle)
 --SKIPIF--
 <?php
 if (!extension_loaded("curl")) {
-	exit("skip curl extension not loaded");
+    exit("skip curl extension not loaded");
 }
 ?>
 --FILE--

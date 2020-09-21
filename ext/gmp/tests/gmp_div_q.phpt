@@ -76,6 +76,6 @@ object(GMP)#1 (1) {
   ["num"]=>
   string(4) "9131"
 }
-gmp_div_q(): Argument #1 ($a) must be of type GMP|string|int|bool, resource given
-gmp_div_q(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_div_q(): Argument #1 ($a) must be of type GMP|string|int, resource given
+gmp_div_q(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

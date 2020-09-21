@@ -3,23 +3,22 @@ mysqli_change_user() - SET NAMES
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die(sprintf("skip [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
-	die(sprintf("skip [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
+    die(sprintf("skip [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
 
 $tmp = mysqli_fetch_assoc($res);
 mysqli_free_result($res);
 $version = explode('.', $tmp['server_version']);
 if (empty($version))
-	die(sprintf("skip Cannot determine server version, we need MySQL Server 4.1+ for the test!"));
+    die(sprintf("skip Cannot determine server version, we need MySQL Server 4.1+ for the test!"));
 
 if ($version[0] <= 4 && $version[1] < 1)
-	die(sprintf("skip We need MySQL Server 4.1+ for the test!"));
+    die(sprintf("skip We need MySQL Server 4.1+ for the test!"));
 ?>
 --FILE--
 <?php

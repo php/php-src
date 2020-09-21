@@ -3,11 +3,10 @@ Trying to clone mysqli_warning object
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 if (!$TEST_EXPERIMENTAL)
-	die("skip - experimental (= unsupported) feature");
+    die("skip - experimental (= unsupported) feature");
 ?>
 --FILE--
 <?php
@@ -35,7 +34,7 @@ if (!$TEST_EXPERIMENTAL)
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Fatal error: Trying to clone an uncloneable object of class mysqli_warning in %s on line %d

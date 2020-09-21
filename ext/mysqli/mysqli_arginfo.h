@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: beb821b6e0b26f798d88f7b726a39084d856251f */
+ * Stub hash: 7657a5373cc27d878b1ac1f11d371f77fe243a6a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)
@@ -96,10 +96,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_fetch_lengths, 0, 1, MAY_
 	ZEND_ARG_OBJ_INFO(0, mysql_result, mysqli_result, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_fetch_all, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, mysql_result, mysqli_result, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "MYSQLI_NUM")
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_fetch_array, 0, 1, MAY_BE_ARRAY|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, mysql_result, mysqli_result, 0)
@@ -137,12 +139,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_free_result, 0, 1, IS_VOI
 	ZEND_ARG_OBJ_INFO(0, mysqli_result, mysqli_result, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_connection_stats, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_client_stats, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_charset, 0, 1, IS_OBJECT, 1)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
@@ -154,7 +160,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_get_client_version arginfo_mysqli_connect_errno
 
-#define arginfo_mysqli_get_links_stats arginfo_mysqli_get_client_stats
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_links_stats, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_host_info, 0, 1, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
@@ -213,6 +220,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_ping arginfo_mysqli_more_results
 
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_poll, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
@@ -220,6 +228,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_poll, 0, 4, MAY_BE_LONG|M
 	ZEND_ARG_TYPE_INFO(0, sec, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, usec, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_prepare, 0, 2, mysqli_stmt, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
@@ -254,9 +263,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_real_query arginfo_mysqli_multi_query
 
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_reap_async_query, 0, 1, mysqli_result, MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_release_savepoint, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
@@ -336,9 +347,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_free_result, 0, 1, I
 	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_stmt_get_result, 0, 1, mysqli_result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_stmt_get_warnings, 0, 1, mysqli_warning, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
@@ -350,9 +363,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_stmt_insert_id arginfo_mysqli_stmt_affected_rows
 
-#define arginfo_mysqli_stmt_more_results arginfo_mysqli_stmt_execute
+#if defined(MYSQLI_USE_MYSQLND)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_more_results, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
+ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_execute
+#if defined(MYSQLI_USE_MYSQLND)
+#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_more_results
+#endif
 
 #define arginfo_mysqli_stmt_num_rows arginfo_mysqli_stmt_affected_rows
 
@@ -365,7 +384,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_stmt_reset arginfo_mysqli_stmt_execute
 
-#define arginfo_mysqli_stmt_result_metadata arginfo_mysqli_stmt_get_result
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_stmt_result_metadata, 0, 1, mysqli_result, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_send_long_data, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
@@ -711,7 +732,9 @@ ZEND_FUNCTION(mysqli_fetch_field);
 ZEND_FUNCTION(mysqli_fetch_fields);
 ZEND_FUNCTION(mysqli_fetch_field_direct);
 ZEND_FUNCTION(mysqli_fetch_lengths);
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_fetch_all);
+#endif
 ZEND_FUNCTION(mysqli_fetch_array);
 ZEND_FUNCTION(mysqli_fetch_assoc);
 ZEND_FUNCTION(mysqli_fetch_object);
@@ -720,8 +743,12 @@ ZEND_FUNCTION(mysqli_field_count);
 ZEND_FUNCTION(mysqli_field_seek);
 ZEND_FUNCTION(mysqli_field_tell);
 ZEND_FUNCTION(mysqli_free_result);
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_get_connection_stats);
+#endif
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_get_client_stats);
+#endif
 ZEND_FUNCTION(mysqli_get_charset);
 ZEND_FUNCTION(mysqli_get_client_info);
 ZEND_FUNCTION(mysqli_get_client_version);
@@ -742,14 +769,18 @@ ZEND_FUNCTION(mysqli_num_fields);
 ZEND_FUNCTION(mysqli_num_rows);
 ZEND_FUNCTION(mysqli_options);
 ZEND_FUNCTION(mysqli_ping);
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_poll);
+#endif
 ZEND_FUNCTION(mysqli_prepare);
 ZEND_FUNCTION(mysqli_report);
 ZEND_FUNCTION(mysqli_query);
 ZEND_FUNCTION(mysqli_real_connect);
 ZEND_FUNCTION(mysqli_real_escape_string);
 ZEND_FUNCTION(mysqli_real_query);
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_reap_async_query);
+#endif
 ZEND_FUNCTION(mysqli_release_savepoint);
 ZEND_FUNCTION(mysqli_rollback);
 ZEND_FUNCTION(mysqli_savepoint);
@@ -768,12 +799,18 @@ ZEND_FUNCTION(mysqli_stmt_error_list);
 ZEND_FUNCTION(mysqli_stmt_fetch);
 ZEND_FUNCTION(mysqli_stmt_field_count);
 ZEND_FUNCTION(mysqli_stmt_free_result);
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_stmt_get_result);
+#endif
 ZEND_FUNCTION(mysqli_stmt_get_warnings);
 ZEND_FUNCTION(mysqli_stmt_init);
 ZEND_FUNCTION(mysqli_stmt_insert_id);
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_stmt_more_results);
+#endif
+#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_stmt_next_result);
+#endif
 ZEND_FUNCTION(mysqli_stmt_num_rows);
 ZEND_FUNCTION(mysqli_stmt_param_count);
 ZEND_FUNCTION(mysqli_stmt_prepare);
@@ -792,31 +829,10 @@ ZEND_FUNCTION(mysqli_use_result);
 ZEND_FUNCTION(mysqli_warning_count);
 ZEND_FUNCTION(mysqli_refresh);
 ZEND_METHOD(mysqli, __construct);
-#if defined(MYSQLI_USE_MYSQLND)
-ZEND_FUNCTION(mysqli_get_connection_stats);
-#endif
 ZEND_FUNCTION(mysqli_init_method);
-#if defined(MYSQLI_USE_MYSQLND)
-ZEND_FUNCTION(mysqli_poll);
-#endif
-#if defined(MYSQLI_USE_MYSQLND)
-ZEND_FUNCTION(mysqli_reap_async_query);
-#endif
 ZEND_METHOD(mysqli_result, __construct);
-#if defined(MYSQLI_USE_MYSQLND)
-ZEND_FUNCTION(mysqli_fetch_all);
-#endif
 ZEND_METHOD(mysqli_result, getIterator);
 ZEND_METHOD(mysqli_stmt, __construct);
-#if defined(MYSQLI_USE_MYSQLND)
-ZEND_FUNCTION(mysqli_stmt_more_results);
-#endif
-#if defined(MYSQLI_USE_MYSQLND)
-ZEND_FUNCTION(mysqli_stmt_next_result);
-#endif
-#if defined(MYSQLI_USE_MYSQLND)
-ZEND_FUNCTION(mysqli_stmt_get_result);
-#endif
 ZEND_METHOD(mysqli_warning, __construct);
 ZEND_METHOD(mysqli_warning, next);
 
@@ -844,7 +860,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_fetch_fields, arginfo_mysqli_fetch_fields)
 	ZEND_FE(mysqli_fetch_field_direct, arginfo_mysqli_fetch_field_direct)
 	ZEND_FE(mysqli_fetch_lengths, arginfo_mysqli_fetch_lengths)
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_fetch_all, arginfo_mysqli_fetch_all)
+#endif
 	ZEND_FE(mysqli_fetch_array, arginfo_mysqli_fetch_array)
 	ZEND_FE(mysqli_fetch_assoc, arginfo_mysqli_fetch_assoc)
 	ZEND_FE(mysqli_fetch_object, arginfo_mysqli_fetch_object)
@@ -853,8 +871,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_field_seek, arginfo_mysqli_field_seek)
 	ZEND_FE(mysqli_field_tell, arginfo_mysqli_field_tell)
 	ZEND_FE(mysqli_free_result, arginfo_mysqli_free_result)
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_get_connection_stats, arginfo_mysqli_get_connection_stats)
+#endif
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_get_client_stats, arginfo_mysqli_get_client_stats)
+#endif
 	ZEND_FE(mysqli_get_charset, arginfo_mysqli_get_charset)
 	ZEND_FE(mysqli_get_client_info, arginfo_mysqli_get_client_info)
 	ZEND_FE(mysqli_get_client_version, arginfo_mysqli_get_client_version)
@@ -875,14 +897,18 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_num_rows, arginfo_mysqli_num_rows)
 	ZEND_FE(mysqli_options, arginfo_mysqli_options)
 	ZEND_FE(mysqli_ping, arginfo_mysqli_ping)
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_poll, arginfo_mysqli_poll)
+#endif
 	ZEND_FE(mysqli_prepare, arginfo_mysqli_prepare)
 	ZEND_FE(mysqli_report, arginfo_mysqli_report)
 	ZEND_FE(mysqli_query, arginfo_mysqli_query)
 	ZEND_FE(mysqli_real_connect, arginfo_mysqli_real_connect)
 	ZEND_FE(mysqli_real_escape_string, arginfo_mysqli_real_escape_string)
 	ZEND_FE(mysqli_real_query, arginfo_mysqli_real_query)
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_reap_async_query, arginfo_mysqli_reap_async_query)
+#endif
 	ZEND_FE(mysqli_release_savepoint, arginfo_mysqli_release_savepoint)
 	ZEND_FE(mysqli_rollback, arginfo_mysqli_rollback)
 	ZEND_FE(mysqli_savepoint, arginfo_mysqli_savepoint)
@@ -901,12 +927,18 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_stmt_fetch, arginfo_mysqli_stmt_fetch)
 	ZEND_FE(mysqli_stmt_field_count, arginfo_mysqli_stmt_field_count)
 	ZEND_FE(mysqli_stmt_free_result, arginfo_mysqli_stmt_free_result)
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_stmt_get_result, arginfo_mysqli_stmt_get_result)
+#endif
 	ZEND_FE(mysqli_stmt_get_warnings, arginfo_mysqli_stmt_get_warnings)
 	ZEND_FE(mysqli_stmt_init, arginfo_mysqli_stmt_init)
 	ZEND_FE(mysqli_stmt_insert_id, arginfo_mysqli_stmt_insert_id)
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_stmt_more_results, arginfo_mysqli_stmt_more_results)
+#endif
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_stmt_next_result, arginfo_mysqli_stmt_next_result)
+#endif
 	ZEND_FE(mysqli_stmt_num_rows, arginfo_mysqli_stmt_num_rows)
 	ZEND_FE(mysqli_stmt_param_count, arginfo_mysqli_stmt_param_count)
 	ZEND_FE(mysqli_stmt_prepare, arginfo_mysqli_stmt_prepare)

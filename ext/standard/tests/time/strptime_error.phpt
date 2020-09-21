@@ -3,7 +3,7 @@ Test localtime() function : error conditions
 --SKIPIF--
 <?php
 if (!function_exists('strptime')) {
-	echo "SKIP strptime function not available in build";
+    echo "SKIP strptime function not available in build";
 }
 ?>
 --FILE--

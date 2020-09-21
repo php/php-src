@@ -2,10 +2,10 @@
 imagefilter() function test
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-	if (!function_exists("imagefilter")) die("skip requires bundled GD library\n");
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available.");
+    }
+    if (!function_exists("imagefilter")) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php

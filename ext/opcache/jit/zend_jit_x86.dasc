@@ -8477,7 +8477,7 @@ typedef struct _zend_closure {
 	zif_handler       orig_internal_handler;
 } zend_closure;
 
-static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zend_function *func, zend_bool is_closure)
+static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zend_function *func, zend_bool is_closure, zend_bool use_this)
 {
 	uint32_t used_stack;
 
@@ -8599,7 +8599,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 		|	// Z_PTR(call->This) = obj;
 		|	mov r1, aword T1
 		|	mov aword EX:RX->This.value.ptr, r1
-	    if (opline->op1_type == IS_UNUSED) {
+	    if (opline->op1_type == IS_UNUSED || use_this) {
 			|	// call->call_info |= ZEND_CALL_HAS_THIS;
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				|	mov dword EX:RX->This.u1.type_info, ZEND_CALL_HAS_THIS
@@ -9038,7 +9038,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|3:
 	}
 
-	if (!zend_jit_push_call_frame(Dst, opline, func, 0)) {
+	if (!zend_jit_push_call_frame(Dst, opline, func, 0, 0)) {
 		return 0;
 	}
 
@@ -9116,7 +9116,11 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 					|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 				}
 				|	SET_EX_OPLINE opline, r0
-				|	EXT_CALL zend_jit_invalid_method_call, r0
+				if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
+					|	EXT_CALL zend_jit_invalid_method_call_tmp, r0
+				} else {
+					|	EXT_CALL zend_jit_invalid_method_call, r0
+				}
 				|	jmp ->exception_handler
 				|.code
 			}
@@ -9169,7 +9173,11 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	|	push r0
 	|.endif
 	|	SET_EX_OPLINE opline, r0
-	|	EXT_CALL zend_jit_find_method_helper, r0
+	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
+		|	EXT_CALL zend_jit_find_method_tmp_helper, r0
+	} else {
+		|	EXT_CALL zend_jit_find_method_helper, r0
+	}
 	|	test r0, r0
 	|	jz ->exception_handler
 	|.if not(X64)
@@ -9247,7 +9255,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|	sub r4, 12
 		|	push opline->extended_value
 		|.endif
-		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
 			|	EXT_CALL zend_jit_push_static_metod_call_frame_tmp, r0
 		} else {
 			|	EXT_CALL zend_jit_push_static_metod_call_frame, r0
@@ -9255,7 +9263,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
-		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR) && !use_this)) {
 			|	test r0, r0
 			|	jz ->exception_handler
 		}
@@ -9268,7 +9276,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	}
 
 	if (!func || (func->common.fn_flags & ZEND_ACC_STATIC) == 0) {
-		if (!zend_jit_push_call_frame(Dst, opline, func, 0)) {
+		if (!zend_jit_push_call_frame(Dst, opline, func, 0, use_this)) {
 			return 0;
 		}
 	}
@@ -9366,7 +9374,7 @@ static int zend_jit_init_closure_call(dasm_State          **Dst,
 		}
 	}
 
-	if (!zend_jit_push_call_frame(Dst, opline, func, 1)) {
+	if (!zend_jit_push_call_frame(Dst, opline, func, 1, 0)) {
 		return 0;
 	}
 
@@ -9425,6 +9433,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	uint32_t call_num_args = 0;
 	zend_bool unknown_num_args = 0;
 	const void *exit_addr = NULL;
+	const zend_op *prev_opline;
 
 	if (RETURN_VALUE_USED(opline)) {
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -9433,8 +9442,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, TMP_ZVAL_OFFSET);
 	}
 
-	if ((opline-1)->opcode == ZEND_SEND_UNPACK || (opline-1)->opcode == ZEND_SEND_ARRAY ||
-			(opline-1)->opcode == ZEND_CHECK_UNDEF_ARGS) {
+	prev_opline = opline - 1;
+	while (prev_opline->opcode == ZEND_EXT_FCALL_BEGIN || prev_opline->opcode == ZEND_TICKS) {
+		prev_opline--;
+	}
+	if (prev_opline->opcode == ZEND_SEND_UNPACK || prev_opline->opcode == ZEND_SEND_ARRAY ||
+			prev_opline->opcode == ZEND_CHECK_UNDEF_ARGS) {
 		unknown_num_args = 1;
 	}
 
@@ -9676,6 +9689,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 					if (!trace && op_array == &func->op_array) {
 						/* recursive call */
+						if (ZEND_OBSERVER_ENABLED) {
+							|	mov FCARG1a, FP
+							|	EXT_CALL zend_observer_fcall_begin, r0
+						}
 #ifdef CONTEXT_THREADED_JIT
 						|	call >1
 						|.cold_code
@@ -9778,6 +9795,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	lea r1, [r1 + 16]
 			|	jne <2
 			|3:
+		}
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	mov FCARG1a, FP
+			|	EXT_CALL zend_observer_fcall_begin, r0
 		}
 
 		if (trace) {
@@ -11157,6 +11179,11 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 
 	if (return_value_used == 0) {
 		|9:
+		if (ZEND_OBSERVER_ENABLED) {
+			|	xor FCARG2a, FCARG2a
+			|	mov FCARG1a, FP
+			|	EXT_CALL zend_observer_fcall_end, r0
+		}
 		return 1;
 	}
 
@@ -11219,6 +11246,11 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	|9:
+	if (ZEND_OBSERVER_ENABLED) {
+		|	LOAD_ZVAL_ADDR FCARG2a, ret_addr
+		|	mov FCARG1a, FP
+		|	EXT_CALL zend_observer_fcall_end, r0
+	}
 	return 1;
 }
 
@@ -15177,6 +15209,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 				regset = ZEND_REGSET_EMPTY;
+				if (!(opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ))) {
+					ZEND_REGSET_INCL(regset, ZREG_R0);
+				}
 				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) &&
 				    opline->op1_type != IS_CONST && opline->op2_type != IS_CONST) {
 					if (ssa_op->op1_use != current_var &&

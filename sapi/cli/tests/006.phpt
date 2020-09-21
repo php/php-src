@@ -4,10 +4,10 @@ show information about extension
 <?php
 include "skipif.inc";
 if (!extension_loaded("session")) {
-	die("skip session extension required");
+    die("skip session extension required");
 }
 if (PCRE_JIT_SUPPORT == false) {
-	die ("skip not pcre jit support builtin");
+    die ("skip not pcre jit support builtin");
 }
 ?>
 --INI--

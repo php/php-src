@@ -2,8 +2,8 @@
 DBA Insert/Replace/Fetch Test
 --SKIPIF--
 <?php
-	require_once(__DIR__ .'/skipif.inc');
-	die("info $HND handler used");
+    require_once(__DIR__ .'/skipif.inc');
+    die("info $HND handler used");
 ?>
 --FILE--
 <?php
@@ -21,7 +21,7 @@ DBA Insert/Replace/Fetch Test
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

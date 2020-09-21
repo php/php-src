@@ -2,8 +2,8 @@
 Bug #48732 (TTF Bounding box wrong for letters below baseline)
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imagefttext')) die('skip imagefttext() not available');
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!function_exists('imagefttext')) die('skip imagefttext() not available');
 ?>
 --FILE--
 <?php

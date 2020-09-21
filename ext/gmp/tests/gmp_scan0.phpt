@@ -34,5 +34,5 @@ int(0)
 int(5)
 int(200)
 int(13)
-gmp_scan0(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_scan0(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

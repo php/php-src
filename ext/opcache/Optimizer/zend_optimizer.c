@@ -844,7 +844,9 @@ zend_function *zend_optimizer_get_called_func(
 		case ZEND_INIT_METHOD_CALL:
 			if (opline->op1_type == IS_UNUSED
 					&& opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING
-					&& op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
+					&& op_array->scope
+					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
+					&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
 				zend_string *method_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
 				zend_function *fbc = zend_hash_find_ptr(
 					&op_array->scope->function_table, method_name);
@@ -883,6 +885,8 @@ uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) 
 	} else if (zend_string_equals_literal(name, "compact")) {
 		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	} else if (zend_string_equals_literal(name, "get_defined_vars")) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "db2_execute")) {
 		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	} else if (zend_string_equals_literal(name, "func_num_args")) {
 		return ZEND_FUNC_VARARG;

@@ -3,7 +3,7 @@ General semaphore and shared memory test
 --SKIPIF--
 <?php
 if(!extension_loaded('sysvsem') || !extension_loaded('sysvshm')) {
-	die("skip Both sysvsem and sysvshm required");
+    die("skip Both sysvsem and sysvshm required");
 }
 ?>
 --FILE--

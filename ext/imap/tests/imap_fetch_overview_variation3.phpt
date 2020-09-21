@@ -58,7 +58,7 @@ imap_fetch_overview() returns an object
 Testing with option value:bool(true)
 imap_fetch_overview() returns an object
 
-Testing with option value:float(1)
+Testing with option value:float(1.000000000000001)
 imap_fetch_overview() returns an object
 
 Testing with option value:float(1)

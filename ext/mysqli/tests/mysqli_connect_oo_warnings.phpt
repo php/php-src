@@ -2,13 +2,12 @@
 new mysqli()
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
-	if (!get_current_user())
-		die('skip: get_current_user() not supported');
-	if (stristr(mysqli_get_client_info(), 'mysqlnd'))
-		die("skip: test for libmysql (different error output when using php streams");
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
+    if (!get_current_user())
+        die('skip: get_current_user() not supported');
+    if (stristr(mysqli_get_client_info(), 'mysqlnd'))
+        die("skip: test for libmysql (different error output when using php streams");
 ?>
 --FILE--
 <?php

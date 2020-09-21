@@ -3,12 +3,11 @@ mysqli_options() - MYSQLI_OPT_INT_AND_FLOAT_NATIVE
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
 if (!$IS_MYSQLND)
-	die("skip mysqlnd only test");
+    die("skip mysqlnd only test");
 ?>
 --FILE--
 <?php
@@ -103,7 +102,7 @@ if (!$IS_MYSQLND)
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

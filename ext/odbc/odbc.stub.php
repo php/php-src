@@ -61,7 +61,7 @@ function odbc_fetch_row($result_id, int $row_number = UNKNOWN): bool {}
 function odbc_result($result_id, string|int $field): string|bool|null {}
 
 /** @param resource $result_id */
-function odbc_result_all($result_id, string $format = ''): int|false {}
+function odbc_result_all($result_id, string $format = ""): int|false {}
 
 /** @param resource $result_id */
 function odbc_free_result($result_id): bool {}

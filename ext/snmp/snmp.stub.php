@@ -60,7 +60,7 @@ class SNMP
     public function close() {}
 
     /** @return bool */
-    public function setSecurity(string $sec_level, string $auth_protocol = '', string $auth_passphrase = '', string $priv_protocol = '', string $priv_passphrase = '', string $contextName = '', string $contextEngineID = '') {}
+    public function setSecurity(string $sec_level, string $auth_protocol = "", string $auth_passphrase = "", string $priv_protocol = "", string $priv_passphrase = "", string $contextName = "", string $contextEngineID = "") {}
 
     /** @return array|bool */
     public function get(array|string $object_id, bool $use_orignames = false) {}

@@ -50,7 +50,7 @@ echo dba_fetch("key2", $db_file1), "\n";
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --XFAIL--
 Test 6 crashes with dba pointer of NULL, bug http://bugs.php.net/bug.php?id=51278

@@ -3,10 +3,9 @@ Trying implicit reconnect after wait_timeout and KILL using mysqli_ping()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (stristr(mysqli_get_client_info(), 'mysqlnd'))
-	die("skip: test for libmysql");
+    die("skip: test for libmysql");
 ?>
 --INI--
 mysqli.reconnect=1

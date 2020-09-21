@@ -6,7 +6,7 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 if (!MYSQLPDOTest::isPDOMySQLnd())
-	die("skip mysqlnd only test");
+    die("skip mysqlnd only test");
 ?>
 --FILE--
 <?php

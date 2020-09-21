@@ -2,7 +2,7 @@
 imagepolygon()
 --SKIPIF--
 <?php
-	if (!function_exists('imagepolygon')) die('skip imagepolygon() not available');
+    if (!function_exists('imagepolygon')) die('skip imagepolygon() not available');
 ?>
 --FILE--
 <?php
@@ -43,8 +43,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-	$dest = dirname(realpath(__FILE__)) . '/imagepolygon.png';
-	@unlink($dest);
+    $dest = dirname(realpath(__FILE__)) . '/imagepolygon.png';
+    @unlink($dest);
 ?>
 --EXPECT--
 Simple test of imagepolygon() function

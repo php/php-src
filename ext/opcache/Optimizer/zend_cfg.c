@@ -426,7 +426,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_FUNC_GET_ARGS:
 				flags |= ZEND_FUNC_VARARG;
 				break;
-			case ZEND_EXT_NOP:
 			case ZEND_EXT_STMT:
 				flags |= ZEND_FUNC_HAS_EXTENDED_STMT;
 				break;

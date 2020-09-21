@@ -2,8 +2,8 @@
 Bug #43073 (TrueType bounding box is wrong for angle<>0)
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imagettftext')) die('skip imagettftext() not available');
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!function_exists('imagettftext')) die('skip imagettftext() not available');
 ?>
 --FILE--
 <?php

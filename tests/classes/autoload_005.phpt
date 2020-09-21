@@ -2,7 +2,7 @@
 ZE2 Autoload from destructor
 --SKIPIF--
 <?php
-	if (class_exists('autoload_root', false)) die('skip Autoload test classes exist already');
+    if (class_exists('autoload_root', false)) die('skip Autoload test classes exist already');
 ?>
 --FILE--
 <?php

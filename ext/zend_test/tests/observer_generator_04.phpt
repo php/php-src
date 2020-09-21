@@ -18,7 +18,7 @@ function fooResults() {
 
 function doSomething() {
     $generator = fooResults();
-    
+
     while($generator->current() !== NULL) {
         echo $generator->current() . PHP_EOL;
         if ($generator->current() === 5) {

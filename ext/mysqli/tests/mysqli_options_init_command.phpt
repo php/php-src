@@ -3,10 +3,8 @@ mysqli_options()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
-<?php require_once('skipifemb.inc'); ?>
 --FILE--
 <?php
     /* see mysqli.c for details */
@@ -70,7 +68,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): %s in %s on line %d

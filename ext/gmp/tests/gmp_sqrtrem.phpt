@@ -86,5 +86,5 @@ string(1) "1"
 gmp_sqrtrem(): Argument #1 ($a) must be greater than or equal to 0
 string(4) "1000"
 string(1) "1"
-gmp_sqrtrem(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_sqrtrem(): Argument #1 ($a) must be of type GMP|string|int, array given
 Done

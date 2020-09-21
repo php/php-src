@@ -7,11 +7,11 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipif.inc'); ?>
 <?php if (!function_exists("ldap_sasl_bind")) die("skip LDAP extension not compiled with SASL support"); ?>
 <?php
-	require "connect.inc";
-	$link = @fsockopen($host, $port);
-	if (!$link) {
-		die("skip no server listening");
-	}
+    require "connect.inc";
+    $link = @fsockopen($host, $port);
+    if (!$link) {
+        die("skip no server listening");
+    }
 ?>
 --FILE--
 <?php

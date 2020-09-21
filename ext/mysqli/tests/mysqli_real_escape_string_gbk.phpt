@@ -3,16 +3,15 @@ mysqli_real_escape_string() - gbk
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",
-		mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",
+        mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (!mysqli_set_charset($link, 'gbk'))
-	die(sprintf("skip Cannot set charset 'gbk'"));
+    die(sprintf("skip Cannot set charset 'gbk'"));
 
 mysqli_close($link);
 ?>
@@ -65,7 +64,7 @@ mysqli_error($link));
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 bool(true)

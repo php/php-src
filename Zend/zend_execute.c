@@ -41,6 +41,7 @@
 #include "zend_type_info.h"
 #include "zend_smart_str.h"
 #include "zend_observer.h"
+#include "zend_system_id.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -4452,6 +4453,7 @@ static void end_fake_frame(zend_execute_data *call, zend_execute_data *old_prev_
 ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call) {
 	zend_function *fbc = call->func;
 	if (fbc->type == ZEND_USER_FUNCTION) {
+		zend_op_array *op_array = &fbc->op_array;
 		uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 		for (uint32_t i = 0; i < num_args; i++) {
 			zval *arg = ZEND_CALL_VAR_NUM(call, i);
@@ -4459,7 +4461,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 				continue;
 			}
 
-			zend_op_array *op_array = &fbc->op_array;
 			zend_op *opline = &op_array->opcodes[i];
 			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
 				zval *default_value = RT_CONSTANT(opline, opline->op2);

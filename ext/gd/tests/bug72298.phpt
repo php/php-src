@@ -2,7 +2,7 @@
 Bug #72298: pass2_no_dither out-of-bounds access
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
+    if (!extension_loaded('gd')) die("skip gd extension not available\n");
 ?>
 --FILE--
 <?php

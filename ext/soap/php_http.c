@@ -21,6 +21,7 @@
 #include "ext/standard/md5.h"
 #include "ext/standard/php_random.h"
 
+static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
 static char *get_http_header_value(char *headers, char *type);
 static zend_string *get_http_body(php_stream *socketd, int close, char *headers);
 static zend_string *get_http_headers(php_stream *socketd);
@@ -348,6 +349,7 @@ int make_http_soap_request(zval        *this_ptr,
 	int use_ssl;
 	zend_string *http_body;
 	char *content_type, *http_version, *cookie_itt;
+	size_t cookie_len;
 	int http_close;
 	zend_string *http_headers;
 	char *connection;
@@ -958,8 +960,9 @@ try_again:
 	   we shouldn't be changing urls so path doesn't
 	   matter too much
 	*/
-	cookie_itt = strstr(ZSTR_VAL(http_headers), "Set-Cookie: ");
-	while (cookie_itt) {
+	cookie_itt = ZSTR_VAL(http_headers);
+
+	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, "Set-Cookie: ", &cookie_len))) {
 		char *cookie;
 		char *eqpos, *sempos;
 		zval *cookies;
@@ -971,7 +974,7 @@ try_again:
 			cookies = zend_hash_str_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1, &tmp_cookies);
 		}
 
-		cookie = get_http_header_value(cookie_itt,"Set-Cookie: ");
+		cookie = estrndup(cookie_itt, cookie_len);
 
 		eqpos = strstr(cookie, "=");
 		sempos = strstr(cookie, ";");
@@ -1029,7 +1032,7 @@ try_again:
 			smart_str_free(&name);
 		}
 
-		cookie_itt = strstr(cookie_itt + sizeof("Set-Cookie: "), "Set-Cookie: ");
+		cookie_itt = cookie_itt + cookie_len;
 		efree(cookie);
 	}
 
@@ -1347,7 +1350,7 @@ try_again:
 	return TRUE;
 }
 
-static char *get_http_header_value(char *headers, char *type)
+static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
 {
 	char *pos, *tmp = NULL;
 	int typelen, headerslen;
@@ -1384,7 +1387,9 @@ static char *get_http_header_value(char *headers, char *type)
 					eol--;
 				}
 			}
-			return estrndup(tmp, eol - tmp);
+
+			*len = eol - tmp;
+			return tmp;
 		}
 
 		/* find next line */
@@ -1394,6 +1399,20 @@ static char *get_http_header_value(char *headers, char *type)
 		}
 
 	} while (pos);
+
+	return NULL;
+}
+
+static char *get_http_header_value(char *headers, char *type)
+{
+	size_t len;
+	char *value;
+
+	value = get_http_header_value_nodup(headers, type, &len);
+
+	if (value) {
+		return estrndup(value, len);
+	}
 
 	return NULL;
 }

@@ -4,7 +4,7 @@ CLI -a and readline
 <?php
 include "skipif.inc";
 if (!extension_loaded('readline') || readline_info('done') === NULL) {
-	die ("skip need readline support");
+    die ("skip need readline support");
 }
 ?>
 --FILE--

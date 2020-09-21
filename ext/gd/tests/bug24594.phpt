@@ -2,9 +2,9 @@
 Bug #24594 (Filling an area using tiles).
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available\n");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available\n");
+    }
 ?>
 --FILE--
 <?php

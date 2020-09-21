@@ -3,7 +3,7 @@ http:// and ignore_errors
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --FILE--
 <?php
 require 'server.inc';
@@ -17,11 +17,11 @@ function do_test($context_options) {
         "data://text/plain,HTTP/1.1 404 Not found\r\nX-bar: baz\r\n\r\n2",
     );
 
-    $pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
+    ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
     foreach($responses as $r) {
 
-        $fd = fopen('http://127.0.0.1:12342/foo/bar', 'rb', false, $context);
+        $fd = fopen("$uri/foo/bar", 'rb', false, $context);
         var_dump($fd);
 
         if ($fd) {
@@ -63,16 +63,16 @@ array(2) {
 }
 string(1) "1"
 string(%d) "GET /foo/bar HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 
 "
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): Failed to open stream: HTTP request failed! HTTP/1.1 404 Not found
+Warning: fopen(http://%s:%d/foo/bar): Failed to open stream: HTTP request failed! HTTP/1.1 404 Not found
  in %s on line %d
 bool(false)
 string(%d) "GET /foo/bar HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 
 "
@@ -86,7 +86,7 @@ array(2) {
 }
 string(1) "1"
 string(%d) "GET /foo/bar HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 
 "
@@ -99,7 +99,7 @@ array(2) {
 }
 string(1) "2"
 string(%d) "GET /foo/bar HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 
 "
@@ -113,7 +113,7 @@ array(2) {
 }
 string(1) "1"
 string(%d) "GET /foo/bar HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 
 "
@@ -126,7 +126,7 @@ array(2) {
 }
 string(1) "2"
 string(%d) "GET /foo/bar HTTP/1.1
-Host: 127.0.0.1:12342
+Host: %s:%d
 Connection: close
 
 "

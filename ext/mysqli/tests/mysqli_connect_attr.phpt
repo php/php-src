@@ -6,10 +6,10 @@ require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$IS_MYSQLND)
-	die("skip: test applies only to mysqlnd");
+    die("skip: test applies only to mysqlnd");
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die("skip Cannot connect to the server");
+    die("skip Cannot connect to the server");
 
 /* skip test if the server version does not have session_connect_attrs table yet*/
 if (!$res = mysqli_query($link, "select count(*) as count from information_schema.tables where table_schema='performance_schema' and table_name='session_connect_attrs';"))

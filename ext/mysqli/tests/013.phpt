@@ -46,9 +46,6 @@ require_once('skipifconnectfailure.inc');
         $test .= ($c[$i] == $d[$i]) ? "1" : "0";
     if ($test == "11111111")
         echo "ok\n";
-    else if ($b_res == FALSE && mysqli_get_client_version() > 40100 && mysqli_get_client_version() < 50000 &&
-                 mysqli_get_server_version($link) > 50000)
-        echo "error (4.1 library with 5.x server)";
     else
         echo "error";
 
@@ -63,7 +60,7 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_result"))
-	printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 mysqli_close($link);
 ?>

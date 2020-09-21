@@ -2,9 +2,9 @@
 Bug #36697 (TrueColor transparency with GIF palette output).
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available\n");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available\n");
+    }
 ?>
 --FILE--
 <?php

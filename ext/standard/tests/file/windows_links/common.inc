@@ -21,10 +21,10 @@ function get_mountvol() {
 }
 
 function skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(string $filename) {
-	$ln = "$filename.lnk";
-	$ret = exec("mklink $ln " . __FILE__ .' 2>&1', $out);
-	@unlink($ln);
-	if (strpos($ret, 'privilege') !== false) {
-		die('skip SeCreateSymbolicLinkPrivilege not enabled');
-	}
+    $ln = "$filename.lnk";
+    $ret = exec("mklink $ln " . __FILE__ .' 2>&1', $out);
+    @unlink($ln);
+    if (strpos($ret, 'privilege') !== false) {
+        die('skip SeCreateSymbolicLinkPrivilege not enabled');
+    }
 }

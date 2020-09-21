@@ -15,7 +15,7 @@ mysqli_driver properties
     print "done!";
 ?>
 --EXPECTF--
-bool(%s)
+bool(false)
 int(%d)
 string(%d) "%s"
 int(%d)

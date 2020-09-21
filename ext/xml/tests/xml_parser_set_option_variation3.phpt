@@ -3,7 +3,7 @@ Test xml_parser_set_option() function : usage variations
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded";
+    print "skip - XML extension not loaded";
 }
 ?>
 --FILE--

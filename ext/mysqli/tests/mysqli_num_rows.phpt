@@ -3,7 +3,6 @@ mysqli_num_rows()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -72,7 +71,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli_result object is already closed
@@ -80,5 +79,5 @@ mysqli_result object is already closed
 mysqli_result object is already closed
 mysqli_result object is already closed
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!
-mysqli_num_rows() cannot be used with MYSQLI_USE_RESULT
+mysqli_num_rows() cannot be used in MYSQLI_USE_RESULT mode
 done!

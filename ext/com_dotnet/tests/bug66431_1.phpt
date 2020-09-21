@@ -5,9 +5,9 @@ Bug #66431 Special Character via COM Interface (CP_UTF8), Application.Word
 if (!extension_loaded("com_dotnet")){ echo "skip COM/.Net support not present"; }
 
 try {
-	new COM("word.application", NULL, CP_UTF8);
+    new COM("word.application", NULL, CP_UTF8);
 } catch (Exception $e) {
-	die('skip ' . $e->getMessage());
+    die('skip ' . $e->getMessage());
 }
 
 ?>
@@ -51,7 +51,7 @@ if (!$result) {
 $fpath = str_replace("/", "\\", __DIR__ . "/bug66431.docx");
 
 if (file_exists($fpath)) {
-	unlink($fpath);
+    unlink($fpath);
 }
 ?>
 --EXPECT--

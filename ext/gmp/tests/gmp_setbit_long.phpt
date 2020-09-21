@@ -6,19 +6,19 @@ gmp_setbit() with large index
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 <?php
-	/* This test requires about 8G RAM which likely not to be present on an arbitrary CI. */
-	if (!file_exists("/proc/meminfo")) {
-		die("skip cannot determine free memory amount.");
-	}
-	$s = file_get_contents("/proc/meminfo");
-	$free = 0;
-	if (preg_match(",MemFree:\s+(\d+)\s+kB,", $s, $m)) {
-		/* Got amount in kb. */
-		$free = $m[1]/1024/1024;
-	}
-	if ($free < 8) {
-		die("skip not enough free RAM.");
-	}
+    /* This test requires about 8G RAM which likely not to be present on an arbitrary CI. */
+    if (!file_exists("/proc/meminfo")) {
+        die("skip cannot determine free memory amount.");
+    }
+    $s = file_get_contents("/proc/meminfo");
+    $free = 0;
+    if (preg_match(",MemFree:\s+(\d+)\s+kB,", $s, $m)) {
+        /* Got amount in kb. */
+        $free = $m[1]/1024/1024;
+    }
+    if ($free < 8) {
+        die("skip not enough free RAM.");
+    }
 ?>
 --FILE--
 <?php

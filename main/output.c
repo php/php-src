@@ -1507,11 +1507,11 @@ PHP_FUNCTION(ob_implicit_flush)
 {
 	zend_long flag = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &flag) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_output_set_implicit_flush(flag);
+	php_output_set_implicit_flush((int) flag);
 }
 /* }}} */
 

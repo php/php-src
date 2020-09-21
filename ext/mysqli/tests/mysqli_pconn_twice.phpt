@@ -3,7 +3,6 @@ Calling connect() on an open persistent connection to create a new persistent co
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 ?>

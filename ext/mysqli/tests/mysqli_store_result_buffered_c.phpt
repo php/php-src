@@ -3,11 +3,11 @@ mysqli_store_result()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
+if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
+    die("skip Requires MYSQLI_STORE_RESULT_COPY_DATA");
+}
 ?>
---INI--
-mysqlnd.debug="d:t:O,{TMP}/mysqlnd.trace"
 --FILE--
 <?php
     require_once("connect.inc");

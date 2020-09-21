@@ -3,13 +3,12 @@ mysqli_stmt_execute()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (mysqli_get_server_version($link) <= 40100) {
-	die(sprintf('skip Needs MySQL 4.1+, found version %d.', mysqli_get_server_version($link)));
+    die(sprintf('skip Needs MySQL 4.1+, found version %d.', mysqli_get_server_version($link)));
 }
 ?>
 --FILE--
@@ -134,7 +133,7 @@ if (mysqli_get_server_version($link) <= 40100) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli_stmt object is not fully initialized

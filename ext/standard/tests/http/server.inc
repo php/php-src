@@ -1,16 +1,16 @@
-<?php
+<?php declare(strict_types=1);
 
-function http_server_skipif($socket_string) {
+function http_server_skipif() {
 
     if (!function_exists('pcntl_fork')) die('skip pcntl_fork() not available');
     if (!function_exists('posix_kill')) die('skip posix_kill() not available');
-    if (!stream_socket_server($socket_string)) die('skip stream_socket_server() failed');
+    if (!stream_socket_server('tcp://localhost:0')) die('skip stream_socket_server() failed');
 }
 
-function http_server_init($socket_string, &$output = null) {
+function http_server_init(&$output = null) {
     pcntl_alarm(60);
 
-    $server = stream_socket_server($socket_string, $errno, $errstr);
+    $server = stream_socket_server('tcp://localhost:0', $errno, $errstr);
     if (!$server) {
         return false;
     }
@@ -26,7 +26,10 @@ function http_server_init($socket_string, &$output = null) {
     if ($pid == -1) {
         die('could not fork');
     } else if ($pid) {
-        return $pid;
+        return [
+            'pid' => $pid,
+            'uri' => 'http://' . stream_socket_get_name($server, false),
+        ];
     }
 
     return $server;
@@ -35,13 +38,18 @@ function http_server_init($socket_string, &$output = null) {
 /* Minimal HTTP server with predefined responses.
  *
  * $socket_string is the socket to create and listen on (e.g. tcp://127.0.0.1:1234)
- * $files is an array of files containing N responses for N expected requests. Server dies after N requests.
+ * $files is an iterable of files or callable generator yielding files.
+ *        containing N responses for N expected requests. Server dies after N requests.
  * $output is a stream on which everything sent by clients is written to
  */
-function http_server($socket_string, array $files, &$output = null) {
+function http_server($files, &$output = null) {
 
-    if (!is_resource($server = http_server_init($socket_string, $output))) {
+    if (!is_resource($server = http_server_init($output))) {
         return $server;
+    }
+
+    if (is_callable($files)) {
+        $files = $files($server);
     }
 
     foreach($files as $file) {
@@ -55,7 +63,7 @@ function http_server($socket_string, array $files, &$output = null) {
 
         $content_length = 0;
 
-        stream_set_blocking($sock, 0);
+        stream_set_blocking($sock, false);
         while (!feof($sock)) {
 
             list($r, $w, $e) = array(array($sock), null, null);
@@ -73,7 +81,7 @@ function http_server($socket_string, array $files, &$output = null) {
                 }
             }
         }
-        stream_set_blocking($sock, 1);
+        stream_set_blocking($sock, true);
 
         // read content
 
@@ -92,9 +100,9 @@ function http_server($socket_string, array $files, &$output = null) {
     exit(0);
 }
 
-function http_server_sleep($socket_string, $micro_seconds = 500000)
+function http_server_sleep($micro_seconds = 500000)
 {
-    if (!is_resource($server = http_server_init($socket_string, $output))) {
+    if (!is_resource($server = http_server_init($output))) {
         return $server;
     }
 
@@ -110,9 +118,7 @@ function http_server_sleep($socket_string, $micro_seconds = 500000)
     exit(0);
 }
 
-function http_server_kill($pid) {
+function http_server_kill(int $pid) {
     posix_kill($pid, SIGTERM);
     pcntl_waitpid($pid, $status);
 }
-
-?>

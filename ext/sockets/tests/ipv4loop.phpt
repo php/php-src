@@ -2,9 +2,9 @@
 IPv4 Loopback test
 --SKIPIF--
 <?php
-	if (!extension_loaded('sockets')) {
-		die('skip sockets extension not available.');
-	}
+    if (!extension_loaded('sockets')) {
+        die('skip sockets extension not available.');
+    }
 ?>
 --FILE--
 <?php

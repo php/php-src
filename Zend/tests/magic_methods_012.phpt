@@ -3,7 +3,7 @@ __get first parameter should be a string when typed
 --FILE--
 <?php
 class Foo {
-	function __get(int $name) {}
+    function __get(int $name) {}
 }
 ?>
 --EXPECTF--

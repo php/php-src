@@ -2,8 +2,8 @@
 HTML input/output
 --SKIPIF--
 <?php
-	ini_set('include_path', __DIR__);
-	extension_loaded('mbstring') or die('skip mbstring not available');
+    ini_set('include_path', __DIR__);
+    extension_loaded('mbstring') or die('skip mbstring not available');
 ?>
 --INI--
 output_buffering=4096

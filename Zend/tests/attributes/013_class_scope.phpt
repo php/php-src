@@ -6,14 +6,14 @@ Attributes make use of class scope.
 #[A1(self::class, self::FOO)]
 class C1
 {
-	#[A1(self::class, self::FOO)]
-	private const FOO = 'foo';
+    #[A1(self::class, self::FOO)]
+    private const FOO = 'foo';
 
-	#[A1(self::class, self::FOO)]
-	public $a;
+    #[A1(self::class, self::FOO)]
+    public $a;
 
-	#[A1(self::class, self::FOO)]
-	public function bar(#[A1(self::class, self::FOO)] $p) { }
+    #[A1(self::class, self::FOO)]
+    public function bar(#[A1(self::class, self::FOO)] $p) { }
 }
 
 $ref = new \ReflectionClass(C1::class);
@@ -27,15 +27,15 @@ echo "\n";
 
 trait T1
 {
-	#[A1(self::class, self::FOO)]
-	public function foo() { }
+    #[A1(self::class, self::FOO)]
+    public function foo() { }
 }
 
 class C2
 {
-	use T1;
+    use T1;
 
-	private const FOO = 'bar';
+    private const FOO = 'bar';
 }
 
 $ref = new \ReflectionClass(C2::class);
@@ -45,7 +45,7 @@ $ref = new \ReflectionClass(T1::class);
 $attr = $ref->getMethod('foo')->getAttributes()[0];
 
 try {
-	$attr->getArguments();
+    $attr->getArguments();
 } catch (\Error $e) {
     var_dump('ERROR 1', $e->getMessage());
 }
@@ -54,17 +54,17 @@ echo "\n";
 
 class C3
 {
-	private const FOO = 'foo';
+    private const FOO = 'foo';
 
-	public static function foo()
-	{
-		return new #[A1(self::class, self::FOO)] class() {
-			private const FOO = 'bar';
+    public static function foo()
+    {
+        return new #[A1(self::class, self::FOO)] class() {
+            private const FOO = 'bar';
 
-			#[A1(self::class, self::FOO)]
-			public function bar() { }
-		};
-	}
+            #[A1(self::class, self::FOO)]
+            public function bar() { }
+        };
+    }
 }
 
 $ref = new \ReflectionObject(C3::foo());

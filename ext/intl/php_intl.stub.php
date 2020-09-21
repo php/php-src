@@ -5,7 +5,7 @@
 /* calendar */
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timeZone */
-function intlcal_create_instance($timeZone = null, ?string $locale = null): IntlCalendar|null {}
+function intlcal_create_instance($timeZone = null, ?string $locale = null): ?IntlCalendar {}
 
 function intlcal_get_keyword_values_for_locale(string $key, string $locale, bool $commonlyUsed): IntlIterator|false {}
 

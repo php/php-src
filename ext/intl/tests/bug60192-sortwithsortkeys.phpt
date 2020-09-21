@@ -2,7 +2,7 @@
 Bug #60192 (SegFault when Collator not constructed properly)
 --SKIPIF--
 <?php
-	if (!extension_loaded('intl')) { die('skip intl extension not available'); }
+    if (!extension_loaded('intl')) { die('skip intl extension not available'); }
 ?>
 --FILE--
 <?php

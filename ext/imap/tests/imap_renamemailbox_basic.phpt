@@ -8,13 +8,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-echo "Checking with no parameters\n";
-imap_renamemailbox();
-
-echo  "Checking with incorrect parameter type\n";
-imap_renamemailbox('');
-imap_renamemailbox(false);
-
 
 require_once(__DIR__.'/imap_include.inc');
 
@@ -25,9 +18,6 @@ if (!is_resource($stream_id)) {
 }
 
 $newbox = $default_mailbox . "." . $mailbox_prefix;
-
-imap_renamemailbox($stream_id, $newbox.'not');
-imap_renamemailbox($stream_id, $newbox);
 
 //commented because of bug #49901
 //$ancError = error_reporting(0);
@@ -47,20 +37,8 @@ imap_close($stream_id);
 require_once('clean.inc');
 ?>
 --EXPECTF--
-Checking with no parameters
-
-Warning: imap_renamemailbox() expects exactly 3 parameters, 0 given in %s on line %d
-Checking with incorrect parameter type
-
-Warning: imap_renamemailbox() expects exactly 3 parameters, 1 given in %s on line %d
-
-Warning: imap_renamemailbox() expects exactly 3 parameters, 1 given in %s on line %d
 Create a temporary mailbox and add 1 msgs
 .. mailbox '{%s}%s' created
-
-Warning: imap_renamemailbox() expects exactly 3 parameters, 2 given in %s on line %d
-
-Warning: imap_renamemailbox() expects exactly 3 parameters, 2 given in %s on line %d
 Checking OK
 bool(true)
 bool(true)

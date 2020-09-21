@@ -3,12 +3,11 @@ mysqli_query() - unicode (cyrillic)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 require_once('table.inc');
 if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'utf8'"))
-	die("skip UTF8 chatset seems not available");
+    die("skip UTF8 chatset seems not available");
 mysqli_free_result($res);
 mysqli_close($link);
 ?>

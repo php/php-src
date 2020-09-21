@@ -3,17 +3,16 @@ mysqli_debug()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_debug'))
- 	die("skip: mysqli_debug() not available");
+    die("skip: mysqli_debug() not available");
 
 if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
-	die("skip: can't say for sure if mysqli_debug works");
+    die("skip: can't say for sure if mysqli_debug works");
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
-	die("skip: debug functionality not enabled");
+    die("skip: debug functionality not enabled");
 ?>
 --FILE--
 <?php
@@ -60,7 +59,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done%s

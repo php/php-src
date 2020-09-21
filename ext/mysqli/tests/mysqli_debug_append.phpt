@@ -3,20 +3,19 @@ mysqli_debug() - append to trace file
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_debug'))
- 	die("skip: mysqli_debug() not available");
+    die("skip: mysqli_debug() not available");
 
 if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
-	die("skip: can't say for sure if mysqli_debug works");
+    die("skip: can't say for sure if mysqli_debug works");
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
-	die("skip: debug functionality not enabled");
+    die("skip: debug functionality not enabled");
 
 if (!$IS_MYSQLND)
-	die("SKIP Libmysql feature not sufficiently spec'd in MySQL C API documentation");
+    die("SKIP Libmysql feature not sufficiently spec'd in MySQL C API documentation");
 
 if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platforms");
 ?>
@@ -89,7 +88,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platfo
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done%s

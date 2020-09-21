@@ -2,7 +2,7 @@
 Test posix_getgrgid() function : basic functionality
 --SKIPIF--
 <?php
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
+    if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
 <?php

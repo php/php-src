@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
   die("skip Valid only on Windows");
 }
 if (!sapi_windows_cp_set(936)) {
-	die("skip Required CP 936 or compatible");
+    die("skip Required CP 936 or compatible");
 }
 
 ?>

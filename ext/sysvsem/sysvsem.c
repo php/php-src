@@ -187,13 +187,14 @@ PHP_MINFO_FUNCTION(sysvsem)
 /* {{{ Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
-	zend_long key, max_acquire = 1, perm = 0666, auto_release = 1;
+	zend_long key, max_acquire = 1, perm = 0666;
+	zend_bool auto_release = 1;
 	int semid;
 	struct sembuf sop[3];
 	int count;
 	sysvsem_sem *sem_ptr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|lll", &key, &max_acquire, &perm, &auto_release)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|llb", &key, &max_acquire, &perm, &auto_release)) {
 		RETURN_THROWS();
 	}
 
@@ -289,7 +290,7 @@ PHP_FUNCTION(sem_get)
 	sem_ptr->key   = key;
 	sem_ptr->semid = semid;
 	sem_ptr->count = 0;
-	sem_ptr->auto_release = auto_release;
+	sem_ptr->auto_release = (int) auto_release;
 }
 /* }}} */
 

@@ -3,7 +3,7 @@
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE > 4) {
-	die("skip 32bit test only");
+    die("skip 32bit test only");
 }
 ?>
 --FILE--

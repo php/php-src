@@ -18,9 +18,9 @@ $attr = $ref->getAttributes()[0];
 var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_CLASS, $attr->isRepeated());
 
 try {
-	$attr->newInstance();
+    $attr->newInstance();
 } catch (\Throwable $e) {
-	var_dump('ERROR 1', $e->getMessage());
+    var_dump('ERROR 1', $e->getMessage());
 }
 
 echo "\n";
@@ -30,9 +30,9 @@ $attr = $ref->getAttributes()[0];
 var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_FUNCTION, $attr->isRepeated());
 
 try {
-	$attr->newInstance();
+    $attr->newInstance();
 } catch (\Throwable $e) {
-	var_dump('ERROR 2', $e->getMessage());
+    var_dump('ERROR 2', $e->getMessage());
 }
 
 echo "\n";

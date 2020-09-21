@@ -3,7 +3,7 @@ CURL file uploading
 --SKIPIF--
 <?php
 if (!extension_loaded("curl")) {
-	exit("skip curl extension not loaded");
+    exit("skip curl extension not loaded");
 }
 ?>
 --FILE--

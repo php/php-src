@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f2d1b412bf2e07c3e607aa6ebad25b19d882b98e */
+ * Stub hash: f35790f5f703b37c45230e97e8f0ee736727b4bd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read_fds, IS_ARRAY, 1)

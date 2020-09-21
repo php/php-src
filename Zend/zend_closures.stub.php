@@ -9,10 +9,7 @@ final class Closure
     /** @param object|string|null $newScope */
     public static function bind(Closure $closure, ?object $newThis, $newScope = UNKNOWN): ?Closure {}
 
-    /**
-     * @param object|string|null $newScope
-     * @alias Closure::bind
-     */
+    /** @param object|string|null $newScope */
     public function bindTo(?object $newThis, $newScope = UNKNOWN): ?Closure {}
 
     public function call(object $newThis, mixed ...$arguments): mixed {}

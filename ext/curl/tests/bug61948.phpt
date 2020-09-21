@@ -18,9 +18,9 @@ Bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction)
 ?>
 --CLEAN--
 <?php
-	$base_dir = __DIR__ . DIRECTORY_SEPARATOR . "bug61948";
-	rmdir("$base_dir/foo");
-	rmdir($base_dir);
+    $base_dir = __DIR__ . DIRECTORY_SEPARATOR . "bug61948";
+    rmdir("$base_dir/foo");
+    rmdir($base_dir);
 ?>
 --EXPECTF--
 %a

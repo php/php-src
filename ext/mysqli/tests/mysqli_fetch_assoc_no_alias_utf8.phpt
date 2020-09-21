@@ -2,36 +2,35 @@
 mysqli_fetch_assoc() - utf8
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
-	require_once("connect.inc");
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
+    require_once("connect.inc");
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		die("skip Cannot connect to server to check charsets");
+    if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+        die("skip Cannot connect to server to check charsets");
 
-	if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'UTF8'"))
-		die("skip Cannot run SHOW CHARACTER SET to check charsets");
+    if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'UTF8'"))
+        die("skip Cannot run SHOW CHARACTER SET to check charsets");
 
-	if (!$tmp = mysqli_fetch_assoc($res))
-		die("skip Looks like UTF8 is not available on the server");
+    if (!$tmp = mysqli_fetch_assoc($res))
+        die("skip Looks like UTF8 is not available on the server");
 
-	if (strtolower($tmp['Charset']) !== 'utf8')
-		die("skip Not sure if UTF8 is available, canceling the test");
+    if (strtolower($tmp['Charset']) !== 'utf8')
+        die("skip Not sure if UTF8 is available, canceling the test");
 
-	mysqli_free_result($res);
+    mysqli_free_result($res);
 
-	if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'UCS2'"))
-		die("skip Cannot run SHOW CHARACTER SET to check charsets");
+    if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'UCS2'"))
+        die("skip Cannot run SHOW CHARACTER SET to check charsets");
 
-	if (!$tmp = mysqli_fetch_assoc($res))
-		die("skip Looks like UCS2 is not available on the server");
+    if (!$tmp = mysqli_fetch_assoc($res))
+        die("skip Looks like UCS2 is not available on the server");
 
-	if (strtolower($tmp['Charset']) !== 'ucs2')
-		die("skip Not sure if UCS2 is available, canceling the test");
+    if (strtolower($tmp['Charset']) !== 'ucs2')
+        die("skip Not sure if UCS2 is available, canceling the test");
 
-	mysqli_free_result($res);
-	mysqli_close($link);
+    mysqli_free_result($res);
+    mysqli_close($link);
 ?>
 --FILE--
 <?php
