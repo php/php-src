@@ -142,7 +142,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {
 #define convert_object_to_type(op, dst, ctype)									\
 	ZVAL_UNDEF(dst);																		\
 	if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), dst, ctype) == FAILURE) {					\
-		zend_error(E_NOTICE,																\
+		zend_error(E_WARNING,																\
 			"Object of class %s could not be converted to %s", ZSTR_VAL(Z_OBJCE_P(op)->name),\
 		zend_get_type_by_const(ctype));														\
 	} 																						\
