@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #80048 (Bug #69100 has not been fixed for Windows). (cmb)
   . Fixed bug #80049 (Memleak when coercing integers to string via variadic
     argument). (Nikita)
+  . Fixed bug ##79699 (PHP parses encoded cookie names so malicious `__Host-` 
+    cookies can be sent). (CVE-2020-7070) (Stas)
 
 - Calendar:
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
