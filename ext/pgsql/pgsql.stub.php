@@ -118,37 +118,37 @@ function pg_last_notice($connection, int $option = PGSQL_NOTICE_LAST): array|str
 function pg_field_table($result, int $field_number, bool $oid_only = false): string|int|false {}
 
 /** @param resource $result */
-function pg_field_name($result, int $field_number): string|false {}
+function pg_field_name($result, int $field_number): string {}
 
 /**
  * @param resource $result
  * @alias pg_field_name
  * @deprecated
  */
-function pg_fieldname($result, int $field_number): string|false {}
+function pg_fieldname($result, int $field_number): string {}
 
 /** @param resource $result */
-function pg_field_size($result, int $field_number): int|false {}
+function pg_field_size($result, int $field_number): int {}
 
 /**
  * @param resource $result
  * @alias pg_field_size
  * @deprecated
  */
-function pg_fieldsize($result, int $field_number): int|false {}
+function pg_fieldsize($result, int $field_number): int {}
 
 /** @param resource $result */
-function pg_field_type($result, int $field_number): string|false {}
+function pg_field_type($result, int $field_number): string {}
 
 /**
  * @param resource $result
  * @alias pg_field_type
  * @deprecated
  */
-function pg_fieldtype($result, int $field_number): string|false {}
+function pg_fieldtype($result, int $field_number): string {}
 
 /** @param resource $result */
-function pg_field_type_oid($result, int $field_number): string|int|false {}
+function pg_field_type_oid($result, int $field_number): string|int {}
 
 /** @param resource $result */
 function pg_field_num($result, string $field_name): int {}
@@ -196,7 +196,7 @@ function pg_fetch_object($result, ?int $row_number = null, string $class_name = 
 function pg_fetch_all($result, int $result_type = PGSQL_ASSOC): array|false {}
 
 /** @param resource $result */
-function pg_fetch_all_columns($result, int $column_number = 0): array|false {}
+function pg_fetch_all_columns($result, int $field_number = 0): array {}
 
 /** @param resource $result */
 function pg_result_seek($result, int $row_number): bool {}

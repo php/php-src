@@ -1560,8 +1560,8 @@ PHP_FUNCTION(pg_field_table)
 	}
 
 	if (fnum >= PQnfields(pg_result->result)) {
-		php_error_docref(NULL, E_WARNING, "Bad field offset specified");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be less than the number of fields for this result set");
+		RETURN_THROWS();
 	}
 
 	oid = PQftable(pg_result->result, (int)fnum);
@@ -1650,8 +1650,8 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 	pgsql_result = pg_result->result;
 
 	if (field >= PQnfields(pgsql_result)) {
-		php_error_docref(NULL, E_WARNING, "Bad field offset specified");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be less than the number of fields for this result set");
+		RETURN_THROWS();
 	}
 
 	switch (entry_type) {
@@ -1728,6 +1728,29 @@ PHP_FUNCTION(pg_field_num)
 }
 /* }}} */
 
+static zend_long field_arg_to_offset(
+		PGresult *result, zend_string *field_name, zend_long field_offset, int arg_num) {
+	if (field_name) {
+		field_offset = PQfnumber(result, ZSTR_VAL(field_name));
+		if (field_offset < 0) {
+			/* Avoid displaying the argument name, as the signature is overloaded and the name
+			 * might not line up. */
+			zend_value_error("Argument #%d must be a field name from this result set", arg_num);
+			return -1;
+		}
+	} else {
+		if (field_offset < 0) {
+			zend_value_error("Argument #%d must be greater than or equal to 0", arg_num);
+			return -1;
+		}
+		if (field_offset >= PQnfields(result)) {
+			zend_value_error("Argument #%d must be less than the number of fields for this result set", arg_num);
+			return -1;
+		}
+	}
+	return field_offset;
+}
+
 /* {{{ Returns values from a result identifier */
 PHP_FUNCTION(pg_fetch_result)
 {
@@ -1777,21 +1800,10 @@ PHP_FUNCTION(pg_fetch_result)
 		}
 		pgsql_row = (int)row;
 	}
-	if (field_name) {
-		field_offset = PQfnumber(pgsql_result, ZSTR_VAL(field_name));
-		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-			RETURN_FALSE;
-		}
-	} else {
-		if (field_offset < 0) {
-			zend_argument_value_error(argc, "must be greater than or equal to 0");
-			RETURN_THROWS();
-		}
-		if (field_offset >= PQnfields(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-			RETURN_FALSE;
-		}
+
+	field_offset = field_arg_to_offset(pgsql_result, field_name, field_offset, argc);
+	if (field_offset < 0) {
+		RETURN_THROWS();
 	}
 
 	if (PQgetisnull(pgsql_result, pgsql_row, field_offset)) {
@@ -2037,8 +2049,8 @@ PHP_FUNCTION(pg_fetch_all_columns)
 
 	num_fields = PQnfields(pgsql_result);
 	if (colno >= (zend_long)num_fields) {
-		php_error_docref(NULL, E_WARNING, "Invalid column number '" ZEND_LONG_FMT "'", colno);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be less than the number of fields for this result set");
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -2134,20 +2146,9 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		pgsql_row = (int)row;
 	}
 
-	if (field_name) {
-		field_offset = PQfnumber(pgsql_result, ZSTR_VAL(field_name));
-		if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-			RETURN_FALSE;
-		}
-	} else {
-		if (field_offset < 0) {
-			zend_argument_value_error(argc, "must be greater than or equal to 0");
-		}
-		if (field_offset >= PQnfields(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Bad column offset specified");
-			RETURN_FALSE;
-		}
+	field_offset = field_arg_to_offset(pgsql_result, field_name, field_offset, argc);
+	if (field_offset < 0) {
+		RETURN_THROWS();
 	}
 
 	switch (entry_type) {

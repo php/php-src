@@ -31,6 +31,32 @@ for ($i=0; $i < $rows; $i++)
     pg_fetch_result($result, $i, 0);
 }
 
+try {
+    pg_fetch_result($result, 0, -1);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_fetch_result($result, 0, 3);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_fetch_result($result, 0, "unknown");
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_fetch_all_columns($result, -1);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_fetch_all_columns($result, 3);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 pg_result_error($result);
 if (function_exists('pg_result_error_field')) {
     pg_result_error_field($result, PGSQL_DIAG_SEVERITY);
@@ -61,6 +87,42 @@ pg_field_type($result, 0);
 pg_field_prtlen($result, 0);
 pg_field_is_null($result, 0);
 
+try {
+    pg_field_is_null($result, -1);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_field_is_null($result, 3);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_field_is_null($result, "unknown");
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_field_name($result, -1);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_field_name($result, 3);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_field_table($result, -1);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    pg_field_table($result, 3);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 $result = pg_query($db, "INSERT INTO ".$table_name." VALUES (9999, 'ABC');");
 pg_last_oid($result);
 
@@ -70,4 +132,16 @@ pg_close($db);
 echo "OK";
 ?>
 --EXPECT--
+Argument #3 must be greater than or equal to 0
+Argument #3 must be less than the number of fields for this result set
+Argument #3 must be a field name from this result set
+pg_fetch_all_columns(): Argument #2 ($field_number) must be greater than or equal to 0
+pg_fetch_all_columns(): Argument #2 ($field_number) must be less than the number of fields for this result set
+Argument #2 must be greater than or equal to 0
+Argument #2 must be less than the number of fields for this result set
+Argument #2 must be a field name from this result set
+pg_field_name(): Argument #2 ($field_number) must be greater than or equal to 0
+pg_field_name(): Argument #2 ($field_number) must be less than the number of fields for this result set
+pg_field_table(): Argument #2 ($field_number) must be greater than or equal to 0
+pg_field_table(): Argument #2 ($field_number) must be less than the number of fields for this result set
 OK
