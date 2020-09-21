@@ -7,8 +7,6 @@ Paul Sohier
 <?php
 require_once(__DIR__.'/skipif.inc');
 ?>
---XFAIL--
-zend_long overflow when trying to fit integer into int
 --FILE--
 <?php
 
@@ -28,7 +26,7 @@ try {
 }
 
 //Access not existing
-var_dump(imap_body($stream_id, 999, FT_UID));
+var_dump(imap_body($stream_id, 255, FT_UID));
 
 imap_close($stream_id);
 
@@ -37,5 +35,5 @@ imap_close($stream_id);
 imap_body(): Argument #2 ($msg_no) must be greater than 0
 imap_body(): Argument #3 ($options) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
 
-Warning: imap_body(): Bad message number in %s on line %d
+Warning: imap_body(): UID does not exist in %s on line %d
 bool(false)

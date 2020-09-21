@@ -1256,7 +1256,7 @@ PHP_FUNCTION(imap_body)
 	zval *streamind;
 	zend_long msgno, flags = 0;
 	pils *imap_le_struct;
-	int msgindex;
+	unsigned long msgindex;
 	char *body;
 	unsigned long body_len = 0;
 
@@ -1283,11 +1283,14 @@ PHP_FUNCTION(imap_body)
 		   IMAP server, then that's the price we pay for making
 		   sure we don't crash. */
 		msgindex = mail_msgno(imap_le_struct->imap_stream, msgno);
+		if (msgindex == 0) {
+			php_error_docref(NULL, E_WARNING, "UID does not exist");
+			RETURN_FALSE;
+		}
 	} else {
-		msgindex = msgno;
+		msgindex = (unsigned long) msgno;
 	}
 
-	// TODO int overflow as can be seen in imap_body.phpt will result in 999 => <0 trigerring a ValueError
 	PHP_IMAP_CHECK_MSGNO(msgindex, 2);
 
 	/* TODO Shouldn't this pass msgindex??? */
@@ -1901,6 +1904,10 @@ PHP_FUNCTION(imap_fetchstructure)
 		   IMAP server, then that's the price we pay for making
 		   sure we don't crash. */
 		msgindex = mail_msgno(imap_le_struct->imap_stream, msgno);
+		if (msgindex == 0) {
+			php_error_docref(NULL, E_WARNING, "UID does not exist");
+			RETURN_FALSE;
+		}
 	} else {
 		msgindex = msgno;
 	}
@@ -2779,6 +2786,10 @@ PHP_FUNCTION(imap_fetchheader)
 		   IMAP server, then that's the price we pay for making sure
 		   we don't crash. */
 		msgindex = mail_msgno(imap_le_struct->imap_stream, msgno);
+		if (msgindex == 0) {
+			php_error_docref(NULL, E_WARNING, "UID does not exist");
+			RETURN_FALSE;
+		}
 	} else {
 		msgindex = msgno;
 	}
