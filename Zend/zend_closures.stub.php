@@ -6,11 +6,13 @@ final class Closure
 {
     private function __construct() {}
 
-    /** @param object|string|null $newScope */
-    public static function bind(Closure $closure, ?object $newThis, $newScope = UNKNOWN): ?Closure {}
+    public static function bind(
+        Closure $closure,
+        ?object $newThis,
+        object|string|null $newScope = "static"
+    ): ?Closure {}
 
-    /** @param object|string|null $newScope */
-    public function bindTo(?object $newThis, $newScope = UNKNOWN): ?Closure {}
+    public function bindTo(?object $newThis, object|string|null $newScope = "static"): ?Closure {}
 
     public function call(object $newThis, mixed ...$arguments): mixed {}
 
