@@ -704,13 +704,12 @@ PHP_MINFO_FUNCTION(imap)
 PHP_FUNCTION(imap_open)
 {
 	zend_string *mailbox, *user, *passwd;
-	zend_long retries = 0, flags = NIL, cl_flags = NIL;
+	zend_long retries = 0, flags = 0, cl_flags = 0;
 	MAILSTREAM *imap_stream;
 	pils *imap_le_struct;
 	HashTable *params = NULL;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "PSS|llh", &mailbox, &user, &passwd, &flags, &retries, &params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "PSS|llh", &mailbox, &user, &passwd, &flags, &retries, &params) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -726,7 +725,7 @@ PHP_FUNCTION(imap_open)
 		RETURN_THROWS();
 	}
 
-	if (argc >= 4) {
+	if (flags) {
 		if (flags & PHP_EXPUNGE) {
 			cl_flags = CL_EXPUNGE;
 			flags ^= PHP_EXPUNGE;
@@ -795,7 +794,7 @@ PHP_FUNCTION(imap_open)
 	IMAPG(imap_password) = estrndup(ZSTR_VAL(passwd), ZSTR_LEN(passwd));
 
 #ifdef SET_MAXLOGINTRIALS
-	if (argc >= 5) {
+	if (retries) {
 		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
 	}
 #endif
@@ -1168,7 +1167,6 @@ PHP_FUNCTION(imap_close)
 	pils *imap_le_struct=NULL;
 	zend_long options = 0, flags = NIL;
 
-	/* TODO Change options to a boolean expunge flag? As it is the only valid flag. */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &streamind, &options) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -1258,11 +1256,11 @@ PHP_FUNCTION(imap_body)
 	zval *streamind;
 	zend_long msgno, flags = 0;
 	pils *imap_le_struct;
-	int msgindex, argc = ZEND_NUM_ARGS();
+	int msgindex;
 	char *body;
 	unsigned long body_len = 0;
 
-	if (zend_parse_parameters(argc, "rl|l", &streamind, &msgno, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|l", &streamind, &msgno, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1293,7 +1291,7 @@ PHP_FUNCTION(imap_body)
 	PHP_IMAP_CHECK_MSGNO(msgindex, 2);
 
 	/* TODO Shouldn't this pass msgindex??? */
-	body = mail_fetchtext_full (imap_le_struct->imap_stream, msgno, &body_len, (argc == 3 ? flags : NIL));
+	body = mail_fetchtext_full (imap_le_struct->imap_stream, msgno, &body_len, flags);
 	if (body_len == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
@@ -1308,10 +1306,9 @@ PHP_FUNCTION(imap_mail_copy)
 	zval *streamind;
 	zend_long options = 0;
 	zend_string *seq, *folder;
-	int argc = ZEND_NUM_ARGS();
 	pils *imap_le_struct;
 
-	if (zend_parse_parameters(argc, "rSS|l", &streamind, &seq, &folder, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|l", &streamind, &seq, &folder, &options) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1324,7 +1321,7 @@ PHP_FUNCTION(imap_mail_copy)
 		RETURN_THROWS();
 	}
 
-	if (mail_copy_full(imap_le_struct->imap_stream, ZSTR_VAL(seq), ZSTR_VAL(folder), (argc == 4 ? options : NIL)) == T) {
+	if (mail_copy_full(imap_le_struct->imap_stream, ZSTR_VAL(seq), ZSTR_VAL(folder), options) == T) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1339,9 +1336,8 @@ PHP_FUNCTION(imap_mail_move)
 	zend_string *seq, *folder;
 	zend_long options = 0;
 	pils *imap_le_struct;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rSS|l", &streamind, &seq, &folder, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|l", &streamind, &seq, &folder, &options) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1354,7 +1350,10 @@ PHP_FUNCTION(imap_mail_move)
 		RETURN_THROWS();
 	}
 
-	if (mail_copy_full(imap_le_struct->imap_stream, ZSTR_VAL(seq), ZSTR_VAL(folder), (argc == 4 ? (options | CP_MOVE) : CP_MOVE)) == T) {
+	/* Add CP_MOVE flag */
+	options = (options | CP_MOVE);
+
+	if (mail_copy_full(imap_le_struct->imap_stream, ZSTR_VAL(seq), ZSTR_VAL(folder), options) == T) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1592,9 +1591,8 @@ PHP_FUNCTION(imap_delete)
 	pils *imap_le_struct;
 	zend_string *sequence;
 	zend_long flags = 0;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rS|l", &streamind, &sequence, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|l", &streamind, &sequence, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1607,7 +1605,7 @@ PHP_FUNCTION(imap_delete)
 		RETURN_THROWS();
 	}
 
-	mail_setflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
+	mail_setflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), "\\DELETED", flags);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1619,9 +1617,8 @@ PHP_FUNCTION(imap_undelete)
 	zend_string *sequence;
 	zend_long flags = 0;
 	pils *imap_le_struct;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rS|l", &streamind, &sequence, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|l", &streamind, &sequence, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1631,7 +1628,9 @@ PHP_FUNCTION(imap_undelete)
 
 	/* TODO Check if flags are valid (documentation is not present on php.net so need to check this first) */
 
-	mail_clearflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
+	mail_clearflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), "\\DELETED", flags);
+
+	// TODO Return void?
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1928,9 +1927,8 @@ PHP_FUNCTION(imap_fetchbody)
 	char *body;
 	zend_string *sec;
 	unsigned long len;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rlS|l", &streamind, &msgno, &sec, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlS|l", &streamind, &msgno, &sec, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1953,7 +1951,7 @@ PHP_FUNCTION(imap_fetchbody)
 		PHP_IMAP_CHECK_MSGNO(msgno, 2);
 	}
 
-	body = mail_fetchbody_full(imap_le_struct->imap_stream, msgno, ZSTR_VAL(sec), &len, (argc == 4 ? flags : NIL));
+	body = mail_fetchbody_full(imap_le_struct->imap_stream, msgno, ZSTR_VAL(sec), &len, flags);
 
 	if (!body) {
 		php_error_docref(NULL, E_WARNING, "No body information available");
@@ -1974,9 +1972,8 @@ PHP_FUNCTION(imap_fetchmime)
 	char *body;
 	zend_string *sec;
 	unsigned long len;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rlS|l", &streamind, &msgno, &sec, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlS|l", &streamind, &msgno, &sec, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1999,7 +1996,7 @@ PHP_FUNCTION(imap_fetchmime)
 		PHP_IMAP_CHECK_MSGNO(msgno, 2);
 	}
 
-	body = mail_fetch_mime(imap_le_struct->imap_stream, msgno, ZSTR_VAL(sec), &len, (argc == 4 ? flags : NIL));
+	body = mail_fetch_mime(imap_le_struct->imap_stream, msgno, ZSTR_VAL(sec), &len, flags);
 
 	if (!body) {
 		php_error_docref(NULL, E_WARNING, "No body MIME information available");
@@ -2673,9 +2670,8 @@ PHP_FUNCTION(imap_clearflag_full)
 	zend_string *sequence, *flag;
 	zend_long flags = 0;
 	pils *imap_le_struct;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rSS|l", &streamind, &sequence, &flag, &flags) ==FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|l", &streamind, &sequence, &flag, &flags) ==FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2688,7 +2684,7 @@ PHP_FUNCTION(imap_clearflag_full)
 		RETURN_THROWS();
 	}
 
-	mail_clearflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), ZSTR_VAL(flag), (argc == 4 ? flags : NIL));
+	mail_clearflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), ZSTR_VAL(flag), flags);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2739,7 +2735,7 @@ PHP_FUNCTION(imap_sort)
 	mypgm->function = (short) sort;
 	mypgm->next = NIL;
 
-	slst = mail_sort(imap_le_struct->imap_stream, (argc == 6 ? ZSTR_VAL(charset) : NIL), spg, mypgm, (argc >= 4 ? flags : NIL));
+	slst = mail_sort(imap_le_struct->imap_stream, (argc == 6 ? ZSTR_VAL(charset) : NIL), spg, mypgm, flags);
 
 	if (spg && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&spg);
