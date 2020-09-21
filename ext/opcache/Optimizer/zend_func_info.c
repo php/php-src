@@ -720,7 +720,7 @@ static const func_info_t func_infos[] = {
 	F1("pg_copy_to",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("pg_escape_string",						MAY_BE_STRING),
 	F1("pg_escape_bytea",						MAY_BE_STRING),
-	F1("pg_unescape_bytea",						MAY_BE_FALSE | MAY_BE_STRING),
+	F1("pg_unescape_bytea",						MAY_BE_STRING),
 	F1("pg_escape_literal",						MAY_BE_FALSE | MAY_BE_STRING),
 	F1("pg_escape_identifier",					MAY_BE_FALSE | MAY_BE_STRING),
 	F1("pg_result_error",						MAY_BE_FALSE | MAY_BE_STRING),

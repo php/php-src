@@ -3362,7 +3362,7 @@ PHP_FUNCTION(pg_escape_bytea)
 /* {{{ Unescape binary for bytea type  */
 PHP_FUNCTION(pg_unescape_bytea)
 {
-	char *from = NULL, *to = NULL, *tmp = NULL;
+	char *from, *tmp;
 	size_t to_len;
 	size_t from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!",
@@ -3371,14 +3371,13 @@ PHP_FUNCTION(pg_unescape_bytea)
 	}
 
 	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
-	to = estrndup(tmp, to_len);
-	PQfreemem(tmp);
-	if (!to) {
-		php_error_docref(NULL, E_WARNING,"Invalid parameter");
-		RETURN_FALSE;
+	if (!tmp) {
+		zend_error(E_ERROR, "Out of memory");
+		return;
 	}
-	RETVAL_STRINGL(to, to_len);
-	efree(to);
+
+	RETVAL_STRINGL(tmp, to_len);
+	PQfreemem(tmp);
 }
 /* }}} */
 

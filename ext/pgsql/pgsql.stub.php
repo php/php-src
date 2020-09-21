@@ -425,7 +425,7 @@ function pg_escape_string($connection, string $data = UNKNOWN): string {}
 /** @param resource|string $connection */
 function pg_escape_bytea($connection, string $data = UNKNOWN): string {}
 
-function pg_unescape_bytea(?string $data = null): string|false {}
+function pg_unescape_bytea(?string $data = null): string {}
 
 /** @param resource|string $connection */
 function pg_escape_literal($connection, string $data = UNKNOWN): string|false {}
