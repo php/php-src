@@ -35,7 +35,7 @@
 #include "unicode_table_jis2004.h"
 
 extern void mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
-static void mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004(unsigned char c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	mbfl_no_encoding_2022jp_2004,
@@ -72,9 +72,9 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
 	mbfl_filt_conv_wchar_jis2004_flush
 };
 
-static void mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004_0208(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004_0213_1(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_2004_0213_2(unsigned char c, mbfl_identify_filter *filter);
 
 /* ISO 2022-JP-2004 has different modes, which can be selected by a sequence
  * starting with ESC (0x1B). In each mode, characters can be selected from a
@@ -166,7 +166,7 @@ static inline int in_unused_jisx0208_range(int c1, int c2)
 }
 
 /* In JIS X 0208 mode */
-static void mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004_0208(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (filter->status == 0) {
@@ -193,7 +193,7 @@ static inline int is_reserved_jisx0213_plane1_range(int c1, int c2)
 }
 
 /* In JIS X 0213:2004 plane 1 */
-static void mbfl_filt_ident_2022jp_2004_0213_1(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004_0213_1(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (filter->status == 0) {
@@ -217,7 +217,7 @@ static inline int is_reserved_jisx0213_plane2_range(int c1, int c2)
 }
 
 /* In JIS X 0213:2000 plane 2 */
-static void mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004_0213_2(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (filter->status == 0) {
@@ -235,7 +235,7 @@ static void mbfl_filt_ident_2022jp_2004_0213_2(int c, mbfl_identify_filter *filt
 }
 
 /* In ASCII mode */
-static void mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022jp_2004(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (!handle_esc_sequence(c, filter)) {
 		if (c > 0x7F) { /* non-ASCII */

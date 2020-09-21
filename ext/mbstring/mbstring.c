@@ -3771,8 +3771,7 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const m
 	mbfl_identify_filter *ident = mbfl_identify_filter_new2(encoding);
 
 	while (length--) {
-		unsigned char c = *input++;
-		(ident->filter_function)(c, ident);
+		mbfl_identify_filter_feed(*input++, ident);
 		if (ident->flag) {
 			mbfl_identify_filter_delete(ident);
 			return 0;

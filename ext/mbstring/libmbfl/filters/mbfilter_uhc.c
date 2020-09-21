@@ -32,7 +32,7 @@
 #define UNICODE_TABLE_UHC_DEF
 #include "unicode_table_uhc.h"
 
-static void mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_uhc(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_uhc[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -219,11 +219,11 @@ mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static void mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_uhc(unsigned char c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* latin */
-		if (c >= 0 && c < 0x80) { /* ok */
+		if (c < 0x80) { /* ok */
 			;
 		} else if (c >= 0x81 && c <= 0xa0) {	/* dbcs first char */
 		    filter->status= 1;

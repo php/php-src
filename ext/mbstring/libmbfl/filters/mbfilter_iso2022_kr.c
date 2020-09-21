@@ -31,7 +31,7 @@
 #include "mbfilter_iso2022_kr.h"
 #include "unicode_table_uhc.h"
 
-static void mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022kr(unsigned char c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_2022kr = {
 	mbfl_no_encoding_2022kr,
@@ -278,7 +278,7 @@ void mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)
 	}
 }
 
-static void mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_2022kr(unsigned char c, mbfl_identify_filter *filter)
 {
 retry:
 	switch (filter->status & 0xf) {
@@ -292,7 +292,7 @@ retry:
 				filter->status += 2;
 		} else if (filter->status == 0x20 && c > 0x20 && c < 0x7f) {		/* kanji first char */
 			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
+		} else if (c < 0x80) {		/* latin, CTLs */
 			;
 		} else {
 			filter->flag = 1;	/* bad */

@@ -40,7 +40,7 @@ extern const unsigned char mblen_table_sjis[];
 extern int mbfl_bisec_srch(int w, const unsigned short *tbl, int n);
 extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
 
-static void mbfl_filt_ident_sjis_2004(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_sjis_2004(unsigned char c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_sjis2004_aliases[] = {"SJIS2004","Shift_JIS-2004", NULL};
 
@@ -781,7 +781,7 @@ static int in_reserved_range(unsigned char byte1, unsigned char byte2)
 		mbfl_bisec_srch2(s, jisx0213_u2_key, jisx0213_u2_tbl_len) == -1;
 }
 
-static void mbfl_filt_ident_sjis_2004(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_sjis_2004(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (filter->status) { /* Kanji, second byte */
 		if (c < 0x40 || c > 0xFC || c == 0x7F || in_reserved_range(filter->status, c)) {

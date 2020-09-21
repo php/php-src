@@ -32,7 +32,7 @@
 
 #include "unicode_table_big5.h"
 
-static void mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_big5(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_big5[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -319,7 +319,7 @@ mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static void mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_big5(unsigned char c, mbfl_identify_filter *filter)
 {
 	int c1;
 	if (filter->encoding->no_encoding == mbfl_no_encoding_cp950) {
@@ -333,7 +333,7 @@ static void mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter)
 		    filter->flag = 1;
 		}
 		filter->status = 0;
-	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
+	} else if (c < 0x80) {	/* latin  ok */
 		;
 	} else if (c > c1 && c < 0xff) {	/* DBCS lead byte */
 		filter->status = 1;

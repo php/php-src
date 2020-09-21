@@ -31,7 +31,7 @@
 #include "mbfilter_utf7.h"
 
 static void mbfl_filt_conv_utf7_wchar_flush(mbfl_convert_filter *filter);
-static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mbfl_base64_table[] = {
  /* 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', */
@@ -442,16 +442,16 @@ void mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 	}
 }
 
-static void mbfl_filt_ident_utf7_base64(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf7_base64_2(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf7_base64_4(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf7_base64_6(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf7_base64_8(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf7_base64_10(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf7_base64_12(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf7_base64_14(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_2(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_4(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_6(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_8(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_10(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_12(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_14(unsigned char c, mbfl_identify_filter *filter);
 
-void (*filt_ident_utf7_functions[])(int, mbfl_identify_filter*) = {
+void (*filt_ident_utf7_functions[])(unsigned char, mbfl_identify_filter*) = {
 	mbfl_filt_ident_utf7_base64,
 	mbfl_filt_ident_utf7_base64_2,
 	mbfl_filt_ident_utf7_base64_4,
@@ -462,7 +462,7 @@ void (*filt_ident_utf7_functions[])(int, mbfl_identify_filter*) = {
 	mbfl_filt_ident_utf7_base64_14
 };
 
-static void identify_utf7_base64(int c, unsigned char bits, mbfl_identify_filter *filter)
+static void identify_utf7_base64(unsigned char c, unsigned char bits, mbfl_identify_filter *filter)
 {
 	/* Cached bits are in low 2 bytes of `filter->status`
 	 * If expecting the 2nd part of a UTF-16BE surrogate pair, bit 17 is set */
@@ -511,47 +511,47 @@ static void identify_utf7_base64(int c, unsigned char bits, mbfl_identify_filter
 	}
 }
 
-static void mbfl_filt_ident_utf7_base64(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 0, filter);
 }
 
-static void mbfl_filt_ident_utf7_base64_2(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64_2(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 2, filter);
 }
 
-static void mbfl_filt_ident_utf7_base64_4(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64_4(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 4, filter);
 }
 
-static void mbfl_filt_ident_utf7_base64_6(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64_6(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 6, filter);
 }
 
-static void mbfl_filt_ident_utf7_base64_8(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64_8(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 8, filter);
 }
 
-static void mbfl_filt_ident_utf7_base64_10(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64_10(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 10, filter);
 }
 
-static void mbfl_filt_ident_utf7_base64_12(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64_12(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 12, filter);
 }
 
-static void mbfl_filt_ident_utf7_base64_14(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64_14(unsigned char c, mbfl_identify_filter *filter)
 {
 	identify_utf7_base64(c, 14, filter);
 }
 
-static void mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (c == '+') { /* '+' shift character */
 		filter->filter_function = mbfl_filt_ident_utf7_base64;

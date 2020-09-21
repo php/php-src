@@ -33,7 +33,7 @@
 #include "unicode_table_cp936.h"
 #include "unicode_table_gb18030.h"
 
-static void mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_gb18030(unsigned char c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_gb18030_aliases[] = {"gb-18030", "gb-18030-2000", NULL};
 
@@ -413,7 +413,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static void mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_gb18030(unsigned char c, mbfl_identify_filter *filter)
 {
 	int c1;
 

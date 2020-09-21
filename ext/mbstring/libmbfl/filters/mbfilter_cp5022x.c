@@ -31,10 +31,10 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-static void mbfl_filt_ident_jis_ms(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_cp50220(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_cp50221(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_cp50222(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_jis_ms(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_cp50220(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_cp50221(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_cp50222(unsigned char c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt);
 
@@ -913,7 +913,7 @@ void mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter)
 }
 
 
-static void mbfl_filt_ident_jis_ms(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_jis_ms(unsigned char c, mbfl_identify_filter *filter)
 {
 retry:
 	switch (filter->status & 0xf) {
@@ -931,7 +931,7 @@ retry:
 			filter->status = 0;
 		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c < 0x7f) {		/* kanji first char */
 			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
+		} else if (c < 0x80) {		/* latin, CTLs */
 			;
 		} else {
 			filter->flag = 1;	/* bad */
@@ -1009,7 +1009,7 @@ retry:
 	}
 }
 
-static void mbfl_filt_ident_cp50220(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_cp50220(unsigned char c, mbfl_identify_filter *filter)
 {
 retry:
 	switch (filter->status & 0xf) {
@@ -1021,7 +1021,7 @@ retry:
 			filter->status += 2;
 		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
 			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
+		} else if (c < 0x80) {		/* latin, CTLs */
 			;
 		} else {
 			filter->flag = 1;	/* bad */
@@ -1083,7 +1083,7 @@ retry:
 	}
 }
 
-static void mbfl_filt_ident_cp50221(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_cp50221(unsigned char c, mbfl_identify_filter *filter)
 {
 retry:
 	switch (filter->status & 0xf) {
@@ -1095,7 +1095,7 @@ retry:
 			filter->status += 2;
 		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
 			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
+		} else if (c < 0x80) {		/* latin, CTLs */
 			;
 		} else {
 			filter->flag = 1;	/* bad */
@@ -1159,7 +1159,7 @@ retry:
 	}
 }
 
-static void mbfl_filt_ident_cp50222(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_cp50222(unsigned char c, mbfl_identify_filter *filter)
 {
 retry:
 	switch (filter->status & 0xf) {
@@ -1171,7 +1171,7 @@ retry:
 			filter->status += 2;
 		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
 			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
+		} else if (c < 0x80) {		/* latin, CTLs */
 			;
 		} else {
 			filter->flag = 1;	/* bad */

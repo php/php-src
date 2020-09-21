@@ -31,9 +31,9 @@
 #include "mbfilter_ucs4.h"
 
 static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter);
-static void mbfl_filt_ident_ucs4(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_ucs4be(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_ucs4le(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_ucs4(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_ucs4be(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_ucs4le(unsigned char c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
 
@@ -251,7 +251,7 @@ static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-static void mbfl_filt_ident_ucs4be(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_ucs4be(unsigned char c, mbfl_identify_filter *filter)
 {
 	int n = filter->status & 0xFF; /* # of bytes already consumed in code unit */
 	if (n < 3) {
@@ -265,7 +265,7 @@ static void mbfl_filt_ident_ucs4be(int c, mbfl_identify_filter *filter)
 	}
 }
 
-static void mbfl_filt_ident_ucs4le(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_ucs4le(unsigned char c, mbfl_identify_filter *filter)
 {
 	int n = filter->status & 0xFF; /* # of bytes already consumed in code unit */
 	if (n < 3) {
@@ -279,7 +279,7 @@ static void mbfl_filt_ident_ucs4le(int c, mbfl_identify_filter *filter)
 	}
 }
 
-static void mbfl_filt_ident_ucs4(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_ucs4(unsigned char c, mbfl_identify_filter *filter)
 {
 	int n = filter->status & 0xFF; /* # of bytes already consumed in code unit */
 	if (n < 3) {

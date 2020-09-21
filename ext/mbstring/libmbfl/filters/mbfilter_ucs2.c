@@ -31,7 +31,7 @@
 #include "mbfilter_ucs2.h"
 
 static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter);
-static void mbfl_filt_ident_ucs2(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_ucs2(unsigned char c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_ucs2_aliases[] = {"ISO-10646-UCS-2", "UCS2" , "UNICODE", NULL};
 
@@ -223,7 +223,7 @@ static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-static void mbfl_filt_ident_ucs2(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_ucs2(unsigned char c, mbfl_identify_filter *filter)
 {
 	/* Input string must be a multiple of 2 bytes */
 	filter->status = (filter->status + 1) % 2;

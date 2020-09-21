@@ -31,7 +31,7 @@
 #include "mbfilter.h"
 #include "mbfilter_base64.h"
 
-static void mbfl_filt_ident_base64(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_base64(unsigned char c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_base64 = {
 	mbfl_no_encoding_base64,
@@ -213,7 +213,7 @@ void mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 	}
 }
 
-static void mbfl_filt_ident_base64(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_base64(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (decode_base64_char(c) != -1 || c == '=') {
 		filter->status = (filter->status + 1) % 4;

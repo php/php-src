@@ -32,7 +32,7 @@
 
 #include "unicode_table_cns11643.h"
 
-static void mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_euctw(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_euctw[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -270,11 +270,11 @@ mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static void mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_euctw(unsigned char c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
+		if (c < 0x80) {	/* ok */
 			;
 		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
 			filter->status = 1;

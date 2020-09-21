@@ -31,7 +31,7 @@
 #include "mbfilter.h"
 #include "mbfilter_byte4.h"
 
-static void mbfl_filt_ident_byte4(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_byte4(unsigned char c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_byte4be = {
 	mbfl_no_encoding_byte4be,
@@ -159,7 +159,7 @@ int mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static void mbfl_filt_ident_byte4(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_byte4(unsigned char c, mbfl_identify_filter *filter)
 {
 	/* Input should be a multiple of 4 bytes */
 	filter->status = (filter->status + 1) % 4;

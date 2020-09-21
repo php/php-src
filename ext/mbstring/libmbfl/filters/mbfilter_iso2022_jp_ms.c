@@ -34,7 +34,7 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-void mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
+void mbfl_filt_ident_2022jpms(unsigned char c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_2022jpms_aliases[] = {"ISO2022JPMS", NULL};
 
@@ -425,7 +425,7 @@ void mbfl_filt_conv_any_2022jpms_flush(mbfl_convert_filter *filter)
 	}
 }
 
-void mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter)
+void mbfl_filt_ident_2022jpms(unsigned char c, mbfl_identify_filter *filter)
 {
 retry:
 	switch (filter->status & 0xf) {
@@ -439,7 +439,7 @@ retry:
 			filter->status += 2;
 		} else if ((filter->status == 0x80 || filter->status == 0xa0) && c > 0x20 && c < 0x80) {		/* kanji first char */
 			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
+		} else if (c < 0x80) {		/* latin, CTLs */
 			;
 		} else {
 			filter->flag = 1;	/* bad */

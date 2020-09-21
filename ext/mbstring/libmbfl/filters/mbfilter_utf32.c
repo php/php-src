@@ -30,9 +30,9 @@
 #include "mbfilter.h"
 #include "mbfilter_utf32.h"
 
-static void mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf32(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf32le(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf32be(unsigned char c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf32_aliases[] = {"utf32", NULL};
@@ -244,7 +244,7 @@ static void mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
 	}
 }
 
-static void mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf32(unsigned char c, mbfl_identify_filter *filter)
 {
 	/* The largest valid codepoint is 0x10FFFF; we don't want values above that
 	 * Neither do we want to see surrogates
@@ -294,7 +294,7 @@ static void mbfl_filt_ident_utf32(int c, mbfl_identify_filter *filter)
 	(filter->filter_function)(c, filter);
 }
 
-static void mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf32le(unsigned char c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* 1st byte */
@@ -331,7 +331,7 @@ static void mbfl_filt_ident_utf32le(int c, mbfl_identify_filter *filter)
 	}
 }
 
-static void mbfl_filt_ident_utf32be(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf32be(unsigned char c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* 1st byte */

@@ -31,7 +31,7 @@
 #include "mbfilter_euc_jp_2004.h"
 #include "mbfilter_sjis_2004.h"
 
-extern void mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
+extern void mbfl_filt_ident_eucjp(unsigned char c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_eucjp[];
 
 static const char *mbfl_encoding_eucjp2004_aliases[] = {"EUC_JP-2004", NULL};

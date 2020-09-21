@@ -33,7 +33,7 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
-static void mbfl_filt_ident_sjis_open(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_sjis_open(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -322,14 +322,14 @@ mbfl_filt_conv_wchar_sjis_open(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static void mbfl_filt_ident_sjis_open(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_sjis_open(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (filter->status) {		/* kanji second char */
 		if (c < 0x40 || c > 0xfc || c == 0x7f) {	/* bad */
 		    filter->flag = 1;
 		}
 		filter->status = 0;
-	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
+	} else if (c < 0x80) {	/* latin  ok */
 		;
 	} else if (c > 0xa0 && c < 0xe0) {	/* kana  ok */
 		;

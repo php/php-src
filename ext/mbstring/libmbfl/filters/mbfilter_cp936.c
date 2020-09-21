@@ -32,7 +32,7 @@
 #define UNICODE_TABLE_CP936_DEF
 #include "unicode_table_cp936.h"
 
-static void mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_cp936(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_cp936[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -282,14 +282,14 @@ mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static void mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_cp936(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (filter->status) {		/* kanji second char */
 		if (c < 0x40 || c > 0xfe || c == 0x7f) {	/* bad */
 		    filter->flag = 1;
 		}
 		filter->status = 0;
-	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
+	} else if (c < 0x80) {	/* latin  ok */
 		;
 	} else if (c > 0x80 && c < 0xff) {	/* DBCS lead byte */
 		filter->status = 1;

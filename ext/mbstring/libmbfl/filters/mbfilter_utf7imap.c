@@ -78,7 +78,7 @@
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
 
-static void mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7imap(unsigned char c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
 
@@ -467,7 +467,7 @@ static inline int decode_modified_base64(int c)
 
 /* After finishing a Base64-encoded block, UTF7imap does not allow another one
  * to start immediately; use this function in such places */
-static void mbfl_filt_ident_utf7imap_finished_base64(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7imap_finished_base64(unsigned char c, mbfl_identify_filter *filter)
 {
 	/* Another modified Base64-encoded section may not begin immediately after
 	 * one has just finished */
@@ -486,7 +486,7 @@ static void check_legal_codepoint_for_base64(int cp, mbfl_identify_filter *filte
 	}
 }
 
-static void mbfl_filt_ident_utf7imap(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7imap(unsigned char c, mbfl_identify_filter *filter)
 {
 	if (filter->status == 0) { /* Decoding ASCII characters */
 		if (c == '&') {

@@ -30,7 +30,7 @@
 #include "mbfilter.h"
 #include "mbfilter_utf8.h"
 
-void mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter);
+void mbfl_filt_ident_utf8(unsigned char c, mbfl_identify_filter *filter);
 
 const unsigned char mblen_table_utf8[] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -225,7 +225,7 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-void mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
+void mbfl_filt_ident_utf8(unsigned char c, mbfl_identify_filter *filter)
 {
 	int c1;
 
@@ -233,9 +233,7 @@ void mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 	filter->status &= 0xff;
 
 	if (c < 0x80) {
-		if (c < 0) {
-			filter->flag = 1;	/* bad */
-		} else if (filter->status) {
+		if (filter->status) {
 			filter->flag = 1;	/* bad */
 		}
 		filter->status = 0;
