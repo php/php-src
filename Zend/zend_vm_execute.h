@@ -10381,9 +10381,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_CO
 	if (IS_CONST == IS_UNUSED) {
 		if (UNEXPECTED(!EX(func)->common.scope)) {
 			SAVE_OPLINE();
-			zend_error(E_WARNING, "get_class() called without object from outside a class");
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		} else {
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
 			ZEND_VM_NEXT_OPCODE();
@@ -17624,9 +17624,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_H
 	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 		if (UNEXPECTED(!EX(func)->common.scope)) {
 			SAVE_OPLINE();
-			zend_error(E_WARNING, "get_class() called without object from outside a class");
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		} else {
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
 			ZEND_VM_NEXT_OPCODE();
@@ -35225,9 +35225,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_UNUSED_UNUSED_H
 	if (IS_UNUSED == IS_UNUSED) {
 		if (UNEXPECTED(!EX(func)->common.scope)) {
 			SAVE_OPLINE();
-			zend_error(E_WARNING, "get_class() called without object from outside a class");
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		} else {
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
 			ZEND_VM_NEXT_OPCODE();
@@ -35266,12 +35266,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CALLED_CLASS_SPEC_UNUSED_U
 	} else if (Z_CE(EX(This))) {
 		ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_CE(EX(This))->name);
 	} else {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
-		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
-			zend_error(E_WARNING, "get_called_class() called from outside a class");
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		}
+		ZEND_ASSERT(!EX(func)->common.scope);
+		SAVE_OPLINE();
+		zend_throw_error(NULL, "get_called_class() must be called from within a class");
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -47385,9 +47384,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_CV_UNUSED_HANDL
 	if (IS_CV == IS_UNUSED) {
 		if (UNEXPECTED(!EX(func)->common.scope)) {
 			SAVE_OPLINE();
-			zend_error(E_WARNING, "get_class() called without object from outside a class");
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		} else {
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
 			ZEND_VM_NEXT_OPCODE();
