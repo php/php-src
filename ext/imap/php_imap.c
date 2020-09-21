@@ -3086,7 +3086,8 @@ static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	if (out == NIL) {
 		RETURN_FALSE;
 	} else {
-		RETURN_STRING((char *)out);
+		RETVAL_STRING((char *)out);
+		fs_give((void**) &out);
 	}
 }
 /* }}} */
