@@ -844,6 +844,7 @@ PHP 8.0 UPGRADE NOTES
 - PGSQL / PDO PGSQL:
   . The constant PG_VERSION_STR has now the same value as PG_VERSION, and thus
     is deprecated.
+  . Function aliases in the pgsql extension have been deprecated.
 
 - Zip:
   . Using empty file as ZipArchive is deprecated. Libzip 1.6.0
