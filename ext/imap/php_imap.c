@@ -715,8 +715,7 @@ PHP_FUNCTION(imap_open)
 
 	if (flags && ((flags & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | CL_EXPUNGE | OP_DEBUG | OP_SHORTCACHE
 	 		| OP_SILENT | OP_PROTOTYPE | OP_SECURE)) != 0)) {
-		zend_argument_value_error(4, "must be a bitmask of OP_READONLY, OP_ANONYMOUS, OP_HALFOPEN, CL_EXPUNGE, "
-			"OP_DEBUG, OP_SHORTCACHE, OP_SILENT, OP_PROTOTYPE, and OP_SECURE");
+		zend_argument_value_error(4, "must be a bitmask of the OP_* constants, and CL_EXPUNGE");
 		RETURN_THROWS();
 	}
 
@@ -2720,7 +2719,7 @@ PHP_FUNCTION(imap_sort)
 
 	if (!(sort == SORTDATE || sort == SORTARRIVAL || sort == SORTFROM || sort == SORTSUBJECT || sort == SORTTO ||
 			sort == SORTCC || sort == SORTSIZE) ) {
-		zend_argument_value_error(2, "must be one of SORTDATE, SORTARRIVAL, SORTFROM, SORTSUBJECT, SORTTO, SORTCC, or SORTSIZE");
+		zend_argument_value_error(2, "must be one of the SORT* constants");
 		RETURN_THROWS();
 	}
 
@@ -2860,8 +2859,7 @@ PHP_FUNCTION(imap_status)
 	}
 
 	if (flags && ((flags & ~(SA_MESSAGES | SA_RECENT | SA_UNSEEN | SA_UIDNEXT | SA_UIDVALIDITY /*| SA_ALL*/)) != 0)) {
-		zend_argument_value_error(3, "must be a bitmask of SA_MESSAGES, SA_RECENT, SA_UNSEEN, "
-			"SA_UIDNEXT, SA_UIDVALIDITY, and SA_ALL");
+		zend_argument_value_error(3, "must be a bitmask of SA_* constants");
 		RETURN_THROWS();
 	}
 
