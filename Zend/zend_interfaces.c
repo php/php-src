@@ -153,19 +153,7 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = &iter->it.data;
-	zval retval;
-
-	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_key, "key", &retval);
-
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		ZVAL_COPY_VALUE(key, &retval);
-	} else {
-		if (!EG(exception)) {
-			zend_error(E_WARNING, "Nothing returned from %s::key()", ZSTR_VAL(iter->ce->name));
-		}
-
-		ZVAL_LONG(key, 0);
-	}
+	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_key, "key", key);
 }
 /* }}} */
 
