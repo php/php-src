@@ -2,12 +2,15 @@
 Resolve attribute names
 --FILE--
 <?php
-function dump_attributes($attributes) {
-    $arr = [];
-    foreach ($attributes as $attribute) {
-        $arr[] = ['name' => $attribute->getName(), 'args' => $attribute->getArguments()];
+
+namespace {
+    function dump_attributes($attributes) {
+        $arr = [];
+        foreach ($attributes as $attribute) {
+            $arr[] = ['name' => $attribute->getName(), 'args' => $attribute->getArguments()];
+        }
+        var_dump($arr);
     }
-    var_dump($arr);
 }
 
 namespace Doctrine\ORM\Mapping {

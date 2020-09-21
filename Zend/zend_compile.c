@@ -5864,20 +5864,19 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static zend_result zend_declare_is_first_statement(zend_ast *ast) /* {{{ */
+/* Check whether this is the first statement, not counting declares. */
+static zend_result zend_is_first_statement(zend_ast *ast) /* {{{ */
 {
 	uint32_t i = 0;
 	zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
 
-	/* Check to see if this declare is preceded only by declare statements */
 	while (i < file_ast->children) {
 		if (file_ast->child[i] == ast) {
 			return SUCCESS;
 		} else if (file_ast->child[i] == NULL) {
-			/* Empty statements are not allowed prior to a declare */
+			/* Empty statements count as statements. */
 			return FAILURE;
 		} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
-			/* declares can only be preceded by other declares */
 			return FAILURE;
 		}
 		i++;
@@ -5910,14 +5909,14 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zval_ptr_dtor_nogc(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
-			if (FAILURE == zend_declare_is_first_statement(ast)) {
+			if (FAILURE == zend_is_first_statement(ast)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 
-			if (FAILURE == zend_declare_is_first_statement(ast)) {
+			if (FAILURE == zend_is_first_statement(ast)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must be "
 					"the very first statement in the script");
 			}
@@ -7682,20 +7681,11 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 		}
 	}
 
-	if (((!with_bracket && !FC(current_namespace))
-		 || (with_bracket && !FC(has_bracketed_namespaces))) && CG(active_op_array)->last > 0
-	) {
-		/* ignore ZEND_EXT_STMT and ZEND_TICKS */
-		uint32_t num = CG(active_op_array)->last;
-		while (num > 0 &&
-		       (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
-		        CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
-			--num;
-		}
-		if (num > 0) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Namespace declaration statement has to be "
-				"the very first statement or after any declare call in the script");
-		}
+	zend_bool is_first_namespace = (!with_bracket && !FC(current_namespace))
+		|| (with_bracket && !FC(has_bracketed_namespaces));
+	if (is_first_namespace && FAILURE == zend_is_first_statement(ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Namespace declaration statement has to be "
+			"the very first statement or after any declare call in the script");
 	}
 
 	if (FC(current_namespace)) {
