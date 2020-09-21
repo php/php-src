@@ -702,10 +702,10 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_long retries = 0, flags = NIL, cl_flags = NIL;
 	MAILSTREAM *imap_stream;
 	pils *imap_le_struct;
-	zval *params = NULL;
+	HashTable *params = NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "PSS|lla", &mailbox, &user,
+	if (zend_parse_parameters(argc, "PSS|llh", &mailbox, &user,
 		&passwd, &flags, &retries, &params) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -723,7 +723,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (params) {
 		zval *disabled_auth_method;
 
-		if ((disabled_auth_method = zend_hash_str_find(Z_ARRVAL_P(params), "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR") - 1)) != NULL) {
+		if ((disabled_auth_method = zend_hash_str_find(params, "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR") - 1)) != NULL) {
 			switch (Z_TYPE_P(disabled_auth_method)) {
 				case IS_STRING:
 					if (Z_STRLEN_P(disabled_auth_method) > 1) {
@@ -866,7 +866,7 @@ PHP_FUNCTION(imap_append)
 	pils *imap_le_struct;
 	STRING st;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|SS", &streamind, &folder, &message, &flags, &internal_date) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|S!S!", &streamind, &folder, &message, &flags, &internal_date) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1603,7 +1603,6 @@ PHP_FUNCTION(imap_undelete)
 PHP_FUNCTION(imap_headerinfo)
 {
 	zval *streamind;
-	zend_string *defaulthost = NULL;
 	int argc = ZEND_NUM_ARGS();
 	zend_long msgno, fromlength, subjectlength;
 	pils *imap_le_struct;
@@ -1611,7 +1610,7 @@ PHP_FUNCTION(imap_headerinfo)
 	ENVELOPE *en;
 	char dummy[2000], fulladdress[MAILTMPLEN + 1];
 
-	if (zend_parse_parameters(argc, "rl|llS", &streamind, &msgno, &fromlength, &subjectlength, &defaulthost) == FAILURE) {
+	if (zend_parse_parameters(argc, "rl|ll", &streamind, &msgno, &fromlength, &subjectlength) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2645,9 +2644,8 @@ PHP_FUNCTION(imap_sort)
 	char *search_criteria;
 	SORTPGM *mypgm=NIL;
 	SEARCHPGM *spg=NIL;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rll|lSS", &streamind, &pgm, &rev, &flags, &criteria, &charset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll|lS!S!", &streamind, &pgm, &rev, &flags, &criteria, &charset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2659,13 +2657,11 @@ PHP_FUNCTION(imap_sort)
 		php_error_docref(NULL, E_WARNING, "Unrecognized sort criteria");
 		RETURN_FALSE;
 	}
-	if (argc >= 4) {
-		if (flags < 0) {
-			php_error_docref(NULL, E_WARNING, "Search options parameter has to be greater than or equal to 0");
-			RETURN_FALSE;
-		}
+	if (flags < 0) {
+		php_error_docref(NULL, E_WARNING, "Search options parameter has to be greater than or equal to 0");
+		RETURN_FALSE;
 	}
-	if (argc >= 5) {
+	if (criteria) {
 		search_criteria = estrndup(ZSTR_VAL(criteria), ZSTR_LEN(criteria));
 		spg = mail_criteria(search_criteria);
 		efree(search_criteria);
@@ -2678,7 +2674,7 @@ PHP_FUNCTION(imap_sort)
 	mypgm->function = (short) pgm;
 	mypgm->next = NIL;
 
-	slst = mail_sort(imap_le_struct->imap_stream, (argc == 6 ? ZSTR_VAL(charset) : NIL), spg, mypgm, (argc >= 4 ? flags : NIL));
+	slst = mail_sort(imap_le_struct->imap_stream, (charset ? ZSTR_VAL(charset) : NIL), spg, mypgm, flags);
 
 	if (spg && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&spg);
@@ -3579,7 +3575,7 @@ PHP_FUNCTION(imap_mail)
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "PPP|PPPP", &to, &subject, &message,
+	if (zend_parse_parameters(argc, "PPP|P!P!P!P!", &to, &subject, &message,
 		&headers, &cc, &bcc, &rpath) == FAILURE) {
 		RETURN_THROWS();
 	}

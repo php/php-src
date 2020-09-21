@@ -325,6 +325,10 @@ PHP 8.0 UPGRADE NOTES
   . iconv() implementations which do not properly set errno in case of errors
     are no longer supported.
 
+- IMAP:
+  . The unused default_host argument of imap_headerinfo() has been removed.
+  . The imap_header() function which is an alias of imap_headerinfo() has been removed.
+
 - Intl:
   . The deprecated constant INTL_IDNA_VARIANT_2003 has been removed.
     RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
