@@ -48,7 +48,7 @@ class Exception implements Throwable
 
 class ErrorException extends Exception
 {
-    public function __construct(string $message = "", int $code = 0, int $severity = E_ERROR, ?string $filename = null, ?int $line_number = null, ?Throwable $previous = null) {}
+    public function __construct(string $message = "", int $code = 0, int $severity = E_ERROR, ?string $filename = null, ?int $line = null, ?Throwable $previous = null) {}
 
     final public function getSeverity(): int {}
 }
