@@ -207,7 +207,7 @@ static zend_long collator_u_strtol(nptr, endptr, base)
 /* {{{ collator_is_numeric]
  * Taken from PHP6:is_numeric_unicode()
  */
-zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, int allow_errors )
+zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, bool allow_errors )
 {
 	zend_long local_lval;
 	double local_dval;
@@ -251,9 +251,6 @@ zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, dou
 
 	if (!allow_errors) {
 		return 0;
-	}
-	if (allow_errors == -1) {
-		zend_error(E_NOTICE, "A non well formed numeric value encountered");
 	}
 
 	if (allow_errors) {
