@@ -3411,7 +3411,8 @@ done:
 /* }}} */
 
 /* {{{ _php_imap_mail */
-int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
+bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message, zend_string *headers,
+	zend_string *cc, zend_string *bcc, zend_string* rpath)
 {
 #ifdef PHP_WIN32
 	int tsm_err;
@@ -3419,6 +3420,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	FILE *sendmail;
 	int ret;
 #endif
+
+	ZEND_ASSERT(to && ZSTR_LEN(to) != 0);
+	ZEND_ASSERT(subject && ZSTR_LEN(subject) != 0);
 
 #ifdef PHP_WIN32
 	char *tempMailTo;
@@ -3428,14 +3432,13 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	size_t offset, bufferLen = 0;
 	size_t bt_len;
 
+	/* Add "To" field's necessary buffer length */
+	bufferLen += ZSTR_LEN(to) + 6;
 	if (headers) {
-		bufferLen += strlen(headers);
-	}
-	if (to) {
-		bufferLen += strlen(to) + 6;
+		bufferLen += ZSTR_LEN(headers);
 	}
 	if (cc) {
-		bufferLen += strlen(cc) + 6;
+		bufferLen += ZSTR_LEN(cc) + 6;
 	}
 
 #define PHP_IMAP_CLEAN	if (bufferTo) efree(bufferTo); if (bufferCc) efree(bufferCc); if (bufferBcc) efree(bufferBcc); if (bufferHeader) efree(bufferHeader);
@@ -3443,41 +3446,41 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 
 	bufferHeader = (char *)safe_emalloc(bufferLen, 1, 1);
 	memset(bufferHeader, 0, bufferLen);
-	if (to && *to) {
-		strlcat(bufferHeader, "To: ", bufferLen + 1);
-		strlcat(bufferHeader, to, bufferLen + 1);
-		strlcat(bufferHeader, "\r\n", bufferLen + 1);
-		tempMailTo = estrdup(to);
-		bt_len = strlen(to);
-		bufferTo = (char *)safe_emalloc(bt_len, 1, 1);
-		bt_len++;
-		offset = 0;
-		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
-		while (addr) {
-			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
-				PHP_IMAP_BAD_DEST;
-			} else {
-				bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->mailbox));
-				bt_len += strlen(addr->mailbox);
-				bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->host));
-				bt_len += strlen(addr->host);
-				offset += slprintf(bufferTo + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
-			}
-			addr = addr->next;
+
+	/* Handle "To" Field */
+	strlcat(bufferHeader, "To: ", bufferLen + 1);
+	strlcat(bufferHeader, ZSTR_VAL(to), bufferLen + 1);
+	strlcat(bufferHeader, "\r\n", bufferLen + 1);
+	tempMailTo = estrdup(ZSTR_VAL(to));
+	bt_len = ZSTR_LEN(to);
+	bufferTo = (char *)safe_emalloc(bt_len, 1, 1);
+	bt_len++;
+	offset = 0;
+	addr = NULL;
+	rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
+	while (addr) {
+		if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
+			PHP_IMAP_BAD_DEST;
+		} else {
+			bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->mailbox));
+			bt_len += strlen(addr->mailbox);
+			bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->host));
+			bt_len += strlen(addr->host);
+			offset += slprintf(bufferTo + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
 		}
-		efree(tempMailTo);
-		if (offset>0) {
-			bufferTo[offset-1] = 0;
-		}
+		addr = addr->next;
+	}
+	efree(tempMailTo);
+	if (offset>0) {
+		bufferTo[offset-1] = 0;
 	}
 
-	if (cc && *cc) {
+	if (cc && ZSTR_LEN(cc) != 0) {
 		strlcat(bufferHeader, "Cc: ", bufferLen + 1);
-		strlcat(bufferHeader, cc, bufferLen + 1);
+		strlcat(bufferHeader, ZSTR_VAL(cc), bufferLen + 1);
 		strlcat(bufferHeader, "\r\n", bufferLen + 1);
-		tempMailTo = estrdup(cc);
-		bt_len = strlen(cc);
+		tempMailTo = estrdup(ZSTR_VAL(cc));
+		bt_len = ZSTR_LEN(cc);
 		bufferCc = (char *)safe_emalloc(bt_len, 1, 1);
 		bt_len++;
 		offset = 0;
@@ -3501,9 +3504,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		}
 	}
 
-	if (bcc && *bcc) {
-		tempMailTo = estrdup(bcc);
-		bt_len = strlen(bcc);
+	if (bcc && ZSTR_LEN(bcc)) {
+		tempMailTo = estrdup(ZSTR_VAL(bcc));
+		bt_len = ZSTR_LEN(bcc);
 		bufferBcc = (char *)safe_emalloc(bt_len, 1, 1);
 		bt_len++;
 		offset = 0;
@@ -3527,11 +3530,12 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		}
 	}
 
-	if (headers && *headers) {
-		strlcat(bufferHeader, headers, bufferLen + 1);
+	if (headers && ZSTR_LEN(headers)) {
+		strlcat(bufferHeader, ZSTR_VAL(headers), bufferLen + 1);
 	}
 
-	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, subject, bufferTo, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
+	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, ZSTR_VAL(subject),
+			bufferTo, ZSTR_VAL(message), bufferCc, bufferBcc, ZSTR_VAL(rpath)) != SUCCESS) {
 		if (tsm_errmsg) {
 			php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 			efree(tsm_errmsg);
@@ -3548,15 +3552,15 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 	sendmail = popen(INI_STR("sendmail_path"), "w");
 	if (sendmail) {
-		if (rpath && rpath[0]) fprintf(sendmail, "From: %s\n", rpath);
-		fprintf(sendmail, "To: %s\n", to);
-		if (cc && cc[0]) fprintf(sendmail, "Cc: %s\n", cc);
-		if (bcc && bcc[0]) fprintf(sendmail, "Bcc: %s\n", bcc);
-		fprintf(sendmail, "Subject: %s\n", subject);
+		if (ZSTR_LEN(rpath) != 0) fprintf(sendmail, "From: %s\n", ZSTR_VAL(rpath));
+		fprintf(sendmail, "To: %s\n", ZSTR_VAL(to));
+		if (ZSTR_LEN(cc) != 0) fprintf(sendmail, "Cc: %s\n", ZSTR_VAL(cc));
+		if (ZSTR_LEN(bcc) != 0) fprintf(sendmail, "Bcc: %s\n", ZSTR_VAL(bcc));
+		fprintf(sendmail, "Subject: %s\n", ZSTR_VAL(subject));
 		if (headers != NULL) {
-			fprintf(sendmail, "%s\n", headers);
+			fprintf(sendmail, "%s\n", ZSTR_VAL(headers));
 		}
-		fprintf(sendmail, "\n%s\n", message);
+		fprintf(sendmail, "\n%s\n", ZSTR_VAL(message));
 		ret = pclose(sendmail);
 
 		return ret != -1;
@@ -3575,7 +3579,7 @@ PHP_FUNCTION(imap_mail)
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "SSS|SSSS", &to, &subject, &message,
+	if (zend_parse_parameters(argc, "PPP|PPPP", &to, &subject, &message,
 		&headers, &cc, &bcc, &rpath) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -3598,8 +3602,7 @@ PHP_FUNCTION(imap_mail)
 		php_error_docref(NULL, E_WARNING, "No message string in mail command");
 	}
 
-	if (_php_imap_mail(ZSTR_VAL(to), ZSTR_VAL(subject), ZSTR_VAL(message), headers?ZSTR_VAL(headers):NULL, cc?ZSTR_VAL(cc):NULL,
-			bcc?ZSTR_VAL(bcc):NULL, rpath?ZSTR_VAL(rpath):NULL)) {
+	if (_php_imap_mail(to, subject, message, headers, cc, bcc, rpath)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
