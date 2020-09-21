@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3c02183529eed2eb21d801ed2ba615deaf749b1d */
+ * Stub hash: 131f77fd51f0d9b5e0354c6e30da6abd29d4fa47 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1823,8 +1823,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_srand arginfo_mt_srand
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rand, 0, 0, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, min, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, max, IS_LONG, 0, "PHP_INT_MAX")
 ZEND_END_ARG_INFO()
 
 #define arginfo_mt_rand arginfo_rand
