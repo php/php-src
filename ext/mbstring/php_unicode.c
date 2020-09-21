@@ -314,7 +314,7 @@ struct convert_case_data {
 	int title_mode;
 };
 
-static int convert_case_filter(int c, void *void_data)
+static void convert_case_filter(int c, void *void_data)
 {
 	struct convert_case_data *data = (struct convert_case_data *) void_data;
 	unsigned code;
@@ -323,7 +323,7 @@ static int convert_case_filter(int c, void *void_data)
 	 * codepoints above 0xffffff. */
 	if (UNEXPECTED((unsigned)c > 0xffffff)) {
 		(*data->next_filter->filter_function)(c, data->next_filter);
-		return 0;
+		return;
 	}
 
 	switch (data->case_mode) {
@@ -379,8 +379,6 @@ static int convert_case_filter(int c, void *void_data)
 		}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-
-	return 0;
 }
 
 MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen,

@@ -57,8 +57,6 @@ const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 /* uuencode => any */
 #define UUDEC(c)	(char)(((c)-' ') & 0x3f)
 static const char * uuenc_begin_text = "begin ";
@@ -74,7 +72,7 @@ enum {
 	uudec_state_skip_newline
 };
 
-int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
+void mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 {
 	int n;
 	switch(filter->status)	{
@@ -132,11 +130,11 @@ int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 			int A = (filter->cache >> 16) & 0xff, B = (filter->cache >> 8) & 0xff,
 				C = (filter->cache) & 0xff, D = UUDEC(c);
 			if (n-- > 0)
-				CK((*filter->output_function)((A << 2) | (B >> 4), filter->data));
+				(*filter->output_function)((A << 2) | (B >> 4), filter->data);
 			if (n-- > 0)
-				CK((*filter->output_function)((B << 4) | (C >> 2), filter->data));
+				(*filter->output_function)((B << 4) | (C >> 2), filter->data);
 			if (n-- > 0)
-				CK((*filter->output_function)((C << 6) | D, filter->data));
+				(*filter->output_function)((C << 6) | D, filter->data);
 			filter->cache = n << 24;
 
 			if (n == 0) {
@@ -149,5 +147,4 @@ int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 			/* skip newline */
 			filter->status = uudec_state_size;
 	}
-	return c;
 }

@@ -103,9 +103,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-int mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status == 0) {
 		filter->status = 1;
@@ -118,21 +116,19 @@ int mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter)
 		filter->cache |= (c & 0xff) << 8;
 	} else {
 		filter->status = 0;
-		CK((*filter->output_function)((c & 0xff) | filter->cache, filter->data));
+		(*filter->output_function)((c & 0xff) | filter->cache, filter->data);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter)
 {
-	CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
-	CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-	CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-	CK((*filter->output_function)(c & 0xff, filter->data));
-	return c;
+	(*filter->output_function)((c >> 24) & 0xff, filter->data);
+	(*filter->output_function)((c >> 16) & 0xff, filter->data);
+	(*filter->output_function)((c >> 8) & 0xff, filter->data);
+	(*filter->output_function)(c & 0xff, filter->data);
 }
 
-int mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status == 0) {
 		filter->status = 1;
@@ -145,18 +141,16 @@ int mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter)
 		filter->cache |= (c & 0xff) << 16;
 	} else {
 		filter->status = 0;
-		CK((*filter->output_function)(((c & 0xff) << 24) | filter->cache, filter->data));
+		(*filter->output_function)(((c & 0xff) << 24) | filter->cache, filter->data);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
 {
-	CK((*filter->output_function)(c & 0xff, filter->data));
-	CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-	CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-	CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
-	return c;
+	(*filter->output_function)(c & 0xff, filter->data);
+	(*filter->output_function)((c >> 8) & 0xff, filter->data);
+	(*filter->output_function)((c >> 16) & 0xff, filter->data);
+	(*filter->output_function)((c >> 24) & 0xff, filter->data);
 }
 
 static void mbfl_filt_ident_byte4(unsigned char c, mbfl_identify_filter *filter)

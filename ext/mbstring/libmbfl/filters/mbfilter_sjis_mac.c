@@ -80,8 +80,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
 	mbfl_filt_conv_wchar_sjis_mac_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 #define SJIS_ENCODE(c1,c2,s1,s2)	\
 		do {						\
 			s1 = c1;				\
@@ -128,8 +126,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
 /*
  * SJIS-mac => wchar
  */
-int
-mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 {
 	int i, j, n;
 	int c1, s, s1, s2, w;
@@ -137,29 +134,29 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 	switch (filter->status) {
 	case 0:
 		if (c >= 0 && c < 0x80 && c != 0x5c) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c > 0xa0 && c < 0xe0) {	/* kana */
-			CK((*filter->output_function)(0xfec0 + c, filter->data));
+			(*filter->output_function)(0xfec0 + c, filter->data);
 		} else if (c > 0x80 && c <= 0xed && c != 0xa0) {	/* kanji first char */
 			filter->status = 1;
 			filter->cache = c;
 		} else if (c == 0x5c) {
-			CK((*filter->output_function)(0x00a5, filter->data));
+			(*filter->output_function)(0x00a5, filter->data);
 		} else if (c == 0x80) {
-			CK((*filter->output_function)(0x005c, filter->data));
+			(*filter->output_function)(0x005c, filter->data);
 		} else if (c == 0xa0) {
-			CK((*filter->output_function)(0x00a0, filter->data));
+			(*filter->output_function)(0x00a0, filter->data);
 		} else if (c == 0xfd) {
-			CK((*filter->output_function)(0x00a9, filter->data));
+			(*filter->output_function)(0x00a9, filter->data);
 		} else if (c == 0xfe) {
-			CK((*filter->output_function)(0x2122, filter->data));
+			(*filter->output_function)(0x2122, filter->data);
 		} else if (c == 0xff) {
-			CK((*filter->output_function)(0x2026, filter->data));
-			CK((*filter->output_function)(0xf87f, filter->data));
+			(*filter->output_function)(0x2026, filter->data);
+			(*filter->output_function)(0xf87f, filter->data);
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -212,7 +209,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 							n = 6;
 						}
 						for (j=1; j<n-1; j++) {
-							CK((*filter->output_function)(code_tbl_m[i][j], filter->data));
+							(*filter->output_function)(code_tbl_m[i][j], filter->data);
 						}
 						w = code_tbl_m[i][n-1];
 						break;
@@ -228,8 +225,8 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 							w = (c1 << 8) | c;
 							w &= MBFL_WCSGROUP_MASK;
 							w |= MBFL_WCSGROUP_THROUGH;
-							CK((*filter->output_function)(w, filter->data));
-							return c;
+							(*filter->output_function)(w, filter->data);
+							return;
 						}
 						s2 = 0;
 						if (s >= 0x043e && s <= 0x0441) {
@@ -244,7 +241,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 							s2 = 0xf87e;
 						}
 						if (s2 > 0) {
-							CK((*filter->output_function)(w, filter->data));
+							(*filter->output_function)(w, filter->data);
 							w = s2;
 						}
 						break;
@@ -261,12 +258,12 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_WINCP932;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -274,8 +271,6 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 static void mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter)
@@ -289,8 +284,7 @@ static void mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter)
 /*
  * wchar => SJIS-mac
  */
-int
-mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 {
 	int i;
 	int c1, c2, s1, s2, mode;
@@ -369,13 +363,13 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 
 		if (s1 >= 0) {
 			if (s1 < 0x100) {
-				CK((*filter->output_function)(s1, filter->data));
+				(*filter->output_function)(s1, filter->data);
 			} else {
-				CK((*filter->output_function)((s1 >> 8) & 0xff, filter->data));
-				CK((*filter->output_function)(s1 & 0xff, filter->data));
+				(*filter->output_function)((s1 >> 8) & 0xff, filter->data);
+				(*filter->output_function)(s1 & 0xff, filter->data);
 			}
 		} else {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			mbfl_filt_conv_illegal_output(c, filter);
 		}
 
 		if (s2 <= 0 || s1 == -1) {
@@ -412,14 +406,14 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				if (c == s_form_tbl[i]) {
 					filter->status = 1;
 					filter->cache = c;
-					return c;
+					return;
 				}
 			}
 
 			if (c == 0xf860 || c == 0xf861 || c == 0xf862) {
 				filter->status = 2;
 				filter->cache = c;
-				return c;
+				return;
 			}
 		}
 
@@ -491,16 +485,16 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 
 		if (s1 >= 0) {
 			if (s1 < 0x100) { /* latin or kana */
-				CK((*filter->output_function)(s1, filter->data));
+				(*filter->output_function)(s1, filter->data);
 			} else { /* kanji */
 				c1 = (s1 >> 8) & 0xff;
 				c2 = s1 & 0xff;
 				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
+				(*filter->output_function)(s1, filter->data);
+				(*filter->output_function)(s2, filter->data);
 			}
 		} else {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			mbfl_filt_conv_illegal_output(c, filter);
 		}
 		break;
 
@@ -536,8 +530,8 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 
 		if (filter->status == 0) {
-			CK(mbfl_filt_conv_illegal_output(c1, filter));
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			mbfl_filt_conv_illegal_output(c1, filter);
+			mbfl_filt_conv_illegal_output(c, filter);
 		}
 
 		break;
@@ -562,14 +556,14 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				c1 = s1/94+0x21;
 				c2 = s1-94*(c1-0x21)+0x21;
 				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
+				(*filter->output_function)(s1, filter->data);
+				(*filter->output_function)(s2, filter->data);
 			}
 
 			if (s1 <= 0) {
-				CK(mbfl_filt_conv_illegal_output(0xf860, filter));
-				CK(mbfl_filt_conv_illegal_output(c1, filter));
-				CK(mbfl_filt_conv_illegal_output(c, filter));
+				mbfl_filt_conv_illegal_output(0xf860, filter);
+				mbfl_filt_conv_illegal_output(c1, filter);
+				mbfl_filt_conv_illegal_output(c, filter);
 			}
 
 		} else if (mode == 0x2) {
@@ -611,20 +605,20 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				c1 = s1/94+0x21;
 				c2 = s1-94*(c1-0x21)+0x21;
 				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
+				(*filter->output_function)(s1, filter->data);
+				(*filter->output_function)(s2, filter->data);
 			}
 
 			if (s1 <= 0) {
-				CK(mbfl_filt_conv_illegal_output(0xf861, filter));
+				mbfl_filt_conv_illegal_output(0xf861, filter);
 				for (i=0; i<3; i++) {
 					if (c1 == code_tbl_m[i+5][3]) {
-						CK(mbfl_filt_conv_illegal_output(code_tbl_m[i+5][2], filter));
+						mbfl_filt_conv_illegal_output(code_tbl_m[i+5][2], filter);
 						break;
 					}
 				}
-				CK(mbfl_filt_conv_illegal_output(c1, filter));
-				CK(mbfl_filt_conv_illegal_output(c, filter));
+				mbfl_filt_conv_illegal_output(c1, filter);
+				mbfl_filt_conv_illegal_output(c, filter);
 			}
 		} else if (mode == 0x4) {
 			for (i=0; i<4; i++) {
@@ -657,21 +651,21 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				c1 = s1/94+0x21;
 				c2 = s1-94*(c1-0x21)+0x21;
 				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
+				(*filter->output_function)(s1, filter->data);
+				(*filter->output_function)(s2, filter->data);
 			}
 
 			if (s1 <= 0) {
-				CK(mbfl_filt_conv_illegal_output(0xf862, filter));
+				mbfl_filt_conv_illegal_output(0xf862, filter);
 				for (i=0; i<4; i++) {
 					if (c1 == code_tbl_m[i+8][4]) {
-						CK(mbfl_filt_conv_illegal_output( code_tbl_m[i+8][2], filter));
-						CK(mbfl_filt_conv_illegal_output( code_tbl_m[i+8][3], filter));
+						mbfl_filt_conv_illegal_output(code_tbl_m[i+8][2], filter);
+						mbfl_filt_conv_illegal_output(code_tbl_m[i+8][3], filter);
 						break;
 					}
 				}
-				CK(mbfl_filt_conv_illegal_output(c1, filter));
-				CK(mbfl_filt_conv_illegal_output(c, filter));
+				mbfl_filt_conv_illegal_output(c1, filter);
+				mbfl_filt_conv_illegal_output(c, filter);
 			}
 		}
 		break;
@@ -680,7 +674,6 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-	return c;
 }
 
 static void mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter)

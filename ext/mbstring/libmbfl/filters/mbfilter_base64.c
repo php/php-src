@@ -68,9 +68,6 @@ const struct mbfl_convert_vtbl vtbl_b64_8bit = {
 	mbfl_filt_conv_base64dec_flush
 };
 
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 /*
  * any => BASE64
  */
@@ -87,7 +84,7 @@ static const unsigned char mbfl_base64_table[] = {
    0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x2b,0x2f,0x00
 };
 
-int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 {
 	int n = (filter->status & 0xff);
 	/* 1st (low) byte of `n` is the number of bytes already cached (0, 1, or 2)
@@ -106,19 +103,18 @@ int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 		filter->status &= ~0xff;
 		if ((filter->status & MBFL_BASE64_STS_MIME_HEADER) == 0) {
 			if ((filter->status & 0xff00) > (72 << 8)) {
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+				(*filter->output_function)(0x0d, filter->data);		/* CR */
+				(*filter->output_function)(0x0a, filter->data);		/* LF */
 				filter->status = 0;
 			}
 			filter->status += 0x400;
 		}
 		n = filter->cache | (c & 0xff);
-		CK((*filter->output_function)(mbfl_base64_table[(n >> 18) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(n >> 12) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(n >> 6) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[n & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_base64_table[(n >> 18) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(n >> 12) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(n >> 6) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[n & 0x3f], filter->data);
 	}
-	return c;
 }
 
 void mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
@@ -166,10 +162,10 @@ static unsigned int decode_base64_char(unsigned char c)
 	return -1;
 }
 
-int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 {
 	if (c == '\r' || c == '\n' || c == ' ' || c == '\t' || c == '=') {
-		return 0;
+		return;
 	}
 
 	unsigned int n = decode_base64_char(c);
@@ -190,13 +186,11 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 	default:
 		filter->status = 0;
 		n |= filter->cache;
-		CK((*filter->output_function)((n >> 16) & 0xff, filter->data));
-		CK((*filter->output_function)((n >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)(n & 0xff, filter->data));
+		(*filter->output_function)((n >> 16) & 0xff, filter->data);
+		(*filter->output_function)((n >> 8) & 0xff, filter->data);
+		(*filter->output_function)(n & 0xff, filter->data);
 		break;
 	}
-
-	return c;
 }
 
 void mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)

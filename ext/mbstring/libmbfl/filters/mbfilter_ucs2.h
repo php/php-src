@@ -45,10 +45,10 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_ucs2be;
 extern const struct mbfl_convert_vtbl vtbl_ucs2le_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_ucs2le;
 
-int mbfl_filt_conv_ucs2_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_ucs2be_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_ucs2be(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_ucs2le_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_ucs2_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_ucs2be_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_ucs2be(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_ucs2le_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_UCS2_H */

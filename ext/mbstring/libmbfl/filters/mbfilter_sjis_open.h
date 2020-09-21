@@ -38,7 +38,7 @@ extern const struct mbfl_identify_vtbl vtbl_identify_sjis_open;
 extern const struct mbfl_convert_vtbl vtbl_sjis_open_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_open;
 
-int mbfl_filt_conv_sjis_open_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_sjis_open(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_sjis_open_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_sjis_open(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_SJIS_OPEN_H */

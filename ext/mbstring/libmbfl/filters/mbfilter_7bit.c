@@ -68,23 +68,18 @@ const struct mbfl_convert_vtbl vtbl_7bit_8bit = {
 	mbfl_filt_conv_common_flush
 };
 
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-int mbfl_filt_conv_7bit_any(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_7bit_any(int c, mbfl_convert_filter *filter)
 {
-	return (*filter->output_function)(c, filter->data);
+	(*filter->output_function)(c, filter->data);
 }
 
-
-int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x80) {
-		CK((*filter->output_function)(c, filter->data));
+		(*filter->output_function)(c, filter->data);
 	} else {
 		mbfl_filt_conv_illegal_output(c, filter);
 	}
-	return c;
 }
 
 static void mbfl_filt_ident_7bit(unsigned char c, mbfl_identify_filter *filter)

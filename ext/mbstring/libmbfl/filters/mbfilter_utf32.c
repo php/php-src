@@ -142,20 +142,17 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-static int emit_char_if_valid(int n, mbfl_convert_filter *filter)
+static void emit_char_if_valid(int n, mbfl_convert_filter *filter)
 {
 	if (n < MBFL_WCSPLANE_UTF32MAX && (n < 0xD800 || n > 0xDFFF)) {
-		CK((*filter->output_function)(n, filter->data));
+		(*filter->output_function)(n, filter->data);
 	} else {
 		n = (n & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH;
-		CK((*filter->output_function)(n, filter->data));
+		(*filter->output_function)(n, filter->data);
 	}
-	return 0;
 }
 
-int mbfl_filt_conv_utf32_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf32_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status < 3) {
 		filter->cache = (filter->cache << 8) | (c & 0xFF);
@@ -170,15 +167,13 @@ int mbfl_filt_conv_utf32_wchar(int c, mbfl_convert_filter *filter)
 		} else {
 			filter->filter_function = mbfl_filt_conv_utf32be_wchar;
 			if (n != 0xFEFF) {
-				CK(emit_char_if_valid(n, filter));
+				emit_char_if_valid(n, filter);
 			}
 		}
 	}
-
-	return c;
 }
 
-int mbfl_filt_conv_utf32be_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf32be_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status < 3) {
 		filter->cache = (filter->cache << 8) | (c & 0xFF);
@@ -186,26 +181,23 @@ int mbfl_filt_conv_utf32be_wchar(int c, mbfl_convert_filter *filter)
 	} else {
 		int n = (filter->cache << 8) | (c & 0xFF);
 		filter->cache = filter->status = 0;
-		CK(emit_char_if_valid(n, filter));
+		emit_char_if_valid(n, filter);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_utf32be(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf32be(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < MBFL_WCSPLANE_UTF32MAX) {
-		CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)(c & 0xff, filter->data));
+		(*filter->output_function)((c >> 24) & 0xff, filter->data);
+		(*filter->output_function)((c >> 16) & 0xff, filter->data);
+		(*filter->output_function)((c >> 8) & 0xff, filter->data);
+		(*filter->output_function)(c & 0xff, filter->data);
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
-int mbfl_filt_conv_utf32le_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf32le_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status < 3) {
 		filter->cache |= ((c & 0xFFU) << (8 * filter->status));
@@ -213,23 +205,20 @@ int mbfl_filt_conv_utf32le_wchar(int c, mbfl_convert_filter *filter)
 	} else {
 		int n = ((c & 0xFFU) << 24) | filter->cache;
 		filter->cache = filter->status = 0;
-		CK(emit_char_if_valid(n, filter));
+		emit_char_if_valid(n, filter);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_utf32le(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf32le(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < MBFL_WCSPLANE_UTF32MAX) {
-		CK((*filter->output_function)(c & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
+		(*filter->output_function)(c & 0xff, filter->data);
+		(*filter->output_function)((c >> 8) & 0xff, filter->data);
+		(*filter->output_function)((c >> 16) & 0xff, filter->data);
+		(*filter->output_function)((c >> 24) & 0xff, filter->data);
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
 static void mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)

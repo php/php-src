@@ -97,16 +97,15 @@
 
 #include "zend_API.h"
 
-static inline unsigned char *mbfl_filter_feed_data(mbfl_string *string, mbfl_convert_filter *filter)
+static inline void mbfl_filter_feed_data(mbfl_string *string, mbfl_convert_filter *filter)
 {
-	return mbfl_convert_filter_feed_string(filter, string->val, string->len);
+	mbfl_convert_filter_feed_string(filter, string->val, string->len);
 }
 
 /* Used below for counting characters in a string */
-static int filter_count_output(int c, void *data)
+static void filter_count_output(int c, void *data)
 {
 	(*(size_t *)data)++;
-	return c;
 }
 
 /* Byte offset into multi-byte encoded string -> number of complete characters up to that position
@@ -314,12 +313,12 @@ void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int s
 	(convd->filter2 ? convd->filter2 : convd->filter1)->illegal_substchar = substchar;
 }
 
-size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string)
+void mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string)
 {
 	/* Ensure that the buffer has enough space to hold the entire string; this is better
 	 * for performance than repeatedly growing it in small increments */
 	mbfl_memory_device_realloc(&convd->device, convd->device.pos + string->len, string->len / 4);
-	return mbfl_filter_feed_data(string, convd->filter1) - string->val;
+	mbfl_filter_feed_data(string, convd->filter1);
 }
 
 void mbfl_buffer_converter_flush(mbfl_buffer_converter *convd)
@@ -817,10 +816,9 @@ static size_t character_width(int c)
 	return 1;
 }
 
-static int filter_count_width(int c, void* data)
+static void filter_count_width(int c, void* data)
 {
 	(*(size_t *)data) += character_width(c);
-	return c;
 }
 
 size_t mbfl_strwidth(mbfl_string *string)

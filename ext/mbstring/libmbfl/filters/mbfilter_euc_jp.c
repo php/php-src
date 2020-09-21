@@ -91,20 +91,17 @@ const struct mbfl_convert_vtbl vtbl_wchar_eucjp = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 /*
  * EUC-JP => wchar
  */
-int
-mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, s, w;
 
 	switch (filter->status) {
 	case 0:
 		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c > 0xa0 && c < 0xff) {	/* X 0208 first char */
 			filter->status = 1;
 			filter->cache = c;
@@ -115,7 +112,7 @@ mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -134,12 +131,12 @@ mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_JIS0208;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -147,12 +144,12 @@ mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		if (c > 0xa0 && c < 0xe0) {
 			w = 0xfec0 + c;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			w = 0x8e00 | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -180,12 +177,12 @@ mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_JIS0212;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			w = (c1 << 8) | c | 0x8f0000;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -193,15 +190,12 @@ mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => EUC-JP
  */
-int
-mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 {
 	int c1, s;
 
@@ -245,23 +239,21 @@ mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 	}
 	if (s >= 0) {
 		if (s < 0x80) {	/* latin */
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else if (s < 0x100) {	/* kana */
-			CK((*filter->output_function)(0x8e, filter->data));
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(0x8e, filter->data);
+			(*filter->output_function)(s, filter->data);
 		} else if (s < 0x8080)  {	/* X 0208 */
-			CK((*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data));
-			CK((*filter->output_function)((s & 0xff) | 0x80, filter->data));
+			(*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data);
+			(*filter->output_function)((s & 0xff) | 0x80, filter->data);
 		} else {	/* X 0212 */
-			CK((*filter->output_function)(0x8f, filter->data));
-			CK((*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data));
-			CK((*filter->output_function)((s & 0xff) | 0x80, filter->data));
+			(*filter->output_function)(0x8f, filter->data);
+			(*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data);
+			(*filter->output_function)((s & 0xff) | 0x80, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
 /* Not all byte sequences in JIS X 0208 which would otherwise be valid are

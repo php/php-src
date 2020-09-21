@@ -37,7 +37,7 @@ extern const struct mbfl_identify_vtbl vtbl_identify_euccn;
 extern const struct mbfl_convert_vtbl vtbl_euccn_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_euccn;
 
-int mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_EUC_CN_H */

@@ -182,13 +182,12 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_sb = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter);
+void mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter);
 
 /*
  * UTF-8 => wchar
  */
-int mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s, s1 = 0, c1 = 0, snd = 0;
 
@@ -196,7 +195,7 @@ retry:
 	switch (filter->status & 0xff) {
 	case 0x00:
 		if (c < 0x80) {
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c >= 0xc2 && c <= 0xdf) { /* 2byte code first char: 0xc2-0xdf */
 			filter->status = 0x10;
 			filter->cache = c & 0x1f;
@@ -207,7 +206,7 @@ retry:
 			filter->status = 0x30;
 			filter->cache = c & 0x7;
 		} else {
-			CK(mbfl_filt_put_invalid_char(c, filter));
+			mbfl_filt_put_invalid_char(c, filter);
 		}
 		break;
 	case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
@@ -233,11 +232,11 @@ retry:
 			}
 
 			if (snd > 0) {
-				CK((*filter->output_function)(snd, filter->data));
+				(*filter->output_function)(snd, filter->data);
 			}
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			mbfl_filt_put_invalid_char(filter->cache, filter);
 			goto retry;
 		}
 		break;
@@ -252,7 +251,7 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			mbfl_filt_put_invalid_char(filter->cache, filter);
 			goto retry;
 		}
 		break;
@@ -267,7 +266,7 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			mbfl_filt_put_invalid_char(filter->cache, filter);
 			goto retry;
 		}
 		break;
@@ -276,7 +275,7 @@ retry:
 			filter->cache = (filter->cache<<6) | (c & 0x3f);
 			filter->status++;
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			mbfl_filt_put_invalid_char(filter->cache, filter);
 			goto retry;
 		}
 		break;
@@ -284,14 +283,12 @@ retry:
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => UTF-8
  */
-int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x110000) {
 		int s1, c1;
@@ -312,27 +309,25 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 		}
 
 		if (filter->status == 1 && filter->cache > 0) {
-			return c;
+			return;
 		}
 
 		if (c < 0x80) {
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c < 0x800) {
-			CK((*filter->output_function)(((c >> 6) & 0x1f) | 0xc0, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
+			(*filter->output_function)(((c >> 6) & 0x1f) | 0xc0, filter->data);
+			(*filter->output_function)((c & 0x3f) | 0x80, filter->data);
 		} else if (c < 0x10000) {
-			CK((*filter->output_function)(((c >> 12) & 0x0f) | 0xe0, filter->data));
-			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
+			(*filter->output_function)(((c >> 12) & 0x0f) | 0xe0, filter->data);
+			(*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data);
+			(*filter->output_function)((c & 0x3f) | 0x80, filter->data);
 		} else {
-			CK((*filter->output_function)(((c >> 18) & 0x07) | 0xf0, filter->data));
-			CK((*filter->output_function)(((c >> 12) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
+			(*filter->output_function)(((c >> 18) & 0x07) | 0xf0, filter->data);
+			(*filter->output_function)(((c >> 12) & 0x3f) | 0x80, filter->data);
+			(*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data);
+			(*filter->output_function)((c & 0x3f) | 0x80, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }

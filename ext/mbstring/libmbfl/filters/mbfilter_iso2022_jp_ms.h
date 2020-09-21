@@ -37,8 +37,8 @@ extern const struct mbfl_identify_vtbl vtbl_identify_2022jpms;
 extern const struct mbfl_convert_vtbl vtbl_2022jpms_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_2022jpms;
 
-int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter);
 void mbfl_filt_conv_any_2022jpms_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_ISO2022_JP_MS_H */

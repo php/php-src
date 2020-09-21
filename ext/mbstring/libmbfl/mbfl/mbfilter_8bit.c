@@ -34,8 +34,8 @@
 
 const struct mbfl_convert_vtbl vtbl_8bit_wchar;
 const struct mbfl_convert_vtbl vtbl_wchar_8bit;
-static int mbfl_filt_conv_8bit_wchar(int c, mbfl_convert_filter *filter);
-static int mbfl_filt_conv_wchar_8bit(int c, mbfl_convert_filter *filter);
+static void mbfl_filt_conv_8bit_wchar(int c, mbfl_convert_filter *filter);
+static void mbfl_filt_conv_wchar_8bit(int c, mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_8bit_aliases[] = {"binary", NULL};
 
@@ -74,20 +74,16 @@ const struct mbfl_convert_vtbl vtbl_wchar_8bit = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement) do { if ((statement) < 0) return (-1); } while (0)
-
-static int mbfl_filt_conv_8bit_wchar(int c, mbfl_convert_filter *filter)
+static void mbfl_filt_conv_8bit_wchar(int c, mbfl_convert_filter *filter)
 {
-	return (*filter->output_function)(c, filter->data);
+	(*filter->output_function)(c, filter->data);
 }
 
-static int mbfl_filt_conv_wchar_8bit(int c, mbfl_convert_filter *filter)
+static void mbfl_filt_conv_wchar_8bit(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x100) {
-		CK((*filter->output_function)(c, filter->data));
+		(*filter->output_function)(c, filter->data);
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }

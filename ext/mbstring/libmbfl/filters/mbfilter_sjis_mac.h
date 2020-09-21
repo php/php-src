@@ -37,7 +37,7 @@ extern const struct mbfl_identify_vtbl vtbl_identify_sjis_mac;
 extern const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac;
 
-int mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_SJIS_MAC_H */

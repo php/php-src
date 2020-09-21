@@ -42,9 +42,9 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_byte2be;
 extern const struct mbfl_convert_vtbl vtbl_byte2le_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_byte2le;
 
-int mbfl_filt_conv_wchar_byte2be(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_byte2be_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_byte2le(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_byte2le_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_byte2be(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_byte2be_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_byte2le(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_byte2le_wchar(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_BYTE2_H */

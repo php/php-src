@@ -26,8 +26,7 @@
 #include "mbfilter_tl_jisx0201_jisx0208.h"
 #include "translit_kana_jisx0201_jisx0208.h"
 
-int
-mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
+void mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 {
 	int s, n;
 	intptr_t mode = (intptr_t)filt->opaque;
@@ -77,7 +76,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 				} else {
 					filt->status = 1;
 					filt->cache = c;
-					return c;
+					return;
 				}
 			} else {
 				if (filt->status) {
@@ -106,7 +105,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 				} else {
 					filt->status = 1;
 					filt->cache = c;
-					return c;
+					return;
 				}
 			} else {
 				if (filt->status) {
@@ -233,7 +232,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 		}
 	}
 
-	return (*filt->output_function)(s, filt->data);
+	(*filt->output_function)(s, filt->data);
 }
 
 void mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)

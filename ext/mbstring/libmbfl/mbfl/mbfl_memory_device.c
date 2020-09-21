@@ -85,43 +85,32 @@ mbfl_string* mbfl_memory_device_result(mbfl_memory_device *device, mbfl_string *
 	return result;
 }
 
-int mbfl_memory_device_output(int c, void *data)
+void mbfl_memory_device_output(int c, void *data)
 {
 	mbfl_memory_device *device = (mbfl_memory_device *)data;
 
 	if (UNEXPECTED(device->pos >= device->length)) {
 		/* reallocate buffer */
-
-		if (UNEXPECTED(device->length > SIZE_MAX - device->allocsz)) {
-			/* overflow */
-			return -1;
-		}
-
+		ZEND_ASSERT(device->length <= SIZE_MAX - device->allocsz);
 		size_t newlen = device->length + device->allocsz;
 		device->buffer = erealloc(device->buffer, newlen);
 		device->length = newlen;
 	}
 
 	device->buffer[device->pos++] = (unsigned char)c;
-	return c;
 }
 
-int mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
+void mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
 {
-	return mbfl_memory_device_strncat(device, psrc, strlen(psrc));
+	mbfl_memory_device_strncat(device, psrc, strlen(psrc));
 }
 
-int mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, size_t len)
+void mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, size_t len)
 {
 	if (UNEXPECTED(len > device->length - device->pos)) {
 		/* reallocate buffer */
-
-		if (UNEXPECTED(len > SIZE_MAX - MBFL_MEMORY_DEVICE_ALLOC_SIZE
-				|| device->length > SIZE_MAX - (len + MBFL_MEMORY_DEVICE_ALLOC_SIZE))) {
-			/* overflow */
-			return -1;
-		}
-
+		ZEND_ASSERT(len <= SIZE_MAX - MBFL_MEMORY_DEVICE_ALLOC_SIZE);
+		ZEND_ASSERT(device->length <= SIZE_MAX - len - MBFL_MEMORY_DEVICE_ALLOC_SIZE);
 		size_t newlen = device->length + len + MBFL_MEMORY_DEVICE_ALLOC_SIZE;
 		device->buffer = erealloc(device->buffer, newlen);
 		device->length = newlen;
@@ -130,13 +119,11 @@ int mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, siz
 	unsigned char *w = &device->buffer[device->pos];
 	memcpy(w, psrc, len);
 	device->pos += len;
-
-	return 0;
 }
 
-int mbfl_memory_device_devcat(mbfl_memory_device *dest, mbfl_memory_device *src)
+void mbfl_memory_device_devcat(mbfl_memory_device *dest, mbfl_memory_device *src)
 {
-	return mbfl_memory_device_strncat(dest, (const char*)src->buffer, src->pos);
+	mbfl_memory_device_strncat(dest, (const char*)src->buffer, src->pos);
 }
 
 void mbfl_wchar_device_init(mbfl_wchar_device *device, size_t initsz)
@@ -156,27 +143,18 @@ void mbfl_wchar_device_clear(mbfl_wchar_device *device)
 	device->length = device->pos = 0;
 }
 
-int mbfl_wchar_device_output(int c, void *data)
+void mbfl_wchar_device_output(int c, void *data)
 {
 	mbfl_wchar_device *device = (mbfl_wchar_device *)data;
 
 	if (UNEXPECTED(device->pos >= device->length)) {
 		/* reallocate buffer */
-		if (UNEXPECTED(device->length > SIZE_MAX - device->allocsz)) {
-			/* overflow */
-			return -1;
-		}
-
+		ZEND_ASSERT(device->length <= SIZE_MAX - device->allocsz);
 		size_t newlen = device->length + device->allocsz;
-		if (UNEXPECTED(newlen > SIZE_MAX / sizeof(int))) {
-			/* overflow */
-			return -1;
-		}
-
+		ZEND_ASSERT(newlen <= SIZE_MAX / sizeof(int));
 		device->buffer = erealloc(device->buffer, newlen * sizeof(int));
 		device->length = newlen;
 	}
 
 	device->buffer[device->pos++] = c;
-	return c;
 }

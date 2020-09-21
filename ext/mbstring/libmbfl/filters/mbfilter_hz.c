@@ -69,13 +69,10 @@ const struct mbfl_convert_vtbl vtbl_wchar_hz = {
 	mbfl_filt_conv_any_hz_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 /*
  * HZ => wchar
  */
-int
-mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, s, w;
 
@@ -89,11 +86,11 @@ mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 			filter->cache = c;
 			filter->status += 1;
 		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -113,14 +110,14 @@ mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_GB2312;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -132,7 +129,7 @@ mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 0x10;
 		} else if (c == 0x7e) { /* '~' */
 			filter->status = 0x0;
-			CK((*filter->output_function)(0x007e, filter->data));
+			(*filter->output_function)(0x007e, filter->data);
 		}
 		break;
 
@@ -140,15 +137,12 @@ mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => HZ
  */
-int
-mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 {
 	int s;
 
@@ -188,28 +182,26 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 	if (s >= 0) {
 		if (s < 0x80) { /* ASCII */
 			if ((filter->status & 0xff00) != 0) {
-				CK((*filter->output_function)(0x7e, filter->data));		/* '~' */
-				CK((*filter->output_function)(0x7d, filter->data));		/* '}' */
+				(*filter->output_function)(0x7e, filter->data);		/* '~' */
+				(*filter->output_function)(0x7d, filter->data);		/* '}' */
 			}
 			filter->status = 0;
 			if (s == 0x7e){
-				CK((*filter->output_function)(0x7e, filter->data));
+				(*filter->output_function)(0x7e, filter->data);
 			}
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else { /* GB 2312-80 */
 			if ((filter->status & 0xff00) != 0x200) {
-				CK((*filter->output_function)(0x7e, filter->data));		/* '~' */
-				CK((*filter->output_function)(0x7b, filter->data));		/* '{' */
+				(*filter->output_function)(0x7e, filter->data);		/* '~' */
+				(*filter->output_function)(0x7b, filter->data);		/* '{' */
 			}
 			filter->status = 0x200;
-			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			(*filter->output_function)((s >> 8) & 0x7f, filter->data);
+			(*filter->output_function)(s & 0x7f, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
 void mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter)

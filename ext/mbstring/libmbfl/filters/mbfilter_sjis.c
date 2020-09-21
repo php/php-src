@@ -95,8 +95,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 #define SJIS_ENCODE(c1,c2,s1,s2)	\
 		do {						\
 			s1 = c1;				\
@@ -140,25 +138,25 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis = {
 			}						\
 		} while (0)
 
-int mbfl_filt_conv_sjis_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_sjis_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s1, s2, w;
 
 	switch (filter->status) {
 	case 0:
 		if (c == 0x5C) {
-			CK((*filter->output_function)(0xA5, filter->data));
+			(*filter->output_function)(0xA5, filter->data);
 		} else if (c == 0x7E) {
-			CK((*filter->output_function)(0x203E, filter->data));
+			(*filter->output_function)(0x203E, filter->data);
 		} else if (c >= 0 && c < 0x80) { /* ASCII */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c > 0xA0 && c < 0xE0) { /* Kana */
-			CK((*filter->output_function)(0xFEC0 + c, filter->data));
+			(*filter->output_function)(0xFEC0 + c, filter->data);
 		} else if (c > 0x80 && c < 0xF0 && c != 0xA0) { /* Kanji, first byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			(*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data);
 		}
 		break;
 
@@ -180,14 +178,12 @@ int mbfl_filt_conv_sjis_wchar(int c, mbfl_convert_filter *filter)
 					w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
 				}
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(w, filter->data));
 		}
 	}
-
-	return c;
 }
 
 static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter)
@@ -203,7 +199,7 @@ static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 {
 	int c1, c2, s1, s2;
 
@@ -245,19 +241,17 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 
 	if (s1 >= 0) {
 		if (s1 < 0x100) { /* Latin/Kana */
-			CK((*filter->output_function)(s1, filter->data));
+			(*filter->output_function)(s1, filter->data);
 		} else { /* Kanji */
 			c1 = (s1 >> 8) & 0xFF;
 			c2 = s1 & 0xFF;
 			SJIS_ENCODE(c1, c2, s1, s2);
-			CK((*filter->output_function)(s1, filter->data));
-			CK((*filter->output_function)(s2, filter->data));
+			(*filter->output_function)(s1, filter->data);
+			(*filter->output_function)(s2, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
 void mbfl_filt_ident_sjis(unsigned char c, mbfl_identify_filter *filter)

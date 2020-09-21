@@ -37,9 +37,9 @@ extern const struct mbfl_identify_vtbl vtbl_identify_qprint;
 extern const struct mbfl_convert_vtbl vtbl_8bit_qprint;
 extern const struct mbfl_convert_vtbl vtbl_qprint_8bit;
 
-int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter);
 void mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter);
-int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter);
 void mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_ASCII_H */

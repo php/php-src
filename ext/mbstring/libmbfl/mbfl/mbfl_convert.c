@@ -155,18 +155,16 @@ void mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 /* Feed a char, return 0 if ok - used by mailparse ext */
 int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter)
 {
-	return (*filter->filter_function)(c, filter);
+	(*filter->filter_function)(c, filter);
+	return 0;
 }
 
-/* Feed string into `filter` byte by byte; return pointer to first byte not processed */
-unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsigned char *p, size_t len)
+/* Feed string into `filter` byte by byte */
+void mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsigned char *p, size_t len)
 {
 	while (len--) {
-		if ((*filter->filter_function)(*p++, filter) < 0) {
-			break;
-		}
+		(*filter->filter_function)(*p++, filter);
 	}
-	return p;
 }
 
 void mbfl_convert_filter_flush(mbfl_convert_filter *filter)
@@ -195,24 +193,19 @@ void mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device 
 	mbfl_convert_filter_feed_string(filter, src->buffer, src->pos);
 }
 
-int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p)
+void mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p)
 {
 	int c;
 	while ((c = *p++)) {
-		if ((*filter->filter_function)(c, filter) < 0) {
-			return -1;
-		}
+		(*filter->filter_function)(c, filter);
 	}
-
-	return 0;
 }
 
 /* illegal character output function for conv-filter */
-int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 {
 	int n, m, r;
 
-	int ret = 0;
 	int mode_backup = filter->illegal_mode;
 	int substchar_backup = filter->illegal_substchar;
 
@@ -228,67 +221,61 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 
 	switch (mode_backup) {
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR:
-		ret = (*filter->filter_function)(substchar_backup, filter);
+		(*filter->filter_function)(substchar_backup, filter);
 		break;
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
 		if (c >= 0) {
 			if (c < MBFL_WCSGROUP_UCS4MAX) {	/* unicode */
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+");
+				mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+");
 			} else {
 				if (c < MBFL_WCSGROUP_WCHARMAX) {
 					m = c & ~MBFL_WCSPLANE_MASK;
 					switch (m) {
 					case MBFL_WCSPLANE_JIS0208:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS+");
+						mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS+");
 						break;
 					case MBFL_WCSPLANE_JIS0212:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS2+");
+						mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS2+");
 						break;
 					case MBFL_WCSPLANE_JIS0213:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS3+");
+						mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS3+");
 						break;
 					case MBFL_WCSPLANE_WINCP932:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"W932+");
+						mbfl_convert_filter_strcat(filter, (const unsigned char *)"W932+");
 						break;
 					case MBFL_WCSPLANE_GB18030:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"GB+");
+						mbfl_convert_filter_strcat(filter, (const unsigned char *)"GB+");
 						break;
 					default:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"?+");
+						mbfl_convert_filter_strcat(filter, (const unsigned char *)"?+");
 						break;
 					}
 					c &= MBFL_WCSPLANE_MASK;
 				} else {
-					ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"BAD+");
+					mbfl_convert_filter_strcat(filter, (const unsigned char *)"BAD+");
 					c &= MBFL_WCSGROUP_MASK;
 				}
 			}
-			if (ret >= 0) {
-				m = 0;
-				r = 28;
-				while (r >= 0) {
-					n = (c >> r) & 0xf;
-					if (n || m) {
-						m = 1;
-						ret = (*filter->filter_function)(mbfl_hexchar_table[n], filter);
-						if (ret < 0) {
-							break;
-						}
-					}
-					r -= 4;
+
+			m = 0;
+			r = 28;
+			while (r >= 0) {
+				n = (c >> r) & 0xf;
+				if (n || m) {
+					m = 1;
+					(*filter->filter_function)(mbfl_hexchar_table[n], filter);
 				}
-				if (m == 0) {
-					ret = (*filter->filter_function)(mbfl_hexchar_table[0], filter);
-				}
+				r -= 4;
+			}
+			if (m == 0) {
+				(*filter->filter_function)(mbfl_hexchar_table[0], filter);
 			}
 		}
 		break;
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY:
 		if (c >= 0) {
 			if (c < MBFL_WCSGROUP_UCS4MAX) {	/* unicode */
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"&#x");
-				if (ret < 0)
-					break;
+				mbfl_convert_filter_strcat(filter, (const unsigned char *)"&#x");
 
 				m = 0;
 				r = 28;
@@ -296,20 +283,17 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 					n = (c >> r) & 0xf;
 					if (n || m) {
 						m = 1;
-						ret = (*filter->filter_function)(mbfl_hexchar_table[n], filter);
-						if (ret < 0) {
-							break;
-						}
+						(*filter->filter_function)(mbfl_hexchar_table[n], filter);
 					}
 					r -= 4;
 				}
 				if (m == 0) {
 					/* illegal character was zero; no hex digits were output by above loop */
-					ret = (*filter->filter_function)('0', filter);
+					(*filter->filter_function)('0', filter);
 				}
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)";");
+				mbfl_convert_filter_strcat(filter, (const unsigned char *)";");
 			} else {
-				ret = (*filter->filter_function)(substchar_backup, filter);
+				(*filter->filter_function)(substchar_backup, filter);
 			}
 		}
 		break;
@@ -321,8 +305,6 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 	filter->illegal_mode = mode_backup;
 	filter->illegal_substchar = substchar_backup;
 	filter->num_illegalchar++;
-
-	return ret;
 }
 
 const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding *from, const mbfl_encoding *to)

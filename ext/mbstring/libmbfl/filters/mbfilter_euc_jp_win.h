@@ -37,7 +37,7 @@ extern const struct mbfl_identify_vtbl vtbl_identify_eucjpwin;
 extern const struct mbfl_convert_vtbl vtbl_eucjpwin_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_eucjpwin;
 
-int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_EUC_JP_WIN_H */

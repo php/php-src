@@ -140,9 +140,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs2le = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-int mbfl_filt_conv_ucs2_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_ucs2_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status == 0) {
 		filter->status = 1;
@@ -156,57 +154,52 @@ int mbfl_filt_conv_ucs2_wchar(int c, mbfl_convert_filter *filter)
 		} else {
 			filter->filter_function = mbfl_filt_conv_ucs2be_wchar;
 			if (n != 0xFEFF) {
-				CK((*filter->output_function)(n, filter->data));
+				(*filter->output_function)(n, filter->data);
 			}
 		}
 	}
-	return c;
 }
 
-int mbfl_filt_conv_ucs2be_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_ucs2be_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status == 0) {
 		filter->status = 1;
 		filter->cache = (c & 0xFF) << 8;
 	} else {
 		filter->status = 0;
-		CK((*filter->output_function)((c & 0xFF) | filter->cache, filter->data));
+		(*filter->output_function)((c & 0xFF) | filter->cache, filter->data);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_ucs2be(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_ucs2be(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
-		CK((*filter->output_function)((c >> 8) & 0xFF, filter->data));
-		CK((*filter->output_function)(c & 0xFF, filter->data));
+		(*filter->output_function)((c >> 8) & 0xFF, filter->data);
+		(*filter->output_function)(c & 0xFF, filter->data);
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_ucs2le_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_ucs2le_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (filter->status == 0) {
 		filter->status = 1;
 		filter->cache = c & 0xFF;
 	} else {
 		filter->status = 0;
-		CK((*filter->output_function)(((c & 0xFF) << 8) | filter->cache, filter->data));
+		(*filter->output_function)(((c & 0xFF) << 8) | filter->cache, filter->data);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
-		CK((*filter->output_function)(c & 0xFF, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xFF, filter->data));
+		(*filter->output_function)(c & 0xFF, filter->data);
+		(*filter->output_function)((c >> 8) & 0xFF, filter->data);
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-	return c;
 }
 
 static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter)

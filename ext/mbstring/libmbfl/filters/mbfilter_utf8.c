@@ -88,24 +88,21 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
+void mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
 {
 	filter->filter_function = mbfl_filt_conv_utf8_wchar;
 	filter->cache = filter->status = 0;
-	CK((*filter->output_function)((c & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data));
-	return 0;
+	(*filter->output_function)((c & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data);
 }
 
-int mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_utf8_wchar_lastbyte(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_utf8_wchar_lastbyte(int c, mbfl_convert_filter *filter);
 
-int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 {
 	if (c < 0x80) {
-		CK((*filter->output_function)(c, filter->data));
+		(*filter->output_function)(c, filter->data);
 	} else if (c >= 0xC2 && c <= 0xDF) { /* 2-byte character */
 		/* The first byte of a 2-byte character must be at least 0xC2... if it was
 		 * 0xC0 or 0xC1, that would mean the character could have fit into 1 byte!
@@ -122,12 +119,11 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 1;
 		filter->cache = c & 0x7;
 	} else {
-		CK(mbfl_filt_put_invalid_char(c, filter));
+		mbfl_filt_put_invalid_char(c, filter);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes(int c, mbfl_convert_filter *filter)
 {
 	/* 2nd byte of a 4-byte character
 	 *
@@ -138,16 +134,15 @@ int mbfl_filt_conv_utf8_wchar_2nd_of_4_bytes(int c, mbfl_convert_filter *filter)
 		filter->cache = (filter->cache << 6) | (c & 0x3F);
 		filter->filter_function = mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte;
 	} else {
-		CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+		mbfl_filt_put_invalid_char(filter->cache, filter);
 		if (c < 0x80 || (c >= 0xC2 && c <= 0xF4)) {
 			/* Only retry if byte could be the start of a valid UTF-8 character */
-			return mbfl_filt_conv_utf8_wchar(c, filter);
+			mbfl_filt_conv_utf8_wchar(c, filter);
 		}
 	}
-	return c;
 }
 
-int mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0x80 && c <= 0xBF && (filter->cache || (c & 0x20)) && (filter->cache != 0xD || !(c & 0x20))) {
 		/* This could be the 2nd byte of a 3-byte character
@@ -160,15 +155,14 @@ int mbfl_filt_conv_utf8_wchar_2nd_to_lastbyte(int c, mbfl_convert_filter *filter
 		filter->cache = (filter->cache << 6) | (c & 0x3f);
 		filter->filter_function = mbfl_filt_conv_utf8_wchar_lastbyte;
 	} else {
-		CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+		mbfl_filt_put_invalid_char(filter->cache, filter);
 		if (c < 0x80 || (c >= 0xC2 && c <= 0xF4)) {
-			return mbfl_filt_conv_utf8_wchar(c, filter);
+			mbfl_filt_conv_utf8_wchar(c, filter);
 		}
 	}
-	return c;
 }
 
-int mbfl_filt_conv_utf8_wchar_lastbyte(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf8_wchar_lastbyte(int c, mbfl_convert_filter *filter)
 {
 	filter->filter_function = mbfl_filt_conv_utf8_wchar;
 	filter->status = 0;
@@ -176,21 +170,20 @@ int mbfl_filt_conv_utf8_wchar_lastbyte(int c, mbfl_convert_filter *filter)
 		int s = (filter->cache << 6) | (c & 0x3F);
 		filter->cache = 0;
 		if (s <= 0x10FFFF) {
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 			return;
 		}
 	}
 
-	CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+	mbfl_filt_put_invalid_char(filter->cache, filter);
 	if (c < 0x80 || (c >= 0xC2 && c <= 0xF4)) {
-		return mbfl_filt_conv_utf8_wchar(c, filter);
+		mbfl_filt_conv_utf8_wchar(c, filter);
 	}
-	return c;
 }
 
 void mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
-	if (filter->cache != 0) {
+	if (filter->cache) {
 		mbfl_filt_put_invalid_char(filter->cache, filter);
 	}
 	filter->cache = 0;
@@ -200,29 +193,27 @@ void mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 	}
 }
 
-int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x110000) {
 		if (c < 0x80) {
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c < 0x800) {
-			CK((*filter->output_function)(((c >> 6) & 0x1f) | 0xc0, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
+			(*filter->output_function)(((c >> 6) & 0x1f) | 0xc0, filter->data);
+			(*filter->output_function)((c & 0x3f) | 0x80, filter->data);
 		} else if (c < 0x10000) {
-			CK((*filter->output_function)(((c >> 12) & 0x0f) | 0xe0, filter->data));
-			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
+			(*filter->output_function)(((c >> 12) & 0x0f) | 0xe0, filter->data);
+			(*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data);
+			(*filter->output_function)((c & 0x3f) | 0x80, filter->data);
 		} else {
-			CK((*filter->output_function)(((c >> 18) & 0x07) | 0xf0, filter->data));
-			CK((*filter->output_function)(((c >> 12) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
+			(*filter->output_function)(((c >> 18) & 0x07) | 0xf0, filter->data);
+			(*filter->output_function)(((c >> 12) & 0x3f) | 0x80, filter->data);
+			(*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data);
+			(*filter->output_function)((c & 0x3f) | 0x80, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
 void mbfl_filt_ident_utf8(unsigned char c, mbfl_identify_filter *filter)

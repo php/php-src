@@ -89,28 +89,25 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
 	mbfl_filt_conv_html_dec_flush
 };
 
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 /*
  * any => HTML
  */
-int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 {
 	int tmp[64];
 
 	if (c < sizeof(htmlentitifieds) / sizeof(htmlentitifieds[0]) && htmlentitifieds[c] != 1) {
-		CK((*filter->output_function)(c, filter->data));
-		return c;
+		(*filter->output_function)(c, filter->data);
+		return;
 	}
 
-	CK((*filter->output_function)('&', filter->data));
+	(*filter->output_function)('&', filter->data);
 
 	for (int i = 0; mbfl_html_entity_list[i].name; i++) {
 		const mbfl_html_entity_entry *e = &mbfl_html_entity_list[i];
 		if (c == e->code) {
 			for (char *p = e->name; *p; p++) {
-				CK((*filter->output_function)(*p, filter->data));
+				(*filter->output_function)(*p, filter->data);
 			}
 			goto last;
 		}
@@ -118,7 +115,7 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 
 	int *p = tmp + sizeof(tmp) / sizeof(tmp[0]);
 
-	CK((*filter->output_function)('#', filter->data));
+	(*filter->output_function)('#', filter->data);
 
 	/* TODO: Why not use hexadecimal entities here?? */
 	unsigned int uc = (unsigned int)c;
@@ -129,12 +126,11 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 	} while (uc);
 
 	while (*p) {
-		CK((*filter->output_function)(*p++, filter->data));
+		(*filter->output_function)(*p++, filter->data);
 	}
 
 last:
-	CK((*filter->output_function)(';', filter->data));
-	return c;
+	(*filter->output_function)(';', filter->data);
 }
 
 void mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter)
@@ -168,7 +164,7 @@ void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
 	}
 }
 
-int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 {
 	int  pos, ent = 0;
 	mbfl_html_entity_entry *entity;
@@ -179,7 +175,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 			filter->status = 1;
 			buffer[0] = '&';
 		} else {
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		}
 	} else {
 		if (c == ';') {
@@ -222,12 +218,12 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					}
 				}
 				if (ent >= 0 && ent < 0x110000) {
-					CK((*filter->output_function)(ent, filter->data));
+					(*filter->output_function)(ent, filter->data);
 				} else {
 					for (pos = 0; pos < filter->status; pos++) {
-						CK((*filter->output_function)(buffer[pos], filter->data));
+						(*filter->output_function)(buffer[pos], filter->data);
 					}
-					CK((*filter->output_function)(c, filter->data));
+					(*filter->output_function)(c, filter->data);
 				}
 				filter->status = 0;
 				/*php_error_docref("ref.mbstring", E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
@@ -244,7 +240,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				}
 				if (ent) {
 					/* decoded */
-					CK((*filter->output_function)(ent, filter->data));
+					(*filter->output_function)(ent, filter->data);
 					filter->status = 0;
 				} else {
 					/* failure */
@@ -269,7 +265,6 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 			}
 		}
 	}
-	return c;
 }
 
 void mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)

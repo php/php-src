@@ -156,7 +156,7 @@ MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new(const mbfl_enco
 MBFLAPI extern void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd);
 MBFLAPI extern void mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
 MBFLAPI extern void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar);
-MBFLAPI extern size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
+MBFLAPI extern void mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
 MBFLAPI extern void mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);

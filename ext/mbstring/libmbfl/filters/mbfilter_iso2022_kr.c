@@ -68,13 +68,10 @@ const struct mbfl_convert_vtbl vtbl_2022kr_wchar = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 /*
  * ISO-2022-KR => wchar
  */
-int
-mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, w, flag;
 
@@ -95,11 +92,11 @@ retry:
 			filter->status += 1;
 		} else if ((filter->status & 0x10) == 0 &&  c >= 0 && c < 0x80) {
 			/* latin, CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -134,16 +131,16 @@ retry:
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_KSC5601;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else if (c == 0x1b) {	 /* ESC */
 			filter->status++;
 		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -152,7 +149,7 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
 			goto retry;
 		}
 		break;
@@ -161,8 +158,8 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
-			CK((*filter->output_function)(0x24, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
+			(*filter->output_function)(0x24, filter->data);
 			goto retry;
 		}
 		break;
@@ -172,9 +169,9 @@ retry:
 			filter->status |= 0x100;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
-			CK((*filter->output_function)(0x24, filter->data));
-			CK((*filter->output_function)(0x29, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
+			(*filter->output_function)(0x24, filter->data);
+			(*filter->output_function)(0x29, filter->data);
 			goto retry;
 		}
 		break;
@@ -182,15 +179,12 @@ retry:
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => ISO-2022-KR
  */
-int
-mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 {
 	int c1, c2, s;
 
@@ -238,30 +232,28 @@ mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 	if (s >= 0) {
 		if (s < 0x80 && s > 0) {	/* ASCII */
 			if ((filter->status & 0x10) != 0) {
-				CK((*filter->output_function)(0x0f, filter->data));		/* SI */
+				(*filter->output_function)(0x0f, filter->data);		/* SI */
 				filter->status &= ~0x10;
 			}
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else {
 			if ( (filter->status & 0x100) == 0) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-				CK((*filter->output_function)(0x29, filter->data));		/* ')' */
-				CK((*filter->output_function)(0x43, filter->data));		/* 'C' */
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x24, filter->data);		/* '$' */
+				(*filter->output_function)(0x29, filter->data);		/* '' */
+				(*filter->output_function)(0x43, filter->data);		/* 'C' */
 				filter->status |= 0x100;
 			}
 			if ((filter->status & 0x10) == 0) {
-				CK((*filter->output_function)(0x0e, filter->data));		/* SO */
+				(*filter->output_function)(0x0e, filter->data);		/* SO */
 				filter->status |= 0x10;
 			}
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
+			(*filter->output_function)((s >> 8) & 0xff, filter->data);
+			(*filter->output_function)(s & 0xff, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
 void mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)

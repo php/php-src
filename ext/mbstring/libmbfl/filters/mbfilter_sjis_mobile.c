@@ -191,8 +191,6 @@ const unsigned short mbfl_kddi2uni_pua_b[8][3] = {
 
 #define NFLAGS(c) (0x1F1A5+(int)(c))
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 #define SJIS_ENCODE(c1,c2,s1,s2)	\
 		do {						\
 			s1 = c1;				\
@@ -398,8 +396,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 	return w;
 }
 
-int
-mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
+int mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
 {
 	int i, match = 0, c1s;
 
@@ -419,7 +416,7 @@ mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
 				match = 1;
 			}
 		} else {
-			CK((*filter->output_function)(c1s, filter->data));
+			(*filter->output_function)(c1s, filter->data);
 		}
 	} else {
 		if (c == 0x0023 || (c >= 0x0030 && c<=0x0039)) {
@@ -488,7 +485,7 @@ mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
 		} else {
 			if (c1s >= ucs_a1_jis_table_min && c1s < ucs_a1_jis_table_max) {
 				c1s = ucs_a1_jis_table[c1s - ucs_a1_jis_table_min];
-				CK((*filter->output_function)(c1s, filter->data));
+				(*filter->output_function)(c1s, filter->data);
 			}
 		}
 	} else {
@@ -559,7 +556,7 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 		} else {
 			if (c1s >= ucs_a1_jis_table_min && c1s < ucs_a1_jis_table_max) {
 				c1s = ucs_a1_jis_table[c1s - ucs_a1_jis_table_min];
-				CK((*filter->output_function)(c1s, filter->data));
+				(*filter->output_function)(c1s, filter->data);
 			}
 		}
 	} else {
@@ -600,8 +597,7 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 /*
  * SJIS-win => wchar
  */
-int
-mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, s, s1 = 0, s2 = 0, w;
 	int snd = 0;
@@ -614,17 +610,17 @@ retry:
 				filter->cache = c;
 				filter->status = 2;
 			} else {
-				CK((*filter->output_function)(c, filter->data));
+				(*filter->output_function)(c, filter->data);
 			}
 		} else if (c > 0xa0 && c < 0xe0) {	/* kana */
-			CK((*filter->output_function)(0xfec0 + c, filter->data));
+			(*filter->output_function)(0xfec0 + c, filter->data);
 		} else if (c > 0x80 && c < 0xfd && c != 0xa0) {	/* kanji first char */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -675,7 +671,7 @@ retry:
 					}
 
 					if (w > 0  && snd > 0) {
-						CK((*filter->output_function)(snd, filter->data));
+						(*filter->output_function)(snd, filter->data);
 					}
 				}
 			}
@@ -684,14 +680,14 @@ retry:
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_WINCP932;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 	/* ESC : Softbank Emoji */
@@ -703,7 +699,7 @@ retry:
 		} else {
 			filter->cache = 0;
 			filter->status = 0;
-			CK((*filter->output_function)(0x1b, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
 			goto retry;
 		}
 		break;
@@ -717,8 +713,8 @@ retry:
 		} else {
 			filter->cache = 0;
 			filter->status = 0;
-			CK((*filter->output_function)(0x1b, filter->data));
-			CK((*filter->output_function)(0x24, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
+			(*filter->output_function)(0x24, filter->data);
 			goto retry;
 		}
 		break;
@@ -751,9 +747,9 @@ retry:
 				w = mbfilter_sjis_emoji_sb2unicode(s, &snd);
 				if (w > 0) {
 					if (snd > 0) {
-						CK((*filter->output_function)(snd, filter->data));
+						(*filter->output_function)(snd, filter->data);
 					}
-					CK((*filter->output_function)(w, filter->data));
+					(*filter->output_function)(w, filter->data);
 				}
 			}
 		}
@@ -762,9 +758,9 @@ retry:
 			c1 = filter->cache;
 			filter->cache = 0;
 			filter->status = 0;
-			CK((*filter->output_function)(0x1b, filter->data));
-			CK((*filter->output_function)(0x24, filter->data));
-			CK((*filter->output_function)(c1 & 0xff, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
+			(*filter->output_function)(0x24, filter->data);
+			(*filter->output_function)(c1 & 0xff, filter->data);
 			goto retry;
 		}
 		break;
@@ -773,15 +769,12 @@ retry:
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => SJIS-win
  */
-int
-mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 {
 	int c1, c2, s1, s2;
 
@@ -884,24 +877,22 @@ mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
  	}
 
 	if (filter->status == 1 && filter->cache > 0) {
-		return c;
+		return;
 	}
 
 	if (s1 >= 0) {
 		if (s1 < 0x100) { /* latin or kana */
-			CK((*filter->output_function)(s1, filter->data));
+			(*filter->output_function)(s1, filter->data);
 		} else { /* kanji */
 			c1 = (s1 >> 8) & 0xff;
 			c2 = s1 & 0xff;
 			SJIS_ENCODE(c1, c2, s1, s2);
-			CK((*filter->output_function)(s1, filter->data));
-			CK((*filter->output_function)(s2, filter->data));
+			(*filter->output_function)(s1, filter->data);
+			(*filter->output_function)(s2, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
 void mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
