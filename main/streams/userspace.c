@@ -559,21 +559,22 @@ PHP_FUNCTION(stream_wrapper_restore)
 {
 	zend_string *protocol;
 	php_stream_wrapper *wrapper;
-	HashTable *global_wrapper_hash;
+	HashTable *global_wrapper_hash, *wrapper_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &protocol) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	global_wrapper_hash = php_stream_get_url_stream_wrappers_hash_global();
-	if (php_stream_get_url_stream_wrappers_hash() == global_wrapper_hash) {
-		php_error_docref(NULL, E_NOTICE, "%s:// was never changed, nothing to restore", ZSTR_VAL(protocol));
-		RETURN_TRUE;
-	}
-
 	if ((wrapper = zend_hash_find_ptr(global_wrapper_hash, protocol)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "%s:// never existed, nothing to restore", ZSTR_VAL(protocol));
 		RETURN_FALSE;
+	}
+
+	wrapper_hash = php_stream_get_url_stream_wrappers_hash();
+	if (wrapper_hash == global_wrapper_hash || zend_hash_find_ptr(wrapper_hash, protocol) == wrapper) {
+		php_error_docref(NULL, E_NOTICE, "%s:// was never changed, nothing to restore", ZSTR_VAL(protocol));
+		RETURN_TRUE;
 	}
 
 	/* A failure here could be okay given that the protocol might have been merely unregistered */
