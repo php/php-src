@@ -747,27 +747,22 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 /* {{{ Returns an array of default properties of the class. */
 ZEND_FUNCTION(get_class_vars)
 {
-	zend_string *class_name;
-	zend_class_entry *ce, *scope;
+	zend_class_entry *ce = NULL, *scope;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &class_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C", &ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	ce = zend_lookup_class(class_name);
-	if (!ce) {
-		RETURN_FALSE;
-	} else {
-		array_init(return_value);
-		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
-				return;
-			}
+	array_init(return_value);
+	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+			return;
 		}
-		scope = zend_get_executed_scope();
-		add_class_vars(scope, ce, 0, return_value);
-		add_class_vars(scope, ce, 1, return_value);
 	}
+
+	scope = zend_get_executed_scope();
+	add_class_vars(scope, ce, 0, return_value);
+	add_class_vars(scope, ce, 1, return_value);
 }
 /* }}} */
 
