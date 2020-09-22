@@ -731,9 +731,10 @@ PHP_FUNCTION(unpack)
 
 
 	if (offset < 0 || offset > inputlen) {
-		php_error_docref(NULL, E_WARNING, "Offset " ZEND_LONG_FMT " is out of input range" , offset);
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #2 ($data)");
+		RETURN_THROWS();
 	}
+
 	input += offset;
 	inputlen -= offset;
 
