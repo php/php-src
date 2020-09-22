@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #80061 (Copying large files may have suboptimal performance).
     (cmb)
+  . Fixed bug #79423 (copy command is limited to size of file it can copy).
+    (cmb)
 
 - MySQLnd:
   . Fixed bug #80115 (mysqlnd.debug doesn't recognize absolute paths with
