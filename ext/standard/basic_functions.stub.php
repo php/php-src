@@ -519,9 +519,9 @@ function headers_list(): array {}
 
 function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
-function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT): string|false {}
+function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT): string {}
 
-function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null): string|false {}
+function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null): string {}
 
 function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
