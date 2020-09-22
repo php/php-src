@@ -687,7 +687,7 @@ function str_split(string $str, int $split_length = 1): array {}
 
 function strpbrk(string $haystack, string $char_list): string|false {}
 
-function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false): int|false {}
+function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false): int {}
 
 function utf8_encode(string $data): string {}
 
