@@ -387,7 +387,7 @@ PHP_FUNCTION(get_meta_tags)
 	php_meta_tags_token tok, tok_last;
 	php_meta_tags_data md;
 
-	/* Initiailize our structure */
+	/* Initialize our structure */
 	memset(&md, 0, sizeof(md));
 
 	/* Parse arguments */
