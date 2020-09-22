@@ -3420,6 +3420,9 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 	int ret;
 #endif
 
+	ZEND_ASSERT(to && ZSTR_LEN(to) != 0);
+	ZEND_ASSERT(subject && ZSTR_LEN(subject) != 0);
+
 #ifdef PHP_WIN32
 	char *tempMailTo;
 	char *tsm_errmsg = NULL;
@@ -3428,11 +3431,10 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 	size_t offset, bufferLen = 0;
 	size_t bt_len;
 
+	/* Add "To" field's necessary buffer length */
+	bufferLen += ZSTR_LEN(to) + 6;
 	if (headers) {
 		bufferLen += ZSTR_LEN(headers);
-	}
-	if (to) {
-		bufferLen += ZSTR_LEN(to) + 6;
 	}
 	if (cc) {
 		bufferLen += ZSTR_LEN(cc) + 6;
@@ -3443,36 +3445,36 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 
 	bufferHeader = (char *)safe_emalloc(bufferLen, 1, 1);
 	memset(bufferHeader, 0, bufferLen);
-	if (to && *to) {
-		strlcat(bufferHeader, "To: ", bufferLen + 1);
-		strlcat(bufferHeader, ZSTR_VAL(to), bufferLen + 1);
-		strlcat(bufferHeader, "\r\n", bufferLen + 1);
-		tempMailTo = estrdup(ZSTR_VAL(to));
-		bt_len = ZSTR_LEN(to);
-		bufferTo = (char *)safe_emalloc(bt_len, 1, 1);
-		bt_len++;
-		offset = 0;
-		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
-		while (addr) {
-			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
-				PHP_IMAP_BAD_DEST;
-			} else {
-				bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->mailbox));
-				bt_len += strlen(addr->mailbox);
-				bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->host));
-				bt_len += strlen(addr->host);
-				offset += slprintf(bufferTo + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
-			}
-			addr = addr->next;
+
+	/* Handle "To" Field */
+	strlcat(bufferHeader, "To: ", bufferLen + 1);
+	strlcat(bufferHeader, ZSTR_VAL(to), bufferLen + 1);
+	strlcat(bufferHeader, "\r\n", bufferLen + 1);
+	tempMailTo = estrdup(ZSTR_VAL(to));
+	bt_len = ZSTR_LEN(to);
+	bufferTo = (char *)safe_emalloc(bt_len, 1, 1);
+	bt_len++;
+	offset = 0;
+	addr = NULL;
+	rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
+	while (addr) {
+		if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
+			PHP_IMAP_BAD_DEST;
+		} else {
+			bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->mailbox));
+			bt_len += strlen(addr->mailbox);
+			bufferTo = safe_erealloc(bufferTo, bt_len, 1, strlen(addr->host));
+			bt_len += strlen(addr->host);
+			offset += slprintf(bufferTo + offset, bt_len - offset, "%s@%s,", addr->mailbox, addr->host);
 		}
-		efree(tempMailTo);
-		if (offset>0) {
-			bufferTo[offset-1] = 0;
-		}
+		addr = addr->next;
+	}
+	efree(tempMailTo);
+	if (offset>0) {
+		bufferTo[offset-1] = 0;
 	}
 
-	if (cc && *cc) {
+	if (cc && ZSTR_LEN(cc) != 0) {
 		strlcat(bufferHeader, "Cc: ", bufferLen + 1);
 		strlcat(bufferHeader, ZSTR_VAL(cc), bufferLen + 1);
 		strlcat(bufferHeader, "\r\n", bufferLen + 1);
@@ -3501,7 +3503,7 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 		}
 	}
 
-	if (bcc && *bcc) {
+	if (bcc && ZSTR_LEN(bcc)) {
 		tempMailTo = estrdup(ZSTR_VAL(bcc));
 		bt_len = ZSTR_LEN(bcc);
 		bufferBcc = (char *)safe_emalloc(bt_len, 1, 1);
@@ -3527,7 +3529,7 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 		}
 	}
 
-	if (headers && *headers) {
+	if (headers && ZSTR_LEN(headers)) {
 		strlcat(bufferHeader, ZSTR_VAL(headers), bufferLen + 1);
 	}
 
