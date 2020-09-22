@@ -50,8 +50,8 @@ function curl_multi_exec(CurlMultiHandle $multi_handle, &$still_running): int {}
 
 function curl_multi_getcontent(CurlHandle $multi_handle): ?string {}
 
-/** @param int $queued_message_count */
-function curl_multi_info_read(CurlMultiHandle $multi_handle, &$queued_message_count = null): array|false {}
+/** @param int $queued_messages */
+function curl_multi_info_read(CurlMultiHandle $multi_handle, &$queued_messages = null): array|false {}
 
 function curl_multi_init(): CurlMultiHandle {}
 
@@ -62,7 +62,7 @@ function curl_multi_select(CurlMultiHandle $multi_handle, float $timeout = 1.0):
 function curl_multi_strerror(int $error_code): ?string {}
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
-function curl_pause(CurlHandle $handle, int $options): int {}
+function curl_pause(CurlHandle $handle, int $flags): int {}
 #endif
 
 function curl_reset(CurlHandle $handle): void {}
