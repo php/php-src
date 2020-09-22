@@ -494,7 +494,7 @@ function inet_pton(string $ip_address): string|false {}
 
 /* metaphone.c */
 
-function metaphone(string $text, int $phones = 0): string|false {}
+function metaphone(string $text, int $phonemes = 0): string {}
 
 /* {{{ head.c */
 function header(string $string, bool $replace = true, int $http_response_code = 0): void {}
