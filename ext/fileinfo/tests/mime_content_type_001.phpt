@@ -35,7 +35,7 @@ try {
 }
 try {
     mime_content_type("\0");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
