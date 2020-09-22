@@ -2265,86 +2265,86 @@ PHP_FUNCTION(substr_replace)
 	}
 
 	if (str) {
-		if ((len_is_null && from_ht) || (!len_is_null && (from_ht == NULL) != (len_ht == NULL))) {
-			php_error_docref(NULL, E_WARNING, "'start' and 'length' should be of same type - numerical or array ");
-			RETURN_STR_COPY(str);
+		if (from_ht) {
+			zend_argument_type_error(3, "cannot be an array when working on a single string");
+			RETURN_THROWS();
 		}
+		if (len_ht) {
+			zend_argument_type_error(4, "cannot be an array when working on a single string");
+			RETURN_THROWS();
+		}
+
+		f = from_long;
+
+		/* if "from" position is negative, count start position from the end
+		 * of the string
+		 */
+		if (f < 0) {
+			f = (zend_long)ZSTR_LEN(str) + f;
+			if (f < 0) {
+				f = 0;
+			}
+		} else if ((size_t)f > ZSTR_LEN(str)) {
+			f = ZSTR_LEN(str);
+		}
+		/* if "length" position is negative, set it to the length
+		 * needed to stop that many chars from the end of the string
+		 */
+		if (l < 0) {
+			l = ((zend_long)ZSTR_LEN(str) - f) + l;
+			if (l < 0) {
+				l = 0;
+			}
+		}
+
+		if ((size_t)l > ZSTR_LEN(str) || (l < 0 && (size_t)(-l) > ZSTR_LEN(str))) {
+			l = ZSTR_LEN(str);
+		}
+
+		if ((f + l) > (zend_long)ZSTR_LEN(str)) {
+			l = ZSTR_LEN(str) - f;
+		}
+
+		zend_string *tmp_repl_str = NULL;
+		if (repl_ht) {
+			repl_idx = 0;
+			while (repl_idx < repl_ht->nNumUsed) {
+				tmp_repl = &repl_ht->arData[repl_idx].val;
+				if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
+					break;
+				}
+				repl_idx++;
+			}
+			if (repl_idx < repl_ht->nNumUsed) {
+				repl_str = zval_get_tmp_string(tmp_repl, &tmp_repl_str);
+			} else {
+				repl_str = STR_EMPTY_ALLOC();
+			}
+		}
+
+		result = zend_string_safe_alloc(1, ZSTR_LEN(str) - l + ZSTR_LEN(repl_str), 0, 0);
+
+		memcpy(ZSTR_VAL(result), ZSTR_VAL(str), f);
+		if (ZSTR_LEN(repl_str)) {
+			memcpy((ZSTR_VAL(result) + f), ZSTR_VAL(repl_str), ZSTR_LEN(repl_str));
+		}
+		memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), ZSTR_VAL(str) + f + l, ZSTR_LEN(str) - f - l);
+		ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
+		zend_tmp_string_release(tmp_repl_str);
+		RETURN_NEW_STR(result);
+	} else { /* str is array of strings */
+		zend_string *str_index = NULL;
+		size_t result_len;
+		zend_ulong num_index;
+
+		/* TODO
 		if (!len_is_null && from_ht) {
 			if (zend_hash_num_elements(from_ht) != zend_hash_num_elements(len_ht)) {
 				php_error_docref(NULL, E_WARNING, "'start' and 'length' should have the same number of elements");
 				RETURN_STR_COPY(str);
 			}
 		}
-	}
-
-	if (str) {
-		if (!from_ht) {
-			f = from_long;
-
-			/* if "from" position is negative, count start position from the end
-			 * of the string
-			 */
-			if (f < 0) {
-				f = (zend_long)ZSTR_LEN(str) + f;
-				if (f < 0) {
-					f = 0;
-				}
-			} else if ((size_t)f > ZSTR_LEN(str)) {
-				f = ZSTR_LEN(str);
-			}
-			/* if "length" position is negative, set it to the length
-			 * needed to stop that many chars from the end of the string
-			 */
-			if (l < 0) {
-				l = ((zend_long)ZSTR_LEN(str) - f) + l;
-				if (l < 0) {
-					l = 0;
-				}
-			}
-
-			if ((size_t)l > ZSTR_LEN(str) || (l < 0 && (size_t)(-l) > ZSTR_LEN(str))) {
-				l = ZSTR_LEN(str);
-			}
-
-			if ((f + l) > (zend_long)ZSTR_LEN(str)) {
-				l = ZSTR_LEN(str) - f;
-			}
-
-			zend_string *tmp_repl_str = NULL;
-			if (repl_ht) {
-				repl_idx = 0;
-				while (repl_idx < repl_ht->nNumUsed) {
-					tmp_repl = &repl_ht->arData[repl_idx].val;
-					if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
-						break;
-					}
-					repl_idx++;
-				}
-				if (repl_idx < repl_ht->nNumUsed) {
-					repl_str = zval_get_tmp_string(tmp_repl, &tmp_repl_str);
-				} else {
-					repl_str = STR_EMPTY_ALLOC();
-				}
-			}
-
-			result = zend_string_safe_alloc(1, ZSTR_LEN(str) - l + ZSTR_LEN(repl_str), 0, 0);
-
-			memcpy(ZSTR_VAL(result), ZSTR_VAL(str), f);
-			if (ZSTR_LEN(repl_str)) {
-				memcpy((ZSTR_VAL(result) + f), ZSTR_VAL(repl_str), ZSTR_LEN(repl_str));
-			}
-			memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), ZSTR_VAL(str) + f + l, ZSTR_LEN(str) - f - l);
-			ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
-			zend_tmp_string_release(tmp_repl_str);
-			RETURN_NEW_STR(result);
-		} else {
-			php_error_docref(NULL, E_WARNING, "Functionality of 'start' and 'length' as arrays is not implemented");
-			RETURN_STR_COPY(str);
-		}
-	} else { /* str is array of strings */
-		zend_string *str_index = NULL;
-		size_t result_len;
-		zend_ulong num_index;
+		*/
 
 		array_init(return_value);
 
