@@ -846,7 +846,6 @@ PHP_FUNCTION(unpack)
 				break;
 #else
 				zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
-				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_THROWS();
 #endif
 
@@ -866,7 +865,6 @@ PHP_FUNCTION(unpack)
 
 			default:
 				zend_value_error("Invalid format type %c", type);
-				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_THROWS();
 		}
 
