@@ -47,8 +47,8 @@
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
 		efree(formatcodes);	\
 		efree(formatargs);	\
-		php_error_docref(NULL, E_WARNING, "Type %c: integer overflow in format string", code); \
-		RETURN_FALSE; \
+		zend_value_error("Type %c: integer overflow in format string", code); \
+		RETURN_THROWS(); \
 	} \
 	outputpos += (a)*(b);
 
@@ -282,8 +282,8 @@ PHP_FUNCTION(pack)
 				if (currentarg >= num_args) {
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL, E_WARNING, "Type %c: not enough arguments", code);
-					RETURN_FALSE;
+					zend_value_error("Type %c: not enough arguments", code);
+					RETURN_THROWS();
 				}
 
 				if (arg < 0) {
@@ -313,8 +313,8 @@ PHP_FUNCTION(pack)
 #if SIZEOF_ZEND_LONG < 8
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
-					RETURN_FALSE;
+					zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
+					RETURN_THROWS();
 #endif
 			case 'c':
 			case 'C':
@@ -346,16 +346,16 @@ PHP_FUNCTION(pack)
 too_few_args:
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL, E_WARNING, "Type %c: too few arguments", code);
-					RETURN_FALSE;
+					zend_value_error("Type %c: too few arguments", code);
+					RETURN_THROWS();
 				}
 				break;
 
 			default:
 				efree(formatcodes);
 				efree(formatargs);
-				php_error_docref(NULL, E_WARNING, "Type %c: unknown format code", code);
-				RETURN_FALSE;
+				zend_value_error("Type %c: unknown format code", code);
+				RETURN_THROWS();
 		}
 
 		formatcodes[formatcount] = code;
@@ -845,9 +845,9 @@ PHP_FUNCTION(unpack)
 				size = 8;
 				break;
 #else
-				php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
+				zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
 				zend_array_destroy(Z_ARR_P(return_value));
-				RETURN_FALSE;
+				RETURN_THROWS();
 #endif
 
 			/* Use sizeof(float) bytes of input */
@@ -865,10 +865,9 @@ PHP_FUNCTION(unpack)
 				break;
 
 			default:
-				php_error_docref(NULL, E_WARNING, "Invalid format type %c", type);
+				zend_value_error("Invalid format type %c", type);
 				zend_array_destroy(Z_ARR_P(return_value));
-				RETURN_FALSE;
-				break;
+				RETURN_THROWS();
 		}
 
 		if (size != 0 && size != -1 && size < 0) {

@@ -324,7 +324,7 @@ static const func_info_t func_infos[] = {
 	F1("realpath",                     MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fsockopen",                    MAY_BE_FALSE | MAY_BE_RESOURCE),
 	FN("pfsockopen",                   MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("pack",                         MAY_BE_FALSE | MAY_BE_STRING),
+	F1("pack",                         MAY_BE_STRING),
 	F1("unpack",                       MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("get_browser",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_OBJECT | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
 	F1("crypt",                        MAY_BE_STRING),
