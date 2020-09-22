@@ -500,10 +500,6 @@ PHP_FUNCTION(stream_bucket_new)
 
 	bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream));
 
-	if (bucket == NULL) {
-		RETURN_FALSE;
-	}
-
 	ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 	object_init(return_value);
 	add_property_zval(return_value, "bucket", &zbucket);

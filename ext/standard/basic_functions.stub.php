@@ -1445,6 +1445,8 @@ function rawurldecode(string $string): string {}
 /** @param resource $context */
 function get_headers(string $url, int $format = 0, $context = null): array|false {}
 
+/* user_filters.c */
+
 /** @param resource $brigade */
 function stream_bucket_make_writeable($brigade): ?object {}
 
@@ -1455,7 +1457,7 @@ function stream_bucket_prepend($brigade, object $bucket): void {}
 function stream_bucket_append($brigade, object $bucket): void {}
 
 /** @param resource $stream */
-function stream_bucket_new($stream, string $buffer): object|false {}
+function stream_bucket_new($stream, string $buffer): object {}
 
 function stream_get_filters(): array {}
 
