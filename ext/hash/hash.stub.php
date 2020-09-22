@@ -8,9 +8,9 @@ function hash_file(string $algorithm, string $filename, bool $binary_output = fa
 
 function hash_hmac(string $algorithm, string $data, string $key, bool $binary_output = false): string|false {}
 
-function hash_hmac_file(string $algorithm, string $data, string $shared_secret_key, bool $binary_output = false): string|false {}
+function hash_hmac_file(string $algorithm, string $data, string $key, bool $binary_output = false): string|false {}
 
-function hash_init(string $algorithm, int $options = 0, string $shared_secret_key = ""): HashContext {}
+function hash_init(string $algorithm, int $options = 0, string $key = ""): HashContext {}
 
 function hash_update(HashContext $context, string $data): bool {}
 
@@ -32,18 +32,18 @@ function hash_pbkdf2(string $algorithm, string $password, string $salt, int $ite
 
 function hash_equals(string $known_string, string $user_string): bool {}
 
-function hash_hkdf(string $algorithm, string $input_key_material, int $length = 0, string $info = "", string $salt = ""): string {}
+function hash_hkdf(string $algorithm, string $key, int $length = 0, string $info = "", string $salt = ""): string {}
 
 #ifdef PHP_MHASH_BC
-function mhash_get_block_size(int $hash): int|false {}
+function mhash_get_block_size(int $algorithm): int|false {}
 
-function mhash_get_hash_name(int $hash): string|false {}
+function mhash_get_hash_name(int $algorithm): string|false {}
 
-function mhash_keygen_s2k(int $hash, string $input_password, string $salt, int $bytes): string|false {}
+function mhash_keygen_s2k(int $algorithm, string $password, string $salt, int $bytes): string|false {}
 
 function mhash_count(): int {}
 
-function mhash(int $hash, string $data, ?string $key = null): string|false {}
+function mhash(int $algorithm, string $data, ?string $key = null): string|false {}
 #endif
 
 final class HashContext
