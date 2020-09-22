@@ -5,6 +5,7 @@ Olivier Doucet
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
+if (getenv("SKIP_ASAN")) die("skip asan chokes on this: 'LeakSanitizer does not work under ptrace (strace, gdb, etc)'");
 ?>
 --FILE--
 <?php
