@@ -232,14 +232,11 @@ PHP_FUNCTION(finfo_open)
 
 	if (finfo->magic == NULL) {
 		efree(finfo);
-		php_error_docref(NULL, E_WARNING, "Invalid mode '" ZEND_LONG_FMT "'.", options);
+		zend_argument_value_error(1, "must be a bitmask of FILEINFO_* constants");
 		if (object) {
 			zend_restore_error_handling(&zeh);
-			if (!EG(exception)) {
-				zend_throw_exception(NULL, "Constructor failed", 0);
-			}
 		}
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (magic_load(finfo->magic, file) == -1) {
@@ -301,56 +298,76 @@ PHP_FUNCTION(finfo_set_flags)
 }
 /* }}} */
 
-#define FILEINFO_MODE_BUFFER 0
-#define FILEINFO_MODE_STREAM 1
-#define FILEINFO_MODE_FILE 2
-
-static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mimetype_emu) /* {{{ */
+static char* _php_finfo_get_file_mode(struct magic_set *magic, zend_string *filepath, zval *stream_context)
 {
+	char *ret_val = NULL;
+	char *mime_directory = "directory";
+	const char *tmp2;
+	php_stream_wrapper *wrap;
+	php_stream_statbuf ssb;
+
+	ZEND_ASSERT(ZSTR_LEN(filepath) != 0);
+
+	/* determine if the file is a local file or remote URL */
+	wrap = php_stream_locate_url_wrapper(ZSTR_VAL(filepath), &tmp2, 0);
+
+	if (!wrap) {
+		return NULL;
+	}
+
+	php_stream *stream;
+	php_stream_context *context = php_stream_context_from_zval(stream_context, 0);
+
+#ifdef PHP_WIN32
+	if (php_stream_stat_path_ex(ZSTR_VAL(filepath), 0, &ssb, context) == SUCCESS) {
+		if (ssb.sb.st_mode & S_IFDIR) {
+			return mime_directory;
+		}
+	}
+#endif
+
+	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filepath), "rb", REPORT_ERRORS, NULL, context);
+
+	if (!stream) {
+		return NULL;
+	}
+
+	if (php_stream_stat(stream, &ssb) == SUCCESS) {
+		if (ssb.sb.st_mode & S_IFDIR) {
+			ret_val = mime_directory;
+		} else {
+			ret_val = (char *)magic_stream(magic, stream);
+			if (!ret_val) {
+				php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
+			}
+		}
+	}
+
+	php_stream_close(stream);
+	return ret_val;
+}
+
+/* {{{ Return information about a file. */
+PHP_FUNCTION(finfo_file)
+{
+	zend_string *filepath;
 	zend_long options = 0;
-	char *ret_val = NULL, *buffer = NULL;
-	size_t buffer_len;
 	php_fileinfo *finfo = NULL;
+	zval *self;
 	zval *zcontext = NULL;
-	zval *what;
-	char mime_directory[] = "directory";
+
+	char *ret_val = NULL;
 	struct magic_set *magic = NULL;
 
-	if (mimetype_emu) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OP|lr!", &self, finfo_class_entry, &filepath, &options, &zcontext) == FAILURE) {
+		RETURN_THROWS();
+	}
+	FILEINFO_FROM_OBJECT(finfo, self);
+	magic = finfo->magic;
 
-		/* mime_content_type(..) emulation */
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &what) == FAILURE) {
-			RETURN_THROWS();
-		}
-
-		switch (Z_TYPE_P(what)) {
-			case IS_STRING:
-				buffer = Z_STRVAL_P(what);
-				buffer_len = Z_STRLEN_P(what);
-				mode = FILEINFO_MODE_FILE;
-				break;
-
-			case IS_RESOURCE:
-				mode = FILEINFO_MODE_STREAM;
-				break;
-
-			default:
-				zend_argument_type_error(1, "must be of type resource|string, %s given", zend_zval_type_name(what));
-				RETURN_THROWS();
-		}
-
-		magic = magic_open(MAGIC_MIME_TYPE);
-		if (magic_load(magic, NULL) == -1) {
-			php_error_docref(NULL, E_WARNING, "Failed to load magic database");
-			goto common;
-		}
-	} else {
-		zval *self;
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|lr!", &self, finfo_class_entry, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
-			RETURN_THROWS();
-		}
-		FILEINFO_FROM_OBJECT(finfo, self);
-		magic = finfo->magic;
+	if (ZSTR_LEN(filepath) == 0) {
+		zend_argument_value_error(getThis() ? 1 : 2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	/* Set options for the current file/buffer. */
@@ -358,96 +375,51 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		FINFO_SET_OPTION(magic, options)
 	}
 
-	switch (mode) {
-		case FILEINFO_MODE_BUFFER:
-		{
-			ret_val = (char *) magic_buffer(magic, buffer, buffer_len);
-			break;
-		}
+	ret_val = _php_finfo_get_file_mode(magic, filepath, zcontext);
 
-		case FILEINFO_MODE_STREAM:
-		{
-				php_stream *stream;
-				zend_off_t streampos;
-
-				php_stream_from_zval_no_verify(stream, what);
-				if (!stream) {
-					goto common;
-				}
-
-				streampos = php_stream_tell(stream); /* remember stream position for restoration */
-				php_stream_seek(stream, 0, SEEK_SET);
-
-				ret_val = (char *) magic_stream(magic, stream);
-
-				php_stream_seek(stream, streampos, SEEK_SET);
-				break;
-		}
-
-		case FILEINFO_MODE_FILE:
-		{
-			/* determine if the file is a local file or remote URL */
-			const char *tmp2;
-			php_stream_wrapper *wrap;
-			php_stream_statbuf ssb;
-
-			if (buffer == NULL || buffer_len == 0) {
-				zend_argument_value_error(1, "cannot be empty");
-				goto clean;
-			}
-			if (CHECK_NULL_PATH(buffer, buffer_len)) {
-				zend_argument_type_error(1, "must not contain any null bytes");
-				goto clean;
-			}
-
-			wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0);
-
-			if (wrap) {
-				php_stream *stream;
-				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
-
-#ifdef PHP_WIN32
-				if (php_stream_stat_path_ex(buffer, 0, &ssb, context) == SUCCESS) {
-					if (ssb.sb.st_mode & S_IFDIR) {
-						ret_val = mime_directory;
-						goto common;
-					}
-				}
-#endif
-
-				stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
-
-				if (!stream) {
-					RETVAL_FALSE;
-					goto clean;
-				}
-
-				if (php_stream_stat(stream, &ssb) == SUCCESS) {
-					if (ssb.sb.st_mode & S_IFDIR) {
-						ret_val = mime_directory;
-					} else {
-						ret_val = (char *)magic_stream(magic, stream);
-					}
-				}
-
-				php_stream_close(stream);
-			}
-			break;
-		}
-		EMPTY_SWITCH_DEFAULT_CASE()
+	/* Restore options */
+	if (options) {
+		FINFO_SET_OPTION(magic, finfo->options)
 	}
 
-common:
+	if (ret_val) {
+		RETVAL_STRING(ret_val);
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ Return information about a string buffer. */
+PHP_FUNCTION(finfo_buffer)
+{
+	zend_string *buffer;
+	zend_long options = 0;
+	char *ret_val = NULL;
+	php_fileinfo *finfo = NULL;
+	zval *self;
+	zval *zcontext = NULL;
+
+	struct magic_set *magic = NULL;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OS|lr!", &self, finfo_class_entry, &buffer, &options, &zcontext) == FAILURE) {
+		RETURN_THROWS();
+	}
+	FILEINFO_FROM_OBJECT(finfo, self);
+	magic = finfo->magic;
+
+	/* Set options for the current buffer. */
+	if (options) {
+		FINFO_SET_OPTION(magic, options)
+	}
+
+	ret_val = (char *) magic_buffer(magic, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
+
 	if (ret_val) {
 		RETVAL_STRING(ret_val);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
 		RETVAL_FALSE;
-	}
-
-clean:
-	if (mimetype_emu) {
-		magic_close(magic);
 	}
 
 	/* Restore options */
@@ -458,23 +430,72 @@ clean:
 }
 /* }}} */
 
-/* {{{ Return information about a file. */
-PHP_FUNCTION(finfo_file)
-{
-	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_FILE, 0);
-}
-/* }}} */
-
-/* {{{ Return information about a string buffer. */
-PHP_FUNCTION(finfo_buffer)
-{
-	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_BUFFER, 0);
-}
-/* }}} */
-
 /* {{{ Return content-type for file */
 PHP_FUNCTION(mime_content_type)
 {
-	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1, 1);
+	zval* what;
+
+	char *ret_val = NULL;
+	struct magic_set *magic = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &what) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	magic = magic_open(MAGIC_MIME_TYPE);
+	if (magic_load(magic, NULL) == -1) {
+		php_error_docref(NULL, E_WARNING, "Failed to load magic database.");
+		RETURN_FALSE;
+	}
+
+	switch (Z_TYPE_P(what)) {
+		case IS_STRING: {
+			zend_string *filepath = Z_STR_P(what);
+
+			if (filepath == NULL || ZSTR_LEN(filepath) == 0) {
+				zend_argument_value_error(1, "cannot be empty");
+				break;
+			}
+			if (CHECK_NULL_PATH(ZSTR_VAL(filepath), ZSTR_LEN(filepath))) {
+				zend_argument_value_error(1, "must not contain any null bytes");
+				break;
+			}
+
+			ret_val = _php_finfo_get_file_mode(magic, filepath, NULL);
+			break;
+		}
+		case IS_RESOURCE: {
+			php_stream *stream;
+			zend_off_t streampos;
+
+			php_stream_from_zval_no_verify(stream, what);
+			if (!stream) {
+				RETVAL_FALSE;
+				break;
+			}
+
+			streampos = php_stream_tell(stream); /* remember stream position for restoration */
+			php_stream_seek(stream, 0, SEEK_SET);
+
+			ret_val = (char *) magic_stream(magic, stream);
+			if (!ret_val) {
+				php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
+			}
+			php_stream_seek(stream, streampos, SEEK_SET);
+			break;
+		}
+		default:
+			magic_close(magic);
+			zend_argument_type_error(1, "must be of type resource|string, %s given", zend_zval_type_name(what));
+			RETURN_THROWS();
+	}
+
+	if (ret_val) {
+		RETVAL_STRING(ret_val);
+	} else {
+		RETVAL_FALSE;
+	}
+
+	magic_close(magic);
 }
 /* }}} */
