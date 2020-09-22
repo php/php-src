@@ -1199,7 +1199,7 @@ function random_int(int $min, int $max): int {}
 
 /* soundex.c */
 
-function soundex(string $string): string|false {}
+function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 

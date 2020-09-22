@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d840ea5a32c8414bdc29e21635e7a36ee7c202e1 */
+ * Stub hash: 56fb3ef4c53a1ed7abf6a115567bca47e1a14cda */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1842,7 +1842,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_random_int, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_soundex, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_soundex, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -2121,15 +2121,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_url, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_urlencode, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_urlencode arginfo_soundex
 
-#define arginfo_urldecode arginfo_urlencode
+#define arginfo_urldecode arginfo_soundex
 
-#define arginfo_rawurlencode arginfo_urlencode
+#define arginfo_rawurlencode arginfo_soundex
 
-#define arginfo_rawurldecode arginfo_urlencode
+#define arginfo_rawurldecode arginfo_soundex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)

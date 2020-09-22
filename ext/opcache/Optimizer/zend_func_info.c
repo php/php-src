@@ -175,7 +175,7 @@ static const func_info_t func_infos[] = {
 #if HAVE_NL_LANGINFO
 	F1("nl_langinfo",                  MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-	F1("soundex",                      MAY_BE_FALSE | MAY_BE_STRING),
+	F1("soundex",                      MAY_BE_STRING),
 	F1("chr",                          MAY_BE_STRING),
 	F1("str_getcsv",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("strchr",                       MAY_BE_FALSE | MAY_BE_STRING),
