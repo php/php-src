@@ -160,7 +160,7 @@ static const func_info_t func_infos[] = {
 	F1("str_word_count",               MAY_BE_LONG | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("str_split",                    MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("strpbrk",                      MAY_BE_FALSE | MAY_BE_STRING),
-	FN("substr_replace",               MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
+	FN("substr_replace",               MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
 	F1("quotemeta",                    MAY_BE_STRING),
 	F1("ucwords",                      MAY_BE_STRING),
 	F1("addcslashes",                  MAY_BE_STRING),
