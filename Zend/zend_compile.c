@@ -7069,11 +7069,6 @@ void zend_compile_prop_group(zend_ast *ast) /* {{{ */
 	zend_ast *prop_ast = ast->child[1];
 	zend_ast *attr_ast = ast->child[2];
 
-	if (attr_ast && zend_ast_get_list(prop_ast)->children > 1) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of properties");
-		return;
-	}
-
 	zend_compile_prop_decl(prop_ast, type_ast, ast->attr, attr_ast);
 }
 /* }}} */
@@ -7129,12 +7124,6 @@ void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
 {
 	zend_ast *const_ast = ast->child[0];
 	zend_ast *attr_ast = ast->child[1];
-
-	if (attr_ast && zend_ast_get_list(const_ast)->children > 1) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of constants");
-
-		return;
-	}
 
 	zend_compile_class_const_decl(const_ast, ast->attr, attr_ast);
 }
