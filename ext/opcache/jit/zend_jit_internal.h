@@ -427,6 +427,9 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_NO_NEED_REKEASE_THIS(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS)
 
+#define TRACE_FRAME_SET_UNKNOWM_NUM_ARGS(frame) do { \
+		(frame)->_info |= (0xffff << TRACE_FRAME_SHIFT_NUM_ARGS); \
+	} while (0)
 #define TRACE_FRAME_SET_RETURN_SSA_VAR(frame, var) do { \
 		(frame)->_info = var; \
 	} while (0)
