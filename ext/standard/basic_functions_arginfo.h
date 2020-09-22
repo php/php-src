@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 02f033de2ff8c06e24b22b150baa1a503ce6b95e */
+ * Stub hash: d840ea5a32c8414bdc29e21635e7a36ee7c202e1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1501,7 +1501,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pfsockopen arginfo_fsockopen
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_http_build_query, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_http_build_query, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, data, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, numeric_prefix, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg_separator, IS_STRING, 1, "null")

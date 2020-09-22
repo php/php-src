@@ -978,7 +978,7 @@ function pfsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr =
 
 /* http.c */
 
-function http_build_query(array|object $data, string $numeric_prefix = "", ?string $arg_separator = null, int $enc_type = PHP_QUERY_RFC1738): string|false {}
+function http_build_query(array|object $data, string $numeric_prefix = "", ?string $arg_separator = null, int $enc_type = PHP_QUERY_RFC1738): string {}
 
 /* image.c */
 

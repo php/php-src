@@ -188,7 +188,7 @@ static const func_info_t func_infos[] = {
 	F1("urldecode",                    MAY_BE_STRING),
 	F1("rawurlencode",                 MAY_BE_STRING),
 	F1("rawurldecode",                 MAY_BE_STRING),
-	F1("http_build_query",             MAY_BE_FALSE | MAY_BE_STRING),
+	F1("http_build_query",             MAY_BE_STRING),
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 	F1("readlink",                     MAY_BE_FALSE | MAY_BE_STRING),
 #endif
@@ -344,7 +344,7 @@ static const func_info_t func_infos[] = {
 	F0("syslog",                       MAY_BE_TRUE),
 	F0("closelog",                     MAY_BE_TRUE),
 #endif
-	F1("metaphone",                    MAY_BE_FALSE | MAY_BE_STRING),
+	F1("metaphone",                    MAY_BE_STRING),
 	F1("ob_get_flush",                 MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ob_get_clean",                 MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ob_get_status",                MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
