@@ -107,23 +107,12 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 }
 /* }}} */
 
-#define STRPOS_CHECK_STATUS(status, error) 							\
-	if ( U_FAILURE( (status) ) ) { 									\
-		intl_error_set_code( NULL, (status) ); 			\
-		intl_error_set_custom_msg( NULL, (error), 0 ); 	\
-		if (uhaystack) { 											\
-			efree( uhaystack ); 									\
-		} 															\
-		if (uneedle) { 												\
-			efree( uneedle ); 										\
-		} 															\
-		if(bi) { 													\
-			ubrk_close (bi); 										\
-		} 															\
-		if(src) {													\
-			usearch_close(src);										\
-		}															\
-		return -1; 													\
+#define STRPOS_CHECK_STATUS(status, error) \
+	if ( U_FAILURE( (status) ) ) { \
+		intl_error_set_code( NULL, (status) ); \
+		intl_error_set_custom_msg( NULL, (error), 0 ); \
+		ret_pos = -1; \
+		goto finish; \
 	}
 
 
@@ -172,9 +161,10 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 
 	if(offset != 0) {
 		offset_pos = grapheme_get_haystack_offset(bi, offset);
-		if(offset_pos == -1) {
-			status = U_ILLEGAL_ARGUMENT_ERROR;
-			STRPOS_CHECK_STATUS(status, "Invalid search offset");
+		if (offset_pos == -1) {
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+			ret_pos = -1;
+			goto finish;
 		}
 		status = U_ZERO_ERROR;
 		usearch_setOffset(src, offset_pos, &status);
@@ -201,14 +191,19 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 		ret_pos = -1;
 	}
 
+finish:
 	if (uhaystack) {
 		efree( uhaystack );
 	}
 	if (uneedle) {
 		efree( uneedle );
 	}
-	ubrk_close (bi);
-	usearch_close (src);
+	if (bi) {
+		ubrk_close (bi);
+	}
+	if (src) {
+		usearch_close (src);
+	}
 
 	return ret_pos;
 }

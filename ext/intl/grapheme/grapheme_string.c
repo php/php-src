@@ -129,21 +129,17 @@ PHP_FUNCTION(grapheme_strpos)
 		RETURN_THROWS();
 	}
 
-	if (offset >= 0) {
+	if (offset >= 0 && grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0) {
 		/* quick check to see if the string might be there
 		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
 		*/
 		found = php_memnstr(haystack + noffset, needle, needle_len, haystack + haystack_len);
 
 		/* if it isn't there the we are done */
-		if (!found) {
-			RETURN_FALSE;
-		}
-
-		/* if it is there, and if the haystack is ascii, we are all done */
-		if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
+		if (found) {
 			RETURN_LONG(found - haystack);
 		}
+		RETURN_FALSE;
 	}
 
 	/* do utf16 part of the strpos */
@@ -586,9 +582,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 
 	if ( !f_ignore_case ) {
 
-		/* ASCII optimization: quick check to see if the string might be there
-		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
-		*/
+		/* ASCII optimization: quick check to see if the string might be there */
 		found = php_memnstr(haystack, needle, needle_len, haystack + haystack_len);
 
 		/* if it isn't there the we are done */
