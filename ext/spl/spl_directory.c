@@ -2328,13 +2328,12 @@ PHP_METHOD(SplFileObject, fgetcsv)
 
 		CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-		// TODO Align behaviour on normal fgetcsv()
 		switch(ZEND_NUM_ARGS())
 		{
 		case 3:
 			if (esc_len > 1) {
-				php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-				RETURN_FALSE;
+				zend_argument_value_error(3, "must be empty or a single character");
+				RETURN_THROWS();
 			}
 			if (esc_len == 0) {
 				escape = PHP_CSV_NO_ESCAPE;
@@ -2344,15 +2343,15 @@ PHP_METHOD(SplFileObject, fgetcsv)
 			/* no break */
 		case 2:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(2, "must be a single character");
+				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
 			/* no break */
 		case 1:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(1, "must be a single character");
+				RETURN_THROWS();
 			}
 			delimiter = delim[0];
 			/* no break */
@@ -2377,7 +2376,6 @@ PHP_METHOD(SplFileObject, fputcsv)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sss", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 
-		// TODO Align behaviour on normal fputcsv()
 		switch(ZEND_NUM_ARGS())
 		{
 		case 4:
@@ -2389,21 +2387,21 @@ PHP_METHOD(SplFileObject, fputcsv)
 					escape = (unsigned char) esc[0];
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-					RETURN_FALSE;
+					zend_argument_value_error(4, "must be empty or a single character");
+					RETURN_THROWS();
 			}
 			/* no break */
 		case 3:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(3, "must be a single character");
+				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
 			/* no break */
 		case 2:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(2, "must be a single character");
+				RETURN_THROWS();
 			}
 			delimiter = delim[0];
 			/* no break */
@@ -2430,7 +2428,6 @@ PHP_METHOD(SplFileObject, setCsvControl)
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
-		// TODO Align behaviour on normal fgetcsv()
 		switch(ZEND_NUM_ARGS())
 		{
 		case 3:
@@ -2442,21 +2439,21 @@ PHP_METHOD(SplFileObject, setCsvControl)
 					escape = (unsigned char) esc[0];
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-					RETURN_FALSE;
+					zend_argument_value_error(3, "must be empty or a single character");
+					RETURN_THROWS();
 			}
 			/* no break */
 		case 2:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(2, "must be a single character");
+				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
 			/* no break */
 		case 1:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(1, "must be a single character");
+				RETURN_THROWS();
 			}
 			delimiter = delim[0];
 			/* no break */

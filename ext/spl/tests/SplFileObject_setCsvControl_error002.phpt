@@ -13,11 +13,15 @@ CDATA
 );
 $s = new SplFileObject('csv_control_data_error002.csv');
 $s->setFlags(SplFileObject::READ_CSV);
-$s->setCsvControl('|', 'two');
+try {
+    $s->setCsvControl('|', 'two');
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
 unlink('csv_control_data_error002.csv');
 ?>
---EXPECTF--
-Warning: SplFileObject::setCsvControl(): enclosure must be a character in %s on line %d
+--EXPECT--
+SplFileObject::setCsvControl(): Argument #2 ($enclosure) must be a single character
