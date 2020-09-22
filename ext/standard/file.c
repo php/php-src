@@ -1815,11 +1815,9 @@ PHP_FUNCTION(fputcsv)
 
 	if (delimiter_str != NULL) {
 		/* Make sure that there is at least one character in string */
-		if (delimiter_str_len < 1) {
+		if (delimiter_str_len != 1) {
 			zend_argument_value_error(3, "must be a single character");
 			RETURN_THROWS();
-		} else if (delimiter_str_len > 1) {
-			php_error_docref(NULL, E_WARNING, "Argument #3 ($delimiter) must be a single character");
 		}
 
 		/* use first character from string */
@@ -1827,11 +1825,9 @@ PHP_FUNCTION(fputcsv)
 	}
 
 	if (enclosure_str != NULL) {
-		if (enclosure_str_len < 1) {
+		if (enclosure_str_len != 1) {
 			zend_argument_value_error(4, "must be a single character");
 			RETURN_THROWS();
-		} else if (enclosure_str_len > 1) {
-			php_error_docref(NULL, E_WARNING, "Argument #4 ($enclosure) must be a single character");
 		}
 		/* use first character from string */
 		enclosure = *enclosure_str;
@@ -1839,7 +1835,8 @@ PHP_FUNCTION(fputcsv)
 
 	if (escape_str != NULL) {
 		if (escape_str_len > 1) {
-			php_error_docref(NULL, E_WARNING, "Argument #5 ($escape) must be empty or a single character");
+			zend_argument_value_error(5, "must be empty or a single character");
+			RETURN_THROWS();
 		}
 		if (escape_str_len < 1) {
 			escape_char = PHP_CSV_NO_ESCAPE;
@@ -1953,11 +1950,9 @@ PHP_FUNCTION(fgetcsv)
 
 		if (delimiter_str != NULL) {
 			/* Make sure that there is at least one character in string */
-			if (delimiter_str_len < 1) {
+			if (delimiter_str_len != 1) {
 				zend_argument_value_error(3, "must be a single character");
 				RETURN_THROWS();
-			} else if (delimiter_str_len > 1) {
-				php_error_docref(NULL, E_WARNING, "Argument #3 ($delimiter) must be a single character");
 			}
 
 			/* use first character from string */
@@ -1965,11 +1960,9 @@ PHP_FUNCTION(fgetcsv)
 		}
 
 		if (enclosure_str != NULL) {
-			if (enclosure_str_len < 1) {
+			if (enclosure_str_len != 1) {
 				zend_argument_value_error(4, "must be a single character");
 				RETURN_THROWS();
-			} else if (enclosure_str_len > 1) {
-				php_error_docref(NULL, E_WARNING, "Argument #4 ($enclosure) must be a single character");
 			}
 
 			/* use first character from string */
@@ -1978,7 +1971,8 @@ PHP_FUNCTION(fgetcsv)
 
 		if (escape_str != NULL) {
 			if (escape_str_len > 1) {
-				php_error_docref(NULL, E_WARNING, "Argument #5 ($enclosure) must be empty or a single character");
+				zend_argument_value_error(5, "must be empty or a single character");
+				RETURN_THROWS();
 			}
 
 			if (escape_str_len < 1) {
