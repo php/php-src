@@ -1134,7 +1134,7 @@ function getrusage(int $who = 0): array|false {}
 
 /* pack.c */
 
-function pack(string $format, mixed ...$args): string|false {}
+function pack(string $format, mixed ...$args): string {}
 
 function unpack(string $format, string $data, int $offset = 0): array|false {}
 
