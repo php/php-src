@@ -542,9 +542,9 @@ function bin2hex(string $data): string {}
 
 function hex2bin(string $data): string|false {}
 
-function strspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
+function strspn(string $str, string $mask, int $start = 0, ?int $len = null): int {}
 
-function strcspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
+function strcspn(string $str, string $mask, int $start = 0, ?int $len = null): int {}
 
 #if HAVE_NL_LANGINFO
 function nl_langinfo(int $item): string|false {}

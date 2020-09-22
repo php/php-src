@@ -8,8 +8,17 @@ $v = 2147483647;
 var_dump(substr("abcde", 1, $v));
 var_dump(substr_replace("abcde", "x", $v, $v));
 
-var_dump(strspn("abcde", "abc", $v, $v));
-var_dump(strcspn("abcde", "abc", $v, $v));
+try {
+    var_dump(strspn("abcde", "abc", $v, $v));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    var_dump(strcspn("abcde", "abc", $v, $v));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 try {
     var_dump(substr_count("abcde", "abc", $v, $v));
@@ -79,8 +88,8 @@ var_dump(substr("abcde", $v, $v));
 --EXPECT--
 string(4) "bcde"
 string(6) "abcdex"
-bool(false)
-bool(false)
+strspn(): Argument #3 ($start) must be contained in argument #1 ($str)
+strcspn(): Argument #3 ($start) must be contained in argument #1 ($str)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_compare(): Argument #3 ($offset) must be contained in argument #1 ($main_str)
 stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

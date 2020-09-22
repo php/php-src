@@ -258,33 +258,28 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (len_is_null) {
-		len = ZSTR_LEN(s11);
-	}
-
-	/* look at substr() function for more information */
-
 	if (start < 0) {
 		start += (zend_long)ZSTR_LEN(s11);
-		if (start < 0) {
-			start = 0;
-		}
-	} else if ((size_t)start > ZSTR_LEN(s11)) {
-		RETURN_FALSE;
+	}
+	if (start < 0 || (size_t)start > ZSTR_LEN(s11)) {
+		zend_argument_value_error(3, "must be contained in argument #1 ($str)");
+		RETURN_THROWS();
 	}
 
-	if (len < 0) {
-		len += (ZSTR_LEN(s11) - start);
+	size_t remain_len = ZSTR_LEN(s11) - start;
+	if (!len_is_null) {
 		if (len < 0) {
-			len = 0;
+			len += remain_len;
 		}
+		if (len < 0 || (size_t)len > remain_len) {
+			zend_argument_value_error(4, "must be contained in argument #1 ($str)");
+			RETURN_THROWS();
+		}
+	} else {
+		len = remain_len;
 	}
 
-	if (len > (zend_long)ZSTR_LEN(s11) - start) {
-		len = ZSTR_LEN(s11) - start;
-	}
-
-	if(len == 0) {
+	if (len == 0) {
 		RETURN_LONG(0);
 	}
 
@@ -293,13 +288,13 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 						ZSTR_VAL(s22) /*str2_start*/,
 						ZSTR_VAL(s11) + start + len /*str1_end*/,
 						ZSTR_VAL(s22) + ZSTR_LEN(s22) /*str2_end*/));
-	} else if (behavior == STR_STRCSPN) {
+	} else {
+		ZEND_ASSERT(behavior == STR_STRCSPN);
 		RETURN_LONG(php_strcspn(ZSTR_VAL(s11) + start /*str1_start*/,
 						ZSTR_VAL(s22) /*str2_start*/,
 						ZSTR_VAL(s11) + start + len /*str1_end*/,
 						ZSTR_VAL(s22) + ZSTR_LEN(s22) /*str2_end*/));
 	}
-
 }
 /* }}} */
 
