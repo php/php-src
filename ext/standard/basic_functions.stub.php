@@ -1465,7 +1465,7 @@ function stream_filter_register(string $filtername, string $classname): bool {}
 
 /* uuencode.c */
 
-function convert_uuencode(string $data): string|false {}
+function convert_uuencode(string $data): string {}
 
 function convert_uudecode(string $data): string|false {}
 
