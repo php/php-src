@@ -90,7 +90,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				inflateEnd(&(data->strm));
 				data->finished = '\1';
 				exit_status = PSFS_PASS_ON;
-			} else if (status != Z_OK) {
+			} else if (status != Z_OK && status != Z_BUF_ERROR) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket);
 				/* reset these because despite the error the filter may be used again */
