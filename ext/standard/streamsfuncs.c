@@ -573,14 +573,11 @@ PHP_FUNCTION(stream_get_transports)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if ((stream_xport_hash = php_stream_xport_get_hash())) {
-		array_init(return_value);
-		ZEND_HASH_FOREACH_STR_KEY(stream_xport_hash, stream_xport) {
-			add_next_index_str(return_value, zend_string_copy(stream_xport));
-		} ZEND_HASH_FOREACH_END();
-	} else {
-		RETURN_FALSE;
-	}
+	stream_xport_hash = php_stream_xport_get_hash();
+	array_init(return_value);
+	ZEND_HASH_FOREACH_STR_KEY(stream_xport_hash, stream_xport) {
+		add_next_index_str(return_value, zend_string_copy(stream_xport));
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -592,16 +589,13 @@ PHP_FUNCTION(stream_get_wrappers)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
-		array_init(return_value);
-		ZEND_HASH_FOREACH_STR_KEY(url_stream_wrappers_hash, stream_protocol) {
-			if (stream_protocol) {
-				add_next_index_str(return_value, zend_string_copy(stream_protocol));
-			}
-		} ZEND_HASH_FOREACH_END();
-	} else {
-		RETURN_FALSE;
-	}
+	url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash();
+	array_init(return_value);
+	ZEND_HASH_FOREACH_STR_KEY(url_stream_wrappers_hash, stream_protocol) {
+		if (stream_protocol) {
+			add_next_index_str(return_value, zend_string_copy(stream_protocol));
+		}
+	} ZEND_HASH_FOREACH_END();
 
 }
 /* }}} */

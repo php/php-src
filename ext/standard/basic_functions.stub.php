@@ -1339,9 +1339,9 @@ function stream_get_line($handle, int $max_length, string $ending = ""): string|
 
 function stream_resolve_include_path(string $filename): string|false {}
 
-function stream_get_wrappers(): array|false {}
+function stream_get_wrappers(): array {}
 
-function stream_get_transports(): array|false {}
+function stream_get_transports(): array {}
 
 /** @param resource|string $stream */
 function stream_is_local($stream): bool {}

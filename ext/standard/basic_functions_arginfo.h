@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 56fb3ef4c53a1ed7abf6a115567bca47e1a14cda */
+ * Stub hash: c61d8a28acaa2a7206f74287dce98282f2fedd2a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2011,9 +2011,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_stream_resolve_include_path arginfo_filetype
 
-#define arginfo_stream_get_wrappers arginfo_net_get_interfaces
+#define arginfo_stream_get_wrappers arginfo_ob_list_handlers
 
-#define arginfo_stream_get_transports arginfo_net_get_interfaces
+#define arginfo_stream_get_transports arginfo_ob_list_handlers
 
 #define arginfo_stream_is_local arginfo_stream_supports_lock
 
