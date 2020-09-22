@@ -961,7 +961,7 @@ find "a%CC%8ABca%CC%8A" in "o%CC%88a%CC%8AaA%CC%8AbCa%CC%8Adef" - grapheme_strri
 
 function grapheme_substr($string, $start, $length = -1) {}
 
-substring of "abc" from "3" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
+substring of "abc" from "3" - grapheme_substr = false == false
 substring of "aa%CC%8Abco%CC%88" from "5" - grapheme_substr = false == false
 substring of "aoa%CC%8Abco%CC%88O" from "2" - grapheme_substr = a%CC%8Abco%CC%88O == a%CC%8Abco%CC%88O
 substring of "o%CC%88a%CC%8AaA%CC%8Abc" from "2" - grapheme_substr = aA%CC%8Abc == aA%CC%8Abc
