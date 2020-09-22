@@ -638,25 +638,20 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		return err;
 	}
 
-	if (len < 0) {
-		if ((len += (total_len - offset)) < 0) {
-			return PHP_ICONV_ERR_SUCCESS;
-		}
-	}
-
 	if (offset < 0) {
 		if ((offset += total_len) < 0) {
-			return PHP_ICONV_ERR_SUCCESS;
+			offset = 0;
 		}
+	} else if ((size_t)offset > total_len) {
+		offset = total_len;
 	}
 
-	if((size_t)len > total_len) {
+	if (len < 0) {
+		if ((len += (total_len - offset)) < 0) {
+			len = 0;
+		}
+	} else if ((size_t)len > total_len) {
 		len = total_len;
-	}
-
-
-	if ((size_t)offset > total_len) {
-		return PHP_ICONV_ERR_SUCCESS;
 	}
 
 	if ((size_t)(offset + len) > total_len ) {

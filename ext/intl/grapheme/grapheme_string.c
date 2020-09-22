@@ -371,22 +371,20 @@ PHP_FUNCTION(grapheme_substr)
 		RETURN_THROWS();
 	}
 
-	if ( OUTSIDE_STRING(lstart, str_len)) {
-		zend_argument_value_error(2, "must be contained in argument #1 ($string)");
+	if (lstart < INT32_MIN || lstart > INT32_MAX) {
+		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
 
-	/* we checked that it will fit: */
 	start = (int32_t) lstart;
 
-	if(no_length) {
+	if (no_length) {
 		length = str_len;
 	}
 
-	if(length < INT32_MIN) {
-		length = INT32_MIN;
-	} else if(length > INT32_MAX) {
-		length = INT32_MAX;
+	if (length < INT32_MIN || length > INT32_MAX) {
+		zend_argument_value_error(3, "is too large");
+		RETURN_THROWS();
 	}
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
@@ -451,15 +449,17 @@ PHP_FUNCTION(grapheme_substr)
 		start += iter_val;
 	}
 
-	if ( 0 != start || sub_str_start_pos >= ustr_len ) {
-
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: start not contained in string", 1 );
-
-		if (ustr) {
-			efree(ustr);
+	if (0 != start) {
+		if (start > 0) {
+			if (ustr) {
+				efree(ustr);
+			}
+			ubrk_close(bi);
+			RETURN_EMPTY_STRING();
 		}
-		ubrk_close(bi);
-		RETURN_FALSE;
+
+		sub_str_start_pos = 0;
+		ubrk_first(bi);
 	}
 
 	/* OK to convert here since if str_len were big, convert above would fail */
@@ -526,20 +526,17 @@ PHP_FUNCTION(grapheme_substr)
 	ubrk_close(bi);
 
 	if ( UBRK_DONE == sub_str_end_pos) {
-		if(length < 0) {
-			zend_argument_value_error(3, "must be contained in argument #1 ($string)");
+		if (length < 0) {
 			efree(ustr);
-			RETURN_THROWS();
+			RETURN_EMPTY_STRING();
 		} else {
 			sub_str_end_pos = ustr_len;
 		}
 	}
 
-	if(sub_str_start_pos > sub_str_end_pos) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length is beyond start", 1 );
-
+	if (sub_str_start_pos > sub_str_end_pos) {
 		efree(ustr);
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 
 	status = U_ZERO_ERROR;
