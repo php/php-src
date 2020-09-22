@@ -2170,9 +2170,7 @@ PHP_FUNCTION(substr)
 		Z_PARAM_LONG_OR_NULL(l, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (f > (zend_long)ZSTR_LEN(str)) {
-		RETURN_FALSE;
-	} else if (f < 0) {
+	if (f < 0) {
 		/* if "from" position is negative, count start position from the end
 		 * of the string
 		 */
@@ -2181,41 +2179,24 @@ PHP_FUNCTION(substr)
 		} else {
 			f = (zend_long)ZSTR_LEN(str) + f;
 		}
-		if (!len_is_null) {
-			if (l < 0) {
-				/* if "length" position is negative, set it to the length
-				 * needed to stop that many chars from the end of the string
-				 */
-				if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)f) {
-					if ((size_t)(-l) > ZSTR_LEN(str)) {
-						RETURN_FALSE;
-					} else {
-						l = 0;
-					}
-				} else {
-					l = (zend_long)ZSTR_LEN(str) - f + l;
-				}
-			} else if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
-				goto truncate_len;
-			}
-		} else {
-			goto truncate_len;
-		}
-	} else if (!len_is_null) {
+	} else if ((size_t)f > ZSTR_LEN(str)) {
+		RETURN_EMPTY_STRING();
+	}
+
+	if (!len_is_null) {
 		if (l < 0) {
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
 			 */
 			if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)f) {
-				RETURN_FALSE;
+				l = 0;
 			} else {
 				l = (zend_long)ZSTR_LEN(str) - f + l;
 			}
 		} else if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
-			goto truncate_len;
+			l = (zend_long)ZSTR_LEN(str) - f;
 		}
 	} else {
-truncate_len:
 		l = (zend_long)ZSTR_LEN(str) - f;
 	}
 
