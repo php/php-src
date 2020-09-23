@@ -10165,6 +10165,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			child0_is_true = zend_is_true(zend_ast_get_zval(ast->child[0]));
+			/* TODO Check if need to handle potential TypeError if child[0] is an object which cannot be converted to bool */
 			if (child0_is_true == (ast->kind == ZEND_AST_OR)) {
 				ZVAL_BOOL(&result, ast->kind == ZEND_AST_OR);
 				break;
@@ -10175,6 +10176,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			child1_is_true = zend_is_true(zend_ast_get_zval(ast->child[1]));
+			/* TODO Check if need to handle potential TypeError if child[1] is an object which cannot be converted to bool */
 			if (ast->kind == ZEND_AST_OR) {
 				ZVAL_BOOL(&result, child0_is_true || child1_is_true);
 			} else {
@@ -10241,6 +10243,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			child = &ast->child[2 - zend_is_true(zend_ast_get_zval(ast->child[0]))];
+			/* TODO Check if need to handle potential TypeError if child[0] is an object which cannot be converted to bool */
 			if (*child == NULL) {
 				child--;
 			}
