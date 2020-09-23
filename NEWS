@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #80114 (parse_url does not accept URLs with port 0). (cmb, twosee)
   . Fixed bug #76943 (Inconsistent stream_wrapper_restore() errors). (cmb)
+  . Fixed bug #76735 (Incorrect message in fopen on invalid mode). (cmb)
 
 01 Oct 2020, PHP 7.4.11
 
