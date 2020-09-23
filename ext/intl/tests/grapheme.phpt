@@ -325,23 +325,23 @@ function ut_main()
 
     $tests = array(
 
-        array( "abc", 3, "false" ),
-        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, 5, "false" ),
+        array( "abc", 3, "" ),
+        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, 5, "" ),
         array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", 2, $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O" ),
         array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_A_ring_nfd . "bc", 2, "a" . $char_A_ring_nfd . "bc" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", 5, "O" ),
-        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, 5, "false" ),
+        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, 5, "" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_O_diaeresis_nfd, 4, $char_O_diaeresis_nfd ),
         array( $char_o_diaeresis_nfd . "a" . $char_a_ring_nfd . "bc", 2, $char_a_ring_nfd . "bc" ),
         array( "a" . $char_A_ring_nfd . "bc", 1, $char_A_ring_nfd . "bc" ),
-        array( "Abc", -5, "false" ),
-        array( $char_a_ring_nfd . "bc", 3, "false" ),
-        array( "abc", 4, "false" ),
+        array( "Abc", -5, "Abc" ),
+        array( $char_a_ring_nfd . "bc", 3, "" ),
+        array( "abc", 4, "" ),
         array( "abC", 2, "C" ),
         array( "abc", 1, "bc" ),
         array( "Abc", 1, 1, "b" ),
         array( "abc", 0, 2, "ab" ),
-        array( "Abc", -4, 1, "false" ),
+        array( "Abc", -4, 1, "A" ),
         array( "ababc", 1, 2, "ba" ),
         array( "ababc", 0, 10, "ababc" ),
 
@@ -350,7 +350,7 @@ function ut_main()
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -1, "Op" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -2, "O" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -3, "" ),
-        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -4, "false" ),
+        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -4, "" ),
 
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, -1, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Op" ),
@@ -361,7 +361,7 @@ function ut_main()
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, -6, "a" . $char_a_ring_nfd ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, -7, "a" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, -8, "" ),
-        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, -9, "false" ),
+        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, -9, "" ),
 
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -7, $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
@@ -371,7 +371,7 @@ function ut_main()
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -3, "Opq" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -2, "pq" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -1, "q" ),
-        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -999, "false" ),
+        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -999, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
 
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, 8, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, 7, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Op" ),
@@ -382,7 +382,7 @@ function ut_main()
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, 2, "a" . $char_a_ring_nfd ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, 1, "a" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, 0, "" ),
-        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -999, "false" ),
+        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -999, "" ),
 
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -1, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Op" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -2, "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O" ),
@@ -392,7 +392,7 @@ function ut_main()
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -6, "a" . $char_a_ring_nfd ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -7, "a" ),
         array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -8, "" ),
-        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -9, "false" ),
+        array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -9, "" ),
 
     );
 
@@ -973,26 +973,23 @@ find "a%CC%8ABca%CC%8A" in "o%CC%88a%CC%8AaA%CC%8AbCa%CC%8Adef" - grapheme_strri
 
 function grapheme_substr($string, $start, $length = -1) {}
 
-substring of "abc" from "3" - grapheme_substr = false == false
-substring of "aa%CC%8Abco%CC%88" from "5" - grapheme_substr = false == false
+substring of "abc" from "3" - grapheme_substr =  == 
+substring of "aa%CC%8Abco%CC%88" from "5" - grapheme_substr =  == 
 substring of "aoa%CC%8Abco%CC%88O" from "2" - grapheme_substr = a%CC%8Abco%CC%88O == a%CC%8Abco%CC%88O
 substring of "o%CC%88a%CC%8AaA%CC%8Abc" from "2" - grapheme_substr = aA%CC%8Abc == aA%CC%8Abc
 substring of "aa%CC%8Abco%CC%88O" from "5" - grapheme_substr = O == O
-substring of "aa%CC%8Abco%CC%88" from "5" - grapheme_substr = false == false
+substring of "aa%CC%8Abco%CC%88" from "5" - grapheme_substr =  == 
 substring of "aa%CC%8AbcO%CC%88" from "4" - grapheme_substr = O%CC%88 == O%CC%88
 substring of "o%CC%88aa%CC%8Abc" from "2" - grapheme_substr = a%CC%8Abc == a%CC%8Abc
 substring of "aA%CC%8Abc" from "1" - grapheme_substr = A%CC%8Abc == A%CC%8Abc
-substring of "Abc" from "-5" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
- = A%CC%8Abc == false **FAILED** 
-substring of "a%CC%8Abc" from "3" - grapheme_substr = false == false
-substring of "abc" from "4" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
- = false == false
+substring of "Abc" from "-5" - grapheme_substr = Abc == Abc
+substring of "a%CC%8Abc" from "3" - grapheme_substr =  == 
+substring of "abc" from "4" - grapheme_substr =  == 
 substring of "abC" from "2" - grapheme_substr = C == C
 substring of "abc" from "1" - grapheme_substr = bc == bc
 substring of "Abc" from "1" - grapheme_substr with length 1 = b == b
 substring of "abc" from "0" - grapheme_substr with length 2 = ab == ab
-substring of "Abc" from "-4" - grapheme_substr with length 1: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
- = ab == false **FAILED** 
+substring of "Abc" from "-4" - grapheme_substr with length 1 = A == A
 substring of "ababc" from "1" - grapheme_substr with length 2 = ba == ba
 substring of "ababc" from "0" - grapheme_substr with length 10 = ababc == ababc
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length 10 = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
@@ -1000,7 +997,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr = Opq == Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -1 = Op == Op
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -2 = O == O
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -3 =  == 
-substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -4 = false == false
+substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -4 =  == 
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -1 = aa%CC%8Abco%CC%88Op == aa%CC%8Abco%CC%88Op
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -2 = aa%CC%8Abco%CC%88O == aa%CC%8Abco%CC%88O
@@ -1010,8 +1007,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -5 = 
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -6 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -7 = a == a
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -8 =  == 
-substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -9: grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
- =  == false **FAILED** 
+substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -9 =  == 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-7" - grapheme_substr = a%CC%8Abco%CC%88Opq == a%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-6" - grapheme_substr = bco%CC%88Opq == bco%CC%88Opq
@@ -1020,8 +1016,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-4" - grapheme_substr = o%CC%88Opq == 
 substring of "aa%CC%8Abco%CC%88Opq" from "-3" - grapheme_substr = Opq == Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-2" - grapheme_substr = pq == pq
 substring of "aa%CC%8Abco%CC%88Opq" from "-1" - grapheme_substr = q == q
-substring of "aa%CC%8Abco%CC%88Opq" from "-999" - grapheme_substr: grapheme_substr(): Argument #2 ($start) must be contained in argument #1 ($string)
- = q == false **FAILED** 
+substring of "aa%CC%8Abco%CC%88Opq" from "-999" - grapheme_substr = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 8 = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 7 = aa%CC%8Abco%CC%88Op == aa%CC%8Abco%CC%88Op
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 6 = aa%CC%8Abco%CC%88O == aa%CC%8Abco%CC%88O
@@ -1031,8 +1026,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 3 = 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 2 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 1 = a == a
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 0 =  == 
-substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -999: grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
- =  == false **FAILED** 
+substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -999 =  == 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -1 = aa%CC%8Abco%CC%88Op == aa%CC%8Abco%CC%88Op
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -2 = aa%CC%8Abco%CC%88O == aa%CC%8Abco%CC%88O
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -3 = aa%CC%8Abco%CC%88 == aa%CC%8Abco%CC%88
@@ -1041,8 +1035,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -5 =
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -6 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -7 = a == a
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -8 =  == 
-substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -9: grapheme_substr(): Argument #3 ($length) must be contained in argument #1 ($string)
- =  == false **FAILED** 
+substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -9 =  == 
 
 function grapheme_strstr($haystack, $needle, $before_needle = FALSE) {}
 

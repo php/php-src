@@ -57,20 +57,6 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
     	return;
     }
 
-    if ((l < 0 && -l > str_len2)) {
-        return;
-    } else if (l > 0 && l > str_len2) {
-        l = str_len2;
-    }
-
-    if (f > str_len2 || (f < 0 && -f > str_len2)) {
-        return;
-    }
-
-    if (l < 0 && str_len2 < f - l) {
-        return;
-    }
-
     /* if "from" position is negative, count start position from the end
      * of the string
      */
@@ -79,8 +65,9 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
         if (f < 0) {
             f = 0;
         }
-    }
-
+    } else if (f > str_len2) {
+		f = str_len2;
+	}
 
     /* if "length" position is negative, set it to the length
      * needed to stop that many chars from the end of the string
@@ -90,20 +77,12 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
         if (l < 0) {
             l = 0;
         }
-    }
-
-    if (f >= str_len2) {
-        return;
-    }
-
-    if ((f + l) > str_len2) {
-        l = str_len - f;
-    }
+    } else if (l > str_len2 - f) {
+		l = str_len2 - f;
+	}
 
     *sub_str = str + f;
     *sub_str_len = l;
-
-    return;
 }
 /* }}} */
 
