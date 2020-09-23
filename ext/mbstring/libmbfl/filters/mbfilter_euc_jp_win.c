@@ -319,8 +319,6 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 			s1 = 0x2172;
 		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
 			s1 = 0x224c;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s1 = 0x2141;
 		} else {
 			s1 = -1;
 			c1 = 0;
