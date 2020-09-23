@@ -595,6 +595,7 @@ constant_binary_op:
 			/* convert Ti = JMPZ_EX(C, L) => Ti = QM_ASSIGN(C)
 			   in case we know it wouldn't jump */
 			if (opline->op1_type == IS_CONST) {
+				/* zend_is_true() cannot fail here as op1 is not an object */
 				if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
 					if (opline->opcode == ZEND_JMPZ_EX) {
 						opline->opcode = ZEND_QM_ASSIGN;
@@ -619,6 +620,7 @@ constant_binary_op:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 			if (opline->op1_type == IS_CONST) {
+				/* zend_is_true() cannot fail here as op1 is not an object */
 				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 
 				if (opline->opcode == ZEND_JMPZ) {
@@ -642,6 +644,7 @@ constant_binary_op:
 			if (opline->op1_type == IS_CONST) {
 				zend_op *target_opline;
 
+				/* zend_is_true() cannot fail here as op1 is not an object */
 				if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
 					target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value); /* JMPNZ */
 				} else {

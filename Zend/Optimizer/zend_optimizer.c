@@ -79,6 +79,9 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 		return unary_op(result, op1);
 	} else { /* ZEND_BOOL */
 		ZVAL_BOOL(result, zend_is_true(op1));
+		if (UNEXPECTED(EG(exception))) {
+			return FAILURE;
+		}
 		return SUCCESS;
 	}
 }

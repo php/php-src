@@ -568,6 +568,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					if (opline->op1_type == IS_CONST) {
 						++(*opt_count);
 						block->successors_count = 1;
+						/* zend_is_true() cannot fail here as op1 cannot be an object */
 						if (zend_is_true(&ZEND_OP1_LITERAL(opline)) ==
 						    (opline->opcode == ZEND_JMPZ)) {
 
@@ -617,6 +618,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				while (1) {
 					if (opline->op1_type == IS_CONST) {
 						++(*opt_count);
+						/* zend_is_true() cannot fail here as op1 cannot be an object */
 						if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
 							zend_op *target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
