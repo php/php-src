@@ -100,7 +100,7 @@
 
 #define private static
 
-#if HAVE_VISIBILITY && !defined(WIN32)
+#if defined(HAVE_VISIBILITY) && !defined(WIN32)
 #define public  __attribute__ ((__visibility__("default")))
 #ifndef protected
 #define protected __attribute__ ((__visibility__("hidden")))
