@@ -6238,11 +6238,14 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 }
 /* }}} */
 
-static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zval *args, uint32_t argc, HashTable *named_params, uint32_t flags) /* {{{ */
+static int call_attribute_constructor(
+	zend_attribute *attr, zend_class_entry *ce, zend_object *obj,
+	zval *args, uint32_t argc, HashTable *named_params)
 {
 	zend_function *ctor = ce->constructor;
 	zend_execute_data *prev_execute_data = NULL, dummy_frame;
 	zend_function dummy_func;
+	zend_op dummy_opline;
 	ZEND_ASSERT(ctor != NULL);
 
 	if (!(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
@@ -6250,22 +6253,28 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 		return FAILURE;
 	}
 
-	if (flags & ZEND_ATTRIBUTE_STRICT_TYPES) {
-		prev_execute_data = EG(current_execute_data);
-		memset(&dummy_frame, 0, sizeof(zend_execute_data));
-		dummy_frame.prev_execute_data = prev_execute_data;
-		dummy_frame.func = &dummy_func;
-		memset(&dummy_func, 0, sizeof(zend_internal_function));
-		dummy_func.type = ZEND_INTERNAL_FUNCTION;
-		dummy_func.common.fn_flags = ZEND_ACC_STRICT_TYPES;
-		EG(current_execute_data) = &dummy_frame;
-	}
+	/* Set up dummy call frame that makes it look the attribute was invoked from
+	 * where it occurs in the code. */
+	memset(&dummy_frame, 0, sizeof(zend_execute_data));
+	memset(&dummy_func, 0, sizeof(zend_function));
+	memset(&dummy_opline, 0, sizeof(zend_op));
 
+	prev_execute_data = EG(current_execute_data);
+	dummy_frame.prev_execute_data = prev_execute_data;
+	dummy_frame.func = &dummy_func;
+	dummy_frame.opline = &dummy_opline;
+
+	dummy_func.type = ZEND_USER_FUNCTION;
+	dummy_func.common.fn_flags =
+		attr->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
+	dummy_func.op_array.filename = ZSTR_EMPTY_ALLOC(); // TODO
+
+	dummy_opline.opcode = ZEND_DO_FCALL;
+	dummy_opline.lineno = attr->lineno;
+
+	EG(current_execute_data) = &dummy_frame;
 	zend_call_known_function(ctor, obj, obj->ce, NULL, argc, args, named_params);
-
-	if (prev_execute_data) {
-		EG(current_execute_data) = prev_execute_data;
-	}
+	EG(current_execute_data) = prev_execute_data;
 
 	if (EG(exception)) {
 		zend_object_store_ctor_failed(obj);
@@ -6274,7 +6283,6 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 
 	return SUCCESS;
 }
-/* }}} */
 
 static void attribute_ctor_cleanup(
 		zval *obj, zval *args, uint32_t argc, HashTable *named_params) /* {{{ */
@@ -6390,7 +6398,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	}
 
 	if (ce->constructor) {
-		if (FAILURE == call_attribute_constructor(ce, Z_OBJ(obj), args, argc, named_params, attr->data->flags)) {
+		if (FAILURE == call_attribute_constructor(attr->data, ce, Z_OBJ(obj), args, argc, named_params)) {
 			attribute_ctor_cleanup(&obj, args, argc, named_params);
 			RETURN_THROWS();
 		}

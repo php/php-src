@@ -196,7 +196,7 @@ static void attr_free(zval *v)
 	pefree(attr, attr->flags & ZEND_ATTRIBUTE_PERSISTENT);
 }
 
-ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, uint32_t flags, uint32_t offset, zend_string *name, uint32_t argc)
+ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_string *name, uint32_t argc, uint32_t flags, uint32_t offset, uint32_t lineno)
 {
 	bool persistent = flags & ZEND_ATTRIBUTE_PERSISTENT;
 	if (*attributes == NULL) {
@@ -214,6 +214,7 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, uint32_t fla
 
 	attr->lcname = zend_string_tolower_ex(attr->name, persistent);
 	attr->flags = flags;
+	attr->lineno = lineno;
 	attr->offset = offset;
 	attr->argc = argc;
 

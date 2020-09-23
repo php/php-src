@@ -6223,7 +6223,8 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 
 			uint32_t flags = (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)
 				? ZEND_ATTRIBUTE_STRICT_TYPES : 0;
-			attr = zend_add_attribute(attributes, flags, offset, name, args ? args->children : 0);
+			attr = zend_add_attribute(
+				attributes, name, args ? args->children : 0, flags, offset, el->lineno);
 			zend_string_release(name);
 
 			/* Populate arguments */

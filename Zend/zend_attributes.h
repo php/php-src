@@ -50,6 +50,7 @@ typedef struct _zend_attribute {
 	zend_string *name;
 	zend_string *lcname;
 	uint32_t flags;
+	uint32_t lineno;
 	/* Parameter offsets start at 1, everything else uses 0. */
 	uint32_t offset;
 	uint32_t argc;
@@ -76,38 +77,40 @@ ZEND_API zend_bool zend_is_attribute_repeated(HashTable *attributes, zend_attrib
 ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags);
 ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname);
 
-ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, uint32_t flags, uint32_t offset, zend_string *name, uint32_t argc);
+ZEND_API zend_attribute *zend_add_attribute(
+		HashTable **attributes, zend_string *name, uint32_t argc,
+		uint32_t flags, uint32_t offset, uint32_t lineno);
 
 END_EXTERN_C()
 
 static zend_always_inline zend_attribute *zend_add_class_attribute(zend_class_entry *ce, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = ce->type != ZEND_USER_CLASS ? ZEND_ATTRIBUTE_PERSISTENT : 0;
-	return zend_add_attribute(&ce->attributes, flags, 0, name, argc);
+	return zend_add_attribute(&ce->attributes, name, argc, flags, 0, 0);
 }
 
 static zend_always_inline zend_attribute *zend_add_function_attribute(zend_function *func, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = func->common.type != ZEND_USER_FUNCTION ? ZEND_ATTRIBUTE_PERSISTENT : 0;
-	return zend_add_attribute(&func->common.attributes, flags, 0, name, argc);
+	return zend_add_attribute(&func->common.attributes, name, argc, flags, 0, 0);
 }
 
 static zend_always_inline zend_attribute *zend_add_parameter_attribute(zend_function *func, uint32_t offset, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = func->common.type != ZEND_USER_FUNCTION ? ZEND_ATTRIBUTE_PERSISTENT : 0;
-	return zend_add_attribute(&func->common.attributes, flags, offset + 1, name, argc);
+	return zend_add_attribute(&func->common.attributes, name, argc, flags, offset + 1, 0);
 }
 
 static zend_always_inline zend_attribute *zend_add_property_attribute(zend_class_entry *ce, zend_property_info *info, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = ce->type != ZEND_USER_CLASS ? ZEND_ATTRIBUTE_PERSISTENT : 0;
-	return zend_add_attribute(&info->attributes, flags, 0, name, argc);
+	return zend_add_attribute(&info->attributes, name, argc, flags, 0, 0);
 }
 
 static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend_class_entry *ce, zend_class_constant *c, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = ce->type != ZEND_USER_CLASS ? ZEND_ATTRIBUTE_PERSISTENT : 0;
-	return zend_add_attribute(&c->attributes, flags, 0, name, argc);
+	return zend_add_attribute(&c->attributes, name, argc, flags, 0, 0);
 }
 
 void zend_register_attribute_ce(void);
