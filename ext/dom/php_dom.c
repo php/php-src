@@ -370,6 +370,7 @@ static int dom_property_exists(zend_object *object, zend_string *name, int check
 			retval = 1;
 		} else if (hnd->read_func(obj, &tmp) == SUCCESS) {
 			if (check_empty == 1) {
+				/* TODO Check can tmp be an object */
 				retval = zend_is_true(&tmp);
 			} else if (check_empty == 0) {
 				retval = (Z_TYPE(tmp) != IS_NULL);

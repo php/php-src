@@ -284,6 +284,9 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval)
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->stricterror = zend_is_true(newval);
+		if (EG(exception)) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
@@ -310,6 +313,9 @@ int dom_document_format_output_write(dom_object *obj, zval *newval)
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->formatoutput = zend_is_true(newval);
+		if (EG(exception)) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
@@ -335,6 +341,9 @@ int dom_document_validate_on_parse_write(dom_object *obj, zval *newval)
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->validateonparse = zend_is_true(newval);
+		if (EG(exception)) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
@@ -360,6 +369,9 @@ int dom_document_resolve_externals_write(dom_object *obj, zval *newval)
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->resolveexternals = zend_is_true(newval);
+		if (EG(exception)) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
@@ -385,6 +397,9 @@ int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval)
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->preservewhitespace = zend_is_true(newval);
+		if (EG(exception)) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
@@ -410,6 +425,9 @@ int dom_document_recover_write(dom_object *obj, zval *newval)
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->recover = zend_is_true(newval);
+		if (EG(exception)) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
@@ -435,6 +453,9 @@ int dom_document_substitue_entities_write(dom_object *obj, zval *newval)
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->substituteentities = zend_is_true(newval);
+		if (EG(exception)) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
