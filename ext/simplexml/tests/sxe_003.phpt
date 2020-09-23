@@ -37,10 +37,14 @@ EOF;
 
 $sxe = simplexml_load_string($xml, 'SimpleXMLIterator');
 
-foreach($sxe->getChildren() as $name => $data) {
-    var_dump($name);
-    var_dump(get_class($data));
-    var_dump(trim($data));
+try {
+    foreach($sxe->getChildren() as $name => $data) {
+        var_dump($name);
+        var_dump(get_class($data));
+        var_dump(trim($data));
+    }
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
 }
 
 echo "===RESET===\n";
@@ -57,8 +61,8 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 }
 
 ?>
---EXPECTF--
-Warning: foreach() argument must be of type array|object, null given in %ssxe_003.php on line %d
+--EXPECT--
+foreach() argument must be of type array|object, null given
 ===RESET===
 bool(true)
 string(5) "elem1"

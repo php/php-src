@@ -8,8 +8,12 @@ Bug #38347 (Segmentation fault when using foreach with an unknown/empty SimpleXM
 function iterate($xml)
 {
     print_r($xml);
-    foreach ($xml->item as $item) {
-        echo "This code will crash!";
+    try {
+        foreach ($xml->item as $item) {
+            echo "This code will crash!";
+        }
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
     }
 }
 
@@ -19,10 +23,9 @@ iterate($xml->unknown);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 SimpleXMLElement Object
 (
 )
-
-Warning: foreach() argument must be of type array|object, null given in %sbug38347.php on line 6
+foreach() argument must be of type array|object, null given
 Done

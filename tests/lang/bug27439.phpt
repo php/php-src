@@ -32,19 +32,39 @@ class test {
     }
 
     public function case2() {
-        foreach ($this->foobar as $foo);
+        try {
+            foreach ($this->foobar as $foo);
+        }
+        catch (\TypeError $e) {
+            echo $e->getMessage(), \PHP_EOL;
+        }
     }
 
     public function case3() {
-        foreach ($this->string as $foo);
+        try {
+            foreach ($this->string as $foo);
+        }
+        catch (\TypeError $e) {
+            echo $e->getMessage(), \PHP_EOL;
+        }
     }
 
     public function case4() {
-        foreach ($this->getArray() as $foo);
+        try {
+            foreach ($this->getArray() as $foo);
+        }
+        catch (\TypeError $e) {
+            echo $e->getMessage(), \PHP_EOL;
+        }
     }
 
     public function case5() {
-        foreach ($this->getString() as $foo);
+        try {
+            foreach ($this->getString() as $foo);
+        }
+        catch (\TypeError $e) {
+            echo $e->getMessage(), \PHP_EOL;
+        }
     }
 
     public function case6() {
@@ -66,11 +86,8 @@ echo "===DONE===";
 --EXPECTF--
 123
 Warning: Undefined property: test::$foobar in %s on line %d
-
-Warning: foreach() argument must be of type array|object, null given in %s on line %d
-
-Warning: foreach() argument must be of type array|object, string given in %s on line %d
-
-Warning: foreach() argument must be of type array|object, string given in %s on line %d
+foreach() argument must be of type array|object, null given
+foreach() argument must be of type array|object, string given
+foreach() argument must be of type array|object, string given
 123
 ===DONE===

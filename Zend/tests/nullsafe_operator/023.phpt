@@ -9,8 +9,12 @@ class Foo {
 
 $foo = new Foo();
 
-foreach ($foo?->bar as &$value) {
-    var_dump($value);
+try {
+    foreach ($foo?->bar as &$value) {
+        var_dump($value);
+    }
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
 }
 
 // Don't convert $foo->bar into a reference.
@@ -30,8 +34,8 @@ foreach ($foo?->bar as &$value) {
 var_dump($foo->bar);
 
 ?>
---EXPECTF--
-Warning: foreach() argument must be of type array|object, null given in %s on line %d
+--EXPECT--
+foreach() argument must be of type array|object, null given
 int(42)
 array(1) {
   [0]=>

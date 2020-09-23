@@ -4,12 +4,16 @@ foreach over null
 <?php
 
 function test() {
-    foreach (null as $v) {
-        echo "Foo\n";
+    try {
+        foreach (null as $v) {
+            echo "Foo\n";
+        }
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
     }
 }
 test();
 
 ?>
---EXPECTF--
-Warning: foreach() argument must be of type array|object, null given in %s on line %d
+--EXPECT--
+foreach() argument must be of type array|object, null given
