@@ -118,7 +118,6 @@ try {
 }
 echo "\n";
 
-// TODO: substr is special.
 var_dump(grapheme_substr("foo", 3));
 var_dump(grapheme_substr("foo", -3));
 var_dump(grapheme_substr("foo", 4));

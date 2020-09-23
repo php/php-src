@@ -46,7 +46,7 @@ var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-J
 a6a4a8a4aaa4ab
 a4aba4ada4afa4b1a4b3a4b5a4b7
 string(0) ""
-bool(false)
+string(0) ""
 string(14) "This is a test"
 string(14) "This is a test"
 string(3) "est"
@@ -56,7 +56,7 @@ string(3) "est"
 string(5) "This "
 string(5) "This "
 string(0) ""
-bool(false)
 string(0) ""
-bool(false)
+string(0) ""
+string(0) ""
 string(10) "¤Á¤Ï ISO-2"
