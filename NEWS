@@ -6,9 +6,13 @@ PHP                                                                        NEWS
   . Fixed bug #80121 (Null pointer deref if CurlHandle directly instantiated).
     (Nikita)
 
-- SPL.
+- SPL:
   . Fixed bug #65387 (Circular references in SPL iterators are not garbage
     collected). (Nikita)
+
+- Standard:
+  . Fixed bug #64060 (lstat_stat_variation7.phpt fails on certain file systems).
+    (M. Voelker, cmb)
 
 01 Oct 2020, PHP 8.0.0rc1
 
