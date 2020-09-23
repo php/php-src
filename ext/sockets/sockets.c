@@ -1045,11 +1045,7 @@ PHP_FUNCTION(socket_read)
 	if (retval == -1) {
 		/* if the socket is in non-blocking mode and there's no data to read,
 		don't output any error, as this is a normal situation, and not an error */
-		if (errno == EAGAIN
-#ifdef EWOULDBLOCK
-		|| errno == EWOULDBLOCK
-#endif
-		) {
+		if (PHP_IS_TRANSIENT_ERROR(errno)) {
 			php_sock->error = errno;
 			SOCKETS_G(last_error) = errno;
 		} else {
