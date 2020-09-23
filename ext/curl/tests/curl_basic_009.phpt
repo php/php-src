@@ -7,7 +7,7 @@ TestFest 2009 - AFUP - Perrick Penet <perrick@noparking.net>
 --FILE--
 <?php
 
-$url = uniqid()."://www.".uniqid().".".uniqid();
+$url = substr(uniqid(),0,7)."://www.".uniqid().".".uniqid();
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 
@@ -18,6 +18,6 @@ curl_close($ch);
 
 
 ?>
---EXPECTREGEX--
-string\(\d+\) "([^\r\n]*rotocol[^\r\n]+|Could not resolve host: .+)"
-int\(\d\)
+--EXPECTF--
+string(%d) "%Srotocol%s"
+int(1)
