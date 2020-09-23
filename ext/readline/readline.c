@@ -219,6 +219,10 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_completion_suppress_append;
 			if (value) {
 				rl_completion_suppress_append = zend_is_true(value);
+				/* If value is an object which cannot be converted to bool */
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 			}
 			RETVAL_BOOL(oldval);
 		} else if (zend_string_equals_literal_ci(what, "completion_append_character")) {
