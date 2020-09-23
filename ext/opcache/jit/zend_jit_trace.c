@@ -5095,7 +5095,7 @@ generic_dynamic_call:
 					case ZEND_SEND_UNPACK:
 						if (JIT_G(current_frame)
 						 && JIT_G(current_frame)->call) {
-							TRACE_FRAME_SET_UNKNOWM_NUM_ARGS(JIT_G(current_frame)->call);
+							TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(JIT_G(current_frame)->call);
 						}
 						break;
 					default:
