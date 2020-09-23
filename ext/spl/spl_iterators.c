@@ -276,6 +276,9 @@ next_step:
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					has_children = zend_is_true(&retval);
 					zval_ptr_dtor(&retval);
+					if (EG(exception)) {
+						return;
+					}
 					if (has_children) {
 						if (object->max_depth == -1 || object->max_depth > object->level) {
 							switch (object->mode) {
@@ -2328,6 +2331,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 					return;
 				}
 			} else {
+				/* retval should be a bool therefore zend_is_true() cannot fail */
 				if (zend_is_true(&retval)) {
 					zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &zchildren);
 					if (EG(exception)) {
@@ -3164,6 +3168,7 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 
 	apply_info->count++;
 	zend_fcall_info_call(&apply_info->fci, &apply_info->fcc, &retval, NULL);
+	/* No special handling in case retval is an object */
 	result = zend_is_true(&retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
 	zval_ptr_dtor(&retval);
 	return result;

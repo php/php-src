@@ -586,6 +586,7 @@ static int spl_array_has_dimension_ex(bool check_inherited, zend_object *object,
 	if (check_inherited && intern->fptr_offset_has) {
 		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 
+		/* Return value must be a bool therefore zend_is_true() cannot fail */
 		if (!zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);
 			return 0;
@@ -638,6 +639,7 @@ static int spl_array_has_dimension_ex(bool check_inherited, zend_object *object,
 	}
 
 	/* empty() check the value is not falsy, isset() only check it is not null */
+	/* Do not check that a TypeError is emitted by zend_is_true() as we're already returning */
 	return check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
 } /* }}} */
 

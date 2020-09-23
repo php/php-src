@@ -851,6 +851,10 @@ PHP_METHOD(DirectoryIterator, seek)
 		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_valid, "valid", &retval);
 		valid = zend_is_true(&retval);
 		zval_ptr_dtor(&retval);
+		/* Is this block needed as we are calling a known function */
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		if (!valid) {
 			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
 			RETURN_THROWS();
