@@ -6238,9 +6238,11 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 }
 /* }}} */
 
-static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zval *args, uint32_t argc, HashTable *named_params) /* {{{ */
+static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zval *args, uint32_t argc, HashTable *named_params, uint32_t flags) /* {{{ */
 {
 	zend_function *ctor = ce->constructor;
+	zend_execute_data *prev_execute_data = NULL, dummy_frame;
+	zend_function dummy_func;
 	ZEND_ASSERT(ctor != NULL);
 
 	if (!(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
@@ -6248,7 +6250,22 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 		return FAILURE;
 	}
 
+	if (flags & ZEND_ATTRIBUTE_STRICT_TYPES) {
+		prev_execute_data = EG(current_execute_data);
+		memset(&dummy_frame, 0, sizeof(zend_execute_data));
+		dummy_frame.prev_execute_data = prev_execute_data;
+		dummy_frame.func = &dummy_func;
+		memset(&dummy_func, 0, sizeof(zend_internal_function));
+		dummy_func.type = ZEND_INTERNAL_FUNCTION;
+		dummy_func.common.fn_flags = ZEND_ACC_STRICT_TYPES;
+		EG(current_execute_data) = &dummy_frame;
+	}
+
 	zend_call_known_function(ctor, obj, obj->ce, NULL, argc, args, named_params);
+
+	if (prev_execute_data) {
+		EG(current_execute_data) = prev_execute_data;
+	}
 
 	if (EG(exception)) {
 		zend_object_store_ctor_failed(obj);
@@ -6373,7 +6390,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	}
 
 	if (ce->constructor) {
-		if (FAILURE == call_attribute_constructor(ce, Z_OBJ(obj), args, argc, named_params)) {
+		if (FAILURE == call_attribute_constructor(ce, Z_OBJ(obj), args, argc, named_params, attr->data->flags)) {
 			attribute_ctor_cleanup(&obj, args, argc, named_params);
 			RETURN_THROWS();
 		}
