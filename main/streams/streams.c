@@ -2038,7 +2038,7 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 
 	if (wrapper && wrapper->wops->dir_opener) {
 		stream = wrapper->wops->dir_opener(wrapper,
-				path_to_open, "r", options ^ REPORT_ERRORS, NULL,
+				path_to_open, "r", options & ~REPORT_ERRORS, NULL,
 				context STREAMS_REL_CC);
 
 		if (stream) {
@@ -2046,7 +2046,7 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 			stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | PHP_STREAM_FLAG_IS_DIR;
 		}
 	} else if (wrapper) {
-		php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS, "not implemented");
+		php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS, "not implemented");
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "Failed to open directory");
@@ -2115,18 +2115,18 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 
 	if (wrapper) {
 		if (!wrapper->wops->stream_opener) {
-			php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS,
+			php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS,
 					"wrapper does not support stream open");
 		} else {
 			stream = wrapper->wops->stream_opener(wrapper,
-				path_to_open, mode, options ^ REPORT_ERRORS,
+				path_to_open, mode, options & ~REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC);
 		}
 
 		/* if the caller asked for a persistent stream but the wrapper did not
 		 * return one, force an error here */
 		if (stream && (options & STREAM_OPEN_PERSISTENT) && !stream->is_persistent) {
-			php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS,
+			php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS,
 					"wrapper does not support persistent streams");
 			php_stream_close(stream);
 			stream = NULL;
@@ -2183,7 +2183,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 							tmp);
 					efree(tmp);
 
-					options ^= REPORT_ERRORS;
+					options &= ~REPORT_ERRORS;
 				}
 		}
 	}
