@@ -511,11 +511,19 @@ PHP_FUNCTION(phpdbg_get_executable)
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("functions")))) {
 		by_function = zend_is_true(option_buffer);
+		/* If option_buffer is an object which cannot be cast to bool */
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("opcodes")))) {
 		if (by_function) {
 			by_opcode = zend_is_true(option_buffer);
+			/* If option_buffer is an object which cannot be cast to bool */
+			if (EG(exception)) {
+				RETURN_THROWS();
+			}
 		}
 	}
 
@@ -616,11 +624,19 @@ PHP_FUNCTION(phpdbg_end_oplog)
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("functions")))) {
 		by_function = zend_is_true(option_buffer);
+		/* If option_buffer is an object which cannot be cast to bool */
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("opcodes")))) {
 		if (by_function) {
 			by_opcode = zend_is_true(option_buffer);
+			/* If option_buffer is an object which cannot be cast to bool */
+			if (EG(exception)) {
+				RETURN_THROWS();
+			}
 		}
 	}
 

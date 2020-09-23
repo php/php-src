@@ -1120,6 +1120,10 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 			PHPDBG_G(flags) |= PHPDBG_IN_COND_BP;
 			zend_execute(bp->ops, &retval);
 			if (zend_is_true(&retval)) {
+				/* If retval is an object which cannot be cast to bool */
+				if (EG(exception)) {
+					breakpoint = FAILURE;
+				}
 				breakpoint = SUCCESS;
 			}
  		} zend_end_try();
