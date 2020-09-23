@@ -109,7 +109,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 			}
 			/* Position at the first row */
 			set->data_cursor = set->data;
-		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
+		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_C) {
 			/*TODO*/
 		}
 
