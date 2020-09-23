@@ -401,8 +401,11 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
 			((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
 			const char *s = zend_is_true(&param->parameter) ? "t" : "f";
-			param->param_type = PDO_PARAM_STR;
 			zval_ptr_dtor(&param->parameter);
+			if (EG(exception)) {
+				return 0;
+			}
+			param->param_type = PDO_PARAM_STR;
 			ZVAL_STRINGL(&param->parameter, s, 1);
 		}
 	}
