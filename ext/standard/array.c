@@ -5879,6 +5879,9 @@ PHP_FUNCTION(array_filter)
 				}
 				retval_true = zend_is_true(&retval);
 				zval_ptr_dtor(&retval);
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 				if (!retval_true) {
 					continue;
 				}
@@ -5890,6 +5893,9 @@ PHP_FUNCTION(array_filter)
 				return;
 			}
 		} else if (!zend_is_true(operand)) {
+			if (EG(exception)) {
+				RETURN_THROWS();
+			}
 			continue;
 		}
 

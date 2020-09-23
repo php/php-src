@@ -382,6 +382,7 @@ finish:
 	/* Should we send the entire path in the request line, default to no. */
 	if (!request_fulluri && context &&
 		(tmpzval = php_stream_context_get_option(context, "http", "request_fulluri")) != NULL) {
+		/* TODO Check if stream context value can be an object */
 		request_fulluri = zend_is_true(tmpzval);
 	}
 
