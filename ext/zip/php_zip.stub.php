@@ -138,13 +138,13 @@ class ZipArchive
     public function deleteName(string $name) {}
 
     /** @return array|false */
-    public function statName(string $filename, int $flags = 0) {}
+    public function statName(string $name, int $flags = 0) {}
 
     /** @return array|false */
     public function statIndex(int $index, int $flags = 0) {}
 
     /** @return int|false */
-    public function locateName(string $filename, int $flags = 0) {}
+    public function locateName(string $name, int $flags = 0) {}
 
     /** @return string|false */
     public function getNameIndex(int $index, int $flags = 0) {}
@@ -165,13 +165,13 @@ class ZipArchive
     public function extractTo(string $pathto, array|string|null $files = null) {}
 
     /** @return string|false */
-    public function getFromName(string $entryname, int $len = 0, int $flags = 0) {}
+    public function getFromName(string $name, int $len = 0, int $flags = 0) {}
 
     /** @return string|false */
     public function getFromIndex(int $index, int $len = 0, int $flags = 0) {}
 
     /** @return resource|false */
-    public function getStream(string $entryname) {}
+    public function getStream(string $name) {}
 
 #ifdef ZIP_OPSYS_DEFAULT
     /** @return bool */
