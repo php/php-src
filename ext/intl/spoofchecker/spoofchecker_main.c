@@ -143,8 +143,8 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 			USPOOF_MODERATELY_RESTRICTIVE != level &&
 			USPOOF_MINIMALLY_RESTRICTIVE != level &&
 			USPOOF_UNRESTRICTIVE != level) {
-		php_error_docref(NULL, E_WARNING, "Invalid restriction level value");
-		return;
+		zend_argument_value_error(1, "must be one of the Spoofchecker::*_RESTRICTIVE constants or Spoofchecker::UNRESTRICTIVE");
+		RETURN_THROWS();
 	}
 
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
