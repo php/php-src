@@ -1781,13 +1781,12 @@ ZEND_FUNCTION(debug_print_backtrace)
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;
+			uint32_t include_kind = 0;
+			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+				include_kind = ptr->opline->extended_value;
+			}
 
-			if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type) || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
-				/* can happen when calling eval from a custom sapi */
-				function_name = "unknown";
-				build_filename_arg = 0;
-			} else
-			switch (ptr->opline->extended_value) {
+			switch (include_kind) {
 				case ZEND_EVAL:
 					function_name = "eval";
 					build_filename_arg = 0;
@@ -1805,8 +1804,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 					function_name = "require_once";
 					break;
 				default:
-					/* this can actually happen if you use debug_backtrace() in your error_handler and
-					 * you're in the top-scope */
+					/* Skip dummy frame unless it is needed to preserve filename/lineno info. */
+					if (!filename) {
+						goto skip_frame;
+					}
+
 					function_name = "unknown";
 					build_filename_arg = 0;
 					break;
@@ -1857,10 +1859,12 @@ ZEND_FUNCTION(debug_print_backtrace)
 				ZEND_PUTS(")\n");
 			}
 		}
+		++indent;
+
+skip_frame:
 		include_filename = filename;
 		call = skip;
 		ptr = skip->prev_execute_data;
-		++indent;
 	}
 }
 
@@ -2009,13 +2013,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;
 			zend_string *pseudo_function_name;
+			uint32_t include_kind = 0;
+			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+				include_kind = ptr->opline->extended_value;
+			}
 
-			if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type) || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
-				/* can happen when calling eval from a custom sapi */
-				pseudo_function_name = ZSTR_KNOWN(ZEND_STR_UNKNOWN);
-				build_filename_arg = 0;
-			} else
-			switch (ptr->opline->extended_value) {
+			switch (include_kind) {
 				case ZEND_EVAL:
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_EVAL);
 					build_filename_arg = 0;
@@ -2033,8 +2036,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_REQUIRE_ONCE);
 					break;
 				default:
-					/* this can actually happen if you use debug_backtrace() in your error_handler and
-					 * you're in the top-scope */
+					/* Skip dummy frame unless it is needed to preserve filename/lineno info. */
+					if (!filename) {
+						zval_ptr_dtor(&stack_frame);
+						goto skip_frame;
+					}
+
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_UNKNOWN);
 					build_filename_arg = 0;
 					break;
@@ -2060,8 +2067,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stack_frame);
 
+skip_frame:
 		include_filename = filename;
-
 		call = skip;
 		ptr = skip->prev_execute_data;
 	}
