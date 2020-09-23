@@ -1058,6 +1058,9 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 					ZSTR_VAL(us->wrapper->ce->name));
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
 		} else if (zend_is_true(&retval)) {
+			if (EG(exception)) {
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
+			}
 			ret = PHP_STREAM_OPTION_RETURN_OK;
 		} else {
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
@@ -1497,6 +1500,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 			break;
 		}
 		if (!zend_is_true(&retval)) {
+			/* return is already FAILURE */
 			break;
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);

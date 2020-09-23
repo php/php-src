@@ -664,6 +664,9 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		sockopts |= STREAM_SOCKOP_IPV6_V6ONLY;
 		sockopts |= STREAM_SOCKOP_IPV6_V6ONLY_ENABLED * zend_is_true(tmpzval);
 	}
+	if (EG(exception)) {
+		return -1;
+	}
 #endif
 
 #ifdef SO_REUSEPORT
@@ -672,6 +675,9 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		&& zend_is_true(tmpzval)
 	) {
 		sockopts |= STREAM_SOCKOP_SO_REUSEPORT;
+	}
+	if (EG(exception)) {
+		return -1;
 	}
 #endif
 
@@ -682,6 +688,9 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		&& zend_is_true(tmpzval)
 	) {
 		sockopts |= STREAM_SOCKOP_SO_BROADCAST;
+	}
+	if (EG(exception)) {
+		return -1;
 	}
 #endif
 
@@ -761,6 +770,9 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	) {
 		sockopts |= STREAM_SOCKOP_SO_BROADCAST;
 	}
+	if (EG(exception)) {
+		return -1;
+	}
 #endif
 
 	if (stream->ops != &php_stream_udp_socket_ops /* TCP_NODELAY is only applicable for TCP */
@@ -773,6 +785,10 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		&& zend_is_true(tmpzval)
 	) {
 		sockopts |= STREAM_SOCKOP_TCP_NODELAY;
+	}
+	/* TODO Need to do cleanup? */
+	if (EG(exception)) {
+		return -1;
 	}
 
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we
@@ -825,6 +841,9 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		(tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
 		zend_is_true(tmpzval)) {
 		nodelay = 1;
+	}
+	if (EG(exception)) {
+		return -1;
 	}
 
 	clisock = php_network_accept_incoming(sock->socket,
