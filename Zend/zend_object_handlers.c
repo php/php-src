@@ -634,6 +634,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 			*guard &= ~IN_ISSET;
 
 			if (!zend_is_true(&tmp_result)) {
+				/* handles case when tmp_result is an object which cannot be converted to bool */
 				retval = &EG(uninitialized_zval);
 				OBJ_RELEASE(zobj);
 				zval_ptr_dtor(&tmp_result);
@@ -851,6 +852,7 @@ ZEND_API zval *zend_std_read_dimension(zend_object *object, zval *offset, int ty
 				return NULL;
 			}
 			if (!i_zend_is_true(rv)) {
+				/* handles case when tmp_result is an object which cannot be converted to bool */
 				OBJ_RELEASE(object);
 				zval_ptr_dtor(&tmp_offset);
 				zval_ptr_dtor(rv);
@@ -909,12 +911,14 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		GC_ADDREF(object);
 		zend_call_method_with_1_params(object, ce, NULL, "offsetexists", &retval, &tmp_offset);
+		ZEND_ASSERT(Z_TYPE(retval) != IS_OBJECT);
 		result = i_zend_is_true(&retval);
 		zval_ptr_dtor(&retval);
 		if (check_empty && result && EXPECTED(!EG(exception))) {
 			zend_call_method_with_1_params(object, ce, NULL, "offsetget", &retval, &tmp_offset);
 			result = i_zend_is_true(&retval);
 			zval_ptr_dtor(&retval);
+			/* TODO: need to do something if retval is an object which cannot be converted to bool? */
 		}
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
@@ -1676,6 +1680,7 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 found:
 				if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY) {
 					result = zend_is_true(value);
+					/* TODO: need to do something if retval is an object which cannot be converted to bool? */
 				} else if (has_set_exists < ZEND_PROPERTY_NOT_EMPTY) {
 					ZEND_ASSERT(has_set_exists == ZEND_PROPERTY_ISSET);
 					ZVAL_DEREF(value);
@@ -1708,6 +1713,7 @@ found:
 			zend_std_call_issetter(zobj, name, &rv);
 			result = zend_is_true(&rv);
 			zval_ptr_dtor(&rv);
+			/* TODO: need to do something if retval is an object which cannot be converted to bool? */
 			if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY && result) {
 				if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 					(*guard) |= IN_GET;
@@ -1715,6 +1721,7 @@ found:
 					(*guard) &= ~IN_GET;
 					result = i_zend_is_true(&rv);
 					zval_ptr_dtor(&rv);
+					/* TODO: need to do something if retval is an object which cannot be converted to bool? */
 				} else {
 					result = 0;
 				}
