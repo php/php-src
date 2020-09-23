@@ -407,6 +407,10 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "iscritical", sizeof("iscritical") - 1)) != NULL) {
 		control_iscritical = zend_is_true(val);
+		/* If val is an object which cannot be converted to object */
+		if (EG(exception)) {
+			return -1;
+		}
 	} else {
 		control_iscritical = 0;
 	}
@@ -592,6 +596,11 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "reverse", sizeof("reverse") - 1)) != NULL) {
 					sort_keys[i]->reverseOrder = zend_is_true(tmp);
+					/* If val is an object which cannot be converted to object */
+                    if (EG(exception)) {
+                    	rc = -1;
+                    	goto failure;
+                    }
 				} else {
 					sort_keys[i]->reverseOrder = 0;
 				}
@@ -3396,6 +3405,10 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			void *val;
 			val = zend_is_true(newval) ? LDAP_OPT_ON : LDAP_OPT_OFF;
+			/* If val is an object which cannot be converted to object */
+            if (EG(exception)) {
+            	RETURN_THROWS();
+            }
 			if (ldap_set_option(ldap, option, val)) {
 				RETURN_FALSE;
 			}
