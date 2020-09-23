@@ -142,6 +142,7 @@ typedef struct _attribute_reference {
 	HashTable *attributes;
 	zend_attribute *data;
 	zend_class_entry *scope;
+	zend_string *filename;
 	uint32_t target;
 } attribute_reference;
 
@@ -252,9 +253,14 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			zend_string_release_ex(prop_reference->unmangled_name, 0);
 			efree(intern->ptr);
 			break;
-		case REF_TYPE_ATTRIBUTE:
+		case REF_TYPE_ATTRIBUTE: {
+			attribute_reference *attr_ref = intern->ptr;
+			if (attr_ref->filename) {
+				zend_string_release(attr_ref->filename);
+			}
 			efree(intern->ptr);
 			break;
+		}
 		case REF_TYPE_GENERATOR:
 		case REF_TYPE_CLASS_CONSTANT:
 		case REF_TYPE_OTHER:
@@ -1084,7 +1090,7 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 
 /* {{{ reflection_attribute_factory */
 static void reflection_attribute_factory(zval *object, HashTable *attributes, zend_attribute *data,
-		zend_class_entry *scope, uint32_t target)
+		zend_class_entry *scope, uint32_t target, zend_string *filename)
 {
 	reflection_object *intern;
 	attribute_reference *reference;
@@ -1095,6 +1101,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->attributes = attributes;
 	reference->data = data;
 	reference->scope = scope;
+	reference->filename = filename ? zend_string_copy(filename) : NULL;
 	reference->target = target;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
@@ -1102,7 +1109,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 /* }}} */
 
 static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
-		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base) /* {{{ */
+		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
 
@@ -1115,7 +1122,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		ZEND_HASH_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attributes, attr, scope, target);
+				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1147,7 +1154,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attributes, attr, scope, target);
+		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
 		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1156,7 +1163,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 /* }}} */
 
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
-		uint32_t offset, zend_class_entry *scope, uint32_t target) /* {{{ */
+		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
 {
 	zend_string *name = NULL;
 	zend_long flags = 0;
@@ -1189,7 +1196,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 
 	array_init(return_value);
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base)) {
+	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename)) {
 		RETURN_THROWS();
 	}
 }
@@ -1760,7 +1767,9 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 		target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
 	}
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, fptr->common.attributes, 0, fptr->common.scope, target);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		fptr->common.attributes, 0, fptr->common.scope, target,
+		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
 }
 /* }}} */
 
@@ -2660,7 +2669,9 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 	HashTable *attributes = param->fptr->common.attributes;
 	zend_class_entry *scope = param->fptr->common.scope;
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
+		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
 }
 
 /* {{{ Returns whether this parameter is an optional parameter */
@@ -3679,7 +3690,9 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
+		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL);
 }
 /* }}} */
 
@@ -4076,7 +4089,9 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
+		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
 }
 /* }}} */
 
@@ -5465,7 +5480,9 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
+		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
 }
 /* }}} */
 
@@ -6238,9 +6255,14 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 }
 /* }}} */
 
-static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zval *args, uint32_t argc, HashTable *named_params) /* {{{ */
+static int call_attribute_constructor(
+	zend_attribute *attr, zend_class_entry *ce, zend_object *obj,
+	zval *args, uint32_t argc, HashTable *named_params, zend_string *filename)
 {
 	zend_function *ctor = ce->constructor;
+	zend_execute_data *prev_execute_data, dummy_frame;
+	zend_function dummy_func;
+	zend_op dummy_opline;
 	ZEND_ASSERT(ctor != NULL);
 
 	if (!(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
@@ -6248,7 +6270,34 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 		return FAILURE;
 	}
 
+	if (filename) {
+		/* Set up dummy call frame that makes it look like the attribute was invoked
+		 * from where it occurs in the code. */
+		memset(&dummy_frame, 0, sizeof(zend_execute_data));
+		memset(&dummy_func, 0, sizeof(zend_function));
+		memset(&dummy_opline, 0, sizeof(zend_op));
+
+		prev_execute_data = EG(current_execute_data);
+		dummy_frame.prev_execute_data = prev_execute_data;
+		dummy_frame.func = &dummy_func;
+		dummy_frame.opline = &dummy_opline;
+
+		dummy_func.type = ZEND_USER_FUNCTION;
+		dummy_func.common.fn_flags =
+			attr->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
+		dummy_func.op_array.filename = filename;
+
+		dummy_opline.opcode = ZEND_DO_FCALL;
+		dummy_opline.lineno = attr->lineno;
+
+		EG(current_execute_data) = &dummy_frame;
+	}
+
 	zend_call_known_function(ctor, obj, obj->ce, NULL, argc, args, named_params);
+
+	if (filename) {
+		EG(current_execute_data) = prev_execute_data;
+	}
 
 	if (EG(exception)) {
 		zend_object_store_ctor_failed(obj);
@@ -6257,7 +6306,6 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 
 	return SUCCESS;
 }
-/* }}} */
 
 static void attribute_ctor_cleanup(
 		zval *obj, zval *args, uint32_t argc, HashTable *named_params) /* {{{ */
@@ -6373,7 +6421,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	}
 
 	if (ce->constructor) {
-		if (FAILURE == call_attribute_constructor(ce, Z_OBJ(obj), args, argc, named_params)) {
+		if (FAILURE == call_attribute_constructor(attr->data, ce, Z_OBJ(obj), args, argc, named_params, attr->filename)) {
 			attribute_ctor_cleanup(&obj, args, argc, named_params);
 			RETURN_THROWS();
 		}
