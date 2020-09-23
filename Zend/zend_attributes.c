@@ -175,38 +175,33 @@ ZEND_API zend_bool zend_is_attribute_repeated(HashTable *attributes, zend_attrib
 	return 0;
 }
 
-static zend_always_inline void free_attribute(zend_attribute *attr, bool persistent)
+static zend_always_inline void free_attribute(zend_attribute *attr)
 {
-	uint32_t i;
+}
+
+static void attr_free(zval *v)
+{
+	zend_attribute *attr = Z_PTR_P(v);
 
 	zend_string_release(attr->name);
 	zend_string_release(attr->lcname);
 
-	for (i = 0; i < attr->argc; i++) {
+	for (uint32_t i = 0; i < attr->argc; i++) {
 		if (attr->args[i].name) {
 			zend_string_release(attr->args[i].name);
 		}
 		zval_ptr_dtor(&attr->args[i].value);
 	}
 
-	pefree(attr, persistent);
+	pefree(attr, attr->flags & ZEND_ATTRIBUTE_PERSISTENT);
 }
 
-static void attr_free(zval *v)
+ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, uint32_t flags, uint32_t offset, zend_string *name, uint32_t argc)
 {
-	free_attribute((zend_attribute *) Z_PTR_P(v), 0);
-}
-
-static void attr_pfree(zval *v)
-{
-	free_attribute((zend_attribute *) Z_PTR_P(v), 1);
-}
-
-ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_bool persistent, uint32_t offset, zend_string *name, uint32_t argc)
-{
+	bool persistent = flags & ZEND_ATTRIBUTE_PERSISTENT;
 	if (*attributes == NULL) {
 		*attributes = pemalloc(sizeof(HashTable), persistent);
-		zend_hash_init(*attributes, 8, NULL, persistent ? attr_pfree : attr_free, persistent);
+		zend_hash_init(*attributes, 8, NULL, attr_free, persistent);
 	}
 
 	zend_attribute *attr = pemalloc(ZEND_ATTRIBUTE_SIZE(argc), persistent);
@@ -218,6 +213,7 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_bool pe
 	}
 
 	attr->lcname = zend_string_tolower_ex(attr->name, persistent);
+	attr->flags = flags;
 	attr->offset = offset;
 	attr->argc = argc;
 
