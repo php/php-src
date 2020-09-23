@@ -734,6 +734,11 @@ again:
 			break;
 		case ZEND_FFI_TYPE_BOOL:
 			*(uint8_t*)ptr = zend_is_true(value);
+			/* If value is an object which cannot be converted to bool */
+			if (EG(exception)) {
+				zend_ffi_assign_incompatible(value, type);
+				return FAILURE;
+			}
 			break;
 		case ZEND_FFI_TYPE_CHAR:
 			str = zval_get_tmp_string(value, &tmp_str);
@@ -2544,6 +2549,11 @@ again:
 		case ZEND_FFI_TYPE_BOOL:
 			*pass_type = &ffi_type_uint8;
 			*(uint8_t*)arg_values[n] = zend_is_true(arg);
+			/* If value is an object which cannot be converted to bool */
+			if (EG(exception)) {
+				zend_ffi_assign_incompatible(arg, type);
+				return FAILURE;
+			}
 			break;
 		case ZEND_FFI_TYPE_CHAR:
 			str = zval_get_tmp_string(arg, &tmp_str);
