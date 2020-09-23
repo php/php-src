@@ -1102,7 +1102,8 @@ PHP_METHOD(DOMDocument, __construct)
 		}
 		intern->document = NULL;
 		if (php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp) == -1) {
-			RETURN_FALSE;
+			/* docp is always non-null so php_libxml_increment_doc_ref() never returns -1 */
+			ZEND_UNREACHABLE();
 		}
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)docp, (void *)intern);
 	}
