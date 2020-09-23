@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - SPL:
   . SplFixedArray is now IteratorAggregate rather than Iterator. (alexdowad)
 
+- Zlib:
+  . Fixed bug #78792 (zlib.output_compression disabled by Content-Type: image/).
+    (cmb)
+
 17 Sep 2020, PHP 8.0.0beta4
 
 - Core:

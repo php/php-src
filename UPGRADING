@@ -662,6 +662,8 @@ PHP 8.0 UPGRADE NOTES
   . deflate_init() will now return a DeflateContext object rather than a
     resource. Return value checks using is_resource() should be replaced with
     checks for `false`.
+  . zlib.output_compression is no longer automatically disabled for
+    Content-Type: image/*.
 
 ========================================
 2. New Features
