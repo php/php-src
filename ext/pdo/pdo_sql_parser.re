@@ -261,7 +261,7 @@ safe:
 							plc->quoted = zend_is_true(parameter) ? ZSTR_CHAR('1') : ZSTR_CHAR('0');
 							// TODO Can an exception occur here?
 							if (EG(exception)) {
-								goto cleanup;
+								goto clean_up;
 							}
 							break;
 
