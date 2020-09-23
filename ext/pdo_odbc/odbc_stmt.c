@@ -773,6 +773,9 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val)
 
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
 			S->assume_utf8 = zval_is_true(val);
+			if (EG(exception)) {
+				return -1;
+			}
 			return 0;
 		default:
 			strcpy(S->einfo.last_err_msg, "Unknown Attribute");

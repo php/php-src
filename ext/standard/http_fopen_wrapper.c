@@ -772,7 +772,11 @@ finish:
 
 			if (!strncasecmp(http_header_line, "Location:", sizeof("Location:")-1)) {
 				if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
+					/* Can tmpzval be an object? */
 					follow_location = zval_is_true(tmpzval);
+					if (UNEXPECTED(EG(exception))) {
+						goto out;
+					}
 				} else if (!((response_code >= 300 && response_code < 304)
 						|| 307 == response_code || 308 == response_code)) {
 					/* we shouldn't redirect automatically

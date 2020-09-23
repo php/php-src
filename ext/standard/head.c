@@ -210,9 +210,16 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 		} else if (zend_string_equals_literal_ci(key, "domain")) {
 			*domain = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "secure")) {
+			/* Explicitly disallow object? */
 			*secure = zval_is_true(value);
+			if (UNEXPECTED(EG(exception))) {
+				return FAILURE;
+			}
 		} else if (zend_string_equals_literal_ci(key, "httponly")) {
 			*httponly = zval_is_true(value);
+			if (UNEXPECTED(EG(exception))) {
+				return FAILURE;
+			}
 		} else if (zend_string_equals_literal_ci(key, "samesite")) {
 			*samesite = zval_get_string(value);
 		} else {

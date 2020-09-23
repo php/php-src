@@ -1743,10 +1743,18 @@ PHP_FUNCTION(session_set_cookie_params)
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "secure")) {
 					secure = zval_is_true(value);
+					/* Exception during string conversion */
+					if (EG(exception)) {
+						goto cleanup;
+					}
 					secure_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "httponly")) {
 					httponly = zval_is_true(value);
+					/* Exception during string conversion */
+					if (EG(exception)) {
+						goto cleanup;
+					}
 					httponly_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "samesite")) {

@@ -360,6 +360,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		zend_bailout();
 	} zend_end_try();
 
+	/* TODO Check can zretval be an object? */
 	if (call_result == SUCCESS && Z_TYPE(zretval) != IS_UNDEF && zval_is_true(&zretval)) {
 		/* the stream is now open! */
 		stream = php_stream_alloc_rel(&php_stream_userspace_ops, us, 0, mode);
@@ -434,6 +435,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 			&zretval,
 			2, args);
 
+	/* TODO Check can zretval be an object? */
 	if (call_result == SUCCESS && Z_TYPE(zretval) != IS_UNDEF && zval_is_true(&zretval)) {
 		/* the stream is now open! */
 		stream = php_stream_alloc_rel(&php_stream_userspace_dir_ops, us, 0, mode);
@@ -679,6 +681,8 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 		return -1;
 	}
 
+	/* TODO Check retval is an object for zval_is_true() */
+
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval)) {
 		stream->eof = 1;
 	} else if (call_result == FAILURE) {
@@ -738,6 +742,7 @@ static int php_userstreamop_flush(php_stream *stream)
 			&retval,
 			0, NULL);
 
+	/* TODO Check retval is an object for zval_is_true() */
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval))
 		call_result = 0;
 	else
@@ -783,6 +788,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 
 		return -1;
 	} else if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval)) {
+	/* TODO Check retval is an object for zval_is_true() */
 		ret = 0;
 	} else {
 		ret = -1;
