@@ -145,7 +145,7 @@ function main(): void
            $optionals, $output_file, $pass_option_n, $pass_options,
            $pattern_match, $php, $php_cgi, $phpdbg, $preload, $redir_tests,
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
-           $temp_source, $temp_target, $temp_urlbase, $test_cnt, $test_dirs,
+           $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
            $user_tests, $valgrind, $sum_results, $shuffle, $file_cache;
     // Parallel testing
@@ -389,7 +389,6 @@ function main(): void
     $valgrind = null;
     $temp_source = null;
     $temp_target = null;
-    $temp_urlbase = null;
     $conf_passed = null;
     $no_clean = false;
     $colorize = true;
@@ -594,12 +593,6 @@ function main(): void
                     break;
                 case '--temp-target':
                     $temp_target = $argv[++$i];
-                    if ($temp_urlbase) {
-                        $temp_urlbase = $temp_target;
-                    }
-                    break;
-                case '--temp-urlbase':
-                    $temp_urlbase = $argv[++$i];
                     break;
                 case 'v':
                 case '--verbose':
