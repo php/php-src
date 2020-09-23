@@ -3532,7 +3532,6 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		}
 		if (trace->op != ZEND_JIT_TRACE_END ||
 		    (trace->stop != ZEND_JIT_TRACE_STOP_RETURN &&
-		     trace->stop != ZEND_JIT_TRACE_STOP_RETURN_HALT &&
 		     trace->stop != ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 
 			const zend_op *next_opline = trace->opline;

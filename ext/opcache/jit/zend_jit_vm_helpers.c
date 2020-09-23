@@ -579,6 +579,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 #endif
 	const zend_op *orig_opline, *end_opline;
 	zend_jit_trace_stop stop = ZEND_JIT_TRACE_STOP_ERROR;
+	zend_jit_trace_stop halt = 0;
 	int level = 0;
 	int ret_level = 0;
 	int call_level;
@@ -762,7 +763,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 #ifdef HAVE_GCC_GLOBAL_REGS
 		handler();
 		if (UNEXPECTED(opline == zend_jit_halt_op)) {
-			stop = ZEND_JIT_TRACE_STOP_RETURN_HALT;
+			stop = ZEND_JIT_TRACE_STOP_RETURN;
+			opline = NULL;
+			halt = ZEND_JIT_TRACE_HALT;
 			break;
 		}
 		if (UNEXPECTED(execute_data != prev_execute_data)) {
@@ -770,7 +773,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		rc = handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		if (rc != 0) {
 			if (rc < 0) {
-				stop = ZEND_JIT_TRACE_STOP_RETURN_HALT;
+				stop = ZEND_JIT_TRACE_STOP_RETURN;
+				opline = NULL;
+				halt = ZEND_JIT_TRACE_HALT;
 				break;
 			} else if (execute_data == EG(current_execute_data)) {
 				/* return after interrupt handler */
@@ -1035,8 +1040,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	TRACE_END(ZEND_JIT_TRACE_END, stop, end_opline);
 
 #ifdef HAVE_GCC_GLOBAL_REGS
-	if (stop != ZEND_JIT_TRACE_STOP_HALT
-	 && stop != ZEND_JIT_TRACE_STOP_RETURN_HALT) {
+	if (!halt) {
 		EX(opline) = opline;
 	}
 #endif
@@ -1046,5 +1050,5 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	opline = save_opline;
 #endif
 
-	return stop;
+	return stop | halt;
 }

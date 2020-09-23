@@ -142,7 +142,6 @@ int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_CALL,    "recursive call") \
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
-	_(RETURN_HALT,       "return from interpreter") \
 	_(INTERPRETER,       "exit to VM interpreter") \
 	_(LINK,              "link to another trace") \
 	/* compilation and linking successful */ \
@@ -163,7 +162,6 @@ int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(COMPILED_LOOP,     "compiled loop") \
 	_(TRAMPOLINE,        "trampoline call") \
 	_(BAD_FUNC,          "bad function call") \
-	_(HALT,              "exit from interpreter") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
 	/* no recoverable error (blacklist immediately) */ \
 	_(NO_SHM,            "insufficient shared memory") \
@@ -176,6 +174,7 @@ int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 
 typedef enum _zend_jit_trace_stop {
 	ZEND_JIT_TRACE_STOP(ZEND_JIT_TRACE_STOP_NAME)
+	ZEND_JIT_TRACE_HALT = 0x40
 } zend_jit_trace_stop;
 
 #define ZEND_JIT_TRACE_STOP_OK(ret) \

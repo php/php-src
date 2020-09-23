@@ -5620,8 +5620,7 @@ done:
 		} else {
 			zend_jit_trace_return(&dasm_state, 0);
 		}
-	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN
-	        || p->stop == ZEND_JIT_TRACE_STOP_RETURN_HALT) {
+	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN) {
 		zend_jit_trace_return(&dasm_state, 0);
 	} else {
 		// TODO: not implemented ???
@@ -5661,7 +5660,6 @@ done:
 				}
 			}
 		} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK
-		        || p->stop == ZEND_JIT_TRACE_STOP_RETURN_HALT
 		        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
 			if (opline
 			 && (opline->opcode == ZEND_DO_UCALL
@@ -6245,14 +6243,16 @@ repeat:
 		ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_START_MASK, 0);
 	JIT_G(tracing) = 0;
 
+	if (stop & ZEND_JIT_TRACE_HALT) {
+		ret = -1;
+	}
+	stop &= ~ZEND_JIT_TRACE_HALT;
+
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
 	}
 
 	if (ZEND_JIT_TRACE_STOP_OK(stop)) {
-		if (stop == ZEND_JIT_TRACE_STOP_RETURN_HALT) {
-			ret = -1;
-		}
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_STOP) {
 			if (stop == ZEND_JIT_TRACE_STOP_LINK) {
 				uint32_t idx = trace_buffer[1].last;
@@ -6277,9 +6277,6 @@ repeat:
 			goto abort;
 		}
 	} else {
-		if (stop == ZEND_JIT_TRACE_STOP_HALT) {
-			ret = -1;
-		}
 abort:
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_ABORT) {
 			fprintf(stderr, "---- TRACE %d abort (%s)\n",
@@ -6534,14 +6531,16 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	stop = zend_jit_trace_execute(execute_data, EX(opline), trace_buffer, ZEND_JIT_TRACE_START_SIDE, is_megamorphic);
 	JIT_G(tracing) = 0;
 
+	if (stop & ZEND_JIT_TRACE_HALT) {
+		ret = -1;
+	}
+	stop &= ~ZEND_JIT_TRACE_HALT;
+
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
 	}
 
 	if (ZEND_JIT_TRACE_STOP_OK(stop)) {
-		if (stop == ZEND_JIT_TRACE_STOP_RETURN_HALT) {
-			ret = -1;
-		}
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_STOP) {
 			if (stop == ZEND_JIT_TRACE_STOP_LINK) {
 				uint32_t idx = trace_buffer[1].last;
@@ -6575,9 +6574,6 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 			goto abort;
 		}
 	} else {
-		if (stop == ZEND_JIT_TRACE_STOP_HALT) {
-			ret = -1;
-		}
 abort:
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_ABORT) {
 			fprintf(stderr, "---- TRACE %d abort (%s)\n",
