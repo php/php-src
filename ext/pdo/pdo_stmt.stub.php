@@ -16,16 +16,16 @@ class PDOStatement implements IteratorAggregate
     /** @return bool */
     public function closeCursor() {}
 
-    /** @return int|false */
+    /** @return int */
     public function columnCount() {}
 
     /** @return bool|null */
     public function debugDumpParams() {}
 
-    /** @return string|false|null */
+    /** @return string|null */
     public function errorCode() {}
 
-    /** @return array|false */
+    /** @return array */
     public function errorInfo() {}
 
     /** @return bool */
@@ -34,8 +34,8 @@ class PDOStatement implements IteratorAggregate
     /** @return mixed */
     public function fetch(int $fetch_style = PDO::FETCH_BOTH, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {}
 
-    /** @return array|false */
-    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, mixed ...$fetch_args) {}
+    /** @return array */
+    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, mixed ...$fetch_mode_args) {}
 
     /** @return mixed */
     public function fetchColumn(int $column_number = 0) {}
@@ -52,14 +52,14 @@ class PDOStatement implements IteratorAggregate
     /** @return bool */
     public function nextRowset() {}
 
-    /** @return int|false */
+    /** @return int */
     public function rowCount() {}
 
     /** @return bool */
     public function setAttribute(int $attribute, mixed $value) {}
 
     /** @return bool */
-    public function setFetchMode(int $mode, mixed ...$params) {}
+    public function setFetchMode(int $mode, mixed ...$fetch_mode_args) {}
 
     public function getIterator(): Iterator {}
 }

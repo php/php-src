@@ -12,16 +12,22 @@ MySQLPDOTest::skip();
     $db = MySQLPDOTest::factory();
     MySQLPDOTest::createTestTable($db);
 
-    $tmp = array();
-    if (false !== @$db->setAttribute(PDO::ATTR_ORACLE_NULLS, $tmp))
-        printf("[001] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...\n");
-
-    $tmp = new stdClass();
-    if (false !== @$db->setAttribute(PDO::ATTR_ORACLE_NULLS, $tmp));
-        printf("[002] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...\n");
-
-    if (false !== @$db->setAttribute(PDO::ATTR_ORACLE_NULLS, 'pdo'))
-        printf("[003] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...\n");
+    try {
+        $db->setAttribute(PDO::ATTR_ORACLE_NULLS, []);
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        $db->setAttribute(PDO::ATTR_ORACLE_NULLS, new stdClass());
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        /* Currently passes... */
+        $db->setAttribute(PDO::ATTR_ORACLE_NULLS, 'pdo');
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
 
     $db->setAttribute(PDO::ATTR_ORACLE_NULLS, 1);
     $stmt = $db->query("SELECT NULL AS z, '' AS a, ' ' AS b, TRIM(' ') as c, ' d' AS d, '" . chr(0) . " e' AS e");
@@ -82,8 +88,8 @@ MySQLPDOTest::skip();
     print "done!";
 ?>
 --EXPECTF--
-[002] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...
-[003] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...
+Attribute value must be of type int for selected attribute, array given
+Attribute value must be of type int for selected attribute, stdClass given
 array(1) {
   [0]=>
   array(6) {
