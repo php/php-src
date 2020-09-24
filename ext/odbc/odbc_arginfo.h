@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 57db79b23d127851f985d9b6280b113637384a68 */
+ * Stub hash: b533372de4f1110216b2545121d7851022980650 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -211,13 +211,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_foreignkeys, 0, 0, 7)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_specialcolumns, 0, 0, 6)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_specialcolumns, 0, 0, 7)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, scope, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, nullable, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_statistics, 0, 0, 6)

@@ -174,7 +174,7 @@ function odbc_foreignkeys($connection_id, ?string $pk_qualifier, string $pk_owne
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_specialcolumns($connection_id, int $type, ?string $qualifier, string $owner, string $table, int $scope) {}
+function odbc_specialcolumns($connection_id, int $type, ?string $qualifier, string $owner, string $table, int $scope, int $nullable) {}
 
 /**
  * @param resource $connection_id
