@@ -652,7 +652,7 @@ function strip_tags(string $str, array|string|null $allowable_tags = null): stri
 function setlocale(int $category, $locales, ...$rest): string|false {}
 
 /** @param array $result */
-function parse_str(string $encoded_string, &$result): void {}
+function parse_str(string $string, &$result): void {}
 
 function str_getcsv(string $string, string $delimiter = ",", string $enclosure = "\"", string $escape = '\\'): array {}
 
@@ -678,7 +678,7 @@ function str_shuffle(string $str): string {}
 
 function str_word_count(string $str, int $format = 0, ?string $charlist = null): array|int {}
 
-function str_split(string $str, int $split_length = 1): array {}
+function str_split(string $str, int $length = 1): array {}
 
 function strpbrk(string $haystack, string $char_list): string|false {}
 
@@ -1027,7 +1027,7 @@ function link(string $target, string $link): bool {}
 
 /* mail.c */
 
-function mail(string $to, string $subject, string $message, array|string $additional_headers = [], string $additional_parameters = ""): bool {}
+function mail(string $to, string $subject, string $message, array|string $additional_headers = [], string $additional_params = ""): bool {}
 
 /* math.c */
 

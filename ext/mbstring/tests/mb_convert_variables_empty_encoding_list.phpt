@@ -22,5 +22,5 @@ try {
 
 ?>
 --EXPECT--
-mb_convert_variables(): Argument #2 ($from) must specify at least one encoding
-mb_convert_variables(): Argument #2 ($from) must specify at least one encoding
+mb_convert_variables(): Argument #2 ($from_encoding) must specify at least one encoding
+mb_convert_variables(): Argument #2 ($from_encoding) must specify at least one encoding
