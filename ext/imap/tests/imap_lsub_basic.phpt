@@ -5,6 +5,7 @@ Olivier Doucet
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
+if (getenv("SKIP_ASAN")) die("skip leak sanitizer crashes");
 ?>
 --FILE--
 <?php
