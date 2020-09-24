@@ -19,7 +19,7 @@ var_dump(finfo_open(FILEINFO_MIME, '/foo/bar/inexistent'));
 
 ?>
 --EXPECTF--
-finfo_open(): Argument #2 ($arg) must not contain any null bytes
+finfo_open(): Argument #2 ($magic_database) must not contain any null bytes
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 
