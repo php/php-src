@@ -19,7 +19,7 @@ function openssl_x509_export_to_file(OpenSSLCertificate|string $certificate, str
 /** @param string $output */
 function openssl_x509_export(OpenSSLCertificate|string $certificate, &$output, bool $no_text = true): bool {}
 
-function openssl_x509_fingerprint(OpenSSLCertificate|string $certificate, string $digest_algo = "sha1", bool $raw_output = false): string|false {}
+function openssl_x509_fingerprint(OpenSSLCertificate|string $certificate, string $digest_algo = "sha1", bool $binary = false): string|false {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key */
 function openssl_x509_check_private_key(OpenSSLCertificate|string $certificate, $private_key): bool {}
@@ -103,7 +103,7 @@ function openssl_get_privatekey($private_key, ?string $passphrase = null): OpenS
 
 function openssl_pkey_get_details(OpenSSLAsymmetricKey $key): array|false {}
 
-function openssl_pbkdf2(string $passphrase, string $salt, int $key_length, int $iterations, string $digest_algo = "sha1"): string|false {}
+function openssl_pbkdf2(string $password, string $salt, int $key_length, int $iterations, string $digest_algo = "sha1"): string|false {}
 
 function openssl_pkcs7_verify(string $input_filename, int $flags, ?string $signers_certificates_filename = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $output_filename = null): bool|int {}
 
@@ -195,7 +195,7 @@ function openssl_get_cipher_methods(bool $aliases = false): array {}
 function openssl_get_curve_names(): array|false {}
 #endif
 
-function openssl_digest(string $data, string $digest_algo, bool $raw_output = false): string|false {}
+function openssl_digest(string $data, string $digest_algo, bool $binary = false): string|false {}
 
 /** @param string $tag */
 function openssl_encrypt(string $data, string $cipher_algo, string $passphrase, int $options = 0, string $iv = "", &$tag = null, string $aad = "", int $tag_length = 16): string|false {}

@@ -10,12 +10,12 @@ function hash_hmac(string $algo, string $data, string $key, bool $binary = false
 
 function hash_hmac_file(string $algo, string $data, string $key, bool $binary = false): string|false {}
 
-function hash_init(string $algo, int $options = 0, string $key = ""): HashContext {}
+function hash_init(string $algo, int $flags = 0, string $key = ""): HashContext {}
 
 function hash_update(HashContext $context, string $data): bool {}
 
-/** @param resource $handle */
-function hash_update_stream(HashContext $context, $handle, int $length = -1): int {}
+/** @param resource $stream */
+function hash_update_stream(HashContext $context, $stream, int $length = -1): int {}
 
 /** @param resource|null $stream_context */
 function hash_update_file(HashContext $context, string $filename, $stream_context = null): bool {}
