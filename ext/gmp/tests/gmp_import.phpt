@@ -95,5 +95,5 @@ gmp_import(): Argument #2 ($word_size) must be greater than or equal to 1
 gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
 gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
 gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
-gmp_import(): Argument #3 ($options) cannot use multiple word order options
-gmp_import(): Argument #3 ($options) cannot use multiple endian options
+gmp_import(): Argument #3 ($flags) cannot use multiple word order options
+gmp_import(): Argument #3 ($flags) cannot use multiple endian options

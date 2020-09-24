@@ -48,16 +48,16 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(1) "1"
-gmp_fact(): Argument #1 ($a) is not an integer string
+gmp_fact(): Argument #1 ($num) is not an integer string
 string(1) "1"
-gmp_fact(): Argument #1 ($a) must be greater than or equal to 0
-gmp_fact(): Argument #1 ($a) must be greater than or equal to 0
+gmp_fact(): Argument #1 ($num) must be greater than or equal to 0
+gmp_fact(): Argument #1 ($num) must be greater than or equal to 0
 string(1) "1"
 string(19) "2432902008176640000"
 string(65) "30414093201713378043612608166064768844377641568960512000000000000"
 string(7) "3628800"
 string(1) "1"
 string(9) "479001600"
-gmp_fact(): Argument #1 ($a) must be greater than or equal to 0
-gmp_fact(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_fact(): Argument #1 ($num) must be greater than or equal to 0
+gmp_fact(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

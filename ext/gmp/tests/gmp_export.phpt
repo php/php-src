@@ -78,5 +78,5 @@ try {
 bool(true)
 gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
 gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
-gmp_export(): Argument #3 ($options) cannot use multiple word order options
-gmp_export(): Argument #3 ($options) cannot use multiple endian options
+gmp_export(): Argument #3 ($flags) cannot use multiple word order options
+gmp_export(): Argument #3 ($flags) cannot use multiple endian options

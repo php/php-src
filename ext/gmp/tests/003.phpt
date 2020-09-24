@@ -35,7 +35,7 @@ Check for number base recognition
         }
 ?>
 --EXPECT--
-gmp_init(): Argument #1 ($number) is not an integer string
+gmp_init(): Argument #1 ($num) is not an integer string
 1234
 1234
 10011010010

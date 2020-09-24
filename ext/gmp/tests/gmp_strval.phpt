@@ -65,9 +65,9 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_strval(): Argument #1 ($gmpnumber) is not an integer string
+gmp_strval(): Argument #1 ($num) is not an integer string
 gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
-gmp_strval(): Argument #1 ($gmpnumber) must be of type GMP|string|int, resource given
+gmp_strval(): Argument #1 ($num) must be of type GMP|string|int, resource given
 string(7) "9765456"
 gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
 gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
@@ -76,6 +76,6 @@ string(8) "-3373333"
 gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
 gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
 string(8) "-3373333"
-gmp_strval(): Argument #1 ($gmpnumber) must be of type GMP|string|int, array given
-gmp_strval(): Argument #1 ($gmpnumber) must be of type GMP|string|int, stdClass given
+gmp_strval(): Argument #1 ($num) must be of type GMP|string|int, array given
+gmp_strval(): Argument #1 ($num) must be of type GMP|string|int, stdClass given
 Done

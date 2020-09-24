@@ -53,7 +53,7 @@ string(1) "0"
 string(1) "0"
 string(22) "3498273496234234523441"
 string(1) "1"
-gmp_invert(): Argument #1 ($a) must be of type GMP|string|int, array given
-gmp_invert(): Argument #2 ($b) must be of type GMP|string|int, array given
-gmp_invert(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_invert(): Argument #1 ($num1) must be of type GMP|string|int, array given
+gmp_invert(): Argument #2 ($num2) must be of type GMP|string|int, array given
+gmp_invert(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done
