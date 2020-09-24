@@ -24,6 +24,77 @@ print "3: " . mb_strwidth($utf16le, 'UTF-16LE') . "\n";
 print "4: " . mb_strwidth($utf16be, 'UTF-16BE') . "\n";
 print "5: " . mb_strwidth($koi8r,   'KOI8-R')   . "\n";
 
+// OK, that was just starters. Now let's get real.
+
+$wideChars   = [];
+$narrowChars = [];
+
+function storeCharByWidth($codepoint, $eawCode) {
+  global $wideChars, $narrowChars;
+  // Interpret code from EastAsianWidth.txt data file (from Unicode consortium)
+  if ($eawCode == 'W' || $eawCode == 'F') {
+    // 'Wide' or 'Fullwidth'
+    array_push($wideChars, pack('N', $codepoint));
+  } else if ($eawCode == 'H' || $eawCode == 'Na' || $eawCode == 'N') {
+    // 'Halfwidth', 'Narrow', or 'Neutral'
+    array_push($narrowChars, pack('N', $codepoint));
+  }
+  // The other possible code is 'A' for 'Ambiguous'
+  // We don't do any testing on those
+}
+
+$fp = fopen(__DIR__ . '/data/EastAsianWidth.txt', 'r+');
+while ($line = fgets($fp, 256)) {
+  if ($line[0] == '#')
+    continue;
+
+  if (sscanf($line, '%x..%x;%s', $startCodepoint, $endCodepoint, $eaw) == 3) {
+    for ($i = $startCodepoint; $i <= $endCodepoint; $i++)
+      storeCharByWidth($i, $eaw);
+  } else if (sscanf($line, '%x;%s', $codepoint, $eaw) == 2) {
+    storeCharByWidth($codepoint, $eaw);
+  }
+}
+
+foreach ($wideChars as $wideChar) {
+  if (mb_strwidth($wideChar, 'UTF-32BE') != 2) {
+    die("Oops! Codepoint " . bin2hex($wideChar) . " should have mb_strwidth of 2");
+  }
+}
+echo "mb_strwidth works as expected on all 'wide' characters\n";
+
+foreach ($narrowChars as $narrowChar) {
+  if (mb_strwidth($narrowChar, 'UTF-32BE') != 1) {
+    die("Oops! Codepoint " . bin2hex($narrowChar) . " should have mb_strwidth of 1");
+  }
+}
+echo "mb_strwidth works as expected on all 'narrow' characters\n";
+
+// Now try some random combinations
+srand(123); // Make results consistent
+shuffle($wideChars);
+shuffle($narrowChars);
+
+for ($i = 0; $i < 100; $i++) {
+  // Put together a random combination of wide and narrow chars
+  $length = rand(5, 20);
+  $testString = '';
+  $testWidth  = 0;
+  while ($length--) {
+    if (rand(0, 1) == 1) {
+      $testString .= array_pop($wideChars);
+      $testWidth += 2;
+    } else {
+      $testString .= array_pop($narrowChars);
+      $testWidth += 1;
+    }
+  }
+  if (mb_strwidth($testString, 'UTF-32BE') != $testWidth)
+    die("mb_strwidth of UTF-32BE string " . bin2hex($testString) . " was " .
+      mb_strwidth($testString, 'UTF-32BE') . ", expected " . $testWidth);
+}
+echo "All good!\n";
+
 ?>
 --EXPECT--
 1: 68
@@ -31,3 +102,6 @@ print "5: " . mb_strwidth($koi8r,   'KOI8-R')   . "\n";
 3: 21
 4: 21
 5: 21
+mb_strwidth works as expected on all 'wide' characters
+mb_strwidth works as expected on all 'narrow' characters
+All good!
