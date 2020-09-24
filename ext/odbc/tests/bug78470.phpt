@@ -1,9 +1,7 @@
 --TEST--
 Bug #78470 (odbc_specialcolumns() no longer accepts $nullable)
 --SKIPIF--
-<?php
-if (!extension_loaded('odbc')) die('skip odbc extension not available');
-?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 include 'config.inc';
