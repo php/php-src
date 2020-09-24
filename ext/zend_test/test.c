@@ -36,6 +36,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_observe_functions;
 	int observer_show_return_type;
 	int observer_show_return_value;
+	int observer_show_init_backtrace;
 	int observer_nesting_depth;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
@@ -315,9 +316,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_functions", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_functions, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
-static zend_observer_fcall_handlers observer_fcall_init(zend_function *fbc);
+static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
 
 PHP_MINIT_FUNCTION(zend_test)
 {
@@ -498,10 +500,34 @@ static void observer_show_init(zend_function *fbc)
 	}
 }
 
-static zend_observer_fcall_handlers observer_fcall_init(zend_function *fbc)
+static void observer_show_init_backtrace(zend_execute_data *execute_data)
 {
+	zend_execute_data *ex = execute_data;
+	php_printf("%*s<!--\n", 2 * ZT_G(observer_nesting_depth), "");
+	do {
+		zend_function *fbc = ex->func;
+		int indent = 2 * ZT_G(observer_nesting_depth) + 4;
+		if (fbc->common.function_name) {
+			if (fbc->common.scope) {
+				php_printf("%*s%s::%s()\n", indent, "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			} else {
+				php_printf("%*s%s()\n", indent, "", ZSTR_VAL(fbc->common.function_name));
+			}
+		} else {
+			php_printf("%*s{main} %s\n", indent, "", ZSTR_VAL(fbc->op_array.filename));
+		}
+	} while ((ex = ex->prev_execute_data) != NULL);
+	php_printf("%*s-->\n", 2 * ZT_G(observer_nesting_depth), "");
+}
+
+static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data)
+{
+	zend_function *fbc = execute_data->func;
 	if (ZT_G(observer_show_output)) {
 		observer_show_init(fbc);
+		if (ZT_G(observer_show_init_backtrace)) {
+			observer_show_init_backtrace(execute_data);
+		}
 	}
 
 	if (ZT_G(observer_observe_all)) {

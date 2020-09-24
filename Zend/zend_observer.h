@@ -50,7 +50,7 @@ typedef struct _zend_observer_fcall_handlers {
 } zend_observer_fcall_handlers;
 
 /* If the fn should not be observed then return {NULL, NULL} */
-typedef zend_observer_fcall_handlers (*zend_observer_fcall_init)(zend_function *func);
+typedef zend_observer_fcall_handlers (*zend_observer_fcall_init)(zend_execute_data *execute_data);
 
 // Call during minit/startup ONLY
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init);
