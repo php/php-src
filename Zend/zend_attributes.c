@@ -175,10 +175,6 @@ ZEND_API zend_bool zend_is_attribute_repeated(HashTable *attributes, zend_attrib
 	return 0;
 }
 
-static zend_always_inline void free_attribute(zend_attribute *attr)
-{
-}
-
 static void attr_free(zval *v)
 {
 	zend_attribute *attr = Z_PTR_P(v);
