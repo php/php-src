@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 54e11efaf9b7b020e27cb0b7a30098af93e1c6f9 */
+ * Stub hash: 7687edcf18fa03c0ae95ac4b3d32c196790ba65e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -688,9 +688,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_mysqli_stmt_get_result arginfo_class_mysqli_get_connection_stats
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_warning___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, mysql, IS_OBJECT, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_mysqli_warning___construct arginfo_class_mysqli_character_set_name
 
 #define arginfo_class_mysqli_warning_next arginfo_mysqli_thread_safe
 
@@ -1059,7 +1057,7 @@ static const zend_function_entry class_mysqli_stmt_methods[] = {
 
 
 static const zend_function_entry class_mysqli_warning_methods[] = {
-	ZEND_ME(mysqli_warning, __construct, arginfo_class_mysqli_warning___construct, ZEND_ACC_PROTECTED)
+	ZEND_ME(mysqli_warning, __construct, arginfo_class_mysqli_warning___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(mysqli_warning, next, arginfo_class_mysqli_warning_next, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
