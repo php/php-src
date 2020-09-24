@@ -964,7 +964,7 @@ PHP_FUNCTION(odbc_prepare)
 PHP_FUNCTION(odbc_execute)
 {
 	zval *pv_res, *tmp;
-	HashTable *pv_param_ht = NULL;
+	HashTable *pv_param_ht = (HashTable *) &zend_empty_array;
 	typedef struct params_t {
 		SQLLEN vallen;
 		int fp;
@@ -974,7 +974,7 @@ PHP_FUNCTION(odbc_execute)
 	unsigned char otype;
 	SQLSMALLINT ctype;
    	odbc_result *result;
-	int i, ne = 0;
+	int i, ne;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h", &pv_res, &pv_param_ht) == FAILURE) {
@@ -986,7 +986,7 @@ PHP_FUNCTION(odbc_execute)
 	}
 
 	if (result->numparams > 0) {
-		if (!pv_param_ht || (ne = zend_hash_num_elements(pv_param_ht)) < result->numparams) {
+		if ((ne = zend_hash_num_elements(pv_param_ht)) < result->numparams) {
 			php_error_docref(NULL, E_WARNING, "Not enough parameters (%d should be %d) given", ne, result->numparams);
 			RETURN_FALSE;
 		}
