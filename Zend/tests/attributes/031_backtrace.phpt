@@ -19,11 +19,15 @@ class Test {}
 
 ?>
 --EXPECTF--
-#0  MyAttribute->__construct()
+#0  MyAttribute->__construct() called at [%s031_backtrace.php:12]
 #1  ReflectionAttribute->newInstance() called at [%s:%d]
 array(2) {
   [0]=>
-  array(5) {
+  array(7) {
+    ["file"]=>
+    string(%d) "%s031_backtrace.php"
+    ["line"]=>
+    int(12)
     ["function"]=>
     string(11) "__construct"
     ["class"]=>
@@ -59,7 +63,11 @@ array(2) {
 }
 array(2) {
   [0]=>
-  array(4) {
+  array(6) {
+    ["file"]=>
+    string(%d) "%s031_backtrace.php"
+    ["line"]=>
+    int(12)
     ["function"]=>
     string(11) "__construct"
     ["class"]=>
