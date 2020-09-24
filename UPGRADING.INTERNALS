@@ -440,6 +440,14 @@ PHP 8.0 INTERNALS UPGRADE NOTES
     2.  The PHP_CHECK_GCC_ARG() m4 macro has been removed in favor of
         AX_CHECK_COMPILE_FLAG().
 
+    3. The 6th argument of PHP_ADD_SOURCES_X has been removed.
+
+    4. The 'special-flags' (3rd) argument of PHP_ADD_SOURCES_X are
+       now appended instead of prepended to previous compiler flags.
+       This means compiler flags passed to PHP_NEW_EXTENSION and PHP_ADD_SOURCES
+       are now appended, this allows to disable compiler flags set by Zend/Zend.m4
+       (e.g. disable certain compiler flags enabled by -Wextra)
+
   c. Windows build system changes
 
     - The configuration option --enable-crt-debug has been removed. The VC
