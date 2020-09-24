@@ -457,7 +457,13 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	int caller_frees = 0;
 	int type, new_type;
 
-	if (colno < 0 || colno >= stmt->column_count) {
+	if (colno < 0) {
+		zend_value_error("Column index must be greater than or equal to 0");
+		ZVAL_NULL(dest);
+		return;
+	}
+
+	if (colno >= stmt->column_count) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
 		ZVAL_FALSE(dest);
 
@@ -666,6 +672,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		fcc->called_scope = ce;
 		return 1;
 	} else if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
+		/* Promote to Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not have a constructor, use NULL for the ctor_params parameter, or simply omit it");
 		return 0;
 	} else {
