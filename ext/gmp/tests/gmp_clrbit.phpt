@@ -52,5 +52,5 @@ gmp_clrbit(): Argument #2 ($index) must be greater than or equal to 0
 string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"
-gmp_clrbit(): Argument #1 ($a) must be of type GMP, array given
+gmp_clrbit(): Argument #1 ($num) must be of type GMP, array given
 Done

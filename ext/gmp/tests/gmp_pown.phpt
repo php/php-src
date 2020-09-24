@@ -75,11 +75,11 @@ string(3) "171"
 string(3) "371"
 Modulo by zero
 Modulo by zero
-gmp_powm(): Argument #1 ($base) must be of type GMP|string|int, array given
-gmp_powm(): Argument #2 ($exp) must be of type GMP|string|int, array given
-gmp_powm(): Argument #2 ($exp) must be of type GMP|string|int, TypeError given
-gmp_powm(): Argument #1 ($base) must be of type GMP|string|int, array given
-gmp_powm(): Argument #2 ($exp) must be greater than or equal to 0
+gmp_powm(): Argument #1 ($num) must be of type GMP|string|int, array given
+gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, array given
+gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, TypeError given
+gmp_powm(): Argument #1 ($num) must be of type GMP|string|int, array given
+gmp_powm(): Argument #2 ($exponent) must be greater than or equal to 0
 object(GMP)#6 (1) {
   ["num"]=>
   string(1) "1"

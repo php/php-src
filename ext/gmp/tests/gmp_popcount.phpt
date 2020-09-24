@@ -28,5 +28,5 @@ int(10)
 int(31)
 int(-1)
 int(20)
-gmp_popcount(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_popcount(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

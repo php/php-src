@@ -67,4 +67,4 @@ object(GMP)#2 (1) {
   ["num"]=>
   string(1) "7"
 }
-gmp_binomial(): Argument #2 ($b) must be greater than or equal to 0
+gmp_binomial(): Argument #2 ($k) must be greater than or equal to 0
