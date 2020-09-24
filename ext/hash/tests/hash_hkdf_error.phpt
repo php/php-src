@@ -48,17 +48,17 @@ trycatch_dump(
 *** Testing hash_hkdf(): error conditions ***
 
 -- Testing hash_hkdf() function with invalid hash algorithm --
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with non-cryptographic hash algorithm --
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
-[ValueError] hash_hkdf(): Argument #1 ($algorithm) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with invalid parameters --
 [ValueError] hash_hkdf(): Argument #2 ($key) cannot be empty

@@ -41,10 +41,10 @@ catch (\Error $e) {
 *** Testing hash_init(): error conditions ***
 
 -- Testing hash_init() function with unknown algorithms --
-hash_init(): Argument #1 ($algorithm) must be a valid hashing algorithm
+hash_init(): Argument #1 ($algo) must be a valid hashing algorithm
 
 -- Testing hash_init() function with HASH_HMAC and non-cryptographic algorithms --
-hash_init(): Argument #1 ($algorithm) must be a cryptographic hashing algorithm if HMAC is requested
+hash_init(): Argument #1 ($algo) must be a cryptographic hashing algorithm if HMAC is requested
 
 -- Testing hash_init() function with HASH_HMAC and no key --
 hash_init(): Argument #3 ($key) cannot be empty when HMAC is requested

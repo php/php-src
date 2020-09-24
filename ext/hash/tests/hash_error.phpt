@@ -17,4 +17,4 @@ try {
 *** Testing hash() : error conditions ***
 
 -- Testing hash() function with invalid hash algorithm --
-hash(): Argument #1 ($algorithm) must be a valid hashing algorithm
+hash(): Argument #1 ($algo) must be a valid hashing algorithm

@@ -34,7 +34,7 @@ unlink( $filename );
 *** Testing hash_file() : error conditions ***
 
 -- Testing hash_file() function with an unknown algorithm --
-hash_file(): Argument #1 ($algorithm) must be a valid hashing algorithm
+hash_file(): Argument #1 ($algo) must be a valid hashing algorithm
 
 -- Testing hash_file() function with a non-existent file --
 
