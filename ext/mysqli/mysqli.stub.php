@@ -301,7 +301,7 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    public function __construct(object $mysqli_link, int $result_mode = MYSQLI_STORE_RESULT) {}
+    public function __construct(mysqli $mysqli_link, int $result_mode = MYSQLI_STORE_RESULT) {}
 
     /**
      * @return void
