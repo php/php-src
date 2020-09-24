@@ -2746,7 +2746,7 @@ PHP_FUNCTION(imap_sort)
 	}
 
 	array_init(return_value);
-	if (slst != NIL && slst != 0) {
+	if (slst != NULL) {
 		for (sl = slst; *sl; sl++) {
 			add_next_index_long(return_value, *sl);
 		}
