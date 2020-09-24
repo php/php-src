@@ -1989,16 +1989,15 @@ PHP_FUNCTION(mb_substr_count)
 /* {{{ Returns part of a string */
 PHP_FUNCTION(mb_substr)
 {
-	char *str;
+	zend_string *str;
 	zend_string *encoding = NULL;
 	zend_long from, len;
 	size_t real_from, real_len;
-	size_t str_len;
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
@@ -2010,8 +2009,16 @@ PHP_FUNCTION(mb_substr)
 		RETURN_THROWS();
 	}
 
-	string.val = (unsigned char *)str;
-	string.len = str_len;
+	string.val = (unsigned char *)ZSTR_VAL(str);
+	string.len = ZSTR_LEN(str);
+
+	/* If the desired character length is >= byte length, we can definitely
+	 * just return the entire input string */
+	if (from == 0 && (len_is_null || len >= string.len)) {
+		zend_string_addref(str);
+		RETVAL_STR(str);
+		return;
+	}
 
 	/* measures length */
 	size_t mblen = 0;
