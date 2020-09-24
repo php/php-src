@@ -19,4 +19,4 @@ try {
 ?>
 --EXPECT--
 bcpowmod(): Argument #1 ($base) cannot have a fractional part
-bcpowmod(): Argument #3 ($modulus) cannot have a fractional part
+bcpowmod(): Argument #3 ($mod) cannot have a fractional part

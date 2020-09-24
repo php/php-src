@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-bcpow(): Argument #2 ($exponent) is too large
+bcpow(): Argument #2 ($exp) is too large
