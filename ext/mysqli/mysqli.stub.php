@@ -511,7 +511,7 @@ class mysqli_stmt
 
 final class mysqli_warning
 {
-    protected function __construct(object $mysql) {}
+    private function __construct() {}
 
     public function next(): bool {}
 }
