@@ -12,7 +12,7 @@ use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
 
-function processDirectory(string $dir, bool $forceRegeneration) {
+function processDirectory(string $dir, Context $context) {
     $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
@@ -20,12 +20,12 @@ function processDirectory(string $dir, bool $forceRegeneration) {
     foreach ($it as $file) {
         $pathName = $file->getPathName();
         if (preg_match('/\.stub\.php$/', $pathName)) {
-            processStubFile($pathName, $forceRegeneration);
+            processStubFile($pathName, $context);
         }
     }
 }
 
-function processStubFile(string $stubFile, bool $forceRegeneration) {
+function processStubFile(string $stubFile, Context $context) {
     try {
         if (!file_exists($stubFile)) {
             throw new Exception("File $stubFile does not exist");
@@ -35,7 +35,7 @@ function processStubFile(string $stubFile, bool $forceRegeneration) {
         $stubCode = file_get_contents($stubFile);
         $stubHash = computeStubHash($stubCode);
         $oldStubHash = extractStubHash($arginfoFile);
-        if ($stubHash === $oldStubHash && $forceRegeneration === false) {
+        if ($stubHash === $oldStubHash && $context->forceRegeneration === false) {
             /* Stub file did not change, do not regenerate. */
             return;
         }
@@ -44,6 +44,16 @@ function processStubFile(string $stubFile, bool $forceRegeneration) {
         $fileInfo = parseStubFile($stubCode);
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
         file_put_contents($arginfoFile, $arginfoCode);
+
+        // Collect parameter name statistics.
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            foreach ($funcInfo->args as $argInfo) {
+                if (!isset($context->parameterStats[$argInfo->name])) {
+                    $context->parameterStats[$argInfo->name] = 0;
+                }
+                $context->parameterStats[$argInfo->name]++;
+            }
+        }
     } catch (Exception $e) {
         echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
@@ -65,6 +75,13 @@ function extractStubHash(string $arginfoFile): ?string {
     }
 
     return $matches[1];
+}
+
+class Context {
+    /** @var bool */
+    public $forceRegeneration = false;
+    /** @var array */
+    public $parameterStats = [];
 }
 
 class SimpleType {
@@ -1131,16 +1148,25 @@ function initPhpParser() {
 }
 
 $optind = null;
-$options = getopt("f", ["force-regeneration"], $optind);
-$forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
-$location = $argv[$optind] ?? ".";
+$options = getopt("f", ["force-regeneration", "parameter-stats"], $optind);
 
+$context = new Context;
+$printParameterStats = isset($options["parameter-stats"]);
+$context->forceRegeneration =
+    isset($options["f"]) || isset($options["force-regeneration"]) || $printParameterStats;
+
+$location = $argv[$optind] ?? ".";
 if (is_file($location)) {
     // Generate single file.
-    processStubFile($location, $forceRegeneration);
+    processStubFile($location, $context);
 } else if (is_dir($location)) {
-    processDirectory($location, $forceRegeneration);
+    processDirectory($location, $context);
 } else {
     echo "$location is neither a file nor a directory.\n";
     exit(1);
+}
+
+if ($printParameterStats) {
+    arsort($context->parameterStats);
+    echo json_encode($context->parameterStats, JSON_PRETTY_PRINT), "\n";
 }
