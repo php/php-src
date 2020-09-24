@@ -24,8 +24,8 @@ try {
 
 ?>
 --EXPECTF--
-mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "0"
+mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid encoding "0"
 
 Warning: Array to string conversion in %s on line %d
-mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "Array"
-mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "foo"
+mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid encoding "Array"
+mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid encoding "foo"

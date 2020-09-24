@@ -678,7 +678,7 @@ function str_shuffle(string $str): string {}
 
 function str_word_count(string $str, int $format = 0, ?string $charlist = null): array|int {}
 
-function str_split(string $str, int $split_length = 1): array {}
+function str_split(string $str, int $length = 1): array {}
 
 function strpbrk(string $haystack, string $char_list): string|false {}
 

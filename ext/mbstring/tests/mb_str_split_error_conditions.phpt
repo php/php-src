@@ -28,6 +28,6 @@ try {
 
 ?>
 --EXPECT--
-mb_str_split(): Argument #2 ($split_length) must be greater than 0
-mb_str_split(): Argument #2 ($split_length) must be greater than 0
+mb_str_split(): Argument #2 ($length) must be greater than 0
+mb_str_split(): Argument #2 ($length) must be greater than 0
 mb_str_split(): Argument #3 ($encoding) must be a valid encoding, "BAD_ENCODING" given
