@@ -170,7 +170,6 @@ function odbc_foreignkeys($connection_id, ?string $pk_qualifier, string $pk_owne
 #endif
 
 /**
- * @see https://bugs.php.net/bug.php?id=78470
  * @param resource $connection_id
  * @return resource|false
  */
