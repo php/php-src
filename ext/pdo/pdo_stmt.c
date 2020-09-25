@@ -815,23 +815,27 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			break;
 
 		case PDO_FETCH_COLUMN:
-			if (colno >= 0 && colno < stmt->column_count) {
-				if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
-					fetch_value(stmt, return_value, 1, NULL);
-				} else if (flags == PDO_FETCH_GROUP && colno) {
-					fetch_value(stmt, return_value, 0, NULL);
-				} else {
-					fetch_value(stmt, return_value, colno, NULL);
-				}
-				if (!return_all) {
-					return 1;
-				} else {
-					break;
-				}
-			} else {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
+			if (colno < 0 ) {
+				zend_value_error("Column index must be greater than or equal to 0");
+				return false;
 			}
-			return 0;
+			/* TODO Always a ValueError? */
+			if (colno >= stmt->column_count) {
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
+				return false;
+			}
+
+			if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
+				fetch_value(stmt, return_value, 1, NULL);
+			} else if (flags == PDO_FETCH_GROUP && colno) {
+				fetch_value(stmt, return_value, 0, NULL);
+			} else {
+				fetch_value(stmt, return_value, colno, NULL);
+			}
+			if (!return_all) {
+				return 1;
+			}
+			break;
 
 		case PDO_FETCH_OBJ:
 			object_init_ex(return_value, ZEND_STANDARD_CLASS_DEF_PTR);
