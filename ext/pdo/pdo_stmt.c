@@ -1454,8 +1454,8 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
 	} else {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	if (driver_params) {
@@ -1498,8 +1498,8 @@ PHP_METHOD(PDOStatement, bindValue)
 	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
 	} else {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(&param.parameter, parameter);
@@ -1685,9 +1685,9 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
-	if(colno < 0) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative");
-		RETURN_FALSE;
+	if (colno < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	if (!stmt->methods->get_column_meta) {

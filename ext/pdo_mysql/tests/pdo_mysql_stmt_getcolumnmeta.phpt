@@ -32,8 +32,11 @@ try {
     $stmt->execute();
 
     // invalid offset
-    if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
-        printf("[004] Expecting false got %s\n", var_export($tmp, true));
+    try {
+        $stmt->getColumnMeta(-1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
 
     $emulated =  $stmt->getColumnMeta(0);
 
@@ -299,5 +302,6 @@ $db->exec('DROP TABLE IF EXISTS test');
 print "done!";
 ?>
 --EXPECT--
+PDOStatement::getColumnMeta(): Argument #1 ($column) must be greater than or equal to 0
 Testing native PS...
 done!
