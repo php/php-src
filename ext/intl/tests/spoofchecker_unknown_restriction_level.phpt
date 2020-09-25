@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-Spoofchecker::setRestrictionLevel(): Argument #1 ($level) must be one of the Spoofchecker::*_RESTRICTIVE constants or Spoofchecker::UNRESTRICTIVE
+Spoofchecker::setRestrictionLevel(): Argument #1 ($level) must be one of Spoofchecker::ASCII, Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE, Spoofchecker::SINGLE_HIGHLY_RESTRICTIVE, Spoofchecker::SINGLE_MODERATELY_RESTRICTIVE, Spoofchecker::SINGLE_MINIMALLY_RESTRICTIVE, or Spoofchecker::UNRESTRICTIVE
