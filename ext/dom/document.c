@@ -1197,6 +1197,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 	if (mode == DOM_LOAD_FILE) {
 		char *file_dest;
 		if (CHECK_NULL_PATH(source, source_len)) {
+			zend_value_error("Path to document must not contain any null bytes");
 			return NULL;
 		}
 		file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
@@ -1633,8 +1634,8 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	switch (type) {
 	case DOM_LOAD_FILE:
 		if (CHECK_NULL_PATH(source, source_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
 		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
@@ -1734,8 +1735,8 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	switch (type) {
 	case DOM_LOAD_FILE:
 		if (CHECK_NULL_PATH(source, source_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
 		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
@@ -1834,8 +1835,8 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 
 	if (mode == DOM_LOAD_FILE) {
 		if (CHECK_NULL_PATH(source, source_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid file source");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {

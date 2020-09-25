@@ -1243,12 +1243,7 @@ PHP_METHOD(SQLite3, openBlob)
 
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|sl", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len, &flags) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (ZEND_NUM_ARGS() >= 4 && CHECK_NULL_PATH(dbname, dbname_len)) {
-		zend_argument_type_error(4, "must not contain null bytes");
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|pl", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1346,17 +1341,7 @@ PHP_METHOD(SQLite3, backup)
 	sqlite3_backup *dbBackup;
 	int rc; // Return code
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|ss", &destination_zval, php_sqlite3_sc_entry, &source_dbname, &source_dbname_length, &destination_dbname, &destination_dbname_length) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (ZEND_NUM_ARGS() >= 2 && CHECK_NULL_PATH(source_dbname, source_dbname_length)) {
-		zend_argument_type_error(2, "must not contain null bytes");
-		RETURN_THROWS();
-	}
-
-	if (ZEND_NUM_ARGS() >= 3 && CHECK_NULL_PATH(destination_dbname, destination_dbname_length)) {
-		zend_argument_type_error(3, "must not contain null bytes");
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|pp", &destination_zval, php_sqlite3_sc_entry, &source_dbname, &source_dbname_length, &destination_dbname, &destination_dbname_length) == FAILURE) {
 		RETURN_THROWS();
 	}
 
