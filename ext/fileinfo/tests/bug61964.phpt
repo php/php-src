@@ -58,5 +58,5 @@ Warning: finfo_open(): offset `a' invalid in %sbug61964.php on line %d
 
 Warning: finfo_open(): offset `b' invalid in %sbug61964.php on line %d
 
-Warning: finfo_open(): Failed to load magic database at '%sbug61964'. in %sbug61964.php on line %d
+Warning: finfo_open(): Failed to load magic database at "%sbug61964" in %sbug61964.php on line %d
 DONE: testing dir with files

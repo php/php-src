@@ -55,15 +55,17 @@ require_once('skipifconnectfailure.inc');
         $illegal_mode = mt_rand(-10000, 10000);
     } while (in_array($illegal_mode, array(MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH)));
     // NOTE: for BC reasons with ext/mysql, ext/mysqli accepts invalid result modes.
-    $tmp = $res->fetch_array($illegal_mode);
-    if (false !== $tmp)
-        printf("[013] Expecting boolean/false although, got %s/%s. [%d] %s\n",
-            gettype($tmp), $tmp, $mysqli->errno, $mysqli->error);
+    try {
+        $res->fetch_array($illegal_mode);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-    $tmp = $res->fetch_array($illegal_mode);
-    if (false !== $tmp)
-        printf("[014] Expecting boolean/false, got %s/%s. [%d] %s\n",
-            gettype($tmp), $tmp, $mysqli->errno, $mysqli->error);
+    try {
+        $res->fetch_array($illegal_mode);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     $res->free_result();
 
@@ -353,9 +355,7 @@ array(11) {
   ["e"]=>
   string(1) "1"
 }
-
-Warning: mysqli_result::fetch_array(): The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH in %s on line %d
-
-Warning: mysqli_result::fetch_array(): The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH in %s on line %d
+mysqli_result::fetch_array(): Argument #1 ($result_type) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
+mysqli_result::fetch_array(): Argument #1 ($result_type) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
 mysqli_result object is already closed
 done!

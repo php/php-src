@@ -71,8 +71,8 @@ static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
 	finfo_object *obj = Z_FINFO_P(object); \
 	finfo = obj->ptr; \
 	if (!finfo) { \
-        	php_error_docref(NULL, E_WARNING, "The invalid fileinfo object."); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Invalid finfo object"); \
+		RETURN_THROWS(); \
 	} \
 }
 
@@ -270,7 +270,7 @@ PHP_FUNCTION(finfo_open)
 	}
 
 	if (magic_load(finfo->magic, file) == -1) {
-		php_error_docref(NULL, E_WARNING, "Failed to load magic database at '%s'.", file);
+		php_error_docref(NULL, E_WARNING, "Failed to load magic database at \"%s\"", file);
 		magic_close(finfo->magic);
 		efree(finfo);
 		if (object) {
@@ -382,7 +382,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 		magic = magic_open(MAGIC_MIME_TYPE);
 		if (magic_load(magic, NULL) == -1) {
-			php_error_docref(NULL, E_WARNING, "Failed to load magic database.");
+			php_error_docref(NULL, E_WARNING, "Failed to load magic database");
 			goto common;
 		}
 	} else if (object) {
