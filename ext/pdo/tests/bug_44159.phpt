@@ -2,16 +2,17 @@
 PDO Common: Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL))
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip PDO not available');
-try {
-    $pdo = new PDO("sqlite:".__DIR__."/foo.db");
-} catch (Exception $e) {
-    die("skip PDP_SQLITE not available");
-}
+if (!extension_loaded('pdo')) die('skip');
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) die('skip no driver');
+require_once $dir . 'pdo_test.inc';
+PDOTest::skip();
 ?>
 --FILE--
 <?php
-$pdo = new PDO("sqlite:".__DIR__."/foo.db");
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$pdo = PDOTest::factory();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $attrs = array(PDO::ATTR_STATEMENT_CLASS, PDO::ATTR_STRINGIFY_FETCHES, PDO::NULL_TO_STRING);
@@ -37,24 +38,13 @@ foreach ($attrs as $attr) {
 @unlink(__DIR__."/foo.db");
 
 ?>
---EXPECTF--
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
+--EXPECT--
+TypeError: PDO::ATTR_STATEMENT_CLASS's value must be of type array, null given
+TypeError: PDO::ATTR_STATEMENT_CLASS's value must be of type array, int given
+TypeError: PDO::ATTR_STATEMENT_CLASS's value must be of type array, string given
 TypeError: Attribute value must be int for selected attribute, null given
 bool(true)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
