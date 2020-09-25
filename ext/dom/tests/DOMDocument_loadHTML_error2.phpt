@@ -9,7 +9,11 @@ require_once('skipif.inc');
 --FILE--
 <?php
 $doc = new DOMDocument();
-$doc->loadHTML('');
+try {
+    $doc->loadHTML('');
+} catch (ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: DOMDocument::loadHTML(): Empty string supplied as input in %s on line %d
+--EXPECT--
+DOMDocument::loadHTML(): Argument #1 ($source) must not be empty

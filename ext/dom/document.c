@@ -1197,6 +1197,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 	if (mode == DOM_LOAD_FILE) {
 		char *file_dest;
 		if (CHECK_NULL_PATH(source, source_len)) {
+			zend_value_error("Path to document must not contain any null bytes");
 			return NULL;
 		}
 		file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
@@ -1305,8 +1306,8 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	}
 
 	if (!source_len) {
-		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
 		php_error_docref(NULL, E_WARNING, "Input string is too long");
@@ -1388,8 +1389,8 @@ PHP_METHOD(DOMDocument, save)
 	}
 
 	if (file_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Filename");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1623,9 +1624,9 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 		RETURN_THROWS();
 	}
 
-	if (source_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Schema source");
-		RETURN_FALSE;
+	if (!source_len) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1633,8 +1634,8 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	switch (type) {
 	case DOM_LOAD_FILE:
 		if (CHECK_NULL_PATH(source, source_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
 		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
@@ -1724,9 +1725,9 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 		RETURN_THROWS();
 	}
 
-	if (source_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Schema source");
-		RETURN_FALSE;
+	if (!source_len) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1734,8 +1735,8 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	switch (type) {
 	case DOM_LOAD_FILE:
 		if (CHECK_NULL_PATH(source, source_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
 		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
@@ -1823,8 +1824,8 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (!source_len) {
-		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
@@ -1834,8 +1835,8 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 
 	if (mode == DOM_LOAD_FILE) {
 		if (CHECK_NULL_PATH(source, source_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid file source");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
@@ -1930,8 +1931,8 @@ PHP_METHOD(DOMDocument, saveHTMLFile)
 	}
 
 	if (file_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Filename");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);

@@ -19,7 +19,11 @@ $title = $doc->createElement('title');
 $title = $head->appendChild($title);
 $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
-$bytes = $doc->saveHTMLFile($filename);
+try {
+    $doc->saveHTMLFile($filename);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: DOMDocument::saveHTMLFile(): Invalid Filename in %s on line %d
+--EXPECT--
+DOMDocument::saveHTMLFile(): Argument #1 ($filename) must not be empty

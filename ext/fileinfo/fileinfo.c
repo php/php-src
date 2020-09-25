@@ -444,7 +444,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				goto clean;
 			}
 			if (CHECK_NULL_PATH(buffer, buffer_len)) {
-				zend_argument_type_error(1, "must not contain null bytes");
+				zend_argument_type_error(1, "must not contain any null bytes");
 				goto clean;
 			}
 

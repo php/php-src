@@ -26,7 +26,7 @@ var_dump(finfo_file($fp, '&'));
 
 ?>
 --EXPECTF--
-finfo_file(): Argument #1 ($finfo) must not contain null bytes
+finfo_file(): Argument #1 ($finfo) must not contain any null bytes
 finfo_file(): Argument #1 ($finfo) cannot be empty
 finfo_file(): Argument #1 ($finfo) cannot be empty
 string(9) "directory"
