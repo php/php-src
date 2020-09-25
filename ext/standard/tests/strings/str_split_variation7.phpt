@@ -1,9 +1,5 @@
 --TEST--
 Test str_split() function : usage variations - different integer values for 'split_length' with heredoc 'str'
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
 --FILE--
 <?php
 /*
