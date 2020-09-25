@@ -923,10 +923,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				}
 			}
 			break;
-
-		default:
-			/* shouldn't happen */
-			return 0;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	if (return_all && how != PDO_FETCH_KEY_PAIR) {
@@ -1052,9 +1049,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 			default:
 				zval_ptr_dtor(&val);
-				pdo_raise_impl_error(stmt->dbh, stmt, "22003", "mode is out of range");
+				zend_value_error("Fetch mode must be a bitmask of PDO::FETCH_* constants");
 				return 0;
-				break;
 		}
 	}
 
