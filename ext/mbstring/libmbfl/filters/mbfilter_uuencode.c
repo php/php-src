@@ -29,6 +29,7 @@
 
 #include "mbfilter.h"
 #include "mbfilter_uuencode.h"
+#include "mbfilter_ascii.h"
 
 const mbfl_encoding mbfl_encoding_uuencode = {
 	mbfl_no_encoding_uuencode,
@@ -39,6 +40,12 @@ const mbfl_encoding mbfl_encoding_uuencode = {
 	MBFL_ENCTYPE_SBCS,
 	NULL,
 	NULL
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_uuencode = {
+	mbfl_no_encoding_uuencode,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_ascii
 };
 
 const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
