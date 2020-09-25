@@ -265,6 +265,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		/* if you prepare and then execute passing an array of params keyed by names,
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
+			/* Should this always be an Error? */
 			char *tmp;
 			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
@@ -464,6 +465,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	}
 
 	if (colno >= stmt->column_count) {
+		/* TODO Should this be a ValueError? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
 		ZVAL_FALSE(dest);
 
