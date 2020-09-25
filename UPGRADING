@@ -254,6 +254,8 @@ PHP 8.0 UPGRADE NOTES
       __wakeup(): void
 
     RFC: https://wiki.php.net/rfc/magic-methods-signature
+  . call_user_func_array() array keys will now be interpreted as parameter names,
+    instead of being silently ignored.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
