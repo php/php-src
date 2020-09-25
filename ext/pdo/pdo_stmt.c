@@ -1738,9 +1738,8 @@ int pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, zval *args, uint
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
 
 	flags = mode & PDO_FETCH_FLAGS;
-	retval = pdo_stmt_verify_mode(stmt, mode, 0);
 
-	if (FAILURE == retval) {
+	if (!pdo_stmt_verify_mode(stmt, mode, 0)) {
 		PDO_STMT_CLEAR_ERR();
 		return FAILURE;
 	}
