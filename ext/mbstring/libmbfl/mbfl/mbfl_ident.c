@@ -165,6 +165,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_byte4be,
 	&vtbl_identify_byte4le,
 	&vtbl_identify_uuencode,
+	&vtbl_identify_qprint,
 	&vtbl_identify_false,
 	NULL
 };

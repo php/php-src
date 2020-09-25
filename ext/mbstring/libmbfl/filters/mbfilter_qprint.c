@@ -29,6 +29,7 @@
 
 #include "mbfilter.h"
 #include "mbfilter_qprint.h"
+#include "mbfilter_ascii.h"
 #include "unicode_prop.h"
 
 static const char *mbfl_encoding_qprint_aliases[] = {"qprint", NULL};
@@ -42,6 +43,12 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
 	NULL
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_qprint = {
+	mbfl_no_encoding_qprint,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_ascii
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_qprint = {
