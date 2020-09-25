@@ -1286,8 +1286,8 @@ PHP_METHOD(PDOStatement, fetchAll)
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(how)
-		Z_PARAM_ZVAL(arg2)
-		Z_PARAM_ZVAL(ctor_args)
+		Z_PARAM_ZVAL_OR_NULL(arg2)
+		Z_PARAM_ARRAY_OR_NULL(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
@@ -1301,85 +1301,77 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	do_fetch_opt_finish(stmt, 0);
 
-	switch(how & ~PDO_FETCH_FLAGS) {
-	case PDO_FETCH_CLASS:
-		switch(ZEND_NUM_ARGS()) {
-		case 0:
-		case 1:
-			stmt->fetch.cls.ce = zend_standard_class_def;
-			break;
-		case 3:
-			if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array");
-				error = 1;
-				break;
+	/* TODO Would be good to reuse part of pdo_stmt_setup_fetch_mode() in some way */
+
+	switch (how & ~PDO_FETCH_FLAGS) {
+		case PDO_FETCH_CLASS:
+			/* Figure out correct class */
+			if (arg2) {
+				if (Z_TYPE_P(arg2) != IS_STRING) {
+					zend_argument_type_error(2, "must be string, %s given", zend_zval_type_name(arg2));
+					RETURN_THROWS();
+				}
+				stmt->fetch.cls.ce = zend_fetch_class(Z_STR_P(arg2), ZEND_FETCH_CLASS_AUTO);
+				if (!stmt->fetch.cls.ce) {
+					zend_argument_type_error(2, "must be a valid class");
+					RETURN_THROWS();
+				}
+			} else {
+				stmt->fetch.cls.ce = zend_standard_class_def;
 			}
-			if (Z_TYPE_P(ctor_args) != IS_ARRAY || !zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-				ctor_args = NULL;
-			}
-			/* no break */
-		case 2:
-			if (ctor_args) {
+
+			if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args)) > 0) {
 				ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, ctor_args); /* we're not going to free these */
 			} else {
 				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 			}
-			if (Z_TYPE_P(arg2) != IS_STRING) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid class name (should be a string)");
-				error = 1;
-				break;
-			} else {
-				stmt->fetch.cls.ce = zend_fetch_class(Z_STR_P(arg2), ZEND_FETCH_CLASS_AUTO);
-				if (!stmt->fetch.cls.ce) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not find user-specified class");
-					error = 1;
-					break;
-				}
-			}
-		}
-		if (!error) {
+
 			do_fetch_class_prepare(stmt);
-		}
-		break;
+			break;
 
-	case PDO_FETCH_FUNC:
-		switch (ZEND_NUM_ARGS()) {
-			case 0:
-			case 1:
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "no fetch function specified");
+		case PDO_FETCH_FUNC: /* Cannot be a default fetch mode */
+			if (ZEND_NUM_ARGS() != 2) {
+				zend_argument_count_error("%s() expects exactly 2 argument for PDO::FETCH_FUNC, %d given",
+					ZSTR_VAL(get_active_function_or_method_name()), ZEND_NUM_ARGS());
+				RETURN_THROWS();
+			}
+			/* TODO Check it is a callable? */
+			ZVAL_COPY_VALUE(&stmt->fetch.func.function, arg2);
+			if (do_fetch_func_prepare(stmt) == 0) {
 				error = 1;
-				break;
-			case 3:
-			case 2:
-				ZVAL_COPY_VALUE(&stmt->fetch.func.function, arg2);
-				if (do_fetch_func_prepare(stmt) == 0) {
-					error = 1;
+			}
+			break;
+
+		case PDO_FETCH_COLUMN:
+			if (ZEND_NUM_ARGS() > 2) {
+				zend_argument_count_error("%s() expects at most 2 argument for the fetch mode provided, %d given",
+					ZSTR_VAL(get_active_function_or_method_name()), ZEND_NUM_ARGS());
+				RETURN_THROWS();
+			}
+			/* Is column index passed? */
+			if (arg2) {
+				// Reuse convert_to_long(arg2); ?
+				if (Z_TYPE_P(arg2) != IS_LONG) {
+					zend_argument_type_error(2, "must be int, %s given", zend_zval_type_name(arg2));
+					RETURN_THROWS();
 				}
-				break;
-		}
-		break;
-
-	case PDO_FETCH_COLUMN:
-		switch(ZEND_NUM_ARGS()) {
-		case 0:
-		case 1:
-			stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
+				if (Z_LVAL_P(arg2) < 0) {
+					zend_argument_value_error(2, "must be greater than or equal to 0");
+					RETURN_THROWS();
+				}
+				stmt->fetch.column = Z_LVAL_P(arg2);
+			} else {
+				stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
+			}
 			break;
-		case 2:
-			convert_to_long(arg2);
-			stmt->fetch.column = Z_LVAL_P(arg2);
-			break;
-		case 3:
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Third parameter not allowed for PDO::FETCH_COLUMN");
-			error = 1;
-		}
-		break;
 
-	default:
-		if (ZEND_NUM_ARGS() > 1) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Extraneous additional parameters");
-			error = 1;
-		}
+		default:
+			/* No support for PDO_FETCH_INTO which takes 2 args??? */
+			if (ZEND_NUM_ARGS() > 1) {
+				zend_argument_count_error("%s() expects exactly 1 argument for the fetch mode provided, %d given",
+				ZSTR_VAL(get_active_function_or_method_name()), ZEND_NUM_ARGS());
+				RETURN_THROWS();
+			}
 	}
 
 	flags = how & PDO_FETCH_FLAGS;
