@@ -689,8 +689,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 /* TODO Always TypeError (also restrict to actual integer?) */
 #define PDO_LONG_PARAM_CHECK \
 	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
-		pdo_raise_impl_error(dbh, NULL, "HY000", "attribute value must be an integer"); \
-		PDO_HANDLE_DBH_ERR(); \
+		zend_type_error("Attribute value must be int for selected attribute, %s given", zend_zval_type_name(value)); \
 		return FAILURE; \
 	} \
 
@@ -705,9 +704,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 					dbh->error_mode = lval;
 					return SUCCESS;
 				default:
-					/* TODO Always ValueError */
-					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid error mode");
-					PDO_HANDLE_DBH_ERR();
+					zend_value_error("Error mode must be one of PDO::ERRMODE_* constants");
 					return FAILURE;
 			}
 			return FAILURE;
@@ -722,9 +719,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 					dbh->desired_case = lval;
 					return SUCCESS;
 				default:
-					/* TODO Always ValueError */
-					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid case folding mode");
-					PDO_HANDLE_DBH_ERR();
+					zend_value_error("Case folding mode must be one of PDO::CASE_* constants");
 					return FAILURE;
 			}
 			return FAILURE;
@@ -739,8 +734,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 				zval *tmp;
 				if ((tmp = zend_hash_index_find(Z_ARRVAL_P(value), 0)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
 					if (Z_LVAL_P(tmp) == PDO_FETCH_INTO || Z_LVAL_P(tmp) == PDO_FETCH_CLASS) {
-						/* TODO Always ValueError */
-						pdo_raise_impl_error(dbh, NULL, "HY000", "FETCH_INTO and FETCH_CLASS are not yet supported as default fetch modes");
+						zend_value_error("PDO::FETCH_INTO and PDO::FETCH_CLASS cannot be set as default fetch mode");
 						return FAILURE;
 					}
 				}
@@ -749,8 +743,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 			}
 			lval = zval_get_long(value);
 			if (lval == PDO_FETCH_USE_DEFAULT) {
-				/* TODO Always ValueError */
-				pdo_raise_impl_error(dbh, NULL, "HY000", "invalid fetch mode type");
+				zend_value_error("Fetch mode must be a bitmask of PDO::FETCH_* constants");
 				return FAILURE;
 			}
 			dbh->default_fetch_type = lval;
