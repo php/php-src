@@ -590,7 +590,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 }
 /* }}} */
 
-static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset, int do_bind) /* {{{ */
+static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
 {
 	if (!stmt->executed) {
 		return 0;
@@ -613,7 +613,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zen
 		return 0;
 	}
 
-	if (do_bind && stmt->bound_columns) {
+	if (stmt->bound_columns) {
 		/* update those bound column variables now */
 		struct pdo_bound_param_data *param;
 
@@ -739,9 +739,9 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 }
 /* }}} */
 
-/* perform a fetch.  If do_bind is true, update any bound columns.
+/* perform a fetch.
  * If return_value is not null, store values into it according to HOW. */
-static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
+static int do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
 {
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
@@ -754,7 +754,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 	flags = how & PDO_FETCH_FLAGS;
 	how = how & ~PDO_FETCH_FLAGS;
 
-	if (!do_fetch_common(stmt, ori, offset, do_bind)) {
+	if (!do_fetch_common(stmt, ori, offset)) {
 		return 0;
 	}
 
@@ -1182,7 +1182,7 @@ PHP_METHOD(PDOStatement, fetch)
 		RETURN_FALSE;
 	}
 
-	if (!do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
+	if (!do_fetch(stmt, return_value, how, ori, off, 0)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -1232,7 +1232,7 @@ PHP_METHOD(PDOStatement, fetchObject)
 		stmt->fetch.cls.ce = zend_standard_class_def;
 	}
 
-	if (!do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
+	if (!do_fetch(stmt, return_value, how, ori, off, 0)) {
 		PDO_HANDLE_STMT_ERR();
 		RETVAL_FALSE;
 	}
@@ -1257,7 +1257,7 @@ PHP_METHOD(PDOStatement, fetchColumn)
 	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
-	if (!do_fetch_common(stmt, PDO_FETCH_ORI_NEXT, 0, TRUE)) {
+	if (!do_fetch_common(stmt, PDO_FETCH_ORI_NEXT, 0)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -1392,20 +1392,20 @@ PHP_METHOD(PDOStatement, fetchAll)
 		} else {
 			return_all = 0;
 		}
-		if (!do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all)) {
+		if (!do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all)) {
 			error = 2;
 		}
 	}
 	if (!error) {
 		if ((how & PDO_FETCH_GROUP)) {
-			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
+			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
 		} else if (how == PDO_FETCH_KEY_PAIR || (how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
-			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
+			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
 		} else {
 			array_init(return_value);
 			do {
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &data);
-			} while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, 0));
+			} while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, 0));
 		}
 	}
 
@@ -2225,7 +2225,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 		zval_ptr_dtor(&I->fetch_ahead);
 	}
 
-	if (!do_fetch(stmt, TRUE, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
 			PDO_FETCH_ORI_NEXT, 0, 0)) {
 
 		PDO_HANDLE_STMT_ERR();
@@ -2265,7 +2265,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	Z_ADDREF_P(object);
 	ZVAL_OBJ(&I->iter.data, Z_OBJ_P(object));
 
-	if (!do_fetch(stmt, 1, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
 			PDO_FETCH_ORI_NEXT, 0, 0)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
