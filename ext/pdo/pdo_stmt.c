@@ -1873,7 +1873,8 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 			mode = Z_LVAL(args[skip]);
 			flags = mode & PDO_FETCH_FLAGS;
 
-			retval = pdo_stmt_verify_mode(stmt, mode, 0);
+			/* pdo_stmt_verify_mode() returns a boolean value */
+			retval = pdo_stmt_verify_mode(stmt, mode, 0) ? SUCCESS : FAILURE;
 		}
 	}
 
