@@ -32,13 +32,16 @@ switch ($conn->getAttribute(PDO::ATTR_DRIVER_NAME)) {
 
 $stmt = $conn->prepare($query);
 
-var_dump(fetchColumn($stmt, -1));
+try {
+    var_dump(fetchColumn($stmt, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 var_dump(fetchColumn($stmt, 0));
 var_dump(fetchColumn($stmt, 1));
 ?>
 --EXPECTF--
-Warning: PDOStatement::fetchColumn(): SQLSTATE[HY000]: General error: Invalid column index in %s
-bool(false)
+Column index must be greater than or equal to 0
 string(1) "1"
 
 Warning: PDOStatement::fetchColumn(): SQLSTATE[HY000]: General error: Invalid column index in %s

@@ -59,7 +59,7 @@ class PDOStatement implements IteratorAggregate
     public function setAttribute(int $attribute, mixed $value) {}
 
     /** @return bool */
-    public function setFetchMode(int $mode, mixed ...$params) {}
+    public function setFetchMode(int $mode, mixed $arg1 = null, ?array $constructorArguments = []) {}
 
     public function getIterator(): Iterator {}
 }
