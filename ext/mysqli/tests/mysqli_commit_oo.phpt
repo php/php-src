@@ -104,12 +104,12 @@ if (!have_innodb($link))
 mysqli object is not fully initialized
 
 Warning: mysqli::commit(): Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, "\", "-", "_", and "=" characters in %s on line %d
-bool(false)
+bool(true)
 
 Warning: mysqli::commit(): Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, "\", "-", "_", and "=" characters in %s on line %d
-bool(false)
+bool(true)
 
 Warning: mysqli::commit(): Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, "\", "-", "_", and "=" characters in %s on line %d
-bool(false)
+bool(true)
 my_mysqli object is already closed
 done!
