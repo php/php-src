@@ -1347,6 +1347,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 					ZSTR_VAL(get_active_function_or_method_name()), ZEND_NUM_ARGS());
 				RETURN_THROWS();
 			}
+			if (arg2 == NULL) {
+				zend_argument_type_error(2, "must be a callable, null given");
+				RETURN_THROWS();
+			}
 			/* TODO Check it is a callable? */
 			ZVAL_COPY_VALUE(&stmt->fetch.func.function, arg2);
 			if (do_fetch_func_prepare(stmt) == false) {

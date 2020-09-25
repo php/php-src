@@ -116,7 +116,7 @@ object(PDOStatement)#%d (1) {
   ["queryString"]=>
   string(21) "SELECT * FROM testing"
 }
-data: 2,
+data: 2, 
 array(2) {
   [0]=>
   string(3) "PHP"
@@ -125,11 +125,8 @@ array(2) {
 }
 function "nothing" not found or invalid function name
 function "" not found or invalid function name
+PDOStatement::fetchAll(): Argument #2 ($arg2) must be a callable, null given
 no array or string given
-no array or string given
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
 cannot access "self" when no class scope is active
 array(2) {
   [0]=>
@@ -145,4 +142,4 @@ array(2) {
 }
 non-static method bar::test2() cannot be called statically
 non-static method bar::test3() cannot be called statically
-class bar does not have a method "inexistent" in %s on line %d
+class bar does not have a method "inexistent"
