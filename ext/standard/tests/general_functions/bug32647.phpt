@@ -73,15 +73,15 @@ register_shutdown_function(array($obj,'barfoo'));
 ?>
 --EXPECTF--
 Warning: Undefined variable $obj in %s on line %d
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "Array" not found or invalid function name
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, first array member is not a valid class name or object
 
 Warning: Undefined variable $obj in %s on line %d
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "Array" not found or invalid function name
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "Array" not found or invalid function name
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "bar::foo" not found or invalid function name
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "Array" not found or invalid function name
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, first array member is not a valid class name or object
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, first array member is not a valid class name or object
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, class bar does not have a method "foo"
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, first array member is not a valid class name or object
 register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "bar" not found or invalid function name
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "bar::barfoo" not found or invalid function name
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "bar::foobar" not found or invalid function name
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, non-static method bar::barfoo() cannot be called statically
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, class bar does not have a method "foobar"
 foo!
 bar!

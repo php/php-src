@@ -20,5 +20,5 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-register_shutdown_function(): Argument #1 ($function) must be a valid callback, function "test::__call" not found or invalid function name
+register_shutdown_function(): Argument #1 ($function) must be a valid callback, non-static method test::__call() cannot be called statically
 Done

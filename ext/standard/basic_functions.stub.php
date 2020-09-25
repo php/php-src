@@ -301,8 +301,7 @@ function forward_static_call(callable $function, mixed ...$args): mixed {}
 
 function forward_static_call_array(callable $function, array $args): mixed {}
 
-/** @param callable $function */
-function register_shutdown_function($function, mixed ...$args): ?bool {}
+function register_shutdown_function(callable $function, mixed ...$args): ?bool {}
 
 function highlight_file(string $filename, bool $return = false): string|bool {}
 

@@ -2034,15 +2034,13 @@ PHP_FUNCTION(session_set_save_handler)
 		if (register_shutdown) {
 			/* create shutdown function */
 			php_shutdown_function_entry shutdown_function_entry;
-			shutdown_function_entry.arg_count = 1;
-			shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
-
-			ZVAL_STRING(&shutdown_function_entry.arguments[0], "session_register_shutdown");
+			ZVAL_STRING(&shutdown_function_entry.function_name, "session_register_shutdown");
+			shutdown_function_entry.arg_count = 0;
+			shutdown_function_entry.arguments = NULL;
 
 			/* add shutdown function, removing the old one if it exists */
 			if (!register_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1, &shutdown_function_entry)) {
-				zval_ptr_dtor(&shutdown_function_entry.arguments[0]);
-				efree(shutdown_function_entry.arguments);
+				zval_ptr_dtor(&shutdown_function_entry.function_name);
 				php_error_docref(NULL, E_WARNING, "Unable to register session shutdown function");
 				RETURN_FALSE;
 			}
@@ -2665,14 +2663,12 @@ PHP_FUNCTION(session_register_shutdown)
 	 * the session still to be available.
 	 */
 
-	shutdown_function_entry.arg_count = 1;
-	shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
+	ZVAL_STRING(&shutdown_function_entry.function_name, "session_write_close");
+	shutdown_function_entry.arg_count = 0;
+	shutdown_function_entry.arguments = NULL;
 
-	ZVAL_STRING(&shutdown_function_entry.arguments[0], "session_write_close");
-
-	if (!append_user_shutdown_function(shutdown_function_entry)) {
-		zval_ptr_dtor(&shutdown_function_entry.arguments[0]);
-		efree(shutdown_function_entry.arguments);
+	if (!append_user_shutdown_function(&shutdown_function_entry)) {
+		zval_ptr_dtor(&shutdown_function_entry.function_name);
 
 		/* Unable to register shutdown function, presumably because of lack
 		 * of memory, so flush the session now. It would be done in rshutdown

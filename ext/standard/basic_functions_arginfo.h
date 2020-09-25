@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 97187c073137b8fdfc03bdecf72377ef73d79290 */
+ * Stub hash: c373aa965002f4c6a816e6574417ce59473ad7b3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -456,7 +456,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_forward_static_call_array arginfo_call_user_func_array
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_shutdown_function, 0, 1, _IS_BOOL, 1)
-	ZEND_ARG_INFO(0, function)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
