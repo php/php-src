@@ -31,6 +31,8 @@
 #include "mbfilter.h"
 #include "mbfilter_base64.h"
 
+static int mbfl_filt_ident_base64(int c, mbfl_identify_filter *filter);
+
 const mbfl_encoding mbfl_encoding_base64 = {
 	mbfl_no_encoding_base64,
 	"BASE64",
@@ -40,6 +42,12 @@ const mbfl_encoding mbfl_encoding_base64 = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
 	NULL
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_base64 = {
+	mbfl_no_encoding_base64,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_base64
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_b64 = {
@@ -146,27 +154,29 @@ int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 /*
  * BASE64 => any
  */
+static unsigned int decode_base64_char(unsigned char c)
+{
+	if (c >= 'A' && c <= 'Z') {
+		return c - 65;
+	} else if (c >= 'a' && c <= 'z') {
+		return c - 71;
+	} else if (c >= '0' && c <= '9') {
+		return c + 4;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == '/') {
+		return 63;
+	}
+	return -1;
+}
+
 int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
-	if (c == 0x0d || c == 0x0a || c == 0x20 || c == 0x09 || c == 0x3d) {	/* CR or LF or SPACE or HTAB or '=' */
-		return c;
+	if (c == '\r' || c == '\n' || c == ' ' || c == '\t' || c == '=') {
+		return 0;
 	}
 
-	n = 0;
-	if (c >= 0x41 && c <= 0x5a) {		/* A - Z */
-		n = c - 65;
-	} else if (c >= 0x61 && c <= 0x7a) {	/* a - z */
-		n = c - 71;
-	} else if (c >= 0x30 && c <= 0x39) {	/* 0 - 9 */
-		n = c + 4;
-	} else if (c == 0x2b) {			/* '+' */
-		n = 62;
-	} else if (c == 0x2f) {			/* '/' */
-		n = 63;
-	}
-	n &= 0x3f;
+	unsigned int n = decode_base64_char(c);
 
 	switch (filter->status) {
 	case 0:
@@ -209,4 +219,14 @@ int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 		}
 	}
 	return 0;
+}
+
+static int mbfl_filt_ident_base64(int c, mbfl_identify_filter *filter)
+{
+	if (decode_base64_char(c) != -1 || c == '=') {
+		filter->status = (filter->status + 1) % 4;
+	} else {
+		filter->flag = 1; /* Illegal character */
+	}
+	return c;
 }
