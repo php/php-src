@@ -425,11 +425,8 @@ options:
 static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
 {
 	if (!Z_ISUNDEF_P(ctor_args)) {
-		if (Z_TYPE_P(ctor_args) != IS_ARRAY) {
-			/* TODO Always TypeError */
-			pdo_raise_impl_error(dbh, NULL, "HY000", "constructor arguments must be passed as an array");
-			return NULL;
-		}
+		/* This implies an error within PDO if this does not hold */
+		ZEND_ASSERT(Z_TYPE_P(ctor_args) == IS_ARRAY);
 		if (!dbstmt_ce->constructor) {
 			/* TODO Error? */
 			pdo_raise_impl_error(dbh, NULL, "HY000", "user-supplied statement does not accept constructor arguments");
@@ -489,7 +486,7 @@ PHP_METHOD(PDO, prepare)
 	pdo_stmt_t *stmt;
 	char *statement;
 	size_t statement_len;
-	zval *options = NULL, *opt, *item, ctor_args;
+	zval *options = NULL, *value, *item, ctor_args;
 	zend_class_entry *dbstmt_ce, *pce;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
@@ -503,43 +500,38 @@ PHP_METHOD(PDO, prepare)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	if (ZEND_NUM_ARGS() > 1 && (opt = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS)) != NULL) {
-		if (Z_TYPE_P(opt) != IS_ARRAY || (item = zend_hash_index_find(Z_ARRVAL_P(opt), 0)) == NULL
-			|| Z_TYPE_P(item) != IS_STRING
-			|| (pce = zend_lookup_class(Z_STR_P(item))) == NULL
-		) {
-			/* TODO Always TypeError */
-			pdo_raise_impl_error(dbh, NULL, "HY000",
-				"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
-				"the classname must be a string specifying an existing class"
-				);
-			PDO_HANDLE_DBH_ERR();
-			RETURN_FALSE;
+	if (options && (value = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS)) != NULL) {
+		if (Z_TYPE_P(value) != IS_ARRAY) {
+			zend_type_error("PDO::ATTR_STATEMENT_CLASS's value must be of type array, %s given",
+				zend_zval_type_name(value));
+			RETURN_THROWS();
+		}
+		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
+			zend_value_error("PDO::ATTR_STATEMENT_CLASS's value must be an array with the following "
+				"format array(classname, array(ctor_args))");
+			RETURN_THROWS();
+		}
+		if (Z_TYPE_P(item) != IS_STRING || (pce = zend_lookup_class(Z_STR_P(item))) == NULL) {
+			zend_type_error("PDO::ATTR_STATEMENT_CLASS's class must be a valid class");
+			RETURN_THROWS();
 		}
 		dbstmt_ce = pce;
 		if (!instanceof_function(dbstmt_ce, pdo_dbstmt_ce)) {
-			/* TODO Always TypeError */
-			pdo_raise_impl_error(dbh, NULL, "HY000",
-				"user-supplied statement class must be derived from PDOStatement");
-			PDO_HANDLE_DBH_ERR();
-			RETURN_FALSE;
+			zend_type_error("PDO::ATTR_STATEMENT_CLASS's class must be derived from PDOStatement");
+			RETURN_THROWS();
 		}
 		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
-			/* TODO Always TError */
+			/* TODO Always Error? */
 			pdo_raise_impl_error(dbh, NULL, "HY000",
 				"user-supplied statement class cannot have a public constructor");
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
 		}
-		if ((item = zend_hash_index_find(Z_ARRVAL_P(opt), 1)) != NULL) {
+		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 			if (Z_TYPE_P(item) != IS_ARRAY) {
-				/* TODO Always TypeError */
-				pdo_raise_impl_error(dbh, NULL, "HY000",
-					"PDO::ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
-					"ctor_args must be an array"
-				);
-				PDO_HANDLE_DBH_ERR();
-				RETURN_FALSE;
+				zend_type_error("PDO::ATTR_STATEMENT_CLASS's ctor_args must be ?array, %s given",
+					zend_zval_type_name(value));
+				RETURN_THROWS();
 			}
 			ZVAL_COPY_VALUE(&ctor_args, item);
 		} else {
