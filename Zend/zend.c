@@ -1329,6 +1329,11 @@ static ZEND_COLD void zend_error_impl(
 		do {
 			if (ex->func->type != ZEND_INTERNAL_FUNCTION) {
 				zend_observer_fcall_end(ex, NULL);
+				/* If an extension catches a fatal error and raises another one, the
+				 * observer end handlers will fire more than once. This requires us
+				 * to "unobserve" the functions after the end handlers have fired the
+				 * first time. */
+				zend_observer_fcall_unobserve(ex->func);
 			}
 		} while ((ex = ex->prev_execute_data) != NULL);
 	}

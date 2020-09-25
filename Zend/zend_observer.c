@@ -210,6 +210,15 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 	}
 }
 
+ZEND_API void zend_observer_fcall_unobserve(zend_function *func)
+{
+	if (ZEND_OBSERVER_ENABLED
+		&& ZEND_OBSERVABLE_FN(func->common.fn_flags)
+		&& ZEND_OBSERVER_DATA(&func->op_array)) {
+		ZEND_OBSERVER_DATA(&func->op_array) = ZEND_OBSERVER_NOT_OBSERVED;
+	}
+}
+
 ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
 {
 	zend_llist_add_element(&zend_observer_error_callbacks, &cb);
