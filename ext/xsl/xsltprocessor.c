@@ -573,9 +573,10 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 			ce = zend_lookup_class(ret_class);
 			if (ce == NULL || !instanceof_function(ce, curce)) {
 				xmlFreeDoc(newdocp);
-				php_error_docref(NULL, E_WARNING,
-					"Expecting class compatible with %s, '%s' given", ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class));
-				RETURN_FALSE;
+				zend_argument_type_error(2, "must be a class name compatible with %s, \"%s\" given",
+					ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class)
+				);
+				RETURN_THROWS();
 			}
 
 			object_init_ex(return_value, ce);

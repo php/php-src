@@ -12,5 +12,5 @@ USE_ZEND_ALLOC=0
     var_dump($finfo);
 ?>
 --EXPECTF--
-Warning: finfo_open(): Failed to load magic database at '%sbug71527私はガラスを食べられます.magic'. in %sbug71527-mb.php on line %d
+Warning: finfo_open(): Failed to load magic database at "%sbug71527私はガラスを食べられます.magic" in %sbug71527-mb.php on line %d
 bool(false)

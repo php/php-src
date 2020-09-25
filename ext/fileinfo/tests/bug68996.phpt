@@ -14,4 +14,4 @@ finfo_open(FILEINFO_MIME_TYPE, "\xfc\x63");
 <br />
 <b>Warning</b>:  finfo_open(%s�c): Failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>%d</b><br />
 <br />
-<b>Warning</b>:  finfo_open(): Failed to load magic database at '%s�c'. in <b>%sbug68996.php</b> on line <b>%d</b><br />
+<b>Warning</b>:  finfo_open(): Failed to load magic database at &quot;%s�c&quot; in <b>%s</b> on line <b>%d</b><br />

@@ -83,16 +83,14 @@ require_once('skipifconnectfailure.inc');
     }
 
     try {
-        if (!false === ($tmp = mysqli_stmt_bind_param($stmt, "aa", $id, $label)))
-            printf("[006] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-    } catch (\ArgumentCountError $e) {
+        mysqli_stmt_bind_param($stmt, "aa", $id, $label);
+    } catch (ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
 
     try {
-        if (!false === ($tmp = mysqli_stmt_bind_param($stmt, "ia", $id, $label)))
-            printf("[007] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-    } catch (\ArgumentCountError $e) {
+        mysqli_stmt_bind_param($stmt, "ia", $id, $label);
+    } catch (ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
 
@@ -414,7 +412,7 @@ require_once('skipifconnectfailure.inc');
 <?php
     require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 The number of variables must match the number of parameters in the prepared statement
 mysqli_stmt_bind_param(): Argument #2 ($types) cannot be empty
 The number of elements in the type definition string must match the number of bind variables
@@ -422,8 +420,6 @@ The number of variables must match the number of parameters in the prepared stat
 The number of elements in the type definition string must match the number of bind variables
 The number of variables must match the number of parameters in the prepared statement
 The number of elements in the type definition string must match the number of bind variables
-
-Warning: mysqli_stmt_bind_param(): Undefined fieldtype a (parameter 3) in %s on line %d
-
-Warning: mysqli_stmt_bind_param(): Undefined fieldtype a (parameter 4) in %s on line %d
+mysqli_stmt_bind_param(): Argument #2 ($types) must only contain the "b", "d", "i", "s" type specifiers
+mysqli_stmt_bind_param(): Argument #2 ($types) must only contain the "b", "d", "i", "s" type specifiers
 done!
