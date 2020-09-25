@@ -1870,6 +1870,7 @@ PHP_FUNCTION(odbc_result)
 			if (rc != SQL_SUCCESS_WITH_INFO) {
 				field_str = zend_string_truncate(field_str, result->values[field_ind].vallen, 0);
 			}
+			ZSTR_VAL(field_str)[ZSTR_LEN(field_str)] = '\0';
 			RETURN_NEW_STR(field_str);
 			break;
 
