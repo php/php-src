@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5275c2ba801f36ecf17e6b615b19373aca34e852 */
+ * Stub hash: 97187c073137b8fdfc03bdecf72377ef73d79290 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -82,7 +82,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_ksort arginfo_krsort
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_count, 0, 1, IS_LONG, 0)
-	ZEND_ARG_INFO(0, var)
+	ZEND_ARG_OBJ_TYPE_MASK(0, var, Countable, MAY_BE_ARRAY, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "COUNT_NORMAL")
 ZEND_END_ARG_INFO()
 

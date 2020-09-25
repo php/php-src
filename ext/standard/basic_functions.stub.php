@@ -62,14 +62,10 @@ function krsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
 function ksort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-/** @param Countable|array $var */
-function count($var, int $mode = COUNT_NORMAL): int {}
+function count(Countable|array $var, int $mode = COUNT_NORMAL): int {}
 
-/**
- * @param Countable|array $var
- * @alias count
- */
-function sizeof($var, int $mode = COUNT_NORMAL): int {}
+/** @alias count */
+function sizeof(Countable|array $var, int $mode = COUNT_NORMAL): int {}
 
 function natsort(array &$array): bool {}
 
