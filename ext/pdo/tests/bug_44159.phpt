@@ -17,9 +17,21 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $attrs = array(PDO::ATTR_STATEMENT_CLASS, PDO::ATTR_STRINGIFY_FETCHES, PDO::NULL_TO_STRING);
 
 foreach ($attrs as $attr) {
-    var_dump($pdo->setAttribute($attr, NULL));
-    var_dump($pdo->setAttribute($attr, 1));
-    var_dump($pdo->setAttribute($attr, 'nonsense'));
+    try {
+        var_dump($pdo->setAttribute($attr, NULL));
+    } catch (\Error $e) {
+        echo  get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        var_dump($pdo->setAttribute($attr, 1));
+    } catch (\Error $e) {
+        echo  get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        var_dump($pdo->setAttribute($attr, 'nonsense'));
+    } catch (\Error $e) {
+        echo  get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
 }
 
 @unlink(__DIR__."/foo.db");
@@ -40,11 +52,7 @@ Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: PDO::ATTR_STATEMEN
 
 Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: attribute value must be an integer in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
+TypeError: Attribute value must be int for selected attribute, null given
 bool(true)
 bool(true)
 bool(true)
