@@ -1749,7 +1749,6 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, uint32_t total_num_args, zend_l
 	flags = fetch_mode & PDO_FETCH_FLAGS;
 
 	if (!pdo_stmt_verify_mode(stmt, fetch_mode, mode_arg_num, false)) {
-		PDO_STMT_CLEAR_ERR();
 		return false;
 	}
 
