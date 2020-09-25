@@ -62,6 +62,7 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 				param->name = zend_string_init(name, strlen(name), 0);
 				return 1;
 			}
+			/* TODO Error? */
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 			return 0;
 		}
@@ -72,12 +73,14 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 				continue;
 			}
 			if (param->paramno >= 0) {
+				/* TODO Error? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO refuses to handle repeating the same :named parameter for multiple positions with this driver, as it might be unsafe to do so.  Consider using a separate name for each parameter instead");
 				return -1;
 			}
 			param->paramno = position;
 			return 1;
 		} ZEND_HASH_FOREACH_END();
+		/* TODO Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 		return 0;
 	}
@@ -267,6 +270,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		if (param->paramno == -1) {
 			/* Should this always be an Error? */
 			char *tmp;
+			/* TODO Error? */
 			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
 			efree(tmp);
@@ -674,7 +678,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		fcc->called_scope = ce;
 		return 1;
 	} else if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
-		/* Promote to Error? */
+		/* TODO Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not have a constructor, use NULL for the ctor_params parameter, or simply omit it");
 		return 0;
 	} else {
@@ -868,6 +872,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			}
 			ce = stmt->fetch.cls.ce;
 			if (!ce) {
+				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch class specified");
 				return 0;
 			}
@@ -885,6 +890,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					stmt->fetch.cls.fci.object = Z_OBJ_P(return_value);
 					stmt->fetch.cls.fcc.object = Z_OBJ_P(return_value);
 					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc) == FAILURE) {
+						/* TODO Error? */
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor");
 						return 0;
 					} else {
@@ -899,6 +905,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		case PDO_FETCH_INTO:
 			if (Z_ISUNDEF(stmt->fetch.into)) {
+				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch-into object specified.");
 				return 0;
 				break;
@@ -913,6 +920,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		case PDO_FETCH_FUNC:
 			if (Z_ISUNDEF(stmt->fetch.func.function)) {
+				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
 				return 0;
 			}
@@ -1060,6 +1068,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				stmt->fetch.cls.fci.object = Z_OBJ_P(return_value);
 				stmt->fetch.cls.fcc.object = Z_OBJ_P(return_value);
 				if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc) == FAILURE) {
+					/* TODO Error? */
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor");
 					return 0;
 				} else {
@@ -1080,6 +1089,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			stmt->fetch.func.fci.param_count = idx;
 			stmt->fetch.func.fci.retval = &retval;
 			if (zend_call_function(&stmt->fetch.func.fci, &stmt->fetch.func.fcc) == FAILURE) {
+				/* TODO Error? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call user-supplied function");
 				return 0;
 			} else {
@@ -2032,6 +2042,7 @@ static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *val
 	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 
 	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
+		/* TODO Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
 		return value;
 	} else {
@@ -2044,6 +2055,7 @@ static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **ca
 	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 
 	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
+		/* TODO Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
 	} else {
 		zend_std_unset_property(object, name, cache_slot);
