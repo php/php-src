@@ -88,8 +88,8 @@ var_dump(substr("abcde", $v, $v));
 --EXPECT--
 string(4) "bcde"
 string(6) "abcdex"
-strspn(): Argument #3 ($start) must be contained in argument #1 ($str)
-strcspn(): Argument #3 ($start) must be contained in argument #1 ($str)
+strspn(): Argument #3 ($offset) must be contained in argument #1 ($str)
+strcspn(): Argument #3 ($offset) must be contained in argument #1 ($str)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_compare(): Argument #3 ($offset) must be contained in argument #1 ($main_str)
 stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

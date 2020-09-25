@@ -36,7 +36,7 @@ string(1) "a"
 string(3) "f6e"
 string(3) "f6e"
 string(2) "27"
-dechex(): Argument #1 ($number) must be of type int, string given
+dechex(): Argument #1 ($num) must be of type int, string given
 string(1) "1"
 string(1) "0"
 string(1) "0"

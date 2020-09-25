@@ -14,4 +14,4 @@ try {
 ?>
 --EXPECT--
 -- Testing strpbrk() function with empty second argument --
-strpbrk(): Argument #2 ($char_list) must be a non-empty string
+strpbrk(): Argument #2 ($characters) must be a non-empty string

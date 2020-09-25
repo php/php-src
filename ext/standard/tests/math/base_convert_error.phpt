@@ -29,6 +29,6 @@ try {
 ?>
 --EXPECT--
 *** Testing base_convert() : error conditions ***
-base_convert(): Argument #2 ($frombase) must be between 2 and 36 (inclusive)
-base_convert(): Argument #3 ($tobase) must be between 2 and 36 (inclusive)
-base_convert(): Argument #1 ($number) must be of type string, classA given
+base_convert(): Argument #2 ($from_base) must be between 2 and 36 (inclusive)
+base_convert(): Argument #3 ($to_base) must be between 2 and 36 (inclusive)
+base_convert(): Argument #1 ($num) must be of type string, classA given

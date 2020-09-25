@@ -36,7 +36,7 @@ string(4) "1010"
 string(12) "111101101110"
 string(12) "111101101110"
 string(6) "100111"
-decbin(): Argument #1 ($number) must be of type int, string given
+decbin(): Argument #1 ($num) must be of type int, string given
 string(1) "1"
 string(1) "0"
 string(1) "0"

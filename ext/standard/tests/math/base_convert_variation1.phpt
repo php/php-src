@@ -145,7 +145,7 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 19 --
-base_convert(): Argument #1 ($number) must be of type string, array given
+base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 20 --
 
@@ -169,4 +169,4 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 25 --
-base_convert(): Argument #1 ($number) must be of type string, resource given
+base_convert(): Argument #1 ($num) must be of type string, resource given

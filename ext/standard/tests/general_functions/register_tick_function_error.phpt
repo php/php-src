@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-register_tick_function(): Argument #1 ($function) must be a valid tick callback, "a" given
+register_tick_function(): Argument #1 ($callback) must be a valid tick callback, "a" given

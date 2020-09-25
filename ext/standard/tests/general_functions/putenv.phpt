@@ -37,6 +37,6 @@ bool(true)
 string(0) ""
 bool(true)
 bool(false)
-putenv(): Argument #1 ($setting) must have a valid syntax
-putenv(): Argument #1 ($setting) must have a valid syntax
+putenv(): Argument #1 ($assignment) must have a valid syntax
+putenv(): Argument #1 ($assignment) must have a valid syntax
 Done

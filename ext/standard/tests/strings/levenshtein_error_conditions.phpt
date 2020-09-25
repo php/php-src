@@ -25,7 +25,7 @@ try {
 --EXPECT--
 --- String 1 ---
 int(254)
-levenshtein(): Argument #1 ($str1) must be less than 256 characters
+levenshtein(): Argument #1 ($string1) must be less than 256 characters
 --- String 2 ---
 int(254)
-levenshtein(): Argument #2 ($str2) must be less than 256 characters
+levenshtein(): Argument #2 ($string2) must be less than 256 characters

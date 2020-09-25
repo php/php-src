@@ -21,4 +21,4 @@ string(4) "1234"
 int(0)
 int(7)
 int(6)
-strcspn(): Argument #4 ($len) must be contained in argument #1 ($str)
+strcspn(): Argument #4 ($length) must be contained in argument #1 ($str)

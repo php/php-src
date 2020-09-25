@@ -54,8 +54,8 @@ fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
 fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
 fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
 fgetcsv() with delimiter as NULL
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 fgetcsv() with enclosure as NULL
 fgetcsv(): Argument #4 ($enclosure) must be a single character
 fgetcsv() with delimiter & enclosure as NULL
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
