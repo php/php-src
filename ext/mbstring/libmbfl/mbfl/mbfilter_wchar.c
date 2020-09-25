@@ -42,3 +42,9 @@ const mbfl_encoding mbfl_encoding_wchar = {
 	NULL,
 	NULL
 };
+
+const struct mbfl_identify_vtbl vtbl_identify_wchar = {
+  mbfl_no_encoding_wchar,
+  mbfl_filt_ident_common_ctor,
+  mbfl_filt_ident_true
+};

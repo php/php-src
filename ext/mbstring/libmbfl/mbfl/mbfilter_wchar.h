@@ -35,5 +35,6 @@
 #include "mbfilter.h"
 
 MBFLAPI extern const mbfl_encoding mbfl_encoding_wchar;
+extern const struct mbfl_identify_vtbl vtbl_identify_wchar;
 
 #endif /* MBFL_MBFILTER_WCHAR_H */
