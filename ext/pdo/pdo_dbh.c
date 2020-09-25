@@ -943,11 +943,11 @@ PHP_METHOD(PDO, exec)
 		Z_PARAM_STRING(statement, statement_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!statement_len) {
-		/* TODO ValueError */
-		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute an empty query");
-		RETURN_FALSE;
+	if (statement_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
+
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 	ret = dbh->methods->doer(dbh, statement, statement_len);
