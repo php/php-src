@@ -689,12 +689,12 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 
 	if (zend_fcall_info_init(callable, 0, fci, fcc, NULL, &is_callable_error) == FAILURE) {
 		if (is_callable_error) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", is_callable_error);
+			zend_type_error("%s", is_callable_error);
 			efree(is_callable_error);
 		} else {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback");
+			zend_type_error("user-supplied function must be a valid callback");
 		}
-		return 0;
+		return false;
 	}
 	if (is_callable_error) {
 		/* Possible error message */
@@ -704,20 +704,20 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 	fci->param_count = num_args; /* probably less */
 	fci->params = safe_emalloc(sizeof(zval), num_args, 0);
 
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
+static bool do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
 {
 	zend_fcall_info *fci = &stmt->fetch.cls.fci;
 	zend_fcall_info_cache *fcc = &stmt->fetch.cls.fcc;
 
 	if (!make_callable_ex(stmt, &stmt->fetch.func.function, fci, fcc, stmt->column_count)) {
-		return 0;
+		return false;
 	} else {
 		stmt->fetch.func.values = safe_emalloc(sizeof(zval), stmt->column_count, 0);
-		return 1;
+		return true;
 	}
 }
 /* }}} */
@@ -1339,8 +1339,8 @@ PHP_METHOD(PDOStatement, fetchAll)
 			}
 			/* TODO Check it is a callable? */
 			ZVAL_COPY_VALUE(&stmt->fetch.func.function, arg2);
-			if (do_fetch_func_prepare(stmt) == 0) {
-				error = 1;
+			if (do_fetch_func_prepare(stmt) == false) {
+				RETURN_THROWS();
 			}
 			break;
 
