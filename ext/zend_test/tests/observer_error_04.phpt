@@ -11,12 +11,8 @@ zend_test.observer.show_return_value=1
 <?php
 function foo()
 {
-    try {
-        // ext/soap catches a fatal error and then throws an exception
-        $client = new SoapClient('foo');
-    } catch (SoapFault $e) {
-        echo $e->getMessage() . PHP_EOL;
-    }
+    // ext/soap catches a fatal error and then throws an exception
+    $client = new SoapClient('foo');
 }
 
 function main()
@@ -24,7 +20,12 @@ function main()
     foo();
 }
 
-main();
+// try/catch is on main() to ensure ZEND_HANDLE_EXCEPTION does not fire the end handlers again
+try {
+    main();
+} catch (SoapFault $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
 
 echo 'Done.' . PHP_EOL;
 ?>
