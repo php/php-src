@@ -1343,8 +1343,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 		case PDO_FETCH_FUNC: /* Cannot be a default fetch mode */
 			if (ZEND_NUM_ARGS() != 2) {
+				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly 2 argument for PDO::FETCH_FUNC, %d given",
-					ZSTR_VAL(get_active_function_or_method_name()), ZEND_NUM_ARGS());
+					ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_string_release(func);
 				RETURN_THROWS();
 			}
 			if (arg2 == NULL) {
@@ -1360,8 +1362,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 		case PDO_FETCH_COLUMN:
 			if (ZEND_NUM_ARGS() > 2) {
+				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects at most 2 argument for the fetch mode provided, %d given",
-					ZSTR_VAL(get_active_function_or_method_name()), ZEND_NUM_ARGS());
+					ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_string_release(func);
 				RETURN_THROWS();
 			}
 			/* Is column index passed? */
@@ -1384,8 +1388,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 		default:
 			/* No support for PDO_FETCH_INTO which takes 2 args??? */
 			if (ZEND_NUM_ARGS() > 1) {
+				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly 1 argument for the fetch mode provided, %d given",
-				ZSTR_VAL(get_active_function_or_method_name()), ZEND_NUM_ARGS());
+				ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_string_release(func);
 				RETURN_THROWS();
 			}
 	}
@@ -1767,16 +1773,20 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, uint32_t total_num_args, zend_l
 		case PDO_FETCH_NAMED:
 		case PDO_FETCH_KEY_PAIR:
 			if (total_num_args != mode_arg_num) {
+				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly %d argument for the fetch mode provided, %d given",
-					ZSTR_VAL(get_active_function_or_method_name()), mode_arg_num, total_num_args);
+					ZSTR_VAL(func), mode_arg_num, total_num_args);
+				zend_string_release(func);
 				return false;
 			}
 			break;
 
 		case PDO_FETCH_COLUMN:
 			if (total_num_args != arg1_arg_num) {
+				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly %d argument for the fetch mode provided, %d given",
-					ZSTR_VAL(get_active_function_or_method_name()), arg1_arg_num, total_num_args);
+					ZSTR_VAL(func), arg1_arg_num, total_num_args);
+				zend_string_release(func);
 				return false;
 			}
 			if (Z_TYPE_P(arg1) != IS_LONG) {
@@ -1796,8 +1806,10 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, uint32_t total_num_args, zend_l
 			/* Gets its class name from 1st column */
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
 				if (arg1 || constructor_args) {
+					zend_string *func = get_active_function_or_method_name();
 					zend_argument_count_error("%s() expects exactly %d argument for the fetch mode provided, %d given",
-						ZSTR_VAL(get_active_function_or_method_name()), mode_arg_num, total_num_args);
+						ZSTR_VAL(func), mode_arg_num, total_num_args);
+					zend_string_release(func);
 					return false;
 				}
 				stmt->fetch.cls.ce = NULL;
@@ -1805,8 +1817,10 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, uint32_t total_num_args, zend_l
 				zend_class_entry *cep;
 
 				if (!arg1 || total_num_args > constructor_arg_num) {
+					zend_string *func = get_active_function_or_method_name();
 					zend_argument_count_error("%s() expects exactly %d argument for the fetch mode provided, %d given",
-						ZSTR_VAL(get_active_function_or_method_name()), constructor_arg_num, total_num_args);
+						ZSTR_VAL(func), constructor_arg_num, total_num_args);
+					zend_string_release(func);
 					return false;
 				}
 				if (Z_TYPE_P(arg1) != IS_STRING) {
@@ -1829,8 +1843,10 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, uint32_t total_num_args, zend_l
 
 		case PDO_FETCH_INTO:
 			if (total_num_args != arg1_arg_num) {
+				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly %d argument for the fetch mode provided, %d given",
-					ZSTR_VAL(get_active_function_or_method_name()), arg1_arg_num, total_num_args);
+					ZSTR_VAL(func), arg1_arg_num, total_num_args);
+				zend_string_release(func);
 				return false;
 			}
 			if (Z_TYPE_P(arg1) != IS_OBJECT) {
@@ -1886,7 +1902,7 @@ PHP_METHOD(PDOStatement, setFetchMode)
 
 /* {{{ Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
 
-static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
+static bool pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 {
 	/* un-describe */
 	if (stmt->columns) {
