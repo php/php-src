@@ -15,7 +15,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $pdo = PDOTest::factory();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$attrs = array(PDO::ATTR_STATEMENT_CLASS, PDO::ATTR_STRINGIFY_FETCHES, PDO::NULL_TO_STRING);
+$attrs = array(PDO::ATTR_STATEMENT_CLASS, PDO::ATTR_STRINGIFY_FETCHES);
 
 foreach ($attrs as $attr) {
     try {
@@ -45,6 +45,3 @@ TypeError: PDO::ATTR_STATEMENT_CLASS's value must be of type array, string given
 TypeError: Attribute value must be int for selected attribute, null given
 bool(true)
 bool(true)
-bool(false)
-bool(false)
-bool(false)
