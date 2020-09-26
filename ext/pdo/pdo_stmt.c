@@ -872,8 +872,9 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				zval_ptr_dtor_str(&val);
 			}
 			ce = stmt->fetch.cls.ce;
+			/* TODO: Make this an assertion and ensure this is true higher up? */
 			if (!ce) {
-				/* TODO ArgumentCountError? */
+				/* TODO Error? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch class specified");
 				return 0;
 			}
