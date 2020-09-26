@@ -1287,11 +1287,12 @@ PHP_METHOD(PDOStatement, fetchColumn)
 PHP_METHOD(PDOStatement, fetchAll)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
-	zval data, *return_all;
+	zval data, *return_all = NULL;
 	zval *arg2 = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
-	int error = 0, flags, old_arg_count;
+	bool error = false;
+	int flags, old_arg_count;
 
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
@@ -1401,20 +1402,17 @@ PHP_METHOD(PDOStatement, fetchAll)
 		how |= stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	}
 
-	if (!error)	{
-		PDO_STMT_CLEAR_ERR();
-		if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
-			(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
-		) {
-			array_init(return_value);
-			return_all = return_value;
-		} else {
-			return_all = NULL;
-		}
-		if (!do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all)) {
-			error = 2;
-		}
+	PDO_STMT_CLEAR_ERR();
+	if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
+		(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
+	) {
+		array_init(return_value);
+		return_all = return_value;
 	}
+	if (!do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all)) {
+		error = true;
+	}
+
 	if (!error) {
 		if ((how & PDO_FETCH_GROUP)) {
 			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all));
@@ -1430,19 +1428,16 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	do_fetch_opt_finish(stmt, 0);
 
+	/* Restore defaults which were changed by PDO_FETCH_CLASS mode */
 	stmt->fetch.cls.ce = old_ce;
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 
+	/* on no results, return an empty array */
 	if (error) {
 		PDO_HANDLE_STMT_ERR();
-		if (error != 2) {
-			RETURN_FALSE;
-		} else { /* on no results, return an empty array */
-			if (Z_TYPE_P(return_value) != IS_ARRAY) {
-				array_init(return_value);
-			}
-			return;
+		if (Z_TYPE_P(return_value) != IS_ARRAY) {
+			array_init(return_value);
 		}
 	}
 }
