@@ -242,6 +242,11 @@ PHP_METHOD(PDO, __construct)
 		Z_PARAM_ARRAY_OR_NULL(options)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (username && usernamelen == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
+	}
+
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
 
@@ -497,8 +502,14 @@ PHP_METHOD(PDO, prepare)
 		Z_PARAM_ARRAY(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
+
+	if (statement_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	PDO_DBH_CLEAR_ERR();
 
 	if (options && (value = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS)) != NULL) {
 		if (Z_TYPE_P(value) != IS_ARRAY) {
@@ -950,8 +961,15 @@ PHP_METHOD(PDO, lastInsertId)
 		Z_PARAM_STRING_OR_NULL(name, namelen)
 	ZEND_PARSE_PARAMETERS_END();
 
-	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
+
+	if (name && namelen == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	PDO_DBH_CLEAR_ERR();
+
 	if (!dbh->methods->last_id) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()");
 		RETURN_FALSE;
@@ -1060,8 +1078,14 @@ PHP_METHOD(PDO, query)
 		RETURN_THROWS();
 	}
 
-	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
+
+	if (statement_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	PDO_DBH_CLEAR_ERR();
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args)) {
 		if (EXPECTED(!EG(exception))) {
@@ -1135,8 +1159,14 @@ PHP_METHOD(PDO, quote)
 		Z_PARAM_LONG(paramtype)
 	ZEND_PARSE_PARAMETERS_END();
 
-	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
+
+	if (str_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	PDO_DBH_CLEAR_ERR();
 	if (!dbh->methods->quoter) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support quoting");
 		RETURN_FALSE;
