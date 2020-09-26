@@ -16,16 +16,16 @@ class PDOStatement implements IteratorAggregate
     /** @return bool */
     public function closeCursor() {}
 
-    /** @return int|false */
+    /** @return int */
     public function columnCount() {}
 
     /** @return bool|null */
     public function debugDumpParams() {}
 
-    /** @return string|false|null */
+    /** @return string|null */
     public function errorCode() {}
 
-    /** @return array|false */
+    /** @return array */
     public function errorInfo() {}
 
     /** @return bool */
@@ -52,7 +52,7 @@ class PDOStatement implements IteratorAggregate
     /** @return bool */
     public function nextRowset() {}
 
-    /** @return int|false */
+    /** @return int */
     public function rowCount() {}
 
     /** @return bool */
