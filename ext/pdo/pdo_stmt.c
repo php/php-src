@@ -1979,6 +1979,8 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_STMT_GET_OBJ;
+
+	/* TODO: Change to assertion? */
 	if (out == NULL) {
 		RETURN_FALSE;
 	}
