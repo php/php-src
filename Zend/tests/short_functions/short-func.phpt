@@ -5,7 +5,7 @@ Basic short functions return values.
 
 function test(int $a) => $a + 1;
 
-function test2(int $b)
+function test2(int $b): int
     => $b + 1;
 
 print test(5) . PHP_EOL;

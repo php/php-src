@@ -9,7 +9,7 @@ class Test {
 
     public function addUp(int $a) => $a + $this->b;
 
-    public function addUp2(int $a)
+    public function addUp2(int $a): int
         => $a + $this->b;
 }
 
