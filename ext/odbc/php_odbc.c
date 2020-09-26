@@ -1309,7 +1309,7 @@ PHP_FUNCTION(odbc_execute)
 	int numArgs = ZEND_NUM_ARGS(), i, ne;
 	RETCODE rc;
 
-	if (zend_parse_parameters(numArgs, "r|a", &pv_res, &pv_param_arr) == FAILURE) {
+	if (zend_parse_parameters(numArgs, "r|a/", &pv_res, &pv_param_arr) == FAILURE) {
 		return;
 	}
 
