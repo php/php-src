@@ -1199,10 +1199,10 @@ PHP_METHOD(PDOStatement, fetch)
 	PDO_STMT_CLEAR_ERR();
 
 	if (!pdo_stmt_verify_mode(stmt, how, 1, false)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
-	if (!do_fetch(stmt, return_value, how, ori, off, 0)) {
+	if (!do_fetch(stmt, return_value, how, ori, off, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -1212,8 +1212,6 @@ PHP_METHOD(PDOStatement, fetch)
 /* {{{ Fetches the next row and returns it as an object. */
 PHP_METHOD(PDOStatement, fetchObject)
 {
-	zend_long ori = PDO_FETCH_ORI_NEXT;
-	zend_long off = 0;
 	zend_class_entry *ce = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
@@ -1229,7 +1227,7 @@ PHP_METHOD(PDOStatement, fetchObject)
 	PDO_STMT_CLEAR_ERR();
 
 	if (!pdo_stmt_verify_mode(stmt, PDO_FETCH_CLASS, 0, false)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	old_ce = stmt->fetch.cls.ce;
@@ -1251,7 +1249,7 @@ PHP_METHOD(PDOStatement, fetchObject)
 		stmt->fetch.cls.ce = zend_standard_class_def;
 	}
 
-	if (!do_fetch(stmt, return_value, PDO_FETCH_CLASS, ori, off, 0)) {
+	if (!do_fetch(stmt, return_value, PDO_FETCH_CLASS, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		RETVAL_FALSE;
 	}
@@ -1304,7 +1302,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	PHP_STMT_GET_OBJ;
 	if (!pdo_stmt_verify_mode(stmt, how, 1, true)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	old_ce = stmt->fetch.cls.ce;
@@ -1411,22 +1409,22 @@ PHP_METHOD(PDOStatement, fetchAll)
 			array_init(return_value);
 			return_all = return_value;
 		} else {
-			return_all = 0;
+			return_all = NULL;
 		}
-		if (!do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all)) {
+		if (!do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all)) {
 			error = 2;
 		}
 	}
 	if (!error) {
 		if ((how & PDO_FETCH_GROUP)) {
-			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
+			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all));
 		} else if (how == PDO_FETCH_KEY_PAIR || (how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
-			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
+			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all));
 		} else {
 			array_init(return_value);
 			do {
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &data);
-			} while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, 0));
+			} while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL));
 		}
 	}
 
@@ -1863,16 +1861,6 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, uint32_t total_num_args, zend_l
 
 	stmt->default_fetch_type = fetch_mode;
 
-	/* TODO Is this still needed? */
-	/*
-	 * PDO error (if any) has already been raised at this point.
-	 *
-	 * The error_code is cleared, otherwise the caller will read the
-	 * last error message from the driver.
-	 *
-	 */
-	PDO_STMT_CLEAR_ERR();
-
 	return true;
 }
 
@@ -2255,7 +2243,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 	}
 
 	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, 0, 0)) {
+			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
@@ -2295,7 +2283,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	ZVAL_OBJ(&I->iter.data, Z_OBJ_P(object));
 
 	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, 0, 0)) {
+			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
 		ZVAL_UNDEF(&I->fetch_ahead);
