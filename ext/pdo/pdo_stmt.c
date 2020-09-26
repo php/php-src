@@ -1226,9 +1226,8 @@ PHP_METHOD(PDOStatement, fetchObject)
 	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
-	if (!pdo_stmt_verify_mode(stmt, PDO_FETCH_CLASS, 0, false)) {
-		RETURN_THROWS();
-	}
+	/* use pdo_stmt_verify_mode() to set fetch mode for this specific statement */
+	ZEND_ASSERT(pdo_stmt_verify_mode(stmt, PDO_FETCH_CLASS, 0, false));
 
 	old_ce = stmt->fetch.cls.ce;
 	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
