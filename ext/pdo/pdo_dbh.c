@@ -242,11 +242,6 @@ PHP_METHOD(PDO, __construct)
 		Z_PARAM_ARRAY_OR_NULL(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (username && usernamelen == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
 
