@@ -302,6 +302,6 @@ $db->exec('DROP TABLE IF EXISTS test');
 print "done!";
 ?>
 --EXPECT--
-PDOStatement::getColumnMeta(): Argument #1 ($column) must be greater than or equal to 0
+PDOStatement::getColumnMeta(): Argument #1 ($index) must be greater than or equal to 0
 Testing native PS...
 done!

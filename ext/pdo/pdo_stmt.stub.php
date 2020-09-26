@@ -5,13 +5,13 @@
 class PDOStatement implements IteratorAggregate
 {
     /** @return bool */
-    public function bindColumn(string|int $column, mixed &$param, int $type = 0, int $maxlen = 0, mixed $driverdata = null) {}
+    public function bindColumn(string|int $column, mixed &$param, int $type = 0, int $max_length = 0, mixed $driver_options = null) {}
 
     /** @return bool */
-    public function bindParam(string|int $parameter, mixed &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, mixed $driverdata = null) {}
+    public function bindParam(string|int $param, mixed &$bind_var, int $type = PDO::PARAM_STR, int $max_length = 0, mixed $driver_options = null) {}
 
     /** @return bool */
-    public function bindValue(string|int $parameter, mixed $value, int $type = PDO::PARAM_STR) {}
+    public function bindValue(string|int $param, mixed $value, int $type = PDO::PARAM_STR) {}
 
     /** @return bool */
     public function closeCursor() {}
@@ -32,22 +32,22 @@ class PDOStatement implements IteratorAggregate
     public function execute(?array $input_parameters = null) {}
 
     /** @return mixed */
-    public function fetch(int $fetch_style = PDO::FETCH_BOTH, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {}
+    public function fetch(int $mode = PDO::FETCH_BOTH, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {}
 
     /** @return array */
-    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, mixed ...$fetch_mode_args) {}
+    public function fetchAll(int $mode = PDO::FETCH_BOTH, mixed ...$args) {}
 
     /** @return mixed */
-    public function fetchColumn(int $column_number = 0) {}
+    public function fetchColumn(int $index = 0) {}
 
     /** @return mixed */
-    public function fetchObject(?string $class_name = "stdClass", ?array $ctor_args = null) {}
+    public function fetchObject(?string $class = "stdClass", ?array $constructor_args = null) {}
 
     /** @return mixed */
-    public function getAttribute(int $attribute) {}
+    public function getAttribute(int $name) {}
 
     /** @return array|false */
-    public function getColumnMeta(int $column) {}
+    public function getColumnMeta(int $index) {}
 
     /** @return bool */
     public function nextRowset() {}
