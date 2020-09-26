@@ -34,11 +34,12 @@
 #include "php_memory_streams.h"
 #include "pdo_stmt_arginfo.h"
 
-#define PHP_STMT_GET_OBJ	\
-  pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS);	\
-  if (!stmt->dbh) {	\
-	  RETURN_FALSE;	\
-  }	\
+#define PHP_STMT_GET_OBJ \
+	pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS); \
+	if (!stmt->dbh) { \
+		zend_throw_error(NULL, "PDO Object is uninitialized"); \
+		RETURN_THROWS(); \
+	} \
 
 static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
 {
