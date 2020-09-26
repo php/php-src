@@ -2058,11 +2058,8 @@ PHP_METHOD(PDOStatement, getIterator)
 /* {{{ overloaded handlers for PDOStatement class */
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
-
 	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
-		/* TODO Error? */
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
+		zend_throw_error(NULL, "Property queryString is read only");
 		return value;
 	} else {
 		return zend_std_write_property(object, name, value, cache_slot);
@@ -2071,11 +2068,8 @@ static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *val
 
 static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **cache_slot)
 {
-	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
-
 	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
-		/* TODO Error? */
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
+		zend_throw_error(NULL, "Property queryString is read only");
 	} else {
 		zend_std_unset_property(object, name, cache_slot);
 	}
