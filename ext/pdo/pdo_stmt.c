@@ -1466,6 +1466,10 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 	param.param_type = (int) param_type;
 
 	if (param.name) {
+		if (ZSTR_LEN(param.name) == 0) {
+			zend_argument_value_error(1, "cannot be empty");
+			RETURN_THROWS();
+		}
 		param.paramno = -1;
 	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
@@ -1510,6 +1514,10 @@ PHP_METHOD(PDOStatement, bindValue)
 	param.param_type = (int) param_type;
 
 	if (param.name) {
+		if (ZSTR_LEN(param.name) == 0) {
+			zend_argument_value_error(1, "cannot be empty");
+			RETURN_THROWS();
+		}
 		param.paramno = -1;
 	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
