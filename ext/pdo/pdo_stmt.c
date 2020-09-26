@@ -1609,8 +1609,11 @@ PHP_METHOD(PDOStatement, setAttribute)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
+
+	/* Driver hasn't registered a function for setting attributes */
 	if (!stmt->methods->set_attribute) {
-		goto fail;
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "This driver doesn't support setting attributes");
+		RETURN_FALSE;
 	}
 
 	PDO_STMT_CLEAR_ERR();
@@ -1618,12 +1621,8 @@ PHP_METHOD(PDOStatement, setAttribute)
 		RETURN_TRUE;
 	}
 
-fail:
-	if (!stmt->methods->set_attribute) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "This driver doesn't support setting attributes");
-	} else {
-		PDO_HANDLE_STMT_ERR();
-	}
+	/* Error while setting attribute */
+	PDO_HANDLE_STMT_ERR();
 	RETURN_FALSE;
 }
 /* }}} */
