@@ -1,7 +1,11 @@
 --TEST--
 Spoofchecker attempting to pass an unknown restriction level
 --SKIPIF--
-<?php if(!extension_loaded('intl') || !class_exists("Spoofchecker")) print 'skip'; ?>
+<?php
+if (!extension_loaded('intl') || !class_exists("Spoofchecker")) print 'skip';
+
+if (!method_exists(new Spoofchecker(), 'setRestrictionLevel')) print 'skip ICU version < 58';
+?>
 --FILE--
 <?php
 
