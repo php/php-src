@@ -2241,8 +2241,9 @@ MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, 
 
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
+	/* This assertion fails if one tries to convert any other encoding to 'uuencode'
+	 * Should we throw an exception in that case? */
+	ZEND_ASSERT(convd);
 
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
