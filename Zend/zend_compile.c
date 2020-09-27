@@ -4596,11 +4596,11 @@ static void zend_compile_static_var_common(zend_string *var_name, zval *value, u
 void zend_compile_static_var(zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
-	zend_ast *value_ast = ast->child[1];
+	zend_ast **value_ast_ptr = &ast->child[1];
 	zval value_zv;
 
-	if (value_ast) {
-		zend_const_expr_to_zval(&value_zv, value_ast);
+	if (*value_ast_ptr) {
+		zend_const_expr_to_zval(&value_zv, value_ast_ptr);
 	} else {
 		ZVAL_NULL(&value_zv);
 	}
@@ -5895,16 +5895,16 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 	for (i = 0; i < declares->children; ++i) {
 		zend_ast *declare_ast = declares->child[i];
 		zend_ast *name_ast = declare_ast->child[0];
-		zend_ast *value_ast = declare_ast->child[1];
+		zend_ast **value_ast_ptr = &declare_ast->child[1];
 		zend_string *name = zend_ast_get_str(name_ast);
 
-		if (value_ast->kind != ZEND_AST_ZVAL) {
+		if ((*value_ast_ptr)->kind != ZEND_AST_ZVAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "declare(%s) value must be a literal", ZSTR_VAL(name));
 		}
 
 		if (zend_string_equals_literal_ci(name, "ticks")) {
 			zval value_zv;
-			zend_const_expr_to_zval(&value_zv, value_ast);
+			zend_const_expr_to_zval(&value_zv, value_ast_ptr);
 			FC(declarables).ticks = zval_get_long(&value_zv);
 			zval_ptr_dtor_nogc(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
@@ -5926,7 +5926,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 					"use block mode");
 			}
 
-			zend_const_expr_to_zval(&value_zv, value_ast);
+			zend_const_expr_to_zval(&value_zv, value_ast_ptr);
 
 			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must have 0 or 1 as its value");
@@ -6233,7 +6233,8 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 
 				zend_bool uses_named_args = 0;
 				for (j = 0; j < args->children; j++) {
-					zend_ast *arg_ast = args->child[j];
+					zend_ast **arg_ast_ptr = &args->child[j];
+					zend_ast *arg_ast = *arg_ast_ptr;
 
 					if (arg_ast->kind == ZEND_AST_UNPACK) {
 						zend_error_noreturn(E_COMPILE_ERROR,
@@ -6242,7 +6243,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 
 					if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
 						attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
-						arg_ast = arg_ast->child[1];
+						arg_ast_ptr = &arg_ast->child[1];
 						uses_named_args = 1;
 
 						for (uint32_t k = 0; k < j; k++) {
@@ -6257,7 +6258,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 							"Cannot use positional argument after named argument");
 					}
 
-					zend_const_expr_to_zval(&attr->args[j].value, arg_ast);
+					zend_const_expr_to_zval(&attr->args[j].value, arg_ast_ptr);
 				}
 			}
 		}
@@ -6324,7 +6325,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_ast *param_ast = list->child[i];
 		zend_ast *type_ast = param_ast->child[0];
 		zend_ast *var_ast = param_ast->child[1];
-		zend_ast *default_ast = param_ast->child[2];
+		zend_ast **default_ast_ptr = &param_ast->child[2];
 		zend_ast *attributes_ast = param_ast->child[3];
 		zend_ast *doc_comment_ast = param_ast->child[4];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
@@ -6337,12 +6338,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_uchar opcode;
 		zend_op *opline;
 		zend_arg_info *arg_info;
-
-		zend_ast_ref *attributes_copy = NULL;
-
-		if (visibility && attributes_ast) {
-			attributes_copy = zend_ast_copy(attributes_ast);
-		}
 
 		if (zend_is_auto_global(name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s",
@@ -6368,17 +6363,17 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			default_node.op_type = IS_UNUSED;
 			op_array->fn_flags |= ZEND_ACC_VARIADIC;
 
-			if (default_ast) {
+			if (*default_ast_ptr) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Variadic parameter cannot have a default value");
 			}
-		} else if (default_ast) {
+		} else if (*default_ast_ptr) {
 			/* we cannot substitute constants here or it will break ReflectionParameter::getDefaultValueConstantName() and ReflectionParameter::isDefaultValueConstant() */
 			uint32_t cops = CG(compiler_options);
 			CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
 			opcode = ZEND_RECV_INIT;
 			default_node.op_type = IS_CONST;
-			zend_const_expr_to_zval(&default_node.u.constant, default_ast);
+			zend_const_expr_to_zval(&default_node.u.constant, default_ast_ptr);
 			CG(compiler_options) = cops;
 
 			if (!optional_param) {
@@ -6409,7 +6404,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		}
 
 		if (type_ast) {
-			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
+			uint32_t default_type = *default_ast_ptr ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
 			zend_bool force_nullable = default_type == IS_NULL && !visibility;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
@@ -6497,8 +6492,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 				scope, name, &default_value, visibility | ZEND_ACC_PROMOTED, doc_comment, type);
 			if (attributes_ast) {
 				zend_compile_attributes(
-					&prop->attributes, GC_AST(attributes_copy), 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
-				zend_ast_ref_destroy(attributes_copy);
+					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 			}
 		}
 	}
@@ -7002,7 +6996,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		zend_property_info *info;
 		zend_ast *prop_ast = list->child[i];
 		zend_ast *name_ast = prop_ast->child[0];
-		zend_ast *value_ast = prop_ast->child[1];
+		zend_ast **value_ast_ptr = &prop_ast->child[1];
 		zend_ast *doc_comment_ast = prop_ast->child[2];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = NULL;
@@ -7036,8 +7030,8 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
-		if (value_ast) {
-			zend_const_expr_to_zval(&value_zv, value_ast);
+		if (*value_ast_ptr) {
+			zend_const_expr_to_zval(&value_zv, value_ast_ptr);
 
 			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)
 					&& !zend_is_valid_default_value(type, &value_zv)) {
@@ -7111,7 +7105,7 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 		zend_class_constant *c;
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
-		zend_ast *value_ast = const_ast->child[1];
+		zend_ast **value_ast_ptr = &const_ast->child[1];
 		zend_ast *doc_comment_ast = const_ast->child[2];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
@@ -7121,7 +7115,7 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 			zend_check_const_and_trait_alias_attr(flags, "constant");
 		}
 
-		zend_const_expr_to_zval(&value_zv, value_ast);
+		zend_const_expr_to_zval(&value_zv, value_ast_ptr);
 		c = zend_declare_class_constant_ex(ce, name, &value_zv, flags, doc_comment);
 
 		if (attr_ast) {
@@ -7622,7 +7616,7 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
-		zend_ast *value_ast = const_ast->child[1];
+		zend_ast **value_ast_ptr = &const_ast->child[1];
 		zend_string *unqualified_name = zend_ast_get_str(name_ast);
 
 		zend_string *name;
@@ -7630,7 +7624,7 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		zval *value_zv = &value_node.u.constant;
 
 		value_node.op_type = IS_CONST;
-		zend_const_expr_to_zval(value_zv, value_ast);
+		zend_const_expr_to_zval(value_zv, value_ast_ptr);
 
 		if (zend_get_special_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -9297,23 +9291,18 @@ void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 }
 /* }}} */
 
-void zend_const_expr_to_zval(zval *result, zend_ast *ast) /* {{{ */
+void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr) /* {{{ */
 {
-	zend_ast *orig_ast = ast;
-	zend_eval_const_expr(&ast);
-	zend_compile_const_expr(&ast);
-	if (ast->kind == ZEND_AST_ZVAL) {
-		ZVAL_COPY_VALUE(result, zend_ast_get_zval(ast));
-	} else {
-		ZVAL_AST(result, zend_ast_copy(ast));
-		/* destroy the ast here, it might have been replaced */
-		zend_ast_destroy(ast);
+	zend_eval_const_expr(ast_ptr);
+	zend_compile_const_expr(ast_ptr);
+	if ((*ast_ptr)->kind != ZEND_AST_ZVAL) {
+		/* Replace with compiled AST zval representation. */
+		zval ast_zv;
+		ZVAL_AST(&ast_zv, zend_ast_copy(*ast_ptr));
+		zend_ast_destroy(*ast_ptr);
+		*ast_ptr = zend_ast_create_zval(&ast_zv);
 	}
-
-	/* Kill this branch of the original AST, as it was already destroyed.
-	 * It would be nice to find a better solution to this problem in the
-	 * future. */
-	orig_ast->kind = 0;
+	ZVAL_COPY(result, zend_ast_get_zval(*ast_ptr));
 }
 /* }}} */
 
