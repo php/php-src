@@ -101,7 +101,7 @@ static void mbfl_convert_filter_common_init(mbfl_convert_filter *filter, const m
 	filter->from = from;
 	filter->to = to;
 
-	if (output_function != NULL) {
+	if (output_function) {
 		filter->output_function = output_function;
 	} else {
 		filter->output_function = mbfl_filter_output_null;
@@ -179,7 +179,6 @@ void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding 
 	}
 
 	const struct mbfl_convert_vtbl *vtbl = mbfl_convert_filter_get_vtbl(from, to);
-
 	if (vtbl == NULL) {
 		vtbl = &vtbl_pass;
 	}
@@ -344,8 +343,7 @@ const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding
  */
 void mbfl_filt_conv_common_ctor(mbfl_convert_filter *filter)
 {
-	filter->status = 0;
-	filter->cache = 0;
+	filter->status = filter->cache = 0;
 }
 
 void mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
