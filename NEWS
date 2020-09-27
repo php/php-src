@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #80109 (Cannot skip arguments when extended debug is enabled).
     (Nikita)
 
+- ODBC:
+  . Fixed bug #22986 (odbc_connect() may reuse persistent connection). (cmb)
+
 - PDO_Firebird:
   . Fixed bug #64937 (Firebird PDO preprocessing sql). (Simonov Denis)
 

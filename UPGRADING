@@ -394,6 +394,7 @@ PHP 8.0 UPGRADE NOTES
   . oci_internal_debug() and its alias ociinternaldebug() have been removed.
 
 - ODBC:
+  . odbc_connect() no longer reuses persistent connections.
   . The unused flags parameter of odbc_exec() has been removed.
 
 - OpenSSL:
