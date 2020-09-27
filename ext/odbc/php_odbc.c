@@ -2167,15 +2167,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 /* Persistent connections: two list-types le_pconn, le_conn and a plist
  * where hashed connection info is stored together with index pointer to
  * the actual link of type le_pconn in the list. Only persistent
- * connections get hashed up. Normal connections use existing pconnections.
- * Maybe this has to change with regard to transactions on pconnections?
- * Possibly set autocommit to on on request shutdown.
- *
- * We do have to hash non-persistent connections, and reuse connections.
- * In the case where two connects were being made, without closing the first
- * connect, access violations were occurring.  This is because some of the
- * "globals" in this module should actually be per-connection variables.  I
- * simply fixed things to get them working for now.  Shane
+ * connections get hashed up.
  */
 /* {{{ odbc_do_connect */
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
@@ -2184,8 +2176,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	size_t db_len, uid_len, pwd_len;
 	zend_long pv_opt = SQL_CUR_DEFAULT;
 	odbc_connection *db_conn;
-	char *hashed_details;
-	int hashed_len, cur_opt;
+	int cur_opt;
 
 	/*  Now an optional 4th parameter specifying the cursor type
 	 *  defaulting to the cursors default
@@ -2212,19 +2203,14 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		persistent = 0;
 	}
 
-	hashed_len = spprintf(&hashed_details, 0, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
-
-	/* FIXME the idea of checking to see if our connection is already persistent
-		is good, but it adds a lot of overhead to non-persistent connections.  We
-		should look and see if we can fix that somehow */
-	/* try to find if we already have this link in our persistent list,
-	 * no matter if it is to be persistent or not
-	 */
-
 try_and_get_another_connection:
 
 	if (persistent) {
+		char *hashed_details;
+		int hashed_len;
 		zend_resource *le;
+
+		hashed_len = spprintf(&hashed_details, 0, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
 
 		/* the link is not in the persistent list */
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_len)) == NULL) {
@@ -2254,9 +2240,8 @@ try_and_get_another_connection:
 			db_conn->res = zend_register_resource(db_conn, le_pconn);
 			RETVAL_RES(db_conn->res);
 		} else { /* found connection */
-			if (le->type != le_pconn) {
-				RETURN_FALSE;
-			}
+			ZEND_ASSERT(le->type == le_pconn);
+
 			/*
 			 * check to see if the connection is still valid
 			 */
@@ -2287,38 +2272,18 @@ try_and_get_another_connection:
 				}
 			}
 		}
+		efree(hashed_details);
 		db_conn->res = zend_register_resource(db_conn, le_pconn);
 		RETVAL_RES(db_conn->res);
 	} else { /* non persistent */
-		zend_resource *index_ptr, new_index_ptr;
+		zend_resource new_index_ptr;
 
-		if ((index_ptr = zend_hash_str_find_ptr(&EG(regular_list), hashed_details, hashed_len)) != NULL) {
-			zend_ulong conn_id;
-			zend_resource *p;
-
-			if (index_ptr->type != le_index_ptr) {
-				RETURN_FALSE;
-			}
-			conn_id = (zend_ulong)index_ptr->ptr;
-			p = zend_hash_index_find_ptr(&EG(regular_list), conn_id);   /* check if the connection is still there */
-
-			if (p && p->ptr && (p->type == le_conn || p->type == le_pconn)) {
-				GC_ADDREF(p);
-				RETVAL_RES(p);
-				efree(hashed_details);
-				return;
-			} else {
-				zend_hash_str_del(&EG(regular_list), hashed_details, hashed_len);
-			}
-		}
 		if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
 			php_error_docref(NULL, E_WARNING,"Too many open connections (%ld)",ODBCG(num_links));
-			efree(hashed_details);
 			RETURN_FALSE;
 		}
 
 		if (!odbc_sqlconnect(&db_conn, db, uid, pwd, cur_opt, 0)) {
-			efree(hashed_details);
 			RETURN_FALSE;
 		}
 		db_conn->res = zend_register_resource(db_conn, le_conn);
@@ -2326,11 +2291,8 @@ try_and_get_another_connection:
 		new_index_ptr.ptr = (void *)(zend_uintptr_t)Z_RES_HANDLE_P(return_value);
 		new_index_ptr.type = le_index_ptr;
 
-		zend_hash_str_update_mem(&EG(regular_list), hashed_details, hashed_len, (void *) &new_index_ptr,
-				   sizeof(zend_resource));
 		ODBCG(num_links)++;
 	}
-	efree(hashed_details);
 }
 /* }}} */
 
