@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 12ba83581b1019e2e0c4565e20682b5e83389cae */
+ * Stub hash: c12bc1c5d1e3dbd8cce67e50c974b20ec5564e67 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -46,8 +46,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_fetchAll, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fetch_style, IS_LONG, 0, "PDO::FETCH_BOTH")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_MIXED, 0, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, constructorArguments, IS_ARRAY, 1, "[]")
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, fetch_mode_args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_fetchColumn, 0, 0, 0)
@@ -78,8 +77,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_setFetchMode, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg1, IS_MIXED, 0, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, constructorArguments, IS_ARRAY, 1, "[]")
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, fetch_mode_args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PDOStatement_getIterator, 0, 0, Iterator, 0)

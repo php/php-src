@@ -35,7 +35,7 @@ class PDOStatement implements IteratorAggregate
     public function fetch(int $fetch_style = PDO::FETCH_BOTH, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {}
 
     /** @return array */
-    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, mixed $arg2 = null, ?array $constructorArguments = []) {}
+    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, mixed ...$fetch_mode_args) {}
 
     /** @return mixed */
     public function fetchColumn(int $column_number = 0) {}
@@ -59,7 +59,7 @@ class PDOStatement implements IteratorAggregate
     public function setAttribute(int $attribute, mixed $value) {}
 
     /** @return bool */
-    public function setFetchMode(int $mode, mixed $arg1 = null, ?array $constructorArguments = []) {}
+    public function setFetchMode(int $mode, mixed ...$fetch_mode_args) {}
 
     public function getIterator(): Iterator {}
 }
