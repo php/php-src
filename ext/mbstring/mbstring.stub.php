@@ -17,9 +17,9 @@ function mb_substitute_character(string|int|null $substitute_character = null): 
 function mb_preferred_mime_name(string $encoding): string|false {}
 
 /** @param array $result */
-function mb_parse_str(string $encoded_string, &$result): bool {}
+function mb_parse_str(string $string, &$result): bool {}
 
-function mb_output_handler(string $contents, int $status): string {}
+function mb_output_handler(string $string, int $status): string {}
 
 function mb_str_split(string $string, int $length = 1, ?string $encoding = null): array {}
 
@@ -59,13 +59,13 @@ function mb_strtoupper(string $string, ?string $encoding = null): string {}
 
 function mb_strtolower(string $string, ?string $encoding = null): string {}
 
-function mb_detect_encoding(string $string, array|string|null $encoding_list = null, bool $strict = false): string|false {}
+function mb_detect_encoding(string $string, array|string|null $encodings = null, bool $strict = false): string|false {}
 
 function mb_list_encodings(): array {}
 
 function mb_encoding_aliases(string $encoding): array {}
 
-function mb_encode_mimeheader(string $string, ?string $charset = null, ?string $transfer_encoding = null, string $linefeed = "\r\n", int $indent = 0): string {}
+function mb_encode_mimeheader(string $string, ?string $charset = null, ?string $transfer_encoding = null, string $newline = "\r\n", int $indent = 0): string {}
 
 function mb_decode_mimeheader(string $string): string {}
 
@@ -73,11 +73,11 @@ function mb_convert_kana(string $string, string $mode = "KV", ?string $encoding 
 
 function mb_convert_variables(string $to_encoding, array|string $from_encoding, mixed &$var, mixed &...$vars): string|false {}
 
-function mb_encode_numericentity(string $string, array $map, ?string $encoding = null, bool $use_hex = false): string {}
+function mb_encode_numericentity(string $string, array $map, ?string $encoding = null, bool $hex = false): string {}
 
 function mb_decode_numericentity(string $string, array $map, ?string $encoding = null): string {}
 
-function mb_send_mail(string $to, string $subject, string $message, array|string $additional_headers = [], ?string $additional_parameters = null): bool {}
+function mb_send_mail(string $to, string $subject, string $message, array|string $additional_headers = [], ?string $additional_params = null): bool {}
 
 function mb_get_info(string $type = "all"): array|string|int|false {}
 
@@ -92,11 +92,11 @@ function mb_chr(int $codepoint, ?string $encoding = null): string|false {}
 #ifdef HAVE_MBREGEX
 function mb_regex_encoding(?string $encoding = null): string|bool {}
 
-/** @param array $registers */
-function mb_ereg(string $pattern, string $string, &$registers = null): int|false {}
+/** @param array $matches */
+function mb_ereg(string $pattern, string $string, &$matches = null): int|false {}
 
-/** @param array $registers */
-function mb_eregi(string $pattern, string $string, &$registers = null): int|false {}
+/** @param array $matches */
+function mb_eregi(string $pattern, string $string, &$matches = null): int|false {}
 
 function mb_ereg_replace(string $pattern, string $replacement, string $string, ?string $options = null): string|false|null {}
 
@@ -120,7 +120,7 @@ function mb_ereg_search_getregs(): array|false {}
 
 function mb_ereg_search_getpos(): int {}
 
-function mb_ereg_search_setpos(int $position): bool {}
+function mb_ereg_search_setpos(int $offset): bool {}
 
 function mb_regex_set_options(?string $options = null): string {}
 #endif

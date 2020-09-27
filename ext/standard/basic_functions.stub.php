@@ -652,7 +652,7 @@ function strip_tags(string $str, array|string|null $allowable_tags = null): stri
 function setlocale(int $category, $locales, ...$rest): string|false {}
 
 /** @param array $result */
-function parse_str(string $encoded_string, &$result): void {}
+function parse_str(string $string, &$result): void {}
 
 function str_getcsv(string $string, string $delimiter = ",", string $enclosure = "\"", string $escape = '\\'): array {}
 
@@ -1027,7 +1027,7 @@ function link(string $target, string $link): bool {}
 
 /* mail.c */
 
-function mail(string $to, string $subject, string $message, array|string $additional_headers = [], string $additional_parameters = ""): bool {}
+function mail(string $to, string $subject, string $message, array|string $additional_headers = [], string $additional_params = ""): bool {}
 
 /* math.c */
 

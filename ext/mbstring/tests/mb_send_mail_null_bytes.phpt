@@ -35,4 +35,4 @@ mb_send_mail(): Argument #1 ($to) must not contain any null bytes
 mb_send_mail(): Argument #2 ($subject) must not contain any null bytes
 mb_send_mail(): Argument #3 ($message) must not contain any null bytes
 mb_send_mail(): Argument #4 ($additional_headers) must not contain any null bytes
-mb_send_mail(): Argument #5 ($additional_parameters) must not contain any null bytes
+mb_send_mail(): Argument #5 ($additional_params) must not contain any null bytes
