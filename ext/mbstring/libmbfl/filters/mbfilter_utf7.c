@@ -410,50 +410,138 @@ int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
+static int mbfl_filt_ident_utf7_base64(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf7_base64_2(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf7_base64_4(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf7_base64_6(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf7_base64_8(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf7_base64_10(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf7_base64_12(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_utf7_base64_14(int c, mbfl_identify_filter *filter);
+
+int (*filt_ident_utf7_functions[])(int, mbfl_identify_filter*) = {
+	mbfl_filt_ident_utf7_base64,
+	mbfl_filt_ident_utf7_base64_2,
+	mbfl_filt_ident_utf7_base64_4,
+	mbfl_filt_ident_utf7_base64_6,
+	mbfl_filt_ident_utf7_base64_8,
+	mbfl_filt_ident_utf7_base64_10,
+	mbfl_filt_ident_utf7_base64_12,
+	mbfl_filt_ident_utf7_base64_14
+};
+
+static unsigned int decode_base64_char(unsigned char c)
+{
+	if (c >= 'A' && c <= 'Z') {
+		return c - 65;
+	} else if (c >= 'a' && c <= 'z') {
+		return c - 71;
+	} else if (c >= '0' && c <= '9') {
+		return c + 4;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == '/') {
+		return 63;
+	}
+	return -1;
+}
+
+static int identify_utf7_base64(int c, unsigned char bits, mbfl_identify_filter *filter)
+{
+	/* Cached bits are in low 2 bytes of `filter->status`
+	 * If expecting the 2nd part of a UTF-16BE surrogate pair, bit 17 is set */
+	int cache, surr;
+
+	if (c == '\\' || c == '~' || c > 0x7F) {
+		filter->flag = 1;
+	} else if (c == '-' || ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '+' && c != '/')) {
+		cache = filter->status & 0xFFFF;
+		surr  = filter->status & 0x10000;
+		if (surr) {
+			/* Error; the 2nd part of a surrogate pair was missing */
+			filter->flag = 1;
+		} else if (cache & ((1 << bits) - 1)) {
+			/* Error; padding was bad */
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		filter->filter_function = mbfl_filt_ident_utf7;
+	} else {
+		cache = ((filter->status & 0xFFFF) << 6) | decode_base64_char(c);
+		surr  = filter->status & 0x10000;
+		bits += 6;
+		if (bits >= 16) {
+			unsigned short codeunit = cache >> (bits - 16);
+			bits -= 16;
+			cache &= ((1 << bits) - 1);
+			if (surr) {
+				if ((codeunit & 0xFC00) != 0xDC00) {
+					/* Error; the 2nd part of a surrogate pair was missing */
+					filter->flag = 1;
+				}
+				if ((codeunit & 0xFC00) != 0xD800) {
+					surr = 0;
+				}
+			} else if ((codeunit & 0xFC00) == 0xD800) {
+				surr = 0x10000;
+			} else if ((codeunit & 0xFC00) == 0xDC00) {
+				/* Error; 2nd part of a surrogate pair appeared when not expected */
+				filter->flag = 1;
+			}
+		}
+
+		filter->status = surr | cache;
+		filter->filter_function = filt_ident_utf7_functions[bits / 2];
+	}
+	return c;
+}
+
+static int mbfl_filt_ident_utf7_base64(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 0, filter);
+}
+
+static int mbfl_filt_ident_utf7_base64_2(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 2, filter);
+}
+
+static int mbfl_filt_ident_utf7_base64_4(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 4, filter);
+}
+
+static int mbfl_filt_ident_utf7_base64_6(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 6, filter);
+}
+
+static int mbfl_filt_ident_utf7_base64_8(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 8, filter);
+}
+
+static int mbfl_filt_ident_utf7_base64_10(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 10, filter);
+}
+
+static int mbfl_filt_ident_utf7_base64_12(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 12, filter);
+}
+
+static int mbfl_filt_ident_utf7_base64_14(int c, mbfl_identify_filter *filter)
+{
+	return identify_utf7_base64(c, 14, filter);
+}
+
 static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter)
 {
-	int n;
-
-	switch (filter->status) {
-	/* directly encoded characters */
-	case 0:
-		if (c == 0x2b) {	/* '+'  shift character */
-			filter->status++;
-		} else if (c == 0x5c || c == 0x7e || c < 0 || c > 0x7f) {	/* illegal character */
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-	/* Modified Base64 */
-	case 1:
-	case 2:
-		n = 0;
-		if (c >= 0x41 && c <= 0x5a) {		/* A - Z */
-			n = 1;
-		} else if (c >= 0x61 && c <= 0x7a) {	/* a - z */
-			n = 1;
-		} else if (c >= 0x30 && c <= 0x39) {	/* 0 - 9 */
-			n = 1;
-		} else if (c == 0x2b) {			/* '+' */
-			n = 1;
-		} else if (c == 0x2f) {			/* '/' */
-			n = 1;
-		}
-		if (n <= 0) {
-			if (filter->status == 1 && c != 0x2d) {
-				filter->flag = 1;	/* bad */
-			} else if (c < 0 || c > 0x7f) {
-				filter->flag = 1;	/* bad */
-			}
-			filter->status = 0;
-		} else {
-			filter->status = 2;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
+	if (c == '+') { /* '+' shift character */
+		filter->filter_function = mbfl_filt_ident_utf7_base64;
+	} else if (c == '\\' || c == '~' || c > 0x7F) { /* illegal character */
+		filter->flag = 1;	/* bad */
 	}
 
 	return c;
