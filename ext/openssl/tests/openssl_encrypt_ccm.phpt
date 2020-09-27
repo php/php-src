@@ -10,15 +10,17 @@ if (!in_array('aes-256-ccm', openssl_get_cipher_methods()))
 --FILE--
 <?php
 require_once __DIR__ . "/cipher_tests.inc";
-$method = 'aes-256-ccm';
-$tests = openssl_get_cipher_tests($method);
+$methods = ['aes-128-ccm', 'aes-256-ccm'];
 
-foreach ($tests as $idx => $test) {
-    echo "TEST $idx\n";
-    $ct = openssl_encrypt($test['pt'], $method, $test['key'], OPENSSL_RAW_DATA,
-        $test['iv'], $tag, $test['aad'], strlen($test['tag']));
-    var_dump($test['ct'] === $ct);
-    var_dump($test['tag'] === $tag);
+foreach ($methods as $method) {
+    $tests = openssl_get_cipher_tests($method);
+    foreach ($tests as $idx => $test) {
+        echo "$method - TEST $idx\n";
+        $ct = openssl_encrypt($test['pt'], $method, $test['key'], OPENSSL_RAW_DATA,
+            $test['iv'], $tag, $test['aad'], strlen($test['tag']));
+        var_dump($test['ct'] === $ct);
+        var_dump($test['tag'] === $tag);
+    }
 }
 
 // Empty IV error
@@ -32,7 +34,13 @@ var_dump(strlen($tag));
 var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 16), $tag, '', 1024));
 ?>
 --EXPECTF--
-TEST 0
+aes-128-ccm - TEST 0
+bool(true)
+bool(true)
+aes-128-ccm - TEST 1
+bool(true)
+bool(true)
+aes-256-ccm - TEST 0
 bool(true)
 bool(true)
 

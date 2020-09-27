@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #79825 (opcache.file_cache causes SIGSEGV when custom opcode
     handlers changed). (SammyK)
 
+- OpenSSL:
+  . Fixed bug ##79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12 
+    bytes IV). (CVE-2020-7069) (Jakub Zelenka)
+
 - PDO:
   . Fixed bug #80027 (Terrible performance using $query->fetch on queries with
     many bind parameters (Matteo)

@@ -6441,16 +6441,16 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 {
 	char *iv_new;
 
-	/* Best case scenario, user behaved */
-	if (*piv_len == iv_required_len) {
-		return SUCCESS;
-	}
-
 	if (mode->is_aead) {
 		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_ivlen_flag, *piv_len, NULL) != 1) {
 			php_error_docref(NULL, E_WARNING, "Setting of IV length for AEAD mode failed");
 			return FAILURE;
 		}
+		return SUCCESS;
+	}
+
+	/* Best case scenario, user behaved */
+	if (*piv_len == iv_required_len) {
 		return SUCCESS;
 	}
 
