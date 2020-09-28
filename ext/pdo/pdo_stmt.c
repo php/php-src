@@ -1314,7 +1314,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			/* Figure out correct class */
 			if (arg2) {
 				if (Z_TYPE_P(arg2) != IS_STRING) {
-					zend_argument_type_error(2, "must be string, %s given", zend_zval_type_name(arg2));
+					zend_argument_type_error(2, "must be of type string, %s given", zend_zval_type_name(arg2));
 					RETURN_THROWS();
 				}
 				stmt->fetch.cls.ce = zend_fetch_class(Z_STR_P(arg2), ZEND_FETCH_CLASS_AUTO);
@@ -1344,6 +1344,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				RETURN_THROWS();
 			}
 			if (arg2 == NULL) {
+				/* TODO use "must be of type callable" format? */
 				zend_argument_type_error(2, "must be a callable, null given");
 				RETURN_THROWS();
 			}
@@ -1366,7 +1367,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			if (arg2) {
 				// Reuse convert_to_long(arg2); ?
 				if (Z_TYPE_P(arg2) != IS_LONG) {
-					zend_argument_type_error(2, "must be int, %s given", zend_zval_type_name(arg2));
+					zend_argument_type_error(2, "must be of type int, %s given", zend_zval_type_name(arg2));
 					RETURN_THROWS();
 				}
 				if (Z_LVAL_P(arg2) < 0) {
@@ -1787,7 +1788,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_LONG) {
-				zend_argument_type_error(arg1_arg_num, "must be int, %s given", zend_zval_type_name(&args[0]));
+				zend_argument_type_error(arg1_arg_num, "must be of type int, %s given", zend_zval_type_name(&args[0]));
 				return false;
 			}
 			if (Z_LVAL(args[0]) < 0) {
@@ -1829,7 +1830,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					return false;
 				}
 				if (Z_TYPE(args[0]) != IS_STRING) {
-					zend_argument_type_error(arg1_arg_num, "must be string, %s given", zend_zval_type_name(&args[0]));
+					zend_argument_type_error(arg1_arg_num, "must be of type string, %s given", zend_zval_type_name(&args[0]));
 					return false;
 				}
 				cep = zend_lookup_class(Z_STR(args[0]));
@@ -1841,7 +1842,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				/* TODO: Improve logic? */
 				if (variadic_num_args == 2) {
 					if (Z_TYPE(args[1]) != IS_NULL && Z_TYPE(args[1]) != IS_ARRAY) {
-						zend_argument_type_error(constructor_arg_num, "must be ?array, %s given",
+						zend_argument_type_error(constructor_arg_num, "must be of type ?array, %s given",
 							zend_zval_type_name(&args[1]));
 						return false;
 					}
@@ -1869,7 +1870,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_OBJECT) {
-				zend_argument_type_error(arg1_arg_num, "must be object, %s given", zend_zval_type_name(&args[0]));
+				zend_argument_type_error(arg1_arg_num, "must be of type object, %s given", zend_zval_type_name(&args[0]));
 				return false;
 			}
 
@@ -1891,7 +1892,6 @@ PHP_METHOD(PDOStatement, setFetchMode)
 	zval *args = NULL;
 	uint32_t num_args = 0;
 
-	/* Support null for constructor arguments for BC */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l*", &fetch_mode, &args, &num_args) == FAILURE) {
 		RETURN_THROWS();
 	}

@@ -531,7 +531,7 @@ PHP_METHOD(PDO, prepare)
 		}
 		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 			if (Z_TYPE_P(item) != IS_ARRAY) {
-				zend_type_error("PDO::ATTR_STATEMENT_CLASS ctor_args must be ?array, %s given",
+				zend_type_error("PDO::ATTR_STATEMENT_CLASS ctor_args must be of type ?array, %s given",
 					zend_zval_type_name(value));
 				RETURN_THROWS();
 			}
@@ -681,7 +681,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 /* TODO: Make distinction between numeric and non-numeric strings */
 #define PDO_LONG_PARAM_CHECK \
 	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
-		zend_type_error("Attribute value must be int for selected attribute, %s given", zend_zval_type_name(value)); \
+		zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_type_name(value)); \
 		return FAILURE; \
 	} \
 
@@ -787,7 +787,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 				if (Z_TYPE_P(item) != IS_ARRAY) {
-					zend_type_error("PDO::ATTR_STATEMENT_CLASS ctor_args must be ?array, %s given",
+					zend_type_error("PDO::ATTR_STATEMENT_CLASS ctor_args must be of type ?array, %s given",
 						zend_zval_type_name(value));
 					return FAILURE;
 				}

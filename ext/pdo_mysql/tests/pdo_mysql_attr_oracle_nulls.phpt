@@ -88,8 +88,8 @@ MySQLPDOTest::skip();
     print "done!";
 ?>
 --EXPECTF--
-Attribute value must be int for selected attribute, array given
-Attribute value must be int for selected attribute, stdClass given
+Attribute value must be of type int for selected attribute, array given
+Attribute value must be of type int for selected attribute, stdClass given
 array(1) {
   [0]=>
   array(6) {
