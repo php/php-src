@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Updated to PCRE 10.35. (cmb)
   . Fixed bug #80118 (Erroneous whitespace match with JIT only). (cmb)
 
+- PDO_ODBC:
+  . Fixed bug #67465 (NULL Pointer dereference in odbc_handle_preparer). (cmb)
+
 - Standard:
   . Fixed bug #80114 (parse_url does not accept URLs with port 0). (cmb, twosee)
   . Fixed bug #76943 (Inconsistent stream_wrapper_restore() errors). (cmb)
