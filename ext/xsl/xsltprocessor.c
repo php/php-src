@@ -66,27 +66,22 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 	memset((char *)params, 0, parsize);
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(parht, string_key, value) {
-		if (string_key == NULL) {
-			php_error_docref(NULL, E_WARNING, "Invalid argument or parameter array");
-			efree(params);
-			return NULL;
-		} else {
-			if (Z_TYPE_P(value) != IS_STRING) {
-				if (!try_convert_to_string(value)) {
-					efree(params);
-					return NULL;
-				}
+		ZEND_ASSERT(string_key != NULL);
+		if (Z_TYPE_P(value) != IS_STRING) {
+			if (!try_convert_to_string(value)) {
+				efree(params);
+				return NULL;
 			}
+		}
 
-			if (!xpath_params) {
-				xpath_expr = php_xsl_xslt_string_to_xpathexpr(Z_STRVAL_P(value));
-			} else {
-				xpath_expr = estrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
-			}
-			if (xpath_expr) {
-				params[i++] = estrndup(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
-				params[i++] = xpath_expr;
-			}
+		if (!xpath_params) {
+			xpath_expr = php_xsl_xslt_string_to_xpathexpr(Z_STRVAL_P(value));
+		} else {
+			xpath_expr = estrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
+		}
+		if (xpath_expr) {
+			params[i++] = estrndup(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
+			params[i++] = xpath_expr;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -336,8 +331,8 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		doc = nodep->doc;
 	}
 	if (doc == NULL) {
-		php_error(E_WARNING, "Invalid Document");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a valid XML node");
+		RETURN_THROWS();
 	}
 
 	/* libxslt uses _private, so we must copy the imported
@@ -417,13 +412,17 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	if (node) {
 		doc = node->doc;
 	}
+
 	if (doc == NULL) {
-		php_error_docref(NULL, E_WARNING, "Invalid Document");
+		zend_argument_value_error(1, "must be a valid XML node");
 		return NULL;
 	}
 
 	if (style == NULL) {
-		php_error_docref(NULL, E_WARNING, "No stylesheet associated to this object");
+		zend_string *name = get_active_function_or_method_name();
+		zend_throw_error(NULL, "%s() can only be called after a stylesheet has been imported",
+			ZSTR_VAL(name));
+		zend_string_release(name);
 		return NULL;
 	}
 
