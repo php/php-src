@@ -56,7 +56,7 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 /* array.c */
 
-function array_push(array &$stack, mixed ...$values): int {}
+function array_push(array &$array, mixed ...$values): int {}
 
 function krsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
@@ -100,13 +100,13 @@ function pos(array|object $array): mixed {}
 
 function key(array|object $array): int|string|null {}
 
-function min(mixed $arg, mixed ...$args): mixed {}
+function min(mixed $value, mixed ...$values): mixed {}
 
-function max(mixed $arg, mixed ...$args): mixed {}
+function max(mixed $value, mixed ...$values): mixed {}
 
-function array_walk(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
+function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): bool {}
 
-function array_walk_recursive(array|object &$input, callable $callback, mixed $argument = UNKNOWN): bool {}
+function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): bool {}
 
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
@@ -121,7 +121,7 @@ function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""
  */
 function compact($var_name, ...$var_names): array {}
 
-function array_fill(int $start, int $length, mixed $value): array {}
+function array_fill(int $start, int $count, mixed $value): array {}
 
 function array_fill_keys(array $keys, mixed $value): array {}
 
@@ -231,7 +231,7 @@ function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
 
-function array_filter(array $array, ?callable $callback = null, int $use_keys = 0): array {}
+function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
 
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
@@ -258,18 +258,18 @@ function base64_decode(string $string, bool $strict = false): string|false {}
 
 function constant(string $name): mixed {}
 
-function ip2long(string $ip_address): int|false {}
+function ip2long(string $ip): int|false {}
 
-function long2ip(int $ip_address): string|false {}
+function long2ip(int $ip): string|false {}
 
 function getenv(?string $name = null, bool $local_only = false): string|array|false {}
 
 #ifdef HAVE_PUTENV
-function putenv(string $setting): bool {}
+function putenv(string $assignment): bool {}
 #endif
 
 /** @param int $rest_index */
-function getopt(string $options, array $long_options = [], &$rest_index = null): array|false {}
+function getopt(string $short_options, array $long_options = [], &$rest_index = null): array|false {}
 
 function flush(): void {}
 
@@ -287,7 +287,7 @@ function get_current_user(): string {}
 
 function get_cfg_var(string $name): string|array|false {}
 
-function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $extra_headers = null): bool {}
+function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
 function error_get_last(): ?array {}
 
@@ -355,9 +355,9 @@ function register_tick_function(callable $callback, mixed ...$args): bool {}
 
 function unregister_tick_function(callable $callback): void {}
 
-function is_uploaded_file(string $path): bool {}
+function is_uploaded_file(string $filename): bool {}
 
-function move_uploaded_file(string $path, string $new_path): bool {}
+function move_uploaded_file(string $filename, string $new_filename): bool {}
 
 function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
@@ -395,7 +395,7 @@ function strptime(string $timestamp, string $format): array|false {}
 function gethostname(): string|false {}
 #endif
 
-function gethostbyaddr(string $ip_address): string|false {}
+function gethostbyaddr(string $ip): string|false {}
 
 function gethostbyname(string $hostname): string {}
 
@@ -480,11 +480,11 @@ function syslog(int $priority, string $message): bool {}
 #endif
 
 #ifdef HAVE_INET_NTOP
-function inet_ntop(string $ip_address): string|false {}
+function inet_ntop(string $ip): string|false {}
 #endif
 
 #ifdef HAVE_INET_PTON
-function inet_pton(string $ip_address): string|false {}
+function inet_pton(string $ip): string|false {}
 #endif
 
 /* metaphone.c */
@@ -492,7 +492,7 @@ function inet_pton(string $ip_address): string|false {}
 function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */
-function header(string $header, bool $replace = true, int $http_response_code = 0): void {}
+function header(string $header, bool $replace = true, int $response_code = 0): void {}
 
 function header_remove(?string $name = null): void {}
 
@@ -503,10 +503,10 @@ function setcookie(string $name, string $value = "", array|int $expires_or_optio
 function http_response_code(int $response_code = 0): int|bool {}
 
 /**
- * @param string $file
+ * @param string $filename
  * @param int $line
  */
-function headers_sent(&$file = null, &$line = null): bool {}
+function headers_sent(&$filename = null, &$line = null): bool {}
 
 function headers_list(): array {}
 
@@ -537,9 +537,9 @@ function bin2hex(string $string): string {}
 
 function hex2bin(string $string): string|false {}
 
-function strspn(string $string, string $characters, int $start = 0, ?int $length = null): int {}
+function strspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
-function strcspn(string $string, string $characters, int $start = 0, ?int $length = null): int {}
+function strcspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
 #if HAVE_NL_LANGINFO
 function nl_langinfo(int $item): string|false {}
@@ -602,9 +602,9 @@ function str_ends_with(string $haystack, string $needle): bool {}
 
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
-function substr(string $string, int $start, ?int $length = null): string {}
+function substr(string $string, int $offset, ?int $length = null): string {}
 
-function substr_replace(array|string $string, array|string $replace, array|int $start, array|int|null $length = null): string|array {}
+function substr_replace(array|string $string, array|string $replace, array|int $offset, array|int|null $length = null): string|array {}
 
 function quotemeta(string $string): string {}
 
@@ -616,7 +616,7 @@ function ucfirst(string $string): string {}
 
 function lcfirst(string $string): string {}
 
-function ucwords(string $string, string $delimiters = " \t\r\n\f\v"): string {}
+function ucwords(string $string, string $separators = " \t\r\n\f\v"): string {}
 
 function strtr(string $string, string|array $from, ?string $to = null): string {}
 
@@ -654,7 +654,7 @@ function setlocale(int $category, $locales, ...$rest): string|false {}
 /** @param array $result */
 function parse_str(string $string, &$result): void {}
 
-function str_getcsv(string $string, string $delimiter = ",", string $enclosure = "\"", string $escape = '\\'): array {}
+function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = '\\'): array {}
 
 function str_repeat(string $string, int $times): string {}
 
@@ -682,7 +682,7 @@ function str_split(string $string, int $length = 1): array {}
 
 function strpbrk(string $string, string $characters): string|false {}
 
-function substr_compare(string $main_string, string $string, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
+function substr_compare(string $haystack, string $needle, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
 
 function utf8_encode(string $string): string {}
 
@@ -856,10 +856,10 @@ function unlink(string $filename, $context = null): bool {}
 function file_put_contents(string $filename, mixed $content, int $flags = 0, $context = null): int|false {}
 
 /** @param resource $stream */
-function fputcsv($stream, array $fields, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
+function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
 
 /** @param resource $stream */
-function fgetcsv($stream, ?int $length = null, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
+function fgetcsv($stream, ?int $length = null, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
 
 function realpath(string $path): string|false {}
 
