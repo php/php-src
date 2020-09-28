@@ -1147,11 +1147,6 @@ PHP_METHOD(PDO, quote)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (str_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	PDO_DBH_CLEAR_ERR();
 	if (!dbh->methods->quoter) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support quoting");
