@@ -194,7 +194,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function getPrototype() {}
 
     /** @return void */
-    public function setAccessible(bool $isAccessible) {}
+    public function setAccessible(bool $accessible) {}
 }
 
 class ReflectionClass implements Reflector
@@ -364,7 +364,7 @@ class ReflectionClass implements Reflector
 
 class ReflectionObject extends ReflectionClass
 {
-    public function __construct(object $argument) {}
+    public function __construct(object $object) {}
 }
 
 class ReflectionProperty implements Reflector
@@ -415,7 +415,7 @@ class ReflectionProperty implements Reflector
     public function getDocComment() {}
 
     /** @return void */
-    public function setAccessible(bool $isAccessible) {}
+    public function setAccessible(bool $accessible) {}
 
     /** @return ReflectionType|null */
     public function getType() {}
@@ -475,7 +475,7 @@ class ReflectionParameter implements Reflector
     final private function __clone() {}
 
     /** @param string|array|object $function */
-    public function __construct($function, int|string $parameter) {}
+    public function __construct($function, int|string $param) {}
 
     public function __toString(): string {}
 

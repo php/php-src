@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35e17de0cdf6c11a315f6d10fd711492d1da567c */
+ * Stub hash: f5f4cfeab0e81c2b51bf11dde7b7d40fc87d9cbc */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -144,7 +144,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionMethod_getPrototype arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_setAccessible, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, isAccessible, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, accessible, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass___clone arginfo_class_ReflectionFunctionAbstract___clone
@@ -277,9 +277,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionObject___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, argument, IS_OBJECT, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionObject___construct arginfo_class_ReflectionClass_isInstance
 
 #define arginfo_class_ReflectionProperty___clone arginfo_class_ReflectionFunctionAbstract___clone
 
@@ -363,7 +361,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_TYPE_MASK(0, parameter, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_ReflectionFunction___toString
