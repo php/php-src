@@ -113,10 +113,10 @@ Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; ch
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_change_user(): (%d/%d): Access denied for user '%s'@'%s' (using password: %s) in %s on line %d
-mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
+mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
-mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
+mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 [011] Access denied for user '%s'@'%s' (using password: YES)
 [014] Access denied for user '%s'@'%s' (using password: YES)
 done!
