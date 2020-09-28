@@ -1777,11 +1777,11 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 			break;
 
 		case PHP_ICONV_ERR_CONVERTER:
-			php_error_docref(NULL, E_NOTICE, "Cannot open converter");
+			php_error_docref(NULL, E_WARNING, "Cannot open converter");
 			break;
 
 		case PHP_ICONV_ERR_WRONG_CHARSET:
-			php_error_docref(NULL, E_NOTICE, "Wrong charset, conversion from `%s' to `%s' is not allowed",
+			php_error_docref(NULL, E_WARNING, "Wrong charset, conversion from \"%s\" to \"%s\" is not allowed",
 			          in_charset, out_charset);
 			break;
 

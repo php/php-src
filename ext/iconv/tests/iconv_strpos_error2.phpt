@@ -24,6 +24,6 @@ echo "Done";
 --EXPECTF--
 *** Testing iconv_strpos() : error conditions ***
 
-Notice: iconv_strpos(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
+Warning: iconv_strpos(): Wrong charset, conversion from "unknown-encoding" to "UCS-4LE" is not allowed in %s on line %d
 bool(false)
 Done
