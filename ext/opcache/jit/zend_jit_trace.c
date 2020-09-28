@@ -5329,7 +5329,8 @@ done:
 					 && (p->op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0
 					 && ((p+1)->op == ZEND_JIT_TRACE_VM
 					  || (p+1)->op == ZEND_JIT_TRACE_END)
-					 && TRACE_FRAME_NUM_ARGS(call) < p->op_array->num_args
+					 && (TRACE_FRAME_NUM_ARGS(call) < 0
+					  || TRACE_FRAME_NUM_ARGS(call) < p->op_array->num_args)
 					 && !zend_jit_trace_opline_guard(&dasm_state, (p+1)->opline)) {
 						goto jit_failure;
 					}
