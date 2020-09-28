@@ -68,18 +68,18 @@ function get_included_files(): array {}
 /** @alias get_included_files */
 function get_required_files(): array {}
 
-function trigger_error(string $message, int $error_type = E_USER_NOTICE): bool {}
+function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool {}
 
 /** @alias trigger_error */
-function user_error(string $message, int $error_type = E_USER_NOTICE): bool {}
+function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
 
 /** @return string|array|object|null */
-function set_error_handler(?callable $error_handler, int $error_types = E_ALL) {}
+function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
 function restore_error_handler(): bool {}
 
 /** @return string|array|object|null */
-function set_exception_handler(?callable $exception_handler) {}
+function set_exception_handler(?callable $callback) {}
 
 function restore_exception_handler(): bool {}
 

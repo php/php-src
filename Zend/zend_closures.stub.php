@@ -14,7 +14,7 @@ final class Closure
 
     public function bindTo(?object $newThis, object|string|null $newScope = "static"): ?Closure {}
 
-    public function call(object $newThis, mixed ...$arguments): mixed {}
+    public function call(object $newThis, mixed ...$args): mixed {}
 
     public static function fromCallable(callable $callback): Closure {}
 }
