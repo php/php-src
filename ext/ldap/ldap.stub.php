@@ -226,7 +226,7 @@ function ldap_get_option($link, int $option, &$retval = null): bool {}
  * @param resource|null $link
  * @param array|string|int|bool $newval
  */
-function ldap_set_option($link, int $option, $newval): bool {}
+function ldap_set_option($link, int $option, $value): bool {}
 
 /**
  * @param resource $link
