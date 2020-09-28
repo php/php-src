@@ -2005,7 +2005,8 @@ propagate_arg:
 						ssa_var_info[phi->ssa_var].type = t & ~MAY_BE_GUARD;
 					}
 				} else if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
-					if (!(t1 & MAY_BE_GUARD)) {
+					if (!(t1 & MAY_BE_GUARD)
+					 || is_checked_guard(tssa, ssa_opcodes, phi->sources[1], phi->ssa_var)) {
 						ssa_var_info[phi->ssa_var].type = t & ~MAY_BE_GUARD;
 						ssa_var_info[phi->sources[0]].type = t | MAY_BE_GUARD;
 					}
