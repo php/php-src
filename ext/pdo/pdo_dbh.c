@@ -949,11 +949,6 @@ PHP_METHOD(PDO, lastInsertId)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (name && namelen == 0) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	PDO_DBH_CLEAR_ERR();
 
 	if (!dbh->methods->last_id) {
