@@ -2300,7 +2300,7 @@ PHP_FUNCTION(pg_lo_create)
 		RETURN_THROWS();
 	}
 
-	/* Overloaded method use default link if arg 1 is not a ressource, set oid pointer */
+	/* Overloaded method uses default link if arg 1 is not a resource, set oid pointer */
 	if ((argc == 1) && (Z_TYPE_P(pgsql_link) != IS_RESOURCE)) {
 		oid = pgsql_link;
 		pgsql_link = NULL;
@@ -4615,7 +4615,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		/* TODO: Check when meta data can be broken and see if can use assertions instead */
 
 		if (!err && field == NULL) {
-			zend_value_error("Array of values must be an associated array with string keys");
+			zend_value_error("Array of values must be an associative array with string keys");
 			err = 1;
 		}
 
@@ -4639,7 +4639,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			php_error_docref(NULL, E_NOTICE, "Detected broken meta data. Missing 'is enum'");
 			err = 1;
 		}
-		if (!err && (Z_TYPE_P(val) == IS_ARRAY || Z_TYPE_P(val) == IS_OBJECT)) {
+		if (!err && (Z_TYPE_P(val) == IS_ARRAY || Z_TYPE_P(val) == IS_OBJECT || Z_TYPE_P(val) == IS_RESOURCE)) {
 			zend_type_error("Values must be of type string|int|float|bool|null, %s given", zend_zval_type_name(val));
 			err = 1;
 		}
@@ -5373,7 +5373,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 
 	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(var_array), fld) {
 		if (fld == NULL) {
-			zend_value_error("Array of values must be an associated array of string keys");
+			zend_value_error("Array of values must be an associative array of string keys");
 			goto cleanup;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
