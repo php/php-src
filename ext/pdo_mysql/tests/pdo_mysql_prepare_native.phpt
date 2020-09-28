@@ -344,7 +344,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECT--
-PDO::prepare(): Argument #1 ($statement) cannot be empty
+PDO::prepare(): Argument #1 ($query) cannot be empty
 array(1) {
   [0]=>
   array(1) {
