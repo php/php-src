@@ -1,9 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
-<<<<<<< HEAD
- * Stub hash: c12bc1c5d1e3dbd8cce67e50c974b20ec5564e67 */
-=======
- * Stub hash: c9ad501fee826e75bb1101edd6fee762958e6e03 */
->>>>>>> 8218779939... Fix PDO parameters.
+ * Stub hash: b3338fc077eab1280da093f059fac14dd7f19678 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -49,13 +45,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_fetch, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_fetchAll, 0, 0, 0)
-<<<<<<< HEAD
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fetch_style, IS_LONG, 0, "PDO::FETCH_BOTH")
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, fetch_mode_args, IS_MIXED, 0)
-=======
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PDO::FETCH_BOTH")
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
->>>>>>> 8218779939... Fix PDO parameters.
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_fetchColumn, 0, 0, 0)
