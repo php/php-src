@@ -2027,18 +2027,22 @@ propagate_arg:
 
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_TSSA)) {
 		if (parent_trace) {
-			fprintf(stderr, "---- TRACE %d TSSA start (side trace %d/%d) %s() %s:%d\n",
+			fprintf(stderr, "---- TRACE %d TSSA start (side trace %d/%d) %s%s%s() %s:%d\n",
 				ZEND_JIT_TRACE_NUM,
 				parent_trace,
 				exit_num,
+				trace_buffer->op_array->scope ? ZSTR_VAL(trace_buffer->op_array->scope->name) : "",
+				trace_buffer->op_array->scope ? "::" : "",
 				trace_buffer->op_array->function_name ?
 					ZSTR_VAL(trace_buffer->op_array->function_name) : "$main",
 				ZSTR_VAL(trace_buffer->op_array->filename),
 				trace_buffer[1].opline->lineno);
 		} else {
-			fprintf(stderr, "---- TRACE %d TSSA start (%s) %s() %s:%d\n",
+			fprintf(stderr, "---- TRACE %d TSSA start (%s) %s%s%s() %s:%d\n",
 				ZEND_JIT_TRACE_NUM,
 				zend_jit_trace_star_desc(trace_buffer->start),
+				trace_buffer->op_array->scope ? ZSTR_VAL(trace_buffer->op_array->scope->name) : "",
+				trace_buffer->op_array->scope ? "::" : "",
 				trace_buffer->op_array->function_name ?
 					ZSTR_VAL(trace_buffer->op_array->function_name) : "$main",
 				ZSTR_VAL(trace_buffer->op_array->filename),
@@ -6227,9 +6231,11 @@ repeat:
 	}
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
-		fprintf(stderr, "---- TRACE %d start (%s) %s() %s:%d\n",
+		fprintf(stderr, "---- TRACE %d start (%s) %s%s%s() %s:%d\n",
 			trace_num,
 			zend_jit_trace_star_desc(ZEND_OP_TRACE_INFO(opline, offset)->trace_flags),
+			EX(func)->op_array.scope ? ZSTR_VAL(EX(func)->op_array.scope->name) : "",
+			EX(func)->op_array.scope ? "::" : "",
 			EX(func)->op_array.function_name ?
 				ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
 			ZSTR_VAL(EX(func)->op_array.filename),
@@ -6263,9 +6269,11 @@ repeat:
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			size_t offset = jit_extension->offset;
 
-			fprintf(stderr, "---- TRACE %d start (%s) %s() %s:%d\n",
+			fprintf(stderr, "---- TRACE %d start (%s) %s%s%s() %s:%d\n",
 				trace_num,
 				zend_jit_trace_star_desc(ZEND_OP_TRACE_INFO(opline, offset)->trace_flags),
+				op_array->scope ? ZSTR_VAL(op_array->scope->name) : "",
+				op_array->scope ? "::" : "",
 				op_array->function_name ?
 					ZSTR_VAL(op_array->function_name) : "$main",
 				ZSTR_VAL(op_array->filename),
@@ -6519,8 +6527,10 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	}
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
-		fprintf(stderr, "---- TRACE %d start (side trace %d/%d) %s() %s:%d\n",
+		fprintf(stderr, "---- TRACE %d start (side trace %d/%d) %s%s%s() %s:%d\n",
 			trace_num, parent_num, exit_num,
+			EX(func)->op_array.scope ? ZSTR_VAL(EX(func)->op_array.scope->name) : "",
+			EX(func)->op_array.scope ? "::" : "",
 			EX(func)->op_array.function_name ?
 				ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
 			ZSTR_VAL(EX(func)->op_array.filename),
@@ -6569,9 +6579,11 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			size_t offset = jit_extension->offset;
 
-			fprintf(stderr, "---- TRACE %d start (%s) %s() %s:%d\n",
+			fprintf(stderr, "---- TRACE %d start (%s) %s%s%s() %s:%d\n",
 				trace_num,
 				zend_jit_trace_star_desc(ZEND_OP_TRACE_INFO(opline, offset)->trace_flags),
+				op_array->scope ? ZSTR_VAL(op_array->scope->name) : "",
+				op_array->scope ? "::" : "",
 				op_array->function_name ?
 					ZSTR_VAL(op_array->function_name) : "$main",
 				ZSTR_VAL(op_array->filename),
@@ -6706,9 +6718,11 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				if (UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
 					/* Undefined array index or property */
 					if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT) {
-						fprintf(stderr, "     TRACE %d exit %d %s() %s:%d\n",
+						fprintf(stderr, "     TRACE %d exit %d %s%s%s() %s:%d\n",
 							trace_num,
 							exit_num,
+							EX(func)->op_array.scope ? ZSTR_VAL(EX(func)->op_array.scope->name) : "",
+							EX(func)->op_array.scope ? "::" : "",
 							EX(func)->op_array.function_name ?
 								ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
 							ZSTR_VAL(EX(func)->op_array.filename),
@@ -6768,9 +6782,11 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		EX(opline) < EX(func)->op_array.opcodes + EX(func)->op_array.last);
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT) {
-		fprintf(stderr, "     TRACE %d exit %d %s() %s:%d\n",
+		fprintf(stderr, "     TRACE %d exit %d %s%s%s() %s:%d\n",
 			trace_num,
 			exit_num,
+			EX(func)->op_array.scope ? ZSTR_VAL(EX(func)->op_array.scope->name) : "",
+			EX(func)->op_array.scope ? "::" : "",
 			EX(func)->op_array.function_name ?
 				ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
 			ZSTR_VAL(EX(func)->op_array.filename),
