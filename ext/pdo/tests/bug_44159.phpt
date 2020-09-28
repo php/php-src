@@ -44,4 +44,4 @@ TypeError: PDO::ATTR_STATEMENT_CLASS value must be of type array, int given
 TypeError: PDO::ATTR_STATEMENT_CLASS value must be of type array, string given
 TypeError: Attribute value must be int for selected attribute, null given
 bool(true)
-TypeError: Attribute value must be int for selected attribute, string given
+bool(true)

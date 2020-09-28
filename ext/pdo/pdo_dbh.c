@@ -678,8 +678,9 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 {
 	zend_long lval;
 
+/* TODO: Make distinction between numeric and non-numeric strings */
 #define PDO_LONG_PARAM_CHECK \
-	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
+	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
 		zend_type_error("Attribute value must be int for selected attribute, %s given", zend_zval_type_name(value)); \
 		return FAILURE; \
 	} \
