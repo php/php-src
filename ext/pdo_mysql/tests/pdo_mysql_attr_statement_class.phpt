@@ -114,13 +114,15 @@ $db = MySQLPDOTest::factory();
     // Yes, this is a fatal error and I want it to fail.
     abstract class mystatement6 extends mystatement5 {
     }
-    if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement6', array('mystatement6')))))
-        printf("[011] Expecting boolean/true got %s\n", var_export($tmp, true));
-    $stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 1');
+    try {
+        $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, ['mystatement6', ['mystatement6']]);
+        $stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 1');
+    } catch (\Error $e) {
+        echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
 
-    print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(12) "PDOStatement"
@@ -157,9 +159,4 @@ array(1) {
     string(1) "a"
   }
 }
-
-Fatal error: Uncaught Error: Cannot instantiate abstract class mystatement6 in %s:%d
-Stack trace:
-#0 %s(%d): PDO->query('SELECT id, labe...')
-#1 {main}
-  thrown in %s on line %d
+Error: Cannot instantiate abstract class mystatement6

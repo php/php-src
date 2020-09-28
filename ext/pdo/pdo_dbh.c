@@ -34,7 +34,7 @@
 #include "zend_interfaces.h"
 #include "pdo_dbh_arginfo.h"
 
-static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
+static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
 void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error)
 {
@@ -405,6 +405,7 @@ options:
 					continue;
 				}
 				ZVAL_DEREF(attr_value);
+				/* TODO: Check that this doesn't fail? */
 				pdo_dbh_attribute_set(dbh, long_key, attr_value);
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -434,6 +435,9 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 	}
 
 	if (UNEXPECTED(object_init_ex(object, dbstmt_ce) != SUCCESS)) {
+		if (EXPECTED(!EG(exception))) {
+			zend_throw_error(NULL, "Cannot instantiate user-supplied statement class");
+		}
 		return NULL;
 	}
 
@@ -544,13 +548,8 @@ PHP_METHOD(PDO, prepare)
 		ZVAL_COPY_VALUE(&ctor_args, &dbh->def_stmt_ctor_args);
 	}
 
-	/* Need to check if pdo_stmt_instantiate() throws an exception unconditionally to see if can change the RETURN_FALSE; */
 	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, &ctor_args)) {
-		if (EXPECTED(!EG(exception))) {
-			zend_throw_error(NULL, "Cannot instantiate user-supplied statement class");
-		}
-		PDO_HANDLE_DBH_ERR();
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	stmt = Z_PDO_STMT_P(return_value);
 
@@ -674,7 +673,7 @@ PHP_METHOD(PDO, inTransaction)
 }
 /* }}} */
 
-static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
+static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
 {
 	zend_long lval;
 
@@ -752,6 +751,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 			zval *item;
 
 			if (dbh->is_persistent) {
+				/* TODO: ValueError/ PDOException? */
 				pdo_raise_impl_error(dbh, NULL, "HY000",
 					"PDO::ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
 					);
@@ -1070,10 +1070,7 @@ PHP_METHOD(PDO, query)
 	PDO_DBH_CLEAR_ERR();
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args)) {
-		if (EXPECTED(!EG(exception))) {
-			pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class");
-		}
-		return;
+		RETURN_THROWS();
 	}
 	stmt = Z_PDO_STMT_P(return_value);
 

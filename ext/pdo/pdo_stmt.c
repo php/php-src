@@ -41,7 +41,7 @@
 		RETURN_THROWS(); \
 	} \
 
-static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
+static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
 {
 	if (stmt->bound_param_map) {
 		/* rewriting :name to ? style.
@@ -90,9 +90,9 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 /* }}} */
 
 /* trigger callback hook for parameters */
-static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type) /* {{{ */
+static bool dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type) /* {{{ */
 {
-	int ret = 1, is_param = 1;
+	bool ret = 1, is_param = 1;
 	struct pdo_bound_param_data *param;
 	HashTable *ht;
 
@@ -212,7 +212,7 @@ static void param_dtor(zval *el) /* {{{ */
 }
 /* }}} */
 
-static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, int is_param) /* {{{ */
+static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, bool is_param) /* {{{ */
 {
 	HashTable *hash;
 	zval *parameter;
@@ -381,12 +381,7 @@ PHP_METHOD(PDOStatement, execute)
 				param.paramno = -1;
 			} else {
 				/* we're okay to be zero based here */
-				/* num_index is unsignend
-				if (num_index < 0) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY093", NULL);
-					RETURN_FALSE;
-				}
-				*/
+				/* num_index is unsignend */
 				param.paramno = num_index;
 			}
 
@@ -601,7 +596,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 }
 /* }}} */
 
-static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
+static bool do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
 {
 	if (!stmt->executed) {
 		return 0;
@@ -652,7 +647,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zen
 }
 /* }}} */
 
-static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
+static bool do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 {
 	zend_class_entry *ce = stmt->fetch.cls.ce;
 	zend_fcall_info *fci = &stmt->fetch.cls.fci;
@@ -677,8 +672,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		fcc->called_scope = ce;
 		return 1;
 	} else if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
-		/* TODO Error? */
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not have a constructor, use NULL for the ctor_params parameter, or simply omit it");
+		zend_throw_error(NULL, "User-supplied statement does not accept constructor arguments");
 		return 0;
 	} else {
 		return 1; /* no ctor no args is also ok */
@@ -686,7 +680,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args) /* {{{ */
+static bool make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args) /* {{{ */
 {
 	char *is_callable_error = NULL;
 
@@ -809,6 +803,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		case PDO_FETCH_KEY_PAIR:
 			if (stmt->column_count != 2) {
+				/* TODO: Error? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns.");
 				return 0;
 			}
@@ -904,6 +899,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			break;
 
 		case PDO_FETCH_INTO:
+			/* TODO: Make this an assertion and ensure this is true higher up? */
 			if (Z_ISUNDEF(stmt->fetch.into)) {
 				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch-into object specified.");
@@ -919,6 +915,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			break;
 
 		case PDO_FETCH_FUNC:
+			/* TODO: Make this an assertion and ensure this is true higher up? */
 			if (Z_ISUNDEF(stmt->fetch.func.function)) {
 				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
@@ -1633,7 +1630,7 @@ PHP_METHOD(PDOStatement, setAttribute)
 
 /* {{{ Get an attribute */
 
-static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long attr)
+static bool generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long attr)
 {
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
