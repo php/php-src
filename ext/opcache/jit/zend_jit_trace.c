@@ -5322,6 +5322,7 @@ done:
 					while (prev_opline->opcode == ZEND_EXT_FCALL_BEGIN || prev_opline->opcode == ZEND_TICKS) {
 						prev_opline--;
 					}
+					JIT_G(current_frame) = call;
 					if ((prev_opline->opcode == ZEND_SEND_ARRAY
 					  || prev_opline->opcode == ZEND_SEND_UNPACK
 					  || prev_opline->opcode == ZEND_CHECK_UNDEF_ARGS)
@@ -5334,6 +5335,7 @@ done:
 					 && !zend_jit_trace_opline_guard(&dasm_state, (p+1)->opline)) {
 						goto jit_failure;
 					}
+					JIT_G(current_frame) = frame;
 				}
 			}
 
