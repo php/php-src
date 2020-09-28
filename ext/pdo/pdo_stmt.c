@@ -470,10 +470,8 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	}
 
 	if (colno >= stmt->column_count) {
-		/* TODO Should this be a ValueError? */
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
-		ZVAL_FALSE(dest);
-
+		zend_value_error("Invalid column index");
+		ZVAL_NULL(dest);
 		return;
 	}
 
@@ -697,7 +695,7 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 			zend_type_error("%s", is_callable_error);
 			efree(is_callable_error);
 		} else {
-			zend_type_error("user-supplied function must be a valid callback");
+			zend_type_error("User-supplied function must be a valid callback");
 		}
 		return false;
 	}
@@ -824,9 +822,9 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				zend_value_error("Column index must be greater than or equal to 0");
 				return false;
 			}
-			/* TODO Always a ValueError? */
+
 			if (colno >= stmt->column_count) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
+				zend_value_error("Invalid column index");
 				return false;
 			}
 
@@ -1150,14 +1148,14 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 	switch(mode) {
 		case PDO_FETCH_FUNC:
 			if (!fetch_all) {
-				zend_argument_value_error(mode_arg_num, "can only use PDO::FETCH_FUNC in PDOStatement::fetchAll()");
+				zend_value_error("Can only use PDO::FETCH_FUNC in PDOStatement::fetchAll()");
 				return 0;
 			}
 			return 1;
 
 		case PDO_FETCH_LAZY:
 			if (fetch_all) {
-				zend_argument_value_error(mode_arg_num, "cannot use PDO::FETCH_LAZY in PDOStatement::fetchAll()");
+				zend_value_error("Cannot be PDO::FETCH_LAZY in PDOStatement::fetchAll()");
 				return 0;
 			}
 			/* fall through */
@@ -1171,7 +1169,6 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 				return 0;
 			}
 			if (mode >= PDO_FETCH__MAX) {
-				/* TODO Better error message? */
 				zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
 				return 0;
 			}
@@ -1228,8 +1225,9 @@ PHP_METHOD(PDOStatement, fetchObject)
 	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
-	/* use pdo_stmt_verify_mode() to set fetch mode for this specific statement */
-	ZEND_ASSERT(pdo_stmt_verify_mode(stmt, PDO_FETCH_CLASS, 0, false));
+	/* Use pdo_stmt_verify_mode() to set fetch mode for this specific statement */
+	/* This should NOT fail */
+	pdo_stmt_verify_mode(stmt, PDO_FETCH_CLASS, 0, false);
 
 	old_ce = stmt->fetch.cls.ce;
 	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
