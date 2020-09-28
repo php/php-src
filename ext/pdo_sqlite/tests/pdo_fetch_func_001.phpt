@@ -125,7 +125,7 @@ array(2) {
 }
 function "nothing" not found or invalid function name
 function "" not found or invalid function name
-PDOStatement::fetchAll(): Argument #2 ($arg2) must be a callable, null given
+PDOStatement::fetchAll(): Argument #2 must be a callable, null given
 no array or string given
 cannot access "self" when no class scope is active
 array(2) {
