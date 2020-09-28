@@ -1306,8 +1306,8 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	}
 
 	if (!source_len) {
-		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
 		php_error_docref(NULL, E_WARNING, "Input string is too long");
@@ -1389,8 +1389,8 @@ PHP_METHOD(DOMDocument, save)
 	}
 
 	if (file_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Filename");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1624,9 +1624,9 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 		RETURN_THROWS();
 	}
 
-	if (source_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Schema source");
-		RETURN_FALSE;
+	if (!source_len) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1725,9 +1725,9 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 		RETURN_THROWS();
 	}
 
-	if (source_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Schema source");
-		RETURN_FALSE;
+	if (!source_len) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1824,8 +1824,8 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (!source_len) {
-		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
@@ -1931,8 +1931,8 @@ PHP_METHOD(DOMDocument, saveHTMLFile)
 	}
 
 	if (file_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid Filename");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
