@@ -151,7 +151,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inque
 	/* did the query make sense to me? */
 	if (query_type == (PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL)) {
 		/* they mixed both types; punt */
-		/* TODO Always Error */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "mixed named and positional parameters");
 		ret = -1;
 		goto clean_up;
@@ -193,7 +192,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inque
 				goto safe;
 			}
 		}
-		/* TODO Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "number of bound variables does not match number of tokens");
 		ret = -1;
 		goto clean_up;
@@ -224,7 +222,6 @@ safe:
 			if (param == NULL) {
 				/* parameter was not defined */
 				ret = -1;
-				/* TODO Error? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 				goto clean_up;
 			}
@@ -260,7 +257,6 @@ safe:
 							zend_string_release_ex(buf, 0);
 						}
 					} else {
-						/* TODO Always TypeError */
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 						ret = -1;
 						goto clean_up;
