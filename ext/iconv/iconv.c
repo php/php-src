@@ -884,6 +884,10 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 	iconv_close(cd);
 
+	if (err == PHP_ICONV_ERR_SUCCESS && offset > cnt) {
+		return PHP_ICONV_ERR_OUT_BY_BOUNDS;
+	}
+
 	return err;
 }
 /* }}} */
@@ -1764,6 +1768,10 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 			php_error_docref(NULL, E_WARNING, "Malformed string");
 			break;
 
+		case PHP_ICONV_ERR_OUT_BY_BOUNDS:
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+			break;
+
 		default:
 			/* other error */
 			php_error_docref(NULL, E_NOTICE, "Unknown error (%d)", errno);
@@ -1881,12 +1889,13 @@ PHP_FUNCTION(iconv_strpos)
 		}
 		offset += haystk_len;
 		if (offset < 0) { /* If offset before start */
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string.");
-			RETURN_FALSE;
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+			RETURN_THROWS();
 		}
 	}
 
 	if (ZSTR_LEN(ndl) < 1) {
+		// TODO: Support empty needles!
 		RETURN_FALSE;
 	}
 

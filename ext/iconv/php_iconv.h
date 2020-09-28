@@ -87,7 +87,8 @@ typedef enum _php_iconv_err_t {
 	PHP_ICONV_ERR_ILLEGAL_CHAR      = 5,
 	PHP_ICONV_ERR_UNKNOWN           = 6,
 	PHP_ICONV_ERR_MALFORMED         = 7,
-	PHP_ICONV_ERR_ALLOC             = 8
+	PHP_ICONV_ERR_ALLOC             = 8,
+	PHP_ICONV_ERR_OUT_BY_BOUNDS     = 9
 } php_iconv_err_t;
 /* }}} */
 
