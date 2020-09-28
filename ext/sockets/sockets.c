@@ -2315,8 +2315,9 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 				} else if (zend_string_equals_literal(key, "ai_family")) {
 					hints.ai_family = zval_get_long(hint);
 				} else {
-					/* TODO Promote to warning/error? */
-					php_error_docref(NULL, E_NOTICE, "Unknown hint %s", ZSTR_VAL(key));
+					zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
+						"\"ai_protocol\", or \"ai_family\"");
+					RETURN_THROWS();
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
