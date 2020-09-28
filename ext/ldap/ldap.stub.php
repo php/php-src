@@ -10,256 +10,256 @@ function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNK
 function ldap_connect(?string $uri = null, int $port = 389) {}
 #endif
 
-/** @param resource $link */
-function ldap_unbind($link): bool {}
+/** @param resource $ldap */
+function ldap_unbind($ldap): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @alias ldap_unbind
  */
-function ldap_close($link): bool {}
+function ldap_close($ldap): bool {}
 
-/** @param resource $link */
-function ldap_bind($link, ?string $dn = null, ?string $password = null): bool {}
+/** @param resource $ldap */
+function ldap_bind($ldap, ?string $dn = null, ?string $password = null): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @return resource|false
  */
-function ldap_bind_ext($link, ?string $dn = null, ?string $password = null, array $controls = []) {}
+function ldap_bind_ext($ldap, ?string $dn = null, ?string $password = null, array $controls = []) {}
 
 #ifdef HAVE_LDAP_SASL
-/** @param resource $link */
-function ldap_sasl_bind($link, ?string $dn = null, ?string $password = null, ?string $mech = null, ?string $realm = null, ?string $authc_id = null, ?string $authz_id = null, ?string $props = null): bool {}
+/** @param resource $ldap */
+function ldap_sasl_bind($ldap, ?string $dn = null, ?string $password = null, ?string $mech = null, ?string $realm = null, ?string $authc_id = null, ?string $authz_id = null, ?string $props = null): bool {}
 #endif
 
 /**
- * @param resource|array $link
+ * @param resource|array $ldap
  * @return resource|false
  */
-function ldap_read($link, array|string $base, array|string $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $controls = []) {}
+function ldap_read($ldap, array|string $base, array|string $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $controls = []) {}
 
 /**
- * @param resource|array $link
+ * @param resource|array $ldap
  * @return resource|false
  */
-function ldap_list($link, array|string $base, array|string $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $controls = []) {}
+function ldap_list($ldap, array|string $base, array|string $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $controls = []) {}
 
 /**
- * @param resource|array $link
+ * @param resource|array $ldap
  * @return resource|false
  */
-function ldap_search($link, array|string $base, array|string $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $controls = []) {}
+function ldap_search($ldap, array|string $base, array|string $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $controls = []) {}
 
-/** @param resource $link */
-function ldap_free_result($link): bool {}
+/** @param resource $ldap */
+function ldap_free_result($ldap): bool {}
 
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $result
  */
-function ldap_count_entries($link, $result): int {}
+function ldap_count_entries($ldap, $result): int {}
 
 /**
- * @param resource $link
- * @param resource $result
- * @return resource|false
- */
-function ldap_first_entry($link, $result) {}
-
-/**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $result
  * @return resource|false
  */
-function ldap_next_entry($link, $result) {}
+function ldap_first_entry($ldap, $result) {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
+ * @param resource $result
+ * @return resource|false
+ */
+function ldap_next_entry($ldap, $result) {}
+
+/**
+ * @param resource $ldap
  * @param resource $result
  */
-function ldap_get_entries($link, $result): array|false {}
+function ldap_get_entries($ldap, $result): array|false {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  */
-function ldap_first_attribute($link, $entry): string|false {}
+function ldap_first_attribute($ldap, $entry): string|false {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  */
-function ldap_next_attribute($link, $entry): string|false {}
+function ldap_next_attribute($ldap, $entry): string|false {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  */
-function ldap_get_attributes($link, $entry): array {}
+function ldap_get_attributes($ldap, $entry): array {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  */
-function ldap_get_values_len($link, $entry, string $attribute): array|false {}
+function ldap_get_values_len($ldap, $entry, string $attribute): array|false {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  * @alias ldap_get_values_len
  */
-function ldap_get_values($link, $entry, string $attribute): array|false {}
+function ldap_get_values($ldap, $entry, string $attribute): array|false {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  */
-function ldap_get_dn($link, $entry): string|false {}
+function ldap_get_dn($ldap, $entry): string|false {}
 
 function ldap_explode_dn(string $dn, int $with_attrib): array|false {}
 
 function ldap_dn2ufn(string $dn): string|false {}
 
-/** @param resource $link */
-function ldap_add($link, string $dn, array $entry, array $controls = []): bool {}
+/** @param resource $ldap */
+function ldap_add($ldap, string $dn, array $entry, array $controls = []): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @return resource|false
  */
-function ldap_add_ext($link, string $dn, array $entry, array $controls = []) {}
+function ldap_add_ext($ldap, string $dn, array $entry, array $controls = []) {}
 
-/** @param resource $link */
-function ldap_delete($link, string $dn, array $controls = []): bool {}
+/** @param resource $ldap */
+function ldap_delete($ldap, string $dn, array $controls = []): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @return resource|false
  */
-function ldap_delete_ext($link, string $dn, array $controls = []) {}
+function ldap_delete_ext($ldap, string $dn, array $controls = []) {}
 
-/** @param resource $link */
-function ldap_modify_batch($link, string $dn, array $modifications_info, array $controls = []): bool {}
+/** @param resource $ldap */
+function ldap_modify_batch($ldap, string $dn, array $modifications_info, array $controls = []): bool {}
 
-/** @param resource $link */
-function ldap_mod_add($link, string $dn, array $entry, array $controls = []): bool {}
+/** @param resource $ldap */
+function ldap_mod_add($ldap, string $dn, array $entry, array $controls = []): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @return resource|false
  */
-function ldap_mod_add_ext($link, string $dn, array $entry, array $controls = []) {}
+function ldap_mod_add_ext($ldap, string $dn, array $entry, array $controls = []) {}
 
-/** @param resource $link */
-function ldap_mod_replace($link, string $dn, array $entry, array $controls = []): bool {}
+/** @param resource $ldap */
+function ldap_mod_replace($ldap, string $dn, array $entry, array $controls = []): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @alias ldap_mod_replace
  */
-function ldap_modify($link, string $dn, array $entry, array $controls = []): bool {}
+function ldap_modify($ldap, string $dn, array $entry, array $controls = []): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @return resource|false
  */
-function ldap_mod_replace_ext($link, string $dn, array $entry, array $controls = []) {}
+function ldap_mod_replace_ext($ldap, string $dn, array $entry, array $controls = []) {}
 
-/** @param resource $link */
-function ldap_mod_del($link, string $dn, array $entry, array $controls = []): bool {}
+/** @param resource $ldap */
+function ldap_mod_del($ldap, string $dn, array $entry, array $controls = []): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @return resource|false
  */
-function ldap_mod_del_ext($link, string $dn, array $entry, array $controls = []) {}
+function ldap_mod_del_ext($ldap, string $dn, array $entry, array $controls = []) {}
 
-/** @param resource $link */
-function ldap_errno($link): int {}
+/** @param resource $ldap */
+function ldap_errno($ldap): int {}
 
-/** @param resource $link */
-function ldap_error($link): string {}
+/** @param resource $ldap */
+function ldap_error($ldap): string {}
 
 function ldap_err2str(int $errno): string {}
 
-/** @param resource $link */
-function ldap_compare($link, string $dn, string $attribute, string $value, array $controls = []): bool|int {}
+/** @param resource $ldap */
+function ldap_compare($ldap, string $dn, string $attribute, string $value, array $controls = []): bool|int {}
 
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
 /**
- * @param resource $link
+ * @param resource $ldap
  * @deprecated since 7.4
  */
-function ldap_control_paged_result($link, int $pagesize, bool $iscritical = false, string $cookie = ""): bool {}
+function ldap_control_paged_result($ldap, int $pagesize, bool $iscritical = false, string $cookie = ""): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $result
  * @param string $cookie
  * @param int $estimated
  * @deprecated since 7.4
  */
-function ldap_control_paged_result_response($link, $result, &$cookie = null, &$estimated = null): bool {}
+function ldap_control_paged_result_response($ldap, $result, &$cookie = null, &$estimated = null): bool {}
 #endif
 
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
-/** @param resource $link */
-function ldap_rename($link, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, array $controls = []): bool {}
+/** @param resource $ldap */
+function ldap_rename($ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, array $controls = []): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @return resource|false
  */
-function ldap_rename_ext($link, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn, array $controls = []) {}
+function ldap_rename_ext($ldap, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn, array $controls = []) {}
 
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param array|string|int $retval
  */
-function ldap_get_option($link, int $option, &$retval = null): bool {}
+function ldap_get_option($ldap, int $option, &$retval = null): bool {}
 
 /**
- * @param resource|null $link
- * @param array|string|int|bool $newval
+ * @param resource|null $ldap
+ * @param array|string|int|bool $value
  */
-function ldap_set_option($link, int $option, $value): bool {}
+function ldap_set_option($ldap, int $option, $value): bool {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $result
  */
-function ldap_count_references($link, $result): int {}
+function ldap_count_references($ldap, $result): int {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $result
  * @return resource|false
  */
-function ldap_first_reference($link, $result) {}
+function ldap_first_reference($ldap, $result) {}
 
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  * @return resource|false
  */
-function ldap_next_reference($link, $entry) {}
+function ldap_next_reference($ldap, $entry) {}
 
 #ifdef HAVE_LDAP_PARSE_REFERENCE
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $entry
  * @param array $referrals
  */
-function ldap_parse_reference($link, $entry, &$referrals): bool {}
+function ldap_parse_reference($ldap, $entry, &$referrals): bool {}
 #endif
 
 #ifdef HAVE_LDAP_PARSE_RESULT
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $result
  * @param int $errcode
  * @param string $matcheddn
@@ -267,18 +267,18 @@ function ldap_parse_reference($link, $entry, &$referrals): bool {}
  * @param array $referrals
  * @param array $controls
  */
-function ldap_parse_result($link, $result, &$errcode, &$matcheddn = null, &$errmsg = null, &$referrals = null, &$controls = null): bool {}
+function ldap_parse_result($ldap, $result, &$errcode, &$matcheddn = null, &$errmsg = null, &$referrals = null, &$controls = null): bool {}
 #endif
 #endif
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-/** @param resource $link */
-function ldap_set_rebind_proc($link, ?callable $callback): bool {}
+/** @param resource $ldap */
+function ldap_set_rebind_proc($ldap, ?callable $callback): bool {}
 #endif
 
 #ifdef HAVE_LDAP_START_TLS_S
-/** @param resource $link */
-function ldap_start_tls($link): bool {}
+/** @param resource $ldap */
+function ldap_start_tls($ldap): bool {}
 #endif
 
 function ldap_escape(string $value, string $ignore = "", int $flags = 0): string {}
@@ -292,39 +292,39 @@ function ldap_8859_to_t61(string $value): string|false {}
 
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param string $retdata
  * @param string $retoid
  * @return resource|bool
  */
-function ldap_exop($link, string $reqoid, ?string $reqdata = null, ?array $controls = [], &$retdata = null, &$retoid = null) {}
+function ldap_exop($ldap, string $reqoid, ?string $reqdata = null, ?array $controls = [], &$retdata = null, &$retoid = null) {}
 #endif
 
 #ifdef HAVE_LDAP_PASSWD
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param array $controls
  */
-function ldap_exop_passwd($link, string $user = "", string $old_password = "", string $new_password = "", &$controls = null): string|bool {}
+function ldap_exop_passwd($ldap, string $user = "", string $old_password = "", string $new_password = "", &$controls = null): string|bool {}
 #endif
 
 
 #ifdef HAVE_LDAP_WHOAMI_S
-/** @param resource $link */
-function ldap_exop_whoami($link): string|bool {}
+/** @param resource $ldap */
+function ldap_exop_whoami($ldap): string|bool {}
 #endif
 
 #ifdef HAVE_LDAP_REFRESH_S
-/** @param resource $link */
-function ldap_exop_refresh($link, string $dn, int $ttl): int|false {}
+/** @param resource $ldap */
+function ldap_exop_refresh($ldap, string $dn, int $ttl): int|false {}
 #endif
 
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 /**
- * @param resource $link
+ * @param resource $ldap
  * @param resource $result
  * @param string $retdata
  * @param string $retoid
  */
-function ldap_parse_exop($link, $result, &$retdata = null, &$retoid = null): bool {}
+function ldap_parse_exop($ldap, $result, &$retdata = null, &$retoid = null): bool {}
 #endif
