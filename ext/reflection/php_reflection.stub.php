@@ -194,7 +194,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function getPrototype() {}
 
     /** @return void */
-    public function setAccessible(bool $isAccessible) {}
+    public function setAccessible(bool $accessible) {}
 }
 
 class ReflectionClass implements Reflector
@@ -254,16 +254,16 @@ class ReflectionClass implements Reflector
     public function getProperty(string $name) {}
 
     /** @return ReflectionProperty[] */
-    public function getProperties(?int $filter = null) {}
+    public function getProperties(?int $modifiers = null) {}
 
     /** @return bool */
     public function hasConstant(string $name) {}
 
     /** @return array|null */
-    public function getConstants(int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
+    public function getConstants(int $modifiers = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
 
     /** @return ReflectionClassConstant[] */
-    public function getReflectionConstants(int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
+    public function getReflectionConstants(int $modifiers = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
 
     /** @return mixed */
     public function getConstant(string $name) {}
@@ -364,7 +364,7 @@ class ReflectionClass implements Reflector
 
 class ReflectionObject extends ReflectionClass
 {
-    public function __construct(object $argument) {}
+    public function __construct(object $object) {}
 }
 
 class ReflectionProperty implements Reflector
@@ -415,7 +415,7 @@ class ReflectionProperty implements Reflector
     public function getDocComment() {}
 
     /** @return void */
-    public function setAccessible(bool $isAccessible) {}
+    public function setAccessible(bool $accessible) {}
 
     /** @return ReflectionType|null */
     public function getType() {}
@@ -475,7 +475,7 @@ class ReflectionParameter implements Reflector
     final private function __clone() {}
 
     /** @param string|array|object $function */
-    public function __construct($function, int|string $parameter) {}
+    public function __construct($function, int|string $param) {}
 
     public function __toString(): string {}
 
