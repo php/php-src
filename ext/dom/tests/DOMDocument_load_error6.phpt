@@ -1,0 +1,31 @@
+--TEST--
+Test DOMDocument::load() with invalid paths
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
+--FILE--
+<?php
+// create dom document
+$dom = new DOMDocument();
+try {
+    $dom->load("");
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $dom->load("/path/with/\0/byte");
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    // Path is too long
+    $dom->load(str_repeat(" ", PHP_MAXPATHLEN + 1));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+?>
+--EXPECT--
+DOMDocument::load(): Argument #1 ($filename) must not be empty
+Path to document must not contain any null bytes
+Path to document is not a valid path
