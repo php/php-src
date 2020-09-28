@@ -6251,6 +6251,28 @@ repeat:
 	}
 	stop &= ~ZEND_JIT_TRACE_HALT;
 
+	if (UNEXPECTED(trace_buffer[1].opline != orig_opline)) {
+		orig_opline = trace_buffer[1].opline;
+		op_array = (zend_op_array*)trace_buffer[0].op_array;
+		jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+		offset = jit_extension->offset;
+		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
+			const zend_op_array *op_array = trace_buffer[0].op_array;
+			const zend_op *opline = trace_buffer[1].opline;
+			zend_jit_op_array_trace_extension *jit_extension =
+				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+			size_t offset = jit_extension->offset;
+
+			fprintf(stderr, "---- TRACE %d start (%s) %s() %s:%d\n",
+				trace_num,
+				zend_jit_trace_star_desc(ZEND_OP_TRACE_INFO(opline, offset)->trace_flags),
+				op_array->function_name ?
+					ZSTR_VAL(op_array->function_name) : "$main",
+				ZSTR_VAL(op_array->filename),
+				opline->lineno);
+		}
+	}
+
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
 	}
@@ -6539,6 +6561,24 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	}
 	stop &= ~ZEND_JIT_TRACE_HALT;
 
+	if (UNEXPECTED(trace_buffer->start != ZEND_JIT_TRACE_START_SIDE)) {
+		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
+			const zend_op_array *op_array = trace_buffer[0].op_array;
+			const zend_op *opline = trace_buffer[1].opline;
+			zend_jit_op_array_trace_extension *jit_extension =
+				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+			size_t offset = jit_extension->offset;
+
+			fprintf(stderr, "---- TRACE %d start (%s) %s() %s:%d\n",
+				trace_num,
+				zend_jit_trace_star_desc(ZEND_OP_TRACE_INFO(opline, offset)->trace_flags),
+				op_array->function_name ?
+					ZSTR_VAL(op_array->function_name) : "$main",
+				ZSTR_VAL(op_array->filename),
+				opline->lineno);
+		}
+	}
+
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
 	}
@@ -6557,7 +6597,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 					zend_jit_trace_stop_description[stop]);
 			}
 		}
-		if (EXPECTED(stop != ZEND_JIT_TRACE_STOP_LOOP)) {
+		if (EXPECTED(trace_buffer->start == ZEND_JIT_TRACE_START_SIDE)) {
 			stop = zend_jit_compile_side_trace(trace_buffer, parent_num, exit_num, polymorphism);
 		} else {
 			const zend_op_array *op_array = trace_buffer[0].op_array;
@@ -6590,6 +6630,10 @@ abort:
 				fprintf(stderr, "---- EXIT %d/%d blacklisted\n",
 					parent_num, exit_num);
 			}
+		}
+		if (ZEND_JIT_TRACE_STOP_REPEAT(stop)) {
+			execute_data = EG(current_execute_data);
+			return zend_jit_trace_hot_root(execute_data, EX(opline));
 		}
 	}
 

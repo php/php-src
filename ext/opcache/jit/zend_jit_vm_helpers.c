@@ -503,6 +503,15 @@ static int zend_jit_trace_call_level(const zend_execute_data *call)
 	return call_level;
 }
 
+static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, int end, uint8_t event, const zend_op_array *op_array, const zend_op *opline)
+{
+	int idx;
+
+	TRACE_START(ZEND_JIT_TRACE_START, event, op_array, opline);
+	memmove(trace_buffer + idx, trace_buffer + start, (end - start) * sizeof(zend_jit_trace_rec));
+	return idx + (end - start);
+}
+
 /*
  *  Trace Linking Rules
  *  ===================
@@ -559,6 +568,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	int backtrack_ret_recursion = -1;
 	int backtrack_ret_recursion_level = 0;
 	int loop_unroll_limit = 0;
+	int last_loop = -1;
+	int last_loop_level = -1;
+	const zend_op *last_loop_opline = NULL;
 	uint32_t megamorphic = 0;
 	const zend_op_array *unrolled_calls[ZEND_JIT_TRACE_MAX_CALL_DEPTH + ZEND_JIT_TRACE_MAX_RET_DEPTH];
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -832,6 +844,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 
 						unrolled_calls[ret_level] = &EX(func)->op_array;
 						ret_level++;
+						last_loop_opline = NULL;
 
 						if (prev_call) {
 							int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, 0, &megamorphic, ret_level + level);
@@ -854,6 +867,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					}
 				} else {
 					level--;
+					if (level < last_loop_level) {
+						last_loop_opline = NULL;
+					}
 					TRACE_RECORD(ZEND_JIT_TRACE_BACK, 0, op_array);
 				}
 			}
@@ -960,24 +976,44 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				stop = ZEND_JIT_TRACE_STOP_BLACK_LIST;
 				break;
 			} else if (trace_flags & ZEND_JIT_TRACE_START_LOOP) {
-				if (start != ZEND_JIT_TRACE_START_SIDE) {
-					uint8_t bad_stop;
+				uint8_t bad_stop;
 
+				if (start != ZEND_JIT_TRACE_START_SIDE) {
 					if (opline == orig_opline && level + ret_level == 0) {
 						stop = ZEND_JIT_TRACE_STOP_LOOP;
 						break;
 					}
-					/* Fail to try creating a trace for inner loop first.
-					   If this doesn't work try unroling loop. */
+				}
+
+				if (start != ZEND_JIT_TRACE_START_SIDE
+				 || level + ret_level != 0) {
+					/* First try creating a trace for inner loop.
+					   If this doesn't work try loop unroling. */
 					bad_stop = zend_jit_trace_bad_stop_event(opline,
 						JIT_G(blacklist_root_trace) / 2);
 					if (bad_stop != ZEND_JIT_TRACE_STOP_INNER_LOOP
 					 && bad_stop != ZEND_JIT_TRACE_STOP_LOOP_EXIT) {
-						stop = ZEND_JIT_TRACE_STOP_INNER_LOOP;
-						break;
+						if (start == ZEND_JIT_TRACE_START_SIDE
+						 || zend_jit_trace_bad_stop_event(orig_opline,
+								JIT_G(blacklist_root_trace) / 2) != ZEND_JIT_TRACE_STOP_INNER_LOOP) {
+							stop = ZEND_JIT_TRACE_STOP_INNER_LOOP;
+							break;
+						}
 					}
 				}
-				if (loop_unroll_limit < JIT_G(max_loops_unroll)) {
+
+				if (opline == last_loop_opline
+				 && level == last_loop_level) {
+					idx = zend_jit_trace_subtrace(trace_buffer,
+						last_loop, idx, ZEND_JIT_TRACE_START_LOOP, op_array, opline);
+					start = ZEND_JIT_TRACE_START_LOOP;
+					stop = ZEND_JIT_TRACE_STOP_LOOP;
+					ret_level = 0;
+					break;
+				} else if (loop_unroll_limit < JIT_G(max_loops_unroll)) {
+					last_loop = idx;
+					last_loop_opline = opline;
+					last_loop_level = level;
 					loop_unroll_limit++;
 				} else {
 					stop = ZEND_JIT_TRACE_STOP_LOOP_UNROLL;
