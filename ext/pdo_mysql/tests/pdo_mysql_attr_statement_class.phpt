@@ -125,14 +125,11 @@ array(1) {
   [0]=>
   string(12) "PDOStatement"
 }
-PDO::ATTR_STATEMENT_CLASS's value must be of type array, string given
-PDO::ATTR_STATEMENT_CLASS's class must be a valid class
-PDO::ATTR_STATEMENT_CLASS's class must be a valid class
-PDO::ATTR_STATEMENT_CLASS's class must be derived from PDOStatement
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: user-supplied statement class cannot have a public constructor in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
+PDO::ATTR_STATEMENT_CLASS value must be of type array, string given
+PDO::ATTR_STATEMENT_CLASS class must be a valid class
+PDO::ATTR_STATEMENT_CLASS class must be a valid class
+PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement
+TypeError: User-supplied statement class cannot have a public constructor
 array(2) {
   [0]=>
   string(12) "mystatement4"
