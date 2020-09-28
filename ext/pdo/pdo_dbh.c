@@ -1051,7 +1051,7 @@ PHP_METHOD(PDO, query)
 	zend_long fetch_mode;
 	zend_bool fetch_mode_is_null = 1;
 	zval *args = NULL;
-    uint32_t num_args = 0;
+	uint32_t num_args = 0;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 

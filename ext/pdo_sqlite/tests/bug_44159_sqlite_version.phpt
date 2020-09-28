@@ -1,13 +1,8 @@
 --TEST--
-PDO Common: Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)): SQLite variant
+PDO Common: Bug #44159: SQLite variant
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip PDO not available');
-try {
-    $pdo = new PDO("sqlite:".__DIR__."/foo.db");
-} catch (Exception $e) {
-    die("skip PDP_SQLITE not available");
-}
+if (!extension_loaded('pdo_sqlite')) die('skip PDO SQLite not available');
 ?>
 --FILE--
 <?php
