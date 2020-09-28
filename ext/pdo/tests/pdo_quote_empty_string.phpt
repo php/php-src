@@ -1,5 +1,5 @@
 --TEST--
-PDO::quote() must accept empty string
+PDO::quote() must accept empty string for drivers which support this feature
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo')) die('skip');
@@ -13,10 +13,19 @@ PDOTest::skip();
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
-$pdo  = PDOTest::factory();
+$pdo = PDOTest::factory();
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-var_dump($pdo->quote(''));
-
+try {
+    $result = $pdo->quote('');
+    if (!is_string($result)) {
+        var_dump($result);
+    }
+} catch (\PDOException) {
+    // Do nothing as quoting is not supported with this driver
+}
 ?>
+DONE
+
 --EXPECT--
-string(2) "''"
+DONE
