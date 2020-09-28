@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6c9840dd5c2e4c597cd0133bf2d0b523c272d3fe */
+ * Stub hash: 0a2dd53716d30893aa5dd92a9907b2298abb3f70 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -17,7 +17,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Closure_call, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, newThis, IS_OBJECT, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, arguments, IS_MIXED, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_fromCallable, 0, 1, Closure, 0)
