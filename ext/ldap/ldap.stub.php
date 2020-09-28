@@ -305,7 +305,7 @@ function ldap_exop($link, string $reqoid, ?string $reqdata = null, ?array $contr
  * @param resource $link
  * @param array $controls
  */
-function ldap_exop_passwd($link, string $user = "", string $oldpw = "", string $newpw = "", &$controls = null): string|bool {}
+function ldap_exop_passwd($link, string $user = "", string $old_password = "", string $new_password = "", &$controls = null): string|bool {}
 #endif
 
 
