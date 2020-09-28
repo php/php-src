@@ -179,6 +179,8 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 		return 0;
 	}
 
+	stmt->driver_data = S;
+
 	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY);
 	if (cursor_type != PDO_CURSOR_FWDONLY) {
 		rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_SCROLLABLE, (void*)SQL_SCROLLABLE, 0);
@@ -197,7 +199,6 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 		efree(nsql);
 	}
 
-	stmt->driver_data = S;
 	stmt->methods = &odbc_stmt_methods;
 
 	if (rc != SQL_SUCCESS) {
