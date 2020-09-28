@@ -207,7 +207,7 @@ function ldap_control_paged_result_response($link, $result, &$cookie = null, &$e
 
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 /** @param resource $link */
-function ldap_rename($link, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn, array $controls = []): bool {}
+function ldap_rename($link, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, array $controls = []): bool {}
 
 /**
  * @param resource $link
