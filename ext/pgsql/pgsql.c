@@ -2321,28 +2321,28 @@ PHP_FUNCTION(pg_lo_create)
 
 	if (oid) {
 		switch (Z_TYPE_P(oid)) {
-		case IS_STRING:
-			{
-				/* TODO: Use zend_is_numeric_string/subroutine? */
-				char *end_ptr;
-				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
-				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
-				/* wrong integer format */
-				zend_value_error("Invalid OID value passed");
-				RETURN_THROWS();
+			case IS_STRING:
+				{
+					/* TODO: Use subroutine? */
+					char *end_ptr;
+					wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
+					if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+					/* wrong integer format */
+					zend_value_error("Invalid OID value passed");
+					RETURN_THROWS();
+					}
 				}
-			}
-			break;
-		case IS_LONG:
-			if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
-				zend_value_error("Invalid OID value passed");
+				break;
+			case IS_LONG:
+				if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
+					zend_value_error("Invalid OID value passed");
+					RETURN_THROWS();
+				}
+				wanted_oid = (Oid)Z_LVAL_P(oid);
+				break;
+			default:
+				zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
 				RETURN_THROWS();
-			}
-			wanted_oid = (Oid)Z_LVAL_P(oid);
-			break;
-		default:
-			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
-			RETURN_THROWS();
 		}
 		if ((pgsql_oid = lo_create(pgsql, wanted_oid)) == InvalidOid) {
 			php_error_docref(NULL, E_WARNING, "Unable to create PostgreSQL large object");
@@ -2376,7 +2376,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	/* accept string type since Oid type is unsigned int */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rs", &pgsql_link, &oid_string, &oid_strlen) == SUCCESS) {
-		/* TODO: Use zend_is_numeric_string/subroutine? */
+		/* TODO: Use subroutine? */
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -2396,7 +2396,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "s", &oid_string, &oid_strlen) == SUCCESS) {
-		/* TODO: Use zend_is_numeric_string/subroutine? */
+		/* TODO: subroutine? */
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -2451,7 +2451,7 @@ PHP_FUNCTION(pg_lo_open)
 	/* accept string type since Oid is unsigned int */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rss", &pgsql_link, &oid_string, &oid_strlen, &mode_string, &mode_strlen) == SUCCESS) {
-		/* TODO: Use zend_is_numeric_string/subroutine? */
+		/* TODO: Use subroutine? */
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -2471,7 +2471,7 @@ PHP_FUNCTION(pg_lo_open)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "ss", &oid_string, &oid_strlen, &mode_string, &mode_strlen) == SUCCESS) {
-		/* TODO: Use zend_is_numeric_string/subroutine? */
+		/* TODO: Use subroutine? */
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -2531,7 +2531,6 @@ PHP_FUNCTION(pg_lo_open)
 				if ((pgsql_lofd = lo_open(pgsql, oid, pgsql_mode)) == -1) {
 					if (lo_unlink(pgsql, oid) == -1) {
 						efree(pgsql_lofp);
-						/* TODO: Throw error? */
 						php_error_docref(NULL, E_WARNING, "Something is really messed up! Your database is badly corrupted in a way NOT related to PHP");
 						RETURN_FALSE;
 					}
@@ -2722,28 +2721,28 @@ PHP_FUNCTION(pg_lo_import)
 	if (oid) {
 		Oid wanted_oid;
 		switch (Z_TYPE_P(oid)) {
-		case IS_STRING:
-			{
-				/* TODO: Use zend_is_numeric_string/subroutine? */
-				char *end_ptr;
-				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
-				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
-				/* wrong integer format */
-				zend_value_error("Invalid OID value passed");
-				RETURN_THROWS();
+			case IS_STRING:
+				{
+					/* TODO: Use subroutine? */
+					char *end_ptr;
+					wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
+					if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+					/* wrong integer format */
+					zend_value_error("Invalid OID value passed");
+					RETURN_THROWS();
+					}
 				}
-			}
-			break;
-		case IS_LONG:
-			if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
-				zend_value_error("Invalid OID value passed");
+				break;
+			case IS_LONG:
+				if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
+					zend_value_error("Invalid OID value passed");
+					RETURN_THROWS();
+				}
+				wanted_oid = (Oid)Z_LVAL_P(oid);
+				break;
+			default:
+				zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
 				RETURN_THROWS();
-			}
-			wanted_oid = (Oid)Z_LVAL_P(oid);
-			break;
-		default:
-			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
-			RETURN_THROWS();
 		}
 
 		returned_oid = lo_import_with_oid(pgsql, file_in, wanted_oid);
@@ -2789,7 +2788,7 @@ PHP_FUNCTION(pg_lo_export)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rsp", &pgsql_link, &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
-		/* TODO: Use zend_is_numeric_string/subroutine? */
+		/* TODO: Use subroutine? */
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -2810,7 +2809,7 @@ PHP_FUNCTION(pg_lo_export)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "sp", &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
-		/* TODO: Use zend_is_numeric_string/subroutine? */
+		/* TODO: Use subroutine? */
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -5373,7 +5372,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 
 	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(var_array), fld) {
 		if (fld == NULL) {
-			zend_value_error("Array of values must be an associative array of string keys");
+			zend_value_error("Array of values must be an associative array with string keys");
 			goto cleanup;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
@@ -5546,7 +5545,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, fld, val) {
 		if (fld == NULL) {
-			zend_value_error("Array of values must be an associated array of string keys");
+			zend_value_error("Array of values must be an associative array with string keys");
 			return -1;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
