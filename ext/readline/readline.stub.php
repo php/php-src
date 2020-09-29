@@ -5,10 +5,10 @@
 function readline(?string $prompt = null): string|false {}
 
 /**
- * @param int|string|bool|null $newvalue
+ * @param int|string|bool|null $value
  * @return array|int|string|bool|null
  */
-function readline_info(?string $varname = null, $newvalue = null): mixed {}
+function readline_info(?string $var_name = null, $value = null): mixed {}
 
 function readline_add_history(string $prompt): bool {}
 
@@ -22,7 +22,7 @@ function readline_read_history(?string $filename = null): bool {}
 
 function readline_write_history(?string $filename = null): bool {}
 
-function readline_completion_function(callable $funcname): bool {}
+function readline_completion_function(callable $callback): bool {}
 
 
 #if HAVE_RL_CALLBACK_READ_CHAR
