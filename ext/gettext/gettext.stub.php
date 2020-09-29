@@ -4,27 +4,27 @@
 
 function textdomain(?string $domain): string {}
 
-function gettext(string $msgid): string {}
+function gettext(string $message): string {}
 
 /** @alias gettext */
-function _(string $msgid): string {}
+function _(string $message): string {}
 
-function dgettext(string $domain, string $msgid): string {}
+function dgettext(string $domain, string $message): string {}
 
-function dcgettext(string $domain, string $msgid, int $category): string {}
+function dcgettext(string $domain, string $message, int $category): string {}
 
-function bindtextdomain(string $domain, string $dir): string|false {}
+function bindtextdomain(string $domain, string $directory): string|false {}
 
 #ifdef HAVE_NGETTEXT
-function ngettext(string $msgid1, string $msgid2, int $n): string {}
+function ngettext(string $singular, string $plural, int $count): string {}
 #endif
 
 #ifdef HAVE_DNGETTEXT
-function dngettext(string $domain, string $msgid1, string $msgid2, int $count): string {}
+function dngettext(string $domain, string $singular, string $plural, int $count): string {}
 #endif
 
 #ifdef HAVE_DCNGETTEXT
-function dcngettext(string $domain, string $msgid1, string $msgid2, int $count, int $category): string {}
+function dcngettext(string $domain, string $singular, string $plural, int $count, int $category): string {}
 #endif
 
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET
