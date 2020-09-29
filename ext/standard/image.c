@@ -17,18 +17,18 @@
 
 #include "php.h"
 #include <stdio.h>
-#if HAVE_FCNTL_H
-#include <fcntl.h>
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
 #endif
 #include "fopen_wrappers.h"
 #include "ext/standard/fsock.h"
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 #include "php_image.h"
 
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-#include "zlib.h"
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
+# include "zlib.h"
 #endif
 
 /* file type markers */
@@ -79,7 +79,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
@@ -186,7 +186,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 }
 /* }}} */
 
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 /* {{{ php_handle_swc */
 static struct gfxinfo *php_handle_swc(php_stream * stream)
 {
@@ -617,7 +617,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 	result->width = php_read4(stream); /* Xsiz */
 	result->height = php_read4(stream); /* Ysiz */
 
-#if MBO_0
+#ifdef MBO_0
 	php_read4(stream); /* XOsiz */
 	php_read4(stream); /* YOsiz */
 	php_read4(stream); /* XTsiz */
@@ -1392,7 +1392,7 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			result = php_handle_swf(stream);
 			break;
 		case IMAGE_FILETYPE_SWC:
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 			result = php_handle_swc(stream);
 #else
 			php_error_docref(NULL, E_NOTICE, "The image is a compressed SWF file, but you do not have a static version of the zlib extension enabled");

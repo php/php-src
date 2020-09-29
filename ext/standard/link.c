@@ -25,14 +25,14 @@
 #endif
 
 #include <stdlib.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifndef PHP_WIN32
 #include <sys/stat.h>
 #endif
 #include <string.h>
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
 #else

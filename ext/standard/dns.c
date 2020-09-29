@@ -20,7 +20,7 @@
 #include "php.h"
 #include "php_network.h"
 
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -31,7 +31,7 @@
 # include <Ws2tcpip.h>
 #else
 #include <netinet/in.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #include <netdb.h>
@@ -39,13 +39,13 @@
 #undef STATUS
 #undef T_UNSPEC
 #endif
-#if HAVE_ARPA_NAMESER_H
+#ifdef HAVE_ARPA_NAMESER_H
 #ifdef DARWIN
 # define BIND_8_COMPAT 1
 #endif
 #include <arpa/nameser.h>
 #endif
-#if HAVE_RESOLV_H
+#ifdef HAVE_RESOLV_H
 #include <resolv.h>
 #endif
 #ifdef HAVE_DNS_H
@@ -153,7 +153,7 @@ PHP_FUNCTION(gethostbyaddr)
 	hostname = php_gethostbyaddr(addr);
 
 	if (hostname == NULL) {
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
 		php_error_docref(NULL, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
 #else
 		php_error_docref(NULL, E_WARNING, "Address is not in a.b.c.d form");
@@ -168,13 +168,13 @@ PHP_FUNCTION(gethostbyaddr)
 /* {{{ php_gethostbyaddr */
 static zend_string *php_gethostbyaddr(char *ip)
 {
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
 	struct in6_addr addr6;
 #endif
 	struct in_addr addr;
 	struct hostent *hp;
 
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
 	if (inet_pton(AF_INET6, ip, &addr6)) {
 		hp = gethostbyaddr((char *) &addr6, sizeof(addr6), AF_INET6);
 	} else if (inet_pton(AF_INET, ip, &addr)) {
@@ -286,7 +286,7 @@ static zend_string *php_gethostbyname(char *name)
 }
 /* }}} */
 
-#if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
+#if defined(HAVE_FULL_DNS_FUNCS) || defined(PHP_WIN32)
 # define PHP_DNS_NUM_TYPES	13	/* Number of DNS Types Supported by PHP currently */
 
 # define PHP_DNS_A      0x00000001
@@ -307,7 +307,7 @@ static zend_string *php_gethostbyname(char *name)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC
+#if !defined(PHP_WIN32) && defined(HAVE_DNS_SEARCH_FUNC)
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -423,7 +423,7 @@ PHP_FUNCTION(dns_check_record)
 }
 /* }}} */
 
-#if HAVE_FULL_DNS_FUNCS
+#ifdef HAVE_FULL_DNS_FUNCS
 
 #define CHECKCP(n) do { \
 	if (cp + n > end) { \
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(dns_get_mx)
 #endif /* HAVE_FULL_DNS_FUNCS */
 #endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
 
-#if HAVE_FULL_DNS_FUNCS && !defined(PHP_WIN32)
+#if defined(HAVE_FULL_DNS_FUNCS) && !defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);

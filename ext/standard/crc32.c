@@ -19,7 +19,7 @@
 #include "crc32.h"
 #include "crc32_x86.h"
 
-#if HAVE_AARCH64_CRC32
+#ifdef HAVE_AARCH64_CRC32
 # include <arm_acle.h>
 # if defined(__linux__)
 #  include <sys/auxv.h>
@@ -83,14 +83,14 @@ PHP_FUNCTION(crc32)
 
 	crc = crcinit^0xFFFFFFFF;
 
-#if HAVE_AARCH64_CRC32
+#ifdef HAVE_AARCH64_CRC32
 	if (has_crc32_insn()) {
 		crc = crc32_aarch64(crc, p, nr);
 		RETURN_LONG(crc^0xFFFFFFFF);
 	}
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 	size_t nr_simd = crc32_x86_simd_update(X86_CRC32B, &crc, (const unsigned char *)p, nr);
 	nr -= nr_simd;
 	p += nr_simd;

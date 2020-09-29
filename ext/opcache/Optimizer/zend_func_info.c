@@ -118,10 +118,10 @@ static const func_info_t func_infos[] = {
 	FN("constant",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_STRING | MAY_BE_RESOURCE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("bin2hex",                      MAY_BE_STRING),
 	F1("hex2bin",                      MAY_BE_FALSE | MAY_BE_STRING),
-#if HAVE_NANOSLEEP
+#ifdef HAVE_NANOSLEEP
 	F1("time_nanosleep",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
 #endif
-#if HAVE_STRPTIME
+#ifdef HAVE_STRPTIME
 	F1("strptime",                     MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 #endif
 	F1("wordwrap",                     MAY_BE_STRING),
@@ -172,7 +172,7 @@ static const func_info_t func_infos[] = {
 	F1("strip_tags",                   MAY_BE_STRING),
 	F1("explode",                      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("localeconv",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 	F1("nl_langinfo",                  MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 	F1("soundex",                      MAY_BE_STRING),
@@ -203,10 +203,10 @@ static const func_info_t func_infos[] = {
 	F1("proc_get_status",              MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 #endif
 	F1("random_bytes",                 MAY_BE_STRING),
-#if HAVE_GETSERVBYPORT
+#ifdef HAVE_GETSERVBYPORT
 	F1("getservbyport",                MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-#if HAVE_GETPROTOBYNUMBER
+#ifdef HAVE_GETPROTOBYNUMBER
 	F1("getprotobynumber",             MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 	F1("base64_decode",                MAY_BE_FALSE | MAY_BE_STRING),
@@ -281,8 +281,8 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GETHOSTNAME
 	F1("gethostname",                  MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+# if defined(PHP_WIN32) || defined(HAVE_FULL_DNS_FUNCS)
 	F1("dns_get_record",               MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
 # endif
 #endif
@@ -308,7 +308,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_socket_accept",         MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("stream_socket_get_name",       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("stream_socket_recvfrom",       MAY_BE_FALSE | MAY_BE_STRING),
-#if HAVE_SOCKETPAIR
+#ifdef HAVE_SOCKETPAIR
 	F1("stream_socket_pair",           MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_RESOURCE),
 #endif
 	F1("stream_get_contents",          MAY_BE_FALSE | MAY_BE_STRING),
@@ -765,13 +765,13 @@ static const func_info_t func_infos[] = {
 	F1("dgettext",								MAY_BE_STRING),
 	F1("dcgettext",								MAY_BE_STRING),
 	F1("bindtextdomain",						MAY_BE_FALSE | MAY_BE_STRING),
-#if HAVE_NGETTEXT
+#ifdef HAVE_NGETTEXT
 	F1("ngettext",								MAY_BE_STRING),
 #endif
-#if HAVE_DNGETTEXT
+#ifdef HAVE_DNGETTEXT
 	F1("dcngettext",							MAY_BE_STRING),
 #endif
-#if HAVE_BIND_TEXTDOMAIN_CODESET
+#ifdef HAVE_BIND_TEXTDOMAIN_CODESET
 	F1("bind_textdomain_codeset",				MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 
@@ -802,14 +802,14 @@ static const func_info_t func_infos[] = {
 	F1("imagecreatefromwebp",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
 	F1("imagecreatefromxbm",					MAY_BE_FALSE | MAY_BE_OBJECT),
-#if defined(HAVE_GD_XPM)
+#ifdef HAVE_GD_XPM
 	F1("imagecreatefromxpm",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
 	F1("imagecreatefromwbmp",					MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("imagecreatefromgd",						MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("imagecreatefromgd2",					MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("imagecreatefromgd2part",				MAY_BE_FALSE | MAY_BE_OBJECT),
-#if defined(HAVE_GD_BMP)
+#ifdef HAVE_GD_BMP
 	F1("imagecreatefrombmp",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
 	F0("imagecolorset",							MAY_BE_NULL | MAY_BE_FALSE),

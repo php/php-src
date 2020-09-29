@@ -26,7 +26,7 @@
 #include "win32/ipc.h"
 #endif
 
-#if HAVE_FTOK
+#ifdef HAVE_FTOK
 /* {{{ Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
 {

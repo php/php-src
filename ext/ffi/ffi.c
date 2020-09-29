@@ -5128,7 +5128,7 @@ const struct {
 	{"ssize_t",    &zend_ffi_type_sint64},
 	{"ptrdiff_t",  &zend_ffi_type_sint64},
 #endif
-#if SIZEOF_OFF_T == 4
+#if defined(SIZEOF_OFF_T) && SIZEOF_OFF_T == 4
 	{"off_t",      &zend_ffi_type_sint32},
 #else
 	{"off_t",      &zend_ffi_type_sint64},

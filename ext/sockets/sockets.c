@@ -464,7 +464,7 @@ static PHP_MINIT_FUNCTION(sockets)
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	REGISTER_LONG_CONSTANT("AF_INET6",		AF_INET6,		CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SOCK_STREAM",	SOCK_STREAM,	CONST_CS | CONST_PERSISTENT);
@@ -559,7 +559,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("IP_MULTICAST_IF",			IP_MULTICAST_IF,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IP_MULTICAST_TTL",			IP_MULTICAST_TTL,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IP_MULTICAST_LOOP",			IP_MULTICAST_LOOP,		CONST_CS | CONST_PERSISTENT);
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	REGISTER_LONG_CONSTANT("IPV6_MULTICAST_IF",			IPV6_MULTICAST_IF,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_MULTICAST_HOPS",		IPV6_MULTICAST_HOPS,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_MULTICAST_LOOP",		IPV6_MULTICAST_LOOP,	CONST_CS | CONST_PERSISTENT);
@@ -576,28 +576,28 @@ static PHP_MINIT_FUNCTION(sockets)
 #endif
 
 	REGISTER_LONG_CONSTANT("IPPROTO_IP",	IPPROTO_IP,		CONST_CS | CONST_PERSISTENT);
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	REGISTER_LONG_CONSTANT("IPPROTO_IPV6",	IPPROTO_IPV6,	CONST_CS | CONST_PERSISTENT);
 #endif
 
 	REGISTER_LONG_CONSTANT("SOL_TCP",		IPPROTO_TCP,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOL_UDP",		IPPROTO_UDP,	CONST_CS | CONST_PERSISTENT);
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	REGISTER_LONG_CONSTANT("IPV6_UNICAST_HOPS",			IPV6_UNICAST_HOPS,	CONST_CS | CONST_PERSISTENT);
 #endif
 
 	REGISTER_LONG_CONSTANT("AI_PASSIVE",		AI_PASSIVE,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_CANONNAME",		AI_CANONNAME,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_NUMERICHOST",	AI_NUMERICHOST,		CONST_CS | CONST_PERSISTENT);
-#if HAVE_AI_V4MAPPED
+#ifdef HAVE_AI_V4MAPPED
 	REGISTER_LONG_CONSTANT("AI_V4MAPPED",		AI_V4MAPPED,		CONST_CS | CONST_PERSISTENT);
 #endif
-#if HAVE_AI_ALL
+#ifdef HAVE_AI_ALL
 	REGISTER_LONG_CONSTANT("AI_ALL",			AI_ALL,				CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("AI_ADDRCONFIG",		AI_ADDRCONFIG,		CONST_CS | CONST_PERSISTENT);
-#if HAVE_AI_IDN
+#ifdef HAVE_AI_IDN
 	REGISTER_LONG_CONSTANT("AI_IDN",			AI_IDN,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_CANONIDN",		AI_CANONIDN,		CONST_CS | CONST_PERSISTENT);
 #endif
@@ -1079,7 +1079,7 @@ PHP_FUNCTION(socket_getsockname)
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	struct sockaddr_in6		*sin6;
 	char					addr6[INET6_ADDRSTRLEN+1];
 #endif
@@ -1102,7 +1102,7 @@ PHP_FUNCTION(socket_getsockname)
 	}
 
 	switch (sa->sa_family) {
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
@@ -1151,7 +1151,7 @@ PHP_FUNCTION(socket_getpeername)
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	struct sockaddr_in6		*sin6;
 	char					addr6[INET6_ADDRSTRLEN+1];
 #endif
@@ -1174,7 +1174,7 @@ PHP_FUNCTION(socket_getpeername)
 	}
 
 	switch (sa->sa_family) {
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
@@ -1229,7 +1229,7 @@ PHP_FUNCTION(socket_create)
 	}
 
 	if (domain != AF_UNIX
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_INET) {
@@ -1280,7 +1280,7 @@ PHP_FUNCTION(socket_connect)
 	ENSURE_SOCKET_VALID(php_sock);
 
 	switch(php_sock->type) {
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6: {
 			struct sockaddr_in6 sin6 = {0};
 
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(socket_bind)
 				retval = bind(php_sock->bsd_socket, (struct sockaddr *)sa, sizeof(struct sockaddr_in));
 				break;
 			}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) sock_type;
@@ -1524,7 +1524,7 @@ PHP_FUNCTION(socket_recvfrom)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	struct sockaddr_in6	sin6;
 	char				addr6[INET6_ADDRSTRLEN];
 #endif
@@ -1595,7 +1595,7 @@ PHP_FUNCTION(socket_recvfrom)
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, address ? address : "0.0.0.0");
 			ZEND_TRY_ASSIGN_REF_LONG(arg6, ntohs(sin.sin_port));
 			break;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 			slen = sizeof(sin6);
 			memset(&sin6, 0, slen);
@@ -1640,7 +1640,7 @@ PHP_FUNCTION(socket_sendto)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	struct sockaddr_in6	sin6;
 #endif
 	int					retval;
@@ -1686,7 +1686,7 @@ PHP_FUNCTION(socket_sendto)
 
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 			if (port_is_null) {
 				zend_argument_value_error(6, "cannot be null when the socket type is AF_INET6");
@@ -1757,7 +1757,7 @@ PHP_FUNCTION(socket_get_option)
 		}
 		}
 	}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	else if (level == IPPROTO_IPV6) {
 		int ret = php_do_getsockopt_ipv6_rfc3542(php_sock, level, optname, return_value);
 		if (ret == SUCCESS) {
@@ -1867,7 +1867,7 @@ PHP_FUNCTION(socket_set_option)
 		HANDLE_SUBCALL(res);
 	}
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	else if (level == IPPROTO_IPV6) {
 		int res = php_do_setsockopt_ipv6_mcast(php_sock, level, optname, arg4);
 		if (res == 1) {
@@ -1983,7 +1983,7 @@ PHP_FUNCTION(socket_create_pair)
 	}
 
 	if (domain != AF_INET
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_UNIX) {
@@ -2216,7 +2216,7 @@ PHP_FUNCTION(socket_export_stream)
 	/* Determine if socket is using a protocol with one of the default registered
 	 * socket stream wrappers */
 	if (socket->type == PF_INET
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		 || socket->type == PF_INET6
 #endif
 	) {
@@ -2393,7 +2393,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 			}
 
 		case AF_INET:
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 #endif
 			{
@@ -2456,7 +2456,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 			}
 
 		case AF_INET:
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 #endif
 			{
@@ -2513,7 +2513,7 @@ PHP_FUNCTION(socket_addrinfo_explain)
 				add_assoc_string(&sockaddr, "sin_addr", addr);
 				break;
 			}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) ai->addrinfo.ai_addr;

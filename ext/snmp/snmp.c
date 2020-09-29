@@ -32,7 +32,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "snmp_arginfo.h"
 
-#if HAVE_SNMP
+#ifdef HAVE_SNMP
 
 #include <sys/types.h>
 #include <errno.h>
@@ -854,7 +854,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
-#if HAVE_GETADDRINFO && HAVE_IPV6 && HAVE_INET_NTOP
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6) && defined(HAVE_INET_NTOP)
 		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
 			res++;
 			continue;

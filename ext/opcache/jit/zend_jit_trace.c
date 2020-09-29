@@ -3446,7 +3446,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (opline->result_type == IS_CV) {
 								res_use_info = RES_USE_INFO();
 							} else {
-#if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
+#ifdef USE_ABSTRACT_STACK_FOR_RES_USE_INFO
 								res_use_info = zend_jit_trace_type_to_info(STACK_VAR_TYPE(opline->result.var));
 #else
 								res_use_info = -1;
@@ -3525,7 +3525,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (opline->result_type == IS_CV) {
 								res_use_info = RES_USE_INFO();
 							} else {
-#if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
+#ifdef USE_ABSTRACT_STACK_FOR_RES_USE_INFO
 								res_use_info = zend_jit_trace_type_to_info(STACK_VAR_TYPE(opline->result.var));
 #else
 								res_use_info = -1;
@@ -3596,7 +3596,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (opline->result_type == IS_CV) {
 								res_use_info = RES_USE_INFO();
 							} else {
-#if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
+#ifdef USE_ABSTRACT_STACK_FOR_RES_USE_INFO
 								res_use_info = zend_jit_trace_type_to_info(STACK_VAR_TYPE(opline->result.var));
 #else
 								res_use_info = -1;
