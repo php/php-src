@@ -65,13 +65,13 @@ int(%d)
 int(%d)
 
 -- With num_req = 0 --
-array_rand(): Argument #2 ($num_req) must be between 1 and the number of elements in argument #1 ($array)
+array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 
 -- With num_req = -1 --
-array_rand(): Argument #2 ($num_req) must be between 1 and the number of elements in argument #1 ($array)
+array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 
 -- With num_req = -2 --
-array_rand(): Argument #2 ($num_req) must be between 1 and the number of elements in argument #1 ($array)
+array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 
 -- With num_req more than number of members in 'input' array --
-array_rand(): Argument #2 ($num_req) must be between 1 and the number of elements in argument #1 ($array)
+array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)

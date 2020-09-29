@@ -60,8 +60,8 @@ Warning: rmdir(%s/mkdir_variation2/): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-mkdir(): Argument #1 ($pathname) must not contain any null bytes
-rmdir(): Argument #1 ($dirname) must not contain any null bytes
+mkdir(): Argument #1 ($directory) must not contain any null bytes
+rmdir(): Argument #1 ($directory) must not contain any null bytes
 
 *** Testing mkdir() with miscellaneous input ***
 bool(true)

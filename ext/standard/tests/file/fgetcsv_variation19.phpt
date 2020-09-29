@@ -89,377 +89,377 @@ echo "Done\n";
 *** Testing fgetcsv() : with default enclosure & delimiter of two chars ***
 
 -- Testing fgetcsv() with file opened using r mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-fgetcsv(): Argument #3 ($delimiter) must be a single character
+fgetcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 Done

@@ -30,7 +30,7 @@ echo "Done\n";
 --EXPECT--
 string(0) ""
 string(0) ""
-metaphone(): Argument #2 ($phonemes) must be greater than or equal to 0
+metaphone(): Argument #2 ($max_phonemes) must be greater than or equal to 0
 string(6) "FLTFRS"
 string(6) "FLTFRS"
 string(26) "0FLFRWRTKRFLNKHTLSLN0KLTR0"

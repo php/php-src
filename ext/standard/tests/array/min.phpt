@@ -33,9 +33,9 @@ var_dump(min(0, true, false, true));
 
 ?>
 --EXPECT--
-min(): Argument #1 ($arg) must be of type array, int given
-min(): Argument #1 ($arg) must contain at least one element
-min(): Argument #1 ($arg) must be of type array, stdClass given
+min(): Argument #1 ($value) must be of type array, int given
+min(): Argument #1 ($value) must contain at least one element
+min(): Argument #1 ($value) must be of type array, stdClass given
 int(1)
 float(2.09)
 string(0) ""

@@ -318,7 +318,7 @@ echo $data . "\n";
 
 ?>
 --EXPECT--
-stream_wrapper_register(): Argument #2 ($classname) must be a valid class name, class_not_exist given
+stream_wrapper_register(): Argument #2 ($class) must be a valid class name, class_not_exist given
 Not Registered
 Registered
 Registered

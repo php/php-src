@@ -14,6 +14,6 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "bc"
-stream_get_contents(): Argument #2 ($maxlength) must be greater than or equal to -1
+stream_get_contents(): Argument #2 ($max_length) must be greater than or equal to -1

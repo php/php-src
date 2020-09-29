@@ -27,5 +27,5 @@ try {
 *** Testing substr_replace() : error conditions ***
 
 -- Testing substr_replace() function with start and length as arrays but string not--
-substr_replace(): Argument #3 ($start) cannot be an array when working on a single string
+substr_replace(): Argument #3 ($offset) cannot be an array when working on a single string
 substr_replace(): Argument #4 ($length) cannot be an array when working on a single string
