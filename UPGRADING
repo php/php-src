@@ -340,7 +340,8 @@ PHP 8.0 UPGRADE NOTES
     constants have been added.
 
 - LDAP:
-  . The deprecated function ldap_sort has been removed.
+  . The deprecated functions ldap_sort(), ldap_control_paged_result() and
+    ldap_control_paged_result_response() have been removed.
   . The interface of ldap_set_rebind_proc has changed; the $callback parameter
     does not accept empty string anymore; null value shall be used instead.
 

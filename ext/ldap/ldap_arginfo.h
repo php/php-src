@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0c721a3272fef9d1a06a8cb4163eeb219661fb00 */
+ * Stub hash: 42f7118d8380424cd4178759cae6cb47b6d9b44f */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
@@ -182,24 +182,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_compare, 0, 4, MAY_BE_BOOL|
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
-
-#if defined(LDAP_CONTROL_PAGEDRESULTS)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_control_paged_result, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ldap)
-	ZEND_ARG_TYPE_INFO(0, pagesize, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, iscritical, _IS_BOOL, 0, "false")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cookie, IS_STRING, 0, "\"\"")
-ZEND_END_ARG_INFO()
-#endif
-
-#if defined(LDAP_CONTROL_PAGEDRESULTS)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_control_paged_result_response, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ldap)
-	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, cookie, "null")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, estimated, "null")
-ZEND_END_ARG_INFO()
-#endif
 
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_rename, 0, 5, _IS_BOOL, 0)
@@ -396,12 +378,6 @@ ZEND_FUNCTION(ldap_errno);
 ZEND_FUNCTION(ldap_error);
 ZEND_FUNCTION(ldap_err2str);
 ZEND_FUNCTION(ldap_compare);
-#if defined(LDAP_CONTROL_PAGEDRESULTS)
-ZEND_FUNCTION(ldap_control_paged_result);
-#endif
-#if defined(LDAP_CONTROL_PAGEDRESULTS)
-ZEND_FUNCTION(ldap_control_paged_result_response);
-#endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_rename);
 #endif
@@ -505,12 +481,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_error, arginfo_ldap_error)
 	ZEND_FE(ldap_err2str, arginfo_ldap_err2str)
 	ZEND_FE(ldap_compare, arginfo_ldap_compare)
-#if defined(LDAP_CONTROL_PAGEDRESULTS)
-	ZEND_DEP_FE(ldap_control_paged_result, arginfo_ldap_control_paged_result)
-#endif
-#if defined(LDAP_CONTROL_PAGEDRESULTS)
-	ZEND_DEP_FE(ldap_control_paged_result_response, arginfo_ldap_control_paged_result_response)
-#endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_rename, arginfo_ldap_rename)
 #endif
