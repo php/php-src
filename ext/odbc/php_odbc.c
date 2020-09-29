@@ -1087,7 +1087,7 @@ PHP_FUNCTION(odbc_execute)
 				efree(params);
 				RETURN_FALSE;
 			}
-			if (i++ > result->numparams) break;
+			if (++i > result->numparams) break;
 		} ZEND_HASH_FOREACH_END();
 	}
 	/* Close cursor, needed for doing multiple selects */
