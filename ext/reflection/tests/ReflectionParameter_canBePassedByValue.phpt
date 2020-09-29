@@ -37,7 +37,7 @@ echo "Done.\n";
 --EXPECT--
 => array_multisort:
 
-Name: array1
+Name: array
 Is passed by reference: yes
 Can be passed by value: yes
 

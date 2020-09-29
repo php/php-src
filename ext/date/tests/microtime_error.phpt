@@ -46,11 +46,11 @@ float(%s)
     int(0)
   }
 }
-microtime(): Argument #1 ($getAsFloat) must be of type bool, array given
+microtime(): Argument #1 ($as_float) must be of type bool, array given
 
 --> bad arg: object(stdClass)#%d (0) {
 }
-microtime(): Argument #1 ($getAsFloat) must be of type bool, stdClass given
+microtime(): Argument #1 ($as_float) must be of type bool, stdClass given
 
 --> bad arg: int(1)
 float(%s)
