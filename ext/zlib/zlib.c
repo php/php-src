@@ -930,6 +930,7 @@ PHP_FUNCTION(inflate_init)
 				php_error_docref(NULL, E_WARNING, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
 				efree(ctx->inflateDict);
 				ctx->inflateDict = NULL;
+				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
