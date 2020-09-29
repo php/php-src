@@ -2785,7 +2785,7 @@ PHP_FUNCTION(odbc_tables)
 			(SQLCHAR *) type, SAFE_SQL_NTS(type));
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLTables");
+		odbc_sql_error(conn, result->stmt, "SQLTables");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -2855,7 +2855,7 @@ PHP_FUNCTION(odbc_columns)
 			(SQLCHAR *) column, (SQLSMALLINT) column_len);
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLColumns");
+		odbc_sql_error(conn, result->stmt, "SQLColumns");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -2919,7 +2919,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 			(SQLCHAR *) column, SAFE_SQL_NTS(column));
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLColumnPrivileges");
+		odbc_sql_error(conn, result->stmt, "SQLColumnPrivileges");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -2998,7 +2998,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 			(SQLCHAR *) ftable, SAFE_SQL_NTS(ftable) );
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLForeignKeys");
+		odbc_sql_error(conn, result->stmt, "SQLForeignKeys");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -3059,7 +3059,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	rc = SQLGetTypeInfo(result->stmt, data_type );
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLGetTypeInfo");
+		odbc_sql_error(conn, result->stmt, "SQLGetTypeInfo");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -3120,7 +3120,7 @@ PHP_FUNCTION(odbc_primarykeys)
 			(SQLCHAR *) table, SAFE_SQL_NTS(table) );
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLPrimaryKeys");
+		odbc_sql_error(conn, result->stmt, "SQLPrimaryKeys");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -3184,7 +3184,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 			(SQLCHAR *) col, SAFE_SQL_NTS(col) );
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLProcedureColumns");
+		odbc_sql_error(conn, result->stmt, "SQLProcedureColumns");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -3247,7 +3247,7 @@ PHP_FUNCTION(odbc_procedures)
 			(SQLCHAR *) proc, SAFE_SQL_NTS(proc) );
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLProcedures");
+		odbc_sql_error(conn, result->stmt, "SQLProcedures");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -3318,7 +3318,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 			nullable);
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLSpecialColumns");
+		odbc_sql_error(conn, result->stmt, "SQLSpecialColumns");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -3387,7 +3387,7 @@ PHP_FUNCTION(odbc_statistics)
 			reserved);
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLStatistics");
+		odbc_sql_error(conn, result->stmt, "SQLStatistics");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -3449,7 +3449,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 			(SQLCHAR *) table, SAFE_SQL_NTS(table));
 
 	if (rc == SQL_ERROR) {
-		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLTablePrivileges");
+		odbc_sql_error(conn, result->stmt, "SQLTablePrivileges");
 		efree(result);
 		RETURN_FALSE;
 	}
