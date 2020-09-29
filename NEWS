@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0RC1
+01 Oct 2020, PHP 8.0.0rc1
 
 - CLI:
   . Allow debug server binding to an ephemeral port via `-S localhost:0`. (Sara)
