@@ -4190,7 +4190,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	zend_function *mptr;
-	zend_long filter = 0;
+	zend_long filter;
 	zend_bool filter_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
@@ -4366,7 +4366,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	zend_class_entry *ce;
 	zend_string *key;
 	zend_property_info *prop_info;
-	zend_long filter = 0;
+	zend_long filter;
 	zend_bool filter_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
@@ -4422,10 +4422,15 @@ ZEND_METHOD(ReflectionClass, getConstants)
 	zend_string *key;
 	zend_class_constant *constant;
 	zval val;
-	zend_long filter = ZEND_ACC_PPP_MASK;
+	zend_long filter;
+	zend_bool filter_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &filter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (filter_is_null) {
+		filter = ZEND_ACC_PPP_MASK;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -4452,10 +4457,15 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 	zend_class_entry *ce;
 	zend_string *name;
 	zend_class_constant *constant;
-	zend_long filter = ZEND_ACC_PPP_MASK;
+	zend_long filter;
+	zend_bool filter_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &filter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (filter_is_null) {
+		filter = ZEND_ACC_PPP_MASK;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
