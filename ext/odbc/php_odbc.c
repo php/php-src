@@ -977,7 +977,7 @@ PHP_FUNCTION(odbc_execute)
 	int i, ne;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h", &pv_res, &pv_param_ht) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h/", &pv_res, &pv_param_ht) == FAILURE) {
 		RETURN_THROWS();
 	}
 
