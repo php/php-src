@@ -369,12 +369,14 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 					switch (type) {
 						case BP_VAR_R:
 							zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(key.key));
+							ZEND_FALLTHROUGH;
 						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
 							zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
+							ZEND_FALLTHROUGH;
 						case BP_VAR_W: {
 							ZVAL_NULL(retval);
 						}
@@ -385,12 +387,14 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 			switch (type) {
 				case BP_VAR_R:
 					zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(key.key));
+					ZEND_FALLTHROUGH;
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
 					zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
+					ZEND_FALLTHROUGH;
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_NULL(&value);
@@ -404,12 +408,14 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 			switch (type) {
 				case BP_VAR_R:
 					zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key.h);
+					ZEND_FALLTHROUGH;
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
 					zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key.h);
+					ZEND_FALLTHROUGH;
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_NULL(&value);

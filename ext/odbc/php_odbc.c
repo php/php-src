@@ -662,6 +662,8 @@ int odbc_bindcols(odbc_result *result)
 #else
 				charextraalloc = 1;
 #endif
+				/* TODO: Check this is the intended behaviour */
+				ZEND_FALLTHROUGH;
 			default:
 				rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
 								NULL, 0, NULL, &displaysize);
@@ -1419,6 +1421,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (result->binmode == 1) {
 					sql_c_type = SQL_C_BINARY;
 				}
+				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
@@ -1573,6 +1576,8 @@ PHP_FUNCTION(odbc_fetch_into)
 				}
 				if (result->binmode == 1) sql_c_type = SQL_C_BINARY;
 
+				/* TODO: Check this is the intended behaviour */
+				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
@@ -1797,6 +1802,9 @@ PHP_FUNCTION(odbc_result)
 			if (result->binmode <= 0) {
 				break;
 			}
+			/* TODO: Check this is the intended behaviour */
+			ZEND_FALLTHROUGH;
+
 		case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 		case SQL_WLONGVARCHAR:
@@ -1969,6 +1977,9 @@ PHP_FUNCTION(odbc_result_all)
 						break;
 					}
 					if (result->binmode <= 1) sql_c_type = SQL_C_BINARY;
+
+					/* TODO: Check this is the intended behaviour */
+					ZEND_FALLTHROUGH;
 				case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				case SQL_WLONGVARCHAR:

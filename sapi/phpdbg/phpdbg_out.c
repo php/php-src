@@ -305,6 +305,7 @@ static int format_converter(register buffy *odp, const char *fmt, bool escape_xm
 						fmt++;
 					}
 					/* these are promoted to int, so no break */
+					ZEND_FALLTHROUGH;
 				default:
 					modifier = LM_STD;
 					break;
@@ -367,6 +368,7 @@ static int format_converter(register buffy *odp, const char *fmt, bool escape_xm
 					 * The rest also applies to other integer formats, so fall
 					 * into that case.
 					 */
+					ZEND_FALLTHROUGH;
 				case 'd':
 				case 'i':
 					/*
@@ -755,6 +757,7 @@ fmt_error:
 					 * Note that we can't point s inside fmt because the
 					 * unknown <char> could be preceded by width etc.
 					 */
+					ZEND_FALLTHROUGH;
 				default:
 					char_buf[0] = '%';
 					char_buf[1] = *fmt;

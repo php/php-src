@@ -1896,6 +1896,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 		break;
 		default:
 			phar->sig_flags = PHAR_SIG_SHA1;
+			ZEND_FALLTHROUGH;
 		case PHAR_SIG_SHA1: {
 			unsigned char digest[20];
 			PHP_SHA1_CTX  context;

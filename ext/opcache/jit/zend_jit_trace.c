@@ -1517,7 +1517,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					if (opline->result_type != IS_UNUSED) {
 						break;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_ASSIGN_DIM:
 					if (opline->op1_type == IS_CV) {
 						ADD_OP1_DATA_TRACE_GUARD();
@@ -1541,7 +1541,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					if (opline->result_type != IS_UNUSED) {
 						break;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_ASSIGN_OBJ:
 				case ZEND_PRE_INC_OBJ:
 				case ZEND_PRE_DEC_OBJ:
@@ -1578,7 +1578,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_CONCAT:
 				case ZEND_FAST_CONCAT:
 					ADD_OP2_TRACE_GUARD();
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_ECHO:
 				case ZEND_STRLEN:
 				case ZEND_COUNT:
@@ -1645,7 +1645,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						/* smart branch */
 						break;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_JMPZNZ:
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
@@ -1671,7 +1671,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						// TODO: support for empty() ???
 						break;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_FETCH_DIM_R:
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_FETCH_LIST_R:
@@ -1722,7 +1722,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					if (opline->op2.num > MAX_ARG_FLAG_NUM) {
 						goto propagate_arg;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAR:
 				case ZEND_SEND_VAR_NO_REF:
@@ -1815,7 +1815,7 @@ propagate_arg:
 					 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame->call)) {
 						break;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_FETCH_OBJ_R:
 				case ZEND_FETCH_OBJ_IS:
 				case ZEND_FETCH_OBJ_W:
@@ -4626,7 +4626,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->extended_value != op1_type) {
 							break;
 						}
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_QM_ASSIGN:
 						op1_addr = OP1_REG_ADDR();
 						if (ra
@@ -5022,7 +5022,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							/* smart branch */
 							break;
 						}
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
@@ -5167,7 +5167,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 							break;
 						}
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_FETCH_DIM_R:
 					case ZEND_FETCH_DIM_IS:
 					case ZEND_FETCH_LIST_R:
@@ -5365,7 +5365,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 							break;
 						}
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:

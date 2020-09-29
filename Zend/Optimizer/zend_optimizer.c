@@ -325,7 +325,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			if (opline->opcode == ZEND_CONCAT && opline->op2_type == IS_CONST) {
 				opline->opcode = ZEND_FAST_CONCAT;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			break;
@@ -353,7 +353,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				(opline + 1)->op2.var == opline->result.var) {
 				return 0;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_INSTANCEOF:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
@@ -507,7 +507,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			if (opline->opcode == ZEND_CONCAT && opline->op1_type == IS_CONST) {
 				opline->opcode = ZEND_FAST_CONCAT;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			break;
@@ -674,7 +674,7 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 			break;
 		case ZEND_JMPZNZ:
 			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
@@ -720,7 +720,7 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 			break;
 		case ZEND_JMPZNZ:
 			opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:

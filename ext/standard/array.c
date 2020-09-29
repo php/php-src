@@ -721,7 +721,7 @@ PHP_FUNCTION(count)
 				return;
 			}
 		}
-		/* fallthrough */
+		ZEND_FALLTHROUGH;
 		default:
 			zend_argument_type_error(1, "must be of type Countable|array, %s given", zend_zval_type_name(array));
 			RETURN_THROWS();

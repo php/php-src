@@ -1318,7 +1318,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				/* bad error in module startup - no way we can live with this */
 				exit(-2);
 			}
-		/* no break - intentionally */
+		ZEND_FALLTHROUGH;
 		case E_ERROR:
 		case E_RECOVERABLE_ERROR:
 		case E_PARSE:

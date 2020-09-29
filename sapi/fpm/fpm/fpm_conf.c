@@ -308,6 +308,7 @@ static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset) /* {
 		case 's' : /* s is the default suffix */
 			val[len-1] = '\0';
 			suffix = '0';
+			ZEND_FALLTHROUGH;
 		default :
 			if (suffix < '0' || suffix > '9') {
 				return "unknown suffix used in time value";

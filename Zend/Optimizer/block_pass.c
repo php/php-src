@@ -399,7 +399,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
 					break;
 				}
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_NOT_EQUAL:
@@ -1037,7 +1037,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				break;
 			case ZEND_JMPZNZ:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[1]].start);
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:

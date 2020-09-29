@@ -2617,7 +2617,7 @@ static int zend_ffi_pass_var_arg(zval *arg, ffi_type **pass_type, void **arg_val
 
 				return zend_ffi_pass_arg(arg, type, pass_type, arg_values, n, execute_data);
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			zend_throw_error(zend_ffi_exception_ce, "Unsupported argument type");
 			return FAILURE;

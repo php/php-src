@@ -793,7 +793,7 @@ static void emit_live_range(
 				return;
 			}
 		}
-		/* explicit fallthrough */
+		ZEND_FALLTHROUGH;
 		default:
 			start++;
 			kind = ZEND_LIVE_TMPVAR;
@@ -1083,14 +1083,14 @@ ZEND_API void pass_two(zend_op_array *op_array)
 				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					zend_check_finally_breakout(op_array, opline - op_array->opcodes, opline->op1.opline_num);
 				}
-				/* break omitted intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_JMP:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				break;
 			case ZEND_JMPZNZ:
 				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				/* break omitted intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:

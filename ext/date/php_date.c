@@ -713,8 +713,8 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 					length = slprintf(buffer, sizeof(buffer), "%s", "Z");
 					break;
 				}
-				/* break intentionally missing */
-			case 'P': rfc_colon = 1; /* break intentionally missing */
+				ZEND_FALLTHROUGH;
+			case 'P': rfc_colon = 1; ZEND_FALLTHROUGH;
 			case 'O': length = slprintf(buffer, sizeof(buffer), "%c%02d%s%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
@@ -765,7 +765,7 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 					  break;
 			case 'U': length = slprintf(buffer, sizeof(buffer), "%lld", (timelib_sll) t->sse); break;
 
-			case '\\': if (i < format_len) i++; /* break intentionally missing */
+			case '\\': if (i < format_len) i++; ZEND_FALLTHROUGH;
 
 			default: buffer[0] = format[i]; buffer[1] = '\0'; length = 1; break;
 		}

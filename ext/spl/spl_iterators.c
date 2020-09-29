@@ -244,13 +244,15 @@ next_step:
 						zend_clear_exception();
 					}
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			case RS_START:
 				if (iterator->funcs->valid(iterator) == FAILURE) {
 					break;
 				}
 				object->iterators[object->level].state = RS_TEST;
 				/* break; */
+				/* TODO: Check this is correct */
+				ZEND_FALLTHROUGH;
 			case RS_TEST:
 				if (object->callHasChildren) {
 					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callHasChildren, "callHasChildren", &retval);

@@ -187,7 +187,7 @@ static void zend_ini_copy_typed_value(zval *retval, const int type, const char *
 			if (convert_to_number(retval, str, len) == SUCCESS) {
 				break;
 			}
-			/* intentional fall-through */
+			ZEND_FALLTHROUGH;
 		default:
 			zend_ini_copy_value(retval, str, len);
 	}
@@ -328,6 +328,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 						*t++ = *s;
 						break;
 					}
+					ZEND_FALLTHROUGH;
 				case '\\':
 				case '$':
 					*t++ = *s;
@@ -606,7 +607,7 @@ end_raw_value_chars:
 				if (YYCURSOR < YYLIMIT && *YYCURSOR != '"') {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}

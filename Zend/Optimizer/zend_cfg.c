@@ -314,6 +314,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 				break;
 			case ZEND_INCLUDE_OR_EVAL:
 				flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+				ZEND_FALLTHROUGH;
 			case ZEND_GENERATOR_CREATE:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:

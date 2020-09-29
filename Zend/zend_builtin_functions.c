@@ -525,7 +525,7 @@ ZEND_FUNCTION(define)
 				val = &val_free;
 				break;
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		default:
 			zval_ptr_dtor(&val_free);
 			zend_argument_type_error(2, "cannot be an object, %s given", zend_zval_type_name(val));

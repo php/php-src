@@ -184,6 +184,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 				php_libxml_node_free_list((xmlNodePtr) nodep->children);
 				nodep->children = NULL;
 			}
+			ZEND_FALLTHROUGH;
 		case XML_TEXT_NODE:
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
@@ -618,6 +619,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 			nsnode = nodep;
+			ZEND_FALLTHROUGH;
 		case XML_ATTRIBUTE_NODE:
 			if (nsnode == NULL) {
 				nsnode = nodep->parent;

@@ -986,6 +986,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 						*t++ = *s;
 						break;
 					}
+					ZEND_FALLTHROUGH;
 				case '\\':
 				case '$':
 					*t++ = *s;
@@ -2373,7 +2374,7 @@ inline_char_handler:
 					YYCURSOR--;
 					break;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2556,7 +2557,7 @@ skip_escape_conversion:
 				if (YYCURSOR < YYLIMIT) {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2793,7 +2794,7 @@ skip_escape_conversion:
 				if (YYCURSOR < YYLIMIT) {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2840,7 +2841,7 @@ double_quotes_scan_done:
 				if (YYCURSOR < YYLIMIT) {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2876,7 +2877,7 @@ double_quotes_scan_done:
 				if (*YYCURSOR == '\n') {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			case '\n':
 				indentation = spacing = 0;
 
@@ -2946,7 +2947,7 @@ double_quotes_scan_done:
 				if (YYCURSOR < YYLIMIT && *YYCURSOR != '\n' && *YYCURSOR != '\r') {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -3000,7 +3001,7 @@ heredoc_scan_done:
 				if (*YYCURSOR == '\n') {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			case '\n':
 				indentation = spacing = 0;
 
@@ -3051,7 +3052,7 @@ heredoc_scan_done:
 
 					goto nowdoc_scan_done;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}

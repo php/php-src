@@ -2216,11 +2216,14 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			 * return;
 			 */
 			info_data->tag = TAG_FMT_UNDEFINED;/* otherwise not freed from memory */
+			ZEND_FALLTHROUGH;
 		case TAG_FMT_SBYTE:
 		case TAG_FMT_BYTE:
 		/* in contrast to strings bytes do not need to allocate buffer for NULL if length==0 */
-			if (!length)
+			if (!length) {
 				break;
+			}
+			ZEND_FALLTHROUGH;
 		case TAG_FMT_UNDEFINED:
 			if (length > value_len) {
 				exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "length > value_len: %d > %zu", length, value_len);
@@ -2520,6 +2523,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									}
 									break;
 								}
+								ZEND_FALLTHROUGH;
 							case TAG_FMT_USHORT:
 							case TAG_FMT_ULONG:
 								if (l==1) {
@@ -2546,6 +2550,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									}
 									break;
 								}
+								ZEND_FALLTHROUGH;
 							case TAG_FMT_SSHORT:
 							case TAG_FMT_SLONG:
 								if (l==1) {

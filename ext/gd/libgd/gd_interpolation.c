@@ -2465,6 +2465,7 @@ int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id)
 	switch (id) {
 		case GD_DEFAULT:
 			id = GD_BILINEAR_FIXED;
+			ZEND_FALLTHROUGH;
 		/* Optimized versions */
 		case GD_BILINEAR_FIXED:
 		case GD_BICUBIC_FIXED:

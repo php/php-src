@@ -2335,21 +2335,21 @@ PHP_METHOD(SplFileObject, fgetcsv)
 			} else {
 				escape = (unsigned char) esc[0];
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 2:
 			if (e_len != 1) {
 				zend_argument_value_error(2, "must be a single character");
 				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 1:
 			if (d_len != 1) {
 				zend_argument_value_error(1, "must be a single character");
 				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 0:
 			break;
 		}
@@ -2387,21 +2387,21 @@ PHP_METHOD(SplFileObject, fputcsv)
 					zend_argument_value_error(4, "must be empty or a single character");
 					RETURN_THROWS();
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 3:
 			if (e_len != 1) {
 				zend_argument_value_error(3, "must be a single character");
 				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 2:
 			if (d_len != 1) {
 				zend_argument_value_error(2, "must be a single character");
 				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 1:
 		case 0:
 			break;
@@ -2440,21 +2440,21 @@ PHP_METHOD(SplFileObject, setCsvControl)
 					zend_argument_value_error(3, "must be empty or a single character");
 					RETURN_THROWS();
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 2:
 			if (e_len != 1) {
 				zend_argument_value_error(2, "must be a single character");
 				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 1:
 			if (d_len != 1) {
 				zend_argument_value_error(1, "must be a single character");
 				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 0:
 			break;
 		}

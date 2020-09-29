@@ -1673,7 +1673,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 				*ptr++ = '\'';
 				*ptr++ = '\\';
 				*ptr++ = '\'';
-				/* fall-through */
+				ZEND_FALLTHROUGH;
 			default:
 				*ptr++ = *dir;
 			}

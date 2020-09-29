@@ -704,7 +704,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						zend_value_error("Missing format specifier at end of string");
 						goto fail;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 
 				default:
 					zend_value_error("Unknown format specifier \"%c\"", *format);

@@ -1810,7 +1810,7 @@ PHP_METHOD(SQLite3Stmt, execute)
 		}
 		case SQLITE_ERROR:
 			sqlite3_reset(stmt_obj->stmt);
-
+			ZEND_FALLTHROUGH;
 		default:
 			if (!EG(exception)) {
 				php_sqlite3_error(stmt_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));

@@ -358,7 +358,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 #else
 				ZSTR_VAL(cmd)[y++] = '\\';
 #endif
-				/* fall-through */
+				ZEND_FALLTHROUGH;
 			default:
 				ZSTR_VAL(cmd)[y++] = str[x];
 
@@ -432,7 +432,7 @@ PHPAPI zend_string *php_escape_shell_arg(const char *str)
 			ZSTR_VAL(cmd)[y++] = '\\';
 			ZSTR_VAL(cmd)[y++] = '\'';
 #endif
-			/* fall-through */
+			ZEND_FALLTHROUGH;
 		default:
 			ZSTR_VAL(cmd)[y++] = str[x];
 		}

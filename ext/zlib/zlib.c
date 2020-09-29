@@ -231,6 +231,7 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 					deflateEnd(&ctx->Z);
 					return FAILURE;
 				}
+				ZEND_FALLTHROUGH;
 			case Z_STREAM_END:
 				if (ctx->Z.avail_in) {
 					memmove(ctx->buffer.data, ctx->buffer.data + ctx->buffer.used - ctx->Z.avail_in, ctx->Z.avail_in);
@@ -366,7 +367,7 @@ static void php_zlib_output_compression_start(void)
 			break;
 		case 1:
 			ZLIBG(output_compression) = PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
-			/* break omitted intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			if (	php_zlib_output_encoding() &&
 					(h = php_zlib_output_handler_init(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS)) &&

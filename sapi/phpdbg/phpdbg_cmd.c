@@ -258,7 +258,7 @@ PHPDBG_API bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t
 					if (l->num != r->num) {
 						break;
 					}
-				/* break intentionally omitted */
+				ZEND_FALLTHROUGH;
 
 				case STR_PARAM:
 					return (l->len == r->len) &&
@@ -288,7 +288,7 @@ PHPDBG_API bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t
 					if (l->num != r->num) {
 						break;
 					}
-				/* break intentionally omitted */
+				ZEND_FALLTHROUGH;
 
 				case METHOD_PARAM: {
 					size_t lengths[2] = {

@@ -3351,7 +3351,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 							state = 3;
 							break;
 						}
-						/* break is missing intentionally */
+						ZEND_FALLTHROUGH;
 
 					case 3:
 						if (crlf_state == -1) {

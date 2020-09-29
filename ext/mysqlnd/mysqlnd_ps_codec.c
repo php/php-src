@@ -712,7 +712,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 				break;
 			case MYSQL_TYPE_LONGLONG:
 				is_longlong = 4;
-				/* fall-through */
+				ZEND_FALLTHROUGH;
 			case MYSQL_TYPE_LONG:
 				{
 					zval *tmp_data = (*copies_param && !Z_ISUNDEF((*copies_param)[i]))? &(*copies_param)[i]: the_var;

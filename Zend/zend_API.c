@@ -942,6 +942,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 		case 'Z': /* replace with 'z' */
 		case 'L': /* replace with 'l' */
 			ZEND_ASSERT(0 && "ZPP modifier no longer supported");
+			ZEND_FALLTHROUGH;
 		default:
 			return "unknown";
 	}

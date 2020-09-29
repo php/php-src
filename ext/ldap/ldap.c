@@ -1592,12 +1592,16 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		case 9:
 		case 8:
 			ldap_deref = deref;
+			ZEND_FALLTHROUGH;
 		case 7:
 			ldap_timelimit = timelimit;
+			ZEND_FALLTHROUGH;
 		case 6:
 			ldap_sizelimit = sizelimit;
+			ZEND_FALLTHROUGH;
 		case 5:
 			ldap_attrsonly = attrsonly;
+			ZEND_FALLTHROUGH;
 		case 4:
 			num_attribs = zend_hash_num_elements(Z_ARRVAL_P(attrs));
 			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
@@ -1617,6 +1621,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ldap_attrs[i] = Z_STRVAL_P(attr);
 			}
 			ldap_attrs[num_attribs] = NULL;
+			ZEND_FALLTHROUGH;
 		default:
 			break;
 	}
@@ -3465,6 +3470,7 @@ PHP_FUNCTION(ldap_parse_result)
 	switch (myargcount) {
 		case 7:
 			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
+			ZEND_FALLTHROUGH;
 		case 6:
 			referrals = zend_try_array_init(referrals);
 			if (!referrals) {
@@ -3478,6 +3484,7 @@ PHP_FUNCTION(ldap_parse_result)
 				}
 				ldap_memvfree((void**)lreferrals);
 			}
+			ZEND_FALLTHROUGH;
 		case 5:
 			if (lerrmsg == NULL) {
 				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(errmsg);
@@ -3485,6 +3492,7 @@ PHP_FUNCTION(ldap_parse_result)
 				ZEND_TRY_ASSIGN_REF_STRING(errmsg, lerrmsg);
 				ldap_memfree(lerrmsg);
 			}
+			ZEND_FALLTHROUGH;
 		case 4:
 			if (lmatcheddn == NULL) {
 				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(matcheddn);
@@ -3538,6 +3546,7 @@ PHP_FUNCTION(ldap_parse_exop)
 				ZEND_TRY_ASSIGN_REF_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
 			}
+			ZEND_FALLTHROUGH;
 		case 3:
 			/* use arg #3 as the data returned by the server */
 			if (lretdata == NULL) {

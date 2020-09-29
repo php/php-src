@@ -1527,7 +1527,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 				}
 			}
 			PS(session_status) = php_session_none;
-			/* Fall through */
+			ZEND_FALLTHROUGH;
 
 		case php_session_none:
 		default:

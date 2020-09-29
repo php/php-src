@@ -678,6 +678,7 @@ static int zend_may_overflow(const zend_op *opline, const zend_ssa_op *ssa_op, c
 					ssa->var_info[res].range.underflow ||
 					ssa->var_info[res].range.overflow);
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			return 1;
 	}
@@ -2827,7 +2828,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_DO_UCALL:
 						is_terminated = 1;
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
@@ -3016,7 +3017,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 							goto done;
 						}
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
@@ -3421,7 +3422,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:

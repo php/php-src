@@ -592,7 +592,7 @@ static inline int ct_eval_assign_dim(zval *result, zval *value, zval *key) {
 		case IS_NULL:
 		case IS_FALSE:
 			array_init(result);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case IS_ARRAY:
 		case PARTIAL_ARRAY:
 			return ct_eval_add_array_elem(result, value, key);
@@ -695,7 +695,7 @@ static inline int ct_eval_assign_obj(zval *result, zval *value, zval *key) {
 		case IS_NULL:
 		case IS_FALSE:
 			empty_partial_object(result);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case PARTIAL_OBJECT:
 			return ct_eval_add_obj_prop(result, value, key);
 		default:

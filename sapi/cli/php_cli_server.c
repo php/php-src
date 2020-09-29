@@ -1627,7 +1627,7 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 	switch (client->last_header_element) {
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_NONE:
 		client->current_header_name = (char *)at;
 		client->current_header_name_len = length;
@@ -1692,7 +1692,7 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 		client->current_header_value = pemalloc(1, 1);
 		*client->current_header_value = '\0';
 		client->current_header_value_len = 0;
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
 		break;

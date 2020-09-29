@@ -217,21 +217,24 @@ void fpm_pctl(int new_state, int action) /* {{{ */
 				case FPM_PCTL_STATE_RELOADING :
 					/* 'reloading' can be overridden by 'finishing' */
 					if (new_state == FPM_PCTL_STATE_FINISHING) break;
+					ZEND_FALLTHROUGH;
 				case FPM_PCTL_STATE_FINISHING :
 					/* 'reloading' and 'finishing' can be overridden by 'terminating' */
 					if (new_state == FPM_PCTL_STATE_TERMINATING) break;
+					ZEND_FALLTHROUGH;
 				case FPM_PCTL_STATE_TERMINATING :
 					/* nothing can override 'terminating' state */
 					zlog(ZLOG_DEBUG, "not switching to '%s' state, because already in '%s' state",
 						fpm_state_names[new_state], fpm_state_names[fpm_state]);
 					return;
+				/* TODO Add EMPTY_SWITCH_DEFAULT_CASE? */
 			}
 
 			fpm_signal_sent = 0;
 			fpm_state = new_state;
 
 			zlog(ZLOG_DEBUG, "switching to '%s' state", fpm_state_names[fpm_state]);
-			/* fall down */
+			ZEND_FALLTHROUGH;
 
 		case FPM_PCTL_ACTION_TIMEOUT :
 			fpm_pctl_action_next();

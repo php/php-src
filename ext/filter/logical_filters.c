@@ -99,6 +99,7 @@ static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret)
 	switch (*str) {
 		case '-':
 			sign = 1;
+			ZEND_FALLTHROUGH;
 		case '+':
 			str++;
 		default:

@@ -298,7 +298,7 @@ static zend_never_inline ZEND_COLD zval *_get_zval_cv_lookup(zval *ptr, uint32_t
 			break;
 		case BP_VAR_RW:
 			zval_undefined_cv(var EXECUTE_DATA_CC);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case BP_VAR_W:
 			ZVAL_NULL(ptr);
 			break;
@@ -1418,6 +1418,7 @@ try_again:
 			}
 			case IS_UNDEF:
 				ZVAL_UNDEFINED_OP2();
+				ZEND_FALLTHROUGH;
 			case IS_DOUBLE:
 			case IS_NULL:
 			case IS_FALSE:
@@ -2081,7 +2082,7 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 			if (EG(exception)) {
 				return IS_NULL;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
 			value->str = ZSTR_EMPTY_ALLOC();
@@ -2122,7 +2123,7 @@ num_undef:
 			switch (type) {
 				case BP_VAR_R:
 					zend_undefined_offset(hval);
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
@@ -2151,7 +2152,7 @@ str_index:
 				switch (type) {
 					case BP_VAR_R:
 						zend_undefined_index(offset_key);
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case BP_VAR_UNSET:
 					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval);
@@ -2389,6 +2390,7 @@ try_string_offset:
 				}
 				case IS_UNDEF:
 					ZVAL_UNDEFINED_OP2();
+					ZEND_FALLTHROUGH;
 				case IS_DOUBLE:
 				case IS_NULL:
 				case IS_FALSE:

@@ -429,6 +429,8 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 					return 1;
 				}
 			}
+			/* TODO Check this is correct? */
+			ZEND_FALLTHROUGH;
 
 		case ttWhite:
 		case ttComment:
@@ -962,6 +964,8 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
+			/* TODO Check this is correct? */
+			ZEND_FALLTHROUGH;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);

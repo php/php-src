@@ -4152,6 +4152,7 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 				*(php_socket_t *)ret = fd_number;
 				return SUCCESS;
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			return FAILURE;
 	}

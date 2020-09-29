@@ -466,7 +466,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						map[i] = l_empty_arr;
 						break;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				default:
 					/* don't merge other types */
 					map[i] = j;

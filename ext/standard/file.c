@@ -651,7 +651,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_FALSE:
 		case IS_TRUE:
 			convert_to_string(data);
-
+			ZEND_FALLTHROUGH;
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
@@ -699,6 +699,7 @@ PHP_FUNCTION(file_put_contents)
 					break;
 				}
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			numbytes = -1;
 			break;
@@ -1774,7 +1775,7 @@ quit_loop:
 			if (last_chars[0] == '\r') {
 				return ptr - 2;
 			}
-			/* break is omitted intentionally */
+			ZEND_FALLTHROUGH;
 		case '\r':
 			return ptr - 1;
 	}
@@ -2080,7 +2081,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 								memcpy(tptr, hunk_begin, bptr - hunk_begin);
 								tptr += (bptr - hunk_begin);
 								hunk_begin = bptr;
-								/* break is omitted intentionally */
+								ZEND_FALLTHROUGH;
 
 							case 0: {
 								char *new_buf;
@@ -2132,7 +2133,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -2:
 					case -1:
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						/* we need to determine if the enclosure is
 						 * 'real' or is it escaped */
@@ -2201,7 +2202,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -1:
 						inc_len = 1;
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						if (*bptr == delimiter) {
 							goto quit_loop_3;
@@ -2232,7 +2233,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -1:
 						inc_len = 1;
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						if (*bptr == delimiter) {
 							goto quit_loop_4;

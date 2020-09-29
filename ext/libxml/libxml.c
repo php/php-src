@@ -165,6 +165,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 					node->ns = NULL;
 				}
 				node->type = XML_ELEMENT_NODE;
+				ZEND_FALLTHROUGH;
 			default:
 				xmlFreeNode(node);
 		}
@@ -188,9 +189,10 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					php_libxml_node_free_list((xmlNodePtr) node->properties);
 					break;
 				case XML_ATTRIBUTE_NODE:
-						if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-							xmlRemoveID(node->doc, (xmlAttrPtr) node);
-						}
+					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
+						xmlRemoveID(node->doc, (xmlAttrPtr) node);
+					}
+					ZEND_FALLTHROUGH;
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_DOCUMENT_TYPE_NODE:

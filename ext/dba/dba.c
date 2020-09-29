@@ -637,7 +637,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				lock_flag = (hptr->flags & DBA_LOCK_ALL);
 				break;
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {

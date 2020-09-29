@@ -385,7 +385,7 @@ static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_o
 			if (!(ctx->ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 				return 0;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_FE_FREE:
 			return !is_var_dead(ctx, ssa_op->op1_use);
 		default:

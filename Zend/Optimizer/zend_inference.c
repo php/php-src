@@ -4474,7 +4474,7 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 				/* Division by zero */
 				return 1;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_SUB:
 		case ZEND_MUL:
 		case ZEND_POW:
@@ -4574,6 +4574,7 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 			if (t1 & MAY_BE_REF) {
 				return 1;
 			}
+			ZEND_FALLTHROUGH;
 		case ZEND_BIND_STATIC:
 		case ZEND_UNSET_VAR:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
@@ -4670,6 +4671,9 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 					return 0;
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
+			/* GCC is getting confused here for the Wimplicit-fallthrough warning with
+			 * EMPTY_SWITCH_DEFAULT_CASE() macro */
+			return 0;
 		case ZEND_ARRAY_KEY_EXISTS:
 			if ((t2 & MAY_BE_ANY) != MAY_BE_ARRAY) {
 				return 1;

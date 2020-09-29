@@ -1514,6 +1514,8 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				} else {
 					break;
 				}
+				/* TODO might want to rearrange logic so this is more obvious */
+				ZEND_FALLTHROUGH;
 
 			case 9: /* choice point, seeing what to do next.*/
 				switch (*p1) {
@@ -1537,7 +1539,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								break;
 							}
 						}
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 
 					case '\r': case '\n': case ' ': case '\t': {
 						zend_string *decoded_text;
@@ -1688,7 +1690,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							scan_stat = 1;
 							break;
 						}
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 
 					default:
 						_php_iconv_appendc(pretval, *p1, cd_pl);

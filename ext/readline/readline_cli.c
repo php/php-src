@@ -551,12 +551,14 @@ TODO:
 				if (retval) {
 					break;
 				}
+				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
 				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}
+				ZEND_FALLTHROUGH;
 			case 4:
 			case 5:
 				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);

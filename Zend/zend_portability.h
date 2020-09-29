@@ -113,6 +113,13 @@
 # define ZEND_UNREACHABLE() ZEND_ASSUME(0)
 #endif
 
+/* pseudo fallthrough keyword; */
+#if defined(__GNUC__) && __GNUC__ >= 7
+# define ZEND_FALLTHROUGH __attribute__((__fallthrough__))
+#else
+# define ZEND_FALLTHROUGH ((void)0)
+#endif
+
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
 #define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_UNREACHABLE(); break;

@@ -497,17 +497,17 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			add_assoc_string(subarray, "type", "MX");
 			GETSHORT(n, cp);
 			add_assoc_long(subarray, "pri", n);
-			/* no break; */
+			ZEND_FALLTHROUGH;
 		case DNS_T_CNAME:
 			if (type == DNS_T_CNAME) {
 				add_assoc_string(subarray, "type", "CNAME");
 			}
-			/* no break; */
+			ZEND_FALLTHROUGH;
 		case DNS_T_NS:
 			if (type == DNS_T_NS) {
 				add_assoc_string(subarray, "type", "NS");
 			}
-			/* no break; */
+			ZEND_FALLTHROUGH;
 		case DNS_T_PTR:
 			if (type == DNS_T_PTR) {
 				add_assoc_string(subarray, "type", "PTR");

@@ -2377,6 +2377,7 @@ PHP_FUNCTION(imap_utf7_decode)
 				case ST_DECODE2:
 				case ST_DECODE1:
 					outlen++;
+					ZEND_FALLTHROUGH;
 				case ST_DECODE0:
 					state++;
 				case ST_NORMAL:
