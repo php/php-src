@@ -22,14 +22,14 @@ function gmp_sub(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 
 function gmp_mul(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 
-function gmp_div_qr(GMP|int|string $num1, GMP|int|string $num2, int $round = GMP_ROUND_ZERO): array {}
+function gmp_div_qr(GMP|int|string $num1, GMP|int|string $num2, int $rounding_mode = GMP_ROUND_ZERO): array {}
 
-function gmp_div_q(GMP|int|string $num1, GMP|int|string $num2, int $round = GMP_ROUND_ZERO): GMP {}
+function gmp_div_q(GMP|int|string $num1, GMP|int|string $num2, int $rounding_mode = GMP_ROUND_ZERO): GMP {}
 
-function gmp_div_r(GMP|int|string $num1, GMP|int|string $num2, int $round = GMP_ROUND_ZERO): GMP {}
+function gmp_div_r(GMP|int|string $num1, GMP|int|string $num2, int $rounding_mode = GMP_ROUND_ZERO): GMP {}
 
 /** @alias gmp_div_q */
-function gmp_div(GMP|int|string $num1, GMP|int|string $num2, int $round = GMP_ROUND_ZERO): GMP {}
+function gmp_div(GMP|int|string $num1, GMP|int|string $num2, int $rounding_mode = GMP_ROUND_ZERO): GMP {}
 
 function gmp_mod(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 
@@ -49,9 +49,9 @@ function gmp_root(GMP|int|string $num, int $nth): GMP {}
 
 function gmp_rootrem(GMP|int|string $num, int $nth): array {}
 
-function gmp_pow(GMP|int|string $base, int $exp): GMP {}
+function gmp_pow(GMP|int|string $num, int $exponent): GMP {}
 
-function gmp_powm(GMP|int|string $base, GMP|int|string $exp, GMP|int|string $mod): GMP {}
+function gmp_powm(GMP|int|string $num, GMP|int|string $exponent, GMP|int|string $modulus): GMP {}
 
 function gmp_perfect_square(GMP|int|string $num): bool {}
 

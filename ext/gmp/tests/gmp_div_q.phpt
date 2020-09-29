@@ -51,7 +51,7 @@ object(GMP)#2 (1) {
   ["num"]=>
   string(1) "0"
 }
-gmp_div_q(): Argument #3 ($round) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
+gmp_div_q(): Argument #3 ($rounding_mode) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
 object(GMP)#1 (1) {
   ["num"]=>
   string(4) "9131"

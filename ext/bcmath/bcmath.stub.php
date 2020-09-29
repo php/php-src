@@ -12,9 +12,9 @@ function bcdiv(string $num1, string $num2, ?int $scale = null): string {}
 
 function bcmod(string $num1, string $num2, ?int $scale = null): string {}
 
-function bcpowmod(string $base, string $exp, string $mod, ?int $scale = null): string {}
+function bcpowmod(string $num, string $exponent, string $modulus, ?int $scale = null): string {}
 
-function bcpow(string $base, string $exp, ?int $scale = null): string {}
+function bcpow(string $num, string $exponent, ?int $scale = null): string {}
 
 function bcsqrt(string $num, ?int $scale = null): string {}
 

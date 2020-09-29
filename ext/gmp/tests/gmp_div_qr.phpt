@@ -74,7 +74,7 @@ array(2) {
     string(5) "12653"
   }
 }
-gmp_div_qr(): Argument #3 ($round) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
+gmp_div_qr(): Argument #3 ($rounding_mode) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
 array(2) {
   [0]=>
   object(GMP)#4 (1) {

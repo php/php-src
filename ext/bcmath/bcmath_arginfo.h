@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39f4f9ccb85c835b6949347f9dacbbcd8a58142b */
+ * Stub hash: 0c1e2a6163a5fc0f42bf79bbc530af7c5fd77074 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -16,15 +16,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_bcmod arginfo_bcadd
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcpowmod, 0, 3, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, base, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, exp, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, mod, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, exponent, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, modulus, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcpow, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, base, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, exp, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, exponent, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 

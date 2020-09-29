@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-bcpow(): Argument #2 ($exp) cannot have a fractional part
+bcpow(): Argument #2 ($exponent) cannot have a fractional part

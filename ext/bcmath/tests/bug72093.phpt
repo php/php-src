@@ -19,4 +19,4 @@ try {
 ?>
 --EXPECT--
 bcpowmod(): Argument #4 ($scale) must be between 0 and 2147483647
-bcpowmod(): Argument #2 ($exp) cannot have a fractional part
+bcpowmod(): Argument #2 ($exponent) cannot have a fractional part
