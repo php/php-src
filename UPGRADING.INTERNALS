@@ -6,6 +6,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   c. zend_get_opcode_id()
 
 2. Build system changes
+  a. New compiler flags
 
 3. Module changes
   a. ext/hash
@@ -39,7 +40,9 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 ========================
 2. Build system changes
 ========================
-
+  a. New compiler flags
+     - [-Wimplicit-fallthrough=1] is now enabled by default.
+       It is possible to use the new ZEND_FALLTHROUGH macro keyword to suppress the warning.
 ========================
 3. Module changes
 ========================
