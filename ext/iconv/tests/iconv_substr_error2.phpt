@@ -25,6 +25,6 @@ echo "Done";
 --EXPECTF--
 *** Testing iconv_substr() : error conditions ***
 
-Warning: iconv_substr(): Wrong charset, conversion from "unknown-encoding" to "UCS-4LE" is not allowed in %s on line %d
+Warning: iconv_substr(): Wrong encoding, conversion from "unknown-encoding" to "UCS-4LE" is not allowed in %s on line %d
 bool(false)
 Done
