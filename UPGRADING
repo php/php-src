@@ -812,7 +812,7 @@ PHP 8.0 UPGRADE NOTES
     values rather than int.
 
 - Zip:
-  . Extension updated to version 1.19.0
+  . Extension updated to version 1.19.1
   . New ZipArchive::lastId property to get index value of last added entry.
   . Error can be checked after an archive is closed using ZipArchive::status,
     ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
