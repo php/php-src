@@ -3,11 +3,11 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.34
 
 - Core:
-  . Fixed bug ##79699 (PHP parses encoded cookie names so malicious `__Host-` 
+  . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-`
     cookies can be sent). (CVE-2020-7070) (Stas)
 
 - OpenSSL:
-  . Fixed bug ##79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12 
+  . Fixed bug #79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12
     bytes IV). (CVE-2020-7069) (Jakub Zelenka)
 
 06 Aug 2020, PHP 7.2.33
