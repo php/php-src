@@ -501,7 +501,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			size_t new_val_len;
 
 			*val++ = '\0';
-			php_url_decode(var, strlen(var));
+			if (arg != PARSE_COOKIE) {
+				php_url_decode(var, strlen(var));
+			}
 			val_len = php_url_decode(val, strlen(val));
 			val = estrndup(val, val_len);
 			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
@@ -512,7 +514,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			size_t val_len;
 			size_t new_val_len;
 
-			php_url_decode(var, strlen(var));
+			if (arg != PARSE_COOKIE) {
+				php_url_decode(var, strlen(var));
+			}
 			val_len = 0;
 			val = estrndup("", val_len);
 			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
