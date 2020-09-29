@@ -254,16 +254,16 @@ class ReflectionClass implements Reflector
     public function getProperty(string $name) {}
 
     /** @return ReflectionProperty[] */
-    public function getProperties(?int $modifiers = null) {}
+    public function getProperties(?int $filter = null) {}
 
     /** @return bool */
     public function hasConstant(string $name) {}
 
     /** @return array|null */
-    public function getConstants(?int $modifiers = null) {}
+    public function getConstants(?int $filter = null) {}
 
     /** @return ReflectionClassConstant[] */
-    public function getReflectionConstants(?int $modifiers = null) {}
+    public function getReflectionConstants(?int $filter = null) {}
 
     /** @return mixed */
     public function getConstant(string $name) {}
