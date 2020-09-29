@@ -977,7 +977,7 @@ PHP_FUNCTION(odbc_execute)
 	int i, ne;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h", &pv_res, &pv_param_ht) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h/", &pv_res, &pv_param_ht) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -991,13 +991,25 @@ PHP_FUNCTION(odbc_execute)
 			RETURN_FALSE;
 		}
 
+		zend_hash_internal_pointer_reset(pv_param_ht);
 		params = (params_t *)safe_emalloc(sizeof(params_t), result->numparams, 0);
 		for(i = 0; i < result->numparams; i++) {
 			params[i].fp = -1;
 		}
 
-		i = 1;
-		ZEND_HASH_FOREACH_VAL(pv_param_ht, tmp) {
+		for(i = 1; i <= result->numparams; i++) {
+			if ((tmp = zend_hash_get_current_data(pv_param_ht)) == NULL) {
+				php_error_docref(NULL, E_WARNING,"Error getting parameter");
+				SQLFreeStmt(result->stmt,SQL_RESET_PARAMS);
+				for (i = 0; i < result->numparams; i++) {
+					if (params[i].fp != -1) {
+						close(params[i].fp);
+					}
+				}
+				efree(params);
+				RETURN_FALSE;
+			}
+
 			otype = Z_TYPE_P(tmp);
 			if (!try_convert_to_string(tmp)) {
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
@@ -1087,8 +1099,8 @@ PHP_FUNCTION(odbc_execute)
 				efree(params);
 				RETURN_FALSE;
 			}
-			if (++i > result->numparams) break;
-		} ZEND_HASH_FOREACH_END();
+			zend_hash_move_forward(pv_param_ht);
+		}
 	}
 	/* Close cursor, needed for doing multiple selects */
 	rc = SQLFreeStmt(result->stmt, SQL_CLOSE);
