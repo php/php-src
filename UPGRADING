@@ -52,10 +52,15 @@ PHP 7.2 UPGRADE NOTES
   . The hash_hmac(), hash_hmac_file(), hash_pbkdf2() and hash_init() (with
     HASH_HMAC) functions no longer accept non-cryptographic hashes.
 
-- JSON
+- JSON:
   . The json_decode() option JSON_OBJECT_AS_ARRAY is used if the second
     parameter (assoc) is null. Previously JSON_OBJECT_AS_ARRAY was always
     ignored.
+
+- SAPI:
+  . Starting with 7.2.34, incoming cookie names are not url-decoded. This was never 
+    required by the standard, outgoing cookie names aren't encoded and this leads 
+    to security issues (CVE-2020-7070).
 
 - Session:
   . Removed register_globals related code and "!" can be used as $_SESSION key name.
@@ -69,7 +74,7 @@ PHP 7.2 UPGRADE NOTES
         session_unset(), session_write_close()/session_commit(), session_abort(),
         session_reset()
     . Functions prohibit invalid operations with regard to session status and
-      HTTP header status, returns correct bool return value.
+      HTTP header status, return correct bool return value.
         session_start(), session_set_cookie_params(), session_name(), session_module_name(),
         session_set_save_handler(), session_regenerate_id(), session_cache_limiter(),
         session_cache_expire(), session_unset(), session_destroy(),
@@ -88,7 +93,7 @@ PHP 7.2 UPGRADE NOTES
         session_start()
     . When headers are already sent and try to set new INI values, session_name(),
       session_module_name(), session_save_path(), session_cache_limiter() and
-      session_cache_expire() are no longer works. Older PHPs accepts new values even
+      session_cache_expire() no longer work. Older PHPs accept new values even
       if new values will not be effective.
       This new corrected behavior may affect command line mode CLI scripts that manage
       sessions. Use output buffer just like web applications to resolve problems on
