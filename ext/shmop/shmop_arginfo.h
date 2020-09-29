@@ -1,35 +1,35 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1fe8d001718e20ca915480d1ab6cb6996115b547 */
+ * Stub hash: 81173e82e0378d5b5c729a3cce8561e0ca56e092 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shmop_open, 0, 4, Shmop, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, permissions, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_read, 0, 3, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, shmid, Shmop, 0)
-	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, shmop, Shmop, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_close, 0, 1, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(0, shmid, Shmop, 0)
+	ZEND_ARG_OBJ_INFO(0, shmop, Shmop, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_size, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, shmid, Shmop, 0)
+	ZEND_ARG_OBJ_INFO(0, shmop, Shmop, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_write, 0, 3, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, shmid, Shmop, 0)
+	ZEND_ARG_OBJ_INFO(0, shmop, Shmop, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_delete, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, shmid, Shmop, 0)
+	ZEND_ARG_OBJ_INFO(0, shmop, Shmop, 0)
 ZEND_END_ARG_INFO()
 
 
