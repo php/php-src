@@ -5788,6 +5788,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 {
 	zend_jit_trace_stop ret;
 	const void *handler;
+	uint8_t orig_trigger;
 	zend_jit_trace_info *t = NULL;
 	zend_jit_trace_exit_info exit_info[ZEND_JIT_TRACE_MAX_EXITS];
 
@@ -5818,7 +5819,12 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
 
+		orig_trigger = JIT_G(trigger);
+		JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
+
 		handler = zend_jit_trace(trace_buffer, 0, 0);
+
+		JIT_G(trigger) = orig_trigger;
 
 		if (handler) {
 			zend_jit_trace_exit_info *shared_exit_info = NULL;
@@ -6407,6 +6413,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 {
 	zend_jit_trace_stop ret;
 	const void *handler;
+	uint8_t orig_trigger;
 	zend_jit_trace_info *t;
 	zend_jit_trace_exit_info exit_info[ZEND_JIT_TRACE_MAX_EXITS];
 
@@ -6439,7 +6446,12 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
 
+		orig_trigger = JIT_G(trigger);
+		JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
+
 		handler = zend_jit_trace(trace_buffer, parent_num, exit_num);
+
+		JIT_G(trigger) = orig_trigger;
 
 		if (handler) {
 			zend_jit_trace_exit_info *shared_exit_info = NULL;
