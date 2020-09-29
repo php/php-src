@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 66d077cacb14825267889aa41369bd09416b5e41 */
+ * Stub hash: af5b921b66f7dd68ba8c771199825a439a07dba0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1090,12 +1090,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_utf8_decode arginfo_base64_encode
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_getdir, 0, 1, Directory, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 

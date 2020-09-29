@@ -694,16 +694,16 @@ function utf8_decode(string $string): string {}
  * @param resource|null $context
  * @return resource|false
  */
-function opendir(string $path, $context = null) {}
+function opendir(string $directory, $context = null) {}
 
 /** @param resource $context */
-function getdir(string $path, $context = null): Directory|false {}
+function getdir(string $directory, $context = null): Directory|false {}
 
 /**
  * @param resource|null $context
  * @alias getdir
  */
-function dir(string $path, $context = null): Directory|false {}
+function dir(string $directory, $context = null): Directory|false {}
 
 /** @param resource|null $dir_handle */
 function closedir($dir_handle = null): void {}
