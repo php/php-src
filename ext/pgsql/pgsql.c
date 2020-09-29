@@ -2321,28 +2321,28 @@ PHP_FUNCTION(pg_lo_create)
 
 	if (oid) {
 		switch (Z_TYPE_P(oid)) {
-			case IS_STRING:
-				{
-					/* TODO: Use subroutine? */
-					char *end_ptr;
-					wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
-					if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+		case IS_STRING:
+			{
+				/* TODO: Use subroutine? */
+				char *end_ptr;
+				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
+				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
 					/* wrong integer format */
 					zend_value_error("Invalid OID value passed");
 					RETURN_THROWS();
-					}
 				}
-				break;
-			case IS_LONG:
-				if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
-					zend_value_error("Invalid OID value passed");
-					RETURN_THROWS();
-				}
-				wanted_oid = (Oid)Z_LVAL_P(oid);
-				break;
-			default:
-				zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			}
+			break;
+		case IS_LONG:
+			if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
+				zend_value_error("Invalid OID value passed");
 				RETURN_THROWS();
+			}
+			wanted_oid = (Oid)Z_LVAL_P(oid);
+			break;
+		default:
+			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			RETURN_THROWS();
 		}
 		if ((pgsql_oid = lo_create(pgsql, wanted_oid)) == InvalidOid) {
 			php_error_docref(NULL, E_WARNING, "Unable to create PostgreSQL large object");
@@ -2721,28 +2721,28 @@ PHP_FUNCTION(pg_lo_import)
 	if (oid) {
 		Oid wanted_oid;
 		switch (Z_TYPE_P(oid)) {
-			case IS_STRING:
-				{
-					/* TODO: Use subroutine? */
-					char *end_ptr;
-					wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
-					if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+		case IS_STRING:
+			{
+				/* TODO: Use subroutine? */
+				char *end_ptr;
+				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
+				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
 					/* wrong integer format */
 					zend_value_error("Invalid OID value passed");
 					RETURN_THROWS();
-					}
 				}
-				break;
-			case IS_LONG:
-				if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
-					zend_value_error("Invalid OID value passed");
-					RETURN_THROWS();
-				}
-				wanted_oid = (Oid)Z_LVAL_P(oid);
-				break;
-			default:
-				zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			}
+			break;
+		case IS_LONG:
+			if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
+				zend_value_error("Invalid OID value passed");
 				RETURN_THROWS();
+			}
+			wanted_oid = (Oid)Z_LVAL_P(oid);
+			break;
+		default:
+			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			RETURN_THROWS();
 		}
 
 		returned_oid = lo_import_with_oid(pgsql, file_in, wanted_oid);
