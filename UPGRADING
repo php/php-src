@@ -126,7 +126,7 @@ DOM:
     The new signature is also (LSP) compatible with older PHP versions.
 
 - SAPI:
-  . Starting with 7.4.12, incoming cookie names are not url-decoded. This was never 
+  . Starting with 7.4.11, incoming cookie names are not url-decoded. This was never 
     required by the standard, outgoing cookie names aren't encoded and this leads 
     to security issues (CVE-2020-7070).
 
