@@ -4487,7 +4487,6 @@ static int accel_preload(const char *config, zend_bool in_child)
 	} zend_end_try();
 
 	PG(open_basedir) = orig_open_basedir;
-	CG(compiler_options) = orig_compiler_options;
 	accelerator_orig_compile_file = preload_orig_compile_file;
 	ZCG(enabled) = 1;
 
@@ -4726,6 +4725,7 @@ static int accel_preload(const char *config, zend_bool in_child)
 	}
 
 finish:
+	CG(compiler_options) = orig_compiler_options;
 	zend_hash_destroy(preload_scripts);
 	efree(preload_scripts);
 	preload_scripts = NULL;

@@ -6833,6 +6833,26 @@ static zend_always_inline uint8_t zend_jit_trace_supported(const zend_op *opline
 	}
 }
 
+static int zend_jit_restart_hot_trace_counters(zend_op_array *op_array)
+{
+	zend_jit_op_array_trace_extension *jit_extension;
+	uint32_t i;
+
+	jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+	for (i = 0; i < op_array->last; i++) {
+		jit_extension->trace_info[i].trace_flags &=
+			ZEND_JIT_TRACE_START_LOOP | ZEND_JIT_TRACE_START_ENTER | ZEND_JIT_TRACE_UNSUPPORTED;
+		if (jit_extension->trace_info[i].trace_flags == ZEND_JIT_TRACE_START_LOOP) {
+			op_array->opcodes[i].handler = (const void*)zend_jit_loop_trace_counter_handler;
+		} else if (jit_extension->trace_info[i].trace_flags == ZEND_JIT_TRACE_START_ENTER) {
+			op_array->opcodes[i].handler = (const void*)zend_jit_func_trace_counter_handler;
+		} else {
+			op_array->opcodes[i].handler = jit_extension->trace_info[i].orig_handler;
+		}
+	}
+	return SUCCESS;
+}
+
 static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 {
 	zend_op *opline;

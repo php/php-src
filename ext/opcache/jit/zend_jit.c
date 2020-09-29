@@ -3626,9 +3626,55 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 	/* JIT-ed code is going to be called by VM */
 }
 
+static void zend_jit_setup_hot_counters_ex(zend_op_array *op_array, zend_cfg *cfg)
+{
+	if (JIT_G(hot_func)) {
+		zend_op *opline = op_array->opcodes;
+
+		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+				opline++;
+			}
+		}
+
+		opline->handler = (const void*)zend_jit_func_hot_counter_handler;
+	}
+
+	if (JIT_G(hot_loop)) {
+		uint32_t i;
+
+		for (i = 0; i < cfg->blocks_count; i++) {
+			if ((cfg->blocks[i].flags & ZEND_BB_REACHABLE) &&
+			    (cfg->blocks[i].flags & ZEND_BB_LOOP_HEADER)) {
+			    op_array->opcodes[cfg->blocks[i].start].handler =
+					(const void*)zend_jit_loop_hot_counter_handler;
+			}
+		}
+	}
+}
+
+static int zend_jit_restart_hot_counters(zend_op_array *op_array)
+{
+	zend_jit_op_array_hot_extension *jit_extension;
+	zend_cfg cfg;
+	uint32_t i;
+
+	jit_extension = (zend_jit_op_array_hot_extension*)ZEND_FUNC_INFO(op_array);
+	for (i = 0; i < op_array->last; i++) {
+		op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
+	}
+
+	if (zend_jit_build_cfg(op_array, &cfg) != SUCCESS) {
+		return FAILURE;
+	}
+
+	zend_jit_setup_hot_counters_ex(op_array, &cfg);
+
+	return SUCCESS;
+}
+
 static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 {
-	zend_op *opline = op_array->opcodes;
 	zend_jit_op_array_hot_extension *jit_extension;
 	zend_cfg cfg;
 	uint32_t i;
@@ -3649,25 +3695,7 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	}
 	ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 
-	if (JIT_G(hot_func)) {
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
-			}
-		}
-
-		opline->handler = (const void*)zend_jit_func_hot_counter_handler;
-	}
-
-	if (JIT_G(hot_loop)) {
-		for (i = 0; i < cfg.blocks_count; i++) {
-			if ((cfg.blocks[i].flags & ZEND_BB_REACHABLE) &&
-			    (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER)) {
-			    op_array->opcodes[cfg.blocks[i].start].handler =
-					(const void*)zend_jit_loop_hot_counter_handler;
-			}
-		}
-	}
+	zend_jit_setup_hot_counters_ex(op_array, &cfg);
 
 	zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
 
@@ -3685,6 +3713,12 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC) {
 		zend_jit_op_array_extension *jit_extension;
 		zend_op *opline = op_array->opcodes;
+
+		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+			ZEND_SET_FUNC_INFO(op_array, NULL);
+			zend_error(E_WARNING, "Preloading is incompatible with first-exec and profile triggered JIT");
+			return SUCCESS;
+		}
 
 		/* Set run-time JIT handler */
 		ZEND_ASSERT(zend_jit_runtime_jit_handler != NULL);
@@ -3705,6 +3739,12 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST) {
 		zend_jit_op_array_extension *jit_extension;
 		zend_op *opline = op_array->opcodes;
+
+		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+			ZEND_SET_FUNC_INFO(op_array, NULL);
+			zend_error(E_WARNING, "Preloading is incompatible with first-exec and profile triggered JIT");
+			return SUCCESS;
+		}
 
 		ZEND_ASSERT(zend_jit_profile_jit_handler != NULL);
 		if (op_array->function_name) {
@@ -4265,6 +4305,59 @@ ZEND_EXT_API void zend_jit_deactivate(void)
 	}
 }
 
+static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
+{
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+
+	if (!func_info) {
+		return;
+	}
+
+	if (func_info->flags & ZEND_FUNC_JIT_ON_HOT_TRACE) {
+		zend_jit_restart_hot_trace_counters(op_array);
+	} else if (func_info->flags & ZEND_FUNC_JIT_ON_HOT_COUNTERS) {
+		zend_jit_restart_hot_counters(op_array);
+#if 0
+	// TODO: We have to restore handlers for some inner basic-blocks, but we didn't store them ???
+	} else if (func_info->flags & (ZEND_FUNC_JIT_ON_FIRST_EXEC|ZEND_FUNC_JIT_ON_PROF_REQUEST)) {
+		zend_op *opline = op_array->opcodes;
+		zend_jit_op_array_extension *jit_extension =
+			(zend_jit_op_array_extension*)func_info;
+
+		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+				opline++;
+			}
+		}
+		if (func_info->flags & ZEND_FUNC_JIT_ON_FIRST_EXEC) {
+			opline->handler = (const void*)zend_jit_runtime_jit_handler;
+		} else {
+			opline->handler = (const void*)zend_jit_profile_jit_handler;
+		}
+#endif
+	}
+}
+
+static void zend_jit_restart_preloaded_script(zend_persistent_script *script)
+{
+	zend_class_entry *ce;
+	zend_op_array *op_array;
+
+	zend_jit_restart_preloaded_op_array(&script->script.main_op_array);
+
+	ZEND_HASH_FOREACH_PTR(&script->script.function_table, op_array) {
+		zend_jit_restart_preloaded_op_array(op_array);
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+			if (op_array->type == ZEND_USER_FUNCTION) {
+				zend_jit_restart_preloaded_op_array(op_array);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
+}
+
 ZEND_EXT_API void zend_jit_restart(void)
 {
 	if (dasm_buf) {
@@ -4274,6 +4367,18 @@ ZEND_EXT_API void zend_jit_restart(void)
 		dasm_ptr[0] = dasm_ptr[1];
 
 		zend_jit_trace_restart();
+
+		if (ZCSG(preload_script)) {
+			zend_jit_restart_preloaded_script(ZCSG(preload_script));
+			if (ZCSG(saved_scripts)) {
+				zend_persistent_script **p = ZCSG(saved_scripts);
+
+				while (*p) {
+					zend_jit_restart_preloaded_script(*p);
+					p++;
+				}
+			}
+		}
 
 		zend_jit_protect();
 	}
