@@ -3452,7 +3452,12 @@ static void zend_jit_cleanup_func_info(zend_op_array *op_array)
 		if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC ||
 		    JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST ||
 		    JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
-			memset(func_info, 0, sizeof(zend_func_info));
+			func_info->num = 0;
+			func_info->flags &= ZEND_FUNC_JIT_ON_FIRST_EXEC
+				| ZEND_FUNC_JIT_ON_PROF_REQUEST
+				| ZEND_FUNC_JIT_ON_HOT_COUNTERS
+				| ZEND_FUNC_JIT_ON_HOT_TRACE;
+			memset(&func_info->ssa, 0, sizeof(zend_func_info) - offsetof(zend_func_info, ssa));
 		} else {
 			ZEND_SET_FUNC_INFO(op_array, NULL);
 		}
@@ -3637,6 +3642,7 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 
 	jit_extension = (zend_jit_op_array_hot_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_hot_extension) + (op_array->last - 1) * sizeof(void*));
 	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+	jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_HOT_COUNTERS;
 	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
 	for (i = 0; i < op_array->last; i++) {
 		jit_extension->orig_handlers[i] = op_array->opcodes[i].handler;
@@ -3689,6 +3695,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		}
 		jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
 		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+		jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_FIRST_EXEC;
 		jit_extension->orig_handler = (void*)opline->handler;
 		ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 		opline->handler = (const void*)zend_jit_runtime_jit_handler;
@@ -3708,6 +3715,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 			}
 			jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
 			memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+			jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_PROF_REQUEST;
 			jit_extension->orig_handler = (void*)opline->handler;
 			ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 			opline->handler = (const void*)zend_jit_profile_jit_handler;
