@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a05b86697bef8c44f537ff37f47764c0fa6be3f */
+ * Stub hash: 68c31a330622d4ea865e4e78dce04a8a27242ade */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -197,11 +197,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_hasConstant arginfo_class_ReflectionClass_hasMethod
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_getConstants, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, modifiers, IS_LONG, 0, "ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE")
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionClass_getConstants arginfo_class_ReflectionClass_getProperties
 
-#define arginfo_class_ReflectionClass_getReflectionConstants arginfo_class_ReflectionClass_getConstants
+#define arginfo_class_ReflectionClass_getReflectionConstants arginfo_class_ReflectionClass_getProperties
 
 #define arginfo_class_ReflectionClass_getConstant arginfo_class_ReflectionClass_hasMethod
 

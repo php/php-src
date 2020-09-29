@@ -260,10 +260,10 @@ class ReflectionClass implements Reflector
     public function hasConstant(string $name) {}
 
     /** @return array|null */
-    public function getConstants(int $modifiers = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
+    public function getConstants(?int $modifiers = null) {}
 
     /** @return ReflectionClassConstant[] */
-    public function getReflectionConstants(int $modifiers = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
+    public function getReflectionConstants(?int $modifiers = null) {}
 
     /** @return mixed */
     public function getConstant(string $name) {}
