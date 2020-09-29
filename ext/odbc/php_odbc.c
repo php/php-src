@@ -2264,8 +2264,6 @@ try_and_get_another_connection:
 		db_conn->res = zend_register_resource(db_conn, le_pconn);
 		RETVAL_RES(db_conn->res);
 	} else { /* non persistent */
-		zend_resource new_index_ptr;
-
 		if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
 			php_error_docref(NULL, E_WARNING,"Too many open connections (%ld)",ODBCG(num_links));
 			RETURN_FALSE;
@@ -2276,9 +2274,6 @@ try_and_get_another_connection:
 		}
 		db_conn->res = zend_register_resource(db_conn, le_conn);
 		RETVAL_RES(db_conn->res);
-		new_index_ptr.ptr = (void *)(zend_uintptr_t)Z_RES_HANDLE_P(return_value);
-		new_index_ptr.type = le_index_ptr;
-
 		ODBCG(num_links)++;
 	}
 }
