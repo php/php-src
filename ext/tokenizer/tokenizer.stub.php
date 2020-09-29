@@ -4,7 +4,7 @@
 
 function token_get_all(string $code, int $flags = 0): array {}
 
-function token_name(int $token_id): string {}
+function token_name(int $id): string {}
 
 class PhpToken implements Stringable
 {
