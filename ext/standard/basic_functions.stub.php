@@ -357,7 +357,7 @@ function unregister_tick_function(callable $callback): void {}
 
 function is_uploaded_file(string $filename): bool {}
 
-function move_uploaded_file(string $filename, string $new_filename): bool {}
+function move_uploaded_file(string $from, string $to): bool {}
 
 function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
@@ -835,10 +835,10 @@ function fputs($stream, string $string, ?int $max_length = null): int|false {}
 function mkdir(string $directory, int $mode = 0777, bool $recursive = false, $context = null): bool {}
 
 /** @param resource|null $context */
-function rename(string $old_name, string $new_name, $context = null): bool {}
+function rename(string $from, string $to, $context = null): bool {}
 
 /** @param resource|null $context */
-function copy(string $source, string $dest, $context = null): bool {}
+function copy(string $from, string $to, $context = null): bool {}
 
 function tempnam(string $directory, string $prefix): string|false {}
 
@@ -1290,10 +1290,10 @@ function stream_socket_pair(int $domain, int $type, int $protocol): array|false 
 #endif
 
 /**
- * @param resource $source
- * @param resource $dest
+ * @param resource $from
+ * @param resource $to
  */
-function stream_copy_to_stream($source, $dest, ?int $max_length = null, int $offset = 0): int|false {}
+function stream_copy_to_stream($from, $to, ?int $max_length = null, int $offset = 0): int|false {}
 
 /** @param resource $stream */
 function stream_get_contents($stream, ?int $max_length = null, int $offset = -1): string|false {}
