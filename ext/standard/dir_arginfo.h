@@ -1,8 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d8d8c93a1659e1790b25a65d7e1d0d7430724e9d */
+ * Stub hash: a715bf6a8d5fe69732623cc17f03bd463f369648 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Directory_close, 0, 0, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, dir_handle, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Directory_rewind arginfo_class_Directory_close

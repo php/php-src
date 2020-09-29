@@ -41,22 +41,19 @@ Class [ <internal%s> class Directory ] {
   - Methods [3] {
     Method [ <internal:standard> public method close ] {
 
-      - Parameters [1] {
-        Parameter #0 [ <optional> $dir_handle = null ]
+      - Parameters [0] {
       }
     }
 
     Method [ <internal:standard> public method rewind ] {
 
-      - Parameters [1] {
-        Parameter #0 [ <optional> $dir_handle = null ]
+      - Parameters [0] {
       }
     }
 
     Method [ <internal:standard> public method read ] {
 
-      - Parameters [1] {
-        Parameter #0 [ <optional> $dir_handle = null ]
+      - Parameters [0] {
       }
     }
   }
