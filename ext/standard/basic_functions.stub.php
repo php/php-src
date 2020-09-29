@@ -121,7 +121,7 @@ function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""
  */
 function compact($var_name, ...$var_names): array {}
 
-function array_fill(int $start, int $count, mixed $value): array {}
+function array_fill(int $start_index, int $count, mixed $value): array {}
 
 function array_fill_keys(array $keys, mixed $value): array {}
 
