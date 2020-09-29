@@ -37,6 +37,8 @@ PHP                                                                        NEWS
   . Fixed bug #80048 (Bug #69100 has not been fixed for Windows). (cmb)
   . Fixed bug #80049 (Memleak when coercing integers to string via variadic
     argument). (Nikita)
+  . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-` 
+    cookies can be sent). (CVE-2020-7070) (Stas)
 
 - Calendar:
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
@@ -51,6 +53,10 @@ PHP                                                                        NEWS
     (t-matsuno)
   . Fixed bug #79825 (opcache.file_cache causes SIGSEGV when custom opcode
     handlers changed). (SammyK)
+
+- OpenSSL:
+  . Fixed bug #79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12 
+    bytes IV). (CVE-2020-7069) (Jakub Zelenka)
 
 - PDO:
   . Fixed bug #80027 (Terrible performance using $query->fetch on queries with
