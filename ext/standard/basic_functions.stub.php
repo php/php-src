@@ -688,6 +688,8 @@ function utf8_encode(string $string): string {}
 
 function utf8_decode(string $string): string {}
 
+/* dir.c */
+
 /**
  * @param resource|null $context
  * @return resource|false
@@ -958,18 +960,18 @@ function vfprintf($stream, string $format, array $values): int {}
 /* fsock.c */
 
 /**
- * @param int $errno
+ * @param int $error_code
  * @param string $error_message
  * @return resource|false
  */
-function fsockopen(string $hostname, int $port = -1, &$errno = null, &$error_message = null, ?float $timeout = null) {}
+function fsockopen(string $hostname, int $port = -1, &$error_code = null, &$error_message = null, ?float $timeout = null) {}
 
 /**
- * @param int $errno
+ * @param int $error_code
  * @param string $error_message
  * @return resource|false
  */
-function pfsockopen(string $hostname, int $port = -1, &$errno = null, &$error_message = null, ?float $timeout = null) {}
+function pfsockopen(string $hostname, int $port = -1, &$error_code = null, &$error_message = null, ?float $timeout = null) {}
 
 /* http.c */
 
@@ -1031,69 +1033,69 @@ function mail(string $to, string $subject, string $message, array|string $additi
 
 /* math.c */
 
-function abs(int|float $number): int|float {}
+function abs(int|float $num): int|float {}
 
-function ceil(int|float $number): float {}
+function ceil(int|float $num): float {}
 
-function floor(int|float $number): float {}
+function floor(int|float $num): float {}
 
-function round(int|float $number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
+function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
 
-function sin(float $number): float {}
+function sin(float $num): float {}
 
-function cos(float $number): float {}
+function cos(float $num): float {}
 
-function tan(float $number): float {}
+function tan(float $num): float {}
 
-function asin(float $number): float {}
+function asin(float $num): float {}
 
-function acos(float $number): float {}
+function acos(float $num): float {}
 
-function atan(float $number): float {}
+function atan(float $num): float {}
 
-function atanh(float $number): float {}
+function atanh(float $num): float {}
 
 function atan2(float $y, float $x): float {}
 
-function sinh(float $number): float {}
+function sinh(float $num): float {}
 
-function cosh(float $number): float {}
+function cosh(float $num): float {}
 
-function tanh(float $number): float {}
+function tanh(float $num): float {}
 
-function asinh(float $number): float {}
+function asinh(float $num): float {}
 
-function acosh(float $number): float {}
+function acosh(float $num): float {}
 
-function expm1(float $number): float {}
+function expm1(float $num): float {}
 
-function log1p(float $number): float {}
+function log1p(float $num): float {}
 
 function pi(): float {}
 
-function is_finite(float $number): bool {}
+function is_finite(float $num): bool {}
 
-function is_nan(float $number): bool {}
+function is_nan(float $num): bool {}
 
-function intdiv(int $dividend, int $divisor): int {}
+function intdiv(int $num1, int $num2): int {}
 
-function is_infinite(float $number): bool {}
+function is_infinite(float $num): bool {}
 
-function pow(mixed $base, mixed $exp): int|float|object {}
+function pow(mixed $num, mixed $exponent): int|float|object {}
 
-function exp(float $number): float {}
+function exp(float $num): float {}
 
-function log(float $number, float $base = M_E): float {}
+function log(float $num, float $base = M_E): float {}
 
-function log10(float $number): float {}
+function log10(float $num): float {}
 
-function sqrt(float $number): float {}
+function sqrt(float $num): float {}
 
 function hypot(float $x, float $y): float {}
 
-function deg2rad(float $number): float {}
+function deg2rad(float $num): float {}
 
-function rad2deg(float $number): float {}
+function rad2deg(float $num): float {}
 
 function bindec(string $binary_string): int|float {}
 
@@ -1101,19 +1103,19 @@ function hexdec(string $hex_string): int|float {}
 
 function octdec(string $octal_string): int|float {}
 
-function decbin(int $number): string {}
+function decbin(int $num): string {}
 
-function decoct(int $number): string {}
+function decoct(int $num): string {}
 
-function dechex(int $number): string {}
+function dechex(int $num): string {}
 
-function base_convert(string $number, int $from_base, int $to_base): string {}
+function base_convert(string $num, int $from_base, int $to_base): string {}
 
-function number_format(float $number, int $decimals = 0, ?string $decimal_point = "." , ?string $thousands_separator = ","): string {}
+function number_format(float $num, int $decimals = 0, ?string $decimal_separator = "." , ?string $thousands_separator = ","): string {}
 
-function fmod(float $x, float $y): float {}
+function fmod(float $num1, float $num2): float {}
 
-function fdiv(float $dividend, float $divisor): float {}
+function fdiv(float $num1, float $num2): float {}
 
 /* microtime.c */
 
@@ -1152,7 +1154,7 @@ function password_algos(): array {}
  * @param array $pipes
  * @return resource|false
  */
-function proc_open(array|string $command, array $descriptor_spec, &$pipes, ?string $cwd = null, ?array $env = null, ?array $options = null) {}
+function proc_open(array|string $command, array $descriptor_spec, &$pipes, ?string $cwd = null, ?array $env_vars = null, ?array $options = null) {}
 
 /** @param resource $process */
 function proc_close($process): int {}
@@ -1198,7 +1200,7 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microsectons = 0): int|false {}
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
 
 /** @return resource */
 function stream_context_create(?array $options = null, ?array $params = null) {}
@@ -1237,20 +1239,20 @@ function stream_filter_append($stream, string $filter_name, int $mode = 0, mixed
 function stream_filter_remove($stream_filter): bool {}
 
 /**
- * @param int $errno
+ * @param int $error_code
  * @param string $error_message
  * @param resource|null $context
  * @return resource|false
  */
-function stream_socket_client(string $address, &$errno = null, &$error_message = null, ?float $timeout = null, int $flags = STREAM_CLIENT_CONNECT, $context = null) {}
+function stream_socket_client(string $address, &$error_code = null, &$error_message = null, ?float $timeout = null, int $flags = STREAM_CLIENT_CONNECT, $context = null) {}
 
 /**
- * @param int $errno
+ * @param int $error_code
  * @param string $error_message
  * @param resource|null $context
  * @return resource|false
  */
-function stream_socket_server(string $address, &$errno = null, &$error_message = null, int $flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context = null) {}
+function stream_socket_server(string $address, &$error_code = null, &$error_message = null, int $flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context = null) {}
 
 /**
  * @param resource $socket
