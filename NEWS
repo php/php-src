@@ -2,10 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.11
 
-
-17 Sep 2020, PHP 7.4.11RC1
-
 - Core:
+  . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-`
+    cookies can be sent). (CVE-2020-7070) (Stas)
   . Fixed bug #79979 (passing value to by-ref param via CUFA crashes). (cmb,
     Nikita)
   . Fixed bug #80037 (Typed property must not be accessed before initialization
@@ -28,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug #80046 (FREE for SWITCH_STRING optimized away). (Nikita)
   . Fixed bug #79825 (opcache.file_cache causes SIGSEGV when custom opcode
     handlers changed). (SammyK)
+
+- OpenSSL:
+  . Fixed bug #79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12
+    bytes IV). (CVE-2020-7069) (Jakub Zelenka)
 
 - PDO:
   . Fixed bug #80027 (Terrible performance using $query->fetch on queries with
