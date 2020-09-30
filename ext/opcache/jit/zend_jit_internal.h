@@ -157,6 +157,7 @@ int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(DEEP_RECURSION,    "deep recursion") \
 	_(LOOP_UNROLL,       "loop unroll limit reached") \
 	_(LOOP_EXIT,         "exit from loop") \
+	_(RECURSION_EXIT,    "return from recursive function") \
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \

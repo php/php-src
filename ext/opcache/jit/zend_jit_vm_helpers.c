@@ -864,6 +864,13 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 						   If this doesn't work terminate it. */
 						stop = ZEND_JIT_TRACE_STOP_LOOP_EXIT;
 						break;
+					} else if (start & ZEND_JIT_TRACE_START_ENTER
+					 && EX(prev_execute_data)
+					 && EX(func) == EX(prev_execute_data)->func
+					 && zend_jit_trace_bad_stop_event(orig_opline, JIT_G(blacklist_root_trace) - 1) !=
+							ZEND_JIT_TRACE_STOP_RECURSION_EXIT) {
+						stop = ZEND_JIT_TRACE_STOP_RECURSION_EXIT;
+						break;
 					} else {
 						stop = ZEND_JIT_TRACE_STOP_RETURN;
 						break;
