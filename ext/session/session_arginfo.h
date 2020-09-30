@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4ae16a4aef8d9c89a7888b44ef300d6f658add78 */
+ * Stub hash: 8ac6478ae176b62a1d6d5bd25b6b6e50a85c657e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -64,17 +64,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_session_set_save_handler, 0, 1, 
 	ZEND_ARG_TYPE_INFO(0, write, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, destroy, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, gc, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, create_session_id, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, validate_session_id, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, create_sid, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, validate_sid, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, update_timestamp, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_cache_limiter, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cache_limiter, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_cache_expire, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, new_cache_expire, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_session_set_cookie_params, 0, 1, _IS_BOOL, 0)
@@ -103,7 +103,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionHandlerInterface_write, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SessionHandlerInterface_destroy arginfo_class_SessionHandlerInterface_read
@@ -116,7 +116,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SessionUpdateTimestampHandlerInterface_validateId arginfo_class_SessionHandlerInterface_read
 
-#define arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp arginfo_class_SessionHandlerInterface_write
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_SessionHandler_open arginfo_class_SessionHandlerInterface_open
 

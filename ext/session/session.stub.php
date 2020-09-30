@@ -50,14 +50,14 @@ function session_set_save_handler(
     callable $write = UNKNOWN,
     callable $destroy = UNKNOWN,
     callable $gc = UNKNOWN,
-    callable $create_session_id = UNKNOWN,
-    callable $validate_session_id = UNKNOWN,
+    callable $create_sid = UNKNOWN,
+    callable $validate_sid = UNKNOWN,
     callable $update_timestamp = UNKNOWN
 ): bool {}
 
-function session_cache_limiter(?string $cache_limiter = null): string|false {}
+function session_cache_limiter(?string $value = null): string|false {}
 
-function session_cache_expire(?int $new_cache_expire = null): int|false {}
+function session_cache_expire(?int $value = null): int|false {}
 
 function session_set_cookie_params(array|int $lifetime_or_options, ?string $path = null, ?string $domain = null, ?bool $secure = null, ?bool $httponly = null): bool {}
 
@@ -75,7 +75,7 @@ interface SessionHandlerInterface
     public function read(string $id);
 
     /** @return bool */
-    public function write(string $id, string $value);
+    public function write(string $id, string $data);
 
     /** @return bool */
     public function destroy(string $id);
@@ -111,7 +111,7 @@ class SessionHandler implements SessionHandlerInterface, SessionIdInterface
     public function read(string $id) {}
 
     /** @return bool */
-    public function write(string $id, string $value) {}
+    public function write(string $id, string $data) {}
 
     /** @return bool */
     public function destroy(string $id) {}
