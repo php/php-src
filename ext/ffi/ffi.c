@@ -7320,7 +7320,7 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 					val->kind = ZEND_FFI_VAL_ERROR;
 				}
 			} else if (str[2] == 'x') {
-				if (str[3] >= '0' && str[3] <= '7') {
+				if (str[3] >= '0' && str[3] <= '9') {
 					n = str[3] - '0';
 				} else if (str[3] >= 'A' && str[3] <= 'F') {
 					n = str[3] - 'A';
@@ -7328,8 +7328,9 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 					n = str[3] - 'a';
 				} else {
 					val->kind = ZEND_FFI_VAL_ERROR;
+					return;
 				}
-				if ((str[4] >= '0' && str[4] <= '7') && str_len == 6) {
+				if ((str[4] >= '0' && str[4] <= '9') && str_len == 6) {
 					n = n * 16 + (str[4] - '0');
 				} else if ((str[4] >= 'A' && str[4] <= 'F') && str_len == 6) {
 					n = n * 16 + (str[4] - 'A');
@@ -7337,6 +7338,7 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 					n = n * 16 + (str[4] - 'a');
 				} else if (str_len != 5) {
 					val->kind = ZEND_FFI_VAL_ERROR;
+					return;
 				}
 				val->ch = n;
 			} else if (str_len == 4) {
