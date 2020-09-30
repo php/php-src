@@ -2023,8 +2023,8 @@ PHP_METHOD(SoapClient, __construct)
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "soap_version", sizeof("soap_version")-1)) != NULL) {
-			if (Z_TYPE_P(tmp) == IS_LONG ||
-			    (Z_LVAL_P(tmp) == SOAP_1_1 && Z_LVAL_P(tmp) == SOAP_1_2)) {
+			if (Z_TYPE_P(tmp) == IS_LONG &&
+			    (Z_LVAL_P(tmp) == SOAP_1_1 || Z_LVAL_P(tmp) == SOAP_1_2)) {
 				soap_version = Z_LVAL_P(tmp);
 			}
 		}
