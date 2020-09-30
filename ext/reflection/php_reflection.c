@@ -144,6 +144,7 @@ typedef struct _attribute_reference {
 	zend_class_entry *scope;
 	zend_string *filename;
 	uint32_t target;
+	zend_bool on_promoted;
 } attribute_reference;
 
 typedef enum {
@@ -1090,7 +1091,7 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 
 /* {{{ reflection_attribute_factory */
 static void reflection_attribute_factory(zval *object, HashTable *attributes, zend_attribute *data,
-		zend_class_entry *scope, uint32_t target, zend_string *filename)
+		zend_class_entry *scope, uint32_t target, zend_bool on_promoted, zend_string *filename)
 {
 	reflection_object *intern;
 	attribute_reference *reference;
@@ -1103,13 +1104,14 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->scope = scope;
 	reference->filename = filename ? zend_string_copy(filename) : NULL;
 	reference->target = target;
+	reference->on_promoted = on_promoted;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
 }
 /* }}} */
 
 static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
-		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
+		uint32_t offset, uint32_t target, zend_bool on_promoted, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
 
@@ -1122,7 +1124,8 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		ZEND_HASH_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+				reflection_attribute_factory(
+					&tmp, attributes, attr, scope, target, on_promoted, filename);
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1154,7 +1157,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+		reflection_attribute_factory(&tmp, attributes, attr, scope, target, on_promoted, filename);
 		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1163,7 +1166,8 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 /* }}} */
 
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
-		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
+		uint32_t offset, zend_class_entry *scope,
+		uint32_t target, zend_bool on_promoted, zend_string *filename) /* {{{ */
 {
 	zend_string *name = NULL;
 	zend_long flags = 0;
@@ -1196,7 +1200,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 
 	array_init(return_value);
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename)) {
+	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, on_promoted, name, base, filename)) {
 		RETURN_THROWS();
 	}
 }
@@ -1768,7 +1772,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 	}
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		fptr->common.attributes, 0, fptr->common.scope, target,
+		fptr->common.attributes, 0, fptr->common.scope, target, /* on_promoted */ 0,
 		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
 }
 /* }}} */
@@ -2671,6 +2675,7 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
+		ZEND_ARG_IS_PROMOTED(param->arg_info),
 		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
 }
 
@@ -3691,7 +3696,7 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
+		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, /* on_promoted */ 0,
 		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL);
 }
 /* }}} */
@@ -4090,7 +4095,7 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
+		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS, /* on_promoted */ 0,
 		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
 }
 /* }}} */
@@ -5492,6 +5497,7 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
+		prop_get_flags(ref) & ZEND_ACC_PROMOTED,
 		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
 }
 /* }}} */
@@ -6380,6 +6386,14 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 			}
 
 			flags = (uint32_t) Z_LVAL(tmp);
+		}
+
+		/* When constructor promotion is used, the attribue is placed on both the implied property
+		 * and the constructor parameter. Ignore target mismatch errors if the attribute is valid
+		 * only for properties or only for parameters. */
+		if (attr->on_promoted
+				&& (flags & (ZEND_ATTRIBUTE_TARGET_PROPERTY|ZEND_ATTRIBUTE_TARGET_PARAMETER))) {
+			flags |= ZEND_ATTRIBUTE_TARGET_PROPERTY|ZEND_ATTRIBUTE_TARGET_PARAMETER;
 		}
 
 		if (!(attr->target & flags)) {
