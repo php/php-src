@@ -977,7 +977,7 @@ PHP_FUNCTION(odbc_execute)
 	int i, ne;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h/", &pv_res, &pv_param_ht) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|h", &pv_res, &pv_param_ht) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -991,27 +991,16 @@ PHP_FUNCTION(odbc_execute)
 			RETURN_FALSE;
 		}
 
-		zend_hash_internal_pointer_reset(pv_param_ht);
 		params = (params_t *)safe_emalloc(sizeof(params_t), result->numparams, 0);
 		for(i = 0; i < result->numparams; i++) {
 			params[i].fp = -1;
 		}
 
-		for(i = 1; i <= result->numparams; i++) {
-			if ((tmp = zend_hash_get_current_data(pv_param_ht)) == NULL) {
-				php_error_docref(NULL, E_WARNING,"Error getting parameter");
-				SQLFreeStmt(result->stmt,SQL_RESET_PARAMS);
-				for (i = 0; i < result->numparams; i++) {
-					if (params[i].fp != -1) {
-						close(params[i].fp);
-					}
-				}
-				efree(params);
-				RETURN_FALSE;
-			}
-
+		i = 1;
+		ZEND_HASH_FOREACH_VAL(pv_param_ht, tmp) {
+			zend_string *tmpstr = zval_try_get_string(tmp);
 			otype = Z_TYPE_P(tmp);
-			if (!try_convert_to_string(tmp)) {
+			if (!tmpstr) {
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
 				for (i = 0; i < result->numparams; i++) {
 					if (params[i].fp != -1) {
@@ -1022,7 +1011,7 @@ PHP_FUNCTION(odbc_execute)
 				RETURN_THROWS();
 			}
 
-			params[i-1].vallen = Z_STRLEN_P(tmp);
+			params[i-1].vallen = ZSTR_LEN(tmpstr);
 			params[i-1].fp = -1;
 
 			if (IS_SQL_BINARY(result->param_info[i-1].sqltype)) {
@@ -1031,14 +1020,15 @@ PHP_FUNCTION(odbc_execute)
 				ctype = SQL_C_CHAR;
 			}
 
-			if (Z_STRLEN_P(tmp) > 2 &&
-				Z_STRVAL_P(tmp)[0] == '\'' &&
-				Z_STRVAL_P(tmp)[Z_STRLEN_P(tmp) - 1] == '\'') {
+			if (ZSTR_LEN(tmpstr) > 2 &&
+				ZSTR_VAL(tmpstr)[0] == '\'' &&
+				ZSTR_VAL(tmpstr)[ZSTR_LEN(tmpstr) - 1] == '\'') {
 
-				if (CHECK_ZVAL_NULL_PATH(tmp)) {
+				if (ZSTR_LEN(tmpstr) != strlen(ZSTR_VAL(tmpstr))) {
+					zend_string_release(tmpstr);
 					RETURN_FALSE;
 				}
-				filename = estrndup(&Z_STRVAL_P(tmp)[1], Z_STRLEN_P(tmp) - 2);
+				filename = estrndup(&ZSTR_VAL(tmpstr)[1], ZSTR_LEN(tmpstr) - 2);
 				filename[strlen(filename)] = '\0';
 
 				/* Check the basedir */
@@ -1050,6 +1040,7 @@ PHP_FUNCTION(odbc_execute)
 							close(params[i].fp);
 						}
 					}
+					zend_string_release(tmpstr);
 					efree(params);
 					RETURN_FALSE;
 				}
@@ -1062,6 +1053,7 @@ PHP_FUNCTION(odbc_execute)
 							close(params[i].fp);
 						}
 					}
+					zend_string_release(tmpstr);
 					efree(params);
 					efree(filename);
 					RETURN_FALSE;
@@ -1085,7 +1077,7 @@ PHP_FUNCTION(odbc_execute)
 
 				rc = SQLBindParameter(result->stmt, (SQLUSMALLINT)i, SQL_PARAM_INPUT,
 									  ctype, result->param_info[i-1].sqltype, result->param_info[i-1].precision, result->param_info[i-1].scale,
-									  Z_STRVAL_P(tmp), 0,
+									  ZSTR_VAL(tmpstr), 0,
 									  &params[i-1].vallen);
 			}
 			if (rc == SQL_ERROR) {
@@ -1096,11 +1088,13 @@ PHP_FUNCTION(odbc_execute)
 						close(params[i].fp);
 					}
 				}
+				zend_string_release(tmpstr);
 				efree(params);
 				RETURN_FALSE;
 			}
-			zend_hash_move_forward(pv_param_ht);
-		}
+			zend_string_release(tmpstr);
+			if (++i > result->numparams) break;
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* Close cursor, needed for doing multiple selects */
 	rc = SQLFreeStmt(result->stmt, SQL_CLOSE);
