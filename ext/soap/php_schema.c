@@ -1614,8 +1614,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	attr = get_attribute(attrs, "default");
 	if (attr) {
 		if (ref != NULL) {
-			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'fixed' attributes");
-		} else if (ref != NULL) {
 			soap_error0(E_ERROR, "Parsing Schema: element has both 'default' and 'fixed' attributes");
 		}
 		cur_type->def = estrdup((char*)attr->children->content);
