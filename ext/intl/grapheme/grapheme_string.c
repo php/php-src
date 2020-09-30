@@ -124,11 +124,6 @@ PHP_FUNCTION(grapheme_strpos)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	if (offset >= 0 && grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0) {
 		/* quick check to see if the string might be there
 		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
@@ -177,11 +172,6 @@ PHP_FUNCTION(grapheme_stripos)
 	offset = (int32_t) loffset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
-
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
@@ -244,11 +234,6 @@ PHP_FUNCTION(grapheme_strrpos)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
 	if ( is_ascii ) {
@@ -303,11 +288,6 @@ PHP_FUNCTION(grapheme_strripos)
 	offset = (int32_t) loffset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
-
-	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
@@ -573,8 +553,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	}
 
 	if (needle_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
+		RETURN_STRINGL(haystack, part ? 0 : haystack_len);
 	}
 
 	if ( !f_ignore_case ) {
