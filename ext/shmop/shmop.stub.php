@@ -13,6 +13,6 @@ function shmop_close(Shmop $shmop): void {}
 
 function shmop_size(Shmop $shmop): int {}
 
-function shmop_write(Shmop $shmop, string $content, int $offset): int {}
+function shmop_write(Shmop $shmop, string $data, int $offset): int {}
 
 function shmop_delete(Shmop $shmop): bool {}
