@@ -7427,11 +7427,11 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 				val->ch = '\t';
 			} else if (str[2] == 'v' && str_len == 4) {
 				val->ch = '\v';
-			} else if (str[2] >= '0' || str[2] <= '7') {
+			} else if (str[2] >= '0' && str[2] <= '7') {
 				n = str[2] - '0';
-				if (str[3] >= '0' || str[3] <= '7') {
+				if (str[3] >= '0' && str[3] <= '7') {
 					n = n * 8 + (str[3] - '0');
-					if ((str[4] >= '0' || str[4] <= '7') && str_len == 6) {
+					if ((str[4] >= '0' && str[4] <= '7') && str_len == 6) {
 						n = n * 8 + (str[4] - '0');
 					} else if (str_len != 5) {
 						val->kind = ZEND_FFI_VAL_ERROR;
@@ -7445,20 +7445,20 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 					val->kind = ZEND_FFI_VAL_ERROR;
 				}
 			} else if (str[2] == 'x') {
-				if (str[3] >= '0' || str[3] <= '7') {
+				if (str[3] >= '0' && str[3] <= '7') {
 					n = str[3] - '0';
-				} else if (str[3] >= 'A' || str[3] <= 'F') {
+				} else if (str[3] >= 'A' && str[3] <= 'F') {
 					n = str[3] - 'A';
-				} else if (str[3] >= 'a' || str[3] <= 'f') {
+				} else if (str[3] >= 'a' && str[3] <= 'f') {
 					n = str[3] - 'a';
 				} else {
 					val->kind = ZEND_FFI_VAL_ERROR;
 				}
-				if ((str[4] >= '0' || str[4] <= '7') && str_len == 6) {
+				if ((str[4] >= '0' && str[4] <= '7') && str_len == 6) {
 					n = n * 16 + (str[4] - '0');
-				} else if ((str[4] >= 'A' || str[4] <= 'F') && str_len == 6) {
+				} else if ((str[4] >= 'A' && str[4] <= 'F') && str_len == 6) {
 					n = n * 16 + (str[4] - 'A');
-				} else if ((str[4] >= 'a' || str[4] <= 'f') && str_len == 6) {
+				} else if ((str[4] >= 'a' && str[4] <= 'f') && str_len == 6) {
 					n = n * 16 + (str[4] - 'a');
 				} else if (str_len != 5) {
 					val->kind = ZEND_FFI_VAL_ERROR;
