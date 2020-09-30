@@ -11297,7 +11297,6 @@ static zend_bool zend_jit_may_avoid_refcounting(const zend_op *opline)
 	switch (opline->opcode) {
 		case ZEND_FETCH_OBJ_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
-			    !JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
 			    !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 				return 0;
@@ -11313,7 +11312,6 @@ static zend_bool zend_jit_may_avoid_refcounting(const zend_op *opline)
 			break;
 		case ZEND_FETCH_DIM_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
-			    !JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
 			    !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 				return 0;
