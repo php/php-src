@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.34
+?? ??? ????, PHP 7.2.35
+
+
+01 Oct 2020, PHP 7.2.34
 
 - Core:
   . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-`
