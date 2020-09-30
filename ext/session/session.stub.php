@@ -81,7 +81,7 @@ interface SessionHandlerInterface
     public function destroy(string $id);
 
     /** @return int|bool */
-    public function gc(int $lifetime);
+    public function gc(int $max_lifetime);
 }
 
 interface SessionIdInterface
@@ -96,7 +96,7 @@ interface SessionUpdateTimestampHandlerInterface
     public function validateId(string $id);
 
     /** @return bool */
-    public function updateTimestamp(string $id, string $value);
+    public function updateTimestamp(string $id, string $data);
 }
 
 class SessionHandler implements SessionHandlerInterface, SessionIdInterface
@@ -117,7 +117,7 @@ class SessionHandler implements SessionHandlerInterface, SessionIdInterface
     public function destroy(string $id) {}
 
     /** @return int|bool */
-    public function gc(int $lifetime) {}
+    public function gc(int $max_lifetime) {}
 
     /** @return string */
     public function create_sid() {}

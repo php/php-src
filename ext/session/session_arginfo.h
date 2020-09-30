@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8ac6478ae176b62a1d6d5bd25b6b6e50a85c657e */
+ * Stub hash: 8175feea632f2832e43d830e70dc9332377b9f22 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -109,17 +109,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SessionHandlerInterface_destroy arginfo_class_SessionHandlerInterface_read
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionHandlerInterface_gc, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, lifetime, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, max_lifetime, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SessionIdInterface_create_sid arginfo_class_SessionHandlerInterface_close
 
 #define arginfo_class_SessionUpdateTimestampHandlerInterface_validateId arginfo_class_SessionHandlerInterface_read
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp arginfo_class_SessionHandlerInterface_write
 
 #define arginfo_class_SessionHandler_open arginfo_class_SessionHandlerInterface_open
 
