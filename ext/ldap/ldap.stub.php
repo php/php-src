@@ -187,24 +187,6 @@ function ldap_err2str(int $errno): string {}
 /** @param resource $ldap */
 function ldap_compare($ldap, string $dn, string $attribute, string $value, array $controls = []): bool|int {}
 
-
-#ifdef LDAP_CONTROL_PAGEDRESULTS
-/**
- * @param resource $ldap
- * @deprecated since 7.4
- */
-function ldap_control_paged_result($ldap, int $pagesize, bool $iscritical = false, string $cookie = ""): bool {}
-
-/**
- * @param resource $ldap
- * @param resource $result
- * @param string $cookie
- * @param int $estimated
- * @deprecated since 7.4
- */
-function ldap_control_paged_result_response($ldap, $result, &$cookie = null, &$estimated = null): bool {}
-#endif
-
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 /** @param resource $ldap */
 function ldap_rename($ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, array $controls = []): bool {}
