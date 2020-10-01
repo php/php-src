@@ -5,24 +5,43 @@ Yield inside arrow functions
 
 // This doesn't make terribly much sense, but it works...
 
-$fn = fn() => yield 123;
+$fn = fn() => yield 1;
 foreach ($fn() as $val) {
     var_dump($val);
 }
 
-$fn = fn() => yield from [456, 789];
+$fn = fn() => { return yield 2; };
 foreach ($fn() as $val) {
     var_dump($val);
 }
 
-$fn = fn() => fn() => yield 987;
+$fn = fn() => yield from [3, 4];
+foreach ($fn() as $val) {
+    var_dump($val);
+}
+
+$fn = fn() => { yield from [5, 6]; };
+foreach ($fn() as $val) {
+    var_dump($val);
+}
+
+$fn = fn() => fn() => yield 7;
+foreach ($fn()() as $val) {
+    var_dump($val);
+}
+
+$fn = fn() => fn() => { yield 8; };
 foreach ($fn()() as $val) {
     var_dump($val);
 }
 
 ?>
 --EXPECT--
-int(123)
-int(456)
-int(789)
-int(987)
+int(1)
+int(2)
+int(3)
+int(4)
+int(5)
+int(6)
+int(7)
+int(8)

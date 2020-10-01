@@ -1575,8 +1575,7 @@ tail_call:
 				zend_ast_export_type(str, decl->child[3], indent);
 			}
 			if (decl->child[2]) {
-				if (decl->kind == ZEND_AST_ARROW_FUNC) {
-					ZEND_ASSERT(decl->child[2]->kind == ZEND_AST_RETURN);
+				if (decl->kind == ZEND_AST_ARROW_FUNC && decl->child[2]->kind == ZEND_AST_RETURN) {
 					smart_str_appends(str, " => ");
 					zend_ast_export_ex(str, decl->child[2]->child[0], 0, indent);
 					break;

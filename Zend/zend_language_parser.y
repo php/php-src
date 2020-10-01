@@ -1177,6 +1177,12 @@ inline_function:
 				  zend_ast_create(ZEND_AST_RETURN, $11), $7, NULL);
 				  ((zend_ast_decl *) $$)->lex_pos = $10;
 				  CG(extra_fn_flags) = $9; }
+	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
+		T_DOUBLE_ARROW backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $13, $1, $3,
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $5, NULL,
+				  $11, $7, NULL);
+				  CG(extra_fn_flags) = $9; }
 ;
 
 fn:
