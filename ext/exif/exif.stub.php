@@ -4,15 +4,15 @@
 
 function exif_tagname(int $index): string|false {}
 
-/** @param resource|string $filename */
-function exif_read_data($filename, ?string $sections_needed = null, bool $sub_arrays = false, bool $read_thumbnail = false): array|false {}
+/** @param resource|string $file */
+function exif_read_data($file, ?string $required_sections = null, bool $as_arrays = false, bool $read_thumbnail = false): array|false {}
 
 /**
- * @param resource|string $filename
+ * @param resource|string $file
  * @param int $width
  * @param int $height
- * @param int $imagetype
+ * @param int $image_type
  */
-function exif_thumbnail($filename, &$width = null, &$height = null, &$imagetype = null): string|false {}
+function exif_thumbnail($file, &$width = null, &$height = null, &$image_type = null): string|false {}
 
 function exif_imagetype(string $filename): int|false {}
