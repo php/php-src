@@ -666,6 +666,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	if (func->type == ZEND_USER_FUNCTION) {
 		memcpy(&closure->func, func, sizeof(zend_op_array));
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
+		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 		if (closure->func.op_array.static_variables) {
 			closure->func.op_array.static_variables =
 				zend_array_dup(closure->func.op_array.static_variables);
@@ -676,7 +677,9 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			|| func->common.scope != scope
 			|| (func->common.fn_flags & ZEND_ACC_NO_RT_ARENA)
 		) {
-			if (!func->op_array.run_time_cache && (func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+			if (!func->op_array.run_time_cache
+			 && (func->common.fn_flags & ZEND_ACC_CLOSURE)
+			 && !(func->common.fn_flags & ZEND_ACC_IMMUTABLE)) {
 				/* If a real closure is used for the first time, we create a shared runtime cache
 				 * and remember which scope it is for. */
 				func->common.scope = scope;
