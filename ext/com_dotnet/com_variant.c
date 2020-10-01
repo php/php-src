@@ -964,8 +964,8 @@ PHP_FUNCTION(variant_date_from_timestamp)
 	}
 
 	if (timestamp < 0) {
-		php_error_docref(NULL, E_WARNING, "Timestamp value must be a positive value.");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	VariantInit(&res);
@@ -975,8 +975,8 @@ PHP_FUNCTION(variant_date_from_timestamp)
 
 	/* Invalid after 23:59:59, December 31, 3000, UTC */
 	if (!tmv) {
-		php_error_docref(NULL, E_WARNING, "Invalid timestamp " ZEND_LONG_FMT, timestamp);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not go past 23:59:59, December 31, 3000, UTC");
+		RETURN_THROWS();
 	}
 
 	memset(&systime, 0, sizeof(systime));

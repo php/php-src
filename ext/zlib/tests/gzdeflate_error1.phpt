@@ -41,4 +41,4 @@ try {
 gzdeflate(): Argument #2 ($level) must be between -1 and 9
 
 -- Testing with incorrect encoding --
-gzdeflate(): Argument #3 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+gzdeflate(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

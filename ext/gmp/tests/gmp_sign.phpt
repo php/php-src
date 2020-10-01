@@ -36,7 +36,7 @@ int(1)
 int(0)
 int(1)
 int(-1)
-gmp_sign(): Argument #1 ($a) is not an integer string
-gmp_init(): Argument #1 ($number) is not an integer string
-gmp_sign(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_sign(): Argument #1 ($num) is not an integer string
+gmp_init(): Argument #1 ($num) is not an integer string
+gmp_sign(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

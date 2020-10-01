@@ -73,7 +73,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /**
      * @param object $object
      * @return bool
-     * @alias SplObjectStorage::contains
+     * @implementation-alias SplObjectStorage::contains
      */
     public function offsetExists($object) {}
 
@@ -86,14 +86,14 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /**
      * @param object $object
      * @return void
-     * @alias SplObjectStorage::attach
+     * @implementation-alias SplObjectStorage::attach
      */
     public function offsetSet($object, mixed $info = null) {}
 
     /**
      * @param object $object
      * @return void
-     * @alias SplObjectStorage::detach
+     * @implementation-alias SplObjectStorage::detach
      */
     public function offsetUnset($object) {}
 
@@ -149,7 +149,7 @@ class MultipleIterator implements Iterator
 
     /**
      * @return array
-     * @alias SplObjectStorage::__debugInfo
+     * @implementation-alias SplObjectStorage::__debugInfo
      */
     public function __debugInfo() {}
 }

@@ -93,7 +93,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 			{
 				*p_copy++ = v;
 			} else if (warned == FALSE) {
-				php_error_docref(NULL, E_WARNING, "Transaction name truncated. Must be only [0-9A-Za-z\\-_=]+");
+				php_error_docref(NULL, E_WARNING, "Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, \"\\\", \"-\", \"_\", and \"=\" characters");
 				warned = TRUE;
 			}
 			++p_orig;
@@ -230,7 +230,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 				break;
 
 			default:
-				php_error_docref(NULL, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[ofs], i + num_extra_args + 1);
+				zend_argument_value_error(num_extra_args, "must only contain the \"b\", \"d\", \"i\", \"s\" type specifiers");
 				rc = 1;
 				goto end_1;
 		}
@@ -292,8 +292,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 				type = MYSQL_TYPE_VAR_STRING;
 				break;
 			default:
-				/* We count parameters from 1 */
-				php_error_docref(NULL, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[i], i + num_extra_args + 1);
+				zend_argument_value_error(num_extra_args, "must only contain the \"b\", \"d\", \"i\", \"s\" type specifiers");
 				ret = FAIL;
 				mysqlnd_stmt_free_param_bind(stmt->stmt, params);
 				goto end;
@@ -2270,8 +2269,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 			case CURSOR_TYPE_SCROLLABLE:
 				break;
 			default:
-				zend_argument_value_error(ERROR_ARG_POS(3), "must be one of MYSQLI_CURSOR_TYPE_NO_CURSOR, "
-					"MYSQLI_CURSOR_TYPE_READ_ONLY, MYSQLI_CURSOR_TYPE_FOR_UPDATE, or MYSQLI_CURSOR_TYPE_SCROLLABLE "
+				zend_argument_value_error(ERROR_ARG_POS(3), "must be one of the MYSQLI_CURSOR_TYPE_* constants "
 					"for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE");
 				RETURN_THROWS();
 		}

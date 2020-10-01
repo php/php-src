@@ -1377,10 +1377,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	replaced = php_unescape_html_entities(str, 0 /*!all*/, (int)quote_style, NULL);
-	if (replaced) {
-		RETURN_STR(replaced);
-	}
-	RETURN_FALSE;
+	RETURN_STR(replaced);
 }
 /* }}} */
 
@@ -1400,11 +1397,7 @@ PHP_FUNCTION(html_entity_decode)
 
 	replaced = php_unescape_html_entities(
 		str, 1 /*all*/, (int)quote_style, hint_charset ? ZSTR_VAL(hint_charset) : NULL);
-
-	if (replaced) {
-		RETURN_STR(replaced);
-	}
-	RETURN_FALSE;
+	RETURN_STR(replaced);
 }
 /* }}} */
 

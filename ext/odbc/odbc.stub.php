@@ -17,7 +17,7 @@ function odbc_longreadlen($result_id, int $length): bool {}
 function odbc_prepare($connection_id, string $query) {}
 
 /** @param resource $result_id */
-function odbc_execute($result_id, array $parameters_array = UNKNOWN): bool {}
+function odbc_execute($result_id, array $parameters_array = []): bool {}
 
 /** @param resource $result_id */
 function odbc_cursor($result_id): string|false {}
@@ -31,14 +31,14 @@ function odbc_data_source($connection_id, int $fetch_type): array|false {}
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_exec($connection_id, string $query, int $flags = UNKNOWN) {}
+function odbc_exec($connection_id, string $query) {}
 
 /**
  * @param resource $connection_id
  * @return resource|false
  * @alias odbc_exec
  */
-function odbc_do($connection_id, string $query, int $flags = UNKNOWN) {}
+function odbc_do($connection_id, string $query) {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
 /** @param resource $result */
@@ -55,7 +55,7 @@ function odbc_fetch_array($result, int $rownumber = -1): array|false {}
 function odbc_fetch_into($result_id, &$result_array, int $rownumber = 0): int|false {}
 
 /** @param resource $result_id */
-function odbc_fetch_row($result_id, int $row_number = UNKNOWN): bool {}
+function odbc_fetch_row($result_id, ?int $row_number = null): bool {}
 
 /** @param resource $result_id */
 function odbc_result($result_id, string|int $field): string|bool|null {}
@@ -116,11 +116,11 @@ function odbc_commit($connection_id): bool {}
 /** @param resource $connection_id */
 function odbc_rollback($connection_id): bool {}
 
-/** @param resource $connection_id */
-function odbc_error($connection_id = UNKNOWN): string {}
+/** @param resource|null $connection_id */
+function odbc_error($connection_id = null): string {}
 
-/** @param resource $connection_id */
-function odbc_errormsg($connection_id = UNKNOWN): string {}
+/** @param resource|null $connection_id */
+function odbc_errormsg($connection_id = null): string {}
 
 /** @param resource $conn_id */
 function odbc_setoption($conn_id, int $which, int $option, int $value): bool {}
@@ -129,13 +129,13 @@ function odbc_setoption($conn_id, int $which, int $option, int $value): bool {}
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_tables($connection_id, ?string $qualfier = null, string $owner = UNKNOWN, string $name = UNKNOWN, string $table_types = UNKNOWN) {}
+function odbc_tables($connection_id, ?string $catalog = null, ?string $schema = null, ?string $name = null, ?string $table_types = null) {}
 
 /**
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_columns($connection_id, ?string $qualifier = null, string $owner = UNKNOWN, string $table_name = UNKNOWN, string $column_name = UNKNOWN) {}
+function odbc_columns($connection_id, ?string $catalog = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null) {}
 
 /**
  * @param resource $connection_id
@@ -147,47 +147,46 @@ function odbc_gettypeinfo($connection_id, int $data_type = 0) {}
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_primarykeys($connection_id, ?string $qualifier, string $owner, string $table) {}
+function odbc_primarykeys($connection_id, ?string $catalog, string $schema, string $table) {}
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /**
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_procedurecolumns($connection_id, ?string $qualifier = null, string $owner = UNKNOWN, string $proc = UNKNOWN, string $column = UNKNOWN) {}
+function odbc_procedurecolumns($connection_id, ?string $catalog = null, ?string $schema = null, ?string $proc = null, ?string $column = null) {}
 
 /**
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_procedures($connection_id, ?string $qualifier = null, string $owner = UNKNOWN, string $name = UNKNOWN) {}
+function odbc_procedures($connection_id, ?string $catalog = null, ?string $schema = null, ?string $name = null) {}
 
 /**
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_foreignkeys($connection_id, ?string $pk_qualifier, string $pk_owner, string $pk_table, string $fk_qualifier, string $fk_owner, string $fk_table) {}
+function odbc_foreignkeys($connection_id, ?string $pk_catalog, string $pk_schema, string $pk_table, string $fk_catalog, string $fk_schema, string $fk_table) {}
 #endif
 
 /**
- * @see https://bugs.php.net/bug.php?id=78470
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_specialcolumns($connection_id, int $type, ?string $qualifier, string $owner, string $table, int $scope) {}
+function odbc_specialcolumns($connection_id, int $type, ?string $catalog, string $schema, string $table, int $scope, int $nullable) {}
 
 /**
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_statistics($connection_id, ?string $qualfier, string $owner, string $name, int $unique, int $accuracy) {}
+function odbc_statistics($connection_id, ?string $catalog, string $schema, string $name, int $unique, int $accuracy) {}
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 /**
  * @param resource $connection_id
  * @return resource|false
  */
-function odbc_tableprivileges($connection_id, ?string $qualifier, string $owner, string $name) {}
+function odbc_tableprivileges($connection_id, ?string $catalog, string $schema, string $name) {}
 
 /**
  * @param resource $connection_id

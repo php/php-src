@@ -92,11 +92,10 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		return;
 	}
 
+	ZEND_ASSERT(instanceof_function(add_previous->ce, zend_ce_throwable)
+		&& "Previous execption must implement Throwable");
+
 	ZVAL_OBJ(&pv, add_previous);
-	if (!instanceof_function(Z_OBJCE(pv), zend_ce_throwable)) {
-		zend_error_noreturn(E_CORE_ERROR, "Previous exception must implement Throwable");
-		return;
-	}
 	ZVAL_OBJ(&zv, exception);
 	ex = &zv;
 	do {
@@ -334,10 +333,10 @@ ZEND_METHOD(ErrorException, __construct)
 {
 	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
+	zend_bool lineno_is_null = 1;
 	zval   tmp, *object, *previous = NULL;
-	int    argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "|SllSlO!", &message, &code, &severity, &filename, &lineno, &previous, zend_ce_throwable) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|SllS!l!O!", &message, &code, &severity, &filename, &lineno, &lineno_is_null, &previous, zend_ce_throwable) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -361,14 +360,17 @@ ZEND_METHOD(ErrorException, __construct)
 	ZVAL_LONG(&tmp, severity);
 	zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
 
-	if (argc >= 4) {
+	if (filename) {
 		ZVAL_STR_COPY(&tmp, filename);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		zval_ptr_dtor(&tmp);
-    	if (argc < 5) {
-    	    lineno = 0; /* invalidate lineno */
-    	}
+	}
+
+	if (!lineno_is_null) {
 		ZVAL_LONG(&tmp, lineno);
+		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+	} else if (filename) {
+		ZVAL_LONG(&tmp, 0);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 	}
 }
@@ -834,16 +836,14 @@ static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, ze
 {
 	zval ex, tmp;
 
-	if (exception_ce) {
-		if (!instanceof_function(exception_ce, zend_ce_throwable)) {
-			zend_error(E_NOTICE, "Exceptions must implement Throwable");
-			exception_ce = zend_ce_exception;
-		}
-	} else {
+	if (!exception_ce) {
 		exception_ce = zend_ce_exception;
 	}
-	object_init_ex(&ex, exception_ce);
 
+	ZEND_ASSERT(instanceof_function(exception_ce, zend_ce_throwable)
+		&& "Exceptions must implement Throwable");
+
+	object_init_ex(&ex, exception_ce);
 
 	if (message) {
 		ZVAL_STR(&tmp, message);

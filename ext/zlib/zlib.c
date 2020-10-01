@@ -725,7 +725,7 @@ PHP_FUNCTION(name) \
 		case PHP_ZLIB_ENCODING_DEFLATE: \
 			break; \
 		default: \
-			zend_argument_value_error(default_encoding ? 3 : 2, "must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE"); \
+			zend_argument_value_error(default_encoding ? 3 : 2, "must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE"); \
 			RETURN_THROWS(); \
 	} \
 	if ((out = php_zlib_encode(ZSTR_VAL(in), ZSTR_LEN(in), encoding, level)) == NULL) { \
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(deflate_init)
 		case Z_DEFAULT_STRATEGY:
 			break;
 		default:
-			zend_value_error("deflate_init(): \"strategy\" option must be one of ZLIB_FILTERED, ZLIB_HUFFMAN_ONLY, ZLIB_RLE, ZLIB_FIXED or ZLIB_DEFAULT_STRATEGY");
+			zend_value_error("deflate_init(): \"strategy\" option must be one of ZLIB_FILTERED, ZLIB_HUFFMAN_ONLY, ZLIB_RLE, ZLIB_FIXED, or ZLIB_DEFAULT_STRATEGY");
 			RETURN_THROWS();
 	}
 
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(deflate_init)
 		case PHP_ZLIB_ENCODING_DEFLATE:
 			break;
 		default:
-			zend_argument_value_error(1, "must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE");
+			zend_argument_value_error(1, "must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE");
 			RETURN_THROWS();
 	}
 

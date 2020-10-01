@@ -33,7 +33,7 @@ function curl_multi_setopt(CurlMultiHandle $multi_handle, int $option, mixed $va
 
 function curl_exec(CurlHandle $handle): string|bool {}
 
-function curl_file_create(string $filename, ?string $mimetype = null, ?string $postname = null): CURLFile {}
+function curl_file_create(string $filename, ?string $mime_type = null, ?string $posted_filename = null): CURLFile {}
 
 function curl_getinfo(CurlHandle $handle, ?int $option = null): mixed {}
 
@@ -50,8 +50,8 @@ function curl_multi_exec(CurlMultiHandle $multi_handle, &$still_running): int {}
 
 function curl_multi_getcontent(CurlHandle $multi_handle): ?string {}
 
-/** @param int|null $msgs_in_queue */
-function curl_multi_info_read(CurlMultiHandle $multi_handle, &$msgs_in_queue = null): array|false {}
+/** @param int $queued_messages */
+function curl_multi_info_read(CurlMultiHandle $multi_handle, &$queued_messages = null): array|false {}
 
 function curl_multi_init(): CurlMultiHandle {}
 
@@ -59,10 +59,10 @@ function curl_multi_remove_handle(CurlMultiHandle $multi_handle, CurlHandle $han
 
 function curl_multi_select(CurlMultiHandle $multi_handle, float $timeout = 1.0): int {}
 
-function curl_multi_strerror(int $error_number): ?string {}
+function curl_multi_strerror(int $error_code): ?string {}
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
-function curl_pause(CurlHandle $handle, int $bitmask): int {}
+function curl_pause(CurlHandle $handle, int $flags): int {}
 #endif
 
 function curl_reset(CurlHandle $handle): void {}
@@ -79,8 +79,8 @@ function curl_share_init(): CurlShareHandle {}
 
 function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $value): bool {}
 
-function curl_share_strerror(int $error_number): ?string {}
+function curl_share_strerror(int $error_code): ?string {}
 
-function curl_strerror(int $error_number): ?string {}
+function curl_strerror(int $error_code): ?string {}
 
 function curl_version(): array|false {}

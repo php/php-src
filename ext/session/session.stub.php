@@ -43,35 +43,45 @@ function session_commit(): bool {}
  * @param callable|object $open
  * @param callable|bool $close
  */
-function session_set_save_handler($open, $close = UNKNOWN, callable $read = UNKNOWN, callable $write = UNKNOWN, callable $destroy = UNKNOWN, callable $gc = UNKNOWN, callable $create_sid = UNKNOWN, callable $validate_sid = UNKNOWN, callable $update_timestamp = UNKNOWN): bool {}
+function session_set_save_handler(
+    $open,
+    $close = UNKNOWN,
+    callable $read = UNKNOWN,
+    callable $write = UNKNOWN,
+    callable $destroy = UNKNOWN,
+    callable $gc = UNKNOWN,
+    callable $create_sid = UNKNOWN,
+    callable $validate_sid = UNKNOWN,
+    callable $update_timestamp = UNKNOWN
+): bool {}
 
-function session_cache_limiter(?string $cache_limiter = null): string|false {}
+function session_cache_limiter(?string $value = null): string|false {}
 
-function session_cache_expire(?int $new_cache_expire = null): int|false {}
+function session_cache_expire(?int $value = null): int|false {}
 
-function session_set_cookie_params(array|int $lifetime_or_options, ?string $path = null, ?string $domain  = null, ?bool $secure = null, ?bool $httponly = null): bool {}
+function session_set_cookie_params(array|int $lifetime_or_options, ?string $path = null, ?string $domain = null, ?bool $secure = null, ?bool $httponly = null): bool {}
 
 function session_start(array $options = []): bool {}
 
 interface SessionHandlerInterface
 {
     /** @return bool */
-    public function open(string $save_path, string $session_name);
+    public function open(string $path, string $name);
 
     /** @return bool */
     public function close();
 
     /** @return string */
-    public function read(string $key);
+    public function read(string $id);
 
     /** @return bool */
-    public function write(string $key, string $val);
+    public function write(string $id, string $data);
 
     /** @return bool */
-    public function destroy(string $key);
+    public function destroy(string $id);
 
     /** @return int|bool */
-    public function gc(int $maxlifetime);
+    public function gc(int $max_lifetime);
 }
 
 interface SessionIdInterface
@@ -83,31 +93,31 @@ interface SessionIdInterface
 interface SessionUpdateTimestampHandlerInterface
 {
     /** @return bool */
-    public function validateId(string $key);
+    public function validateId(string $id);
 
     /** @return bool */
-    public function updateTimestamp(string $key, string $val);
+    public function updateTimestamp(string $id, string $data);
 }
 
 class SessionHandler implements SessionHandlerInterface, SessionIdInterface
 {
     /** @return bool */
-    public function open(string $save_path, string $session_name) {}
+    public function open(string $path, string $name) {}
 
     /** @return bool */
     public function close() {}
 
     /** @return string */
-    public function read(string $key) {}
+    public function read(string $id) {}
 
     /** @return bool */
-    public function write(string $key, string $val) {}
+    public function write(string $id, string $data) {}
 
     /** @return bool */
-    public function destroy(string $key) {}
+    public function destroy(string $id) {}
 
     /** @return int|bool */
-    public function gc(int $maxlifetime) {}
+    public function gc(int $max_lifetime) {}
 
     /** @return string */
     public function create_sid() {}

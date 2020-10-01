@@ -60,4 +60,4 @@ int(0)
 bool(true)
 int(0)
 bool(true)
-flock(): Argument #2 ($operation) must be either LOCK_SH, LOCK_EX, or LOCK_UN
+flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN

@@ -63,6 +63,6 @@ string(1) "1"
 string(1) "1"
 string(3) "195"
 string(3) "195"
-gmp_gcdext(): Argument #2 ($b) must be of type GMP|string|int, array given
-gmp_gcdext(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_gcdext(): Argument #2 ($num2) must be of type GMP|string|int, array given
+gmp_gcdext(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

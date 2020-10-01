@@ -139,5 +139,5 @@ Exception: Too few arguments to function mysqli_fetch_object_construct::__constr
 NULL
 NULL
 mysqli_result object is already closed
-mysqli_result::fetch_object(): Argument #1 ($class_name) must be a valid class name, this_class_does_not_exist given
+mysqli_result::fetch_object(): Argument #1 ($class) must be a valid class name, this_class_does_not_exist given
 done!

@@ -99,9 +99,11 @@ $db = MySQLPDOTest::factory();
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
 
-        // TODO - that's PDO - you can prepare empty statements!
-        prepex(3, $db, '',
-            array(), array('prepare' => array('sqlstate' => '42000')));
+        try {
+            prepex(3, $db, '', [], ['prepare' => ['sqlstate' => '42000']]);
+        } catch (\ValueError $e) {
+            echo $e->getMessage(), \PHP_EOL;
+        }
 
         // lets be fair and do the most simple SELECT first
         $stmt = prepex(4, $db, 'SELECT 1 as "one"');
@@ -342,6 +344,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECT--
+PDO::prepare(): Argument #1 ($query) cannot be empty
 array(1) {
   [0]=>
   array(1) {

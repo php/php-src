@@ -99,70 +99,70 @@ fclose($file_handle);
 *** Testing vprintf() : with unexpected values for args argument ***
 
 -- Iteration 1 --
-vprintf(): Argument #2 ($args) must be of type array, int given
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 2 --
-vprintf(): Argument #2 ($args) must be of type array, int given
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 3 --
-vprintf(): Argument #2 ($args) must be of type array, int given
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 4 --
-vprintf(): Argument #2 ($args) must be of type array, int given
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 5 --
-vprintf(): Argument #2 ($args) must be of type array, float given
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 6 --
-vprintf(): Argument #2 ($args) must be of type array, float given
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 7 --
-vprintf(): Argument #2 ($args) must be of type array, float given
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 8 --
-vprintf(): Argument #2 ($args) must be of type array, float given
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 9 --
-vprintf(): Argument #2 ($args) must be of type array, float given
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 10 --
-vprintf(): Argument #2 ($args) must be of type array, null given
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 11 --
-vprintf(): Argument #2 ($args) must be of type array, null given
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 12 --
-vprintf(): Argument #2 ($args) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, bool given
 
 -- Iteration 13 --
-vprintf(): Argument #2 ($args) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, bool given
 
 -- Iteration 14 --
-vprintf(): Argument #2 ($args) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, bool given
 
 -- Iteration 15 --
-vprintf(): Argument #2 ($args) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, bool given
 
 -- Iteration 16 --
-vprintf(): Argument #2 ($args) must be of type array, string given
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 17 --
-vprintf(): Argument #2 ($args) must be of type array, string given
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 18 --
-vprintf(): Argument #2 ($args) must be of type array, string given
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 19 --
-vprintf(): Argument #2 ($args) must be of type array, string given
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 20 --
-vprintf(): Argument #2 ($args) must be of type array, sample given
+vprintf(): Argument #2 ($values) must be of type array, sample given
 
 -- Iteration 21 --
-vprintf(): Argument #2 ($args) must be of type array, null given
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 22 --
-vprintf(): Argument #2 ($args) must be of type array, null given
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 23 --
-vprintf(): Argument #2 ($args) must be of type array, resource given
+vprintf(): Argument #2 ($values) must be of type array, resource given

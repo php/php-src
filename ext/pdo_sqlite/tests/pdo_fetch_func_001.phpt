@@ -20,20 +20,40 @@ $st->fetchAll(PDO::FETCH_FUNC, function($x, $y) use ($st) { var_dump($st); print
 $st = $db->query('SELECT name FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, 'strtoupper'));
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, 'nothing'));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, 'nothing'));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, ''));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, ''));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, NULL));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, NULL));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, 1));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 class foo {
     public function method($x) {
@@ -64,14 +84,26 @@ new bar($db);
 $st = $db->query('SELECT * FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test')));
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test2')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test2')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test3')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test3')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'inexistent')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'inexistent')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
@@ -91,31 +123,11 @@ array(2) {
   [1]=>
   string(0) ""
 }
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function "nothing" not found or invalid function name in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function "" not found or invalid function name in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: cannot access "self" when no class scope is active in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
+function "nothing" not found or invalid function name
+function "" not found or invalid function name
+PDOStatement::fetchAll(): Argument #2 must be a callable, null given
+no array or string given
+cannot access "self" when no class scope is active
 array(2) {
   [0]=>
   string(9) "--- 1 ---"
@@ -128,18 +140,6 @@ array(2) {
   [1]=>
   string(4) "2---"
 }
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test2() cannot be called statically in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test3() cannot be called statically in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class bar does not have a method "inexistent" in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
+non-static method bar::test2() cannot be called statically
+non-static method bar::test3() cannot be called statically
+class bar does not have a method "inexistent"

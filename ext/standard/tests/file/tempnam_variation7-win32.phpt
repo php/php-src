@@ -96,9 +96,9 @@ File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 6 --
-tempnam(): Argument #1 ($dir) must not contain any null bytes
+tempnam(): Argument #1 ($directory) must not contain any null bytes
 -- Iteration 7 --
-tempnam(): Argument #1 ($dir) must be of type string, array given
+tempnam(): Argument #1 ($directory) must be of type string, array given
 -- Iteration 8 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d

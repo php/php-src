@@ -44,8 +44,8 @@ int(-2349828)
 int(2342344)
 int(1)
 int(12345678)
-gmp_intval(): Argument #1 ($gmpnumber) is not an integer string
-gmp_intval(): Argument #1 ($gmpnumber) must be of type GMP|string|int, stdClass given
-gmp_intval(): Argument #1 ($gmpnumber) must be of type GMP|string|int, array given
-gmp_intval(): Argument #1 ($gmpnumber) is not an integer string
+gmp_intval(): Argument #1 ($num) is not an integer string
+gmp_intval(): Argument #1 ($num) must be of type GMP|string|int, stdClass given
+gmp_intval(): Argument #1 ($num) must be of type GMP|string|int, array given
+gmp_intval(): Argument #1 ($num) is not an integer string
 Done

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 57db79b23d127851f985d9b6280b113637384a68 */
+ * Stub hash: 53069f42e460cfea8e2daf499277f6ceb9c760f7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -21,7 +21,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_execute, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, result_id)
-	ZEND_ARG_TYPE_INFO(0, parameters_array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, parameters_array, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_cursor, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -35,13 +35,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_data_source, 0, 2, MAY_BE_A
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_exec, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_odbc_exec arginfo_odbc_prepare
 
-#define arginfo_odbc_do arginfo_odbc_exec
+#define arginfo_odbc_do arginfo_odbc_prepare
 
 #if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
@@ -65,7 +61,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_fetch_row, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, result_id)
-	ZEND_ARG_TYPE_INFO(0, row_number, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row_number, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_result, 0, 2, MAY_BE_STRING|MAY_BE_BOOL|MAY_BE_NULL)
@@ -140,7 +136,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_odbc_rollback arginfo_odbc_commit
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_error, 0, 0, IS_STRING, 0)
-	ZEND_ARG_INFO(0, connection_id)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection_id, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_odbc_errormsg arginfo_odbc_error
@@ -154,18 +150,18 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_tables, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualfier, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, table_types, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, catalog, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, table_types, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_columns, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifier, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, column_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, catalog, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, table_name, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, column_name, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_gettypeinfo, 0, 0, 1)
@@ -175,55 +171,56 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_primarykeys, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, catalog, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedurecolumns, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifier, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, proc, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, column, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, catalog, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, proc, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, column, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 #endif
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedures, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifier, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, catalog, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 #endif
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_foreignkeys, 0, 0, 7)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO(0, pk_qualifier, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, pk_owner, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, pk_catalog, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, pk_schema, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pk_table, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, fk_qualifier, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, fk_owner, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, fk_catalog, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, fk_schema, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, fk_table, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_specialcolumns, 0, 0, 6)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_specialcolumns, 0, 0, 7)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, catalog, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, scope, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, nullable, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_statistics, 0, 0, 6)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO(0, qualfier, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, catalog, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, unique, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, accuracy, IS_LONG, 0)
@@ -232,8 +229,8 @@ ZEND_END_ARG_INFO()
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_tableprivileges, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_id)
-	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, owner, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, catalog, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif

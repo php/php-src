@@ -27,8 +27,8 @@ try {
 ?>
 --EXPECT--
 bool(true)
-socket_create_pair(): Argument #1 ($domain) must be either AF_UNIX, AF_INET6 or AF_INET
-socket_create_pair(): Argument #2 ($type) must be either SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW, or SOCK_RDM
+socket_create_pair(): Argument #1 ($domain) must be one of AF_UNIX, AF_INET6, or AF_INET
+socket_create_pair(): Argument #2 ($type) must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW, or SOCK_RDM
 --CREDITS--
 Till Klampaeckel, till@php.net
 Berlin TestFest 2009

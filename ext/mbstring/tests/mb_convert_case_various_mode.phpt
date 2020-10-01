@@ -31,4 +31,4 @@ string(13) "FOO BAR SPAß"
 string(13) "foo bar spaß"
 string(13) "Foo Bar Spaß"
 string(13) "foo bar spaß"
-mb_convert_case(): Argument #2 ($mode) must be one of MB_CASE_UPPER, MB_CASE_LOWER, MB_CASE_TITLE, MB_CASE_FOLD, MB_CASE_UPPER_SIMPLE, MB_CASE_LOWER_SIMPLE, MB_CASE_TITLE_SIMPLE, or MB_CASE_FOLD_SIMPLE
+mb_convert_case(): Argument #2 ($mode) must be one of the MB_CASE_* constants

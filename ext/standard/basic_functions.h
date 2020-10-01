@@ -143,13 +143,14 @@ PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
+	zval function_name;
 	zval *arguments;
 	int arg_count;
 } php_shutdown_function_entry;
 
 PHPAPI extern zend_bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry);
 PHPAPI extern zend_bool remove_user_shutdown_function(const char *function_name, size_t function_len);
-PHPAPI extern zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry);
+PHPAPI extern zend_bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_function_entry);
 
 PHPAPI void php_call_shutdown_functions(void);
 PHPAPI void php_free_shutdown_functions(void);

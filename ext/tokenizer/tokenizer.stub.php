@@ -2,9 +2,9 @@
 
 /** @generate-function-entries */
 
-function token_get_all(string $source, int $flags = 0): array {}
+function token_get_all(string $code, int $flags = 0): array {}
 
-function token_name(int $token): string {}
+function token_name(int $id): string {}
 
 class PhpToken implements Stringable
 {

@@ -50,14 +50,14 @@ PHP_METHOD(DOMAttr, __construct)
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	oldnode = dom_object_get_node(intern);

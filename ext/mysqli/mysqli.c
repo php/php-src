@@ -47,6 +47,8 @@ static PHP_GINIT_FUNCTION(mysqli);
 	} \
 }
 
+#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+
 static HashTable classes;
 static zend_object_handlers mysqli_object_handlers;
 static zend_object_handlers mysqli_object_driver_handlers;
@@ -1168,8 +1170,8 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (fetchtype < MYSQLI_ASSOC || fetchtype > MYSQLI_BOTH) {
-		php_error_docref(NULL, E_WARNING, "The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH");
-		RETURN_FALSE;
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH");
+		RETURN_THROWS();
 	}
 
 	php_mysqli_fetch_into_hash_aux(return_value, result, fetchtype);

@@ -18,7 +18,7 @@ interface Reflector extends Stringable
 
 abstract class ReflectionFunctionAbstract implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @return bool */
@@ -194,7 +194,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function getPrototype() {}
 
     /** @return void */
-    public function setAccessible(bool $isAccessible) {}
+    public function setAccessible(bool $accessible) {}
 }
 
 class ReflectionClass implements Reflector
@@ -260,10 +260,10 @@ class ReflectionClass implements Reflector
     public function hasConstant(string $name) {}
 
     /** @return array|null */
-    public function getConstants(int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
+    public function getConstants(?int $filter = null) {}
 
     /** @return ReflectionClassConstant[] */
-    public function getReflectionConstants(int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE) {}
+    public function getReflectionConstants(?int $filter = null) {}
 
     /** @return mixed */
     public function getConstant(string $name) {}
@@ -364,12 +364,12 @@ class ReflectionClass implements Reflector
 
 class ReflectionObject extends ReflectionClass
 {
-    public function __construct(object $argument) {}
+    public function __construct(object $object) {}
 }
 
 class ReflectionProperty implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(object|string $class, string $property) {}
@@ -415,7 +415,7 @@ class ReflectionProperty implements Reflector
     public function getDocComment() {}
 
     /** @return void */
-    public function setAccessible(bool $isAccessible) {}
+    public function setAccessible(bool $accessible) {}
 
     /** @return ReflectionType|null */
     public function getType() {}
@@ -434,7 +434,7 @@ class ReflectionProperty implements Reflector
 
 class ReflectionClassConstant implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(object|string $class, string $constant) {}
@@ -471,11 +471,11 @@ class ReflectionClassConstant implements Reflector
 
 class ReflectionParameter implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @param string|array|object $function */
-    public function __construct($function, int|string $parameter) {}
+    public function __construct($function, int|string $param) {}
 
     public function __toString(): string {}
 
@@ -550,7 +550,7 @@ class ReflectionParameter implements Reflector
 
 abstract class ReflectionType implements Stringable
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @return bool */
@@ -575,7 +575,7 @@ class ReflectionUnionType extends ReflectionType
 
 class ReflectionExtension implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(string $name) {}
@@ -618,7 +618,7 @@ class ReflectionExtension implements Reflector
 
 class ReflectionZendExtension implements Reflector
 {
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(string $name) {}
@@ -647,7 +647,7 @@ final class ReflectionReference
 
     public function getId(): string {}
 
-    /** @alias ReflectionClass::__clone */
+    /** @implementation-alias ReflectionClass::__clone */
     private function __clone() {}
 
     private function __construct() {}

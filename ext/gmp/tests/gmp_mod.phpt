@@ -33,7 +33,7 @@ var_dump(gmp_mod($a, $b));
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_mod(): Argument #1 ($a) is not an integer string
+gmp_mod(): Argument #1 ($num1) is not an integer string
 object(GMP)#2 (1) {
   ["num"]=>
   string(1) "0"
@@ -43,7 +43,7 @@ object(GMP)#2 (1) {
   string(1) "0"
 }
 Modulo by zero
-gmp_mod(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_mod(): Argument #1 ($num1) must be of type GMP|string|int, array given
 object(GMP)#4 (1) {
   ["num"]=>
   string(5) "31161"

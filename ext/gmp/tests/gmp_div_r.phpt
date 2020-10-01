@@ -51,7 +51,7 @@ object(GMP)#3 (1) {
   ["num"]=>
   string(5) "12653"
 }
-gmp_div_r(): Argument #3 ($round) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
+gmp_div_r(): Argument #3 ($rounding_mode) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
 object(GMP)#2 (1) {
   ["num"]=>
   string(2) "10"
@@ -76,6 +76,6 @@ object(GMP)#3 (1) {
   ["num"]=>
   string(2) "10"
 }
-gmp_div_r(): Argument #1 ($a) must be of type GMP|string|int, resource given
-gmp_div_r(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_div_r(): Argument #1 ($num1) must be of type GMP|string|int, resource given
+gmp_div_r(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

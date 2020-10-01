@@ -35,7 +35,7 @@ Warning: Array to string conversion in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
-join(): Argument #1 ($glue) must be of type string, array given
+join(): Argument #1 ($separator) must be of type string, array given
 
 Warning: Array to string conversion in %s on line %d
 

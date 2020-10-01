@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-class SplFixedArray implements Iterator, ArrayAccess, Countable
+class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable
 {
     public function __construct(int $size = 0) {}
 
@@ -48,18 +48,5 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable
      */
     public function offsetUnset($index) {}
 
-    /** @return void */
-    public function rewind() {}
-
-    /** @return mixed */
-    public function current() {}
-
-    /** @return int */
-    public function key() {}
-
-    /** @return void */
-    public function next() {}
-
-    /** @return bool */
-    public function valid() {}
+    public function getIterator(): Iterator {}
 }

@@ -24,7 +24,6 @@ var_dump(odbc_data_source($conn, SQL_FETCH_FIRST));
 ?>
 --EXPECTF--
 odbc_data_source(): Argument #2 ($fetch_type) must be either SQL_FETCH_FIRST or SQL_FETCH_NEXT
-bool(false)
 array(%d) {
 %a
 }

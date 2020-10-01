@@ -55,7 +55,7 @@ include $pname . '/foo';
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/opendir_edgecases');
 --EXPECTF--
-opendir(): Argument #1 ($path) must be of type string, array given
+opendir(): Argument #1 ($directory) must be of type string, array given
 .
 ..
 foo

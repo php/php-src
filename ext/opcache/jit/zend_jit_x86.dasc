@@ -1485,7 +1485,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro EFREE_REG_24
+|.macro EFREE_REG_REFERENCE
 ||#if ZEND_DEBUG
 |		xor FCARG2a, FCARG2a // filename
 |		.if X64WIN
@@ -1508,16 +1508,16 @@ static void* dasm_labels[zend_lb_MAX];
 |		.endif
 ||#else
 ||#ifdef HAVE_BUILTIN_CONSTANT_P
-|		EXT_CALL _efree_24, r0
+|		EXT_CALL _efree_32, r0
 ||#else
 |		EXT_CALL _efree, r0
 ||#endif
 ||#endif
 |.endmacro
 
-|.macro EFREE_24, ptr
+|.macro EFREE_REFERENCE, ptr
 |	mov FCARG1a, ptr
-|	EFREE_REG_24
+|	EFREE_REG_REFERENCE
 |.endmacro
 
 |.macro EMALLOC, size, op_array, opline
@@ -1545,8 +1545,8 @@ static void* dasm_labels[zend_lb_MAX];
 |		.endif
 ||#else
 ||#ifdef HAVE_BUILTIN_CONSTANT_P
-||	if (size == 24) {
-|		EXT_CALL _emalloc_24, r0
+||	if (size > 24 && size <= 32) {
+|		EXT_CALL _emalloc_32, r0
 ||	} else {
 |		mov FCARG1a, size
 |		EXT_CALL _emalloc, r0
@@ -3532,7 +3532,6 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		}
 		if (trace->op != ZEND_JIT_TRACE_END ||
 		    (trace->stop != ZEND_JIT_TRACE_STOP_RETURN &&
-		     trace->stop != ZEND_JIT_TRACE_STOP_RETURN_HALT &&
 		     trace->stop != ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 
 			const zend_op *next_opline = trace->opline;
@@ -5781,7 +5780,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				if (save_r1) {
 					|	mov aword T1, FCARG1a // save
 				}
-				|	EFREE_24 aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)]
+				|	EFREE_REFERENCE aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)]
 				if (save_r1) {
 					|	mov FCARG1a, aword T1 // restore
 				}
@@ -9092,6 +9091,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 				|	ZVAL_DEREF FCARG1a, op1_info
 				op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 			} else {
+				/* Hack: Convert reference to regular value to simplify JIT code */
 				ZEND_ASSERT(Z_REG(op1_addr) == ZREG_FP);
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >1
 				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
@@ -9178,12 +9178,12 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	} else {
 		|	EXT_CALL zend_jit_find_method_helper, r0
 	}
-	|	test r0, r0
-	|	jz ->exception_handler
 	|.if not(X64)
 	|	add r4, 12
 	|.endif
-	|	jmp >2
+	|	test r0, r0
+	|	jnz >2
+	|	jmp ->exception_handler
 	|.code
 	|2:
 
@@ -10136,13 +10136,16 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 		|2:
 		|	// ZVAL_NEW_REF(arg, varptr);
 		if (opline->op1_type == IS_VAR) {
+			if (Z_REG(op1_addr) != ZREG_R0 || Z_OFFSET(op1_addr) != 0) {
+				|	LOAD_ZVAL_ADDR r0, op1_addr
+			}
 			|	mov aword T1, r0 // save
 		}
 		|	EMALLOC sizeof(zend_reference), op_array, opline
 		|	mov dword [r0], 2
 		|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], GC_REFERENCE
 		|	mov aword [r0 + offsetof(zend_reference, sources.ptr)], 0
-		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 8);
+		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, offsetof(zend_reference, val));
 		if (opline->op1_type == IS_VAR) {
 			zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R1, 0);
 
@@ -10363,7 +10366,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				|	GC_ADDREF r2
 				|	jmp >2
 				|1:
-				|	EFREE_REG_24
+				|	EFREE_REG_REFERENCE
 				|	jmp >2
 				|.code
 				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R0, ZREG_R2
@@ -11234,7 +11237,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	jmp >9
 			}
 			|2:
-			|	EFREE_24 r0
+			|	EFREE_REFERENCE r0
 			if (jit_return_label >= 0) {
 				|	jmp =>jit_return_label
 			} else {
@@ -11294,7 +11297,6 @@ static zend_bool zend_jit_may_avoid_refcounting(const zend_op *opline)
 	switch (opline->opcode) {
 		case ZEND_FETCH_OBJ_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
-			    !JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
 			    !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 				return 0;
@@ -11310,7 +11312,6 @@ static zend_bool zend_jit_may_avoid_refcounting(const zend_op *opline)
 			break;
 		case ZEND_FETCH_DIM_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
-			    !JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
 			    !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 				return 0;
@@ -14704,10 +14705,17 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 	if (add_ref_guard) {
 		|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, &exit_addr
 	}
-	|	GET_ZVAL_PTR FCARG1a, var_addr
-
-	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
-	*var_addr_ptr = var_addr;
+	if (opline->opcode == ZEND_INIT_METHOD_CALL && opline->op1_type == IS_VAR) {
+		/* Hack: Convert reference to regular value to simplify JIT code for INIT_METHOD_CALL */
+		if (Z_REG(var_addr) != ZREG_FCARG1a || Z_OFFSET(var_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1a, var_addr
+		}
+		|	EXT_CALL zend_jit_unref_helper, r0
+	} else {
+		|	GET_ZVAL_PTR FCARG1a, var_addr
+		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
+		*var_addr_ptr = var_addr;
+	}
 
 	if (var_type != IS_UNKNOWN) {
 		var_type &= ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED);

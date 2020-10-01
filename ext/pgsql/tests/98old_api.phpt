@@ -29,5 +29,28 @@ pg_cmdtuples($result);
 
 echo "OK";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function pg_numrows() is deprecated in %s on line %d
+
+Deprecated: Function pg_numfields() is deprecated in %s on line %d
+
+Deprecated: Function pg_fieldname() is deprecated in %s on line %d
+
+Deprecated: Function pg_fieldsize() is deprecated in %s on line %d
+
+Deprecated: Function pg_fieldtype() is deprecated in %s on line %d
+
+Deprecated: Function pg_fieldprtlen() is deprecated in %s on line %d
+
+Deprecated: Function pg_fieldisnull() is deprecated in %s on line %d
+
+Deprecated: Function pg_result() is deprecated in %s on line %d
+
+Deprecated: Function pg_getlastoid() is deprecated in %s on line %d
+
+Deprecated: Function pg_freeresult() is deprecated in %s on line %d
+
+Deprecated: Function pg_errormessage() is deprecated in %s on line %d
+
+Deprecated: Function pg_cmdtuples() is deprecated in %s on line %d
 OK

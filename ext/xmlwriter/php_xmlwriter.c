@@ -88,10 +88,10 @@ static zend_object *xmlwriter_object_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-#define XMLW_NAME_CHK(__err) \
+#define XMLW_NAME_CHK(__arg_no, __subject) \
 	if (xmlValidateName((xmlChar *) name, 0) != 0) {	\
-		php_error_docref(NULL, E_WARNING, "%s", __err);	\
-		RETURN_FALSE;	\
+		zend_argument_value_error(__arg_no, "must be a valid %s, \"%s\" given", __subject, name);	\
+		RETURN_THROWS();	\
 	}	\
 
 /* {{{ function prototypes */
@@ -199,7 +199,7 @@ static void xmlwriter_objects_clone(void *object, void **object_clone)
 }
 }}} */
 
-static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_one_char_t internal_function, char *err_string)
+static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_one_char_t internal_function, char *subject_name)
 {
 	xmlTextWriterPtr ptr;
 	char *name;
@@ -212,8 +212,8 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	if (err_string != NULL) {
-		XMLW_NAME_CHK(err_string);
+	if (subject_name != NULL) {
+		XMLW_NAME_CHK(2, subject_name);
 	}
 
 	if (ptr) {
@@ -281,7 +281,7 @@ PHP_FUNCTION(xmlwriter_set_indent_string)
 /* {{{ Create start attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_attribute)
 {
-	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartAttribute, "Invalid Attribute Name");
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartAttribute, "attribute name");
 }
 /* }}} */
 
@@ -307,7 +307,7 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Attribute Name");
+	XMLW_NAME_CHK(3, "attribute name");
 
 	if (ptr) {
 		retval = xmlTextWriterStartAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
@@ -335,7 +335,7 @@ PHP_FUNCTION(xmlwriter_write_attribute)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Attribute Name");
+	XMLW_NAME_CHK(2, "attribute name");
 
 	if (ptr) {
 		retval = xmlTextWriterWriteAttribute(ptr, (xmlChar *)name, (xmlChar *)content);
@@ -363,7 +363,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Attribute Name");
+	XMLW_NAME_CHK(3, "attribute name");
 
 	if (ptr) {
 		retval = xmlTextWriterWriteAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
@@ -379,7 +379,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 /* {{{ Create start element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_element)
 {
-	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartElement, "Invalid Element Name");
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartElement, "element name");
 }
 /* }}} */
 
@@ -398,7 +398,7 @@ PHP_FUNCTION(xmlwriter_start_element_ns)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Element Name");
+	XMLW_NAME_CHK(3, "element name");
 
 	if (ptr) {
 		retval = xmlTextWriterStartElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
@@ -441,7 +441,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Element Name");
+	XMLW_NAME_CHK(2, "element name");
 
 	if (ptr) {
 		if (!content) {
@@ -480,7 +480,7 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Element Name");
+	XMLW_NAME_CHK(3, "element name");
 
 	if (ptr) {
 		if (!content) {
@@ -507,7 +507,7 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 /* {{{ Create start PI tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_pi)
 {
-	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartPI, "Invalid PI Target");
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartPI, "PI target");
 }
 /* }}} */
 
@@ -533,7 +533,7 @@ PHP_FUNCTION(xmlwriter_write_pi)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid PI Target");
+	XMLW_NAME_CHK(2, "PI target");
 
 	if (ptr) {
 		retval = xmlTextWriterWritePI(ptr, (xmlChar *)name, (xmlChar *)content);
@@ -726,7 +726,7 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 /* {{{ Create start DTD element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_element)
 {
-	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDElement, "Invalid Element Name");
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDElement, "element name");
 }
 /* }}} */
 
@@ -752,7 +752,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Element Name");
+	XMLW_NAME_CHK(2, "element name");
 
 	if (ptr) {
 		retval = xmlTextWriterWriteDTDElement(ptr, (xmlChar *)name, (xmlChar *)content);
@@ -768,7 +768,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 /* {{{ Create start DTD AttList - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_attlist)
 {
-	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDAttlist, "Invalid Element Name");
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDAttlist, "element name");
 }
 /* }}} */
 
@@ -794,7 +794,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Element Name");
+	XMLW_NAME_CHK(2, "element name");
 
 	if (ptr) {
 		retval = xmlTextWriterWriteDTDAttlist(ptr, (xmlChar *)name, (xmlChar *)content);
@@ -822,7 +822,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Attribute Name");
+	XMLW_NAME_CHK(2, "attribute name");
 
 	if (ptr) {
 		retval = xmlTextWriterStartDTDEntity(ptr, isparm, (xmlChar *)name);
@@ -862,7 +862,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLW_NAME_CHK("Invalid Element Name");
+	XMLW_NAME_CHK(2, "element name");
 
 	if (ptr) {
 		retval = xmlTextWriterWriteDTDEntity(ptr, pe, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)ndataid, (xmlChar *)content);

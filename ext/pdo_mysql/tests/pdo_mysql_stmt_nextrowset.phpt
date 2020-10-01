@@ -33,10 +33,6 @@ if (!MySQLPDOTest::isPDOMySQLnd())
     if (false !== ($tmp = $stmt->nextRowSet()))
         printf("[002] Expecting false got %s\n", var_export($tmp, true));
 
-    // TODO: should give a warning, but its PDO, let's ignore the missing warning for now
-    if (false !== ($tmp = $stmt->nextRowSet(1)))
-        printf("[003] Expecting false got %s\n", var_export($tmp, true));
-
     function test_proc1($db) {
 
         $stmt = $db->query('SELECT @VERSION as _version');

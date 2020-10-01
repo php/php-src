@@ -40,13 +40,13 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_sqrt(): Argument #1 ($a) must be greater than or equal to 0
-gmp_sqrt(): Argument #1 ($a) must be greater than or equal to 0
+gmp_sqrt(): Argument #1 ($num) must be greater than or equal to 0
+gmp_sqrt(): Argument #1 ($num) must be greater than or equal to 0
 string(1) "0"
 string(1) "1"
 string(2) "12"
 string(1) "0"
-gmp_sqrt(): Argument #1 ($a) must be greater than or equal to 0
+gmp_sqrt(): Argument #1 ($num) must be greater than or equal to 0
 string(2) "27"
-gmp_sqrt(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_sqrt(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

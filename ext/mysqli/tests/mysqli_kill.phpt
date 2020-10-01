@@ -80,7 +80,7 @@ require_once('skipifconnectfailure.inc');
     require_once("clean_table.inc");
 ?>
 --EXPECTF--
-mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
+mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 string(%d) "%s"
 bool(false)
 object(mysqli)#%d (%d) {
@@ -131,10 +131,10 @@ object(mysqli)#%d (%d) {
   ["warning_count"]=>
   int(0)
 }
-mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
+mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 array(1) {
   ["id"]=>
   string(1) "1"
 }
-mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
+mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 done!

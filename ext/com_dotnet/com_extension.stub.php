@@ -46,7 +46,7 @@ function variant_cmp(mixed $left, mixed $right, int $lcid = LOCALE_SYSTEM_DEFAUL
 
 function variant_date_to_timestamp(variant $variant): ?int {}
 
-function variant_date_from_timestamp(int $timestamp): variant|false {}
+function variant_date_from_timestamp(int $timestamp): variant {}
 
 function variant_get_type(variant $variant): int {}
 

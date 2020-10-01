@@ -587,7 +587,7 @@ PHP_METHOD(SoapHeader, __construct)
 		if ((actor_long == SOAP_ACTOR_NEXT || actor_long == SOAP_ACTOR_NONE || actor_long == SOAP_ACTOR_UNLIMATERECEIVER)) {
 			add_property_long(this_ptr, "actor", actor_long);
 		} else {
-			zend_argument_value_error(5, "must be either SOAP_ACTOR_NEXT, SOAP_ACTOR_NONE or SOAP_ACTOR_UNLIMATERECEIVER");
+			zend_argument_value_error(5, "must be one of SOAP_ACTOR_NEXT, SOAP_ACTOR_NONE, or SOAP_ACTOR_UNLIMATERECEIVER");
 			RETURN_THROWS();
 		}
 	}
@@ -2023,8 +2023,8 @@ PHP_METHOD(SoapClient, __construct)
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "soap_version", sizeof("soap_version")-1)) != NULL) {
-			if (Z_TYPE_P(tmp) == IS_LONG ||
-			    (Z_LVAL_P(tmp) == SOAP_1_1 && Z_LVAL_P(tmp) == SOAP_1_2)) {
+			if (Z_TYPE_P(tmp) == IS_LONG &&
+			    (Z_LVAL_P(tmp) == SOAP_1_1 || Z_LVAL_P(tmp) == SOAP_1_2)) {
 				soap_version = Z_LVAL_P(tmp);
 			}
 		}

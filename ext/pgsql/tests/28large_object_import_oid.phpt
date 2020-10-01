@@ -38,6 +38,47 @@ if ($oid != 21005) echo ("pg_lo_import() wrong id\n");
 pg_lo_unlink ($oid);
 pg_exec('commit');
 
+/* Invalide OID */
+try {
+    pg_lo_import(__FILE__, -15);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_import($db, __FILE__, -15);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_import(__FILE__, 'giberrish');
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_import($db, __FILE__, 'giberrish');
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_import(__FILE__, true);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_import($db, __FILE__, []);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_import($db, __FILE__, new stdClass());
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_import($db, __FILE__, $db);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 echo "OK";
 ?>
@@ -45,4 +86,12 @@ echo "OK";
 import LO from int
 import LO from string
 import LO using default connection
+Invalid OID value passed
+Invalid OID value passed
+Invalid OID value passed
+Invalid OID value passed
+OID value must be of type string|int, bool given
+OID value must be of type string|int, array given
+OID value must be of type string|int, stdClass given
+OID value must be of type string|int, resource given
 OK

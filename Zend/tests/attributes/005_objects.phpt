@@ -96,16 +96,16 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(2) "A1"
 string(4) "test"
 int(50)
 
 string(7) "ERROR 1"
-string(81) "Too few arguments to function A1::__construct(), 0 passed and at least 1 expected"
+string(%d) "Too few arguments to function A1::__construct(), 0 passed in %s005_objects.php on line 26 and at least 1 expected"
 
 string(7) "ERROR 2"
-string(74) "A1::__construct(): Argument #1 ($name) must be of type string, array given"
+string(%d) "A1::__construct(): Argument #1 ($name) must be of type string, array given, called in %s005_objects.php on line 36"
 
 string(7) "ERROR 3"
 string(30) "Attribute class "A2" not found"

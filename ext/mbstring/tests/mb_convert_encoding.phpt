@@ -124,4 +124,4 @@ JIS: GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==
 == INVALID PARAMETER ==
 INT: 1234
 EUC-JP: 
-mb_convert_encoding(): Argument #2 ($to) must be a valid encoding, "BAD" given
+mb_convert_encoding(): Argument #2 ($to_encoding) must be a valid encoding, "BAD" given

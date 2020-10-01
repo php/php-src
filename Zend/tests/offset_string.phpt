@@ -69,7 +69,7 @@ Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 Cannot access offset of type resource on string
 
-Notice: Object of class stdClass could not be converted to int in %s on line %d
+Warning: Object of class stdClass could not be converted to int in %s on line %d
 Cannot access offset of type stdClass on string
 Cannot access offset of type array on string
 Done

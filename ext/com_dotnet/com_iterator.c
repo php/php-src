@@ -149,6 +149,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) != VT_DISPATCH && !V_ISARRAY(&obj->v)) {
+		/* TODO Promote to TypeError? */
 		php_error_docref(NULL, E_WARNING, "Variant is not an object or array VT=%d", V_VT(&obj->v));
 		return NULL;
 	}
@@ -172,6 +173,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		dims = SafeArrayGetDim(V_ARRAY(&obj->v));
 
 		if (dims != 1) {
+			/* TODO Promote to ValueError? */
 			php_error_docref(NULL, E_WARNING,
 				   "Can only handle single dimension variant arrays (this array has %d)", dims);
 			goto fail;

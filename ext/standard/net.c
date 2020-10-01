@@ -301,7 +301,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	freeifaddrs(addrs);
 #else
 	/* Should never happen as we never register the function */
-	ZEND_UNREACHABLE("No support for net_get_interfaces");
+	ZEND_UNREACHABLE();
 #endif
 }
 /* }}} */

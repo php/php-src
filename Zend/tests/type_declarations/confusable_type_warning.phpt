@@ -3,10 +3,12 @@ Warnings for confusable types
 --FILE--
 <?php
 
-function test1(integer $x) {}
-function test2(double $x) {}
-function test3(boolean $x) {}
-function test4(resource $x) {}
+namespace {
+    function test1(integer $x) {}
+    function test2(double $x) {}
+    function test3(boolean $x) {}
+    function test4(resource $x) {}
+}
 
 namespace Foo {
     use integer as foo;

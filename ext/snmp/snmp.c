@@ -941,7 +941,7 @@ static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
 		s->securityAuthProto = usmHMACSHA1AuthProtocol;
 		s->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
 	} else {
-		zend_value_error("Authentication protocol must be either MD5 or SHA");
+		zend_value_error("Authentication protocol must be either \"MD5\" or \"SHA\"");
 		return (-1);
 	}
 	return (0);
@@ -962,9 +962,9 @@ static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
 #endif
 	} else {
 #ifdef HAVE_AES
-		zend_value_error("Security protocol must be one of DES, AES128, or AES");
+		zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
 #else
-		zend_value_error("Security protocol must be DES");
+		zend_value_error("Security protocol must be \"DES\"");
 #endif
 		return (-1);
 	}

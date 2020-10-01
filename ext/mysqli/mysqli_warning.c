@@ -254,67 +254,12 @@ static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quie
 }
 /* }}} */
 
-/* {{{ mysqli_warning_construct(object obj) */
 PHP_METHOD(mysqli_warning, __construct)
 {
-	zval			*z;
-	mysqli_object	*obj;
-#ifndef MYSQLI_USE_MYSQLND
-	MYSQL			*hdl;
-#endif
-	MYSQLI_WARNING  *w;
-	MYSQLI_RESOURCE *mysqli_resource;
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &z) == FAILURE) {
-		RETURN_THROWS();
-	}
-	obj = Z_MYSQLI_P(z);
-
-	if (obj->zo.ce == mysqli_link_class_entry) {
-		MY_MYSQL *mysql;
-		MYSQLI_FETCH_RESOURCE_CONN(mysql, z, MYSQLI_STATUS_VALID);
-		if (mysql_warning_count(mysql->mysql)) {
-#ifndef MYSQLI_USE_MYSQLND
-			w = php_get_warnings(mysql->mysql);
-#else
-			w = php_get_warnings(mysql->mysql->data);
-#endif
-		} else {
-			php_error_docref(NULL, E_WARNING, "No warnings found");
-			RETURN_FALSE;
-		}
-	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
-		MY_STMT *stmt;
-		MYSQLI_FETCH_RESOURCE_STMT(stmt, z, MYSQLI_STATUS_VALID);
-#ifndef MYSQLI_USE_MYSQLND
-		hdl = mysqli_stmt_get_connection(stmt->stmt);
-		if (mysql_warning_count(hdl)) {
-			w = php_get_warnings(hdl);
-#else
-		if (mysqlnd_stmt_warning_count(stmt->stmt)) {
-			w = php_get_warnings(mysqli_stmt_get_connection(stmt->stmt));
-#endif
-		} else {
-			php_error_docref(NULL, E_WARNING, "No warnings found");
-			RETURN_FALSE;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Invalid class argument");
-		RETURN_FALSE;
-	}
-
-	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
-	mysqli_resource->status = MYSQLI_STATUS_VALID;
-
-	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_warning_class_entry)) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
-	} else {
-		(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
-	}
-
+	zend_throw_error(NULL, "Cannot directly construct mysqli_warning");
 }
-/* }}} */
 
 /* {{{ mysqli_warning_property_entries */
 const mysqli_property_entry mysqli_warning_property_entries[] = {

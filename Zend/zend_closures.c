@@ -192,30 +192,22 @@ ZEND_METHOD(Closure, call)
 }
 /* }}} */
 
-static void do_closure_bind(zval *return_value, zval *zclosure, zval *newthis, zval *scope_arg)
+static void do_closure_bind(zval *return_value, zval *zclosure, zval *newthis, zend_object *scope_obj, zend_string *scope_str)
 {
 	zend_class_entry *ce, *called_scope;
 	zend_closure *closure = (zend_closure *) Z_OBJ_P(zclosure);
 
-	if (scope_arg != NULL) { /* scope argument was given */
-		if (Z_TYPE_P(scope_arg) == IS_OBJECT) {
-			ce = Z_OBJCE_P(scope_arg);
-		} else if (Z_TYPE_P(scope_arg) == IS_NULL) {
-			ce = NULL;
-		} else {
-			zend_string *tmp_class_name;
-			zend_string *class_name = zval_get_tmp_string(scope_arg, &tmp_class_name);
-			if (zend_string_equals_literal(class_name, "static")) {
-				ce = closure->func.common.scope;
-			} else if ((ce = zend_lookup_class(class_name)) == NULL) {
-				zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(class_name));
-				zend_tmp_string_release(tmp_class_name);
-				RETURN_NULL();
-			}
-			zend_tmp_string_release(tmp_class_name);
+	if (scope_obj) {
+		ce = scope_obj->ce;
+	} else if (scope_str) {
+		if (zend_string_equals(scope_str, ZSTR_KNOWN(ZEND_STR_STATIC))) {
+			ce = closure->func.common.scope;
+		} else if ((ce = zend_lookup_class(scope_str)) == NULL) {
+			zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(scope_str));
+			RETURN_NULL();
 		}
-	} else { /* scope argument not given; do not change the scope by default */
-		ce = closure->func.common.scope;
+	} else {
+		ce = NULL;
 	}
 
 	if (!zend_valid_closure_binding(closure, newthis, ce)) {
@@ -234,25 +226,34 @@ static void do_closure_bind(zval *return_value, zval *zclosure, zval *newthis, z
 /* {{{ Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind)
 {
-	zval *newthis, *zclosure, *scope_arg = NULL;
+	zval *zclosure, *newthis;
+	zend_object *scope_obj = NULL;
+	zend_string *scope_str = ZSTR_KNOWN(ZEND_STR_STATIC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJECT_OF_CLASS(zclosure, zend_ce_closure)
+		Z_PARAM_OBJECT_OR_NULL(newthis)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_STR_OR_NULL(scope_obj, scope_str)
+	ZEND_PARSE_PARAMETERS_END();
 
-	do_closure_bind(return_value, zclosure, newthis, scope_arg);
+	do_closure_bind(return_value, zclosure, newthis, scope_obj, scope_str);
 }
 
 /* {{{ Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bindTo)
 {
-	zval *newthis, *scope_arg = NULL;
+	zval *newthis;
+	zend_object *scope_obj = NULL;
+	zend_string *scope_str = ZSTR_KNOWN(ZEND_STR_STATIC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!|z", &newthis, &scope_arg) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OR_NULL(newthis)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_STR_OR_NULL(scope_obj, scope_str)
+	ZEND_PARSE_PARAMETERS_END();
 
-	do_closure_bind(return_value, getThis(), newthis, scope_arg);
+	do_closure_bind(return_value, getThis(), newthis, scope_obj, scope_str);
 }
 
 static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {

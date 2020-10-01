@@ -49,4 +49,4 @@ aŒbœcŠdše€fg
 &#0000000000
 &#000000000
 f&ouml;o
-mb_decode_numericentity(): Argument #2 ($convmap) must have a multiple of 4 elements
+mb_decode_numericentity(): Argument #2 ($map) must have a multiple of 4 elements

@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-bcsqrt(): Argument #1 ($operand) must be greater than or equal to 0
+bcsqrt(): Argument #1 ($num) must be greater than or equal to 0

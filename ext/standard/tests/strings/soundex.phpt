@@ -31,7 +31,7 @@ foreach ($array as $str) {
 echo "Done\n";
 ?>
 --EXPECT--
-bool(false)
+string(4) "0000"
 string(4) "0000"
 string(4) "F650"
 string(4) "T300"

@@ -84,4 +84,4 @@ array(4) {
   [3]=>
   float(2)
 }
-array_pad(): Argument #2 ($pad_size) must be less than or equal to 1048576
+array_pad(): Argument #2 ($length) must be less than or equal to 1048576

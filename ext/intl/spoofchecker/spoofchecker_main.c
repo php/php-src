@@ -125,6 +125,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 /* }}} */
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
+/* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
@@ -143,8 +144,10 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 			USPOOF_MODERATELY_RESTRICTIVE != level &&
 			USPOOF_MINIMALLY_RESTRICTIVE != level &&
 			USPOOF_UNRESTRICTIVE != level) {
-		php_error_docref(NULL, E_WARNING, "Invalid restriction level value");
-		return;
+		zend_argument_value_error(1, "must be one of Spoofchecker::ASCII, Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE, "
+			"Spoofchecker::SINGLE_HIGHLY_RESTRICTIVE, Spoofchecker::SINGLE_MODERATELY_RESTRICTIVE, "
+			"Spoofchecker::SINGLE_MINIMALLY_RESTRICTIVE, or Spoofchecker::UNRESTRICTIVE");
+		RETURN_THROWS();
 	}
 
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);

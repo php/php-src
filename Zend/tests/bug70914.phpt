@@ -18,4 +18,4 @@ try {
 }
 ?>
 --EXPECT--
-PDOStatement::fetchObject(): Argument #1 ($class_name) must be a valid class name, %Z given
+PDOStatement::fetchObject(): Argument #1 ($class) must be a valid class name, %Z given

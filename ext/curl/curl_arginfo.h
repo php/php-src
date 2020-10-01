@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ca65615cacfe914f3511007fd393169ffededf34 */
+ * Stub hash: afeae538b49eb43a661e5b491da79c17d10c6bfe */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -42,8 +42,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_curl_file_create, 0, 1, CURLFile, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mimetype, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, postname, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mime_type, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, posted_filename, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_getinfo, 0, 1, IS_MIXED, 0)
@@ -79,7 +79,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_multi_info_read, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, msgs_in_queue, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, queued_messages, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_curl_multi_init, 0, 0, CurlMultiHandle, 0)
@@ -93,13 +93,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_select, 0, 1, IS_LONG
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_strerror, 0, 1, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, error_number, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, error_code, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_pause, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
-	ZEND_ARG_TYPE_INFO(0, bitmask, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
