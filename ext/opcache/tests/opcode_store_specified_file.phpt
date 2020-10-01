@@ -59,4 +59,4 @@ unlink(__DIR__ .DIRECTORY_SEPARATOR. 'opcode_store_specified_file.bin.php');
 --EXPECT--
 bool(true)
 string(14) "opcode include"
-string(11) "inculde end"
+string(11) "include end"

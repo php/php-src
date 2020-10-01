@@ -198,6 +198,11 @@ typedef struct _zend_file_cache_metainfo {
 	uint32_t     checksum;
 } zend_file_cache_metainfo;
 
+typedef struct _zend_opcode_file_taginfo {
+	char         tagname[T_PHP_OPCODE_LEN];
+	uint32_t	 php_version_id;
+} zend_opcode_file_taginfo;
+
 static int zend_file_cache_mkdir(char *filename, size_t start)
 {
 	char *s = filename + start;
@@ -1643,24 +1648,21 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	UNSERIALIZE_PTR(script->arena_mem);
 }
 
-static int zend_opcache_check_jump_opcode_tag(int fd) {
-	char sep;
-	char tag[T_PHP_OPCODE_LEN];
+static int zend_opcache_check_jump_opcode_tag(int fd, char* filename) {
+	zend_opcode_file_taginfo taginfo;
+	uint32_t php_version_id = (uint32_t)PHP_VERSION_ID;
 
-	int rn = read(fd, &tag, T_PHP_OPCODE_LEN);
-	if(rn <= 0) {
-		return -1;
-	}
-	int ret = strcasecmp(tag, T_PHP_OPCODE); 
-
-	if( ret != 0) {
-		return -1;
-	}
-	
-	if(!read(fd, &sep, 1) || !isspace(sep)) {
+	int rn = read(fd, &taginfo, sizeof(zend_opcode_file_taginfo));
+	if(rn != sizeof(taginfo)) {
 		return -1;
 	}
 
+	if(memcmp(taginfo.tagname, T_PHP_OPCODE, T_PHP_OPCODE_LEN) != 0) {
+		return -1;
+	}
+	if(memcmp(&taginfo.php_version_id, &php_version_id, sizeof(php_version_id)) != 0) {
+		zend_error(E_WARNING, "Opcode file %s is compiled by different versions of PHP", filename);
+	}
 	return 0;
 }
 
@@ -1686,6 +1688,8 @@ int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_
 	int chunksize = sizeof(buf);
 	int write_size = 0;
 
+	zend_opcode_file_taginfo taginfo = {.tagname=T_PHP_OPCODE, .php_version_id= (uint32_t)PHP_VERSION_ID};
+
 	VCWD_REALPATH(src_filename,full_path_buff);
 	full_path = zend_string_init(full_path_buff, strlen(full_path_buff), 0);
 	cache_file = zend_file_cache_get_bin_file_path(full_path);
@@ -1696,14 +1700,8 @@ int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_
 		return FAILURE;
 	}
 
-	int tag_len = T_PHP_OPCODE_LEN;
-
-	if(write(fd_new, T_PHP_OPCODE, tag_len) != tag_len) {
-		zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
-		return FAILURE;
-	}
-	if(write(fd_new, " ", 1) != 1){
-		zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
+	if(write(fd_new, &taginfo, sizeof(taginfo)) != sizeof(taginfo)) {
+		zend_opcache_copy_file_error("write taginfo to file '%s' error\n", opcode_file, cache_file, 0);
 		return FAILURE;
 	}
 
@@ -1758,7 +1756,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if(ZCG(accel_directives).allow_direct_exec_opcode) {
 		fd = zend_file_cache_open(ZSTR_VAL(full_path),  O_RDONLY | O_BINARY);
 
-		if(fd < 0 || zend_opcache_check_jump_opcode_tag(fd) < 0) {
+		if(fd < 0 || zend_opcache_check_jump_opcode_tag(fd, ZSTR_VAL(full_path)) < 0) {
 			close(fd);
 			fd = -1;
 		} else {
