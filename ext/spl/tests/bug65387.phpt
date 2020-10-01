@@ -41,12 +41,10 @@ $it2[] = $it2;
 $it2->next();
 
 // Append
-/* TODO
 $it = new ArrayIterator();
 $it2 = new AppendIterator();
 $it[] = $it2;
 $it2->append($it);
- */
 
 ?>
 ===DONE===

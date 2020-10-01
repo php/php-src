@@ -1079,6 +1079,13 @@ static void spl_array_it_rewind(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
+static HashTable *spl_array_it_get_gc(zend_object_iterator *iter, zval **table, int *n)
+{
+	*n = 1;
+	*table = &iter->data;
+	return NULL;
+}
+
 /* {{{ spl_array_set_array */
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array) {
 	if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
@@ -1135,7 +1142,7 @@ static const zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_move_forward,
 	spl_array_it_rewind,
 	NULL,
-	NULL, /* get_gc */
+	spl_array_it_get_gc,
 };
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

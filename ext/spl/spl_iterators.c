@@ -2140,11 +2140,10 @@ static HashTable *spl_dual_it_get_gc(zend_object *obj, zval **table, int *n)
 			/* Nothing to do */
 			break;
 		case DIT_AppendIterator:
-			// TODO
-			/*zend_get_gc_buffer_add_obj(gc_buffer, &object->u.append.iterator->std);
+			zend_get_gc_buffer_add_obj(gc_buffer, &object->u.append.iterator->std);
 			if (Z_TYPE(object->u.append.zarrayit) != IS_UNDEF) {
 				zend_get_gc_buffer_add_zval(gc_buffer, &object->u.append.zarrayit);
-			}*/
+			}
 			break;
 		case DIT_CachingIterator:
 		case DIT_RecursiveCachingIterator:
