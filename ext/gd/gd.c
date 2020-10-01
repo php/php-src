@@ -199,9 +199,9 @@ zend_object *php_gd_image_object_create(zend_class_entry *class_type)
 static void php_gd_image_object_free(zend_object *intern)
 {
 	php_gd_image_object *img_obj_ptr = php_gd_exgdimage_from_zobj_p(intern);
-	gdImageDestroy(img_obj_ptr->image);
-	img_obj_ptr->image = NULL;
-
+	if (img_obj_ptr->image) {
+		gdImageDestroy(img_obj_ptr->image);
+	}
 	zend_object_std_dtor(intern);
 }
 
