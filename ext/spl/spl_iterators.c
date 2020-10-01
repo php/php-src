@@ -2119,6 +2119,52 @@ static void spl_dual_it_free_storage(zend_object *_object)
 }
 /* }}} */
 
+static HashTable *spl_dual_it_get_gc(zend_object *obj, zval **table, int *n)
+{
+	spl_dual_it_object *object = spl_dual_it_from_obj(obj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	if (!Z_ISUNDEF(object->inner.zobject)) {
+		zend_get_gc_buffer_add_zval(gc_buffer, &object->inner.zobject);
+	}
+
+	switch (object->dit_type) {
+		case DIT_Unknown:
+		case DIT_Default:
+		case DIT_IteratorIterator:
+		case DIT_NoRewindIterator:
+		case DIT_InfiniteIterator:
+		case DIT_LimitIterator:
+		case DIT_RegexIterator:
+		case DIT_RecursiveRegexIterator:
+			/* Nothing to do */
+			break;
+		case DIT_AppendIterator:
+			// TODO
+			/*zend_get_gc_buffer_add_obj(gc_buffer, &object->u.append.iterator->std);
+			if (Z_TYPE(object->u.append.zarrayit) != IS_UNDEF) {
+				zend_get_gc_buffer_add_zval(gc_buffer, &object->u.append.zarrayit);
+			}*/
+			break;
+		case DIT_CachingIterator:
+		case DIT_RecursiveCachingIterator:
+			zend_get_gc_buffer_add_zval(gc_buffer, &object->u.caching.zcache);
+			break;
+		case DIT_CallbackFilterIterator:
+		case DIT_RecursiveCallbackFilterIterator:
+			if (object->u.cbfilter) {
+				zend_get_gc_buffer_add_zval(gc_buffer, &object->u.cbfilter->fci.function_name);
+				if (object->u.cbfilter->fci.object) {
+					zend_get_gc_buffer_add_obj(gc_buffer, object->u.cbfilter->fci.object);
+				}
+			}
+			break;
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return zend_std_get_properties(obj);
+}
+
 /* {{{ spl_dual_it_new */
 static zend_object *spl_dual_it_new(zend_class_entry *class_type)
 {
@@ -3191,6 +3237,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	spl_handlers_dual_it.clone_obj = NULL;
 	spl_handlers_dual_it.dtor_obj = spl_dual_it_dtor;
 	spl_handlers_dual_it.free_obj = spl_dual_it_free_storage;
+	spl_handlers_dual_it.get_gc = spl_dual_it_get_gc;
 
 	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 
