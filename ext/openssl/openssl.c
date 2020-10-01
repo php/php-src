@@ -233,10 +233,7 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 {
 	php_openssl_pkey_object *key_object = php_openssl_pkey_from_obj(object);
 
-	EVP_PKEY *pkey = key_object->pkey;
-	assert(pkey != NULL);
-	EVP_PKEY_free(pkey);
-
+	EVP_PKEY_free(key_object->pkey);
 	zend_object_std_dtor(&key_object->std);
 }
 
