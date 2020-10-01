@@ -2034,7 +2034,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	zend_uchar smart_branch_opcode;
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info;
-	zend_bool send_result;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
 	zend_class_entry *ce;
 	zend_bool ce_is_instanceof;
@@ -2306,11 +2305,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && (opline+1)->op1_type == IS_TMP_VAR
 						 && (opline+1)->op1.var == opline->result.var) {
 							i++;
-							send_result = 1;
 							res_use_info = -1;
-							res_addr = 0; /* set inside backend */
+							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+							if (!zend_jit_reuse_ip(&dasm_state)) {
+								goto jit_failure;
+							}
 						} else {
-							send_result = 0;
 							res_use_info = RES_USE_INFO();
 							res_addr = RES_REG_ADDR();
 						}
@@ -2318,7 +2318,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								op1_info, OP1_RANGE(), OP1_REG_ADDR(),
 								op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 								res_use_info, RES_INFO(), res_addr,
-								send_result,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -2353,11 +2352,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && (opline+1)->op1_type == IS_TMP_VAR
 						 && (opline+1)->op1.var == opline->result.var) {
 							i++;
-							send_result = 1;
 							res_use_info = -1;
-							res_addr = 0; /* set inside backend */
+							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+							if (!zend_jit_reuse_ip(&dasm_state)) {
+								goto jit_failure;
+							}
 						} else {
-							send_result = 0;
 							res_use_info = RES_USE_INFO();
 							res_addr = RES_REG_ADDR();
 						}
@@ -2366,7 +2366,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								op1_info, OP1_REG_ADDR(),
 								op2_info, OP2_REG_ADDR(),
 								res_use_info, res_info, res_addr,
-								send_result,
 								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
@@ -2392,12 +2391,15 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && (opline+1)->op1_type == IS_TMP_VAR
 						 && (opline+1)->op1.var == opline->result.var) {
 							i++;
-							send_result = 1;
+							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+							if (!zend_jit_reuse_ip(&dasm_state)) {
+								goto jit_failure;
+							}
 						} else {
-							send_result = 0;
+							res_addr = RES_REG_ADDR();
 						}
 						if (!zend_jit_concat(&dasm_state, opline,
-								op1_info, op2_info, send_result,
+								op1_info, op2_info, res_addr,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}

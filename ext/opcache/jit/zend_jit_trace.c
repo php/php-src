@@ -3524,7 +3524,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 							send_result = 1;
 							res_use_info = -1;
-							res_addr = 0; /* set inside backend */
+							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+							if (!zend_jit_reuse_ip(&dasm_state)) {
+								goto jit_failure;
+							}
 						} else {
 							send_result = 0;
 							if (opline->result_type == IS_CV) {
@@ -3543,7 +3546,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, OP1_RANGE(), OP1_REG_ADDR(),
 								op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 								res_use_info, res_info, res_addr,
-								send_result,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3595,7 +3597,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 							send_result = 1;
 							res_use_info = -1;
-							res_addr = 0; /* set inside backend */
+							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+							if (!zend_jit_reuse_ip(&dasm_state)) {
+								goto jit_failure;
+							}
 						} else {
 							send_result = 0;
 							if (opline->result_type == IS_CV) {
@@ -3614,7 +3619,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, OP1_REG_ADDR(),
 								op2_info, OP2_REG_ADDR(),
 								res_use_info, res_info, res_addr,
-								send_result,
 								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
@@ -3659,11 +3663,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								p++;
 							}
 							send_result = 1;
+							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+							if (!zend_jit_reuse_ip(&dasm_state)) {
+								goto jit_failure;
+							}
 						} else {
 							send_result = 0;
+							res_addr = RES_REG_ADDR();
 						}
 						if (!zend_jit_concat(&dasm_state, opline,
-								op1_info, op2_info, send_result,
+								op1_info, op2_info, res_addr,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
