@@ -127,7 +127,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	STRPOS_CHECK_STATUS(status, "Failed to set up iterator");
 
 	if (uneedle_len == 0) {
-		offset_pos = grapheme_get_haystack_offset(bi, last ? uhaystack_len : offset);
+		offset_pos = grapheme_get_haystack_offset(bi, last && offset >= 0 ? uhaystack_len : offset);
 		if (offset_pos == -1) {
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			ret_pos = -1;

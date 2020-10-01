@@ -51,7 +51,7 @@ int(2)
 int(0)
 int(2)
 int(3)
-int(3)
+int(2)
 int(3)
 int(3)
 string(4) "äbc"
