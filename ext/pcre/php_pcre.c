@@ -2295,7 +2295,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 
 	/* If replace is an array then the regex argument needs to also be an array */
 	if (replace_ht && !regex_ht) {
-		zend_argument_type_error(1, "must be of type array when argument #2 ($replace) is an array, string given");
+		zend_argument_type_error(1, "must be of type array when argument #2 ($replacement) is an array, string given");
 		RETURN_THROWS();
 	}
 
