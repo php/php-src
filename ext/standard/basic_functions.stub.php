@@ -823,13 +823,13 @@ function ftell($stream): int|false {}
 function fflush($stream): bool {}
 
 /** @param resource $stream */
-function fwrite($stream, string $string, ?int $max_length = null): int|false {}
+function fwrite($stream, string $data, ?int $max_length = null): int|false {}
 
 /**
  * @param resource $stream
  * @alias fwrite
  */
-function fputs($stream, string $string, ?int $max_length = null): int|false {}
+function fputs($stream, string $data, ?int $max_length = null): int|false {}
 
 /** @param resource|null $context */
 function mkdir(string $directory, int $mode = 0777, bool $recursive = false, $context = null): bool {}
@@ -855,7 +855,7 @@ function file_get_contents(string $filename, bool $use_include_path = false, $co
 function unlink(string $filename, $context = null): bool {}
 
 /** @param resource|null $context */
-function file_put_contents(string $filename, mixed $content, int $flags = 0, $context = null): int|false {}
+function file_put_contents(string $filename, mixed $data, int $flags = 0, $context = null): int|false {}
 
 /** @param resource $stream */
 function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}

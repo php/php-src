@@ -53,7 +53,7 @@ string(%d) "%a"
 
 Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
-gzuncompress(): Argument #2 ($max_decoded_len) must be greater than or equal to 0
+gzuncompress(): Argument #2 ($max_length) must be greater than or equal to 0
 
 Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
