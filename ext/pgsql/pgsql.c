@@ -1474,6 +1474,13 @@ PHP_FUNCTION(pg_last_notice)
 }
 /* }}} */
 
+static inline bool is_valid_oid_string(zend_string *oid, Oid *return_oid)
+{
+	char *end_ptr;
+	*return_oid = (Oid) strtoul(ZSTR_VAL(oid), &end_ptr, 10);
+	return ZSTR_VAL(oid) + ZSTR_LEN(oid) == end_ptr;
+}
+
 /* {{{ get_field_name */
 static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 {
@@ -2323,10 +2330,7 @@ PHP_FUNCTION(pg_lo_create)
 		switch (Z_TYPE_P(oid)) {
 		case IS_STRING:
 			{
-				/* TODO: Use subroutine? */
-				char *end_ptr;
-				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
-				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+				if (!is_valid_oid_string(Z_STR_P(oid), &wanted_oid)) {
 					/* wrong integer format */
 					zend_value_error("Invalid OID value passed");
 					RETURN_THROWS();
@@ -2366,19 +2370,15 @@ PHP_FUNCTION(pg_lo_unlink)
 {
 	zval *pgsql_link = NULL;
 	zend_long oid_long;
-	char *oid_string, *end_ptr;
-	size_t oid_strlen;
+	zend_string *oid_string;
 	PGconn *pgsql;
 	Oid oid;
 	zend_resource *link;
 	int argc = ZEND_NUM_ARGS();
 
 	/* accept string type since Oid type is unsigned int */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "rs", &pgsql_link, &oid_string, &oid_strlen) == SUCCESS) {
-		/* TODO: Use subroutine? */
-		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
-		if ((oid_string+oid_strlen) != end_ptr) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "rS", &pgsql_link, &oid_string) == SUCCESS) {
+		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
@@ -2394,11 +2394,8 @@ PHP_FUNCTION(pg_lo_unlink)
 		oid = (Oid)oid_long;
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "s", &oid_string, &oid_strlen) == SUCCESS) {
-		/* TODO: subroutine? */
-		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
-		if ((oid_string+oid_strlen) != end_ptr) {
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "S", &oid_string) == SUCCESS) {
+		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
@@ -2438,8 +2435,9 @@ PHP_FUNCTION(pg_lo_open)
 {
 	zval *pgsql_link = NULL;
 	zend_long oid_long;
-	char *oid_string, *end_ptr, *mode_string;
-	size_t oid_strlen, mode_strlen;
+	zend_string *oid_string;
+	char *mode_string;
+	size_t mode_strlen;
 	PGconn *pgsql;
 	Oid oid;
 	int pgsql_mode=0, pgsql_lofd;
@@ -2450,10 +2448,8 @@ PHP_FUNCTION(pg_lo_open)
 
 	/* accept string type since Oid is unsigned int */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "rss", &pgsql_link, &oid_string, &oid_strlen, &mode_string, &mode_strlen) == SUCCESS) {
-		/* TODO: Use subroutine? */
-		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
-		if ((oid_string+oid_strlen) != end_ptr) {
+								 "rSs", &pgsql_link, &oid_string, &mode_string, &mode_strlen) == SUCCESS) {
+		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
@@ -2470,10 +2466,8 @@ PHP_FUNCTION(pg_lo_open)
 		link = Z_RES_P(pgsql_link);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "ss", &oid_string, &oid_strlen, &mode_string, &mode_strlen) == SUCCESS) {
-		/* TODO: Use subroutine? */
-		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
-		if ((oid_string+oid_strlen) != end_ptr) {
+								 "Ss", &oid_string, &mode_string, &mode_strlen) == SUCCESS) {
+		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
@@ -2723,10 +2717,7 @@ PHP_FUNCTION(pg_lo_import)
 		switch (Z_TYPE_P(oid)) {
 		case IS_STRING:
 			{
-				/* TODO: Use subroutine? */
-				char *end_ptr;
-				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
-				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+				if (!is_valid_oid_string(Z_STR_P(oid), &wanted_oid)) {
 					/* wrong integer format */
 					zend_value_error("Invalid OID value passed");
 					RETURN_THROWS();
@@ -2767,8 +2758,8 @@ PHP_FUNCTION(pg_lo_import)
 PHP_FUNCTION(pg_lo_export)
 {
 	zval *pgsql_link = NULL;
-	char *file_out, *oid_string, *end_ptr;
-	size_t oid_strlen;
+	zend_string *oid_string;
+	char *file_out;
 	size_t name_len;
 	zend_long oid_long;
 	Oid oid;
@@ -2787,10 +2778,8 @@ PHP_FUNCTION(pg_lo_export)
 		link = Z_RES_P(pgsql_link);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "rsp", &pgsql_link, &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
-		/* TODO: Use subroutine? */
-		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
-		if ((oid_string+oid_strlen) != end_ptr) {
+								 "rSp", &pgsql_link, &oid_string, &file_out, &name_len) == SUCCESS) {
+		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
@@ -2808,10 +2797,8 @@ PHP_FUNCTION(pg_lo_export)
 		CHECK_DEFAULT_LINK(link);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
-								 "sp", &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
-		/* TODO: Use subroutine? */
-		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
-		if ((oid_string+oid_strlen) != end_ptr) {
+								 "Sp", &oid_string, &file_out, &name_len) == SUCCESS) {
+		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
