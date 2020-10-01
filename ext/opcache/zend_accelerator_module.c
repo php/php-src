@@ -881,7 +881,7 @@ ZEND_FUNCTION(opcache_compile_file)
 
 	if(opcode_file != NULL) {
 		if(!file_cache_only) {
-			zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has been disable file_cache_only, can't store opcode to file");
+			zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has been disable 'opcache.file_cache_only' option in php.ini, can't store opcode to file");
 			RETURN_FALSE;
 		}
 		if(access(opcode_file, F_OK) != -1) {

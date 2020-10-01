@@ -27,7 +27,7 @@ if(!isset($is_include)) {
     }
     $is_include = 1;
     include_once __DIR__ . DIRECTORY_SEPARATOR. 'opcode_store_specified_file.bin.php';
-    var_dump('inculde end');
+    var_dump('include end');
     exit;
 } else {
     function message() {
