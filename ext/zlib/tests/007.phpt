@@ -42,9 +42,9 @@ var_dump(gzencode($string, 9, ZLIB_ENCODING_DEFLATE));
 --EXPECTF--
 gzencode(): Argument #2 ($level) must be between -1 and 9
 gzencode(): Argument #2 ($level) must be between -1 and 9
-gzencode(): Argument #3 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+gzencode(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
 string(%d) "%a"
 string(%d) "%a"
-gzencode(): Argument #3 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+gzencode(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
 string(%d) "%a"
 string(%d) "%a"

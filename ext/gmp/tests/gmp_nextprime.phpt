@@ -43,7 +43,7 @@ string(1) "2"
 string(1) "2"
 string(4) "1009"
 string(6) "100003"
-gmp_nextprime(): Argument #1 ($a) must be of type GMP|string|int, array given
-gmp_nextprime(): Argument #1 ($a) is not an integer string
-gmp_nextprime(): Argument #1 ($a) must be of type GMP|string|int, stdClass given
+gmp_nextprime(): Argument #1 ($num) must be of type GMP|string|int, array given
+gmp_nextprime(): Argument #1 ($num) is not an integer string
+gmp_nextprime(): Argument #1 ($num) must be of type GMP|string|int, stdClass given
 Done

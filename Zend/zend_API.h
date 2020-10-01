@@ -638,12 +638,9 @@ END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(str) \
-	if (ZSTR_VAL(str)[ZSTR_LEN(str)] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", ZSTR_VAL(str)); }
-#define CHECK_ZVAL_STRING_REL(str) \
-	if (ZSTR_VAL(str)[ZSTR_LEN(str)] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", ZSTR_VAL(str) ZEND_FILE_LINE_RELAY_CC); }
+	ZEND_ASSERT(ZSTR_VAL(str)[ZSTR_LEN(str)] == '\0' && "String is not null-terminated");
 #else
 #define CHECK_ZVAL_STRING(z)
-#define CHECK_ZVAL_STRING_REL(z)
 #endif
 
 #define CHECK_ZVAL_NULL_PATH(p) (Z_STRLEN_P(p) != strlen(Z_STRVAL_P(p)))

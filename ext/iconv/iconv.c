@@ -117,8 +117,6 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 
 static php_iconv_err_t _php_iconv_substr(smart_str *pretval, const char *str, size_t nbytes, zend_long offset, zend_long len, const char *enc);
 
-static php_iconv_err_t _php_iconv_strpos(size_t *pretval, const char *haystk, size_t haystk_nbytes, const char *ndl, size_t ndl_nbytes, zend_long offset, const char *enc);
-
 static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fname, size_t fname_nbytes, const char *fval, size_t fval_nbytes, size_t max_line_len, const char *lfchars, php_iconv_enc_scheme_t enc_scheme, const char *out_charset, const char *enc);
 
 static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *str, size_t str_nbytes, const char *enc, const char **next_pos, int mode);
@@ -638,25 +636,20 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		return err;
 	}
 
-	if (len < 0) {
-		if ((len += (total_len - offset)) < 0) {
-			return PHP_ICONV_ERR_SUCCESS;
-		}
-	}
-
 	if (offset < 0) {
 		if ((offset += total_len) < 0) {
-			return PHP_ICONV_ERR_SUCCESS;
+			offset = 0;
 		}
+	} else if ((size_t)offset > total_len) {
+		offset = total_len;
 	}
 
-	if((size_t)len > total_len) {
+	if (len < 0) {
+		if ((len += (total_len - offset)) < 0) {
+			len = 0;
+		}
+	} else if ((size_t)len > total_len) {
 		len = total_len;
-	}
-
-
-	if ((size_t)offset > total_len) {
-		return PHP_ICONV_ERR_SUCCESS;
 	}
 
 	if ((size_t)(offset + len) > total_len ) {
@@ -753,7 +746,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 	const char *haystk, size_t haystk_nbytes,
 	const char *ndl, size_t ndl_nbytes,
-	zend_long offset, const char *enc)
+	size_t offset, const char *enc, bool reverse)
 {
 	char buf[GENERIC_SUPERSET_NBYTES];
 
@@ -834,49 +827,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 					break;
 			}
 		}
-		if (offset >= 0) {
-			if (cnt >= (size_t)offset) {
-				if (_php_iconv_memequal(buf, ndl_buf_p, sizeof(buf))) {
-					if (match_ofs == (size_t)-1) {
-						match_ofs = cnt;
-					}
-					ndl_buf_p += GENERIC_SUPERSET_NBYTES;
-					ndl_buf_left -= GENERIC_SUPERSET_NBYTES;
-					if (ndl_buf_left == 0) {
-						*pretval = match_ofs;
-						break;
-					}
-				} else {
-					size_t i, j, lim;
-
-					i = 0;
-					j = GENERIC_SUPERSET_NBYTES;
-					lim = (size_t)(ndl_buf_p - ZSTR_VAL(ndl_buf));
-
-					while (j < lim) {
-						if (_php_iconv_memequal(&ZSTR_VAL(ndl_buf)[j], &ZSTR_VAL(ndl_buf)[i],
-						           GENERIC_SUPERSET_NBYTES)) {
-							i += GENERIC_SUPERSET_NBYTES;
-						} else {
-							j -= i;
-							i = 0;
-						}
-						j += GENERIC_SUPERSET_NBYTES;
-					}
-
-					if (_php_iconv_memequal(buf, &ZSTR_VAL(ndl_buf)[i], sizeof(buf))) {
-						match_ofs += (lim - i) / GENERIC_SUPERSET_NBYTES;
-						i += GENERIC_SUPERSET_NBYTES;
-						ndl_buf_p = &ZSTR_VAL(ndl_buf)[i];
-						ndl_buf_left = ZSTR_LEN(ndl_buf) - i;
-					} else {
-						match_ofs = (size_t)-1;
-						ndl_buf_p = ZSTR_VAL(ndl_buf);
-						ndl_buf_left = ZSTR_LEN(ndl_buf);
-					}
-				}
-			}
-		} else {
+		if (cnt >= offset) {
 			if (_php_iconv_memequal(buf, ndl_buf_p, sizeof(buf))) {
 				if (match_ofs == (size_t)-1) {
 					match_ofs = cnt;
@@ -885,9 +836,15 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 				ndl_buf_left -= GENERIC_SUPERSET_NBYTES;
 				if (ndl_buf_left == 0) {
 					*pretval = match_ofs;
-					ndl_buf_p = ZSTR_VAL(ndl_buf);
-					ndl_buf_left = ZSTR_LEN(ndl_buf);
-					match_ofs = -1;
+					if (reverse) {
+						/* If searching backward, continue trying to find a later match. */
+						ndl_buf_p = ZSTR_VAL(ndl_buf);
+						ndl_buf_left = ZSTR_LEN(ndl_buf);
+						match_ofs = -1;
+					} else {
+						/* If searching forward, stop at first match. */
+						break;
+					}
 				}
 			} else {
 				size_t i, j, lim;
@@ -926,6 +883,10 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 	}
 
 	iconv_close(cd);
+
+	if (err == PHP_ICONV_ERR_SUCCESS && offset > cnt) {
+		return PHP_ICONV_ERR_OUT_BY_BOUNDS;
+	}
 
 	return err;
 }
@@ -1782,11 +1743,11 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 			break;
 
 		case PHP_ICONV_ERR_CONVERTER:
-			php_error_docref(NULL, E_NOTICE, "Cannot open converter");
+			php_error_docref(NULL, E_WARNING, "Cannot open converter");
 			break;
 
 		case PHP_ICONV_ERR_WRONG_CHARSET:
-			php_error_docref(NULL, E_NOTICE, "Wrong charset, conversion from `%s' to `%s' is not allowed",
+			php_error_docref(NULL, E_WARNING, "Wrong encoding, conversion from \"%s\" to \"%s\" is not allowed",
 			          in_charset, out_charset);
 			break;
 
@@ -1805,6 +1766,10 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 
 		case PHP_ICONV_ERR_MALFORMED:
 			php_error_docref(NULL, E_WARNING, "Malformed string");
+			break;
+
+		case PHP_ICONV_ERR_OUT_BY_BOUNDS:
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			break;
 
 		default:
@@ -1834,7 +1799,7 @@ PHP_FUNCTION(iconv_strlen)
 	if (charset == NULL) {
 	 	charset = get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 
@@ -1870,7 +1835,7 @@ PHP_FUNCTION(iconv_substr)
 	if (charset == NULL) {
 	 	charset = get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 
@@ -1911,7 +1876,7 @@ PHP_FUNCTION(iconv_strpos)
 	if (charset == NULL) {
 	 	charset = get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 
@@ -1924,17 +1889,19 @@ PHP_FUNCTION(iconv_strpos)
 		}
 		offset += haystk_len;
 		if (offset < 0) { /* If offset before start */
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string.");
-			RETURN_FALSE;
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
+			RETURN_THROWS();
 		}
 	}
 
 	if (ZSTR_LEN(ndl) < 1) {
+		// TODO: Support empty needles!
 		RETURN_FALSE;
 	}
 
-	err = _php_iconv_strpos(&retval, ZSTR_VAL(haystk), ZSTR_LEN(haystk), ZSTR_VAL(ndl), ZSTR_LEN(ndl),
-	                        offset, charset);
+	err = _php_iconv_strpos(
+		&retval, ZSTR_VAL(haystk), ZSTR_LEN(haystk), ZSTR_VAL(ndl), ZSTR_LEN(ndl),
+		offset, charset, /* reverse */ false);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && retval != (size_t)-1) {
@@ -1970,12 +1937,13 @@ PHP_FUNCTION(iconv_strrpos)
 	if (charset == NULL) {
 	 	charset = get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 
-	err = _php_iconv_strpos(&retval, ZSTR_VAL(haystk), ZSTR_LEN(haystk), ZSTR_VAL(ndl), ZSTR_LEN(ndl),
-	                        -1, charset);
+	err = _php_iconv_strpos(
+		&retval, ZSTR_VAL(haystk), ZSTR_LEN(haystk), ZSTR_VAL(ndl), ZSTR_LEN(ndl),
+		/* offset */ 0, charset, /* reserve */ true);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && retval != (size_t)-1) {
@@ -2028,7 +1996,7 @@ PHP_FUNCTION(iconv_mime_encode)
 
 		if ((pzval = zend_hash_str_find_deref(Z_ARRVAL_P(pref), "input-charset", sizeof("input-charset") - 1)) != NULL && Z_TYPE_P(pzval) == IS_STRING) {
 			if (Z_STRLEN_P(pzval) >= ICONV_CSNMAXLEN) {
-				php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+				php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 				RETURN_FALSE;
 			}
 
@@ -2040,7 +2008,7 @@ PHP_FUNCTION(iconv_mime_encode)
 
 		if ((pzval = zend_hash_str_find_deref(Z_ARRVAL_P(pref), "output-charset", sizeof("output-charset") - 1)) != NULL && Z_TYPE_P(pzval) == IS_STRING) {
 			if (Z_STRLEN_P(pzval) >= ICONV_CSNMAXLEN) {
-				php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+				php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 				RETURN_FALSE;
 			}
 
@@ -2109,7 +2077,7 @@ PHP_FUNCTION(iconv_mime_decode)
 	if (charset == NULL) {
 	 	charset = get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 
@@ -2150,7 +2118,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 	if (charset == NULL) {
 	 	charset = get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 
@@ -2243,7 +2211,7 @@ PHP_FUNCTION(iconv)
 	}
 
 	if (in_charset_len >= ICONV_CSNMAXLEN || out_charset_len >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 
@@ -2273,7 +2241,7 @@ PHP_FUNCTION(iconv_set_encoding)
 	}
 
 	if (ZSTR_LEN(charset) >= ICONV_CSNMAXLEN) {
-		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
+		php_error_docref(NULL, E_WARNING, "Encoding parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
 

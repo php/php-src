@@ -536,21 +536,18 @@ static void php_session_normalize_vars() /* {{{ */
 static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 {
 	const ps_module *tmp;
+	int err_type = E_ERROR;
 
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
 	tmp = _php_find_ps_module(ZSTR_VAL(new_value));
 
+	if (stage == ZEND_INI_STAGE_RUNTIME) {
+		err_type = E_WARNING;
+	}
+
 	if (PG(modules_activated) && !tmp) {
-		int err_type;
-
-		if (stage == ZEND_INI_STAGE_RUNTIME) {
-			err_type = E_WARNING;
-		} else {
-			err_type = E_ERROR;
-		}
-
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
 			php_error_docref(NULL, err_type, "Session save handler \"%s\" cannot be found", ZSTR_VAL(new_value));
@@ -561,7 +558,7 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 
 	/* "user" save handler should not be set by user */
 	if (!PS(set_handler) &&  tmp == ps_user_ptr) {
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Session save handler \"user\" cannot be set by ini_set() or session_module_name()");
+		php_error_docref(NULL, err_type, "Session save handler \"user\" cannot be set by ini_set()");
 		return FAILURE;
 	}
 
@@ -1917,6 +1914,10 @@ PHP_FUNCTION(session_module_name)
 	}
 
 	if (name) {
+		if (zend_string_equals_literal_ci(name, "user")) {
+			zend_argument_value_error(1, "cannot be \"user\"");
+			RETURN_THROWS();
+		}
 		if (!_php_find_ps_module(ZSTR_VAL(name))) {
 			php_error_docref(NULL, E_WARNING, "Session handler module \"%s\" cannot be found", ZSTR_VAL(name));
 
@@ -2033,15 +2034,13 @@ PHP_FUNCTION(session_set_save_handler)
 		if (register_shutdown) {
 			/* create shutdown function */
 			php_shutdown_function_entry shutdown_function_entry;
-			shutdown_function_entry.arg_count = 1;
-			shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
-
-			ZVAL_STRING(&shutdown_function_entry.arguments[0], "session_register_shutdown");
+			ZVAL_STRING(&shutdown_function_entry.function_name, "session_register_shutdown");
+			shutdown_function_entry.arg_count = 0;
+			shutdown_function_entry.arguments = NULL;
 
 			/* add shutdown function, removing the old one if it exists */
 			if (!register_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1, &shutdown_function_entry)) {
-				zval_ptr_dtor(&shutdown_function_entry.arguments[0]);
-				efree(shutdown_function_entry.arguments);
+				zval_ptr_dtor(&shutdown_function_entry.function_name);
 				php_error_docref(NULL, E_WARNING, "Unable to register session shutdown function");
 				RETURN_FALSE;
 			}
@@ -2664,14 +2663,12 @@ PHP_FUNCTION(session_register_shutdown)
 	 * the session still to be available.
 	 */
 
-	shutdown_function_entry.arg_count = 1;
-	shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
+	ZVAL_STRING(&shutdown_function_entry.function_name, "session_write_close");
+	shutdown_function_entry.arg_count = 0;
+	shutdown_function_entry.arguments = NULL;
 
-	ZVAL_STRING(&shutdown_function_entry.arguments[0], "session_write_close");
-
-	if (!append_user_shutdown_function(shutdown_function_entry)) {
-		zval_ptr_dtor(&shutdown_function_entry.arguments[0]);
-		efree(shutdown_function_entry.arguments);
+	if (!append_user_shutdown_function(&shutdown_function_entry)) {
+		zval_ptr_dtor(&shutdown_function_entry.function_name);
 
 		/* Unable to register shutdown function, presumably because of lack
 		 * of memory, so flush the session now. It would be done in rshutdown

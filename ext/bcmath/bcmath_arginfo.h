@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a1e223f29a06a2292a88c0e90e104cb956f80500 */
+ * Stub hash: 0c1e2a6163a5fc0f42bf79bbc530af7c5fd77074 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, left_operand, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, right_operand, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -11,35 +11,31 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_bcmul arginfo_bcadd
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcdiv, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, dividend, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, divisor, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_bcdiv arginfo_bcadd
 
-#define arginfo_bcmod arginfo_bcdiv
+#define arginfo_bcmod arginfo_bcadd
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcpowmod, 0, 3, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, base, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, exponent, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, modulus, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcpow, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, base, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, exponent, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcsqrt, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, operand, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bccomp, 0, 2, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, left_operand, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, right_operand, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 

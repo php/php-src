@@ -7594,25 +7594,43 @@ if (needstype || needsscript)
       }
 
     cc = ccbegin;
+
+    if (needstype)
+      {
+      /* TMP2 has already been shifted by 2 */
+      if (!needschar)
+        {
+        OP2(SLJIT_ADD, TMP1, 0, TMP2, 0, TMP2, 0);
+        OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
+
+        OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+        }
+      else
+        {
+        OP2(SLJIT_ADD, TMP1, 0, TMP2, 0, TMP2, 0);
+        OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
+
+        OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
+        OP1(SLJIT_MOV_U8, RETURN_ADDR, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+        typereg = RETURN_ADDR;
+        }
+      }
+    else if (needschar)
+      OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
     }
-
-  if (needschar)
-    OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
-
-  if (needstype)
+  else if (needstype)
     {
+    OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 3);
+    OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
+
     if (!needschar)
       {
-      OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 3);
-      OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
       OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
 
       OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
       }
     else
       {
-      OP2(SLJIT_SHL, TMP1, 0, TMP2, 0, SLJIT_IMM, 2);
-      OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 3);
       OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
       OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
@@ -7620,6 +7638,8 @@ if (needstype || needsscript)
       typereg = RETURN_ADDR;
       }
     }
+  else if (needschar)
+    OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
   }
 #endif /* SUPPORT_UNICODE */
 

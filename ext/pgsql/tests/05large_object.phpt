@@ -68,6 +68,28 @@ if (!file_exists($path . 'php.gif.exported')) {
 @unlink($path . 'php.gif.exported');
 pg_query($db, 'commit');
 
+/* invalid OID values */
+try {
+    pg_lo_create(-15);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_create($db, -15);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_create('giberrish');
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_create($db, 'giberrish');
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+
 echo "OK";
 ?>
 --EXPECT--
@@ -79,4 +101,8 @@ unlink LO
 Test without connection
 Test with string oid value
 import/export LO
+Invalid OID value passed
+Invalid OID value passed
+Invalid OID value passed
+Invalid OID value passed
 OK

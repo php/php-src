@@ -88,9 +88,11 @@ $db = MySQLPDOTest::factory();
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch to emulated prepared statements, test will fail\n");
 
-        // TODO - that's PDO - you can prepare empty statements!
-        prepex(3, $db, '',
-            array(), array('execute' => array('sqlstate' => '42000')));
+        try {
+            prepex(3, $db, '', [], ['execute' => ['sqlstate' => '42000']]);
+        } catch (\ValueError $e) {
+            echo $e->getMessage(), \PHP_EOL;
+        }
 
         // lets be fair and do the most simple SELECT first
         $stmt = prepex(4, $db, 'SELECT 1 as "one"');
@@ -328,6 +330,7 @@ $db->exec('DROP TABLE IF EXISTS test');
 PDO's PS parser has some problems with invalid SQL and crashes from time to time
 (check with valgrind...)
 --EXPECT--
+PDO::prepare(): Argument #1 ($statement) cannot be empty
 array(1) {
   ["one"]=>
   string(1) "1"

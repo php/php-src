@@ -162,7 +162,7 @@ bool(true)
 
 Arg value Some Ascii Data 
 
-Notice: Object of class aClass could not be converted to int in %s on line %d
+Warning: Object of class aClass could not be converted to int in %s on line %d
 bool(true)
 
 Arg value Resource id %s

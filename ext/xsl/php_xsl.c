@@ -111,7 +111,6 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xsl)
 {
-
 	zend_class_entry ce;
 
 	memcpy(&xsl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -119,7 +118,10 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 
-	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, class_XSLTProcessor_methods, xsl_xsltprocessor_class_entry);
+	INIT_CLASS_ENTRY(ce, "XSLTProcessor", class_XSLTProcessor_methods);
+	ce.create_object = xsl_objects_new;
+	xsl_xsltprocessor_class_entry = zend_register_internal_class(&ce);
+
 #ifdef HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif

@@ -66,12 +66,10 @@ static void zend_resource_dtor(zend_resource *res)
 	res->ptr = NULL;
 
 	ld = zend_hash_index_find_ptr(&list_destructors, r.type);
-	if (ld) {
-		if (ld->list_dtor_ex) {
-			ld->list_dtor_ex(&r);
-		}
-	} else {
-		zend_error(E_WARNING, "Unknown list entry type (%d)", r.type);
+	ZEND_ASSERT(ld && "Unknown list entry type");
+
+	if (ld->list_dtor_ex) {
+		ld->list_dtor_ex(&r);
 	}
 }
 
@@ -191,12 +189,10 @@ void plist_entry_destructor(zval *zv)
 		zend_rsrc_list_dtors_entry *ld;
 
 		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
-		if (ld) {
-			if (ld->plist_dtor_ex) {
-				ld->plist_dtor_ex(res);
-			}
-		} else {
-			zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
+		ZEND_ASSERT(ld && "Unknown list entry type");
+
+		if (ld->plist_dtor_ex) {
+			ld->plist_dtor_ex(res);
 		}
 	}
 	free(res);

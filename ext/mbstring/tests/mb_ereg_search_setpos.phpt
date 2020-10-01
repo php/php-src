@@ -36,7 +36,7 @@ foreach($positions as $pos) {
 ?>
 --EXPECT--
 bool(true)
-mb_ereg_search_setpos(): Argument #1 ($position) is out of range
+mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
 * Position: 5 :
 bool(true)
@@ -47,11 +47,11 @@ bool(true)
 int(20)
 
 * Position: 21 :
-mb_ereg_search_setpos(): Argument #1 ($position) is out of range
+mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 int(20)
 
 * Position: 25 :
-mb_ereg_search_setpos(): Argument #1 ($position) is out of range
+mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 int(20)
 
 * Position: 0 :
@@ -67,5 +67,5 @@ bool(true)
 int(0)
 
 * Position: -30 :
-mb_ereg_search_setpos(): Argument #1 ($position) is out of range
+mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 int(0)

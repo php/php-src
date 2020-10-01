@@ -2,8 +2,7 @@
 Test copy() function: usage variations - destination file names(case sensitive)
 --SKIPIF--
 <?php
-if( (stristr(PHP_OS, "Darwin")) || (stristr(PHP_OS, "Win")) )
-  die("skip do not run on MacOS/Windows");
+if (file_exists(__DIR__ . '/COPY_VARIATION5.PHPT')) die('skip requires case-sensitive file system');
 ?>
 --FILE--
 <?php

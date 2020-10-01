@@ -1,19 +1,16 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d8e8b4d749c2960b33fd20b27a1abf033604d4e2 */
+ * Stub hash: ef39f4efec05a3ebc5cf56a6b26e01369f00d129 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_get_all, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_name, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, token, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PhpToken_getAll, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
-ZEND_END_ARG_INFO()
+#define arginfo_class_PhpToken_getAll arginfo_token_get_all
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PhpToken___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, id, IS_LONG, 0)

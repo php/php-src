@@ -125,6 +125,6 @@ array(1) {
   string(1) "a"
 }
 string(1) "a"
-mysqli_query(): Argument #3 ($result_mode) must be either MYSQLI_USE_RESULT, or MYSQLI_STORE_RESULT%S
+mysqli_query(): Argument #3 ($result_mode) must be either MYSQLI_USE_RESULT or MYSQLI_STORE_RESULT%S
 mysqli object is already closed
 done!

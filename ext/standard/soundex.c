@@ -60,10 +60,6 @@ PHP_FUNCTION(soundex)
 		Z_PARAM_STRING(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (str_len == 0) {
-		RETURN_FALSE;
-	}
-
 	/* build soundex string */
 	last = -1;
 	for (i = 0, _small = 0; i < str_len && _small < 4; i++) {

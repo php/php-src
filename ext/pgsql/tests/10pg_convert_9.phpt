@@ -18,6 +18,34 @@ $fields = array('num'=>'1234', 'str'=>'AAA', 'bin'=>'BBB');
 $converted = pg_convert($db, $table_name, $fields);
 
 var_dump($converted);
+
+/* Invalid values */
+try {
+    $converted = pg_convert($db, $table_name, [5 => 'AAA']);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    $converted = pg_convert($db, $table_name, ['AAA']);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    $converted = pg_convert($db, $table_name, ['num' => []]);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    $converted = pg_convert($db, $table_name, ['num' => new stdClass()]);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    $converted = pg_convert($db, $table_name, ['num' => $db]);
+    var_dump($converted);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 ?>
 --EXPECT--
 array(3) {
@@ -28,3 +56,8 @@ array(3) {
   [""bin""]=>
   string(12) "E'\\x424242'"
 }
+Array of values must be an associative array with string keys
+Array of values must be an associative array with string keys
+Values must be of type string|int|float|bool|null, array given
+Values must be of type string|int|float|bool|null, stdClass given
+Values must be of type string|int|float|bool|null, resource given

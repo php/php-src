@@ -106,16 +106,16 @@ try {
 --EXPECT--
 bindtextdomain(): Argument #1 ($domain) is too long
 dngettext(): Argument #1 ($domain) is too long
-dngettext(): Argument #2 ($msgid1) is too long
-dngettext(): Argument #3 ($msgid2) is too long
-gettext(): Argument #1 ($msgid) is too long
-ngettext(): Argument #1 ($msgid1) is too long
-ngettext(): Argument #2 ($msgid2) is too long
+dngettext(): Argument #2 ($singular) is too long
+dngettext(): Argument #3 ($plural) is too long
+gettext(): Argument #1 ($message) is too long
+ngettext(): Argument #1 ($singular) is too long
+ngettext(): Argument #2 ($plural) is too long
 dcgettext(): Argument #1 ($domain) is too long
-dcgettext(): Argument #2 ($msgid) is too long
+dcgettext(): Argument #2 ($message) is too long
 dcngettext(): Argument #1 ($domain) is too long
-dcngettext(): Argument #2 ($msgid1) is too long
-dcngettext(): Argument #3 ($msgid2) is too long
+dcngettext(): Argument #2 ($singular) is too long
+dcngettext(): Argument #3 ($plural) is too long
 dgettext(): Argument #1 ($domain) is too long
-dgettext(): Argument #2 ($msgid) is too long
+dgettext(): Argument #2 ($message) is too long
 textdomain(): Argument #1 ($domain) is too long

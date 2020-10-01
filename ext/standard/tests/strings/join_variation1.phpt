@@ -119,15 +119,15 @@ string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
 string(19) "element10.5element2"
 -- Iteration 10 --
-join(): Argument #1 ($glue) must be of type string, array given
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 11 --
-join(): Argument #1 ($glue) must be of type string, array given
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 12 --
-join(): Argument #1 ($glue) must be of type string, array given
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 13 --
-join(): Argument #1 ($glue) must be of type string, array given
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 14 --
-join(): Argument #1 ($glue) must be of type string, array given
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 15 --
 string(17) "element11element2"
 -- Iteration 16 --
@@ -147,7 +147,7 @@ string(16) "element1element2"
 -- Iteration 23 --
 string(16) "element1element2"
 -- Iteration 24 --
-join(): Argument #1 ($glue) must be of type array|string, resource given
+join(): Argument #1 ($separator) must be of type array|string, resource given
 -- Iteration 25 --
 string(16) "element1element2"
 -- Iteration 26 --

@@ -1001,7 +1001,7 @@ PHP_FUNCTION(ldap_connect)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|slssl", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!lssl", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1009,7 +1009,7 @@ PHP_FUNCTION(ldap_connect)
 		ssl = 1;
 	}
 #else
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl", &host, &hostlen, &port) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!l", &host, &hostlen, &port) != SUCCESS) {
 		RETURN_THROWS();
 	}
 #endif
@@ -1119,7 +1119,7 @@ PHP_FUNCTION(ldap_bind)
 	ldap_linkdata *ld;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ss", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1175,7 +1175,7 @@ PHP_FUNCTION(ldap_bind_ext)
 	LDAPMessage *ldap_res;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ssa", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!a", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1337,7 +1337,7 @@ PHP_FUNCTION(ldap_sasl_bind)
 	size_t rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
 	php_ldap_bictx *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|sssssss", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!s!s!s!s!s!", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1601,12 +1601,12 @@ cleanup_parallel:
 		}
 
 		if (!base_dn_str) {
-			zend_argument_type_error(2, "must be of type string when argument #1 ($link_identifier) is a resource");
+			zend_argument_type_error(2, "must be of type string when argument #1 ($ldap) is a resource");
 		}
 		ldap_base_dn = zend_string_copy(base_dn_str);
 
 		if (!filter_str) {
-			zend_argument_type_error(3, "must be of type string when argument #1 ($link_identifier) is a resource");
+			zend_argument_type_error(3, "must be of type string when argument #1 ($ldap) is a resource");
 		}
 		ldap_filter = zend_string_copy(filter_str);
 
@@ -1909,9 +1909,8 @@ PHP_FUNCTION(ldap_first_attribute)
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
 	char *attribute;
-	zend_long dummy_ber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|l", &link, &result_entry, &dummy_ber) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &link, &result_entry) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1941,9 +1940,8 @@ PHP_FUNCTION(ldap_next_attribute)
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
 	char *attribute;
-	zend_long dummy_ber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|l", &link, &result_entry, &dummy_ber) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &link, &result_entry) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2655,7 +2653,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						modtype != LDAP_MODIFY_BATCH_REPLACE &&
 						modtype != LDAP_MODIFY_BATCH_REMOVE_ALL
 					) {
-						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be one of LDAP_MODIFY_BATCH_ADD, LDAP_MODIFY_BATCH_REMOVE, LDAP_MODIFY_BATCH_REPLACE, or LDAP_MODIFY_BATCH_REMOVE_ALL", get_active_function_name());
+						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be one of the LDAP_MODIFY_BATCH_* constants", get_active_function_name());
 						RETURN_THROWS();
 					}
 
@@ -3877,195 +3875,6 @@ PHP_FUNCTION(ldap_t61_to_8859)
 PHP_FUNCTION(ldap_8859_to_t61)
 {
 	php_ldap_do_translate(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-}
-/* }}} */
-#endif
-
-#ifdef LDAP_CONTROL_PAGEDRESULTS
-/* {{{ Inject paged results control*/
-PHP_FUNCTION(ldap_control_paged_result)
-{
-	zend_long pagesize;
-	zend_bool iscritical;
-	zval *link;
-	char *cookie = NULL;
-	size_t cookie_len = 0;
-	struct berval lcookie = { 0L, NULL };
-	ldap_linkdata *ld;
-	LDAP *ldap;
-	BerElement *ber = NULL;
-	LDAPControl	ctrl, *ctrlsp[2];
-	int rc, myargcount = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(myargcount, "rl|bs", &link, &pagesize, &iscritical, &cookie, &cookie_len) != SUCCESS) {
-		RETURN_THROWS();
-	}
-
-	if (Z_TYPE_P(link) == IS_NULL) {
-		ldap = NULL;
-	} else {
-		if ((ld = (ldap_linkdata *)zend_fetch_resource_ex(link, "ldap link", le_link)) == NULL) {
-			RETURN_THROWS();
-		}
-		ldap = ld->link;
-	}
-
-	ber = ber_alloc_t(LBER_USE_DER);
-	if (ber == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to alloc BER encoding resources for paged results control");
-		RETURN_FALSE;
-	}
-
-	ctrl.ldctl_iscritical = 0;
-
-	switch (myargcount) {
-		case 4:
-			lcookie.bv_val = cookie;
-			lcookie.bv_len = cookie_len;
-			/* fallthru */
-		case 3:
-			ctrl.ldctl_iscritical = (int)iscritical;
-			/* fallthru */
-	}
-
-	if (ber_printf(ber, "{iO}", (int)pagesize, &lcookie) == LBER_ERROR) {
-		php_error_docref(NULL, E_WARNING, "Unable to BER printf paged results control");
-		RETVAL_FALSE;
-		goto lcpr_error_out;
-	}
-	rc = ber_flatten2(ber, &ctrl.ldctl_value, 0);
-	if (rc == LBER_ERROR) {
-		php_error_docref(NULL, E_WARNING, "Unable to BER encode paged results control");
-		RETVAL_FALSE;
-		goto lcpr_error_out;
-	}
-
-	ctrl.ldctl_oid = LDAP_CONTROL_PAGEDRESULTS;
-
-	if (ldap) {
-		/* directly set the option */
-		ctrlsp[0] = &ctrl;
-		ctrlsp[1] = NULL;
-
-		rc = ldap_set_option(ldap, LDAP_OPT_SERVER_CONTROLS, ctrlsp);
-		if (rc != LDAP_SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to set paged results control: %s (%d)", ldap_err2string(rc), rc);
-			RETVAL_FALSE;
-			goto lcpr_error_out;
-		}
-		RETVAL_TRUE;
-	} else {
-		/* return a PHP control object */
-		array_init(return_value);
-
-		add_assoc_string(return_value, "oid", ctrl.ldctl_oid);
-		if (ctrl.ldctl_value.bv_len) {
-			add_assoc_stringl(return_value, "value", ctrl.ldctl_value.bv_val, ctrl.ldctl_value.bv_len);
-		}
-		if (ctrl.ldctl_iscritical) {
-			add_assoc_bool(return_value, "iscritical", ctrl.ldctl_iscritical);
-		}
-	}
-
-lcpr_error_out:
-	if (ber != NULL) {
-		ber_free(ber, 1);
-	}
-	return;
-}
-/* }}} */
-
-/* {{{ Extract paged results control response */
-PHP_FUNCTION(ldap_control_paged_result_response)
-{
-	zval *link, *result, *cookie, *estimated;
-	struct berval lcookie;
-	int lestimated;
-	ldap_linkdata *ld;
-	LDAPMessage *ldap_result;
-	LDAPControl **lserverctrls, *lctrl;
-	BerElement *ber;
-	ber_tag_t tag;
-	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(myargcount, "rr|zz", &link, &result, &cookie, &estimated) != SUCCESS) {
-		RETURN_THROWS();
-	}
-
-	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_THROWS();
-	}
-
-	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_THROWS();
-	}
-
-	rc = ldap_parse_result(ld->link,
-				ldap_result,
-				&lerrcode,
-				NULL,		/* matcheddn */
-				NULL,		/* errmsg */
-				NULL,		/* referrals */
-				&lserverctrls,
-				0);
-
-	if (rc != LDAP_SUCCESS) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse result: %s (%d)", ldap_err2string(rc), rc);
-		RETURN_FALSE;
-	}
-
-	if (lerrcode != LDAP_SUCCESS) {
-		php_error_docref(NULL, E_WARNING, "Result is: %s (%d)", ldap_err2string(lerrcode), lerrcode);
-		RETURN_FALSE;
-	}
-
-	if (lserverctrls == NULL) {
-		php_error_docref(NULL, E_WARNING, "No server controls in result");
-		RETURN_FALSE;
-	}
-
-	lctrl = ldap_control_find(LDAP_CONTROL_PAGEDRESULTS, lserverctrls, NULL);
-	if (lctrl == NULL) {
-		ldap_controls_free(lserverctrls);
-		php_error_docref(NULL, E_WARNING, "No paged results control response in result");
-		RETURN_FALSE;
-	}
-
-	ber = ber_init(&lctrl->ldctl_value);
-	if (ber == NULL) {
-		ldap_controls_free(lserverctrls);
-		php_error_docref(NULL, E_WARNING, "Unable to alloc BER decoding resources for paged results control response");
-		RETURN_FALSE;
-	}
-
-	tag = ber_scanf(ber, "{io}", &lestimated, &lcookie);
-	(void)ber_free(ber, 1);
-
-	if (tag == LBER_ERROR) {
-		ldap_controls_free(lserverctrls);
-		php_error_docref(NULL, E_WARNING, "Unable to decode paged results control response");
-		RETURN_FALSE;
-	}
-
-	if (lestimated < 0) {
-		ldap_controls_free(lserverctrls);
-		php_error_docref(NULL, E_WARNING, "Invalid paged results control response value");
-		RETURN_FALSE;
-	}
-
-	ldap_controls_free(lserverctrls);
-	if (myargcount == 4) {
-		ZEND_TRY_ASSIGN_REF_LONG(estimated, lestimated);
-	}
-
- 	if (lcookie.bv_len == 0) {
-		ZEND_TRY_ASSIGN_REF_EMPTY_STRING(cookie);
- 	} else {
-		ZEND_TRY_ASSIGN_REF_STRINGL(cookie, lcookie.bv_val, lcookie.bv_len);
- 	}
- 	ldap_memfree(lcookie.bv_val);
-
-	RETURN_TRUE;
 }
 /* }}} */
 #endif

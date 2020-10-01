@@ -59,15 +59,15 @@ var_dump($session->close());
 --EXPECTF--
 Security level must be one of "noAuthNoPriv", "authNoPriv", or "authPriv"
 Security level must be one of "noAuthNoPriv", "authNoPriv", or "authPriv"
-Authentication protocol must be either MD5 or SHA
+Authentication protocol must be either "MD5" or "SHA"
 
 Warning: SNMP::setSecurity(): Error generating a key for authentication pass phrase '': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
 
 Warning: SNMP::setSecurity(): Error generating a key for authentication pass phrase 'te': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
-Security protocol must be one of DES, AES128, or AES
-Security protocol must be one of DES, AES128, or AES
+Security protocol must be one of "DES", "AES128", or "AES"
+Security protocol must be one of "DES", "AES128", or "AES"
 
 Warning: SNMP::setSecurity(): Error generating a key for privacy pass phrase '': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)

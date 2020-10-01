@@ -34,6 +34,6 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-filter_has_var(): Argument #1 ($type) must be an INPUT_* constant
+filter_has_var(): Argument #1 ($input_type) must be an INPUT_* constant
 bool(false)
 Done

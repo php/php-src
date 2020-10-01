@@ -13,7 +13,7 @@ echo "*** Testing strspn() : basic functionality ***\n";
 $str = "this is the test string";
 $mask = "htes ";
 $start = 8;
-$len = 30;
+$len = 12;
 
 // Calling strspn() with all possible arguments
 var_dump( strspn($str, $mask, $start, $len) );

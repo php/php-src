@@ -142,7 +142,6 @@ int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_CALL,    "recursive call") \
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
-	_(RETURN_HALT,       "return from interpreter") \
 	_(INTERPRETER,       "exit to VM interpreter") \
 	_(LINK,              "link to another trace") \
 	/* compilation and linking successful */ \
@@ -158,12 +157,12 @@ int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(DEEP_RECURSION,    "deep recursion") \
 	_(LOOP_UNROLL,       "loop unroll limit reached") \
 	_(LOOP_EXIT,         "exit from loop") \
+	_(RECURSION_EXIT,    "return from recursive function") \
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \
 	_(TRAMPOLINE,        "trampoline call") \
 	_(BAD_FUNC,          "bad function call") \
-	_(HALT,              "exit from interpreter") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
 	/* no recoverable error (blacklist immediately) */ \
 	_(NO_SHM,            "insufficient shared memory") \
@@ -176,6 +175,7 @@ int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 
 typedef enum _zend_jit_trace_stop {
 	ZEND_JIT_TRACE_STOP(ZEND_JIT_TRACE_STOP_NAME)
+	ZEND_JIT_TRACE_HALT = 0x40
 } zend_jit_trace_stop;
 
 #define ZEND_JIT_TRACE_STOP_OK(ret) \
@@ -427,6 +427,9 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_NO_NEED_REKEASE_THIS(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS)
 
+#define TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(frame) do { \
+		(frame)->_info |= (0xffffu << TRACE_FRAME_SHIFT_NUM_ARGS); \
+	} while (0)
 #define TRACE_FRAME_SET_RETURN_SSA_VAR(frame, var) do { \
 		(frame)->_info = var; \
 	} while (0)

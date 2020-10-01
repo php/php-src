@@ -59,30 +59,32 @@ php_dir_globals dir_globals;
 static zend_class_entry *dir_class_entry_ptr;
 
 #define FETCH_DIRP() \
-	ZEND_PARSE_PARAMETERS_START(0, 1) \
-		Z_PARAM_OPTIONAL \
-		Z_PARAM_RESOURCE_OR_NULL(id) \
-	ZEND_PARSE_PARAMETERS_END(); \
-	if (!id) { \
-		myself = getThis(); \
-		if (myself) { \
-			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
-				zend_throw_error(NULL, "Unable to find my handle property"); \
-				RETURN_THROWS(); \
-			} \
-			if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
+	myself = getThis(); \
+	if (!myself) { \
+		ZEND_PARSE_PARAMETERS_START(0, 1) \
+			Z_PARAM_OPTIONAL \
+			Z_PARAM_RESOURCE_OR_NULL(id) \
+		ZEND_PARSE_PARAMETERS_END(); \
+		if (id) { \
+			if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
 				RETURN_THROWS(); \
 			} \
 		} else { \
 			if (!DIRG(default_dir)) { \
 				zend_type_error("No resource supplied"); \
 				RETURN_THROWS(); \
-			} else if ((dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
+			} \
+			if ((dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
 				RETURN_THROWS(); \
 			} \
 		} \
 	} else { \
-		if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
+		ZEND_PARSE_PARAMETERS_NONE(); \
+		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
+			zend_throw_error(NULL, "Unable to find my handle property"); \
+			RETURN_THROWS(); \
+		} \
+		if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
 			RETURN_THROWS(); \
 		} \
 	}

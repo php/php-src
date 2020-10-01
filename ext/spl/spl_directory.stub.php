@@ -90,7 +90,7 @@ class SplFileInfo
     /** @return void */
     public function setInfoClass(string $class_name = SplFileInfo::class) {}
 
-    /** @alias SplFileInfo::getPathname */
+    /** @implementation-alias SplFileInfo::getPathname */
     public function __toString(): string {}
 
     /** @return array */
@@ -134,7 +134,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     /** @return void */
     public function seek(int $position) {}
 
-    /** @alias DirectoryIterator::getFilename */
+    /** @implementation-alias DirectoryIterator::getFilename */
     public function __toString(): string {}
 }
 
@@ -286,7 +286,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
      */
     public function getCurrentLine() {}
 
-    /** @alias SplFileObject::fgets */
+    /** @implementation-alias SplFileObject::fgets */
     public function __toString(): string {}
 }
 

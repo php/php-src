@@ -125,5 +125,5 @@ string(10) "helloworld"
 -- Iteration 20 --
 string(10) "helloworld"
 -- Iteration 21 --
-strip_tags(): Argument #2 ($allowable_tags) must be of type array|string|null, resource given
+strip_tags(): Argument #2 ($allowed_tags) must be of type array|string|null, resource given
 Done

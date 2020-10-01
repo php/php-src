@@ -41,7 +41,7 @@ try {
 
 ?>
 --EXPECT--
-deflate_init(): Argument #1 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+deflate_init(): Argument #1 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
 deflate_init(): "level" option must be between -1 and 9
 deflate_init(): "level" option must be between -1 and 9
 deflate_init(): "memory" option must be between 1 and 9

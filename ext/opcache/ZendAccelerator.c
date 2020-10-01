@@ -4160,6 +4160,7 @@ static void preload_fix_trait_methods(zend_class_entry *ce)
 static int preload_optimize(zend_persistent_script *script)
 {
 	zend_class_entry *ce;
+	zend_persistent_script *tmp_script;
 
 	zend_shared_alloc_init_xlat_table();
 
@@ -4169,8 +4170,8 @@ static int preload_optimize(zend_persistent_script *script)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
-		ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+	ZEND_HASH_FOREACH_PTR(preload_scripts, tmp_script) {
+		ZEND_HASH_FOREACH_PTR(&tmp_script->script.class_table, ce) {
 			if (ce->ce_flags & ZEND_ACC_TRAIT) {
 				preload_register_trait_methods(ce);
 			}
@@ -4486,7 +4487,6 @@ static int accel_preload(const char *config, zend_bool in_child)
 	} zend_end_try();
 
 	PG(open_basedir) = orig_open_basedir;
-	CG(compiler_options) = orig_compiler_options;
 	accelerator_orig_compile_file = preload_orig_compile_file;
 	ZCG(enabled) = 1;
 
@@ -4725,6 +4725,7 @@ static int accel_preload(const char *config, zend_bool in_child)
 	}
 
 finish:
+	CG(compiler_options) = orig_compiler_options;
 	zend_hash_destroy(preload_scripts);
 	efree(preload_scripts);
 	preload_scripts = NULL;

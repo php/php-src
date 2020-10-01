@@ -37,8 +37,8 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_sub(): Argument #1 ($a) is not an integer string
-gmp_sub(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_sub(): Argument #1 ($num1) is not an integer string
+gmp_sub(): Argument #1 ($num1) must be of type GMP|string|int, array given
 object(GMP)#1 (1) {
   ["num"]=>
   string(2) "-1"
@@ -49,6 +49,6 @@ object(GMP)#3 (1) {
   string(5) "10001"
 }
 string(5) "10001"
-gmp_sub(): Argument #2 ($b) must be of type GMP|string|int, stdClass given
-gmp_sub(): Argument #1 ($a) must be of type GMP|string|int, stdClass given
+gmp_sub(): Argument #2 ($num2) must be of type GMP|string|int, stdClass given
+gmp_sub(): Argument #1 ($num1) must be of type GMP|string|int, stdClass given
 Done

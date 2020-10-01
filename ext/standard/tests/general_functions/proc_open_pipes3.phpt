@@ -32,7 +32,7 @@ echo "END\n";
 ?>
 --EXPECTF--
 Warning: proc_open(): pi is not a valid descriptor spec/mode in %s on line %d
-proc_open(): Argument #2 ($descriptorspec) must only contain arrays and streams
+proc_open(): Argument #2 ($descriptor_spec) must only contain arrays and streams
 array(4) {
   [3]=>
   resource(%d) of type (Unknown)

@@ -33,12 +33,12 @@ echo "Done\n";
 --EXPECT--
 string(2) "-1"
 string(2) "-1"
-gmp_com(): Argument #1 ($a) is not an integer string
+gmp_com(): Argument #1 ($num) is not an integer string
 string(14) "-2394876545679"
 string(3) "110"
 string(7) "-874654"
 string(4) "9875"
 string(9) "-98765468"
 string(12) "-98765463338"
-gmp_com(): Argument #1 ($a) must be of type GMP|string|int, array given
+gmp_com(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

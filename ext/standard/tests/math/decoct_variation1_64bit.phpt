@@ -106,10 +106,10 @@ string(5) "30071"
 string(22) "1777777777777777773327"
 
 -- Iteration 5 --
-decoct(): Argument #1 ($number) must be of type int, float given
+decoct(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 6 --
-decoct(): Argument #1 ($number) must be of type int, float given
+decoct(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 string(2) "12"
@@ -145,25 +145,25 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 18 --
-decoct(): Argument #1 ($number) must be of type int, string given
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 19 --
-decoct(): Argument #1 ($number) must be of type int, string given
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 20 --
-decoct(): Argument #1 ($number) must be of type int, array given
+decoct(): Argument #1 ($num) must be of type int, array given
 
 -- Iteration 21 --
-decoct(): Argument #1 ($number) must be of type int, string given
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 22 --
-decoct(): Argument #1 ($number) must be of type int, string given
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 23 --
-decoct(): Argument #1 ($number) must be of type int, string given
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 24 --
-decoct(): Argument #1 ($number) must be of type int, classA given
+decoct(): Argument #1 ($num) must be of type int, classA given
 
 -- Iteration 25 --
 string(1) "0"
@@ -172,4 +172,4 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 27 --
-decoct(): Argument #1 ($number) must be of type int, resource given
+decoct(): Argument #1 ($num) must be of type int, resource given

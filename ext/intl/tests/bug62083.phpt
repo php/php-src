@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-grapheme_extract(): Argument #3 ($extract_type) must be either GRAPHEME_EXTR_COUNT, GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS
+grapheme_extract(): Argument #3 ($extract_type) must be one of GRAPHEME_EXTR_COUNT, GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS

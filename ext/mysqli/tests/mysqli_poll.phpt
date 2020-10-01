@@ -114,8 +114,8 @@ if (!$IS_MYSQLND)
     print "done!";
 ?>
 --EXPECTF--
-mysqli_poll(): Argument #4 ($sec) must be greater than or equal to 0
-mysqli_poll(): Argument #5 ($usec) must be greater than or equal to 0
+mysqli_poll(): Argument #4 ($seconds) must be greater than or equal to 0
+mysqli_poll(): Argument #5 ($microseconds) must be greater than or equal to 0
 [012 + 6] Rejecting thread %d: 0/
 [013 + 6] Rejecting thread %d: 0/
 [014 + 6] Rejecting thread %d: 0/

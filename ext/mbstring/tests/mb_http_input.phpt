@@ -43,4 +43,4 @@ array(1) {
   string(10) "ISO-8859-1"
 }
 string(10) "ISO-8859-1"
-mb_http_input(): Argument #1 ($type) must be one of "G", "P", "C", "S", "I" or "L"
+mb_http_input(): Argument #1 ($type) must be one of "G", "P", "C", "S", "I", or "L"

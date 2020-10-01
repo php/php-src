@@ -23,6 +23,7 @@ function pg_last_error($connection = null): string {}
 /**
  * @param resource|null $connection
  * @alias pg_last_error
+ * @deprecated
  */
 function pg_errormessage($connection = null): string {}
 
@@ -86,6 +87,7 @@ function pg_num_rows($result): int {}
 /**
  * @param resource $result
  * @alias pg_num_rows
+ * @deprecated
  */
 function pg_numrows($result): int {}
 
@@ -95,6 +97,7 @@ function pg_num_fields($result): int {}
 /**
  * @param resource $result
  * @alias pg_num_fields
+ * @deprecated
  */
 function pg_numfields($result): int {}
 
@@ -104,6 +107,7 @@ function pg_affected_rows($result): int {}
 /**
  * @param resource $result
  * @alias pg_affected_rows
+ * @deprecated
  */
 function pg_cmdtuples($result): int {}
 
@@ -114,34 +118,37 @@ function pg_last_notice($connection, int $option = PGSQL_NOTICE_LAST): array|str
 function pg_field_table($result, int $field_number, bool $oid_only = false): string|int|false {}
 
 /** @param resource $result */
-function pg_field_name($result, int $field_number): string|false {}
+function pg_field_name($result, int $field_number): string {}
 
 /**
  * @param resource $result
  * @alias pg_field_name
+ * @deprecated
  */
-function pg_fieldname($result, int $field_number): string|false {}
+function pg_fieldname($result, int $field_number): string {}
 
 /** @param resource $result */
-function pg_field_size($result, int $field_number): int|false {}
+function pg_field_size($result, int $field_number): int {}
 
 /**
  * @param resource $result
  * @alias pg_field_size
+ * @deprecated
  */
-function pg_fieldsize($result, int $field_number): int|false {}
+function pg_fieldsize($result, int $field_number): int {}
 
 /** @param resource $result */
-function pg_field_type($result, int $field_number): string|false {}
+function pg_field_type($result, int $field_number): string {}
 
 /**
  * @param resource $result
  * @alias pg_field_type
+ * @deprecated
  */
-function pg_fieldtype($result, int $field_number): string|false {}
+function pg_fieldtype($result, int $field_number): string {}
 
 /** @param resource $result */
-function pg_field_type_oid($result, int $field_number): string|int|false {}
+function pg_field_type_oid($result, int $field_number): string|int {}
 
 /** @param resource $result */
 function pg_field_num($result, string $field_name): int {}
@@ -149,6 +156,7 @@ function pg_field_num($result, string $field_name): int {}
 /**
  * @param resource $result
  * @alias pg_field_num
+ * @deprecated
  */
 function pg_fieldnum($result, string $field_name): int {}
 
@@ -162,6 +170,7 @@ function pg_fetch_result($result, $row_number, string|int $field = UNKNOWN): str
  * @param resource $result
  * @param string|int $row_number
  * @alias pg_fetch_result
+ * @deprecated
  */
 function pg_result($result, $row_number, string|int $field = UNKNOWN): string|false|null {}
 
@@ -184,10 +193,10 @@ function pg_fetch_array($result, ?int $row_number = null, int $result_type = PGS
 function pg_fetch_object($result, ?int $row_number = null, string $class_name = "stdClass", ?array $ctor_params = null): object|false {}
 
 /** @param resource $result */
-function pg_fetch_all($result, int $result_type = PGSQL_ASSOC): array|false {}
+function pg_fetch_all($result, int $result_type = PGSQL_ASSOC): array {}
 
 /** @param resource $result */
-function pg_fetch_all_columns($result, int $column_number = 0): array|false {}
+function pg_fetch_all_columns($result, int $field_number = 0): array {}
 
 /** @param resource $result */
 function pg_result_seek($result, int $row_number): bool {}
@@ -202,6 +211,7 @@ function pg_field_prtlen($result, $row_number, string|int $field = UNKNOWN): int
  * @param resource $result
  * @param string|int $row_number
  * @alias pg_field_prtlen
+ * @deprecated
  */
 function pg_fieldprtlen($result, $row_number, string|int $field = UNKNOWN): int|false {}
 
@@ -215,6 +225,7 @@ function pg_field_is_null($result, $row_number, string|int $field = UNKNOWN): in
  * @param resource $result
  * @param string|int $row_number
  * @alias pg_field_is_null
+ * @deprecated
  */
 function pg_fieldisnull($result, $row_number, string|int $field = UNKNOWN): int|false {}
 
@@ -224,6 +235,7 @@ function pg_free_result($result): bool {}
 /**
  * @param resource $result
  * @alias pg_free_result
+ * @deprecated
  */
 function pg_freeresult($result): bool {}
 
@@ -233,6 +245,7 @@ function pg_last_oid($result): string|int|false {}
 /**
  * @param resource $result
  * @alias pg_last_oid
+ * @deprecated
  */
 function pg_getlastoid($result): string|int|false {}
 
@@ -252,6 +265,7 @@ function pg_lo_create($connection = UNKNOWN, $large_object_id = UNKNOWN): string
  * @param resource $connection
  * @param string|int $large_object_id
  * @alias pg_lo_create
+ * @deprecated
  */
 function pg_locreate($connection = UNKNOWN, $large_object_id = UNKNOWN): string|int|false {}
 
@@ -265,6 +279,7 @@ function pg_lo_unlink($connection, $large_object_id = UNKNOWN): bool {}
  * @param resource $connection
  * @param string|int $large_object_id
  * @alias pg_lo_unlink
+ * @deprecated
  */
 function pg_lounlink($connection, $large_object_id = UNKNOWN): bool {}
 
@@ -280,6 +295,7 @@ function pg_lo_open($connection, $large_object_id = UNKNOWN, string $mode = UNKN
  * @param string|int $large_object_id
  * @return resource|false
  * @alias pg_lo_open
+ * @deprecated
  */
 function pg_loopen($connection, $large_object_id = UNKNOWN, string $mode = UNKNOWN) {}
 
@@ -289,6 +305,7 @@ function pg_lo_close($large_object): bool {}
 /**
  * @param resource $large_object
  * @alias pg_lo_close
+ * @deprecated
  */
 function pg_loclose($large_object): bool {}
 
@@ -298,6 +315,7 @@ function pg_lo_read($large_object, int $len = 8192): string|false {}
 /**
  * @param resource $large_object
  * @alias pg_lo_read
+ * @deprecated
  */
 function pg_loread($large_object, int $len = 8192): string|false {}
 
@@ -307,6 +325,7 @@ function pg_lo_write($large_object, string $buf, ?int $len = null): int|false {}
 /**
  * @param resource $large_object
  * @alias pg_lo_write
+ * @deprecated
  */
 function pg_lowrite($large_object, string $buf, ?int $len = null): int|false {}
 
@@ -316,6 +335,7 @@ function pg_lo_read_all($large_object): int {}
 /**
  * @param resource $large_object
  * @alias pg_lo_read_all
+ * @deprecated
  */
 function pg_loreadall($large_object): int {}
 
@@ -333,6 +353,7 @@ function pg_lo_import($connection, $filename = UNKNOWN, $large_object_id = UNKNO
  * @param string|int $large_object_id
  * @return resource|false
  * @alias pg_lo_import
+ * @deprecated
  */
 function pg_loimport($connection, $filename = UNKNOWN, $large_object_id = UNKNOWN): string|int|false {}
 
@@ -350,6 +371,7 @@ function pg_lo_export($connection, $large_object_id = UNKNOWN, $filename = UNKNO
  * @param string|int $filename
  * @return resource|false
  * @alias pg_lo_export
+ * @deprecated
  */
 function pg_loexport($connection, $large_object_id = UNKNOWN, $filename = UNKNOWN): bool {}
 
@@ -371,6 +393,7 @@ function pg_set_client_encoding($connection, string $encoding = UNKNOWN): int {}
 /**
  * @param resource|string $connection
  * @alias pg_set_client_encoding
+ * @deprecated
  */
 function pg_setclientencoding($connection, string $encoding = UNKNOWN): int {}
 
@@ -380,6 +403,7 @@ function pg_client_encoding($connection = null): string {}
 /**
  * @param resource|null $connection
  * @alias pg_client_encoding
+ * @deprecated
  */
 function pg_clientencoding($connection = null): string {}
 
@@ -401,7 +425,7 @@ function pg_escape_string($connection, string $data = UNKNOWN): string {}
 /** @param resource|string $connection */
 function pg_escape_bytea($connection, string $data = UNKNOWN): string {}
 
-function pg_unescape_bytea(?string $data = null): string|false {}
+function pg_unescape_bytea(?string $data = null): string {}
 
 /** @param resource|string $connection */
 function pg_escape_literal($connection, string $data = UNKNOWN): string|false {}

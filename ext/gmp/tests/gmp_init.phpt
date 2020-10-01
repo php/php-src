@@ -38,7 +38,7 @@ object(GMP)#1 (1) {
 }
 string(8) "98765678"
 gmp_init(): Argument #2 ($base) must be between 2 and 62
-gmp_init(): Argument #1 ($number) is not an integer string
-gmp_init(): Argument #1 ($number) is not an integer string
-gmp_init(): Argument #1 ($number) is not an integer string
+gmp_init(): Argument #1 ($num) is not an integer string
+gmp_init(): Argument #1 ($num) is not an integer string
+gmp_init(): Argument #1 ($num) is not an integer string
 Done

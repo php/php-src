@@ -532,6 +532,21 @@ static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
 }
 /* }}} */
 
+#ifdef PDO_USE_MYSQLND
+# define pdo_mysql_get_server_status(m) mysqlnd_get_server_status(m)
+#else
+# define pdo_mysql_get_server_status(m) (m)->server_status
+#endif
+
+/* {{{ pdo_mysql_in_transaction */
+static int pdo_mysql_in_transaction(pdo_dbh_t *dbh)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+	PDO_DBG_ENTER("pdo_mysql_in_transaction");
+	PDO_DBG_RETURN((pdo_mysql_get_server_status(H->server) & SERVER_STATUS_IN_TRANS) != 0);
+}
+/* }}} */
+
 /* {{{ mysql_methods */
 static const struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
@@ -548,7 +563,7 @@ static const struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_check_liveness,
 	NULL,
 	pdo_mysql_request_shutdown,
-	NULL
+	pdo_mysql_in_transaction
 };
 /* }}} */
 

@@ -1284,7 +1284,7 @@ PHP_FUNCTION(ftp_set_option)
 			RETURN_TRUE;
 			break;
 		default:
-			zend_argument_value_error(2, "must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
+			zend_argument_value_error(2, "must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
 			RETURN_THROWS();
 			break;
 	}
@@ -1317,7 +1317,7 @@ PHP_FUNCTION(ftp_get_option)
 			RETURN_BOOL(ftp->usepasvaddress);
 			break;
 		default:
-			zend_argument_value_error(2, "must be either FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
+			zend_argument_value_error(2, "must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
 			RETURN_THROWS();
 	}
 }

@@ -50,6 +50,6 @@ int(1)
 int(0)
 int(%d)
 
-Notice: Object of class test could not be converted to int in %s on line %d
+Warning: Object of class test could not be converted to int in %s on line %d
 int(1)
 Done

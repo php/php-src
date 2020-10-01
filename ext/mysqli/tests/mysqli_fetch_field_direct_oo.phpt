@@ -57,7 +57,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 mysqli object is not fully initialized
-mysqli_result::fetch_field_direct(): Argument #1 ($field_nr) must be greater than or equal to 0
+mysqli_result::fetch_field_direct(): Argument #1 ($index) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
@@ -86,6 +86,6 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(%d)
 }
-mysqli_result::fetch_field_direct(): Argument #1 ($field_nr) must be less than the number of fields for this result set
+mysqli_result::fetch_field_direct(): Argument #1 ($index) must be less than the number of fields for this result set
 mysqli_result object is already closed
 done!

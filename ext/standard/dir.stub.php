@@ -5,23 +5,20 @@
 class Directory
 {
     /**
-     * @param resource|null $dir_handle
      * @return void
-     * @alias closedir
+     * @implementation-alias closedir
      */
-    public function close($dir_handle = null) {}
+    public function close() {}
 
     /**
-     * @param resource|null $dir_handle
      * @return void
-     * @alias rewinddir
+     * @implementation-alias rewinddir
      */
-    public function rewind($dir_handle = null) {}
+    public function rewind() {}
 
     /**
-     * @param resource|null $dir_handle
      * @return string|false
-     * @alias readdir
+     * @implementation-alias readdir
      */
-    public function read($dir_handle = null) {}
+    public function read() {}
 }

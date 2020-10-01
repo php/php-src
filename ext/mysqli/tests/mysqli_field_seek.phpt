@@ -122,7 +122,7 @@ require_once('skipifconnectfailure.inc');
     require_once("clean_table.inc");
 ?>
 --EXPECTF--
-mysqli_field_seek(): Argument #2 ($field_nr) must be greater than or equal to 0
+mysqli_field_seek(): Argument #2 ($index) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "id"
@@ -210,7 +210,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 int(2)
-mysqli_field_seek(): Argument #2 ($field_nr) must be less than the number of fields for this result set
+mysqli_field_seek(): Argument #2 ($index) must be less than the number of fields for this result set
 bool(false)
 bool(true)
 object(stdClass)#%d (13) {

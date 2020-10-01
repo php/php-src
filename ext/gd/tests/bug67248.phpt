@@ -19,7 +19,7 @@ for($i=0;$i<7;$i++) {
 !! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
 !! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
 
-Notice: Object of class stdClass could not be converted to float in %s on line %d
+Warning: Object of class stdClass could not be converted to float in %s on line %d
 array(6) {
   [0]=>
   float(%f)
@@ -35,7 +35,7 @@ array(6) {
   float(0)
 }
 
-Notice: Object of class stdClass could not be converted to float in %s on line %d
+Warning: Object of class stdClass could not be converted to float in %s on line %d
 array(6) {
   [0]=>
   float(1)
@@ -51,7 +51,7 @@ array(6) {
   float(0)
 }
 
-Notice: Object of class stdClass could not be converted to float in %s on line %d
+Warning: Object of class stdClass could not be converted to float in %s on line %d
 array(6) {
   [0]=>
   float(1)

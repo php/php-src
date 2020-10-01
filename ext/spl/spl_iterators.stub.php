@@ -34,7 +34,7 @@ class RecursiveCallbackFilterIterator extends CallbackFilterIterator implements 
 
     /**
      * @return bool
-     * @alias RecursiveFilterIterator::hasChildren
+     * @implementation-alias RecursiveFilterIterator::hasChildren
      */
     public function hasChildren() {}
 
@@ -74,7 +74,7 @@ class RecursiveIteratorIterator implements OuterIterator
     public function getDepth() {}
 
     /** @return RecursiveIterator|null */
-    public function getSubIterator(int $level = UNKNOWN) {}
+    public function getSubIterator(?int $level = null) {}
 
     /** @return RecursiveIterator */
     public function getInnerIterator() {}
@@ -115,8 +115,7 @@ interface OuterIterator extends Iterator
 
 class IteratorIterator implements OuterIterator
 {
-    /** @param Traversable $iterator */
-    public function __construct($iterator, string $class_name = UNKNOWN) {}
+    public function __construct(Traversable $iterator, ?string $class_name = null) {}
 
     /** @return Iterator|null */
     public function getInnerIterator() {}
@@ -168,7 +167,7 @@ class ParentIterator extends RecursiveFilterIterator
 
     /**
      * @return bool
-     * @alias RecursiveFilterIterator::hasChildren
+     * @implementation-alias RecursiveFilterIterator::hasChildren
      */
     public function accept() {}
 }
@@ -357,7 +356,7 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 
     /**
      * @return bool
-     * @alias RecursiveFilterIterator::hasChildren
+     * @implementation-alias RecursiveFilterIterator::hasChildren
      */
     public function hasChildren() {}
 

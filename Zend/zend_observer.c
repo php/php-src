@@ -89,9 +89,10 @@ ZEND_API void zend_observer_shutdown(void) {
 	zend_llist_destroy(&zend_observer_error_callbacks);
 }
 
-static void zend_observer_fcall_install(zend_function *function) {
+static void zend_observer_fcall_install(zend_execute_data *execute_data) {
 	zend_llist_element *element;
 	zend_llist *list = &zend_observers_fcall_list;
+	zend_function *function = execute_data->func;
 	zend_op_array *op_array = &function->op_array;
 
 	if (fcall_handlers_arena == NULL) {
@@ -105,7 +106,7 @@ static void zend_observer_fcall_install(zend_function *function) {
 	for (element = list->head; element; element = element->next) {
 		zend_observer_fcall_init init;
 		memcpy(&init, element->data, sizeof init);
-		zend_observer_fcall_handlers handlers = init(function);
+		zend_observer_fcall_handlers handlers = init(execute_data);
 		if (handlers.begin || handlers.end) {
 			zend_llist_add_element(&handlers_list, &handlers);
 		}
@@ -150,7 +151,7 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 
 	fcall_data = ZEND_OBSERVER_DATA(op_array);
 	if (!fcall_data) {
-		zend_observer_fcall_install((zend_function *)op_array);
+		zend_observer_fcall_install(execute_data);
 		fcall_data = ZEND_OBSERVER_DATA(op_array);
 	}
 

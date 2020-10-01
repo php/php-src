@@ -23,5 +23,5 @@ try {
 
 ?>
 --EXPECT--
-mb_convert_encoding(): Argument #3 ($from) must specify at least one encoding
-mb_convert_encoding(): Argument #3 ($from) must specify at least one encoding
+mb_convert_encoding(): Argument #3 ($from_encoding) must specify at least one encoding
+mb_convert_encoding(): Argument #3 ($from_encoding) must specify at least one encoding

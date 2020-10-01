@@ -762,13 +762,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 					len--;
 				}
 
-				/* Disable possible output compression for images */
-				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
-					zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
-					zend_alter_ini_entry_chars(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-					zend_string_release_ex(key, 0);
-				}
-
 				mimetype = estrdup(ptr);
 				newlen = sapi_apply_default_charset(&mimetype, len);
 				if (!SG(sapi_headers).mimetype){

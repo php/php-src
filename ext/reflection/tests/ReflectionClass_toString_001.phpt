@@ -166,14 +166,14 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method getConstants ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE ]
+        Parameter #0 [ <optional> ?int $filter = null ]
       }
     }
 
     Method [ <internal:Reflection> public method getReflectionConstants ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE ]
+        Parameter #0 [ <optional> ?int $filter = null ]
       }
     }
 

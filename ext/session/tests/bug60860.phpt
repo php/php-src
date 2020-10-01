@@ -15,5 +15,5 @@ echo "ok\n";
 
 ?>
 --EXPECT--
-Recoverable fatal error: PHP Startup: Session save handler "user" cannot be set by ini_set() or session_module_name() in Unknown on line 0
+Fatal error: PHP Startup: Session save handler "user" cannot be set by ini_set() in Unknown on line 0
 ok

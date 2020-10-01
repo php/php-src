@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f78e9db58131f9d67021eaea4c3d4be75cafe2ac */
+ * Stub hash: 637bee9d71fb0d566ce38004eec8bc6f75656837 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -63,7 +63,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_date_to_timestamp, 0, 1,
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_variant_date_from_timestamp, 0, 1, variant, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_date_from_timestamp, 0, 1, variant, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

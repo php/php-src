@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4991f82d78672ab23044864fa6dd75851952965c */
+ * Stub hash: e501d6869d721ad720a1a7c8b597b96e9591d5ed */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -7,7 +7,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, n_retries, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_reopen, 0, 2, _IS_BOOL, 0)
@@ -37,10 +37,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_headerinfo, 0, 2, stdCl
 	ZEND_ARG_TYPE_INFO(0, msg_no, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, from_length, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, subject_length, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO(0, default_host, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-#define arginfo_imap_header arginfo_imap_headerinfo
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_imap_rfc822_parse_headers, 0, 1, stdClass, 0)
 	ZEND_ARG_TYPE_INFO(0, headers, IS_STRING, 0)
@@ -173,8 +170,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_append, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_TYPE_INFO(0, folder, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, internal_date, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, internal_date, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_imap_ping arginfo_imap_expunge
@@ -217,8 +214,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_sort, 0, 3, MAY_BE_ARRAY|MA
 	ZEND_ARG_TYPE_INFO(0, criteria, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, reverse, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO(0, search_criteria, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, charset, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, search_criteria, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, charset, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_uid, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
@@ -342,10 +339,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_mail, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, additional_headers, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, cc, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, bcc, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, rpath, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, additional_headers, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cc, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, bcc, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rpath, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 
@@ -440,7 +437,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imap_num_recent, arginfo_imap_num_recent)
 	ZEND_FE(imap_headers, arginfo_imap_headers)
 	ZEND_FE(imap_headerinfo, arginfo_imap_headerinfo)
-	ZEND_FALIAS(imap_header, imap_headerinfo, arginfo_imap_header)
 	ZEND_FE(imap_rfc822_parse_headers, arginfo_imap_rfc822_parse_headers)
 	ZEND_FE(imap_rfc822_write_address, arginfo_imap_rfc822_write_address)
 	ZEND_FE(imap_rfc822_parse_adrlist, arginfo_imap_rfc822_parse_adrlist)

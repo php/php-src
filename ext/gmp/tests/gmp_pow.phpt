@@ -49,13 +49,13 @@ string(4) "1024"
 string(5) "-2048"
 string(4) "1024"
 string(1) "1"
-gmp_pow(): Argument #2 ($exp) must be greater than or equal to 0
+gmp_pow(): Argument #2 ($exponent) must be greater than or equal to 0
 string(4) "1024"
 string(14) "10240000000000"
 string(17) "97656250000000000"
-gmp_pow(): Argument #2 ($exp) must be greater than or equal to 0
+gmp_pow(): Argument #2 ($exponent) must be greater than or equal to 0
 string(14) "10240000000000"
 string(14) "10240000000000"
-gmp_pow(): Argument #2 ($exp) must be of type int, array given
-gmp_pow(): Argument #1 ($base) must be of type GMP|string|int, array given
+gmp_pow(): Argument #2 ($exponent) must be of type int, array given
+gmp_pow(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

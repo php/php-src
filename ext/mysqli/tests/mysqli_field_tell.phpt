@@ -88,9 +88,9 @@ object(stdClass)#%d (13) {
 }
 bool(false)
 int(1)
-mysqli_field_seek(): Argument #2 ($field_nr) must be less than the number of fields for this result set
+mysqli_field_seek(): Argument #2 ($index) must be less than the number of fields for this result set
 int(1)
-mysqli_field_seek(): Argument #2 ($field_nr) must be greater than or equal to 0
+mysqli_field_seek(): Argument #2 ($index) must be greater than or equal to 0
 int(1)
 bool(true)
 int(0)

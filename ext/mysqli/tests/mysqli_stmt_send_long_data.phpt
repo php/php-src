@@ -108,5 +108,5 @@ require_once('skipifconnectfailure.inc');
     require_once("clean_table.inc");
 ?>
 --EXPECT--
-mysqli_stmt_send_long_data(): Argument #2 ($param_nr) must be greater than or equal to 0
+mysqli_stmt_send_long_data(): Argument #2 ($param_num) must be greater than or equal to 0
 done!

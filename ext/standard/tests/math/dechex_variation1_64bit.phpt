@@ -105,10 +105,10 @@ string(4) "3039"
 string(16) "fffffffffffff6d7"
 
 -- Iteration 5 --
-dechex(): Argument #1 ($number) must be of type int, float given
+dechex(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 6 --
-dechex(): Argument #1 ($number) must be of type int, float given
+dechex(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 string(1) "a"
@@ -144,25 +144,25 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 18 --
-dechex(): Argument #1 ($number) must be of type int, string given
+dechex(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 19 --
-dechex(): Argument #1 ($number) must be of type int, string given
+dechex(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 20 --
-dechex(): Argument #1 ($number) must be of type int, array given
+dechex(): Argument #1 ($num) must be of type int, array given
 
 -- Iteration 21 --
-dechex(): Argument #1 ($number) must be of type int, string given
+dechex(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 22 --
-dechex(): Argument #1 ($number) must be of type int, string given
+dechex(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 23 --
-dechex(): Argument #1 ($number) must be of type int, string given
+dechex(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 24 --
-dechex(): Argument #1 ($number) must be of type int, classA given
+dechex(): Argument #1 ($num) must be of type int, classA given
 
 -- Iteration 25 --
 string(1) "0"
@@ -171,4 +171,4 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 27 --
-dechex(): Argument #1 ($number) must be of type int, resource given
+dechex(): Argument #1 ($num) must be of type int, resource given
