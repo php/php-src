@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0rc2
 
+- Curl:
+  . Fixed bug #80121 (Null pointer deref if CurlHandle directly instantiated).
+    (Nikita)
+
 - SPL.
   . Fixed bug #65387 (Circular references in SPL iterators are not garbage
     collected). (Nikita)
