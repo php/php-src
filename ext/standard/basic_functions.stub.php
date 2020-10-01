@@ -823,13 +823,13 @@ function ftell($stream): int|false {}
 function fflush($stream): bool {}
 
 /** @param resource $stream */
-function fwrite($stream, string $string, ?int $max_length = null): int|false {}
+function fwrite($stream, string $data, ?int $max_length = null): int|false {}
 
 /**
  * @param resource $stream
  * @alias fwrite
  */
-function fputs($stream, string $string, ?int $max_length = null): int|false {}
+function fputs($stream, string $data, ?int $max_length = null): int|false {}
 
 /** @param resource|null $context */
 function mkdir(string $directory, int $mode = 0777, bool $recursive = false, $context = null): bool {}
