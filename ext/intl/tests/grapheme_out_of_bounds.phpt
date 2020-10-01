@@ -118,6 +118,49 @@ try {
 }
 echo "\n";
 
+// Empty needle +  out of bounds
+try {
+    var_dump(grapheme_strpos("äöü", "", 4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(grapheme_stripos("äöü", "", 4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(grapheme_strrpos("äöü", "", 4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(grapheme_strripos("äöü", "", 4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(grapheme_strpos("äöü", "", -4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(grapheme_stripos("äöü", "", -4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(grapheme_strrpos("äöü", "", -4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(grapheme_strripos("äöü", "", -4));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+echo "\n";
+
 var_dump(grapheme_substr("foo", 3));
 var_dump(grapheme_substr("foo", -3));
 var_dump(grapheme_substr("foo", 4));
@@ -162,6 +205,15 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+
+grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
