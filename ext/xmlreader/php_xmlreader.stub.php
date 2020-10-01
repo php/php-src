@@ -14,7 +14,7 @@ class XMLReader
     public function getAttributeNo(int $index) {}
 
     /** @return string|null */
-    public function getAttributeNs(string $name, string $namespaceURI) {}
+    public function getAttributeNs(string $name, string $uri) {}
 
     /** @return bool */
     public function getParserProperty(int $property) {}
@@ -32,7 +32,7 @@ class XMLReader
     public function moveToAttributeNo(int $index) {}
 
     /** @return bool */
-    public function moveToAttributeNs(string $name, string $namespaceURI) {}
+    public function moveToAttributeNs(string $name, string $uri) {}
 
     /** @return bool */
     public function moveToElement() {}
@@ -47,10 +47,10 @@ class XMLReader
     public function read() {}
 
     /** @return bool */
-    public function next(?string $localname = null) {}
+    public function next(?string $name = null) {}
 
     /** @return bool|XMLReader */
-    public static function open(string $URI, ?string $encoding = null, int $options = 0) {}
+    public static function open(string $uri, ?string $encoding = null, int $flags = 0) {}
 
     /** @return string */
     public function readInnerXml() {}
@@ -74,8 +74,8 @@ class XMLReader
     public function setRelaxNGSchemaSource(?string $source) {}
 
     /** @return bool|XMLReader */
-    public static function XML(string $source, ?string $encoding = null, int $options = 0) {}
+    public static function XML(string $source, ?string $encoding = null, int $flags = 0) {}
 
     /** @return DOMNode|false */
-    public function expand(?DOMNode $basenode = null) {}
+    public function expand(?DOMNode $baseNode = null) {}
 }
