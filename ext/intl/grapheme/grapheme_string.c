@@ -552,10 +552,6 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 		RETURN_THROWS();
 	}
 
-	if (needle_len == 0) {
-		RETURN_STRINGL(haystack, part ? 0 : haystack_len);
-	}
-
 	if ( !f_ignore_case ) {
 
 		/* ASCII optimization: quick check to see if the string might be there */
