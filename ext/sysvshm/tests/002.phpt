@@ -55,11 +55,11 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
 object(SysvSharedMemory)#%d (0) {
 }
 object(SysvSharedMemory)#%d (0) {
