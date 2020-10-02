@@ -4185,7 +4185,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	zend_bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 	zend_reg result_reg;
 
-	if (Z_MODE(res_addr) == IS_REG) {
+	if (Z_MODE(res_addr) == IS_REG && (res_info & MAY_BE_LONG)) {
 		result_reg = Z_REG(res_addr);
 	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
 		result_reg = Z_REG(op1_addr);
@@ -4255,13 +4255,23 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		if (res_info & MAY_BE_GUARD) {
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-			|	jo &exit_addr
+			if ((res_info & MAY_BE_ANY) == MAY_BE_LONG) {
+				|	jo &exit_addr
+			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+				|	jno &exit_addr
+			} else {
+				ZEND_UNREACHABLE();
+			}
 		} else {
-			|	jo >1
+			if (res_info & MAY_BE_LONG) {
+				|	jo >1
+			} else {
+				|	jno >1
+			}
 		}
 	}
 
-	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+	if (Z_MODE(res_addr) == IS_MEM_ZVAL && (res_info & MAY_BE_LONG)) {
 		|	SET_ZVAL_LVAL res_addr, Ra(result_reg)
 		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
 			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
@@ -4270,12 +4280,14 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		}
 	}
 
-	if (may_overflow && !(res_info & MAY_BE_GUARD)) {
+	if (may_overflow && (!(res_info & MAY_BE_GUARD) || (res_info & MAY_BE_ANY) == MAY_BE_DOUBLE)) {
 		zend_reg tmp_reg1 = ZREG_XMM0;
 		zend_reg tmp_reg2 = ZREG_XMM1;
 
-		|.cold_code
-		|1:
+		if (res_info & MAY_BE_LONG) {
+			|.cold_code
+			|1:
+		}
 
 		do {
 			if ((Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 1) ||
@@ -4311,11 +4323,14 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			|	SSE_SET_ZVAL_DVAL res_addr, tmp_reg1
 		} while (0);
 
-		if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
+		if (Z_MODE(res_addr) == IS_MEM_ZVAL
+		 && (res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE
 		}
-		|	jmp >2
-		|.code
+		if (res_info & MAY_BE_LONG) {
+			|	jmp >2
+			|.code
+		}
 		|2:
 	}
 
