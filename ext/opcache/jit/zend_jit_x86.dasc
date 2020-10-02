@@ -4797,7 +4797,12 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 	if (opcode == ZEND_MOD) {
 		result_reg = ZREG_RAX;
 	} else if (Z_MODE(res_addr) == IS_REG) {
-		result_reg = Z_REG(res_addr);
+		if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR)
+		 && opline->op2_type != IS_CONST) {
+			result_reg = ZREG_R0;
+		} else {
+			result_reg = Z_REG(res_addr);
+		}
 	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
 		result_reg = Z_REG(op1_addr);
 	} else if (Z_REG(res_addr) != ZREG_R0) {
