@@ -3502,10 +3502,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 || !(op2_info & MAY_BE_LONG)) {
 							break;
 						}
-						if (opline->result_type == IS_TMP_VAR
+						res_addr = RES_REG_ADDR();
+						if (Z_MODE(res_addr) != IS_REG
+						 && opline->result_type == IS_TMP_VAR
 						 && (p+1)->op == ZEND_JIT_TRACE_VM
 						 && (p+1)->opline == opline + 1
-						 && (opline+1)->opcode == ZEND_SEND_VAL
+						 && ((opline+1)->opcode == ZEND_SEND_VAL
+						  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
+						   && frame
+						   && frame->call
+						   && frame->call->func
+						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 						 && (opline+1)->op1_type == IS_TMP_VAR
 						 && (opline+1)->op1.var == opline->result.var) {
 							p++;
@@ -3529,7 +3536,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 						} else {
-							send_result = 0;
 							if (opline->result_type == IS_CV) {
 								res_use_info = RES_USE_INFO();
 							} else {
@@ -3539,7 +3545,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								res_use_info = -1;
 #endif
 							}
-							res_addr = RES_REG_ADDR();
 						}
 						res_info = RES_INFO();
 						if (!zend_jit_long_math(&dasm_state, opline,
@@ -3564,19 +3569,22 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->opcode == ZEND_ADD &&
 						    (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY &&
 						    (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
-							if (!zend_jit_add_arrays(&dasm_state, opline, op1_info, op2_info)) {
-								goto jit_failure;
-							}
-							goto done;
-						}
-						if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) ||
+							/* pass */
+						} else if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) ||
 						    !(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 							break;
 						}
-						if (opline->result_type == IS_TMP_VAR
+						res_addr = RES_REG_ADDR();
+						if (Z_MODE(res_addr) != IS_REG
+						 && opline->result_type == IS_TMP_VAR
 						 && (p+1)->op == ZEND_JIT_TRACE_VM
 						 && (p+1)->opline == opline + 1
-						 && (opline+1)->opcode == ZEND_SEND_VAL
+						 && ((opline+1)->opcode == ZEND_SEND_VAL
+						  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
+						   && frame
+						   && frame->call
+						   && frame->call->func
+						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 						 && (opline+1)->op1_type == IS_TMP_VAR
 						 && (opline+1)->op1.var == opline->result.var) {
 							p++;
@@ -3602,7 +3610,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 						} else {
-							send_result = 0;
 							if (opline->result_type == IS_CV) {
 								res_use_info = RES_USE_INFO();
 							} else {
@@ -3612,19 +3619,27 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								res_use_info = -1;
 #endif
 							}
-							res_addr = RES_REG_ADDR();
 						}
 						res_info = RES_INFO();
-						if (!zend_jit_math(&dasm_state, opline,
-								op1_info, OP1_REG_ADDR(),
-								op2_info, OP2_REG_ADDR(),
-								res_use_info, res_info, res_addr,
-								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
-							goto jit_failure;
-						}
-						if ((res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)) {
-							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+						if (opline->opcode == ZEND_ADD &&
+						    (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY &&
+						    (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
+							if (!zend_jit_add_arrays(&dasm_state, opline, op1_info, op2_info, res_addr)) {
+								goto jit_failure;
+							}
+						} else {
+							if (!zend_jit_math(&dasm_state, opline,
+									op1_info, OP1_REG_ADDR(),
+									op2_info, OP2_REG_ADDR(),
+									res_use_info, res_info, res_addr,
+									(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
+									zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								goto jit_failure;
+							}
+							if ((res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)
+							 || (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)) {
+								ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+							}
 						}
 						goto done;
 					case ZEND_CONCAT:
@@ -3640,10 +3655,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						    !(op2_info & MAY_BE_STRING)) {
 							break;
 						}
-						if (opline->result_type == IS_TMP_VAR
+						res_addr = RES_REG_ADDR();
+						if (Z_MODE(res_addr) != IS_REG
+						 && opline->result_type == IS_TMP_VAR
 						 && (p+1)->op == ZEND_JIT_TRACE_VM
 						 && (p+1)->opline == opline + 1
-						 && (opline+1)->opcode == ZEND_SEND_VAL
+						 && ((opline+1)->opcode == ZEND_SEND_VAL
+						  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
+						   && frame
+						   && frame->call
+						   && frame->call->func
+						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 						 && (opline+1)->op1_type == IS_TMP_VAR
 						 && (opline+1)->op1.var == opline->result.var) {
 							p++;
@@ -3667,9 +3689,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (!zend_jit_reuse_ip(&dasm_state)) {
 								goto jit_failure;
 							}
-						} else {
-							send_result = 0;
-							res_addr = RES_REG_ADDR();
 						}
 						if (!zend_jit_concat(&dasm_state, opline,
 								op1_info, op2_info, res_addr,
@@ -4028,13 +4047,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->op1_type != IS_CV) {
 							break;
 						}
-						if (opline->result_type == IS_UNUSED) {
-							res_addr = 0;
-							res_info = -1;
-						} else {
-							res_addr = RES_REG_ADDR();
-							res_info = RES_INFO();
-						}
 						op2_addr = OP2_REG_ADDR();
 						if (ra
 						 && ssa_op->op2_def >= 0
@@ -4070,6 +4082,47 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 								op1_info &= ~MAY_BE_REF;
 								op1_def_info &= ~MAY_BE_REF;
+							}
+						}
+						if (opline->result_type == IS_UNUSED) {
+							res_addr = 0;
+							res_info = -1;
+						} else {
+							res_addr = RES_REG_ADDR();
+							res_info = RES_INFO();
+							if (Z_MODE(res_addr) != IS_REG
+							 && opline->result_type == IS_TMP_VAR
+							 && (p+1)->op == ZEND_JIT_TRACE_VM
+							 && (p+1)->opline == opline + 1
+							 && ((opline+1)->opcode == ZEND_SEND_VAL
+							  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
+							   && frame
+							   && frame->call
+							   && frame->call->func
+							   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
+							 && (opline+1)->op1_type == IS_TMP_VAR
+							 && (opline+1)->op1.var == opline->result.var) {
+								p++;
+								if (frame->call
+								 && frame->call->func
+								 && frame->call->func->type == ZEND_USER_FUNCTION) {
+									uint8_t res_type = p->op1_type;
+									if (res_type & IS_TRACE_REFERENCE) {
+										res_type = IS_UNKNOWN;
+									}
+									if (res_type != IS_UNKNOWN) {
+										zend_jit_trace_send_type(opline+1, frame->call, res_type);
+									}
+								}
+								while ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE ||
+								      (p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
+									p++;
+								}
+								send_result = 1;
+								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+								if (!zend_jit_reuse_ip(&dasm_state)) {
+									goto jit_failure;
+								}
 							}
 						}
 						if (!zend_jit_assign(&dasm_state, opline,
