@@ -608,6 +608,9 @@ PHP 8.0 UPGRADE NOTES
   . Calling crypt() without an explicit salt is no longer supported. If you
     would like to produce a strong hash with an auto-generated salt, use
     password_hash() instead.
+  . substr(), mb_substr(), iconv_substr() and grapheme_substr() now consistently
+    clamp out-of-bounds offsets to the string boundary. Previously, false was
+    returned instead of the empty string in some cases.
 
 - Sysvmsg:
   . msg_get_queue() will now return an SysvMessageQueue object rather than a
