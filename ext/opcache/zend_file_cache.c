@@ -1660,8 +1660,9 @@ static int zend_opcache_check_jump_opcode_tag(int fd, char* filename) {
 	if(memcmp(taginfo.tagname, T_PHP_OPCODE, T_PHP_OPCODE_LEN) != 0) {
 		return -1;
 	}
+
 	if(memcmp(&taginfo.php_version_id, &php_version_id, sizeof(php_version_id)) != 0) {
-		zend_error(E_WARNING, "Opcode file %s is compiled by different versions of PHP", filename);
+		zend_error(E_STRICT, "Opcode file '%s' (version id: %d) is compiled by different versions of PHP (version id: %d), it's not safe and not suggest", filename, taginfo.php_version_id, php_version_id);
 	}
 	return 0;
 }
