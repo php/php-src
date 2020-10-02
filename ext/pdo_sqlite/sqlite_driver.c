@@ -695,6 +695,25 @@ static void pdo_sqlite_request_shutdown(pdo_dbh_t *dbh)
 	}
 }
 
+static void pdo_sqlite_get_gc(pdo_dbh_t *dbh, zend_get_gc_buffer *gc_buffer)
+{
+	pdo_sqlite_db_handle *H = dbh->driver_data;
+
+	struct pdo_sqlite_func *func = H->funcs;
+	while (func) {
+		zend_get_gc_buffer_add_zval(gc_buffer, &func->func);
+		zend_get_gc_buffer_add_zval(gc_buffer, &func->step);
+		zend_get_gc_buffer_add_zval(gc_buffer, &func->fini);
+		func = func->next;
+	}
+
+	struct pdo_sqlite_collation *collation = H->collations;
+	while (collation) {
+		zend_get_gc_buffer_add_zval(gc_buffer, &collation->callback);
+		collation = collation->next;
+	}
+}
+
 static const struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_closer,
 	sqlite_handle_preparer,
@@ -711,7 +730,7 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	get_driver_methods,
 	pdo_sqlite_request_shutdown,
 	NULL, /* in_transaction */
-	NULL /* get_gc */
+	pdo_sqlite_get_gc
 };
 
 static char *make_filename_safe(const char *filename)

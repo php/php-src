@@ -288,7 +288,7 @@ typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh);
 
 /* Called when the PDO handle is scanned for GC. Should populate the get_gc buffer
  * with any zvals in the driver_data that would be freed if the handle is destroyed. */
-typedef void (*pdo_dbh_get_gc_func)(zend_get_gc_buffer *buffer);
+typedef void (*pdo_dbh_get_gc_func)(pdo_dbh_t *dbh, zend_get_gc_buffer *buffer);
 
 /* for adding methods to the dbh or stmt objects
 pointer to a list of driver specific functions. The convention is
