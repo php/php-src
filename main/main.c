@@ -744,14 +744,14 @@ static int module_startup = 1;
 static int module_shutdown = 0;
 
 /* {{{ php_during_module_startup */
-static int php_during_module_startup(void)
+PHPAPI int php_during_module_startup(void)
 {
 	return module_startup;
 }
 /* }}} */
 
 /* {{{ php_during_module_shutdown */
-static int php_during_module_shutdown(void)
+PHPAPI int php_during_module_shutdown(void)
 {
 	return module_shutdown;
 }
