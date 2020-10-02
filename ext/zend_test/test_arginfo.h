@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 87c9d71b08c538c28b4f9bad01d7a7a3a3b191ef */
+ * Stub hash: 1aa8e876ff9efb99c61603216eed267b0d225221 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -61,22 +61,22 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestTrait_testMethod,
 ZEND_END_ARG_INFO()
 
 
-ZEND_FUNCTION(zend_test_array_return);
-ZEND_FUNCTION(zend_test_nullable_array_return);
-ZEND_FUNCTION(zend_test_void_return);
-ZEND_FUNCTION(zend_test_deprecated);
-ZEND_FUNCTION(zend_create_unterminated_string);
-ZEND_FUNCTION(zend_terminate_string);
-ZEND_FUNCTION(zend_leak_variable);
-ZEND_FUNCTION(zend_leak_bytes);
-ZEND_FUNCTION(zend_string_or_object);
-ZEND_FUNCTION(zend_string_or_object_or_null);
-ZEND_FUNCTION(zend_string_or_stdclass);
-ZEND_FUNCTION(zend_string_or_stdclass_or_null);
-ZEND_FUNCTION(zend_iterable);
-ZEND_METHOD(_ZendTestClass, is_object);
-ZEND_METHOD(_ZendTestClass, __toString);
-ZEND_METHOD(_ZendTestTrait, testMethod);
+static ZEND_FUNCTION(zend_test_array_return);
+static ZEND_FUNCTION(zend_test_nullable_array_return);
+static ZEND_FUNCTION(zend_test_void_return);
+static ZEND_FUNCTION(zend_test_deprecated);
+static ZEND_FUNCTION(zend_create_unterminated_string);
+static ZEND_FUNCTION(zend_terminate_string);
+static ZEND_FUNCTION(zend_leak_variable);
+static ZEND_FUNCTION(zend_leak_bytes);
+static ZEND_FUNCTION(zend_string_or_object);
+static ZEND_FUNCTION(zend_string_or_object_or_null);
+static ZEND_FUNCTION(zend_string_or_stdclass);
+static ZEND_FUNCTION(zend_string_or_stdclass_or_null);
+static ZEND_FUNCTION(zend_iterable);
+static ZEND_METHOD(_ZendTestClass, is_object);
+static ZEND_METHOD(_ZendTestClass, __toString);
+static ZEND_METHOD(_ZendTestTrait, testMethod);
 
 
 static const zend_function_entry ext_functions[] = {

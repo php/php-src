@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-function-entries static */
 
 class _ZendTestClass {
     public static function is_object(): int {}

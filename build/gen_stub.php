@@ -624,6 +624,8 @@ class FileInfo {
     public $classInfos = [];
     /** @var bool */
     public $generateFunctionEntries = false;
+    /** @var string */
+    public $declarationPrefix = "";
 
     /**
      * @return iterable<FuncInfo>
@@ -941,8 +943,12 @@ function parseStubFile(string $code): FileInfo {
     $fileInfo = new FileInfo;
     $fileDocComment = getFileDocComment($stmts);
     if ($fileDocComment) {
-        if (strpos($fileDocComment->getText(), '@generate-function-entries') !== false) {
-            $fileInfo->generateFunctionEntries = true;
+        $fileTags = parseDocComment($fileDocComment);
+        foreach ($fileTags as $tag) {
+            if ($tag->name === 'generate-function-entries') {
+                $fileInfo->generateFunctionEntries = true;
+                $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
+            }
         }
     }
 
@@ -1110,15 +1116,14 @@ function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
         $generatedFunctionDeclarations = [];
         $code .= generateCodeWithConditions(
             $fileInfo->getAllFuncInfos(), "",
-            function (FuncInfo $funcInfo) use(&$generatedFunctionDeclarations) {
+            function (FuncInfo $funcInfo) use($fileInfo, &$generatedFunctionDeclarations) {
                 $key = $funcInfo->getDeclarationKey();
                 if (isset($generatedFunctionDeclarations[$key])) {
                     return null;
                 }
 
                 $generatedFunctionDeclarations[$key] = true;
-
-                return $funcInfo->getDeclaration();
+                return $fileInfo->declarationPrefix . $funcInfo->getDeclaration();
             }
         );
 
