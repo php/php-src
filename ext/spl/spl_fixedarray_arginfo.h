@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 831fe70055eb62135ae49321e5e5f3fe08c3d95f */
+ * Stub hash: 54028c566f2d868da1f91e5f4f627fbe6e823bb5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -39,6 +39,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_SplFixedArray_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___set_state, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, state, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(SplFixedArray, __construct);
 ZEND_METHOD(SplFixedArray, __wakeup);
@@ -52,6 +56,7 @@ ZEND_METHOD(SplFixedArray, offsetGet);
 ZEND_METHOD(SplFixedArray, offsetSet);
 ZEND_METHOD(SplFixedArray, offsetUnset);
 ZEND_METHOD(SplFixedArray, getIterator);
+ZEND_METHOD(SplFixedArray, __set_state);
 
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
@@ -67,5 +72,6 @@ static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, offsetSet, arginfo_class_SplFixedArray_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetUnset, arginfo_class_SplFixedArray_offsetUnset, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, getIterator, arginfo_class_SplFixedArray_getIterator, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, __set_state, arginfo_class_SplFixedArray___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
