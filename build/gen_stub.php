@@ -31,7 +31,8 @@ function processStubFile(string $stubFile, Context $context) {
             throw new Exception("File $stubFile does not exist");
         }
 
-        $arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
+        $arginfoFile = str_replace('.stub.php', '', $stubFile)
+                     . ($context->legacy ? '_legacy' : '') . '_arginfo.h';
         $stubCode = file_get_contents($stubFile);
         $stubHash = computeStubHash($stubCode);
         $oldStubHash = extractStubHash($arginfoFile);
@@ -42,6 +43,12 @@ function processStubFile(string $stubFile, Context $context) {
 
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
+        if ($context->legacy) {
+            foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+                $funcInfo->discardInfoForOldPhpVersions();
+            }
+        }
+
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
         file_put_contents($arginfoFile, $arginfoCode);
 
@@ -533,6 +540,14 @@ class FuncInfo {
         }
 
         return $flags;
+    }
+
+    public function discardInfoForOldPhpVersions(): void {
+        $this->return->type = null;
+        foreach ($this->args as $arg) {
+            $arg->type = null;
+            $arg->defaultValue = null;
+        }
     }
 }
 
@@ -1148,10 +1163,11 @@ function initPhpParser() {
 }
 
 $optind = null;
-$options = getopt("f", ["force-regeneration", "parameter-stats"], $optind);
+$options = getopt("f", ["force-regeneration", "parameter-stats", "legacy"], $optind);
 
 $context = new Context;
 $printParameterStats = isset($options["parameter-stats"]);
+$context->legacy = isset($options["legacy"]);
 $context->forceRegeneration =
     isset($options["f"]) || isset($options["force-regeneration"]) || $printParameterStats;
 
