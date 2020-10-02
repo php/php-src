@@ -59,13 +59,13 @@ function ftp_systype($ftp): string|false {}
  * @param resource $ftp
  * @param resource $stream
  */
-function ftp_fget($ftp, $stream, string $filename, int $mode = FTP_BINARY, int $offset = 0): bool {}
+function ftp_fget($ftp, $stream, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): bool {}
 
 /**
  * @param resource $ftp
  * @param resource $stream
  */
-function ftp_nb_fget($ftp, $stream, string $filename, int $mode = FTP_BINARY, int $offset = 0): int {}
+function ftp_nb_fget($ftp, $stream, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): int {}
 
 /** @param resource $ftp */
 function ftp_pasv($ftp, bool $enable): bool {}
@@ -83,13 +83,13 @@ function ftp_nb_continue($ftp): int {}
  * @param resource $ftp
  * @param resource $stream
  */
-function ftp_fput($ftp, string $filename, $stream, int $mode = FTP_BINARY, int $offset = 0): bool {}
+function ftp_fput($ftp, string $remote_filename, $stream, int $mode = FTP_BINARY, int $offset = 0): bool {}
 
 /**
  * @param resource $ftp
  * @param resource $stream
  */
-function ftp_nb_fput($ftp, string $filename, $stream, int $mode = FTP_BINARY, int $offset = 0): int {}
+function ftp_nb_fput($ftp, string $remote_filename, $stream, int $mode = FTP_BINARY, int $offset = 0): int {}
 
 /** @param resource $ftp */
 function ftp_put($ftp, string $remote_filename, string $local_filename, int $mode = FTP_BINARY, int $offset = 0): bool {}
