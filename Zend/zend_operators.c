@@ -1253,7 +1253,9 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-static zend_result ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
+/* Returns SUCCESS/FAILURE/TYPES_NOT_HANDLED */
+#define TYPES_NOT_HANDLED 1
+static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -1290,14 +1292,14 @@ static zend_result ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval
 		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else {
-		return FAILURE;
+		return TYPES_NOT_HANDLED;
 	}
 division_by_0:
 	if (result != op1) {
 		ZVAL_UNDEF(result);
 	}
 	zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
-	return SUCCESS;
+	return FAILURE;
 }
 /* }}} */
 
@@ -1305,8 +1307,10 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 {
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
-	if (div_function_base(result, op1, op2) == SUCCESS) {
-		return SUCCESS;
+
+	int retval = div_function_base(result, op1, op2);
+	if (retval != TYPES_NOT_HANDLED) {
+		return retval;
 	}
 
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
@@ -1325,12 +1329,9 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 		zval_ptr_dtor(result);
 	}
 
-	if (div_function_base(result, &op1_copy, &op2_copy) == SUCCESS) {
-		return SUCCESS;
-	}
-
-	ZEND_ASSERT(0 && "Operation must succeed");
-	return FAILURE;
+	retval = div_function_base(result, &op1_copy, &op2_copy);
+	ZEND_ASSERT(retval != TYPES_NOT_HANDLED && "Types should be handled");
+	return retval;
 }
 /* }}} */
 
