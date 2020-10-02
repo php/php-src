@@ -27,6 +27,8 @@ PHP 8.0 UPGRADE NOTES
   . Methods with the same name as the class are no longer interpreted as
     constructors. The __construct() method should be used instead.
   . Removed ability to call non-static methods statically.
+    Thus `is_callable` will fail when checking for a non-static method with a
+    classname (must check with an object instance).
   . Removed (unset) cast.
   . Removed track_errors ini directive. This means that $php_errormsg is no
     longer available. The error_get_last() function may be used instead.
