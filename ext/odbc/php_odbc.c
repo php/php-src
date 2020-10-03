@@ -971,9 +971,8 @@ PHP_FUNCTION(odbc_execute)
 	} params_t;
 	params_t *params = NULL;
 	char *filename;
-	unsigned char otype;
 	SQLSMALLINT ctype;
-   	odbc_result *result;
+	odbc_result *result;
 	int i, ne;
 	RETCODE rc;
 
@@ -998,8 +997,8 @@ PHP_FUNCTION(odbc_execute)
 
 		i = 1;
 		ZEND_HASH_FOREACH_VAL(pv_param_ht, tmp) {
+			unsigned char otype = Z_TYPE_P(tmp);
 			zend_string *tmpstr = zval_try_get_string(tmp);
-			otype = Z_TYPE_P(tmp);
 			if (!tmpstr) {
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
 				for (i = 0; i < result->numparams; i++) {
