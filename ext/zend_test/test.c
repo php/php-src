@@ -51,7 +51,7 @@ static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
 static zend_object_handlers zend_test_class_handlers;
 
-ZEND_FUNCTION(zend_test_func)
+static ZEND_FUNCTION(zend_test_func)
 {
 	RETVAL_STR_COPY(EX(func)->common.function_name);
 
@@ -62,23 +62,23 @@ ZEND_FUNCTION(zend_test_func)
 	EX(func) = NULL;
 }
 
-ZEND_FUNCTION(zend_test_array_return)
+static ZEND_FUNCTION(zend_test_array_return)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-ZEND_FUNCTION(zend_test_nullable_array_return)
+static ZEND_FUNCTION(zend_test_nullable_array_return)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-ZEND_FUNCTION(zend_test_void_return)
+static ZEND_FUNCTION(zend_test_void_return)
 {
 	/* dummy */
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-ZEND_FUNCTION(zend_test_deprecated)
+static ZEND_FUNCTION(zend_test_deprecated)
 {
 	zval *arg1;
 
@@ -88,7 +88,7 @@ ZEND_FUNCTION(zend_test_deprecated)
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
-ZEND_FUNCTION(zend_create_unterminated_string)
+static ZEND_FUNCTION(zend_create_unterminated_string)
 {
 	zend_string *str, *res;
 
@@ -104,7 +104,7 @@ ZEND_FUNCTION(zend_create_unterminated_string)
 }
 
 /* Enforce terminate null byte on string. This avoids a warning in debug builds. */
-ZEND_FUNCTION(zend_terminate_string)
+static ZEND_FUNCTION(zend_terminate_string)
 {
 	zend_string *str;
 
@@ -116,7 +116,7 @@ ZEND_FUNCTION(zend_terminate_string)
 }
 
 /* {{{ Cause an intentional memory leak, for testing/debugging purposes */
-ZEND_FUNCTION(zend_leak_bytes)
+static ZEND_FUNCTION(zend_leak_bytes)
 {
 	zend_long leakbytes = 3;
 
@@ -129,7 +129,7 @@ ZEND_FUNCTION(zend_leak_bytes)
 /* }}} */
 
 /* {{{ Leak a refcounted variable */
-ZEND_FUNCTION(zend_leak_variable)
+static ZEND_FUNCTION(zend_leak_variable)
 {
 	zval *zv;
 
@@ -147,7 +147,7 @@ ZEND_FUNCTION(zend_leak_variable)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OR_STR */
-ZEND_FUNCTION(zend_string_or_object)
+static ZEND_FUNCTION(zend_string_or_object)
 {
 	zend_string *str;
 	zend_object *object;
@@ -165,7 +165,7 @@ ZEND_FUNCTION(zend_string_or_object)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OR_STR_OR_NULL */
-ZEND_FUNCTION(zend_string_or_object_or_null)
+static ZEND_FUNCTION(zend_string_or_object_or_null)
 {
 	zend_string *str;
 	zend_object *object;
@@ -185,7 +185,7 @@ ZEND_FUNCTION(zend_string_or_object_or_null)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR */
-ZEND_FUNCTION(zend_string_or_stdclass)
+static ZEND_FUNCTION(zend_string_or_stdclass)
 {
 	zend_string *str;
 	zend_object *object;
@@ -203,7 +203,7 @@ ZEND_FUNCTION(zend_string_or_stdclass)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
-ZEND_FUNCTION(zend_string_or_stdclass_or_null)
+static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 {
 	zend_string *str;
 	zend_object *object;
@@ -223,7 +223,7 @@ ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 /* }}} */
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
-ZEND_FUNCTION(zend_iterable)
+static ZEND_FUNCTION(zend_iterable)
 {
 	zval *arg1, *arg2;
 
@@ -292,18 +292,18 @@ void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t ta
 	}
 }
 
-ZEND_METHOD(_ZendTestClass, __toString) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, __toString) /* {{{ */ {
 	RETURN_EMPTY_STRING();
 }
 /* }}} */
 
 /* Internal function returns bool, we return int. */
-ZEND_METHOD(_ZendTestClass, is_object) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, is_object) /* {{{ */ {
 	RETURN_LONG(42);
 }
 /* }}} */
 
-ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
+static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 	RETURN_TRUE;
 }
 /* }}} */

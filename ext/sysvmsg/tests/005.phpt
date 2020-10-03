@@ -46,7 +46,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-msg_receive(): Argument #4 ($maxsize) must be greater than 0
+msg_receive(): Argument #4 ($max_message_size) must be greater than 0
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)
@@ -56,7 +56,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-msg_receive(): Argument #4 ($maxsize) must be greater than 0
+msg_receive(): Argument #4 ($max_message_size) must be greater than 0
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)

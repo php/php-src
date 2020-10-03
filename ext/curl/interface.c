@@ -3308,6 +3308,12 @@ static void curl_free_obj(zend_object *object)
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
 
+	if (!ch->cp) {
+		/* Can happen if constructor throws. */
+		zend_object_std_dtor(&ch->std);
+		return;
+	}
+
 	_php_curl_verify_handlers(ch, 0);
 
 	/*
@@ -3321,12 +3327,10 @@ static void curl_free_obj(zend_object *object)
 	 *
 	 * Libcurl commit d021f2e8a00 fix this issue and should be part of 7.28.2
 	 */
-	if (ch->cp != NULL) {
-		curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, curl_write_nothing);
-		curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION, curl_write_nothing);
+	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, curl_write_nothing);
+	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION, curl_write_nothing);
 
-		curl_easy_cleanup(ch->cp);
-	}
+	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
 	if (--(*ch->clone) == 0) {

@@ -1,29 +1,29 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 40f03edb33ac213c9f436d5e7ea85ec2750fdf6e */
+ * Stub hash: 3f918caddccfebee1f1048abd4a23672724436ad */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_msg_get_queue, 0, 1, SysvMessageQueue, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, perms, IS_LONG, 0, "0666")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, permissions, IS_LONG, 0, "0666")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msg_send, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, queue, SysvMessageQueue, 0)
-	ZEND_ARG_TYPE_INFO(0, msgtype, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, message_type, IS_LONG, 0)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, serialize, _IS_BOOL, 0, "true")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, blocking, _IS_BOOL, 0, "true")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errorcode, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, error_code, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msg_receive, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, queue, SysvMessageQueue, 0)
-	ZEND_ARG_TYPE_INFO(0, desiredmsgtype, IS_LONG, 0)
-	ZEND_ARG_INFO(1, msgtype)
-	ZEND_ARG_TYPE_INFO(0, maxsize, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, desired_message_type, IS_LONG, 0)
+	ZEND_ARG_INFO(1, received_message_type)
+	ZEND_ARG_TYPE_INFO(0, max_message_size, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(1, message, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unserialize, _IS_BOOL, 0, "true")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errorcode, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, error_code, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msg_remove_queue, 0, 1, _IS_BOOL, 0)

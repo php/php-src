@@ -1656,6 +1656,16 @@ static void zend_jit_start_reuse_ip(void)
 	reuse_ip = 1;
 }
 
+static int zend_jit_reuse_ip(dasm_State **Dst)
+{
+	if (!reuse_ip) {
+		zend_jit_start_reuse_ip();
+		|	// call = EX(call);
+		|	mov RX, EX->call
+	}
+	return 1;
+}
+
 static void zend_jit_stop_reuse_ip(void)
 {
 	reuse_ip = 0;
@@ -4175,7 +4185,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	zend_bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 	zend_reg result_reg;
 
-	if (Z_MODE(res_addr) == IS_REG) {
+	if (Z_MODE(res_addr) == IS_REG && (res_info & MAY_BE_LONG)) {
 		result_reg = Z_REG(res_addr);
 	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
 		result_reg = Z_REG(op1_addr);
@@ -4245,13 +4255,23 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		if (res_info & MAY_BE_GUARD) {
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-			|	jo &exit_addr
+			if ((res_info & MAY_BE_ANY) == MAY_BE_LONG) {
+				|	jo &exit_addr
+			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+				|	jno &exit_addr
+			} else {
+				ZEND_UNREACHABLE();
+			}
 		} else {
-			|	jo >1
+			if (res_info & MAY_BE_LONG) {
+				|	jo >1
+			} else {
+				|	jno >1
+			}
 		}
 	}
 
-	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+	if (Z_MODE(res_addr) == IS_MEM_ZVAL && (res_info & MAY_BE_LONG)) {
 		|	SET_ZVAL_LVAL res_addr, Ra(result_reg)
 		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
 			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
@@ -4260,12 +4280,14 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		}
 	}
 
-	if (may_overflow && !(res_info & MAY_BE_GUARD)) {
+	if (may_overflow && (!(res_info & MAY_BE_GUARD) || (res_info & MAY_BE_ANY) == MAY_BE_DOUBLE)) {
 		zend_reg tmp_reg1 = ZREG_XMM0;
 		zend_reg tmp_reg2 = ZREG_XMM1;
 
-		|.cold_code
-		|1:
+		if (res_info & MAY_BE_LONG) {
+			|.cold_code
+			|1:
+		}
 
 		do {
 			if ((Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 1) ||
@@ -4301,11 +4323,14 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			|	SSE_SET_ZVAL_DVAL res_addr, tmp_reg1
 		} while (0);
 
-		if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
+		if (Z_MODE(res_addr) == IS_MEM_ZVAL
+		 && (res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE
 		}
-		|	jmp >2
-		|.code
+		if (res_info & MAY_BE_LONG) {
+			|	jmp >2
+			|.code
+		}
 		|2:
 	}
 
@@ -4709,20 +4734,11 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 	return 1;
 }
 
-static int zend_jit_math(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, zend_jit_addr op2_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr, zend_bool send_result, int may_overflow, int may_throw)
+static int zend_jit_math(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, zend_jit_addr op2_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr, int may_overflow, int may_throw)
 {
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF) && !(op2_info & MAY_BE_UNDEF));
 	ZEND_ASSERT((op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
 	    (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)));
-
-	if (send_result) {
-		if (!reuse_ip) {
-			zend_jit_start_reuse_ip();
-			|	// call = EX(call);
-			|	mov RX, EX->call
-		}
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-	}
 
 	if (!zend_jit_math_helper(Dst, opline, opline->opcode, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, opline->result.var, res_addr, res_info, res_use_info, may_overflow, may_throw)) {
 		return 0;
@@ -4733,11 +4749,10 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 	return 1;
 }
 
-static int zend_jit_add_arrays(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op2_info)
+static int zend_jit_add_arrays(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, zend_jit_addr res_addr)
 {
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_jit_addr op2_addr = OP2_ADDR();
-	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
 	|	GET_ZVAL_LVAL ZREG_FCARG1a, op1_addr
 	|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
@@ -4796,7 +4811,12 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 	if (opcode == ZEND_MOD) {
 		result_reg = ZREG_RAX;
 	} else if (Z_MODE(res_addr) == IS_REG) {
-		result_reg = Z_REG(res_addr);
+		if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR)
+		 && opline->op2_type != IS_CONST) {
+			result_reg = ZREG_R0;
+		} else {
+			result_reg = Z_REG(res_addr);
+		}
 	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
 		result_reg = Z_REG(op1_addr);
 	} else if (Z_REG(res_addr) != ZREG_R0) {
@@ -5049,19 +5069,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 	return 1;
 }
 
-static int zend_jit_long_math(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_ssa_range *op1_range, zend_jit_addr op1_addr, uint32_t op2_info, zend_ssa_range *op2_range, zend_jit_addr op2_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr, zend_bool send_result, int may_throw)
+static int zend_jit_long_math(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_ssa_range *op1_range, zend_jit_addr op1_addr, uint32_t op2_info, zend_ssa_range *op2_range, zend_jit_addr op2_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr, int may_throw)
 {
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF) && !(op2_info & MAY_BE_UNDEF));
 	ZEND_ASSERT((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG));
-
-	if (send_result) {
-		if (!reuse_ip) {
-			zend_jit_start_reuse_ip();
-			|	// call = EX(call);
-			|	mov RX, EX->call
-		}
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-	}
 
 	if (!zend_jit_long_math_helper(Dst, opline, opline->opcode,
 			opline->op1_type, opline->op1, op1_addr, op1_info, op1_range,
@@ -5160,9 +5171,9 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 	return 1;
 }
 
-static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, zend_bool send_result, int may_throw)
+static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, zend_jit_addr res_addr, int may_throw)
 {
-	zend_jit_addr op1_addr, op2_addr, res_addr;
+	zend_jit_addr op1_addr, op2_addr;
 
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF) && !(op2_info & MAY_BE_UNDEF));
 	ZEND_ASSERT((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING));
@@ -5170,16 +5181,6 @@ static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, uint32_t op1
 	op1_addr = OP1_ADDR();
 	op2_addr = OP2_ADDR();
 
-	if (send_result) {
-		if (!reuse_ip) {
-			zend_jit_start_reuse_ip();
-			|	// call = EX(call);
-			|	mov RX, EX->call
-		}
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-	} else {
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
-	}
 	return zend_jit_concat_helper(Dst, opline, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr, may_throw);
 }
 
@@ -10011,10 +10012,8 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t o
 
 	ZEND_ASSERT(opline->opcode == ZEND_SEND_VAL || arg_num <= MAX_ARG_FLAG_NUM);
 
-	if (!reuse_ip) {
-		zend_jit_start_reuse_ip();
-		|	// call = EX(call);
-		|	mov RX, EX->call
+	if (!zend_jit_reuse_ip(Dst)) {
+		return 0;
 	}
 
 	if (opline->opcode == ZEND_SEND_VAL_EX) {
@@ -10093,10 +10092,8 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 	op1_addr = OP1_ADDR();
 	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 
-	if (!reuse_ip) {
-		zend_jit_start_reuse_ip();
-		|	// call = EX(call);
-		|	mov RX, EX->call
+	if (!zend_jit_reuse_ip(Dst)) {
+		return 0;
 	}
 
 	if (opline->op1_type == IS_VAR) {
@@ -10180,10 +10177,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 
 	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 
-	if (!reuse_ip) {
-		zend_jit_start_reuse_ip();
-		|	// call = EX(call);
-		|	mov RX, EX->call
+	if (!zend_jit_reuse_ip(Dst)) {
+		return 0;
 	}
 
 	if (opline->opcode == ZEND_SEND_VAR_EX) {
@@ -10427,11 +10422,10 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline)
 		// if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 		uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
 
-		if (!reuse_ip) {
-			zend_jit_start_reuse_ip();
-			|	// call = EX(call);
-			|	mov RX, EX->call
+		if (!zend_jit_reuse_ip(Dst)) {
+			return 0;
 		}
+
 		|	mov r0, EX:RX->func
 		|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
 		|	jnz >1

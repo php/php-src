@@ -2,6 +2,8 @@
 
 /** @generate-function-entries */
 
+namespace {
+
 final class FFI
 {
     public static function cdef(string $code = "", ?string $lib = null): FFI {}
@@ -62,6 +64,12 @@ final class FFI
     public static function isNull(FFI\CData $ptr): bool {}
 }
 
+}
+
+namespace FFI {
+
 final class CType {
     public function getName() : string {}
+}
+
 }

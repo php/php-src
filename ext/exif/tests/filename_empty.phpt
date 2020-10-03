@@ -29,7 +29,7 @@ try {
 
 ?>
 --EXPECT--
-exif_read_data(): Argument #1 ($filename) cannot be empty
-exif_thumbnail(): Argument #1 ($filename) cannot be empty
-exif_read_data(): Argument #1 ($filename) must not contain any null bytes
-exif_thumbnail(): Argument #1 ($filename) must not contain any null bytes
+exif_read_data(): Argument #1 ($file) cannot be empty
+exif_thumbnail(): Argument #1 ($file) cannot be empty
+exif_read_data(): Argument #1 ($file) must not contain any null bytes
+exif_thumbnail(): Argument #1 ($file) must not contain any null bytes
