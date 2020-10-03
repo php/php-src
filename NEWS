@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #80184 (Complex expression in while / if statements resolves to
     false incorrectly). (Nikita)
+  . Fixed bug #80175 (PHP8 RC1 - JIT Buffer not working). (cmb)
 
 - Reflection:
   . Fixed bug #80190 (ReflectionMethod::getReturnType() does not handle static
