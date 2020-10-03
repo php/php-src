@@ -1089,32 +1089,31 @@ PHP_FUNCTION(odbc_execute)
 		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFreeStmt");
 	}
 
-	rc = SQLExecute(result->stmt);
-
 	result->fetched = 0;
-	if (rc == SQL_NEED_DATA) {
-		char buf[4096];
-		int fp, nbytes;
-		while (rc == SQL_NEED_DATA) {
-			rc = SQLParamData(result->stmt, (void*)&fp);
-			if (rc == SQL_NEED_DATA) {
-				while ((nbytes = read(fp, &buf, 4096)) > 0) {
-					SQLPutData(result->stmt, (void*)&buf, nbytes);
+	rc = SQLExecute(result->stmt);
+	switch (rc) {
+		case SQL_NEED_DATA: {
+			char buf[4096];
+			int fp, nbytes;
+			while (rc == SQL_NEED_DATA) {
+				rc = SQLParamData(result->stmt, (void*)&fp);
+				if (rc == SQL_NEED_DATA) {
+					while ((nbytes = read(fp, &buf, 4096)) > 0) {
+						SQLPutData(result->stmt, (void*)&buf, nbytes);
+					}
 				}
 			}
+			break;
 		}
-	} else {
-		switch (rc) {
-			case SQL_SUCCESS:
-				break;
-			case SQL_NO_DATA_FOUND:
-			case SQL_SUCCESS_WITH_INFO:
-				odbc_sql_error(result->conn_ptr, result->stmt, "SQLExecute");
-				break;
-			default:
-				odbc_sql_error(result->conn_ptr, result->stmt, "SQLExecute");
-				RETVAL_FALSE;
-		}
+		case SQL_SUCCESS:
+			break;
+		case SQL_NO_DATA_FOUND:
+		case SQL_SUCCESS_WITH_INFO:
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExecute");
+			break;
+		default:
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExecute");
+			RETVAL_FALSE;
 	}
 
 	if (result->numparams > 0) {
