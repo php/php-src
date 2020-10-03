@@ -1081,7 +1081,7 @@ function intdiv(int $num1, int $num2): int {}
 
 function is_infinite(float $num): bool {}
 
-function pow(mixed $num, mixed $exponent): int|float|object {}
+function pow(mixed $num, mixed $exponent): int|float {}
 
 function exp(float $num): float {}
 
