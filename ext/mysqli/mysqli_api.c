@@ -811,14 +811,42 @@ PHP_FUNCTION(mysqli_stmt_execute)
 {
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
+	zval		*input_params = NULL;
 #ifndef MYSQLI_USE_MYSQLND
 	unsigned int	i;
 #endif
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|a", &mysql_stmt, mysqli_stmt_class_entry, &input_params) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
+
+	// bind-in-execute
+#if defined(MYSQLI_USE_MYSQLND)
+	if(input_params) {
+		zval *tmp;
+		unsigned int index;
+		MYSQLND_PARAM_BIND	*params;
+
+		params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
+		if (!params) {
+			// can we safely return here?
+			RETVAL_FALSE;
+		}
+
+		index = 0;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input_params), tmp) {
+			ZVAL_COPY_VALUE(&params[index].zv, tmp);
+			params[index].type = MYSQL_TYPE_VAR_STRING;
+			index++;
+		} ZEND_HASH_FOREACH_END();
+
+		if(mysqlnd_stmt_bind_param(stmt->stmt, params)) {
+			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+			RETVAL_FALSE;
+		}
+	}
+#endif
 
 #ifndef MYSQLI_USE_MYSQLND
 	if (stmt->param.var_cnt) {
