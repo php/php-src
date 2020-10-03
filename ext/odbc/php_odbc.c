@@ -960,16 +960,27 @@ PHP_FUNCTION(odbc_prepare)
  * Execute prepared SQL statement. Supports only input parameters.
  */
 
+typedef struct odbc_params_t {
+	SQLLEN vallen;
+	int fp;
+} odbc_params_t;
+
+static void odbc_release_params(odbc_result *result, odbc_params_t *params) {
+	SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
+	for (int i = 0; i < result->numparams; i++) {
+		if (params[i].fp != -1) {
+			close(params[i].fp);
+		}
+	}
+	efree(params);
+}
+
 /* {{{ Execute a prepared statement */
 PHP_FUNCTION(odbc_execute)
 {
 	zval *pv_res, *tmp;
 	HashTable *pv_param_ht = (HashTable *) &zend_empty_array;
-	typedef struct params_t {
-		SQLLEN vallen;
-		int fp;
-	} params_t;
-	params_t *params = NULL;
+	odbc_params_t *params = NULL;
 	char *filename;
 	SQLSMALLINT ctype;
 	odbc_result *result;
@@ -990,7 +1001,7 @@ PHP_FUNCTION(odbc_execute)
 			RETURN_FALSE;
 		}
 
-		params = (params_t *)safe_emalloc(sizeof(params_t), result->numparams, 0);
+		params = (odbc_params_t *)safe_emalloc(sizeof(odbc_params_t), result->numparams, 0);
 		for(i = 0; i < result->numparams; i++) {
 			params[i].fp = -1;
 		}
@@ -1000,13 +1011,7 @@ PHP_FUNCTION(odbc_execute)
 			unsigned char otype = Z_TYPE_P(tmp);
 			zend_string *tmpstr = zval_try_get_string(tmp);
 			if (!tmpstr) {
-				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-				for (i = 0; i < result->numparams; i++) {
-					if (params[i].fp != -1) {
-						close(params[i].fp);
-					}
-				}
-				efree(params);
+				odbc_release_params(result, params);
 				RETURN_THROWS();
 			}
 
@@ -1033,27 +1038,15 @@ PHP_FUNCTION(odbc_execute)
 				/* Check the basedir */
 				if (php_check_open_basedir(filename)) {
 					efree(filename);
-					SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-					for (i = 0; i < result->numparams; i++) {
-						if (params[i].fp != -1) {
-							close(params[i].fp);
-						}
-					}
+					odbc_release_params(result, params);
 					zend_string_release(tmpstr);
-					efree(params);
 					RETURN_FALSE;
 				}
 
 				if ((params[i-1].fp = open(filename,O_RDONLY)) == -1) {
 					php_error_docref(NULL, E_WARNING,"Can't open file %s", filename);
-					SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-					for (i = 0; i < result->numparams; i++) {
-						if (params[i].fp != -1) {
-							close(params[i].fp);
-						}
-					}
+					odbc_release_params(result, params);
 					zend_string_release(tmpstr);
-					efree(params);
 					efree(filename);
 					RETURN_FALSE;
 				}
@@ -1081,14 +1074,8 @@ PHP_FUNCTION(odbc_execute)
 			}
 			if (rc == SQL_ERROR) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SQLBindParameter");
-				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-				for (i = 0; i < result->numparams; i++) {
-					if (params[i].fp != -1) {
-						close(params[i].fp);
-					}
-				}
+				odbc_release_params(result, params);
 				zend_string_release(tmpstr);
-				efree(params);
 				RETURN_FALSE;
 			}
 			zend_string_release(tmpstr);
@@ -1131,13 +1118,7 @@ PHP_FUNCTION(odbc_execute)
 	}
 
 	if (result->numparams > 0) {
-		SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-		for(i = 0; i < result->numparams; i++) {
-			if (params[i].fp != -1) {
-				close(params[i].fp);
-			}
-		}
-		efree(params);
+		odbc_release_params(result, params);
 	}
 
 	if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO || rc == SQL_NO_DATA_FOUND) {
