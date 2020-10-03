@@ -90,10 +90,10 @@ echo "Done\n";
 **Test  Negative cases************
 
 Invalid Connection resource 1
-string(89) "oci_set_action(): Argument #1 ($connection_resource) must be of type resource, null given"
+string(89) "oci_set_action(): Argument #1 ($connection) must be of type resource, null given"
 
 Invalid Connection resource 2
-string(96) "oci_set_client_info(): Argument #1 ($connection_resource) must be of type resource, string given"
+string(96) "oci_set_client_info(): Argument #1 ($connection) must be of type resource, string given"
 
 Invalid Action value 
 string(78) "oci_set_action(): Argument #2 ($action) must be of type string, resource given"
