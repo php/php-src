@@ -35,7 +35,7 @@ function pspell_config_runtogether(int $config, bool $allow): bool {}
 
 function pspell_config_mode(int $config, int $mode): bool {}
 
-function pspell_config_ignore(int $config, int $minimum_length): bool {}
+function pspell_config_ignore(int $config, int $min_length): bool {}
 
 function pspell_config_personal(int $config, string $filename): bool {}
 
