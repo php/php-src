@@ -201,8 +201,6 @@ void mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 				w |= MBFL_WCSPLANE_WINCP932;
 			}
 			(*filter->output_function)(w, filter->data);
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			(*filter->output_function)(c, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
@@ -314,20 +312,48 @@ void mbfl_filt_conv_wchar_cp932(int c, mbfl_convert_filter *filter)
 	}
 }
 
+static int is_unused_cp932_range(unsigned char c1, unsigned char c2)
+{
+	if (c1 == 0x85 || c1 == 0x86 || (c1 >= 0xA1 && c1 <= 0xDF) || c1 == 0xEB || c1 == 0xEC || c1 == 0xEF) {
+		return 1;
+	} else if (c1 == 0x81) {
+		return (c2 >= 0xAD && c2 <= 0xB7) || (c2 >= 0xC0 && c2 <= 0xC7) || (c2 >= 0xCF && c2 <= 0xD9) || (c2 >= 0xE9 && c2 <= 0xEF) || (c2 >= 0xF8 && c2 <= 0xFB);
+	} else if (c1 == 0x82) {
+		return (c2 <= 0x4E) || (c2 >= 0x59 && c2 <= 0x5F) || (c2 >= 0x7A && c2 <= 0x80) || (c2 >= 0x9B && c2 <= 0x9E) || (c2 >= 0xF2);
+	} else if (c1 == 0x83) {
+		return (c2 >= 0x97 && c2 <= 0x9E) || (c2 >= 0xB7 && c2 <= 0xBE) || (c2 >= 0xD7);
+	} else if (c1 == 0x84) {
+		return (c2 >= 0x61 && c2 <= 0x6F) || (c2 >= 0x92 && c2 <= 0x9E) || (c2 >= 0xBF);
+	} else if (c1 == 0x87) {
+		return (c2 == 0x5E) || (c2 >= 0x76 && c2 <= 0x7D) || (c2 == 0x7F) || (c2 >= 0x9D);
+	} else if (c1 == 0x88) {
+		return (c2 <= 0x9E);
+	} else if (c1 == 0x98) {
+		return (c2 >= 0x73 && c2 <= 0x9E);
+	} else if (c1 == 0xEA) {
+		return (c2 >= 0xA5);
+	} else if (c1 == 0xEE) {
+		return (c2 == 0xED) || (c2 == 0xEE);
+	} else if (c1 == 0xFC) {
+		return (c2 >= 0x4C);
+	}
+	return 0;
+}
+
 static void mbfl_filt_ident_cp932(unsigned char c, mbfl_identify_filter *filter)
 {
-	if (filter->status) {		/* kanji second char */
-		if (c < 0x40 || c > 0xfc || c == 0x7f) {	/* bad */
+	if (filter->status) { /* Kanji second char */
+		if (c < 0x40 || c > 0xFC || c == 0x7F || is_unused_cp932_range(filter->status, c)) { /* bad */
 		    filter->flag = 1;
 		}
 		filter->status = 0;
-	} else if (c < 0x80) {	/* latin  ok */
+	} else if (c < 0x80) { /* Latin */
 		;
-	} else if (c > 0xa0 && c < 0xe0) {	/* kana  ok */
+	} else if (c > 0xA0 && c < 0xE0) { /* Kana */
 		;
-	} else if (c > 0x80 && c < 0xfd && c != 0xa0) {	/* kanji first char */
-		filter->status = 1;
-	} else {							/* bad */
+	} else if (c > 0x80 && c < 0xFD && c != 0xA0) { /* Kanji first char */
+		filter->status = c;
+	} else {
 		filter->flag = 1;
 	}
 }
