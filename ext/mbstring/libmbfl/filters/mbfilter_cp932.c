@@ -33,6 +33,8 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
+static int mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter);
+
 static const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -71,7 +73,7 @@ const struct mbfl_convert_vtbl vtbl_cp932_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_cp932_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_cp932_wchar_flush,
 	NULL,
 };
 
@@ -193,17 +195,11 @@ mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 				}
 			}
 			if (w <= 0) {
-				w = (s1 << 8) | s2;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_WINCP932;
+				w = (s1 << 8) | s2 | MBFL_WCSPLANE_WINCP932;
 			}
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
+			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(w, filter->data));
 		}
 		break;
@@ -214,6 +210,19 @@ mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status) {
+		(*filter->filter_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter);
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
 
 /*
