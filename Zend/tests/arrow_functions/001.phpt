@@ -47,11 +47,13 @@ $var = 11;
 $foo = fn() => ++$var;
 var_dump($var);
 var_dump($foo());
+var_dump($var);
 
 $var = 13;
 $foo = fn() => { return ++$var; };
 var_dump($var);
 var_dump($foo());
+var_dump($var);
 
 // Nested arrow functions
 $var = 14;
@@ -81,8 +83,10 @@ int(9)
 int(10)
 int(11)
 int(12)
+int(11)
 int(13)
 int(14)
+int(13)
 int(14)
 int(15)
 int(16)
