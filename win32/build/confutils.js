@@ -1542,7 +1542,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			var _tmp = FSO.CreateTextFile(PHP_DIR + "/include/main/config.pickle.h", true);
 			_tmp.Close();
 		}
-		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
@@ -2207,7 +2206,7 @@ function generate_config_pickle_h()
 			var ln = outfile.ReadLine();
 
 			for (var i in keys) {
-				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*", "g");
+				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*|#undef[\s ]+" + keys[i], "g");
 
 				if (ln.match(reg)) {
 					found = true;
@@ -2233,6 +2232,7 @@ function generate_config_pickle_h()
 			continue;
 		}*/
 
+		lines.push("#undef " + keys[i]);
 		lines.push("#define " + keys[i] + " " + item[0]);
 	}
 
@@ -2308,6 +2308,11 @@ function generate_config_h()
 
 		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
+
+	outfile.WriteBlankLines(1);
+	outfile.WriteLine("#if __has_include(\"main/config.pickle.h\")");
+	outfile.WriteLine("#include \"main/config.pickle.h\"");
+	outfile.WriteLine("#endif");
 
 	outfile.Close();
 }
