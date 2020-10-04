@@ -4644,7 +4644,7 @@ static ZEND_COLD zend_function *zend_fake_get_method(zend_object **obj_ptr, zend
 
 static HashTable *zend_fake_get_properties(zend_object *obj) /* {{{ */
 {
-	return (HashTable*)&zend_empty_array;
+	return NULL;
 }
 /* }}} */
 

@@ -38110,9 +38110,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 			} else {
 				properties = zobj->handlers->get_properties(zobj);
 			}
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(properties, 0);
-
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			if (!properties) {
+				/* No properties to iterate over */
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+				if (IS_CV != IS_TMP_VAR) {
+					GC_DELREF(zobj);
+				}
+				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+			} else {
+				Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(properties, 0);
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 		} else {
 			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
