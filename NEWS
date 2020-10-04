@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0alpha1
 
+- Core:
+  . Fixed inclusion order for phpize builds on Windows. (cmb)
+
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)
 
