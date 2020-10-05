@@ -832,7 +832,7 @@ function fwrite($stream, string $data, ?int $max_length = null): int|false {}
 function fputs($stream, string $data, ?int $max_length = null): int|false {}
 
 /** @param resource|null $context */
-function mkdir(string $directory, int $mode = 0777, bool $recursive = false, $context = null): bool {}
+function mkdir(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool {}
 
 /** @param resource|null $context */
 function rename(string $from, string $to, $context = null): bool {}
@@ -922,7 +922,7 @@ function lchown(string $filename, string|int $user): bool {}
 function lchgrp(string $filename, string|int $group): bool {}
 #endif
 
-function chmod(string $filename, int $mode): bool {}
+function chmod(string $filename, int $permissions): bool {}
 
 #if HAVE_UTIME
 function touch(string $filename, ?int $mtime = null, ?int $atime = null): bool {}

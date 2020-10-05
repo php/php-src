@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c97ecb9b83ed873ca1ee2046ade191eef5bff25b */
+ * Stub hash: c0fc9487fd4b2de900ed66e77c8d6f14747c8a7a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, sig, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_getpid, 0, 0, IS_LONG, 0)
@@ -96,15 +96,15 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_MKFIFO)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_mkfifo, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, pathname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, permissions, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_MKNOD)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_mknod, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, pathname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, major, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, minor, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -112,7 +112,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_access, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getgrnam, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -139,8 +139,8 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_SETRLIMIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setrlimit, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, resource, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, softlimit, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, hardlimit, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, soft_limit, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, hard_limit, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -149,12 +149,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_posix_errno arginfo_posix_getpid
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_strerror, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, errno, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, error_code, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_INITGROUPS)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_initgroups, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, base_group_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif

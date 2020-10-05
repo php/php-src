@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-function posix_kill(int $pid, int $sig): bool {}
+function posix_kill(int $pid, int $signal): bool {}
 
 function posix_getpid(): int {}
 
@@ -70,14 +70,14 @@ function posix_isatty($fd): bool {}
 function posix_getcwd(): string|false {}
 
 #ifdef HAVE_MKFIFO
-function posix_mkfifo(string $pathname, int $mode): bool {}
+function posix_mkfifo(string $filename, int $permissions): bool {}
 #endif
 
 #ifdef HAVE_MKNOD
-function posix_mknod(string $pathname, int $mode, int $major = 0, int $minor = 0): bool {}
+function posix_mknod(string $filename, int $flags, int $major = 0, int $minor = 0): bool {}
 #endif
 
-function posix_access(string $file, int $mode = 0): bool {}
+function posix_access(string $file, int $flags = 0): bool {}
 
 function posix_getgrnam(string $name): array|false {}
 
@@ -92,7 +92,7 @@ function posix_getrlimit(): array|false {}
 #endif
 
 #ifdef HAVE_SETRLIMIT
-function posix_setrlimit(int $resource, int $softlimit, int $hardlimit): bool {}
+function posix_setrlimit(int $resource, int $soft_limit, int $hard_limit): bool {}
 #endif
 
 function posix_get_last_error(): int {}
@@ -100,8 +100,8 @@ function posix_get_last_error(): int {}
 /** @alias posix_get_last_error */
 function posix_errno(): int {}
 
-function posix_strerror(int $errno): string {}
+function posix_strerror(int $error_code): string {}
 
 #ifdef HAVE_INITGROUPS
-function posix_initgroups(string $name, int $base_group_id): bool {}
+function posix_initgroups(string $username, int $base_group_id): bool {}
 #endif
