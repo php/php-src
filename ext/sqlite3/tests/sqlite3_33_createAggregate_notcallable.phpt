@@ -32,7 +32,7 @@ $db->close();
 echo "Done"
 ?>
 --EXPECT--
-SQLite3::createAggregate(): Argument #2 ($step_callback) must be a valid callback, function "aggregate_test_step" not found or invalid function name
-SQLite3::createAggregate(): Argument #3 ($final_callback) must be a valid callback, function "aggregate_test_final" not found or invalid function name
+SQLite3::createAggregate(): Argument #2 ($stepCallback) must be a valid callback, function "aggregate_test_step" not found or invalid function name
+SQLite3::createAggregate(): Argument #3 ($finalCallback) must be a valid callback, function "aggregate_test_final" not found or invalid function name
 bool(true)
 Done

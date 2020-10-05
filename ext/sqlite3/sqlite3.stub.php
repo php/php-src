@@ -5,10 +5,10 @@
 class SQLite3
 {
     /** @implementation-alias SQLite3::open */
-    public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryption_key = "") {}
+    public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = "") {}
 
     /** @return void */
-    public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryption_key = "") {}
+    public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = "") {}
 
     /** @return bool */
     public function close() {}
@@ -41,7 +41,7 @@ class SQLite3
 
 #if SQLITE_VERSION_NUMBER >= 3006011
     /** @return bool */
-    public function backup(SQLite3 $sqlite3, string $source_database = "main", string $destination_database = "main") {}
+    public function backup(SQLite3 $destination, string $sourceDatabase = "main", string $destinationDatabase = "main") {}
 #endif
 
     /** @return string */
@@ -57,13 +57,13 @@ class SQLite3
     public function query(string $query) {}
 
     /** @return mixed */
-    public function querySingle(string $query, bool $entire_row = false) {}
+    public function querySingle(string $query, bool $entireRow = false) {}
 
     /** @return bool */
-    public function createFunction(string $name, callable $callback, int $argument_count = -1, int $flags = 0) {}
+    public function createFunction(string $name, callable $callback, int $argCount = -1, int $flags = 0) {}
 
     /** @return bool */
-    public function createAggregate(string $name, callable $step_callback, callable $final_callback, int $argument_count = -1) {}
+    public function createAggregate(string $name, callable $stepCallback, callable $finalCallback, int $argCount = -1) {}
 
     /** @return bool */
     public function createCollation(string $name, callable $callback) {}
@@ -83,10 +83,10 @@ class SQLite3
 
 class SQLite3Stmt
 {
-    private function __construct(SQLite3 $sqlite3, string $sql) {}
+    private function __construct(SQLite3 $sqlite3, string $query) {}
 
     /** @return bool */
-    public function bindParam(string|int $param, mixed &$bind_var, int $type = SQLITE3_TEXT) {}
+    public function bindParam(string|int $param, mixed &$var, int $type = SQLITE3_TEXT) {}
 
     /** @return bool */
     public function bindValue(string|int $param, mixed $value, int $type = SQLITE3_TEXT) {}
@@ -121,10 +121,10 @@ class SQLite3Result
     public function numColumns() {}
 
     /** @return string|false */
-    public function columnName(int $index) {}
+    public function columnName(int $column) {}
 
     /** @return int|false */
-    public function columnType(int $index) {}
+    public function columnType(int $column) {}
 
     /** @return array|false */
     public function fetchArray(int $mode = SQLITE3_BOTH) {}
