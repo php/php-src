@@ -17,4 +17,4 @@ ext/sockets - socket_sendto - test with incorrect parameters
     socket_close($s_c);
 ?>
 --EXPECT--
-socket_sendto(): Argument #3 ($len) must be greater than or equal to 0
+socket_sendto(): Argument #3 ($length) must be greater than or equal to 0
