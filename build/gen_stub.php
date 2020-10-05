@@ -49,7 +49,7 @@ function processStubFile(string $stubFile, Context $context) {
             echo "Saved $arginfoFile\n";
         }
 
-        if (file_exists($legacyFile)) {
+        if ($fileInfo->generateLegacyArginfo) {
             foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
@@ -633,6 +633,8 @@ class FileInfo {
     public $generateFunctionEntries = false;
     /** @var string */
     public $declarationPrefix = "";
+    /** @var bool */
+    public $generateLegacyArginfo = false;
 
     /**
      * @return iterable<FuncInfo>
@@ -955,6 +957,8 @@ function parseStubFile(string $code): FileInfo {
             if ($tag->name === 'generate-function-entries') {
                 $fileInfo->generateFunctionEntries = true;
                 $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
+            } else if ($tag->name === 'generate-legacy-arginfo') {
+                $fileInfo->generateLegacyArginfo = true;
             }
         }
     }
