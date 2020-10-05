@@ -164,16 +164,16 @@ int main()
 		double d = (double) LONG_MIN * LONG_MIN + 2e9;
 
 		if ((long) d == 2e9 && (long) -d == -2e9) {
-			exit(0);
+			return 0;
 		}
 	} else if (sizeof(long) == 8) {
 		double correct = 18e18 - ((double) LONG_MIN * -2); /* Subtract ULONG_MAX + 1 */
 
 		if ((long) 18e18 == correct) { /* On 64-bit, only check between LONG_MAX and ULONG_MAX */
-			exit(0);
+			return 0;
 		}
 	}
-	exit(1);
+	return 1;
 }
 ]])], [
   AC_DEFINE([ZEND_DVAL_TO_LVAL_CAST_OK], 1, [Define if double cast to long preserves least significant bits])
@@ -284,7 +284,7 @@ int main()
   fprintf(fp, "%d %d\n", ZEND_MM_ALIGNMENT, zeros);
   fclose(fp);
 
-  exit(0);
+  return 0;
 }
 ]])], [
   LIBZEND_MM_ALIGN=`cat conftest.zend | cut -d ' ' -f 1`

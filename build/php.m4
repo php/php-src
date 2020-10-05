@@ -1176,14 +1176,14 @@ AC_DEFUN([PHP_DOES_PWRITE_WORK],[
 #include <unistd.h>
 #include <errno.h>
 $1
-    main() {
+    int main() {
     int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
 
-    if (fd < 0) exit(1);
-    if (pwrite(fd, "text", 4, 0) != 4) exit(1);
+    if (fd < 0) return 1;
+    if (pwrite(fd, "text", 4, 0) != 4) return 1;
     /* Linux glibc breakage until 2.2.5 */
-    if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) exit(1);
-    exit(0);
+    if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) return 1;
+    return 0;
     }
 
   ]])],[
@@ -1209,14 +1209,14 @@ AC_DEFUN([PHP_DOES_PREAD_WORK],[
 #include <unistd.h>
 #include <errno.h>
 $1
-    main() {
+    int main() {
     char buf[3];
     int fd = open("conftest_in", O_RDONLY);
-    if (fd < 0) exit(1);
-    if (pread(fd, buf, 2, 0) != 2) exit(1);
+    if (fd < 0) return 1;
+    if (pread(fd, buf, 2, 0) != 2) return 1;
     /* Linux glibc breakage until 2.2.5 */
-    if (pread(fd, buf, 2, -1) != -1 || errno != EINVAL) exit(1);
-    exit(0);
+    if (pread(fd, buf, 2, -1) != -1 || errno != EINVAL) return 1;
+    return 0;
     }
   ]])],[
     ac_cv_pread=yes
@@ -1478,13 +1478,13 @@ int seeker(void *cookie, off64_t *position, int whence)
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
 
-main() {
+int main() {
   struct cookiedata g = { 0 };
   FILE *fp = fopencookie(&g, "r", funcs);
 
   if (fp && fseek(fp, 8192, SEEK_SET) == 0 && g.pos == 8192)
-    exit(0);
-  exit(1);
+    return 0;
+  return 1;
 }
 
 ]])], [

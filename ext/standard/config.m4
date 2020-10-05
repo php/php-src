@@ -5,6 +5,8 @@ AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 int main(int argc, char **argv)
 {
@@ -59,6 +61,8 @@ fi
 
 AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -70,9 +74,9 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","rl");
-	exit(!encrypted || strcmp(encrypted,"rl.3StKT.4T8M"));
+	return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_des=yes
@@ -84,6 +88,8 @@ int main() {
 
 AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -95,9 +101,9 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
-	exit(!encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc"));
+	return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_ext_des=yes
@@ -109,6 +115,8 @@ int main() {
 
 AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -130,9 +138,9 @@ int main() {
 	strcpy(answer,salt);
 	strcat(answer,"rISCgZzpwk3UhDidwXvin0");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_md5=yes
@@ -144,6 +152,8 @@ int main() {
 
 AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -162,9 +172,9 @@ int main() {
 	strcpy(answer,salt);
 	strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_blowfish=yes
@@ -176,6 +186,8 @@ int main() {
 
 AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -193,9 +205,9 @@ int main() {
 	strcpy(answer, salt);
 	strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_sha512=yes
@@ -207,6 +219,8 @@ int main() {
 
 AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -224,9 +238,9 @@ int main() {
 	strcpy(answer, salt);
 	strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_sha256=yes
