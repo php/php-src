@@ -3043,6 +3043,7 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 		case ZEND_CASE:
 		case ZEND_IS_IDENTICAL:
 		case ZEND_CASE_STRICT:
+		case ZEND_IS_NOT_IDENTICAL:
 			if (!exit_if_true) {
 				/* op1 == op2 */
 				if (ssa_op->op1_use >= 0) {
@@ -3060,7 +3061,6 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
-		case ZEND_IS_NOT_IDENTICAL:
 			if (exit_if_true) {
 				/* op1 == op2 */
 				if (ssa_op->op1_use >= 0) {
