@@ -823,13 +823,13 @@ function ftell($stream): int|false {}
 function fflush($stream): bool {}
 
 /** @param resource $stream */
-function fwrite($stream, string $data, ?int $max_length = null): int|false {}
+function fwrite($stream, string $data, ?int $length = null): int|false {}
 
 /**
  * @param resource $stream
  * @alias fwrite
  */
-function fputs($stream, string $data, ?int $max_length = null): int|false {}
+function fputs($stream, string $data, ?int $length = null): int|false {}
 
 /** @param resource|null $context */
 function mkdir(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool {}
@@ -849,7 +849,7 @@ function tmpfile() {}
 function file(string $filename, int $flags = 0, $context = null): array|false {}
 
 /** @param resource|null $context */
-function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $max_length = null): string|false {}
+function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null): string|false {}
 
 /** @param resource|null $context */
 function unlink(string $filename, $context = null): bool {}
@@ -1293,10 +1293,10 @@ function stream_socket_pair(int $domain, int $type, int $protocol): array|false 
  * @param resource $from
  * @param resource $to
  */
-function stream_copy_to_stream($from, $to, ?int $max_length = null, int $offset = 0): int|false {}
+function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
 
 /** @param resource $stream */
-function stream_get_contents($stream, ?int $max_length = null, int $offset = -1): string|false {}
+function stream_get_contents($stream, ?int $length = null, int $offset = -1): string|false {}
 
 /** @param resource $stream */
 function stream_supports_lock($stream): bool {}
@@ -1332,7 +1332,7 @@ function stream_get_meta_data($stream): array {}
 function socket_get_status($stream): array {}
 
 /** @param resource $stream */
-function stream_get_line($stream, int $max_length, string $ending = ""): string|false {}
+function stream_get_line($stream, int $length, string $ending = ""): string|false {}
 
 function stream_resolve_include_path(string $filename): string|false {}
 

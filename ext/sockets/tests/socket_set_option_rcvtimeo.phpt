@@ -34,9 +34,6 @@ var_dump($retval_3 === $options);
 socket_close($socket);
 ?>
 --EXPECT--
-socket_set_option(): Argument #4 ($optval) must have key "sec"
+socket_set_option(): Argument #4 ($value) must have key "sec"
 bool(true)
 bool(true)
---CREDITS--
-Moritz Neuhaeuser, info@xcompile.net
-PHP Testfest Berlin 2009-05-10
