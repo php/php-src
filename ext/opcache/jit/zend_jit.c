@@ -192,6 +192,7 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 
 #define OP_RANGE(ssa_op, opN) \
 	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
+	  ssa->var_info && \
 	  (ssa_op)->opN##_use >= 0 && \
 	  ssa->var_info[(ssa_op)->opN##_use].has_range) ? \
 	 &ssa->var_info[(ssa_op)->opN##_use].range : NULL)
@@ -2796,8 +2797,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							target_label = target_label2 = (uint32_t)-1;
 						}
 						if (!zend_jit_cmp(&dasm_state, opline,
-								OP1_INFO(), OP1_REG_ADDR(),
-								OP2_INFO(), OP2_REG_ADDR(),
+								OP1_INFO(), OP1_RANGE(), OP1_REG_ADDR(),
+								OP2_INFO(), OP2_RANGE(), OP2_REG_ADDR(),
 								res_addr,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
@@ -2825,8 +2826,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							target_label = target_label2 = (uint32_t)-1;
 						}
 						if (!zend_jit_identical(&dasm_state, opline,
-								OP1_INFO(), OP1_REG_ADDR(),
-								OP2_INFO(), OP2_REG_ADDR(),
+								OP1_INFO(), OP1_RANGE(), OP1_REG_ADDR(),
+								OP2_INFO(), OP2_RANGE(), OP2_REG_ADDR(),
 								RES_REG_ADDR(),
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,

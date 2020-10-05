@@ -4299,18 +4299,26 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							smart_branch_opcode = exit_if_true ? ZEND_JMPNZ : ZEND_JMPZ;
+							if (!zend_jit_cmp(&dasm_state, opline,
+									op1_info, OP1_RANGE(), OP1_REG_ADDR(),
+									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
+									RES_REG_ADDR(),
+									zend_may_throw(opline, ssa_op, op_array, ssa),
+									smart_branch_opcode, -1, -1, exit_addr)) {
+								goto jit_failure;
+							}
 							zend_jit_trace_update_condition_ranges(opline, ssa_op, op_array, ssa, exit_if_true);
 						} else {
 							smart_branch_opcode = 0;
 							exit_addr = NULL;
-						}
-						if (!zend_jit_cmp(&dasm_state, opline,
-								op1_info, OP1_REG_ADDR(),
-								op2_info, OP2_REG_ADDR(),
-								RES_REG_ADDR(),
-								zend_may_throw(opline, ssa_op, op_array, ssa),
-								smart_branch_opcode, -1, -1, exit_addr)) {
-							goto jit_failure;
+							if (!zend_jit_cmp(&dasm_state, opline,
+									op1_info, OP1_RANGE(), OP1_REG_ADDR(),
+									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
+									RES_REG_ADDR(),
+									zend_may_throw(opline, ssa_op, op_array, ssa),
+									smart_branch_opcode, -1, -1, exit_addr)) {
+								goto jit_failure;
+							}
 						}
 						goto done;
 					case ZEND_IS_IDENTICAL:
@@ -4337,18 +4345,26 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								exit_if_true = !exit_if_true;
 							}
 							smart_branch_opcode = exit_if_true ? ZEND_JMPNZ : ZEND_JMPZ;
+							if (!zend_jit_identical(&dasm_state, opline,
+									op1_info, OP1_RANGE(), OP1_REG_ADDR(),
+									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
+									RES_REG_ADDR(),
+									zend_may_throw(opline, ssa_op, op_array, ssa),
+									smart_branch_opcode, -1, -1, exit_addr)) {
+								goto jit_failure;
+							}
 							zend_jit_trace_update_condition_ranges(opline, ssa_op, op_array, ssa, exit_if_true);
 						} else {
 							smart_branch_opcode = 0;
 							exit_addr = NULL;
-						}
-						if (!zend_jit_identical(&dasm_state, opline,
-								op1_info, OP1_REG_ADDR(),
-								op2_info, OP2_REG_ADDR(),
-								RES_REG_ADDR(),
-								zend_may_throw(opline, ssa_op, op_array, ssa),
-								smart_branch_opcode, -1, -1, exit_addr)) {
-							goto jit_failure;
+							if (!zend_jit_identical(&dasm_state, opline,
+									op1_info, OP1_RANGE(), OP1_REG_ADDR(),
+									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
+									RES_REG_ADDR(),
+									zend_may_throw(opline, ssa_op, op_array, ssa),
+									smart_branch_opcode, -1, -1, exit_addr)) {
+								goto jit_failure;
+							}
 						}
 						goto done;
 					case ZEND_DEFINED:
