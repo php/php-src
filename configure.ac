@@ -716,6 +716,7 @@ dnl Also check for working getaddrinfo
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netdb.h>]],
   [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
 #include <netdb.h>
 #include <sys/types.h>
 #ifndef AF_INET
@@ -728,11 +729,11 @@ int main(void) {
   hints.ai_flags = AI_NUMERICHOST;
 
   if (getaddrinfo("127.0.0.1", 0, &hints, &ai) < 0) {
-    exit(1);
+    return 1;
   }
 
   if (ai == 0) {
-    exit(1);
+    return 1;
   }
 
   pai = ai;
@@ -740,16 +741,16 @@ int main(void) {
   while (pai) {
     if (pai->ai_family != AF_INET) {
       /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-      exit(1);
+      return 1;
     }
     if (pai->ai_addr->sa_family != AF_INET) {
       /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-      exit(1);
+      return 1;
     }
     pai = pai->ai_next;
   }
   freeaddrinfo(ai);
-  exit(0);
+  return 0;
 }
   ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [ac_cv_func_getaddrinfo=no])],
 [ac_cv_func_getaddrinfo=no])])
