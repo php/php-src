@@ -77,7 +77,7 @@ function posix_mkfifo(string $filename, int $permissions): bool {}
 function posix_mknod(string $filename, int $flags, int $major = 0, int $minor = 0): bool {}
 #endif
 
-function posix_access(string $file, int $flags = 0): bool {}
+function posix_access(string $filename, int $flags = 0): bool {}
 
 function posix_getgrnam(string $name): array|false {}
 
@@ -103,5 +103,5 @@ function posix_errno(): int {}
 function posix_strerror(int $error_code): string {}
 
 #ifdef HAVE_INITGROUPS
-function posix_initgroups(string $username, int $base_group_id): bool {}
+function posix_initgroups(string $username, int $gid): bool {}
 #endif

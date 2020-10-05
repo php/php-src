@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c0fc9487fd4b2de900ed66e77c8d6f14747c8a7a */
+ * Stub hash: 8e35f6fd57766d3140cf584ed1622e427d1b761c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
@@ -111,7 +111,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_access, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -155,7 +155,7 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_INITGROUPS)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_initgroups, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, base_group_id, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, gid, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
