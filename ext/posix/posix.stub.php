@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-function posix_kill(int $pid, int $signal): bool {}
+function posix_kill(int $process_id, int $signal): bool {}
 
 function posix_getpid(): int {}
 
@@ -10,22 +10,22 @@ function posix_getppid(): int {}
 
 function posix_getuid(): int {}
 
-function posix_setuid(int $uid): bool {}
+function posix_setuid(int $user_id): bool {}
 
 function posix_geteuid(): int {}
 
 #ifdef HAVE_SETEUID
-function posix_seteuid(int $uid): bool {}
+function posix_seteuid(int $user_id): bool {}
 #endif
 
 function posix_getgid(): int {}
 
-function posix_setgid(int $gid): bool {}
+function posix_setgid(int $group_id): bool {}
 
 function posix_getegid(): int {}
 
 #ifdef HAVE_SETEGID
-function posix_setegid(int $gid): bool {}
+function posix_setegid(int $group_id): bool {}
 #endif
 
 #ifdef HAVE_GETGROUPS
@@ -42,14 +42,14 @@ function posix_getpgrp(): int {}
 function posix_setsid(): int {}
 #endif
 
-function posix_setpgid(int $pid, int $pgid): bool {}
+function posix_setpgid(int $process_id, int $process_group_id): bool {}
 
 #ifdef HAVE_GETPGID
-function posix_getpgid(int $pid): int|false {}
+function posix_getpgid(int $process_id): int|false {}
 #endif
 
 #ifdef HAVE_GETSID
-function posix_getsid(int $pid): int|false {}
+function posix_getsid(int $process_id): int|false {}
 #endif
 
 function posix_uname(): array|false {}
@@ -81,11 +81,11 @@ function posix_access(string $filename, int $flags = 0): bool {}
 
 function posix_getgrnam(string $name): array|false {}
 
-function posix_getgrgid(int $gid): array|false {}
+function posix_getgrgid(int $group_id): array|false {}
 
 function posix_getpwnam(string $username): array|false {}
 
-function posix_getpwuid(int $uid): array|false {}
+function posix_getpwuid(int $user_id): array|false {}
 
 #ifdef HAVE_GETRLIMIT
 function posix_getrlimit(): array|false {}
@@ -103,5 +103,5 @@ function posix_errno(): int {}
 function posix_strerror(int $error_code): string {}
 
 #ifdef HAVE_INITGROUPS
-function posix_initgroups(string $username, int $gid): bool {}
+function posix_initgroups(string $username, int $group_id): bool {}
 #endif

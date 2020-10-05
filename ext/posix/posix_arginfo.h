@@ -1,8 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8e35f6fd57766d3140cf584ed1622e427d1b761c */
+ * Stub hash: 28776d0cd89a2d359f131e8268f70d73e45b91d7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -14,28 +14,28 @@ ZEND_END_ARG_INFO()
 #define arginfo_posix_getuid arginfo_posix_getpid
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setuid, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, uid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, user_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_posix_geteuid arginfo_posix_getpid
 
 #if defined(HAVE_SETEUID)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_seteuid, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, uid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, user_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #define arginfo_posix_getgid arginfo_posix_getpid
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setgid, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, gid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, group_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_posix_getegid arginfo_posix_getpid
 
 #if defined(HAVE_SETEGID)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setegid, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, gid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, group_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -57,19 +57,19 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setpgid, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, pgid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, process_group_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GETPGID)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getpgid, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GETSID)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getsid, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -120,7 +120,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getgrnam, 0, 1, MAY_BE_ARR
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getgrgid, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, gid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, group_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getpwnam, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -128,7 +128,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getpwnam, 0, 1, MAY_BE_ARR
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getpwuid, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, uid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, user_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GETRLIMIT)
@@ -155,7 +155,7 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_INITGROUPS)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_initgroups, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, gid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, group_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
