@@ -31,8 +31,9 @@ function processStubFile(string $stubFile, Context $context) {
             throw new Exception("File $stubFile does not exist");
         }
 
-        $arginfoFile = str_replace('.stub.php', '', $stubFile)
-                     . ($context->legacy ? '_legacy' : '') . '_arginfo.h';
+        $arginfoFile = str_replace('.stub.php', '_arginfo.h', $stubFile);
+        $legacyFile = str_replace('.stub.php', '_legacy_arginfo.h', $stubFile);
+
         $stubCode = file_get_contents($stubFile);
         $stubHash = computeStubHash($stubCode);
         $oldStubHash = extractStubHash($arginfoFile);
@@ -43,14 +44,20 @@ function processStubFile(string $stubFile, Context $context) {
 
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
-        if ($context->legacy) {
+        $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
+        if (file_put_contents($arginfoFile, $arginfoCode)) {
+            echo "Saved $arginfoFile\n";
+        }
+
+        if (file_exists($legacyFile)) {
             foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
-        }
-
-        $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-        file_put_contents($arginfoFile, $arginfoCode);
+            $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
+            if (file_put_contents($legacyFile, $arginfoCode)) {
+                echo "Saved $legacyFile\n";
+            }
+		}
 
         // Collect parameter name statistics.
         foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
@@ -1220,13 +1227,16 @@ function initPhpParser() {
 }
 
 $optind = null;
-$options = getopt("f", ["force-regeneration", "parameter-stats", "legacy"], $optind);
+$options = getopt("fh", ["force-regeneration", "parameter-stats", "help"], $optind);
 
 $context = new Context;
 $printParameterStats = isset($options["parameter-stats"]);
-$context->legacy = isset($options["legacy"]);
 $context->forceRegeneration =
     isset($options["f"]) || isset($options["force-regeneration"]) || $printParameterStats;
+
+if (isset($options["h"]) || isset($options["help"])) {
+    die("\nusage: gen-stub.php [ -f | --force-regeneration ] [ --parameter-stats ] [ -h | --help ] [ name.stub.php | directory ]\n\n");
+}
 
 $location = $argv[$optind] ?? ".";
 if (is_file($location)) {
