@@ -2772,6 +2772,7 @@ PHP_FUNCTION(odbc_next_result)
 		}
 		efree(result->values);
 		result->values = NULL;
+		result->numcols = 0;
 	}
 
 	result->fetched = 0;
