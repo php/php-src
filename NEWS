@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #80121 (Null pointer deref if CurlHandle directly instantiated).
     (Nikita)
 
+- Opcache:
+  . Fixed bug #80184 (Complex expression in while / if statements resolves to
+    false incorrectly). (Nikita)
+
 - SPL:
   . Fixed bug #65387 (Circular references in SPL iterators are not garbage
     collected). (Nikita)

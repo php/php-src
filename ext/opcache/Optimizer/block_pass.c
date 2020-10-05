@@ -1371,6 +1371,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 							MAKE_NOP(last_op);
 							block->len--;
 						}
+						block->successors[0] = follow_block - cfg->blocks;
 						block->successors_count = 1;
 						++(*opt_count);
 						break;
