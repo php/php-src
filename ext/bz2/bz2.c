@@ -496,7 +496,7 @@ PHP_FUNCTION(bzdecompress)
 	zend_string *dest;
 	size_t source_len;
 	int error;
-	zend_long small = 0;
+	zend_bool small = 0;
 #ifdef PHP_WIN32
 	unsigned __int64 size = 0;
 #else
@@ -504,7 +504,7 @@ PHP_FUNCTION(bzdecompress)
 #endif
 	bz_stream bzs;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &small)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &source, &source_len, &small)) {
 		RETURN_THROWS();
 	}
 
