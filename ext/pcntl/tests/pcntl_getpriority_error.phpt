@@ -20,4 +20,4 @@ try {
 
 ?>
 --EXPECT--
-pcntl_getpriority(): Argument #2 ($process_identifier) must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS
+pcntl_getpriority(): Argument #2 ($mode) must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS
