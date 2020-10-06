@@ -40,4 +40,4 @@ function bzerror($bz): array {}
 
 function bzcompress(string $data, int $block_size = 4, int $work_factor = 0): string|int {}
 
-function bzdecompress(string $data, int $use_less_memory = 0): string|int|false {}
+function bzdecompress(string $data, bool $use_less_memory = false): string|int|false {}
