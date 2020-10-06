@@ -1,20 +1,20 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1b93d102c6dfa12f65a95a50bbc78c03802e261c */
+ * Stub hash: da85db1e5e985ddbefaf38598133e3cba46475f2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, input, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
+	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, iterator_class, IS_STRING, 0, "ArrayIterator::class")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, iteratorClass, IS_STRING, 0, "ArrayIterator::class")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_offsetExists, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_offsetGet arginfo_class_ArrayObject_offsetExists
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_offsetSet, 0, 0, 2)
-	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -36,13 +36,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_setFlags, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_asort, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sort_flags, IS_LONG, 0, "SORT_REGULAR")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_ksort arginfo_class_ArrayObject_asort
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_uasort, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, cmp_function, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_uksort arginfo_class_ArrayObject_uasort
@@ -52,7 +52,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayObject_natcasesort arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_unserialize, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_serialize arginfo_class_ArrayObject_getArrayCopy
@@ -66,7 +66,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayObject_getIterator arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_exchangeArray, 0, 0, 1)
-	ZEND_ARG_TYPE_MASK(0, input, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
+	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_setIteratorClass, 0, 0, 1)
@@ -131,7 +131,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayIterator_valid arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayIterator_seek, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator___debugInfo arginfo_class_ArrayObject_getArrayCopy

@@ -16,7 +16,7 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable
     public function toArray() {}
 
     /** @return SplFixedArray */
-    public static function fromArray(array $array, bool $save_indexes = true) {}
+    public static function fromArray(array $array, bool $preserveKeys = true) {}
 
     /** @return int */
     public function getSize() {}

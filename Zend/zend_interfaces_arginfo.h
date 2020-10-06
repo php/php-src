@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1aa9ef81a738328a334176d37683646b60b2f6fa */
+ * Stub hash: 29a5ed0b859b0732074c81cf9d26047a6eb9059a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -30,7 +30,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Serializable_serialize arginfo_class_IteratorAggregate_getIterator
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Serializable_unserialize, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Countable_count arginfo_class_IteratorAggregate_getIterator

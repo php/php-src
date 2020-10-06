@@ -27,5 +27,5 @@ unlink($file);
 ?>
 --EXPECT--
 *** Testing fputcsv() : with default enclosure & delimiter of two chars ***
-SplFileObject::fputcsv(): Argument #2 ($delimiter) must be a single character
+SplFileObject::fputcsv(): Argument #2 ($separator) must be a single character
 Done

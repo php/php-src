@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5414c8c3ed41482650a15a7ec6ddf0bb6489091a */
+ * Stub hash: 4cac5b648d326f06e5866f32881583c87d9bce73 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2156,7 +2156,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_serialize arginfo_gettype
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_unserialize, 0, 1, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 

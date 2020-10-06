@@ -1477,7 +1477,7 @@ function debug_zval_dump(mixed $value, mixed ...$values): void {}
 
 function serialize(mixed $value): string {}
 
-function unserialize(string $value, array $options = []): mixed {}
+function unserialize(string $data, array $options = []): mixed {}
 
 function memory_get_usage(bool $real_usage = false): int {}
 

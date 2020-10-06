@@ -83,7 +83,7 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     public function valid() {}
 
     /** @return void */
-    public function unserialize(string $serialized) {}
+    public function unserialize(string $data) {}
 
     /** @return string */
     public function serialize() {}

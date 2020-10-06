@@ -40,7 +40,7 @@ unlink(__DIR__ . '/files/phar_oo_006.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
-SplFileInfo::setFileClass(): Argument #1 ($class_name) must be a class name derived from SplFileObject, SplFileInfo given
+SplFileInfo::setFileClass(): Argument #1 ($class) must be a class name derived from SplFileObject, SplFileInfo given
 MyFile::__construct(phar://%s/a.php)
 a.php
 MyFile::__construct(phar://%s/b/c.php)
