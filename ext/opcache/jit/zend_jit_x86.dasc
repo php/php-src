@@ -11099,8 +11099,11 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 			if (may_be_top_frame) {
 				// TODO: try to avoid this check ???
 				if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+#if 0
+					/* this check should be handled by the following OPLINE guard */
 					|	cmp IP, zend_jit_halt_op
 					|	je ->trace_halt
+#endif
 				} else if (GCC_GLOBAL_REGS) {
 					|	test IP, IP
 					|	je ->trace_halt
