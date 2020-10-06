@@ -3,24 +3,24 @@
 /** @generate-function-entries */
 
 /** @param resource $statement */
-function oci_define_by_name($statement, string $column, mixed &$result, int $type = 0): bool {}
+function oci_define_by_name($statement, string $column, mixed &$var, int $type = 0): bool {}
 
 /**
  * @param resource $statement
  * @alias oci_define_by_name
  * @deprecated
  */
-function ocidefinebyname($statement, string $column, mixed &$result, int $type = 0): bool {}
+function ocidefinebyname($statement, string $column, mixed &$var, int $type = 0): bool {}
 
 /** @param resource $statement */
-function oci_bind_by_name($statement, string $param, mixed &$var, int $max_length = -1, int $type = 0): bool {}
+function oci_bind_by_name($statement, string $param, mixed &$var, int $length = -1, int $type = 0): bool {}
 
 /**
  * @param resource $statement
  * @alias oci_bind_by_name
  * @deprecated
  */
-function ocibindbyname($statement, string $param, mixed &$var, int $max_length = -1, int $type = 0): bool {}
+function ocibindbyname($statement, string $param, mixed &$var, int $length = -1, int $type = 0): bool {}
 
 /** @param resource $statement */
 function oci_bind_array_by_name($statement, string $param, mixed &$var, int $max_array_length, int $max_item_length = -1, int $type = SQLT_AFC): bool {}
@@ -69,7 +69,7 @@ function oci_lob_seek(OCILob $lob, int $offset, int $whence = OCI_SEEK_SET): boo
 
 function oci_lob_size(OCILob $lob): int|false {}
 
-function oci_lob_write(OCILob $lob, string $data, ?int $max_length = null): int|false {}
+function oci_lob_write(OCILob $lob, string $data, ?int $length = null): int|false {}
 
 function oci_lob_append(OCILob $to, OCILob $from): bool {}
 
@@ -604,7 +604,7 @@ class OCILob {
      * @alias oci_lob_write
      * @return int|false
      */
-    public function write(string $string, ?int $max_length = null) {}
+    public function write(string $string, ?int $length = null) {}
 
     /**
      * @alias oci_lob_append
