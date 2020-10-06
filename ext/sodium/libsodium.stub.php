@@ -5,31 +5,31 @@
 function sodium_crypto_aead_aes256gcm_is_available(): bool {}
 
 #ifdef HAVE_AESGCM
-function sodium_crypto_aead_aes256gcm_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
+function sodium_crypto_aead_aes256gcm_decrypt(string $string, string $additional_data, string $nonce, string $key): string|false {}
 
-function sodium_crypto_aead_aes256gcm_encrypt(string $string, string $ad, string $nonce, string $key): string {}
+function sodium_crypto_aead_aes256gcm_encrypt(string $string, string $additional_data, string $nonce, string $key): string {}
 
 function sodium_crypto_aead_aes256gcm_keygen(): string {}
 #endif
 
-function sodium_crypto_aead_chacha20poly1305_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
+function sodium_crypto_aead_chacha20poly1305_decrypt(string $string, string $additional_data, string $nonce, string $key): string|false {}
 
-function sodium_crypto_aead_chacha20poly1305_encrypt(string $string, string $ad, string $nonce, string $key): string {}
+function sodium_crypto_aead_chacha20poly1305_encrypt(string $string, string $additional_data, string $nonce, string $key): string {}
 
 function sodium_crypto_aead_chacha20poly1305_keygen(): string {}
 
-function sodium_crypto_aead_chacha20poly1305_ietf_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
+function sodium_crypto_aead_chacha20poly1305_ietf_decrypt(string $string, string $additional_data, string $nonce, string $key): string|false {}
 
-function sodium_crypto_aead_chacha20poly1305_ietf_encrypt(string $string, string $ad, string $nonce, string $key): string {}
+function sodium_crypto_aead_chacha20poly1305_ietf_encrypt(string $string, string $additional_data, string $nonce, string $key): string {}
 
 function sodium_crypto_aead_chacha20poly1305_ietf_keygen(): string {}
 
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
-function sodium_crypto_aead_xchacha20poly1305_ietf_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
+function sodium_crypto_aead_xchacha20poly1305_ietf_decrypt(string $string, string $additional_data, string $nonce, string $key): string|false {}
 
 function sodium_crypto_aead_xchacha20poly1305_ietf_keygen(): string {}
 
-function sodium_crypto_aead_xchacha20poly1305_ietf_encrypt(string $string, string $ad, string $nonce, string $key): string {}
+function sodium_crypto_aead_xchacha20poly1305_ietf_encrypt(string $string, string $additional_data, string $nonce, string $key): string {}
 #endif
 
 function sodium_crypto_auth(string $string, string $key): string {}
@@ -117,11 +117,11 @@ function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_init_push(string $key): array {}
 
-function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, string $message, string $ad  = "", int $tag  = SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE): string {}
+function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, string $message, string $additional_data  = "", int $tag  = SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE): string {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $string, string $key): string {}
 
-function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $ciphertext, string $ad  = ""): array|false {}
+function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $ciphertext, string $additional_data  = ""): array|false {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_rekey(string &$state): void {}
 #endif
