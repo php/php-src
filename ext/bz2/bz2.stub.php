@@ -38,6 +38,6 @@ function bzerrstr($bz): string {}
 /** @param resource $bz */
 function bzerror($bz): array {}
 
-function bzcompress(string $source, int $blocksize = 4, int $workfactor = 0): string|int {}
+function bzcompress(string $data, int $block_size = 4, int $work_factor = 0): string|int {}
 
-function bzdecompress(string $source, int $small = 0): string|int|false {}
+function bzdecompress(string $data, int $use_less_memory = 0): string|int|false {}
