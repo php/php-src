@@ -4,7 +4,7 @@
 
 class SplFileInfo
 {
-    public function __construct(string $file_name) {}
+    public function __construct(string $filename) {}
 
     /** @return string */
     public function getPath() {}
@@ -73,22 +73,22 @@ class SplFileInfo
     public function getRealPath() {}
 
     /** @return SplFileInfo */
-    public function getFileInfo(?string $class_name = null) {}
+    public function getFileInfo(?string $class = null) {}
 
     /** @return SplFileInfo|null */
-    public function getPathInfo(?string $class_name = null) {}
+    public function getPathInfo(?string $class = null) {}
 
     /**
      * @param resource|null $context
      * @return SplFileObject
      */
-    public function openFile(string $open_mode = "r", bool $use_include_path = false, $context = null) {}
+    public function openFile(string $mode = "r", bool $useIncludePath = false, $context = null) {}
 
     /** @return void */
-    public function setFileClass(string $class_name = SplFileObject::class) {}
+    public function setFileClass(string $class = SplFileObject::class) {}
 
     /** @return void */
-    public function setInfoClass(string $class_name = SplFileInfo::class) {}
+    public function setInfoClass(string $class = SplFileInfo::class) {}
 
     /** @implementation-alias SplFileInfo::getPathname */
     public function __toString(): string {}
@@ -102,7 +102,7 @@ class SplFileInfo
 
 class DirectoryIterator extends SplFileInfo implements SeekableIterator
 {
-    public function __construct(string $path) {}
+    public function __construct(string $directory) {}
 
     /** @return string */
     public function getFilename() {}
@@ -132,7 +132,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     public function next() {}
 
     /** @return void */
-    public function seek(int $position) {}
+    public function seek(int $offset) {}
 
     /** @implementation-alias DirectoryIterator::getFilename */
     public function __toString(): string {}
@@ -140,7 +140,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
 
 class FilesystemIterator extends DirectoryIterator
 {
-    public function __construct(string $path, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS) {}
+    public function __construct(string $directory, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS) {}
 
     /** @return void */
     public function rewind() {}
@@ -160,10 +160,10 @@ class FilesystemIterator extends DirectoryIterator
 
 class RecursiveDirectoryIterator extends FilesystemIterator implements RecursiveIterator
 {
-    public function __construct(string $path, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO) {}
+    public function __construct(string $directory, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO) {}
 
     /** @return bool */
-    public function hasChildren(bool $allow_links = false) {}
+    public function hasChildren(bool $allowLinks = false) {}
 
     /** @return RecursiveDirectoryIterator */
     public function getChildren() {}
@@ -178,7 +178,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator implements Recursive
 #ifdef HAVE_GLOB
 class GlobIterator extends FilesystemIterator implements Countable
 {
-    public function __construct(string $path, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO) {}
+    public function __construct(string $pattern, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO) {}
 
     /** @return int */
     public function count() {}
@@ -188,7 +188,7 @@ class GlobIterator extends FilesystemIterator implements Countable
 class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
 {
     /** @param resource|null $context */
-    public function __construct(string $file_name, string $open_mode = "r", bool $use_include_path = false, $context = null) {}
+    public function __construct(string $filename, string $mode = "r", bool $useIncludePath = false, $context = null) {}
 
     /** @return void */
     public function rewind() {}
@@ -206,22 +206,22 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fread(int $length) {}
 
     /** @return array|false */
-    public function fgetcsv(string $delimiter = ",", string $enclosure = "\"", string $escape = "\\") {}
+    public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
 
     /** @return int|false */
-    public function fputcsv(array $fields, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\") {}
+    public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
 
     /** @return bool|null */
-    public function setCsvControl(string $delimiter = ",", string $enclosure = "\"", string $escape = "\\") {}
+    public function setCsvControl(string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
 
     /** @return array */
     public function getCsvControl() {}
 
     /**
-     * @param int $wouldblock
+     * @param int $wouldBlock
      * @return bool
      */
-    public function flock(int $operation, &$wouldblock = null) {}
+    public function flock(int $operation, &$wouldBlock = null) {}
 
     /** @return bool */
     public function fflush() {}
@@ -239,10 +239,10 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fpassthru() {}
 
     /** @return array|int|false|null */
-    public function fscanf(string $format, mixed &...$params) {}
+    public function fscanf(string $format, mixed &...$vars) {}
 
     /** @return int|false */
-    public function fwrite(string $str, int $length = 0) {}
+    public function fwrite(string $data, int $length = 0) {}
 
     /** @return array */
     public function fstat() {}
@@ -266,7 +266,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function getFlags() {}
 
     /** @return void */
-    public function setMaxLineLen(int $max_len) {}
+    public function setMaxLineLen(int $maxLength) {}
 
     /** @return int */
     public function getMaxLineLen() {}
@@ -278,7 +278,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function getChildren() {}
 
     /** @return void */
-    public function seek(int $line_pos) {}
+    public function seek(int $line) {}
 
     /**
      * @return string|false
@@ -292,5 +292,5 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 
 class SplTempFileObject extends SplFileObject
 {
-    public function __construct(int $max_memory = 2 * 1024 * 1024) {}
+    public function __construct(int $maxMemory = 2 * 1024 * 1024) {}
 }

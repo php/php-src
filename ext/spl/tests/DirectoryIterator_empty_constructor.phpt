@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-DirectoryIterator::__construct(): Argument #1 ($path) cannot be empty
+DirectoryIterator::__construct(): Argument #1 ($directory) cannot be empty

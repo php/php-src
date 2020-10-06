@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-SplFileObject::seek(): Argument #1 ($line_pos) must be greater than or equal to 0
+SplFileObject::seek(): Argument #1 ($line) must be greater than or equal to 0

@@ -24,4 +24,4 @@ try {
 unlink('csv_control_data_error001.csv');
 ?>
 --EXPECT--
-SplFileObject::setCsvControl(): Argument #1 ($delimiter) must be a single character
+SplFileObject::setCsvControl(): Argument #1 ($separator) must be a single character

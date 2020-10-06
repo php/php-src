@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-SplTempFileObject::__construct(): Argument #1 ($max_memory) must be of type int, string given
+SplTempFileObject::__construct(): Argument #1 ($maxMemory) must be of type int, string given
