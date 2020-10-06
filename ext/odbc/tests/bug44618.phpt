@@ -53,4 +53,4 @@ array(3) {
 }
 bool(false)
 <table><tr><th>ID</th><th>real1</th><th>text1</th></tr>
-<tr><td>1</td><td>10.02</td><td>
+<tr><td>1</td><td>10.02</td><td></td></tr></table>

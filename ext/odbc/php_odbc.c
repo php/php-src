@@ -2369,6 +2369,7 @@ PHP_FUNCTION(odbc_result_all)
 					if (rc == SQL_SUCCESS_WITH_INFO) {
 						PHPWRITE(buf, result->longreadlen);
 					} else if (rc != SQL_SUCCESS) {
+						php_printf("</td></tr></table>");
 						efree(buf);
 						RETURN_FALSE;
 					} else if (result->values[i].vallen == SQL_NULL_DATA) {
