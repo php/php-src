@@ -259,8 +259,6 @@ static zend_class_entry *lookup_class(zend_class_entry *scope, zend_string *name
 
 /* Instanceof that's safe to use on unlinked classes. */
 static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
-	zend_class_entry *ce;
-
 	if (ce1 == ce2) {
 		return 1;
 	}
@@ -269,18 +267,18 @@ static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce
 		return instanceof_function(ce1, ce2);
 	}
 
-	ce = ce1;
-	while (ce->parent) {
-		if (ce->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
-			ce = ce->parent;
+	if (ce1->parent) {
+		zend_class_entry *parent_ce;
+		if (ce1->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
+			parent_ce = ce1->parent;
 		} else {
-			ce = zend_lookup_class_ex(ce->parent_name, NULL,
+			parent_ce = zend_lookup_class_ex(ce1->parent_name, NULL,
 				ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
-			if (!ce) {
-				break;
-			}
 		}
-		if (ce == ce2) {
+
+		/* It's not sufficient to only check the parent chain itself, as need to do a full
+		 * recursive instanceof in case the parent interfaces haven't been copied yet. */
+		if (parent_ce && unlinked_instanceof(parent_ce, ce2)) {
 			return 1;
 		}
 	}
@@ -297,7 +295,7 @@ static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce
 			}
 		} else {
 			for (i = 0; i < ce1->num_interfaces; i++) {
-				ce = zend_lookup_class_ex(
+				zend_class_entry *ce = zend_lookup_class_ex(
 					ce1->interface_names[i].name, ce1->interface_names[i].lc_name,
 					ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 				if (ce && unlinked_instanceof(ce, ce2)) {

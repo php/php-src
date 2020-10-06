@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #79423 (copy command is limited to size of file it can copy).
     (cmb)
+  . Fixed bug #80126 (Covariant return types failing compilation). (Nikita)
 
 - MySQLnd:
   . Fixed bug #80115 (mysqlnd.debug doesn't recognize absolute paths with
