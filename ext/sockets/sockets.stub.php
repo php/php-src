@@ -110,7 +110,7 @@ function socket_addrinfo_bind(AddressInfo $address): Socket|false {}
 function socket_addrinfo_explain(AddressInfo $address): array {}
 
 #ifdef PHP_WIN32
-function socket_wsaprotocol_info_export(Socket $socket, int $target_pid): string|false {}
+function socket_wsaprotocol_info_export(Socket $socket, int $process_id): string|false {}
 
 function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 

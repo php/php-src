@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35196eb31a98dd0b30761eed91f10a8b7e814f9e */
+ * Stub hash: 58b939e7e18129e0072d6e0c02f845f7cfd4242a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -193,7 +193,7 @@ ZEND_END_ARG_INFO()
 #if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_wsaprotocol_info_export, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
-	ZEND_ARG_TYPE_INFO(0, target_pid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
