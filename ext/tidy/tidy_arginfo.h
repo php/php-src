@@ -1,42 +1,42 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 62b1cdb7f9b9a5641d3bd9248f5a73c30266d02e */
+ * Stub hash: ac4cd960d6c65653994b8b044dcc52c179a57d45 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_get_error_buffer, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_get_output, 0, 1, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_file, 0, 1, tidy, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, useIncludePath, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_clean_repair, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_repair_string, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_repair_file, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, useIncludePath, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 #define arginfo_tidy_diagnose arginfo_tidy_clean_repair
@@ -46,17 +46,17 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_TIDYOPTGETDOC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_get_opt_doc, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
-	ZEND_ARG_TYPE_INFO(0, optname, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_get_config, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_get_status, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_tidy_get_html_ver arginfo_tidy_get_status
@@ -74,27 +74,25 @@ ZEND_END_ARG_INFO()
 #define arginfo_tidy_config_count arginfo_tidy_get_status
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_getopt, 0, 2, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_tidy_get_root, 0, 1, tidyNode, 1)
-	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
+	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_tidy_get_html arginfo_tidy_get_root
 
 #define arginfo_tidy_get_head arginfo_tidy_get_root
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_tidy_get_body, 0, 1, tidyNode, 1)
-	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_tidy_get_body arginfo_tidy_get_root
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filename, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, useIncludePath, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_getOpt, 0, 0, 1)
@@ -105,30 +103,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_cleanRepair, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_parseFile, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, useIncludePath, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_parseString, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_repairString, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_tidy_repairString arginfo_class_tidy_parseString
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_repairFile, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, config_options, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
+#define arginfo_class_tidy_repairFile arginfo_class_tidy_parseFile
 
 #define arginfo_class_tidy_diagnose arginfo_class_tidy_cleanRepair
 
@@ -142,7 +131,7 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_TIDYOPTGETDOC)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_getOptDoc, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, optname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
