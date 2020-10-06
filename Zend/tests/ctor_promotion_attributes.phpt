@@ -1,5 +1,5 @@
 --TEST--
-Attributes on promoted properties are assigned to both the property and parameter
+Attributes on promoted properties are currently not supported
 --FILE--
 <?php
 
@@ -17,6 +17,5 @@ $param = new ReflectionParameter([Test::class, '__construct'], 'num');
 var_dump($param->getAttributes()[0]->getName());
 
 ?>
---EXPECT--
-string(11) "NonNegative"
-string(11) "NonNegative"
+--EXPECTF--
+Fatal error: Attributes on promoted properties are currently not supported in %s on line %d

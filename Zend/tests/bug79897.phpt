@@ -23,16 +23,5 @@ const X = 42;
 var_dump((new ReflectionParameter(['A', '__construct'], 'b'))->getAttributes()[0]->getArguments());
 var_dump((new ReflectionProperty('A', 'b'))->getAttributes()[0]->getArguments());
 ?>
---EXPECT--
-array(2) {
-  [0]=>
-  int(12)
-  [1]=>
-  int(42)
-}
-array(2) {
-  [0]=>
-  int(12)
-  [1]=>
-  int(42)
-}
+--EXPECTF--
+Fatal error: Attributes on promoted properties are currently not supported in %s on line %d
