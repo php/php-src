@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 63219df3f7ccf823350d288bf2dfeba5291a3e51 */
+ * Stub hash: abd3bc186ae3f71f2b7eb1d47f3b6bab84fb2bda */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -11,7 +11,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_load, 0, 1, FFI, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_scope, 0, 1, FFI, 1)
-	ZEND_ARG_TYPE_INFO(0, scope_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_new, 0, 1, FFI\\CData, 1)
@@ -39,7 +39,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_arrayType, 0, 2, FFI\\CType, 1)
 	ZEND_ARG_OBJ_INFO(0, type, FFI\\CType, 0)
-	ZEND_ARG_TYPE_INFO(0, dims, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, dimensions, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_addr, 0, 1, FFI\\CData, 0)
@@ -53,8 +53,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_FFI_alignof arginfo_class_FFI_sizeof
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_memcpy, 0, 3, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, dst, FFI\\CData, 0)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, src)
+	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, to, FFI\\CData, 0)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, from)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -66,7 +66,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_memset, 0, 3, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
-	ZEND_ARG_TYPE_INFO(0, ch, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
