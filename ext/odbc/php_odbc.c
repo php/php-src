@@ -1810,6 +1810,8 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
+				} else if (rc != SQL_SUCCESS) {
+					ZVAL_FALSE(&tmp);
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
 					break;
@@ -1962,6 +1964,8 @@ PHP_FUNCTION(odbc_fetch_into)
 				}
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
+				} else if (rc != SQL_SUCCESS) {
+					ZVAL_FALSE(&tmp);
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
 					break;
@@ -2199,12 +2203,12 @@ PHP_FUNCTION(odbc_result)
 				RETURN_FALSE;
 			}
 
-			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
-				zend_string_efree(field_str);
-				RETURN_NULL();
-			} else if (rc == SQL_NO_DATA_FOUND) {
+			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				zend_string_efree(field_str);
 				RETURN_FALSE;
+			} else if (result->values[field_ind].vallen == SQL_NULL_DATA) {
+				zend_string_efree(field_str);
+				RETURN_NULL();
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might
 			   have binary strings... */
@@ -2246,6 +2250,11 @@ PHP_FUNCTION(odbc_result)
 
 		if (rc == SQL_ERROR) {
 			odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
+			efree(field);
+			RETURN_FALSE;
+		}
+
+		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			efree(field);
 			RETURN_FALSE;
 		}
@@ -2359,6 +2368,9 @@ PHP_FUNCTION(odbc_result_all)
 					}
 					if (rc == SQL_SUCCESS_WITH_INFO) {
 						PHPWRITE(buf, result->longreadlen);
+					} else if (rc != SQL_SUCCESS) {
+						efree(buf);
+						RETURN_FALSE;
 					} else if (result->values[i].vallen == SQL_NULL_DATA) {
 						php_printf("<td>NULL</td>");
 						break;
