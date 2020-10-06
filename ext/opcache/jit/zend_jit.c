@@ -2892,6 +2892,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						} else {
 							int j;
+							zend_bool left_frame = 0;
 
 							if (!zend_jit_return(&dasm_state, opline, op_array,
 									op1_info, OP1_REG_ADDR())) {
@@ -2907,20 +2908,23 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (!zend_jit_label(&dasm_state, jit_return_label)) {
 								goto jit_failure;
 							}
-							if (!zend_jit_leave_frame(&dasm_state)) {
-								goto jit_failure;
-							}
 							for (j = 0 ; j < op_array->last_var; j++) {
 								uint32_t info = zend_ssa_cv_info(op_array, ssa, j);
 
 								if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+									if (!left_frame) {
+										left_frame = 1;
+									    if (!zend_jit_leave_frame(&dasm_state)) {
+											goto jit_failure;
+									    }
+									}
 									if (!zend_jit_free_cv(&dasm_state, info, j)) {
 										goto jit_failure;
 									}
 								}
 							}
-							if (!zend_jit_leave_func(&dasm_state, op_array, opline, op1_info, NULL, NULL,
-									(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, 1)) {
+							if (!zend_jit_leave_func(&dasm_state, op_array, opline, op1_info, left_frame,
+									NULL, NULL, (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, 1)) {
 								goto jit_failure;
 							}
 						}

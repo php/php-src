@@ -11044,7 +11044,15 @@ static int zend_jit_free_op(dasm_State **Dst, const zend_op *opline, uint32_t in
 	return 1;
 }
 
-static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, const zend_op *opline, uint32_t op1_info, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info, int indirect_var_access, int may_throw)
+static int zend_jit_leave_func(dasm_State          **Dst,
+                               const zend_op_array  *op_array,
+                               const zend_op        *opline,
+                               uint32_t              op1_info,
+                               zend_bool             left_frame,
+                               zend_jit_trace_rec   *trace,
+                               zend_jit_trace_info  *trace_info,
+                               int                   indirect_var_access,
+                               int                   may_throw)
 {
 	zend_bool may_be_top_frame =
 		JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
@@ -11071,6 +11079,12 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, 
 		|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
 	}
 	if (may_need_call_helper) {
+		if (!left_frame) {
+			left_frame = 1;
+		    if (!zend_jit_leave_frame(Dst)) {
+				return 0;
+		    }
+		}
 		/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
 		|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
 		if (trace && trace->op != ZEND_JIT_TRACE_END) {
@@ -11108,12 +11122,24 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, 
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		if (!left_frame) {
+			left_frame = 1;
+		    if (!zend_jit_leave_frame(Dst)) {
+				return 0;
+		    }
+		}
 		|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		|	mov FCARG1a, EX->func
 		|	sub FCARG1a, sizeof(zend_object)
 		|	OBJ_RELEASE ZREG_FCARG1a, >4
 		|4:
 	} else if (may_need_release_this) {
+		if (!left_frame) {
+			left_frame = 1;
+		    if (!zend_jit_leave_frame(Dst)) {
+				return 0;
+		    }
+		}
 		|	// if (call_info & ZEND_CALL_RELEASE_THIS)
 		|	test FCARG1d, ZEND_CALL_RELEASE_THIS
 		|	je >4
@@ -11130,6 +11156,11 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op_array *op_array, 
 	|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
 	|	// execute_data = EX(prev_execute_data);
 	|	mov FP, EX->prev_execute_data
+
+	if (!left_frame) {
+		|	// EG(current_execute_data) = execute_data;
+		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, FP, r0
+	}
 
 	|9:
 	if (trace) {
