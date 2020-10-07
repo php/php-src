@@ -288,9 +288,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 	}
 	if (s <= 0) {
 		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_JIS0208) {
-			s = c & MBFL_WCSPLANE_MASK;
-		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
+		if (c1 == MBFL_WCSPLANE_JIS0212) {
 			s = c & MBFL_WCSPLANE_MASK;
 			s |= 0x8080;
 		} else if (c == 0xa5) {		/* YEN SIGN */

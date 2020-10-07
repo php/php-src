@@ -279,11 +279,6 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 			if (s1 >= ((85 + 0x20) << 8)) {	/* 85ku - 120ku */
 				s1 = -1;
 			}
-		} else if (c1 == MBFL_WCSPLANE_JIS0208) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			if (s1 >= ((85 + 0x20) << 8)) {	/* 85ku - 94ku */
-				s1 = -1;
-			}
 		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
 			s1 = c & MBFL_WCSPLANE_MASK;
 			if (s1 >= ((83 + 0x20) << 8)) {	/* 83ku - 94ku */
