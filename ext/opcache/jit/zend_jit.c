@@ -1367,6 +1367,27 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 								zend_jit_add_hint(intervals, i, ssa->ops[line].op2_use);
 							}
 							break;
+						case ZEND_SUB:
+						case ZEND_ADD:
+						case ZEND_MUL:
+						case ZEND_BW_OR:
+						case ZEND_BW_AND:
+						case ZEND_BW_XOR:
+							if (i == ssa->ops[line].result_def) {
+								if (ssa->ops[line].op1_use >= 0 &&
+								    intervals[ssa->ops[line].op1_use] &&
+								    ssa->ops[line].op1_use_chain < 0 &&
+								    !ssa->vars[ssa->ops[line].op1_use].phi_use_chain) {
+									zend_jit_add_hint(intervals, i, ssa->ops[line].op1_use);
+								} else if (opline->opcode != ZEND_SUB &&
+								    ssa->ops[line].op2_use >= 0 &&
+								    intervals[ssa->ops[line].op2_use] &&
+								    ssa->ops[line].op2_use_chain < 0 &&
+								    !ssa->vars[ssa->ops[line].op2_use].phi_use_chain) {
+									zend_jit_add_hint(intervals, i, ssa->ops[line].op2_use);
+								}
+							}
+							break;
 					}
 				}
 			}
