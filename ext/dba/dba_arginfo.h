@@ -1,28 +1,28 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5b43c7cfcb48f3081d5585192eaaa5185df036f8 */
+ * Stub hash: 15c236854ed1d2e775486de5c8018adbd00506f9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, handlername)
-	ZEND_ARG_VARIADIC_INFO(0, handler_parameters)
+	ZEND_ARG_INFO(0, handler)
+	ZEND_ARG_VARIADIC_INFO(0, handler_params)
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_open arginfo_dba_popen
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_close, 0, 1, IS_VOID, 0)
-	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_INFO(0, dba)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_exists, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_INFO(0, dba)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dba_fetch, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, skip)
-	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_INFO(0, dba)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dba_key_split, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -30,7 +30,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dba_key_split, 0, 1, MAY_BE_ARRA
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dba_firstkey, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_INFO(0, dba)
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_nextkey arginfo_dba_firstkey
@@ -40,13 +40,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_insert, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_INFO(0, dba)
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_replace arginfo_dba_insert
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_optimize, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_INFO(0, dba)
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_sync arginfo_dba_optimize
