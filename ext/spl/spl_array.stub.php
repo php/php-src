@@ -64,7 +64,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     public function natcasesort() {}
 
     /** @return void */
-    public function unserialize(string $serialized) {}
+    public function unserialize(string $data) {}
 
     /** @return string */
     public function serialize() {}
@@ -193,7 +193,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
      * @return void
      * @implementation-alias ArrayObject::unserialize
      */
-    public function unserialize(string $serialized) {}
+    public function unserialize(string $data) {}
 
     /**
      * @return string

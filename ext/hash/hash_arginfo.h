@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5298231334ab85edd67ae46c33b7e6cffb2ecc53 */
+ * Stub hash: 9352e0ac98e2ac53dc15d5024f9ef0c8092c4e9c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_hash, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -121,7 +121,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_HashContext___serialize arginfo_hash_algos
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_HashContext___unserialize, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 

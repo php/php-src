@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eabfa31ef9badedd358ce54729e586daa50d9282 */
+ * Stub hash: da85db1e5e985ddbefaf38598133e3cba46475f2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -52,7 +52,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayObject_natcasesort arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_unserialize, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_serialize arginfo_class_ArrayObject_getArrayCopy

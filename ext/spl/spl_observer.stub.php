@@ -65,7 +65,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     public function next() {}
 
     /** @return void */
-    public function unserialize(string $serialized) {}
+    public function unserialize(string $data) {}
 
     /** @return string */
     public function serialize() {}
