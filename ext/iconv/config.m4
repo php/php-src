@@ -129,7 +129,7 @@ int main() {
 
 int main() {
   iconv_t cd;
-  cd = iconv_open( "*blahblah*", "*blahblah*" );
+  cd = iconv_open( "*blahblah*", "*blahblahblah*" );
   if (cd == (iconv_t)(-1)) {
     if (errno == EINVAL) {
       return 0;
