@@ -1941,7 +1941,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 		/* Eliminate NOPs */
 		for (b = blocks; b < end; b++) {
-			if (b->flags & ZEND_BB_REACHABLE) {
+			if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 				strip_nops(op_array, b);
 			}
 		}

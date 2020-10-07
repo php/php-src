@@ -29,6 +29,8 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug #80083 (Optimizer pass 6 removes variables used for ibm_db2 data
     binding). (Nikita)
+  . Fixed bug #80194 (Assertion failure during block assembly of unreachable
+    free with leading nop). (Nikita)
 
 - PCRE:
   . Updated to PCRE 10.35. (cmb)
