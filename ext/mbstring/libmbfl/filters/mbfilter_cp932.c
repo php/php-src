@@ -255,8 +255,6 @@ mbfl_filt_conv_wchar_cp932(int c, mbfl_convert_filter *filter)
 		if (c1 == MBFL_WCSPLANE_WINCP932) {
 			s1 = c & MBFL_WCSPLANE_MASK;
 			s2 = 1;
-		} else if (c1 == MBFL_WCSPLANE_JIS0208) {
-			s1 = c & MBFL_WCSPLANE_MASK;
 		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
 			s1 = c & MBFL_WCSPLANE_MASK;
 			s1 |= 0x8080;

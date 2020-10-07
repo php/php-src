@@ -216,14 +216,6 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 			if (s1 >= ((85 + 0x20) << 8)) {	/* 85ku - 120ku */
 				s1 = -1;
 			}
-		} else if (c1 == MBFL_WCSPLANE_JIS0208) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			if ((s1 >= ((85 + 0x20) << 8) &&  /* 85ku - 94ku */
-                             s1 <= ((88 + 0x20) << 8)) ||/* IBM extension */
-			    (s1 >= ((93 + 0x20) << 8) && /* 89ku - 92ku */
-                             s1 <= ((94 + 0x20) << 8))) {
-				s1 = -1;
-			}
 		} else if (c == 0xa5) {		/* YEN SIGN */
 			s1 = 0x005c;			/* YEN SIGN */
 		} else if (c == 0x203e) {	/* OVER LINE */
