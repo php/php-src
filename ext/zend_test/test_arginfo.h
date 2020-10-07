@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2d871bb7fda01594bb46f53bca64323424db4709 */
+ * Stub hash: 759463b1adece643974a9c51455789aef11ba935 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -63,6 +63,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestTrait_testMethod, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_ZendTestNS_Foo_method arginfo_zend_test_void_return
+
+#define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
+
 
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
@@ -81,6 +85,8 @@ static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
 static ZEND_METHOD(_ZendTestClass, returnsStatic);
 static ZEND_METHOD(_ZendTestTrait, testMethod);
+static ZEND_METHOD(ZendTestNS_Foo, method);
+static ZEND_METHOD(ZendTestNS2_Foo, method);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -111,5 +117,17 @@ static const zend_function_entry class__ZendTestClass_methods[] = {
 
 static const zend_function_entry class__ZendTestTrait_methods[] = {
 	ZEND_ME(_ZendTestTrait, testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestNS_Foo_methods[] = {
+	ZEND_ME(ZendTestNS_Foo, method, arginfo_class_ZendTestNS_Foo_method, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestNS2_Foo_methods[] = {
+	ZEND_ME(ZendTestNS2_Foo, method, arginfo_class_ZendTestNS2_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

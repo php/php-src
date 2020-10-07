@@ -357,6 +357,7 @@ interface FunctionOrMethodName {
     public function getDeclaration(): string;
     public function getArgInfoName(): string;
     public function __toString(): string;
+    public function isMagicMethod(): bool;
 }
 
 class FunctionName implements FunctionOrMethodName {
@@ -374,10 +375,6 @@ class FunctionName implements FunctionOrMethodName {
         return null;
     }
 
-    public function getShortName(): string {
-        return $this->name->getLast();
-    }
-
     public function getNonNamespacedName(): string {
         if ($this->name->isQualified()) {
             throw new Exception("Namespaced name not supported here");
@@ -385,8 +382,12 @@ class FunctionName implements FunctionOrMethodName {
         return $this->name->toString();
     }
 
+    public function getDeclarationName(): string {
+        return $this->name->getLast();
+    }
+
     public function getDeclaration(): string {
-        return "ZEND_FUNCTION({$this->name->getLast()});\n";
+        return "ZEND_FUNCTION({$this->getDeclarationName()});\n";
     }
 
     public function getArgInfoName(): string {
@@ -397,29 +398,41 @@ class FunctionName implements FunctionOrMethodName {
     public function __toString(): string {
         return $this->name->toString();
     }
+
+    public function isMagicMethod(): bool {
+        return false;
+    }
 }
 
 class MethodName implements FunctionOrMethodName {
+    /** @var Name */
+    private $className;
     /** @var string */
-    public $className;
-    /** @var string */
-    public $name;
+    public $methodName;
 
-    public function __construct(string $className, string $name) {
+    public function __construct(Name $className, string $methodName) {
         $this->className = $className;
-        $this->name = $name;
+        $this->methodName = $methodName;
+    }
+
+    public function getDeclarationClassName(): string {
+        return implode('_', $this->className->parts);
     }
 
     public function getDeclaration(): string {
-        return "ZEND_METHOD($this->className, $this->name);\n";
+        return "ZEND_METHOD({$this->getDeclarationClassName()}, $this->methodName);\n";
     }
 
     public function getArgInfoName(): string {
-        return "arginfo_class_{$this->className}_{$this->name}";
+        return "arginfo_class_{$this->getDeclarationClassName()}_{$this->methodName}";
     }
 
     public function __toString(): string {
-        return "$this->className::$this->name";
+        return "$this->className::$this->methodName";
+    }
+
+    public function isMagicMethod(): bool {
+        return strpos($this->methodName, '__') === 0;
     }
 }
 
@@ -526,58 +539,63 @@ class FuncInfo {
                 if ($this->alias instanceof MethodName) {
                     return sprintf(
                         "\tZEND_MALIAS(%s, %s, %s, %s, %s)\n",
-                        $this->alias->className, $this->name->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $this->alias->getDeclarationClassName(), $this->name->methodName,
+                        $this->alias->methodName, $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 } else if ($this->alias instanceof FunctionName) {
                     return sprintf(
                         "\tZEND_ME_MAPPING(%s, %s, %s, %s)\n",
-                        $this->name->name, $this->alias->getNonNamespacedName(),
+                        $this->name->methodName, $this->alias->getNonNamespacedName(),
                         $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 } else {
                     throw new Error("Cannot happen");
                 }
             } else {
+                $declarationClassName = $this->name->getDeclarationClassName();
                 if ($this->flags & Class_::MODIFIER_ABSTRACT) {
                     return sprintf(
                         "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
-                        $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
+                        $this->getFlagsAsString()
                     );
                 }
 
                 return sprintf(
                     "\tZEND_ME(%s, %s, %s, %s)\n",
-                    $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                    $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
+                    $this->getFlagsAsString()
                 );
             }
         } else if ($this->name instanceof FunctionName) {
             $namespace = $this->name->getNamespace();
-            $shortName = $this->name->getShortName();
+            $declarationName = $this->name->getDeclarationName();
 
             if ($this->alias && $this->isDeprecated) {
                 return sprintf(
                     "\tZEND_DEP_FALIAS(%s, %s, %s)\n",
-                    $shortName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
                 );
             }
 
             if ($this->alias) {
                 return sprintf(
                     "\tZEND_FALIAS(%s, %s, %s)\n",
-                    $shortName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
                 );
             }
 
             if ($this->isDeprecated) {
-                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $shortName, $this->getArgInfoName());
+                return sprintf(
+                    "\tZEND_DEP_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
 
             if ($namespace) {
                 return sprintf(
                     "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    $namespace, $shortName, $this->getArgInfoName());
+                    $namespace, $declarationName, $this->getArgInfoName());
             } else {
-                return sprintf("\tZEND_FE(%s, %s)\n", $shortName, $this->getArgInfoName());
+                return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
         } else {
             throw new Error("Cannot happen");
@@ -622,12 +640,12 @@ class FuncInfo {
 }
 
 class ClassInfo {
-    /** @var string */
+    /** @var Name */
     public $name;
     /** @var FuncInfo[] */
     public $funcInfos;
 
-    public function __construct(string $name, array $funcInfos) {
+    public function __construct(Name $name, array $funcInfos) {
         $this->name = $name;
         $this->funcInfos = $funcInfos;
     }
@@ -741,7 +759,7 @@ function parseFunctionLike(
                 if (count($aliasParts) === 1) {
                     $alias = new FunctionName(new Name($aliasParts[0]));
                 } else {
-                    $alias = new MethodName($aliasParts[0], $aliasParts[1]);
+                    $alias = new MethodName(new Name($aliasParts[0]), $aliasParts[1]);
                 }
             } else if ($tag->name === 'deprecated') {
                 $isDeprecated = true;
@@ -814,7 +832,7 @@ function parseFunctionLike(
     }
 
     $returnType = $func->getReturnType();
-    if ($returnType === null && !$haveDocReturnType && strpos($name->name, '__') !== 0) {
+    if ($returnType === null && !$haveDocReturnType && !$name->isMagicMethod()) {
         throw new Exception("Missing return type for function $name()");
     }
 
@@ -906,7 +924,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
         }
 
         if ($stmt instanceof Stmt\ClassLike) {
-            $className = $stmt->name->toString();
+            $className = $stmt->namespacedName;
             $methodInfos = [];
             foreach ($stmt->stmts as $classStmt) {
                 $cond = handlePreprocessorConditions($conds, $classStmt);
@@ -1160,10 +1178,14 @@ function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
 }
 
 /** @param FuncInfo[] $funcInfos */
-function generateFunctionEntries(?string $className, array $funcInfos): string {
+function generateFunctionEntries(?Name $className, array $funcInfos): string {
     $code = "";
 
-    $functionEntryName = $className ? "class_{$className}_methods" : "ext_functions";
+    $functionEntryName = "ext_functions";
+    if ($className) {
+        $underscoreName = implode("_", $className->parts);
+        $functionEntryName = "class_{$underscoreName}_methods";
+    }
 
     $code .= "\n\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
     $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {

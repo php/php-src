@@ -313,6 +313,14 @@ static ZEND_METHOD(_ZendTestTrait, testMethod) {
 	RETURN_TRUE;
 }
 
+static ZEND_METHOD(ZendTestNS_Foo, method) {
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_METHOD(ZendTestNS2_Foo, method) {
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.enabled", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_enabled, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_output", "1", PHP_INI_SYSTEM, OnUpdateBool, observer_show_output, zend_zend_test_globals, zend_test_globals)

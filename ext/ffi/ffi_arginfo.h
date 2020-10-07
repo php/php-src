@@ -79,7 +79,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_isNull, 0, 1, _IS_BOOL
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CType_getName, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getName, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -100,7 +100,7 @@ ZEND_METHOD(FFI, memcmp);
 ZEND_METHOD(FFI, memset);
 ZEND_METHOD(FFI, string);
 ZEND_METHOD(FFI, isNull);
-ZEND_METHOD(CType, getName);
+ZEND_METHOD(FFI_CType, getName);
 
 
 static const zend_function_entry class_FFI_methods[] = {
@@ -125,7 +125,7 @@ static const zend_function_entry class_FFI_methods[] = {
 };
 
 
-static const zend_function_entry class_CType_methods[] = {
-	ZEND_ME(CType, getName, arginfo_class_CType_getName, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_FFI_CType_methods[] = {
+	ZEND_ME(FFI_CType, getName, arginfo_class_FFI_CType_getName, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
