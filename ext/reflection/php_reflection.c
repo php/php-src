@@ -674,7 +674,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	smart_str_append_printf(str, "$%s", has_internal_arg_info(fptr)
 		? ((zend_internal_arg_info*)arg_info)->name : ZSTR_VAL(arg_info->name));
 
-	if (!required) {
+	if (!required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 			smart_str_appends(str, " = ");
 			/* TODO: We don't have a way to fetch the default value for an internal function
