@@ -14,7 +14,7 @@ class XMLReader
     public function getAttributeNo(int $index) {}
 
     /** @return string|null */
-    public function getAttributeNs(string $name, string $uri) {}
+    public function getAttributeNs(string $name, string $namespace) {}
 
     /** @return bool */
     public function getParserProperty(int $property) {}
@@ -32,7 +32,7 @@ class XMLReader
     public function moveToAttributeNo(int $index) {}
 
     /** @return bool */
-    public function moveToAttributeNs(string $name, string $uri) {}
+    public function moveToAttributeNs(string $name, string $namespace) {}
 
     /** @return bool */
     public function moveToElement() {}
