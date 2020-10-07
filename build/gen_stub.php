@@ -111,6 +111,11 @@ class SimpleType {
 
     public static function fromNode(Node $node) {
         if ($node instanceof Node\Name) {
+            if ($node->toLowerString() === 'static') {
+                // PHP internally considers "static" a builtin type.
+                return new SimpleType($node->toString(), true);
+            }
+
             assert($node->isFullyQualified());
             return new SimpleType($node->toString(), false);
         }
@@ -147,6 +152,8 @@ class SimpleType {
             return "IS_ITERABLE";
         case "mixed":
             return "IS_MIXED";
+        case "static":
+            return "IS_STATIC";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -175,6 +182,8 @@ class SimpleType {
             return "MAY_BE_CALLABLE";
         case "mixed":
             return "MAY_BE_ANY";
+        case "static":
+            return "MAY_BE_STATIC";
         default:
             throw new Exception("Not implemented: $this->name");
         }

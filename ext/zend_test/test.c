@@ -292,21 +292,26 @@ void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t ta
 	}
 }
 
-static ZEND_METHOD(_ZendTestClass, __toString) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, __toString) {
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_EMPTY_STRING();
 }
-/* }}} */
 
 /* Internal function returns bool, we return int. */
-static ZEND_METHOD(_ZendTestClass, is_object) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, is_object) {
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_LONG(42);
 }
-/* }}} */
 
-static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, returnsStatic) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	object_init_ex(return_value, zend_get_called_scope(execute_data));
+}
+
+static ZEND_METHOD(_ZendTestTrait, testMethod) {
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
 }
-/* }}} */
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.enabled", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_enabled, zend_zend_test_globals, zend_test_globals)

@@ -7,6 +7,8 @@ class _ZendTestClass {
 
     /** @deprecated */
     public function __toString(): string {}
+
+    public function returnsStatic(): static {}
 }
 
 trait _ZendTestTrait {
