@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #79423 (copy command is limited to size of file it can copy).
     (cmb)
 
+- Calendar:
+  . Fixed bug #80185 (jdtounix() fails after 2037). (cmb)
+
 - MySQLnd:
   . Fixed bug #80115 (mysqlnd.debug doesn't recognize absolute paths with
     slashes). (cmb)
