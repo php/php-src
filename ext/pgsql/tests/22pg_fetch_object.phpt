@@ -40,5 +40,5 @@ object(test_class)#1 (3) {
   ["bin"]=>
   NULL
 }
-pg_fetch_object(): Argument #3 ($class_name) must be a valid class name, does_not_exist given
+pg_fetch_object(): Argument #3 ($class) must be a valid class name, does_not_exist given
 Ok

@@ -136,15 +136,15 @@ echo "OK";
 Argument #3 must be greater than or equal to 0
 Argument #3 must be less than the number of fields for this result set
 Argument #3 must be a field name from this result set
-pg_fetch_all_columns(): Argument #2 ($field_number) must be greater than or equal to 0
-pg_fetch_all_columns(): Argument #2 ($field_number) must be less than the number of fields for this result set
+pg_fetch_all_columns(): Argument #2 ($field) must be greater than or equal to 0
+pg_fetch_all_columns(): Argument #2 ($field) must be less than the number of fields for this result set
 Argument #2 must be greater than or equal to 0
 Argument #2 must be less than the number of fields for this result set
 Argument #2 must be a field name from this result set
-pg_field_name(): Argument #2 ($field_number) must be greater than or equal to 0
-pg_field_name(): Argument #2 ($field_number) must be less than the number of fields for this result set
-pg_field_table(): Argument #2 ($field_number) must be greater than or equal to 0
-pg_field_table(): Argument #2 ($field_number) must be less than the number of fields for this result set
+pg_field_name(): Argument #2 ($field) must be greater than or equal to 0
+pg_field_name(): Argument #2 ($field) must be less than the number of fields for this result set
+pg_field_table(): Argument #2 ($field) must be greater than or equal to 0
+pg_field_table(): Argument #2 ($field) must be less than the number of fields for this result set
 array(0) {
 }
 OK

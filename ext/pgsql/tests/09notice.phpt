@@ -72,4 +72,4 @@ bool(true)
 string(0) ""
 array(0) {
 }
-pg_last_notice(): Argument #2 ($option) must be one of PGSQL_NOTICE_LAST, PGSQL_NOTICE_ALL, or PGSQL_NOTICE_CLEAR
+pg_last_notice(): Argument #2 ($mode) must be one of PGSQL_NOTICE_LAST, PGSQL_NOTICE_ALL, or PGSQL_NOTICE_CLEAR
