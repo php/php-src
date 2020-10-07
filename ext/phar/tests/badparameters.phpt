@@ -228,14 +228,14 @@ try {
 }
 ?>
 --EXPECTF--
-Phar::mungServer(): Argument #1 ($munglist) must be of type array, string given
+Phar::mungServer(): Argument #1 ($variables) must be of type array, string given
 Phar::createDefaultStub(): Argument #1 ($index) must be of type ?string, array given
 Phar::loadPhar(): Argument #1 ($filename) must be of type string, array given
-Phar::canCompress(): Argument #1 ($method) must be of type int, string given
+Phar::canCompress(): Argument #1 ($compression) must be of type int, string given
 Phar::__construct(): Argument #1 ($filename) must be of type string, array given
 Phar::convertToExecutable(): Argument #1 ($format) must be of type ?int, array given
 Phar::convertToData(): Argument #1 ($format) must be of type ?int, array given
-PharData::delete(): Argument #1 ($entry) must be of type string, array given
+PharData::delete(): Argument #1 ($localName) must be of type string, array given
 Cannot write out phar archive, phar is read-only
 Entry oops does not exist and cannot be deleted
 %sfrontcontroller10.phar
@@ -244,23 +244,23 @@ A Phar alias cannot be set in a plain tar archive
 Phar::setAlias(): Argument #1 ($alias) must be of type string, array given
 Cannot change stub, phar is read-only
 A Phar stub cannot be set in a plain tar archive
-Phar::setStub(): Argument #1 ($newstub) must be of type string, array given
+Phar::setStub(): Argument #1 ($stub) must be of type string, array given
 A Phar stub cannot be set in a plain tar archive
 Phar::setDefaultStub(): Argument #1 ($index) must be of type ?string, array given
 Cannot change stub: phar.readonly=1
 Cannot set signature algorithm, phar is read-only
-Phar::compress(): Argument #1 ($compression_type) must be of type int, array given
+Phar::compress(): Argument #1 ($compression) must be of type int, array given
 Cannot compress phar archive, phar is read-only
-Phar::compressFiles(): Argument #1 ($compression_type) must be of type int, array given
+Phar::compressFiles(): Argument #1 ($compression) must be of type int, array given
 Phar is readonly, cannot change compression
 Phar::copy() expects exactly 2 arguments, 1 given
 Cannot copy "a" to "b", phar is read-only
-Phar::offsetExists(): Argument #1 ($entry) must be of type string, array given
-Phar::offsetGet(): Argument #1 ($entry) must be of type string, array given
+Phar::offsetExists(): Argument #1 ($localName) must be of type string, array given
+Phar::offsetGet(): Argument #1 ($localName) must be of type string, array given
 Phar::offsetSet() expects exactly 2 arguments, 1 given
-PharData::offsetUnset(): Argument #1 ($entry) must be of type string, array given
+PharData::offsetUnset(): Argument #1 ($localName) must be of type string, array given
 Write operations disabled by the php.ini setting phar.readonly
-Phar::addEmptyDir(): Argument #1 ($dirname) must be of type string, array given
+Phar::addEmptyDir(): Argument #1 ($directory) must be of type string, array given
 Phar::addFile(): Argument #1 ($filename) must be of type string, array given
 Phar::addFromString() expects exactly 2 arguments, 1 given
 Write operations disabled by the php.ini setting phar.readonly

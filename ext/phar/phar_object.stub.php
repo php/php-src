@@ -13,52 +13,52 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function __destruct() {}
 
     /** @return void */
-    public function addEmptyDir(string $dirname) {}
+    public function addEmptyDir(string $directory) {}
 
     /** @return void */
-    public function addFile(string $filename, ?string $localname = null) {}
+    public function addFile(string $filename, ?string $localName = null) {}
 
     /** @return void */
-    public function addFromString(string $localname, string $contents) {}
+    public function addFromString(string $localName, string $contents) {}
 
     /** @return array|false */
-    public function buildFromDirectory(string $base_dir, string $regex = "") {}
+    public function buildFromDirectory(string $directory, string $pattern = "") {}
 
     /** @return array|false */
-    public function buildFromIterator(Traversable $iterator, ?string $base_directory = null) {}
+    public function buildFromIterator(Traversable $iterator, ?string $baseDirectory = null) {}
 
     /** @return void */
-    public function compressFiles(int $compression_type) {}
+    public function compressFiles(int $compression) {}
 
     /** @return bool */
     public function decompressFiles() {}
 
     /** @return Phar|null */
-    public function compress(int $compression_type, ?string $file_ext = null) {}
+    public function compress(int $compression, ?string $extension = null) {}
 
     /** @return Phar|null */
-    public function decompress(?string $file_ext = null) {}
+    public function decompress(?string $extension = null) {}
 
     /** @return Phar|null */
-    public function convertToExecutable(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
+    public function convertToExecutable(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
     /** @return Phar|null */
-    public function convertToData(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
+    public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
     /** @return bool */
-    public function copy(string $newfile, string $oldfile) {}
+    public function copy(string $to, string $from) {}
 
     /** @return int */
     public function count(int $mode = COUNT_NORMAL) {}
 
     /** @return bool */
-    public function delete(string $entry) {}
+    public function delete(string $localName) {}
 
     /** @return bool */
     public function delMetadata() {}
 
     /** @return bool */
-    public function extractTo(string $pathto, array|string|null $files = null, bool $overwrite = false) {}
+    public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false) {}
 
     /** @return string|null */
     public function getAlias() {}
@@ -67,7 +67,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function getPath() {}
 
     /** @return mixed */
-    public function getMetadata(array $unserialize_options = []) {}
+    public function getMetadata(array $unserializeOptions = []) {}
 
     /** @return bool */
     public function getModified() {}
@@ -91,53 +91,53 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function isCompressed() {}
 
     /** @return bool */
-    public function isFileFormat(int $fileformat) {}
+    public function isFileFormat(int $format) {}
 
     /** @return bool */
     public function isWritable() {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @return bool
      */
-    public function offsetExists($entry) {}
+    public function offsetExists($localName) {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @return PharFileInfo
      */
-    public function offsetGet($entry) {}
+    public function offsetGet($localName) {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @param resource|string $value
      * @return void
      */
-    public function offsetSet($entry, $value) {}
+    public function offsetSet($localName, $value) {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @return bool
      */
-    public function offsetUnset($entry) {}
+    public function offsetUnset($localName) {}
 
     /** @return bool */
     public function setAlias(string $alias) {}
 
     /** @return bool */
-    public function setDefaultStub(?string $index = null, ?string $webindex = null) {}
+    public function setDefaultStub(?string $index = null, ?string $webIndex = null) {}
 
     /** @return void */
     public function setMetadata(mixed $metadata) {}
 
     /** @return void */
-    public function setSignatureAlgorithm(int $algorithm, ?string $privatekey = null) {}
+    public function setSignatureAlgorithm(int $algo, ?string $privateKey = null) {}
 
     /**
-     * @param resource $newstub
+     * @param resource $stub
      * @return bool
      */
-    public function setStub($newstub, int $maxlen = -1) {}
+    public function setStub($stub, int $length = -1) {}
 
     /** @return void */
     public function startBuffering() {}
@@ -147,11 +147,11 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
     final public static function apiVersion(): string {}
 
-    final public static function canCompress(int $method = 0): bool {}
+    final public static function canCompress(int $compression = 0): bool {}
 
     final public static function canWrite(): bool {}
 
-    final public static function createDefaultStub(?string $index = null, ?string $webindex = null): string {}
+    final public static function createDefaultStub(?string $index = null, ?string $webIndex = null): string {}
 
     final public static function getSupportedCompression(): array {}
 
@@ -159,30 +159,29 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
     final public static function interceptFileFuncs(): void {}
 
-    final public static function isValidPharFilename(
-        string $filename, bool $executable = true): bool {}
+    final public static function isValidPharFilename(string $filename, bool $executable = true): bool {}
 
     final public static function loadPhar(string $filename, ?string $alias = null): bool {}
 
     final public static function mapPhar(?string $alias = null, int $offset = 0): bool {}
 
-    final public static function running(bool $retphar = true): string {}
+    final public static function running(bool $returnPhar = true): string {}
 
-    final public static function mount(string $inphar, string $externalfile): void {}
+    final public static function mount(string $pharPath, string $externalPath): void {}
 
-    final public static function mungServer(array $munglist): void {}
+    final public static function mungServer(array $variables): void {}
 
-    final public static function unlinkArchive(string $archive): bool {}
+    final public static function unlinkArchive(string $filename): bool {}
 
     final public static function webPhar(
-        ?string $alias = null, ?string $index = null, string $f404 = "",
-        array $mimetypes = [], ?callable $rewrites = null): void {}
+        ?string $alias = null, ?string $index = null, string $fileNotFoundScript = "",
+        array $mimeTypes = [], ?callable $rewrite = null): void {}
 }
 
 class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 {
     /** @implementation-alias Phar::__construct */
-    public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null, int $fileformat = 0) {}
+    public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null, int $format = 0) {}
 
     /** @implementation-alias Phar::__destruct */
     public function __destruct() {}
@@ -191,37 +190,37 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return void
      * @implementation-alias Phar::addEmptyDir
      */
-    public function addEmptyDir(string $dirname) {}
+    public function addEmptyDir(string $directory) {}
 
     /**
      * @return void
      * @implementation-alias Phar::addFile
      */
-    public function addFile(string $filename, ?string $localname = null) {}
+    public function addFile(string $filename, ?string $localName = null) {}
 
     /**
      * @return void
      * @implementation-alias Phar::addFromString
      */
-    public function addFromString(string $localname, string $contents) {}
+    public function addFromString(string $localName, string $contents) {}
 
     /**
      * @return array|false
      * @implementation-alias Phar::buildFromDirectory
      */
-    public function buildFromDirectory(string $base_dir, string $regex = "") {}
+    public function buildFromDirectory(string $directory, string $pattern = "") {}
 
     /**
      * @return array|false
      * @implementation-alias Phar::buildFromIterator
      */
-    public function buildFromIterator(Traversable $iterator, ?string $base_directory = null) {}
+    public function buildFromIterator(Traversable $iterator, ?string $baseDirectory = null) {}
 
     /**
      * @return void
      * @implementation-alias Phar::compressFiles
      */
-    public function compressFiles(int $compression_type) {}
+    public function compressFiles(int $compression) {}
 
     /**
      * @return bool
@@ -233,31 +232,31 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return Phar|null
      * @implementation-alias Phar::compress
      */
-    public function compress(int $compression_type, ?string $file_ext = null) {}
+    public function compress(int $compression, ?string $extension = null) {}
 
     /**
      * @return Phar|null
      * @implementation-alias Phar::decompress
      */
-    public function decompress(?string $file_ext = null) {}
+    public function decompress(?string $extension = null) {}
 
     /**
      * @return Phar|null
      * @implementation-alias Phar::convertToExecutable
      */
-    public function convertToExecutable(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
+    public function convertToExecutable(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
     /**
      * @return Phar|null
      * @implementation-alias Phar::convertToData
      */
-    public function convertToData(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
+    public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
     /**
      * @return bool
      * @implementation-alias Phar::copy
      */
-    public function copy(string $newfile, string $oldfile) {}
+    public function copy(string $to, string $from) {}
 
     /**
      * @return int
@@ -269,7 +268,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::delete
      */
-    public function delete(string $entry) {}
+    public function delete(string $localName) {}
 
     /**
      * @return bool
@@ -281,7 +280,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::extractTo
      */
-    public function extractTo(string $pathto, array|string|null $files = null, bool $overwrite = false) {}
+    public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false) {}
 
     /**
      * @return string|null
@@ -347,7 +346,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::isFileFormat
      */
-    public function isFileFormat(int $fileformat) {}
+    public function isFileFormat(int $format) {}
 
     /**
      * @return bool
@@ -356,33 +355,33 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     public function isWritable() {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @return bool
      * @implementation-alias Phar::offsetExists
      */
-    public function offsetExists($entry) {}
+    public function offsetExists($localName) {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @return PharFileInfo
      * @implementation-alias Phar::offsetGet
      */
-    public function offsetGet($entry) {}
+    public function offsetGet($localName) {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @param resource|string $value
      * @return void
      * @implementation-alias Phar::offsetSet
      */
-    public function offsetSet($entry, $value) {}
+    public function offsetSet($localName, $value) {}
 
     /**
-     * @param string $entry
+     * @param string $localName
      * @return bool
      * @implementation-alias Phar::offsetUnset
      */
-    public function offsetUnset($entry) {}
+    public function offsetUnset($localName) {}
 
     /**
      * @return bool
@@ -394,7 +393,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::setDefaultStub
      */
-    public function setDefaultStub(?string $index = null, ?string $webindex = null) {}
+    public function setDefaultStub(?string $index = null, ?string $webIndex = null) {}
 
     /**
      * @return void
@@ -406,7 +405,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return void
      * @implementation-alias Phar::setSignatureAlgorithm
      */
-    public function setSignatureAlgorithm(int $algorithm, ?string $privatekey = null) {}
+    public function setSignatureAlgorithm(int $algo, ?string $privateKey = null) {}
 
     /**
      * @param resource $newstub
@@ -431,13 +430,13 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     final public static function apiVersion(): string {}
 
     /** @implementation-alias Phar::canCompress */
-    final public static function canCompress(int $method = 0): bool {}
+    final public static function canCompress(int $compression = 0): bool {}
 
     /** @implementation-alias Phar::canWrite */
     final public static function canWrite(): bool {}
 
     /** @implementation-alias Phar::createDefaultStub */
-    final public static function createDefaultStub(?string $index = null, ?string $webindex = null): string {}
+    final public static function createDefaultStub(?string $index = null, ?string $webIndex = null): string {}
 
     /** @implementation-alias Phar::getSupportedCompression */
     final public static function getSupportedCompression(): array {}
@@ -449,8 +448,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     final public static function interceptFileFuncs(): void {}
 
     /** @implementation-alias Phar::isValidPharFilename */
-    final public static function isValidPharFilename(
-        string $filename, bool $executable = true): bool {}
+    final public static function isValidPharFilename(string $filename, bool $executable = true): bool {}
 
     /** @implementation-alias Phar::loadPhar */
     final public static function loadPhar(string $filename, ?string $alias = null): bool {}
@@ -459,21 +457,21 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     final public static function mapPhar(?string $alias = null, int $offset = 0): bool {}
 
     /** @implementation-alias Phar::running */
-    final public static function running(bool $retphar = true): string {}
+    final public static function running(bool $returnPhar = true): string {}
 
     /** @implementation-alias Phar::mount */
-    final public static function mount(string $inphar, string $externalfile): void {}
+    final public static function mount(string $pharPath, string $externalPath): void {}
 
     /** @implementation-alias Phar::mungServer */
-    final public static function mungServer(array $munglist): void {}
+    final public static function mungServer(array $variables): void {}
 
     /** @implementation-alias Phar::unlinkArchive */
-    final public static function unlinkArchive(string $archive): bool {}
+    final public static function unlinkArchive(string $filename): bool {}
 
     /** @implementation-alias Phar::webPhar */
     final public static function webPhar(
-        ?string $alias = null, ?string $index = null, string $f404 = "",
-        array $mimetypes = [], ?callable $rewrites = null): void {}
+        ?string $alias = null, ?string $index = null, string $fileNotFoundScript = "",
+        array $mimeTypes = [], ?callable $rewrite = null): void {}
 }
 
 class PharFileInfo extends SplFileInfo
@@ -486,7 +484,7 @@ class PharFileInfo extends SplFileInfo
     public function chmod(int $perms) {}
 
     /** @return bool */
-    public function compress(int $compression_type) {}
+    public function compress(int $compression) {}
 
     /** @return bool */
     public function decompress() {}
@@ -504,7 +502,7 @@ class PharFileInfo extends SplFileInfo
     public function getContent() {}
 
     /** @return mixed */
-    public function getMetadata(array $unserialize_options = []) {}
+    public function getMetadata(array $unserializeOptions = []) {}
 
     /** @return int */
     public function getPharFlags() {}
@@ -513,7 +511,7 @@ class PharFileInfo extends SplFileInfo
     public function hasMetadata() {}
 
     /** @return bool */
-    public function isCompressed(?int $compression_type = null) {}
+    public function isCompressed(?int $compression = null) {}
 
     /** @return bool */
     public function isCRCChecked() {}
