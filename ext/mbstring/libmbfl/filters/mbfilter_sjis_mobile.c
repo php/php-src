@@ -790,14 +790,7 @@ mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 		s2 = 1;
 	}
 	if (s1 <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_WINCP932) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			s2 = 1;
-		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			s1 |= 0x8080;
-		} else if (c == 0xa5) {		/* YEN SIGN */
+		if (c == 0xa5) {		/* YEN SIGN */
 			s1 = 0x216f;	/* FULLWIDTH YEN SIGN */
 		} else if (c == 0x203e) {	/* OVER LINE */
 			s1 = 0x2131;	/* FULLWIDTH MACRON */

@@ -590,10 +590,6 @@ retry:
 	}
 
 	if (s1 <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_JIS0213) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-		}
 		if (c == 0) {
 			s1 = 0;
 		} else if (s1 <= 0) {

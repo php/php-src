@@ -273,20 +273,7 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 		s1 = 0x2d62;		/* NUMERO SIGN */
 	}
 	if (s1 <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_WINCP932) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			if (s1 >= ((85 + 0x20) << 8)) {	/* 85ku - 120ku */
-				s1 = -1;
-			}
-		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			if (s1 >= ((83 + 0x20) << 8)) {	/* 83ku - 94ku */
-				s1 = -1;
-			} else {
-				s1 |= 0x8080;
-			}
-		} else if (c == 0xa5) {		/* YEN SIGN */
+		if (c == 0xa5) {		/* YEN SIGN */
 			s1 = 0x216f;			/* FULLWIDTH YEN SIGN */
 		} else if (c == 0x203e) {	/* OVER LINE */
 			s1 = 0x2131;			/* FULLWIDTH MACRON */

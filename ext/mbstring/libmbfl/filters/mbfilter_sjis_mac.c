@@ -416,14 +416,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 
 		if (s1 <= 0) {
-			c1 = c & ~MBFL_WCSPLANE_MASK;
-			if (c1 == MBFL_WCSPLANE_WINCP932) {
-				s1 = c & MBFL_WCSPLANE_MASK;
-				s2 = 1;
-			} else if (c1 == MBFL_WCSPLANE_JIS0212) {
-				s1 = c & MBFL_WCSPLANE_MASK;
-				s1 |= 0x8080;
-			} else if (c == 0xa0) {
+			if (c == 0xa0) {
 				s1 = 0x00a0;
 			} else if (c == 0xa5) { /* YEN SIGN */
 				/* Unicode has codepoint 0xFFE5 for a fullwidth Yen sign;

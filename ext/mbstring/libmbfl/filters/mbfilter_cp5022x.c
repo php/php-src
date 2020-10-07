@@ -383,9 +383,8 @@ retry:
 int
 mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 {
-	int c1, s;
+	int s = 0;
 
-	s = 0;
 	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
@@ -408,11 +407,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 
 	/* do some transliteration */
 	if (s <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_JIS0212) {
-			s = c & MBFL_WCSPLANE_MASK;
-			s |= 0x8080;
-		} else if (c == 0xa5) {		/* YEN SIGN */
+		if (c == 0xa5) {		/* YEN SIGN */
 			s = 0x1005c;
 		} else if (c == 0x203e) {	/* OVER LINE */
 			s = 0x1007e;
