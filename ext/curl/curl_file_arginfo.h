@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a81720edab23748f6dce30306f5a5ffc9634da5d */
+ * Stub hash: 4cdab686b39e7c4bb03bd5517a637ff25a38b04a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -40,3 +40,20 @@ static const zend_function_entry class_CURLFile_methods[] = {
 	ZEND_ME(CURLFile, setPostFilename, arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_CURLFile()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CURLFile", class_CURLFile_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zend_declare_property_string(class_entry, "name", sizeof("name") - 1, "", ZEND_ACC_PUBLIC);
+
+	zend_declare_property_string(class_entry, "mime", sizeof("mime") - 1, "", ZEND_ACC_PUBLIC);
+
+	zend_declare_property_string(class_entry, "postname", sizeof("postname") - 1, "", ZEND_ACC_PUBLIC);
+
+	return class_entry;
+}
+

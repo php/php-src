@@ -2682,14 +2682,9 @@ ZEND_GET_MODULE(simplexml)
 /* {{{ PHP_MINIT_FUNCTION(simplexml) */
 PHP_MINIT_FUNCTION(simplexml)
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "SimpleXMLElement", class_SimpleXMLElement_methods);
-	sxe_class_entry = zend_register_internal_class(&ce);
+	sxe_class_entry = register_class_SimpleXMLElement(zend_ce_stringable, zend_ce_countable, spl_ce_RecursiveIterator);
 	sxe_class_entry->create_object = sxe_object_new;
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
-	zend_class_implements(sxe_class_entry, 3,
-		zend_ce_countable, zend_ce_stringable, spl_ce_RecursiveIterator);
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
@@ -2719,8 +2714,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	/* TODO: Why do we have two variables for this? */
 	ce_SimpleXMLElement = sxe_class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SimpleXMLIterator", NULL);
-	ce_SimpleXMLIterator = zend_register_internal_class_ex(&ce, ce_SimpleXMLElement);
+	ce_SimpleXMLIterator = register_class_SimpleXMLIterator(ce_SimpleXMLElement);
 
 	php_libxml_register_export(sxe_class_entry, simplexml_export_node);
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3699b51b31e509c11435845c7e0d35a2608dd268 */
+ * Stub hash: fc90f59a8c670e7874f4a7564333c5b22c0eea5e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -180,3 +180,168 @@ static const zend_function_entry class_ArithmeticError_methods[] = {
 static const zend_function_entry class_DivisionByZeroError_methods[] = {
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_UnhandledMatchError_methods[] = {
+	ZEND_FE_END
+};
+
+zend_class_entry *register_class_Throwable(zend_class_entry *class_entry_Stringable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Throwable", class_Throwable_methods);
+	class_entry = zend_register_internal_interface(&ce);
+	zend_class_implements(class_entry, 1, class_entry_Stringable);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_Exception(zend_class_entry *class_entry_Throwable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Exception", class_Exception_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Throwable);
+
+	zend_declare_property_string(class_entry, "message", sizeof("message") - 1, "", ZEND_ACC_PROTECTED);
+
+	zend_declare_property_string(class_entry, "string", sizeof("string") - 1, "", ZEND_ACC_PRIVATE);
+
+	zend_declare_property_long(class_entry, "code", sizeof("code") - 1, 0, ZEND_ACC_PROTECTED);
+
+	zend_declare_property_null(class_entry, "file", sizeof("file") - 1, ZEND_ACC_PROTECTED);
+
+	zend_declare_property_null(class_entry, "line", sizeof("line") - 1, ZEND_ACC_PROTECTED);
+
+	zval property_trace_default_value;
+	ZVAL_EMPTY_ARRAY(&property_trace_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TRACE), &property_trace_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+
+	zval property_previous_default_value;
+	ZVAL_NULL(&property_previous_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &property_previous_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CE(class_entry_Throwable, 1, 0));
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ErrorException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ErrorException", class_ErrorException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_Error(zend_class_entry *class_entry_Throwable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Error", class_Error_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Throwable);
+
+	zend_declare_property_string(class_entry, "message", sizeof("message") - 1, "", ZEND_ACC_PROTECTED);
+
+	zend_declare_property_string(class_entry, "string", sizeof("string") - 1, "", ZEND_ACC_PRIVATE);
+
+	zend_declare_property_long(class_entry, "code", sizeof("code") - 1, 0, ZEND_ACC_PROTECTED);
+
+	zend_declare_property_null(class_entry, "file", sizeof("file") - 1, ZEND_ACC_PROTECTED);
+
+	zend_declare_property_null(class_entry, "line", sizeof("line") - 1, ZEND_ACC_PROTECTED);
+
+	zval property_trace_default_value;
+	ZVAL_EMPTY_ARRAY(&property_trace_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TRACE), &property_trace_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+
+	zval property_previous_default_value;
+	ZVAL_NULL(&property_previous_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &property_previous_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CE(class_entry_Throwable, 1, 0));
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_CompileError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CompileError", class_CompileError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ParseError(zend_class_entry *class_entry_CompileError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ParseError", class_ParseError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_CompileError);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_TypeError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "TypeError", class_TypeError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ArgumentCountError(zend_class_entry *class_entry_TypeError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ArgumentCountError", class_ArgumentCountError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_TypeError);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ValueError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ValueError", class_ValueError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ArithmeticError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ArithmeticError", class_ArithmeticError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_DivisionByZeroError(zend_class_entry *class_entry_ArithmeticError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", class_DivisionByZeroError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_ArithmeticError);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "UnhandledMatchError", class_UnhandledMatchError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+

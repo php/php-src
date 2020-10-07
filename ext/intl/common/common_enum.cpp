@@ -286,15 +286,10 @@ PHP_METHOD(IntlIterator, valid)
  */
 U_CFUNC void intl_register_IntlIterator_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlIterator", class_IntlIterator_methods);
-	ce.create_object = IntlIterator_object_create;
-	IntlIterator_ce_ptr = zend_register_internal_class(&ce);
+	IntlIterator_ce_ptr = register_class_IntlIterator(zend_ce_iterator);
+	IntlIterator_ce_ptr->create_object = IntlIterator_object_create;
 	IntlIterator_ce_ptr->get_iterator = IntlIterator_get_iterator;
-	zend_class_implements(IntlIterator_ce_ptr, 1,
-		zend_ce_iterator);
 
 	memcpy(&IntlIterator_handlers, &std_object_handlers,
 		sizeof IntlIterator_handlers);

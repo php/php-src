@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f8ca25a00ae1a5fed436851e88229b503c77bf31 */
+ * Stub hash: 71a9a5aa5947f254c62889f0a7d1eb5eafc01502 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -154,3 +154,25 @@ static const zend_function_entry class_SimpleXMLElement_methods[] = {
 static const zend_function_entry class_SimpleXMLIterator_methods[] = {
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_SimpleXMLElement(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_RecursiveIterator)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SimpleXMLElement", class_SimpleXMLElement_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_RecursiveIterator);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_SimpleXMLIterator(zend_class_entry *class_entry_SimpleXMLElement)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SimpleXMLIterator", class_SimpleXMLIterator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_SimpleXMLElement);
+
+	return class_entry;
+}
+

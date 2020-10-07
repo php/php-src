@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 function token_get_all(string $code, int $flags = 0): array {}
 
@@ -8,6 +11,11 @@ function token_name(int $id): string {}
 
 class PhpToken implements Stringable
 {
+    public int $id;
+    public string $text;
+    public int $line;
+    public int $pos;
+
     /** @return static[] */
     public static function tokenize(string $code, int $flags = 0): array {}
 

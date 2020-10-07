@@ -2,11 +2,13 @@
 <?php declare(strict_types=1);
 
 use PhpParser\Comment\Doc as DocComment;
+use PhpParser\ConstExprEvaluator;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Interface_;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -54,6 +56,7 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
 
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
+
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
         if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
             echo "Saved $arginfoFile\n";
@@ -63,11 +66,15 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
             foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
+            foreach ($fileInfo->getAllPropertyInfos() as $propertyInfo) {
+                $propertyInfo->discardInfoForOldPhpVersions();
+            }
+
             $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
             if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($legacyFile, $arginfoCode)) {
                 echo "Saved $legacyFile\n";
             }
-		}
+        }
 
         return $fileInfo;
     } catch (Exception $e) {
@@ -457,6 +464,24 @@ class ArgInfo {
     }
 }
 
+class PropertyName {
+    /** @var string */
+    public $class;
+    /** @var string */
+    public $property;
+
+    public function __construct(string $class, string $property)
+    {
+        $this->class = $class;
+        $this->property = $property;
+    }
+
+    public function __toString()
+    {
+        return $this->class . "::$" . $this->property;
+    }
+}
+
 interface FunctionOrMethodName {
     public function getDeclaration(): string;
     public function getArgInfoName(): string;
@@ -804,6 +829,14 @@ class FuncInfo {
         }
     }
 
+    public function discardInfoForOldPhpVersions(): void {
+        $this->return->type = null;
+        foreach ($this->args as $arg) {
+            $arg->type = null;
+            $arg->defaultValue = null;
+        }
+    }
+
     private function getFlagsAsArginfoString(): string
     {
         $flags = "ZEND_ACC_PUBLIC";
@@ -830,6 +863,32 @@ class FuncInfo {
         }
 
         return $flags;
+    }
+}
+
+class PropertyInfo
+{
+    /** @var PropertyName */
+    public $name;
+    /** @var int */
+    public $flags;
+    /** @var bool */
+    public $isKnownName;
+    /** @var bool */
+    public $isDeprecated;
+    /** @var Type|null */
+    public $type;
+    /** @var Expr|null */
+    public $defaultValue;
+
+    public function __construct(PropertyName $name, int $flags, bool $isKnownName, bool $isDeprecated, ?Type $type, ?Expr $defaultValue)
+    {
+        $this->name = $name;
+        $this->flags = $flags;
+        $this->isKnownName = $isKnownName;
+        $this->isDeprecated = $isDeprecated;
+        $this->type = $type;
+        $this->defaultValue = $defaultValue;
     }
 
     /**
@@ -941,11 +1000,181 @@ class FuncInfo {
     }
 
     public function discardInfoForOldPhpVersions(): void {
-        $this->return->type = null;
-        foreach ($this->args as $arg) {
-            $arg->type = null;
-            $arg->defaultValue = null;
+        $this->type = null;
+    }
+
+    public function getDeclaration(): string {
+        $code = "\n";
+
+        $propertyName = $this->name->property;
+
+        $defaultValueConstant = false;
+        if ($this->defaultValue === null) {
+            $defaultValue = null;
+            $defaultValueType = "undefined";
+        } else {
+            $evaluator = new ConstExprEvaluator(
+                function (Expr $expr) use (&$defaultValueConstant) {
+                    if ($expr instanceof Expr\ConstFetch) {
+                        $defaultValueConstant = true;
+                        return null;
+                    }
+
+                    throw new Exception("Property $this->name has an unsupported default value");
+                }
+            );
+            $defaultValue = $evaluator->evaluateDirectly($this->defaultValue);
+            $defaultValueType = gettype($defaultValue);
         }
+
+        if ($defaultValueConstant) {
+            echo "Skipping code generation for property $this->name, because it has a constant default value\n";
+            return "";
+        }
+
+        if ($this->type) {
+            $typeFlags = $this->type->tryToRepresentableType();
+            if ($typeFlags === null) {
+                echo "Skipping code generation for property $this->name, because it has an unimplemented type\n";
+                return "";
+            }
+
+            if ($typeFlags->classType) {
+                $simpleType = $this->type->tryToSimpleType();
+                if ($simpleType) {
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CE(class_entry_" . str_replace("\\", "_", $typeFlags->classType->name) . ", " .  ((int) $this->type->isNullable()) . ", 0)";
+                } else {
+                    throw new Exception("Property $this->name has an unsupported union type");
+                }
+            } else {
+                $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $typeFlags->toTypeMask() . ")";
+            }
+
+            $code .= $this->initializeValue($defaultValueType, $defaultValue);
+
+            if ($this->isKnownName) {
+                $nameCode = "ZSTR_KNOWN(ZEND_STR_" . strtoupper($propertyName) . ")";
+            } else {
+                $code .= "\tzend_string *property_{$propertyName}_name = zend_string_init(\"$propertyName\", sizeof(\"$propertyName\") - 1, 1);\n";
+                $nameCode = "property_{$propertyName}_name";
+            }
+
+            $code .= "\tzend_declare_typed_property(class_entry, $nameCode, &property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ", NULL, $typeCode);\n";
+            if (!$this->isKnownName) {
+                $code .= "\tzend_string_release(property_{$propertyName}_name);\n";
+            }
+        } else {
+            if ($this->isKnownName) {
+                Throw new Exception("Non-typed property $this->name cannot be annotated as @known");
+            }
+
+            switch ($defaultValueType) {
+                case "undefined": // intentional fallthrough
+                case "NULL":
+                    $code .= "\tzend_declare_property_null(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . $this->getFlagsAsString() . ");\n";
+                    break;
+
+                case "boolean":
+                    $code .= "\tzend_declare_property_bool(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . ((int) $defaultValue) . ", " . $this->getFlagsAsString() . ");\n";
+                    break;
+
+                case "integer":
+                    $code .= "\tzend_declare_property_long(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . $defaultValue . ", " . $this->getFlagsAsString() . ");\n";
+                    break;
+
+                case "double":
+                    $code .= "\tzend_declare_property_double(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . $defaultValue . ", " . $this->getFlagsAsString() . ");\n";
+                    break;
+
+                case "string":
+                    $code .= "\tzend_declare_property_string(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, \"" . $defaultValue . "\", " . $this->getFlagsAsString() . ");\n";
+                    break;
+
+                case "array":
+                    $code .= $this->initializeValue($defaultValueType, $defaultValue);
+                    $code .= "\tzend_declare_property_ex(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ");\n";
+                    break;
+
+                default:
+                    throw new Exception("Property $this->name has an invalid default value");
+            }
+        }
+
+        return $code;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function initializeValue(string $type, $value): string
+    {
+        $name = $this->name->property;
+        $zvalName = "property_{$name}_default_value";
+
+        $code = "\tzval $zvalName;\n";
+
+        switch ($type) {
+            case "undefined":
+                $code .= "\tZVAL_UNDEF(&$zvalName);\n";
+                break;
+
+            case "NULL":
+                $code .= "\tZVAL_NULL(&$zvalName);\n";
+                break;
+
+            case "boolean":
+                $code .= "\tZVAL_BOOL(&$zvalName, " . ((int) $value) . ");\n";
+                break;
+
+            case "integer":
+                $code .= "\tZVAL_LONG(&$zvalName, $value);\n";
+                break;
+
+            case "double":
+                $code .= "\tZVAL_DOUBLE(&$zvalName, $value);\n";
+                break;
+
+            case "string":
+                if (empty($value)) {
+                    $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
+                } else {
+                    $code .= "\tZVAL_STRING(&$zvalName, \"$value\");\n";
+                }
+                break;
+
+            case "array":
+                if (empty($value)) {
+                    $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
+                } else {
+                    throw new Exception("Unimplemented property default value");
+                }
+                break;
+
+            default:
+                throw new Exception("Invalid property default value");
+        }
+
+        return $code;
+    }
+
+    private function getFlagsAsString(): string
+    {
+        $flags = "ZEND_ACC_PUBLIC";
+        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+            $flags = "ZEND_ACC_PROTECTED";
+        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+            $flags = "ZEND_ACC_PRIVATE";
+        }
+
+        if ($this->flags & Class_::MODIFIER_STATIC) {
+            $flags .= "|ZEND_ACC_STATIC";
+        }
+
+        if ($this->isDeprecated) {
+            $flags .= "|ZEND_ACC_DEPRECATED";
+        }
+
+        return $flags;
     }
 
     private function appendMethodSynopsisTypeToElement(DOMDocument $doc, DOMElement $elementToAppend, Type $type) {
@@ -968,12 +1197,152 @@ class FuncInfo {
 class ClassInfo {
     /** @var Name */
     public $name;
+    /** @var int */
+    public $flags;
+    /** @var string */
+    public $type;
+    /** @var string|null */
+    public $alias;
+    /** @var bool */
+    public $isDeprecated;
+    /** @var bool */
+    public $isStrictProperties;
+    /** @var Name[] */
+    public $extends;
+    /** @var Name[] */
+    public $implements;
+    /** @var PropertyInfo[] */
+    public $propertyInfos;
     /** @var FuncInfo[] */
     public $funcInfos;
 
-    public function __construct(Name $name, array $funcInfos) {
+    /**
+     * @param Name[] $extends
+     * @param Name[] $implements
+     * @param PropertyInfo[] $propertyInfos
+     * @param FuncInfo[] $funcInfos
+     */
+    public function __construct(
+        Name $name,
+        int $flags,
+        string $type,
+        ?string $alias,
+        bool $isDeprecated,
+        bool $isStrictProperties,
+        array $extends,
+        array $implements,
+        array $propertyInfos,
+        array $funcInfos
+    ) {
         $this->name = $name;
+        $this->flags = $flags;
+        $this->type = $type;
+        $this->alias = $alias;
+        $this->isDeprecated = $isDeprecated;
+        $this->isStrictProperties = $isStrictProperties;
+        $this->extends = $extends;
+        $this->implements = $implements;
+        $this->propertyInfos = $propertyInfos;
         $this->funcInfos = $funcInfos;
+    }
+
+    public function getRegistration(): string
+    {
+        $params = [];
+        foreach ($this->extends as $extends) {
+            $params[] = "zend_class_entry *class_entry_" . implode("_", $extends->parts);
+        }
+        foreach ($this->implements as $implements) {
+            $params[] = "zend_class_entry *class_entry_" . implode("_", $implements->parts);
+        }
+        foreach ($this->propertyInfos as $property) {
+            $type = $property->type;
+            if ($type === null) {
+                continue;
+            }
+
+            $representableType = $type->tryToRepresentableType();
+            if ($representableType && $representableType->classType) {
+                $params[] = "zend_class_entry *class_entry_" . str_replace("\\", "_", $representableType->classType->name);
+            }
+        }
+        $params = array_unique($params);
+
+        $escapedName = implode("_", $this->name->parts);
+
+        $code = "zend_class_entry *register_class_$escapedName(" . implode(", ", $params) . ")\n";
+
+        $code .= "{\n";
+        $code .= "\tzend_class_entry ce, *class_entry;\n\n";
+        if (count($this->name->parts) > 1) {
+            $className = array_pop($this->name->parts);
+            $namespace = $this->name->toCodeString();
+
+            $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
+        } else {
+            $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", class_{$escapedName}_methods);\n";
+        }
+
+        if ($this->type === "class" || $this->type === "trait") {
+            $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]) : "NULL") . ");\n";
+        } else {
+            $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
+        }
+        if ($this->getFlagsAsString()) {
+            $code .= "\tclass_entry->ce_flags |= " . $this->getFlagsAsString() . ";\n";
+        }
+
+        $implements = array_map(
+            function (Name $item) {
+                return "class_entry_" . implode("_", $item->parts);
+            },
+            $this->type === "interface" ? $this->extends : $this->implements
+        );
+
+        if (!empty($implements)) {
+            $code .= "\tzend_class_implements(class_entry, " . count($implements) . ", " . implode(", ", $implements) . ");\n";
+        }
+
+        if ($this->alias) {
+            $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "_", $this->alias) . "\", class_entry);\n";
+        }
+
+        foreach ($this->propertyInfos as $property) {
+            $code .= $property->getDeclaration();
+        }
+
+        $code .= "\n\treturn class_entry;\n";
+
+        $code .= "}\n\n";
+
+        return $code;
+    }
+
+    private function getFlagsAsString(): string
+    {
+        $flags = [];
+
+        if ($this->type === "trait") {
+            $flags[] = "ZEND_ACC_TRAIT";
+        }
+
+        if ($this->flags & Class_::MODIFIER_FINAL) {
+            $flags[] = "ZEND_ACC_FINAL";
+        }
+
+        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+            $flags[] = "ZEND_ACC_ABSTRACT";
+        }
+
+        if ($this->isDeprecated) {
+            $flags[] = "ZEND_ACC_DEPRECATED";
+        }
+
+        if ($this->isStrictProperties) {
+            $flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
+        }
+
+        return implode("|", $flags);
     }
 }
 
@@ -988,6 +1357,10 @@ class FileInfo {
     public $declarationPrefix = "";
     /** @var bool */
     public $generateLegacyArginfo = false;
+    /** @var bool */
+    public $generateClassEntries = false;
+    /** @var bool */
+    public $generateLegacyClassEntries = false;
 
     /**
      * @return iterable<FuncInfo>
@@ -996,6 +1369,15 @@ class FileInfo {
         yield from $this->funcInfos;
         foreach ($this->classInfos as $classInfo) {
             yield from $classInfo->funcInfos;
+        }
+    }
+
+    /**
+     * @return iterable<PropertyInfo>
+     */
+    public function getAllPropertyInfos(): iterable {
+        foreach ($this->classInfos as $classInfo) {
+            yield from $classInfo->propertyInfos;
         }
     }
 }
@@ -1209,6 +1591,106 @@ function parseFunctionLike(
     }
 }
 
+function parseProperty(
+    Name $class,
+    int $flags,
+    Stmt\PropertyProperty $property,
+    ?Node $type,
+    ?DocComment $comment
+): PropertyInfo {
+    $isDeprecated = false;
+    $isKnownName = false;
+    $docType = false;
+
+    if ($comment) {
+        $tags = parseDocComment($comment);
+        foreach ($tags as $tag) {
+            if ($tag->name === 'deprecated') {
+                $isDeprecated = true;
+            } else if ($tag->name === 'known') {
+                $isKnownName = true;
+            } else if ($tag->name === 'var') {
+                $docType = true;
+            }
+        }
+    }
+
+    $propertyType = $type ? Type::fromNode($type) : null;
+    if ($propertyType === null && !$docType) {
+        throw new Exception("Missing type for property $class::\$$property->name");
+    }
+
+    if ($property->default instanceof Expr\ConstFetch &&
+        $property->default->name->toLowerString() === "null" &&
+        $propertyType && !$propertyType->isNullable()
+    ) {
+        $simpleType = $propertyType->tryToSimpleType();
+        if ($simpleType === null) {
+            throw new Exception(
+                "Property $class::\$$property->name has null default, but is not nullable");
+        }
+    }
+
+    return new PropertyInfo(
+        new PropertyName($class->__toString(), $property->name->__toString()),
+        $flags,
+        $isKnownName,
+        $isDeprecated,
+        $propertyType,
+        $property->default
+    );
+}
+
+/**
+ * @param PropertyInfo[] $properties
+ * @param FuncInfo[] $methods
+ */
+function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array $methods): ClassInfo {
+    $flags = $class instanceof Class_ ? $class->flags : 0;
+    $comment = $class->getDocComment();
+    $alias = null;
+    $isDeprecated = false;
+    $isStrictProperties = false;
+
+    if ($comment) {
+        $tags = parseDocComment($comment);
+        foreach ($tags as $tag) {
+            if ($tag->name === 'alias') {
+                $alias = $tag->getValue();
+            } else if ($tag->name === 'deprecated') {
+                $isDeprecated = true;
+            } else if ($tag->name === 'strict-properties') {
+                $isStrictProperties = true;
+            }
+        }
+    }
+
+    $extends = [];
+    $implements = [];
+
+    if ($class instanceof Class_) {
+        if ($class->extends) {
+            $extends[] = $class->extends;
+        }
+        $implements = $class->implements;
+    } elseif ($class instanceof Interface_) {
+        $extends = $class->extends;
+    }
+
+    return new ClassInfo(
+        $name,
+        $flags,
+        $class instanceof Class_ ? "class" : ($class instanceof Interface_ ? "interface" : "trait"),
+        $alias,
+        $isDeprecated,
+        $isStrictProperties,
+        $extends,
+        $implements,
+        $properties,
+        $methods
+    );
+}
+
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
     foreach ($stmt->getComments() as $comment) {
         $text = trim($comment->getText());
@@ -1281,6 +1763,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
 
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->namespacedName;
+            $propertyInfos = [];
             $methodInfos = [];
             foreach ($stmt->stmts as $classStmt) {
                 $cond = handlePreprocessorConditions($conds, $classStmt);
@@ -1288,7 +1771,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     continue;
                 }
 
-                if (!$classStmt instanceof Stmt\ClassMethod) {
+                if (!$classStmt instanceof Stmt\ClassMethod && !$classStmt instanceof Stmt\Property) {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
 
@@ -1303,20 +1786,32 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 }
 
                 if (!($flags & Class_::VISIBILITY_MODIFIER_MASK)) {
-                    throw new Exception("Method visibility modifier is required");
+                    throw new Exception("Visibility modifier is required");
                 }
 
-                $methodInfos[] = parseFunctionLike(
-                    $prettyPrinter,
-                    new MethodName($className, $classStmt->name->toString()),
-                    $classFlags,
-                    $flags,
-                    $classStmt,
-                    $cond
-                );
+                if ($classStmt instanceof Stmt\Property) {
+                    foreach ($classStmt->props as $property) {
+                        $propertyInfos[] = parseProperty(
+                            $className,
+                            $flags,
+                            $property,
+                            $classStmt->type,
+                            $classStmt->getDocComment()
+                        );
+                    }
+                } else if ($classStmt instanceof Stmt\ClassMethod) {
+                    $methodInfos[] = parseFunctionLike(
+                        $prettyPrinter,
+                        new MethodName($className, $classStmt->name->toString()),
+                        $classFlags,
+                        $flags,
+                        $classStmt,
+                        $cond
+                    );
+                }
             }
 
-            $fileInfo->classInfos[] = new ClassInfo($className, $methodInfos);
+            $fileInfo->classInfos[] = parseClass($className, $stmt, $propertyInfos, $methodInfos);
             continue;
         }
 
@@ -1348,8 +1843,14 @@ function parseStubFile(string $code): FileInfo {
                 $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
             } else if ($tag->name === 'generate-legacy-arginfo') {
                 $fileInfo->generateLegacyArginfo = true;
+            } else if ($tag->name === 'generate-class-entries') {
+                $fileInfo->generateClassEntries = true;
             }
         }
+    }
+
+    if ($fileInfo->generateClassEntries && !$fileInfo->generateFunctionEntries) {
+        throw new Exception("Function entry generation must be enabled when generating class entries");
     }
 
     handleStatements($fileInfo, $stmts, $prettyPrinter);
@@ -1531,6 +2032,20 @@ function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
         foreach ($fileInfo->classInfos as $classInfo) {
             $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos);
         }
+    }
+
+    if ($fileInfo->generateClassEntries) {
+        $code .= generateClassEntryCode($fileInfo);
+    }
+
+    return $code;
+}
+
+function generateClassEntryCode(FileInfo $fileInfo): string {
+    $code = "\n";
+
+    foreach ($fileInfo->classInfos as $class) {
+        $code .= $class->getRegistration();
     }
 
     return $code;
