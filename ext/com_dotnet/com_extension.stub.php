@@ -54,32 +54,31 @@ function variant_set_type(variant $variant, int $type): void {}
 
 function variant_cast(variant $variant, int $type): variant {}
 
-function com_get_active_object(string $progid, ?int $code_page = null): variant {}
+function com_get_active_object(string $prog_id, ?int $code_page = null): variant {}
 
 function com_create_guid(): string|false {}
 
-function com_event_sink(variant $comobject, object $sinkobject, array|string|null $sinkinterface = null): bool {}
+function com_event_sink(variant $variant, object $sink_object, array|string|null $sink_interface = null): bool {}
 
-/** @param com|dotnet|variant|string $comobject */
-function com_print_typeinfo($comobject, ?string $dispinterface = null, bool $wantsink = false): bool {}
+function com_print_typeinfo(variant|string $variant, ?string $disp_interface = null, bool $want_sink = false): bool {}
 
 function com_message_pump(int $timeoutms = 0): bool {}
 
-function com_load_typelib(string $typelib_name, bool $case_insensitive = true): bool {}
+function com_load_typelib(string $typelib, bool $case_insensitive = true): bool {}
 
 class variant
 {
-    public function __construct(mixed $value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}
+    public function __construct(mixed $value = null, int $type = VT_EMPTY, int $code_page = CP_ACP) {}
 }
 
 class com
 {
-    public function __construct(string $module_name, array|string|null $server_name = null, int $codepage = CP_ACP, string $typelib = "") {}
+    public function __construct(string $module_name, array|string|null $server_name = null, int $code_page = CP_ACP, string $typelib = "") {}
 }
 
 #if HAVE_MSCOREE_H
 class dotnet
 {
-    public function __construct(string $assembly_name, string $datatype_name, int $codepage = CP_ACP) {}
+    public function __construct(string $assembly_name, string $datatype_name, int $code_page = CP_ACP) {}
 }
 #endif
