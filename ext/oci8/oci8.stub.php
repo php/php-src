@@ -13,14 +13,14 @@ function oci_define_by_name($statement, string $column, mixed &$var, int $type =
 function ocidefinebyname($statement, string $column, mixed &$var, int $type = 0): bool {}
 
 /** @param resource $statement */
-function oci_bind_by_name($statement, string $param, mixed &$var, int $length = -1, int $type = 0): bool {}
+function oci_bind_by_name($statement, string $param, mixed &$var, int $max_length = -1, int $type = 0): bool {}
 
 /**
  * @param resource $statement
  * @alias oci_bind_by_name
  * @deprecated
  */
-function ocibindbyname($statement, string $param, mixed &$var, int $length = -1, int $type = 0): bool {}
+function ocibindbyname($statement, string $param, mixed &$var, int $max_length = -1, int $type = 0): bool {}
 
 /** @param resource $statement */
 function oci_bind_array_by_name($statement, string $param, mixed &$var, int $max_array_length, int $max_item_length = -1, int $type = SQLT_AFC): bool {}
