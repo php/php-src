@@ -1785,8 +1785,8 @@ static TIDY_NODE_METHOD(isComment)
 static TIDY_NODE_METHOD(isHtml)
 {
 	TIDY_FETCH_ONLY_OBJECT;
-	int type;
-	switch (type = tidyNodeGetType(obj->node)) {
+
+	switch (tidyNodeGetType(obj->node)) {
 		case TidyNode_Start:
 		case TidyNode_End:
 		case TidyNode_StartEnd:
