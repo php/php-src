@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 71fc3abb8050b454420b7f35d21d184dde844951 */
+ * Stub hash: abd3bc186ae3f71f2b7eb1d47f3b6bab84fb2bda */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -66,7 +66,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_memset, 0, 3, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
-	ZEND_ARG_TYPE_INFO(0, byte, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

@@ -55,7 +55,7 @@ final class FFI
     public static function memcmp($ptr1, $ptr2, int $size): ?int {}
 
     /** @prefer-ref $ptr */
-    public static function memset(FFI\CData $ptr, int $byte, int $size): void {}
+    public static function memset(FFI\CData $ptr, int $value, int $size): void {}
 
     /** @prefer-ref $ptr */
     public static function string(FFI\CData $ptr, ?int $size = null): ?string {}
