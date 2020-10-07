@@ -87,6 +87,10 @@
  |.define T3,      [r4+0x18] // Used to store old value of IP (CALL VM only)
  |.define T2,      [r4+0x14] // Used to store old value of FP (CALL VM only)
  |.define T1,      [r4]
+ |.define A4,      [r4+0xC]  // preallocated slots for arguments of "cdecl" functions (intersect with T1)
+ |.define A3,      [r4+0x8]
+ |.define A2,      [r4+0x4]
+ |.define A1,      [r4]
 |.endif
 
 |.define HYBRID_SPAD, 16     // padding for stack alignment
@@ -1734,10 +1738,8 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 			|	mov CARG1, FP
 			|	EXT_CALL zend_interrupt_function, r0
 		|.else
-			|	sub r4, 12
-			|	push FP
+			|	mov aword A1, FP
 			|	EXT_CALL zend_interrupt_function, r0
-			|	add r4, 16
 		|.endif
 		|	//ZEND_VM_ENTER();
 		|	//execute_data = EG(current_execute_data);
@@ -2143,15 +2145,13 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 		|	add CARG3, offsetof(zend_string, val)
 		|	EXT_CALL zend_throw_error, r0
 	|.else
-		|	sub r4, 4
 		|	mov r0, aword [r0 + offsetof(zend_op, op2.zv)]
 		|	mov r0, aword [r0]
 		|	add r0, offsetof(zend_string, val)
-		|	push r0
-		|	push "Call to undefined function %s()"
-		|	push 0
+		|	mov aword A3, r0
+		|	mov aword A2, "Call to undefined function %s()"
+		|	mov aword A1, 0
 		|	EXT_CALL zend_throw_error, r0
-		|	add r4, 16
 	|.endif
 	|	jmp ->exception_handler
 	return 1;
@@ -12417,8 +12417,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 			|	sub r4, 8
 			|	mov r0, EX->func
 			|	push dword [r0 + offsetof(zend_op_array, scope)]
-			|	LOAD_ZVAL_ADDR r0, res_addr
-			|	push r0
+			|	PUSH_ZVAL_ADDR res_addr, r0
 			|	EXT_CALL zval_update_constant_ex, r0
 			|	add r4, 16
 		|.endif
@@ -13989,11 +13988,9 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 				|	LOAD_ADDR CARG2, len
 				|	EXT_CALL zend_write, r0
 			|.else
-				|	sub r4, 8
-				|	push len
-				|	push str
+				|	mov aword A2, len
+				|	mov aword A1, str
 				|	EXT_CALL zend_write, r0
-				|	add r4, 16
 			|.endif
 			if (!zend_jit_check_exception(Dst)) {
 				return 0;
@@ -14011,12 +14008,11 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 		|	mov CARG2, aword [r0 + offsetof(zend_string, len)]
 		|	EXT_CALL zend_write, r0
 		|.else
-		|	sub r4, 8
-		|	push aword [r0 + offsetof(zend_string, len)]
 		|	add r0, offsetof(zend_string, val)
-		|	push r0
+		|	mov aword A1, r0
+		|	mov r0, aword [r0 + (offsetof(zend_string, len)-offsetof(zend_string, val))]
+		|	mov aword A2, r0
 		|	EXT_CALL zend_write, r0
-		|	add r4, 16
 		|.endif
 		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 			|	ZVAL_PTR_DTOR op1_addr, op1_info, 0, 0, opline
