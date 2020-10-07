@@ -115,7 +115,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_cp850,
 	mbfl_no_encoding_jis_ms,
 	mbfl_no_encoding_cp50220,
-	mbfl_no_encoding_cp50220raw,
 	mbfl_no_encoding_cp50221,
 	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_charset_max

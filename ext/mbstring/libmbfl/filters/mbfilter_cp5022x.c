@@ -41,6 +41,13 @@ static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter);
 
+/* Previously, a dubious 'encoding' called 'cp50220raw' was supported
+ * This was just CP50220, but the implementation was less strict regarding
+ * invalid characters; it would silently pass some through
+ * This 'encoding' only existed in mbstring. In case some poor, lost soul is
+ * still using it, retain minimal support by aliasing it to CP50220 */
+static const char *cp50220_aliases[] = {"cp50220raw", "cp50220-raw", NULL};
+
 const mbfl_encoding mbfl_encoding_jis_ms = {
 	mbfl_no_encoding_jis_ms,
 	"JIS-ms",
@@ -56,22 +63,11 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	mbfl_no_encoding_cp50220,
 	"CP50220",
 	"ISO-2022-JP",
-	NULL,
+	cp50220_aliases,
 	NULL,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50220_wchar,
 	&vtbl_wchar_cp50220
-};
-
-const mbfl_encoding mbfl_encoding_cp50220raw = {
-	mbfl_no_encoding_cp50220raw,
-	"CP50220raw",
-	"ISO-2022-JP",
-	NULL,
-	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_cp50220raw_wchar,
-	&vtbl_wchar_cp50220raw
 };
 
 const mbfl_encoding mbfl_encoding_cp50221 = {
@@ -132,26 +128,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50220 = {
 	mbfl_filt_conv_wchar_cp50220_ctor,
 	mbfl_filt_conv_wchar_cp50220_dtor,
 	mbfl_filt_conv_wchar_cp50221,
-	mbfl_filt_conv_any_jis_flush,
-	mbfl_filt_conv_wchar_cp50220_copy
-};
-
-const struct mbfl_convert_vtbl vtbl_cp50220raw_wchar = {
-	mbfl_no_encoding_cp50220raw,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_cp50220raw = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_cp50220raw,
-	mbfl_filt_conv_wchar_cp50220_ctor,
-	mbfl_filt_conv_wchar_cp50220_dtor,
-	mbfl_filt_conv_wchar_cp50220raw,
 	mbfl_filt_conv_any_jis_flush,
 	mbfl_filt_conv_wchar_cp50220_copy
 };
@@ -568,29 +544,6 @@ mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 {
 	if (filt->opaque != NULL) {
 		efree(filt->opaque);
-	}
-}
-
-/*
- * wchar => cp50220raw
- */
-int
-mbfl_filt_conv_wchar_cp50220raw(int c, mbfl_convert_filter *filter)
-{
-	if (c & MBFL_WCSPLANE_JIS0208) {
-		const int s = c & MBFL_WCSPLANE_MASK;
-
-		if ((filter->status & 0xff00) != 0x200) {
-			CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-			CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-			CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
-			filter->status = 0x200;
-		}
-		CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-		CK((*filter->output_function)(s & 0x7f, filter->data));
-		return c;
-	} else {
-		return mbfl_filt_conv_wchar_cp50221(c, filter);
 	}
 }
 
