@@ -42,10 +42,10 @@ pg_close($db);
 
 ?>
 --EXPECT--
-pg_fetch_array(): Argument #2 ($row_number) must be greater than or equal to 0
-pg_fetch_assoc(): Argument #2 ($row_number) must be greater than or equal to 0
-pg_fetch_object(): Argument #2 ($row_number) must be greater than or equal to 0
-pg_fetch_row(): Argument #2 ($row_number) must be greater than or equal to 0
+pg_fetch_array(): Argument #2 ($row) must be greater than or equal to 0
+pg_fetch_assoc(): Argument #2 ($row) must be greater than or equal to 0
+pg_fetch_object(): Argument #2 ($row) must be greater than or equal to 0
+pg_fetch_row(): Argument #2 ($row) must be greater than or equal to 0
 array(2) {
   [0]=>
   string(1) "a"
