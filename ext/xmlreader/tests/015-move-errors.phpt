@@ -41,4 +41,4 @@ $reader->close();
 unlink(__DIR__.'/015-move-errors.xml');
 ?>
 --EXPECT--
-XMLReader::moveToAttributeNs(): Argument #2 ($uri) cannot be empty
+XMLReader::moveToAttributeNs(): Argument #2 ($namespace) cannot be empty

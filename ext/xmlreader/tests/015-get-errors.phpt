@@ -46,5 +46,5 @@ $reader->close();
 unlink(__DIR__.'/015-get-errors.xml');
 ?>
 --EXPECT--
-XMLReader::getAttributeNs(): Argument #2 ($uri) cannot be empty
+XMLReader::getAttributeNs(): Argument #2 ($namespace) cannot be empty
 ns1:num: 1
