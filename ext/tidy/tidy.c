@@ -1786,11 +1786,14 @@ static TIDY_NODE_METHOD(isHtml)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyNodeGetType(obj->node) & (TidyNode_Start | TidyNode_End | TidyNode_StartEnd)) {
-		RETURN_TRUE;
+	switch (tidyNodeGetType(obj->node)) {
+		case TidyNode_Start:
+		case TidyNode_End:
+		case TidyNode_StartEnd:
+			RETURN_TRUE;
+		default:
+			RETURN_FALSE;
 	}
-
-	RETURN_FALSE;
 }
 /* }}} */
 

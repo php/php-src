@@ -35,6 +35,9 @@ PHP                                                                        NEWS
   . Fixed bug #76943 (Inconsistent stream_wrapper_restore() errors). (cmb)
   . Fixed bug #76735 (Incorrect message in fopen on invalid mode). (cmb)
 
+- Tidy:
+  . Fixed bug #77040 (tidyNode::isHtml() is completely broken). (cmb)
+
 01 Oct 2020, PHP 7.3.23
 
 - Core:
