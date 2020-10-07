@@ -4,14 +4,17 @@
 
 class XSLTProcessor
 {
-    /** @return bool */
+    /**
+     * @param DOMDocument|SimpleXMLElement $stylesheet
+     * @return bool
+     */
     public function importStylesheet(object $stylesheet) {}
 
     /**
      * @param DOMDocument|SimpleXMLElement $document
      * @return DOMDocument|false
      */
-    public function transformToDoc(object $document, ?string $return_class = null) {}
+    public function transformToDoc(object $document, ?string $returnClass = null) {}
 
     /**
      * @param DOMDocument|SimpleXMLElement $document
@@ -38,7 +41,7 @@ class XSLTProcessor
     public function hasExsltSupport() {}
 
     /** @return void */
-    public function registerPHPFunctions(array|string|null $restrict = null) {}
+    public function registerPHPFunctions(array|string|null $functions = null) {}
 
     /** @return bool */
     public function setProfiling(?string $filename) {}
