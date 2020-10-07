@@ -15,4 +15,4 @@ try {
 }
 ?>
 --EXPECT--
-jday must be within the Unix epoch
+jday must be between 2440588 and 2465443
