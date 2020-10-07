@@ -23,6 +23,8 @@
 #include "sdncal.h"
 #include <time.h>
 
+#define SECS_PER_DAY (24 * 3600)
+
 /* {{{ proto int unixtojd([int timestamp])
    Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
@@ -62,10 +64,10 @@ PHP_FUNCTION(jdtounix)
 	}
 	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
-	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */
+	if (uday < 0 || uday > ZEND_LONG_MAX / SECS_PER_DAY) { /* before beginning of unix epoch or greater than representable */
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(uday * 24 * 3600);
+	RETURN_LONG(uday * SECS_PER_DAY);
 }
 /* }}} */
