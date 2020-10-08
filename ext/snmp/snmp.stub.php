@@ -17,9 +17,9 @@ function snmpset(string $host, string $community, array|string $object_id, array
 
 function snmp_get_quick_print(): bool {}
 
-function snmp_set_quick_print(int $quick_print): bool {}
+function snmp_set_quick_print(bool $quick_print): bool {}
 
-function snmp_set_enum_print(int $enum_print): bool {}
+function snmp_set_enum_print(bool $enum_print): bool {}
 
 function snmp_set_oid_output_format(int $oid_format): bool {}
 
