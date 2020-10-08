@@ -21,10 +21,10 @@ function snmp_set_quick_print(bool $enable): bool {}
 
 function snmp_set_enum_print(bool $enable): bool {}
 
-function snmp_set_oid_output_format(int $oid_format): bool {}
+function snmp_set_oid_output_format(int $format): bool {}
 
 /** @alias snmp_set_oid_output_format */
-function snmp_set_oid_numeric_print(int $oid_format): bool {}
+function snmp_set_oid_numeric_print(int $format): bool {}
 
 function snmp2_get(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
 
@@ -37,31 +37,31 @@ function snmp2_real_walk(string $hostname, string $community, array|string $obje
 function snmp2_set(string $hostname, string $community, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): array|bool {}
 
 function snmp3_get(
-    string $hostname, string $sec_name, string $sec_level,
+    string $hostname, string $security_name, string $security_level,
     string $auth_protocol, string $auth_passphrase,
     string $privacy_protocol, string $privacy_passphrase,
     array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
 
 function snmp3_getnext(
-    string $hostname, string $sec_name, string $sec_level,
+    string $hostname, string $security_name, string $security_level,
     string $auth_protocol, string $auth_passphrase,
     string $privacy_protocol, string $privacy_passphrase,
     array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
 
 function snmp3_walk(
-    string $hostname, string $sec_name, string $sec_level,
+    string $hostname, string $security_name, string $security_level,
     string $auth_protocol, string $auth_passphrase,
     string $privacy_protocol, string $privacy_passphrase,
     array|string $object_id, int $timeout = -1, int $retries = -1): array|bool {}
 
 function snmp3_real_walk(
-    string $hostname, string $sec_name, string $sec_level,
+    string $hostname, string $security_name, string $security_level,
     string $auth_protocol, string $auth_passphrase,
     string $privacy_protocol, string $privacy_passphrase,
     array|string $object_id, int $timeout = -1, int $retries = -1): array|bool {}
 
 function snmp3_set(
-    string $hostname, string $sec_name, string $sec_level,
+    string $hostname, string $security_name, string $security_level,
     string $auth_protocol, string $auth_passphrase,
     string $privacy_protocol, string $privacy_passphrase,
     array|string $object_id, array|string $type, array|string $value,
@@ -82,7 +82,7 @@ class SNMP
 
     /** @return bool */
     public function setSecurity(
-        string $secLevel, string $authProtocol = "", string $authPassphrase = "",
+        string $securityLevel, string $authProtocol = "", string $authPassphrase = "",
         string $privacyProtocol = "", string $privacyPassphrase = "",
         string $contextName = "", string $contextEngineId = "") {}
 

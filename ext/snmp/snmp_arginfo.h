@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ccd1540981df14d5ce3e6440a353978be8cc8dcc */
+ * Stub hash: 68d61381ba27923bb68d6d9c6e5d5e8ff296cc90 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_snmpget, 0, 3, stdClass, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -43,7 +43,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_snmp_set_enum_print arginfo_snmp_set_quick_print
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, oid_format, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_snmp_set_oid_numeric_print arginfo_snmp_set_oid_output_format
@@ -60,8 +60,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_snmp3_get, 0, 8, stdClass, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, sec_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, sec_level, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, security_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, security_level, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, auth_protocol, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, auth_passphrase, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, privacy_protocol, IS_STRING, 0)
@@ -75,8 +75,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_snmp3_walk, 0, 8, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, sec_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, sec_level, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, security_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, security_level, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, auth_protocol, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, auth_passphrase, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, privacy_protocol, IS_STRING, 0)
@@ -90,8 +90,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_snmp3_set, 0, 10, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, sec_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, sec_level, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, security_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, security_level, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, auth_protocol, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, auth_passphrase, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, privacy_protocol, IS_STRING, 0)
@@ -126,7 +126,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SNMP_close, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SNMP_setSecurity, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, secLevel, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, securityLevel, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, authProtocol, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, authPassphrase, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, privacyProtocol, IS_STRING, 0, "\"\"")
