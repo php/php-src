@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b33d57ddba20c64739d51bfba39f2557026939cd */
+ * Stub hash: 6cba3704e7a71fa22031734207365dd88764ddb2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, handler, _IS_BOOL, 0, "true")
@@ -116,7 +116,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapClient___doRequest, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, location, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, action, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, version, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, one_way, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, one_way, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapClient___setCookie, 0, 0, 1)
