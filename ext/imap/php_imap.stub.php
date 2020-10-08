@@ -29,11 +29,11 @@ function imap_headers($imap): array|false {}
 /** @param resource $imap */
 function imap_headerinfo($imap, int $message_num, int $from_length = 0, int $subject_length = 0): stdClass|false {}
 
-function imap_rfc822_parse_headers(string $headers, string $default_host = "UNKNOWN"): stdClass {}
+function imap_rfc822_parse_headers(string $headers, string $default_hostname = "UNKNOWN"): stdClass {}
 
-function imap_rfc822_write_address(string $mailbox, string $host, string $personal): string|false {}
+function imap_rfc822_write_address(string $mailbox, string $hostname, string $personal): string|false {}
 
-function imap_rfc822_parse_adrlist(string $string, string $default_host): array {}
+function imap_rfc822_parse_adrlist(string $string, string $default_hostname): array {}
 
 /** @param resource $imap */
 function imap_body($imap, int $message_num, int $flags = 0): string|false {}
@@ -251,4 +251,4 @@ function imap_setacl($imap, string $mailbox, string $user_id, string $rights): b
 function imap_getacl($imap, string $mailbox): array|false {}
 #endif
 
-function imap_mail(string $to, string $subject, string $message, ?string $additional_headers = null, ?string $cc = null, ?string $bcc = null, ?string $rpath = null): bool {}
+function imap_mail(string $to, string $subject, string $message, ?string $additional_headers = null, ?string $cc = null, ?string $bcc = null, ?string $return_path = null): bool {}
