@@ -49,4 +49,4 @@ bool(false)
 
 -- $msg_no is 1 --
 string(%s) "1: this is a test message, please ignore
-%S"
+%A"
