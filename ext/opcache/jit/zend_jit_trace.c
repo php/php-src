@@ -363,15 +363,6 @@ static zend_always_inline zend_ssa_alias_kind zend_jit_var_may_alias(const zend_
 	return NO_ALIAS;
 }
 
-#define STACK_VAR_TYPE(_var) \
-	STACK_TYPE(stack, EX_VAR_TO_NUM(_var))
-
-#define SET_STACK_VAR_TYPE(_var, _type) do { \
-		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(_var), _type); \
-	} while (0)
-
-
-
 static zend_always_inline void zend_jit_trace_add_op_guard(const zend_op_array  *op_array,
                                                            const zend_ssa       *ssa,
                                                            zend_ssa             *tssa,
@@ -397,14 +388,14 @@ static zend_always_inline void zend_jit_trace_add_op_guard(const zend_op_array  
 #define CHECK_OP_TRACE_TYPE(_var, _ssa_var, op_info, op_type) do { \
 		if (op_type != IS_UNKNOWN) { \
 			if ((op_info & MAY_BE_GUARD) != 0 \
-			 && op_type != STACK_VAR_TYPE(_var)) { \
+			 && op_type != STACK_TYPE(stack, EX_VAR_TO_NUM(_var))) { \
 				if (!zend_jit_type_guard(&dasm_state, opline, _var, op_type)) { \
 					goto jit_failure; \
 				} \
 				if (zend_jit_var_may_alias(op_array, op_array_ssa, _var) != NO_ALIAS) { \
-					SET_STACK_VAR_TYPE(_var, IS_UNKNOWN); \
+					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(_var), IS_UNKNOWN); \
 				} else { \
-					SET_STACK_VAR_TYPE(_var, op_type); \
+					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(_var), op_type); \
 					op_info &= ~MAY_BE_GUARD; \
 				} \
 				ssa->var_info[_ssa_var].type &= op_info; \
@@ -425,15 +416,6 @@ static zend_always_inline void zend_jit_trace_add_op_guard(const zend_op_array  
 	CHECK_OP_TRACE_TYPE(opline->op2.var, ssa_op->op2_use, op2_info, op2_type)
 #define CHECK_OP1_DATA_TRACE_TYPE() \
 	CHECK_OP_TRACE_TYPE((opline+1)->op1.var, (ssa_op+1)->op1_use, op1_data_info, op3_type)
-
-#define SET_OP1_STACK_VAR_TYPE(_type) \
-	SET_STACK_VAR_TYPE(opline->op1.var, _type)
-#define SET_OP2_STACK_VAR_TYPE( _type) \
-	SET_STACK_VAR_TYPE(opline->op2.var, _type)
-#define SET_OP1_DATA_STACK_VAR_TYPE(_type) \
-	SET_STACK_VAR_TYPE((opline+1)->op1.var, _type)
-#define SET_RES_STACK_VAR_TYPE(_type) \
-	SET_STACK_VAR_TYPE(opline->result.var, _type)
 
 static zend_always_inline size_t zend_jit_trace_frame_size(const zend_op_array *op_array)
 {
@@ -476,7 +458,7 @@ static void zend_jit_trace_send_type(const zend_op *opline, zend_jit_trace_stack
 			}
 		}
 	}
-	SET_STACK_VAR_TYPE(opline->result.var, type);
+	SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type);
 }
 
 static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_script *script)
@@ -3473,7 +3455,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								res_use_info = RES_USE_INFO();
 							} else {
 #if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
-								res_use_info = zend_jit_trace_type_to_info(STACK_VAR_TYPE(opline->result.var));
+								res_use_info = zend_jit_trace_type_to_info(
+									STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
 #else
 								res_use_info = -1;
 #endif
@@ -3561,7 +3544,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								res_use_info = RES_USE_INFO();
 							} else {
 #if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
-								res_use_info = zend_jit_trace_type_to_info(STACK_VAR_TYPE(opline->result.var));
+								res_use_info = zend_jit_trace_type_to_info(
+									STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
 #else
 								res_use_info = -1;
 #endif
@@ -3635,7 +3619,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								res_use_info = RES_USE_INFO();
 							} else {
 #if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
-								res_use_info = zend_jit_trace_type_to_info(STACK_VAR_TYPE(opline->result.var));
+								res_use_info = zend_jit_trace_type_to_info(
+									STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
 #else
 								res_use_info = -1;
 #endif
@@ -5255,7 +5240,7 @@ done:
 					} else if (opline->opcode == ZEND_QM_ASSIGN) {
 						if (opline->op1_type != IS_CONST) {
 							/* copy */
-							type = STACK_VAR_TYPE(opline->op1.var);
+							type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
 						}
 					} else if (opline->opcode == ZEND_ASSIGN) {
 						if (opline->op2_type != IS_CONST
@@ -5263,14 +5248,14 @@ done:
 						 /* assignment to typed reference may cause conversion */
 						 && (ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF) == 0) {
 							/* copy */
-							type = STACK_VAR_TYPE(opline->op2.var);
+							type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var));
 						}
 					} else if (opline->opcode == ZEND_POST_INC
 			         || opline->opcode == ZEND_POST_DEC) {
 						/* copy */
-						type = STACK_VAR_TYPE(opline->op1.var);
+						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
 					}
-					SET_RES_STACK_VAR_TYPE(type);
+					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type);
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 						if (opline->opcode == ZEND_FETCH_THIS
@@ -5291,10 +5276,10 @@ done:
 						type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
 					} else if (opline->opcode == ZEND_ASSIGN) {
 						if (!(OP1_INFO() & MAY_BE_REF)
-						 || STACK_VAR_TYPE(opline->op1.var) != IS_UNKNOWN) {
+						 || STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) != IS_UNKNOWN) {
 							if (opline->op2_type != IS_CONST) {
 								/* copy */
-								type = STACK_VAR_TYPE(opline->op2.var);
+								type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var));
 							}
 						}
 					} else if (opline->opcode == ZEND_SEND_VAR
@@ -5305,9 +5290,9 @@ done:
 					 || opline->opcode == ZEND_JMP_NULL
 					 || opline->opcode == ZEND_FE_RESET_R) {
 						/* keep old value */
-						type = STACK_VAR_TYPE(opline->op1.var);
+						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
 					}
-					SET_OP1_STACK_VAR_TYPE(type);
+					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type);
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op1_def]) {
@@ -5323,9 +5308,9 @@ done:
 						type = concrete_type(ssa->var_info[ssa_op->op2_def].type);
 					} else if (opline->opcode == ZEND_ASSIGN) {
 						/* keep old value */
-						type = STACK_VAR_TYPE(opline->op2.var);
+						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var));
 					}
-					SET_OP2_STACK_VAR_TYPE(type);
+					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), type);
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op2_def]) {
@@ -5356,9 +5341,9 @@ done:
 							 || (opline-1)->opcode == ZEND_ASSIGN_OBJ
 							 || (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP) {
 								/* keep old value */
-								type = STACK_VAR_TYPE(opline->op1.var);
+								type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
 							}
-							SET_OP1_STACK_VAR_TYPE(type);
+							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type);
 							if (type != IS_UNKNOWN) {
 								ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 								if (ra && ra[ssa_op->op1_def]) {
@@ -5379,7 +5364,7 @@ done:
 								 && has_concrete_type(ssa->var_info[ssa_op->result_def].type)) {
 									type = concrete_type(ssa->var_info[ssa_op->result_def].type);
 								}
-								SET_RES_STACK_VAR_TYPE(type);
+								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type);
 								if (ra && ra[ssa_op->result_def]) {
 									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
 								}
@@ -5399,7 +5384,7 @@ done:
 								 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
 									type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
 								}
-								SET_OP1_STACK_VAR_TYPE(type);
+								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type);
 								if (ra && ra[ssa_op->op1_def]) {
 									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
 								}
@@ -5530,7 +5515,7 @@ done:
 			 && (p+1)->op == ZEND_JIT_TRACE_VM) {
 				const zend_op *opline = (p+1)->opline - 1;
 				if (opline->result_type != IS_UNUSED) {
-				    SET_RES_STACK_VAR_TYPE(res_type);
+				    SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), res_type);
 				}
 			}
 			res_type = IS_UNKNOWN;
