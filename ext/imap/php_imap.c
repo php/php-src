@@ -3602,7 +3602,7 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 	}
 
 	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, ZSTR_VAL(subject),
-			bufferTo, ZSTR_VAL(message), bufferCc, bufferBcc, ZSTR_VAL(rpath)) != SUCCESS) {
+			bufferTo, ZSTR_VAL(message), bufferCc, bufferBcc, rpath ? ZSTR_VAL(rpath) : NULL) != SUCCESS) {
 		if (tsm_errmsg) {
 			php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 			efree(tsm_errmsg);
