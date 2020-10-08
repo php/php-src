@@ -4313,7 +4313,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 					}
 					object_init(&myobject);
 					add_property_string(&myobject, "charset", charset);
-					add_property_string(&myobject, "text", decode);
+					add_property_stringl(&myobject, "text", decode, newlength);
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &myobject);
 
 					/* only free decode if it was allocated by rfc822_qprint or rfc822_base64 */
