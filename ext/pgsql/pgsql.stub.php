@@ -3,10 +3,10 @@
 /** @generate-function-entries */
 
 /** @return resource|false */
-function pg_connect(string $pgsql_string, int $pgsql_type = 0) {}
+function pg_connect(string $connection_string, int $pgsql_type = 0) {}
 
 /** @return resource|false */
-function pg_pconnect(string $pgsql_string, int $pgsql_type = 0) {}
+function pg_pconnect(string $connection_string, int $pgsql_type = 0) {}
 
 /** @param resource $pgsql */
 function pg_connect_poll($pgsql): int {}
