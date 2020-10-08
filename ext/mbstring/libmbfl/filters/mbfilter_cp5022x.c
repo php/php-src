@@ -32,9 +32,7 @@
 #include "cp932_table.h"
 
 static void mbfl_filt_ident_jis_ms(unsigned char c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_cp50220(unsigned char c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_cp50221(unsigned char c, mbfl_identify_filter *filter);
-static void mbfl_filt_ident_cp50222(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_cp5022x(unsigned char c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt);
 
@@ -98,19 +96,19 @@ const struct mbfl_identify_vtbl vtbl_identify_jis_ms = {
 const struct mbfl_identify_vtbl vtbl_identify_cp50220 = {
 	mbfl_no_encoding_cp50220,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_cp50220
+	mbfl_filt_ident_cp5022x
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50221 = {
 	mbfl_no_encoding_cp50221,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_cp50221
+	mbfl_filt_ident_cp5022x
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50222 = {
 	mbfl_no_encoding_cp50222,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_cp50222
+	mbfl_filt_ident_cp5022x
 };
 
 const struct mbfl_convert_vtbl vtbl_jis_ms_wchar = {
@@ -937,226 +935,142 @@ retry:
 	}
 }
 
-static void mbfl_filt_ident_cp50220(unsigned char c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_cp5022x_x0201(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_cp5022x_x0208(unsigned char c, mbfl_identify_filter *filter);
+
+static int handle_cp5022x_escape(unsigned char c, mbfl_identify_filter *filter)
 {
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x80:	 X 0208 */
+	switch (filter->status) {
 	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
+		if (c == 0x1B) {
+			filter->status = 2;
+			return 1;
 		}
 		break;
 
-/*	case 0x81:	 X 0208 second char */
+	/* 2nd byte of Kanji */
 	case 1:
-		if (c == 0x1b) {
-			filter->status++;
-		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
-				filter->flag = 1;
-			}
+		if (c == 0x1B) {
+			filter->flag = 1;
+			filter->status = 2;
+			return 1;
 		}
 		break;
 
 	/* ESC */
 	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
+		if (c == '$') {
+			filter->status = 3;
+			return 1;
+		} else if (c == '(') {
+			filter->status = 4;
+			return 1;
 		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
+			filter->flag = 1; /* bad */
+			filter->status = 0;
 		}
 		break;
 
 	/* ESC $ */
 	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
+		filter->status = 0;
+		if (c == '@' || c == 'B') {
+			filter->filter_function = mbfl_filt_ident_cp5022x_x0208;
+			return 1;
 		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
+			filter->flag = 1; /* bad */
 		}
 		break;
 
 	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
+	case 4:
 		filter->status = 0;
-		break;
+		if (c == 'B' || c == 'J') {
+			/* 'J' is actually for X 0201 Latin, but the acceptable bytes are the same */
+			filter->filter_function = mbfl_filt_ident_cp5022x;
+			return 1;
+		} else if (c == 'I') { /* ESC ( I escape added by MicroSoft */
+			filter->filter_function = mbfl_filt_ident_cp5022x_x0201;
+			return 1;
+		} else {
+			filter->flag = 1; /* bad */
+		}
+	}
+
+	return 0;
+}
+
+#undef IN
+#define IN(c,lo,hi) ((c) >= lo && (c) <= hi)
+
+static void mbfl_filt_ident_cp5022x(unsigned char c, mbfl_identify_filter *filter)
+{
+	/* We convert single bytes from 0xA1-0xDF to JIS X 0201 kana, even if
+	 * no escape to shift to JIS X 0201 has been seen */
+	if (!handle_cp5022x_escape(c, filter) && (IN(c,0x80,0xA0) || c >= 0xE0)) {
+		filter->flag = 1;
 	}
 }
 
-static void mbfl_filt_ident_cp50221(unsigned char c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_cp5022x_x0201(unsigned char c, mbfl_identify_filter *filter)
 {
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x80:	 X 0208 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x81:	 X 0208 second char */
-	case 1:
-		if (c == 0x1b) {
-			filter->status++;
-		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
-				filter->flag = 1;
-			}
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else if (c == 0x49) {		/* 'I' */
-			filter->status = 0x20;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
+	/* JIS X 0201 kana use single bytes from 0xA1-0xDF; when in X 0201 Kana mode,
+	 * we map these to corresponding bytes with high bit cleared */
+	if (!handle_cp5022x_escape(c, filter) && !IN(c,0x21,0x5F)) {
+		filter->flag = 1;
 	}
 }
 
-static void mbfl_filt_ident_cp50222(unsigned char c, mbfl_identify_filter *filter)
+/* CP50220 actually uses the CP932 character set rather than "vanilla" JIS X 0208
+ * Note we are working with kuten codes here, not the Shift-JIS-like representation
+ * used for CP932 encoding
+ * Although the number of characters in CP932 is significantly expanded from
+ * JIS X 0208, there are still lots of unmapped kuten codes */
+static int is_unused_cp932(unsigned char ku, unsigned char ten)
 {
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x80:	 X 0208 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
+	if (IN(ku,0x29,0x2C) || ku == 0x2E || ku == 0x2F || IN(ku,0x75,0x78) || ku == 0x7D || ku == 0x7E) {
+		return 1;
+	} else if (IN(ku,0x22,0x28)) {
+		if (ku == 0x22) {
+			return IN(ten,0x2F,0x39) || IN(ten,0x42,0x49) || IN(ten,0x51,0x5B) || IN(ten,0x6B,0x71) || IN(ten,0x7A,0x7D);
+		} else if (ku == 0x23) {
+			return (ten <= 0x2F) || IN(ten,0x3A,0x40) || IN(ten,0x5B,0x60) || (ten >= 0x7B);
+		} else if (ku == 0x24) {
+			return (ten >= 0x74);
+		} else if (ku == 0x25) {
+			return (ten >= 0x77);
+		} else if (ku == 0x26) {
+			return IN(ten,0x39,0x40) || (ten >= 0x59);
+		} else if (ku == 0x27) {
+			return IN(ten,0x42,0x50) || (ten >= 0x72);
+		} else { /* ku == 0x28 */
+			return (ten >= 0x41);
 		}
-		break;
+	} else if (ku == 0x2D) {
+		return (ten == 0x3F) || IN(ten,0x57,0x5E) || (ten >= 0x7D);
+	} else if (ku == 0x4F) {
+		return (ten >= 0x54);
+	} else if (ku == 0x74) {
+		return (ten >= 0x27);
+	} else if (ku == 0x7C) {
+		return (ten == 0x6F) || (ten == 0x70);
+	}
+	return 0;
+}
 
-/*	case 0x81:	 X 0208 second char */
-	case 1:
-		if (c == 0x1b) {
-			filter->status++;
-		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
+static void mbfl_filt_ident_cp5022x_x0208(unsigned char c, mbfl_identify_filter *filter)
+{
+	if (!handle_cp5022x_escape(c, filter)) {
+		if (filter->status == 0) { /* First byte of Kanji */
+			if (c < 0x21 || c > 0x92) {
 				filter->flag = 1;
 			}
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
+			filter->status = c;
+		} else { /* Second byte of Kanji */
+			if (c < 0x21 || c > 0x7E || is_unused_cp932(filter->status, c)) {
+				filter->flag = 1;
+			}
 			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
 		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
 	}
 }
