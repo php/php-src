@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 77b278a9349573a355cb3f2fe441a7a0462c33ce */
+ * Stub hash: a119247725ff61dbd615cb86ee6201ee6603ba51 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
@@ -44,7 +44,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setProfiling, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setSecurityPrefs, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, securityPrefs, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, preferences, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_XSLTProcessor_getSecurityPrefs arginfo_class_XSLTProcessor_hasExsltSupport

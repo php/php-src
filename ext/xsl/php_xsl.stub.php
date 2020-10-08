@@ -47,7 +47,7 @@ class XSLTProcessor
     public function setProfiling(?string $filename) {}
 
     /** @return int */
-    public function setSecurityPrefs(int $securityPrefs) {}
+    public function setSecurityPrefs(int $preferences) {}
 
     /** @return int */
     public function getSecurityPrefs() {}
