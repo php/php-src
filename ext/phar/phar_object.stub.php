@@ -40,10 +40,10 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function decompress(?string $file_ext = null) {}
 
     /** @return Phar|null */
-    public function convertToExecutable(int $format = 9021976, int $compression_type = 9021976, ?string $file_ext = null) {}
+    public function convertToExecutable(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
 
     /** @return Phar|null */
-    public function convertToData(int $format = 9021976, int $compression_type = 9021976, ?string $file_ext = null) {}
+    public function convertToData(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
 
     /** @return bool */
     public function copy(string $newfile, string $oldfile) {}

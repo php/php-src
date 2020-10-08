@@ -2336,10 +2336,10 @@ PHP_METHOD(Phar, convertToExecutable)
 	size_t ext_len = 0;
 	uint32_t flags;
 	zend_object *ret;
-	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday, so there) */
-	zend_long format = 9021976, method = 9021976;
+	zend_long format, method;
+	zend_bool format_is_null = 1, method_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls!", &format, &method, &ext, &ext_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l!s!", &format, &format_is_null, &method, &method_is_null, &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2351,9 +2351,12 @@ PHP_METHOD(Phar, convertToExecutable)
 		RETURN_THROWS();
 	}
 
+	if (format_is_null) {
+		format = PHAR_FORMAT_SAME;
+	}
 	switch (format) {
-		case 9021976:
-		case PHAR_FORMAT_SAME: /* null is converted to 0 */
+		case 9021976: /* Retained for BC */
+		case PHAR_FORMAT_SAME:
 			/* by default, use the existing format */
 			if (phar_obj->archive->is_tar) {
 				format = PHAR_FORMAT_TAR;
@@ -2373,8 +2376,11 @@ PHP_METHOD(Phar, convertToExecutable)
 			RETURN_THROWS();
 	}
 
-	switch (method) {
-		case 9021976:
+	if (method_is_null) {
+		flags = phar_obj->archive->flags & PHAR_FILE_COMPRESSION_MASK;
+	} else {
+		switch (method) {
+		case 9021976: /* Retained for BC */
 			flags = phar_obj->archive->flags & PHAR_FILE_COMPRESSION_MASK;
 			break;
 		case 0:
@@ -2414,6 +2420,7 @@ PHP_METHOD(Phar, convertToExecutable)
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
 			RETURN_THROWS();
+		}
 	}
 
 	is_data = phar_obj->archive->is_data;
@@ -2440,18 +2447,21 @@ PHP_METHOD(Phar, convertToData)
 	size_t ext_len = 0;
 	uint32_t flags;
 	zend_object *ret;
-	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday so there) */
-	zend_long format = 9021976, method = 9021976;
+	zend_long format, method;
+	zend_bool format_is_null = 1, method_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls!", &format, &method, &ext, &ext_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l!s!", &format, &format_is_null, &method, &method_is_null, &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
+	if (format_is_null) {
+		format = PHAR_FORMAT_SAME;
+	}
 	switch (format) {
-		case 9021976:
-		case PHAR_FORMAT_SAME: /* null is converted to 0 */
+		case 9021976: /* Retained for BC */
+		case PHAR_FORMAT_SAME:
 			/* by default, use the existing format */
 			if (phar_obj->archive->is_tar) {
 				format = PHAR_FORMAT_TAR;
@@ -2476,8 +2486,11 @@ PHP_METHOD(Phar, convertToData)
 			RETURN_THROWS();
 	}
 
-	switch (method) {
-		case 9021976:
+	if (method_is_null) {
+		flags = phar_obj->archive->flags & PHAR_FILE_COMPRESSION_MASK;
+	} else  {
+		switch (method) {
+		case 9021976: /* Retained for BC */
 			flags = phar_obj->archive->flags & PHAR_FILE_COMPRESSION_MASK;
 			break;
 		case 0:
@@ -2517,6 +2530,7 @@ PHP_METHOD(Phar, convertToData)
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
 			RETURN_THROWS();
+		}
 	}
 
 	is_data = phar_obj->archive->is_data;

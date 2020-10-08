@@ -233,8 +233,8 @@ Phar::createDefaultStub(): Argument #1 ($index) must be of type ?string, array g
 Phar::loadPhar(): Argument #1 ($filename) must be of type string, array given
 Phar::canCompress(): Argument #1 ($method) must be of type int, string given
 Phar::__construct(): Argument #1 ($filename) must be of type string, array given
-Phar::convertToExecutable(): Argument #1 ($format) must be of type int, array given
-Phar::convertToData(): Argument #1 ($format) must be of type int, array given
+Phar::convertToExecutable(): Argument #1 ($format) must be of type ?int, array given
+Phar::convertToData(): Argument #1 ($format) must be of type ?int, array given
 PharData::delete(): Argument #1 ($entry) must be of type string, array given
 Cannot write out phar archive, phar is read-only
 Entry oops does not exist and cannot be deleted

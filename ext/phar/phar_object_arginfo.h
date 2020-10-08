@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e67cd4d59555843688a1bdd90ecd7d3924f1ee29 */
+ * Stub hash: 7c9fbbc6da2c4d7196583d82102fa857ce8eda6b */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -50,8 +50,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_decompress, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_convertToExecutable, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "9021976")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compression_type, IS_LONG, 0, "9021976")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compression_type, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file_ext, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -236,9 +236,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_decompress arginfo_class_Phar_decompress
 
-#define arginfo_class_PharData_convertToExecutable arginfo_class_Phar_convertToExecutable
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharData_convertToExecutable, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "9021976")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compression_type, IS_LONG, 0, "9021976")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file_ext, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_PharData_convertToData arginfo_class_Phar_convertToExecutable
+#define arginfo_class_PharData_convertToData arginfo_class_PharData_convertToExecutable
 
 #define arginfo_class_PharData_copy arginfo_class_Phar_copy
 
