@@ -51,7 +51,7 @@ bool(false)
 -- $msg_no is 1 --
 string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
-To: webmaster@something.com
+To: %s
 MIME-Version: 1.0
 Content-Type: MULTIPART/mixed; BOUNDARY="%s=:%d"
 

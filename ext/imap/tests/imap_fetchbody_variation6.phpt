@@ -48,5 +48,5 @@ Warning: imap_fetchbody(): Bad message number in %s on line %d
 bool(false)
 
 -- $msg_no is 1 --
-string(42) "1: this is a test message, please ignore
-"
+string(%s) "1: this is a test message, please ignore
+%S"
