@@ -334,6 +334,8 @@ typedef union _zend_jit_trace_stack {
 	(_stack)[_slot].mem_type
 #define STACK_REG(_stack, _slot) \
 	(_stack)[_slot].reg
+#define STACK_FLAGS(_stack, _slot) \
+	(_stack)[_slot].flags
 #define SET_STACK_VAR(_stack, _slot, _ssa_var) do { \
 		(_stack)[_slot].ssa_var = _ssa_var; \
 	} while (0)
@@ -351,6 +353,11 @@ typedef union _zend_jit_trace_stack {
 	} while (0)
 #define SET_STACK_REG(_stack, _slot, _reg) do { \
 		(_stack)[_slot].reg = _reg; \
+		(_stack)[_slot].flags = 0; \
+	} while (0)
+#define SET_STACK_REG_EX(_stack, _slot, _reg, _flags) do { \
+		(_stack)[_slot].reg = _reg; \
+		(_stack)[_slot].flags = _flags; \
 	} while (0)
 
 /* trace info flags */

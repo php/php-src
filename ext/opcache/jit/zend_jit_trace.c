@@ -2164,6 +2164,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			 && STACK_REG(parent_stack, i) != ZREG_NONE
 			 && STACK_REG(parent_stack, i) < ZREG_NUM) {
 				/* We will try to reuse register from parent trace */
+				flags[i] = STACK_FLAGS(parent_stack, i);
 				count += 2;
 			} else {
 				flags[i] = ZREG_LOAD;
@@ -2888,7 +2889,8 @@ static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack
 	uint32_t i;
 
 	for (i = 0; i < stack_size; i++) {
-		if (STACK_REG(stack, i) != ZREG_NONE) {
+		if (STACK_REG(stack, i) != ZREG_NONE
+		 && !(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))) {
 			return 1;
 		}
 	}
@@ -2932,7 +2934,7 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 				if (ra && ra[i] && ra[i]->reg == reg) {
 					/* register already loaded by parent trace */
 					if (stack) {
-						SET_STACK_REG(stack, i, reg);
+						SET_STACK_REG_EX(stack, i, reg, STACK_FLAGS(parent_stack, i));
 					}
 					has_unsaved_vars = 1;
 				} else {
@@ -2941,7 +2943,8 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 					if (stack) {
 						SET_STACK_TYPE(stack, i, type, 1);
 					}
-					if (!zend_jit_store_var(Dst, 1 << type, i, reg,
+					if (!(STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE))
+					 && !zend_jit_store_var(Dst, 1 << type, i, reg,
 							STACK_MEM_TYPE(parent_stack, i) != type)) {
 						return 0;
 					}
@@ -2967,7 +2970,8 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 					    if (stack) {
 							SET_STACK_TYPE(stack, i, type, 1);
 						}
-						if (!zend_jit_store_var(Dst, 1 << type, i, reg,
+						if (!(STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE))
+						 && !zend_jit_store_var(Dst, 1 << type, i, reg,
 								STACK_MEM_TYPE(parent_stack, i) != type)) {
 							return 0;
 						}
@@ -3331,7 +3335,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		 && trace_buffer->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 			for (i = 0; i < last_var; i++) {
 				if (ra[i] && (ra[i]->flags & ZREG_LOAD) != 0) {
-					//SET_STACK_REG(stack, i, ra[i]->reg);
+					SET_STACK_REG_EX(stack, i, ra[i]->reg, ZREG_LOAD);
 					if (!zend_jit_load_var(&dasm_state, ssa->var_info[i].type, i, ra[i]->reg)) {
 						goto jit_failure;
 					}
@@ -3356,12 +3360,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					if (ival->flags & ZREG_LOAD) {
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
+						SET_STACK_REG_EX(stack, phi->var, ival->reg, ZREG_LOAD);
 						if (!zend_jit_load_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg)) {
 							goto jit_failure;
 						}
 					} else if (ival->flags & ZREG_STORE) {
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
+						SET_STACK_REG_EX(stack, phi->var, ival->reg, ZREG_STORE);
 						if (!zend_jit_store_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg,
 								STACK_MEM_TYPE(stack, phi->var) != ssa->var_info[phi->ssa_var].type)) {
 							goto jit_failure;
@@ -3394,7 +3400,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 			for (i = 0; i < last_var; i++) {
 				if (ra && ra[i] && (ra[i]->flags & ZREG_LOAD) != 0) {
-					//SET_STACK_REG(stack, i, ra[i]->reg);
+					SET_STACK_REG_EX(stack, i, ra[i]->reg, ZREG_LOAD);
 					if (!zend_jit_load_var(&dasm_state, ssa->var_info[i].type, i, ra[i]->reg)) {
 						goto jit_failure;
 					}
@@ -5294,7 +5300,8 @@ done:
 							} else if (ssa->var_info[ssa_op->result_def].avoid_refcounting) {
 								SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_TRY_ADDREF);
 							} else if (ra && ra[ssa_op->result_def]) {
-								SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
+								SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg,
+									ra[ssa_op->result_def]->flags & ZREG_STORE);
 							}
 						}
 					}
@@ -5328,7 +5335,8 @@ done:
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op1_def]) {
-							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
+							SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
+								ra[ssa_op->op1_def]->flags & ZREG_STORE);
 						}
 					}
 				}
@@ -5347,7 +5355,8 @@ done:
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op2_def]) {
-							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op2.var), ra[ssa_op->op2_def]->reg);
+							SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op2.var), ra[ssa_op->op2_def]->reg,
+								ra[ssa_op->op2_def]->flags & ZREG_STORE);
 						}
 					}
 				}
@@ -5381,7 +5390,8 @@ done:
 							if (type != IS_UNKNOWN) {
 								ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 								if (ra && ra[ssa_op->op1_def]) {
-									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
+									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
+										ra[ssa_op->op1_def]->reg & ZREG_STORE);
 								}
 							}
 						}
@@ -5401,7 +5411,8 @@ done:
 								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type,
 									(!ra || !ra[ssa_op->result_def]));
 								if (ra && ra[ssa_op->result_def]) {
-									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
+									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg,
+										ra[ssa_op->result_def]->flags & ZREG_STORE);
 								}
 							}
 							ssa_op++;
@@ -5422,7 +5433,8 @@ done:
 								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
 									(!ra || !ra[ssa_op->op1_def]));
 								if (ra && ra[ssa_op->op1_def]) {
-									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
+									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
+										ra[ssa_op->op1_def]->flags & ZREG_STORE);
 								}
 							}
 							ssa_op++;
@@ -5495,7 +5507,7 @@ done:
 
 				for (i = 0; i < op_array->last_var; i++,j++) {
 					if (ra[j] && (ra[j]->flags & ZREG_LOAD) != 0) {
-						//SET_STACK_REG(stack, i, ra[j]->reg);
+						SET_STACK_REG_EX(stack, i, ra[j]->reg, ZREG_LOAD);
 						if (!zend_jit_load_var(&dasm_state, ssa->var_info[j].type, i, ra[j]->reg)) {
 							goto jit_failure;
 						}
@@ -5532,7 +5544,7 @@ done:
 						j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
 						for (i = 0; i < op_array->last_var + op_array->T; i++, j++) {
 							if (ra[j] && (ra[j]->flags & ZREG_LOAD) != 0) {
-								//SET_STACK_REG(stack, i, ra[j]->reg);
+								SET_STACK_REG_EX(stack, i, ra[j]->reg, ZREG_LOAD);
 								if (!zend_jit_load_var(&dasm_state, ssa->var_info[j].type, i, ra[j]->reg)) {
 									goto jit_failure;
 								}
