@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2c539af9f98b6920f8fd857299ded301ba8cf123 */
+ * Stub hash: da1da8fcfe8a04d08d354ad2cc5a3658d16c3076 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -36,7 +36,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_variant_xor arginfo_variant_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_abs, 0, 1, variant, 0)
-	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_variant_fix arginfo_variant_abs
@@ -48,7 +48,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_variant_not arginfo_variant_abs
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_round, 0, 2, variant, 1)
-	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

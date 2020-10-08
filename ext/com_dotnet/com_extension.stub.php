@@ -30,17 +30,17 @@ function variant_pow(mixed $left, mixed $right): variant {}
 
 function variant_xor(mixed $left, mixed $right): variant {}
 
-function variant_abs(mixed $left): variant {}
+function variant_abs(mixed $value): variant {}
 
-function variant_fix(mixed $left): variant {}
+function variant_fix(mixed $value): variant {}
 
-function variant_int(mixed $left): variant {}
+function variant_int(mixed $value): variant {}
 
-function variant_neg(mixed $left): variant {}
+function variant_neg(mixed $value): variant {}
 
-function variant_not(mixed $left): variant {}
+function variant_not(mixed $value): variant {}
 
-function variant_round(mixed $left, int $decimals): ?variant {}
+function variant_round(mixed $value, int $decimals): ?variant {}
 
 function variant_cmp(mixed $left, mixed $right, int $locale_id = LOCALE_SYSTEM_DEFAULT, int $flags = 0): int {}
 
