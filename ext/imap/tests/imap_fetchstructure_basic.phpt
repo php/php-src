@@ -43,7 +43,7 @@ require_once('clean.inc');
 --EXPECTF--
 Create a temporary mailbox and add 1 msgs
 .. mailbox '{127.0.0.1:143/norsh}INBOX.phpttest' created
-imap_fetchstructure(): Argument #2 ($msg_no) must be greater than 0
+imap_fetchstructure(): Argument #2 ($message_num) must be greater than 0
 bool(true)
 bool(true)
 bool(true)

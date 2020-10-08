@@ -1,5 +1,5 @@
 --TEST--
-Test imap_fetchheader() function : usage variations - $msg_no argument
+Test imap_fetchheader() function : usage variations - $message_num argument
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
@@ -7,7 +7,7 @@ require_once(__DIR__.'/skipif.inc');
 --FILE--
 <?php
 /*
- * Pass different integers and strings as $msg_no argument
+ * Pass different integers and strings as $message_num argument
  * to test behaviour of imap_fetchheader()
  */
 
@@ -19,10 +19,10 @@ $stream_id = setup_test_mailbox('', 3, $mailbox, 'notSimple'); // set up temp ma
 
 $sequences = [0, /* out of range */ 4, 1];
 
-foreach($sequences as $msg_no) {
-    echo "\n-- \$msg_no is $msg_no --\n";
+foreach($sequences as $message_num) {
+    echo "\n-- \$message_num is $message_num --\n";
     try {
-        var_dump(imap_fetchheader($stream_id, $msg_no));
+        var_dump(imap_fetchheader($stream_id, $message_num));
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
@@ -40,15 +40,15 @@ require_once(__DIR__.'/clean.inc');
 Create a temporary mailbox and add 3 msgs
 .. mailbox '{%s}%s' created
 
--- $msg_no is 0 --
-imap_fetchheader(): Argument #2 ($msg_no) must be greater than 0
+-- $message_num is 0 --
+imap_fetchheader(): Argument #2 ($message_num) must be greater than 0
 
--- $msg_no is 4 --
+-- $message_num is 4 --
 
 Warning: imap_fetchheader(): Bad message number in %s on line %d
 bool(false)
 
--- $msg_no is 1 --
+-- $message_num is 1 --
 string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s

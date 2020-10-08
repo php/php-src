@@ -1,5 +1,5 @@
 --TEST--
-Test imap_close() function : usage variations - different ints as $options arg
+Test imap_close() function : usage variations - different ints as $flags arg
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
@@ -7,7 +7,7 @@ require_once(__DIR__.'/skipif.inc');
 --FILE--
 <?php
 /*
- * Pass different integers as $options arg to imap_close() to test which are
+ * Pass different integers as $flags arg to imap_close() to test which are
  * recognised as CL_EXPUNGE option
  */
 
@@ -76,10 +76,10 @@ bool(true)
 CL_EXPUNGE was set
 
 -- Iteration 3 --
-imap_close(): Argument #2 ($options) must be CL_EXPUNGE or 0
+imap_close(): Argument #2 ($flags) must be CL_EXPUNGE or 0
 
 -- Iteration 4 --
-imap_close(): Argument #2 ($options) must be CL_EXPUNGE or 0
+imap_close(): Argument #2 ($flags) must be CL_EXPUNGE or 0
 
 -- Iteration 5 --
-imap_close(): Argument #2 ($options) must be CL_EXPUNGE or 0
+imap_close(): Argument #2 ($flags) must be CL_EXPUNGE or 0
