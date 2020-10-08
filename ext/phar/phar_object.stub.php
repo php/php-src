@@ -245,13 +245,13 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return Phar|null
      * @implementation-alias Phar::convertToExecutable
      */
-    public function convertToExecutable(int $format = 9021976, int $compression_type = 9021976, ?string $file_ext = null) {}
+    public function convertToExecutable(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
 
     /**
      * @return Phar|null
      * @implementation-alias Phar::convertToData
      */
-    public function convertToData(int $format = 9021976, int $compression_type = 9021976, ?string $file_ext = null) {}
+    public function convertToData(?int $format = null, ?int $compression_type = null, ?string $file_ext = null) {}
 
     /**
      * @return bool
@@ -513,7 +513,7 @@ class PharFileInfo extends SplFileInfo
     public function hasMetadata() {}
 
     /** @return bool */
-    public function isCompressed(int $compression_type = 9021976) {}
+    public function isCompressed(?int $compression_type = null) {}
 
     /** @return bool */
     public function isCRCChecked() {}

@@ -4519,17 +4519,21 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 /* {{{ Returns whether the entry is compressed, and whether it is compressed with Phar::GZ or Phar::BZ2 if specified */
 PHP_METHOD(PharFileInfo, isCompressed)
 {
-	/* a number that is not Phar::GZ or Phar::BZ2 */
-	zend_long method = 9021976;
+	zend_long method;
+	zend_bool method_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &method) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &method, &method_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ENTRY_OBJECT();
 
+	if (method_is_null) {
+		RETURN_BOOL(entry_obj->entry->flags & PHAR_ENT_COMPRESSION_MASK);
+	}
+
 	switch (method) {
-		case 9021976:
+		case 9021976: /* Retained for BC */
 			RETURN_BOOL(entry_obj->entry->flags & PHAR_ENT_COMPRESSION_MASK);
 		case PHAR_ENT_COMPRESSED_GZ:
 			RETURN_BOOL(entry_obj->entry->flags & PHAR_ENT_COMPRESSED_GZ);
