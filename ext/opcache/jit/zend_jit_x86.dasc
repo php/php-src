@@ -3579,7 +3579,7 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 					case ZEND_FE_FETCH_RW:
 						if (opline->op2_type == IS_CV) {
 							old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op2.var));
-							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), IS_UNKNOWN);
+							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), IS_UNKNOWN, 1);
 						}
 						exit_opline = (trace->opline == opline + 1) ?
 							ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) :
@@ -3591,7 +3591,7 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 
 			if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
 				old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN);
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 			}
 			exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
 			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
@@ -3796,12 +3796,12 @@ static int zend_jit_load_reg(dasm_State **Dst, zend_jit_addr src, zend_jit_addr 
 	return 1;
 }
 
-static int zend_jit_store_var(dasm_State **Dst, uint32_t info, int var, zend_reg reg)
+static int zend_jit_store_var(dasm_State **Dst, uint32_t info, int var, zend_reg reg, zend_bool set_type)
 {
 	zend_jit_addr src = ZEND_ADDR_REG(reg);
 	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
 
-	return zend_jit_spill_store(Dst, src, dst, info, 1);
+	return zend_jit_spill_store(Dst, src, dst, info, set_type);
 }
 
 static int zend_jit_store_var_if_necessary(dasm_State **Dst, int var, zend_jit_addr src, uint32_t info)
@@ -3978,7 +3978,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 
 		stack = JIT_G(current_frame)->stack;
 		old_op1_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
-		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_DOUBLE);
+		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_DOUBLE, 0);
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_LONG_MAX_PLUS_1);
 		} else {
@@ -3987,16 +3987,16 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 		if (opline->result_type != IS_UNUSED) {
 			old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 			if (opline->opcode == ZEND_PRE_INC) {
-				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE);
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MAX_PLUS_1);
 			} else if (opline->opcode == ZEND_PRE_DEC) {
-				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE);
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MIN_MINUS_1);
 			} else if (opline->opcode == ZEND_POST_INC) {
-				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG);
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG, 0);
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MAX);
 			} else if (opline->opcode == ZEND_POST_DEC) {
-				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG);
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG, 0);
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MIN);
 			}
 		}
@@ -8558,7 +8558,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	return 1;
 }
 
-static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr op1_def_addr, uint32_t res_info, zend_jit_addr res_addr)
+static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr op1_def_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr)
 {
 	if (op1_addr != op1_def_addr) {
 		if (!zend_jit_update_regs(Dst, op1_addr, op1_def_addr, op1_info)) {
@@ -8569,7 +8569,7 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, uint32_t 
 		}
 	}
 
-	if (!zend_jit_simple_assign(Dst, opline, res_addr, -1, -1, opline->op1_type, op1_addr, op1_info, 0, 0, 0)) {
+	if (!zend_jit_simple_assign(Dst, opline, res_addr, res_use_info, res_info, opline->op1_type, op1_addr, op1_info, 0, 0, 0)) {
 		return 0;
 	}
 	if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
@@ -11569,7 +11569,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 
 		if (!(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))) {
 			old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-			SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN);
+			SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_COPY_R0);
 			exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
 			SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
@@ -11584,7 +11584,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		if (opline->opcode == ZEND_FETCH_DIM_IS
 		 && !(res_info & MAY_BE_NULL)) {
 			old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-			SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_NULL);
+			SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_NULL, 0);
 			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_NULL);
 			exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
 			SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
@@ -12795,7 +12795,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			}
 
 			old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-			SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN);
+			SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_COPY_R0);
 			exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
 			SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);

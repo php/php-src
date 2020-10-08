@@ -317,9 +317,10 @@ typedef union _zend_jit_trace_stack {
 	int32_t      ssa_var;
 	uint32_t     info;
 	struct {
-		uint8_t  type;
-		int8_t   reg;
-		uint16_t flags;
+		uint8_t type;     /* variable type (for type inference) */
+		uint8_t mem_type; /* stack slot type  (for eliminate dead type store) */
+		int8_t  reg;
+		uint8_t flags;
 	};
 } zend_jit_trace_stack;
 
@@ -329,6 +330,8 @@ typedef union _zend_jit_trace_stack {
 	(_stack)[_slot].info
 #define STACK_TYPE(_stack, _slot) \
 	(_stack)[_slot].type
+#define STACK_MEM_TYPE(_stack, _slot) \
+	(_stack)[_slot].mem_type
 #define STACK_REG(_stack, _slot) \
 	(_stack)[_slot].reg
 #define SET_STACK_VAR(_stack, _slot, _ssa_var) do { \
@@ -337,8 +340,12 @@ typedef union _zend_jit_trace_stack {
 #define SET_STACK_INFO(_stack, _slot, _info) do { \
 		(_stack)[_slot].info = _info; \
 	} while (0)
-#define SET_STACK_TYPE(_stack, _slot, _type) do { \
-		(_stack)[_slot].type = _type; \
+#define SET_STACK_TYPE(_stack, _slot, _type, _set_mem_type) do { \
+		uint8_t __type = (_type); \
+		(_stack)[_slot].type = __type; \
+		if (_set_mem_type) { \
+			(_stack)[_slot].mem_type = __type; \
+		} \
 		(_stack)[_slot].reg = ZREG_NONE; \
 		(_stack)[_slot].flags = 0; \
 	} while (0)

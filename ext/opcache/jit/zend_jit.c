@@ -2246,7 +2246,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					} else if (ival->flags & ZREG_STORE) {
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
-						if (!zend_jit_store_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg)) {
+						if (!zend_jit_store_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg, 1)) {
 							goto jit_failure;
 						}
 					}
@@ -2699,7 +2699,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_qm_assign(&dasm_state, opline,
 								OP1_INFO(), op1_addr, op1_def_addr,
-								RES_INFO(), RES_REG_ADDR())) {
+								-1, RES_INFO(), RES_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
