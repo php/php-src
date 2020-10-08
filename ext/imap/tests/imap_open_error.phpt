@@ -33,7 +33,7 @@ try {
 Checking with incorrect parameters
 
 Warning: imap_open(): Couldn't open stream  in %s on line %d
-imap_open(): Argument #4 ($options) must be a bitmask of the OP_* constants, and CL_EXPUNGE
-imap_open(): Argument #5 ($n_retries) must be greater than or equal to 0
+imap_open(): Argument #4 ($flags) must be a bitmask of the OP_* constants, and CL_EXPUNGE
+imap_open(): Argument #5 ($retries) must be greater than or equal to 0
 
 Notice: Unknown: Can't open mailbox : no such mailbox (errflg=2) in Unknown on line 0

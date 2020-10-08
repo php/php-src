@@ -32,8 +32,8 @@ imap_close($stream_id);
 
 ?>
 --EXPECTF--
-imap_body(): Argument #2 ($msg_no) must be greater than 0
-imap_body(): Argument #3 ($options) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
+imap_body(): Argument #2 ($message_num) must be greater than 0
+imap_body(): Argument #3 ($flags) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
 
 Warning: imap_body(): UID does not exist in %s on line %d
 bool(false)
