@@ -106,7 +106,7 @@ Create a temporary mailbox and add 1 msgs
 .. mailbox '%s.phpttest' created
 
 -- Iteration 1 --
-string(71) "From: %s
+string(%d) "From: %s
 To: %s
 Subject: test1
 
