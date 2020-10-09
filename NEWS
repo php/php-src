@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #79423 (copy command is limited to size of file it can copy).
     (cmb)
   . Fixed bug #80126 (Covariant return types failing compilation). (Nikita)
+  . Fixed bug #80186 (Segfault when iterating over FFI object). (Nikita)
 
 - Calendar:
   . Fixed bug #80185 (jdtounix() fails after 2037). (cmb)
