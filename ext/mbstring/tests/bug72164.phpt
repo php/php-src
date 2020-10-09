@@ -10,9 +10,13 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 $var0 = "e";
 $var2 = "";
 $var3 = NULL;
-$var8 = mb_ereg_replace($var2,$var3,$var3,$var0);
-var_dump($var8);
+try {
+    $var8 = mb_ereg_replace($var2,$var3,$var3,$var0);
+    var_dump($var8);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
-Deprecated: mb_ereg_replace(): The 'e' option is deprecated, use mb_ereg_replace_callback instead in %s%ebug72164.php on line %d
-string(0) ""
+--EXPECT--
+Option "e" is not supported

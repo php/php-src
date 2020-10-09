@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - with length as 0
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to rwad from a file with length argument equal to zero */
 
 echo "*** Testing fgetcsv() : with length as 0 ***\n";
@@ -26,7 +21,7 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation2.tmp';
+$filename = __DIR__ . '/fgetcsv_variation2.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",

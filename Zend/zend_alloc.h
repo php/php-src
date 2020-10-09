@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,21 +27,21 @@
 #include "zend.h"
 
 #ifndef ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT Z_L(8)
+# define ZEND_MM_ALIGNMENT Z_UL(8)
 # define ZEND_MM_ALIGNMENT_LOG2 Z_L(3)
 #elif ZEND_MM_ALIGNMENT < 4
 # undef ZEND_MM_ALIGNMENT
 # undef ZEND_MM_ALIGNMENT_LOG2
-# define ZEND_MM_ALIGNMENT Z_L(4)
+# define ZEND_MM_ALIGNMENT Z_UL(4)
 # define ZEND_MM_ALIGNMENT_LOG2 Z_L(2)
 #endif
 
-#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - Z_L(1))
+#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - 1)
 
-#define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - Z_L(1)) & ZEND_MM_ALIGNMENT_MASK)
+#define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
 
 #define ZEND_MM_ALIGNED_SIZE_EX(size, alignment) \
-	(((size) + ((alignment) - Z_L(1))) & ~((alignment) - Z_L(1)))
+	(((size) + ((alignment) - 1)) & ~((alignment) - 1))
 
 typedef struct _zend_leak_info {
 	void *addr;
@@ -219,14 +219,15 @@ ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2)
 #define perealloc2_recoverable_rel(ptr, size, copy_size, persistent) ((persistent)?realloc((ptr), (size)):erealloc2_recoverable_rel((ptr), (size), (copy_size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
-ZEND_API int zend_set_memory_limit(size_t memory_limit);
+ZEND_API void zend_set_memory_limit(size_t memory_limit);
 
 ZEND_API void start_memory_manager(void);
-ZEND_API void shutdown_memory_manager(int silent, int full_shutdown);
-ZEND_API int is_zend_mm(void);
+ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);
+ZEND_API bool is_zend_mm(void);
+ZEND_API bool is_zend_ptr(const void *ptr);
 
-ZEND_API size_t zend_memory_usage(int real_usage);
-ZEND_API size_t zend_memory_peak_usage(int real_usage);
+ZEND_API size_t zend_memory_usage(bool real_usage);
+ZEND_API size_t zend_memory_peak_usage(bool real_usage);
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
@@ -245,7 +246,7 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage);
 typedef struct _zend_mm_heap zend_mm_heap;
 
 ZEND_API zend_mm_heap *zend_mm_startup(void);
-ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent);
+ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full_shutdown, bool silent);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void   ZEND_FASTCALL _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
@@ -273,7 +274,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap);
 #define ZEND_MM_CUSTOM_HEAP_STD   1
 #define ZEND_MM_CUSTOM_HEAP_DEBUG 2
 
-ZEND_API int zend_mm_is_custom_heap(zend_mm_heap *new_heap);
+ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap);
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
                                           void  (*_free)(void*),
@@ -294,8 +295,8 @@ typedef struct _zend_mm_storage zend_mm_storage;
 
 typedef	void* (*zend_mm_chunk_alloc_t)(zend_mm_storage *storage, size_t size, size_t alignment);
 typedef void  (*zend_mm_chunk_free_t)(zend_mm_storage *storage, void *chunk, size_t size);
-typedef int   (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
-typedef int   (*zend_mm_chunk_extend_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
+typedef bool   (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
+typedef bool   (*zend_mm_chunk_extend_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
 
 typedef struct _zend_mm_handlers {
 	zend_mm_chunk_alloc_t       chunk_alloc;
@@ -397,16 +398,10 @@ static void apc_init_heap(void)
 
 */
 
+#ifdef ZTS
+size_t zend_mm_globals_size(void);
+#endif
+
 END_EXTERN_C()
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

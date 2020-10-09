@@ -1,10 +1,11 @@
-dnl config.m4 for sapi apache2handler
+PHP_ARG_WITH([apxs2],,
+  [AS_HELP_STRING([[--with-apxs2[=FILE]]],
+    [Build shared Apache 2 handler module. FILE is the optional pathname to
+    the Apache apxs tool [apxs]])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(apxs2,,
-[  --with-apxs2[=FILE]       Build shared Apache 2.0 Handler module. FILE is the optional
-                          pathname to the Apache apxs tool [apxs]], no, no)
-
-AC_MSG_CHECKING([for Apache 2.0 handler-module support via DSO through APXS])
+AC_MSG_CHECKING([for Apache 2 handler module support via DSO through APXS])
 
 if test "$PHP_APXS2" != "no"; then
   if test "$PHP_APXS2" = "yes"; then
@@ -39,7 +40,7 @@ if test "$PHP_APXS2" != "no"; then
   APU_BINDIR=`$APXS -q APU_BINDIR`
   APR_BINDIR=`$APXS -q APR_BINDIR`
 
-  # Pick up ap[ru]-N-config if using httpd >=2.1
+  dnl Pick up ap[ru]-N-config if using httpd >=2.1
   APR_CONFIG=`$APXS -q APR_CONFIG 2>/dev/null ||
     echo $APR_BINDIR/apr-config`
   APU_CONFIG=`$APXS -q APU_CONFIG 2>/dev/null ||
@@ -56,11 +57,9 @@ if test "$PHP_APXS2" != "no"; then
 
   APACHE_CFLAGS="$APACHE_CPPFLAGS -I$APXS_INCLUDEDIR $APR_CFLAGS $APU_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
-  # Test that we're trying to configure with apache 2.x
+  dnl Test that we're trying to configure with apache 2.x
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
-  if test "$APACHE_VERSION" -le 2000000; then
-    AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropriate switch --with-apxs (without the 2)])
-  elif test "$APACHE_VERSION" -lt 2000044; then
+  if test "$APACHE_VERSION" -lt 2000044; then
     AC_MSG_ERROR([Please note that Apache version >= 2.0.44 is required])
   fi
 
@@ -68,27 +67,29 @@ if test "$PHP_APXS2" != "no"; then
   if test -z `$APXS -q SYSCONFDIR`; then
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
-                       -i -n php7"
+                       -i -n php"
   else
     APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                 \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                        -S SYSCONFDIR='$APXS_SYSCONFDIR' \
-                       -i -a -n php7"
+                       -i -a -n php"
   fi
+
+  LIBPHP_CFLAGS="-shared"
+  PHP_SUBST(LIBPHP_CFLAGS)
 
   case $host_alias in
   *aix*)
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    PHP_SELECT_SAPI(apache2handler, shared, mod_php.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   *darwin*)
-    dnl When using bundles on Darwin, we must resolve all symbols.  However,
-    dnl the linker does not recursively look at the bundle loader and
-    dnl pull in its dependencies.  Therefore, we must pull in the APR
-    dnl and APR-util libraries.
+    dnl When using bundles on Darwin, we must resolve all symbols. However, the
+    dnl linker does not recursively look at the bundle loader and pull in its
+    dnl dependencies. Therefore, we must pull in the APR and APR-util libraries.
     if test -x "$APR_CONFIG"; then
         MH_BUNDLE_FLAGS="`$APR_CONFIG --ldflags --link-ld --libs`"
     fi
@@ -97,12 +98,12 @@ if test "$PHP_APXS2" != "no"; then
     fi
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
-    PHP_SELECT_SAPI(apache2handler, bundle, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
-    SAPI_SHARED=libs/libphp7.so
+    PHP_SELECT_SAPI(apache2handler, bundle, mod_php.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    SAPI_SHARED=libs/libphp.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
   *)
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    PHP_SELECT_SAPI(apache2handler, shared, mod_php.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   esac
@@ -113,7 +114,7 @@ if test "$PHP_APXS2" != "no"; then
       PHP_BUILD_THREAD_SAFE
     fi
   else
-    APACHE_THREADED_MPM=`$APXS_HTTPD -V | grep 'threaded:.*yes'`
+    APACHE_THREADED_MPM=`$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes'`
     if test -n "$APACHE_THREADED_MPM"; then
       PHP_BUILD_THREAD_SAFE
     fi
@@ -123,7 +124,3 @@ if test "$PHP_APXS2" != "no"; then
 else
   AC_MSG_RESULT(no)
 fi
-
-dnl ## Local Variables:
-dnl ## tab-width: 4
-dnl ## End:

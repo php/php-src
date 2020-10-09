@@ -1,16 +1,16 @@
 --TEST--
 PDO PgSQL pgsqlCopyToArray and pgsqlCopyToFile
 --SKIPIF--
-<?php # vim:se ft=php:
+<?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
@@ -22,13 +22,13 @@ echo "Preparing test table for CopyTo tests\n";
 $stmt = $db->prepare("INSERT INTO test (a, b, c) values (?, ?, ?)");
 
 for($i=0;$i<3;$i++) {
-	$firstParameter = $i;
-	$secondParameter = "test insert {$i}";
-	$thirdParameter = NULL;
-	$stmt->bindValue(1, $firstParameter);
-	$stmt->bindValue(2, $secondParameter);
-	$stmt->bindValue(3, $thirdParameter);
-	$stmt->execute();
+    $firstParameter = $i;
+    $secondParameter = "test insert {$i}";
+    $thirdParameter = NULL;
+    $stmt->bindValue(1, $firstParameter);
+    $stmt->bindValue(2, $secondParameter);
+    $stmt->bindValue(3, $thirdParameter);
+    $stmt->execute();
 }
 
 $db->commit();
@@ -42,9 +42,9 @@ var_dump($db->pgsqlCopyToArray('test',";","NULL",'a,c'));
 
 echo "Testing pgsqlCopyToArray() with error\n";
 try {
-	var_dump($db->pgsqlCopyToArray('test_error'));
+    var_dump($db->pgsqlCopyToArray('test_error'));
 } catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
+    echo "Exception: {$e->getMessage()}\n";
 }
 
 echo "Testing pgsqlCopyToFile() with default parameters\n";
@@ -61,20 +61,20 @@ echo file_get_contents($filename);
 
 echo "Testing pgsqlCopyToFile() with error\n";
 try {
-	var_dump($db->pgsqlCopyToFile('test_error',$filename));
+    var_dump($db->pgsqlCopyToFile('test_error',$filename));
 } catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
+    echo "Exception: {$e->getMessage()}\n";
 }
 
 echo "Testing pgsqlCopyToFile() to unwritable file\n";
 try {
-	var_dump($db->pgsqlCopyToFile('test', 'nonexistent/foo.csv'));
+    var_dump($db->pgsqlCopyToFile('test', 'nonexistent/foo.csv'));
 } catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
+    echo "Exception: {$e->getMessage()}\n";
 }
 
 if(isset($filename)) {
-	@unlink($filename);
+    @unlink($filename);
 }
 ?>
 --EXPECTF--

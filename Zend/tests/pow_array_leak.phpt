@@ -4,14 +4,30 @@ Memory leak on ** with result==op1 array
 <?php
 
 $x = [0];
-$x **= 1;
+try {
+    $x **= 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($x);
 
 $x = [0];
-$x **= $x;
+try {
+    $x **= $x;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($x);
 
 ?>
 --EXPECT--
-int(0)
-int(0)
+Unsupported operand types: array ** int
+array(1) {
+  [0]=>
+  int(0)
+}
+Unsupported operand types: array ** array
+array(1) {
+  [0]=>
+  int(0)
+}

@@ -11,7 +11,7 @@ var_dump($temp1);
 function a($b,$c) {}
 ?>
 --EXPECTF--
-Notice: Undefined variable: var in %sbug52001.php on line 2
+Warning: Undefined variable $var in %s on line %d
 
-Notice: Undefined variable:  in %sbug52001.php on line 2
+Warning: Undefined variable $ in %s on line %d
 int(1)

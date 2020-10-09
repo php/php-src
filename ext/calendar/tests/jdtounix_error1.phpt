@@ -8,7 +8,11 @@ date.timezone=UTC
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-var_dump(jdtounix(2440579)) . PHP_EOL;
+try {
+    jdtounix(2440579);
+} catch (ValueError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 ?>
---EXPECT--
-bool(false)
+--EXPECTF--
+jday must be between 2440588 and %d

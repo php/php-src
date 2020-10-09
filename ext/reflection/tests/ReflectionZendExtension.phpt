@@ -12,12 +12,10 @@ var_dump($reflection->getCopyright());
 var_dump($reflection->getName());
 var_dump($reflection->getURL());
 var_dump($reflection->getVersion() === PHP_VERSION);
-var_dump(gettype($reflection->export('Zend OPcache', true)) === 'string');
 ?>
---EXPECTF--
+--EXPECT--
 string(17) "Zend Technologies"
-string(23) "Copyright (c) 1999-20%d"
+string(13) "Copyright (c)"
 string(12) "Zend OPcache"
 string(20) "http://www.zend.com/"
-bool(true)
 bool(true)

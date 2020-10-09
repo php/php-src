@@ -351,7 +351,7 @@ static void add_error(Scanner *s, int error_code, char *error)
 	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
 }
 
-static void add_pbf_warning(Scanner *s, int error_code, char *error, char *sptr, char *cptr)
+static void add_pbf_warning(Scanner *s, int error_code, char *error, const char *sptr, const char *cptr)
 {
 	s->errors->warning_count++;
 	s->errors->warning_messages = timelib_realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
@@ -361,7 +361,7 @@ static void add_pbf_warning(Scanner *s, int error_code, char *error, char *sptr,
 	s->errors->warning_messages[s->errors->warning_count - 1].message = timelib_strdup(error);
 }
 
-static void add_pbf_error(Scanner *s, int error_code, char *error, char *sptr, char *cptr)
+static void add_pbf_error(Scanner *s, int error_code, char *error, const char *sptr, const char *cptr)
 {
 	s->errors->error_count++;
 	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
@@ -371,7 +371,7 @@ static void add_pbf_error(Scanner *s, int error_code, char *error, char *sptr, c
 	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
 }
 
-static timelib_sll timelib_meridian(char **ptr, timelib_sll h)
+static timelib_sll timelib_meridian(const char **ptr, timelib_sll h)
 {
 	timelib_sll retval = 0;
 
@@ -398,7 +398,7 @@ static timelib_sll timelib_meridian(char **ptr, timelib_sll h)
 	return retval;
 }
 
-static timelib_sll timelib_meridian_with_check(char **ptr, timelib_sll h)
+static timelib_sll timelib_meridian_with_check(const char **ptr, timelib_sll h)
 {
 	timelib_sll retval = 0;
 
@@ -442,9 +442,10 @@ static char *timelib_string(Scanner *s)
 	return tmp;
 }
 
-static timelib_sll timelib_get_nr_ex(char **ptr, int max_length, int *scanned_length)
+static timelib_sll timelib_get_nr_ex(const char **ptr, int max_length, int *scanned_length)
 {
-	char *begin, *end, *str;
+	const char *begin, *end;
+	char *str;
 	timelib_sll tmp_nr = TIMELIB_UNSET;
 	int len = 0;
 
@@ -470,12 +471,12 @@ static timelib_sll timelib_get_nr_ex(char **ptr, int max_length, int *scanned_le
 	return tmp_nr;
 }
 
-static timelib_sll timelib_get_nr(char **ptr, int max_length)
+static timelib_sll timelib_get_nr(const char **ptr, int max_length)
 {
 	return timelib_get_nr_ex(ptr, max_length, NULL);
 }
 
-static void timelib_skip_day_suffix(char **ptr)
+static void timelib_skip_day_suffix(const char **ptr)
 {
 	if (isspace(**ptr)) {
 		return;
@@ -485,9 +486,10 @@ static void timelib_skip_day_suffix(char **ptr)
 	}
 }
 
-static timelib_sll timelib_get_frac_nr(char **ptr, int max_length)
+static timelib_sll timelib_get_frac_nr(const char **ptr, int max_length)
 {
-	char *begin, *end, *str;
+	const char *begin, *end;
+	char *str;
 	double tmp_nr = TIMELIB_UNSET;
 	int len = 0;
 
@@ -510,7 +512,7 @@ static timelib_sll timelib_get_frac_nr(char **ptr, int max_length)
 	return tmp_nr;
 }
 
-static timelib_ull timelib_get_unsigned_nr(char **ptr, int max_length)
+static timelib_ull timelib_get_unsigned_nr(const char **ptr, int max_length)
 {
 	timelib_ull dir = 1;
 
@@ -531,10 +533,10 @@ static timelib_ull timelib_get_unsigned_nr(char **ptr, int max_length)
 	return dir * timelib_get_nr(ptr, max_length);
 }
 
-static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
+static timelib_sll timelib_lookup_relative_text(const char **ptr, int *behavior)
 {
 	char *word;
-	char *begin = *ptr, *end;
+	const char *begin = *ptr, *end;
 	timelib_sll  value = 0;
 	const timelib_lookup_table *tp;
 
@@ -556,7 +558,7 @@ static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
 	return value;
 }
 
-static timelib_sll timelib_get_relative_text(char **ptr, int *behavior)
+static timelib_sll timelib_get_relative_text(const char **ptr, int *behavior)
 {
 	while (**ptr == ' ' || **ptr == '\t' || **ptr == '-' || **ptr == '/') {
 		++*ptr;
@@ -564,10 +566,10 @@ static timelib_sll timelib_get_relative_text(char **ptr, int *behavior)
 	return timelib_lookup_relative_text(ptr, behavior);
 }
 
-static timelib_long timelib_lookup_month(char **ptr)
+static timelib_long timelib_lookup_month(const char **ptr)
 {
 	char *word;
-	char *begin = *ptr, *end;
+	const char *begin = *ptr, *end;
 	timelib_long  value = 0;
 	const timelib_lookup_table *tp;
 
@@ -588,7 +590,7 @@ static timelib_long timelib_lookup_month(char **ptr)
 	return value;
 }
 
-static timelib_long timelib_get_month(char **ptr)
+static timelib_long timelib_get_month(const char **ptr)
 {
 	while (**ptr == ' ' || **ptr == '\t' || **ptr == '-' || **ptr == '.' || **ptr == '/') {
 		++*ptr;
@@ -596,14 +598,14 @@ static timelib_long timelib_get_month(char **ptr)
 	return timelib_lookup_month(ptr);
 }
 
-static void timelib_eat_spaces(char **ptr)
+static void timelib_eat_spaces(const char **ptr)
 {
 	while (**ptr == ' ' || **ptr == '\t') {
 		++*ptr;
 	}
 }
 
-static void timelib_eat_until_separator(char **ptr)
+static void timelib_eat_until_separator(const char **ptr)
 {
 	++*ptr;
 	while (strchr(" \t.,:;/-0123456789", **ptr) == NULL) {
@@ -611,10 +613,10 @@ static void timelib_eat_until_separator(char **ptr)
 	}
 }
 
-static const timelib_relunit* timelib_lookup_relunit(char **ptr)
+static const timelib_relunit* timelib_lookup_relunit(const char **ptr)
 {
 	char *word;
-	char *begin = *ptr, *end;
+	const char *begin = *ptr, *end;
 	const timelib_relunit *tp, *value = NULL;
 
 	while (**ptr != '\0' && **ptr != ' ' && **ptr != ',' && **ptr != '\t' && **ptr != ';' && **ptr != ':' &&
@@ -636,7 +638,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	return value;
 }
 
-static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, Scanner *s)
+static void timelib_set_relative(const char **ptr, timelib_sll amount, int behavior, Scanner *s)
 {
 	const timelib_relunit* relunit;
 
@@ -707,10 +709,10 @@ static const timelib_tz_lookup_table* abbr_search(const char *word, timelib_long
 	return NULL;
 }
 
-static timelib_long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, int *found)
+static timelib_long timelib_lookup_abbr(const char **ptr, int *dst, char **tz_abbr, int *found)
 {
 	char *word;
-	char *begin = *ptr, *end;
+	const char *begin = *ptr, *end;
 	timelib_long  value = 0;
 	const timelib_tz_lookup_table *tp;
 
@@ -737,9 +739,9 @@ static timelib_long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, in
 #define sHOUR(a) (int)(a * 3600)
 #define sMIN(a) (int)(a * 60)
 
-static timelib_long timelib_parse_tz_cor(char **ptr)
+static timelib_long timelib_parse_tz_cor(const char **ptr)
 {
-	char *begin = *ptr, *end;
+	const char *begin = *ptr, *end;
 	timelib_long  tmp;
 
 	while (isdigit(**ptr) || **ptr == ':') {
@@ -770,10 +772,10 @@ static timelib_long timelib_parse_tz_cor(char **ptr)
 	return 0;
 }
 
-static timelib_long timelib_parse_tz_minutes(char **ptr, timelib_time *t)
+static timelib_long timelib_parse_tz_minutes(const char **ptr, timelib_time *t)
 {
 	timelib_long retval = TIMELIB_UNSET;
-	char *begin = *ptr;
+	const char *begin = *ptr;
 
 	/* First character must be +/- */
 	if (**ptr != '+' && **ptr != '-') {
@@ -801,7 +803,7 @@ static timelib_long timelib_parse_tz_minutes(char **ptr, timelib_time *t)
 	return retval;
 }
 
-timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper)
+timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper)
 {
 	timelib_tzinfo *res;
 	timelib_long            retval = 0;
@@ -877,7 +879,8 @@ timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_n
 static int scan(Scanner *s, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	uchar *cursor = s->cur;
-	char *str, *ptr = NULL;
+	char *str;
+	const char *ptr = NULL;
 
 std:
 	s->tok = cursor;
@@ -909,6 +912,7 @@ year  = [0-9]{1,4};
 year2 = [0-9]{2};
 year4 = [0-9]{4};
 year4withsign = [+-]? [0-9]{4};
+yearx = [+-] [0-9]{5,19};
 
 dayofyear = "00"[1-9] | "0"[1-9][0-9] | [1-2][0-9][0-9] | "3"[0-5][0-9] | "36"[0-6];
 weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
@@ -951,6 +955,7 @@ iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
 dateslash        = year4 "/" month "/" day;
 iso8601date4     = year4withsign "-" monthlz "-" daylz;
 iso8601date2     = year2 "-" monthlz "-" daylz;
+iso8601datex     = yearx "-" monthlz "-" daylz;
 gnudateshorter   = year4 "-" month;
 gnudateshort     = year "-" month "-" day;
 pointeddate4     = day [.\t-] month [.-] year4;
@@ -985,7 +990,7 @@ clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" sec
 
 /* Timestamp format: @1126396800 */
 timestamp        = "@" "-"? [0-9]+;
-timestampms      = "@" "-"? [0-9]+ "." [0-9]{6};
+timestampms      = "@" "-"? [0-9]+ "." [0-9]{0,6};
 
 /* To fix some ambiguities */
 dateshortwithtimeshort12  = datenoyear timeshort12;
@@ -1001,7 +1006,7 @@ reltextnumber = 'first'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eig
 reltexttext = 'next'|'last'|'previous'|'this';
 reltextunit = 'ms' | 'µs' | (('msec'|'millisecond'|'µsec'|'microsecond'|'usec'|'sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
 
-relnumber = ([+-]*[ \t]*[0-9]+);
+relnumber = ([+-]*[ \t]*[0-9]{1,13});
 relative = relnumber space? (reltextunit | 'week' );
 relativetext = (reltextnumber|reltexttext) space reltextunit;
 relativetextweek = reltexttext space 'week';
@@ -1077,7 +1082,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_UNHAVE_TIME();
 		TIMELIB_HAVE_TZ();
 
-		i = timelib_get_unsigned_nr((char **) &ptr, 24);
+		i = timelib_get_unsigned_nr(&ptr, 24);
 		s->time->y = 1970;
 		s->time->m = 1;
 		s->time->d = 1;
@@ -1096,6 +1101,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 	timestampms
 	{
 		timelib_ull i, us;
+		const char *ptr_before;
 
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
@@ -1103,8 +1109,12 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_UNHAVE_TIME();
 		TIMELIB_HAVE_TZ();
 
-		i = timelib_get_unsigned_nr((char **) &ptr, 24);
-		us = timelib_get_unsigned_nr((char **) &ptr, 24);
+		i = timelib_get_unsigned_nr(&ptr, 24);
+
+		ptr_before = ptr;
+		us = timelib_get_unsigned_nr(&ptr, 6);
+		us = us * pow(10, 7 - (ptr - ptr_before));
+
 		s->time->y = 1970;
 		s->time->m = 1;
 		s->time->d = 1;
@@ -1146,15 +1156,15 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_TIME();
 
 		if (*ptr == 'b') {
-			s->time->h = timelib_get_nr((char **) &ptr, 2);
+			s->time->h = timelib_get_nr(&ptr, 2);
 			s->time->i = 15;
 		} else {
-			s->time->h = timelib_get_nr((char **) &ptr, 2) - 1;
+			s->time->h = timelib_get_nr(&ptr, 2) - 1;
 			s->time->i = 45;
 		}
 		if (*ptr != '\0' ) {
-			timelib_eat_spaces((char **) &ptr);
-			s->time->h += timelib_meridian((char **) &ptr, s->time->h);
+			timelib_eat_spaces(&ptr);
+			s->time->h += timelib_meridian(&ptr, s->time->h);
 		}
 
 		TIMELIB_DEINIT;
@@ -1170,14 +1180,14 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_RELATIVE();
 		TIMELIB_HAVE_SPECIAL_RELATIVE();
 
-		i = timelib_get_relative_text((char **) &ptr, &behavior);
-		timelib_eat_spaces((char **) &ptr);
+		i = timelib_get_relative_text(&ptr, &behavior);
+		timelib_eat_spaces(&ptr);
 		if (i > 0) { /* first, second... etc */
 			s->time->relative.special.type = TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH;
-			timelib_set_relative((char **) &ptr, i, 1, s);
+			timelib_set_relative(&ptr, i, 1, s);
 		} else { /* last */
 			s->time->relative.special.type = TIMELIB_SPECIAL_LAST_DAY_OF_WEEK_IN_MONTH;
-			timelib_set_relative((char **) &ptr, i, behavior, s);
+			timelib_set_relative(&ptr, i, behavior, s);
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_WEEK_DAY_OF_MONTH;
@@ -1188,14 +1198,14 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("timetiny12 | timeshort12 | timelong12");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
+		s->time->h = timelib_get_nr(&ptr, 2);
 		if (*ptr == ':' || *ptr == '.') {
-			s->time->i = timelib_get_nr((char **) &ptr, 2);
+			s->time->i = timelib_get_nr(&ptr, 2);
 			if (*ptr == ':' || *ptr == '.') {
-				s->time->s = timelib_get_nr((char **) &ptr, 2);
+				s->time->s = timelib_get_nr(&ptr, 2);
 			}
 		}
-		s->time->h += timelib_meridian((char **) &ptr, s->time->h);
+		s->time->h += timelib_meridian(&ptr, s->time->h);
 		TIMELIB_DEINIT;
 		return TIMELIB_TIME12;
 	}
@@ -1205,17 +1215,17 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("mssqltime");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
-		s->time->i = timelib_get_nr((char **) &ptr, 2);
+		s->time->h = timelib_get_nr(&ptr, 2);
+		s->time->i = timelib_get_nr(&ptr, 2);
 		if (*ptr == ':' || *ptr == '.') {
-			s->time->s = timelib_get_nr((char **) &ptr, 2);
+			s->time->s = timelib_get_nr(&ptr, 2);
 
 			if (*ptr == ':' || *ptr == '.') {
-				s->time->us = timelib_get_frac_nr((char **) &ptr, 8);
+				s->time->us = timelib_get_frac_nr(&ptr, 8);
 			}
 		}
-		timelib_eat_spaces((char **) &ptr);
-		s->time->h += timelib_meridian((char **) &ptr, s->time->h);
+		timelib_eat_spaces(&ptr);
+		s->time->h += timelib_meridian(&ptr, s->time->h);
 		TIMELIB_DEINIT;
 		return TIMELIB_TIME24_WITH_ZONE;
 	}
@@ -1226,18 +1236,18 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("timeshort24 | timelong24 | iso8601long");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
-		s->time->i = timelib_get_nr((char **) &ptr, 2);
+		s->time->h = timelib_get_nr(&ptr, 2);
+		s->time->i = timelib_get_nr(&ptr, 2);
 		if (*ptr == ':' || *ptr == '.') {
-			s->time->s = timelib_get_nr((char **) &ptr, 2);
+			s->time->s = timelib_get_nr(&ptr, 2);
 
 			if (*ptr == '.') {
-				s->time->us = timelib_get_frac_nr((char **) &ptr, 8);
+				s->time->us = timelib_get_frac_nr(&ptr, 8);
 			}
 		}
 
 		if (*ptr != '\0') {
-			s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+			s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 			if (tz_not_found) {
 				add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
 			}
@@ -1252,12 +1262,12 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_INIT;
 		switch (s->time->have_time) {
 			case 0:
-				s->time->h = timelib_get_nr((char **) &ptr, 2);
-				s->time->i = timelib_get_nr((char **) &ptr, 2);
+				s->time->h = timelib_get_nr(&ptr, 2);
+				s->time->i = timelib_get_nr(&ptr, 2);
 				s->time->s = 0;
 				break;
 			case 1:
-				s->time->y = timelib_get_nr((char **) &ptr, 4);
+				s->time->y = timelib_get_nr(&ptr, 4);
 				break;
 			default:
 				TIMELIB_DEINIT;
@@ -1275,13 +1285,13 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_INIT;
 		switch (s->time->have_time) {
 			case 0:
-				s->time->h = timelib_get_nr((char **) &ptr, 2);
-				s->time->i = timelib_get_nr((char **) &ptr, 2);
+				s->time->h = timelib_get_nr(&ptr, 2);
+				s->time->i = timelib_get_nr(&ptr, 2);
 				s->time->s = 0;
-				s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, s->tzdb, tz_get_wrapper);
+				s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, s->tzdb, tz_get_wrapper);
 				break;
 			case 1:
-				s->time->y = timelib_get_nr((char **) &ptr, 4);
+				s->time->y = timelib_get_nr(&ptr, 4);
 				break;
 			default:
 				TIMELIB_DEINIT;
@@ -1298,12 +1308,12 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("iso8601nocolon");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
-		s->time->i = timelib_get_nr((char **) &ptr, 2);
-		s->time->s = timelib_get_nr((char **) &ptr, 2);
+		s->time->h = timelib_get_nr(&ptr, 2);
+		s->time->i = timelib_get_nr(&ptr, 2);
+		s->time->s = timelib_get_nr(&ptr, 2);
 
 		if (*ptr != '\0') {
-			s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+			s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 			if (tz_not_found) {
 				add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
 			}
@@ -1318,10 +1328,10 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("americanshort | american");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->d = timelib_get_nr(&ptr, 2);
 		if (*ptr == '/') {
-			s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
+			s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
 			TIMELIB_PROCESS_YEAR(s->time->y, length);
 		}
 		TIMELIB_DEINIT;
@@ -1333,9 +1343,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("iso8601date4 | iso8601date2 | iso8601dateslash | dateslash");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_unsigned_nr((char **) &ptr, 4);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_unsigned_nr(&ptr, 4);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->d = timelib_get_nr(&ptr, 2);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
 	}
@@ -1346,10 +1356,22 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("iso8601date2");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->d = timelib_get_nr(&ptr, 2);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
+		TIMELIB_DEINIT;
+		return TIMELIB_ISO_DATE;
+	}
+
+	iso8601datex
+	{
+		DEBUG_OUTPUT("iso8601datex");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->y = timelib_get_unsigned_nr(&ptr, 19);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->d = timelib_get_nr(&ptr, 2);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
 	}
@@ -1360,8 +1382,8 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("gnudateshorter");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
+		s->time->m = timelib_get_nr(&ptr, 2);
 		s->time->d = 1;
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
@@ -1374,9 +1396,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("gnudateshort");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->d = timelib_get_nr(&ptr, 2);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
@@ -1388,10 +1410,10 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("datefull");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		timelib_skip_day_suffix((char **) &ptr);
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		timelib_skip_day_suffix(&ptr);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_FULL;
@@ -1402,9 +1424,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("pointed date YYYY");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->y = timelib_get_nr((char **) &ptr, 4);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->y = timelib_get_nr(&ptr, 4);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_FULL_POINTED;
 	}
@@ -1415,9 +1437,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("pointed date YY");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 2, &length);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->y = timelib_get_nr_ex(&ptr, 2, &length);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_FULL_POINTED;
@@ -1429,8 +1451,8 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("datenoday");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
 		s->time->d = 1;
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
@@ -1443,8 +1465,8 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("datenodayrev");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
-		s->time->m = timelib_get_month((char **) &ptr);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
+		s->time->m = timelib_get_month(&ptr);
 		s->time->d = 1;
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
@@ -1457,9 +1479,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("datetextual | datenoyear");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_TEXT;
@@ -1470,9 +1492,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("datenoyearrev");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		timelib_skip_day_suffix((char **) &ptr);
-		s->time->m = timelib_get_month((char **) &ptr);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		timelib_skip_day_suffix(&ptr);
+		s->time->m = timelib_get_month(&ptr);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_TEXT;
 	}
@@ -1482,9 +1504,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("datenocolon");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr((char **) &ptr, 4);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr(&ptr, 4);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->d = timelib_get_nr(&ptr, 2);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_NOCOLON;
 	}
@@ -1496,16 +1518,16 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr((char **) &ptr, 4);
-		s->time->m = timelib_get_nr((char **) &ptr, 2);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
-		s->time->i = timelib_get_nr((char **) &ptr, 2);
-		s->time->s = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr(&ptr, 4);
+		s->time->m = timelib_get_nr(&ptr, 2);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		s->time->h = timelib_get_nr(&ptr, 2);
+		s->time->i = timelib_get_nr(&ptr, 2);
+		s->time->s = timelib_get_nr(&ptr, 2);
 		if (*ptr == '.') {
-			s->time->us = timelib_get_frac_nr((char **) &ptr, 9);
+			s->time->us = timelib_get_frac_nr(&ptr, 9);
 			if (*ptr) { /* timezone is optional */
-				s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+				s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 				if (tz_not_found) {
 					add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
 				}
@@ -1521,8 +1543,8 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("pgydotd");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
-		s->time->d = timelib_get_nr((char **) &ptr, 3);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
+		s->time->d = timelib_get_nr(&ptr, 3);
 		s->time->m = 1;
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
@@ -1537,9 +1559,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
 
-		s->time->y = timelib_get_nr((char **) &ptr, 4);
-		w = timelib_get_nr((char **) &ptr, 2);
-		d = timelib_get_nr((char **) &ptr, 1);
+		s->time->y = timelib_get_nr(&ptr, 4);
+		w = timelib_get_nr(&ptr, 2);
+		d = timelib_get_nr(&ptr, 1);
 		s->time->m = 1;
 		s->time->d = 1;
 		s->time->relative.d = timelib_daynr_from_weeknr(s->time->y, w, d);
@@ -1556,8 +1578,8 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
 
-		s->time->y = timelib_get_nr((char **) &ptr, 4);
-		w = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr(&ptr, 4);
+		w = timelib_get_nr(&ptr, 2);
 		d = 1;
 		s->time->m = 1;
 		s->time->d = 1;
@@ -1573,9 +1595,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("pgtextshort");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
 		return TIMELIB_PG_TEXT;
@@ -1587,9 +1609,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("pgtextreverse");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->y = timelib_get_nr_ex((char **) &ptr, 4, &length);
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->y = timelib_get_nr_ex(&ptr, 4, &length);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->d = timelib_get_nr(&ptr, 2);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
 		TIMELIB_DEINIT;
 		return TIMELIB_PG_TEXT;
@@ -1602,13 +1624,13 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
 		TIMELIB_HAVE_DATE();
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->y = timelib_get_nr((char **) &ptr, 4);
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
-		s->time->i = timelib_get_nr((char **) &ptr, 2);
-		s->time->s = timelib_get_nr((char **) &ptr, 2);
-		s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+		s->time->d = timelib_get_nr(&ptr, 2);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->y = timelib_get_nr(&ptr, 4);
+		s->time->h = timelib_get_nr(&ptr, 2);
+		s->time->i = timelib_get_nr(&ptr, 2);
+		s->time->s = timelib_get_nr(&ptr, 2);
+		s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 		if (tz_not_found) {
 			add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
 		}
@@ -1620,7 +1642,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 	{
 		DEBUG_OUTPUT("year4");
 		TIMELIB_INIT;
-		s->time->y = timelib_get_nr((char **) &ptr, 4);
+		s->time->y = timelib_get_nr(&ptr, 4);
 		TIMELIB_DEINIT;
 		return TIMELIB_CLF;
 	}
@@ -1654,7 +1676,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_RELATIVE();
 		TIMELIB_HAVE_WEEKDAY_RELATIVE();
 		TIMELIB_UNHAVE_TIME();
-		relunit = timelib_lookup_relunit((char**) &ptr);
+		relunit = timelib_lookup_relunit(&ptr);
 		s->time->relative.weekday = relunit->multiplier;
 		if (s->time->relative.weekday_behavior != 2) {
 			s->time->relative.weekday_behavior = 1;
@@ -1673,9 +1695,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_RELATIVE();
 
 		while(*ptr) {
-			i = timelib_get_relative_text((char **) &ptr, &behavior);
-			timelib_eat_spaces((char **) &ptr);
-			timelib_set_relative((char **) &ptr, i, behavior, s);
+			i = timelib_get_relative_text(&ptr, &behavior);
+			timelib_eat_spaces(&ptr);
+			timelib_set_relative(&ptr, i, behavior, s);
 			s->time->relative.weekday_behavior = 2;
 
 			/* to handle the format weekday + last/this/next week */
@@ -1697,9 +1719,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_RELATIVE();
 
 		while(*ptr) {
-			i = timelib_get_relative_text((char **) &ptr, &behavior);
-			timelib_eat_spaces((char **) &ptr);
-			timelib_set_relative((char **) &ptr, i, behavior, s);
+			i = timelib_get_relative_text(&ptr, &behavior);
+			timelib_eat_spaces(&ptr);
+			timelib_set_relative(&ptr, i, behavior, s);
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
@@ -1710,7 +1732,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("monthtext");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->m = timelib_lookup_month((char **) &ptr);
+		s->time->m = timelib_lookup_month(&ptr);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_TEXT;
 	}
@@ -1721,7 +1743,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("tzcorrection | tz");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TZ();
-		s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+		s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 		if (tz_not_found) {
 			add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
 		}
@@ -1734,21 +1756,21 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("dateshortwithtimeshort12 | dateshortwithtimelong12");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->d = timelib_get_nr(&ptr, 2);
 
 		TIMELIB_HAVE_TIME();
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
-		s->time->i = timelib_get_nr((char **) &ptr, 2);
+		s->time->h = timelib_get_nr(&ptr, 2);
+		s->time->i = timelib_get_nr(&ptr, 2);
 		if (*ptr == ':' || *ptr == '.') {
-			s->time->s = timelib_get_nr((char **) &ptr, 2);
+			s->time->s = timelib_get_nr(&ptr, 2);
 
 			if (*ptr == '.') {
-				s->time->us = timelib_get_frac_nr((char **) &ptr, 8);
+				s->time->us = timelib_get_frac_nr(&ptr, 8);
 			}
 		}
 
-		s->time->h += timelib_meridian((char **) &ptr, s->time->h);
+		s->time->h += timelib_meridian(&ptr, s->time->h);
 		TIMELIB_DEINIT;
 		return TIMELIB_SHORTDATE_WITH_TIME;
 	}
@@ -1759,22 +1781,22 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("dateshortwithtimeshort | dateshortwithtimelong | dateshortwithtimelongtz");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
-		s->time->m = timelib_get_month((char **) &ptr);
-		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->m = timelib_get_month(&ptr);
+		s->time->d = timelib_get_nr(&ptr, 2);
 
 		TIMELIB_HAVE_TIME();
-		s->time->h = timelib_get_nr((char **) &ptr, 2);
-		s->time->i = timelib_get_nr((char **) &ptr, 2);
+		s->time->h = timelib_get_nr(&ptr, 2);
+		s->time->i = timelib_get_nr(&ptr, 2);
 		if (*ptr == ':') {
-			s->time->s = timelib_get_nr((char **) &ptr, 2);
+			s->time->s = timelib_get_nr(&ptr, 2);
 
 			if (*ptr == '.') {
-				s->time->us = timelib_get_frac_nr((char **) &ptr, 8);
+				s->time->us = timelib_get_frac_nr(&ptr, 8);
 			}
 		}
 
 		if (*ptr != '\0') {
-			s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+			s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 			if (tz_not_found) {
 				add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
 			}
@@ -1791,9 +1813,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_RELATIVE();
 
 		while(*ptr) {
-			i = timelib_get_unsigned_nr((char **) &ptr, 24);
-			timelib_eat_spaces((char **) &ptr);
-			timelib_set_relative((char **) &ptr, i, 1, s);
+			i = timelib_get_unsigned_nr(&ptr, 24);
+			timelib_eat_spaces(&ptr);
+			timelib_set_relative(&ptr, i, 1, s);
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
@@ -1820,11 +1842,11 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
+timelib_time *timelib_strtotime(const char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	Scanner in;
 	int t;
-	char *e = s + len - 1;
+	const char *e = s + len - 1;
 
 	memset(&in, 0, sizeof(in));
 	in.errors = timelib_malloc(sizeof(timelib_error_container));
@@ -1975,6 +1997,7 @@ static const timelib_format_specifier default_format_map[] = {
 	{'F', TIMELIB_FORMAT_TEXTUAL_MONTH_FULL},
 	{'e', TIMELIB_FORMAT_TIMEZONE_OFFSET},
 	{'P', TIMELIB_FORMAT_TIMEZONE_OFFSET},
+	{'p', TIMELIB_FORMAT_TIMEZONE_OFFSET},
 	{'T', TIMELIB_FORMAT_TIMEZONE_OFFSET},
 	{'O', TIMELIB_FORMAT_TIMEZONE_OFFSET},
 	{' ', TIMELIB_FORMAT_WHITESPACE},
@@ -2000,16 +2023,16 @@ static timelib_format_specifier_code timelib_lookup_format(char input, const tim
 	return TIMELIB_FORMAT_LITERAL;
 }
 
-timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
+timelib_time *timelib_parse_from_format(const char *format, const char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	return timelib_parse_from_format_with_map(format, string, len, errors, tzdb, tz_get_wrapper, &default_format_config);
 }
 
-timelib_time *timelib_parse_from_format_with_map(char *format, char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper, const timelib_format_config* format_config)
+timelib_time *timelib_parse_from_format_with_map(const char *format, const char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper, const timelib_format_config* format_config)
 {
-	char        *fptr = format;
-	char        *ptr = string;
-	char        *begin;
+	const char  *fptr = format;
+	const char  *ptr = string;
+	const char  *begin;
 	timelib_sll  tmp;
 	Scanner      in;
 	Scanner     *s = &in;
@@ -2083,7 +2106,7 @@ timelib_time *timelib_parse_from_format_with_map(char *format, char *string, siz
 				{
 					const timelib_relunit* tmprel = 0;
 
-					tmprel = timelib_lookup_relunit((char **) &ptr);
+					tmprel = timelib_lookup_relunit(&ptr);
 					if (!tmprel) {
 						add_pbf_error(s, TIMELIB_ERR_NO_TEXTUAL_DAY, "A textual day could not be found", string, begin);
 						break;
@@ -2098,81 +2121,107 @@ timelib_time *timelib_parse_from_format_with_map(char *format, char *string, siz
 			case TIMELIB_FORMAT_DAY_TWO_DIGIT: /* two digit day, without leading zero */
 			case TIMELIB_FORMAT_DAY_TWO_DIGIT_PADDED: /* two digit day, with leading zero */
 				TIMELIB_CHECK_NUMBER;
-				if ((s->time->d = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
+				if ((s->time->d = timelib_get_nr(&ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_DAY, "A two digit day could not be found", string, begin);
+					break;
 				}
+
+				s->time->have_date = 1;
 				break;
 			case TIMELIB_FORMAT_DAY_SUFFIX: /* day suffix, ignored, nor checked */
-				timelib_skip_day_suffix((char **) &ptr);
+				timelib_skip_day_suffix(&ptr);
 				break;
 			case TIMELIB_FORMAT_DAY_OF_YEAR: /* day of year - resets month (0 based) - also initializes everything else to !TIMELIB_UNSET */
 				TIMELIB_CHECK_NUMBER;
-				if ((tmp = timelib_get_nr((char **) &ptr, 3)) == TIMELIB_UNSET) {
+				if ((tmp = timelib_get_nr(&ptr, 3)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_THREE_DIGIT_DAY_OF_YEAR, "A three digit day-of-year could not be found", string, begin);
-				} else {
-					s->time->m = 1;
-					s->time->d = tmp + 1;
-					timelib_do_normalize(s->time);
+					break;
 				}
+
+				s->time->have_date = 1;
+				s->time->m = 1;
+				s->time->d = tmp + 1;
+				timelib_do_normalize(s->time);
 				break;
 
 			case TIMELIB_FORMAT_MONTH_TWO_DIGIT: /* two digit month, without leading zero */
 			case TIMELIB_FORMAT_MONTH_TWO_DIGIT_PADDED: /* two digit month, with leading zero */
 				TIMELIB_CHECK_NUMBER;
-				if ((s->time->m = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
+				if ((s->time->m = timelib_get_nr(&ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_MONTH, "A two digit month could not be found", string, begin);
+					break;
 				}
+				s->time->have_date = 1;
 				break;
 			case TIMELIB_FORMAT_TEXTUAL_MONTH_3_LETTER: /* three letter month */
 			case TIMELIB_FORMAT_TEXTUAL_MONTH_FULL: /* full month */
-				tmp = timelib_lookup_month((char **) &ptr);
+				tmp = timelib_lookup_month(&ptr);
 				if (!tmp) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TEXTUAL_MONTH, "A textual month could not be found", string, begin);
-				} else {
-					s->time->m = tmp;
+					break;
 				}
+
+				s->time->have_date = 1;
+				s->time->m = tmp;
 				break;
 			case TIMELIB_FORMAT_YEAR_TWO_DIGIT: /* two digit year */
 				{
 					int length = 0;
 					TIMELIB_CHECK_NUMBER;
-					if ((s->time->y = timelib_get_nr_ex((char **) &ptr, 2, &length)) == TIMELIB_UNSET) {
+					if ((s->time->y = timelib_get_nr_ex(&ptr, 2, &length)) == TIMELIB_UNSET) {
 						add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_YEAR, "A two digit year could not be found", string, begin);
+						break;
 					}
+					
+					s->time->have_date = 1;
 					TIMELIB_PROCESS_YEAR(s->time->y, length);
 				}
 				break;
 			case TIMELIB_FORMAT_YEAR_FOUR_DIGIT: /* four digit year */
 				TIMELIB_CHECK_NUMBER;
-				if ((s->time->y = timelib_get_nr((char **) &ptr, 4)) == TIMELIB_UNSET) {
+				if ((s->time->y = timelib_get_nr(&ptr, 4)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_FOUR_DIGIT_YEAR, "A four digit year could not be found", string, begin);
+					break;
 				}
+
+				s->time->have_date = 1;
 				break;
 			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX: /* two digit hour, without leading zero */
 			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX_PADDED: /* two digit hour, with leading zero */
 				TIMELIB_CHECK_NUMBER;
-				if ((s->time->h = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
+				if ((s->time->h = timelib_get_nr(&ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_HOUR, "A two digit hour could not be found", string, begin);
+					break;
 				}
 				if (s->time->h > 12) {
 					add_pbf_error(s, TIMELIB_ERR_HOUR_LARGER_THAN_12, "Hour can not be higher than 12", string, begin);
+					break;
 				}
+
+				s->time->have_time = 1;
 				break;
 			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX_PADDED: /* two digit hour, with leading zero */
 			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX: /* two digit hour, without leading zero */
 				TIMELIB_CHECK_NUMBER;
-				if ((s->time->h = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
+				if ((s->time->h = timelib_get_nr(&ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_HOUR, "A two digit hour could not be found", string, begin);
+					break;
 				}
+
+				s->time->have_time = 1;
 				break;
 			case TIMELIB_FORMAT_MERIDIAN: /* am/pm/a.m./p.m. AM/PM/A.M./P.M. */
 				if (s->time->h == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_MERIDIAN_BEFORE_HOUR, "Meridian can only come after an hour has been found", string, begin);
-				} else if ((tmp = timelib_meridian_with_check((char **) &ptr, s->time->h)) == TIMELIB_UNSET) {
-					add_pbf_error(s, TIMELIB_ERR_NO_MERIDIAN, "A meridian could not be found", string, begin);
-				} else {
-					s->time->h += tmp;
+					break;
 				}
+				if ((tmp = timelib_meridian_with_check(&ptr, s->time->h)) == TIMELIB_UNSET) {
+					add_pbf_error(s, TIMELIB_ERR_NO_MERIDIAN, "A meridian could not be found", string, begin);
+					break;
+				}
+
+				s->time->have_time = 1;
+				s->time->h += tmp;
 				break;
 			case TIMELIB_FORMAT_MINUTE_TWO_DIGIT: /* two digit minute, with leading zero */
 				{
@@ -2180,12 +2229,14 @@ timelib_time *timelib_parse_from_format_with_map(char *format, char *string, siz
 					timelib_sll min;
 
 					TIMELIB_CHECK_NUMBER;
-					min = timelib_get_nr_ex((char **) &ptr, 2, &length);
+					min = timelib_get_nr_ex(&ptr, 2, &length);
 					if (min == TIMELIB_UNSET || length != 2) {
 						add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_MINUTE, "A two digit minute could not be found", string, begin);
-					} else {
-						s->time->i = min;
+						break;
 					}
+
+					s->time->have_time = 1;
+					s->time->i = min;
 				}
 				break;
 			case TIMELIB_FORMAT_SECOND_TWO_DIGIT: /* two digit second, with leading zero */
@@ -2194,73 +2245,77 @@ timelib_time *timelib_parse_from_format_with_map(char *format, char *string, siz
 					timelib_sll sec;
 
 					TIMELIB_CHECK_NUMBER;
-					sec = timelib_get_nr_ex((char **) &ptr, 2, &length);
+					sec = timelib_get_nr_ex(&ptr, 2, &length);
 					if (sec == TIMELIB_UNSET || length != 2) {
 						add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_SECOND, "A two digit second could not be found", string, begin);
-					} else {
-						s->time->s = sec;
+						break;
 					}
+
+					s->time->have_time = 1;
+					s->time->s = sec;
 				}
 				break;
 			case TIMELIB_FORMAT_MICROSECOND_SIX_DIGIT: /* up to six digit microsecond */
 				{
 					double f;
-					char *tptr;
+					const char *tptr;
 
 					TIMELIB_CHECK_NUMBER;
 					tptr = ptr;
-					if ((f = timelib_get_nr((char **) &ptr, 6)) == TIMELIB_UNSET || (ptr - tptr < 1)) {
+					if ((f = timelib_get_nr(&ptr, 6)) == TIMELIB_UNSET || (ptr - tptr < 1)) {
 						add_pbf_error(s, TIMELIB_ERR_NO_SIX_DIGIT_MICROSECOND, "A six digit microsecond could not be found", string, begin);
-					} else {
-						s->time->us = (f * pow(10, 6 - (ptr - tptr)));
+						break;
 					}
+
+					s->time->us = (f * pow(10, 6 - (ptr - tptr)));
 				}
 				break;
 			case TIMELIB_FORMAT_MILLISECOND_THREE_DIGIT: /* up to three digit millisecond */
 				{
 					double f;
-					char *tptr;
+					const char *tptr;
 
 					TIMELIB_CHECK_NUMBER;
 					tptr = ptr;
-					if ((f = timelib_get_nr((char **) &ptr, 3)) == TIMELIB_UNSET || (ptr - tptr < 1)) {
+					if ((f = timelib_get_nr(&ptr, 3)) == TIMELIB_UNSET || (ptr - tptr < 1)) {
 						add_pbf_error(s, TIMELIB_ERR_NO_THREE_DIGIT_MILLISECOND, "A three digit millisecond could not be found", string, begin);
-					} else {
-						s->time->us = (f * pow(10, 3 - (ptr - tptr)) * 1000);
+						break;
 					}
+					
+					s->time->us = (f * pow(10, 3 - (ptr - tptr)) * 1000);
 				}
 				break;
 			case TIMELIB_FORMAT_WHITESPACE: /* any sort of whitespace (' ' and \t) */
-				timelib_eat_spaces((char **) &ptr);
+				timelib_eat_spaces(&ptr);
 				break;
 			case TIMELIB_FORMAT_EPOCH_SECONDS: /* epoch seconds */
 				TIMELIB_CHECK_SIGNED_NUMBER;
-				TIMELIB_HAVE_RELATIVE();
-				tmp = timelib_get_unsigned_nr((char **) &ptr, 24);
-				s->time->y = 1970;
-				s->time->m = 1;
-				s->time->d = 1;
-				s->time->h = s->time->i = s->time->s = 0;
-				s->time->relative.s += tmp;
+				tmp = timelib_get_unsigned_nr(&ptr, 24);
+				s->time->have_zone = 1;
+				s->time->sse = tmp;
 				s->time->is_localtime = 1;
 				s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
 				s->time->z = 0;
 				s->time->dst = 0;
+				timelib_update_from_sse(s->time);
 				break;
+
 			case TIMELIB_FORMAT_ANY_SEPARATOR: /* separation symbol */
-				if (timelib_lookup_format(*ptr, format_map) == TIMELIB_FORMAT_SEPARATOR) {
-					++ptr;
-				} else {
+				if (timelib_lookup_format(*ptr, format_map) != TIMELIB_FORMAT_SEPARATOR) {
 					add_pbf_error(s, TIMELIB_ERR_NO_SEP_SYMBOL, "The separation symbol ([;:/.,-]) could not be found", string, begin);
+					break;
 				}
+				
+				++ptr;
 				break;
 
 			case TIMELIB_FORMAT_SEPARATOR:
-				if (*ptr == *fptr) {
-					++ptr;
-				} else {
+				if (*ptr != *fptr) {
 					add_pbf_error(s, TIMELIB_ERR_NO_SEP_SYMBOL, "The separation symbol could not be found", string, begin);
+					break;
 				}
+
+				++ptr;
 				break;
 
 			case TIMELIB_FORMAT_RESET_ALL: /* reset all fields to default */
@@ -2276,62 +2331,80 @@ timelib_time *timelib_parse_from_format_with_map(char *format, char *string, siz
 				break;
 
 			case TIMELIB_FORMAT_ESCAPE: /* escaped char */
-				if(!fptr[1]) {
+				if (!fptr[1]) {
 					add_pbf_error(s, TIMELIB_ERR_EXPECTED_ESCAPE_CHAR, "Escaped character expected", string, begin);
 					break;
 				}
 				fptr++;
-				if (*ptr == *fptr) {
-					++ptr;
-				} else {
+				if (*ptr != *fptr) {
 					add_pbf_error(s, TIMELIB_ERR_NO_ESCAPED_CHAR, "The escaped character could not be found", string, begin);
+					break;
 				}
+
+				++ptr;
 				break;
 
 			case TIMELIB_FORMAT_SKIP_TO_SEPARATOR: /* random chars until a separator or number ([ \t.,:;/-0123456789]) */
-				timelib_eat_until_separator((char **) &ptr);
+				timelib_eat_until_separator(&ptr);
 				break;
 
 			case TIMELIB_FORMAT_ALLOW_EXTRA_CHARACTERS: /* allow extra chars in the format */
 				allow_extra = true;
 				break;
 			case TIMELIB_FORMAT_YEAR_ISO:
-				if ((iso_year = timelib_get_nr((char **) &ptr, 4)) == TIMELIB_UNSET) {
+				if ((iso_year = timelib_get_nr(&ptr, 4)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_FOUR_DIGIT_YEAR_ISO, "A four digit ISO year could not be found", string, begin);
+					break;
 				}
+
+				s->time->have_date = 1;
 				break;
 			case TIMELIB_FORMAT_WEEK_OF_YEAR_ISO:
-				if ((iso_week_of_year = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
+				if ((iso_week_of_year = timelib_get_nr(&ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_WEEK, "A two digit ISO week could not be found", string, begin);
+					break;
 				}
 				/* Range is 1 - 53  for ISO week of year */
 				if (iso_week_of_year < 1 || iso_week_of_year > 53) {
 					add_pbf_error(s, TIMELIB_ERR_INVALID_WEEK, "ISO Week must be between 1 and 53", string, begin);
+					break;
 				}
+
+				s->time->have_date = 1;
 				break;
 			case TIMELIB_FORMAT_DAY_OF_WEEK_ISO:
-				if ((iso_day_of_week = timelib_get_nr((char **) &ptr, 1)) == TIMELIB_UNSET) {
+				if ((iso_day_of_week = timelib_get_nr(&ptr, 1)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_DAY_OF_WEEK, "A single digit day of week could not be found", string, begin);
+					break;
 				}
 				if (iso_day_of_week < 1 || iso_day_of_week > 7) {
 					add_pbf_error(s, TIMELIB_ERR_INVALID_DAY_OF_WEEK, "Day of week must be between 1 and 7", string, begin);
+					break;
 				}
+
+				s->time->have_date = 1;
 				break;
 			case TIMELIB_FORMAT_TIMEZONE_OFFSET: /* timezone */
 				{
 					int tz_not_found;
 
-					s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+					s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 					if (tz_not_found) {
 						add_pbf_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database", string, begin);
+						break;
 					}
+
+					s->time->have_zone = 1;
 				}
 				break;
 			case TIMELIB_FORMAT_TIMEZONE_OFFSET_MINUTES: /* timezone format +/-mmm */
-				s->time->z = timelib_parse_tz_minutes((char **) &ptr, s->time);
+				s->time->z = timelib_parse_tz_minutes(&ptr, s->time);
 				if (s->time->z == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_INVALID_TZ_OFFSET, "Invalid timezone offset in minutes", string, begin);
+					break;
 				}
+
+				s->time->have_zone = 1;
 				break;
 			case TIMELIB_FORMAT_LITERAL:
 			default:

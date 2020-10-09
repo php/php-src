@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -46,7 +44,7 @@ extern zend_module_entry intl_module_entry;
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(intl)
-	zval current_collator;
+	struct UCollator *current_collator;
 	char* default_locale;
 	collator_compare_func_t compare_func;
 	UBreakIterator* grapheme_iterator;
@@ -74,12 +72,3 @@ const char *intl_locale_get_default( void );
 #define PHP_INTL_VERSION PHP_VERSION
 
 #endif  /* PHP_INTL_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

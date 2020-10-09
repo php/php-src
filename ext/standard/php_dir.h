@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,18 +20,9 @@
 /* directory functions */
 PHP_MINIT_FUNCTION(dir);
 PHP_RINIT_FUNCTION(dir);
-PHP_FUNCTION(opendir);
 PHP_FUNCTION(closedir);
-PHP_FUNCTION(chdir);
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
-PHP_FUNCTION(chroot);
-#endif
-PHP_FUNCTION(getcwd);
 PHP_FUNCTION(rewinddir);
-PHP_NAMED_FUNCTION(php_if_readdir);
-PHP_FUNCTION(getdir);
-PHP_FUNCTION(glob);
-PHP_FUNCTION(scandir);
+PHP_FUNCTION(readdir);
 
 #define PHP_SCANDIR_SORT_ASCENDING 0
 #define PHP_SCANDIR_SORT_DESCENDING 1

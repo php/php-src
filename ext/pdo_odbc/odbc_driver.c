@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -179,6 +177,8 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 		return 0;
 	}
 
+	stmt->driver_data = S;
+
 	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY);
 	if (cursor_type != PDO_CURSOR_FWDONLY) {
 		rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_SCROLLABLE, (void*)SQL_SCROLLABLE, 0);
@@ -197,7 +197,6 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 		efree(nsql);
 	}
 
-	stmt->driver_data = S;
 	stmt->methods = &odbc_stmt_methods;
 
 	if (rc != SQL_SUCCESS) {
@@ -259,12 +258,14 @@ out:
 	return row_count;
 }
 
+/* TODO: Do ODBC quoter
 static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type param_type )
 {
-	/* pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data; */
-	/* TODO: figure it out */
+	// pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	// TODO: figure it out
 	return 0;
 }
+*/
 
 static int odbc_handle_begin(pdo_dbh_t *dbh)
 {
@@ -375,7 +376,7 @@ static const struct pdo_dbh_methods odbc_methods = {
 	odbc_handle_closer,
 	odbc_handle_preparer,
 	odbc_handle_doer,
-	odbc_handle_quoter,
+	NULL, /* quoter */
 	odbc_handle_begin,
 	odbc_handle_commit,
 	odbc_handle_rollback,
@@ -422,7 +423,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 	}
 
 	rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT,
-		(SQLPOINTER)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_INTEGER);
+		(SQLPOINTER)(intptr_t)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT");
 		goto fail;
@@ -480,12 +481,3 @@ const pdo_driver_t pdo_odbc_driver = {
 	PDO_DRIVER_HEADER(odbc),
 	pdo_odbc_handle_factory
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

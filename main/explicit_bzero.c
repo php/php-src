@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +28,7 @@
 
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
-#if HAVE_EXPLICIT_MEMSET
+#ifdef HAVE_EXPLICIT_MEMSET
     explicit_memset(dst, 0, siz);
 #elif defined(PHP_WIN32)
 	RtlSecureZeroMemory(dst, siz);
@@ -46,11 +44,3 @@ PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 #endif
 }
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

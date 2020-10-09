@@ -13,7 +13,7 @@ class just_constants
     const FLOAT_CONSTANT = 3.14159265;
 }
 
-Reflection::export(new ReflectionClass('just_constants'));
+echo new ReflectionClass('just_constants');
 ?>
 --EXPECTF--
 Class [ <user> class just_constants ] {

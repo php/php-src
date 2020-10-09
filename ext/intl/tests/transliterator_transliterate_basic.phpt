@@ -12,6 +12,7 @@ echo $t->transliterate($s, 3),"\n";
 echo $t->transliterate($s, 3, 4),"\n";
 
 echo "Done.\n";
+?>
 --EXPECT--
 Kontogiannátos, Basílēs
 Kontogiannátos, Basílēs

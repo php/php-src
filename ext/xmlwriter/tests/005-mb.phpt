@@ -8,7 +8,7 @@ if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ requi
 --FILE--
 <?php
 
-$doc_dest = '私はガラスを食べられます001.xml';
+$doc_dest = '私はガラスを食べられます005.xml';
 $xw = xmlwriter_open_uri($doc_dest);
 xmlwriter_start_document($xw, '1.0', 'UTF-8');
 xmlwriter_start_element($xw, "tag1");
@@ -25,8 +25,6 @@ echo file_get_contents($doc_dest);
 unset($xw);
 unlink($doc_dest);
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <tag1><!--comment--><!--comment #2--></tag1>
-===DONE===

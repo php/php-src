@@ -1,16 +1,13 @@
 --TEST--
 Bug #64037 Firebird return wrong value for numeric field
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 
 require("testdb.inc");
 
-$dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$value = '2';
 @$dbh->exec('DROP TABLE price');
 $dbh->exec("CREATE TABLE PRICE (ID INTEGER NOT NULL, TEXT VARCHAR(10), COST NUMERIC(15, 2))");
 $dbh->exec("INSERT INTO PRICE (ID, TEXT, COST) VALUES (1, 'test', -1.0)");

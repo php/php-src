@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +17,7 @@
 #ifndef PHP_SHMOP_H
 #define PHP_SHMOP_H
 
-#if HAVE_SHMOP
+#ifdef HAVE_SHMOP
 
 extern zend_module_entry shmop_module_entry;
 #define phpext_shmop_ptr &shmop_module_entry
@@ -30,35 +28,8 @@ extern zend_module_entry shmop_module_entry;
 PHP_MINIT_FUNCTION(shmop);
 PHP_MINFO_FUNCTION(shmop);
 
-PHP_FUNCTION(shmop_open);
-PHP_FUNCTION(shmop_read);
-PHP_FUNCTION(shmop_close);
-PHP_FUNCTION(shmop_size);
-PHP_FUNCTION(shmop_write);
-PHP_FUNCTION(shmop_delete);
-
 #ifdef PHP_WIN32
 # include "win32/ipc.h"
-#endif
-
-struct php_shmop
-{
-	int shmid;
-	key_t key;
-	int shmflg;
-	int shmatflg;
-	char *addr;
-	zend_long size;
-};
-
-typedef struct {
-	int le_shmop;
-} php_shmop_globals;
-
-#ifdef ZTS
-#define SHMOPG(v) TSRMG(shmop_globals_id, php_shmop_globals *, v)
-#else
-#define SHMOPG(v) (shmop_globals.v)
 #endif
 
 #else
@@ -68,11 +39,3 @@ typedef struct {
 #endif
 
 #endif	/* PHP_SHMOP_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

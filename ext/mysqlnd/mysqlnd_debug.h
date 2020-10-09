@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -131,18 +129,18 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 						/* EMPTY */ ; /* shut compiler's mouth */	\
 					} \
 					do { \
-						if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
-							((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \
+						if (((dbg_obj1) && ((dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) || \
+							((dbg_obj2) && ((dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS))) \
 						{ \
 							DBG_PROFILE_START_TIME(); \
 						} \
 					} while (0);
 
-#define DBG_LEAVE_EX2(dbg_obj1, dbg_obj2, leave)	\
-			do {\
+#define DBG_LEAVE_EX2(dbg_obj1, dbg_obj2, leave) \
+			do { \
 				uint64_t this_call_duration = 0; \
-				if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
-					((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \
+				if (((dbg_obj1) && ((dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) || \
+					((dbg_obj2) && ((dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS))) \
 				{ \
 					DBG_PROFILE_END_TIME(this_call_duration); \
 				} \
@@ -228,12 +226,3 @@ static inline void TRACE_ALLOC_ENTER(const char * const func_name) {}
 #endif
 
 #endif /* MYSQLND_DEBUG_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

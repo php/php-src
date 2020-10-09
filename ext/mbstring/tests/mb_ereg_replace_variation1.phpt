@@ -9,12 +9,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
 ?>
 --FILE--
 <?php
-/* Prototype  : proto string mb_ereg_replace(string pattern, string replacement, string string [, string option])
- * Description: Replace regular expression for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions:
- */
-
 echo "*** Testing mb_ereg_replace() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -96,7 +90,7 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg_replace() : usage variations ***
 
 -- Iteration 1 --
@@ -109,17 +103,13 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 4 --
-
-Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
-bool(false)
+string(10) "string_val"
 
 -- Iteration 5 --
 string(10) "string_val"
 
 -- Iteration 6 --
-
-Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
-bool(false)
+string(10) "string_val"
 
 -- Iteration 7 --
 string(10) "string_val"
@@ -131,22 +121,22 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 10 --
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 11 --
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 12 --
 string(10) "string_val"
 
 -- Iteration 13 --
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 14 --
 string(10) "string_val"
 
 -- Iteration 15 --
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 16 --
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
@@ -167,8 +157,8 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 22 --
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 23 --
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 Done

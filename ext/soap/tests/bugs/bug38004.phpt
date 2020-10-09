@@ -7,9 +7,9 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function Test($param) {
-	global $g;
-	$g = $param->strA."\n".$param->strB."\n";
-	return $g;
+    global $g;
+    $g = $param->strA."\n".$param->strB."\n";
+    return $g;
 }
 
 class TestSoapClient extends SoapClient {
@@ -28,7 +28,7 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38004.wsdl');
+$client = new TestSoapClient(__DIR__.'/bug38004.wsdl');
 $strA = 'test &amp; test';
 $strB = 'test & test';
 $res = $client->Test(array('strA'=>$strA, 'strB'=>$strB));

@@ -13,7 +13,7 @@ putenv('TZ=UTC');
 //      -adding a call direct to GetEnvironmentVariableA just before tzset() is called to check the value of 'TZ' returns 'UTC'
 // putting a call to date_default_timezone_set() here doesn't help
 //
-// on Windows, the only thing that gets this test to pass is to put TZ=UTC in --ENV-- section
+// on Windows, the only thing that gets this test to pass is to put TZ=UTC in--ENV-- section
 // 		-since putenv() is written to call tzset() when env var is TZ, I assume that putenv("TZ=UTC") is intended to work
 //			and should work on all platforms(including Windows).
 // easter_date.phpt passes

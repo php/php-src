@@ -11,17 +11,22 @@ if (!in_array('AES-128-CBC', openssl_get_cipher_methods(true))) {
 <?php
 $data = "openssl_seal() test";
 $cipher = 'AES-128-CBC';
-$pub_key = "file://" . dirname(__FILE__) . "/public.key";
-$priv_key = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
+$pub_key = "file://" . __DIR__ . "/public.key";
+$priv_key = "file://" . __DIR__ . "/private_rsa_1024.key";
 
-openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key), $cipher);
+try {
+    openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key), $cipher);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key), 'sparkles', $iv);
 openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key), $cipher, $iv);
 openssl_open($sealed, $decrypted, $ekeys[0], $priv_key, $cipher, $iv);
 echo $decrypted;
 ?>
 --EXPECTF--
-Warning: openssl_seal(): Cipher algorithm requires an IV to be supplied as a sixth parameter in %s on line %d
+openssl_seal(): Argument #6 ($iv) cannot be null for the chosen cipher algorithm
 
-Warning: openssl_seal(): Unknown signature algorithm. in %s on line %d
+Warning: openssl_seal(): Unknown cipher algorithm in %s on line %d
 openssl_seal() test

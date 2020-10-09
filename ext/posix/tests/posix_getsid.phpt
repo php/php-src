@@ -8,7 +8,7 @@ Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10
 --SKIPIF--
 <?php
-	if(!extension_loaded("posix")) print "SKIP - POSIX extension not loaded";
+    if(!extension_loaded("posix")) print "SKIP - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
@@ -19,10 +19,8 @@ echo "\n-- Testing posix_getsid() function with current process pid --\n";
 var_dump( is_long(posix_getsid($pid)) );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing posix_getsid() : function test ***
 
 -- Testing posix_getsid() function with current process pid --
 bool(true)
-===DONE===

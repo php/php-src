@@ -4,15 +4,18 @@ Bug #37076 (SimpleXML ignores .=) (appending to unnamed attribute)
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
+
 $xml = simplexml_load_string("<root><foo /></root>");
-$xml->{""} .= "bar";
+
+try {
+    $xml->{""} .= "bar";
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 print $xml->asXML();
 ?>
-===DONE===
---EXPECTF--
-Warning: main(): Cannot write or create unnamed element in %s on line %d
-
-Warning: main(): Cannot write or create unnamed element in %s on line %d
+--EXPECT--
+Cannot create element with an empty name
 <?xml version="1.0"?>
 <root><foo/></root>
-===DONE===

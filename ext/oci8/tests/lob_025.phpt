@@ -3,13 +3,13 @@ oci_lob_read() tests
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -35,16 +35,13 @@ oci_execute($s, OCI_DEFAULT);
 var_dump($row = oci_fetch_array($s));
 
 var_dump(oci_lob_read($row[0], 2));
-var_dump(oci_lob_read($row[0]));
-var_dump(oci_lob_read());
 var_dump(oci_lob_eof($row[0]));
-var_dump(oci_lob_eof());
 
 unset($row[0]->descriptor);
 var_dump(oci_lob_read($row[0],1));
 var_dump(oci_lob_eof($row[0]));
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 
@@ -55,27 +52,18 @@ int(7000)
 int(7000)
 array(2) {
   [0]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }
 string(2) "st"
-
-Warning: oci_lob_read() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: oci_lob_read() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 bool(false)
-
-Warning: oci_lob_eof() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
 
 Warning: oci_lob_read(): Unable to find descriptor property in %s on line %d
 bool(false)

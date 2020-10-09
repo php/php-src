@@ -19,11 +19,9 @@ $zip->close();
 
 var_dump(file_exists($filename));
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
-===DONE===
 --CLEAN--
 <?php
 $filename =  __DIR__ . DIRECTORY_SEPARATOR . 'bug70752.txt';

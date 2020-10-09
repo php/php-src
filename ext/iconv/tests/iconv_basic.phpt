@@ -7,11 +7,6 @@ function_exists('iconv') or die("skip iconv() is not available in this build");
 ?>
 --FILE--
 <?php
-/* Prototype  : string iconv(string in_charset, string out_charset, string str)
- * Description: Returns converted string in desired encoding
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Test basic functionality of iconv()
  */

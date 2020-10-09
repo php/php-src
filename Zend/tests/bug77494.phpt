@@ -12,5 +12,5 @@ var_dump($a->name);
 --EXPECTF--
 Warning: CURLFile() has been disabled for security reasons in %sbug77494.php on line 2
 
-Notice: Undefined property: CURLFile::$name in %sbug77494.php on line 3
+Warning: Undefined property: CURLFile::$name in %s on line %d
 NULL

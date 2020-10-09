@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -82,7 +80,7 @@ PHPAPI void mysqlnd_library_init(void)
 			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;
 			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core);
 		}
-#if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
+#if MYSQLND_DBG_ENABLED == 1
 		mysqlnd_example_plugin_register();
 #endif
 		mysqlnd_debug_trace_plugin_register();
@@ -98,8 +96,8 @@ PHPAPI void mysqlnd_library_init(void)
 static MYSQLND *
 MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory, const zend_bool persistent)
 {
-	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
-	size_t alloc_size_ret_data = sizeof(MYSQLND_CONN_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	const size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
+	const size_t alloc_size_ret_data = sizeof(MYSQLND_CONN_DATA) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND * new_object;
 	MYSQLND_CONN_DATA * data;
 
@@ -143,9 +141,9 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYP
 	data->protocol_frame_codec = mysqlnd_pfc_init(persistent, factory, data->stats, data->error_info);
 	data->vio = mysqlnd_vio_init(persistent, factory, data->stats, data->error_info);
 	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
-	data->run_command = mysqlnd_command_factory_get();
+	data->command = mysqlnd_command_get_methods();
 
-	if (!data->protocol_frame_codec || !data->vio || !data->payload_decoder_factory || !data->run_command) {
+	if (!data->protocol_frame_codec || !data->vio || !data->payload_decoder_factory || !data->command) {
 		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
 	}
@@ -159,7 +157,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYP
 static MYSQLND *
 MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_cloned)
 {
-	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
+	const size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND * new_object;
 
 	DBG_ENTER("mysqlnd_driver::clone_connection_object");
@@ -188,7 +186,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 static MYSQLND_STMT *
 MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn)
 {
-	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
+	const size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_STMT * ret = mnd_ecalloc(1, alloc_size);
 	MYSQLND_STMT_DATA * stmt = NULL;
 
@@ -245,8 +243,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 static MYSQLND_PFC *
 MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t pfc_alloc_size = ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *));
-	size_t pfc_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	const size_t pfc_alloc_size = ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *));
+	const size_t pfc_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_PFC * pfc = mnd_pecalloc(1, pfc_alloc_size + pfc_data_alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_pfc");
@@ -270,8 +268,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const zend_bool persistent, MYSQ
 static MYSQLND_VIO *
 MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t vio_alloc_size = ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_VIO) + mysqlnd_plugin_count() * sizeof(void *));
-	size_t vio_data_alloc_size = sizeof(MYSQLND_VIO_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	const size_t vio_alloc_size = ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_VIO) + mysqlnd_plugin_count() * sizeof(void *));
+	const size_t vio_data_alloc_size = sizeof(MYSQLND_VIO_DATA) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_VIO * vio = mnd_pecalloc(1, vio_alloc_size + vio_data_alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_vio");
@@ -295,7 +293,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(const zend_bool persistent, MYSQ
 static MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
 MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, const zend_bool persistent)
 {
-	size_t alloc_size = sizeof(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY) + mysqlnd_plugin_count() * sizeof(void *);
+	const size_t alloc_size = sizeof(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *ret = mnd_pecalloc(1, alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_protocol_payload_decoder_factory");
@@ -319,12 +317,3 @@ PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_vio),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)
 MYSQLND_CLASS_METHODS_END;
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +24,10 @@
 #endif
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error);
+PHP_WINUTIL_API void php_win32_error_msg_free(char *msg);
 
 #define php_win_err()	php_win32_error_to_msg(GetLastError())
+#define php_win_err_free(err) php_win32_error_msg_free(err)
 int php_win32_check_trailing_space(const char * path, const size_t path_len);
 PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size);
 #ifdef PHP_EXPORTS
@@ -53,13 +53,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err);
 
 PHP_WINUTIL_API char *php_win32_get_username(void);
 
-#endif
+PHP_WINUTIL_API BOOL php_win32_image_compatible(HMODULE handle, char **err);
+PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err);
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+#endif

@@ -1,15 +1,13 @@
 --TEST--
 PDO_Firebird: bug 53280 segfaults if query column count is less than param count
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 
 require("testdb.inc");
 
-$dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
-$value = '2';
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz(A VARCHAR(30), B VARCHAR(30), C VARCHAR(30))');
 $dbh->exec("INSERT INTO testz VALUES ('A', 'B', 'C')");

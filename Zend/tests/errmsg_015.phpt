@@ -4,11 +4,11 @@ errmsg: __clone() cannot accept any arguments
 <?php
 
 class test {
-	function __clone($var) {
-	}
+    function __clone($var) {
+    }
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Method test::__clone() cannot accept any arguments in %s on line %d
+Fatal error: Method test::__clone() cannot take arguments in %s on line %d

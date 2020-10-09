@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -35,30 +33,4 @@ PHP_RINIT_FUNCTION(pdo_odbc);
 PHP_RSHUTDOWN_FUNCTION(pdo_odbc);
 PHP_MINFO_FUNCTION(pdo_odbc);
 
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(pdo_odbc)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(pdo_odbc)
-*/
-
-#ifdef ZTS
-#define PDO_ODBC_G(v) TSRMG(pdo_odbc_globals_id, zend_pdo_odbc_globals *, v)
-#else
-#define PDO_ODBC_G(v) (pdo_odbc_globals.v)
-#endif
-
 #endif	/* PHP_PDO_ODBC_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

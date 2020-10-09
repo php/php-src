@@ -2,11 +2,6 @@
 Test array_push() function : push empty set to the array
 --FILE--
 <?php
-/* Prototype  : int array_push(array $stack[, mixed $...])
- * Description: Pushes elements onto the end of the array
- * Source code: ext/standard/array.c
- */
-
 $array = [1,2,3];
 $values = [];
 
@@ -16,7 +11,7 @@ var_dump( $array );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
 int(3)
 array(3) {

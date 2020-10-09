@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
 
-#define ZEND_MODULE_API_NO 20180731
+#define ZEND_MODULE_API_NO 20201009
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -77,10 +77,10 @@ struct _zend_module_entry {
 	const struct _zend_module_dep *deps;
 	const char *name;
 	const struct _zend_function_entry *functions;
-	int (*module_startup_func)(INIT_FUNC_ARGS);
-	int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-	int (*request_startup_func)(INIT_FUNC_ARGS);
-	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+	zend_result (*module_startup_func)(INIT_FUNC_ARGS);
+	zend_result (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+	zend_result (*request_startup_func)(INIT_FUNC_ARGS);
+	zend_result (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	const char *version;
 	size_t globals_size;
@@ -91,7 +91,7 @@ struct _zend_module_entry {
 #endif
 	void (*globals_ctor)(void *global);
 	void (*globals_dtor)(void *global);
-	int (*post_deactivate_func)(void);
+	zend_result (*post_deactivate_func)(void);
 	int module_started;
 	unsigned char type;
 	void *handle;
@@ -129,13 +129,3 @@ int module_registry_unload_temp(const zend_module_entry *module);
 END_EXTERN_C()
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

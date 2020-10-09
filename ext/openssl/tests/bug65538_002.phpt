@@ -22,4 +22,4 @@ Warning: remote cafile streams are disabled for security purposes in %s on line 
 
 Warning: file_get_contents(): Failed to enable crypto in %s on line %d
 
-Warning: file_get_contents(%s): failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(%s): Failed to open stream: operation failed in %s on line %d

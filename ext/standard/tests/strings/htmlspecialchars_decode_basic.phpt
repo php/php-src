@@ -2,11 +2,6 @@
 Test htmlspecialchars_decode() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters
- * Source code: ext/standard/html.c
-*/
-
 echo "*** Testing htmlspecialchars_decode() : basic functionality ***\n";
 
 

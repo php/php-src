@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,11 +27,7 @@
 #if defined(HAVE_LIBDL)
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #ifdef PHP_WIN32
 #include "win32/param.h"
 #include "win32/winutil.h"
@@ -44,8 +38,7 @@
 #endif
 #endif /* defined(HAVE_LIBDL) */
 
-/* {{{ proto int dl(string extension_filename)
-   Load a PHP extension at runtime */
+/* {{{ Load a PHP extension at runtime */
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
@@ -61,7 +54,7 @@ PHPAPI PHP_FUNCTION(dl)
 	}
 
 	if (filename_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		php_error_docref(NULL, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 
@@ -74,9 +67,8 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if defined(HAVE_LIBDL)
 
-/* {{{ php_load_shlib
- */
-PHPAPI void *php_load_shlib(char *path, char **errp)
+/* {{{ php_load_shlib */
+PHPAPI void *php_load_shlib(const char *path, char **errp)
 {
 	void *handle;
 	char *err;
@@ -88,7 +80,7 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 		if (err && (*err)) {
 			size_t i = strlen(err);
 			(*errp)=estrdup(err);
-			LocalFree(err);
+			php_win32_error_msg_free(err);
 			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
 		} else {
 			(*errp) = estrdup("<No message>");
@@ -102,9 +94,8 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 }
 /* }}} */
 
-/* {{{ php_load_extension
- */
-PHPAPI int php_load_extension(char *filename, int type, int start_now)
+/* {{{ php_load_extension */
+PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 {
 	void *handle;
 	char *libpath;
@@ -170,8 +161,16 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		efree(orig_libpath);
 		efree(err1);
 	}
-
 	efree(libpath);
+
+#ifdef PHP_WIN32
+	if (!php_win32_image_compatible(handle, &err1)) {
+			php_error_docref(NULL, error_type, err1);
+			efree(err1);
+			DL_UNLOAD(handle);
+			return FAILURE;
+	}
+#endif
 
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
 
@@ -239,44 +238,46 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 }
 /* }}} */
 
-/* {{{ php_dl
- */
-PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
+#else
+
+static void php_dl_error(const char *filename)
 {
-	/* Load extension */
-	if (php_load_extension(file, type, start_now) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		RETVAL_TRUE;
-	}
+    php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", filename);
+}
+
+PHPAPI void *php_load_shlib(const char *path, char **errp)
+{
+    php_dl_error(filename);
+    (*errp) = estrdup("No DL support");
+}
+
+PHPAPI int php_load_extension(const char *filename, int type, int start_now)
+{
+    php_dl_error(filename);
+
+    return FAILURE;
+}
+
+#endif
+
+/* {{{ php_dl */
+PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now)
+{
+    /* Load extension */
+    if (php_load_extension(file, type, start_now) == FAILURE) {
+        RETVAL_FALSE;
+    } else {
+        RETVAL_TRUE;
+    }
 }
 /* }}} */
 
 PHP_MINFO_FUNCTION(dl)
 {
-	php_info_print_table_row(2, "Dynamic Library Support", "enabled");
-}
-
+#if defined(HAVE_LIBDL)
+#define PHP_DL_SUPPORT_STATUS "enabled"
 #else
-
-PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
-{
-	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
-	RETVAL_FALSE;
-}
-
-PHP_MINFO_FUNCTION(dl)
-{
-	PUTS("Dynamic Library support not available<br />.\n");
-}
-
+#define PHP_DL_SUPPORT_STATUS "unavailable"
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+    php_info_print_table_row(2, "Dynamic Library Support", PHP_DL_SUPPORT_STATUS);
+}

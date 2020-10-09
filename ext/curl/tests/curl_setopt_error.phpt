@@ -9,37 +9,28 @@ Paul Sohier
 <?php
 echo "*** curl_setopt() call with incorrect parameters\n";
 $ch = curl_init();
-curl_setopt();
-curl_setopt(false);
 
-curl_setopt($ch);
-curl_setopt($ch, false);
-curl_setopt($ch, -10);
-curl_setopt($ch, '');
-curl_setopt($ch, 1, false);
+try {
+    curl_setopt($ch, '', false);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-curl_setopt(false, false, false);
-curl_setopt($ch, '', false);
-curl_setopt($ch, 1, '');
-curl_setopt($ch, -10, 0);
+try {
+    curl_setopt($ch, -10, 0);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    curl_setopt($ch, 1000, 0);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
---EXPECTF--
+--EXPECT--
 *** curl_setopt() call with incorrect parameters
-
-Warning: curl_setopt() expects exactly 3 parameters, 0 given in %s on line %d
-
-Warning: curl_setopt() expects exactly 3 parameters, 1 given in %s on line %d
-
-Warning: curl_setopt() expects exactly 3 parameters, 1 given in %s on line %d
-
-Warning: curl_setopt() expects exactly 3 parameters, 2 given in %s on line %d
-
-Warning: curl_setopt() expects exactly 3 parameters, 2 given in %s on line %d
-
-Warning: curl_setopt() expects exactly 3 parameters, 2 given in %s on line %d
-
-Warning: curl_setopt() expects parameter 1 to be resource, bool given in %s on line %d
-
-Warning: curl_setopt() expects parameter 2 to be int, string given in %s on line %d
-
-Warning: curl_setopt(): Invalid curl configuration option in %scurl_setopt_error.php on line %d
+curl_setopt(): Argument #2 ($option) must be of type int, string given
+curl_setopt(): Argument #2 ($option) is not a valid cURL option
+curl_setopt(): Argument #2 ($option) is not a valid cURL option

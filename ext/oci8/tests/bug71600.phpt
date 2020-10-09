@@ -3,12 +3,12 @@ Bug #71600 (oci_fetch_all result in segfault when select more than 8 columns)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialize
 
@@ -78,8 +78,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 Executing SELECT statament...
@@ -93,4 +91,3 @@ Fetching data by rows...
 2 Records Found
 0|1|9
 1|11|19
-===DONE===

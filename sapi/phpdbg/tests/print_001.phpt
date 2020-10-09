@@ -30,19 +30,17 @@ L5-7 Foo\Bar::Foo() %s - %s + 5 ops
 L9-9 Foo\Bar::baz() %s - %s + 1 ops
  L9    #0     RETURN<-1>              null                                                          
 prompt> [Not Executing!]
-prompt> [Context %s (11 ops)]
-L1-21 {main}() %s - %s + 11 ops
- L4    #0     NOP                                                                                   
- L14   #1     NOP                                                                                   
- L18   #2     NEW                     "Foo\\Bar"                                @1                  
- L18   #3     DO_FCALL                                                                              
- L18   #4     INIT_METHOD_CALL<1>     @1                   "Foo"                                    
- L18   #5     SEND_VAL_EX             "test"               1                                        
- L18   #6     DO_FCALL                                                                              
- L19   #7     INIT_FCALL%s %d %s "foo"                                    
- L19   #8     SEND_VAL                "test"               1                                        
- L19   #9     DO_FCALL                                                                              
- L21   #10    RETURN<-1>              1                                                             
+prompt> [Context %s (9 ops)]
+L1-21 {main}() %s - %s + 9 ops
+ L18   #0     NEW                     "Foo\\Bar"                                @0                  
+ L18   #1     DO_FCALL                                                                              
+ L18   #2     INIT_METHOD_CALL<1>     @0                   "Foo"                                    
+ L18   #3     SEND_VAL_EX             "test"               1                                        
+ L18   #4     DO_FCALL                                                                              
+ L19   #5     INIT_FCALL%s %d %s "foo"                                    
+ L19   #6     SEND_VAL                "test"               1                                        
+ L19   #7     DO_FCALL                                                                              
+ L21   #8     RETURN<-1>              1                                                             
 prompt> 
 --FILE--
 <?php

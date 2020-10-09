@@ -9,14 +9,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the stats of dir/file when their names are stored in objects */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -63,7 +58,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation7.tmp");
 unlink("$file_path/stat_variation7a.tmp");
 rmdir("$file_path/stat_variation7");
@@ -76,7 +71,7 @@ rmdir("$file_path/stat_variation7a");
 -- Testing stat() on filename stored inside an object --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -102,7 +97,7 @@ array(26) {
   [12]=>
   int(-%d)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -130,7 +125,7 @@ array(26) {
 }
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -156,7 +151,7 @@ array(26) {
   [12]=>
   int(-%d)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -186,7 +181,7 @@ array(26) {
 -- Testing stat() on directory name stored inside an object --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -212,7 +207,7 @@ array(26) {
   [12]=>
   int(-%d)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -240,7 +235,7 @@ array(26) {
 }
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -266,7 +261,7 @@ array(26) {
   [12]=>
   int(-%d)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>

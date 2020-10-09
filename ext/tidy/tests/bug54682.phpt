@@ -10,4 +10,4 @@ $nx->diagnose();
 
 ?>
 --EXPECTF--
-Warning: tidy::__construct(): Cannot Load '*' into memory%win %s on line %d
+Warning: tidy::__construct(): Cannot load "*" into memory%win %s on line %d

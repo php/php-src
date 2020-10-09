@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -47,12 +45,15 @@ zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval 
 	php_mysqli_result_iterator *iterator;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
+
 	iterator = ecalloc(1, sizeof(php_mysqli_result_iterator));
 	zend_iterator_init(&iterator->intern);
 
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_mysqli_result_iterator_funcs;
 	iterator->result = Z_MYSQLI_P(object);
 	iterator->row_num = -1;
@@ -118,7 +119,7 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-#if MYSQLI_USE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 		if (result->unbuf->eof_reached) {
 #else
 		if (result->eof) {
@@ -151,15 +152,7 @@ const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_current_key,
 	php_mysqli_result_iterator_move_forward,
 	php_mysqli_result_iterator_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

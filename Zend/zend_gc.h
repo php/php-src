@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,6 +51,10 @@ void gc_globals_ctor(void);
 void gc_globals_dtor(void);
 void gc_reset(void);
 
+#ifdef ZTS
+size_t zend_gc_globals_size(void);
+#endif
+
 END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
@@ -62,15 +66,14 @@ END_EXTERN_C()
 
 #define GC_MAY_LEAK(ref) \
 	((GC_TYPE_INFO(ref) & \
-		(GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))) == \
-	(GC_COLLECTABLE << GC_FLAGS_SHIFT))
+		(GC_INFO_MASK | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))) == 0)
 
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
-	if (GC_TYPE_INFO(ref) == IS_REFERENCE) {
+	if (EXPECTED(GC_TYPE_INFO(ref) == GC_REFERENCE)) {
 		zval *zv = &((zend_reference*)ref)->val;
 
-		if (!Z_REFCOUNTED_P(zv)) {
+		if (!Z_COLLECTABLE_P(zv)) {
 			return;
 		}
 		ref = Z_COUNTED_P(zv);
@@ -80,14 +83,43 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 	}
 }
 
-#endif /* ZEND_GC_H */
+/* These APIs can be used to simplify object get_gc implementations
+ * over heterogeneous structures. See zend_generator_get_gc() for
+ * a usage example. */
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+typedef struct {
+	zval *cur;
+	zval *end;
+	zval *start;
+} zend_get_gc_buffer;
+
+ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create(void);
+ZEND_API void zend_get_gc_buffer_grow(zend_get_gc_buffer *gc_buffer);
+
+static zend_always_inline void zend_get_gc_buffer_add_zval(
+		zend_get_gc_buffer *gc_buffer, zval *zv) {
+	if (Z_REFCOUNTED_P(zv)) {
+		if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
+			zend_get_gc_buffer_grow(gc_buffer);
+		}
+		ZVAL_COPY_VALUE(gc_buffer->cur, zv);
+		gc_buffer->cur++;
+	}
+}
+
+static zend_always_inline void zend_get_gc_buffer_add_obj(
+		zend_get_gc_buffer *gc_buffer, zend_object *obj) {
+	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
+		zend_get_gc_buffer_grow(gc_buffer);
+	}
+	ZVAL_OBJ(gc_buffer->cur, obj);
+	gc_buffer->cur++;
+}
+
+static zend_always_inline void zend_get_gc_buffer_use(
+		zend_get_gc_buffer *gc_buffer, zval **table, int *n) {
+	*table = gc_buffer->start;
+	*n = gc_buffer->cur - gc_buffer->start;
+}
+
+#endif /* ZEND_GC_H */

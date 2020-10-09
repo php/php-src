@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -25,16 +23,11 @@
 
 #include "formatter_class.h"
 #include "formatter_format.h"
-#include "formatter_parse.h"
 #include "intl_convert.h"
 
 #define ICU_LOCALE_BUG 1
 
-/* {{{ proto mixed NumberFormatter::parse( string $str[, int $type, int &$position ])
- * Parse a number. }}} */
-/* {{{ proto mixed numfmt_parse( NumberFormatter $nf, string $str[, int $type, int &$position ])
- * Parse a number.
- */
+/* {{{ Parse a number. */
 PHP_FUNCTION( numfmt_parse )
 {
 	zend_long type = FORMAT_TYPE_DOUBLE;
@@ -51,13 +44,15 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz/!",
+	if (zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"number_parse: unable to parse input params", 0 );
+		RETURN_THROWS();
+	}
 
-		RETURN_FALSE;
+	if (zposition) {
+		position = (int32_t) zval_get_long(zposition);
+		position_p = &position;
 	}
 
 	/* Fetch the object. */
@@ -66,12 +61,6 @@ PHP_FUNCTION( numfmt_parse )
 	/* Convert given string to UTF-16. */
 	intl_convert_utf8_to_utf16(&sstr, &sstr_len, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
-
-	if(zposition) {
-		ZVAL_DEREF(zposition);
-		position = (int32_t)zval_get_long( zposition );
-		position_p = &position;
-	}
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	/* need to copy here since setlocale may change it later */
@@ -97,18 +86,20 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
-			RETVAL_FALSE;
-			break;
+			zend_argument_value_error(3, "must be a NumberFormatter::TYPE_* constant");
+			goto cleanup;
 	}
+
+	if (zposition) {
+		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
+	}
+
+cleanup:
+
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	setlocale(LC_NUMERIC, oldlocale);
 	efree(oldlocale);
 #endif
-	if(zposition) {
-		zval_ptr_dtor(zposition);
-		ZVAL_LONG(zposition, position);
-	}
 
 	if (sstr) {
 		efree(sstr);
@@ -118,11 +109,7 @@ PHP_FUNCTION( numfmt_parse )
 }
 /* }}} */
 
-/* {{{ proto float NumberFormatter::parseCurrency( string $str, string &$currency[, int &$position] )
- * Parse a number as currency. }}} */
-/* {{{ proto float numfmt_parse_currency( NumberFormatter $nf, string $str, string &$currency[, int &$position] )
- * Parse a number as currency.
- */
+/* {{{ Parse a number as currency. */
 PHP_FUNCTION( numfmt_parse_currency )
 {
 	double number;
@@ -138,13 +125,10 @@ PHP_FUNCTION( numfmt_parse_currency )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"number_parse_currency: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -155,15 +139,13 @@ PHP_FUNCTION( numfmt_parse_currency )
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
 	if(zposition) {
-		ZVAL_DEREF(zposition);
-		position = (int32_t)zval_get_long( zposition );
+		position = (int32_t) zval_get_long(zposition);
 		position_p = &position;
 	}
 
 	number = unum_parseDoubleCurrency(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, currency, &INTL_DATA_ERROR_CODE(nfo));
 	if(zposition) {
-		zval_ptr_dtor(zposition);
-		ZVAL_LONG(zposition, position);
+		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
 	}
 	if (sstr) {
 		efree(sstr);
@@ -179,12 +161,3 @@ PHP_FUNCTION( numfmt_parse_currency )
 	RETVAL_DOUBLE( number );
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

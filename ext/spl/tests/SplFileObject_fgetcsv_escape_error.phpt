@@ -7,12 +7,15 @@ fwrite($fp, '"aaa","b""bb","ccc"');
 fclose($fp);
 
 $fo = new SplFileObject('SplFileObject__fgetcsv8.csv');
-var_dump($fo->fgetcsv(',', '"', 'invalid'));
+try {
+    var_dump($fo->fgetcsv(',', '"', 'invalid'));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
 unlink('SplFileObject__fgetcsv8.csv');
 ?>
---EXPECTF--
-Warning: SplFileObject::fgetcsv(): escape must be a character in %s on line %d
-bool(false)
+--EXPECT--
+SplFileObject::fgetcsv(): Argument #3 ($escape) must be empty or a single character

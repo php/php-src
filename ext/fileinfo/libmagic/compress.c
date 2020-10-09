@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.104 2017/03/29 15:57:48 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.127 2020/05/31 00:11:06 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -45,12 +45,12 @@ FILE_RCSID("@(#)$File: compress.c,v 1.104 2017/03/29 15:57:48 christos Exp $")
 #endif
 #include <string.h>
 #include <errno.h>
-#ifdef HAVE_SIGNAL_H
+#include <ctype.h>
+#include <stdarg.h>
 #include <signal.h>
-# ifndef HAVE_SIG_T
+#ifndef HAVE_SIG_T
 typedef void (*sig_t)(int);
-# endif /* HAVE_SIG_T */
-#endif
+#endif /* HAVE_SIG_T */
 #ifndef PHP_WIN32
 #include <sys/ioctl.h>
 #endif
@@ -66,6 +66,70 @@ typedef void (*sig_t)(int);
 #endif
 
 #undef FIONREAD
+
+#if defined(PHP_FILEINFO_UNCOMPRESS)
+#define BUILTIN_BZLIB
+#include <bzlib.h>
+#endif
+
+#if defined(HAVE_XZLIB_H) && defined(XZLIBSUPPORT)
+#define BUILTIN_XZLIB
+#include <lzma.h>
+#endif
+
+#ifdef DEBUG
+int tty = -1;
+#define DPRINTF(...)	do { \
+	if (tty == -1) \
+		tty = open("/dev/tty", O_RDWR); \
+	if (tty == -1) \
+		abort(); \
+	dprintf(tty, __VA_ARGS__); \
+} while (/*CONSTCOND*/0)
+#else
+#define DPRINTF(...)
+#endif
+
+#ifdef ZLIBSUPPORT
+/*
+ * The following python code is not really used because ZLIBSUPPORT is only
+ * defined if we have a built-in zlib, and the built-in zlib handles that.
+ * That is not true for android where we have zlib.h and not -lz.
+ */
+static const char zlibcode[] =
+    "import sys, zlib; sys.stdout.write(zlib.decompress(sys.stdin.read()))";
+
+static const char *zlib_args[] = { "python", "-c", zlibcode, NULL };
+
+static int
+zlibcmp(const unsigned char *buf)
+{
+	unsigned short x = 1;
+	unsigned char *s = CAST(unsigned char *, CAST(void *, &x));
+
+	if ((buf[0] & 0xf) != 8 || (buf[0] & 0x80) != 0)
+		return 0;
+	if (s[0] != 1)	/* endianness test */
+		x = buf[0] | (buf[1] << 8);
+	else
+		x = buf[1] | (buf[0] << 8);
+	if (x % 31)
+		return 0;
+	return 1;
+}
+#endif
+
+#ifdef PHP_FILEINFO_UNCOMPRESS
+
+static int
+lzmacmp(const unsigned char *buf)
+{
+	if (buf[0] != 0x5d || buf[1] || buf[2])
+		return 0;
+	if (buf[12] && buf[12] != 0xff)
+		return 0;
+	return 1;
+}
 
 #define gzip_flags "-cd"
 #define lrzip_flags "-do"
@@ -96,30 +160,43 @@ static const char *zstd_args[] = {
 	"zstd", "-cd", NULL
 };
 
+#define	do_zlib		NULL
+#define	do_bzlib	NULL
+
 private const struct {
-	const void *magic;
-	size_t maglen;
+	union {
+		const char *magic;
+		int (*func)(const unsigned char *);
+	} u;
+	int maglen;
 	const char **argv;
+	void *unused;
 } compr[] = {
-	{ "\037\235",	2, gzip_args },		/* compressed */
-	/* Uncompress can get stuck; so use gzip first if we have it
-	 * Idea from Damien Clark, thanks! */
-	{ "\037\235",	2, uncompress_args },	/* compressed */
-	{ "\037\213",	2, gzip_args },		/* gzipped */
-	{ "\037\236",	2, gzip_args },		/* frozen */
-	{ "\037\240",	2, gzip_args },		/* SCO LZH */
-	/* the standard pack utilities do not accept standard input */
-	{ "\037\036",	2, gzip_args },		/* packed */
-	{ "PK\3\4",	4, gzip_args },		/* pkzipped, */
-	/* ...only first file examined */
-	{ "BZh",	3, bzip2_args },	/* bzip2-ed */
-	{ "LZIP",	4, lzip_args },		/* lzip-ed */
- 	{ "\3757zXZ\0",	6, xz_args },		/* XZ Utils */
- 	{ "LRZI",	4, lrzip_args },	/* LRZIP */
- 	{ "\004\"M\030",4, lz4_args },		/* LZ4 */
- 	{ "\x28\xB5\x2F\xFD", 4, zstd_args },	/* zstd */
+#define METH_FROZEN	2
+#define METH_BZIP	7
+#define METH_XZ		9
+#define METH_LZMA	13
+#define METH_ZLIB	14
+    { { .magic = "\037\235" },	2, gzip_args, NULL },	/* 0, compressed */
+    /* Uncompress can get stuck; so use gzip first if we have it
+     * Idea from Damien Clark, thanks! */
+    { { .magic = "\037\235" },	2, uncompress_args, NULL },/* 1, compressed */
+    { { .magic = "\037\213" },	2, gzip_args, do_zlib },/* 2, gzipped */
+    { { .magic = "\037\236" },	2, gzip_args, NULL },	/* 3, frozen */
+    { { .magic = "\037\240" },	2, gzip_args, NULL },	/* 4, SCO LZH */
+    /* the standard pack utilities do not accept standard input */
+    { { .magic = "\037\036" },	2, gzip_args, NULL },	/* 5, packed */
+    { { .magic = "PK\3\4" },	4, gzip_args, NULL },	/* 6, pkziped */
+    /* ...only first file examined */
+    { { .magic = "BZh" },	3, bzip2_args, do_bzlib },/* 7, bzip2-ed */
+    { { .magic = "LZIP" },	4, lzip_args, NULL },	/* 8, lzip-ed */
+    { { .magic = "\3757zXZ\0" },6, xz_args, NULL },	/* 9, XZ Util */
+    { { .magic = "LRZI" },	4, lrzip_args, NULL },	/* 10, LRZIP */
+    { { .magic = "\004\"M\030" },4, lz4_args, NULL },	/* 11, LZ4 */
+    { { .magic = "\x28\xB5\x2F\xFD" }, 4, zstd_args, NULL },/* 12, zstd */
+    { { .func = lzmacmp },	-13, xz_args, NULL },	/* 13, lzma */
 #ifdef ZLIBSUPPORT
-	{ RCAST(const void *, zlibcmp),	0, zlib_args },		/* zlib */
+    { { .func = zlibcmp },	-2, zlib_args, NULL },	/* 14, zlib */
 #endif
 };
 
@@ -128,8 +205,8 @@ private const struct {
 #define ERRDATA	2
 
 private ssize_t swrite(int, const void *, size_t);
-#ifdef PHP_FILEINFO_UNCOMPRESS
-private size_t ncompr = sizeof(compr) / sizeof(compr[0]);
+#if HAVE_FORK
+private size_t ncompr = __arraycount(compr);
 private int uncompressbuf(int, size_t, size_t, const unsigned char *,
     unsigned char **, size_t *);
 #ifdef BUILTIN_DECOMPRESS
@@ -138,12 +215,37 @@ private int uncompresszlib(const unsigned char *, unsigned char **, size_t,
 private int uncompressgzipped(const unsigned char *, unsigned char **, size_t,
     size_t *);
 #endif
+#ifdef BUILTIN_BZLIB
+private int uncompressbzlib(const unsigned char *, unsigned char **, size_t,
+    size_t *);
+#endif
+#ifdef BUILTIN_XZLIB
+private int uncompressxzlib(const unsigned char *, unsigned char **, size_t,
+    size_t *);
+#endif
+
 static int makeerror(unsigned char **, size_t *, const char *, ...);
 private const char *methodname(size_t);
 
+private int
+format_decompression_error(struct magic_set *ms, size_t i, unsigned char *buf)
+{
+	unsigned char *p;
+	int mime = ms->flags & MAGIC_MIME;
+
+	if (!mime)
+		return file_printf(ms, "ERROR:[%s: %s]", methodname(i), buf);
+
+	for (p = buf; *p; p++)
+		if (!isalnum(*p))
+			*p = '-';
+
+	return file_printf(ms, "application/x-decompression-error-%s-%s",
+	    methodname(i), buf);
+}
+
 protected int
-file_zmagic(struct magic_set *ms, int fd, const char *name,
-    const unsigned char *buf, size_t nbytes)
+file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
 {
 	unsigned char *newbuf = NULL;
 	size_t i, nsz;
@@ -151,44 +253,50 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	file_pushbuf_t *pb;
 	int urv, prv, rv = 0;
 	int mime = ms->flags & MAGIC_MIME;
-#ifdef HAVE_SIGNAL_H
-	sig_t osigpipe;
-#endif
+	int fd = b->fd;
+	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
+	size_t nbytes = b->flen;
+	int sa_saved = 0;
+	struct sigaction sig_act;
 
 	if ((ms->flags & MAGIC_COMPRESS) == 0)
 		return 0;
 
-#ifdef HAVE_SIGNAL_H
-	osigpipe = signal(SIGPIPE, SIG_IGN);
-#endif
 	for (i = 0; i < ncompr; i++) {
 		int zm;
-		if (nbytes < compr[i].maglen)
+		if (nbytes < CAST(size_t, abs(compr[i].maglen)))
 			continue;
-#ifdef ZLIBSUPPORT
-		if (compr[i].maglen == 0)
-			zm = (RCAST(int (*)(const unsigned char *),
-			    CCAST(void *, compr[i].magic)))(buf);
-		else
-#endif
-			zm = memcmp(buf, compr[i].magic, compr[i].maglen) == 0;
+		if (compr[i].maglen < 0) {
+			zm = (*compr[i].u.func)(buf);
+		} else {
+			zm = memcmp(buf, compr[i].u.magic,
+			    CAST(size_t, compr[i].maglen)) == 0;
+		}
 
 		if (!zm)
 			continue;
+
+		/* Prevent SIGPIPE death if child dies unexpectedly */
+		if (!sa_saved) {
+			//We can use sig_act for both new and old, but
+			struct sigaction new_act;
+			memset(&new_act, 0, sizeof(new_act));
+			new_act.sa_handler = SIG_IGN;
+			sa_saved = sigaction(SIGPIPE, &new_act, &sig_act) != -1;
+		}
+
 		nsz = nbytes;
 		urv = uncompressbuf(fd, ms->bytes_max, i, buf, &newbuf, &nsz);
-		DPRINTF("uncompressbuf = %d, %s, %zu\n", urv, (char *)newbuf,
-		    nsz);
+		DPRINTF("uncompressbuf = %d, %s, %" SIZE_T_FORMAT "u\n", urv,
+		    (char *)newbuf, nsz);
 		switch (urv) {
 		case OKDATA:
 		case ERRDATA:
-
 			ms->flags &= ~MAGIC_COMPRESS;
 			if (urv == ERRDATA)
-				prv = file_printf(ms, "%s ERROR: %s",
-				    methodname(i), newbuf);
+				prv = format_decompression_error(ms, i, newbuf);
 			else
-				prv = file_buffer(ms, -1, name, newbuf, nsz);
+				prv = file_buffer(ms, NULL, NULL, name, newbuf, nsz);
 			if (prv == -1)
 				goto error;
 			rv = 1;
@@ -205,8 +313,11 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 			 * XXX: If file_buffer fails here, we overwrite
 			 * the compressed text. FIXME.
 			 */
-			if (file_buffer(ms, -1, NULL, buf, nbytes) == -1)
+			if (file_buffer(ms, NULL, NULL, NULL, buf, nbytes) == -1) {
+				if (file_pop_buffer(ms, pb) != NULL)
+					abort();
 				goto error;
+			}
 			if ((rbuf = file_pop_buffer(ms, pb)) != NULL) {
 				if (file_printf(ms, "%s", rbuf) == -1) {
 					efree(rbuf);
@@ -230,9 +341,9 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 out:
 	DPRINTF("rv = %d\n", rv);
 
-#ifdef HAVE_SIGNAL_H
-	(void)signal(SIGPIPE, osigpipe);
-#endif
+	if (sa_saved && sig_act.sa_handler != SIG_IGN)
+		(void)sigaction(SIGPIPE, &sig_act, NULL);
+
 	if (newbuf)
 		efree(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
@@ -309,7 +420,7 @@ sread(int fd, void *buf, size_t n, int canbepipe)
 		(void)ioctl(fd, FIONREAD, &t);
 	}
 
-	if (t > 0 && (size_t)t < n) {
+	if (t > 0 && CAST(size_t, t) < n) {
 		n = t;
 		rn = n;
 	}
@@ -353,7 +464,9 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 #else
 	{
 		int te;
+		mode_t ou = umask(0);
 		tfd = mkstemp(buf);
+		(void)umask(ou);
 		te = errno;
 		(void)unlink(buf);
 		errno = te;
@@ -365,11 +478,11 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 		return -1;
 	}
 
-	if (swrite(tfd, startbuf, nbytes) != (ssize_t)nbytes)
+	if (swrite(tfd, startbuf, nbytes) != CAST(ssize_t, nbytes))
 		r = 1;
 	else {
 		while ((r = sread(fd, buf, sizeof(buf), 1)) > 0)
-			if (swrite(tfd, buf, (size_t)r) != r)
+			if (swrite(tfd, buf, CAST(size_t, r)) != r)
 				break;
 	}
 
@@ -400,7 +513,6 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 	}
 	return fd;
 }
-
 #ifdef PHP_FILEINFO_UNCOMPRESS
 #ifdef BUILTIN_DECOMPRESS
 
@@ -472,7 +584,7 @@ uncompresszlib(const unsigned char *old, unsigned char **newch,
 	if (rc != Z_OK && rc != Z_STREAM_END)
 		goto err;
 
-	*n = (size_t)z.total_out;
+	*n = CAST(size_t, z.total_out);
 	rc = inflateEnd(&z);
 	if (rc != Z_OK)
 		goto err;
@@ -482,11 +594,95 @@ uncompresszlib(const unsigned char *old, unsigned char **newch,
 
 	return OKDATA;
 err:
-	strlcpy((char *)*newch, z.msg ? z.msg : zError(rc), bytes_max);
-	*n = strlen((char *)*newch);
+	strlcpy(RCAST(char *, *newch), z.msg ? z.msg : zError(rc), bytes_max);
+	*n = strlen(RCAST(char *, *newch));
 	return ERRDATA;
 }
 #endif
+
+#ifdef BUILTIN_BZLIB
+private int
+uncompressbzlib(const unsigned char *old, unsigned char **newch,
+    size_t bytes_max, size_t *n)
+{
+	int rc;
+	bz_stream bz;
+
+	memset(&bz, 0, sizeof(bz));
+	rc = BZ2_bzDecompressInit(&bz, 0, 0);
+	if (rc != BZ_OK)
+		goto err;
+
+	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
+		return makeerror(newch, n, "No buffer, %s", strerror(errno));
+
+	bz.next_in = CCAST(char *, RCAST(const char *, old));
+	bz.avail_in = CAST(uint32_t, *n);
+	bz.next_out = RCAST(char *, *newch);
+	bz.avail_out = CAST(unsigned int, bytes_max);
+
+	rc = BZ2_bzDecompress(&bz);
+	if (rc != BZ_OK && rc != BZ_STREAM_END)
+		goto err;
+
+	/* Assume byte_max is within 32bit */
+	/* assert(bz.total_out_hi32 == 0); */
+	*n = CAST(size_t, bz.total_out_lo32);
+	rc = BZ2_bzDecompressEnd(&bz);
+	if (rc != BZ_OK)
+		goto err;
+
+	/* let's keep the nul-terminate tradition */
+	(*newch)[*n] = '\0';
+
+	return OKDATA;
+err:
+	snprintf(RCAST(char *, *newch), bytes_max, "bunzip error %d", rc);
+	*n = strlen(RCAST(char *, *newch));
+	return ERRDATA;
+}
+#endif
+
+#ifdef BUILTIN_XZLIB
+private int
+uncompressxzlib(const unsigned char *old, unsigned char **newch,
+    size_t bytes_max, size_t *n)
+{
+	int rc;
+	lzma_stream xz;
+
+	memset(&xz, 0, sizeof(xz));
+	rc = lzma_auto_decoder(&xz, UINT64_MAX, 0);
+	if (rc != LZMA_OK)
+		goto err;
+
+	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
+		return makeerror(newch, n, "No buffer, %s", strerror(errno));
+
+	xz.next_in = CCAST(const uint8_t *, old);
+	xz.avail_in = CAST(uint32_t, *n);
+	xz.next_out = RCAST(uint8_t *, *newch);
+	xz.avail_out = CAST(unsigned int, bytes_max);
+
+	rc = lzma_code(&xz, LZMA_RUN);
+	if (rc != LZMA_OK && rc != LZMA_STREAM_END)
+		goto err;
+
+	*n = CAST(size_t, xz.total_out);
+
+	lzma_end(&xz);
+
+	/* let's keep the nul-terminate tradition */
+	(*newch)[*n] = '\0';
+
+	return OKDATA;
+err:
+	snprintf(RCAST(char *, *newch), bytes_max, "unxz error %d", rc);
+	*n = strlen(RCAST(char *, *newch));
+	return ERRDATA;
+}
+#endif
+
 
 static int
 makeerror(unsigned char **buf, size_t *len, const char *fmt, ...)
@@ -503,7 +699,7 @@ makeerror(unsigned char **buf, size_t *len, const char *fmt, ...)
 		*len = 0;
 		return NODATA;
 	}
-	*buf = (unsigned char *)msg;
+	*buf = RCAST(unsigned char *, msg);
 	*len = strlen(msg);
 	return ERRDATA;
 }
@@ -525,52 +721,42 @@ closep(int *fd)
 		closefd(fd, i);
 }
 
-static void
-copydesc(int i, int *fd)
+static int
+copydesc(int i, int fd)
 {
-	int j = fd[i == STDIN_FILENO ? 0 : 1];
-	if (j == i)
-		return;
-	if (dup2(j, i) == -1) {
-		DPRINTF("dup(%d, %d) failed (%s)\n", j, i, strerror(errno));
+	if (fd == i)
+		return 0; /* "no dup was necessary" */
+	if (dup2(fd, i) == -1) {
+		DPRINTF("dup(%d, %d) failed (%s)\n", fd, i, strerror(errno));
 		exit(1);
 	}
-	closep(fd);
+	return 1;
 }
 
-static void
-writechild(int fdp[3][2], const void *old, size_t n)
+static pid_t
+writechild(int fd, const void *old, size_t n)
 {
-	int status;
+	pid_t pid;
 
-	closefd(fdp[STDIN_FILENO], 0);
 	/*
 	 * fork again, to avoid blocking because both
 	 * pipes filled
 	 */
-	switch (fork()) {
-	case 0: /* child */
-		closefd(fdp[STDOUT_FILENO], 0);
-		if (swrite(fdp[STDIN_FILENO][1], old, n) != (ssize_t)n) {
+	pid = fork();
+	if (pid == -1) {
+		DPRINTF("Fork failed (%s)\n", strerror(errno));
+		exit(1);
+	}
+	if (pid == 0) {
+		/* child */
+		if (swrite(fd, old, n) != CAST(ssize_t, n)) {
 			DPRINTF("Write failed (%s)\n", strerror(errno));
 			exit(1);
 		}
 		exit(0);
-		/*NOTREACHED*/
-
-	case -1:
-		DPRINTF("Fork failed (%s)\n", strerror(errno));
-		exit(1);
-		/*NOTREACHED*/
-
-	default:  /* parent */
-		if (wait(&status) == -1) {
-			DPRINTF("Wait failed (%s)\n", strerror(errno));
-			exit(1);
-		}
-		DPRINTF("Grandchild wait return %#x\n", status);
 	}
-	closefd(fdp[STDIN_FILENO], 1);
+	/* parent */
+	return pid;
 }
 
 static ssize_t
@@ -580,17 +766,17 @@ filter_error(unsigned char *ubuf, ssize_t n)
 	char *buf;
 
 	ubuf[n] = '\0';
-	buf = (char *)ubuf;
-	while (isspace((unsigned char)*buf))
+	buf = RCAST(char *, ubuf);
+	while (isspace(CAST(unsigned char, *buf)))
 		buf++;
 	DPRINTF("Filter error[[[%s]]]\n", buf);
-	if ((p = strchr((char *)buf, '\n')) != NULL)
+	if ((p = strchr(CAST(char *, buf), '\n')) != NULL)
 		*p = '\0';
-	if ((p = strchr((char *)buf, ';')) != NULL)
+	if ((p = strchr(CAST(char *, buf), ';')) != NULL)
 		*p = '\0';
-	if ((p = strrchr((char *)buf, ':')) != NULL) {
+	if ((p = strrchr(CAST(char *, buf), ':')) != NULL) {
 		++p;
-		while (isspace((unsigned char)*p))
+		while (isspace(CAST(unsigned char, *p)))
 			p++;
 		n = strlen(p);
 		memmove(ubuf, p, CAST(size_t, n + 1));
@@ -604,12 +790,24 @@ filter_error(unsigned char *ubuf, ssize_t n)
 private const char *
 methodname(size_t method)
 {
+	switch (method) {
 #ifdef BUILTIN_DECOMPRESS
-        /* FIXME: This doesn't cope with bzip2 */
-	if (method == 2 || compr[method].maglen == 0)
-	    return "zlib";
+	case METH_FROZEN:
+	case METH_ZLIB:
+		return "zlib";
 #endif
-	return compr[method].argv[0];
+#ifdef BUILTIN_BZLIB
+	case METH_BZIP:
+		return "bzlib";
+#endif
+#ifdef BUILTIN_XZLIB
+	case METH_XZ:
+	case METH_LZMA:
+		return "xzlib";
+#endif
+	default:
+		return compr[method].argv[0];
+	}
 }
 
 private int
@@ -617,17 +815,32 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
     unsigned char **newch, size_t* n)
 {
 	int fdp[3][2];
-	int status, rv;
+	int status, rv, w;
+	pid_t pid;
+	pid_t writepid = -1;
 	size_t i;
 	ssize_t r;
 
+	switch (method) {
 #ifdef BUILTIN_DECOMPRESS
-        /* FIXME: This doesn't cope with bzip2 */
-	if (method == 2)
+	case METH_FROZEN:
 		return uncompressgzipped(old, newch, bytes_max, n);
-	if (compr[method].maglen == 0)
+	case METH_ZLIB:
 		return uncompresszlib(old, newch, bytes_max, n, 1);
 #endif
+#ifdef BUILTIN_BZLIB
+	case METH_BZIP:
+		return uncompressbzlib(old, newch, bytes_max, n);
+#endif
+#ifdef BUILTIN_XZLIB
+	case METH_XZ:
+	case METH_LZMA:
+		return uncompressxzlib(old, newch, bytes_max, n);
+#endif
+	default:
+		break;
+	}
+
 	(void)fflush(stdout);
 	(void)fflush(stderr);
 
@@ -641,43 +854,68 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 		return makeerror(newch, n, "Cannot create pipe, %s",
 		    strerror(errno));
 	}
-	switch (fork()) {
-	case 0:	/* child */
-		if (fd != -1) {
-			fdp[STDIN_FILENO][0] = fd;
-			(void) lseek(fd, (off_t)0, SEEK_SET);
-		}
 
-		for (i = 0; i < __arraycount(fdp); i++)
-			copydesc(CAST(int, i), fdp[i]);
+	/* For processes with large mapped virtual sizes, vfork
+	 * may be _much_ faster (10-100 times) than fork.
+	 */
+	pid = vfork();
+	if (pid == -1) {
+		return makeerror(newch, n, "Cannot vfork, %s",
+		    strerror(errno));
+	}
+	if (pid == 0) {
+		/* child */
+		/* Note: we are after vfork, do not modify memory
+		 * in a way which confuses parent. In particular,
+		 * do not modify fdp[i][j].
+		 */
+		if (fd != -1) {
+			(void) lseek(fd, CAST(off_t, 0), SEEK_SET);
+			if (copydesc(STDIN_FILENO, fd))
+				(void) close(fd);
+		} else {
+			if (copydesc(STDIN_FILENO, fdp[STDIN_FILENO][0]))
+				(void) close(fdp[STDIN_FILENO][0]);
+			if (fdp[STDIN_FILENO][1] > 2)
+				(void) close(fdp[STDIN_FILENO][1]);
+		}
+///FIXME: if one of the fdp[i][j] is 0 or 1, this can bomb spectacularly
+		if (copydesc(STDOUT_FILENO, fdp[STDOUT_FILENO][1]))
+			(void) close(fdp[STDOUT_FILENO][1]);
+		if (fdp[STDOUT_FILENO][0] > 2)
+			(void) close(fdp[STDOUT_FILENO][0]);
+
+		if (copydesc(STDERR_FILENO, fdp[STDERR_FILENO][1]))
+			(void) close(fdp[STDERR_FILENO][1]);
+		if (fdp[STDERR_FILENO][0] > 2)
+			(void) close(fdp[STDERR_FILENO][0]);
 
 		(void)execvp(compr[method].argv[0],
-		    (char *const *)(intptr_t)compr[method].argv);
+		    RCAST(char *const *, RCAST(intptr_t, compr[method].argv)));
 		dprintf(STDERR_FILENO, "exec `%s' failed, %s",
 		    compr[method].argv[0], strerror(errno));
-		exit(1);
-		/*NOTREACHED*/
-	case -1:
-		return makeerror(newch, n, "Cannot fork, %s",
+		_exit(1); /* _exit(), not exit(), because of vfork */
+	}
+	/* parent */
+	/* Close write sides of child stdout/err pipes */
+	for (i = 1; i < __arraycount(fdp); i++)
+		closefd(fdp[i], 1);
+	/* Write the buffer data to child stdin, if we don't have fd */
+	if (fd == -1) {
+		closefd(fdp[STDIN_FILENO], 0);
+		writepid = writechild(fdp[STDIN_FILENO][1], old, *n);
+		closefd(fdp[STDIN_FILENO], 1);
+	}
+
+	*newch = CAST(unsigned char *, malloc(bytes_max + 1));
+	if (*newch == NULL) {
+		rv = makeerror(newch, n, "No buffer, %s",
 		    strerror(errno));
-
-	default: /* parent */
-		for (i = 1; i < __arraycount(fdp); i++)
-			closefd(fdp[i], 1);
-
-		/* Write the buffer data to the child, if we don't have fd */
-		if (fd == -1)
-			writechild(fdp, old, *n);
-
-		*newch = CAST(unsigned char *, emalloc(bytes_max + 1));
-		if (*newch == NULL) {
-			rv = makeerror(newch, n, "No buffer, %s",
-			    strerror(errno));
-			goto err;
-		}
-		rv = OKDATA;
-		if ((r = sread(fdp[STDOUT_FILENO][0], *newch, bytes_max, 0)) > 0)
-			break;
+		goto err;
+	}
+	rv = OKDATA;
+	r = sread(fdp[STDOUT_FILENO][0], *newch, bytes_max, 0);
+	if (r <= 0) {
 		DPRINTF("Read stdout failed %d (%s)\n", fdp[STDOUT_FILENO][0],
 		    r != -1 ? strerror(errno) : "no data");
 
@@ -686,9 +924,9 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 		    (r = sread(fdp[STDERR_FILENO][0], *newch, bytes_max, 0)) > 0)
 		{
 			r = filter_error(*newch, r);
-			break;
+			goto ok;
 		}
-		efree(*newch);
+		free(*newch);
 		if  (r == 0)
 			rv = makeerror(newch, n, "Read failed, %s",
 			    strerror(errno));
@@ -696,5 +934,40 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 			rv = makeerror(newch, n, "No data");
 		goto err;
 	}
+ok:
+	*n = r;
+	/* NUL terminate, as every buffer is handled here. */
+	(*newch)[*n] = '\0';
+err:
+	closefd(fdp[STDIN_FILENO], 1);
+	closefd(fdp[STDOUT_FILENO], 0);
+	closefd(fdp[STDERR_FILENO], 0);
+
+	w = waitpid(pid, &status, 0);
+wait_err:
+	if (w == -1) {
+		free(*newch);
+		rv = makeerror(newch, n, "Wait failed, %s", strerror(errno));
+		DPRINTF("Child wait return %#x\n", status);
+	} else if (!WIFEXITED(status)) {
+		DPRINTF("Child not exited (%#x)\n", status);
+	} else if (WEXITSTATUS(status) != 0) {
+		DPRINTF("Child exited (%#x)\n", WEXITSTATUS(status));
+	}
+	if (writepid > 0) {
+		/* _After_ we know decompressor has exited, our input writer
+		 * definitely will exit now (at worst, writing fails in it,
+		 * since output fd is closed now on the reading size).
+		 */
+		w = waitpid(writepid, &status, 0);
+		writepid = -1;
+		goto wait_err;
+	}
+
+	closefd(fdp[STDIN_FILENO], 0); //why? it is already closed here!
+	DPRINTF("Returning %p n=%" SIZE_T_FORMAT "u rv=%d\n", *newch, *n, rv);
+
+	return rv;
 }
-#endif /* if PHP_FILEINFO_UNCOMPRESS */
+#endif
+#endif

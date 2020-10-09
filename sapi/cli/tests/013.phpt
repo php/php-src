@@ -4,7 +4,7 @@ running PHP code before and after processing input lines with -B and -E
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename_txt = dirname(__FILE__)."/013.test.txt";
+$filename_txt = __DIR__."/013.test.txt";
 file_put_contents($filename_txt, "test\nfile\ncontents\n");
 
 var_dump(`cat "$filename_txt" | "$php" -n -B 'var_dump("start");'`);

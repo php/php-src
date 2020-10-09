@@ -25,10 +25,8 @@ function rebind_proc ($ds, $ldap_url) {
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 var_dump(ldap_set_rebind_proc($link, "rebind_proc"));
-var_dump(ldap_set_rebind_proc($link, ""));
+var_dump(ldap_set_rebind_proc($link, null));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

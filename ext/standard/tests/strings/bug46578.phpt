@@ -16,7 +16,7 @@ var_dump(strip_tags('<! a>'));
 var_dump(strip_tags('<? ax'));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "foobar"
 string(6) "foobar"
 string(6) "foobar"

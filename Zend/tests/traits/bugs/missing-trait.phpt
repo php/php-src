@@ -12,4 +12,4 @@ $test = new TraitsTest();
 
 ?>
 --EXPECTF--
-Fatal error: Trait 'THello' not found in %s on line %d
+Fatal error: Trait "THello" not found in %s on line %d

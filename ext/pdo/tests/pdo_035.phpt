@@ -16,7 +16,33 @@ $result = $stmt->fetch(PDO::FETCH_LAZY);
 
 echo get_class($result), "\n";
 var_dump(get_parent_class($result));
+
+try {
+    $result->foo = 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $result[0] = 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    unset($result->foo);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    unset($result[0]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 PDORow
 bool(false)
+Cannot write to PDORow property
+Cannot write to PDORow offset
+Cannot unset PDORow property
+Cannot unset PDORow offset

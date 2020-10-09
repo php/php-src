@@ -29,23 +29,29 @@ echo $a[$i[0][0]=f()][++$i[0][0]];
 unset($i);
 
 echo "\n" . '$i->p=f(): ';
+$i = new stdClass;
 echo $a[$i->p=f()][++$i->p];
 unset($i);
 
 echo "\n" . '$i->p->q=f(): ';
+$i = new stdClass;
+$i->p = new stdClass;
 echo $a[$i->p->q=f()][++$i->p->q];
 unset($i);
 
 echo "\n" . '$i->p[0]=f(): ';
+$i = new stdClass;
 echo $a[$i->p[0]=f()][++$i->p[0]];
 unset($i);
 
 echo "\n" . '$i->p[0]->p=f(): ';
+$i = new stdClass;
+$i->p[0] = new stdClass;
 echo $a[$i->p[0]->p=f()][++$i->p[0]->p];
 unset($i);
 
 Class C {
-	static $p;
+    static $p;
 }
 
 echo "\n" . 'C::$p=f(): ';
@@ -59,22 +65,16 @@ echo "\n" . 'C::$p->q=f(): ';
 C::$p = new stdclass;
 echo $a[C::$p->q=f()][++C::$p->q];
 ?>
---EXPECTF--
+--EXPECT--
 $i=f(): good
 $$x=f(): good
 ${'i'}=f(): good
 $i[0]=f(): good
 $i[0][0]=f(): good
-$i->p=f(): 
-Warning: Creating default object from empty value in %s on line %d
-good
-$i->p->q=f(): 
-Warning: Creating default object from empty value in %s on line %d
-good
+$i->p=f(): good
+$i->p->q=f(): good
 $i->p[0]=f(): good
-$i->p[0]->p=f(): 
-Warning: Creating default object from empty value in %s on line %d
-good
+$i->p[0]->p=f(): good
 C::$p=f(): good
 C::$p[0]=f(): good
 C::$p->q=f(): good

@@ -1,7 +1,7 @@
 --TEST--
 DBLIB
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 ?>
 --REDIRECTTEST--

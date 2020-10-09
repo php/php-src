@@ -8,7 +8,7 @@ if (!extension_loaded("phar")) die("skip");
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
 
@@ -23,21 +23,21 @@ include 'files/phar_test.inc';
 
 function dump($phar, $base)
 {
-	var_dump(str_replace(dirname(__FILE__), '*', $phar) . $base);
-	$dir = opendir($phar . $base);
-	if ($base == '/')
-	{
-		$base = '';
-	}
-	while (false !== ($entry = readdir($dir))) {
-		$entry = $base . '/' . $entry;
-		var_dump($entry);
-		var_dump(is_dir($phar . $entry));
-		if (is_dir($phar . $entry))
-		{
-			dump($phar, $entry);
-		}
-	}
+    var_dump(str_replace(__DIR__, '*', $phar) . $base);
+    $dir = opendir($phar . $base);
+    if ($base == '/')
+    {
+        $base = '';
+    }
+    while (false !== ($entry = readdir($dir))) {
+        $entry = $base . '/' . $entry;
+        var_dump($entry);
+        var_dump(is_dir($phar . $entry));
+        if (is_dir($phar . $entry))
+        {
+            dump($phar, $entry);
+        }
+    }
 }
 
 dump($pname, '/');
@@ -56,9 +56,8 @@ echo "opendir edge cases\n";
 var_dump(opendir("phar://"));
 var_dump(opendir("phar://foo.phar/hi"));
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 string(%d) "phar://*/027.phar.php/"
 string(6) "/a.php"
@@ -82,15 +81,14 @@ int(4)
 int(0)
 int(1)
 fwrite on dir handle
-int(0)
+bool(false)
 bool(false)
 opendir edge cases
 
-Warning: opendir(phar://): failed to open dir: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar)
+Warning: opendir(phar://): Failed to open directory: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar)
 phar url "phar://" is unknown in %s027.php on line %d
 bool(false)
 
-Warning: opendir(phar://foo.phar/hi): failed to open dir: phar error: invalid url or non-existent phar "phar://foo.phar/hi"
+Warning: opendir(phar://foo.phar/hi): Failed to open directory: phar error: invalid url or non-existent phar "phar://foo.phar/hi"
 phar url "phar://foo.phar/hi" is unknown in %s027.php on line %d
 bool(false)
-===DONE===

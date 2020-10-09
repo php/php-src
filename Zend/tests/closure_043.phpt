@@ -9,10 +9,10 @@ Closure 043: Scope/bounding combination invariants; static closures
 $staticUnscoped = static function () { var_dump(isset(A::$priv)); var_dump(isset($this)); };
 
 class A {
-	private static $priv = 7;
-	static function getStaticClosure() {
-		return static function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
-	}
+    private static $priv = 7;
+    static function getStaticClosure() {
+        return static function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
+    }
 }
 
 $staticScoped = A::getStaticClosure();
@@ -38,6 +38,7 @@ $d = $staticUnscoped->bindTo(new A, 'A');
 $d = $staticScoped->bindTo(new A, 'A');
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Before binding
 bool(false)

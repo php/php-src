@@ -4,7 +4,7 @@ ReflectionGenerator::getTrace()
 <?php
 function foo()
 {
-	yield 1;
+    yield 1;
 }
 
 $g = foo();
@@ -13,9 +13,9 @@ $r = new ReflectionGenerator($g);
 $g->next();
 
 try {
-	$r->getTrace();
+    $r->getTrace();
 } catch (ReflectionException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 ?>
 --EXPECT--

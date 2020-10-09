@@ -28,6 +28,8 @@ $serverCode = <<<'CODE'
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
+        // TLS 1.3 does not support renegotiation.
+        'max_proto_version' => STREAM_CRYPTO_PROTO_TLSv1_2,
         'reneg_limit' => 0,
         'reneg_window' => 30,
         'reneg_limit_callback' => function($stream) use (&$printed) {

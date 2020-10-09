@@ -4,7 +4,7 @@ Test usort, uksort and uasort
 precision=14
 --FILE--
 <?php
-require(dirname(__FILE__) . '/data.inc');
+require(__DIR__ . '/data.inc');
 
 function cmp ($a, $b) {
     is_array ($a)
@@ -31,7 +31,7 @@ var_dump ($data);
 -- Testing uasort() -- 
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [-1000]=>
   array(2) {
     [0]=>
@@ -69,7 +69,7 @@ array(8) {
   [1001]=>
   string(6) "monkey"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
@@ -81,7 +81,7 @@ array(8) {
  -- Testing usort() -- 
 array(8) {
   [0]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1]=>
   array(2) {
     [0]=>

@@ -6,19 +6,13 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-/* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
- * Description: Set an option for a cURL transfer
- * Source code: ext/curl/interface.c
- * Alias to functions:
- */
-
   include 'server.inc';
   $host = curl_cli_server_start();
 
   // start testing
   echo '*** Testing curl with HTTP/1.0 ***' . "\n";
 
-  $url = "{$host}/get.php?test=httpversion";
+  $url = "{$host}/get.inc?test=httpversion";
   $ch = curl_init();
 
   ob_start(); // start output buffering
@@ -31,9 +25,7 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl with HTTP/1.0 ***
 string(8) "HTTP/1.0"
-===DONE===
                      

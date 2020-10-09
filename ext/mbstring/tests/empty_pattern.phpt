@@ -8,12 +8,21 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 --FILE--
 <?php
 
-mb_ereg_search_init("","","");
+try {
+    mb_ereg_search_init("","","");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 mb_split("","");
-mb_ereg_search_regs();
+
+try {
+    mb_ereg_search_regs();
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: mb_ereg_search_init(): Empty pattern in %s on line %d
-
-Warning: mb_ereg_search_regs(): No regex given in %s on line %d
+--EXPECT--
+mb_ereg_search_init(): Argument #2 ($pattern) must not be empty
+No pattern was provided

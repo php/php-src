@@ -27,6 +27,20 @@
 #ifndef _SLJIT_CONFIG_INTERNAL_H_
 #define _SLJIT_CONFIG_INTERNAL_H_
 
+#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
+	|| (defined SLJIT_DEBUG && SLJIT_DEBUG && (!defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE)))
+#include <stdio.h>
+#endif
+
+#if (defined SLJIT_DEBUG && SLJIT_DEBUG \
+	&& (!defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE) || !defined(SLJIT_HALT_PROCESS)))
+#include <stdlib.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
    SLJIT defines the following architecture dependent types and macros:
 
@@ -191,6 +205,24 @@
 #define SLJIT_CONFIG_SPARC 1
 #endif
 
+/***********************************************************/
+/* Intel Control-flow Enforcement Technology (CET) spport. */
+/***********************************************************/
+
+#ifdef SLJIT_CONFIG_X86
+#if defined(__CET__)
+#define SLJIT_CONFIG_X86_CET 1
+#endif
+#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
+#if defined(__GNUC__)
+#if !defined (__SHSTK__)
+#error "-mshstk is needed to compile with -fcf-protection"
+#endif
+#include <x86intrin.h>
+#endif
+#endif
+#endif
+
 /**********************************/
 /* External function definitions. */
 /**********************************/
@@ -212,6 +244,10 @@
 
 #ifndef SLJIT_MEMCPY
 #define SLJIT_MEMCPY(dest, src, len) memcpy(dest, src, len)
+#endif
+
+#ifndef SLJIT_MEMMOVE
+#define SLJIT_MEMMOVE(dest, src, len) memmove(dest, src, len)
 #endif
 
 #ifndef SLJIT_ZEROMEM
@@ -261,6 +297,7 @@
 /* Type of public API functions. */
 /*********************************/
 
+#ifndef SLJIT_API_FUNC_ATTRIBUTE 
 #if (defined SLJIT_CONFIG_STATIC && SLJIT_CONFIG_STATIC)
 /* Static ABI functions. For all-in-one programs. */
 
@@ -274,6 +311,7 @@
 #else
 #define SLJIT_API_FUNC_ATTRIBUTE
 #endif /* (defined SLJIT_CONFIG_STATIC && SLJIT_CONFIG_STATIC) */
+#endif /* defined SLJIT_API_FUNC_ATTRIBUTE */
 
 /****************************/
 /* Instruction cache flush. */
@@ -283,7 +321,7 @@
 #if __has_builtin(__builtin___clear_cache)
 
 #define SLJIT_CACHE_FLUSH(from, to) \
-	__builtin___clear_cache((char*)from, (char*)to)
+	__builtin___clear_cache((char*)(from), (char*)(to))
 
 #endif /* __has_builtin(__builtin___clear_cache) */
 #endif /* (!defined SLJIT_CACHE_FLUSH && defined __has_builtin) */
@@ -314,7 +352,7 @@
 #elif (defined(__GNUC__) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
 
 #define SLJIT_CACHE_FLUSH(from, to) \
-	__builtin___clear_cache((char*)from, (char*)to)
+	__builtin___clear_cache((char*)(from), (char*)(to))
 
 #elif defined __ANDROID__
 
@@ -447,6 +485,25 @@ typedef double sljit_f64;
 #define SLJIT_BIG_ENDIAN 1
 #endif
 
+#ifndef SLJIT_MIPS_REV
+
+/* Auto detecting mips revision. */
+#if (defined __mips_isa_rev) && (__mips_isa_rev >= 6)
+#define SLJIT_MIPS_REV 6
+#elif (defined __mips_isa_rev && __mips_isa_rev >= 1) \
+	|| (defined __clang__ && defined _MIPS_ARCH_OCTEON) \
+	|| (defined __clang__ && defined _MIPS_ARCH_P5600)
+/* clang either forgets to define (clang-7) __mips_isa_rev at all
+ * or sets it to zero (clang-8,-9) for -march=octeon (MIPS64 R2+)
+ * and -march=p5600 (MIPS32 R5).
+ * It also sets the __mips macro to 64 or 32 for -mipsN when N <= 5
+ * (should be set to N exactly) so we cannot rely on this too.
+ */
+#define SLJIT_MIPS_REV 1
+#endif
+
+#endif /* !SLJIT_MIPS_REV */
+
 #elif (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
 
 #define SLJIT_BIG_ENDIAN 1
@@ -530,7 +587,7 @@ typedef double sljit_f64;
 #endif /* !SLJIT_FUNC */
 
 #ifndef SLJIT_INDIRECT_CALL
-#if ((defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64) && (defined SLJIT_BIG_ENDIAN && SLJIT_BIG_ENDIAN)) \
+#if ((defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64) && (!defined _CALL_ELF || _CALL_ELF == 1)) \
 	|| ((defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32) && defined _AIX)
 /* It seems certain ppc compilers use an indirect addressing for functions
    which makes things complicated. */
@@ -675,23 +732,15 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 /* Debug and verbose related macros. */
 /*************************************/
 
-#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
-#include <stdio.h>
-#endif
-
 #if (defined SLJIT_DEBUG && SLJIT_DEBUG)
 
 #if !defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE)
 
 /* SLJIT_HALT_PROCESS must halt the process. */
 #ifndef SLJIT_HALT_PROCESS
-#include <stdlib.h>
-
 #define SLJIT_HALT_PROCESS() \
 	abort();
 #endif /* !SLJIT_HALT_PROCESS */
-
-#include <stdio.h>
 
 #endif /* !SLJIT_ASSERT || !SLJIT_UNREACHABLE */
 
@@ -737,5 +786,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 	switch(0) { case 0: case ((x) ? 1 : 0): break; }
 
 #endif /* !SLJIT_COMPILE_ASSERT */
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif

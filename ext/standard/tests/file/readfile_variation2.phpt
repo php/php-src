@@ -8,10 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
-
 /* Variation 2 : Create file
                  Create soft/hard link to it
                  Read link using readfile()
@@ -21,7 +17,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 // include file.inc
 require("file.inc");
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp file used here
 $filename = "$file_path/readfile_variation2.tmp";
@@ -61,7 +57,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/readfile_variation2.tmp");
 ?>
 --EXPECT--

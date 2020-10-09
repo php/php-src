@@ -2,11 +2,6 @@
 Test strncmp() function: usage variations - different inputs(heredoc strings)
 --FILE--
 <?php
-/* Prototype  : int strncmp ( string $str1, string $str2, int $len );
- * Description: Binary safe case-sensitive string comparison of the first n characters
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 /* Test strncmp() function with different strings for 'str1', 'str2' and considering case sensitive */
 
 echo "*** Test strncmp() function: with different input strings ***\n";
@@ -22,7 +17,7 @@ EOD;
 $str2 = <<<identifier_str2
 Example of heredoc
 string, whose identifier
-having underscore("_") 
+having underscore("_")
 & numeric value.
 identifier_str2;
 

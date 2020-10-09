@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,10 +20,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -658,7 +654,7 @@ static int php_url_scanner_ex_activate(int type)
 		ctx = &BG(url_adapt_output_ex);
 	}
 
-	memset(ctx, 0, ((size_t) &((url_adapt_state_ex_t *)0)->tags));
+	memset(ctx, 0, XtOffsetOf(url_adapt_state_ex_t, tags));
 
 	return SUCCESS;
 }
@@ -695,7 +691,7 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 
 	if (ZSTR_LEN(url_state->url_app.s) != 0) {
 		*handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & (PHP_OUTPUT_HANDLER_END | PHP_OUTPUT_HANDLER_CONT | PHP_OUTPUT_HANDLER_FLUSH | PHP_OUTPUT_HANDLER_FINAL) ? 1 : 0), url_state);
-		if (sizeof(uint) < sizeof(size_t)) {
+		if (sizeof(unsigned int) < sizeof(size_t)) {
 			if (len > UINT_MAX)
 				len = UINT_MAX;
 		}
@@ -729,7 +725,7 @@ static void php_url_scanner_output_handler(char *output, size_t output_len, char
 	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, 0);
 }
 
-static inline int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value, size_t value_len, int encode, int type)
+static inline int php_url_scanner_add_var_impl(const char *name, size_t name_len, const char *value, size_t value_len, int encode, int type)
 {
 	smart_str sname = {0};
 	smart_str svalue = {0};
@@ -762,9 +758,9 @@ static inline int php_url_scanner_add_var_impl(char *name, size_t name_len, char
 		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
 		encoded = php_raw_url_encode(value, value_len);
 		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
-		encoded = php_escape_html_entities_ex((unsigned char*)name, name_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), 0);
+		encoded = php_escape_html_entities_ex((const unsigned char *) name, name_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
 		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
-		encoded = php_escape_html_entities_ex((unsigned char*)value, value_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), 0);
+		encoded = php_escape_html_entities_ex((const unsigned char *) value, value_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
 		smart_str_appendl(&hvalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
 	} else {
 		smart_str_appendl(&sname, name, name_len);
@@ -792,13 +788,13 @@ static inline int php_url_scanner_add_var_impl(char *name, size_t name_len, char
 }
 
 
-PHPAPI int php_url_scanner_add_session_var(char *name, size_t name_len, char *value, size_t value_len, int encode)
+PHPAPI int php_url_scanner_add_session_var(const char *name, size_t name_len, const char *value, size_t value_len, int encode)
 {
 	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 1);
 }
 
 
-PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int encode)
+PHPAPI int php_url_scanner_add_var(const char *name, size_t name_len, const char *value, size_t value_len, int encode)
 {
 	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 0);
 }
@@ -864,7 +860,7 @@ static inline int php_url_scanner_reset_var_impl(zend_string *name, int encode, 
 		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
 		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
 		zend_string_free(encoded);
-		encoded = php_escape_html_entities_ex((unsigned char *)ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), 0);
+		encoded = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), /* double_encode */ 0, /* quiet */ 1);
 		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
 		zend_string_free(encoded);
 	} else {

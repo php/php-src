@@ -6,7 +6,7 @@ Phar: PharFileInfo::__construct
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
 
 try {
@@ -45,13 +45,11 @@ $a = new PharFileInfo(__FILE__);
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
 Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
-PharFileInfo::__construct() expects parameter 1 to be a valid path, array given
+PharFileInfo::__construct(): Argument #1 ($filename) must be of type string, array given
 Cannot access phar file entry '%s' in archive '%s'
 Cannot call constructor twice
 '%s' is not a valid phar archive URL (must have at least phar://filename.phar)
-===DONE===

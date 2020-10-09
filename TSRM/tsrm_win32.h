@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,9 +19,7 @@
 
 #include "TSRM.h"
 #include <windows.h>
-#if HAVE_UTIME
-# include <sys/utime.h>
-#endif
+#include <sys/utime.h>
 #include "win32/ipc.h"
 
 struct ipc_perm {
@@ -93,12 +89,12 @@ TSRMLS_CACHE_EXTERN()
 #define	SHM_RND		FILE_MAP_WRITE
 #define	SHM_REMAP	FILE_MAP_COPY
 
-char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len);
+const char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len);
 
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env);
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, const char *env);
 TSRM_API FILE *popen(const char *command, const char *type);
 TSRM_API int pclose(FILE *stream);
 TSRM_API int tsrm_win32_access(const char *pathname, int mode);
@@ -109,12 +105,3 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags);
 TSRM_API int shmdt(const void *shmaddr);
 TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf);
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

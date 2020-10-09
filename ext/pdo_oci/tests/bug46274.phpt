@@ -4,7 +4,7 @@ Bug #46274 (pdo_pgsql - Segfault when using PDO::ATTR_STRINGIFY_FETCHES and blob
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci'))
 die('skip not loaded');
-require dirname(__FILE__).'/../../pdo/tests/pdo_test.inc';
+require __DIR__.'/../../pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
@@ -16,7 +16,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 try {
-	$db->exec("DROP TABLE test_one_blob");
+    $db->exec("DROP TABLE test_one_blob");
 } catch (Exception $e) {
 }
 

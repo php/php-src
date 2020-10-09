@@ -3,48 +3,37 @@ mysqli_sqlstate()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    require('table.inc');
 
-	if (!is_null($tmp = @mysqli_sqlstate()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    var_dump(mysqli_sqlstate($link));
+    mysqli_query($link, "SELECT unknown_column FROM test");
+    var_dump(mysqli_sqlstate($link));
+    mysqli_free_result(mysqli_query($link, "SELECT id FROM test"));
+    var_dump(mysqli_sqlstate($link));
 
-	if (!is_null($tmp = @mysqli_sqlstate($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_close($link);
 
-	require('table.inc');
+    try {
+        mysqli_sqlstate($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	var_dump(@mysqli_sqlstate($link, "foo"));
-
-	var_dump(mysqli_sqlstate($link));
-	mysqli_query($link, "SELECT unknown_column FROM test");
-	var_dump(mysqli_sqlstate($link));
-	mysqli_free_result(mysqli_query($link, "SELECT id FROM test"));
-	var_dump(mysqli_sqlstate($link));
-
-	mysqli_close($link);
-
-	var_dump(mysqli_sqlstate($link));
-
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
-NULL
 %s(5) "00000"
 %s(5) "42S22"
 %s(5) "00000"
-
-Warning: mysqli_sqlstate(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

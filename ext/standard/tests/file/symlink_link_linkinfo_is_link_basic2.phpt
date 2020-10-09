@@ -2,26 +2,14 @@
 Test symlink(), linkinfo(), link() and is_link() functions: basic functionality - link to dirs
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/* Prototype: bool symlink ( string $target, string $link );
-   Description: creates a symbolic link to the existing target with the specified name link
-
-   Prototype: bool is_link ( string $filename );
-   Description: Tells whether the given file is a symbolic link.
-
-   Prototype: bool link ( string $target, string $link );
-   Description: Create a hard link
-
-   Prototype: int linkinfo ( string $path );
-   Description: Gets information about a link
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing symlink(), linkinfo(), link() and is_link() : basic functionality ***\n";
 
@@ -44,7 +32,8 @@ echo "\n-- Testing on soft links --\n";
 // creating soft link to $dirname
 var_dump( symlink("$file_path/$dirname", $sym_linkname) ); // this works, expected true
 // gets information about soft link created to directory; expected: true
-var_dump( linkinfo($sym_linkname) );
+$linkinfo = linkinfo($sym_linkname);
+var_dump( is_int($linkinfo) && $linkinfo !== -1 );
 // checks if link created is soft link; expected: true
 var_dump( is_link($sym_linkname) );
 // clear the cache
@@ -60,13 +49,17 @@ var_dump( is_link($linkname) ); // link doesn't exists as not created, expected 
 clearstatcache();
 
 // deleting the links
-unlink($sym_linkname);
+if (PHP_OS_FAMILY === 'Windows') {
+   rmdir($sym_linkname);
+} else {
+   unlink($sym_linkname);
+}
 
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$dirname = dirname(__FILE__)."/symlink_link_linkinfo_is_link_basic2";
+$dirname = __DIR__."/symlink_link_linkinfo_is_link_basic2";
 rmdir($dirname);
 ?>
 --EXPECTF--
@@ -76,7 +69,7 @@ rmdir($dirname);
 
 -- Testing on soft links --
 bool(true)
-int(%d)
+bool(true)
 bool(true)
 
 -- Testing on hard links --

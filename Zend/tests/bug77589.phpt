@@ -3,14 +3,14 @@ BUG #77589 (Core dump using parse_ini_string with numeric sections)
 --FILE--
 <?php
 var_dump(
-	parse_ini_string(<<<INI
+    parse_ini_string(<<<INI
 [0]
 a = 1
 b = on
 c = true
 
 ["true"]
-a = 100 
+a = 100
 b = null
 c = yes
 INI

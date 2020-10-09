@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,19 +21,9 @@
 
 #include "php.h"
 
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 
 #include "php_dom.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_attr_is_id, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_attr_construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMAttr extends DOMNode
@@ -44,39 +32,32 @@ ZEND_END_ARG_INFO();
 * Since:
 */
 
-const zend_function_entry php_dom_attr_class_functions[] = {
-	PHP_FALIAS(isId, dom_attr_is_id, arginfo_dom_attr_is_id)
-	PHP_ME(domattr, __construct, arginfo_dom_attr_construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
-/* {{{ proto DOMAttr::__construct(string name, [string value]) */
-PHP_METHOD(domattr, __construct)
+/* {{{ */
+PHP_METHOD(DOMAttr, __construct)
 {
-	zval *id = getThis();
 	xmlAttrPtr nodep = NULL;
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
 	size_t name_len, value_len, name_valid;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
+		RETURN_THROWS();
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	oldnode = dom_object_get_node(intern);
@@ -161,11 +142,14 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (attrp->children) {
 		node_list_unlink(attrp->children);
 	}
-
-	str = zval_get_string(newval);
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 
@@ -218,18 +202,18 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto bool dom_attr_is_id()
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_attr_is_id)
+PHP_METHOD(DOMAttr, isId)
 {
 	zval *id;
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_attr_class_entry) == FAILURE) {
-		return;
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);
@@ -243,12 +227,3 @@ PHP_FUNCTION(dom_attr_is_id)
 /* }}} end dom_attr_is_id */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -3,7 +3,7 @@ IntlCalendar::getAvailableLocales() basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -16,8 +16,6 @@ $locales = intlcal_get_available_locales();
 var_dump(in_array('pt', $locales));
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
-bool(true)
-==DONE==
+bool(true)

@@ -3,88 +3,82 @@ mysqli_fetch_field()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
 
-	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-	if (!is_null($tmp = @mysqli_fetch_field()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    require('table.inc');
 
-	if (!is_null($tmp = @mysqli_fetch_field($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    // Make sure that client, connection and result charsets are all the
+    // same. Not sure whether this is strictly necessary.
+    if (!mysqli_set_charset($link, 'utf8'))
+        printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
 
-	require('table.inc');
+    $charsetInfo = mysqli_get_charset($link);
 
-	// Make sure that client, connection and result charsets are all the
-	// same. Not sure whether this is strictly necessary.
-	if (!mysqli_set_charset($link, 'utf8'))
-		printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
+    if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	$charsetInfo = mysqli_get_charset($link);
+    /* ID column, binary charset */
+    $tmp = mysqli_fetch_field($res);
+    var_dump($tmp);
 
-	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    /* label column, result set charset */
+    $tmp = mysqli_fetch_field($res);
+    var_dump($tmp);
+    if ($tmp->charsetnr != $charsetInfo->number) {
+        printf("[004] Expecting charset %s/%d got %d\n",
+            $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
+    }
+    if ($tmp->length != $charsetInfo->max_length) {
+        printf("[005] Expecting length %d got %d\n",
+            $charsetInfo->max_length, $tmp->max_length);
+    }
+    if ($tmp->db != $db) {
+        printf("011] Expecting database '%s' got '%s'\n",
+            $db, $tmp->db);
+    }
 
-	/* ID column, binary charset */
-	$tmp = mysqli_fetch_field($res);
-	var_dump($tmp);
+    var_dump(mysqli_fetch_field($res));
 
-	/* label column, result set charset */
-	$tmp = mysqli_fetch_field($res);
-	var_dump($tmp);
-	if ($tmp->charsetnr != $charsetInfo->number) {
-		printf("[004] Expecting charset %s/%d got %d\n",
-			$charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
-	}
-	if ($tmp->length != $charsetInfo->max_length) {
-		printf("[005] Expecting length %d got %d\n",
-			$charsetInfo->max_length, $tmp->max_length);
-	}
-	if ($tmp->db != $db) {
-		printf("011] Expecting database '%s' got '%s'\n",
-			$db, $tmp->db);
-	}
+    mysqli_free_result($res);
 
-	var_dump(mysqli_fetch_field($res));
+    // Read http://bugs.php.net/bug.php?id=42344 on defaults!
+    try {
+        mysqli_fetch_field($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	mysqli_free_result($res);
+    if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
+        printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	// Read http://bugs.php.net/bug.php?id=42344 on defaults!
-	if (false !== ($tmp = mysqli_fetch_field($res)))
-		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    if (!mysqli_query($link, "CREATE TABLE test(id INT NOT NULL DEFAULT 1)"))
+        printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
-		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if (!mysqli_query($link, "INSERT INTO test(id) VALUES (2)"))
+        printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "CREATE TABLE test(id INT NOT NULL DEFAULT 1)"))
-		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if (!$res = mysqli_query($link, "SELECT id as _default_test FROM test")) {
+        printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+    var_dump(mysqli_fetch_assoc($res));
+    /* binary */
+    var_dump(mysqli_fetch_field($res));
+    mysqli_free_result($res);
 
-	if (!mysqli_query($link, "INSERT INTO test(id) VALUES (2)"))
-		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_close($link);
 
-	if (!$res = mysqli_query($link, "SELECT id as _default_test FROM test")) {
-		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
-	var_dump(mysqli_fetch_assoc($res));
-	/* binary */
-	var_dump(mysqli_fetch_field($res));
-	mysqli_free_result($res);
-
-	mysqli_close($link);
-
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 object(stdClass)#%d (13) {
@@ -144,8 +138,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 array(1) {
   ["_default_test"]=>
   string(1) "2"

@@ -4,7 +4,7 @@ openssl_csr_export_to_file() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$csrfile = dirname(__FILE__) . "/openssl_csr_export_to_file_csr.tmp";
+$csrfile = __DIR__ . "/openssl_csr_export_to_file_csr.tmp";
 $wrong = "wrong";
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
 $phex = 'dcf93a0b883972ec0e19989ac5a2ce310e1d37717e8d9571bb7623731866e61e' .
@@ -32,18 +32,23 @@ $args = array(
     "config" => $config,
 );
 
-$privkey_file = 'file://' . dirname(__FILE__) . '/private_rsa_2048.key';
+$privkey_file = 'file://' . __DIR__ . '/private_rsa_2048.key';
 $csr = openssl_csr_new($dn, $privkey_file, $args);
 var_dump(openssl_csr_export_to_file($csr, $csrfile));
 var_dump(file_get_contents($csrfile));
+
 var_dump(openssl_csr_export_to_file($wrong, $csrfile));
-var_dump(openssl_csr_export_to_file($dh, $csrfile));
-var_dump(openssl_csr_export_to_file(array(), $csrfile));
+
+try {
+    openssl_csr_export_to_file($dh, $csrfile);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(openssl_csr_export_to_file($csr, $csrfile, false));
 ?>
 --CLEAN--
 <?php
-$csrfile = dirname(__FILE__) . "/openssl_csr_export_to_file_csr.tmp";
+$csrfile = __DIR__ . "/openssl_csr_export_to_file_csr.tmp";
 if (file_exists($csrfile)) {
     unlink($csrfile);
 }
@@ -70,14 +75,7 @@ JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
 -----END CERTIFICATE REQUEST-----
 "
 
-Warning: openssl_csr_export_to_file() expects parameter 1 to be resource, string given in %s on line %d
-NULL
-
-Warning: openssl_csr_export_to_file(): supplied resource is not a valid OpenSSL X.509 CSR resource in %s on line %d
-
-Warning: openssl_csr_export_to_file(): cannot get CSR from parameter 1 in %s on line %d
+Warning: openssl_csr_export_to_file(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
 bool(false)
-
-Warning: openssl_csr_export_to_file() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+openssl_csr_export_to_file(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
 bool(true)

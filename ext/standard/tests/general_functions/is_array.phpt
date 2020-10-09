@@ -2,10 +2,6 @@
 Test is_array() function
 --FILE--
 <?php
-/* Prototype: bool is_array ( mixed $var );
- * Description: Finds whether the given variable is an array
- */
-
 echo "*** Testing is_array() on different type of arrays ***\n";
 /* different types of arrays */
 $arrays = array(
@@ -37,7 +33,7 @@ echo "\n*** Testing is_array() on non array types ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset variables
 $unset_array = array(10);
@@ -98,19 +94,12 @@ foreach ($varient_arrays as $type ) {
   var_dump( is_array ($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_array() );
-
-//arguments more than expected
-var_dump( is_array ($fp, $fp) );
-
 echo "Done\n";
 /* close resources */
 fclose($fp);
 closedir($dfp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_array() on different type of arrays ***
 -- Iteration 1 --
 bool(true)
@@ -201,13 +190,5 @@ bool(false)
 -- Iteration 28 --
 bool(false)
 -- Iteration 29 --
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_array() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_array() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

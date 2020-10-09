@@ -4,8 +4,8 @@ shadowing a global function with a local version
 <?php
 
 namespace {
-    require 'includes/global_bar.php';
-    require 'includes/foo_bar.php';
+    require 'includes/global_bar.inc';
+    require 'includes/foo_bar.inc';
 }
 
 namespace {

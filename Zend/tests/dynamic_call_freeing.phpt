@@ -24,5 +24,5 @@ try {
 ?>
 --EXPECT--
 Call to undefined function foobar()
-Function name must be a string
-Function name must be a string
+Array callback must have exactly two elements
+Object of type stdClass is not callable

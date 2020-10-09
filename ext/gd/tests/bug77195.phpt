@@ -7,13 +7,11 @@ if (!gd_info()['JPEG Support']) die('skip JPEG support not available');
 ?>
 --FILE--
 <?php
-$filename = __DIR__ . '/bug77195.jpeg';
+$filename = __DIR__ . '/bug77195.jpg';
 @imagecreatefromjpeg($filename);
 imagecreatefromjpeg($filename);
 ?>
-===DONE===
 --EXPECTF--
 Warning: imagecreatefromjpeg(): gd-jpeg: JPEG library reports unrecoverable error: JPEG datastream contains no image in %s on line %d
 
-Warning: imagecreatefromjpeg(): '%s' is not a valid JPEG file in %s on line %d
-===DONE===
+Warning: imagecreatefromjpeg(): "%s" is not a valid JPEG file in %s on line %d

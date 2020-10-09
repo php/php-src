@@ -26,7 +26,7 @@ $csv_lists = array (
   array(':', '&', array('&""""&:&"&:,:":&,&:,,,,'))
 
 );
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file = "$file_path/fputcsv_variation6.tmp";
 
 $file_modes = array ("r+", "r+b", "r+t",

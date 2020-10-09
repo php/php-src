@@ -8,10 +8,10 @@ phar.require_hash=0
 --FILE--
 <?php
 ini_set('phar.require_hash', 1);
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/tar_004.phar.tar';
+include __DIR__ . '/files/tarmaker.php.inc';
+$fname = __DIR__ . '/require_hash.phar.tar';
 $alias = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_004.tar';
+$fname2 = __DIR__ . '/require_hash.tar';
 
 $tar = new tarmaker($fname, 'none');
 $tar->init();
@@ -21,31 +21,30 @@ $tar->addFile('.phar/stub.php', "__HALT_COMPILER();");
 $tar->close();
 
 try {
-	$phar = new Phar($fname);
-	var_dump($phar->getStub());
+    $phar = new Phar($fname);
+    var_dump($phar->getStub());
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 ini_set('phar.require_hash', 0);
 try {
-	$phar = new PharData($fname2);
-	$phar['file'] = 'hi';
-	var_dump($phar->getSignature());
-	$phar->setSignatureAlgorithm(Phar::MD5);
-	var_dump($phar->getSignature());
+    $phar = new PharData($fname2);
+    $phar['file'] = 'hi';
+    var_dump($phar->getSignature());
+    $phar->setSignatureAlgorithm(Phar::MD5);
+    var_dump($phar->getSignature());
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_004.phar.tar');
-@unlink(dirname(__FILE__) . '/tar_004.tar');
+@unlink(__DIR__ . '/require_hash.phar.tar');
+@unlink(__DIR__ . '/require_hash.tar');
 ?>
 --EXPECTF--
-tar-based phar "%star_004.phar.tar" does not have a signature
+tar-based phar "%srequire_hash.phar.tar" does not have a signature
 bool(false)
 array(2) {
   ["hash"]=>
@@ -53,4 +52,3 @@ array(2) {
   ["hash_type"]=>
   string(3) "MD5"
 }
-===DONE===

@@ -19,7 +19,7 @@ $host = curl_cli_server_start();
 if(!empty($host)) {
 
     // Use the set Environment variable
-    $url = "$host/get.php?test=1";
+    $url = "$host/get.inc?test=1";
 
 } else {
 
@@ -33,16 +33,21 @@ if(!empty($host)) {
 
 
 $tempfile	= tempnam(sys_get_temp_dir(), 'CURL_FILE_HANDLE');
+$fp = fopen($tempfile, "r"); // Opening 'fubar' with the incorrect readonly flag
 
 $ch = curl_init($url);
-$fp = fopen($tempfile, "r"); // Opening 'fubar' with the incorrect readonly flag
-curl_setopt($ch, CURLOPT_FILE, $fp);
+try {
+    curl_setopt($ch, CURLOPT_FILE, $fp);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 curl_exec($ch);
 curl_close($ch);
 is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
---EXPECTF--
-Warning: curl_setopt(): the provided file handle is not writable in %s on line %d
+--EXPECT--
+curl_setopt(): The provided file handle must be writable
 Hello World!
 Hello World!

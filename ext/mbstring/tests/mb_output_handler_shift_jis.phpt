@@ -4,8 +4,8 @@ mb_output_handler() (Shift_JIS)
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 output_handler=mb_output_handler
-mbstring.internal_encoding=Shift_JIS
-mbstring.http_output=EUC-JP
+internal_encoding=Shift_JIS
+output_encoding=EUC-JP
 --FILE--
 <?php
 // Shift_JIS

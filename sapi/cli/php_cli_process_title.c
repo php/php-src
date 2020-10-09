@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,8 +22,7 @@
 #include "php_cli_process_title.h"
 #include "ps_title.h"
 
-/* {{{ proto bool cli_set_process_title(string arg)
-   Return a boolean to confirm if the process title was successfully changed or not */
+/* {{{ Return a boolean to confirm if the process title was successfully changed or not */
 PHP_FUNCTION(cli_set_process_title)
 {
     char *title = NULL;
@@ -33,7 +30,7 @@ PHP_FUNCTION(cli_set_process_title)
     int rc;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &title, &title_len) == FAILURE) {
-        return;
+        RETURN_THROWS();
     }
 
     rc = set_ps_title(title);
@@ -46,8 +43,7 @@ PHP_FUNCTION(cli_set_process_title)
 }
 /* }}} */
 
-/* {{{ proto string cli_get_process_title()
-   Return a string with the current process title. NULL if error. */
+/* {{{ Return a string with the current process title. NULL if error. */
 PHP_FUNCTION(cli_get_process_title)
 {
         int length = 0;
@@ -55,7 +51,7 @@ PHP_FUNCTION(cli_get_process_title)
         int rc;
 
         if (zend_parse_parameters_none() == FAILURE) {
-            return;
+            RETURN_THROWS();
         }
 
         rc = get_ps_title(&length, &title);
@@ -67,12 +63,3 @@ PHP_FUNCTION(cli_get_process_title)
         RETURN_STRINGL(title, length);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

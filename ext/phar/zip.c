@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | ZIP archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2007-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -147,8 +147,15 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 	struct tm *tm, tmbuf;
 
 	tm = php_localtime_r(&time, &tmbuf);
-	cdate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
-	ctime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	if (tm->tm_year >= 1980) {
+		cdate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
+		ctime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	} else {
+		/* This is the earliest date/time supported by zip. */
+		cdate = (1<<5) + 1; /* 1980-01-01 */
+		ctime = 0; /* 00:00:00 */
+	}
+
 	PHAR_SET_16(dtime, ctime);
 	PHAR_SET_16(ddate, cdate);
 }
@@ -235,16 +242,9 @@ int phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alia
 					return FAILURE;
 				}
 
-				mydata->metadata_len = PHAR_GET_16(locator.comment_len);
-
-				if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len)) == FAILURE) {
-					mydata->metadata_len = 0;
-					/* if not valid serialized data, it is a regular string */
-
-					ZVAL_NEW_STR(&mydata->metadata, zend_string_init(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
-				}
+				phar_parse_metadata_lazy(metadata, &mydata->metadata_tracker, PHAR_GET_16(locator.comment_len), mydata->is_persistent);
 			} else {
-				ZVAL_UNDEF(&mydata->metadata);
+				ZVAL_UNDEF(&mydata->metadata_tracker.val);
 			}
 
 			goto foundit;
@@ -293,13 +293,13 @@ foundit:
 	entry.is_persistent = mydata->is_persistent;
 #define PHAR_ZIP_FAIL_FREE(errmsg, save) \
 			zend_hash_destroy(&mydata->manifest); \
-			HT_FLAGS(&mydata->manifest) = 0; \
+			HT_INVALIDATE(&mydata->manifest); \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			HT_FLAGS(&mydata->mounted_dirs) = 0; \
+			HT_INVALIDATE(&mydata->mounted_dirs); \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			HT_FLAGS(&mydata->virtual_dirs) = 0; \
+			HT_INVALIDATE(&mydata->virtual_dirs); \
 			php_stream_close(fp); \
-			zval_ptr_dtor(&mydata->metadata); \
+			phar_metadata_tracker_free(&mydata->metadata_tracker, mydata->is_persistent); \
 			if (mydata->signature) { \
 				efree(mydata->signature); \
 			} \
@@ -315,13 +315,13 @@ foundit:
 			return FAILURE;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
-			HT_FLAGS(&mydata->manifest) = 0; \
+			HT_INVALIDATE(&mydata->manifest); \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			HT_FLAGS(&mydata->mounted_dirs) = 0; \
+			HT_INVALIDATE(&mydata->mounted_dirs); \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			HT_FLAGS(&mydata->virtual_dirs) = 0; \
+			HT_INVALIDATE(&mydata->virtual_dirs); \
 			php_stream_close(fp); \
-			zval_ptr_dtor(&mydata->metadata); \
+			phar_metadata_tracker_free(&mydata->metadata_tracker, mydata->is_persistent); \
 			if (mydata->signature) { \
 				efree(mydata->signature); \
 			} \
@@ -339,6 +339,9 @@ foundit:
 	for (i = 0; i < PHAR_GET_16(locator.count); ++i) {
 		phar_zip_central_dir_file zipentry;
 		zend_off_t beforeus = php_stream_tell(fp);
+
+		ZVAL_UNDEF(&entry.metadata_tracker.val);
+		entry.metadata_tracker.str = NULL;
 
 		if (sizeof(zipentry) != php_stream_read(fp, (char *) &zipentry, sizeof(zipentry))) {
 			PHAR_ZIP_FAIL("unable to read central directory entry, truncated");
@@ -526,16 +529,9 @@ foundit:
 			}
 
 			p = buf;
-			entry.metadata_len = PHAR_GET_16(zipentry.comment_len);
-
-			if (phar_parse_metadata(&p, &(entry.metadata), PHAR_GET_16(zipentry.comment_len)) == FAILURE) {
-				entry.metadata_len = 0;
-				/* if not valid serialized data, it is a regular string */
-
-				ZVAL_NEW_STR(&entry.metadata, zend_string_init(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent));
-			}
+			phar_parse_metadata_lazy(buf, &entry.metadata_tracker, PHAR_GET_16(zipentry.comment_len), entry.is_persistent);
 		} else {
-			ZVAL_UNDEF(&entry.metadata);
+			ZVAL_UNDEF(&entry.metadata_tracker.val);
 		}
 
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
@@ -705,7 +701,7 @@ foundit:
 			efree(actual_alias);
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len, mydata);
+		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), mydata->alias, mydata->alias_len, mydata);
 	} else {
 		phar_archive_data *fd_ptr;
 
@@ -814,8 +810,8 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	memset(&local, 0, sizeof(local));
 	memset(&central, 0, sizeof(central));
 	memset(&perms, 0, sizeof(perms));
-	strncpy(local.signature, "PK\3\4", 4);
-	strncpy(central.signature, "PK\1\2", 4);
+	memcpy(local.signature, "PK\3\4", 4);
+	memcpy(central.signature, "PK\1\2", 4);
 	PHAR_SET_16(central.extra_len, sizeof(perms));
 	PHAR_SET_16(local.extra_len, sizeof(perms));
 	perms.tag[0] = 'n';
@@ -962,17 +958,9 @@ not_compressed:
 	PHAR_SET_32(local.crc32, entry->crc32);
 continue_dir:
 	/* set file metadata */
-	if (Z_TYPE(entry->metadata) != IS_UNDEF) {
-		php_serialize_data_t metadata_hash;
-
-		if (entry->metadata_str.s) {
-			smart_str_free(&entry->metadata_str);
-		}
-		entry->metadata_str.s = NULL;
-		PHP_VAR_SERIALIZE_INIT(metadata_hash);
-		php_var_serialize(&entry->metadata_str, &entry->metadata, &metadata_hash);
-		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-		PHAR_SET_16(central.comment_len, ZSTR_LEN(entry->metadata_str.s));
+	if (phar_metadata_tracker_has_data(&entry->metadata_tracker, entry->is_persistent)) {
+		phar_metadata_tracker_try_ensure_has_serialized_data(&entry->metadata_tracker, entry->is_persistent);
+		PHAR_SET_16(central.comment_len, entry->metadata_tracker.str ? ZSTR_LEN(entry->metadata_tracker.str) : 0);
 	}
 
 	entry->header_offset = php_stream_tell(p->filefp);
@@ -1082,14 +1070,11 @@ continue_dir:
 	entry->offset = entry->offset_abs = offset;
 	entry->fp_type = PHAR_FP;
 
-	if (entry->metadata_str.s) {
-		if (ZSTR_LEN(entry->metadata_str.s) != php_stream_write(p->centralfp, ZSTR_VAL(entry->metadata_str.s), ZSTR_LEN(entry->metadata_str.s))) {
+	if (entry->metadata_tracker.str) {
+		if (ZSTR_LEN(entry->metadata_tracker.str) != php_stream_write(p->centralfp, ZSTR_VAL(entry->metadata_tracker.str), ZSTR_LEN(entry->metadata_tracker.str))) {
 			spprintf(p->error, 0, "unable to write metadata as file comment for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
-			smart_str_free(&entry->metadata_str);
 			return ZEND_HASH_APPLY_STOP;
 		}
-
-		smart_str_free(&entry->metadata_str);
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -1102,8 +1087,7 @@ static int phar_zip_changed_apply(zval *zv, void *arg) /* {{{ */
 }
 /* }}} */
 
-static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pass *pass,
-				   smart_str *metadata) /* {{{ */
+static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pass *pass) /* {{{ */
 {
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
@@ -1125,8 +1109,8 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		tell = php_stream_tell(pass->centralfp);
 		php_stream_seek(pass->centralfp, 0, SEEK_SET);
 		php_stream_copy_to_stream_ex(pass->centralfp, newfile, tell, NULL);
-		if (metadata->s) {
-			php_stream_write(newfile, ZSTR_VAL(metadata->s), ZSTR_LEN(metadata->s));
+		if (phar->metadata_tracker.str) {
+			php_stream_write(newfile, ZSTR_VAL(phar->metadata_tracker.str), ZSTR_LEN(phar->metadata_tracker.str));
 		}
 
 		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, pass->error)) {
@@ -1182,13 +1166,11 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error) /* {{{ */
 {
 	char *pos;
-	smart_str main_metadata_str = {0};
 	static const char newstub[] = "<?php // zip-based phar archive stub file\n__HALT_COMPILER();";
 	char halt_stub[] = "__HALT_COMPILER();";
 	char *tmp;
 
 	php_stream *stubfile, *oldfile;
-	php_serialize_data_t metadata_hash;
 	int free_user_stub, closeoldfile = 0;
 	phar_entry_info entry = {0};
 	char *temperr = NULL;
@@ -1402,7 +1384,7 @@ fperror:
 	pass.free_fp = pass.free_ufp = 1;
 	memset(&eocd, 0, sizeof(eocd));
 
-	strncpy(eocd.signature, "PK\5\6", 4);
+	memcpy(eocd.signature, "PK\5\6", 4);
 	if (!phar->is_data && !phar->sig_flags) {
 		phar->sig_flags = PHAR_SIG_SHA1;
 	}
@@ -1415,12 +1397,7 @@ fperror:
 	}
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass);
 
-	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
-		/* set phar metadata */
-		PHP_VAR_SERIALIZE_INIT(metadata_hash);
-		php_var_serialize(&main_metadata_str, &phar->metadata, &metadata_hash);
-		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-	}
+	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
 	if (temperr) {
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, temperr);
@@ -1429,9 +1406,6 @@ fperror:
 temperror:
 		php_stream_close(pass.centralfp);
 nocentralerror:
-		if (Z_TYPE(phar->metadata) != IS_UNDEF) {
-			smart_str_free(&main_metadata_str);
-		}
 		php_stream_close(pass.filefp);
 		if (closeoldfile) {
 			php_stream_close(oldfile);
@@ -1439,7 +1413,7 @@ nocentralerror:
 		return EOF;
 	}
 
-	if (FAILURE == phar_zip_applysignature(phar, &pass, &main_metadata_str)) {
+	if (FAILURE == phar_zip_applysignature(phar, &pass)) {
 		goto temperror;
 	}
 
@@ -1463,9 +1437,10 @@ nocentralerror:
 
 	php_stream_close(pass.centralfp);
 
-	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
+	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
+	if (phar->metadata_tracker.str) {
 		/* set phar metadata */
-		PHAR_SET_16(eocd.comment_len, ZSTR_LEN(main_metadata_str.s));
+		PHAR_SET_16(eocd.comment_len, ZSTR_LEN(phar->metadata_tracker.str));
 
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
 			if (error) {
@@ -1474,15 +1449,12 @@ nocentralerror:
 			goto nocentralerror;
 		}
 
-		if (ZSTR_LEN(main_metadata_str.s) != php_stream_write(pass.filefp, ZSTR_VAL(main_metadata_str.s), ZSTR_LEN(main_metadata_str.s))) {
+		if (ZSTR_LEN(phar->metadata_tracker.str) != php_stream_write(pass.filefp, ZSTR_VAL(phar->metadata_tracker.str), ZSTR_LEN(phar->metadata_tracker.str))) {
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write metadata to zip comment", phar->fname);
 			}
 			goto nocentralerror;
 		}
-
-		smart_str_free(&main_metadata_str);
-
 	} else {
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
 			if (error) {
@@ -1533,12 +1505,3 @@ nocentralerror:
 	return EOF;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

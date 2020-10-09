@@ -23,7 +23,7 @@ toCases("ﬀ");
 toCases("İ");
 
 // Make sure that case-conversion in Turkish still works correctly.
-// Using the language-agnostic Unicode case mappins would result in
+// Using the language-agnostic Unicode case mappings would result in
 // characters that are illegal under ISO-8859-9.
 mb_internal_encoding('ISO-8859-9');
 

@@ -1,21 +1,10 @@
 --TEST--
 Test arsort() function : usage variations - sort strings
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-  die("skip Output tested contains chars that are not shown the same on windows concole (ESC and co)");
-}
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing arsort() by providing different string arrays for $array argument with following flag values
- *  flag value as defualt
+ *  flag value as default
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */

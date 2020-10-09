@@ -4,11 +4,11 @@ Ensure that extending of undefined class throws the exception
 <?php
 
 try {
-	class A extends B {}
+    class A extends B {}
 } catch (Error $e) {
-	var_dump(class_exists('A'));
-	var_dump(class_exists('B'));
-	throw $e;
+    var_dump(class_exists('A'));
+    var_dump(class_exists('B'));
+    throw $e;
 }
 
 ?>
@@ -16,7 +16,7 @@ try {
 bool(false)
 bool(false)
 
-Fatal error: Uncaught Error: Class 'B' not found in %sbug75765.php:%d
+Fatal error: Uncaught Error: Class "B" not found in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %sbug75765.php on line %d
+  thrown in %s on line %d

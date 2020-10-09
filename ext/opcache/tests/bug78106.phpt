@@ -2,6 +2,8 @@
 Bug #78106: Path resolution fails if opcache disabled during request
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 

@@ -6,15 +6,15 @@ $pipes = array(1, 2, 3);
 $orig_pipes = $pipes;
 $php = getenv('TEST_PHP_EXECUTABLE');
 if ($php === false) {
-	die("no php executable defined");
+    die("no php executable defined");
 }
 $proc = proc_open(
-	"$php -n",
-	array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
-	$pipes, getcwd(), array(), array()
+    "$php -n",
+    array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
+    $pipes, getcwd(), array(), array()
 );
 if ($proc === false) {
-	print "something went wrong.\n";
+    print "something went wrong.\n";
 }
 var_dump($pipes);
 stream_set_blocking($pipes[1], FALSE);
@@ -25,25 +25,25 @@ fclose($pipes[0]);
 $cnt = '';
 $n=0;
 for ($left = strlen($test_string); $left > 0;) {
-	if (++$n >1000) {
-	  print "terminated after 1000 iterations\n";
-	  break;
-	}
-	$read_fds = array($pipes[1]);
-	$write_fds = NULL;
-	$exp_fds = NULL;
-	$retval = stream_select($read_fds, $write_fds, $exp_fds, 5);
-	if ($retval === false) {
-		print "select() failed\n";
-		break;
-	}
-	if ($retval === 0) {
-		print "timed out\n";
-		break;
-	}
-	$buf = fread($pipes[1], 1024);
-	$cnt .= $buf;
-	$left -= strlen($buf);
+    if (++$n >1000) {
+      print "terminated after 1000 iterations\n";
+      break;
+    }
+    $read_fds = array($pipes[1]);
+    $write_fds = NULL;
+    $exp_fds = NULL;
+    $retval = stream_select($read_fds, $write_fds, $exp_fds, 5);
+    if ($retval === false) {
+        print "select() failed\n";
+        break;
+    }
+    if ($retval === 0) {
+        print "timed out\n";
+        break;
+    }
+    $buf = fread($pipes[1], 1024);
+    $cnt .= $buf;
+    $left -= strlen($buf);
 }
 var_dump($cnt);
 fclose($pipes[1]);

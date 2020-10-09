@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -26,6 +24,7 @@
 extern "C" {
 #define USE_BREAKITERATOR_POINTER
 #include "breakiterator_class.h"
+#include "breakiterator_arginfo.h"
 #include "../intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
@@ -111,7 +110,7 @@ U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
 
 	zoi_with_current *zoi_iter = static_cast<zoi_with_current*>(emalloc(sizeof *zoi_iter));
 	zend_iterator_init(&zoi_iter->zoi);
-	ZVAL_COPY(&zoi_iter->zoi.data, object);
+	ZVAL_OBJ_COPY(&zoi_iter->zoi.data, Z_OBJ_P(object));
 	zoi_iter->zoi.funcs = &breakiterator_iterator_funcs;
 	zoi_iter->zoi.index = 0;
 	zoi_iter->destroy_it = _breakiterator_destroy_it;
@@ -168,10 +167,9 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 	 * No need to do anything, the engine increments ->index */
 
 	const char	*s = Z_STRVAL(bio->text);
-	size_t		slen = Z_STRLEN(bio->text);
 	zend_string	*res;
 
-	assert(next <= slen && next >= cur);
+	assert(next <= Z_STRLEN(bio->text) && next >= cur);
 	res = zend_string_alloc(next - cur, 0);
 
 	memcpy(ZSTR_VAL(res), &s[cur], ZSTR_LEN(res));
@@ -221,7 +219,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	ii->iterator->index = 0;
 
 	((zoi_with_current*)ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
-	ZVAL_COPY_VALUE(&((zoi_with_current*)ii->iterator)->wrapping_obj, object);
+	ZVAL_OBJ(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 
 	((zoi_break_iter_parts*)ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);
@@ -278,9 +276,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlPartsIterator::getBreakIterator: bad arguments", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -289,20 +285,12 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	ZVAL_COPY_DEREF(return_value, biter_zval);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_parts_it_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry IntlPartsIterator_class_functions[] = {
-	PHP_ME(IntlPartsIterator,	getBreakIterator,	ainfo_parts_it_void,	ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
 {
 	zend_class_entry ce;
 
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", IntlPartsIterator_class_functions);
+	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
 	IntlPartsIterator_ce_ptr = zend_register_internal_class_ex(&ce,
 			IntlIterator_ce_ptr);
 	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;

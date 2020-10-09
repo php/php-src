@@ -4,7 +4,7 @@ Test array_merge and array_walk
 precision=14
 --FILE--
 <?php
-require(dirname(__FILE__) . '/data.inc');
+require(__DIR__ . '/data.inc');
 /*
 ** Create sample arrays
 ** Test alpha, numeric (decimal, hex, octal) and special data
@@ -65,7 +65,7 @@ array(11) {
   [5]=>
   string(6) "monkey"
   [6]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [7]=>
   array(1) {
     [0]=>
@@ -121,7 +121,7 @@ array(2) {
 int(5)
 string(6) "monkey"
 int(6)
-float(-0.33333333333333)
+float(-0.3333333333333333)
 int(7)
 array(1) {
   [0]=>

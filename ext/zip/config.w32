@@ -5,7 +5,8 @@ ARG_ENABLE("zip", "ZIP support", "yes");
 if (PHP_ZIP != "no") {
 	if (CHECK_HEADER_ADD_INCLUDE("zip.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\include;" + PHP_EXTRA_INCLUDES) &&
 		CHECK_HEADER_ADD_INCLUDE("zipconf.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\lib\\libzip\\include;" + PHP_EXTRA_LIBS + "\\libzip\\include;" + PHP_ZIP) &&
-		(PHP_ZIP_SHARED && CHECK_LIB("libzip.lib", "zip", PHP_ZIP) || CHECK_LIB("libzip_a.lib", "zip", PHP_ZIP) && CHECK_LIB("libbz2_a.lib", "zip", PHP_ZIP) && CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP))
+		(PHP_ZIP_SHARED && CHECK_LIB("libzip.lib", "zip", PHP_ZIP) ||
+		 CHECK_LIB("libzip_a.lib", "zip", PHP_ZIP) && CHECK_LIB("libbz2_a.lib", "zip", PHP_ZIP) && CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP) && CHECK_LIB("liblzma_a.lib", "zip", PHP_ZIP))
 	) {
 		EXTENSION('zip', 'php_zip.c zip_stream.c');
 
@@ -15,8 +16,7 @@ if (PHP_ZIP != "no") {
 		}
 
 		AC_DEFINE('HAVE_ZIP', 1);
-		AC_DEFINE('HAVE_LIBZIP', 1);
-		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32 /D HAVE_ENCRYPTION");
+		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32 /D HAVE_SET_MTIME /D HAVE_ENCRYPTION /D HAVE_LIBZIP_VERSION /D HAVE_PROGRESS_CALLBACK /D HAVE_CANCEL_CALLBACK /D LZMA_API_STATIC");
 	} else {
 		WARNING("zip not enabled; libraries and headers not found");
 	}

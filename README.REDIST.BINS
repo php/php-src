@@ -1,25 +1,23 @@
-1. libmagic (ext/fileinfo) see ext/fileinfo/libmagic/LICENSE
-2. Oniguruma (ext/mbstring) see ext/mbstring/oniguruma/COPYING
-3. libmbfl (ext/mbstring) see ext/mbstring/libmbfl/LICENSE
-4. pcre2lib (ext/pcre)
-5. ext/standard crypt
-6. ext/standard crypt's blowfish implementation
-7. Sqlite/Sqlite3 ext/sqlite3 ext/sqlite
-8. ext/standard/rand
-9. ext/standard/scanf
-10. ext/standard/strnatcmp.c
-11. ext/standard/uuencode
-12. libxmlrpc ext/xmlrpc
-13. libzip ext/zip
-14. main/snprintf.c
-15. main/strlcat
-16. main/strlcpy
-17. libgd see ext/gd/libgd/COPYING
-18. ext/phar portions of tar implementations
-19. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/COPYING.LIB
+ 1. libmagic (ext/fileinfo) see ext/fileinfo/libmagic/LICENSE
+ 2. libmbfl (ext/mbstring) see ext/mbstring/libmbfl/LICENSE
+ 3. pcre2lib (ext/pcre)
+ 4. ext/standard crypt
+ 5. ext/standard crypt's blowfish implementation
+ 6. ext/standard/rand
+ 7. ext/standard/scanf
+ 8. ext/standard/strnatcmp.c
+ 9. ext/standard/uuencode
+10. main/snprintf.c
+11. main/strlcat
+12. main/strlcpy
+13. libgd (ext/gd)
+14. ext/phar portions of tar implementations
+15. ext/phar/zip.c portion extracted from libzip
+16. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/LICENSE
+17. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
 
 
-4. pcre2lib (ext/pcre)
+3. pcre2lib (ext/pcre)
 
 PCRE2 LICENCE
 -------------
@@ -27,11 +25,11 @@ PCRE2 LICENCE
 PCRE2 is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
-Release 10 of PCRE2 is distributed under the terms of the "BSD" licence, as
-specified below, with one exemption for certain binary redistributions. The
-documentation for PCRE2, supplied in the "doc" directory, is distributed under
-the same terms as the software itself. The data in the testdata directory is
-not copyrighted and is in the public domain.
+Releases 10.00 and above of PCRE2 are distributed under the terms of the "BSD"
+licence, as specified below, with one exemption for certain binary
+redistributions. The documentation for PCRE2, supplied in the "doc" directory,
+is distributed under the same terms as the software itself. The data in the
+testdata directory is not copyrighted and is in the public domain.
 
 The basic library functions are written in C and are freestanding. Also
 included in the distribution is a just-in-time compiler that can be used to
@@ -49,7 +47,7 @@ Email domain:     cam.ac.uk
 University of Cambridge Computing Service,
 Cambridge, England.
 
-Copyright (c) 1997-2018 University of Cambridge
+Copyright (c) 1997-2019 University of Cambridge
 All rights reserved.
 
 
@@ -58,9 +56,9 @@ PCRE2 JUST-IN-TIME COMPILATION SUPPORT
 
 Written by:       Zoltan Herczeg
 Email local part: hzmester
-Emain domain:     freemail.hu
+Email domain:     freemail.hu
 
-Copyright(c) 2010-2018 Zoltan Herczeg
+Copyright(c) 2010-2019 Zoltan Herczeg
 All rights reserved.
 
 
@@ -69,9 +67,9 @@ STACK-LESS JUST-IN-TIME COMPILER
 
 Written by:       Zoltan Herczeg
 Email local part: hzmester
-Emain domain:     freemail.hu
+Email domain:     freemail.hu
 
-Copyright(c) 2009-2018 Zoltan Herczeg
+Copyright(c) 2009-2019 Zoltan Herczeg
 All rights reserved.
 
 
@@ -117,7 +115,7 @@ PCRE2 independently.
 End
 
 
-5. ext/standard crypt
+4. ext/standard crypt
 
 FreeSec: libcrypt for NetBSD
 
@@ -128,13 +126,13 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
 are met:
 1. Redistributions of source code must retain the above copyright
-	 notice, this list of conditions and the following disclaimer.
+   notice, this list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright
-	 notice, this list of conditions and the following disclaimer in the
-	 documentation and/or other materials provided with the distribution.
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
 3. Neither the name of the author nor the names of other contributors
-	 may be used to endorse or promote products derived from this software
-	 without specific prior written permission.
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -149,7 +147,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
-6. ext/standard crypt's blowfish implementation
+5. ext/standard crypt's blowfish implementation
 
 The crypt_blowfish homepage is:
 
@@ -195,16 +193,8 @@ Blowfish library (I can't be sure if I would think of something if I
 hadn't seen his code).
 
 
-7. Sqlite/Sqlite3 ext/sqlite3 ext/sqlite
+6. ext/standard/rand
 
-The author disclaims copyright to this source code.  In place of
-a legal notice, here is a blessing:
-  May you do good and not evil.
-  May you find forgiveness for yourself and forgive others.
-  May you share freely, never taking more than you give.
-
-
-8. ext/standard/rand
 The following php_mt_...() functions are based on a C++ class MTRand by
 Richard J. Wagner. For more information see the web page at
 http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
@@ -234,15 +224,15 @@ modification, are permitted provided that the following conditions
 are met:
 
 1. Redistributions of source code must retain the above copyright
-	 notice, this list of conditions and the following disclaimer.
+   notice, this list of conditions and the following disclaimer.
 
 2. Redistributions in binary form must reproduce the above copyright
-	 notice, this list of conditions and the following disclaimer in the
-	 documentation and/or other materials provided with the distribution.
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
 
 3. The names of its contributors may not be used to endorse or promote
-	 products derived from this software without specific prior written
-	 permission.
+   products derived from this software without specific prior written
+   permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -257,7 +247,8 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-9. ext/standard/scanf
+7. ext/standard/scanf
+
 scanf.c --
 
 This file contains the base code which implements sscanf and by extension
@@ -303,7 +294,8 @@ authors grant the U.S. Government and others acting in its behalf
 permission to use and distribute the software in accordance with the
 terms specified in this license.
 
-10. ext/standard/strnatcmp.c
+
+8. ext/standard/strnatcmp.c
 
 strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
 Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
@@ -317,14 +309,16 @@ including commercial applications, and to alter it and redistribute it
 freely, subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not
-	 claim that you wrote the original software. If you use this software
-	 in a product, an acknowledgment in the product documentation would be
-	 appreciated but is not required.
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
 2. Altered source versions must be plainly marked as such, and must not be
-	 misrepresented as being the original software.
+   misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
-11. ext/standard/uuencode
+
+9. ext/standard/uuencode
+
 Portions of this code are based on Berkeley's uuencode/uudecode
 implementation.
 
@@ -335,17 +329,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
 are met:
 1. Redistributions of source code must retain the above copyright
-	notice, this list of conditions and the following disclaimer.
+   notice, this list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
 3. All advertising materials mentioning features or use of this software
-	must display the following acknowledgement:
+   must display the following acknowledgement:
 This product includes software developed by the University of
 California, Berkeley and its contributors.
 4. Neither the name of the University nor the names of its contributors
-	may be used to endorse or promote products derived from this software
-	without specific prior written permission.
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -360,63 +354,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
-12. libxmlrpc ext/xmlrpc
+10. main/snprintf.c
 
-Copyright 2000 Epinions, Inc.
-
-Subject to the following 3 conditions, Epinions, Inc.  permits you, free
-of charge, to (a) use, copy, distribute, modify, perform and display this
-software and associated documentation files (the "Software"), and (b)
-permit others to whom the Software is furnished to do so as well.
-
-1) The above copyright notice and this permission notice shall be included
-without modification in all copies or substantial portions of the
-Software.
-
-2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
-ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
-IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE OR NONINFRINGEMENT.
-
-3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
-SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
-OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
-NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
-DAMAGES.
-
-13. libzip ext/zip
-zip.h -- exported declarations.
-Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
-
-This file is part of libzip, a library to manipulate ZIP archives.
-The authors can be contacted at <libzip@nih.at>
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-1. Redistributions of source code must retain the above copyright
-	 notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-	 notice, this list of conditions and the following disclaimer in
-	 the documentation and/or other materials provided with the
-	 distribution.
-3. The names of the authors may not be used to endorse or promote
-	 products derived from this software without specific prior
-	 written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-14. main/snprintf.c
 Copyright (c) 2002, 2006 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
@@ -443,26 +382,26 @@ modification, are permitted provided that the following conditions
 are met:
 
 1. Redistributions of source code must retain the above copyright
-	 notice, this list of conditions and the following disclaimer.
+   notice, this list of conditions and the following disclaimer.
 
 2. Redistributions in binary form must reproduce the above copyright
-	 notice, this list of conditions and the following disclaimer in
-	 the documentation and/or other materials provided with the
-	 distribution.
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
 
 3. All advertising materials mentioning features or use of this
-	 software must display the following acknowledgment:
-	 "This product includes software developed by the Apache Group
-	 for use in the Apache HTTP server project (http://www.apache.org/)."
+   software must display the following acknowledgment:
+   "This product includes software developed by the Apache Group
+   for use in the Apache HTTP server project (http://www.apache.org/)."
 
 4. The names "Apache Server" and "Apache Group" must not be used to
-	 endorse or promote products derived from this software without
-	 prior written permission.
+   endorse or promote products derived from this software without
+   prior written permission.
 
 5. Redistributions of any form whatsoever must retain the following
-	 acknowledgment:
-	 "This product includes software developed by the Apache Group
-	 for use in the Apache HTTP server project (http://www.apache.org/)."
+   acknowledgment:
+   "This product includes software developed by the Apache Group
+   for use in the Apache HTTP server project (http://www.apache.org/)."
 
 THIS SOFTWARE IS PROVIDED BY THE APACHE GROUP ``AS IS'' AND ANY
 EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -489,8 +428,10 @@ This code is based on, and used with the permission of, the
 SIO stdio-replacement strx_* functions by Panos Tsirigotis
 <panos@alumni.cs.colorado.edu> for xinetd.
 
-15. main/strlcat
-16. main/strlcpy
+
+11. main/strlcat
+12. main/strlcpy
+
 Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
 All rights reserved.
 
@@ -498,12 +439,12 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
 are met:
 1. Redistributions of source code must retain the above copyright
-	notice, this list of conditions and the following disclaimer.
+   notice, this list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
 3. The name of the author may not be used to endorse or promote products
-	derived from this software without specific prior written permission.
+   derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
 INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
@@ -516,7 +457,78 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-18. ext/phar portions of tar implementations
+
+13. libgd (ext/gd)
+
+* Portions copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+  2002, 2003, 2004 by Cold Spring Harbor Laboratory. Funded under
+  Grant P41-RR02188 by the National Institutes of Health.
+
+* Portions copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+  2004 by Boutell.Com, Inc.
+
+* Portions relating to GD2 format copyright 1999, 2000, 2001, 2002,
+  2003, 2004 Philip Warner.
+
+* Portions relating to PNG copyright 1999, 2000, 2001, 2002, 2003,
+  2004 Greg Roelofs.
+
+* Portions relating to gdttf.c copyright 1999, 2000, 2001, 2002,
+  2003, 2004 John Ellson (ellson@graphviz.org).
+
+* Portions relating to gdft.c copyright 2001, 2002, 2003, 2004 John
+  Ellson (ellson@graphviz.org).
+
+* Portions copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+  Pierre-Alain Joye (pierre@libgd.org).
+
+* Portions relating to JPEG and to color quantization copyright
+  2000, 2001, 2002, 2003, 2004, Doug Becker and copyright (C) 1994,
+  1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Thomas
+  G. Lane. This software is based in part on the work of the
+  Independent JPEG Group. See the file README-JPEG.TXT for more
+  information.
+
+* Portions relating to GIF compression copyright 1989 by Jef
+  Poskanzer and David Rowley, with modifications for thread safety
+  by Thomas Boutell.
+
+* Portions relating to GIF decompression copyright 1990, 1991, 1993
+  by David Koblas, with modifications for thread safety by Thomas
+  Boutell.
+
+* Portions relating to WBMP copyright 2000, 2001, 2002, 2003, 2004
+  Maurice Szmurlo and Johan Van den Brande.
+
+* Portions relating to GIF animations copyright 2004 Jaakko Hyvätti
+  (jaakko.hyvatti@iki.fi)
+
+Permission has been granted to copy, distribute and modify gd in
+any context without fee, including a commercial application,
+provided that this notice is present in user-accessible supporting
+documentation.
+
+This does not affect your ownership of the derived work itself,
+and the intent is to assure proper credit for the authors of gd,
+not to interfere with your productive use of gd. If you have
+questions, ask. "Derived works" includes all programs that utilize
+the library. Credit must be given in user-accessible
+documentation.
+
+This software is provided "AS IS." The copyright holders disclaim
+all warranties, either express or implied, including but not
+limited to implied warranties of merchantability and fitness for a
+particular purpose, with respect to this code and accompanying
+documentation.
+
+Although their code does not appear in the current release, the
+authors wish to thank David Koblas, David Rowley, and Hutchison
+Avenue Software Corporation for their prior contributions.
+
+END OF COPYRIGHT STATEMENT
+
+
+14. ext/phar portions of tar implementations
 
 portions of tar implementations in ext/phar - phar_tar_octal() are based on an
 implementation by Tim Kientzle from libarchive, licensed with this license:
@@ -543,3 +555,88 @@ implementation by Tim Kientzle from libarchive, licensed with this license:
  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+15. ext/phar/zip.c portion extracted from libzip
+
+zip_dirent.c -- read directory entry (local or central), clean dirent
+Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
+
+This function is part of libzip, a library to manipulate ZIP archives.
+The authors can be contacted at <nih@giga.or.at>
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+3. The names of the authors may not be used to endorse or promote
+   products derived from this software without specific prior
+   written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+16. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
+
+The OpenLDAP Public License
+  Version 2.8, 17 August 2003
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions in source form must retain copyright statements
+   and notices,
+
+2. Redistributions in binary form must reproduce applicable copyright
+   statements and notices, this list of conditions, and the following
+   disclaimer in the documentation and/or other materials provided
+   with the distribution, and
+
+3. Redistributions must contain a verbatim copy of this document.
+
+The OpenLDAP Foundation may revise this license from time to time.
+Each revision is distinguished by a version number.  You may use
+this Software under terms of this license revision or under the
+terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND ITS
+CONTRIBUTORS ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT
+SHALL THE OPENLDAP FOUNDATION, ITS CONTRIBUTORS, OR THE AUTHOR(S)
+OR OWNER(S) OF THE SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+The names of the authors and copyright holders must not be used in
+advertising or otherwise to promote the sale, use or other dealing
+in this Software without specific, written prior permission.  Title
+to copyright in this Software shall at all times remain with copyright
+holders.
+
+OpenLDAP is a registered trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2003 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distribute verbatim copies of this document is granted.

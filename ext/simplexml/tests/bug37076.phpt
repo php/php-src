@@ -9,8 +9,6 @@ $xml->foo = "foo";
 $xml->foo .= "bar";
 print $xml->asXML();
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0"?>
 <root><foo>foobar</foo></root>
-===DONE===

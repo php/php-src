@@ -5,16 +5,16 @@ Test oci_fetch_all with 0 and -1 skip & maxrows
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
 $stmtarray = array(
-	"drop table fetch_all5_tab",
-	"create table fetch_all5_tab (mycol1 number, mycol2 varchar2(20))",
-	"insert into fetch_all5_tab values (1, 'abc')",
-	"insert into fetch_all5_tab values (2, 'def')",
-	"insert into fetch_all5_tab values (3, 'ghi')"
+    "drop table fetch_all5_tab",
+    "create table fetch_all5_tab (mycol1 number, mycol2 varchar2(20))",
+    "insert into fetch_all5_tab values (1, 'abc')",
+    "insert into fetch_all5_tab values (2, 'def')",
+    "insert into fetch_all5_tab values (3, 'ghi')"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -48,7 +48,7 @@ var_dump($res);
 // Clean up
 
 $stmtarray = array(
-	"drop table fetch_all5_tab"
+    "drop table fetch_all5_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -56,8 +56,6 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 int(3)
@@ -107,4 +105,3 @@ Test 3
 int(0)
 array(0) {
 }
-===DONE===

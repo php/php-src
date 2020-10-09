@@ -2,7 +2,7 @@
 Bug #75679 Path 260 character problem
 --FILE--
 <?php
-$d = dirname(__FILE__);
+$d = __DIR__;
 $Files2Report =
  [
   str_pad ($d . '/' . str_repeat (str_pad ('bug75679_path_259_characters_long_', 100, '_') . '/', 1), 259, '_') => [],
@@ -24,10 +24,9 @@ foreach ($Files2Report as $file => &$Report)
 
 
 ?>
-==DONE==
 --CLEAN--
 <?php
-$d = dirname(__FILE__);
+$d = __DIR__;
 $Files2Report =
  [
   str_pad ($d . '/' . str_repeat (str_pad ('bug75679_path_259_characters_long_', 100, '_') . '/', 1), 259, '_') => [],
@@ -63,4 +62,3 @@ Array
     [strlen] => 261
     [result] => ok
 )
-==DONE==

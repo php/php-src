@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -205,7 +203,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 	for (i = 0; i < stats->count; i++) {
 		char tmp[25];
 
-		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
+		sprintf((char *)&tmp, "%" PRIu64, stats->values[i]);
 		add_assoc_string_ex(return_value, names[i].s, names[i].l, tmp);
 	}
 }
@@ -292,14 +290,3 @@ _mysqlnd_get_client_stats(MYSQLND_STATS * stats_ptr, zval *return_value ZEND_FIL
 	DBG_VOID_RETURN;
 }
 /* }}} */
-
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

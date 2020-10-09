@@ -4,18 +4,18 @@ $s = str_replace("\r", '', file_get_contents(dirname(__FILE__) . '/shortarc.php'
 $s .= "\nExtract_Phar::go();\n__HALT_COMPILER();";
 $news = '';
 foreach (token_get_all($s) as $token) {
-	if (is_array($token)) {
-		if ($token[0] == T_COMMENT) {
-			$token[1] = '';
-		}
-		if ($token[0] == T_WHITESPACE) {
-			$n = str_repeat("\n", substr_count($token[1], "\n"));
-			$token[1] = strlen($n) ? $n : ' ';
-		}
-		$news .= $token[1];
-	} else {
-		$news .= $token;
-	}
+    if (is_array($token)) {
+        if ($token[0] == T_COMMENT) {
+            $token[1] = '';
+        }
+        if ($token[0] == T_WHITESPACE) {
+            $n = str_repeat("\n", substr_count($token[1], "\n"));
+            $token[1] = strlen($n) ? $n : ' ';
+        }
+        $news .= $token[1];
+    } else {
+        $news .= $token;
+    }
 }
 $s = $news . ' ?>';
 $slen = strlen($s) - strlen('index.php') - strlen("000");
@@ -34,7 +34,7 @@ $stub = '/*
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension generated stub         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-' . date('Y') . ' The PHP Group                   |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -55,50 +55,50 @@ $s1split = str_split($s1, 2046);
 $s3split = str_split($s3, 2046);
 $took = false;
 foreach ($s1split as $i => $chunk) {
-	if ($took) {
-		$s1split[$i] = substr($chunk, 1);
-		$took = false;
-	}
-	if ($chunk[strlen($chunk) - 1] == '\\') {
-		$s1split[$i] .= $s1split[$i + 1][0];
-		$took = true;
-	}
+    if ($took) {
+        $s1split[$i] = substr($chunk, 1);
+        $took = false;
+    }
+    if ($chunk[strlen($chunk) - 1] == '\\') {
+        $s1split[$i] .= $s1split[$i + 1][0];
+        $took = true;
+    }
 }
 foreach ($s3split as $i => $chunk) {
-	if ($took) {
-		$s3split[$i] = substr($chunk, 1);
-		$took = false;
-	}
-	if ($chunk[strlen($chunk) - 1] == '\\') {
-		$s3split[$i] .= $s3split[$i + 1][0];
-		$took = true;
-	}
+    if ($took) {
+        $s3split[$i] = substr($chunk, 1);
+        $took = false;
+    }
+    if ($chunk[strlen($chunk) - 1] == '\\') {
+        $s3split[$i] .= $s3split[$i + 1][0];
+        $took = true;
+    }
 }
 $stub .= "\tstatic const char newstub0[] = \"" . $webs . '";
 ';
 foreach ($s1split as $i => $chunk) {
-	$s1count = $i + 1;
-	$stub .= "\tstatic const char newstub1_" . $i . '[] = "' . $chunk . '";
+    $s1count = $i + 1;
+    $stub .= "\tstatic const char newstub1_" . $i . '[] = "' . $chunk . '";
 ';
 }
 $stub .= "\tstatic const char newstub2[] = \"" . $s2 . "\";
 ";
 foreach ($s3split as $i => $chunk) {
-	$s3count = $i + 1;
-	$stub .= "\tstatic const char newstub3_" . $i . '[] = "' . $chunk . '";
+    $s3count = $i + 1;
+    $stub .= "\tstatic const char newstub3_" . $i . '[] = "' . $chunk . '";
 ';
 }
 $stub .= "\n\tstatic const int newstub_len = " . $slen . ";
 
 \t*len = spprintf(stub, name_len + web_len + newstub_len, \"%s%s" . str_repeat('%s', $s1count) . '%s%s%d'
-	. str_repeat('%s', $s3count) . '", newstub0, web';
+    . str_repeat('%s', $s3count) . '", newstub0, web';
 foreach ($s1split as $i => $unused) {
-	$stub .= ', newstub1_' . $i;
+    $stub .= ', newstub1_' . $i;
 }
 $stub .= ', index_php, newstub2';
 $stub .= ", name_len + web_len + newstub_len";
 foreach ($s3split as $i => $unused) {
-	$stub .= ', newstub3_' . $i;
+    $stub .= ', newstub3_' . $i;
 }
 $stub .= ");
 }";

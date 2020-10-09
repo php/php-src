@@ -8,18 +8,23 @@ readline_completion_function(): Basic test
 function foo() { }
 
 $data = array(
-	'foo',
-	'strtolower',
-	1,
-	1.1231
+    'foo',
+    'strtolower',
+    1,
+    1.1231
 );
 
 foreach ($data as $callback) {
-	readline_completion_function($callback);
+    try {
+        var_dump(readline_completion_function($callback));
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 
 ?>
---EXPECTF--
-Warning: readline_completion_function(): 1 is not callable in %s on line %d
-
-Warning: readline_completion_function(): 1.1231 is not callable in %s on line %d
+--EXPECT--
+bool(true)
+bool(true)
+readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given
+readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given

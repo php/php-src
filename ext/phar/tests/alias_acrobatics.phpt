@@ -7,8 +7,8 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar';
 
 $p = new Phar($fname);
 
@@ -32,15 +32,13 @@ $b = new Phar($fname, 0, 'another');
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
 ?>
 --EXPECTF--
 alias "foo" is already used for archive "%salias_acrobatics.phar" cannot be overloaded with "%salias_acrobatics.2.phar"
 2
 Cannot open archive "%salias_acrobatics.2.phar", alias is already in use by existing archive
 alias "another" is already used for archive "%salias_acrobatics.phar" cannot be overloaded with "%salias_acrobatics.phar"
-===DONE===

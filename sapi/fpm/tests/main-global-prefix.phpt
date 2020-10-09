@@ -27,7 +27,7 @@ EOT;
 
 $prefix = __DIR__;
 $tester = new FPM\Tester($cfg);
-$tester->start('--prefix ' . $prefix);
+$tester->start(['--prefix', $prefix]);
 $tester->expectLogStartNotices();
 $tester->expectFile(FPM\Tester::FILE_EXT_LOG_ACC, $prefix);
 $tester->expectFile(FPM\Tester::FILE_EXT_LOG_ERR, $prefix);

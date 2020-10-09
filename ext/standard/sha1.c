@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,13 +21,12 @@
 #include "sha1.h"
 #include "md5.h"
 
-PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
+PHPAPI void make_sha1_digest(char *sha1str, const unsigned char *digest)
 {
 	make_digest_ex(sha1str, digest, 20);
 }
 
-/* {{{ proto string sha1(string str [, bool raw_output])
-   Calculate the sha1 hash of a string */
+/* {{{ Calculate the sha1 hash of a string */
 PHP_FUNCTION(sha1)
 {
 	zend_string *arg;
@@ -58,8 +55,7 @@ PHP_FUNCTION(sha1)
 /* }}} */
 
 
-/* {{{ proto string sha1_file(string filename [, bool raw_output])
-   Calculate the sha1 hash of given filename */
+/* {{{ Calculate the sha1 hash of given filename */
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
@@ -68,7 +64,7 @@ PHP_FUNCTION(sha1_file)
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
-	size_t         n;
+	ssize_t        n;
 	php_stream    *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -395,12 +391,3 @@ unsigned int len;
 			(((uint32_t) input[j + 1]) << 16) | (((uint32_t) input[j]) << 24);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

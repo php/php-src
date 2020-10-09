@@ -24,31 +24,31 @@ $refParameters = $refMethod->getParameters();
 
 echo "parameter names from staticMethod method:\n\n";
 foreach($refParameters as $parameter) {
-	var_dump($parameter);
-	if($parameter->isOptional()) {
-	  echo "this parameter is optional\n";
-	} else {
-	  echo "this parameter is not optional\n";
-	}
+    var_dump($parameter);
+    if($parameter->isOptional()) {
+      echo "this parameter is optional\n";
+    } else {
+      echo "this parameter is not optional\n";
+    }
 
-	if($parameter->isDefaultValueAvailable()) {
-	  echo "this parameter has a default value\n";
-	} else {
-	  echo "this parameter has no default value\n";
-	}
+    if($parameter->isDefaultValueAvailable()) {
+      echo "this parameter has a default value\n";
+    } else {
+      echo "this parameter has no default value\n";
+    }
 
-	/*
-	$val = 0;
-	try {
-		$val = $parameter->getDefaultValue();
-		var_dump($val);
-	} catch (ReflectionException $e) {
-		print $e->getMessage();
-		echo "\n";
-	}
-	*/
+    /*
+    $val = 0;
+    try {
+        $val = $parameter->getDefaultValue();
+        var_dump($val);
+    } catch (ReflectionException $e) {
+        print $e->getMessage();
+        echo "\n";
+    }
+    */
 
-	echo "\n";
+    echo "\n";
 }
 
 ?>
@@ -56,7 +56,7 @@ foreach($refParameters as $parameter) {
 hello from test
 third is jack
 
-Notice: Undefined variable: theIncrement in %s on line 8
+Warning: Undefined variable $theIncrement in %s on line %d
 parameter names from staticMethod method:
 
 object(ReflectionParameter)#%d (1) {

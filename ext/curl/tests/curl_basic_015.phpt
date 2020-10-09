@@ -10,7 +10,5 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   $ch  = curl_init($url);
   var_dump($url == curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

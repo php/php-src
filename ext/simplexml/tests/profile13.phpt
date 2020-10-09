@@ -8,15 +8,15 @@ SimpleXML [profile]: Accessing by namespace prefix
 $xml =<<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope
-xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 >
 <soap:Body>
 <businessList foo="bar">
 <businessInfo businessKey="bla"/>
 </businessList>
-</soap:Body> 
+</soap:Body>
 </soap:Envelope>
 EOF;
 
@@ -29,8 +29,6 @@ var_dump($sxe->Body->children(''));
 var_dump($sxe->Body->children('')->businessList);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   ["Body"]=>
@@ -72,4 +70,3 @@ object(SimpleXMLElement)#%d (2) {
     }
   }
 }
-===DONE===

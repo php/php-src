@@ -7,9 +7,14 @@ function separate_zval(&$var) { }
 $s2 = $s;
 separate_zval($s2);
 fclose($s);
-echo fread($s2, strlen("<?php"));
+try {
+    echo fread($s2, strlen("<?php"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "\nDone.\n";
---EXPECTF--
-Warning: fread(): supplied resource is not a valid stream resource in %s on line %d
+?>
+--EXPECT--
+fread(): supplied resource is not a valid stream resource
 
 Done.

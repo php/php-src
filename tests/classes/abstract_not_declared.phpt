@@ -4,7 +4,7 @@ ZE2 An abstract class must be declared abstract
 <?php
 
 class fail {
-	abstract function show();
+    abstract function show();
 }
 
 echo "Done\n"; // shouldn't be displayed

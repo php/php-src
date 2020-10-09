@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,17 +19,16 @@
 #ifndef PHP_PDO_MYSQL_INT_H
 #define PHP_PDO_MYSQL_INT_H
 
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 #	include "ext/mysqlnd/mysqlnd.h"
 #	include "ext/mysqlnd/mysqlnd_libmysql_compat.h"
 #	define PDO_MYSQL_PARAM_BIND MYSQLND_PARAM_BIND
 #else
 #	include <mysql.h>
-#	define PDO_MYSQL_PARAM_BIND MYSQL_BIND
+#if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
+typedef _Bool       my_bool;
 #endif
-
-#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || defined(MYSQL_USE_MYSQLND)
-# define PDO_MYSQL_HAS_CHARSET
+#	define PDO_MYSQL_PARAM_BIND MYSQL_BIND
 #endif
 
 #if defined(PDO_USE_MYSQLND) && PHP_DEBUG && !defined(PHP_WIN32)
@@ -63,7 +60,7 @@ static inline void PDO_DBG_ENTER(char *func_name) {}
 
 #endif
 
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd_debug.h"
 #endif
 
@@ -107,7 +104,7 @@ typedef struct {
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
 	unsigned fetch_table_names:1;
-#if !PDO_USE_MYSQLND
+#ifndef PDO_USE_MYSQLND
 	zend_ulong max_buffer_size;
 #endif
 
@@ -123,13 +120,13 @@ typedef struct {
 	MYSQL_RES				*result;
 	const MYSQL_FIELD		*fields;
 	MYSQL_ROW				current_data;
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	const size_t			*current_lengths;
 #else
-	zend_long				*current_lengths;
+	unsigned long			*current_lengths;
 #endif
 	pdo_mysql_error_info 	einfo;
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	MYSQLND_STMT 			*stmt;
 #else
 	MYSQL_STMT				*stmt;

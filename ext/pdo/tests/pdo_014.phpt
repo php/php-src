@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: PDOStatement SPL iterator
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -21,10 +21,10 @@ $SELECT = 'SELECT val, grp FROM test';
 
 class Test
 {
-	function __construct($name = 'N/A')
-	{
-		echo __METHOD__ . "($name)\n";
-	}
+    function __construct($name = 'N/A')
+    {
+        echo __METHOD__ . "($name)\n";
+    }
 }
 
 $stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
@@ -35,7 +35,7 @@ $it = new IteratorIterator($stmt); /* check if we can convert that thing */
 
 foreach($it as $data)
 {
-	var_dump($data);
+    var_dump($data);
 }
 
 $it->next();              /* must be allowed */
@@ -44,26 +44,26 @@ var_dump($it->valid());   /* must return false */
 
 class PDOStatementAggregate extends PDOStatement implements IteratorAggregate
 {
-	private function __construct()
-	{
-		echo __METHOD__ . "\n";
-		$this->setFetchMode(PDO::FETCH_NUM);
-		/* default fetch mode is BOTH, so we see if the ctor can overwrite that */
-	}
+    private function __construct()
+    {
+        echo __METHOD__ . "\n";
+        $this->setFetchMode(PDO::FETCH_NUM);
+        /* default fetch mode is BOTH, so we see if the ctor can overwrite that */
+    }
 
-	function getIterator()
-	{
-		echo __METHOD__ . "\n";
-		$this->execute();
-		return new IteratorIterator($this, 'PDOStatement');
-	}
+    function getIterator(): Iterator
+    {
+        echo __METHOD__ . "\n";
+        $this->execute();
+        return new IteratorIterator($this, 'PDOStatement');
+    }
 }
 
 $stmt = $db->prepare($SELECT, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementAggregate')));
 
 foreach($stmt as $data)
 {
-	var_dump($data);
+    var_dump($data);
 }
 
 ?>

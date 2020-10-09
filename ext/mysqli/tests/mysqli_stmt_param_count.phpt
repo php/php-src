@@ -3,70 +3,59 @@ mysqli_stmt_param_count()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    require('table.inc');
 
-	if (!is_null($tmp = @mysqli_stmt_param_count()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (!$stmt = mysqli_stmt_init($link))
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!is_null($tmp = @mysqli_stmt_param_count($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_param_count($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	require('table.inc');
+    function func_test_mysqli_stmt_param_count($stmt, $query, $expected, $offset) {
 
-	if (!$stmt = mysqli_stmt_init($link))
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        if (!mysqli_stmt_prepare($stmt, $query)) {
+            printf("[%03d] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_error($stmt));
+            return false;
+        }
 
-	if (false !== ($tmp = mysqli_stmt_param_count($stmt)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+        if ($expected !== ($tmp = mysqli_stmt_param_count($stmt)))
+            printf("[%03d] Expecting %s/%d, got %s/%d\n", $offset + 3,
+                gettype($expected), $expected,
+                gettype($tmp), $tmp);
+        return true;
+    }
 
-	function func_test_mysqli_stmt_param_count($stmt, $query, $expected, $offset) {
+    func_test_mysqli_stmt_param_count($stmt, "SELECT 1 AS a", 0, 10);
+    func_test_mysqli_stmt_param_count($stmt, "INSERT INTO test(id) VALUES (?)", 1, 20);
+    func_test_mysqli_stmt_param_count($stmt, "INSERT INTO test(id, label) VALUES (?, ?)", 2, 30);
+    func_test_mysqli_stmt_param_count($stmt, "INSERT INTO test(id, label) VALUES (?, '?')", 1, 40);
 
-		if (!mysqli_stmt_prepare($stmt, $query)) {
-			printf("[%03d] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_error($stmt));
-			return false;
-		}
+    mysqli_stmt_close($stmt);
 
-		if ($expected !== ($tmp = mysqli_stmt_param_count($stmt)))
-			printf("[%03d] Expecting %s/%d, got %s/%d\n", $offset + 3,
-				gettype($expected), $expected,
-				gettype($tmp), $tmp);
-		return true;
-	}
+    try {
+        mysqli_stmt_param_count($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	func_test_mysqli_stmt_param_count($stmt, "SELECT 1 AS a", 0, 10);
-	func_test_mysqli_stmt_param_count($stmt, "INSERT INTO test(id) VALUES (?)", 1, 20);
-	func_test_mysqli_stmt_param_count($stmt, "INSERT INTO test(id, label) VALUES (?, ?)", 2, 30);
-	func_test_mysqli_stmt_param_count($stmt, "INSERT INTO test(id, label) VALUES (?, '?')", 1, 40);
+    mysqli_close($link);
 
-	mysqli_stmt_close($stmt);
-
-	if (false !== ($tmp = mysqli_stmt_param_count($stmt)))
-		printf("[40] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
-
-	mysqli_close($link);
-
-	/* Check that the function alias exists. It's a deprecated function,
-	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_stmt_param_count()))
-		printf("[041] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_stmt_param_count(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_param_count(): Couldn't fetch mysqli_stmt in %s on line %d
+--EXPECT--
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is already closed
 done!

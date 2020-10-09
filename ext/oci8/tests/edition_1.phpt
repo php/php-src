@@ -3,7 +3,7 @@ Basic test for setting Oracle 11gR2 "edition" attribute
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
     die("skip needs to be run as a DBA user");
 }
@@ -15,7 +15,7 @@ if (!(isset($matches[0]) &&
       (($matches[1] == 11 && $matches[2] >= 2) ||
        ($matches[1] >= 12)
        ))) {
-       	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
+        die("skip expected output only valid when using Oracle 11gR2 or greater database server");
 }
 preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
 if (!(isset($matches[0]) &&
@@ -36,14 +36,14 @@ if (!(isset($matches[0]) &&
 $testuser     = 'testuser_attr_1';  // Used in conn_attr.inc
 $testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 function select_fn($conn) {
-	$s = oci_parse($conn,"select * from view_ed");
-	oci_execute($s);
-	while ($row = oci_fetch_row($s)) {
-		var_dump($row);
-	}
+    $s = oci_parse($conn,"select * from view_ed");
+    oci_execute($s);
+    while ($row = oci_fetch_row($s)) {
+        var_dump($row);
+    }
 }
 /* Create a editon MYEDITION
    create a view view_ed in MYEDITION1.

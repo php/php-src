@@ -42,9 +42,10 @@ var_dump("\u{ffffff}");');
 
 ?>
 --EXPECT--
-syntax error, unexpected end of file on line 2
-syntax error, unexpected end of file on line 3
-syntax error, unexpected end of file, expecting '(' on line 2
+Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
+Unclosed '{' on line 2
+Unclosed '{' on line 3
+syntax error, unexpected end of file, expecting "(" on line 2
 Invalid numeric literal on line 2
 Invalid UTF-8 codepoint escape sequence on line 2
 Invalid UTF-8 codepoint escape sequence: Codepoint too large on line 2

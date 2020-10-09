@@ -3,10 +3,9 @@ zend multibyte (9)
 --SKIPIF--
 <?php require 'skipif.inc'; ?>
 --INI--
-error_reporting=E_ALL & ~E_DEPRECATED
 zend.multibyte=On
 zend.script_encoding=cp1251
-mbstring.internal_encoding=UTF-8
+internal_encoding=UTF-8
 --FILE--
 <?php
 declare(encoding="EUC-JP");

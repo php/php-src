@@ -15,7 +15,6 @@ var_dump(IntlTimeZone::getCanonicalID('GMT +01:25', $isSystemId));
 var_dump($isSystemId);
 
 ?>
-==DONE==
 --EXPECTF--
 string(13) "Europe/Lisbon"
 bool(true)
@@ -23,4 +22,3 @@ bool(true)
 Warning: IntlTimeZone::getCanonicalID(): intltz_get_canonical_id: error obtaining canonical ID in %stimezone_getCanonicalID_variant1_2.php on line %d
 bool(false)
 bool(true)
-==DONE==

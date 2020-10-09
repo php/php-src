@@ -4,7 +4,13 @@ SQLite3::loadExtension with disabled extensions
 Jelle Lampaert
 #Belgian Testfest 2009
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php
+require_once(__DIR__ . '/skipif.inc');
+
+if (!method_exists('SQLite3', 'loadExtension')) {
+    die("skip if SQLITE_OMIT_LOAD_EXTENSION defined");
+}
+?>
 --FILE--
 <?php
 

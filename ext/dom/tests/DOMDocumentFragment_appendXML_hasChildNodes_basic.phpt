@@ -18,6 +18,7 @@ if ($fragment->hasChildNodes()) {
 } else {
   echo "has no child nodes\n";
 }
+?>
 --EXPECT--
 has no child nodes
 has child nodes

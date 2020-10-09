@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,9 +19,7 @@
 
 #include "php.h"
 #include "php_spl.h"
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
-#endif
 
 #define spl_ce_Traversable   zend_ce_traversable
 #define spl_ce_Iterator      zend_ce_iterator
@@ -31,6 +27,7 @@
 #define spl_ce_ArrayAccess   zend_ce_arrayaccess
 #define spl_ce_Serializable  zend_ce_serializable
 #define spl_ce_Countable     zend_ce_countable
+#define spl_ce_Stringable    zend_ce_stringable
 
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
@@ -71,10 +68,8 @@ typedef enum {
 	DIT_NoRewindIterator,
 	DIT_InfiniteIterator,
 	DIT_AppendIterator,
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	DIT_RegexIterator,
 	DIT_RecursiveRegexIterator,
-#endif
 	DIT_CallbackFilterIterator,
 	DIT_RecursiveCallbackFilterIterator,
 	DIT_Unknown = ~0
@@ -150,7 +145,6 @@ typedef struct _spl_dual_it_object {
 			zval                  zarrayit;
 			zend_object_iterator *iterator;
 		} append;
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		struct {
 			zend_long        flags;
 			zend_long        preg_flags;
@@ -159,7 +153,6 @@ typedef struct _spl_dual_it_object {
 			regex_mode       mode;
 			int              use_flags;
 		} regex;
-#endif
 		_spl_cbfilter_it_intern *cbfilter;
 	} u;
 	zend_object              std;
@@ -176,12 +169,3 @@ typedef int (*spl_iterator_apply_func_t)(zend_object_iterator *iter, void *puser
 PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser);
 
 #endif /* SPL_ITERATORS_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -45,10 +44,6 @@ _bc_new_num_ex (length, scale, persistent)
      int length, scale, persistent;
 {
   bc_num temp;
-  /* PHP Change:  add length check */
-  if ((size_t)length+(size_t)scale > INT_MAX) {
-   zend_error(E_ERROR, "Result too long, max is %d", INT_MAX);
-  }
   /* PHP Change:  malloc() -> pemalloc(), removed free_list code */
   temp = (bc_num) safe_pemalloc (1, sizeof(bc_struct)+length, scale, persistent);
   temp->n_sign = PLUS;
@@ -83,7 +78,7 @@ _bc_free_num_ex (num, persistent)
 }
 
 
-/* Intitialize the number package! */
+/* Initialize the number package! */
 
 void
 bc_init_numbers (void)

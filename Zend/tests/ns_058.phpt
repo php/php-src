@@ -5,30 +5,30 @@
 const C = "const ok\n";
 
 function foo() {
-	return "func ok\n";
+    return "func ok\n";
 }
 
 class foo {
-	const C = "const ok\n";
-	const C2 = namespace\C;
-	static $var = "var ok\n";
-	function __construct() {
-		echo "class ok\n";
-	}
-	static function bar() {
-		return "method ok\n";
-	}
+    const C = "const ok\n";
+    const C2 = namespace\C;
+    static $var = "var ok\n";
+    function __construct() {
+        echo "class ok\n";
+    }
+    static function bar() {
+        return "method ok\n";
+    }
 }
 
 function f1($x=namespace\C) {
-	return $x;
+    return $x;
 }
 function f2($x=namespace\foo::C) {
-	return $x;
+    return $x;
 }
 
 function f3(namespace\foo $x) {
-	return "ok\n";
+    return "ok\n";
 }
 
 echo namespace\C;
@@ -54,7 +54,7 @@ const ok
 class ok
 ok
 
-Fatal error: Uncaught Error: Undefined constant 'unknown' in %sns_058.php:%d
+Fatal error: Uncaught Error: Undefined constant "unknown" in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sns_058.php on line %d

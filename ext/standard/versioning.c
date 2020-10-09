@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,8 +21,6 @@
 #include <string.h>
 #include "php.h"
 #include "php_versioning.h"
-
-#define sign(n) ((n)<0?-1:((n)>0?1:0))
 
 /* {{{ php_canonicalize_version() */
 
@@ -115,7 +111,7 @@ compare_special_version_forms(char *form1, char *form2)
 			break;
 		}
 	}
-	return sign(found1 - found2);
+	return ZEND_NORMALIZE_BOOL(found1 - found2);
 }
 
 /* }}} */
@@ -160,7 +156,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 			/* compare element numerically */
 			l1 = strtol(p1, NULL, 10);
 			l2 = strtol(p2, NULL, 10);
-			compare = sign(l1 - l2);
+			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
 		} else if (!isdigit(*p1) && !isdigit(*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);
@@ -203,8 +199,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 }
 
 /* }}} */
-/* {{{ proto int version_compare(string ver1, string ver2 [, string oper])
-  Compares two "PHP-standardized" version number strings */
+/* {{{ Compares two "PHP-standardized" version number strings */
 
 PHP_FUNCTION(version_compare)
 {
@@ -216,7 +211,7 @@ PHP_FUNCTION(version_compare)
 		Z_PARAM_STRING(v1, v1_len)
 		Z_PARAM_STRING(v2, v2_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(op, op_len)
+		Z_PARAM_STRING_OR_NULL(op, op_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	compare = php_version_compare(v1, v2);
@@ -241,15 +236,8 @@ PHP_FUNCTION(version_compare)
 	if (!strncmp(op, "!=", op_len) || !strncmp(op, "<>", op_len) || !strncmp(op, "ne", op_len)) {
 		RETURN_BOOL(compare != 0);
 	}
-	RETURN_NULL();
+
+	zend_argument_value_error(3, "must be a valid comparison operator");
 }
 
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

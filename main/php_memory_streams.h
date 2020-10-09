@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,12 +40,12 @@
 BEGIN_EXTERN_C()
 
 PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC);
-PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length STREAMS_DC);
+PHPAPI php_stream *_php_stream_memory_open(int mode, const char *buf, size_t length STREAMS_DC);
 PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length STREAMS_DC);
 
 PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC);
 PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage, const char *tmpdir STREAMS_DC);
-PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC);
+PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, const char *buf, size_t length STREAMS_DC);
 
 PHPAPI int php_stream_mode_from_str(const char *mode);
 PHPAPI const char *_php_stream_mode_to_str(int mode);
@@ -63,12 +61,3 @@ extern PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper;
 #define PHP_STREAM_IS_TEMP   &php_stream_temp_ops
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

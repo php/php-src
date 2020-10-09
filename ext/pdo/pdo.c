@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,14 +29,12 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
+#include "pdo_arginfo.h"
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
-
-ZEND_DECLARE_MODULE_GLOBALS(pdo)
-static PHP_GINIT_FUNCTION(pdo);
 
 /* True global resources - no need for thread safety here */
 
@@ -74,24 +70,12 @@ PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
 }
 /* }}} */
 
-PDO_API zend_class_entry *php_pdo_get_exception_base(int root) /* {{{ */
-{
-	if (!root) {
-		return spl_ce_RuntimeException;
-	}
-	return zend_ce_exception;
-}
-/* }}} */
-
-/* {{{ proto array pdo_drivers()
- Return array of available PDO drivers */
+/* {{{ Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
 	pdo_driver_t *pdriver;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -99,18 +83,6 @@ PHP_FUNCTION(pdo_drivers)
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_drivers, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ pdo_functions[] */
-const zend_function_entry pdo_functions[] = {
-	PHP_FE(pdo_drivers,             arginfo_pdo_drivers)
-	PHP_FE_END
-};
 /* }}} */
 
 /* {{{ pdo_functions[] */
@@ -125,18 +97,14 @@ zend_module_entry pdo_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_deps,
 	"PDO",
-	pdo_functions,
+	ext_functions,
 	PHP_MINIT(pdo),
 	PHP_MSHUTDOWN(pdo),
 	NULL,
 	NULL,
 	PHP_MINFO(pdo),
 	PHP_PDO_VERSION,
-	PHP_MODULE_GLOBALS(pdo),
-	PHP_GINIT(pdo),
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -146,13 +114,6 @@ zend_module_entry pdo_module_entry = {
 #ifdef COMPILE_DL_PDO
 ZEND_GET_MODULE(pdo)
 #endif
-
-/* {{{ PHP_GINIT_FUNCTION */
-static PHP_GINIT_FUNCTION(pdo)
-{
-	pdo_globals->global_value = 0;
-}
-/* }}} */
 
 PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 {
@@ -345,7 +306,7 @@ PHP_MINIT_FUNCTION(pdo)
 
 	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
 
- 	pdo_exception_ce = zend_register_internal_class_ex(&ce, php_pdo_get_exception_base(0));
+	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException);
 
 	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC);
 
@@ -392,12 +353,3 @@ PHP_MINFO_FUNCTION(pdo)
 
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

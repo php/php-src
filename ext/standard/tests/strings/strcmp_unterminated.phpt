@@ -15,8 +15,6 @@ var_dump(
 zend_terminate_string($a);
 zend_terminate_string($b);
 ?>
-===DONE===
 --EXPECT--
 int(-1)
 int(1)
-===DONE===

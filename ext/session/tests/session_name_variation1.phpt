@@ -11,12 +11,6 @@ session.save_handler=files
 
 ob_start();
 
-/*
- * Prototype : string session_name([string $name])
- * Description : Get and/or set the current session name
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_name() : variation ***\n";
 
 var_dump(session_name("\0"));
@@ -53,7 +47,7 @@ string(1) "	"
 bool(true)
 string(1) "	"
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+Warning: session_name(): session.name "" cannot be numeric or empty in %s on line %d
 string(1) "	"
 bool(true)
 string(1) "	"

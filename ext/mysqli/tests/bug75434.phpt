@@ -15,10 +15,8 @@ $rm = new ReflectionMethod('mysqli_result', 'fetch_all');
 var_dump($rm->getNumberOfParameters());
 var_dump($rm->getNumberOfRequiredParameters());
 ?>
-===DONE===
 --EXPECT--
 int(2)
 int(1)
 int(1)
 int(0)
-===DONE===

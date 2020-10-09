@@ -4,11 +4,11 @@ Function snmp_getvalue
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);
@@ -72,7 +72,7 @@ string(%d) "%s"
 Get with SNMP_VALUE_OBJECT for BITS OID
 object
 int(4)
-string(25) "BITS: %d %s"
+string(%d) "%s: %d %S"
 Get with SNMP_VALUE_OBJECT | SNMP_VALUE_PLAIN for BITS OID
 object
 int(4)

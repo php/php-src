@@ -15,12 +15,11 @@ insert_dummy_data($link, $base);
 $result = ldap_list($link, "$base", "(objectClass=person)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	$entry = ldap_next_entry($link, $entry),
-	ldap_get_values($link, $entry, 'sn'),
-	$entry = ldap_next_entry($link, $entry)
+    $entry = ldap_next_entry($link, $entry),
+    ldap_get_values($link, $entry, 'sn'),
+    $entry = ldap_next_entry($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -37,4 +36,3 @@ array(2) {
   int(1)
 }
 bool(false)
-===DONE===

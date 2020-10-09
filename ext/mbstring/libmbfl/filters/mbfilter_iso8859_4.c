@@ -27,15 +27,11 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso8859_4.h"
 #include "unicode_table_iso8859_4.h"
 
-static const char *mbfl_encoding_8859_4_aliases[] = {"ISO_8859-4", "latin4", NULL};
+static const char *mbfl_encoding_8859_4_aliases[] = {"ISO8859-4", "latin4", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_4 = {
 	mbfl_no_encoding_8859_4,
@@ -51,25 +47,27 @@ const mbfl_encoding mbfl_encoding_8859_4 = {
 const struct mbfl_identify_vtbl vtbl_identify_8859_4 = {
 	mbfl_no_encoding_8859_4,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true
+};
 
 const struct mbfl_convert_vtbl vtbl_8859_4_wchar = {
 	mbfl_no_encoding_8859_4,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_8859_4_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_8859_4 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_4,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_8859_4,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -128,9 +126,7 @@ int mbfl_filt_conv_wchar_8859_4(int c, mbfl_convert_filter *filter)
 	if (s >= 0) {
 		CK((*filter->output_function)(s, filter->data));
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

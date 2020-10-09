@@ -2,12 +2,6 @@
 Test strtr() function : usage variations - regular & numeric strings for 'str' argument
 --FILE--
 <?php
-/* Prototype  : string strtr(string $str, string $from[, string $to]);
-                string strtr(string $str, array $replace_pairs);
- * Description: Translates characters in str using given translation tables
- * Source code: ext/standard/string.c
-*/
-
 /* Testing strtr() function by passing the
  *   combination of numeric & regular strings for 'str' argument and
  *   corresponding translation pair of chars for 'from', 'to' & 'replace_pairs' arguments

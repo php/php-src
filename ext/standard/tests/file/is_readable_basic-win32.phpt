@@ -8,17 +8,13 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_readable ( string $filename );
-   Description: Tells whether the filename is readable
-*/
-
 // include common file test functions
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 echo "*** Testing is_readable(): basic functionality ***\n";
 
 // create a file
-$filename = dirname(__FILE__)."/is_readable.tmp";
+$filename = __DIR__."/is_readable.tmp";
 create_file($filename);
 
 $counter = 1;

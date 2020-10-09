@@ -7,11 +7,16 @@ oci8.old_oci_close_semantics=0
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 var_dump($c);
 var_dump(oci_close($c));
-var_dump(oci_parse($c, "select 1 from dual"));
+
+try {
+    var_dump(oci_parse($c, "select 1 from dual"));
+} catch(\TypeError $exception) {
+    var_dump($exception->getMessage());
+}
 
 echo "Done\n";
 
@@ -19,7 +24,5 @@ echo "Done\n";
 --EXPECTF--
 resource(%d) of type (oci8 connection)
 bool(true)
-
-Warning: oci_parse(): supplied resource is not a valid oci8 connection resource in %sold_oci_close1.php on line %d
-bool(false)
+string(%d) "oci_parse(): supplied resource is not a valid oci8 connection resource"
 Done

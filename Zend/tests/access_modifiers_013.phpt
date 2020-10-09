@@ -4,7 +4,7 @@ Prevent abstract and final in the same class declaration
 <?php
 
 final abstract class C {
-	private function priv() { }
+    private function priv() { }
 }
 
 ?>

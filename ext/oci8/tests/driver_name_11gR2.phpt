@@ -3,7 +3,7 @@ Verify that the Driver Name attribute is set
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip as Output might vary with DRCP");
 
@@ -19,7 +19,7 @@ if (!(isset($matches[0]) && ($matches[1] == 11 && $matches[2] >= 2) || ($matches
 ?>
 --FILE--
 <?php
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 echo"**Test 1.1 - Default values for the attribute **************\n";
 get_attr($c);
@@ -40,7 +40,7 @@ echo "Done\n";
 
 function get_attr($conn)
 {
-	$sel_stmt = "select client_driver
+    $sel_stmt = "select client_driver
         from v\$session_connect_info sci, v\$session s
         where sci.client_driver is not null
           and sci.sid = s.sid

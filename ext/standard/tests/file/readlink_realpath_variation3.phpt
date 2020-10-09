@@ -1,20 +1,7 @@
 --TEST--
 Test readlink() and realpath() functions: usage variation - invalid args
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
-}
-?>
 --FILE--
 <?php
-/* Prototype: string readlink ( string $path );
-   Description: Returns the target of a symbolic link
-
-   Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 
 echo "\n*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***\n";

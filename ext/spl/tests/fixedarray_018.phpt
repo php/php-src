@@ -1,5 +1,5 @@
 --TEST--
-SPL: FixedArray: overriden count()
+SPL: FixedArray: overridden count()
 --FILE--
 <?php
 $obj = new SplFixedArray(2);

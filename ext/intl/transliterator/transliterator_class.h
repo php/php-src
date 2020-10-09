@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -54,8 +52,8 @@ static inline Transliterator_object *php_intl_transliterator_fetch_object(zend_o
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if( to->utrans == NULL ) \
 	{ \
-		intl_errors_set( &to->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed transliterator", 0 ); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed transliterator"); \
+		RETURN_THROWS(); \
 	}
 
 int transliterator_object_construct( zval *object,

@@ -4,16 +4,16 @@ Checking error message when the trait doesn't implements the interface
 <?php
 
 trait foo {
-	public function a() {
-	}
+    public function a() {
+    }
 }
 
 interface baz {
-	public function abc();
+    public function abc();
 }
 
 class bar implements baz {
-	use foo;
+    use foo;
 
 }
 

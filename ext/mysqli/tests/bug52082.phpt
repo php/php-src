@@ -3,24 +3,23 @@ Bug #52082 (character_set_client & character_set_connection reset after mysqli_c
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
-	$link = mysqli_init();
-	$link->options(MYSQLI_SET_CHARSET_NAME, "latin2");
-	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
-		die("can't connect");
-	}
-	var_dump($link->query("show variables like 'character_set_client'")->fetch_row());
-	var_dump($link->query("show variables like 'character_set_connection'")->fetch_row());
-	$link->change_user($user, $passwd, $db);
-	var_dump($link->query("show variables like 'character_set_client'")->fetch_row());
-	var_dump($link->query("show variables like 'character_set_connection'")->fetch_row());
+    require_once("connect.inc");
+    $link = mysqli_init();
+    $link->options(MYSQLI_SET_CHARSET_NAME, "latin2");
+    if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+        die("can't connect");
+    }
+    var_dump($link->query("show variables like 'character_set_client'")->fetch_row());
+    var_dump($link->query("show variables like 'character_set_connection'")->fetch_row());
+    $link->change_user($user, $passwd, $db);
+    var_dump($link->query("show variables like 'character_set_client'")->fetch_row());
+    var_dump($link->query("show variables like 'character_set_connection'")->fetch_row());
 
-	print "done!";
+    print "done!";
 ?>
 --EXPECT--
 array(2) {

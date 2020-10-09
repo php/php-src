@@ -17,7 +17,7 @@ XML_FILE=/not_well_formed2.xml
 LOAD_OPTIONS=0
 EXPECTED_RESULT=0
 --FILE_EXTERNAL--
-domdocumentloadxml_test_method.php
+domdocumentloadxml_test_method.inc
 --EXPECTF--
 Warning: DOMDocument::load%r(XML){0,1}%r(): AttValue: " or ' expected %s
 

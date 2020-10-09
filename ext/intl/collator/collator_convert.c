@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -196,6 +194,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
 			&ustr, &ustr_len,
 			Z_STRVAL_P( utf8_zval ), Z_STRLEN_P( utf8_zval ),
 			&status );
+	// FIXME Or throw error or use intl internal error handler
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_zstr_utf8_to_utf16()" );
 
@@ -226,38 +225,13 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	}
 
 	/* Try object's handlers. */
-	if( Z_OBJ_HT_P(obj)->get )
+	zstr = rv;
+
+	if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
 	{
-		zstr = Z_OBJ_HT_P(obj)->get( obj, rv );
-
-		switch( Z_TYPE_P( zstr ) )
-		{
-			case IS_OBJECT:
-				{
-					/* Bail out. */
-					zval_ptr_dtor( zstr );
-					COLLATOR_CONVERT_RETURN_FAILED( obj );
-				} break;
-
-			case IS_STRING:
-				break;
-
-			default:
-				{
-					convert_to_string( zstr );
-				} break;
-		}
-	}
-	else if( Z_OBJ_HT_P(obj)->cast_object )
-	{
-		zstr = rv;
-
-		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING ) == FAILURE )
-		{
-			/* cast_object failed => bail out. */
-			zval_ptr_dtor( zstr );
-			COLLATOR_CONVERT_RETURN_FAILED( obj );
-		}
+		/* cast_object failed => bail out. */
+		zval_ptr_dtor( zstr );
+		COLLATOR_CONVERT_RETURN_FAILED( obj );
 	}
 
 	/* Object wasn't successfully converted => bail out. */
@@ -271,6 +245,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 			&ustr, &ustr_len,
 			Z_STRVAL_P( zstr ), Z_STRLEN_P( zstr ),
 			&status );
+	// FIXME Or throw error or use intl internal error handler
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
 
@@ -345,7 +320,7 @@ zval* collator_convert_string_to_double( zval* str, zval *rv )
  */
 zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 {
-	int is_numeric = 0;
+	zend_uchar is_numeric = 0;
 	zend_long lval      = 0;
 	double dval    = 0;
 
@@ -354,7 +329,7 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 		COLLATOR_CONVERT_RETURN_FAILED( str );
 	}
 
-	if( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, 1 ) ) )
+	if ( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, /* allow_errors */ 1 ) ) )
 	{
 		if( is_numeric == IS_LONG ) {
 			ZVAL_LONG(rv, lval);
@@ -444,11 +419,3 @@ zval* collator_normalize_sort_argument( zval* arg, zval *rv )
 	return n_arg;
 }
 /* }}} */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

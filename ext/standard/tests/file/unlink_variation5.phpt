@@ -8,13 +8,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 /* delete files with different file permission(0000 to 0777) */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp file used
 $filename = "$file_path/unlink_variation5.tmp";

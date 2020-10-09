@@ -1,8 +1,9 @@
+#include "php.h"
+
 #include <malloc.h>
 #include <string.h>
 #include <errno.h>
 
-#include "php.h"
 #include "readdir.h"
 #include "win32/ioutil.h"
 
@@ -127,46 +128,6 @@ struct dirent *readdir(DIR *dp)
 	return &(dp->dent);
 }/*}}}*/
 
-int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
-{/*{{{*/
-	char *_tmp;
-	size_t reclen;
-
-	if (!dp || dp->finished) {
-		*result = NULL;
-		return 0;
-	}
-
-	if (dp->offset != 0) {
-		if (FindNextFileW(dp->handle, &(dp->fileinfo)) == 0) {
-			dp->finished = 1;
-			*result = NULL;
-			return 0;
-		}
-	}
-
-	_tmp = php_win32_cp_conv_w_to_any(dp->fileinfo.cFileName, PHP_WIN32_CP_IGNORE_LEN, &reclen);
-	if (!_tmp) {
-		/* wide to utf8 failed, should never happen. */
-		result = NULL;
-		return 0;
-	}
-	memmove(dp->dent.d_name, _tmp, reclen + 1);
-	free(_tmp);
-	dp->dent.d_reclen = (unsigned short)reclen;
-
-	dp->offset++;
-
-	dp->dent.d_ino = 1;
-	dp->dent.d_off = dp->offset;
-
-	memcpy(entry, &dp->dent, sizeof(*entry));
-
-	*result = &dp->dent;
-
-	return 0;
-}/*}}}*/
-
 int closedir(DIR *dp)
 {/*{{{*/
 	if (!dp)
@@ -239,12 +200,3 @@ int rewinddir(DIR *dp)
 #ifdef __cplusplus
 }
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

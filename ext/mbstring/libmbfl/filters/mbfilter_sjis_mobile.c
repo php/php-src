@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_sjis_mobile.h"
 
@@ -83,21 +79,18 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis_docomo = {
 	mbfl_no_encoding_sjis_docomo,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis_kddi = {
 	mbfl_no_encoding_sjis_kddi,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis_sb = {
 	mbfl_no_encoding_sjis_sb,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
@@ -105,54 +98,60 @@ const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar = {
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_no_encoding_wchar,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush
+ 	mbfl_filt_conv_common_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
  	mbfl_no_encoding_wchar,
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
- 	mbfl_filt_conv_sjis_mobile_flush
+ 	mbfl_filt_conv_sjis_mobile_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_no_encoding_wchar,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush
+ 	mbfl_filt_conv_common_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
  	mbfl_no_encoding_wchar,
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush
+	mbfl_filt_conv_sjis_mobile_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
  	mbfl_no_encoding_sjis_sb,
  	mbfl_no_encoding_wchar,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush
+ 	mbfl_filt_conv_common_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
  	mbfl_no_encoding_wchar,
  	mbfl_no_encoding_sjis_sb,
  	mbfl_filt_conv_common_ctor,
- 	mbfl_filt_conv_common_dtor,
+	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush
+	mbfl_filt_conv_sjis_mobile_flush,
+	NULL,
 };
 
 static const char nflags_s[10][2] = {"CN","DE","ES","FR","GB","IT","JP","KR","RU","US"};
@@ -905,9 +904,7 @@ mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s2, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

@@ -3,7 +3,7 @@ IntlCodepointBreakIterator::getLastCodePoint(): basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -20,30 +20,29 @@ var_dump($codepoint_it->getLastCodePoint());
 //before the last read codepoint is moving backwards
 $p = $codepoint_it->first();
 while ($p != IntlBreakIterator::DONE) {
-	$c = $codepoint_it->getLastCodePoint();
-	if ($c > 0)
-		var_dump(sprintf('U+%04X', $codepoint_it->getLastCodePoint()));
-	else
-		var_dump($c);
-	//it's a post-increment operation as to the codepoint, i.e., it gives the codepoint
-	//starting at the initial position and only then moves the pointer forward
-	$p = $codepoint_it->next();
+    $c = $codepoint_it->getLastCodePoint();
+    if ($c > 0)
+        var_dump(sprintf('U+%04X', $codepoint_it->getLastCodePoint()));
+    else
+        var_dump($c);
+    //it's a post-increment operation as to the codepoint, i.e., it gives the codepoint
+    //starting at the initial position and only then moves the pointer forward
+    $p = $codepoint_it->next();
 }
 
 echo "Now backwards\n";
 $p = $codepoint_it->last();
 while ($p != IntlBreakIterator::DONE) {
-	$c = $codepoint_it->getLastCodePoint();
-	if ($c > 0)
-		var_dump(sprintf('U+%04X', $codepoint_it->getLastCodePoint()));
-	else
-		var_dump($c);
-	$p = $codepoint_it->previous();
+    $c = $codepoint_it->getLastCodePoint();
+    if ($c > 0)
+        var_dump(sprintf('U+%04X', $codepoint_it->getLastCodePoint()));
+    else
+        var_dump($c);
+    $p = $codepoint_it->previous();
 }
 
 
 ?>
-==DONE==
 --EXPECT--
 int(-1)
 int(-1)
@@ -79,4 +78,3 @@ string(6) "U+0E2D"
 string(6) "U+0E27"
 string(6) "U+0E31"
 string(6) "U+0E15"
-==DONE==

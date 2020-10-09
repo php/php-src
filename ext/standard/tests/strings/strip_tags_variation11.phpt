@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : obscure values within attributes
---INI--
-short_open_tag = on
 --FILE--
 <?php
 

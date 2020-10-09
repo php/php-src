@@ -1,10 +1,5 @@
-dnl config.m4 for date extension
-
 dnl Check for headers needed by timelib
-AC_CHECK_HEADERS([ \
-strings.h \
-io.h
-])
+AC_CHECK_HEADERS([io.h])
 
 dnl Check for strtoll, atoll
 AC_CHECK_FUNCS(strtoll atoll)
@@ -29,7 +24,6 @@ cat > $ext_builddir/lib/timelib_config.h <<EOF
 # include <php_config.h>
 #endif
 #include <php_stdint.h>
-#define TIMELIB_OMIT_STDINT 1
 
 #include "zend.h"
 

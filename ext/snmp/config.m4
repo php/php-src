@@ -1,10 +1,7 @@
-dnl config.m4 for extension snmp
-
-PHP_ARG_WITH(snmp,for SNMP support,
-[  --with-snmp[=DIR]         Include SNMP support])
-
-PHP_ARG_WITH(openssl-dir,OpenSSL dir for SNMP,
-[  --with-openssl-dir[=DIR]  SNMP: openssl install prefix], no, no)
+PHP_ARG_WITH([snmp],
+  [for SNMP support],
+  [AS_HELP_STRING([[--with-snmp[=DIR]]],
+    [Include SNMP support])])
 
 if test "$PHP_SNMP" != "no"; then
 

@@ -44,8 +44,6 @@ $queue_clone = clone $queue;
 $queue_clone->dequeue();
 echo count($queue)."\n";
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Exception: Can't shift from an empty datastructure
 Exception: Can't shift from an empty datastructure
@@ -58,4 +56,3 @@ Exception: Can't shift from an empty datastructure
 int(1)
 int(2)
 3
-===DONE===

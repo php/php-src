@@ -20,11 +20,9 @@ echo $msgf->format(array($cal)), "\n";
 '{1, select, date {{0,date,full}} other {{0,time,h:m:s a V}}}');
 
 echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
-		$msgf->format(array($time, 'time')), "\n";
+        $msgf->format(array($time, 'time')), "\n";
 */
 
 ?>
-==DONE==
 --EXPECT--
 Quinta-feira, 17 de Maio de 2012 5:35:36 PM ptlis
-==DONE==

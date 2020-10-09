@@ -33,11 +33,9 @@ if (rmdir($tmpDir, NULL)) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 ok
 ok
 ok
 ok
 ok
-===DONE===

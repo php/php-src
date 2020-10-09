@@ -1,34 +1,29 @@
 --TEST--
 $http_reponse_header (redirect + not found)
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:22348'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --INI--
 allow_url_fopen=1
-allow_url_include=1
 --FILE--
 <?php
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 302 Found\r\n"
-    . "Some: Header\r\nLocation: http://127.0.0.1:22348/try-again\r\n\r\n",
+    "data://text/plain,HTTP/1.0 302 Found\r\n"
+    . "Some: Header\r\nLocation: /try-again\r\n\r\n",
     "data://test/plain,HTTP/1.0 404 Not Found\r\nSome: Header\r\n\r\nBody",
 );
 
-$pid = http_server("tcp://127.0.0.1:22348", $responses, $output);
+['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
-function test() {
-    $f = file_get_contents('http://127.0.0.1:22348/');
-    var_dump($f);
-    var_dump($http_response_header);
-}
-test();
+$f = file_get_contents($uri);
+var_dump($f);
+var_dump($http_response_header);
 
 http_server_kill($pid);
-?>
-==DONE==
+
 --EXPECTF--
-Warning: file_get_contents(http://127.0.0.1:22348/): failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
+Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
 bool(false)
 array(5) {
   [0]=>
@@ -36,10 +31,9 @@ array(5) {
   [1]=>
   string(12) "Some: Header"
   [2]=>
-  string(42) "Location: http://127.0.0.1:22348/try-again"
+  string(20) "Location: /try-again"
   [3]=>
   string(22) "HTTP/1.0 404 Not Found"
   [4]=>
   string(12) "Some: Header"
 }
-==DONE==

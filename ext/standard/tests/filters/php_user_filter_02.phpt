@@ -9,4 +9,4 @@ class foo extends php_user_filter {
 }
 ?>
 --EXPECTF--
-Warning: Declaration of foo::filter($in, $out, $consumed, $closing) should be compatible with php_user_filter::filter($in, $out, &$consumed, $closing) in %s on line %d
+Fatal error: Declaration of foo::filter($in, $out, $consumed, $closing) must be compatible with php_user_filter::filter($in, $out, &$consumed, bool $closing) in %s on line %d

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,15 +21,14 @@
 #include "php_string.h"
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
-/* {{{ proto string soundex(string str)
-   Calculate the soundex key of a string */
+/* {{{ Calculate the soundex key of a string */
 PHP_FUNCTION(soundex)
 {
 	char	*str;
 	size_t	i, _small, str_len, code, last;
 	char	soundex[4 + 1];
 
-	static char soundex_table[26] =
+	static const char soundex_table[26] =
 	{0,							/* A */
 	 '1',						/* B */
 	 '2',						/* C */
@@ -62,10 +59,6 @@ PHP_FUNCTION(soundex)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (str_len == 0) {
-		RETURN_FALSE;
-	}
 
 	/* build soundex string */
 	last = -1;
@@ -104,12 +97,3 @@ PHP_FUNCTION(soundex)
 	RETURN_STRINGL(soundex, _small);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

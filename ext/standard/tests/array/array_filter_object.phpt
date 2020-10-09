@@ -2,11 +2,6 @@
 Test array_filter() function : object functionality
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /* This file uses 'input' array with different types of objects and passes
  * it to array_filter() to test object functionality
  * i.e. object of simple class with members and functions
@@ -65,7 +60,6 @@ class StaticClass
   }
 }
 
-// Callback function which returns always true
 function always_true($input)
 {
   return true;

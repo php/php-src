@@ -4,20 +4,20 @@ Bug #67359 (Segfault in recursiveDirectoryIterator)
 <?php
 try
 {
-	$rdi = new recursiveDirectoryIterator(dirname(__FILE__),  FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
-	$it = new recursiveIteratorIterator( $rdi );
-	$it->seek(1);
-	while( $it->valid())
-	{
-		if( $it->isFile() )
-		{
-			$it->current();
-		}
+    $rdi = new recursiveDirectoryIterator(__DIR__,  FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
+    $it = new recursiveIteratorIterator( $rdi );
+    $it->seek(1);
+    while( $it->valid())
+    {
+        if( $it->isFile() )
+        {
+            $it->current();
+        }
 
-		$it->next();
-	}
+        $it->next();
+    }
 
-	$it->current();
+    $it->current();
 }
 catch(Exception $e)
 {

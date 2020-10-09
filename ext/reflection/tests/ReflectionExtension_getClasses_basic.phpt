@@ -7,9 +7,8 @@ Thijs Lensselink <tl@lenss.nl>
 $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
-==DONE==
 --EXPECT--
-array(16) {
+array(19) {
   ["ReflectionException"]=>
   object(ReflectionClass)#2 (1) {
     ["name"]=>
@@ -55,40 +54,54 @@ array(16) {
     ["name"]=>
     string(19) "ReflectionNamedType"
   }
-  ["ReflectionMethod"]=>
+  ["ReflectionUnionType"]=>
   object(ReflectionClass)#11 (1) {
+    ["name"]=>
+    string(19) "ReflectionUnionType"
+  }
+  ["ReflectionMethod"]=>
+  object(ReflectionClass)#12 (1) {
     ["name"]=>
     string(16) "ReflectionMethod"
   }
   ["ReflectionClass"]=>
-  object(ReflectionClass)#12 (1) {
+  object(ReflectionClass)#13 (1) {
     ["name"]=>
     string(15) "ReflectionClass"
   }
   ["ReflectionObject"]=>
-  object(ReflectionClass)#13 (1) {
+  object(ReflectionClass)#14 (1) {
     ["name"]=>
     string(16) "ReflectionObject"
   }
   ["ReflectionProperty"]=>
-  object(ReflectionClass)#14 (1) {
+  object(ReflectionClass)#15 (1) {
     ["name"]=>
     string(18) "ReflectionProperty"
   }
   ["ReflectionClassConstant"]=>
-  object(ReflectionClass)#15 (1) {
+  object(ReflectionClass)#16 (1) {
     ["name"]=>
     string(23) "ReflectionClassConstant"
   }
   ["ReflectionExtension"]=>
-  object(ReflectionClass)#16 (1) {
+  object(ReflectionClass)#17 (1) {
     ["name"]=>
     string(19) "ReflectionExtension"
   }
   ["ReflectionZendExtension"]=>
-  object(ReflectionClass)#17 (1) {
+  object(ReflectionClass)#18 (1) {
     ["name"]=>
     string(23) "ReflectionZendExtension"
   }
+  ["ReflectionReference"]=>
+  object(ReflectionClass)#19 (1) {
+    ["name"]=>
+    string(19) "ReflectionReference"
+  }
+  ["ReflectionAttribute"]=>
+  object(ReflectionClass)#20 (1) {
+    ["name"]=>
+    string(19) "ReflectionAttribute"
+  }
 }
-==DONE==

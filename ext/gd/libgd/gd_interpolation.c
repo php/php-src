@@ -91,7 +91,7 @@ TODO:
    part of GD */
 typedef long gdFixed;
 /* Integer to fixed point */
-#define gd_itofx(x) ((x) << 8)
+#define gd_itofx(x) (long)((unsigned long)(x) << 8)
 
 /* Float to fixed point */
 #define gd_ftofx(x) (long)((x) * 256)
@@ -112,7 +112,7 @@ typedef long gdFixed;
 #define gd_mulfx(x,y) (((x) * (y)) >> 8)
 
 /* Divide a fixed by a fixed */
-#define gd_divfx(x,y) (((x) << 8) / (y))
+#define gd_divfx(x,y) ((long)((unsigned long)(x) << 8) / (y))
 
 typedef struct
 {
@@ -366,6 +366,7 @@ static double filter_generalized_cubic(const double t)
 	return 0;
 }
 
+#ifdef FUNCTION_NOT_USED_YET
 /* CubicSpline filter, default radius 2 */
 static double filter_cubic_spline(const double x1)
 {
@@ -381,7 +382,9 @@ static double filter_cubic_spline(const double x1)
 	}
 	return 0;
 }
+#endif
 
+#ifdef FUNCTION_NOT_USED_YET
 /* CubicConvolution filter, default radius 3 */
 static double filter_cubic_convolution(const double x1)
 {
@@ -394,6 +397,7 @@ static double filter_cubic_convolution(const double x1)
 	if (x <= 3.0) return ( (1.0/12.0) * x2_x - (2.0 / 3.0) * x2 + 1.75 * x - 1.5);
 	return 0;
 }
+#endif
 
 static double filter_box(double x) {
 	if (x < - DEFAULT_FILTER_BOX)
@@ -418,6 +422,7 @@ static double filter_catmullrom(const double x)
 	return(0.0f);
 }
 
+#ifdef FUNCTION_NOT_USED_YET
 static double filter_filter(double t)
 {
 	/* f(t) = 2|t|^3 - 3|t|^2 + 1, -1 <= t <= 1 */
@@ -425,8 +430,9 @@ static double filter_filter(double t)
 	if(t < 1.0) return((2.0 * t - 3.0) * t * t + 1.0);
 	return(0.0);
 }
+#endif
 
-
+#ifdef FUNCTION_NOT_USED_YET
 /* Lanczos8 filter, default radius 8 */
 static double filter_lanczos8(const double x1)
 {
@@ -441,8 +447,9 @@ static double filter_lanczos8(const double x1)
 	return 0.0;
 #undef R
 }
+#endif
 
-
+#ifdef FUNCTION_NOT_USED_YET
 /* Lanczos3 filter, default radius 3 */
 static double filter_lanczos3(const double x1)
 {
@@ -458,6 +465,7 @@ static double filter_lanczos3(const double x1)
 	return 0.0;
 #undef R
 }
+#endif
 
 /* Hermite filter, default radius 1 */
 static double filter_hermite(const double x1)
@@ -515,6 +523,7 @@ static double filter_mitchell(const double x)
 
 
 
+#ifdef FUNCTION_NOT_USED_YET
 /* Cosine filter, default radius 1 */
 static double filter_cosine(const double x)
 {
@@ -522,6 +531,7 @@ static double filter_cosine(const double x)
 
 	return 0;
 }
+#endif
 
 /* Quadratic filter, default radius 1.5 */
 static double filter_quadratic(const double x1)
@@ -553,6 +563,7 @@ static double filter_bspline(const double x)
 	}
 }
 
+#ifdef FUNCTION_NOT_USED_YET
 /* QuadraticBSpline filter, default radius 1.5 */
 static double filter_quadratic_bspline(const double x1)
 {
@@ -562,6 +573,7 @@ static double filter_quadratic_bspline(const double x1)
 	if (x <= 1.5) return (0.5 * x * x - 1.5 * x + 1.125);
 	return 0.0;
 }
+#endif
 
 static double filter_gaussian(const double x)
 {
@@ -603,6 +615,7 @@ static double filter_sinc(const double x)
 	return (sin(M_PI * (double) x) / (M_PI * (double) x));
 }
 
+#ifdef FUNCTION_NOT_USED_YET
 static double filter_welsh(const double x)
 {
 	/* Welsh parabolic windowing filter */
@@ -610,7 +623,7 @@ static double filter_welsh(const double x)
 		return(1 - x*x);
 	return(0.0);
 }
-
+#endif
 
 /* Copied from upstream's libgd */
 static inline int _color_blend (const int dst, const int src)
@@ -643,14 +656,6 @@ static inline int _color_blend (const int dst, const int src)
 			return ((alpha << 24) + (red << 16) + (green << 8) + blue);
 		}
 	}
-}
-
-static inline int _setEdgePixel(const gdImagePtr src, unsigned int x, unsigned int y, gdFixed coverage, const int bgColor)
-{
-	const gdFixed f_127 = gd_itofx(127);
-	register int c = src->tpixels[y][x];
-	c = c | (( (int) (gd_fxtof(gd_mulfx(coverage, f_127)) + 50.5f)) << 24);
-	return _color_blend(bgColor, c);
 }
 
 static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, const int bgColor)
@@ -931,7 +936,7 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
     int *p_dst_row = dst->tpixels[row];
 	unsigned int x;
 
-    for (x = 0; x < dst_width - 1; x++) {
+    for (x = 0; x < dst_width; x++) {
 		register unsigned char r = 0, g = 0, b = 0, a = 0;
         const int left = contrib->ContribRow[x].Left;
         const int right = contrib->ContribRow[x].Right;
@@ -967,7 +972,7 @@ static inline int _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsigne
 		return 0;
 	}
 	/* Scale each row */
-	for (u = 0; u < dst_height - 1; u++) {
+	for (u = 0; u < dst_height; u++) {
 		_gdScaleRow(pSrc, src_width, pDst, dst_width, u, contrib);
 	}
 	_gdContributionsFree (contrib);
@@ -977,7 +982,7 @@ static inline int _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsigne
 static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
 {
 	unsigned int y;
-	for (y = 0; y < dst_height - 1; y++) {
+	for (y = 0; y < dst_height; y++) {
 		register unsigned char r = 0, g = 0, b = 0, a = 0;
 		const int iLeft = contrib->ContribRow[y].Left;
 		const int iRight = contrib->ContribRow[y].Right;
@@ -1014,7 +1019,7 @@ static inline int _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_wi
 		return 0;
 	}
 	/* scale each column */
-	for (u = 0; u < dst_width - 1; u++) {
+	for (u = 0; u < dst_width; u++) {
 		_gdScaleCol(pSrc, src_width, pDst, dst_width, dst_height, u, contrib);
 	}
 	_gdContributionsFree(contrib);
@@ -1123,54 +1128,6 @@ gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width,
 		dst_offset_y++;
 	}
 	return dst_img;
-}
-
-static inline int getPixelOverflowColorTC(gdImagePtr im, const int x, const int y, const int color)
-{
-	if (gdImageBoundsSafe(im, x, y)) {
-		const int c = im->tpixels[y][x];
-		if (c == im->transparent) {
-			return gdTrueColorAlpha(0, 0, 0, 127);
-		}
-		return c;
-	} else {
-		register int border = 0;
-		if (y < im->cy1) {
-			border = im->tpixels[0][im->cx1];
-			goto processborder;
-		}
-
-		if (y < im->cy1) {
-			border = im->tpixels[0][im->cx1];
-			goto processborder;
-		}
-
-		if (y > im->cy2) {
-			if (x >= im->cx1 && x <= im->cx1) {
-				border = im->tpixels[im->cy2][x];
-				goto processborder;
-			} else {
-				return gdTrueColorAlpha(0, 0, 0, 127);
-			}
-		}
-
-		/* y is bound safe at this point */
-		if (x < im->cx1) {
-			border = im->tpixels[y][im->cx1];
-			goto processborder;
-		}
-
-		if (x > im->cx2) {
-			border = im->tpixels[y][im->cx2];
-		}
-
-processborder:
-		if (border == im->transparent) {
-			return gdTrueColorAlpha(0, 0, 0, 127);
-		} else{
-			return gdTrueColorAlpha(gdTrueColorGetRed(border), gdTrueColorGetGreen(border), gdTrueColorGetBlue(border), 127);
-		}
-	}
 }
 
 static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int new_width, const unsigned int new_height)
@@ -1287,7 +1244,6 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 
 	int dst_offset_h;
 	int dst_offset_v = 0;
-	int dwSrcTotalOffset;
 	long i;
 	gdImagePtr new_img;
 
@@ -1309,8 +1265,8 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 			gdFixed f_j = gd_itofx(j);
 			gdFixed f_a = gd_mulfx(f_i, f_dy);
 			gdFixed f_b = gd_mulfx(f_j, f_dx);
-			const gdFixed m = gd_fxtoi(f_a);
-			const gdFixed n = gd_fxtoi(f_b);
+			const long m = gd_fxtoi(f_a);
+			const long n = gd_fxtoi(f_b);
 			gdFixed f_f = f_a - gd_itofx(m);
 			gdFixed f_g = f_b - gd_itofx(n);
 
@@ -1326,7 +1282,6 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 					f_g1, f_g2, f_g3, f_g4,
 					f_b1, f_b2, f_b3, f_b4,
 					f_a1, f_a2, f_a3, f_a4;
-			dwSrcTotalOffset = m + n;
 			/* 0 for bgColor; (n,m) is supposed to be valid anyway */
 			pixel1 = getPixelOverflowTC(im, n, m, 0);
 			pixel2 = getPixelOverflowTC(im, n + 1, m, pixel1);
@@ -1816,8 +1771,8 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
-			const unsigned int m = gd_fxtoi(f_m);
-			const unsigned int n = gd_fxtoi(f_n);
+			const int m = gd_fxtoi(f_m);
+			const int n = gd_fxtoi(f_n);
 
 			if ((m >= 0) && (m < src_h - 1) && (n >= 0) && (n < src_w - 1)) {
 				const gdFixed f_f = f_m - gd_itofx(m);
@@ -2162,7 +2117,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 {
 	/* round to two decimals and keep the 100x multiplication to use it in the common square angles
 	   case later. Keep the two decimal precisions so smaller rotation steps can be done, useful for
-	   slow animations, f.e. */
+	   slow animations. */
 	const int angle_rounded = fmod((int) floorf(angle * 100), 360 * 100);
 
 	if (bgcolor < 0) {
@@ -2347,17 +2302,14 @@ int gdTransformAffineCopy(gdImagePtr dst,
 	int backup_clipx1, backup_clipy1, backup_clipx2, backup_clipy2;
 	register int x, y, src_offset_x, src_offset_y;
 	double inv[6];
-	int *dst_p;
 	gdPointF pt, src_pt;
 	gdRect bbox;
 	int end_x, end_y;
 	gdInterpolationMethod interpolation_id_bak = src->interpolation_id;
-	interpolation_method interpolation_bak;
 
 	/* These methods use special implementations */
 	if (src->interpolation_id == GD_BILINEAR_FIXED || src->interpolation_id == GD_BICUBIC_FIXED || src->interpolation_id == GD_NEAREST_NEIGHBOUR) {
 		interpolation_id_bak = src->interpolation_id;
-		interpolation_bak = src->interpolation;
 
 		gdImageSetInterpolationMethod(src, GD_BICUBIC);
 	}
@@ -2389,8 +2341,8 @@ int gdTransformAffineCopy(gdImagePtr dst,
 
 	gdImageGetClip(dst, &c1x, &c1y, &c2x, &c2y);
 
-	end_x = bbox.width  + (int) fabs(bbox.x);
-	end_y = bbox.height + (int) fabs(bbox.y);
+	end_x = bbox.width  + abs(bbox.x);
+	end_y = bbox.height + abs(bbox.y);
 
 	/* Get inverse affine to let us work with destination -> source */
 	if (gdAffineInvert(inv, affine) == GD_FALSE) {
@@ -2412,11 +2364,18 @@ int gdTransformAffineCopy(gdImagePtr dst,
 		}
 	} else {
 		for (y = 0; y <= end_y; y++) {
+			unsigned char *dst_p = NULL;
+			int *tdst_p = NULL;
+
 			pt.y = y + 0.5 + bbox.y;
 			if ((dst_y + y) < 0 || ((dst_y + y) > gdImageSY(dst) -1)) {
 				continue;
 			}
-			dst_p = dst->tpixels[dst_y + y] + dst_x;
+			if (dst->trueColor) {
+				tdst_p = dst->tpixels[dst_y + y] + dst_x;
+			} else {
+				dst_p = dst->pixels[dst_y + y] + dst_x;
+			}
 
 			for (x = 0; x <= end_x; x++) {
 				pt.x = x + 0.5 + bbox.x;
@@ -2425,7 +2384,11 @@ int gdTransformAffineCopy(gdImagePtr dst,
 				if ((dst_x + x) < 0 || (dst_x + x) > (gdImageSX(dst) - 1)) {
 					break;
 				}
-				*(dst_p++) = getPixelInterpolated(src, src_offset_x + src_pt.x, src_offset_y + src_pt.y, -1);
+				if (dst->trueColor) {
+					*(tdst_p++) = getPixelInterpolated(src, src_offset_x + src_pt.x, src_offset_y + src_pt.y, -1);
+				} else {
+					*(dst_p++) = getPixelInterpolated(src, src_offset_x + src_pt.x, src_offset_y + src_pt.y, -1);
+				}
 			}
 		}
 	}
@@ -2569,6 +2532,29 @@ int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id)
 	}
 	im->interpolation_id = id;
 	return 1;
+}
+
+/**
+ * Function: gdImageGetInterpolationMethod
+ *
+ * Get the current interpolation method
+ *
+ * This is here so that the value can be read via a language or VM with an FFI
+ * but no (portable) way to extract the value from the struct.
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * Returns:
+ *   The current interpolation method.
+ *
+ * See also:
+ *   - <gdInterpolationMethod>
+ *   - <gdImageSetInterpolationMethod>
+ */
+gdInterpolationMethod gdImageGetInterpolationMethod(gdImagePtr im)
+{
+    return im->interpolation_id;
 }
 
 #ifdef _MSC_VER

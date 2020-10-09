@@ -3,14 +3,14 @@ PDO_OCI: check fread() EOF
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for WE8MSWIN1252 character set');
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
+require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 
 $dbh = PDOTest::factory();
 
@@ -19,7 +19,7 @@ $dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 // Initialization
 $stmtarray = array(
     "begin execute immediate 'drop table pdo_oci_fread_tab'; exception when others then null; end;",
-	"create table pdo_oci_fread_tab (id number, data clob)",
+    "create table pdo_oci_fread_tab (id number, data clob)",
     "declare
     lob1 clob := 'abc' || lpad('j',4020,'j') || 'xyz';
    begin
@@ -28,7 +28,7 @@ $stmtarray = array(
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 echo "Test 1\n";
@@ -47,11 +47,11 @@ fclose($sh);
 // Clean up
 
 $stmtarray = array(
-	"drop table pdo_oci_fread_tab"
+    "drop table pdo_oci_fread_tab"
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 ?>

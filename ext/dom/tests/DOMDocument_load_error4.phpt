@@ -12,12 +12,11 @@ Antonio Diaz Ruiz <dejalatele@gmail.com>
 assert.bail=true
 --SKIPIF--
 <?php include('skipif.inc'); ?>
-<?php if (LIBXML_VERSION < 20701) die("skip: libxml2 2.7.1+ required"); ?>
 --ENV--
 XML_FILE=/not_well_formed4.xml
 LOAD_OPTIONS=0
 EXPECTED_RESULT=0
 --FILE_EXTERNAL--
-domdocumentload_test_method.php
+domdocumentload_test_method.inc
 --EXPECTF--
 Warning: DOMDocument::load%r(XML){0,1}%r(): Unsupported version '3.1' %s

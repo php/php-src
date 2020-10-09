@@ -3,9 +3,7 @@ IntlCalendar::createInstance() argument variations
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
-	die('skip for ICU 4.8+');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -39,7 +37,6 @@ print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
 
 ?>
-==DONE==
 --EXPECTF--
 IntlTimeZone Object
 (
@@ -81,4 +78,3 @@ IntlTimeZone Object
     [currentOffset] => %d
 )
 pt
-==DONE==

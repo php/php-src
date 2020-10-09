@@ -4,12 +4,6 @@ Test ctype_punct() function : usage variations - different data types as $c argu
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace
- * or an alphanumeric character
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_punt() to test behaviour
  */
@@ -99,7 +93,6 @@ fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_punct() : usage variations ***
 
@@ -177,4 +170,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

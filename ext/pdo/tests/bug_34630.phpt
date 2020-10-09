@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #34630 (inserting streams as LOBs)
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -18,9 +18,9 @@ $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
 $is_oci = $driver == 'oci';
 
 if ($is_oci) {
-	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val BLOB)');
+    $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val BLOB)');
 } else {
-	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
+    $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
 }
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -29,13 +29,13 @@ fwrite($fp, "I am the LOB data");
 rewind($fp);
 
 if ($is_oci) {
-	/* oracle is a bit different; you need to initiate a transaction otherwise
-	 * the empty blob will be committed implicitly when the statement is
-	 * executed */
-	$db->beginTransaction();
-	$insert = $db->prepare("insert into test (id, val) values (1, EMPTY_BLOB()) RETURNING val INTO :blob");
+    /* oracle is a bit different; you need to initiate a transaction otherwise
+     * the empty blob will be committed implicitly when the statement is
+     * executed */
+    $db->beginTransaction();
+    $insert = $db->prepare("insert into test (id, val) values (1, EMPTY_BLOB()) RETURNING val INTO :blob");
 } else {
-	$insert = $db->prepare("insert into test (id, val) values (1, :blob)");
+    $insert = $db->prepare("insert into test (id, val) values (1, :blob)");
 }
 $insert->bindValue(':blob', $fp, PDO::PARAM_LOB);
 $insert->execute();

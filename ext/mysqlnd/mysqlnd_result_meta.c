@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -311,7 +309,7 @@ mysqlnd_result_meta_init(MYSQLND_RES *result, unsigned int field_count)
 
 /* {{{ mysqlnd_res_meta_get_methods */
 PHPAPI struct st_mysqlnd_res_meta_methods *
-mysqlnd_result_metadata_get_methods()
+mysqlnd_result_metadata_get_methods(void)
 {
 	return &mysqlnd_mysqlnd_res_meta_methods;
 }
@@ -330,12 +328,3 @@ _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * met
 	DBG_RETURN((void *)((char *)meta + sizeof(MYSQLND_RES_METADATA) + plugin_id * sizeof(void *)));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,11 +34,11 @@ struct phpdbg_eol_rep phpdbg_eol_list[EOL_LIST_LEN] = {
 int phpdbg_eol_global_update(char *name)
 {
 
-	if (0 == memcmp(name, "CRLF", 4) || 0 == memcmp(name, "crlf", 4) || 0 == memcmp(name, "DOS", 3) || 0 == memcmp(name, "dos", 3)) {
+	if (0 == strcmp(name, "CRLF") || 0 == strcmp(name, "crlf") || 0 == strcmp(name, "DOS") || 0 == strcmp(name, "dos")) {
 		PHPDBG_G(eol) = PHPDBG_EOL_CRLF;
-	} else if (0 == memcmp(name, "LF", 2) || 0 == memcmp(name, "lf", 2) || 0 == memcmp(name, "UNIX", 4) || 0 == memcmp(name, "unix", 4)) {
+	} else if (0 == strcmp(name, "LF") || 0 == strcmp(name, "lf") || 0 == strcmp(name, "UNIX") || 0 == strcmp(name, "unix")) {
 		PHPDBG_G(eol) = PHPDBG_EOL_LF;
-	} else if (0 == memcmp(name, "CR", 2) || 0 == memcmp(name, "cr", 2) || 0 == memcmp(name, "MAC", 3) || 0 == memcmp(name, "mac", 3)) {
+	} else if (0 == strcmp(name, "CR") || 0 == strcmp(name, "cr") || 0 == strcmp(name, "MAC") || 0 == strcmp(name, "mac")) {
 		PHPDBG_G(eol) = PHPDBG_EOL_CR;
 	} else {
 		return FAILURE;
@@ -81,27 +79,30 @@ char *phpdbg_eol_rep(int id)
 	return NULL;
 }
 
+/* Marked as never_inline to work around a -Walloc-size-larger-than bug in GCC. */
+static zend_never_inline int count_lf_and_cr(const char *in, int in_len) {
+	int i, count = 0;
+	for (i = 0; i < in_len; i++) {
+		if (0x0a == in[i] || 0x0d == in[i]) {
+			count++;
+		}
+	}
+	return count;
+}
 
 /* Inspired by https://ccrma.stanford.edu/~craig/utility/flip/flip.cpp */
 void phpdbg_eol_convert(char **str, int *len)
 {
-	char *in = *str, *out ;
-	int in_len = *len, out_len, cursor, i;
+	char *in = *str, *out;
+	int in_len = *len, cursor, i;
 	char last, cur;
 
 	if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) != PHPDBG_IS_REMOTE) {
 		return;
 	}
 
-	out_len = *len;
 	if (PHPDBG_EOL_CRLF == PHPDBG_G(eol)) { /* XXX add LFCR case if it's gonna be needed */
-		/* depending on the source EOL the out str will have all CR/LF duplicated */
-		for (i = 0; i < in_len; i++) {
-			if (0x0a == in[i] || 0x0d == in[i]) {
-				out_len++;
-			}
-		}
-		out = (char *)emalloc(out_len);
+		out = (char *)emalloc(in_len + count_lf_and_cr(in, in_len));
 
 		last = cur = in[0];
 		i = cursor = 0;
@@ -142,7 +143,7 @@ void phpdbg_eol_convert(char **str, int *len)
 		}
 
 		/* We gonna have a smaller or equally long string, estimation is almost neglecting */
-		out = (char *)emalloc(out_len);
+		out = (char *)emalloc(in_len);
 
 		last = cur = in[0];
 		i = cursor = 0;

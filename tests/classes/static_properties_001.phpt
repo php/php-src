@@ -4,7 +4,7 @@ ZE2 Initializing static properties to arrays
 <?php
 
 class test {
-	static public $ar = array();
+    static public $ar = array();
 }
 
 var_dump(test::$ar);

@@ -6,29 +6,20 @@ SPL: LimitIterator zero is valid offset
 $array = array('a', 'b', 'c');
 $arrayIterator = new ArrayIterator($array);
 
-try {
-  $limitIterator = new LimitIterator($arrayIterator, 0);
-  foreach ($limitIterator as $item) {
+$limitIterator = new LimitIterator($arrayIterator, 0);
+foreach ($limitIterator as $item) {
     echo $item . "\n";
-  }
-} catch (OutOfRangeException $e){
-  print $e->getMessage() . "\n";
 }
 
 try {
-  $limitIterator = new LimitIterator($arrayIterator, -1);
-  foreach ($limitIterator as $item) {
-    echo $item . "\n";
-  }
-} catch (OutOfRangeException $e){
-  print $e->getMessage() . "\n";
+    $limitIterator = new LimitIterator($arrayIterator, -1);
+} catch (\ValueError $e){
+    print $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --EXPECT--
 a
 b
 c
-Parameter offset must be >= 0
-===DONE===
+LimitIterator::__construct(): Argument #2 ($offset) must be greater than or equal to 0

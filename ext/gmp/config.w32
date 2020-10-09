@@ -8,7 +8,6 @@ if (PHP_GMP != "no") {
 		EXTENSION("gmp", "gmp.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		PHP_INSTALL_HEADERS("ext/gmp", "php_gmp_int.h");
 		AC_DEFINE('HAVE_GMP', 1, 'GMP support');
-		AC_DEFINE('HAVE_MPIR', 1, 'MPIR support');
 	} else {
 		WARNING("GMP not enabled; libraries and headers not found");
 	}

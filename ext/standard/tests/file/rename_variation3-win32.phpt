@@ -8,14 +8,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
-   Description: Renames a file or directory
-*/
-
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 /* creating directory */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirname = "$file_path/rename_variation3_dir";
 mkdir($dirname);
 
@@ -25,7 +21,7 @@ mkdir($dirname);
 $filename = "$file_path/rename_variation3.tmp";
 $fp = fopen($filename, "w");
 if (!$fp) {
-	die("Cannot create $filename\n");
+    die("Cannot create $filename\n");
 }
 fclose($fp);
 
@@ -54,7 +50,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/rename_variation3_link.tmp");
 unlink($file_path."/rename_variation3.tmp");
 rmdir($file_path."/rename_variation3_dir");

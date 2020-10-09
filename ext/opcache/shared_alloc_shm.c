@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,6 @@
 #include <sys/types.h>
 #include <sys/shm.h>
 #include <sys/ipc.h>
-#include <dirent.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,13 +60,13 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
 	int shmget_flags;
 	zend_shared_segment_shm *shared_segments;
 
-    seg_allocate_size = SEG_ALLOC_SIZE_MAX;
-    /* determine segment size we _really_ need:
-     * no more than to include requested_size
-     */
-    while (requested_size * 2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
-        seg_allocate_size >>= 1;
-    }
+	seg_allocate_size = SEG_ALLOC_SIZE_MAX;
+	/* determine segment size we _really_ need:
+	 * no more than to include requested_size
+	 */
+	while (requested_size * 2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
+		seg_allocate_size >>= 1;
+	}
 
 	shmget_flags = IPC_CREAT|SHM_R|SHM_W|IPC_EXCL;
 

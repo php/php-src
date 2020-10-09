@@ -5,8 +5,7 @@ XMLWriter: libxml2 XML Writer, membuffer, flush
 --FILE--
 <?php
 
-$doc_dest = '001.xml';
-$xw = xmlwriter_open_memory($doc_dest);
+$xw = xmlwriter_open_memory();
 xmlwriter_start_document($xw, '1.0', 'UTF-8');
 xmlwriter_start_element($xw, "tag1");
 xmlwriter_end_document($xw);
@@ -14,8 +13,6 @@ xmlwriter_end_document($xw);
 // Force to write and empty the buffer
 echo xmlwriter_flush($xw, true);
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <tag1/>
-===DONE===

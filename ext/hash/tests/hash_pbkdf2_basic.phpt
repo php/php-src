@@ -1,15 +1,7 @@
 --TEST--
-Test hash_pbkdf2() function : basic functionality
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_pbkdf2() function : basic functionality
 --FILE--
 <?php
-
-/* Prototype  : string hash_hmac(string $algo, string $data, string $key [, int $length = 0 [, bool $raw_output = false]])
- * Description: Generate a keyed hash value using the HMAC method
- * Source code: ext/hash/hash.c
- * Alias to functions:
-*/
 
 echo "*** Testing hash_pbkdf2() : basic functionality ***\n";
 
@@ -25,7 +17,6 @@ echo "sha256(rounds): " . hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'sal
 echo "sha256(rounds)(raw): " . bin2hex(hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'saltSALTsaltSALTsaltSALTsaltSALTsalt', 4096, 40, TRUE))."\n";
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_pbkdf2() : basic functionality ***
 sha1: 0c60c80f961f0e71f3a9
@@ -38,4 +29,3 @@ sha256(no length): 120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be
 sha256(raw): 120fb6cffcf8b32c43e7225256c4f837a86548c9
 sha256(rounds): 348c89dbcbd32b2f32d814b8116e84cf2b17347e
 sha256(rounds)(raw): 348c89dbcbd32b2f32d814b8116e84cf2b17347ebc1800181c4e2a1fb8dd53e1c635518c7dac47e9
-===Done===

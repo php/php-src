@@ -13,12 +13,12 @@ die('skip not for AIX');
 }
 --CLEAN--
 <?php
-$path = __DIR__ . "/unix_sock";
+$path = __DIR__ . "/socket_cmsg_rights.sock";
 @unlink($path);
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";
-$path = __DIR__ . "/unix_sock";
+$path = __DIR__ . "/socket_cmsg_rights.sock";
 
 @unlink($path);
 
@@ -55,12 +55,36 @@ $data = [
 ];
 var_dump($data);
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
-print_r($data);
+
+if ($data["control"]) {
+    $control = $data["control"][0];
+    if ($control["level"] == SOL_SOCKET &&
+        $control["type"]  == SCM_RIGHTS) {
+        foreach ($control["data"] as $resource) {
+            if (!is_resource($resource)) {
+                echo "FAIL RES\n";
+                var_dump($data);
+                exit;
+            }
+        }
+        echo "OK";
+    } else {
+        echo "FAIL RIGHTS\n";
+        var_dump($data);
+        exit;
+    }
+} else {
+    echo "FAIL CONTROL\n";
+    var_dump($data);
+}
+?>
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 creating receive socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(11)
 array(3) {
@@ -72,32 +96,4 @@ array(3) {
   ["controllen"]=>
   int(%d)
 }
-Array
-(
-    [name] => 
-    [control] => Array
-        (
-            [0] => Array
-                (
-                    [level] => %d
-                    [type] => %d
-                    [data] => Array
-                        (
-                            [0] => Resource id #%d
-                            [1] => Resource id #%d
-                            [2] => Resource id #%d
-                            [3] => Resource id #%d
-                        )
-
-                )
-
-        )
-
-    [iov] => Array
-        (
-            [0] => test thing
-
-        )
-
-    [flags] => 0
-)
+OK

@@ -2,76 +2,69 @@
 MySQL PDO->getAttribute()
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
-	die("skip Transactional engine not found");
+    die("skip Transactional engine not found");
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	$db = MySQLPDOTest::factory();
-	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    $db = MySQLPDOTest::factory();
+    MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
-	function find_invalid_int($valid_options) {
-		do {
-			$invalid = mt_rand(-10000, 10000);
-		} while (in_array($invalid, $valid_options));
-		return $invalid;
-	}
+    function set_and_get($offset, $db, $attribute, $value) {
 
-	function set_and_get($offset, $db, $attribute, $value) {
+        $value_type = gettype($value);
+        try {
 
-		$value_type = gettype($value);
-		try {
+            if (!$db->setAttribute($attribute, $value)) {
+                printf("[%03d] Cannot set attribute '%s' to value '%s'\n",
+                    $offset, $attribute, var_export($tmp, true));
+                return false;
+            }
 
-			if (!$db->setAttribute($attribute, $value)) {
-				printf("[%03d] Cannot set attribute '%s' to value '%s'\n",
-					$offset, $attribute, var_export($tmp, true));
-				return false;
-			}
+            if (gettype($value) != $value_type) {
+                printf("[%03d] Call to PDO::setAttribute(int attribute, mixed value) has changed the type of value from %s to %s, test will not work properly\n",
+                    $offset, $value_type, gettype($value));
+                return false;
+            }
 
-			if (gettype($value) != $value_type) {
-				printf("[%03d] Call to PDO::setAttribute(int attribute, mixed value) has changed the type of value from %s to %s, test will not work properly\n",
-					$offset, $value_type, gettype($value));
-				return false;
-			}
+            $tmp = $db->getAttribute($attribute);
+            if ($tmp !== $value) {
+                printf("[%03d] Attribute '%s' was set to '%s'/%s but getAttribute() reports '%s'/%s\n",
+                    $offset, $attribute, var_export($value, true), gettype($value), var_export($tmp, true), gettype($tmp));
+                return false;
+            }
 
-			$tmp = $db->getAttribute($attribute);
-			if ($tmp !== $value) {
-				printf("[%03d] Attribute '%s' was set to '%s'/%s but getAttribute() reports '%s'/%s\n",
-					$offset, $attribute, var_export($value, true), gettype($value), var_export($tmp, true), gettype($tmp));
-				return false;
-			}
+        } catch (PDOException $e) {
+            printf("[%03d] %s, [%s] %s\n",
+                $offset, $e->getMessage(),
+                $db->errorCode(), implode(' ', $db->errorInfo()));
+            return false;
+        }
 
-		} catch (PDOException $e) {
-			printf("[%03d] %s, [%s] %s\n",
-				$offset, $e->getMessage(),
-				$db->errorCode(), implode(' ', $db->errorInfo()));
-			return false;
-		}
+        return true;
+    }
 
-		return true;
-	}
-
-	set_and_get(1, $db, PDO::ATTR_AUTOCOMMIT, 1);
+    set_and_get(1, $db, PDO::ATTR_AUTOCOMMIT, 1);
 /*
-	set_and_get(2, $db, PDO::ATTR_AUTOCOMMIT, 0);
-	set_and_get(3, $db, PDO::ATTR_AUTOCOMMIT, -1);
-	$obj = new stdClass();
-	set_and_get(4, $db, PDO::ATTR_AUTOCOMMIT, $obj);
+    set_and_get(2, $db, PDO::ATTR_AUTOCOMMIT, 0);
+    set_and_get(3, $db, PDO::ATTR_AUTOCOMMIT, -1);
+    $obj = new stdClass();
+    set_and_get(4, $db, PDO::ATTR_AUTOCOMMIT, $obj);
 
-	set_and_get(5, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, 1);
-	set_and_get(6, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, 0);
-	set_and_get(7, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, -1);
-	$tmp = array();
-	set_and_get(8, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, $tmp);
+    set_and_get(5, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, 1);
+    set_and_get(6, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, 0);
+    set_and_get(7, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, -1);
+    $tmp = array();
+    set_and_get(8, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, $tmp);
 
-	set_and_get(9, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, '');
-	set_and_get(10, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, 'SOME SQL');
-	set_and_get(11, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, -1);
+    set_and_get(9, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, '');
+    set_and_get(10, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, 'SOME SQL');
+    set_and_get(11, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, -1);
 
 */
 /*
@@ -94,11 +87,11 @@ PDO::ATTR_CONNECTION_STATUS
 PDO::ATTR_SERVER_INFO
 */
 
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--

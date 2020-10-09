@@ -6,7 +6,6 @@ EUC-JP to UTF8
 error_reporting=2039
 --FILE--
 <?php
-/* include('test.inc'); */
 /* charset=EUC-JP */
 
 $str = "

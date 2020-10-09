@@ -8,4 +8,4 @@ function test() : ?void {
 
 ?>
 --EXPECTF--
-Fatal error: Void type cannot be nullable in %s on line %d
+Fatal error: Void can only be used as a standalone type in %s on line %d

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +17,7 @@
 #ifndef PHP_BZ2_H
 #define PHP_BZ2_H
 
-#if HAVE_BZ2
+#ifdef HAVE_BZ2
 
 extern zend_module_entry bz2_module_entry;
 #define phpext_bz2_ptr &bz2_module_entry
@@ -65,11 +63,3 @@ extern const php_stream_ops php_stream_bz2io_ops;
 #define PHP_BZ2_FILTER_DEFAULT_WORKFACTOR       0
 
 #endif
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

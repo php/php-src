@@ -21,5 +21,6 @@ var_dump(is_file($file));
 --CLEAN--
 <?php
 unlink(__DIR__ . "/bug74663.inc");
+?>
 --EXPECT--
 bool(true)

@@ -12,7 +12,6 @@ if(!is_dir($dir)) {
 $phar->extractTo($dir);
 var_dump(file_exists("$dir/ThisIsATestFile.txt"));
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__."/bug70019";
@@ -21,4 +20,3 @@ rmdir($dir);
 ?>
 --EXPECT--
 bool(true)
-===DONE===

@@ -1,8 +1,4 @@
-#if HAVE_GD_BUNDLED
-# include "gd.h"
-#else
-# include <gd.h>
-#endif
+#include "gd.h"
 
 #include "gd_intern.h"
 #include <math.h>

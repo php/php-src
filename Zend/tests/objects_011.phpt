@@ -6,10 +6,10 @@ error_reporting=8191
 <?php
 
 class test {
-	function __construct() {
-	}
-	function test() {
-	}
+    function __construct() {
+    }
+    function test() {
+    }
 }
 
 echo "Done\n";

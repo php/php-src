@@ -2,12 +2,6 @@
 Test join() function : usage variations - different values for 'pieces' argument
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
- * Source code: ext/standard/string.c
- * Alias of function: implode()
-*/
-
 /*
  * test join() by giving different pieces values
 */
@@ -37,7 +31,7 @@ $pieces_arrays = array (
   array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
   array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
 
-  // array with repetative keys
+  // array with repetitive keys
   array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
 );
 
@@ -62,9 +56,9 @@ string(6) "1], [2"
 string(10) "1.1], [2.2"
 -- Iteration 3 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(14) "Array], [Array"
 -- Iteration 4 --
 string(5) "], [1"

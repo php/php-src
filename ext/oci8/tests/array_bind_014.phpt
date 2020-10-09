@@ -3,12 +3,12 @@ oci_bind_array_by_name() and NUMBERs
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $drop = "DROP table bind_test";
 $statement = oci_parse($c, $drop);
@@ -47,8 +47,8 @@ $statement = oci_parse($c, $create_pkg_body);
 oci_execute($statement);
 
 for ($i = 1; $i < 6; $i++) {
-	$statement = oci_parse($c, "INSERT INTO bind_test VALUES (".$i.")");
-	oci_execute($statement);
+    $statement = oci_parse($c, "INSERT INTO bind_test VALUES (".$i.")");
+    oci_execute($statement);
 }
 
 $statement = oci_parse($c, "BEGIN array_bind_014_pkg.iobind(:c1); END;");

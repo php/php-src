@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,26 +20,9 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "dom_ce.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_split_text, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_is_whitespace_in_element_content, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_replace_whole_text, 0, 0, 1)
-	ZEND_ARG_INFO(0, content)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMText extends DOMCharacterData
@@ -50,37 +31,26 @@ ZEND_END_ARG_INFO();
 * Since:
 */
 
-const zend_function_entry php_dom_text_class_functions[] = {
-	PHP_FALIAS(splitText, dom_text_split_text, arginfo_dom_text_split_text)
-	PHP_FALIAS(isWhitespaceInElementContent, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
-	PHP_FALIAS(isElementContentWhitespace, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
-	PHP_FALIAS(replaceWholeText, dom_text_replace_whole_text, arginfo_dom_text_replace_whole_text)
-	PHP_ME(domtext, __construct, arginfo_dom_text_construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
-/* {{{ proto DOMText::__construct([string value]); */
-PHP_METHOD(domtext, __construct)
+/* {{{ */
+PHP_METHOD(DOMText, __construct)
 {
-
-	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
 	size_t value_len;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewText((xmlChar *) value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {
@@ -131,11 +101,10 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto DOMText dom_text_split_text(int offset)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since:
 */
-PHP_FUNCTION(dom_text_split_text)
+PHP_METHOD(DOMText, splitText)
 {
 	zval       *id;
 	xmlChar    *cur;
@@ -147,22 +116,31 @@ PHP_FUNCTION(dom_text_split_text)
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &id, dom_text_class_entry, &offset) == FAILURE) {
-		return;
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
+	if (offset < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
 	if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
+		/* TODO Add warning? */
 		RETURN_FALSE;
 	}
 
 	cur = xmlNodeGetContent(node);
 	if (cur == NULL) {
+		/* TODO Add warning? */
 		RETURN_FALSE;
 	}
 	length = xmlUTF8Strlen(cur);
 
-	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length || offset < 0) {
+	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
+		/* TODO Add warning? */
 		xmlFree(cur);
 		RETURN_FALSE;
 	}
@@ -179,6 +157,7 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlFree(second);
 
 	if (nnode == NULL) {
+		/* TODO Add warning? */
 		RETURN_FALSE;
 	}
 
@@ -192,18 +171,18 @@ PHP_FUNCTION(dom_text_split_text)
 }
 /* }}} end dom_text_split_text */
 
-/* {{{ proto bool dom_text_is_whitespace_in_element_content()
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
+PHP_METHOD(DOMText, isWhitespaceInElementContent)
 {
 	zval       *id;
 	xmlNodePtr  node;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_text_class_entry) == FAILURE) {
-		return;
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
@@ -215,23 +194,4 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 }
 /* }}} end dom_text_is_whitespace_in_element_content */
 
-/* {{{ proto DOMText dom_text_replace_whole_text(string content)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-replaceWholeText
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_text_replace_whole_text)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_text_replace_whole_text */
-
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

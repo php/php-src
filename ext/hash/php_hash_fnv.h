@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -46,32 +44,25 @@ enum php_fnv_type {
 typedef struct {
 	uint32_t state;
 } PHP_FNV132_CTX;
+#define PHP_FNV132_SPEC "l."
 
 typedef struct {
 	uint64_t state;
 } PHP_FNV164_CTX;
+#define PHP_FNV164_SPEC "q."
 
 
 PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context);
-PHP_HASH_API void PHP_FNV132Update(PHP_FNV132_CTX *context, const unsigned char *input, unsigned int inputLen);
-PHP_HASH_API void PHP_FNV1a32Update(PHP_FNV132_CTX *context, const unsigned char *input, unsigned int inputLen);
+PHP_HASH_API void PHP_FNV132Update(PHP_FNV132_CTX *context, const unsigned char *input, size_t inputLen);
+PHP_HASH_API void PHP_FNV1a32Update(PHP_FNV132_CTX *context, const unsigned char *input, size_t inputLen);
 PHP_HASH_API void PHP_FNV132Final(unsigned char digest[16], PHP_FNV132_CTX * context);
 
 PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context);
-PHP_HASH_API void PHP_FNV164Update(PHP_FNV164_CTX *context, const unsigned char *input, unsigned int inputLen);
-PHP_HASH_API void PHP_FNV1a64Update(PHP_FNV164_CTX *context, const unsigned char *input, unsigned int inputLen);
+PHP_HASH_API void PHP_FNV164Update(PHP_FNV164_CTX *context, const unsigned char *input, size_t inputLen);
+PHP_HASH_API void PHP_FNV1a64Update(PHP_FNV164_CTX *context, const unsigned char *input, size_t inputLen);
 PHP_HASH_API void PHP_FNV164Final(unsigned char digest[16], PHP_FNV164_CTX * context);
 
 static uint32_t fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate);
 static uint64_t fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

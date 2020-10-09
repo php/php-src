@@ -16,5 +16,7 @@ function parseQuery() {
 }
 parseQuery();
 echo "ok\n";
+?>
 --EXPECT--
+Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 ok

@@ -8,7 +8,7 @@ throw new MyErrorException(new stdClass);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Wrong parameters for MyErrorException([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]]) in %sexception_020.php:%d
+Fatal error: Uncaught TypeError: ErrorException::__construct(): Argument #1 ($message) must be of type string, stdClass given in %s:%d
 Stack trace:
 #0 %sexception_020.php(%d): ErrorException->__construct(Object(stdClass))
 #1 {main}

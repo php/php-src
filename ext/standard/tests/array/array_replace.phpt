@@ -4,26 +4,26 @@ Test array_replace and array_replace_recursive
 <?php
 
 $array1 = array(
-	0 => 'dontclobber',
-	'1' => 'unclobbered',
-	'test2' => 0.0,
-	'test3' => array(
-		'testarray2' => true,
-		1 => array(
-			'testsubarray1' => 'dontclobber2',
-			'testsubarray2' => 'dontclobber3',
-	),
+    0 => 'dontclobber',
+    '1' => 'unclobbered',
+    'test2' => 0.0,
+    'test3' => array(
+        'testarray2' => true,
+        1 => array(
+            'testsubarray1' => 'dontclobber2',
+            'testsubarray2' => 'dontclobber3',
+    ),
     ),
 );
 
 $array2 = array(
-	1 => 'clobbered',
-	'test3' => array(
-		'testarray2' => false,
-	),
-	'test4' => array(
-		'clobbered3' => array(0, 1, 2),
-	),
+    1 => 'clobbered',
+    'test3' => array(
+        'testarray2' => false,
+    ),
+    'test4' => array(
+        'clobbered3' => array(0, 1, 2),
+    ),
 );
 
 $array3 = array(array(array(array())));
@@ -42,11 +42,15 @@ $data = array_replace_recursive($array1, $array2);
 var_dump($data);
 
 echo " -- Testing array_replace_recursive() w/ endless recusrsion --\n";
-$data = array_replace_recursive($array3, $array4);
+try {
+    $data = array_replace_recursive($array3, $array4);
+    var_dump($data);
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
-var_dump($data);
 ?>
---EXPECTF--
+--EXPECT--
  -- Testing array_replace() --
 array(5) {
   [0]=>
@@ -107,16 +111,4 @@ array(5) {
   }
 }
  -- Testing array_replace_recursive() w/ endless recusrsion --
-
-Warning: array_replace_recursive(): recursion detected in %s on line %d
-array(1) {
-  [0]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
-      array(0) {
-      }
-    }
-  }
-}
+Recursion detected

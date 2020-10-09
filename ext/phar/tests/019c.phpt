@@ -8,7 +8,7 @@ if (!extension_loaded("phar")) die("skip");
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
@@ -24,32 +24,32 @@ include $fname;
 
 function dump($phar, $base)
 {
-	var_dump($phar . $base);
-	$dir = opendir($phar . $base);
-	if ($base == '/')
-	{
-		$base = '';
-	}
-	while (false !== ($entry = readdir($dir))) {
-		$entry = $base . '/' . $entry;
-		var_dump($entry);
-		var_dump(is_dir($phar . $entry));
-		if (is_dir($phar . $entry))
-		{
-			dump($phar, $entry);
-		}
-		else
-		{
-			var_dump(file_get_contents($phar . $entry));
-		}
-	}
+    var_dump($phar . $base);
+    $dir = opendir($phar . $base);
+    if ($base == '/')
+    {
+        $base = '';
+    }
+    while (false !== ($entry = readdir($dir))) {
+        $entry = $base . '/' . $entry;
+        var_dump($entry);
+        var_dump(is_dir($phar . $entry));
+        if (is_dir($phar . $entry))
+        {
+            dump($phar, $entry);
+        }
+        else
+        {
+            var_dump(file_get_contents($phar . $entry));
+        }
+    }
 }
 
 dump('phar://hio', '/');
 
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 string(11) "phar://hio/"
 string(2) "/a"

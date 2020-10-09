@@ -29,7 +29,6 @@ $copy = clone $sxe;
 var_dump($copy);
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (2) {
   ["@attributes"]=>
@@ -61,4 +60,3 @@ object(SimpleXMLElement)#%d (2) {
     }
   }
 }
-===DONE===

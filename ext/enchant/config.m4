@@ -1,40 +1,42 @@
-dnl config.m4 for extension enchant
-
-PHP_ARG_WITH(enchant,for ENCHANT support,
-[  --with-enchant[=DIR]      Include enchant support.
-                          GNU Aspell version 1.1.3 or higher required.])
+PHP_ARG_WITH([enchant],
+  [whether to build with Enchant support],
+  [AS_HELP_STRING([--with-enchant],
+    [Include Enchant support])])
 
 if test "$PHP_ENCHANT" != "no"; then
-	PHP_NEW_EXTENSION(enchant, enchant.c, $ext_shared)
-	if test "$PHP_ENCHANT" != "yes"; then
-	    ENCHANT_SEARCH_DIRS=$PHP_ENCHANT
-	else
-	    ENCHANT_SEARCH_DIRS="/usr/local /usr"
-	fi
-	for i in $ENCHANT_SEARCH_DIRS; do
-		if test -f $i/include/enchant/enchant.h; then
-			ENCHANT_DIR=$i
-			ENCHANT_INCDIR=$i/include/enchant
-		elif test -f $i/include/enchant.h; then
-			ENCHANT_DIR=$i
-			ENCHANT_INCDIR=$i/include
-		fi
-	done
+  PKG_CHECK_MODULES([ENCHANT2], [enchant-2], [found_enchant_2=yes], [found_enchant_2=no])
 
-	if test -z "$ENCHANT_DIR"; then
-		AC_MSG_ERROR(Cannot find enchant)
-	fi
+  if test "$found_enchant_2" = "yes"; then
 
-	ENCHANT_LIBDIR=$ENCHANT_DIR/lib
+    PHP_EVAL_INCLINE($ENCHANT2_CFLAGS)
+    PHP_EVAL_LIBLINE($ENCHANT2_LIBS, ENCHANT_SHARED_LIBADD)
 
-	AC_DEFINE(HAVE_ENCHANT,1,[ ])
-	PHP_SUBST(ENCHANT_SHARED_LIBADD)
-	PHP_ADD_LIBRARY_WITH_PATH(enchant, $ENCHANT_LIBDIR, ENCHANT_SHARED_LIBADD)
-	PHP_ADD_INCLUDE($ENCHANT_INCDIR)
-	PHP_CHECK_LIBRARY(enchant, enchant_broker_set_param,
-	[
-	  AC_DEFINE(HAVE_ENCHANT_BROKER_SET_PARAM,             1, [ ])
-	  AC_DEFINE(ENCHANT_VERSION_STRING,             "1.5.x", [ ])
-	], [], [ -L$ENCHANT_LIBDIR $ENCHANT_SHARED_LIBADD])
+    AC_DEFINE(HAVE_ENCHANT_GET_VERSION, 1, [ enchant_get_version since 1.6.0 ])
 
+  else
+    AC_MSG_WARN([libenchant-2 not found trying with old libenchant])
+    PKG_CHECK_MODULES([ENCHANT], [enchant >= 1.4.2])
+
+    PHP_EVAL_INCLINE($ENCHANT_CFLAGS)
+    PHP_EVAL_LIBLINE($ENCHANT_LIBS, ENCHANT_SHARED_LIBADD)
+
+    PHP_CHECK_LIBRARY(enchant, enchant_get_version,
+    [
+      AC_DEFINE(HAVE_ENCHANT_GET_VERSION, 1, [ enchant_get_version since 1.6.0 ])
+    ], [ ], [
+      $ENCHANT_LIBS
+    ])
+
+    PHP_CHECK_LIBRARY(enchant, enchant_broker_set_param,
+    [
+      AC_DEFINE(HAVE_ENCHANT_BROKER_SET_PARAM, 1, [ enchant_broker_set_param since 1.5.0 and removed in 2.x ])
+    ], [ ], [
+      $ENCHANT_LIBS
+    ])
+  fi
+
+  AC_DEFINE(HAVE_ENCHANT, 1, [ ])
+
+  PHP_NEW_EXTENSION(enchant, enchant.c, $ext_shared)
+  PHP_SUBST(ENCHANT_SHARED_LIBADD)
 fi

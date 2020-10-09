@@ -5,23 +5,23 @@ Test ROWID bind
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 function do_query($c)
 {
-	$s = oci_parse($c, 'select address from rid_tab order by id');
-	$id = 1;
-	oci_execute($s, OCI_DEFAULT);
-	while ($row = oci_fetch_array($s, OCI_ASSOC+OCI_RETURN_NULLS)) {
-		var_dump($row);
-	}
+    $s = oci_parse($c, 'select address from rid_tab order by id');
+    $id = 1;
+    oci_execute($s, OCI_DEFAULT);
+    while ($row = oci_fetch_array($s, OCI_ASSOC+OCI_RETURN_NULLS)) {
+        var_dump($row);
+    }
 }
 
 $stmtarray = array(
-	"drop table rid_tab",
-	"create table rid_tab (id number, address varchar2(40))",
-	"insert into rid_tab (id, address) values (1, 'original text #1')",
-	"insert into rid_tab (id, address) values (2, 'original text #2')"
+    "drop table rid_tab",
+    "create table rid_tab (id number, address varchar2(40))",
+    "insert into rid_tab (id, address) values (1, 'original text #1')",
+    "insert into rid_tab (id, address) values (2, 'original text #2')"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

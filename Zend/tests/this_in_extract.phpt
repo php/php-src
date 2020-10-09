@@ -15,5 +15,5 @@ foo();
 --EXPECTF--
 Cannot re-assign $this
 
-Notice: Undefined variable: a in %s on line %d
+Warning: Undefined variable $a in %s on line %d
 NULL

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +19,11 @@
 #define BASE64_H
 
 /*
+ * NEON implementation is based on https://github.com/WojciechMula/base64simd
+ * which is copyrighted to:
+ * Copyright (c) 2015-2018, Wojciech Mula
+ * All rights reserved.
+ *
  * SSSE3 and AVX2 implementation are based on https://github.com/aklomp/base64
  * which is copyrighted to:
  *
@@ -54,17 +57,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-PHP_FUNCTION(base64_decode);
-PHP_FUNCTION(base64_encode);
-
 #if (ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR) && !ZEND_INTRIN_AVX2_NATIVE
 PHP_MINIT_FUNCTION(base64_intrin);
-PHPAPI extern zend_string *(*php_base64_encode)(const unsigned char *, size_t);
-PHPAPI extern zend_string *(*php_base64_decode_ex)(const unsigned char *, size_t, zend_bool);
-#else
+#endif
+
 PHPAPI extern zend_string *php_base64_encode(const unsigned char *, size_t);
 PHPAPI extern zend_string *php_base64_decode_ex(const unsigned char *, size_t, zend_bool);
-#endif
 
 static inline zend_string *php_base64_encode_str(const zend_string *str) {
 	return php_base64_encode((const unsigned char*)(ZSTR_VAL(str)), ZSTR_LEN(str));
@@ -78,10 +76,3 @@ static inline zend_string *php_base64_decode_str(const zend_string *str) {
 }
 
 #endif /* BASE64_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

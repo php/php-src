@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -108,7 +108,7 @@ _PROTOTYPE(bc_num bc_copy_num, (bc_num num));
 
 _PROTOTYPE(void bc_init_num, (bc_num *num));
 
-_PROTOTYPE(void bc_str2num, (bc_num *num, char *str, int scale));
+_PROTOTYPE(int bc_str2num, (bc_num *num, char *str, int scale));
 
 _PROTOTYPE(zend_string *bc_num2str_ex, (bc_num num, int scale));
 
@@ -150,9 +150,6 @@ _PROTOTYPE(void bc_out_num, (bc_num num, int o_base, void (* out_char)(int),
 			     int leading_zero));
 
 /* Prototypes needed for external utility routines. */
-
-_PROTOTYPE(void bc_out_of_memory, (void));
-
 #define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)
 #define bc_free_num(num)			_bc_free_num_ex((num), 0)
 #define bc_num2str(num)				bc_num2str_ex((num), (num->n_scale))

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor
 	l->persistent = persistent;
 }
 
-ZEND_API void zend_llist_add_element(zend_llist *l, void *element)
+ZEND_API void zend_llist_add_element(zend_llist *l, const void *element)
 {
 	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
 
@@ -49,7 +49,7 @@ ZEND_API void zend_llist_add_element(zend_llist *l, void *element)
 }
 
 
-ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
+ZEND_API void zend_llist_prepend_element(zend_llist *l, const void *element)
 {
 	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
 
@@ -307,13 +307,3 @@ ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos)
 	}
 	return NULL;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,8 +30,6 @@
 
 #ifndef PHP_UNICODE_H
 #define PHP_UNICODE_H
-
-#if HAVE_MBSTRING
 
 #define UC_MN  0 /* Mark, Non-Spacing          */
 #define UC_MC  1 /* Mark, Spacing Combining    */
@@ -191,9 +187,5 @@ static inline int php_unicode_is_upper(unsigned long code) {
 
 #define php_unicode_is_cased(cc) php_unicode_is_prop1(cc, UC_CASED)
 #define php_unicode_is_case_ignorable(cc) php_unicode_is_prop1(cc, UC_CASE_IGNORABLE)
-
-
-#endif
-
 
 #endif /* PHP_UNICODE_H */

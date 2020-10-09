@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +17,7 @@
 #include "php.h"
 #include "info.h"
 
-PHPAPI void php_info_print_css(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 {
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
@@ -30,6 +28,7 @@ PHPAPI void php_info_print_css(void) /* {{{ */
 	PUTS(".center table {margin: 1em auto; text-align: left;}\n");
 	PUTS(".center th {text-align: center !important;}\n");
 	PUTS("td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px;}\n");
+	PUTS("th {position: sticky; top: 0; background: inherit;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
 	PUTS(".p {text-align: left;}\n");
@@ -41,12 +40,3 @@ PHPAPI void php_info_print_css(void) /* {{{ */
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

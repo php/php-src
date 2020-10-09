@@ -4,7 +4,7 @@ strip comments and whitespace with -w
 <?php
 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 
 include "skipif.inc";
@@ -17,18 +17,18 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__).'/003.test.php';
+$filename = __DIR__.'/003.test.php';
 $code ='
 <?php
 /* some test script */
 
 class test { /* {{{ */
-	public $var = "test"; //test var
-#perl style comment 
-	private $pri; /* private attr */
+    public $var = "test"; //test var
+#perl style comment
+    private $pri; /* private attr */
 
-	function foo(/* void */) {
-	}
+    function foo(/* void */) {
+    }
 }
 /* }}} */
 

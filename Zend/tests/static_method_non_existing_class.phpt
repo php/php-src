@@ -12,4 +12,4 @@ try {
 
 ?>
 --EXPECT--
-Class 'Test' not found
+Class "Test" not found

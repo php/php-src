@@ -3,8 +3,8 @@ Bug #75420.6 (Indirect modification of magic method argument)
 --FILE--
 <?php
 class Test {
-	public function __isset($x) { $GLOBALS["obj"] = 24; return true; }
-	public function __get($x) { var_dump($this); return 42; }
+    public function __isset($x) { $GLOBALS["obj"] = 24; return true; }
+    public function __get($x) { var_dump($this); return 42; }
 }
 
 $obj = new Test;

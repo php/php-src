@@ -14,7 +14,6 @@ print_r($xml);
 $xml = new SimpleXMLElement('<foo><bar/><baz/></foo>');
 print_r($xml);
 ?>
-===DONE===
 --EXPECT--
 SimpleXMLElement Object
 (
@@ -49,5 +48,4 @@ SimpleXMLElement Object
         )
 
 )
-===DONE===
 	

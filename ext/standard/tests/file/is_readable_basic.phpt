@@ -5,30 +5,17 @@ Test is_readable() function: basic functionality
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-	unlink ($filename);
-	die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_readable ( string $filename );
-   Description: Tells whether the filename is readable
-*/
-
 // include common file test functions
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 echo "*** Testing is_readable(): basic functionality ***\n";
 
 // create a file
-$filename = dirname(__FILE__)."/is_readable.tmp";
+$filename = __DIR__."/is_readable.tmp";
 create_file($filename);
 
 $counter = 1;

@@ -18,10 +18,8 @@ $availableLocales = array(Locale::getDefault());
 var_dump(locale_lookup($availableLocales, false, true));
 
 ?>
-==DONE==
 --EXPECT--
 string(5) "fr_fr"
 string(5) "en_us"
 string(5) "fr_fr"
 string(5) "de_de"
-==DONE==

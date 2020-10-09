@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,21 +27,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 
-#ifdef HAVE_LOCALE_H
 #include <locale.h>
 #ifdef ZTS
 #include "ext/standard/php_string.h"
 #define LCONV_DECIMAL_POINT (*lconv.decimal_point)
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
-#endif
-#else
-#define LCONV_DECIMAL_POINT '.'
 #endif
 
 /*
@@ -191,8 +182,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 			*dst = '\0';
 		} else {
 			/* XXX - optimize */
-			for (sign = decpt, i = 0; (sign /= 10) != 0; i++)
-				continue;
+			for (sign = decpt, i = 0; (sign /= 10) != 0; i++);
 			dst[i + 1] = '\0';
 			while (decpt != 0) {
 				dst[i--] = '0' + decpt % 10;
@@ -573,7 +563,7 @@ typedef struct buf_area buffy;
 	    INS_CHAR( ch, sp, bep, cc ) ;	\
 	    width-- ;				\
 	}					\
-	while ( width > len )
+	while ( (size_t)width > len )
 
 /*
  * Prefix the character ch to the string str
@@ -613,12 +603,10 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 	struct lconv lconv;
 #else
 	struct lconv *lconv = NULL;
-#endif
 #endif
 
 	/*
@@ -720,25 +708,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 				case 'L':
 					fmt++;
 					modifier = LM_LONG_DOUBLE;
-					break;
-				case 'I':
-					fmt++;
-#if SIZEOF_LONG_LONG
-					if (*fmt == '6' && *(fmt+1) == '4') {
-						fmt += 2;
-						modifier = LM_LONG_LONG;
-					} else
-#endif
-						if (*fmt == '3' && *(fmt+1) == '2') {
-							fmt += 2;
-							modifier = LM_LONG;
-						} else {
-#ifdef _WIN64
-							modifier = LM_LONG_LONG;
-#else
-							modifier = LM_LONG;
-#endif
-						}
 					break;
 				case 'l':
 					fmt++;
@@ -989,7 +958,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 
 
 				case 's':
-				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						s_len = strlen(s);
@@ -1026,14 +994,12 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						s = "INF";
 						s_len = 3;
 					} else {
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 						localeconv_r(&lconv);
 #else
 						if (!lconv) {
 							lconv = localeconv();
 						}
-#endif
 #endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
@@ -1087,14 +1053,12 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 					localeconv_r(&lconv);
 #else
 					if (!lconv) {
 						lconv = localeconv();
 					}
-#endif
 #endif
 					s = php_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
 					if (*s == '-') {
@@ -1199,7 +1163,7 @@ fmt_error:
 					s_len--;
 					min_width--;
 				}
-				PAD((size_t)min_width, s_len, pad_char);
+				PAD(min_width, s_len, pad_char);
 			}
 			/*
 			 * Print the string s.
@@ -1210,7 +1174,7 @@ fmt_error:
 			}
 
 			if (adjust_width && adjust == LEFT && (size_t)min_width > s_len)
-				PAD((size_t)min_width, s_len, pad_char);
+				PAD(min_width, s_len, pad_char);
 			if (free_zcopy) {
 				zval_ptr_dtor_str(&zcopy);
 			}
@@ -1342,12 +1306,3 @@ PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) /* {{{ */
 	return cc;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

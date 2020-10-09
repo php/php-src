@@ -26,9 +26,9 @@ $client = new SoapClient($testServiceWsdl);
 unset($client);
 
 $parameters = [
-	'proxy_host' => $proxyHost,
-	'proxy_port' => $proxyPort,
-	'trace' => 1,
+    'proxy_host' => $proxyHost,
+    'proxy_port' => $proxyPort,
+    'trace' => 1,
 ];
 $client = new SoapClient($testServiceWsdl, $parameters);
 
@@ -39,7 +39,7 @@ $lookup->ipAddress = '72.52.91.14';
 $result = $client->ResolveIP($lookup);
 
 if ($result && is_object($result) && $result->ResolveIPResult && is_object($result->ResolveIPResult)) {
-	print "successful lookup";
+    print "successful lookup";
 }
 ?>
 --EXPECT--

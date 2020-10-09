@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -26,7 +24,6 @@
 #include "php_intl.h"
 #include "locale.h"
 #include "locale_class.h"
-#include "locale_methods.h"
 #include "intl_convert.h"
 #include "intl_data.h"
 
@@ -202,23 +199,23 @@ static zend_off_t getSingletonPos(const char* str)
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getDefault(  )
-   Get default locale */
+/* {{{ Get default locale */
 /* }}} */
-/* {{{ proto static string locale_get_default( )
-   Get default locale */
+/* {{{ Get default locale */
 PHP_NAMED_FUNCTION(zif_locale_get_default)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	RETURN_STRING( intl_locale_get_default(  ) );
 }
 
 /* }}} */
 
-/* {{{ proto static string Locale::setDefault( string $locale )
-   Set default locale */
+/* {{{ Set default locale */
 /* }}} */
-/* {{{ proto static string locale_set_default( string $locale )
-   Set default locale */
+/* {{{ Set default locale */
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
 	zend_string* locale_name;
@@ -227,10 +224,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(),  "S", &locale_name) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 	"locale_set_default: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(locale_name) == 0) {
@@ -340,7 +334,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 				continue;
 			}
 
-			/* Error in retriving data */
+			/* Error in retrieving data */
 			*result = 0;
 			if( tag_value ){
 				zend_string_release_ex( tag_value, 0 );
@@ -397,11 +391,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 	&loc_name ,&loc_name_len ) == FAILURE) {
-		spprintf(&msg , 0, "locale_get_%s : unable to parse input params", tag_name );
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 );
-		efree(msg);
-
-		RETURN_FALSE;
+		RETURN_THROWS();
     }
 
 	if(loc_name_len == 0) {
@@ -439,36 +429,21 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getScript($locale)
- * gets the script for the $locale
- }}} */
-/* {{{ proto static string locale_get_script($locale)
- * gets the script for the $locale
- */
+/* {{{ gets the script for the $locale */
 PHP_FUNCTION( locale_get_script )
 {
 	get_icu_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getRegion($locale)
- * gets the region for the $locale
- }}} */
-/* {{{ proto static string locale_get_region($locale)
- * gets the region for the $locale
- */
+/* {{{ gets the region for the $locale */
 PHP_FUNCTION( locale_get_region )
 {
 	get_icu_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getPrimaryLanguage($locale)
- * gets the primary language for the $locale
- }}} */
-/* {{{ proto static string locale_get_primary_language($locale)
- * gets the primary language for the $locale
- */
+/* {{{ gets the primary language for the $locale */
 PHP_FUNCTION(locale_get_primary_language )
 {
 	get_icu_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
@@ -502,14 +477,11 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 
 	intl_error_reset( NULL );
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s|s",
+	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s|s!",
 		&loc_name, &loc_name_len ,
 		&disp_loc_name ,&disp_loc_name_len ) == FAILURE)
 	{
-		spprintf(&msg , 0, "locale_get_display_%s : unable to parse input params", tag_name );
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 );
-		efree(msg);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
     if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
@@ -612,48 +584,28 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getDisplayName($locale[, $in_locale = null])
-* gets the name for the $locale in $in_locale or default_locale
- }}} */
-/* {{{ proto static string get_display_name($locale[, $in_locale = null])
-* gets the name for the $locale in $in_locale or default_locale
-*/
+/* {{{ gets the name for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_name)
 {
     get_icu_disp_value_src_php( DISP_NAME , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getDisplayLanguage($locale[, $in_locale = null])
-* gets the language for the $locale in $in_locale or default_locale
- }}} */
-/* {{{ proto static string get_display_language($locale[, $in_locale = null])
-* gets the language for the $locale in $in_locale or default_locale
-*/
+/* {{{ gets the language for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_language)
 {
     get_icu_disp_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getDisplayScript($locale, $in_locale = null)
-* gets the script for the $locale in $in_locale or default_locale
- }}} */
-/* {{{ proto static string get_display_script($locale, $in_locale = null)
-* gets the script for the $locale in $in_locale or default_locale
-*/
+/* {{{ gets the script for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_script)
 {
     get_icu_disp_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
-/* {{{ proto static string Locale::getDisplayRegion($locale, $in_locale = null)
-* gets the region for the $locale in $in_locale or default_locale
- }}} */
-/* {{{ proto static string get_display_region($locale, $in_locale = null)
-* gets the region for the $locale in $in_locale or default_locale
-*/
+/* {{{ gets the region for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_region)
 {
     get_icu_disp_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
@@ -674,12 +626,10 @@ PHP_FUNCTION(locale_get_display_variant)
 }
 /* }}} */
 
- /* {{{ proto static array getKeywords(string $locale) {
- * return an associative array containing keyword-value
+ /* {{{ return an associative array containing keyword-value
  * pairs for this locale. The keys are keys to the array (doh!)
  * }}}*/
- /* {{{ proto static array locale_get_keywords(string $locale) {
- * return an associative array containing keyword-value
+ /* {{{ return an associative array containing keyword-value
  * pairs for this locale. The keys are keys to the array (doh!)
  */
 PHP_FUNCTION( locale_get_keywords )
@@ -698,10 +648,7 @@ PHP_FUNCTION( locale_get_keywords )
     if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
         &loc_name, &loc_name_len ) == FAILURE)
     {
-        intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-             "locale_get_keywords: unable to parse input params", 0 );
-
-        RETURN_FALSE;
+        RETURN_THROWS();
     }
 
 	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -755,12 +702,9 @@ PHP_FUNCTION( locale_get_keywords )
 }
 /* }}} */
 
- /* {{{ proto static string Locale::canonicalize($locale)
- * @return string the canonicalized locale
+ /* {{{ @return string the canonicalized locale
  * }}} */
- /* {{{ proto static string locale_canonicalize(Locale $loc, string $locale)
- * @param string $locale	The locale string to canonicalize
- */
+ /* {{{ @param string $locale	The locale string to canonicalize */
 PHP_FUNCTION(locale_canonicalize)
 {
 	get_icu_value_src_php( LOC_CANONICALIZE_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
@@ -901,11 +845,9 @@ static int handleAppendResult( int result, smart_str* loc_name)
 /* }}} */
 
 #define RETURN_SMART_STR(str) smart_str_0((str)); RETURN_NEW_STR((str)->s)
-/* {{{ proto static string Locale::composeLocale($array)
-* Creates a locale by combining the parts of locale-ID passed
+/* {{{ Creates a locale by combining the parts of locale-ID passed
 * }}} */
-/* {{{ proto static string compose_locale($array)
-* Creates a locale by combining the parts of locale-ID passed
+/* {{{ Creates a locale by combining the parts of locale-ID passed
 * }}} */
 PHP_FUNCTION(locale_compose)
 {
@@ -920,9 +862,7 @@ PHP_FUNCTION(locale_compose)
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "a",
 		&arr) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "locale_compose: unable to parse input params", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	hash_arr = Z_ARRVAL_P( arr );
@@ -942,10 +882,9 @@ PHP_FUNCTION(locale_compose)
 	/* Not grandfathered */
 	result = append_key_value(loc_name, hash_arr , LOC_LANG_TAG);
 	if( result == LOC_NOT_FOUND ){
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		"locale_compose: parameter array does not contain 'language' tag.", 0 );
+		zend_argument_value_error(1, "must contain a \"%s\" key", LOC_LANG_TAG);
 		smart_str_free(loc_name);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	if( !handleAppendResult( result, loc_name)){
 		RETURN_FALSE;
@@ -1030,8 +969,7 @@ static zend_string* get_private_subtags(const char* loc_name)
 }
 /* }}} */
 
-/* {{{ code used by locale_parse
-*/
+/* {{{ code used by locale_parse */
 static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 {
 	zend_string*   key_value 	= NULL;
@@ -1091,12 +1029,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 }
 /* }}} */
 
-/* {{{ proto static array Locale::parseLocale($locale)
-* parses a locale-id into an array the different parts of it
- }}} */
-/* {{{ proto static array parse_locale($locale)
-* parses a locale-id into an array the different parts of it
-*/
+/* {{{ parses a locale-id into an array the different parts of it */
 PHP_FUNCTION(locale_parse)
 {
     const char* loc_name        = NULL;
@@ -1108,10 +1041,7 @@ PHP_FUNCTION(locale_parse)
     if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
         &loc_name, &loc_name_len ) == FAILURE)
     {
-        intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-             "locale_parse: unable to parse input params", 0 );
-
-        RETURN_FALSE;
+        RETURN_THROWS();
     }
 
     INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -1137,12 +1067,7 @@ PHP_FUNCTION(locale_parse)
 }
 /* }}} */
 
-/* {{{ proto static array Locale::getAllVariants($locale)
-* gets an array containing the list of variants, or null
- }}} */
-/* {{{ proto static array locale_get_all_variants($locale)
-* gets an array containing the list of variants, or null
-*/
+/* {{{ gets an array containing the list of variants, or null */
 PHP_FUNCTION(locale_get_all_variants)
 {
 	const char*  	loc_name        = NULL;
@@ -1158,10 +1083,7 @@ PHP_FUNCTION(locale_get_all_variants)
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 	&loc_name, &loc_name_len ) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-	     "locale_parse: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if(loc_name_len == 0) {
@@ -1198,9 +1120,7 @@ PHP_FUNCTION(locale_get_all_variants)
 }
 /* }}} */
 
-/*{{{
-* Converts to lower case and also replaces all hyphens with the underscore
-*/
+/* {{{ Converts to lower case and also replaces all hyphens with the underscore */
 static int strToMatch(const char* str ,char *retstr)
 {
 	char* 	anchor 	= NULL;
@@ -1231,13 +1151,9 @@ static int strToMatch(const char* str ,char *retstr)
 }
 /* }}} */
 
-/* {{{ proto static boolean Locale::filterMatches(string $langtag, string $locale[, bool $canonicalize])
-* Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm
-*/
+/* {{{ Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm */
 /* }}} */
-/* {{{ proto bool locale_filter_matches(string $langtag, string $locale[, bool $canonicalize])
-* Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm
-*/
+/* {{{ Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm */
 PHP_FUNCTION(locale_filter_matches)
 {
 	char*       	lang_tag        = NULL;
@@ -1264,10 +1180,7 @@ PHP_FUNCTION(locale_filter_matches)
 		&lang_tag, &lang_tag_len , &loc_range , &loc_range_len ,
 		&boolCanonical) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		"locale_filter_matches: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if(loc_range_len == 0) {
@@ -1434,7 +1347,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
 		if(Z_TYPE_P(ele_value)!= IS_STRING) {
 			/* element value is not a string */
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: locale array element is not a string", 0);
+			zend_argument_type_error(2, "must only contain string values");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
 		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
@@ -1516,13 +1429,11 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 }
 /* }}} */
 
-/* {{{ proto string Locale::lookup(array $langtag, string $locale[, bool $canonicalize[, string $default = null]])
-* Searchs the items in $langtag for the best match to the language
+/* {{{ Searches the items in $langtag for the best match to the language
 * range
 */
 /* }}} */
-/* {{{ proto string locale_lookup(array $langtag, string $locale[, bool $canonicalize[, string $default = null]])
-* Searchs the items in $langtag for the best match to the language
+/* {{{ Searches the items in $langtag for the best match to the language
 * range
 */
 PHP_FUNCTION(locale_lookup)
@@ -1538,17 +1449,10 @@ PHP_FUNCTION(locale_lookup)
 
 	intl_error_reset( NULL );
 
-#if U_ICU_VERSION_MAJOR_NUM > 63
-# define BANG "!"
-#else
-# define BANG
-#endif	
-	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS" BANG, &arr, &loc_range, &loc_range_len,
+	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS!", &arr, &loc_range, &loc_range_len,
 		&boolCanonical,	&fallback_loc_str) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"locale_lookup: unable to parse input params", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
-#undef BANG
 
 	if(loc_range_len == 0) {
 		if(fallback_loc_str) {
@@ -1581,13 +1485,9 @@ PHP_FUNCTION(locale_lookup)
 }
 /* }}} */
 
-/* {{{ proto string Locale::acceptFromHttp(string $http_accept)
-* Tries to find out best available locale based on HTTP �Accept-Language� header
-*/
+/* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
 /* }}} */
-/* {{{ proto string locale_accept_from_http(string $http_accept)
-* Tries to find out best available locale based on HTTP �Accept-Language� header
-*/
+/* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
 PHP_FUNCTION(locale_accept_from_http)
 {
 	UEnumeration *available;
@@ -1600,9 +1500,7 @@ PHP_FUNCTION(locale_accept_from_http)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s", &http_accept, &http_accept_len) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		"locale_accept_from_http: unable to parse input parameters", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	if(http_accept_len > ULOC_FULLNAME_CAPACITY) {
 		/* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */
@@ -1635,13 +1533,3 @@ PHP_FUNCTION(locale_accept_from_http)
 	RETURN_STRINGL(resultLocale, len);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- *can_loc_len
-*/

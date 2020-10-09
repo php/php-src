@@ -3,7 +3,7 @@ Bug #61139 (gzopen leaks when specifying invalid mode)
 --SKIPIF--
 <?php
 if (!extension_loaded('zlib')) {
-	die('skip - zlib extension not loaded');
+    die('skip - zlib extension not loaded');
 }
 ?>
 --FILE--
@@ -12,7 +12,7 @@ if (!extension_loaded('zlib')) {
 gzopen('someFile', 'c');
 --CLEAN--
 <?php
-	unlink('someFile');
+    unlink('someFile');
 ?>
 --EXPECTF--
 Warning: gzopen(): gzopen failed in %s on line %d

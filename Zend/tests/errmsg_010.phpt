@@ -4,7 +4,7 @@ errmsg: multiple access type modifiers are not allowed (methods)
 <?php
 
 class test {
-	private protected function foo() {}
+    private protected function foo() {}
 }
 
 echo "Done\n";

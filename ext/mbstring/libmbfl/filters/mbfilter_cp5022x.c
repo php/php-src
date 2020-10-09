@@ -22,10 +22,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_cp5022x.h"
 #include "mbfilter_jis.h"
@@ -54,7 +50,7 @@ const mbfl_encoding mbfl_encoding_jis_ms = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_jis_ms_wchar,
 	&vtbl_wchar_jis_ms
 };
@@ -65,7 +61,7 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50220_wchar,
 	&vtbl_wchar_cp50220
 };
@@ -76,7 +72,7 @@ const mbfl_encoding mbfl_encoding_cp50220raw = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50220raw_wchar,
 	&vtbl_wchar_cp50220raw
 };
@@ -87,7 +83,7 @@ const mbfl_encoding mbfl_encoding_cp50221 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50221_wchar,
 	&vtbl_wchar_cp50221
 };
@@ -98,7 +94,7 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50222_wchar,
 	&vtbl_wchar_cp50222
 };
@@ -106,35 +102,30 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 const struct mbfl_identify_vtbl vtbl_identify_jis_ms = {
 	mbfl_no_encoding_jis_ms,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_jis_ms
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50220 = {
 	mbfl_no_encoding_cp50220,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50220
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50220raw = {
 	mbfl_no_encoding_cp50220raw,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50220
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50221 = {
 	mbfl_no_encoding_cp50221,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50221
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50222 = {
 	mbfl_no_encoding_cp50222,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50222
 };
 
@@ -142,27 +133,30 @@ const struct mbfl_convert_vtbl vtbl_jis_ms_wchar = {
 	mbfl_no_encoding_jis_ms,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_jis_ms = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_jis_ms,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_jis_ms,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
 	mbfl_no_encoding_cp50220,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220 = {
@@ -179,9 +173,10 @@ const struct mbfl_convert_vtbl vtbl_cp50220raw_wchar = {
 	mbfl_no_encoding_cp50220raw,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220raw = {
@@ -198,36 +193,40 @@ const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
 	mbfl_no_encoding_cp50221,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50221 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp50221,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp50221,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
 	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50222 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp50222,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp50222,
-	mbfl_filt_conv_wchar_cp50222_flush
+	mbfl_filt_conv_wchar_cp50222_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -563,9 +562,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -581,12 +578,7 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 
 	mbfl_filt_conv_common_ctor(filt);
 
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	if (ctx == NULL) {
-		mbfl_filt_conv_common_dtor(filt);
-		return;
-	}
-
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	ctx->tl_param.mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
 
 	ctx->last = *filt;
@@ -594,8 +586,8 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 	ctx->last.data = filt->data;
 	filt->filter_function = vtbl_tl_jisx0201_jisx0208.filter_function;
 	filt->filter_flush = vtbl_tl_jisx0201_jisx0208.filter_flush;
-	filt->output_function = (int(*)(int, void *))ctx->last.filter_function;
-	filt->flush_function = (int(*)(void *))ctx->last.filter_flush;
+	filt->output_function = (output_function_t)ctx->last.filter_function;
+	filt->flush_function = (flush_function_t)ctx->last.filter_flush;
 	filt->data = &ctx->last;
 	filt->opaque = ctx;
 	vtbl_tl_jisx0201_jisx0208.filter_ctor(filt);
@@ -607,11 +599,7 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
 
 	*dest = *src;
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	if (ctx != NULL) {
-		*ctx = *(mbfl_filt_conv_wchar_cp50220_ctx*)src->opaque;
-	}
-
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	dest->opaque = ctx;
 	dest->data = &ctx->last;
 }
@@ -619,13 +607,9 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 static void
 mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 {
-	vtbl_tl_jisx0201_jisx0208.filter_dtor(filt);
-
 	if (filt->opaque != NULL) {
-		mbfl_free(filt->opaque);
+		efree(filt->opaque);
 	}
-
-	mbfl_filt_conv_common_dtor(filt);
 }
 
 /*
@@ -776,9 +760,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
 			if ((filter->status & 0xff00) != 0x400) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
@@ -789,9 +771,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -928,9 +908,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
 			if ((filter->status & 0xff00) == 0x500) {
 				CK((*filter->output_function)(0x0f, filter->data));		/* SO */
@@ -945,9 +923,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

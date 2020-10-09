@@ -3,8 +3,8 @@ Bug #42499 (Multi-statement execution via PDO::exec() makes connection unusable)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 MySQLPDOTest::skip();
 
@@ -13,29 +13,29 @@ $stmt = $db->query('SELECT VERSION() as _version');
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 $matches = array();
 if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-	die(sprintf("skip Cannot determine MySQL Server version\n"));
+    die(sprintf("skip Cannot determine MySQL Server version\n"));
 
-$version = $matches[0] * 10000 + $matches[1] * 100 + $matches[2];
+$version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 41000)
-	die(sprintf("skip Need MySQL Server 4.1.0+, found %d.%02d.%02d (%d)\n",
-		$matches[0], $matches[1], $matches[2], $version));
+    die(sprintf("skip Need MySQL Server 4.1.0+, found %d.%02d.%02d (%d)\n",
+        $matches[1], $matches[2], $matches[3], $version));
 --FILE--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
 function bug_42499($db) {
 
-	$db->exec('DROP TABLE IF EXISTS test');
-	$db->exec("CREATE TABLE test(id CHAR(1)); INSERT INTO test(id) VALUES ('a')");
+    $db->exec('DROP TABLE IF EXISTS test');
+    $db->exec("CREATE TABLE test(id CHAR(1)); INSERT INTO test(id) VALUES ('a')");
 
-	$stmt = $db->query('SELECT id AS _id FROM test');
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt = $db->query('SELECT id AS _id FROM test');
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-	// You must not use exec() to run statements that create a result set!
-	$db->exec('SELECT id FROM test');
-	// This will bail at you because you have not fetched the SELECT results: this is not a bug!
-	$db->exec("INSERT INTO test(id) VALUES ('b')");
+    // You must not use exec() to run statements that create a result set!
+    $db->exec('SELECT id FROM test');
+    // This will bail at you because you have not fetched the SELECT results: this is not a bug!
+    $db->exec("INSERT INTO test(id) VALUES ('b')");
 
 }
 

@@ -9,14 +9,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 /* Creating soft and hard links to a file and applying fileinode() on links */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 fclose( fopen($file_path."/fileinode_variation1.tmp", "w") );
 
 echo "*** Testing fileinode() with links ***\n";
@@ -34,7 +29,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/fileinode_variation1_symlink.tmp");
 unlink($file_path."/fileinode_variation1_link.tmp");
 unlink($file_path."/fileinode_variation1.tmp");

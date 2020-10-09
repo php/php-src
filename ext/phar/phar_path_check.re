@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2007-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@ phar_path_check_result phar_path_check(char **s, size_t *len, const char **error
 #define YYCURSOR        p
 #define YYLIMIT         p+*len
 #define YYMARKER        m
-#define YYFILL(n)
+#define YYFILL(n)       do {} while (0)
 
 loop:
 /*!re2c

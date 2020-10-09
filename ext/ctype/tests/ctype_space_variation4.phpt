@@ -4,11 +4,6 @@ Test ctype_space() function : usage variations - octal and hexadecimal values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_space(mixed $c)
- * Description: Checks for whitespace character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass octal and hexadecimal values as $c to ctype_space() to test behaviour
  */
@@ -23,21 +18,20 @@ $hex_values   = array (0x9, 0xA, 0xB, 0xC, 0xD, 0x20);
 echo "\n-- Octal Values --\n";
 $iterator = 1;
 foreach($octal_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_space($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_space($c));
+    $iterator++;
 }
 
 echo "\n-- Hexadecimal Values --\n";
 $iterator = 1;
 foreach($hex_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_space($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_space($c));
+    $iterator++;
 }
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_space() : usage variations ***
 
@@ -68,4 +62,3 @@ bool(true)
 bool(true)
 -- Iteration 6 --
 bool(true)
-===DONE===

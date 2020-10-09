@@ -1,7 +1,14 @@
+#!/usr/bin/env php
 <?php error_reporting(E_ALL);
 
-/* This is based on the ucgendat.c file from the OpenLDAP project, licensed
- * as follows. */
+/**
+ * This is based on the ucgendat.c file from the OpenLDAP project, licensed as
+ * follows. This file is not necessary to build PHP. It's only necessary to
+ * rebuild unicode_data.h from Unicode ucd files.
+ *
+ * Example usage:
+ * php ucgendat.php UnicodeData.txt
+ */
 
 /* Copyright 1998-2007 The OpenLDAP Foundation.
  * All rights reserved.

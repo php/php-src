@@ -8,110 +8,111 @@ opcache.enable_cli=1
 --FILE--
 <?php
 function foo() {
-	try
-	{
-		switch (1)
-		{
-		case 0:
-			try
-			{
+    try
+    {
+        switch (1)
+        {
+        case 0:
+            try
+            {
 
-			}
-			catch (Exception $e)
-			{
+            }
+            catch (Exception $e)
+            {
 
-			}
+            }
 
-			break;
+            break;
 
-		case 1:
-			try
-			{
-				throw new Exception('aaa');
-			}
-			catch (Exception $e)
-			{
-				echo "correct\n";
-			}
+        case 1:
+            try
+            {
+                throw new Exception('aaa');
+            }
+            catch (Exception $e)
+            {
+                echo "correct\n";
+            }
 
-			break;
-		}
-	}
-	catch (Exception $e)
-	{
-		echo "wrong\n";
-	}
-	return;
+            break;
+        }
+    }
+    catch (Exception $e)
+    {
+        echo "wrong\n";
+    }
+    return;
 }
 
 function foo1() {
-	try
-	{
-		switch (1)
-		{
-		case 0:
-			try
-			{
+    try
+    {
+        switch (1)
+        {
+        case 0:
+            try
+            {
 
-			}
-			catch (Exception $e)
-			{
+            }
+            catch (Exception $e)
+            {
 dummy:
-				echo "ect\n";
-			}
+                echo "ect\n";
+            }
 
-			break;
+            break;
 
-		case 1:
-			try
-			{
-				throw new Exception('aaa');
-			}
-			catch (Exception $e)
-			{
-				echo "corr";
-				goto dummy;
-			}
-			break;
-		}
-	}
-	catch (Exception $e)
-	{
-		echo "wrong\n";
-	}
-	return;
+        case 1:
+            try
+            {
+                throw new Exception('aaa');
+            }
+            catch (Exception $e)
+            {
+                echo "corr";
+                goto dummy;
+            }
+            break;
+        }
+    }
+    catch (Exception $e)
+    {
+        echo "wrong\n";
+    }
+    return;
 }
 
 function foo2() {
-	try
-	{
-		switch (1)
-		{
-		case 0:
-			try
-			{
+    try
+    {
+        switch (1)
+        {
+        case 0:
+            try
+            {
 dummy:
-				throw new Exception('aaa');
-			}
-			catch (Exception $e)
-			{
-				echo "correct\n";
-			}
+                throw new Exception('aaa');
+            }
+            catch (Exception $e)
+            {
+                echo "correct\n";
+            }
 
-			break;
+            break;
 
-		case 1:
-			goto dummy;
-			break;
-		}
-	}
-	catch (Exception $e)
-	{
-		echo "wrong\n";
-	}
-	return;
+        case 1:
+            goto dummy;
+            break;
+        }
+    }
+    catch (Exception $e)
+    {
+        echo "wrong\n";
+    }
+    return;
 }
 foo();foo1();foo2();
+?>
 --EXPECT--
 correct
 correct

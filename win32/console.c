@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +14,8 @@
    +----------------------------------------------------------------------+
  */
 
+#include "php.h"
+#include "SAPI.h"
 #include "win32/console.h"
 
 
@@ -109,11 +109,8 @@ PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
 	return FALSE;
 }/*}}}*/
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void)
+{/*{{{*/
+	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
+}/*}}}*/
+

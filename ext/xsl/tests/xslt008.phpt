@@ -2,20 +2,20 @@
 Test 8: Stream Wrapper Includes
 --SKIPIF--
 <?php
-	require_once dirname(__FILE__) .'/skipif.inc';
-	if (!extension_loaded('zlib')) die('skip zlib extension not available');
+    require_once __DIR__ .'/skipif.inc';
+    if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
 --FILE--
 <?php
 echo "Test 8: Stream Wrapper Includes ";
 include("prepare.inc");
 $xsl = new domDocument;
-$xsl->load(dirname(__FILE__)."/streamsinclude.xsl");
+$xsl->load(__DIR__."/streamsinclude.xsl");
 if(!$xsl) {
   echo "Error while parsing the document\n";
   exit;
 }
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXML($dom);

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -42,7 +40,5 @@
 #define mysqli_free_result(r, implicit)	mysqlnd_free_result((r), (implicit))
 #define mysqli_async_query(c, q, l)		mysqlnd_async_query((c), (q), (l))
 #define mysqli_change_user_silent(c, u, p, d, p_len)   mysqlnd_change_user_ex((c), (u), (p), (d), TRUE, (size_t)(p_len))
-
-#define HAVE_STMT_NEXT_RESULT
 
 #endif

@@ -4,7 +4,7 @@ errmsg: static abstract function
 <?php
 
 class test {
-	static abstract function foo ();
+    static abstract function foo ();
 }
 
 echo "Done\n";

@@ -11,7 +11,6 @@ class Test {
 var_dump(get_class_vars('Test'));
 
 ?>
-===DONE===
 --EXPECT--
 array(2) {
   ["empty"]=>
@@ -28,4 +27,3 @@ array(2) {
     }
   }
 }
-===DONE===

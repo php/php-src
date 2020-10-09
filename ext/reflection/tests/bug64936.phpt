@@ -9,8 +9,8 @@ opcache.save_comments=1
 
 function strip_doc_comment($c)
 {
-	if (!strlen($c) || $c === false) return $c;
-	return trim(substr($c, 3, -2));
+    if (!strlen($c) || $c === false) return $c;
+    return trim(substr($c, 3, -2));
 }
 
 token_get_all("<?php\n/**\n * Foo\n */"); // doc_comment compiler global now contains this Foo comment
@@ -28,8 +28,6 @@ $rb = new ReflectionClass('B');
 var_dump(strip_doc_comment($rb->getDocComment()));
 
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
-===DONE===

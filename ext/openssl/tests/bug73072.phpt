@@ -16,9 +16,9 @@ $serverCode = <<<'CODE'
             "domain2.com" => __DIR__ . "/not_existing.pem",
         ]
     ]]);
-    
+
     $server = stream_socket_server('tls://127.0.0.1:64322', $errno, $errstr, $flags, $ctx);
-    
+
     phpt_notify();
     @stream_socket_accept($server, 3);
     // if there is a segfault, this won't be called

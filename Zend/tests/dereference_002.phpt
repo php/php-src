@@ -6,13 +6,13 @@ Testing array dereference on method calls
 error_reporting(E_ALL);
 
 class  foo {
-	public function bar() {
-		$x = array();
-		$x[] = 3;
-		$x[] = array(1, 5);
-		$x[] = new foo;
-		return $x;
-	}
+    public function bar() {
+        $x = array();
+        $x[] = 3;
+        $x[] = array(1, 5);
+        $x[] = new foo;
+        return $x;
+    }
 }
 
 $foo = new foo;
@@ -69,12 +69,14 @@ array(2) {
   int(5)
 }
 int(1)
+
+Warning: Trying to access array offset on value of type int in %s on line %d
 NULL
 
-Notice: Undefined offset: 4 in %s on line %d
+Warning: Undefined array key 4 in %s on line %d
 NULL
 
-Notice: Undefined offset: 3 in %s on line %d
+Warning: Undefined array key 3 in %s on line %d
 
 Fatal error: Uncaught Error: Call to a member function bar() on null in %s:%d
 Stack trace:

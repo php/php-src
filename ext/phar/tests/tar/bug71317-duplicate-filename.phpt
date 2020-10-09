@@ -5,7 +5,7 @@ Bug #71317: regression in opening tar based phar files
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
+include __DIR__ . '/files/tarmaker.php.inc';
 
 $testDirectory = __DIR__ . '/files/test_bug71317';
 $testTarFilename  = __DIR__ . '/files/test_bug71317.tar';
@@ -22,17 +22,17 @@ $tar->close();
 
 $fname = str_replace('\\', '/', $testTarFilename);
 try {
-	mkdir($testDirectory);
-	$tar = new PharData($fname);
-	$tar->extractTo($testDirectory);
+    mkdir($testDirectory);
+    $tar = new PharData($fname);
+    $tar->extractTo($testDirectory);
 
-	$fileContent = file_get_contents($testDirectory . '/file2.txt');
-	$expectedContent = 'file2a';
-	if ($fileContent !== $expectedContent) {
-		throw new Exception(sprintf('Contents of file2.txt ("%s") is invalid, expected "%s"', $fileContent, $expectedContent));
-	}
+    $fileContent = file_get_contents($testDirectory . '/file2.txt');
+    $expectedContent = 'file2a';
+    if ($fileContent !== $expectedContent) {
+        throw new Exception(sprintf('Contents of file2.txt ("%s") is invalid, expected "%s"', $fileContent, $expectedContent));
+    }
 } catch(Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 ===DONE===

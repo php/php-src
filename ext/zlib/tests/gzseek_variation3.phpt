@@ -3,12 +3,12 @@ Test function gzseek() by calling it with SEEK_CUR when reading
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
-$f = dirname(__FILE__)."/004.txt.gz";
+$f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 
 echo "move to the 50th byte\n";
@@ -30,7 +30,6 @@ echo "tell=".gztell($h)."\n";
 var_dump(gzread($h, 10));
 gzclose($h);
 ?>
-===DONE===
 --EXPECT--
 move to the 50th byte
 int(0)
@@ -47,4 +46,3 @@ move backward to the 77th byte
 int(0)
 tell=77
 string(10) "hat you ca"
-===DONE===

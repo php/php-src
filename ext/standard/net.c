@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -130,8 +128,7 @@ static void iface_append_unicast(zval *unicast, zend_long flags,
 }
 #endif
 
-/* {{{ proto array|false net_get_interfaces()
-Returns an array in the form:
+/* {{{ Returns an array in the form:
 array(
   'ifacename' => array(
     'description' => 'Awesome interface', // Win32 only
@@ -177,7 +174,9 @@ PHP_FUNCTION(net_get_interfaces) {
 	dwRetVal = GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
 
 	if (NO_ERROR != dwRetVal) {
-		/* TODO check GetLastError() */
+		char *buf = php_win32_error_to_msg(GetLastError());
+		zend_error(E_WARNING, "GetAdaptersAddresses failed: %s", buf);
+		php_win32_error_msg_free(buf);
 		FREE(pAddresses);
 		RETURN_FALSE;
 	}
@@ -252,6 +251,8 @@ PHP_FUNCTION(net_get_interfaces) {
 		}
 		add_assoc_zval(&iface, "unicast", &unicast);
 
+		add_assoc_bool(&iface, "up", (p->OperStatus == IfOperStatusUp));
+
 		add_assoc_zval(return_value, p->AdapterName, &iface);
 	}
 
@@ -271,7 +272,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	array_init(return_value);
 	for (p = addrs; p; p = p->ifa_next) {
 		zval *iface = zend_hash_str_find(Z_ARR_P(return_value), p->ifa_name, strlen(p->ifa_name));
-		zval *unicast;
+		zval *unicast, *status;
 
 		if (!iface) {
 			zval newif;
@@ -291,13 +292,16 @@ PHP_FUNCTION(net_get_interfaces) {
 		                     p->ifa_addr, p->ifa_netmask,
 		                     (p->ifa_flags & IFF_BROADCAST) ? p->ifa_broadaddr : NULL,
 					         (p->ifa_flags & IFF_POINTOPOINT) ? p->ifa_dstaddr : NULL);
+		status = zend_hash_str_find(Z_ARR_P(iface), "up", sizeof("up") - 1);
+		if (!status) {
+			add_assoc_bool(iface, "up", ((p->ifa_flags & IFF_UP) != 0));
+		}
 	}
 
 	freeifaddrs(addrs);
 #else
 	/* Should never happen as we never register the function */
-	php_error(E_WARNING, "No support for net_get_interfaces");
-	RETURN_FALSE;
+	ZEND_UNREACHABLE();
 #endif
 }
 /* }}} */

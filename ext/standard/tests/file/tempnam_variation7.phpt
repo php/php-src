@@ -5,12 +5,10 @@ Test tempnam() function: usage variations - invalid/non-existing dir
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Do not run on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype:  string tempnam ( string $dir, string $prefix );
-   Description: Create file with unique file name.
-*/
-
 /* Passing invalid/non-existing args for $dir,
      hence the unique files will be created in temporary dir */
 
@@ -35,7 +33,12 @@ $names_arr = array(
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
-  $file_name = tempnam($names_arr[$i], "tempnam_variation3.tmp");
+  try {
+    $file_name = tempnam($names_arr[$i], "tempnam_variation3.tmp");
+  } catch (Error $e) {
+    echo $e->getMessage(), "\n";
+    continue;
+  }
 
   if( file_exists($file_name) ){
 
@@ -64,8 +67,6 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 
   unlink($file_name);
 }
-
-echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing tempnam() with invalid/non-existing directory names ***
@@ -100,17 +101,9 @@ File name is => %s%etempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 -- Iteration 6 --
-
-Warning: tempnam() expects parameter 1 to be a valid path, string given in %s on line %d
--- File is not created --
-
-Warning: unlink(): %s in %s on line %d
+tempnam(): Argument #1 ($directory) must not contain any null bytes
 -- Iteration 7 --
-
-Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on line %d
--- File is not created --
-
-Warning: unlink(): %s in %s on line %d
+tempnam(): Argument #1 ($directory) must be of type string, array given
 -- Iteration 8 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
@@ -123,5 +116,3 @@ Notice: tempnam(): file created in the system's temporary directory in %stempnam
 File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
-
-*** Done ***

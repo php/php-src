@@ -2,12 +2,6 @@
 Test array_diff_uassoc() function : usage variation - Passing float indexed array
 --FILE--
 <?php
-/* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a
- * 				user supplied callback function
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -19,7 +13,6 @@ var_dump( array_diff_uassoc($input_array, $float_indx_array, "strcasecmp") );
 var_dump( array_diff_uassoc($float_indx_array, $input_array, "strcasecmp") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -44,4 +37,3 @@ array(3) {
   [-10]=>
   string(5) "-10.5"
 }
-===DONE===

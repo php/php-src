@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +24,7 @@
 /* {{{ data structure */
 
 enum strm_status {
-    PHP_BZ2_UNITIALIZED,
+    PHP_BZ2_UNINITIALIZED,
     PHP_BZ2_RUNNING,
     PHP_BZ2_FINISHED
 };
@@ -91,7 +89,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 		while (bin < bucket->buflen) {
-			if (data->status == PHP_BZ2_UNITIALIZED) {
+			if (data->status == PHP_BZ2_UNINITIALIZED) {
 				status = BZ2_bzDecompressInit(streamp, 0, data->small_footprint);
 
 				if (BZ_OK != status) {
@@ -119,12 +117,13 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (status == BZ_STREAM_END) {
 				BZ2_bzDecompressEnd(&(data->strm));
 				if (data->expect_concatenated) {
-					data->status = PHP_BZ2_UNITIALIZED;
+					data->status = PHP_BZ2_UNINITIALIZED;
 				} else {
 					data->status = PHP_BZ2_FINISHED;
 				}
 			} else if (status != BZ_OK) {
 				/* Something bad happened */
+				php_error_docref(NULL, E_NOTICE, "bzip2 decompression failed");
 				php_stream_bucket_delref(bucket);
 				return PSFS_ERR_FATAL;
 			}
@@ -348,7 +347,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			}
 		}
 
-		data->status = PHP_BZ2_UNITIALIZED;
+		data->status = PHP_BZ2_UNINITIALIZED;
 		fops = &php_bz2_decompress_ops;
 	} else if (strcasecmp(filtername, "bzip2.compress") == 0) {
 		int blockSize100k = PHP_BZ2_FILTER_DEFAULT_BLOCKSIZE;
@@ -401,12 +400,3 @@ const php_stream_filter_factory php_bz2_filter_factory = {
 	php_bz2_filter_create
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

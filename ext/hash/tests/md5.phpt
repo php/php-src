@@ -1,13 +1,12 @@
 --TEST--
-md5 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: md5 algorithm
 --FILE--
 <?php
 echo hash('md5', '') . "\n";
 echo hash('md5', 'a') . "\n";
 echo hash('md5', '012345678901234567890123456789012345678901234567890123456789') . "\n";
 echo hash('md5', str_repeat('a', 1000000)) . "\n";
+?>
 --EXPECT--
 d41d8cd98f00b204e9800998ecf8427e
 0cc175b9c0f1b6a831c399e269772661

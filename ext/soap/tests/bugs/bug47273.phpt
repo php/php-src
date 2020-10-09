@@ -16,12 +16,12 @@ EOF;
 class SoapFaultTest
 {
     public function test1() {
-    	//  Test #1
+        //  Test #1
         return 'Test #1 exception with some special chars: Äßö';
     }
     public function test2() {
         //  Test #2
-	//throw new SoapFault('Server', 'Test #2 exception with some special chars: Äßö');
+    //throw new SoapFault('Server', 'Test #2 exception with some special chars: Äßö');
         throw new Exception('Test #2 exception with some special chars: Äßö');
     }
 }
@@ -32,9 +32,9 @@ $server = new SoapServer(null, array(
 $server->setClass('SoapFaultTest');
 
 try {
-	$server->handle($request1);
+    $server->handle($request1);
 } catch (Exception $e) {
-	$server->fault("Sender", $e->getMessage());
+    $server->fault("Sender", $e->getMessage());
 }
 try {
         $server->handle($request2);

@@ -8,7 +8,7 @@ echo (new ReflectionMethod('ArrayIterator', '__construct'));
 Method [ <internal:SPL, ctor> public method __construct ] {
 
   - Parameters [2] {
-    Parameter #0 [ <optional> $array ]
-    Parameter #1 [ <optional> $ar_flags ]
+    Parameter #0 [ <optional> object|array $array = [] ]
+    Parameter #1 [ <optional> int $flags = 0 ]
   }
 }

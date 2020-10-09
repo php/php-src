@@ -30,7 +30,7 @@ $testClassInstance->prop = "Hello";
 echo "invoke() on a non-object:\n";
 try {
     var_dump($foo->invoke(true));
-} catch (ReflectionException $e) {
+} catch (TypeError $e) {
     var_dump($e->getMessage());
 }
 
@@ -57,11 +57,9 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 invoke() on a non-object:
-
-Warning: ReflectionMethod::invoke() expects parameter 1 to be object, bool given in %s%eReflectionMethod_invoke_error1.php on line %d
-NULL
+string(85) "ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, bool given"
 
 invoke() on a non-instance:
 string(72) "Given object is not an instance of the class this method was declared in"

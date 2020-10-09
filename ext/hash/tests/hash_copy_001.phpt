@@ -1,31 +1,29 @@
 --TEST--
-hash_copy() basic tests
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: hash_copy() basic tests
 --FILE--
 <?php
 
 $algos = hash_algos();
 
 foreach ($algos as $algo) {
-	var_dump($algo);
-	$orig = hash_init($algo);
-	hash_update($orig, "I can't remember anything");
-	$copy = hash_copy($orig);
-	var_dump(hash_final($orig));
+    var_dump($algo);
+    $orig = hash_init($algo);
+    hash_update($orig, "I can't remember anything");
+    $copy = hash_copy($orig);
+    var_dump(hash_final($orig));
 
-	var_dump(hash_final($copy));
+    var_dump(hash_final($copy));
 }
 
 foreach ($algos as $algo) {
-	var_dump($algo);
-	$orig = hash_init($algo);
-	hash_update($orig, "I can't remember anything");
-	$copy = hash_copy($orig);
-	var_dump(hash_final($orig));
+    var_dump($algo);
+    $orig = hash_init($algo);
+    hash_update($orig, "I can't remember anything");
+    $copy = hash_copy($orig);
+    var_dump(hash_final($orig));
 
-	hash_update($copy, "Can’t tell if this is true or dream");
-	var_dump(hash_final($copy));
+    hash_update($copy, "Can’t tell if this is true or dream");
+    var_dump(hash_final($copy));
 }
 
 echo "Done\n";
@@ -127,6 +125,9 @@ string(8) "e5cfc160"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "69147a4e"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "5e405e93"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "98139504"
@@ -283,6 +284,9 @@ string(8) "59f8d3d2"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "3ee63999"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "516ad412"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "59ad036f"
@@ -297,7 +301,7 @@ string(16) "bebc746a33b6ab62"
 string(16) "893899e4415a920f"
 string(5) "joaat"
 string(8) "aaebf370"
-string(8) "513479b4"
+string(8) "836fb0e5"
 string(10) "haval128,3"
 string(32) "86362472c8895e68e223ef8b3711d8d9"
 string(32) "ebeeeb05c18af1e53d2d127b561d5e0d"

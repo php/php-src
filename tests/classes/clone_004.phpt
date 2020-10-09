@@ -12,11 +12,11 @@ abstract class base {
 class test extends base {
   public $b = 'test';
 
-  // reenable cloning
+  // re-enable cloning
   public function __clone() {}
 
   public function show() {
-	var_dump($this);
+    var_dump($this);
   }
 }
 

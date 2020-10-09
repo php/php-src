@@ -1,100 +1,66 @@
 --TEST--
-Test hash_hkdf() function: error conditions
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_hkdf() function: error conditions
 --FILE--
 <?php
 
-/* Prototype  : string hkdf  ( string $algo  , string $ikm  [, int $length  , string $info = '' , string $salt = ''  ] )
- * Description: HMAC-based Key Derivation Function
- * Source code: ext/hash/hash.c
-*/
+error_reporting(E_ALL);
+
+function trycatch_dump(...$tests) {
+    foreach ($tests as $test) {
+        try {
+            var_dump($test());
+        }
+        catch (\Error $e) {
+            echo '[' . get_class($e) . '] ' . $e->getMessage() . "\n";
+        }
+    }
+}
 
 $ikm = 'input key material';
 
 echo "*** Testing hash_hkdf(): error conditions ***\n";
 
-echo "\n-- Testing hash_hkdf() function with less than expected no. of arguments --\n";
-var_dump(hash_hkdf());
-var_dump(hash_hkdf('sha1'));
-
-echo "\n-- Testing hash_hkdf() function with more than expected no. of arguments --\n";
-var_dump(hash_hkdf('sha1', $ikm, 20, '', '', 'extra parameter'));
-
 echo "\n-- Testing hash_hkdf() function with invalid hash algorithm --\n";
-var_dump(hash_hkdf('foo', $ikm));
+trycatch_dump(
+    fn() => hash_hkdf('foo', $ikm)
+);
 
 echo "\n-- Testing hash_hkdf() function with non-cryptographic hash algorithm --\n";
-var_dump(hash_hkdf('adler32', $ikm));
-var_dump(hash_hkdf('crc32', $ikm));
-var_dump(hash_hkdf('crc32b', $ikm));
-var_dump(hash_hkdf('fnv132', $ikm));
-var_dump(hash_hkdf('fnv1a32', $ikm));
-var_dump(hash_hkdf('fnv164', $ikm));
-var_dump(hash_hkdf('fnv1a64', $ikm));
-var_dump(hash_hkdf('joaat', $ikm));
+trycatch_dump(
+    fn() => hash_hkdf('adler32', $ikm),
+    fn() => hash_hkdf('crc32', $ikm),
+    fn() => hash_hkdf('crc32b', $ikm),
+    fn() => hash_hkdf('fnv132', $ikm),
+    fn() => hash_hkdf('fnv1a32', $ikm),
+    fn() => hash_hkdf('fnv164', $ikm),
+    fn() => hash_hkdf('fnv1a64', $ikm),
+    fn() => hash_hkdf('joaat', $ikm)
+);
 
 echo "\n-- Testing hash_hkdf() function with invalid parameters --\n";
-var_dump(hash_hkdf('sha1', ''));
-var_dump(hash_hkdf('sha1', $ikm, -1));
-var_dump(hash_hkdf('sha1', $ikm, 20 * 255 + 1)); // Length can't be more than 255 times the hash digest size
+trycatch_dump(
+    fn() => hash_hkdf('sha1', ''),
+    fn() => hash_hkdf('sha1', $ikm, -1),
+    fn() => hash_hkdf('sha1', $ikm, 20 * 255 + 1) // Length can't be more than 255 times the hash digest size
+)
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hkdf(): error conditions ***
 
--- Testing hash_hkdf() function with less than expected no. of arguments --
-
-Warning: hash_hkdf() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: hash_hkdf() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
--- Testing hash_hkdf() function with more than expected no. of arguments --
-
-Warning: hash_hkdf() expects at most 5 parameters, 6 given in %s on line %d
-NULL
-
 -- Testing hash_hkdf() function with invalid hash algorithm --
-
-Warning: hash_hkdf(): Unknown hashing algorithm: foo in %s on line %d
-bool(false)
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with non-cryptographic hash algorithm --
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: adler32 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: crc32 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: crc32b in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv132 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv1a32 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv164 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv1a64 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: joaat in %s on line %d
-bool(false)
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with invalid parameters --
-
-Warning: hash_hkdf(): Input keying material cannot be empty in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Length must be greater than or equal to 0: -1 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Length must be less than or equal to 5100: 5101 in %s on line %d
-bool(false)
-===Done===
+[ValueError] hash_hkdf(): Argument #2 ($key) cannot be empty
+[ValueError] hash_hkdf(): Argument #3 ($length) must be greater than or equal to 0
+[ValueError] hash_hkdf(): Argument #3 ($length) must be less than or equal to 5100

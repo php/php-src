@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_utf8.h"
 
@@ -71,7 +67,6 @@ const mbfl_encoding mbfl_encoding_utf8 = {
 const struct mbfl_identify_vtbl vtbl_identify_utf8 = {
 	mbfl_no_encoding_utf8,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
@@ -79,18 +74,20 @@ const struct mbfl_convert_vtbl vtbl_utf8_wchar = {
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_wchar,
-	mbfl_filt_conv_utf8_wchar_flush
+	mbfl_filt_conv_utf8_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -234,9 +231,7 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

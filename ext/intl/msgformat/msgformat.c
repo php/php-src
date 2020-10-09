@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -27,7 +25,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern;
@@ -36,16 +34,13 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	int         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
-	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 	intl_error_reset( NULL );
 
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "ss",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_create: unable to parse input parameters", 0 );
 		return FAILURE;
 	}
 
@@ -90,31 +85,25 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 }
 /* }}} */
 
-/* {{{ proto MessageFormatter MesssageFormatter::create( string $locale, string $pattern )
- * Create formatter. }}} */
-/* {{{ proto MessageFormatter msgfmt_create( string $locale, string $pattern )
- * Create formatter.
- */
+/* {{{ Create formatter. */
 PHP_FUNCTION( msgfmt_create )
 {
 	object_init_ex( return_value, MessageFormatter_ce_ptr );
-	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 }
 /* }}} */
 
-/* {{{ proto MessageFormatter::__construct( string $locale, string $pattern )
- * MessageFormatter object constructor.
- */
+/* {{{ MessageFormatter object constructor. */
 PHP_METHOD( MessageFormatter, __construct )
 {
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-	return_value = getThis();
-	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+	return_value = ZEND_THIS;
+	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}
@@ -123,11 +112,7 @@ PHP_METHOD( MessageFormatter, __construct )
 }
 /* }}} */
 
-/* {{{ proto int MessageFormatter::getErrorCode()
- * Get formatter's last error code. }}} */
-/* {{{ proto int msgfmt_get_error_code( MessageFormatter $nf )
- * Get formatter's last error code.
- */
+/* {{{ Get formatter's last error code. */
 PHP_FUNCTION( msgfmt_get_error_code )
 {
 	zval*                    object  = NULL;
@@ -137,10 +122,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_code: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
@@ -150,11 +132,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 }
 /* }}} */
 
-/* {{{ proto string MessageFormatter::getErrorMessage( )
- * Get text description for formatter's last error code. }}} */
-/* {{{ proto string msgfmt_get_error_message( MessageFormatter $coll )
- * Get text description for formatter's last error code.
- */
+/* {{{ Get text description for formatter's last error code. */
 PHP_FUNCTION( msgfmt_get_error_message )
 {
 	zend_string*             message = NULL;
@@ -165,10 +143,7 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_message: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
@@ -178,12 +153,3 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	RETURN_STR(message);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

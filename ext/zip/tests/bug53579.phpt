@@ -6,12 +6,12 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 $fp = $zip->getStream('foo');
 
@@ -24,7 +24,7 @@ $zip->close();
 var_dump($contents);
 
 
-$fp = fopen('zip://' . dirname(__FILE__) . '/test_with_comment.zip#foo', 'rb');
+$fp = fopen('zip://' . __DIR__ . '/test_with_comment.zip#foo', 'rb');
 if (!$fp) {
   exit("cannot open\n");
 }

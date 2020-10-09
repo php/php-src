@@ -7,16 +7,10 @@ Test session_set_save_handler() function : variation
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() : variation ***\n";
 
 require_once "save_handler.inc";
-$path = dirname(__FILE__);
+$path = __DIR__;
 session_save_path($path);
 var_dump(session_start());
 var_dump(session_set_save_handler("open", "close", "read", "write", "destroy", "gc"));
@@ -28,6 +22,6 @@ ob_end_flush();
 *** Testing session_set_save_handler() : variation ***
 bool(true)
 
-Warning: session_set_save_handler(): Cannot change save handler when session is active in %s on line 17
+Warning: session_set_save_handler(): Session save handler cannot be changed when a session is active in %s on line %d
 bool(false)
 bool(true)

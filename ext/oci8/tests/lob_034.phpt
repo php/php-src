@@ -3,13 +3,13 @@ lob buffering - 2
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -34,7 +34,7 @@ var_dump($blob->flush(-1));
 
 oci_commit($c);
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 
@@ -48,6 +48,6 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: OCI-Lob::flush(): Invalid flag value: -1 in %s on line %d
+Warning: OCILob::flush(): Invalid flag value: -1 in %s on line %d
 bool(false)
 Done

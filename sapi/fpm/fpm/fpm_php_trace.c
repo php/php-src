@@ -9,11 +9,7 @@
 
 #include <stdio.h>
 #include <stddef.h>
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# include <stdint.h>
-#endif
+#include <inttypes.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -99,12 +95,12 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					return -1;
 				}
 
-				if (ZEND_CALL_KIND_EX((*call_info) >> ZEND_CALL_INFO_SHIFT) == ZEND_CALL_TOP_CODE) {
+				if (ZEND_CALL_KIND_EX(*call_info) == ZEND_CALL_TOP_CODE) {
 					return 0;
-				} else if (ZEND_CALL_KIND_EX(*(call_info) >> ZEND_CALL_INFO_SHIFT) == ZEND_CALL_NESTED_CODE) {
+				} else if (ZEND_CALL_KIND_EX(*call_info) == ZEND_CALL_NESTED_CODE) {
 					memcpy(buf, "[INCLUDE_OR_EVAL]", sizeof("[INCLUDE_OR_EVAL]"));
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 				}
 			} else {
 				if (0 > fpm_trace_get_strz(buf, buf_size, function_name + offsetof(zend_string, val))) {

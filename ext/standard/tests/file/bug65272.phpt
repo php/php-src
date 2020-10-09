@@ -1,13 +1,9 @@
 --TEST--
 Bug #65272: flock() correctly sets wouldblock out param in windows
---SKIPIF--
-<?php
-if (stripos(PHP_OS, 'win') !== 0) die("skip windows required");
-?>
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/flock_bug65272.dat";
+$file = __DIR__."/flock_bug65272.dat";
 
 $fp1 = fopen($file, "w");
 var_dump(flock($fp1, LOCK_SH));
@@ -20,7 +16,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file = dirname(__FILE__)."/flock_bug65272.dat";
+$file = __DIR__."/flock_bug65272.dat";
 unlink($file);
 ?>
 --EXPECT--

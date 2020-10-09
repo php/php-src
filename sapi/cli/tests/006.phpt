@@ -4,10 +4,10 @@ show information about extension
 <?php
 include "skipif.inc";
 if (!extension_loaded("session")) {
-	die("skip session extension required");
+    die("skip session extension required");
 }
 if (PCRE_JIT_SUPPORT == false) {
-	die ("skip not pcre jit support builtin");
+    die ("skip not pcre jit support builtin");
 }
 ?>
 --INI--
@@ -24,9 +24,9 @@ var_dump(`$php -n --re pcre`);
 echo "Done\n";
 ?>
 --EXPECTF--
-string(44) "Exception: Extension unknown does not exist
+string(46) "Exception: Extension "unknown" does not exist
 "
-string(37) "Exception: Extension  does not exist
+string(39) "Exception: Extension "" does not exist
 "
 string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
@@ -68,90 +68,108 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_match ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> &$subpatterns ]
-        Parameter #3 [ <optional> $flags ]
-        Parameter #4 [ <optional> $offset ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> string $subject ]
+        Parameter #2 [ <optional> &$matches = null ]
+        Parameter #3 [ <optional> int $flags = 0 ]
+        Parameter #4 [ <optional> int $offset = 0 ]
       }
+      - Return [ int|false ]
     }
     Function [ <internal:pcre> function preg_match_all ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> &$subpatterns ]
-        Parameter #3 [ <optional> $flags ]
-        Parameter #4 [ <optional> $offset ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> string $subject ]
+        Parameter #2 [ <optional> &$matches = null ]
+        Parameter #3 [ <optional> int $flags = 0 ]
+        Parameter #4 [ <optional> int $offset = 0 ]
       }
+      - Return [ int|false|null ]
     }
     Function [ <internal:pcre> function preg_replace ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $regex ]
-        Parameter #1 [ <required> $replace ]
-        Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> $limit ]
-        Parameter #4 [ <optional> &$count ]
+        Parameter #0 [ <required> array|string $pattern ]
+        Parameter #1 [ <required> array|string $replacement ]
+        Parameter #2 [ <required> array|string $subject ]
+        Parameter #3 [ <optional> int $limit = -1 ]
+        Parameter #4 [ <optional> &$count = null ]
       }
-    }
-    Function [ <internal:pcre> function preg_replace_callback ] {
-
-      - Parameters [5] {
-        Parameter #0 [ <required> $regex ]
-        Parameter #1 [ <required> $callback ]
-        Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> $limit ]
-        Parameter #4 [ <optional> &$count ]
-      }
-    }
-    Function [ <internal:pcre> function preg_replace_callback_array ] {
-
-      - Parameters [4] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> $limit ]
-        Parameter #3 [ <optional> &$count ]
-      }
+      - Return [ array|string|null ]
     }
     Function [ <internal:pcre> function preg_filter ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $regex ]
-        Parameter #1 [ <required> $replace ]
-        Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> $limit ]
-        Parameter #4 [ <optional> &$count ]
+        Parameter #0 [ <required> array|string $pattern ]
+        Parameter #1 [ <required> array|string $replacement ]
+        Parameter #2 [ <required> array|string $subject ]
+        Parameter #3 [ <optional> int $limit = -1 ]
+        Parameter #4 [ <optional> &$count = null ]
       }
+      - Return [ array|string|null ]
+    }
+    Function [ <internal:pcre> function preg_replace_callback ] {
+
+      - Parameters [6] {
+        Parameter #0 [ <required> array|string $pattern ]
+        Parameter #1 [ <required> callable $callback ]
+        Parameter #2 [ <required> array|string $subject ]
+        Parameter #3 [ <optional> int $limit = -1 ]
+        Parameter #4 [ <optional> &$count = null ]
+        Parameter #5 [ <optional> int $flags = 0 ]
+      }
+      - Return [ array|string|null ]
+    }
+    Function [ <internal:pcre> function preg_replace_callback_array ] {
+
+      - Parameters [5] {
+        Parameter #0 [ <required> array $pattern ]
+        Parameter #1 [ <required> array|string $subject ]
+        Parameter #2 [ <optional> int $limit = -1 ]
+        Parameter #3 [ <optional> &$count = null ]
+        Parameter #4 [ <optional> int $flags = 0 ]
+      }
+      - Return [ array|string|null ]
     }
     Function [ <internal:pcre> function preg_split ] {
 
       - Parameters [4] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> $limit ]
-        Parameter #3 [ <optional> $flags ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> string $subject ]
+        Parameter #2 [ <optional> int $limit = -1 ]
+        Parameter #3 [ <optional> int $flags = 0 ]
       }
+      - Return [ array|false ]
     }
     Function [ <internal:pcre> function preg_quote ] {
 
       - Parameters [2] {
-        Parameter #0 [ <required> $str ]
-        Parameter #1 [ <optional> $delim_char ]
+        Parameter #0 [ <required> string $str ]
+        Parameter #1 [ <optional> ?string $delimiter = null ]
       }
+      - Return [ string ]
     }
     Function [ <internal:pcre> function preg_grep ] {
 
       - Parameters [3] {
-        Parameter #0 [ <required> $regex ]
-        Parameter #1 [ <required> $input ]
-        Parameter #2 [ <optional> $flags ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> array $array ]
+        Parameter #2 [ <optional> int $flags = 0 ]
       }
+      - Return [ array|false ]
     }
     Function [ <internal:pcre> function preg_last_error ] {
 
       - Parameters [0] {
       }
+      - Return [ int ]
+    }
+    Function [ <internal:pcre> function preg_last_error_msg ] {
+
+      - Parameters [0] {
+      }
+      - Return [ string ]
     }
   }
 }

@@ -3,13 +3,13 @@
 ARG_WITH("sqlite3", "SQLite 3 support", "no");
 
 if (PHP_SQLITE3 != "no") {
-	ADD_FLAG("CFLAGS_SQLITE3", "/D SQLITE_THREADSAFE=" + (PHP_ZTS == "yes" ? "1" : "0") + " /D SQLITE_ENABLE_FTS3=1 /D SQLITE_ENABLE_FTS4=1 /D SQLITE_ENABLE_FTS5=1 /D SQLITE_ENABLE_JSON1=1 /D SQLITE_ENABLE_COLUMN_METADATA=1 /D SQLITE_CORE=1 /D SQLITE_API=__declspec(dllexport) ");
-	EXTENSION("sqlite3", "sqlite3.c", null, "/I" + configure_module_dirname + "/libsqlite /I" + configure_module_dirname + " /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	if (SETUP_SQLITE3("sqlite3", PHP_SQLITE3, PHP_SQLITE3_SHARED)) {
+		EXTENSION("sqlite3", "sqlite3.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-	ADD_SOURCES(configure_module_dirname + "/libsqlite", "sqlite3.c", "sqlite3");
-
-	AC_DEFINE("HAVE_SQLITE3", 1, "SQLite support");
-	AC_DEFINE("HAVE_SQLITE3_ERRSTR", 1, "have sqlite3_errstr function")
-	AC_DEFINE("HAVE_SQLITE3_CLOSE_V2", 1, "have sqlite3_close_v2")
-	PHP_INSTALL_HEADERS("ext/sqlite3", "libsqlite/sqlite3.h");
+		AC_DEFINE("HAVE_SQLITE3", 1, "SQLite support");
+		AC_DEFINE("HAVE_SQLITE3_ERRSTR", 1, "have sqlite3_errstr function");
+		AC_DEFINE("HAVE_SQLITE3_EXPANDED_SQL", 1, "have sqlite3_expanded_sql function");
+	} else {
+		WARNING("sqlite3 not enabled; libraries and/or headers not found");
+	}
 }

@@ -7,4 +7,4 @@ global $$foo->bar;
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected '->' (T_OBJECT_OPERATOR), expecting ',' or ';' in %s on line %d
+Parse error: syntax error, unexpected token "->", expecting "," or ";" in %s on line %d

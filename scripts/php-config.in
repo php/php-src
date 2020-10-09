@@ -19,6 +19,8 @@ php_cli_binary=NONE
 php_cgi_binary=NONE
 configure_options="@CONFIGURE_OPTIONS@"
 php_sapis="@PHP_INSTALLED_SAPIS@"
+ini_dir="@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@"
+ini_path="@EXPANDED_PHP_CONFIG_FILE_PATH@"
 
 # Set php_cli_binary and php_cgi_binary if available
 for sapi in $php_sapis; do
@@ -63,6 +65,10 @@ case "$1" in
   echo $configure_options;;
 --man-dir)
   echo $man_dir;;
+--ini-path)
+  echo $ini_path;;
+--ini-dir)
+  echo $ini_dir;;
 --version)
   echo $version;;
 --vernum)
@@ -80,6 +86,8 @@ Options:
   --man-dir           [$man_dir]
   --php-binary        [$php_binary]
   --php-sapis         [$php_sapis]
+  --ini-path          [$ini_path]
+  --ini-dir           [$ini_dir]
   --configure-options [$configure_options]
   --version           [$version]
   --vernum            [$vernum]

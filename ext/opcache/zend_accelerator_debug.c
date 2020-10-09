@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,7 @@ void zend_accel_error(int type, const char *format, ...)
 
 		fLog = stderr;
 	} else {
-		fLog = fopen(ZCG(accel_directives).error_log, "a+");
+		fLog = fopen(ZCG(accel_directives).error_log, "a");
 		if (!fLog) {
 			fLog = stderr;
 		}

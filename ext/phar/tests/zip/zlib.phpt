@@ -6,13 +6,11 @@ Phar: process zlib-compressed zip alias
 --FILE--
 <?php
 try {
-	$a = new Phar(dirname(__FILE__) . '/files/zlib_alias.phar.zip');
-	var_dump($a->getAlias());
+    $a = new Phar(__DIR__ . '/files/zlib_alias.phar.zip');
+    var_dump($a->getAlias());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 string(175) "hitheresuperlongzipistoostupidtodowhatIsaysoIhavetousethisridiculouslylongaliasbecauseitisstupiddidImentionthatalreadythemadnessdoesnotstopIhateinfozipIhateinfozipIhateinfozip"
-===DONE===

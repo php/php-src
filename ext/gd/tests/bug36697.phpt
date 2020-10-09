@@ -2,13 +2,13 @@
 Bug #36697 (TrueColor transparency with GIF palette output).
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available\n");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available\n");
+    }
 ?>
 --FILE--
 <?php
-$dest = dirname(__FILE__) . "/36697.gif";
+$dest = __DIR__ . "/36697.gif";
 
 $im = imagecreatetruecolor(192, 36);
 $trans_color = imagecolorallocate($im, 255, 0, 0);

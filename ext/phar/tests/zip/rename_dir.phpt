@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $alias = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -26,9 +26,9 @@ echo file_get_contents($alias . '/b/x') . "\n";
 echo file_get_contents($alias . '/a/x') . "\n";
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 a
 a
 
-Warning: file_get_contents(phar://%srename_dir.phar.zip/a/x): failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.zip" in %srename_dir.php on line %d
+Warning: file_get_contents(phar://%srename_dir.phar.zip/a/x): Failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.zip" in %srename_dir.php on line %d

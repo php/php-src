@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,17 +41,11 @@ extern PHPAPI zend_class_entry *reflection_method_ptr;
 extern PHPAPI zend_class_entry *reflection_property_ptr;
 extern PHPAPI zend_class_entry *reflection_extension_ptr;
 extern PHPAPI zend_class_entry *reflection_zend_extension_ptr;
+extern PHPAPI zend_class_entry *reflection_reference_ptr;
+extern PHPAPI zend_class_entry *reflection_attribute_ptr;
 
 PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
 
 END_EXTERN_C()
 
 #endif /* PHP_REFLECTION_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

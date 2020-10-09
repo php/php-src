@@ -2,21 +2,16 @@
 Test imap_createmailbox() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_createmailbox  ( resource $imap_stream  , string $mailbox  )
- * Description: Creates a new mailbox specified by mailbox .
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_createmailbox() : basic functionality ***\n";
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 $imap_stream = imap_open($default_mailbox, $username, $password) or
-	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
+    die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
 
 $newname = "phpnewbox";
 
@@ -25,8 +20,8 @@ echo "Newname will be '$newname'\n";
 $newbox = imap_utf7_encode($server.$newname);
 if (imap_createmailbox($imap_stream, $newbox)) {
 
-	echo "Add a couple of msgs to '$newname' mailbox\n";
-	populate_mailbox($imap_stream, $newbox, 2);
+    echo "Add a couple of msgs to '$newname' mailbox\n";
+    populate_mailbox($imap_stream, $newbox, 2);
 
     $status = imap_status($imap_stream, $newbox, SA_ALL);
     if ($status) {
@@ -54,7 +49,6 @@ if (imap_createmailbox($imap_stream, $newbox)) {
 imap_close($imap_stream);
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing imap_createmailbox() : basic functionality ***
 Newname will be 'phpnewbox'
@@ -66,4 +60,3 @@ Unseen:      2
 UIDnext:     %d
 UIDvalidity: %d
 Mailbox 'phpnewbox' removed to restore initial state
-===Done===

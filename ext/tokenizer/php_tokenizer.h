@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,19 +37,4 @@ PHP_MINFO_FUNCTION(tokenizer);
 PHP_FUNCTION(token_get_all);
 PHP_FUNCTION(token_name);
 
-#ifdef ZTS
-#define TOKENIZER_G(v) TSRMG(tokenizer_globals_id, zend_tokenizer_globals *, v)
-#else
-#define TOKENIZER_G(v) (tokenizer_globals.v)
-#endif
-
 #endif	/* PHP_TOKENIZER_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

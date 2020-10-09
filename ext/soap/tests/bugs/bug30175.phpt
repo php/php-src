@@ -33,7 +33,7 @@ EOF;
 
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug30175.wsdl");
+$client = new LocalSoapClient(__DIR__."/bug30175.wsdl");
 var_dump($client->qwebGetHostInfo());
 ?>
 --EXPECT--

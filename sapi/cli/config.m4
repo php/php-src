@@ -1,8 +1,8 @@
-dnl config.m4 for sapi cli
-
-PHP_ARG_ENABLE(cli,,
-[  --disable-cli           Disable building CLI version of PHP
-                          (this forces --without-pear)], yes, no)
+PHP_ARG_ENABLE([cli],,
+  [AS_HELP_STRING([--disable-cli],
+    [Disable building CLI version of PHP (this forces --without-pear)])],
+  [yes],
+  [no])
 
 AC_CHECK_FUNCS(setproctitle)
 
@@ -24,10 +24,10 @@ AC_MSG_CHECKING(for CLI build)
 if test "$PHP_CLI" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag)
 
-  dnl Set filename
+  dnl Set filename.
   SAPI_CLI_PATH=sapi/cli/php
 
-  dnl Select SAPI
+  dnl Select SAPI.
   PHP_SELECT_SAPI(cli, program, php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, '$(SAPI_CLI_PATH)')
 
   case $host_alias in
@@ -42,15 +42,15 @@ if test "$PHP_CLI" != "no"; then
     BUILD_CLI="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_CLI_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CLI_PATH)"
     ;;
   *)
-    BUILD_CLI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_CLI_OBJS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CLI_PATH)"
+    BUILD_CLI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_CLI_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CLI_PATH)"
     ;;
   esac
 
-  dnl Set executable for tests
+  dnl Set executable for tests.
   PHP_EXECUTABLE="\$(top_builddir)/\$(SAPI_CLI_PATH)"
   PHP_SUBST(PHP_EXECUTABLE)
 
-  dnl Expose to Makefile
+  dnl Expose to Makefile.
   PHP_SUBST(SAPI_CLI_PATH)
   PHP_SUBST(BUILD_CLI)
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #48097 (date_timezone_set function produces wrong datetime result)
+--XFAIL--
+Broken by timelib update
 --INI--
 date.timezone=UTC
 --FILE--
@@ -13,6 +15,7 @@ $d->setTimeZone( new DateTimeZone( 'Europe/Budapest' ) );
 var_dump( $d );
 echo $d->format( DATE_ISO8601 ), "\n\n";
 echo $d->format( 'U' ), "\n\n";
+?>
 --EXPECT--
 object(DateTime)#1 (3) {
   ["date"]=>

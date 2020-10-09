@@ -5,11 +5,11 @@ errmsg: __construct() cannot be static
 
 class test {
 
-	static function __construct() {
-	}
+    static function __construct() {
+    }
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Constructor test::__construct() cannot be static in %s on line %d
+Fatal error: Method test::__construct() cannot be static in %s on line %d

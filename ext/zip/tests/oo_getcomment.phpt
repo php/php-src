@@ -6,30 +6,30 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 echo $zip->getArchiveComment() . "\n";
 
 $idx = $zip->locateName('foo');
-echo $zip->getCommentName('foo') . "\n";
-echo $zip->getCommentIndex($idx);
+var_dump($zip->getCommentName('foo'));
+var_dump($zip->getCommentIndex($idx));
 
-echo $zip->getCommentName('') . "\n";
-echo $zip->getCommentName() . "\n";
+try {
+    echo $zip->getCommentName('') . "\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $zip->close();
 
 ?>
---EXPECTF--
+--EXPECT--
 Zip archive comment
-foo comment
-foo comment
-Notice: ZipArchive::getCommentName(): Empty string as entry name in %s on line %d
-
-
-Warning: ZipArchive::getCommentName() expects at least 1 parameter, 0 given in %s on line %d
+string(11) "foo comment"
+string(11) "foo comment"
+ZipArchive::getCommentName(): Argument #1 ($name) cannot be empty

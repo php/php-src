@@ -7,10 +7,8 @@ output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-$infile = dirname(__FILE__).'/bug73115.jpg';
+$infile = __DIR__.'/bug73115.jpg';
 var_dump(count(exif_read_data($infile)));
 ?>
-===DONE===
 --EXPECT--
 int(80)
-===DONE===

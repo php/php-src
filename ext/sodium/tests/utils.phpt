@@ -93,7 +93,7 @@ if (defined('SODIUM_BASE64_VARIANT_ORIGINAL')) {
     var_dump('base64("O") case passed');
     var_dump('abcd');
 }
-    
+
 function sodium_foo()
 {
     throw new SodiumException('test');

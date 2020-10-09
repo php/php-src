@@ -1,7 +1,5 @@
 --TEST--
-gost
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: gost algorithm
 --FILE--
 <?php
 echo hash('gost', ''), "\n";

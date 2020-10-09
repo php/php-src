@@ -1,21 +1,11 @@
 --TEST--
 Test krsort() function : usage variations - sort strings
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-  die("skip Output tested contains chars that are not shown the same on windows concole (ESC and co)");
-}
 --FILE--
 <?php
-/* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing krsort() by providing array of string values for $array argument with
  * following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
@@ -45,7 +35,7 @@ echo "\n-- Testing krsort() by supplying various string arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n";
+  echo "- With default sort flag -\n";
   $temp_array = $array;
   var_dump(krsort($temp_array) ); // expecting : bool(true)
   var_dump($temp_array);
@@ -68,7 +58,7 @@ echo "Done\n";
 -- Testing krsort() by supplying various string arrays --
 
 -- Iteration 1 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   ["\xhh"]=>
@@ -154,7 +144,7 @@ array(11) {
 }
 
 -- Iteration 2 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   ["x"]=>

@@ -2,12 +2,12 @@
 Bug #53504 imagettfbbox/imageftbbox gives incorrect values for bounding box
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $font = "$cwd/Tuffy.ttf";
 
 $g = imagecreate(800, 800);
@@ -51,16 +51,16 @@ $tests = [
 
 foreach ($tests as $testnum => $test) {
     $bbox = imageftbbox($test['fontSize'], $test['angle'], $font, $test['text']);
-	printf('%2d: ', $testnum);
-	for ($i = 0; $i < 8; $i++) {
-		$exp = $test['exp'][$i];
-		if ($bbox[$i] >= $exp - 2 && $bbox[$i] <= $exp + 2) {
-			echo '.';
-		} else {
-			echo "(expected $exp, got $bbox[$i])";
-		}
-	}
-	echo "\n";
+    printf('%2d: ', $testnum);
+    for ($i = 0; $i < 8; $i++) {
+        $exp = $test['exp'][$i];
+        if ($bbox[$i] >= $exp - 2 && $bbox[$i] <= $exp + 2) {
+            echo '.';
+        } else {
+            echo "(expected $exp, got $bbox[$i])";
+        }
+    }
+    echo "\n";
 
     $bboxDrawn = imagefttext($g, $test['fontSize'], $test['angle'],
         $test['x'], $test['y'], $black, $font, $test['text']);
@@ -72,7 +72,7 @@ foreach ($tests as $testnum => $test) {
     }
 
     // draw bounding box:
-    imagepolygon($g, $bboxDrawn, 4, $red);
+    imagepolygon($g, $bboxDrawn, $red);
 
     // draw baseline:
     $width = sqrt(pow($bboxDrawn[2] - $bboxDrawn[0], 2) + pow($bboxDrawn[3] - $bboxDrawn[1], 2));
@@ -84,7 +84,7 @@ foreach ($tests as $testnum => $test) {
 imagepng($g, "$cwd/bug53504.png");
 ?>
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug53504.png'); ?>
+<?php @unlink(__DIR__ . '/bug53504.png'); ?>
 --EXPECT--
  0: ........
  1: ........

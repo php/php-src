@@ -2,11 +2,7 @@
 Test glob() function with relative path
 --FILE--
 <?php
-/* Prototype: array glob ( string $pattern [, int $flags] );
-   Description: Find pathnames matching a pattern
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp dirname used here
 $dir_name = 'glob_test';
@@ -32,7 +28,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/glob_test/file.text");
 rmdir("$file_path/glob_test/");
 ?>

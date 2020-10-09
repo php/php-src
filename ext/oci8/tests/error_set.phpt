@@ -5,7 +5,7 @@ Check oci_set_{action,client_identifier,module_name,client_info} error handling
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 error_reporting(E_ALL);
 ini_set('display_errors', 'Off');
@@ -51,8 +51,6 @@ $r = oci_set_client_info($c, $s);
 var_dump($r);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 bool(false)
@@ -69,4 +67,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

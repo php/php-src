@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Call Graph                                              |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,7 @@ static inline uint32_t scdf_edge(zend_cfg *cfg, int from, int to) {
 			return edge;
 		}
 	}
-	ZEND_ASSERT(0);
+	ZEND_UNREACHABLE();
 }
 
 static inline zend_bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) {

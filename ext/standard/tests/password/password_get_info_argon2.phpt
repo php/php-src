@@ -15,7 +15,7 @@ echo "OK!";
 --EXPECT--
 array(3) {
   ["algo"]=>
-  int(2)
+  string(7) "argon2i"
   ["algoName"]=>
   string(7) "argon2i"
   ["options"]=>
@@ -30,7 +30,7 @@ array(3) {
 }
 array(3) {
   ["algo"]=>
-  int(3)
+  string(8) "argon2id"
   ["algoName"]=>
   string(8) "argon2id"
   ["options"]=>

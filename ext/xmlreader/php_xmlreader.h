@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -62,19 +60,4 @@ PHP_MINFO_FUNCTION(xmlreader);
 #define REGISTER_XMLREADER_CLASS_CONST_LONG(const_name, value) \
 	zend_declare_class_constant_long(xmlreader_class_entry, const_name, sizeof(const_name)-1, (zend_long)value);
 
-#ifdef ZTS
-#define XMLREADER_G(v) TSRMG(xmlreader_globals_id, zend_xmlreader_globals *, v)
-#else
-#define XMLREADER_G(v) (xmlreader_globals.v)
-#endif
-
 #endif	/* PHP_XMLREADER_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

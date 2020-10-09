@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -137,8 +135,7 @@ static void Decode(uint32_t *output, const unsigned char *input, unsigned int le
 #define ROTR(x,n)	(((x) >> (n)) | ((x) << (32 - (n))))
 
 
-/* {{{ PHP_3HAVALTransform
- */
+/* {{{ PHP_3HAVALTransform */
 static void PHP_3HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
 	uint32_t E[8];
@@ -171,8 +168,7 @@ static void PHP_3HAVALTransform(uint32_t state[8], const unsigned char block[128
 }
 /* }}} */
 
-/* {{{ PHP_4HAVALTransform
- */
+/* {{{ PHP_4HAVALTransform */
 static void PHP_4HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
 	uint32_t E[8];
@@ -208,8 +204,7 @@ static void PHP_4HAVALTransform(uint32_t state[8], const unsigned char block[128
 }
 /* }}} */
 
-/* {{{ PHP_5HAVALTransform
- */
+/* {{{ PHP_5HAVALTransform */
 static void PHP_5HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
 	uint32_t E[8];
@@ -249,10 +244,14 @@ static void PHP_5HAVALTransform(uint32_t state[8], const unsigned char block[128
 
 #define PHP_HASH_HAVAL_INIT(p,b) \
 const php_hash_ops php_hash_##p##haval##b##_ops = { \
+	"haval" #b "," #p, \
 	(php_hash_init_func_t) PHP_##p##HAVAL##b##Init, \
 	(php_hash_update_func_t) PHP_HAVALUpdate, \
 	(php_hash_final_func_t) PHP_HAVAL##b##Final, \
-	(php_hash_copy_func_t) php_hash_copy, \
+	php_hash_copy, \
+	php_hash_serialize, \
+	php_hash_unserialize, \
+	PHP_HAVAL_SPEC, \
 	((b) / 8), 128, sizeof(PHP_HAVAL_CTX), 1 }; \
 PHP_HASH_API void PHP_##p##HAVAL##b##Init(PHP_HAVAL_CTX *context) \
 {	int i; context->count[0] = 	context->count[1] = 	0; \
@@ -278,9 +277,8 @@ PHP_HASH_HAVAL_INIT(5,192)
 PHP_HASH_HAVAL_INIT(5,224)
 PHP_HASH_HAVAL_INIT(5,256)
 
-/* {{{ PHP_HAVALUpdate
- */
-PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, unsigned int inputLen)
+/* {{{ PHP_HAVALUpdate */
+PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -316,8 +314,7 @@ PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *i
 
 #define PHP_HASH_HAVAL_VERSION	0x01
 
-/* {{{ PHP_HAVAL128Final
- */
+/* {{{ PHP_HAVAL128Final */
 PHP_HASH_API void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -370,8 +367,7 @@ PHP_HASH_API void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL160Final
- */
+/* {{{ PHP_HAVAL160Final */
 PHP_HASH_API void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -424,8 +420,7 @@ PHP_HASH_API void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL192Final
- */
+/* {{{ PHP_HAVAL192Final */
 PHP_HASH_API void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -464,8 +459,7 @@ PHP_HASH_API void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL224Final
- */
+/* {{{ PHP_HAVAL224Final */
 PHP_HASH_API void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -505,8 +499,7 @@ PHP_HASH_API void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL256Final
- */
+/* {{{ PHP_HAVAL256Final */
 PHP_HASH_API void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -538,12 +531,3 @@ PHP_HASH_API void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

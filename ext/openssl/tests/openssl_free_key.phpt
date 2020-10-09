@@ -18,11 +18,10 @@ echo "Creating private key\n";
  */
 for ($z = "", $i = 0; $i < 1024; $i++) {
     $z .= $i * $i;
-    if (function_exists("usleep"))
-        usleep($i);
+    usleep($i);
 }
 
-$conf = array('config' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'openssl.cnf');
+$conf = array('config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf');
 $privkey = openssl_pkey_new($conf);
 
 if ($privkey === false)
@@ -69,10 +68,16 @@ echo "OK!\n";
 
 @unlink($key_file_name);
 ?>
---EXPECT--
+--EXPECTF--
 Creating private key
 Export key to file
 Load key from file - array syntax
+
+Deprecated: Function openssl_free_key() is deprecated in %s on line %d
 Load key using direct syntax
+
+Deprecated: Function openssl_free_key() is deprecated in %s on line %d
 Load key manually and use string syntax
+
+Deprecated: Function openssl_free_key() is deprecated in %s on line %d
 OK!

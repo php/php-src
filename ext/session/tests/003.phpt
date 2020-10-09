@@ -13,8 +13,8 @@ session.save_handler=files
 error_reporting(E_ALL);
 
 class foo {
-	public $bar = "ok";
-	function method() { $this->yes++; }
+    public $bar = "ok";
+    function method() { $this->yes++; }
 }
 
 session_id("abtest");
@@ -27,6 +27,7 @@ $_SESSION["arr"][3]->method();
 var_dump($_SESSION["baz"]);
 var_dump($_SESSION["arr"]);
 session_destroy();
+?>
 --EXPECT--
 object(foo)#1 (2) {
   ["bar"]=>

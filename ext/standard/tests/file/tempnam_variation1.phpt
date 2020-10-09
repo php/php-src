@@ -7,13 +7,9 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype:  string tempnam ( string $dir, string $prefix );
-   Description: Create file with unique file name.
-*/
-
 /* Creating number of unique files by passing a file name as prefix */
 
-$file_path = dirname(__FILE__)."/tempnamVar1";
+$file_path = __DIR__."/tempnamVar1";
 mkdir($file_path);
 
 echo "*** Testing tempnam() in creation of unique files ***\n";
@@ -66,51 +62,51 @@ echo "*** Done ***\n";
 -- Iteration 1 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 2 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 3 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 4 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 5 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 6 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 7 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 8 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 9 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 -- Iteration 10 --
 File name is => %s%etempnam_variation1.tmp%s
 File permissions are => 100600
-File inode is => %d
+File inode is => %i
 File created in => directory specified
 *** Done ***

@@ -38,7 +38,7 @@ class SOAP_Admin {
     }
 }
 
-$soap = new SoapServer(dirname(__FILE__).'/bug42326.wsdl', array('classmap' => $soap_admin_classmap));
+$soap = new SoapServer(__DIR__.'/bug42326.wsdl', array('classmap' => $soap_admin_classmap));
 $soap->setClass('SOAP_Admin');
 ob_start();
 $soap->handle($request);

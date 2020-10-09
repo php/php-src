@@ -3,22 +3,23 @@ Bug #62915: incomplete cloning of IntlTimeZone objects
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	    die('skip intl extension not enabled');
+        die('skip intl extension not enabled');
 --FILE--
 <?php
 
 class foo extends IntlTimeZone {
-		public $foo = 'test';
+        public $foo = 'test';
 
-				public function __construct() { }
+                public function __construct() { }
 }
 
 $x = new foo;
 
 try {
-		$z = clone $x;
+        $z = clone $x;
 } catch (Exception $e) {
-		var_dump($e->getMessage());
+        var_dump($e->getMessage());
 }
+?>
 --EXPECT--
 string(39) "Cannot clone unconstructed IntlTimeZone"

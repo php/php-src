@@ -17,6 +17,6 @@ XML_FILE=/not_well_formed5.xml
 LOAD_OPTIONS=0
 EXPECTED_RESULT=0
 --FILE_EXTERNAL--
-domdocumentload_test_method.php
+domdocumentload_test_method.inc
 --EXPECTF--
 Warning: DOMDocument::load%r(XML){0,1}%r(): Extra content at the end of the document %s

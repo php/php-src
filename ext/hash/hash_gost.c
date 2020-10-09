@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -306,11 +304,28 @@ PHP_HASH_API void PHP_GOSTFinal(unsigned char digest[32], PHP_GOST_CTX *context)
 	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
+static int php_gost_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_GOST_CTX *ctx = (PHP_GOST_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_GOST_SPEC)) == SUCCESS
+		&& ctx->length < sizeof(ctx->buffer)) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
+}
+
 const php_hash_ops php_hash_gost_ops = {
+	"gost",
 	(php_hash_init_func_t) PHP_GOSTInit,
 	(php_hash_update_func_t) PHP_GOSTUpdate,
 	(php_hash_final_func_t) PHP_GOSTFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_gost_unserialize,
+	PHP_GOST_SPEC,
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
@@ -318,21 +333,16 @@ const php_hash_ops php_hash_gost_ops = {
 };
 
 const php_hash_ops php_hash_gost_crypto_ops = {
+	"gost-crypto",
 	(php_hash_init_func_t) PHP_GOSTInitCrypto,
 	(php_hash_update_func_t) PHP_GOSTUpdate,
 	(php_hash_final_func_t) PHP_GOSTFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_gost_unserialize,
+	PHP_GOST_SPEC,
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
 	1
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

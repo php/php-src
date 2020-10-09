@@ -11,13 +11,9 @@ if (!defined('GLOB_BRACE')) {
 ?>
 --FILE--
 <?php
-/* Prototype: array glob ( string $pattern [, int $flags] );
-   Description: Find pathnames matching a pattern
-*/
-
 echo "*** Testing glob() : usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp dir created
 mkdir("$file_path/glob_variation");
@@ -48,12 +44,16 @@ $counter = 1;
    using glob() */
 foreach($patterns as $pattern) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( glob($pattern) );  // default arguments
-  var_dump( glob($pattern, GLOB_MARK) );
-  var_dump( glob($pattern, GLOB_NOSORT) );
-  var_dump( glob($pattern, GLOB_NOCHECK) );
-  var_dump( glob($pattern, GLOB_NOESCAPE) );
-  var_dump( glob($pattern, GLOB_ERR) );
+  try {
+    var_dump( glob($pattern) );  // default arguments
+    var_dump( glob($pattern, GLOB_MARK) );
+    var_dump( glob($pattern, GLOB_NOSORT) );
+    var_dump( glob($pattern, GLOB_NOCHECK) );
+    var_dump( glob($pattern, GLOB_NOESCAPE) );
+    var_dump( glob($pattern, GLOB_ERR) );
+  } catch (Error $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
 }
 
@@ -75,7 +75,11 @@ $counter = 1;
    using glob() */
 foreach($patterns as $pattern) {
   echo "-- Iteration $counter --\n";
-  var_dump( glob($pattern, GLOB_ONLYDIR) );
+  try {
+    var_dump( glob($pattern, GLOB_ONLYDIR) );
+  } catch (Error $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
 }
 
@@ -83,7 +87,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/glob_variation/wonder1/wonder2");
 rmdir("$file_path/glob_variation/wonder1/");
 rmdir("$file_path/glob_variation/");
@@ -328,24 +332,7 @@ array(0) {
 }
 
 -- Iteration 8 --
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+glob(): Argument #1 ($pattern) must not contain any null bytes
 
 -- Iteration 9 --
 array(0) {
@@ -448,9 +435,7 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+glob(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 9 --
 array(0) {
 }

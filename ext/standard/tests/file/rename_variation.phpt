@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 <?php
 
 /* creating directory */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/rename_variation");
 
 /* rename files across directories */
@@ -26,12 +26,12 @@ $src_filenames = array(
   "$file_path//rename_variation//rename_variation.tmp",
 );
 $counter = 1;
-/* loop through each $file and rename it to rename_variation2.tmp */
+/* loop through each $file and rename it to rename_variation_renamed.tmp */
 foreach($src_filenames as $src_filename) {
   echo "-- Iteration $counter --\n";
   $fp = fopen("$file_path/rename_variation/rename_variation.tmp", "w");
   fclose($fp);
-  $dest_filename = "$file_path/rename_variation2.tmp";
+  $dest_filename = "$file_path/rename_variation_renamed.tmp";
   var_dump( rename($src_filename, $dest_filename) );
   // ensure that file got renamed to new name
   var_dump( file_exists($src_filename) );  // expecting false

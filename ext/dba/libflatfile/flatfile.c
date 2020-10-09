@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,8 +43,7 @@
  * ret = 1  key already exists - nothing done
  */
 
-/* {{{ flatfile_store
- */
+/* {{{ flatfile_store */
 int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode) {
 	if (mode == FLATFILE_INSERT) {
 		if (flatfile_findkey(dba, key_datum)) {
@@ -81,8 +78,7 @@ int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode) 
 }
 /* }}} */
 
-/* {{{ flatfile_fetch
- */
+/* {{{ flatfile_fetch */
 datum flatfile_fetch(flatfile *dba, datum key_datum) {
 	datum value_datum = {NULL, 0};
 	char buf[16];
@@ -101,8 +97,7 @@ datum flatfile_fetch(flatfile *dba, datum key_datum) {
 }
 /* }}} */
 
-/* {{{ flatfile_delete
- */
+/* {{{ flatfile_delete */
 int flatfile_delete(flatfile *dba, datum key_datum) {
 	char *key = key_datum.dptr;
 	size_t size = key_datum.dsize;
@@ -153,8 +148,7 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 }
 /* }}} */
 
-/* {{{ flatfile_findkey
- */
+/* {{{ flatfile_findkey */
 int flatfile_findkey(flatfile *dba, datum key_datum) {
 	size_t buf_size = FLATFILE_BLOCK_SIZE;
 	char *buf = emalloc(buf_size);
@@ -196,8 +190,7 @@ int flatfile_findkey(flatfile *dba, datum key_datum) {
 }
 /* }}} */
 
-/* {{{ flatfile_firstkey
- */
+/* {{{ flatfile_firstkey */
 datum flatfile_firstkey(flatfile *dba) {
 	datum res;
 	size_t num;
@@ -239,8 +232,7 @@ datum flatfile_firstkey(flatfile *dba) {
 }
 /* }}} */
 
-/* {{{ flatfile_nextkey
- */
+/* {{{ flatfile_nextkey */
 datum flatfile_nextkey(flatfile *dba) {
 	datum res;
 	size_t num;
@@ -289,12 +281,3 @@ char *flatfile_version()
 	return "1.0, $Id$";
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,9 +22,9 @@
 		php_error_docref(NULL, E_WARNING, "Session is not active"); \
 		RETURN_FALSE; \
 	} \
-	if (PS(default_mod) == NULL) {				\
-		php_error_docref(NULL, E_CORE_ERROR, "Cannot call default session handler"); \
-		RETURN_FALSE;						\
+	if (PS(default_mod) == NULL) { \
+		zend_throw_error(NULL, "Cannot call default session handler"); \
+		RETURN_THROWS(); \
 	}
 
 #define PS_SANITY_CHECK_IS_OPEN				\
@@ -36,19 +34,18 @@
 		RETURN_FALSE;						\
 	}
 
-/* {{{ proto bool SessionHandler::open(string save_path, string session_name)
-   Wraps the old open handler */
+/* {{{ Wraps the old open handler */
 PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
 	size_t save_path_len, session_name_len;
 	int ret;
 
-	PS_SANITY_CHECK;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK;
 
 	PS(mod_user_is_open) = 1;
 
@@ -63,17 +60,16 @@ PHP_METHOD(SessionHandler, open)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::close()
-   Wraps the old close handler */
+/* {{{ Wraps the old close handler */
 PHP_METHOD(SessionHandler, close)
 {
 	int ret;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	// don't return on failure, since not closing the default handler
 	// could result in memory leaks or other nasties
 	zend_parse_parameters_none();
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	PS(mod_user_is_open) = 0;
 
@@ -88,18 +84,17 @@ PHP_METHOD(SessionHandler, close)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::read(string id)
-   Wraps the old read handler */
+/* {{{ Wraps the old read handler */
 PHP_METHOD(SessionHandler, read)
 {
 	zend_string *val;
 	zend_string *key;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	if (PS(default_mod)->s_read(&PS(mod_data), key, &val, PS(gc_maxlifetime)) == FAILURE) {
 		RETURN_FALSE;
@@ -109,50 +104,47 @@ PHP_METHOD(SessionHandler, read)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::write(string id, string data)
-   Wraps the old write handler */
+/* {{{ Wraps the old write handler */
 PHP_METHOD(SessionHandler, write)
 {
 	zend_string *key, *val;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &key, &val) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::destroy(string id)
-   Wraps the old destroy handler */
+/* {{{ Wraps the old destroy handler */
 PHP_METHOD(SessionHandler, destroy)
 {
 	zend_string *key;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key));
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::gc(int maxlifetime)
-   Wraps the old gc handler */
+/* {{{ Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
 {
 	zend_long maxlifetime;
 	zend_long nrdels = -1;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &maxlifetime) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	if (PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels) == FAILURE) {
 		RETURN_FALSE;
@@ -161,54 +153,19 @@ PHP_METHOD(SessionHandler, gc)
 }
 /* }}} */
 
-/* {{{ proto char SessionHandler::create_sid()
-   Wraps the old create_sid handler */
+/* {{{ Wraps the old create_sid handler */
 PHP_METHOD(SessionHandler, create_sid)
 {
 	zend_string *id;
 
-	PS_SANITY_CHECK;
-
 	if (zend_parse_parameters_none() == FAILURE) {
-	    return;
+	    RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK;
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data));
 
 	RETURN_STR(id);
-}
-/* }}} */
-
-/* {{{ proto char SessionUpdateTimestampHandler::validateId(string id)
-   Simply return TRUE */
-PHP_METHOD(SessionHandler, validateId)
-{
-	zend_string *key;
-
-	PS_SANITY_CHECK_IS_OPEN;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
-		return;
-	}
-
-	/* Legacy save handler may not support validate_sid API. Return TRUE. */
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool SessionUpdateTimestampHandler::updateTimestamp(string id, string data)
-   Simply call update_timestamp */
-PHP_METHOD(SessionHandler, updateTimestamp)
-{
-	zend_string *key, *val;
-
-	PS_SANITY_CHECK_IS_OPEN;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &key, &val) == FAILURE) {
-		return;
-	}
-
-	/* Legacy save handler may not support update_timestamp API. Just write. */
-	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
 /* }}} */

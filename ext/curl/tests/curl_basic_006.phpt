@@ -7,19 +7,13 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-/* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
- * Description: Set an option for a cURL transfer
- * Source code: ext/curl/interface.c
- * Alias to functions:
- */
-
   include 'server.inc';
   $host = curl_cli_server_start();
 
   // start testing
   echo '*** Testing curl_setopt($ch, CURLOPT_WRITEFUNCTION, <closure>); ***' . "\n";
 
-  $url = "{$host}/get.php?test=get";
+  $url = "{$host}/get.inc?test=get";
   $ch = curl_init();
   $alldata = '';
   ob_start(); // start output buffering

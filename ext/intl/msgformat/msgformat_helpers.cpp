@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -37,17 +35,11 @@
 extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_format.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
 #define USE_TIMEZONE_POINTER
 #include "../timezone/timezone_class.h"
 }
-
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
-#define HAS_MESSAGE_PATTERN 1
-#define HAS_MISALLOCATE_MEMORY_BUG 1
-#endif
 
 U_NAMESPACE_BEGIN
 /**
@@ -59,9 +51,7 @@ class MessageFormatAdapter {
 public:
     static const Formattable::Type* getArgTypeList(const MessageFormat& m,
                                                    int32_t& count);
-#ifdef HAS_MESSAGE_PATTERN
     static const MessagePattern getMessagePattern(MessageFormat* m);
-#endif
 };
 
 const Formattable::Type*
@@ -70,21 +60,17 @@ MessageFormatAdapter::getArgTypeList(const MessageFormat& m,
     return m.getArgTypeList(count);
 }
 
-#ifdef HAS_MESSAGE_PATTERN
 const MessagePattern
 MessageFormatAdapter::getMessagePattern(MessageFormat* m) {
     return m->msgPattern;
 }
-#endif
 U_NAMESPACE_END
 
 using icu::Formattable;
 using icu::Format;
 using icu::DateFormat;
 using icu::MessageFormat;
-#ifdef HAS_MESSAGE_PATTERN
 using icu::MessagePattern;
-#endif
 using icu::MessageFormatAdapter;
 using icu::FieldPosition;
 
@@ -139,7 +125,6 @@ static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 	return ret;
 }
 
-#ifdef HAS_MESSAGE_PATTERN
 static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 									const MessagePattern& mp,
 									intl_error& err)
@@ -266,10 +251,8 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 				type = Formattable::kDouble;
 			} else if (argType == UMSGPAT_ARG_TYPE_SELECT) {
 				type = Formattable::kString;
-#if U_ICU_VERSION_MAJOR_NUM >= 50
 			} else if (argType == UMSGPAT_ARG_TYPE_SELECTORDINAL) {
 				type = Formattable::kDouble;
-#endif
 			} else {
 				type = Formattable::kString;
 			}
@@ -296,26 +279,15 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 	return ret;
 }
-#endif
 
 static HashTable *umsg_get_types(MessageFormatter_object *mfo,
 								 intl_error& err)
 {
 	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
 
-#ifdef HAS_MESSAGE_PATTERN
 	const MessagePattern mp = MessageFormatAdapter::getMessagePattern(mf);
 
 	return umsg_parse_format(mfo, mp, err);
-#else
-	if (mf->usesNamedArguments()) {
-			intl_errors_set(&err, U_UNSUPPORTED_ERROR,
-				"This extension supports named arguments only on ICU 4.8+",
-				0);
-		return NULL;
-	}
-	return umsg_get_numeric_types(mfo, err);
-#endif
 }
 
 static void umsg_set_timezone(MessageFormatter_object *mfo,
@@ -335,7 +307,6 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		return; /* already done */
 	}
 
-#ifdef HAS_MISALLOCATE_MEMORY_BUG
 	/* There is a bug in ICU which prevents MessageFormatter::getFormats()
 	   to handle more than 10 formats correctly. The enumerator could be
 	   used to walk through the present formatters using getFormat(), which
@@ -353,7 +324,6 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 	if (count > 10) {
 		return;
 	}
-#endif
 
 	formats = mf->getFormats(count);
 
@@ -370,20 +340,24 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 
 		if (used_tz == NULL) {
-			zval nullzv, *zvptr = &nullzv;
-			ZVAL_NULL(zvptr);
-			used_tz = timezone_process_timezone_argument(zvptr, &err, "msgfmt_format");
+			zval nullzv;
+			ZVAL_NULL(&nullzv);
+			used_tz = timezone_process_timezone_argument(&nullzv, &err, "msgfmt_format");
 			if (used_tz == NULL) {
 				continue;
 			}
 		}
 
-		df->setTimeZone(*used_tz);
+		df->adoptTimeZone(used_tz->clone());
 	}
 
 	if (U_SUCCESS(err.code)) {
 		mfo->mf_data.tz_set = 1;
 	}
+
+  if (used_tz) {
+    delete used_tz;
+  }
 }
 
 U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
@@ -702,12 +676,3 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
     }
 	delete[] fargs;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

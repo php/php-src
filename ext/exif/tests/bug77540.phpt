@@ -10,7 +10,7 @@ echo "Width ".$width."\n";
 echo "Height ".$height."\n";
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 Width 0
 Height 0
 DONE

@@ -60,7 +60,7 @@ string(9) "TEST TEST"
 Writing to read-only stream
 
 Warning: fwrite(): Can't write to blob stream: is open as read only in %s on line %d
-int(0)
+bool(false)
 Closing Stream
 bool(true)
 Opening stream in write mode
@@ -72,7 +72,7 @@ string(9) "ABCD TEST"
 Expanding blob size
 
 Warning: fwrite(): It is not possible to increase the size of a BLOB in %s on line %d
-int(0)
+bool(false)
 Closing Stream
 bool(true)
 Closing database

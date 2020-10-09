@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,26 +57,11 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	intptr_t     hash_mask_handle;
 	intptr_t     hash_mask_handlers;
 	int          hash_mask_init;
-	int          autoload_running;
 ZEND_END_MODULE_GLOBALS(spl)
 
 ZEND_EXTERN_MODULE_GLOBALS(spl)
 #define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
 
-PHP_FUNCTION(spl_classes);
-PHP_FUNCTION(class_parents);
-PHP_FUNCTION(class_implements);
-PHP_FUNCTION(class_uses);
-
 PHPAPI zend_string *php_spl_object_hash(zval *obj);
 
 #endif /* PHP_SPL_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

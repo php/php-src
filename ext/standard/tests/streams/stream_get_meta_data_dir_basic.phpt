@@ -3,11 +3,11 @@ stream_get_meta_data() on directories
 --FILE--
 <?php
 
-$dir = opendir(dirname(__FILE__));
+$dir = opendir(__DIR__);
 var_dump(stream_get_meta_data($dir));
 closedir($dir);
 
-$dirObject = dir(dirname(__FILE__));
+$dirObject = dir(__DIR__);
 var_dump(stream_get_meta_data($dirObject->handle));
 
 ?>

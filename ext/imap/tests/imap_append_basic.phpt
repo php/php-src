@@ -2,23 +2,18 @@
 Test imap_append() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_append  ( resource $imap_stream  , string $mailbox  , string $message  [, string $options  ] )
- * Description: Append a string message to a specified mailbox.
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_append() : basic functionality ***\n";
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 echo "Create a new mailbox for test\n";
 $imap_stream = setup_test_mailbox("", 0);
 if (!is_resource($imap_stream)) {
-	exit("TEST FAILED: Unable to create test mailbox\n");
+    exit("TEST FAILED: Unable to create test mailbox\n");
 }
 
 $mb_details = imap_mailboxmsginfo($imap_stream);
@@ -47,7 +42,6 @@ var_dump(imap_headers($imap_stream));
 
 imap_close($imap_stream);
 ?>
-===Done===
 --CLEAN--
 <?php
 require_once('clean.inc');
@@ -68,4 +62,3 @@ array(2) {
   [1]=>
   string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
 }
-===Done===

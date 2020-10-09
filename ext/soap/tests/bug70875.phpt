@@ -9,19 +9,19 @@ soap.wsdl_cache_enabled=0
 
 class bug70875 extends SOAPClient
 {
-	public function __doRequest($request, $location, $action, $version, $one_way = 0)
-	{
-		die("no SIGSEGV");
-	}
+    public function __doRequest($request, $location, $action, $version, $one_way = 0)
+    {
+        die("no SIGSEGV");
+    }
 }
 
 $c = new bug70875(__DIR__.'/bug70875.wsdl', [
-	'trace' => 1,
-	'classmap' => [
-		'TestService' => 'TestService',
-		'TestServiceRQ' => 'TestServiceRQ',
-		'RqHeader' => 'RqHeader',
-	],
+    'trace' => 1,
+    'classmap' => [
+        'TestService' => 'TestService',
+        'TestServiceRQ' => 'TestServiceRQ',
+        'RqHeader' => 'RqHeader',
+    ],
 ]);
 
 
@@ -32,7 +32,7 @@ class TestService
 
 class TestServiceRQ
 {
-	public $RqHeader;
+    public $RqHeader;
 }
 
 class RqHeader

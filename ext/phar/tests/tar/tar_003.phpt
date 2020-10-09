@@ -7,9 +7,9 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
+include __DIR__ . '/files/tarmaker.php.inc';
 
-$fname = dirname(__FILE__) . '/tar_003.phar.tar';
+$fname = __DIR__ . '/tar_003.phar.tar';
 $alias = 'phar://' . $fname;
 
 $tar = new tarmaker($fname, 'none');
@@ -32,8 +32,8 @@ echo $e->getMessage()."\n";
 }
 
 while (false !== ($v = readdir($tar))) {
-	echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
-	echo $v . "\n";
+    echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
+    echo $v . "\n";
 }
 closedir($tar);
 
@@ -41,16 +41,15 @@ closedir($tar);
 echo "second round\n";
 $tar = opendir($alias . '/');
 while (false !== ($v = readdir($tar))) {
-	echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
-	echo $v . "\n";
+    echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
+    echo $v . "\n";
 }
 closedir($tar);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_003.phar.tar');
+@unlink(__DIR__ . '/tar_003.phar.tar');
 ?>
 --EXPECT--
 hi there!
@@ -67,4 +66,3 @@ dir
 internal
 file
 tar_003.phpt
-===DONE===

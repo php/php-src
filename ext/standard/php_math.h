@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,66 +18,13 @@
 #ifndef PHP_MATH_H
 #define PHP_MATH_H
 
-PHPAPI double _php_math_round(double, int, int);
-PHPAPI zend_string *_php_math_number_format(double, int, char, char);
-PHPAPI zend_string *_php_math_number_format_ex(double, int, char *, size_t, char *, size_t);
-PHPAPI zend_string * _php_math_longtobase(zval *arg, int base);
+PHPAPI double _php_math_round(double value, int places, int mode);
+PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep);
+PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *dec_point, size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len);
+PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base);
 PHPAPI zend_long _php_math_basetolong(zval *arg, int base);
-PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret);
+PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret);
 PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base);
-
-PHP_FUNCTION(sin);
-PHP_FUNCTION(cos);
-PHP_FUNCTION(tan);
-PHP_FUNCTION(asin);
-PHP_FUNCTION(acos);
-PHP_FUNCTION(atan);
-PHP_FUNCTION(atan2);
-PHP_FUNCTION(pi);
-PHP_FUNCTION(exp);
-PHP_FUNCTION(log);
-PHP_FUNCTION(log10);
-PHP_FUNCTION(is_finite);
-PHP_FUNCTION(is_infinite);
-PHP_FUNCTION(is_nan);
-PHP_FUNCTION(pow);
-PHP_FUNCTION(sqrt);
-PHP_FUNCTION(rand);
-PHP_FUNCTION(mt_srand);
-PHP_FUNCTION(mt_rand);
-PHP_FUNCTION(mt_getrandmax);
-PHP_FUNCTION(abs);
-PHP_FUNCTION(ceil);
-PHP_FUNCTION(floor);
-PHP_FUNCTION(round);
-PHP_FUNCTION(decbin);
-PHP_FUNCTION(dechex);
-PHP_FUNCTION(decoct);
-PHP_FUNCTION(bindec);
-PHP_FUNCTION(hexdec);
-PHP_FUNCTION(octdec);
-PHP_FUNCTION(base_convert);
-PHP_FUNCTION(number_format);
-PHP_FUNCTION(fmod);
-PHP_FUNCTION(deg2rad);
-PHP_FUNCTION(rad2deg);
-PHP_FUNCTION(intdiv);
-
-   /*
-   WARNING: these functions are expermental: they could change their names or
-   disappear in the next version of PHP!
-   */
-PHP_FUNCTION(hypot);
-PHP_FUNCTION(expm1);
-PHP_FUNCTION(log1p);
-
-PHP_FUNCTION(sinh);
-PHP_FUNCTION(cosh);
-PHP_FUNCTION(tanh);
-
-PHP_FUNCTION(asinh);
-PHP_FUNCTION(acosh);
-PHP_FUNCTION(atanh);
 
 #include <math.h>
 

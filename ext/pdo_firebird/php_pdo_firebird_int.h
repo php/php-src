@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -39,13 +37,8 @@
 # define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else
-# ifdef PHP_WIN32
-#  define LL_MASK "I64"
-#  define LL_LIT(lit) lit ## I64
-# else
-#  define LL_MASK "ll"
-#  define LL_LIT(lit) lit ## LL
-# endif
+# define LL_MASK "ll"
+# define LL_LIT(lit) lit ## LL
 #endif
 
 /* Firebird API has a couple of missing const decls in its API */
@@ -86,10 +79,12 @@ typedef struct {
 	char *time_format;
 	char *timestamp_format;
 
+	unsigned sql_dialect:2;
+
 	/* prepend table names on column names in fetch */
 	unsigned fetch_table_names:1;
 
-	unsigned _reserved:31;
+	unsigned _reserved:29;
 
 } pdo_firebird_db_handle;
 
@@ -143,12 +138,3 @@ enum {
 };
 
 #endif	/* PHP_PDO_FIREBIRD_INT_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -19,10 +19,6 @@ if ($period->getEndDate() != $clonedPeriod->getEndDate()) {
     echo "failure\n";
 }
 
-if ($period->getDateInterval() != $clonedPeriod->getDateInterval()) {
-    echo "failure\n";
-}
-
 if ($interval->format('Y-m-d H:i:s') != $clonedInterval->format('Y-m-d H:i:s')) {
     echo "failure\n";
 }

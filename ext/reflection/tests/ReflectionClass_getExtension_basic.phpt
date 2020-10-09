@@ -7,8 +7,8 @@ Rein Velt <rein@velt.org>
 #testFest Roosendaal 2008-05-10
 --FILE--
 <?php
- 	$rc=new reflectionClass('domDocument');
- 	var_dump($rc->getExtension()) ;
+    $rc=new reflectionClass('domDocument');
+    var_dump($rc->getExtension()) ;
 ?>
 --EXPECTF--
 object(ReflectionExtension)#%d (1) {

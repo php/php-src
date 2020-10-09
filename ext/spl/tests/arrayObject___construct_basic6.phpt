@@ -3,8 +3,8 @@ SPL: ArrayObject::__construct: check impact of ArrayObject::STD_PROP_LIST on var
 --FILE--
 <?php
 class MyArrayObject extends ArrayObject {
-	private $priv1 = 'secret1';
-	public $pub1 = 'public1';
+    private $priv1 = 'secret1';
+    public $pub1 = 'public1';
 }
 
 $ao = new ArrayObject(array(1,2,3));

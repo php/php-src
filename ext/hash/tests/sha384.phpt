@@ -1,7 +1,5 @@
 --TEST--
-sha384 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: sha384 algorithm
 --FILE--
 <?php
 echo hash('sha384', '') . "\n";
@@ -12,6 +10,7 @@ echo hash('sha384', '01234567890123456789012345678901234567890123456789012345678
 echo hash('sha384', 'abc') . "\n";
 echo hash('sha384', 'abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu') . "\n";
 echo hash('sha384', str_repeat('a', 1000000)) . "\n";
+?>
 --EXPECT--
 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
 54a59b9f22b0b80880d8427e548b7c23abd873486e1f035dce9cd697e85175033caa88e6d57bc35efae0b5afd3145f31

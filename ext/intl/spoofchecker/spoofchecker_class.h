@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -20,7 +18,6 @@
 #include <php.h>
 
 #include "intl_common.h"
-#include "spoofchecker_create.h"
 #include "intl_error.h"
 #include "intl_data.h"
 
@@ -57,7 +54,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 /* Auxiliary macros */
 
 #define SPOOFCHECKER_METHOD_INIT_VARS       \
-    zval*             object  = getThis();   \
+    zval*             object  = ZEND_THIS;  \
     Spoofchecker_object*  co  = NULL;   \
     intl_error_reset(NULL); \
 
@@ -65,9 +62,8 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 #define SPOOFCHECKER_METHOD_FETCH_OBJECT							\
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;						\
 	if (co->uspoof == NULL)	{										\
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,			\
-				"Found unconstructed Spoofchecker", 0);	\
-		RETURN_FALSE;												\
+		zend_throw_error(NULL, "Found unconstructed Spoofchecker");	\
+		RETURN_THROWS();											\
 	}
 
 // Macro to check return value of a ucol_* function call.

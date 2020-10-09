@@ -9,16 +9,15 @@ set_error_handler(function($errno, $errstr, $errfile, $errline){
 });
 
 require 'notfound.php';
+?>
 --EXPECTF--
-error(require(notfound.php): failed to open stream: %s)
-Warning: Uncaught Exception: Foo in %sbug60909_1.php:5
+error(require(notfound.php): Failed to open stream: %s)
+Fatal error: Uncaught Exception: Foo in %sbug60909_1.php:5
 Stack trace:
-#0 %sbug60909_1.php(8): {closure}(2, 'require(notfoun...', '%s', 8, Array)
+#0 %sbug60909_1.php(8): {closure}(2, 'require(notfoun...', '%s', 8)
 #1 %sbug60909_1.php(8): require()
 #2 {main}
   thrown in %sbug60909_1.php on line 5
-
-Fatal error: main(): Failed opening required 'notfound.php' (include_path='%s') in %sbug60909_1.php on line 8
 
 
 !!!shutdown!!!

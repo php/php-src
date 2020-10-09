@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,6 +71,8 @@ typedef struct _php_sqlite3_db_object  {
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
 	php_sqlite3_collation *collations;
+	zend_fcall_info authorizer_fci;
+	zend_fcall_info_cache authorizer_fcc;
 
 	zend_bool exception;
 
@@ -108,7 +108,6 @@ struct _php_sqlite3_result_object  {
 	zval stmt_obj_zval;
 
 	int is_prepared_statement;
-	int complete;
 	zend_object zo;
 };
 
@@ -138,12 +137,3 @@ static inline php_sqlite3_stmt *php_sqlite3_stmt_from_obj(zend_object *obj) {
 #define Z_SQLITE3_STMT_P(zv)  php_sqlite3_stmt_from_obj(Z_OBJ_P((zv)))
 
 #endif
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -6,7 +6,7 @@ SOAP Interop Round4 GroupH Simple Doc Lit 017 (php/wsdl): echoMultipleFaults4(3)
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$client = new SoapClient(dirname(__FILE__)."/round4_groupH_simple_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round4_groupH_simple_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoMultipleFaults4(array("whichFault" => 3,
                                    "param1" => 162,
                                    "param2" => 1));

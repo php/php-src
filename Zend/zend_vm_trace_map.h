@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,7 @@ static void zend_vm_trace_init(void)
 
 	f = fopen("zend_vm.map", "w+");
 	if (f) {
-		zend_hash_sort(&vm_trace_ht, (compare_func_t)zend_vm_trace_compare, 0);
+		zend_hash_sort(&vm_trace_ht, (bucket_compare_func_t)zend_vm_trace_compare, 0);
 		prev_key = NULL;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(&vm_trace_ht, key, val) {
 			if (prev_key) {

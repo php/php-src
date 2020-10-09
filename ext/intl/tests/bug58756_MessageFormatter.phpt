@@ -3,9 +3,9 @@ Bug #58756: w.r.t MessageFormatter
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 if (version_compare(INTL_ICU_VERSION, '51.2') >=  0)
-	die('skip for ICU < 51.2');
+    die('skip for ICU < 51.2');
 ?>
 --FILE--
 <?php
@@ -26,12 +26,10 @@ echo "msgf:  " . $msgf->format(array($time)) . "\n";
 '{1, select, date {{0,date,full}} other {{0,time,h:m:s a V}}}');
 
 echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
-		$msgf->format(array($time, 'time')), "\n";
+        $msgf->format(array($time, 'time')), "\n";
 */
 
 ?>
-==DONE==
 --EXPECT--
 date:  Tuesday, July 7, 2009 8:41:13 PM EDT
 msgf:  Tuesday, July 7, 2009 8:41:13 PM EDT
-==DONE==

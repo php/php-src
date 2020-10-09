@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,8 +28,8 @@ ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
 
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str);
 static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *str);
-static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, int permanent);
-static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, int permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, bool permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, bool permanent);
 
 /* Any strings interned in the startup phase. Common to all the threads,
    won't be free'd until process exit. If we want an ability to
@@ -39,8 +39,6 @@ static HashTable interned_strings_permanent;
 
 static zend_new_interned_string_func_t interned_string_request_handler = zend_new_interned_string_request;
 static zend_string_init_interned_func_t interned_string_init_request_handler = zend_string_init_interned_request;
-static zend_string_copy_storage_func_t interned_string_copy_storage = NULL;
-static zend_string_copy_storage_func_t interned_string_restore_storage = NULL;
 
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
@@ -69,22 +67,22 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_DSC)
 	NULL
 };
 
-static void zend_init_interned_strings_ht(HashTable *interned_strings, int permanent)
+static zend_always_inline void zend_init_interned_strings_ht(HashTable *interned_strings, bool permanent)
 {
 	zend_hash_init(interned_strings, 1024, NULL, _str_dtor, permanent);
-	zend_hash_real_init_mixed(interned_strings);
+	if (permanent) {
+		zend_hash_real_init_mixed(interned_strings);
+	}
 }
 
 ZEND_API void zend_interned_strings_init(void)
 {
 	char s[2];
-	int i;
+	unsigned int i;
 	zend_string *str;
 
 	interned_string_request_handler = zend_new_interned_string_request;
 	interned_string_init_request_handler = zend_string_init_interned_request;
-	interned_string_copy_storage = NULL;
-	interned_string_restore_storage = NULL;
 
 	zend_empty_string = NULL;
 	zend_known_strings = NULL;
@@ -253,7 +251,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 	return ret;
 }
 
-static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, bool permanent)
 {
 	zend_string *ret;
 	zend_ulong h = zend_inline_hash_func(str, size);
@@ -269,7 +267,7 @@ static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char
 	return zend_add_interned_string(ret, &interned_strings_permanent, IS_STR_PERMANENT);
 }
 
-static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, bool permanent)
 {
 	zend_string *ret;
 	zend_ulong h = zend_inline_hash_func(str, size);
@@ -315,26 +313,14 @@ ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_intern
 	interned_string_init_request_handler = init_handler;
 }
 
-ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler)
-{
-	interned_string_copy_storage = copy_handler;
-	interned_string_restore_storage = restore_handler;
-}
-
 ZEND_API void zend_interned_strings_switch_storage(zend_bool request)
 {
 	if (request) {
-		if (interned_string_copy_storage) {
-			interned_string_copy_storage();
-		}
 		zend_new_interned_string = interned_string_request_handler;
 		zend_string_init_interned = interned_string_init_request_handler;
 	} else {
 		zend_new_interned_string = zend_new_interned_string_permanent;
 		zend_string_init_interned = zend_string_init_interned_permanent;
-		if (interned_string_restore_storage) {
-			interned_string_restore_storage();
-		}
 	}
 }
 
@@ -476,12 +462,32 @@ ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_
 
 #endif
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+ZEND_API zend_string *zend_string_concat2(
+		const char *str1, size_t str1_len,
+		const char *str2, size_t str2_len)
+{
+	size_t len = str1_len + str2_len;
+	zend_string *res = zend_string_alloc(len, 0);
+
+	memcpy(ZSTR_VAL(res), str1, str1_len);
+	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
+	ZSTR_VAL(res)[len] = '\0';
+
+	return res;
+}
+
+ZEND_API zend_string *zend_string_concat3(
+		const char *str1, size_t str1_len,
+		const char *str2, size_t str2_len,
+		const char *str3, size_t str3_len)
+{
+	size_t len = str1_len + str2_len + str3_len;
+	zend_string *res = zend_string_alloc(len, 0);
+
+	memcpy(ZSTR_VAL(res), str1, str1_len);
+	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
+	memcpy(ZSTR_VAL(res) + str1_len + str2_len, str3, str3_len);
+	ZSTR_VAL(res)[len] = '\0';
+
+	return res;
+}

@@ -3,38 +3,28 @@ mysqli_stat()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    require('table.inc');
 
-	if (!is_null($tmp = @mysqli_stat()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if ((!is_string($tmp = mysqli_stat($link))) || ('' === $tmp))
+        printf("[004] Expecting non empty string, got %s/'%s', [%d] %s\n",
+            gettype($tmp), $tmp, mysqli_errno($link), mysql_error($link));
 
-	if (!is_null($tmp = @mysqli_stat($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_close($link);
 
-	require('table.inc');
+    try {
+        mysqli_stat($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	if (!is_null($tmp = @mysqli_stat($link, "foo")))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if ((!is_string($tmp = mysqli_stat($link))) || ('' === $tmp))
-		printf("[004] Expecting non empty string, got %s/'%s', [%d] %s\n",
-			gettype($tmp), $tmp, mysqli_errno($link), mysql_error($link));
-
-	mysqli_close($link);
-
-	if (false !== ($tmp = mysqli_stat($link)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
-
-	print "done!";
+    print "done!";
 ?>
---EXPECTF--
-Warning: mysqli_stat(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

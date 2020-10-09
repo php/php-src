@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -40,11 +38,11 @@ extern "C" {
 #define INTLITERATOR_METHOD_INIT_VARS				INTL_METHOD_INIT_VARS(IntlIterator, ii)
 #define INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_ITERATOR, ii)
 #define INTLITERATOR_METHOD_FETCH_OBJECT\
-	object = getThis(); \
+	object = ZEND_THIS; \
 	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (ii->iterator == NULL) { \
-		intl_errors_set(&ii->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlIterator", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed IntlIterator"); \
+		RETURN_THROWS(); \
 	}
 
 typedef struct {

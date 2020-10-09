@@ -1,10 +1,5 @@
-#if HAVE_GD_BUNDLED
-# include "gd.h"
-# include "gdhelpers.h"
-#else
-# include <gd.h>
-# include "libgd/gdhelpers.h"
-#endif
+#include "gd.h"
+#include "gdhelpers.h"
 
 #include "gd_intern.h"
 #include "php.h"

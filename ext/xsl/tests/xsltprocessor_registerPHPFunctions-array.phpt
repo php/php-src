@@ -8,9 +8,9 @@ Check xsltprocessor::registerPHPFunctions with array
 ?>
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 $phpfuncxsl = new domDocument();
-$phpfuncxsl->load(dirname(__FILE__)."/phpfunc.xsl");
+$phpfuncxsl->load(__DIR__."/phpfunc.xsl");
 if(!$phpfuncxsl) {
   echo "Error while parsing the xsl document\n";
   exit;
@@ -18,6 +18,7 @@ if(!$phpfuncxsl) {
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions(array('ucwords')));
 var_dump($proc->transformToXml($dom));
+?>
 --EXPECT--
 NULL
 string(18) "This Is An Example"

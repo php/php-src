@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,9 +25,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
-#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
-#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -45,6 +41,7 @@
 
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
+SAPI_API size_t sapi_globals_offset;
 #else
 sapi_globals_struct sapi_globals;
 #endif
@@ -56,11 +53,8 @@ static void _type_dtor(zval *zv)
 
 static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
 {
-#ifdef ZTS
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
-	zend_hash_init_ex(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1, 0);
+	zend_hash_init(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1);
 	php_setup_sapi_content_types();
 }
 
@@ -79,7 +73,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_module = *sf;
 
 #ifdef ZTS
-	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
+	ts_allocate_fast_id(&sapi_globals_id, &sapi_globals_offset, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
 # ifdef PHP_WIN32
 	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 # endif
@@ -115,18 +109,14 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 	efree(sapi_header->header);
 }
 
-/* {{{ proto bool header_register_callback(mixed callback)
-   call a header function */
+/* {{{ call a header function */
 PHP_FUNCTION(header_register_callback)
 {
-	zval *callback_func;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback_func) == FAILURE) {
-		return;
-	}
-
-	if (!zend_is_callable(callback_func, 0, NULL)) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
@@ -134,7 +124,7 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	ZVAL_COPY(&SG(callback_func), callback_func);
+	ZVAL_COPY(&SG(callback_func), &fci.function_name);
 
 	RETURN_TRUE;
 }
@@ -616,7 +606,7 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	}
 }
 
-SAPI_API int sapi_add_header_ex(char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace)
+SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace)
 {
 	sapi_header_line ctr = {0};
 	int r;
@@ -628,7 +618,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, size_t header_line_len, zend_
 			&ctr);
 
 	if (!duplicate)
-		efree(header_line);
+		efree((void *) header_line);
 
 	return r;
 }
@@ -688,7 +678,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				if (!p->line || !p->line_len) {
 					return FAILURE;
 				}
-				header_line = p->line;
+				header_line = estrndup(p->line, p->line_len);
 				header_line_len = p->line_len;
 				http_response_code = p->response_code;
 				break;
@@ -704,8 +694,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		default:
 			return FAILURE;
 	}
-
-	header_line = estrndup(header_line, header_line_len);
 
 	/* cut off trailing spaces, linefeeds and carriage-returns */
 	if (header_line_len && isspace(header_line[header_line_len-1])) {
@@ -772,13 +760,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				while (*ptr == ' ') {
 					ptr++;
 					len--;
-				}
-
-				/* Disable possible output compression for images */
-				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
-					zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
-					zend_alter_ini_entry_chars(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-					zend_string_release_ex(key, 0);
 				}
 
 				mimetype = estrdup(ptr);
@@ -988,7 +969,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void))
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void))
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
@@ -1020,7 +1001,7 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 	}
 }
 
-SAPI_API char *sapi_getenv(char *name, size_t name_len)
+SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 {
 	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
 		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
@@ -1107,10 +1088,10 @@ SAPI_API void sapi_terminate_process(void) {
 	}
 }
 
-SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */
+SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */
 {
 	zval *return_value = (zval*)arg;
-	char *str = NULL;
+	char *buf = NULL;
 
 	ALLOCA_FLAG(use_heap)
 
@@ -1121,11 +1102,12 @@ SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val
 	    var[3] == 'P' &&
 	    var[4] == '_') {
 
-		char *p;
+		const char *p;
+		char *str;
 
 		var_len -= 5;
 		p = var + 5;
-		var = str = do_alloca(var_len + 1, use_heap);
+		var = str = buf = do_alloca(var_len + 1, use_heap);
 		*str++ = *p++;
 		while (*p) {
 			if (*p == '_') {
@@ -1151,17 +1133,8 @@ SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val
 		return;
 	}
 	add_assoc_stringl_ex(return_value, var, var_len, val, val_len);
-	if (str) {
-		free_alloca(var, use_heap);
+	if (buf) {
+		free_alloca(buf, use_heap);
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

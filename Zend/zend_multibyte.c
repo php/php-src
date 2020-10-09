@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ static const char *dummy_encoding_name_getter(const zend_encoding *encoding)
 	return (const char*)encoding;
 }
 
-static int dummy_encoding_lexer_compatibility_checker(const zend_encoding *encoding)
+static bool dummy_encoding_lexer_compatibility_checker(const zend_encoding *encoding)
 {
 	return 0;
 }
@@ -48,7 +48,7 @@ static size_t dummy_encoding_converter(unsigned char **to, size_t *to_length, co
 	return (size_t)-1;
 }
 
-static int dummy_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, int persistent)
+static zend_result dummy_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent)
 {
 	*return_list = pemalloc(0, persistent);
 	*return_size = 0;
@@ -60,7 +60,7 @@ static const zend_encoding *dummy_internal_encoding_getter(void)
 	return NULL;
 }
 
-static int dummy_internal_encoding_setter(const zend_encoding *encoding)
+static zend_result dummy_internal_encoding_setter(const zend_encoding *encoding)
 {
 	return FAILURE;
 }
@@ -84,7 +84,7 @@ ZEND_API const zend_encoding *zend_multibyte_encoding_utf16be = (const zend_enco
 ZEND_API const zend_encoding *zend_multibyte_encoding_utf16le = (const zend_encoding*)"UTF-32LE";
 ZEND_API const zend_encoding *zend_multibyte_encoding_utf8 = (const zend_encoding*)"UTF-8";
 
-ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functions)
+ZEND_API zend_result zend_multibyte_set_functions(const zend_multibyte_functions *functions)
 {
 	zend_multibyte_encoding_utf32be = functions->encoding_fetcher("UTF-32BE");
 	if (!zend_multibyte_encoding_utf32be) {
@@ -155,7 +155,7 @@ ZEND_API size_t zend_multibyte_encoding_converter(unsigned char **to, size_t *to
 	return multibyte_functions.encoding_converter(to, to_length, from, from_length, encoding_to, encoding_from);
 }
 
-ZEND_API int zend_multibyte_parse_encoding_list(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, int persistent)
+ZEND_API zend_result zend_multibyte_parse_encoding_list(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent)
 {
 	return multibyte_functions.encoding_list_parser(encoding_list, encoding_list_len, return_list, return_size, persistent);
 }
@@ -180,12 +180,12 @@ ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_l
 	return SUCCESS;
 }
 
-ZEND_API int zend_multibyte_set_internal_encoding(const zend_encoding *encoding)
+ZEND_API zend_result zend_multibyte_set_internal_encoding(const zend_encoding *encoding)
 {
 	return multibyte_functions.internal_encoding_setter(encoding);
 }
 
-ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value, size_t new_value_length)
+ZEND_API zend_result zend_multibyte_set_script_encoding_by_string(const char *new_value, size_t new_value_length)
 {
 	const zend_encoding **list = 0;
 	size_t size = 0;
@@ -210,12 +210,3 @@ ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value,
 
 	return SUCCESS;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

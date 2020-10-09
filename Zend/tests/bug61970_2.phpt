@@ -14,5 +14,6 @@ class Bar extends Foo {
 class Baz extends Bar {
     protected function __construct(){}
 }
+?>
 --EXPECTF--
-Fatal error: Access level to Baz::__construct() must be public (as in class Bar) in %s
+Fatal error: Access level to Baz::__construct() must be public (as in class Foo) in %s on line 12

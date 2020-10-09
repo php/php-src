@@ -3,7 +3,7 @@ Abstract constants are not allowed
 --FILE--
 <?php
 class A {
-	abstract const X = 1;
+    abstract const X = 1;
 }
 ?>
 --EXPECTF--

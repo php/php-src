@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -567,7 +565,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	RETCODE rc;
 	SWORD	colnamelen;
 	SQLULEN	colsize;
-	SQLLEN displaysize;
+	SQLLEN displaysize = 0;
 
 	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,
 			sizeof(S->cols[colno].colname)-1, &colnamelen,
@@ -880,12 +878,3 @@ const struct pdo_stmt_methods odbc_stmt_methods = {
 	odbc_stmt_next_rowset,
 	odbc_stmt_close_cursor
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

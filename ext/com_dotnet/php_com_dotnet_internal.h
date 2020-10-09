@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +24,6 @@
 #include <unknwn.h>
 #include <dispex.h>
 #include "win32/winutil.h"
-
-#include "zend_ts_hash.h"
 
 typedef struct _php_com_dotnet_object {
 	zend_object zo;
@@ -70,35 +66,30 @@ static inline int php_com_is_valid_object(zval *zv)
 } while(0)
 
 /* com_extension.c */
-TsHashTable php_com_typelibraries;
 zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *php_com_saproxy_class_entry;
 
 /* com_handlers.c */
 zend_object* php_com_object_new(zend_class_entry *ce);
-zend_object* php_com_object_clone(zval *object);
+zend_object* php_com_object_clone(zend_object *object);
 void php_com_object_free_storage(zend_object *object);
 zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable);
 
 /* com_saproxy.c */
 zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref);
-int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index);
+int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
 		size_t *string_len, int codepage);
-PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
+PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(const char *string,
 		size_t string_len, int codepage);
+BSTR php_com_string_to_bstr(zend_string *string, int codepage);
+zend_string *php_com_bstr_to_string(BSTR bstr, int codepage);
 
 
 /* com_com.c */
-PHP_FUNCTION(com_create_instance);
-PHP_FUNCTION(com_event_sink);
-PHP_FUNCTION(com_create_guid);
-PHP_FUNCTION(com_print_typeinfo);
-PHP_FUNCTION(com_message_pump);
-PHP_FUNCTION(com_load_typelib);
-PHP_FUNCTION(com_get_active_object);
+PHP_METHOD(com, __construct);
 
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg);
@@ -120,33 +111,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
 int php_com_persist_minit(INIT_FUNC_ARGS);
 
 /* com_variant.c */
-PHP_FUNCTION(com_variant_create_instance);
-PHP_FUNCTION(variant_set);
-PHP_FUNCTION(variant_add);
-PHP_FUNCTION(variant_cat);
-PHP_FUNCTION(variant_sub);
-PHP_FUNCTION(variant_mul);
-PHP_FUNCTION(variant_and);
-PHP_FUNCTION(variant_div);
-PHP_FUNCTION(variant_eqv);
-PHP_FUNCTION(variant_idiv);
-PHP_FUNCTION(variant_imp);
-PHP_FUNCTION(variant_mod);
-PHP_FUNCTION(variant_or);
-PHP_FUNCTION(variant_pow);
-PHP_FUNCTION(variant_xor);
-PHP_FUNCTION(variant_abs);
-PHP_FUNCTION(variant_fix);
-PHP_FUNCTION(variant_int);
-PHP_FUNCTION(variant_neg);
-PHP_FUNCTION(variant_not);
-PHP_FUNCTION(variant_round);
-PHP_FUNCTION(variant_cmp);
-PHP_FUNCTION(variant_date_to_timestamp);
-PHP_FUNCTION(variant_date_from_timestamp);
-PHP_FUNCTION(variant_get_type);
-PHP_FUNCTION(variant_set_type);
-PHP_FUNCTION(variant_cast);
+PHP_METHOD(variant, __construct);
 
 PHP_COM_DOTNET_API void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, int codepage);
 PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage);
@@ -154,7 +119,7 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dst, VARIANT *src);
 
 /* com_dotnet.c */
-PHP_FUNCTION(com_dotnet_create_instance);
+PHP_METHOD(dotnet, __construct);
 void php_com_dotnet_rshutdown(void);
 void php_com_dotnet_mshutdown(void);
 
@@ -167,14 +132,16 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1);
 
 /* com_typeinfo.c */
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
-		int codepage, int *cached);
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage);
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage);
 PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
 		int codepage);
 void php_com_typelibrary_dtor(zval *pDest);
 ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink);
 int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage);
+ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len);
+PHP_MINIT_FUNCTION(com_typeinfo);
+PHP_MSHUTDOWN_FUNCTION(com_typeinfo);
 
 /* com_iterator.c */
 zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref);

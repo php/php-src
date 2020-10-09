@@ -2,8 +2,8 @@
 PDO::MYSQL_ATTR_INIT_COMMAND
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
@@ -11,29 +11,29 @@ $db = MySQLPDOTest::factory();
 error_reporting=E_ALL
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
-	$dsn = MySQLPDOTest::getDSN();
-	$user = PDO_MYSQL_TEST_USER;
-	$pass = PDO_MYSQL_TEST_PASS;
+    $dsn = MySQLPDOTest::getDSN();
+    $user = PDO_MYSQL_TEST_USER;
+    $pass = PDO_MYSQL_TEST_PASS;
 
-	$table = sprintf("test_%s", md5(mt_rand(0, PHP_INT_MAX)));
-	$db = new PDO($dsn, $user, $pass);
-	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
+    $table = sprintf("test_%s", md5(mt_rand(0, PHP_INT_MAX)));
+    $db = new PDO($dsn, $user, $pass);
+    $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
 
-	$create = sprintf('CREATE TABLE %s(id INT)', $table);
-	var_dump($create);
-	$db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => $create));
+    $create = sprintf('CREATE TABLE %s(id INT)', $table);
+    var_dump($create);
+    $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => $create));
 
-	$info = $db->errorInfo();
-	var_dump($info[0]);
+    $info = $db->errorInfo();
+    var_dump($info[0]);
 
-	$db->exec(sprintf('INSERT INTO %s(id) VALUES (1)', $table));
-	$stmt = $db->query(sprintf('SELECT id FROM %s', $table));
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $db->exec(sprintf('INSERT INTO %s(id) VALUES (1)', $table));
+    $stmt = $db->query(sprintf('SELECT id FROM %s', $table));
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
-	print "done!";
+    $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
+    print "done!";
 ?>
 --EXPECTF--
 string(58) "CREATE TABLE test_%s(id INT)"

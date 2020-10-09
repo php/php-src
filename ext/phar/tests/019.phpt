@@ -7,7 +7,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
@@ -25,15 +25,15 @@ include $fname;
 $dir = opendir('phar://hio/b');
 
 if ($dir) {
-	while (false !== ($a = readdir($dir))) {
-		var_dump($a);
-		var_dump(is_dir('phar://hio/b/' . $a));
-	}
+    while (false !== ($a = readdir($dir))) {
+        var_dump($a);
+        var_dump(is_dir('phar://hio/b/' . $a));
+    }
 }
 
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 %s(1) "a"
 bool(false)

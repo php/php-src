@@ -12,6 +12,7 @@ Transliterator::create("bad UTF-8 \x8F");
 echo intl_get_error_message(), "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Warning: Transliterator::create(): transliterator_create: unable to open ICU transliterator with id "inexistent id" in %s on line %d
 transliterator_create: unable to open ICU transliterator with id "inexistent id": U_INVALID_ID

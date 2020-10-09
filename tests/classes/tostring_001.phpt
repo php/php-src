@@ -3,12 +3,6 @@ ZE2 __toString()
 --FILE--
 <?php
 
-function my_error_handler($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
-}
-
-set_error_handler('my_error_handler');
-
 class test1
 {
 }
@@ -17,7 +11,7 @@ class test2
 {
     function __toString()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
         return "Converted\n";
     }
 }
@@ -26,14 +20,18 @@ class test3
 {
     function __toString()
     {
-    	echo __METHOD__ . "()\n";
-        return 42;
+        echo __METHOD__ . "()\n";
+        return [];
     }
 }
 echo "====test1====\n";
 $o = new test1;
 print_r($o);
-var_dump((string)$o);
+try {
+    var_dump((string)$o);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($o);
 
 echo "====test2====\n";
@@ -58,7 +56,11 @@ echo $o , $o;
 echo "====test7====\n";
 $ar = array();
 $ar[$o->__toString()] = "ERROR";
-echo $ar[$o];
+try {
+    echo $ar[$o];
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "====test8====\n";
 var_dump(trim($o));
@@ -70,18 +72,21 @@ echo sprintf("%s", $o);
 echo "====test10====\n";
 $o = new test3;
 var_dump($o);
-echo $o;
+try {
+    echo $o;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ====DONE====
---EXPECTF--
+--EXPECT--
 ====test1====
 test1 Object
 (
 )
-string(54) "Object of class test1 could not be converted to string"
-string(0) ""
-object(test1)#%d (0) {
+Object of class test1 could not be converted to string
+object(test1)#1 (0) {
 }
 ====test2====
 test2 Object
@@ -89,7 +94,7 @@ test2 Object
 )
 test2::__toString()
 Converted
-object(test2)#%d (0) {
+object(test2)#3 (0) {
 }
 ====test3====
 test2::__toString()
@@ -113,7 +118,7 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-string(19) "Illegal offset type"
+Illegal offset type
 ====test8====
 test2::__toString()
 string(9) "Converted"
@@ -123,8 +128,8 @@ string(9) "Converted"
 test2::__toString()
 Converted
 ====test10====
-object(test3)#%d (0) {
+object(test3)#2 (0) {
 }
 test3::__toString()
-string(53) "Method test3::__toString() must return a string value"
+test3::__toString(): Return value must be of type string, array returned
 ====DONE====

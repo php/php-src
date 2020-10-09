@@ -7,17 +7,17 @@ if(!extension_loaded('zip')) die('skip');
 --FILE--
 <?php
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $zip = new ZipArchive;
 if (!$zip->open($dirname . 'test.zip')) {
-	exit('failed');
+    exit('failed');
 }
 
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-	$zip->close();
-	echo "ok\n";
+    $zip->close();
+    echo "ok\n";
 } else {
-	echo "failed\n";
+    echo "failed\n";
 }
 ?>
 --EXPECT--

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,13 +19,14 @@
 
 #include "ext/standard/basic_functions.h"
 
-#define PHP_IC_ENTRY \
-	BG(incomplete_class)
+extern PHPAPI zend_class_entry *php_ce_incomplete_class;
+
+#define PHP_IC_ENTRY php_ce_incomplete_class
 
 #define PHP_SET_CLASS_ATTRIBUTES(struc) \
 	/* OBJECTS_FIXME: Fix for new object model */	\
-	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
-		class_name = php_lookup_class_name(struc); \
+	if (Z_OBJCE_P(struc) == php_ce_incomplete_class) {	\
+		class_name = php_lookup_class_name(Z_OBJ_P(struc)); \
 		if (!class_name) { \
 			class_name = zend_string_init(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
 		} \
@@ -50,9 +49,9 @@
 extern "C" {
 #endif
 
-PHPAPI zend_class_entry *php_create_incomplete_class(void);
-PHPAPI zend_string *php_lookup_class_name(zval *object);
-PHPAPI void  php_store_class_name(zval *object, const char *name, size_t len);
+PHPAPI void php_register_incomplete_class(void);
+PHPAPI zend_string *php_lookup_class_name(zend_object *object);
+PHPAPI void php_store_class_name(zval *object, zend_string *name);
 
 #ifdef __cplusplus
 };

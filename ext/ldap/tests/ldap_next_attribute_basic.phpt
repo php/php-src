@@ -16,13 +16,12 @@ $result = ldap_search($link, "$base", "(cn=userC)");
 $entry = ldap_first_entry($link, $result);
 $attribute = ldap_first_attribute($link, $entry);
 var_dump(
-	ldap_next_attribute($link, $entry),
-	ldap_next_attribute($link, $entry),
-	ldap_next_attribute($link, $entry),
-	ldap_next_attribute($link, $entry)
+    ldap_next_attribute($link, $entry),
+    ldap_next_attribute($link, $entry),
+    ldap_next_attribute($link, $entry),
+    ldap_next_attribute($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -35,4 +34,3 @@ string(%d) "%s"
 string(%d) "%s"
 string(%d) "%s"
 bool(false)
-===DONE===

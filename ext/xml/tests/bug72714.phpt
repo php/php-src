@@ -27,9 +27,7 @@ function parse($tagstart) {
 parse(3015809298423721);
 parse(20);
 ?>
-===DONE===
 --EXPECTF--
-Notice: xml_parser_set_option(): tagstart ignored, because it is out of range in %s%ebug72714.php on line %d
+Warning: xml_parser_set_option(): tagstart ignored, because it is out of range in %s on line %d
 string(9) "NS1:TOTAL"
 string(0) ""
-===DONE===

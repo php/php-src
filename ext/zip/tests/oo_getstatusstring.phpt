@@ -8,7 +8,7 @@ Ole-Petter Wikene <olepw@redpill-linpro.com>
 --FILE--
 <?php
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $arch = new ZipArchive;
 $arch->open($dirname.'foo.zip',ZIPARCHIVE::CREATE);
 var_dump($arch->getStatusString());

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +28,7 @@ static int phpdbg_is_auto_global(char *name, int len) {
 PHPDBG_API void phpdbg_webdata_compress(char **msg, size_t *len) {
 	zval array;
 	HashTable *ht;
-	zval zv[9] = {{{0}}};
+	zval zv[9];
 
 	array_init(&array);
 	ht = Z_ARRVAL(array);

@@ -14,7 +14,7 @@ function ut_main()
 {
     $res_str='';
 
-	$disp_locales=array('en','fr','de');
+    $disp_locales=array('en','fr','de');
 
     $locales = array(
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
@@ -72,15 +72,15 @@ function ut_main()
 
     $res_str = '';
 
-   	foreach( $locales as $locale )
+    foreach( $locales as $locale )
     {
-       	$res_str .= "locale='$locale'\n";
-   		foreach( $disp_locales as $disp_locale )
-    	{
-        	$scr = ut_loc_get_display_language( $locale ,$disp_locale );
-        	$res_str .= "disp_locale=$disp_locale :  display_language=$scr";
-        	$res_str .= "\n";
-		}
+        $res_str .= "locale='$locale'\n";
+        foreach( $disp_locales as $disp_locale )
+        {
+            $scr = ut_loc_get_display_language( $locale ,$disp_locale );
+            $res_str .= "disp_locale=$disp_locale :  display_language=$scr";
+            $res_str .= "\n";
+        }
         $res_str .= "-----------------\n";
     }
 

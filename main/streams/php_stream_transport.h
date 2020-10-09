@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -171,21 +169,23 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT = (1 << 3 | 1),
 	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT = (1 << 4 | 1),
 	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT = (1 << 5 | 1),
+	STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT = (1 << 6 | 1),
 	/* TLS equates to TLS_ANY as of PHP 7.2 */
-	STREAM_CRYPTO_METHOD_TLS_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | 1),
-	STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | 1),
-	STREAM_CRYPTO_METHOD_ANY_CLIENT = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | 1),
+	STREAM_CRYPTO_METHOD_TLS_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
+	STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
+	STREAM_CRYPTO_METHOD_ANY_CLIENT = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
 	STREAM_CRYPTO_METHOD_SSLv2_SERVER = (1 << 1),
 	STREAM_CRYPTO_METHOD_SSLv3_SERVER = (1 << 2),
 	/* v23 no longer negotiates SSL2 or SSL3 */
-	STREAM_CRYPTO_METHOD_SSLv23_SERVER = ((1 << 3) | (1 << 4) | (1 << 5)),
+	STREAM_CRYPTO_METHOD_SSLv23_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
 	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER = (1 << 3),
 	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER = (1 << 4),
 	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER = (1 << 5),
+	STREAM_CRYPTO_METHOD_TLSv1_3_SERVER = (1 << 6),
 	/* TLS equates to TLS_ANY as of PHP 7.2 */
-	STREAM_CRYPTO_METHOD_TLS_SERVER = ((1 << 3) | (1 << 4) | (1 << 5)),
-	STREAM_CRYPTO_METHOD_TLS_ANY_SERVER = ((1 << 3) | (1 << 4) | (1 << 5)),
-	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5))
+	STREAM_CRYPTO_METHOD_TLS_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
+	STREAM_CRYPTO_METHOD_TLS_ANY_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
+	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6))
 } php_stream_xport_crypt_method_t;
 
 /* These functions provide crypto support on the underlying transport */
@@ -214,12 +214,3 @@ BEGIN_EXTERN_C()
 PHPAPI HashTable *php_stream_xport_get_hash(void);
 PHPAPI php_stream_transport_factory_func php_stream_generic_socket_factory;
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

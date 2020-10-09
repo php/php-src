@@ -28,13 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HAVE_STDDEF_H
 #include <stddef.h>
-#endif
 
 #include "mbfilter.h"
 
@@ -60,18 +54,20 @@ const struct mbfl_convert_vtbl vtbl_8bit_wchar = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_8bit_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_8bit = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_8bit,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement) do { if ((statement) < 0) return (-1); } while (0)

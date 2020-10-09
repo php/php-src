@@ -15,7 +15,7 @@ Content-Type: text/plain-file1
 var_dump($_FILES);
 var_dump($_POST);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["file1"]=>
   array(5) {

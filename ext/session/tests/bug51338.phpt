@@ -9,6 +9,7 @@ session.use_trans_sid=1
 <?php
 session_start();
 print_r(ob_list_handlers());
+?>
 --EXPECT--
 Array
 (

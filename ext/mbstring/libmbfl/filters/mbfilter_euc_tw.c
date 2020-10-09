@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_euc_tw.h"
 
@@ -74,7 +70,6 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 const struct mbfl_identify_vtbl vtbl_identify_euctw = {
 	mbfl_no_encoding_euc_tw,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_euctw
 };
 
@@ -82,18 +77,20 @@ const struct mbfl_convert_vtbl vtbl_euctw_wchar = {
 	mbfl_no_encoding_euc_tw,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_euctw_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_euctw = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_tw,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_euctw,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -270,9 +267,7 @@ mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0xff, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 	return c;
 }

@@ -3,14 +3,14 @@ DBA DB4 File Creation open("c") with existing file
 --SKIPIF--
 <?php
 $handler = "db4";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 die("info $HND handler used");
 ?>
 --FILE--
 <?php
 
 $handler = "db4";
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
 
 var_dump(file_put_contents($db_filename, "Dummy contents"));
@@ -33,7 +33,7 @@ echo "$s\n";
 ?>
 --CLEAN--
 <?php
-require(dirname(__FILE__) .'/clean.inc');
+require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: db4

@@ -5,7 +5,7 @@ Bug #37816 (ReflectionProperty does not throw exception when accessing protected
 
 class TestClass
 {
-	protected $p = 2;
+    protected $p = 2;
 }
 
 $o = new TestClass;
@@ -14,15 +14,13 @@ $r = new ReflectionProperty($o, 'p');
 
 try
 {
-	$x = $r->getValue($o);
+    $x = $r->getValue($o);
 }
 catch (Exception $e)
 {
-	echo 'Caught: ' . $e->getMessage() . "\n";
+    echo 'Caught: ' . $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --EXPECT--
-Caught: Cannot access non-public member TestClass::$p
-===DONE===
+Caught: Cannot access non-public property TestClass::$p

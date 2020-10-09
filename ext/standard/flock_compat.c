@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,17 +17,6 @@
 #include "php.h"
 #include <errno.h>
 #include "ext/standard/flock_compat.h"
-
-#if HAVE_STRUCT_FLOCK
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/file.h>
-#endif
-
-#ifdef PHP_WIN32
-#include <io.h>
-#include "config.w32.h"
-#endif
 
 #ifndef HAVE_FLOCK
 PHPAPI int flock(int fd, int operation)
@@ -60,7 +47,7 @@ PHPAPI int php_flock(int fd, int operation)
 
 	ret = fcntl(fd, operation & LOCK_NB ? F_SETLK : F_SETLKW, &flck);
 
-	if (operation & LOCK_NB && ret == -1 &&
+	if ((operation & LOCK_NB) && ret == -1 &&
 			(errno == EACCES || errno == EAGAIN))
 		errno = EWOULDBLOCK;
 
@@ -228,12 +215,3 @@ int inet_aton(const char *cp, struct in_addr *ap)
 /* }}} */
 #endif /* !HAVE_INET_ATON */
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

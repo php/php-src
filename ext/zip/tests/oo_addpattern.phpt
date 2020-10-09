@@ -10,11 +10,13 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
-include $dirname . 'utils.inc';
-$file = $dirname . '__tmp_oo_addpattern.zip';
+include __DIR__ . '/utils.inc';
 
-copy($dirname . 'test.zip', $file);
+$dirname = __DIR__ . '/oo_addpattern_dir/';
+$file = $dirname . 'tmp.zip';
+
+@mkdir($dirname);
+copy(__DIR__ . '/test.zip', $file);
 touch($dirname . 'foo.txt');
 touch($dirname . 'bar.txt');
 
@@ -25,26 +27,43 @@ if (!$zip->open($file)) {
 $dir = realpath($dirname);
 $options = array('add_path' => 'baz/', 'remove_path' => $dir);
 if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
-        echo "failed\n";
+    echo "failed 1\n";
 }
+$options['flags'] = 0; // clean FL_OVERWRITE
+if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
+    var_dump($zip->getStatusString());
+}
+$options['flags'] = ZipArchive::FL_OVERWRITE;
+if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
+    echo "failed 2\n";
+}
+
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-        dump_entries_name($zip);
+        if (!verify_entries($zip, [
+            "bar",
+            "foobar/",
+            "foobar/baz",
+            "entry1.txt",
+            "baz/foo.txt",
+            "baz/bar.txt"
+        ])) {
+            echo "failed\n";
+        } else {
+            echo "OK";
+        }
         $zip->close();
 } else {
-        echo "failed\n";
+        echo "failed3\n";
 }
 ?>
 --CLEAN--
 <?php
-$dirname = dirname(__FILE__) . '/';
-unlink($dirname . '__tmp_oo_addpattern.zip');
+$dirname = __DIR__ . '/oo_addpattern_dir/';
+unlink($dirname . 'tmp.zip');
 unlink($dirname . 'foo.txt');
 unlink($dirname . 'bar.txt');
+rmdir($dirname);
 ?>
 --EXPECT--
-0 bar
-1 foobar/
-2 foobar/baz
-3 entry1.txt
-4 baz/bar.txt
-5 baz/foo.txt
+string(19) "File already exists"
+OK

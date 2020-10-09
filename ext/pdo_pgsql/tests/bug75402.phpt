@@ -3,14 +3,14 @@ PDO PgSQL Bug #75402 Possible Memory Leak using PDO::CURSOR_SCROLL option
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 $resp = new \stdClass();
 $resp->entries = [];
@@ -46,29 +46,29 @@ $db->query("INSERT INTO bug75402 (\"id\", \"group_id\", \"submitter\", \"operati
 
 
 
-$sql = "SELECT 
-            ID as \"sID\", 
-            GROUP_ID as \"sGroupID\", 
-            SUBMITTER as \"sOwner\", 
-            OPERATION as \"sOperation\", 
-            DESCRIPTION as \"sInfo\", 
-            STAGE as \"sShortStatus\", 
-            STATUS as \"sStatus\", 
-            PROGRESS as \"sProgress\", 
-            HIDDEN as \"bHidden\", 
-            to_char(INSERT_DATETIME, 'IYYY.MM.DD HH24:MI:SS')  as \"sDatetime\" 
-          FROM bug75402 
+$sql = "SELECT
+            ID as \"sID\",
+            GROUP_ID as \"sGroupID\",
+            SUBMITTER as \"sOwner\",
+            OPERATION as \"sOperation\",
+            DESCRIPTION as \"sInfo\",
+            STAGE as \"sShortStatus\",
+            STATUS as \"sStatus\",
+            PROGRESS as \"sProgress\",
+            HIDDEN as \"bHidden\",
+            to_char(INSERT_DATETIME, 'IYYY.MM.DD HH24:MI:SS')  as \"sDatetime\"
+          FROM bug75402
           ORDER BY INSERT_DATETIME DESC";
 
 if ($db) {
     $stmt = $db->prepare($sql,
-		array(
-			// With the following options memory is not being
-			// deallocated
-			  \PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL
-			// With the following option memory is de-allocated
-			// \PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY
-		)
+        array(
+            // With the following options memory is not being
+            // deallocated
+              \PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL
+            // With the following option memory is de-allocated
+            // \PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY
+        )
     );
     $stmt->execute();
 
@@ -81,6 +81,7 @@ if ($db) {
 }
 
 var_dump($resp);
+?>
 --EXPECT--
 object(stdClass)#2 (1) {
   ["entries"]=>

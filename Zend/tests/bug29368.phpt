@@ -5,30 +5,28 @@ Bug #29368 (The destructor is called when an exception is thrown from the constr
 
 class Foo
 {
-	function __construct()
-	{
-		echo __METHOD__ . "\n";
-		throw new Exception;
-	}
-	function __destruct()
-	{
-		echo __METHOD__ . "\n";
-	}
+    function __construct()
+    {
+        echo __METHOD__ . "\n";
+        throw new Exception;
+    }
+    function __destruct()
+    {
+        echo __METHOD__ . "\n";
+    }
 }
 
 try
 {
-	$bar = new Foo;
+    $bar = new Foo;
 } catch(Exception $exc)
 {
-	echo "Caught exception!\n";
+    echo "Caught exception!\n";
 }
 
 unset($bar);
 
 ?>
-===DONE===
 --EXPECT--
 Foo::__construct
 Caught exception!
-===DONE===

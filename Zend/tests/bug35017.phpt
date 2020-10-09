@@ -4,18 +4,18 @@ Bug #35017 (Exception thrown in error handler may cause unexpected behavior)
 <?php
 set_error_handler('errorHandler');
 try {
-	if ($a) {
-		echo "1\n";
-	} else {
-		echo "0\n";
-	}
-	echo "?\n";
+    if ($a) {
+        echo "1\n";
+    } else {
+        echo "0\n";
+    }
+    echo "?\n";
 } catch(Exception $e) {
-  echo "This Exception should be catched\n";
+  echo "This Exception should be caught\n";
 }
-function errorHandler($errno, $errstr, $errfile, $errline, $vars) {
-	throw new Exception('Some Exception');
+function errorHandler($errno, $errstr, $errfile, $errline) {
+    throw new Exception('Some Exception');
 }
 ?>
 --EXPECT--
-This Exception should be catched
+This Exception should be caught

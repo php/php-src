@@ -5,7 +5,7 @@ report_memleaks=1
 --FILE--
 <?php
 function foo() {
-	gc_collect_cycles();
+    gc_collect_cycles();
 }
 
 $str = 'a:1:{i:0;R:1;}';

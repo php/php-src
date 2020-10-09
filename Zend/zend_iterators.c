@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,36 +24,34 @@ static zend_class_entry zend_iterator_class_entry;
 
 static void iter_wrapper_free(zend_object *object);
 static void iter_wrapper_dtor(zend_object *object);
+static HashTable *iter_wrapper_get_gc(zend_object *object, zval **table, int *n);
 
 static const zend_object_handlers iterator_object_handlers = {
 	0,
 	iter_wrapper_free,
 	iter_wrapper_dtor,
-	NULL,
+	NULL, /* clone_obj */
 	NULL, /* prop read */
 	NULL, /* prop write */
 	NULL, /* read dim */
 	NULL, /* write dim */
-	NULL,
-	NULL, /* get */
-	NULL, /* set */
+	NULL, /* get_property_ptr_ptr */
 	NULL, /* has prop */
 	NULL, /* unset prop */
 	NULL, /* has dim */
 	NULL, /* unset dim */
 	NULL, /* props get */
 	NULL, /* method get */
-	NULL, /* call */
 	NULL, /* get ctor */
 	NULL, /* get class name */
-	NULL, /* compare */
 	NULL, /* cast */
 	NULL, /* count */
 	NULL, /* get_debug_info */
 	NULL, /* get_closure */
-	NULL, /* get_gc */
+	iter_wrapper_get_gc,
 	NULL, /* do_operation */
-	NULL  /* compare */
+	NULL, /* compare */
+	NULL  /* get_properties_for */
 };
 
 ZEND_API void zend_register_iterator_wrapper(void)
@@ -69,6 +67,17 @@ static void iter_wrapper_free(zend_object *object)
 
 static void iter_wrapper_dtor(zend_object *object)
 {
+}
+
+static HashTable *iter_wrapper_get_gc(zend_object *object, zval **table, int *n) {
+	zend_object_iterator *iter = (zend_object_iterator*)object;
+	if (iter->funcs->get_gc) {
+		return iter->funcs->get_gc(iter, table, n);
+	}
+
+	*table = NULL;
+	*n = 0;
+	return NULL;
 }
 
 ZEND_API void zend_iterator_init(zend_object_iterator *iter)
@@ -94,13 +103,3 @@ ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr)
 	}
 	return NULL;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

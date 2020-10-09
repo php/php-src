@@ -11,12 +11,6 @@ session.save_handler=files
 
 ob_start();
 
-/*
- * Prototype : void session_abort(void)
- * Description : Should abort session. Session data should not be written.
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_abort() : basic functionality ***\n";
 
 session_start();

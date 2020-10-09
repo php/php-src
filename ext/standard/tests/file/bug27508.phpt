@@ -1,7 +1,7 @@
 --TEST--
 Bug #27508 (userspace wrappers have bogus eof indicator)
 --FILE--
-<?php # vim:ft=php
+<?php
 class FileStream {
     public $fp;
 

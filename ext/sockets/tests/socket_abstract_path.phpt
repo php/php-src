@@ -3,10 +3,10 @@ Support for paths in the abstract namespace (bind, connect)
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets'))
-	die('skip sockets extension not available.');
+    die('skip sockets extension not available.');
 
 if (PHP_OS != 'Linux') {
-	die('skip For Linux only');
+    die('skip For Linux only');
 }
 ?>
 --FILE--
@@ -28,8 +28,8 @@ socket_connect($clients, $path) or die("Error connecting");
 $conns = socket_accept($servers) or die("Could not accept connection");
 
 $r = socket_sendmsg($clients, [
-	//"name" => [ "addr" => $path, ],
-	"iov" => ["test ", "thing", "\n"],
+    //"name" => [ "addr" => $path, ],
+    "iov" => ["test ", "thing", "\n"],
 ], 0);
 var_dump($r);
 checktimeout($conns, 500);

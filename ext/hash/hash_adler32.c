@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -61,21 +59,16 @@ PHP_HASH_API int PHP_ADLER32Copy(const php_hash_ops *ops, PHP_ADLER32_CTX *orig_
 }
 
 const php_hash_ops php_hash_adler32_ops = {
+	"adler32",
 	(php_hash_init_func_t) PHP_ADLER32Init,
 	(php_hash_update_func_t) PHP_ADLER32Update,
 	(php_hash_final_func_t) PHP_ADLER32Final,
 	(php_hash_copy_func_t) PHP_ADLER32Copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_ADLER32_SPEC,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_ADLER32_CTX),
 	0
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +18,7 @@
 #include "php_ini.h"
 #include <errno.h>
 
-ZEND_DECLARE_MODULE_GLOBALS(phpdbg_webhelper);
+ZEND_DECLARE_MODULE_GLOBALS(phpdbg_webhelper)
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("phpdbg.auth", "", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString, auth, zend_phpdbg_webhelper_globals, phpdbg_webhelper_globals)

@@ -55,18 +55,40 @@ pg_lo_unlink($db, (string)$oid) or print("pg_lo_unlink() error 3\n");
 pg_exec ($db, "commit");
 
 echo "import/export LO\n";
-$path = dirname(__FILE__) . '/';
+$path = __DIR__ . '/';
 pg_query($db, 'begin');
 $oid = pg_lo_import($db, $path . 'php.gif');
 pg_query($db, 'commit');
 pg_query($db, 'begin');
 @unlink($path . 'php.gif.exported');
-pg_lo_export($oid, $path . 'php.gif.exported', $db);
+pg_lo_export($db, $oid, $path . 'php.gif.exported');
 if (!file_exists($path . 'php.gif.exported')) {
-	echo "Export failed\n";
+    echo "Export failed\n";
 }
 @unlink($path . 'php.gif.exported');
 pg_query($db, 'commit');
+
+/* invalid OID values */
+try {
+    pg_lo_create(-15);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_create($db, -15);
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_create('giberrish');
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    pg_lo_create($db, 'giberrish');
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 echo "OK";
 ?>
@@ -79,4 +101,8 @@ unlink LO
 Test without connection
 Test with string oid value
 import/export LO
+Invalid OID value passed
+Invalid OID value passed
+Invalid OID value passed
+Invalid OID value passed
 OK

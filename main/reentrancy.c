@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,54 +107,6 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 
 #endif
 
-#if !defined(HAVE_POSIX_READDIR_R)
-
-PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
-		struct dirent **result)
-{
-#if defined(HAVE_OLD_READDIR_R)
-	int ret = 0;
-
-	/* We cannot rely on the return value of readdir_r
-	   as it differs between various platforms
-	   (HPUX returns 0 on success whereas Solaris returns non-zero)
-	 */
-	entry->d_name[0] = '\0';
-	readdir_r(dirp, entry);
-
-	if (entry->d_name[0] == '\0') {
-		*result = NULL;
-		ret = errno;
-	} else {
-		*result = entry;
-	}
-	return ret;
-#else
-	struct dirent *ptr;
-	int ret = 0;
-
-	local_lock(READDIR_R);
-
-	errno = 0;
-
-	ptr = readdir(dirp);
-
-	if (!ptr && errno != 0)
-		ret = errno;
-
-	if (ptr)
-		memcpy(entry, ptr, sizeof(*ptr));
-
-	*result = ptr;
-
-	local_unlock(READDIR_R);
-
-	return ret;
-#endif
-}
-
-#endif
-
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 
 PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
@@ -187,11 +137,14 @@ PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 	local_lock(CTIME_R);
 
 	tmp = ctime(clock);
-	strcpy(buf, tmp);
+	if (tmp) {
+		strcpy(buf, tmp);
+		tmp = buf;
+	}
 
 	local_unlock(CTIME_R);
 
-	return buf;
+	return tmp;
 }
 
 #endif
@@ -205,11 +158,14 @@ PHPAPI char *php_asctime_r(const struct tm *tm, char *buf)
 	local_lock(ASCTIME_R);
 
 	tmp = asctime(tm);
-	strcpy(buf, tmp);
+	if (tmp) {
+		strcpy(buf, tmp);
+		tmp = buf;
+	}
 
 	local_unlock(ASCTIME_R);
 
-	return buf;
+	return tmp;
 }
 
 #endif
@@ -253,63 +209,6 @@ void reentrancy_shutdown(void)
 	for (i = 0; i < NUMBER_OF_LOCKS; i++) {
 		tsrm_mutex_free(reentrant_locks[i]);
 	}
-}
-
-#endif
-
-#ifndef HAVE_RAND_R
-
-/*-
- * Copyright (c) 1990, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * Posix rand_r function added May 1999 by Wes Peters <wes@softweyr.com>.
- */
-
-#include <sys/types.h>
-#include <stdlib.h>
-
-static int
-do_rand(unsigned long *ctx)
-{
-	return ((*ctx = *ctx * 1103515245 + 12345) % ((u_long)PHP_RAND_MAX + 1));
-}
-
-
-PHPAPI int
-php_rand_r(unsigned int *ctx)
-{
-	u_long val = (u_long) *ctx;
-	*ctx = do_rand(&val);
-	return (int) *ctx;
 }
 
 #endif
@@ -425,12 +324,3 @@ cont:
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -3,29 +3,29 @@ PDO MySQL PECL bug #1295 (http://pecl.php.net/bugs/bug.php?id=12925)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
 function bug_pecl_1295($db) {
 
-	$db->exec('DROP TABLE IF EXISTS test');
-	$db->exec('CREATE TABLE test(id CHAR(1))');
-	$db->exec("INSERT INTO test(id) VALUES ('a')");
-	$stmt = $db->prepare("UPDATE test SET id = 'b'");
-	$stmt->execute();
-	$stmt = $db->prepare("UPDATE test SET id = 'c'");
-	$stmt->execute();
-	$stmt = $db->prepare('SELECT id FROM test');
-	$stmt->execute();
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-	$stmt->closeCursor();
+    $db->exec('DROP TABLE IF EXISTS test');
+    $db->exec('CREATE TABLE test(id CHAR(1))');
+    $db->exec("INSERT INTO test(id) VALUES ('a')");
+    $stmt = $db->prepare("UPDATE test SET id = 'b'");
+    $stmt->execute();
+    $stmt = $db->prepare("UPDATE test SET id = 'c'");
+    $stmt->execute();
+    $stmt = $db->prepare('SELECT id FROM test');
+    $stmt->execute();
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt->closeCursor();
 
 }
 

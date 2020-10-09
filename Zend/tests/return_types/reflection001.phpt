@@ -9,7 +9,7 @@ class A {
     }
 }
 
-ReflectionClass::export("A");
+echo new ReflectionClass("A");
 ?>
 --EXPECTF--
 Class [ <user> class A ] {

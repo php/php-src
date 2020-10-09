@@ -3,140 +3,237 @@ Interface of the class mysqli
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require('table.inc');
+    require('table.inc');
 
-	function dump_properties($mysqli) {
+    function dump_properties($mysqli) {
 
-		printf("\nClass variables:\n");
-		$variables = array_keys(get_class_vars(get_class($mysqli)));
-		sort($variables);
-		foreach ($variables as $k => $var) {
-			printf("%s = '%s'\n", $var, var_export(@$mysqli->$var, true));
-		}
+        printf("\nClass variables:\n");
+        $variables = array_keys(get_class_vars(get_class($mysqli)));
+        sort($variables);
+        foreach ($variables as $k => $var) {
+            try {
+                printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
+            } catch (Error $exception) {
+                echo $exception->getMessage() . "\n";
+            }
+        }
 
-		printf("\nObject variables:\n");
-		$variables = array_keys(get_object_vars($mysqli));
-		foreach ($variables as $k => $var) {
-			printf("%s = '%s'\n", $var, var_export(@$mysqli->$var, true));
-		}
+        printf("\nObject variables:\n");
+        $variables = array_keys(get_object_vars($mysqli));
+        foreach ($variables as $k => $var) {
+            try {
+                printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
+            } catch (Error $exception) {
+                echo $exception->getMessage() . "\n";
+            }
+        }
 
-		printf("\nMagic, magic properties:\n");
+        printf("\nMagic, magic properties:\n");
+        try {
+            mysqli_affected_rows($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_affected_rows($mysqli) === @$mysqli->affected_rows);
-		printf("mysqli->affected_rows = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->affected_rows, gettype(@$mysqli->affected_rows),
-			@mysqli_affected_rows($mysqli), gettype(@mysqli_affected_rows($mysqli)));
+        try {
+            $mysqli->affected_rows;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_get_client_info() === @$mysqli->client_info);
-		printf("mysqli->client_info = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->client_info, gettype(@$mysqli->client_info),
-			@mysqli_get_client_info(), gettype(@mysqli_get_client_info()));
+        try {
+            $mysqli->client_info;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_get_client_version() === @$mysqli->client_version);
-		printf("mysqli->client_version =  '%s'/%s ('%s'/%s)\n",
-			@$mysqli->client_version, gettype(@$mysqli->client_version),
-			@mysqli_get_client_version(), gettype(@mysqli_get_client_version()));
+        printf("mysqli->client_version = '%s'/%s\n", $mysqli->client_version, gettype($mysqli->client_version));
 
-		assert(@mysqli_errno($mysqli) === @$mysqli->errno);
-		printf("mysqli->errno = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->errno, gettype(@$mysqli->errno),
+        try {
+            mysqli_errno($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-			@mysqli_errno($mysqli), gettype(@mysqli_errno($mysqli)));
+        try {
+            $mysqli->errno;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_error($mysqli) === @$mysqli->error);
-		printf("mysqli->error = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->error, gettype(@$mysqli->error),
-			@mysqli_error($mysqli), gettype(@mysqli_error($mysqli)));
+        try {
+            mysqli_error($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_field_count($mysqli) === @$mysqli->field_count);
-		printf("mysqli->field_count = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->field_count, gettype(@$mysqli->field_count),
-			@mysqli_field_count($mysqli), gettype(@mysqli_field_count($mysqli)));
+        try {
+            $mysqli->error;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_insert_id($mysqli) === @$mysqli->insert_id);
-		printf("mysqli->insert_id = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->insert_id, gettype(@$mysqli->insert_id),
-			@mysqli_insert_id($mysqli), gettype(@mysqli_insert_id($mysqli)));
+        try {
+            mysqli_field_count($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_sqlstate($mysqli) === @$mysqli->sqlstate);
-		printf("mysqli->sqlstate = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->sqlstate, gettype(@$mysqli->sqlstate),
-			@mysqli_sqlstate($mysqli), gettype(@mysqli_sqlstate($mysqli)));
+        try {
+            $mysqli->field_count;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_get_host_info($mysqli) === @$mysqli->host_info);
-		printf("mysqli->host_info = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->host_info, gettype(@$mysqli->host_info),
-			@mysqli_get_host_info($mysqli), gettype(@mysqli_get_host_info($mysqli)));
+        try {
+            mysqli_insert_id($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		/* note that the data types are different */
-		assert(@mysqli_info($mysqli) == @$mysqli->info);
-		printf("mysqli->info = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->info, gettype(@$mysqli->info),
-			@mysqli_info($mysqli), gettype(@mysqli_info($mysqli)));
+        try {
+            $mysqli->insert_id;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_thread_id($mysqli) > @$mysqli->thread_id);
-		assert(gettype(@$mysqli->thread_id) == gettype(@mysqli_thread_id($mysqli)));
-		printf("mysqli->thread_id = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->thread_id, gettype(@$mysqli->thread_id),
-			@mysqli_thread_id($mysqli), gettype(@mysqli_thread_id($mysqli)));
+        try {
+            mysqli_sqlstate($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_get_proto_info($mysqli) === @$mysqli->protocol_version);
-		printf("mysqli->protocol_version = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->protocol_version, gettype(@$mysqli->protocol_version),
-			@mysqli_get_proto_info($mysqli), gettype(@mysqli_get_proto_info($mysqli)));
+        try {
+            $mysqli->sqlstate;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_get_server_info($mysqli) === @$mysqli->server_info);
-		printf("mysqli->server_info = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->server_info, gettype(@$mysqli->server_info),
-			@mysqli_get_server_info($mysqli), gettype(@mysqli_get_server_info($mysqli)));
+        try {
+            mysqli_get_host_info($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_get_server_version($mysqli) === @$mysqli->server_version);
-		printf("mysqli->server_version = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->server_version, gettype(@$mysqli->server_version),
-			@mysqli_get_server_version($mysqli), gettype(@mysqli_get_server_version($mysqli)));
+        try {
+            $mysqli->host_info;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_warning_count($mysqli) === @$mysqli->warning_count);
-		printf("mysqli->warning_count = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->warning_count, gettype(@$mysqli->warning_count),
-			@mysqli_warning_count($mysqli), gettype(@mysqli_warning_count($mysqli)));
+        try {
+            mysqli_info($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		printf("\nAccess to undefined properties:\n");
-		printf("mysqli->unknown = '%s'\n", @$mysqli->unknown);
+        try {
+            $mysqli->info;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		@$mysqli->unknown = 13;
-		printf("setting mysqli->unknown, @mysqli_unknown = '%s'\n", @$mysqli->unknown);
+        try {
+            mysqli_thread_id($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		$unknown = 'friday';
-		@$mysqli->unknown = $unknown;
-		printf("setting mysqli->unknown, @mysqli_unknown = '%s'\n", @$mysqli->unknown);
+        try {
+            $mysqli->thread_id;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		printf("\nAccess hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):\n");
-		assert(@mysqli_connect_error() === @$mysqli->connect_error);
-		printf("mysqli->connect_error = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->connect_error, gettype(@$mysqli->connect_error),
-			@mysqli_connect_error(), gettype(@mysqli_connect_error()));
+        try {
+            mysqli_get_proto_info($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-		assert(@mysqli_connect_errno() === @$mysqli->connect_errno);
-		printf("mysqli->connect_errno = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->connect_errno, gettype(@$mysqli->connect_errno),
-			@mysqli_connect_errno(), gettype(@mysqli_connect_errno()));
-	}
+        try {
+            $mysqli->protocol_version;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-	printf("Without RS\n");
-	$mysqli = @new mysqli($host, $user, $passwd . "invalid", $db, $port, $socket);
-	dump_properties($mysqli);
+        try {
+            mysqli_get_server_info($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-	printf("With RS\n");
-	$mysqli = @new mysqli($host, $user, $passwd . "invalid", $db, $port, $socket);
-	$res = @$mysqli->query("SELECT * FROM test");
-	dump_properties($mysqli);
+        try {
+            $mysqli->server_info;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 
-	print "done!";
+        try {
+            mysqli_get_server_version($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
+
+        try {
+            $mysqli->server_version;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
+
+        try {
+            mysqli_warning_count($mysqli);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
+
+        try {
+            $mysqli->warning_count;
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
+
+
+        printf("\nAccess to undefined properties:\n");
+        printf("mysqli->unknown = '%s'\n", @$mysqli->unknown);
+
+        @$mysqli->unknown = 13;
+        printf("setting mysqli->unknown, @mysqli_unknown = '%s'\n", @$mysqli->unknown);
+
+        $unknown = 'friday';
+        @$mysqli->unknown = $unknown;
+        printf("setting mysqli->unknown, @mysqli_unknown = '%s'\n", @$mysqli->unknown);
+
+        printf("\nAccess hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):\n");
+        assert(@mysqli_connect_error() === @$mysqli->connect_error);
+        printf("mysqli->connect_error = '%s'/%s ('%s'/%s)\n",
+            @$mysqli->connect_error, gettype(@$mysqli->connect_error),
+            @mysqli_connect_error(), gettype(@mysqli_connect_error()));
+
+        assert(@mysqli_connect_errno() === @$mysqli->connect_errno);
+        printf("mysqli->connect_errno = '%s'/%s ('%s'/%s)\n",
+            @$mysqli->connect_errno, gettype(@$mysqli->connect_errno),
+            @mysqli_connect_errno(), gettype(@mysqli_connect_errno()));
+    }
+
+    printf("Without RS\n");
+    $mysqli = @new mysqli($host, $user, $passwd . "invalid", $db, $port, $socket);
+    dump_properties($mysqli);
+
+    printf("\nWith RS\n");
+    $mysqli = @new mysqli($host, $user, $passwd . "invalid", $db, $port, $socket);
+    try {
+        $mysqli->query("SELECT * FROM test");
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+    dump_properties($mysqli);
+
+    print "done!";
 ?>
 --CLEAN--
 <?php require_once("clean_table.inc"); ?>
@@ -144,67 +241,74 @@ require_once('skipifconnectfailure.inc');
 Without RS
 
 Class variables:
-affected_rows = 'false'
-client_info = 'false'
+Property access is not allowed yet
+Property access is not allowed yet
 client_version = '%s'
 connect_errno = '%s'
 connect_error = ''%s'
-errno = 'false'
-error = 'false'
-error_list = 'false'
-field_count = 'false'
-host_info = 'false'
-info = 'false'
-insert_id = 'false'
-protocol_version = 'false'
-server_info = 'false'
-server_version = 'false'
-sqlstate = 'false'
-stat = 'false'
-thread_id = 'false'
-warning_count = 'false'
+mysqli object is already closed
+mysqli object is already closed
+Property access is not allowed yet
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
 
 Object variables:
-affected_rows = 'false'
-client_info = 'false'
+Property access is not allowed yet
+Property access is not allowed yet
 client_version = '%s'
 connect_errno = '%s'
-connect_error = '%s'
-errno = 'false'
-error = 'false'
-error_list = 'false'
-field_count = 'false'
-host_info = 'false'
-info = 'false'
-insert_id = 'false'
-server_info = 'false'
-server_version = 'false'
-stat = 'false'
-sqlstate = 'false'
-protocol_version = 'false'
-thread_id = 'false'
-warning_count = 'false'
+connect_error = ''%s'
+mysqli object is already closed
+mysqli object is already closed
+Property access is not allowed yet
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
 
 Magic, magic properties:
-mysqli->affected_rows = ''/boolean (''/boolean)
-
-Warning: assert(): assert(@mysqli_get_client_info() === @$mysqli->client_info) failed in %s on line %d
-mysqli->client_info = ''/boolean ('%s'/%s)
-mysqli->client_version =  '%s'/integer ('%s'/integer)
-mysqli->errno = ''/boolean (''/boolean)
-mysqli->error = ''/boolean (''/boolean)
-mysqli->field_count = ''/boolean (''/boolean)
-mysqli->insert_id = ''/boolean (''/boolean)
-mysqli->sqlstate = ''/boolean (''/boolean)
-mysqli->host_info = ''/boolean (''/boolean)
-mysqli->info = ''/boolean (''/boolean)
-
-Warning: assert(): assert(@mysqli_thread_id($mysqli) > @$mysqli->thread_id) failed in %s on line %d
-mysqli->thread_id = ''/boolean (''/boolean)
-mysqli->protocol_version = ''/boolean (''/boolean)
-mysqli->server_info = ''/boolean (''/boolean)
-mysqli->server_version = ''/boolean (''/boolean)
-mysqli->warning_count = ''/boolean (''/boolean)
+mysqli object is already closed
+Property access is not allowed yet
+Property access is not allowed yet
+mysqli->client_version = '%d'/integer
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
 
 Access to undefined properties:
 mysqli->unknown = ''
@@ -214,70 +318,79 @@ setting mysqli->unknown, @mysqli_unknown = 'friday'
 Access hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):
 mysqli->connect_error = '%s'/%s)
 mysqli->connect_errno = '%s'/integer ('%s'/integer)
+
 With RS
+mysqli object is already closed
 
 Class variables:
-affected_rows = 'false'
-client_info = 'false'
+Property access is not allowed yet
+Property access is not allowed yet
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
-errno = 'false'
-error = 'false'
-error_list = 'false'
-field_count = 'false'
-host_info = 'false'
-info = 'false'
-insert_id = 'false'
-protocol_version = 'false'
-server_info = 'false'
-server_version = 'false'
-sqlstate = 'false'
-stat = 'false'
-thread_id = 'false'
-warning_count = 'false'
+mysqli object is already closed
+mysqli object is already closed
+Property access is not allowed yet
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
 
 Object variables:
-affected_rows = 'false'
-client_info = 'false'
+Property access is not allowed yet
+Property access is not allowed yet
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
-errno = 'false'
-error = 'false'
-error_list = 'false'
-field_count = 'false'
-host_info = 'false'
-info = 'false'
-insert_id = 'false'
-server_info = 'false'
-server_version = 'false'
-stat = 'false'
-sqlstate = 'false'
-protocol_version = 'false'
-thread_id = 'false'
-warning_count = 'false'
+mysqli object is already closed
+mysqli object is already closed
+Property access is not allowed yet
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
 
 Magic, magic properties:
-mysqli->affected_rows = ''/boolean (''/boolean)
-
-Warning: assert(): assert(@mysqli_get_client_info() === @$mysqli->client_info) failed in %s on line %d
-mysqli->client_info = ''/boolean ('%s'/%s)
-mysqli->client_version =  '%s'/integer ('%s'/integer)
-mysqli->errno = ''/boolean (''/boolean)
-mysqli->error = ''/boolean (''/boolean)
-mysqli->field_count = ''/boolean (''/boolean)
-mysqli->insert_id = ''/boolean (''/boolean)
-mysqli->sqlstate = ''/boolean (''/boolean)
-mysqli->host_info = ''/boolean (''/boolean)
-mysqli->info = ''/boolean (''/boolean)
-
-Warning: assert(): assert(@mysqli_thread_id($mysqli) > @$mysqli->thread_id) failed in %s on line %d
-mysqli->thread_id = ''/boolean (''/boolean)
-mysqli->protocol_version = ''/boolean (''/boolean)
-mysqli->server_info = ''/boolean (''/boolean)
-mysqli->server_version = ''/boolean (''/boolean)
-mysqli->warning_count = ''/boolean (''/boolean)
+mysqli object is already closed
+Property access is not allowed yet
+Property access is not allowed yet
+mysqli->client_version = '%d'/integer
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
+mysqli object is already closed
 
 Access to undefined properties:
 mysqli->unknown = ''

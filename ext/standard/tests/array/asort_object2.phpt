@@ -2,15 +2,9 @@
 Test asort() function : object functionality - sorting objects with diff. accessibility of member vars
 --FILE--
 <?php
-/* Prototype  : bool asort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing asort() by providing integer/string object arrays with following flag values
- * 1. Defualt flag value
+ * 1. Default flag value
    2. SORT_REGULAR - compare items normally
 */
 

@@ -27,6 +27,10 @@
 #ifndef _SLJIT_CONFIG_H_
 #define _SLJIT_CONFIG_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* --------------------------------------------------------------------- */
 /*  Custom defines                                                       */
 /* --------------------------------------------------------------------- */
@@ -65,10 +69,17 @@
 #define SLJIT_UTIL_GLOBAL_LOCK 1
 #endif
 
-/* Implements a stack like data structure (by using mmap / VirtualAlloc). */
+/* Implements a stack like data structure (by using mmap / VirtualAlloc  */
+/* or a custom allocator). */
 #ifndef SLJIT_UTIL_STACK
 /* Enabled by default */
 #define SLJIT_UTIL_STACK 1
+#endif
+
+/* Uses user provided allocator to allocate the stack (see SLJIT_UTIL_STACK) */
+#ifndef SLJIT_UTIL_SIMPLE_STACK_ALLOCATION
+/* Disabled by default */
+#define SLJIT_UTIL_SIMPLE_STACK_ALLOCATION 0
 #endif
 
 /* Single threaded application. Does not require any locks. */
@@ -143,5 +154,9 @@
 */
 
 /* For further configurations, see the beginning of sljitConfigInternal.h */
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif

@@ -3,16 +3,16 @@ Test oci_define_by_name() LOB descriptor
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
-	"drop table phpdefblobtable",
-	"create table phpdefblobtable (id number(10), fileimage blob)"
+    "drop table phpdefblobtable",
+    "create table phpdefblobtable (id number(10), fileimage blob)"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -24,7 +24,7 @@ oci_bind_by_name($stmt,":id",$id);
 oci_bind_by_name($stmt,":fileimage",$fileimage,-1,OCI_B_BLOB);
 $id = 1;
 oci_execute($stmt, OCI_DEFAULT);
-$fileimage->savefile(dirname(__FILE__)."/test.gif");
+$fileimage->savefile(__DIR__."/test.gif");
 $data = $fileimage->load();
 var_dump(md5($data));  // original md5
 oci_commit($c);
@@ -76,7 +76,7 @@ while (oci_fetch($stmt)) {
 }
 
 $stmtarray = array(
-	"drop table phpdefblobtable"
+    "drop table phpdefblobtable"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -89,12 +89,12 @@ string(32) "614fcbba1effb7caa27ef0ef25c27fcf"
 string(32) "06d4f219d946c74d748d43932cd9dcb2"
 Test 1
 bool(true)
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 file md5:614fcbba1effb7caa27ef0ef25c27fcf
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

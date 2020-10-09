@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -362,19 +360,19 @@ _mysqlnd_vio_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods)
 
 
 /* {{{ mysqlnd_command_factory_get */
-static func_mysqlnd__run_command
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) *
 _mysqlnd_command_factory_get()
 {
-	return mysqlnd_run_command;
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_command);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_command_factory_set */
 static void
-_mysqlnd_command_factory_set(func_mysqlnd__run_command run_command)
+_mysqlnd_command_factory_set(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * methods)
 {
-	mysqlnd_run_command = run_command;
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_command) = *methods;
 }
 /* }}} */
 
@@ -448,12 +446,3 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 		_mysqlnd_command_factory_set,
 	},
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

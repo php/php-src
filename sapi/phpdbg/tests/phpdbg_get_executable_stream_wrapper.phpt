@@ -1,5 +1,11 @@
 --TEST--
 Getting executable lines from custom wrappers
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail breakpoint/watchpoint issues with JIT on Windows');
+}
+?>
 --PHPDBG--
 r
 q
@@ -59,6 +65,7 @@ final class StreamWrapper
     public function stream_close() : bool { return \fclose($this->stream); }
     public function stream_eof() : bool { return \feof($this->stream); }
     public function stream_stat() { return \fstat($this->stream); }
+    public function stream_set_option($option, $arg1, $arg2) { return false; }
 
     private $stream = false;
 }
@@ -69,7 +76,7 @@ stream_wrapper_register('wrapper', StreamWrapper::class);
  * Next, we include a PHP file that contains executable lines, via the stream
  * wrapper.
  */
-$filename = __DIR__ . '/phpdbg_get_executable_stream_wrapper.inc';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'phpdbg_get_executable_stream_wrapper.inc';
 require 'wrapper://' . $filename;
 
 /**

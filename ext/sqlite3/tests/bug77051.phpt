@@ -43,7 +43,7 @@ echo "Statement result\n";
 var_dump($res->fetchArray(SQLITE3_NUM));
 
 ?>
---EXPECTF--
+--EXPECT--
 Execute statement
 object(SQLite3Result)#3 (0) {
 }

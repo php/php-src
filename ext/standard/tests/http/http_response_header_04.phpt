@@ -1,30 +1,25 @@
 --TEST--
 $http_reponse_header (header with trailing whitespace)
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:22349'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --INI--
 allow_url_fopen=1
-allow_url_include=1
 --FILE--
 <?php
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 200 Ok\r\nSome:   Header   \r\n\r\nBody",
+    "data://text/plain,HTTP/1.0 200 Ok\r\nSome:   Header   \r\n\r\nBody",
 );
 
-$pid = http_server("tcp://127.0.0.1:22349", $responses, $output);
+['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
-function test() {
-    $f = file_get_contents('http://127.0.0.1:22349/');
-    var_dump($f);
-    var_dump($http_response_header);
-}
-test();
+$f = file_get_contents($uri);
+var_dump($f);
+var_dump($http_response_header);
 
 http_server_kill($pid);
-?>
-==DONE==
+
 --EXPECT--
 string(4) "Body"
 array(2) {
@@ -33,4 +28,3 @@ array(2) {
   [1]=>
   string(14) "Some:   Header"
 }
-==DONE==

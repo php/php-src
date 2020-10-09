@@ -2,12 +2,12 @@
 Bug #48801 (Problem with imagettfbbox)
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $font = "$cwd/Tuffy.ttf";
 $bbox = imageftbbox(50, 0, $font, "image");
 echo '(' . $bbox[0] . ', ' . $bbox[1] . ")\n";

@@ -3,13 +3,13 @@ mb_send_mail() test 6 (lang=Traditional Chinese)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. Not valid for Windows');
+    die('skip.. Not valid for Windows');
 }
 if (!function_exists("mb_send_mail") || !mb_language("Traditional Chinese")) {
-	die("skip mb_send_mail() not available");
+    die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('BIG5')) {
-	die("skip BIG5 encoding is not available on this platform");
+    die("skip BIG5 encoding is not available on this platform");
 }
 ?>
 --INI--
@@ -24,8 +24,8 @@ mb_send_mail($to, mb_language(), "test");
 
 /* Traditional Chinese () */
 if (mb_language("traditional chinese")) {
-	mb_internal_encoding('BIG5');
-	mb_send_mail($to, "代喷 ".mb_language(), "代喷");
+    mb_internal_encoding('BIG5');
+    mb_send_mail($to, "代喷 ".mb_language(), "代喷");
 }
 ?>
 --EXPECTF--

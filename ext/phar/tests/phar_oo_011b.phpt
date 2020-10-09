@@ -10,29 +10,27 @@ phar.require_hash=0
 
 try
 {
-	$pharconfig = 0;
+    $pharconfig = 0;
 
-	require_once 'files/phar_oo_test.inc';
+    require_once 'files/phar_oo_test.inc';
 
-	$phar = new Phar($fname);
+    $phar = new Phar($fname);
 
-	$phar['f.php'] = 'hi';
-	var_dump(isset($phar['f.php']));
-	echo $phar['f.php'];
-	echo "\n";
+    $phar['f.php'] = 'hi';
+    var_dump(isset($phar['f.php']));
+    echo $phar['f.php'];
+    echo "\n";
 }
 catch (BadMethodCallException $e)
 {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/files/phar_oo_011b.phar.php');
+unlink(__DIR__ . '/files/phar_oo_011b.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--
 Exception: Write operations disabled by the php.ini setting phar.readonly
-===DONE===

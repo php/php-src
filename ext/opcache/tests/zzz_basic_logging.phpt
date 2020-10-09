@@ -10,6 +10,7 @@ opcache.file_cache_only=0
 opcache.error_log=
 opcache.log_verbosity_level=4
 opcache.huge_code_pages=0
+opcache.preload=
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

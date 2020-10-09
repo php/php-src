@@ -2,24 +2,13 @@
 Test fopen and fclose() functions - usage variations - "a+b" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "a+b" mode,
    checking for the file creation, write & read operations,
    checking for the file pointer position,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "w", "007_variation", 22, "bytes");
@@ -43,7 +32,7 @@ var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation22.tmp");
+unlink(__DIR__."/007_variation22.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'a+b' mode ***

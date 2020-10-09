@@ -1,11 +1,11 @@
-﻿/*
+/*
  *    PHP Sendmail for Windows.
  *
- *  This file is rewritten specificly for PHPFI.  Some functionality
+ *  This file is rewritten specifically for PHPFI.  Some functionality
  *  has been removed (MIME and file attachments).  This code was
  *  modified from code based on code written by Jarle Aase.
  *
- *  This class is based on the original code by Jarle Aase, see bellow:
+ *  This class is based on the original code by Jarle Aase, see below:
  *  wSendmail.cpp  It has been striped of some functionality to match
  *  the requirements of phpfi.
  *
@@ -26,7 +26,6 @@
 #include <string.h>
 #include <math.h>
 #include <malloc.h>
-#include <memory.h>
 #include <winbase.h>
 #include "sendmail.h"
 #include "php_ini.h"
@@ -48,7 +47,7 @@
 
 /* '*error_message' has to be passed around from php_mail() */
 #define SMTP_ERROR_RESPONSE_SPEC	"SMTP server response: %s"
-/* Convinient way to handle error messages from the SMTP server.
+/* Convenient way to handle error messages from the SMTP server.
    response is ecalloc()d in Ack() itself and efree()d here
    because the content is in *error_message now */
 #define SMTP_ERROR_RESPONSE(response)	{ \
@@ -92,7 +91,7 @@ static char *ErrorMessages[] =
 };
 
 /* This pattern converts all single occurrences of \n (Unix)
- * withour a leading \r to \r\n and all occurrences of \r (Mac)
+ * without a leading \r to \r\n and all occurrences of \r (Mac)
  * without a trailing \n to \r\n
  * Thx to Nibbler from ircnet/#linuxger
  */
@@ -115,7 +114,7 @@ static char *ErrorMessages[] =
 
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
- * As a second step we also eleminate all \r\n occurrences which are:
+ * As a second step we also eliminate all \r\n occurrences which are:
  * 1) At the start of the header
  * 2) At the end of the header
  * 3) Two or more occurrences in the header are removed so only one is left
@@ -123,7 +122,7 @@ static char *ErrorMessages[] =
  * Returns NULL on error, or the new char* buffer on success.
  * You have to take care and efree() the buffer on your own.
  */
-static zend_string *php_win32_mail_trim_header(char *header)
+static zend_string *php_win32_mail_trim_header(const char *header)
 {
 	zend_string *result, *result2;
 	zend_string *replace;
@@ -177,14 +176,14 @@ static zend_string *php_win32_mail_trim_header(char *header)
 //
 //  See SendText() for additional args!
 //********************************************************************/
-PHPAPI int TSendMail(char *host, int *error, char **error_message,
-			  char *headers, char *Subject, char *mailTo, char *data,
+PHPAPI int TSendMail(const char *host, int *error, char **error_message,
+			  const char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
 {
 	int ret;
 	char *RPath = NULL;
 	zend_string *headers_lc = NULL, *headers_trim = NULL; /* headers_lc is only created if we've a header at all */
-	char *pos1 = NULL, *pos2 = NULL;
+	const char *pos1 = NULL, *pos2 = NULL;
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
@@ -217,7 +216,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
-		char *lookup = ZSTR_VAL(headers_lc);
+		const char *lookup = ZSTR_VAL(headers_lc);
 
 		while (lookup) {
 			pos1 = strstr(lookup, "from:");
@@ -271,7 +270,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
 		snprintf(*error_message, HOST_NAME_LEN + 128,
-			"Failed to connect to mailserver at \"%s\" port %d, verify your \"SMTP\" "
+			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
@@ -301,7 +300,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-PHPAPI void TSMClose()
+PHPAPI void TSMClose(void)
 {
 	Post("QUIT\r\n");
 	Ack(NULL);
@@ -353,12 +352,13 @@ PHPAPI char *GetSMErrorText(int index)
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data,
-			 char *headers, char *headers_lc, char **error_message)
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
+			 const char *headers, char *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
-	char *tempMailTo, *token, *pos1, *pos2;
+	char *tempMailTo, *token;
+	const char *pos1, *pos2;
 	char *server_response = NULL;
 	char *stripped_header  = NULL;
 	zend_string *data_cln;
@@ -634,7 +634,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	return (SUCCESS);
 }
 
-static int addToHeader(char **header_buffer, const char *specifier, char *string)
+static int addToHeader(char **header_buffer, const char *specifier, const char *string)
 {
 	*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1);
 	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
@@ -652,7 +652,7 @@ static int addToHeader(char **header_buffer, const char *specifier, char *string
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
+static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
@@ -888,7 +888,7 @@ again:
 	/* Check for newline */
 	Index += rlen;
 
-	/* SMPT RFC says \r\n is the only valid line ending, who are we to argue ;)
+	/* SMTP RFC says \r\n is the only valid line ending, who are we to argue ;)
 	 * The response code must contain at least 5 characters ex. 220\r\n */
 	if (Received < 5 || buf[Received - 1] != '\n' || buf[Received - 2] != '\r') {
 		goto again;
@@ -959,7 +959,7 @@ static unsigned long GetAddr(LPSTR szHost)
 // Name:  int FormatEmailAddress
 // Input:
 // Output:
-// Description: Formats the email address to remove any content ouside
+// Description: Formats the email address to remove any content outside
 //   of the angle brackets < > as per RFC 2821.
 //
 //   Returns the invalidly formatted mail address if the < > are
@@ -980,12 +980,3 @@ static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString)
 	}
 	return snprintf(Buf, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
 } /* end FormatEmailAddress() */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

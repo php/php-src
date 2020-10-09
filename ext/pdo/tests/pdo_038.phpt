@@ -1,7 +1,7 @@
 --TEST--
 PDOStatement::fetchColumn() invalid column index
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 function fetchColumn($stmt, $index) {
@@ -32,14 +32,19 @@ switch ($conn->getAttribute(PDO::ATTR_DRIVER_NAME)) {
 
 $stmt = $conn->prepare($query);
 
-var_dump(fetchColumn($stmt, -1));
+try {
+    var_dump(fetchColumn($stmt, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 var_dump(fetchColumn($stmt, 0));
-var_dump(fetchColumn($stmt, 1));
+try {
+    var_dump(fetchColumn($stmt, 1));
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: PDOStatement::fetchColumn(): SQLSTATE[HY000]: General error: Invalid column index in %s
-bool(false)
+--EXPECT--
+Column index must be greater than or equal to 0
 string(1) "1"
-
-Warning: PDOStatement::fetchColumn(): SQLSTATE[HY000]: General error: Invalid column index in %s
-bool(false)
+Invalid column index

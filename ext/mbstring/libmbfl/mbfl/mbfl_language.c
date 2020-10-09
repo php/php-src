@@ -28,21 +28,10 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libmbfl/config.h"
 
-#ifdef HAVE_STDDEF_H
 #include <stddef.h>
-#endif
-
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
 
 #ifdef HAVE_STRINGS_H
 #include <strings.h>

@@ -9,15 +9,33 @@ if (!defined('PASSWORD_ARGON2ID')) die('skip password_hash not built with Argon2
 
 $password = "the password for testing 12345!";
 
-$hash = password_hash($password, PASSWORD_ARGON2I);
-var_dump(password_verify($password, $hash));
-
-$hash = password_hash($password, PASSWORD_ARGON2ID);
-var_dump(password_verify($password, $hash));
+$algos = [
+    PASSWORD_ARGON2I,
+    'argon2i',
+    2,
+    PASSWORD_ARGON2ID,
+    'argon2id',
+    3,
+];
+foreach ($algos as $algo) {
+  $hash = password_hash($password, $algo);
+  var_dump(password_verify($password, $hash));
+  var_dump(password_get_info($hash)['algo']);
+}
 
 echo "OK!";
 ?>
 --EXPECT--
 bool(true)
+string(7) "argon2i"
 bool(true)
+string(7) "argon2i"
+bool(true)
+string(7) "argon2i"
+bool(true)
+string(8) "argon2id"
+bool(true)
+string(8) "argon2id"
+bool(true)
+string(8) "argon2id"
 OK!

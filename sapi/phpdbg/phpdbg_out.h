@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,9 +64,6 @@ PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBU
 #define phpdbg_out_ex(out, fmt, ...) phpdbg_out_internal(out, fmt, ##__VA_ARGS__)
 
 #define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd, fmt, ##__VA_ARGS__)
-
-#define phpdbg_xml_asprintf(buf, ...) _phpdbg_xml_asprintf(buf, ##__VA_ARGS__)
-PHPDBG_API int _phpdbg_xml_asprintf(char **buf, const char *format, zend_bool escape_xml, ...);
 
 #define phpdbg_asprintf(buf, ...) _phpdbg_asprintf(buf, ##__VA_ARGS__)
 PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...);

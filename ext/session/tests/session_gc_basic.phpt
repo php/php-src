@@ -7,12 +7,6 @@ Test session_gc() function : basic functionality
 
 ob_start();
 
-/*
- * Prototype : int session_gc(void)
- * Description : Perform GC
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_gc() : basic functionality ***\n";
 
 var_dump(session_gc());
@@ -28,7 +22,7 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_gc() : basic functionality ***
 
-Warning: session_gc(): Session is not active in %s on line %d
+Warning: session_gc(): Session cannot be garbage collected when there is no active session in %s on line %d
 bool(false)
 bool(true)
 int(%d)

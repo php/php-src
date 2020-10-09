@@ -1,23 +1,12 @@
-dnl config.m4 for extension intl
-
-dnl ##########################################################################
-dnl Initialize the extension
-PHP_ARG_ENABLE(intl, whether to enable internationalization support,
-[  --enable-intl           Enable internationalization support])
+PHP_ARG_ENABLE([intl],
+  [whether to enable internationalization support],
+  [AS_HELP_STRING([--enable-intl],
+    [Enable internationalization support])])
 
 if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)
   PHP_SUBST(INTL_SHARED_LIBADD)
-  PHP_REQUIRE_CXX()
-  INTL_COMMON_FLAGS="$ICU_INCS $ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  if test "$icu_version" -ge "4002"; then
-    icu_spoof_src=" spoofchecker/spoofchecker_class.c \
-    spoofchecker/spoofchecker.c\
-    spoofchecker/spoofchecker_create.c\
-    spoofchecker/spoofchecker_main.c"
-  else
-    icu_spoof_src=""
-  fi
+  INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
     intl_convert.c \
@@ -68,7 +57,10 @@ if test "$PHP_INTL" != "no"; then
     transliterator/transliterator_methods.c \
     uchar/uchar.c \
     idn/idn.c \
-    $icu_spoof_src, $ext_shared,,$INTL_COMMON_FLAGS,cxx)
+    spoofchecker/spoofchecker_class.c \
+    spoofchecker/spoofchecker.c\
+    spoofchecker/spoofchecker_create.c\
+    spoofchecker/spoofchecker_main.c, $ext_shared,,$INTL_COMMON_FLAGS,cxx)
 
   PHP_INTL_CXX_SOURCES="intl_convertcpp.cpp \
     common/common_enum.cpp \
@@ -89,7 +81,10 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
     breakiterator/codepointiterator_methods.cpp"
-  PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $ICU_CXXFLAGS"
+
+  PHP_REQUIRE_CXX()
+  PHP_CXX_COMPILE_STDCXX(11, mandatory, PHP_INTL_STDCXX)
+  PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $PHP_INTL_STDCXX $ICU_CXXFLAGS"
   if test "$ext_shared" = "no"; then
     PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS)
   else

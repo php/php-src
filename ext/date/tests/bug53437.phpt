@@ -22,7 +22,6 @@ foreach($dpu as $dt) {
         echo $dt->format('Y-m-d H:i:s')."\r\n";
 }
 ?>
-==DONE==
 --EXPECTF--
 Original:
 2010-01-01 00:00:00
@@ -155,4 +154,3 @@ Unserialized:
 2010-01-01 00:00:00
 2010-01-02 00:00:00
 2010-01-03 00:00:00
-==DONE==

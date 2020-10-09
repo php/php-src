@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,14 +35,9 @@ BEGIN_EXTERN_C()
 #define TS_HASH(table) (&(table->hash))
 
 /* startup/shutdown */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
+ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
-
-#define zend_ts_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)	\
-	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
-#define zend_ts_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)	\
-	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
 
 
 /* additions/updates/changes */
@@ -61,29 +56,25 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 
 
 /* Deletes */
-ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
+ZEND_API zend_result zend_ts_hash_del(TsHashTable *ht, zend_string *key);
+ZEND_API zend_result zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
 
-/* Data retreival */
+/* Data retrieval */
 ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key);
 ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong);
-
-/* Misc */
-ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h);
 
 /* Copying, merging and sorting */
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
 ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
-ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, int overwrite);
+ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite);
 ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
-ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber);
-ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered);
-ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, compare_func_t compar, int flag);
+ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
+ZEND_API int  zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered);
+ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, bucket_compare_func_t compar, int flag);
 
 ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht);
 
-ZEND_API int zend_ts_hash_rehash(TsHashTable *ht);
+ZEND_API void zend_ts_hash_rehash(TsHashTable *ht);
 
 #if ZEND_DEBUG
 /* debug */
@@ -121,22 +112,22 @@ static zend_always_inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const 
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static zend_always_inline bool zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
+{
+	return zend_ts_hash_find(ht, key) != NULL;
+}
+
+static zend_always_inline bool zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
+{
+	return zend_ts_hash_index_find(ht, h) != NULL;
+}
+
 END_EXTERN_C()
 
 #define ZEND_TS_INIT_SYMTABLE(ht)								\
 	ZEND_TS_INIT_SYMTABLE_EX(ht, 2, 0)
 
 #define ZEND_TS_INIT_SYMTABLE_EX(ht, n, persistent)			\
-	zend_ts_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
+	zend_ts_hash_init(ht, n, ZVAL_PTR_DTOR, persistent)
 
 #endif							/* ZEND_HASH_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

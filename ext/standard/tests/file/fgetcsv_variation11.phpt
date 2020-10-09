@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - with different enclosure but same delimiter
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() by reading from a file when different enclosure that is not
    present in the data being read and delimiter which is present in the data  */
 
@@ -27,7 +22,7 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation11.tmp';
+$filename = __DIR__ . '/fgetcsv_variation11.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",

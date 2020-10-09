@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,15 +26,10 @@
 #define COOKIE_SAMESITE   "; SameSite="
 
 extern PHP_RINIT_FUNCTION(head);
-PHP_FUNCTION(header);
-PHP_FUNCTION(header_remove);
-PHP_FUNCTION(setcookie);
-PHP_FUNCTION(setrawcookie);
-PHP_FUNCTION(headers_sent);
-PHP_FUNCTION(headers_list);
-PHP_FUNCTION(http_response_code);
 
 PHPAPI int php_header(void);
-PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int httponly, zend_string *samesite, int url_encode);
+PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
+	zend_string *path, zend_string *domain, bool secure, bool httponly,
+	zend_string *samesite, bool url_encode);
 
 #endif

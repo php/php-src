@@ -4,7 +4,12 @@ Bug #72162 (use-after-free - error_reporting)
 <?php
 error_reporting(E_ALL);
 $var11 = new StdClass();
-$var16 = error_reporting($var11);
+
+try {
+    $var16 = error_reporting($var11);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Recoverable fatal error: Object of class stdClass could not be converted to string in %sbug72162.php on line %d
+--EXPECT--
+error_reporting(): Argument #1 ($error_level) must be of type ?int, stdClass given

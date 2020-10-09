@@ -1,17 +1,29 @@
-dnl config.m4 for sapi phpdbg
+PHP_ARG_ENABLE([phpdbg],
+  [for phpdbg support],
+  [AS_HELP_STRING([--enable-phpdbg],
+    [Build phpdbg])],
+  [yes],
+  [yes])
 
-PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg         Build phpdbg], yes, yes)
+PHP_ARG_ENABLE([phpdbg-webhelper],
+  [for phpdbg web SAPI support],
+  [AS_HELP_STRING([--enable-phpdbg-webhelper],
+    [Build phpdbg web SAPI support])],
+  [no])
 
-PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
-[  --enable-phpdbg-webhelper
-                          Build phpdbg web SAPI support], no)
+PHP_ARG_ENABLE([phpdbg-debug],
+  [for phpdbg debug build],
+  [AS_HELP_STRING([--enable-phpdbg-debug],
+    [Build phpdbg in debug mode])],
+  [no],
+  [no])
 
-PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
-[  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
-
-PHP_ARG_ENABLE(phpdbg-readline, for phpdbg readline support,
-[  --enable-phpdbg-readline   Enable readline support in phpdbg (depends on static ext/readline)], no, no)
+PHP_ARG_ENABLE([phpdbg-readline],
+  [for phpdbg readline support],
+  [AS_HELP_STRING([--enable-phpdbg-readline],
+    [Enable readline support in phpdbg (depends on static ext/readline)])],
+  [no],
+  [no])
 
 if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
@@ -51,9 +63,9 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
 
   BUILD_PHPDBG="\$(LIBTOOL) --mode=link \
         \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
-                \$(PHP_GLOBAL_OBJS) \
-                \$(PHP_BINARY_OBJS) \
-                \$(PHP_PHPDBG_OBJS) \
+                \$(PHP_GLOBAL_OBJS:.lo=.o) \
+                \$(PHP_BINARY_OBJS:.lo=.o) \
+                \$(PHP_PHPDBG_OBJS:.lo=.o) \
                 \$(EXTRA_LIBS) \
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
@@ -82,7 +94,3 @@ fi
 if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
   PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c phpdbg_webdata_transfer.c, $ext_shared)
 fi
-
-dnl ## Local Variables:
-dnl ## tab-width: 4
-dnl ## End:

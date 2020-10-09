@@ -6,7 +6,7 @@ abstract class base {
   public $a = 'base';
 
   // disallow cloning once forever
-  final private function __clone() {}
+  final protected function __clone() {}
 }
 
 class test extends base {
@@ -16,4 +16,4 @@ class test extends base {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method base::__clone() in %sclone_005.php on line %d
+Fatal error: Cannot override final method base::__clone() in %sclone_005.php on line 11

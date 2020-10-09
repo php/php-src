@@ -3,7 +3,7 @@ Bug #77081 ftruncate() changes seek pointer in c mode
 --FILE--
 <?php
 
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test77081";
+$filename = __DIR__ . DIRECTORY_SEPARATOR . "test77081";
 
 file_put_contents($filename, 'foo');
 $stream = fopen($filename, 'c');
@@ -16,7 +16,7 @@ var_dump(file_get_contents($filename));
 ?>
 --CLEAN--
 <?php
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test77081";
+$fn = __DIR__ . DIRECTORY_SEPARATOR . "test77081";
 unlink($fn);
 ?>
 --EXPECT--

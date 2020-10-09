@@ -2,12 +2,12 @@
 Bug #51263 (imagettftext and rotated text uses wrong baseline)
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imagettftext')) die('skip imagettftext() not available');
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!function_exists('imagettftext')) die('skip imagettftext() not available');
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $ttf = "$cwd/Tuffy.ttf";
 $w = 23;
 $h = 70;

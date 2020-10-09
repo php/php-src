@@ -2,8 +2,8 @@
 libgd #100 (spurious horizontal line drawn by gdImageFilledPolygon)
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
-	if (!GD_BUNDLED) die("skip requires bundled GD library\n");
+    if (!extension_loaded('gd')) die("skip gd extension not available\n");
+    if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php
@@ -33,7 +33,7 @@ $points = array(
   $x+$d,   ($top+$bot)/2,
   $x,      $bot
 );
-imagefilledpolygon($im, $points, 5, $yellow);
+imagefilledpolygon($im, $points, $yellow);
 
 // left-facing M not on baseline
 $top = 40;
@@ -47,7 +47,7 @@ $points = array(
   $left,  $bot,
   ($left+$right)/2, ($top+$bot)/2
 );
-imagefilledpolygon($im, $points, 5, $purple);
+imagefilledpolygon($im, $points, $purple);
 
 // left-facing M on baseline
 $top = 240;
@@ -61,7 +61,7 @@ $points = array(
   $left,  $bot,
   ($left+$right)/2, ($top+$bot)/2
 );
-imagefilledpolygon($im, $points, 5, $magenta);
+imagefilledpolygon($im, $points, $magenta);
 
 // left-facing M on ceiling
 $top = -15;
@@ -75,23 +75,23 @@ $points = array(
   $left,  $bot,
   ($left+$right)/2, ($top+$bot)/2
 );
-imagefilledpolygon($im, $points, 5, $blue);
+imagefilledpolygon($im, $points, $blue);
 
 $d = 30;
 $x = 150;
 $y = 150;
 $diamond = array($x-$d, $y, $x, $y+$d, $x+$d, $y, $x, $y-$d);
-imagefilledpolygon($im, $diamond, 4, $green);
+imagefilledpolygon($im, $diamond, $green);
 
 $x = 180;
 $y = 225;
 $diamond = array($x-$d, $y, $x, $y+$d, $x+$d, $y, $x, $y-$d);
-imagefilledpolygon($im, $diamond, 4, $red);
+imagefilledpolygon($im, $diamond, $red);
 
 $x = 225;
 $y = 255;
 $diamond = array($x-$d, $y, $x, $y+$d, $x+$d, $y, $x, $y-$d);
-imagefilledpolygon($im, $diamond, 4, $cyan);
+imagefilledpolygon($im, $diamond, $cyan);
 
 // M (bridge) not touching bottom boundary
 $top = 100;
@@ -104,7 +104,7 @@ $points = array(
   $x+$d,   ($top+$bot)/2,
   $x,      $bot
 );
-imagefilledpolygon($im, $points, 5, $black);
+imagefilledpolygon($im, $points, $black);
 
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/libgd00100.png', $im);

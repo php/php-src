@@ -3,17 +3,15 @@ Phar: test that creation of tar-based phar generates valid tar with all bells/wh
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("zlib")) die("skip zlib not available");
-if (!extension_loaded("bz2")) die("skip bz2 not available");
 ?>
 --INI--
 phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.tar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.tar.php';
 $pname2 = 'phar://' . $fname2;
 
 $phar = new Phar($fname);
@@ -39,9 +37,8 @@ var_dump($phar->getAlias());
 var_dump($phar->getMetadata());
 var_dump($phar['a']->getMetadata());
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar.php'); ?>
 --EXPECT--
 bool(false)
 bool(false)
@@ -54,4 +51,3 @@ string(32) "<?php ok __HALT_COMPILER(); ?>
 string(4) "hime"
 string(8) "hi there"
 string(6) "a meta"
-===DONE===

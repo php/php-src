@@ -25,11 +25,7 @@
 #else
 # include <sys/param.h>
 # include <sys/types.h>
-# if HAVE_STRING_H
-#  include <string.h>
-# else
-#  include <strings.h>
-# endif
+# include <string.h>
 #endif
 
 extern void * __php_mempcpy(void * dst, const void * src, size_t len);
@@ -397,7 +393,11 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 
 		if (*endp == '$') {
 			salt = endp + 1;
-			rounds = MAX(ROUNDS_MIN, MIN(srounds, ROUNDS_MAX));
+			if (srounds < ROUNDS_MIN || srounds > ROUNDS_MAX) {
+				return NULL;
+			}
+
+			rounds = srounds;
 			rounds_custom = 1;
 		}
 	}

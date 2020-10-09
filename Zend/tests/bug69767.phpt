@@ -5,4 +5,4 @@ Bug #69767 (Default parameter value with wrong type segfaults)
 function foo(String $bar = 0) {}
 ?>
 --EXPECTF--
-Fatal error: Default value for parameters with a string type can only be string or NULL in %sbug69767.php on line %d
+Fatal error: Cannot use int as default value for parameter $bar of type string in %s on line %d

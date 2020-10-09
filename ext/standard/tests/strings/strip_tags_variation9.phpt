@@ -1,14 +1,7 @@
 --TEST--
 Test strip_tags() function : usage variations - double quoted strings
---INI--
-short_open_tag = on
 --FILE--
 <?php
-/* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string
- * Source code: ext/standard/string.c
-*/
-
 /*
  * testing functionality of strip_tags() by giving double quoted strings as values for $str argument
 */
@@ -36,6 +29,7 @@ foreach($double_quote_string as $string_value)
 }
 
 echo "Done";
+?>
 --EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +17,7 @@
 #ifndef PHP_GETTEXT_H
 #define PHP_GETTEXT_H
 
-#if HAVE_LIBINTL
+#ifdef HAVE_LIBINTL
 
 extern zend_module_entry php_gettext_module_entry;
 #define gettext_module_ptr &php_gettext_module_entry
@@ -28,24 +26,6 @@ extern zend_module_entry php_gettext_module_entry;
 #define PHP_GETTEXT_VERSION PHP_VERSION
 
 PHP_MINFO_FUNCTION(php_gettext);
-
-PHP_NAMED_FUNCTION(zif_textdomain);
-PHP_NAMED_FUNCTION(zif_gettext);
-PHP_NAMED_FUNCTION(zif_dgettext);
-PHP_NAMED_FUNCTION(zif_dcgettext);
-PHP_NAMED_FUNCTION(zif_bindtextdomain);
-#if HAVE_NGETTEXT
-PHP_NAMED_FUNCTION(zif_ngettext);
-#endif
-#if HAVE_DNGETTEXT
-PHP_NAMED_FUNCTION(zif_dngettext);
-#endif
-#if HAVE_DCNGETTEXT
-PHP_NAMED_FUNCTION(zif_dcngettext);
-#endif
-#if HAVE_BIND_TEXTDOMAIN_CODESET
-PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset);
-#endif
 
 #else
 #define gettext_module_ptr NULL

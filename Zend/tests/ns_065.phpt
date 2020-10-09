@@ -8,6 +8,7 @@ require "ns_065.inc";
 
 test\foo();
 test2\foo();
+?>
 --EXPECT--
 X\Y\foo
 X\Z\foo

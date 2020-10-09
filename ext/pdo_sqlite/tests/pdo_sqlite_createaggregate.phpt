@@ -5,7 +5,7 @@ PDO_sqlite: Testing sqliteCreateAggregate()
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
 
@@ -16,13 +16,13 @@ $db->sqliteCreateAggregate('testing', function(&$a, $b) { $a .= $b; return $a; }
 
 
 foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
-	var_dump($row);
+    var_dump($row);
 }
 
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["testing(name)"]=>
   string(2) "12"

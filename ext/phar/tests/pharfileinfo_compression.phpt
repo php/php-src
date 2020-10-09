@@ -8,7 +8,7 @@ Phar: PharFileInfo compression-related methods
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -17,7 +17,6 @@ $phar['a/b'] = 'hi there';
 
 $b = $phar['a/b'];
 
-$b->isCompressed(array());
 try {
 $b->isCompressed(25);
 } catch (Exception $e) {
@@ -71,12 +70,10 @@ var_dump($b->decompress());
 var_dump($b->decompress());
 
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
---EXPECTF--
-Warning: PharFileInfo::isCompressed() expects parameter 1 to be int, array given in %spharfileinfo_compression.php on line 11
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
+--EXPECT--
 Unknown compression type specified
 Unknown compression type specified
 Cannot compress with Gzip compression, not possible with tar-based phar archives
@@ -91,4 +88,3 @@ Phar is readonly, cannot decompress
 Phar entry is a directory, cannot set compression
 bool(true)
 bool(true)
-===DONE===

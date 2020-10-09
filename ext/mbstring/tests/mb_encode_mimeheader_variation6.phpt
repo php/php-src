@@ -7,8 +7,7 @@ function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is n
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_encode_mimeheader
- * (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])
+/* (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])
  * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?=
  * Source code: ext/mbstring/mbstring.c
  */
@@ -28,9 +27,9 @@ $str = base64_decode('zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr8
 
 $iterator = 1;
 foreach ($linefeeds as $linefeed) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_encode_mimeheader($str, 'utf-8', 'B', $linefeed));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(mb_encode_mimeheader($str, 'utf-8', 'B', $linefeed));
+    $iterator++;
 }
 
 

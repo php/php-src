@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,13 +29,6 @@
 
 #include "spl_array.h"
 
-/* {{{ spl_instantiate */
-PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object)
-{
-	object_init_ex(object, pce);
-}
-/* }}} */
-
 PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 {
 	zend_ulong idx;
@@ -50,7 +41,7 @@ try_again:
 		}
 		break;
 	case IS_DOUBLE:
-		return (zend_long)Z_DVAL_P(offset);
+		return zend_dval_to_lval(Z_DVAL_P(offset));
 	case IS_LONG:
 		return Z_LVAL_P(offset);
 	case IS_FALSE:
@@ -66,12 +57,3 @@ try_again:
 	return -1;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

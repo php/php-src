@@ -10,7 +10,7 @@ if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.3', '<=')) {
 ?>
 --FILE--
 <?php
-$filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug67325.jpeg';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug67325.jpg';
 
 $im = imagecreatefromjpeg($filename);
 imagetruecolortopalette($im, 0, 256);
@@ -26,7 +26,5 @@ var_dump($white);
 
 imagedestroy($im);
 ?>
-===DONE===
 --EXPECT--
 int(0)
-===DONE===

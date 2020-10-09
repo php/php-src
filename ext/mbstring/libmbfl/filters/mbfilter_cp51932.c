@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_cp51932.h"
 
@@ -65,7 +61,6 @@ static const char *mbfl_encoding_cp51932_aliases[] = {"cp51932", NULL};
 const struct mbfl_identify_vtbl vtbl_identify_cp51932 = {
 	mbfl_no_encoding_cp51932,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp51932
 };
 
@@ -84,18 +79,20 @@ const struct mbfl_convert_vtbl vtbl_cp51932_wchar = {
 	mbfl_no_encoding_cp51932,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_cp51932_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp51932,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp51932,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -294,14 +291,10 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(((s1 >> 8) & 0xff) | 0x80, filter->data));
 			CK((*filter->output_function)((s1 & 0xff) | 0x80, filter->data));
 		} else {
-		  if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
 		    CK(mbfl_filt_conv_illegal_output(c, filter));
-		  }
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

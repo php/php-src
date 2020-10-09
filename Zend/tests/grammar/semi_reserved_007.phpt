@@ -25,6 +25,7 @@ class Bar extends Foo {
 new Bar;
 
 echo "\nDone\n";
+?>
 --EXPECT--
 From Foo::__construct:
 self

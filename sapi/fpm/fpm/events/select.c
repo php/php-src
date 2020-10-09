@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +19,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_SELECT
+#ifdef HAVE_SELECT
 
 /* According to POSIX.1-2001 */
 #include <sys/select.h>
@@ -57,7 +55,7 @@ static fd_set fds;
  */
 struct fpm_event_module_s *fpm_event_select_module() /* {{{ */
 {
-#if HAVE_SELECT
+#ifdef HAVE_SELECT
 	return &select_module;
 #else
 	return NULL;
@@ -65,7 +63,7 @@ struct fpm_event_module_s *fpm_event_select_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_SELECT
+#ifdef HAVE_SELECT
 
 /*
  * Init the module

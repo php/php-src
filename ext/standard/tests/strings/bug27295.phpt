@@ -5,8 +5,8 @@ Bug #27295 (memory leak inside sscanf())
 $strings = array("foo = bar", "bar = foo");
 foreach( $strings as $string )
 {
-	sscanf( $string, "%s = %[^[]]", $var, $val );
-	echo "$var = $val\n";
+    sscanf( $string, "%s = %[^[]]", $var, $val );
+    echo "$var = $val\n";
 }
 ?>
 --EXPECT--

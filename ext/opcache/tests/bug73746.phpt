@@ -8,19 +8,19 @@ namespace Core\Bundle\Service\Property\Room\Rooms;
 
 class CountryMapping
 {
-	const CZ = 'CZ';
-	const EN = 'EN';
+    const CZ = 'CZ';
+    const EN = 'EN';
 
-	public function get(string $countryIsoCode = null) : string // Works correctly if return type is removed
-	{
-		switch (strtoupper($countryIsoCode)) {
-		case 'CZ':
-		case 'SK':
-			return self::CZ; // Works correctly if changed to CountryMapping::CZ
-		default:
-			return self::EN; // Works correctly if changed to CountryMapping::EN
-		}
-	}
+    public function get(string $countryIsoCode = null) : string // Works correctly if return type is removed
+    {
+        switch (strtoupper($countryIsoCode)) {
+        case 'CZ':
+        case 'SK':
+            return self::CZ; // Works correctly if changed to CountryMapping::CZ
+        default:
+            return self::EN; // Works correctly if changed to CountryMapping::EN
+        }
+    }
 }
 
 $mapping = new CountryMapping();

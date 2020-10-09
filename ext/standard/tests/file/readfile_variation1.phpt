@@ -2,15 +2,11 @@
 Test readfile() function: usage variation - stream_context
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
-
 /* test readfile() with third argument : context */
 
 // include file.inc
 require("file.inc");
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 /* Variation 1 : Check working of third argument of readfile() */
 
@@ -32,7 +28,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/readfile_variation1.tmp");
+unlink(__DIR__."/readfile_variation1.tmp");
 ?>
 --EXPECT--
 *** Testing readfile(): checking third argument ***

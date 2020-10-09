@@ -3,11 +3,6 @@ Test fgetcsv() : usage variations - with length less than line size
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
-/*
   Testing fgetcsv() to read from a file when provided with the length argument
   value less than the line size
 */
@@ -29,7 +24,7 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation6.tmp';
+$filename = __DIR__ . '/fgetcsv_variation6.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",

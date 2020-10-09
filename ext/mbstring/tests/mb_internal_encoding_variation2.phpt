@@ -7,12 +7,6 @@ function_exists('mb_internal_encoding') or die("skip mb_internal_encoding() is n
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_internal_encoding([string $encoding])
- * Description: Sets the current internal encoding or Returns
- * the current internal encoding as a string
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test all listed encoding types from php.net to check all are known to function
  * NB: The strings passed are *NOT* necessarily encoded in the encoding passed to the function.
@@ -80,11 +74,11 @@ $encoding = array('UCS-4',			/*1*/
 
 $iterator = 1;
 foreach($encoding as $enc) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_internal_encoding());
-	var_dump(mb_internal_encoding($enc));
-	var_dump(mb_internal_encoding());
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(mb_internal_encoding());
+    var_dump(mb_internal_encoding($enc));
+    var_dump(mb_internal_encoding());
+    $iterator++;
 }
 echo "Done";
 ?>

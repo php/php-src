@@ -9,6 +9,7 @@ var_dump(filter_var(
     FILTER_VALIDATE_BOOLEAN,
     FILTER_NULL_ON_FAILURE
 ));
+?>
 --XFAIL--
 Requires php_zval_filter to not use convert_to_string for all filters.
 --EXPECT--

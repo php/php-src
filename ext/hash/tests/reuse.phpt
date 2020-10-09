@@ -1,12 +1,17 @@
 --TEST--
-Attempt to reuse a closed hash context
---SKIPIF--
-<?php if (!extension_loaded('hash')) echo 'skip';
+Hash: Attempt to reuse a closed hash context
 --FILE--
 <?php
 
 $h = hash_init('md5');
 hash_final($h);
-hash_update($h, 'foo');
---EXPECTF--
-Warning: hash_update(): supplied resource is not a valid Hash Context resource in %s%eext%ehash%etests%ereuse.php on line %d
+try {
+    hash_update($h, 'foo');
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+?>
+--EXPECT--
+hash_update(): Argument #1 ($context) must be a valid Hash Context resource

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, CFG - Control Flow Graph                                |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,7 +73,11 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 						succ->flags |= ZEND_BB_FOLLOW;
 					}
 				} else {
-					ZEND_ASSERT(opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING);
+					ZEND_ASSERT(
+						opcode == ZEND_SWITCH_LONG
+						|| opcode == ZEND_SWITCH_STRING
+						|| opcode == ZEND_MATCH
+					);
 					if (i == b->successors_count - 1) {
 						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
 					} else {
@@ -93,7 +97,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 				b = succ;
 				break;
 			} else {
-				/* Recusively check reachability */
+				/* Recursively check reachability */
 				if (!(succ->flags & ZEND_BB_REACHABLE)) {
 					zend_mark_reachable(opcodes, cfg, succ);
 				}
@@ -110,56 +114,13 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 	blocks[start].flags = ZEND_BB_START;
 	zend_mark_reachable(op_array->opcodes, cfg, blocks + start);
 
-	if (op_array->last_live_range || op_array->last_try_catch) {
+	if (op_array->last_try_catch) {
 		zend_basic_block *b;
 		int j, changed;
 		uint32_t *block_map = cfg->map;
 
 		do {
 			changed = 0;
-
-			/* Add live range paths */
-			for (j = 0; j < op_array->last_live_range; j++) {
-				zend_live_range *live_range = &op_array->live_range[j];
-				if (live_range->var == (uint32_t)-1) {
-					/* this live range already removed */
-					continue;
-				}
-				b = blocks + block_map[live_range->start];
-				if (b->flags & ZEND_BB_REACHABLE) {
-					while (b->len > 0 && op_array->opcodes[b->start].opcode == ZEND_NOP) {
-					    /* check if NOP breaks incorrect smart branch */
-						if (b->len == 2
-						 && (op_array->opcodes[b->start + 1].opcode == ZEND_JMPZ
-						  || op_array->opcodes[b->start + 1].opcode == ZEND_JMPNZ)
-						 && (op_array->opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
-						 && b->start > 0
-						 && zend_is_smart_branch(op_array->opcodes + b->start - 1)) {
-							break;
-						}
-						b->start++;
-						b->len--;
-					}
-					if (b->len == 0 && (uint32_t)b->successors[0] == block_map[live_range->end]) {
-						/* mark as removed (empty live range) */
-						live_range->var = (uint32_t)-1;
-						continue;
-					}
-					b->flags |= ZEND_BB_GEN_VAR;
-					b = blocks + block_map[live_range->end];
-					b->flags |= ZEND_BB_KILL_VAR;
-					if (!(b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE))) {
-						if ((cfg->flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES)) {
-							changed = 1;
-							zend_mark_reachable(op_array->opcodes, cfg, b);
-						} else {
-							b->flags |= ZEND_BB_UNREACHABLE_FREE;
-						}
-					}
-				} else {
-					ZEND_ASSERT(!(blocks[block_map[live_range->end]].flags & ZEND_BB_REACHABLE));
-				}
-			}
 
 			/* Add exception paths */
 			for (j = 0; j < op_array->last_try_catch; j++) {
@@ -237,6 +198,33 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 			}
 		} while (changed);
 	}
+
+	if (cfg->flags & ZEND_FUNC_FREE_LOOP_VAR) {
+		zend_basic_block *b;
+		int j;
+		uint32_t *block_map = cfg->map;
+
+		/* Mark blocks that are unreachable, but free a loop var created in a reachable block. */
+		for (b = blocks; b < blocks + cfg->blocks_count; b++) {
+			if (b->flags & ZEND_BB_REACHABLE) {
+				continue;
+			}
+
+			for (j = b->start; j < b->start + b->len; j++) {
+				zend_op *opline = &op_array->opcodes[j];
+				if (zend_optimizer_is_loop_var_free(opline)) {
+					zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
+					if (def_opline) {
+						uint32_t def_block = block_map[def_opline - op_array->opcodes];
+						if (blocks[def_block].flags & ZEND_BB_REACHABLE) {
+							b->flags |= ZEND_BB_UNREACHABLE_FREE;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 /* }}} */
 
@@ -293,7 +281,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	zval *zv;
 	zend_bool extra_entry_block = 0;
 
-	cfg->flags = build_flags & (ZEND_CFG_SPLIT_AT_LIVE_RANGES|ZEND_CFG_STACKLESS|ZEND_CFG_RECV_ENTRY);
+	cfg->flags = build_flags & (ZEND_CFG_STACKLESS|ZEND_CFG_RECV_ENTRY);
 
 	cfg->map = block_map = zend_arena_calloc(arena, op_array->last, sizeof(uint32_t));
 
@@ -312,8 +300,15 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
-			case ZEND_THROW:
+			case ZEND_MATCH_ERROR:
 				if (i + 1 < op_array->last) {
+					BB_START(i + 1);
+				}
+				break;
+			case ZEND_THROW:
+				/* Don't treat THROW as terminator if it's used in expression context,
+				 * as we may lose live ranges when eliminating unreachable code. */
+				if (opline->extended_value != ZEND_THROW_IS_EXPR && i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;
@@ -380,6 +375,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
+			case ZEND_JMP_NULL:
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
@@ -389,8 +385,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				}
 				BB_START(i + 1);
 				break;
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
@@ -403,6 +397,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 			{
 				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
 				zval *zv;
@@ -413,21 +408,14 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(i + 1);
 				break;
 			}
-			case ZEND_UNSET_VAR:
-			case ZEND_ISSET_ISEMPTY_VAR:
-				if (opline->extended_value & ZEND_FETCH_LOCAL) {
-					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-				} else if ((opline->extended_value & (ZEND_FETCH_GLOBAL | ZEND_FETCH_GLOBAL_LOCK)) &&
-				           !op_array->function_name) {
-					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-				}
-				break;
 			case ZEND_FETCH_R:
 			case ZEND_FETCH_W:
 			case ZEND_FETCH_RW:
 			case ZEND_FETCH_FUNC_ARG:
 			case ZEND_FETCH_IS:
 			case ZEND_FETCH_UNSET:
+			case ZEND_UNSET_VAR:
+			case ZEND_ISSET_ISEMPTY_VAR:
 				if (opline->extended_value & ZEND_FETCH_LOCAL) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				} else if ((opline->extended_value & (ZEND_FETCH_GLOBAL | ZEND_FETCH_GLOBAL_LOCK)) &&
@@ -438,11 +426,20 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_FUNC_GET_ARGS:
 				flags |= ZEND_FUNC_VARARG;
 				break;
-			case ZEND_EXT_NOP:
 			case ZEND_EXT_STMT:
+				flags |= ZEND_FUNC_HAS_EXTENDED_STMT;
+				break;
 			case ZEND_EXT_FCALL_BEGIN:
 			case ZEND_EXT_FCALL_END:
-				flags |= ZEND_FUNC_HAS_EXTENDED_INFO;
+				flags |= ZEND_FUNC_HAS_EXTENDED_FCALL;
+				break;
+			case ZEND_FREE:
+				if (opline->extended_value == ZEND_FREE_SWITCH) {
+					flags |= ZEND_FUNC_FREE_LOOP_VAR;
+				}
+				break;
+			case ZEND_FE_FREE:
+				flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				break;
 		}
 	}
@@ -451,13 +448,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	if ((build_flags & ZEND_CFG_NO_ENTRY_PREDECESSORS)
 			&& op_array->last > 0 && block_map[0] > 1) {
 		extra_entry_block = 1;
-	}
-
-	if ((cfg->flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES)) {
-		for (j = 0; j < op_array->last_live_range; j++) {
-			BB_START(op_array->live_range[j].start);
-			BB_START(op_array->live_range[j].end);
-		}
 	}
 
 	if (op_array->last_try_catch) {
@@ -523,6 +513,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_THROW:
+			case ZEND_MATCH_ERROR:
 				break;
 			case ZEND_JMP:
 				block->successors_count = 1;
@@ -540,6 +531,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
+			case ZEND_JMP_NULL:
 				block->successors_count = 2;
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
 				block->successors[1] = j + 1;
@@ -554,8 +546,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 					block->successors[0] = j + 1;
 				}
 				break;
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				block->successors_count = 2;
@@ -575,12 +565,13 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 			{
 				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
 				zval *zv;
 				uint32_t s = 0;
 
-				block->successors_count = 2 + zend_hash_num_elements(jumptable);
+				block->successors_count = (opline->opcode == ZEND_MATCH ? 1 : 2) + zend_hash_num_elements(jumptable);
 				block->successors = zend_arena_calloc(arena, block->successors_count, sizeof(int));
 
 				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
@@ -588,7 +579,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				} ZEND_HASH_FOREACH_END();
 
 				block->successors[s++] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
-				block->successors[s++] = j + 1;
+				if (opline->opcode != ZEND_MATCH) {
+					block->successors[s++] = j + 1;
+				}
 				break;
 			}
 			default:
@@ -599,9 +592,8 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	}
 
 	/* Build CFG, Step 4, Mark Reachable Basic Blocks */
-	zend_mark_reachable_blocks(op_array, cfg, 0);
-
 	cfg->flags |= flags;
+	zend_mark_reachable_blocks(op_array, cfg, 0);
 
 	return SUCCESS;
 }
@@ -915,11 +907,3 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -2,21 +2,20 @@
 DBA TCADB handler test
 --SKIPIF--
 <?php
-	$handler = 'tcadb';
-	require_once dirname(__FILE__) .'/skipif.inc';
+    $handler = 'tcadb';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
     $lock_flag = 'l';
-    $db_filename = $db_file = dirname(__FILE__) .'/test0.tch';
+    $db_filename = $db_file = __DIR__ .'/test0.tch';
     @unlink($db_filename);
     @unlink($db_filename.'.lck');
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --CLEAN--
 <?php
-$db_filename = $db_file = dirname(__FILE__) .'/test0.tch';
+$db_filename = $db_file = __DIR__ .'/test0.tch';
 @unlink($db_filename);
 @unlink($db_filename.'.lck');
 ?>
@@ -55,4 +54,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

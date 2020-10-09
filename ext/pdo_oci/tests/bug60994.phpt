@@ -6,7 +6,7 @@ ashnazg@php.net
 --SKIPIF--
 <?php
 if (!extension_loaded('mbstring') || !extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require dirname(__FILE__).'/../../pdo/tests/pdo_test.inc';
+require __DIR__.'/../../pdo/tests/pdo_test.inc';
 if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=al32utf8')) die('skip expected output valid for AL32UTF8 character set');
 PDOTest::skip();
 ?>
@@ -92,6 +92,7 @@ echo 'size of string4 is ', strlen($string4), ' bytes, ', mb_strlen($string4), '
 echo 'size of stream4 is ', strlen($stream4), ' bytes, ', mb_strlen($stream4), ' chars.', PHP_EOL;
 echo 'beg  of stream4 is ', $start4, PHP_EOL;
 echo 'end  of stream4 is ', $ending4, PHP_EOL;
+?>
 --XFAIL--
 Fails due to Bug 60994
 --EXPECT--

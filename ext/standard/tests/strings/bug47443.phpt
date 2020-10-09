@@ -8,7 +8,7 @@ var_dump(metaphone("scrath"));
 var_dump(metaphone("scratc"));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "SKRX"
 string(4) "SKR0"
 string(5) "SKRTK"

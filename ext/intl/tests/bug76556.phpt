@@ -10,7 +10,6 @@ $it = IntlBreakIterator::createCharacterInstance();
 $it->setText('foo');
 var_dump($it);
 ?>
-===DONE===
 --EXPECTF--
 object(IntlRuleBasedBreakIterator)#%d (3) {
   ["valid"]=>
@@ -20,4 +19,3 @@ object(IntlRuleBasedBreakIterator)#%d (3) {
   ["type"]=>
   string(%d) "%SRuleBasedBreakIterator%S"
 }
-===DONE===

@@ -10,18 +10,17 @@ require "connect.inc";
 $link = ldap_connect($host, $port);
 
 foreach([
-	LDAP_OPT_X_KEEPALIVE_IDLE,
-	LDAP_OPT_X_KEEPALIVE_PROBES,
-	LDAP_OPT_X_KEEPALIVE_INTERVAL,
+    LDAP_OPT_X_KEEPALIVE_IDLE,
+    LDAP_OPT_X_KEEPALIVE_PROBES,
+    LDAP_OPT_X_KEEPALIVE_INTERVAL,
 ] as $option) {
-	$result = ldap_set_option($link, $option, 5);
-	var_dump($result);
+    $result = ldap_set_option($link, $option, 5);
+    var_dump($result);
 
-	ldap_get_option($link, $option, $optionval);
-	var_dump($optionval);
+    ldap_get_option($link, $option, $optionval);
+    var_dump($optionval);
 }
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 int(5)
@@ -29,4 +28,3 @@ bool(true)
 int(5)
 bool(true)
 int(5)
-===DONE===

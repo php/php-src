@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - file pointer pointing to EOF
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() by reading from a file when the file pointer is pointing to end of file */
 
 echo "*** Testing fgetcsv() : with file pointer pointing to EOF ***\n";
@@ -26,7 +21,7 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation10.tmp';
+$filename = __DIR__ . '/fgetcsv_variation10.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",

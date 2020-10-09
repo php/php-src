@@ -15,7 +15,5 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 Exception raised
-===DONE===

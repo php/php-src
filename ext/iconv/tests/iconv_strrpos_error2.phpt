@@ -7,11 +7,6 @@ function_exists('iconv_strrpos') or die("skip iconv_strrpos() is not available i
 ?>
 --FILE--
 <?php
-/* Prototype  : proto int iconv_strrpos(string haystack, string needle [, string charset])
- * Description: Find position of last occurrence of a string within another
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Pass iconv_strrpos() an encoding that doesn't exist
  */
@@ -30,6 +25,6 @@ echo "Done";
 --EXPECTF--
 *** Testing iconv_strrpos() : error conditions ***
 
-Notice: iconv_strrpos(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
+Warning: iconv_strrpos(): Wrong encoding, conversion from "unknown-encoding" to "UCS-4LE" is not allowed in %s on line %d
 bool(false)
 Done

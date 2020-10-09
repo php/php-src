@@ -3,7 +3,7 @@ $this as parameter
 --FILE--
 <?php
 function foo($this) {
-	var_dump($this);
+    var_dump($this);
 }
 foo(5);
 ?>

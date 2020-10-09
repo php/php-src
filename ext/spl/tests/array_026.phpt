@@ -8,8 +8,10 @@ $test['d1']['d3'] = 'world';
 var_dump($test, $test3['mmmmm']);
 ?>
 --EXPECTF--
-Notice: Undefined variable: test3 in %s%earray_026.php on line %d
-object(ArrayObject)#%d (1) {
+Warning: Undefined variable $test3 in %s on line %d
+
+Warning: Trying to access array offset on value of type null in %s on line %d
+object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {
     ["d1"]=>

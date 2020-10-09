@@ -2,11 +2,6 @@
 Test vsprintf() function : usage variations - scientific formats with scientific values
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string format, array args)
- * Description: Output a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  * Test vprintf() when different scientific formats and scientific values
  * are passed to the '$format' and '$args' arguments of the function
@@ -17,7 +12,7 @@ echo "*** Testing vprintf() : scientific formats and scientific values ***\n";
 // defining array of scientific formats
 $formats = array(
   '%e %+e %-e',
-  '%le %Le %4e %-4e',
+  '%le %4e %-4e',
   '%10.4e %-10.4e %.4e',
   '%\'#20e %\'20e %\'$20e %\'_20e',
   '%3$e %4$e %1$e %2$e'
@@ -27,7 +22,7 @@ $formats = array(
 // Each sub array contains scientific values which correspond to each format string in $format
 $args_array = array(
   array(0, 1e0, "10e2" ),
-  array(2.2e2, 10e10, 1000e-2, 1000e7),
+  array(2.2e2, 1000e-2, 1000e7),
   array(-22e12, 10e20, 1.2e2),
   array(1e1, +1e2, -1e3, "1e2_"),
   array(3e3, 4e3, 1e3, 2e3)
@@ -45,7 +40,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : scientific formats and scientific values ***
 
@@ -54,8 +48,8 @@ foreach($formats as $format) {
 int(36)
 
 -- Iteration 2 --
-2.200000e+2 e 1.000000e+1 1.000000e+10
-int(38)
+2.200000e+2 1.000000e+1 1.000000e+10
+int(36)
 
 -- Iteration 3 --
 -2.2000e+13 1.0000e+21 1.2000e+2
@@ -68,4 +62,3 @@ int(74)
 -- Iteration 5 --
 1.000000e+3 2.000000e+3 3.000000e+3 4.000000e+3
 int(47)
-===DONE===

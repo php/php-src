@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -20,12 +18,9 @@
 
 #include "php_intl.h"
 #include "spoofchecker_class.h"
-#include "spoofchecker_create.h"
 #include "intl_data.h"
 
-/* {{{ proto Spoofchecker::__construct()
- * Spoofchecker object constructor.
- */
+/* {{{ Spoofchecker object constructor. */
 PHP_METHOD(Spoofchecker, __construct)
 {
 #if U_ICU_VERSION_MAJOR_NUM < 58
@@ -34,8 +29,8 @@ PHP_METHOD(Spoofchecker, __construct)
 	zend_error_handling error_handling;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
@@ -65,12 +60,3 @@ PHP_METHOD(Spoofchecker, __construct)
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

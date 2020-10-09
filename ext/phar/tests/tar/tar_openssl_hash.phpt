@@ -10,9 +10,9 @@ phar.require_hash=1
 --FILE--
 <?php
 try {
-	$phar = new PharData(dirname(__FILE__) . '/files/P1-1.0.0.tgz');
+    $phar = new PharData(__DIR__ . '/files/P1-1.0.0.tgz');
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 
 ?>

@@ -3,40 +3,54 @@ Only arrays and countable objects can be counted
 --FILE--
 <?php
 
-$result = count(null);
-var_dump($result);
+try {
+    $result = count(null);
+    var_dump($result);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$result = count("string");
-var_dump($result);
+try {
+    $result = count("string");
+    var_dump($result);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$result = count(123);
-var_dump($result);
+try {
+    $result = count(123);
+    var_dump($result);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$result = count(true);
-var_dump($result);
+try {
+    $result = count(true);
+    var_dump($result);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$result = count(false);
-var_dump($result);
+try {
+    $result = count(false);
+    var_dump($result);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$result = count((object) []);
-var_dump($result);
+try {
+    $result = count((object) []);
+    var_dump($result);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+--EXPECT--
+count(): Argument #1 ($var) must be of type Countable|array, null given
+count(): Argument #1 ($var) must be of type Countable|array, string given
+count(): Argument #1 ($var) must be of type Countable|array, int given
+count(): Argument #1 ($var) must be of type Countable|array, bool given
+count(): Argument #1 ($var) must be of type Countable|array, bool given
+count(): Argument #1 ($var) must be of type Countable|array, stdClass given
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)

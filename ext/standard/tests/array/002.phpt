@@ -4,20 +4,20 @@ Test arsort, asort, krsort, ksort, rsort, and sort
 precision=14
 --FILE--
 <?php
-require(dirname(__FILE__) . '/data.inc');
+require(__DIR__ . '/data.inc');
 
 function test_sort ($sort_function, $data) {
     echo "\n -- Testing $sort_function() -- \n";
-	echo "No second argument:\n";
+    echo "No second argument:\n";
     $sort_function ($data);
     var_dump ($data);
-	echo "Using SORT_REGULAR:\n";
+    echo "Using SORT_REGULAR:\n";
     $sort_function ($data, SORT_REGULAR);
     var_dump ($data);
-	echo "Using SORT_NUMERIC:\n";
+    echo "Using SORT_NUMERIC:\n";
     $sort_function ($data, SORT_NUMERIC);
     var_dump ($data);
-	echo "Using SORT_STRING\n";
+    echo "Using SORT_STRING\n";
     $sort_function ($data, SORT_STRING);
     var_dump ($data);
 }
@@ -52,7 +52,7 @@ array(8) {
   [1001]=>
   string(6) "monkey"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 
  -- Testing arsort() -- 
@@ -65,8 +65,6 @@ array(8) {
     [1]=>
     string(6) "orange"
   }
-  ["test"]=>
-  int(27)
   [1000]=>
   string(4) "test"
   [1001]=>
@@ -77,8 +75,10 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_REGULAR:
 array(8) {
@@ -89,8 +89,6 @@ array(8) {
     [1]=>
     string(6) "orange"
   }
-  ["test"]=>
-  int(27)
   [1000]=>
   string(4) "test"
   [1001]=>
@@ -101,8 +99,10 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_NUMERIC:
 array(8) {
@@ -126,21 +126,21 @@ array(8) {
   [0]=>
   string(3) "PHP"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [1000]=>
   string(4) "test"
@@ -162,14 +162,16 @@ array(8) {
   ["test"]=>
   int(27)
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 
  -- Testing asort() -- 
 No second argument:
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
+  ["test"]=>
+  int(27)
   [0]=>
   string(3) "PHP"
   [17]=>
@@ -180,8 +182,6 @@ array(8) {
   string(6) "monkey"
   [1000]=>
   string(4) "test"
-  ["test"]=>
-  int(27)
   [-1000]=>
   array(2) {
     [0]=>
@@ -193,7 +193,9 @@ array(8) {
 Using SORT_REGULAR:
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
+  ["test"]=>
+  int(27)
   [0]=>
   string(3) "PHP"
   [17]=>
@@ -204,8 +206,6 @@ array(8) {
   string(6) "monkey"
   [1000]=>
   string(4) "test"
-  ["test"]=>
-  int(27)
   [-1000]=>
   array(2) {
     [0]=>
@@ -217,7 +217,7 @@ array(8) {
 Using SORT_NUMERIC:
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [0]=>
   string(3) "PHP"
   [17]=>
@@ -240,18 +240,18 @@ array(8) {
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   ["test"]=>
   int(27)
   [-1000]=>
@@ -277,7 +277,7 @@ array(8) {
 No second argument:
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1001]=>
   string(6) "monkey"
   [1000]=>
@@ -301,7 +301,7 @@ array(8) {
 Using SORT_REGULAR:
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1001]=>
   string(6) "monkey"
   [1000]=>
@@ -325,7 +325,7 @@ array(8) {
 Using SORT_NUMERIC:
 array(8) {
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1001]=>
   string(6) "monkey"
   [1000]=>
@@ -355,7 +355,7 @@ array(8) {
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1001]=>
   string(6) "monkey"
   [1000]=>
@@ -394,7 +394,7 @@ array(8) {
   [1001]=>
   string(6) "monkey"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_REGULAR:
 array(8) {
@@ -418,7 +418,7 @@ array(8) {
   [1001]=>
   string(6) "monkey"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_NUMERIC:
 array(8) {
@@ -442,7 +442,7 @@ array(8) {
   [1001]=>
   string(6) "monkey"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_STRING
 array(8) {
@@ -460,7 +460,7 @@ array(8) {
   [1001]=>
   string(6) "monkey"
   [16777216]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
@@ -480,19 +480,19 @@ array(8) {
     string(6) "orange"
   }
   [1]=>
-  int(27)
-  [2]=>
   string(4) "test"
-  [3]=>
+  [2]=>
   string(6) "monkey"
-  [4]=>
+  [3]=>
   string(4) "Test"
-  [5]=>
+  [4]=>
   string(27) "PHP: Hypertext Preprocessor"
-  [6]=>
+  [5]=>
   string(3) "PHP"
+  [6]=>
+  int(27)
   [7]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_REGULAR:
 array(8) {
@@ -504,19 +504,19 @@ array(8) {
     string(6) "orange"
   }
   [1]=>
-  int(27)
-  [2]=>
   string(4) "test"
-  [3]=>
+  [2]=>
   string(6) "monkey"
-  [4]=>
+  [3]=>
   string(4) "Test"
-  [5]=>
+  [4]=>
   string(27) "PHP: Hypertext Preprocessor"
-  [6]=>
+  [5]=>
   string(3) "PHP"
+  [6]=>
+  int(27)
   [7]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_NUMERIC:
 array(8) {
@@ -540,21 +540,21 @@ array(8) {
   [6]=>
   string(3) "PHP"
   [7]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
   string(4) "test"
@@ -576,26 +576,26 @@ array(8) {
   [6]=>
   int(27)
   [7]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
 }
 
  -- Testing sort() -- 
 No second argument:
 array(8) {
   [0]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1]=>
-  string(3) "PHP"
-  [2]=>
-  string(27) "PHP: Hypertext Preprocessor"
-  [3]=>
-  string(4) "Test"
-  [4]=>
-  string(6) "monkey"
-  [5]=>
-  string(4) "test"
-  [6]=>
   int(27)
+  [2]=>
+  string(3) "PHP"
+  [3]=>
+  string(27) "PHP: Hypertext Preprocessor"
+  [4]=>
+  string(4) "Test"
+  [5]=>
+  string(6) "monkey"
+  [6]=>
+  string(4) "test"
   [7]=>
   array(2) {
     [0]=>
@@ -607,19 +607,19 @@ array(8) {
 Using SORT_REGULAR:
 array(8) {
   [0]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1]=>
-  string(3) "PHP"
-  [2]=>
-  string(27) "PHP: Hypertext Preprocessor"
-  [3]=>
-  string(4) "Test"
-  [4]=>
-  string(6) "monkey"
-  [5]=>
-  string(4) "test"
-  [6]=>
   int(27)
+  [2]=>
+  string(3) "PHP"
+  [3]=>
+  string(27) "PHP: Hypertext Preprocessor"
+  [4]=>
+  string(4) "Test"
+  [5]=>
+  string(6) "monkey"
+  [6]=>
+  string(4) "test"
   [7]=>
   array(2) {
     [0]=>
@@ -631,7 +631,7 @@ array(8) {
 Using SORT_NUMERIC:
 array(8) {
   [0]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1]=>
   string(3) "PHP"
   [2]=>
@@ -654,18 +654,18 @@ array(8) {
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
-  float(-0.33333333333333)
+  float(-0.3333333333333333)
   [1]=>
   int(27)
   [2]=>

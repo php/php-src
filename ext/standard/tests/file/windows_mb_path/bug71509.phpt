@@ -2,18 +2,20 @@
 Bug #71509 Zip problem with swedish letters in filename.
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts("zip");
 
 ?>
+--CONFLICTS--
+bug71509
 --FILE--
 <?PHP
 // åöä
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv("ISO-8859-1", "UTF-8", "Röd_Statistics"); // cp1252
 $prefix = create_data("bug71509", "$item.txt");
@@ -37,8 +39,6 @@ var_dump(file_exists($outputfile_zip));
 
 remove_data("bug71509");
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

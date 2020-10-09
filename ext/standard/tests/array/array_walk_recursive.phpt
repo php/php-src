@@ -3,11 +3,11 @@ Test array_walk_recursive()
 --FILE--
 <?php
 function foo($value) {
-	echo $value . " foo\n";
+    echo $value . " foo\n";
 }
 
 function bar($value) {
-	echo $value . " bar\n";
+    echo $value . " bar\n";
 }
 
 $arr = array (1,2,3);

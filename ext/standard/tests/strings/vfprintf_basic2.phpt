@@ -2,11 +2,6 @@
 Test vfprintf() function : basic functionality - integer format
 --FILE--
 <?php
-/* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
- * Description: Write a formatted string to a stream
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  *  Testing vfprintf() : basic functionality - using integer format
 */
@@ -23,7 +18,7 @@ $arg2 = array(111,222);
 $arg3 = array(111,222,333);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic2.txt';
+$data_file = __DIR__ . '/vfprintf_basic2.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -42,10 +37,8 @@ print_r(file_get_contents($data_file));
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using integer format ***
 111
 111 222
 111 222 333
-===DONE===

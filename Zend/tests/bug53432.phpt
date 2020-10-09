@@ -16,7 +16,11 @@ var_dump($str[-1] = 'a');
 var_dump($str);
 
 $str = '';
-var_dump($str['foo'] = 'a');
+try {
+    var_dump($str['foo'] = 'a');
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump($str);
 
 $str = '';
@@ -50,12 +54,10 @@ string(1) "a"
 string(1) "a"
 string(6) "     a"
 
-Warning: Illegal string offset:  -1 in %s on line %d
+Warning: Illegal string offset -1 in %s on line %d
 NULL
 string(0) ""
-
-Warning: Illegal string offset 'foo' in %s on line %d
-string(1) "a"
+Cannot access offset of type string on string
 string(1) "a"
 Error: [] operator not supported for strings
 string(0) ""

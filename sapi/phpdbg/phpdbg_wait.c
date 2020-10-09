@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +34,7 @@ static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 
 
 static int phpdbg_dearm_autoglobals(zend_auto_global *auto_global) {
-	if (ZSTR_LEN(auto_global->name) != sizeof("GLOBALS") - 1 || memcmp(ZSTR_VAL(auto_global->name), "GLOBALS", sizeof("GLOBALS") - 1)) {
+	if (zend_string_equals_literal(auto_global->name, "GLOBALS")) {
 		auto_global->armed = 0;
 	}
 
@@ -48,13 +46,9 @@ typedef struct {
 	HashPosition pos[2];
 } phpdbg_intersect_ptr;
 
-static int phpdbg_array_data_compare(const void *a, const void *b) {
-	Bucket *f, *s;
+static int phpdbg_array_data_compare(Bucket *f, Bucket *s) {
 	int result;
 	zval *first, *second;
-
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
 
 	first = &f->val;
 	second = &s->val;
@@ -74,8 +68,8 @@ static void phpdbg_array_intersect_init(phpdbg_intersect_ptr *info, HashTable *h
 	info->ht[0] = ht1;
 	info->ht[1] = ht2;
 
-	zend_hash_sort(info->ht[0], (compare_func_t) phpdbg_array_data_compare, 0);
-	zend_hash_sort(info->ht[1], (compare_func_t) phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[0], phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[1], phpdbg_array_data_compare, 0);
 
 	zend_hash_internal_pointer_reset_ex(info->ht[0], &info->pos[0]);
 	zend_hash_internal_pointer_reset_ex(info->ht[1], &info->pos[1]);
@@ -243,7 +237,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		zend_extension *extension;
 		zend_llist_position pos;
 		zval *name = NULL;
-		zend_string *strkey;
+		zend_string *strkey = NULL;
 
 		extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
 		while (extension) {
@@ -257,6 +251,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 					break;
 				}
 				name = NULL;
+				strkey = NULL;
 			} ZEND_HASH_FOREACH_END();
 
 			if (name) {
@@ -283,6 +278,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 				pefree(elm, zend_extensions.persistent);
 				zend_extensions.count--;
 			} else {
+				ZEND_ASSERT(strkey);
 				zend_hash_del(Z_ARRVAL_P(zvp), strkey);
 			}
 		}
@@ -377,21 +373,25 @@ PHPDBG_COMMAND(wait) /* {{{ */
 		return FAILURE;
 	}
 
-	char msglen[5];
-	int recvd = 4;
+	unsigned char msglen_buf[4];
+	int needed = 4;
 
 	do {
-		recvd -= recv(sr, &(msglen[4 - recvd]), recvd, 0);
-	} while (recvd > 0);
+		needed -= recv(sr, &msglen_buf[4 - needed], needed, 0);
+	} while (needed > 0);
 
-	recvd = *(size_t *) msglen;
-	char *data = emalloc(recvd);
+	uint32_t msglen = (msglen_buf[3] << 24)
+					| (msglen_buf[2] << 16)
+					| (msglen_buf[1] <<  8)
+					| (msglen_buf[0] <<  0);
+	char *data = emalloc(msglen);
+	needed = msglen;
 
 	do {
-		recvd -= recv(sr, &(data[(*(int *) msglen) - recvd]), recvd, 0);
-	} while (recvd > 0);
+		needed -= recv(sr, &(data[msglen - needed]), needed, 0);
+	} while (needed > 0);
 
-	phpdbg_webdata_decompress(data, *(int *) msglen);
+	phpdbg_webdata_decompress(data, msglen);
 
 	if (PHPDBG_G(socket_fd) != -1) {
 		close(PHPDBG_G(socket_fd));

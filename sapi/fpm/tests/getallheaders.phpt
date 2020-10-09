@@ -31,27 +31,27 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester->request(
-		'',
-		[
-			'HTTP_X_FOO' => 'BAR',
-			'HTTP_FOO'   => 'foo'
-		]
-	)->expectBody(
-		[
-			'Test Start',
-			'array(4) {',
-			'  ["Foo"]=>',
-			'  string(3) "foo"',
-			'  ["X-Foo"]=>',
-			'  string(3) "BAR"',
-			'  ["Content-Length"]=>',
-			'  string(1) "0"',
-			'  ["Content-Type"]=>',
-			'  string(0) ""',
-			'}',
-			'Test End',
-		]
-	);
+        '',
+        [
+            'HTTP_X_FOO' => 'BAR',
+            'HTTP_FOO'   => 'foo'
+        ]
+    )->expectBody(
+        [
+            'Test Start',
+            'array(4) {',
+            '  ["Foo"]=>',
+            '  string(3) "foo"',
+            '  ["X-Foo"]=>',
+            '  string(3) "BAR"',
+            '  ["Content-Length"]=>',
+            '  string(1) "0"',
+            '  ["Content-Type"]=>',
+            '  string(0) ""',
+            '}',
+            'Test End',
+        ]
+    );
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();

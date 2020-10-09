@@ -1,5 +1,3 @@
-dnl config.m4 for extension imap
-
 AC_DEFUN([IMAP_INC_CHK],[if test -r "$i$1/c-client.h"; then
     AC_DEFINE(HAVE_IMAP2000, 1, [ ])
     IMAP_DIR=$i
@@ -48,15 +46,12 @@ AC_DEFUN([PHP_IMAP_TEST_BUILD], [
 
 AC_DEFUN([PHP_IMAP_KRB_CHK], [
   if test "$PHP_KERBEROS" != "no"; then
-    PHP_SETUP_KERBEROS(IMAP_SHARED_LIBADD,
-    [
-      AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
-    ], [
-      AC_MSG_ERROR([Kerberos libraries not found.
+    PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
 
-      Check the path given to --with-kerberos (if no path is given, searches in /usr/kerberos, /usr/local and /usr )
-      ])
-    ])
+    PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+    PHP_EVAL_LIBLINE($KERBEROS_LIBS, IMAP_SHARED_LIBADD)
+
+    AC_DEFINE(HAVE_IMAP_KRB, 1, [Whether IMAP extension has Kerberos support])
   else
     AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
       AC_MSG_ERROR([This c-client library is built with Kerberos support.
@@ -78,7 +73,7 @@ AC_DEFUN([PHP_IMAP_SSL_CHK], [
     ], [
       AC_MSG_ERROR([OpenSSL libraries not found.
 
-      Check the path given to --with-openssl-dir and output in config.log)
+      Check whether openssl is on your PKG_CONFIG_PATH and the output in config.log)
       ])
     ])
   elif test -f "$IMAP_INC_DIR/linkage.c"; then
@@ -91,20 +86,28 @@ AC_DEFUN([PHP_IMAP_SSL_CHK], [
   fi
 ])
 
+PHP_ARG_WITH([imap],
+  [for IMAP support],
+  [AS_HELP_STRING([[--with-imap[=DIR]]],
+    [Include IMAP support. DIR is the c-client install prefix])])
 
-PHP_ARG_WITH(imap,for IMAP support,
-[  --with-imap[=DIR]         Include IMAP support. DIR is the c-client install prefix])
+PHP_ARG_WITH([kerberos],
+  [for IMAP Kerberos support],
+  [AS_HELP_STRING([--with-kerberos],
+    [IMAP: Include Kerberos support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(kerberos,for IMAP Kerberos support,
-[  --with-kerberos[=DIR]     IMAP: Include Kerberos support. DIR is the Kerberos install prefix], no, no)
-
-PHP_ARG_WITH(imap-ssl,for IMAP SSL support,
-[  --with-imap-ssl[=DIR]     IMAP: Include SSL support. DIR is the OpenSSL install prefix], no, no)
-
+PHP_ARG_WITH([imap-ssl],
+  [for IMAP SSL support],
+  [AS_HELP_STRING([[--with-imap-ssl]],
+    [IMAP: Include SSL support])],
+  [no],
+  [no])
 
 if test "$PHP_IMAP" != "no"; then
     PHP_SUBST(IMAP_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared)
+    PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     AC_DEFINE(HAVE_IMAP,1,[ ])
 
     for i in $PHP_IMAP /usr/local /usr; do

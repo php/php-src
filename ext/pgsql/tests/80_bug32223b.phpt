@@ -55,7 +55,6 @@ tester();
 pg_close(dbh);
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (pgsql result)
 array(1) {
@@ -63,4 +62,3 @@ array(1) {
   string(1) "f"
 }
 string(14) "NOTICE:  11111"
-===DONE===

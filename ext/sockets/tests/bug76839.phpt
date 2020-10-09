@@ -12,7 +12,7 @@ if (!extension_loaded('sockets')) {
 <?php
 
 // This bug only occurs when a specific portion of memory is unclean.
-// Unforunately, looping around 10 times and using random paths is the
+// Unfortunately, looping around 10 times and using random paths is the
 // best way I could manage to reproduce this problem without modifying php itself :-/
 
 for ($i = 0; $i < 10; $i++) {
@@ -42,6 +42,7 @@ for ($i = 0; $i < 10; $i++) {
     socket_close($senderSocket);
     unlink($senderSocketPath);
 }
+?>
 --EXPECT--
 Received 'Ping!'
 Responded to sender with 'Pong!'

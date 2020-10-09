@@ -2,15 +2,10 @@
 Test ksort() function : usage variations - sort integer/float values
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing ksort() by providing array of integer/float/mixed values for $array argument
  * with following flag  values:
- *  1. flag value as defualt
+ *  1. flag value as default
  *  2. SORT_REGULAR - compare items normally
  *  3. SORT_NUMERIC - compare items numerically
 */
@@ -40,7 +35,7 @@ echo "\n-- Testing ksort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n";
+  echo "- With default sort flag -\n";
   $temp_array = $array;
   var_dump(ksort($temp_array) );
   var_dump($temp_array);
@@ -63,7 +58,7 @@ echo "Done\n";
 -- Testing ksort() by supplying various integer/float arrays --
 
 -- Iteration 1 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(9) {
   [-10]=>
@@ -131,7 +126,7 @@ array(9) {
 }
 
 -- Iteration 2 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(6) {
   [-7]=>
@@ -181,7 +176,7 @@ array(6) {
 }
 
 -- Iteration 3 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   [-10]=>

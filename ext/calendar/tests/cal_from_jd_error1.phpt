@@ -6,8 +6,11 @@ edgarsandi - <edgar.r.sandi@gmail.com>
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-var_dump(cal_from_jd(1748326, -1));
+try {
+    cal_from_jd(1748326, -1);
+} catch (ValueError $ex) {
+    echo "{$ex->getMessage()}\n";
+}
 ?>
---EXPECTF--
-Warning: cal_from_jd(): invalid calendar ID -1 in %s on line %d
-bool(false)
+--EXPECT--
+cal_from_jd(): Argument #2 ($calendar) must be a valid calendar ID

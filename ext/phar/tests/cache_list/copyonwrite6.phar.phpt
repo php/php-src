@@ -11,9 +11,9 @@ open_basedir=
 files/write6.phar
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/copyonwrite6/file1');
-unlink(dirname(__FILE__) . '/copyonwrite6/file2');
-rmdir(dirname(__FILE__) . '/copyonwrite6');
+unlink(__DIR__ . '/copyonwrite6/file1');
+unlink(__DIR__ . '/copyonwrite6/file2');
+rmdir(__DIR__ . '/copyonwrite6');
 ?>
 --EXPECTF--
 array(2) {

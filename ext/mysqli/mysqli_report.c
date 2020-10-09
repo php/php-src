@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,15 +25,14 @@
 
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);
 
-/* {{{ proto bool mysqli_report(int flags)
-   sets report level */
+/* {{{ sets report level */
 PHP_FUNCTION(mysqli_report)
 {
 	zend_long flags;
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	MyG(report_mode) = flags;
@@ -65,12 +62,3 @@ void php_mysqli_report_index(const char *query, unsigned int status) {
 	php_mysqli_throw_sql_exception("00000", 0, "%s used in query/prepared statement %s", index, query);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

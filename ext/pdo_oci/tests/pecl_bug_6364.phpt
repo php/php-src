@@ -3,13 +3,13 @@ PECL PDO_OCI Bug #6364 (segmentation fault on stored procedure call with OUT bin
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc';
+require __DIR__ . '/../../pdo/tests/pdo_test.inc';
 $dbh = PDOTest::factory();
 
 @$dbh->exec ("drop table bug_6364_t");
@@ -32,7 +32,7 @@ var_dump($out_param1);
 var_dump($out_param2);
 
 foreach ($dbh->query("select * from bug_6364_t") as $row) {
-	var_dump($row);
+    var_dump($row);
 }
 
 print "Done\n";

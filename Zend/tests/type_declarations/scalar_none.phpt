@@ -3,16 +3,6 @@ Scalar type missing parameters
 --FILE--
 <?php
 
-$errnames = [
-    E_NOTICE => 'E_NOTICE',
-    E_WARNING => 'E_WARNING',
-    E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
-];
-set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
-    echo "$errnames[$errno]: $errmsg on line $line\n";
-    return true;
-});
-
 $functions = [
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
@@ -33,6 +23,7 @@ foreach ($functions as $type => $function) {
     }
 }
 echo PHP_EOL . "Done";
+?>
 --EXPECTF--
 Testing int:
 *** Caught Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected

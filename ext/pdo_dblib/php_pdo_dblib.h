@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +18,7 @@
 #ifndef PHP_PDO_DBLIB_H
 #define PHP_PDO_DBLIB_H
 
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 extern zend_module_entry pdo_mssql_module_entry;
 #define phpext_pdo_mssql_ptr &pdo_mssql_module_entry
 #else

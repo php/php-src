@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - two chars as enclosure & delimiter (various read and append modes)
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() by providing two characters for enclosure and delimiter parameters */
 
 echo "*** Testing fgetcsv() : with two chars as enclosure & delimiter ***\n";
@@ -26,7 +21,7 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation12.tmp';
+$filename = __DIR__ . '/fgetcsv_variation12.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
@@ -74,7 +69,11 @@ foreach ($csv_lists as $csv_list) {
     fseek($file_handle, 0, SEEK_SET);
     $del = "++";
     $enc = "%%";
-    var_dump( fgetcsv($file_handle, 1024, $del, $enc) );
+    try {
+        var_dump( fgetcsv($file_handle, 1024, $del, $enc) );
+    } catch (ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
@@ -88,870 +87,366 @@ foreach ($csv_lists as $csv_list) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgetcsv() : with two chars as enclosure & delimiter ***
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(13) ""water",fruit"
-}
-int(14)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) ""water","fruit""
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "^water^ ^fruit^"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "&water&:&fruit&"
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(15) "=water===fruit="
-}
-int(16)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(17) "-water--fruit-air"
-}
-int(18)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(21) "-water---fruit---air-"
-}
-int(22)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-
-Notice: fgetcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fgetcsv(): enclosure must be a single character in %s on line %d
-array(1) {
-  [0]=>
-  string(23) "&""""&:&"&:,:":&,&:,,,,"
-}
-int(24)
+fgetcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
 Done

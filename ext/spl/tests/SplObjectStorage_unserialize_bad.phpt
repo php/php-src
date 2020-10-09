@@ -15,10 +15,11 @@ try {
   $so->unserialize($blob);
   var_dump($so);
 } catch(UnexpectedValueException $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 }
 echo "DONE\n";
+?>
 --EXPECTF--
 Error at offset 6 of 34 bytes
 Error at offset 46 of 89 bytes

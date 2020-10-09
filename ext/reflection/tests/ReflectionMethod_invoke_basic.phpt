@@ -23,10 +23,10 @@ class TestClass {
     public static function staticMethod() {
         echo "Called staticMethod()\n";
         try {
-	        var_dump($this);
-		} catch (Throwable $e) {
-			echo "Exception: " . $e->getMessage() . "\n";
-		}
+            var_dump($this);
+        } catch (Throwable $e) {
+            echo "Exception: " . $e->getMessage() . "\n";
+        }
     }
 
     private static function privateMethod() {
@@ -60,15 +60,23 @@ var_dump($methodWithArgs->invoke($testClassInstance, 1, "arg2", 3));
 
 echo "\nStatic method:\n";
 
-var_dump($staticMethod->invoke());
-var_dump($staticMethod->invoke(true));
+try {
+    var_dump($staticMethod->invoke());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($staticMethod->invoke(true));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($staticMethod->invoke(new stdClass()));
 
 echo "\nMethod that throws an exception:\n";
 try {
-	var_dump($methodThatThrows->invoke($testClassInstance));
+    var_dump($methodThatThrows->invoke($testClassInstance));
 } catch (Exception $exc) {
-	var_dump($exc->getMessage());
+    var_dump($exc->getMessage());
 }
 
 ?>
@@ -94,12 +102,8 @@ Called methodWithArgs(1, arg2)
 NULL
 
 Static method:
-
-Warning: ReflectionMethod::invoke() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: ReflectionMethod::invoke() expects parameter 1 to be object, bool given in %s on line %d
-NULL
+ReflectionMethod::invoke() expects at least 1 argument, 0 given
+ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, bool given
 Called staticMethod()
 Exception: Using $this when not in object context
 NULL

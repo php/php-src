@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -431,22 +429,33 @@ PHP_HASH_API void PHP_WHIRLPOOLFinal(unsigned char digest[64], PHP_WHIRLPOOL_CTX
     ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
+static int php_whirlpool_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+    PHP_WHIRLPOOL_CTX *ctx = (PHP_WHIRLPOOL_CTX *) hash->context;
+    int r = FAILURE;
+    if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+        && (r = php_hash_unserialize_spec(hash, zv, PHP_WHIRLPOOL_SPEC)) == SUCCESS
+        && ctx->buffer.pos >= 0
+        && ctx->buffer.pos < (int) sizeof(ctx->buffer.data)
+        && ctx->buffer.bits >= ctx->buffer.pos * 8
+        && ctx->buffer.bits < ctx->buffer.pos * 8 + 8) {
+        return SUCCESS;
+    } else {
+        return r != SUCCESS ? r : -2000;
+    }
+}
+
 const php_hash_ops php_hash_whirlpool_ops = {
+	"whirlpool",
 	(php_hash_init_func_t) PHP_WHIRLPOOLInit,
 	(php_hash_update_func_t) PHP_WHIRLPOOLUpdate,
 	(php_hash_final_func_t) PHP_WHIRLPOOLFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_whirlpool_unserialize,
+	PHP_WHIRLPOOL_SPEC,
 	64,
 	64,
 	sizeof(PHP_WHIRLPOOL_CTX),
 	1
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

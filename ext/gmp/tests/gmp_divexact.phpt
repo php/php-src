@@ -4,20 +4,21 @@ gmp_divexact() tests
 <?php
 if (!extension_loaded("gmp")) die ("skip");
 if (!defined('GMP_VERSION') || version_compare("4.2.1", GMP_VERSION, ">=")) {
-	die("skip your GMP is too old and will crash");
+    die("skip your GMP is too old and will crash");
 }
 ?>
 --FILE--
 <?php
 
-var_dump(gmp_divexact(1, 1, 1));
-var_dump(gmp_divexact());
-
 $r = gmp_divexact("233", "23345555555555555555555555");
 var_dump(gmp_strval($r));
 
-$r = gmp_divexact("233", "0");
-var_dump(gmp_strval($r));
+try {
+    $r = gmp_divexact("233", "0");
+    var_dump(gmp_strval($r));
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $r = gmp_divexact("100", "10");
 var_dump(gmp_strval($r));
@@ -38,16 +39,9 @@ var_dump(gmp_strval($r));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: gmp_divexact() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_divexact() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
+--EXPECT--
 string(1) "0"
-
-Warning: gmp_divexact(): Zero operand not allowed in %s on line %d
-string(1) "0"
+Division by zero
 string(2) "10"
 string(3) "512"
 string(19) "5000000000000000000"

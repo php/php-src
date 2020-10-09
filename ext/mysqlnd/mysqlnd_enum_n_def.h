@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -631,6 +629,7 @@ enum mysqlnd_packet_type
 	PROT_CHG_USER_RESP_PACKET,
 	PROT_SHA256_PK_REQUEST_PACKET,
 	PROT_SHA256_PK_REQUEST_RESPONSE_PACKET,
+	PROT_CACHED_SHA2_RESULT_PACKET,
 	PROT_LAST /* should always be last */
 };
 
@@ -710,13 +709,3 @@ enum mysqlnd_buffered_type
 #define MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA	1
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

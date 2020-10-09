@@ -14,4 +14,4 @@ class bar extends php_user_filter {
 }
 ?>
 --EXPECTF--
-Warning: Declaration of bar::filter($in, $out, &$consumed) should be compatible with php_user_filter::filter($in, $out, &$consumed, $closing) in %s on line %d
+Fatal error: Declaration of bar::filter($in, $out, &$consumed) must be compatible with php_user_filter::filter($in, $out, &$consumed, bool $closing) in %s on line %d

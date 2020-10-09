@@ -4,10 +4,10 @@ errmsg: cannot reassign $this (by ref)
 <?php
 
 class test {
-	function foo() {
-		$a = new test;
-		$this = &$a;
-	}
+    function foo() {
+        $a = new test;
+        $this = &$a;
+    }
 }
 
 $t = new test;

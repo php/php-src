@@ -7,5 +7,6 @@ function answer(): int {
 }
 
 var_dump(answer());
+?>
 --EXPECT--
 int(42)

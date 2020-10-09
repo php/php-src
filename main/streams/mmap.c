@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,12 +27,6 @@ PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t le
 	range.mode = mode;
 	range.mapped = NULL;
 
-	/* For now, we impose an arbitrary limit to avoid
-	 * runaway swapping when large files are passed through. */
-	if (length > 4 * 1024 * 1024) {
-		return NULL;
-	}
-
 	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_MAP_RANGE, &range)) {
 		if (mapped_len) {
 			*mapped_len = range.length;
@@ -46,7 +38,7 @@ PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t le
 
 PHPAPI int _php_stream_mmap_unmap(php_stream *stream)
 {
-	return php_stream_set_option(stream, PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_UNMAP, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0;
+	return php_stream_set_option(stream, PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_UNMAP, NULL) == PHP_STREAM_OPTION_RETURN_OK;
 }
 
 PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden)
@@ -62,12 +54,3 @@ PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden)
 
 	return ret;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

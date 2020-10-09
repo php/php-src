@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,9 +38,8 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
 }
 /* }}} */
 
-/* {{{ proto string md5(string str, [ bool raw_output])
-   Calculate the md5 hash of a string */
-PHP_NAMED_FUNCTION(php_if_md5)
+/* {{{ Calculate the md5 hash of a string */
+PHP_FUNCTION(md5)
 {
 	zend_string *arg;
 	zend_bool raw_output = 0;
@@ -68,9 +65,8 @@ PHP_NAMED_FUNCTION(php_if_md5)
 }
 /* }}} */
 
-/* {{{ proto string md5_file(string filename [, bool raw_output])
-   Calculate the md5 hash of given filename */
-PHP_NAMED_FUNCTION(php_if_md5_file)
+/* {{{ Calculate the md5 hash of given filename */
+PHP_FUNCTION(md5_file)
 {
 	char          *arg;
 	size_t           arg_len;
@@ -78,7 +74,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	size_t           n;
+	ssize_t       n;
 	php_stream    *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -167,8 +163,9 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
  * doesn't work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
+typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
 # define SET(n) \
-	(*(uint32_t *)&ptr[(n) * 4])
+	(*(unaligned_uint32_t *)&ptr[(n) * 4])
 # define GET(n) \
 	SET(n)
 #else
@@ -389,12 +386,3 @@ PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 
 	ZEND_SECURE_ZERO(ctx, sizeof(*ctx));
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

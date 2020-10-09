@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,44 +31,46 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
+#include "zend_exceptions.h"
 
-
-/* Truncate a number to zero scale.  To avoid sharing issues (refcount and
-   shared n_value) the number is copied, this copy is truncated, and the
-   original number is "freed". */
-
-static void
-_bc_truncate (bc_num *num)
-{
-  bc_num temp;
-
-  temp = bc_new_num ((*num)->n_len, 0);
-  temp->n_sign = (*num)->n_sign;
-  memcpy (temp->n_value, (*num)->n_value, (*num)->n_len);
-  bc_free_num (num);
-  *num = temp;
-}
-
-
-/* Raise BASE to the EXPO power, reduced modulo MOD.  The result is
-   placed in RESULT.  If a EXPO is not an integer,
-   only the integer part is used.  */
-
-int
-bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
+/* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
+zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
 {
   bc_num power, exponent, modulus, parity, temp;
   int rscale;
 
-  /* Check for correct numbers. */
-  if (bc_is_zero(mod)) return -1;
-  if (bc_is_neg(expo)) return -1;
+	/* Check the base for scale digits. */
+	if (base->n_scale != 0) {
+		/* 1st argument from PHP_FUNCTION(bcpowmod) */
+		zend_argument_value_error(1, "cannot have a fractional part");
+		return FAILURE;
+    }
+	/* Check the exponent for scale digits. */
+	if (expo->n_scale != 0) {
+		/* 2nd argument from PHP_FUNCTION(bcpowmod) */
+		zend_argument_value_error(2, "cannot have a fractional part");
+		return FAILURE;
+    }
+	if (bc_is_neg(expo)) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		return FAILURE;
+	}
+	/* Check the modulus for scale digits. */
+	if (mod->n_scale != 0) {
+		/* 3rd argument from PHP_FUNCTION(bcpowmod) */
+		zend_argument_value_error(3, "cannot have a fractional part");
+		return FAILURE;
+    }
+    /* Modulus cannot be 0 */
+	if (bc_is_zero(mod)) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		return FAILURE;
+	}
 
   /* Set initial values.  */
   power = bc_copy_num (base);
@@ -77,31 +79,11 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   temp = bc_copy_num (BCG(_one_));
   bc_init_num(&parity);
 
-  /* Check the base for scale digits. */
-  if (power->n_scale != 0)
-    {
-      php_error_docref (NULL, E_WARNING, "non-zero scale in base");
-      _bc_truncate (&power);
-    }
-
-  /* Check the exponent for scale digits. */
-  if (exponent->n_scale != 0)
-    {
-      php_error_docref (NULL, E_WARNING, "non-zero scale in exponent");
-      _bc_truncate (&exponent);
-    }
-
-  /* Check the modulus for scale digits. */
-  if (modulus->n_scale != 0)
-    {
-      php_error_docref (NULL, E_WARNING, "non-zero scale in modulus");
-      _bc_truncate (&modulus);
-    }
-
   /* Do the calculation. */
   rscale = MAX(scale, power->n_scale);
   if ( !bc_compare(modulus, BCG(_one_)) )
     {
+      bc_free_num (&temp);
       temp = bc_new_num (1, scale);
     }
   else
@@ -127,5 +109,5 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   bc_free_num (result);
   bc_free_num (&parity);
   *result = temp;
-  return 0;	/* Everything is OK. */
+  return SUCCESS;	/* Everything is OK. */
 }

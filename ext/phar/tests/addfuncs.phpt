@@ -6,7 +6,7 @@ Phar: addFile/addFromString
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $phar = new Phar($fname);
 $phar->addFromString('a', 'hi');
@@ -24,7 +24,7 @@ $phar->addFile($pname . '/a', 'a');
 echo $e->getMessage() . "\n";
 }
 try {
-$phar->addFile(dirname(__FILE__) . '/does/not/exist');
+$phar->addFile(__DIR__ . '/does/not/exist');
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
@@ -39,9 +39,8 @@ $phar->addFromString('.phar/stub.php', 'hi');
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 hi
 hi
@@ -50,4 +49,3 @@ Entry a does not exist and cannot be created: phar error: file "a" in phar "%sad
 phar error: unable to open file "%s/does/not/exist" to add to phar archive
 Cannot create any files in magic ".phar" directory
 Cannot create any files in magic ".phar" directory
-===DONE===

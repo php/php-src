@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +31,7 @@
 		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
-		php_error_docref(NULL, E_WARNING, "Node no longer exists"); \
+		zend_throw_error(NULL, "SimpleXMLElement is not properly initialized"); \
 	} \
 }
 
@@ -55,13 +53,3 @@ PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe);
 PHP_SXE_API void php_sxe_move_forward_iterator(php_sxe_object *sxe);
 
 #endif /* PHP_SIMPLEXML_EXPORTS_H */
-
-/**
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * indent-tabs-mode: t
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

@@ -2,13 +2,13 @@
 GetImageSize() for compressed swf files
 --SKIPIF--
 <?php
-	if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
-		die("skip zlib extension is not available");
-	}
+    if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
+        die("skip zlib extension is not available");
+    }
 ?>
 --FILE--
 <?php
-	var_dump(getimagesize(dirname(__FILE__) . "/test13pix.swf"));
+    var_dump(getimagesize(__DIR__ . "/test13pix.swf"));
 ?>
 --EXPECT--
 array(5) {

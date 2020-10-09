@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -536,12 +534,3 @@ static const uint64_t table[4*256] = {
 	L64(0xCD56D9430EA8280E)   /* 1020 */,    L64(0xC12591D7535F5065)   /* 1021 */,
 	L64(0xC83223F1720AEF96)   /* 1022 */,    L64(0xC3A0396F7363A51F)   /* 1023 */,
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

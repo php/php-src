@@ -15,7 +15,7 @@ bool(false)
 bool(true)
 bool(true)
 
-Notice: Uninitialized string offset: -10 in %s on line 6
+Warning: Uninitialized string offset -10 in %s on line %d
 string(0) ""
 string(1) "u"
 string(1) "u"

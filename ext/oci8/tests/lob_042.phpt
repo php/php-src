@@ -3,13 +3,13 @@ Check various LOB error messages
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
-require(dirname(__FILE__).'/create_table.inc');
+require(__DIR__.'/connect.inc');
+require(__DIR__.'/create_table.inc');
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -32,41 +32,44 @@ var_dump($blob->write($str));
 var_dump($blob->truncate(1));
 var_dump($blob->truncate(1));
 var_dump($blob->truncate(2));
-var_dump($blob->truncate(-1));
 var_dump($blob->read(2));
 
 var_dump($blob->import("does_not_exist"));
 var_dump($blob->saveFile("does_not_exist"));
 
-require(dirname(__FILE__).'/drop_table.inc');
+try {
+    var_dump($blob->truncate(-1));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+require(__DIR__.'/drop_table.inc');
 
 echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 
-Warning: OCI-Lob::writetemporary(): Invalid temporary lob type: %d in %s on line %d
+Warning: OCILob::writetemporary(): Invalid temporary lob type: %d in %s on line %d
 bool(false)
 int(6)
 bool(true)
 bool(true)
 
-Warning: OCI-Lob::truncate(): Size must be less than or equal to the current LOB size in %s on line %d
+Warning: OCILob::truncate(): Size must be less than or equal to the current LOB size in %s on line %d
 bool(false)
 
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
+Warning: OCILob::read(): Offset must be less than size of the LOB in %s on line %d
 bool(false)
 
-Warning: OCI-Lob::read(): Offset must be less than size of the LOB in %s on line %d
+Warning: OCILob::import(): Can't open file %s in %s on line %d
 bool(false)
 
-Warning: OCI-Lob::import(): Can't open file %s in %s on line %d
+Warning: OCILob::savefile(): Can't open file %s in %s on line %d
 bool(false)
-
-Warning: OCI-Lob::savefile(): Can't open file %s in %s on line %d
-bool(false)
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 Done

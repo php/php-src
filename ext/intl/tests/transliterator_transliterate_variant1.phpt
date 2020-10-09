@@ -20,6 +20,7 @@ echo transliterator_transliterate(new A(), $str), "\n";
 echo intl_get_error_message(), "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 \u0020o
 

@@ -165,7 +165,7 @@ define ____printzv_contents
 	set $type = $zvalue->u1.v.type
 
 	# 15 == IS_INDIRECT
-	if $type > 5 && $type != 15
+	if $type > 5 && $type < 12
 		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
 	end
 
@@ -215,12 +215,8 @@ define ____printzv_contents
 		if ! $arg1
 			if $handlers->get_properties == &zend_std_get_properties
 				if $zobj->properties
+					printf "\nProperties "
 					set $ht = $zobj->properties
-				else
-					set $ht = &$zobj->ce->properties_info
-				end
-				printf "\nProperties "
-				if $ht
 					set $ind = $ind + 1
 					____print_ht $ht 1
 					set $ind = $ind - 1
@@ -230,7 +226,19 @@ define ____printzv_contents
 						set $i = $i - 1
 					end
 				else
-					echo "not found"
+					printf " {\n"
+					set $ht = &$zobj->ce->properties_info
+					set $k = 0
+					set $num = $ht->nNumUsed
+					while $k < $num
+						set $p = (Bucket*)($ht->arData + $k)
+						set $name = $p->key
+						set $prop = (zend_property_info*)$p->val.value.ptr
+						set $val = (zval*)((char*)$zobj + $prop->offset)
+						printf "%s => ", $name->val
+						printzv $val
+						set $k = $k + 1
+					end
 				end
 			end
 		end
@@ -244,34 +252,25 @@ define ____printzv_contents
 		____printzv &$zvalue->value.ref->val $arg1
 	end
 	if $type == 11
-		printf "const: %s", $zvalue->value.str->val
-	end
-	if $type == 12
 		printf "CONSTANT_AST"
 	end
-	if $type == 13
-		printf "_BOOL"
-	end
-	if $type == 14
-		printf "CALLABLE"
-	end
-	if $type == 15
+	if $type == 12
 		printf "indirect: "
 		____printzv $zvalue->value.zv $arg1
 	end
-	if $type == 17
+	if $type == 13
 		printf "pointer: %p", $zvalue->value.ptr
 	end
-	if $type == 18
-		printf "ITERABLE"
-	end
-	if $type == 19
-		printf "VOID"
-	end
-	if $type == 20
+	if $type == 15
 		printf "_ERROR"
 	end
-	if $type == 16 || $type > 20
+	if $type == 16
+		printf "_BOOL"
+	end
+	if $type == 17
+		printf "_NUMBER"
+	end
+	if $type > 17
 		printf "unknown type %d", $type
 	end
 	printf "\n"

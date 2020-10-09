@@ -546,6 +546,7 @@ Bigint {
  static Bigint *freelist[Kmax+1];
 
 static void destroy_freelist(void);
+static void free_p5s(void);
 
 #ifdef ZTS
 static MUTEX_T dtoa_mutex;
@@ -564,6 +565,8 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
+	free_p5s();
+
 #ifdef ZTS
 	tsrm_mutex_free(dtoa_mutex);
 	dtoa_mutex = NULL;
@@ -1560,7 +1563,7 @@ hexdig_init(void)	/* Use of hexdig_init omitted 20121220 to avoid a */
 	htinit(hexdig, USC "ABCDEF", 0x10 + 10);
 	}
 #else
-static unsigned char hexdig[256] = {
+static const unsigned char hexdig[256] = {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -2705,7 +2708,7 @@ zend_strtod
 				L = c - '0';
 				s1 = s;
 				while((c = *++s) >= '0' && c <= '9')
-					L = 10*L + c - '0';
+					L = (Long) (10*(ULong)L + (c - '0'));
 				if (s - s1 > 8 || L > 19999)
 					/* Avoid confusion from exponents
 					 * so large that e might overflow.
@@ -3751,7 +3754,7 @@ zend_dtoa
 	*/
 
 	int bbits, b2, b5, be, dig, i, ieps, ilim = 0, ilim0, ilim1,
-		j, j1, k, k0, k_check, leftright, m2, m5, s2, s5,
+		j, j1 = 0, k, k0, k_check, leftright, m2, m5, s2, s5,
 		spec_case = 0, try_quick;
 	Long L;
 #ifndef Sudden_Underflow
@@ -4540,14 +4543,19 @@ static void destroy_freelist(void)
 	FREE_DTOA_LOCK(0)
 }
 
+static void free_p5s(void)
+{
+	Bigint **listp, *tmp;
+
+	ACQUIRE_DTOA_LOCK(1)
+	listp = &p5s;
+	while ((tmp = *listp) != NULL) {
+		*listp = tmp->next;
+		free(tmp);
+	}
+	FREE_DTOA_LOCK(1)
+}
+
 #ifdef __cplusplus
 }
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

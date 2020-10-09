@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_sjis_2004.h"
 
@@ -38,8 +34,6 @@
 #include "unicode_table_jis.h"
 
 extern const unsigned char mblen_table_sjis[];
-
-static int mbfl_filt_ident_sjis2004(int c, mbfl_identify_filter *filter);
 
 extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern int mbfl_bisec_srch(int w, const unsigned short *tbl, int n);
@@ -61,7 +55,6 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis2004 = {
 	mbfl_no_encoding_sjis2004,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
@@ -69,18 +62,20 @@ const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
 	mbfl_no_encoding_sjis2004,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis2004 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_sjis2004,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_jis2004_flush
+	mbfl_filt_conv_jis2004_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -508,7 +503,7 @@ retry:
 
 	/* check for 2nd char of combining characters */
 	if ((filter->status & 0xf) == 1 &&
-		filter->cache >= 0 && filter->cache <= jisx0213_u2_tbl_len) {
+		filter->cache >= 0 && filter->cache < jisx0213_u2_tbl_len) {
 		k = filter->cache;
 		filter->status &= ~0xf;
 		filter->cache = 0;
@@ -670,9 +665,7 @@ retry:
 			CK((*filter->output_function)(s2, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

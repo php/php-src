@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -78,7 +76,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
 		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
 		SYSTEMTIME loc_t;
@@ -175,7 +173,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
 		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
 		SYSTEMTIME loc_t;
@@ -414,7 +412,8 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 #endif
 	}
 
-	return zend_stack_del_top(&self->call_stack) == SUCCESS? PASS:FAIL;
+	zend_stack_del_top(&self->call_stack);
+	return PASS;
 }
 /* }}} */
 
@@ -524,7 +523,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				if (i + 1 < mode_len && mode[i+1] == ',') {
 					unsigned int j = i + 2;
 #ifdef PHP_WIN32
-					if (i+4 < mode_len && mode[i+3] == ':' && (mode[i+4] == '\\' || mode[i+5] == '/')) {
+					if (i+4 < mode_len && mode[i+3] == ':' && (mode[i+4] == '\\' || mode[i+4] == '/')) {
 						j = i + 5;
 					}
 #endif
@@ -545,11 +544,9 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				state = PARSER_WAIT_COLON;
 				break;
 			case ':':
-#if 0
 				if (state != PARSER_WAIT_COLON) {
 					php_error_docref(NULL, E_WARNING, "Consecutive semicolons at position %u", i);
 				}
-#endif
 				state = PARSER_WAIT_MODIFIER;
 				break;
 			case 'f': /* limit output to these functions */
@@ -583,10 +580,8 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 					}
 					i = j;
 				} else {
-#if 0
 					php_error_docref(NULL, E_WARNING,
 									 "Expected list of functions for '%c' found none", mode[i]);
-#endif
 				}
 				state = PARSER_WAIT_COLON;
 				break;
@@ -663,9 +658,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				break;
 			default:
 				if (state == PARSER_WAIT_MODIFIER) {
-#if 0
 					php_error_docref(NULL, E_WARNING, "Unrecognized format '%c'", mode[i]);
-#endif
 					if (i+1 < mode_len && mode[i+1] == ',') {
 						i+= 2;
 						while (i < mode_len) {
@@ -677,9 +670,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 					}
 					state = PARSER_WAIT_COLON;
 				} else if (state == PARSER_WAIT_COLON) {
-#if 0
 					php_error_docref(NULL, E_WARNING, "Colon expected, '%c' found", mode[i]);
-#endif
 				}
 				break;
 		}
@@ -699,6 +690,10 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_debug)
 MYSQLND_CLASS_METHODS_END;
 
 
+static void free_ptr(zval *zv) {
+	efree(Z_PTR_P(zv));
+}
+
 /* {{{ mysqlnd_debug_init */
 PHPAPI MYSQLND_DEBUG *
 mysqlnd_debug_init(const char * skip_functions[])
@@ -710,7 +705,7 @@ mysqlnd_debug_init(const char * skip_functions[])
 	zend_stack_init(&ret->call_stack, sizeof(char *));
 	zend_stack_init(&ret->call_time_stack, sizeof(uint64_t));
 	zend_hash_init(&ret->not_filtered_functions, 0, NULL, NULL, 0);
-	zend_hash_init(&ret->function_profiles, 0, NULL, NULL, 0);
+	zend_hash_init(&ret->function_profiles, 0, NULL, free_ptr, 0);
 
 	ret->m = & mysqlnd_mysqlnd_debug_methods;
 	ret->skip_functions = skip_functions;
@@ -780,13 +775,3 @@ mysqlnd_debug_trace_plugin_register(void)
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_trace_log_plugin);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -5,7 +5,7 @@ oci_fetch_row()
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -22,14 +22,14 @@ oci8_test_sql_execute($c, $stmtarray);
 // Run Test
 
 if (!($s = oci_parse($c, "select * from fetch_row_tab"))) {
-	die("oci_parse(select) failed!\n");
+    die("oci_parse(select) failed!\n");
 }
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_row($s)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 // Cleanup

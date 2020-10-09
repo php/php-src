@@ -9,6 +9,7 @@ function _int_(?int $v): ?int {
 
 var_dump(_int_(null));
 var_dump(_int_(1));
+?>
 --EXPECT--
 NULL
 int(1)

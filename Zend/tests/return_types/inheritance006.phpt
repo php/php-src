@@ -17,5 +17,9 @@ class Bar extends Foo {
         return new B;
     }
 }
---EXPECTF--
-Fatal error: Declaration of Bar::test(): B must be compatible with Foo::test(): A in %sinheritance006.php on line 14
+
+echo get_class(Bar::test());
+
+?>
+--EXPECT--
+B

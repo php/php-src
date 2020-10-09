@@ -7,15 +7,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/* Prototype: bool is_dir ( string $dirname );
-   Description: Tells whether the dirname is a directory
-     Returns TRUE if the dirname exists and is a directory, FALSE  otherwise.
-*/
-
 /* Testing is_dir() with dir, soft & hard link to dir,
      and with file, soft & hard link to file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing is_dir() with dir and links to dir ***\n";
 echo "-- With dir --\n";
@@ -55,7 +50,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 if(file_exists($file_path."/is_dir_variation2_symlink")) {
   unlink($file_path."/is_dir_variation2_symlink");
 }

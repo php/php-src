@@ -7,12 +7,18 @@ if (!extension_loaded('gd')) die('skip ext/gd not available');
 --FILE--
 <?php
 $im = imagecreatetruecolor(1, 1);
-var_dump(imagesetstyle($im, array()));
+
+try {
+    var_dump(imagesetstyle($im, array()));
+}
+catch (\Error $ex) {
+    echo $ex->getMessage() . "\n";
+}
+
 imagesetpixel($im, 0, 0, IMG_COLOR_STYLED);
 imagedestroy($im);
 ?>
 ====DONE====
---EXPECTF--
-Warning: imagesetstyle(): styles array must not be empty in %s%ebug72709.php on line %d
-bool(false)
+--EXPECT--
+imagesetstyle(): Argument #2 ($style) cannot be empty
 ====DONE====

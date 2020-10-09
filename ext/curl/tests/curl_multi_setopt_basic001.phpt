@@ -3,11 +3,7 @@ curl_multi_setopt basic test
 --SKIPIF--
 <?php
 if (!extension_loaded("curl")) {
-	    exit("skip curl extension not loaded");
-}
-$curl_version = curl_version();
-if ($curl_version['version_number'] < 0x071000) {
-	    exit("skip: test works only with curl >= 7.16.0");
+        exit("skip curl extension not loaded");
 }
 ?>
 --FILE--
@@ -15,11 +11,14 @@ if ($curl_version['version_number'] < 0x071000) {
 
 $mh = curl_multi_init();
 var_dump(curl_multi_setopt($mh, CURLMOPT_PIPELINING, 0));
-var_dump(curl_multi_setopt($mh, -1, 0));
+
+try {
+    curl_multi_setopt($mh, -1, 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
-
-Warning: curl_multi_setopt(): Invalid curl multi configuration option in %s on line %d
-bool(false)
+curl_multi_setopt(): Argument #2 ($option) is not a valid cURL multi option

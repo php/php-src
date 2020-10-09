@@ -12,7 +12,6 @@ var_dump(iterator_to_array($it, false));
 var_dump(iterator_to_array($it, true));
 
 ?>
-===DONE===
 --EXPECT--
 array(2) {
   [0]=>
@@ -36,4 +35,3 @@ array(2) {
   [1]=>
   int(3)
 }
-===DONE===

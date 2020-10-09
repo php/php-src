@@ -11,5 +11,8 @@ array_walk_recursive(
 );
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
+Warning: {closure}(): Argument #3 ($userdata) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #3 ($userdata) must be passed by reference, value given in %s on line %d
 Done

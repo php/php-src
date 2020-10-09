@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_euc_kr.h"
 #include "unicode_table_uhc.h"
@@ -72,7 +68,6 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 const struct mbfl_identify_vtbl vtbl_identify_euckr = {
 	mbfl_no_encoding_euc_kr,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_euckr
 };
 
@@ -80,18 +75,20 @@ const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_no_encoding_euc_kr,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_euckr_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_kr,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_euckr,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -221,9 +218,7 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0xff, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

@@ -18,7 +18,11 @@ if (!$socket) {
 socket_set_block($socket);
 
 //wrong params
-$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, array());
+try {
+    $retval_1 = socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, []);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 //set/get comparison
 $options = array("sec" => 1, "usec" => 0);
@@ -29,10 +33,7 @@ var_dump($retval_2);
 var_dump($retval_3 === $options);
 socket_close($socket);
 ?>
---EXPECTF--
-Warning: socket_set_option(): no key "sec" passed in optval in %s on line %d
+--EXPECT--
+socket_set_option(): Argument #4 ($value) must have key "sec"
 bool(true)
 bool(true)
---CREDITS--
-Moritz Neuhaeuser, info@xcompile.net
-PHP Testfest Berlin 2009-05-10

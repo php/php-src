@@ -15,8 +15,8 @@ trait THelloImpl {
 }
 
 class TraitsTest {
-	use THello;
-	use THelloImpl;
+    use THello;
+    use THelloImpl;
 }
 
 $test = new TraitsTest();

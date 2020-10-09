@@ -13,7 +13,7 @@ var_dump(exif_read_data(__DIR__ . '/tag_with_illegal_zero_components.jpeg'));
 
 ?>
 --EXPECTF--
-Warning: exif_read_data(tag_with_illegal_zero_components.jpeg): Process tag(x0202=JPEGInterch): Cannot be empty in %s on line %d
+Warning: exif_read_data(tag_with_illegal_zero_components.jpeg): Process tag(x0202=JPEGInterchangeFormatLength): Cannot be empty in %s on line %d
 
 Warning: exif_read_data(tag_with_illegal_zero_components.jpeg): File structure corrupted in %s on line %d
 

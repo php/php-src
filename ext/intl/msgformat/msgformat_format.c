@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -22,7 +20,6 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_format.h"
 #include "msgformat_data.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
@@ -50,11 +47,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 }
 /* }}} */
 
-/* {{{ proto mixed MessageFormatter::format( array $args )
- * Format a message. }}} */
-/* {{{ proto mixed msgfmt_format( MessageFormatter $nf, array $args )
- * Format a message.
- */
+/* {{{ Format a message. */
 PHP_FUNCTION( msgfmt_format )
 {
 	zval *args;
@@ -65,10 +58,7 @@ PHP_FUNCTION( msgfmt_format )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, MessageFormatter_ce_ptr,  &args ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_format: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -78,11 +68,7 @@ PHP_FUNCTION( msgfmt_format )
 }
 /* }}} */
 
-/* {{{ proto mixed MessageFormatter::formatMessage( string $locale, string $pattern, array $args )
- * Format a message. }}} */
-/* {{{ proto mixed msgfmt_format_message( string $locale, string $pattern, array $args )
- * Format a message.
- */
+/* {{{ Format a message. */
 PHP_FUNCTION( msgfmt_format_message )
 {
 	zval       *args;
@@ -99,10 +85,7 @@ PHP_FUNCTION( msgfmt_format_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "ssa",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &args ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_format_message: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	INTL_CHECK_LOCALE_LEN(slocale_len);
@@ -148,12 +131,3 @@ PHP_FUNCTION( msgfmt_format_message )
 	msgformat_data_free(&mfo->mf_data);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,23 +1,10 @@
 --TEST--
 Test lstat() and stat() functions: usage variations - effects of rename() on dir
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
-}
-?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of rename() on stats of dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require("file.inc");
 
 /* create temp directory */
@@ -48,7 +35,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/lstat_stat_variation1a");
 ?>
 --EXPECT--

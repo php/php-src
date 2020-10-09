@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,8 +55,6 @@ struct _zend_generator_node {
 struct _zend_generator {
 	zend_object std;
 
-	zend_object_iterator *iterator;
-
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
@@ -89,9 +87,6 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
-
-	zval *gc_buffer;
-	uint32_t gc_buffer_size;
 };
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
@@ -134,13 +129,3 @@ static zend_always_inline zend_generator *zend_generator_get_current(zend_genera
 END_EXTERN_C()
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

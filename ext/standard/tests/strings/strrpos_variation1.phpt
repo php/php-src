@@ -2,11 +2,6 @@
 Test strrpos() function : usage variations - double quoted strings for 'haystack' & 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of last occurrence of 'needle' in 'haystack'.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrpos() function by passing double quoted strings for 'haystack' & 'needle' arguments */
 
 echo "*** Testing strrpos() function: with double quoted strings ***\n";
@@ -72,7 +67,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with double quoted strings ***
 -- Iteration 1 --
 int(28)
@@ -108,36 +103,20 @@ int(9)
 int(8)
 bool(false)
 -- Iteration 12 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(44)
+int(44)
 -- Iteration 13 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(44)
+int(44)
 -- Iteration 14 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(44)
+int(44)
 -- Iteration 15 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(44)
+int(44)
 -- Iteration 16 --
-bool(false)
-bool(false)
+int(44)
+int(44)
 -- Iteration 17 --
 int(43)
 int(43)

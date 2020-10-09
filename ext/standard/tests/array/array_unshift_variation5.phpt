@@ -4,11 +4,6 @@ Test array_unshift() function : usage variations - assoc. array with diff values
 precision=12
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unshift() by passing different
  * associative arrays having different possible values to $array argument.
@@ -209,9 +204,9 @@ array(5) {
   ["f2"]=>
   float(3.33)
   [1]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
-  float(33333333.3333)
+  float(33333333.333333)
 }
 int(7)
 array(7) {
@@ -226,9 +221,9 @@ array(7) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
-  float(33333333.3333)
+  float(33333333.333333)
 }
 -- Iteration 7 --
 int(5)

@@ -170,8 +170,6 @@ static const u_char	bits8[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 
 
 static const unsigned char	ascii64[] =
 	 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-/*	  0000000000111111111122222222223333333333444444444455555555556666 */
-/*	  0123456789012345678901234567890123456789012345678901234567890123 */
 
 static u_char m_sbox[4][4096];
 static uint32_t psbox[4][256];
@@ -607,7 +605,7 @@ des_cipher(const char *in, char *out, uint32_t salt, int count,
 }
 
 char *
-_crypt_extended_r(const char *key, const char *setting,
+_crypt_extended_r(const unsigned char *key, const char *setting,
 	struct php_crypt_extended_data *data)
 {
 	int		i;

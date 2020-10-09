@@ -4,7 +4,7 @@ executing a code with -R
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename_txt = dirname(__FILE__)."/010.test.txt";
+$filename_txt = __DIR__."/010.test.txt";
 
 $txt = '
 test

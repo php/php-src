@@ -7,11 +7,8 @@ $e = unserialize('O:9:"Exception":7:{s:17:"'."\0".'Exception'."\0".'string";s:1:
 var_dump($e."");
 ?>
 --EXPECTF--
-Notice: Undefined property: Exception::$file in %s%ebug69793.php on line %d
-
-Notice: Undefined property: Exception::$previous in %s%ebug69793.php on line %d
-
-Notice: Undefined property: Exception::$previous in %s%ebug69793.php on line %d
-string(41) "Exception in :1337
+Fatal error: Uncaught TypeError: Cannot assign int to property Exception::$previous of type ?Throwable in %s:%d
 Stack trace:
-#0 {main}"
+#0 %s(%d): unserialize('O:9:"Exception"...')
+#1 {main}
+  thrown in %s on line %d

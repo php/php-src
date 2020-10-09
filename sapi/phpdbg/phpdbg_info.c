@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +123,7 @@ PHPDBG_INFO(constants) /* {{{ */
 		"address=\"%p\" refcount=\"%d\" type=\"%s\" name=\"%.*s\" " attrs, \
 		"%-18p %-7d %-9s %.*s" msg, &data->value, \
 		Z_REFCOUNTED(data->value) ? Z_REFCOUNT(data->value) : 1, \
-		zend_zval_type_name(&data->value), \
+		zend_get_type_by_const(Z_TYPE(data->value)), \
 		(int) ZSTR_LEN(data->name), ZSTR_VAL(data->name), ##__VA_ARGS__)
 
 			switch (Z_TYPE(data->value)) {
@@ -233,7 +231,7 @@ static int phpdbg_print_symbols(zend_bool show_globals) {
 #define VARIABLEINFO(attrs, msg, ...) \
 	phpdbg_writeln("variable", \
 		"address=\"%p\" refcount=\"%d\" type=\"%s\" refstatus=\"%s\" name=\"%.*s\" " attrs, \
-		"%-18p %-7d %-9s %s$%.*s" msg, data, Z_REFCOUNTED_P(data) ? Z_REFCOUNT_P(data) : 1, zend_zval_type_name(data), isref, (int) ZSTR_LEN(var), ZSTR_VAL(var), ##__VA_ARGS__)
+		"%-18p %-7d %-9s %s$%.*s" msg, data, Z_REFCOUNTED_P(data) ? Z_REFCOUNT_P(data) : 1, zend_get_type_by_const(Z_TYPE_P(data)), isref, (int) ZSTR_LEN(var), ZSTR_VAL(var), ##__VA_ARGS__)
 retry_switch:
 				switch (Z_TYPE_P(data)) {
 					case IS_RESOURCE:
@@ -343,11 +341,11 @@ PHPDBG_INFO(literal) /* {{{ */
 PHPDBG_INFO(memory) /* {{{ */
 {
 	size_t used, real, peak_used, peak_real;
-	zend_mm_heap *heap;
+	zend_mm_heap *orig_heap = NULL;
 	zend_bool is_mm;
 
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		heap = zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem());
+		orig_heap = zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem());
 	}
 	if ((is_mm = is_zend_mm())) {
 		used = zend_memory_usage(0);
@@ -355,8 +353,8 @@ PHPDBG_INFO(memory) /* {{{ */
 		peak_used = zend_memory_peak_usage(0);
 		peak_real = zend_memory_peak_usage(1);
 	}
-	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		zend_mm_set_heap(heap);
+	if (orig_heap) {
+		zend_mm_set_heap(orig_heap);
 	}
 
 	if (is_mm) {

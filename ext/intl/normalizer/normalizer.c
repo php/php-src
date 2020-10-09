@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -42,7 +40,6 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 	#define NORMALIZER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( name ) - 1, value );
 
 	/* Normalization form constants */
-	NORMALIZER_EXPOSE_CLASS_CONST( NONE );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_D );
 	NORMALIZER_EXPOSE_CLASS_CONST( NFD );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_KD );
@@ -61,12 +58,3 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 	#undef NORMALIZER_EXPOSE_CONST
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -62,7 +62,7 @@ var_dump(empty($str[$f]));
 print "done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 - empty ---
 bool(false)
 bool(true)

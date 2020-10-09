@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,18 +27,10 @@ typedef struct {
 	unsigned char buffer[32];
 	const uint32_t (*tables)[4][256];
 } PHP_GOST_CTX;
+#define PHP_GOST_SPEC "l16l2bb32"
 
 PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *);
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_GOSTFinal(unsigned char[64], PHP_GOST_CTX *);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +21,10 @@
 #define PDO_PARSER_TEXT 1
 #define PDO_PARSER_BIND 2
 #define PDO_PARSER_BIND_POS 3
-#define PDO_PARSER_EOI 4
+#define PDO_PARSER_ESCAPED_QUESTION 4
+#define PDO_PARSER_EOI 5
+
+#define PDO_PARSER_BINDNO_ESCAPED_CHAR -1
 
 #define RET(i) {s->cur = cursor; return i; }
 #define SKIP_ONE(i) {s->cur = s->tok + 1; return i; }
@@ -35,20 +36,21 @@
 #define YYFILL(n)		{ RET(PDO_PARSER_EOI); }
 
 typedef struct Scanner {
-	char 	*ptr, *cur, *tok, *end;
+	const char *ptr, *cur, *tok, *end;
 } Scanner;
 
 static int scan(Scanner *s)
 {
-	char *cursor = s->cur;
+	const char *cursor = s->cur;
 
 	s->tok = cursor;
 	/*!re2c
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
+	ESCQUESTION	= [?][?];
 	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
 	SPECIALS	= [:?"'-/];
-	MULTICHAR	= ([:]{2,}|[?]{2,});
+	MULTICHAR	= [:]{2,};
 	ANYNOEOF	= [\001-\377];
 	*/
 
@@ -56,6 +58,7 @@ static int scan(Scanner *s)
 		(["](([\\]ANYNOEOF)|ANYNOEOF\["\\])*["]) { RET(PDO_PARSER_TEXT); }
 		(['](([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
 		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
+		ESCQUESTION								{ RET(PDO_PARSER_ESCAPED_QUESTION); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
@@ -65,9 +68,9 @@ static int scan(Scanner *s)
 }
 
 struct placeholder {
-	char *pos;
+	const char *pos;
 	size_t len;
-	size_t qlen;		/* quoted length of value */
+	size_t qlen;	/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
 	int bindno;
@@ -78,14 +81,15 @@ static void free_param_name(zval *el) {
 	efree(Z_PTR_P(el));
 }
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len,
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inquery_len,
 	char **outquery, size_t *outquery_len)
 {
 	Scanner s;
-	char *ptr, *newbuffer;
+	const char *ptr;
+	char *newbuffer;
 	ptrdiff_t t;
 	uint32_t bindno = 0;
-	int ret = 0;
+	int ret = 0, escapes = 0;
 	size_t newbuffer_len;
 	HashTable *params;
 	struct pdo_bound_param_data *param;
@@ -98,14 +102,19 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	/* phase 1: look for args */
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
-		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
+		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS || t == PDO_PARSER_ESCAPED_QUESTION) {
+			if (t == PDO_PARSER_ESCAPED_QUESTION && stmt->supports_placeholders == PDO_PLACEHOLDER_POSITIONAL) {
+				/* escaped question marks unsupported, treat as text */
+				continue;
+			}
+
 			if (t == PDO_PARSER_BIND) {
 				ptrdiff_t len = s.cur - s.tok;
 				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}
 				query_type |= PDO_PLACEHOLDER_NAMED;
-			} else {
+			} else if (t == PDO_PARSER_BIND_POS) {
 				query_type |= PDO_PLACEHOLDER_POSITIONAL;
 			}
 
@@ -114,7 +123,16 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 			plc->next = NULL;
 			plc->pos = s.tok;
 			plc->len = s.cur - s.tok;
-			plc->bindno = bindno++;
+
+			if (t == PDO_PARSER_ESCAPED_QUESTION) {
+				plc->bindno = PDO_PARSER_BINDNO_ESCAPED_CHAR;
+				plc->quoted = "?";
+				plc->qlen = 1;
+				plc->freeq = 0;
+				escapes++;
+			} else {
+				plc->bindno = bindno++;
+			}
 
 			if (placetail) {
 				placetail->next = plc;
@@ -125,7 +143,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 		}
 	}
 
-	if (bindno == 0) {
+	if (!placeholders) {
 		/* nothing to do; good! */
 		return 0;
 	}
@@ -140,11 +158,16 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	if (stmt->supports_placeholders == query_type && !stmt->named_rewrite_template) {
 		/* query matches native syntax */
+		if (escapes) {
+			newbuffer_len = inquery_len;
+			goto rewrite;
+		}
+
 		ret = 0;
 		goto clean_up;
 	}
 
-	if (stmt->named_rewrite_template) {
+	if (query_type == PDO_PLACEHOLDER_NAMED && stmt->named_rewrite_template) {
 		/* magic/hack.
 		 * We we pretend that the query was positional even if
 		 * it was named so that we fall into the
@@ -155,14 +178,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	params = stmt->bound_params;
 
-	/* Do we have placeholders but no bound params */
-	if (bindno && !params && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "no parameters were bound");
-		ret = -1;
-		goto clean_up;
-	}
-
-	if (params && bindno != zend_hash_num_elements(params) && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
+	if (bindno && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE && params && bindno != zend_hash_num_elements(params)) {
 		/* extra bit of validation for instances when same params are bound more than once */
 		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
 			int ok = 1;
@@ -188,7 +204,16 @@ safe:
 		newbuffer_len = inquery_len;
 
 		/* let's quote all the values */
-		for (plc = placeholders; plc; plc = plc->next) {
+		for (plc = placeholders; plc && params; plc = plc->next) {
+			if (plc->bindno == PDO_PARSER_BINDNO_ESCAPED_CHAR) {
+				/* escaped character */
+				continue;
+			}
+
+			if (query_type == PDO_PLACEHOLDER_NONE) {
+				continue;
+			}
+
 			if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
 				param = zend_hash_index_find_ptr(params, plc->bindno);
 			} else {
@@ -269,7 +294,8 @@ safe:
 
 						default:
 							buf = zval_get_string(parameter);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
+							if (EG(exception) ||
+								!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
 									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 									param_type)) {
 								/* bork */
@@ -315,8 +341,13 @@ rewrite:
 				memcpy(newbuffer, ptr, t);
 				newbuffer += t;
 			}
-			memcpy(newbuffer, plc->quoted, plc->qlen);
-			newbuffer += plc->qlen;
+			if (plc->quoted) {
+				memcpy(newbuffer, plc->quoted, plc->qlen);
+				newbuffer += plc->qlen;
+			} else {
+				memcpy(newbuffer, plc->pos, plc->len);
+				newbuffer += plc->len;
+			}
 			ptr = plc->pos + plc->len;
 
 			plc = plc->next;
@@ -349,6 +380,11 @@ rewrite:
 		for (plc = placeholders; plc; plc = plc->next) {
 			int skip_map = 0;
 			char *p;
+
+			if (plc->bindno == PDO_PARSER_BINDNO_ESCAPED_CHAR) {
+				continue;
+			}
+
 			name = estrndup(plc->pos, plc->len);
 
 			/* check if bound parameter is already available */
@@ -394,6 +430,7 @@ rewrite:
 			efree(name);
 			plc->quoted = "?";
 			plc->qlen = 1;
+			newbuffer_len -= plc->len - 1;
 		}
 
 		goto rewrite;
@@ -414,12 +451,3 @@ clean_up:
 
 	return ret;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker ft=c
- * vim<600: noet sw=4 ts=4
- */

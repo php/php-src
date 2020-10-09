@@ -5,15 +5,15 @@ Bind with various WHERE conditions
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
 $stmtarray = array(
-	"drop table bind_query_tab",
-	"create table bind_query_tab (empno number(4), ename varchar2(10), sal number(7,2))",
-	"insert into bind_query_tab values (7934, 'MILLER', 1300)",
-	"insert into bind_query_tab values (7902, 'FORD', 3000)"
+    "drop table bind_query_tab",
+    "create table bind_query_tab (empno number(4), ename varchar2(10), sal number(7,2))",
+    "insert into bind_query_tab values (7934, 'MILLER', 1300)",
+    "insert into bind_query_tab values (7902, 'FORD', 3000)"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -56,14 +56,12 @@ while (oci_fetch($s)) {
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_query_tab"
+    "drop table bind_query_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 array(1) {
@@ -75,4 +73,3 @@ string(4) "FORD"
 string(6) "MILLER"
 Test 3
 string(4) "FORD"
-===DONE===

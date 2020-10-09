@@ -13,7 +13,6 @@ $node = $xpath->query('/root')->item(0);
 echo $node->nodeName . "\n";
 $dom->removeChild($GLOBALS['dom']->firstChild);
 echo "nodeType: " . $node->nodeType . "\n";
-
 /* Node gets destroyed during removeChild */
 $dom->loadXML('<root><child/></root>');
 $xpath = new DOMXpath($dom);
@@ -21,15 +20,15 @@ $node = $xpath->query('//child')->item(0);
 echo $node->nodeName . "\n";
 $GLOBALS['dom']->removeChild($GLOBALS['dom']->firstChild);
 
-echo "nodeType: " . $node->nodeType . "\n";
+try {
+    echo "nodeType: " . $node->nodeType . "\n";
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage() .\PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 root
 nodeType: 1
 child
-
-Warning: Couldn't fetch DOMElement. Node no longer exists in %sbug36756.php on line %d
-
-Notice: Undefined property: DOMElement::$nodeType in %sbug36756.php on line %d
-nodeType:
+Error: Couldn't fetch DOMElement. Node no longer exists

@@ -34,7 +34,7 @@ prompt> [L10 %s ECHO                    "ok"                                    
  00011: } finally {
  00012: 	echo " ... ok";
 prompt> ok
-[L11 %s FAST_CALL               J8                                        ~%d                   %s]
+[L11 %s FAST_CALL               J7                                        ~%d                   %s]
 >00011: } finally {
  00012: 	echo " ... ok";
  00013: }
@@ -44,7 +44,7 @@ prompt> [L12 %s ECHO                    " ... ok"                               
  00014: 
 prompt>  ... ok
 [L12 %s FAST_RET                ~%d                                                             %s]
-[L11 %s JMP                     J10                                                            %s]
+[L11 %s JMP                     J9                                                             %s]
 >00011: } finally {
  00012: 	echo " ... ok";
  00013: }

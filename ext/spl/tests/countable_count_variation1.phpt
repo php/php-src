@@ -4,32 +4,32 @@ SPL: Countable::count() with wrong return types and exception.
 <?php
 
 Class returnNull implements Countable {
-	function count() {
-	}
+    function count() {
+    }
 }
 
 Class returnString implements Countable {
-	function count() {
-		return "hello";
-	}
+    function count() {
+        return "hello";
+    }
 }
 
 Class returnObject implements Countable {
-	function count() {
-		return new returnObject;
-	}
+    function count() {
+        return new returnObject;
+    }
 }
 
 Class returnArray implements Countable {
-	function count() {
-		return array(1,2,3);
-	}
+    function count() {
+        return array(1,2,3);
+    }
 }
 
 Class throwException implements Countable {
-	function count() {
-		throw new Exception('Thrown from count');
-	}
+    function count() {
+        throw new Exception('Thrown from count');
+    }
 }
 
 
@@ -47,9 +47,9 @@ var_dump(count(new returnArray));
 
 echo "Count throws an exception:\n";
 try {
-	echo count(new throwException);
+    echo count(new throwException);
 } catch (Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>
@@ -60,7 +60,7 @@ Count returns a string:
 int(0)
 Count returns an object:
 
-Notice: Object of class returnObject could not be converted to int in %s on line 40
+Warning: Object of class returnObject could not be converted to int in %s on line %d
 int(1)
 Count returns an array:
 int(1)

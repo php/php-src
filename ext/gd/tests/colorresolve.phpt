@@ -25,11 +25,11 @@ print_r(imagecolorsforindex($im, $c));
 
 $im = imagecreate(5,5);
 for ($i=0; $i<256; $i++) {
-	if ($i == 246) {
-		imagecolorresolve($im, $i,10,10);
-	} else {
-		imagecolorresolve($im, $i,0,0);
-	}
+    if ($i == 246) {
+        imagecolorresolve($im, $i,10,10);
+    } else {
+        imagecolorresolve($im, $i,0,0);
+    }
 }
 $c = imagecolorresolve($im, 255,10,10);
 print_r(imagecolorsforindex($im, $c));
@@ -55,11 +55,11 @@ print_r(imagecolorsforindex($im, $c));
 
 $im = imagecreate(5,5);
 for ($i=0; $i<256; $i++) {
-	if ($i == 246) {
-		imagecolorresolvealpha($im, $i,10,10,1);
-	} else {
-		imagecolorresolvealpha($im, $i,0,0,100);
-	}
+    if ($i == 246) {
+        imagecolorresolvealpha($im, $i,10,10,1);
+    } else {
+        imagecolorresolvealpha($im, $i,0,0,100);
+    }
 }
 $c = imagecolorresolvealpha($im, 255,10,10,0);
 print_r(imagecolorsforindex($im, $c));

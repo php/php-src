@@ -4,49 +4,40 @@ Test error operation of password_hash()
 <?php
 //-=-=-=-
 
-var_dump(password_hash());
+try {
+    var_dump(password_hash("foo"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump(password_hash("foo"));
+try {
+    password_hash("foo", array());
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(password_hash("foo", array()));
+try {
+    var_dump(password_hash("foo", 19, new StdClass));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump(password_hash("foo", 19, new StdClass));
+try {
+    var_dump(password_hash("foo", PASSWORD_BCRYPT, "baz"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump(password_hash("foo", PASSWORD_BCRYPT, "baz"));
-
-var_dump(password_hash(array(), PASSWORD_BCRYPT));
-
-var_dump(password_hash("123", PASSWORD_BCRYPT, array("salt" => array())));
-
-/* Non-string salt, checking for memory leaks */
-var_dump(password_hash('123', PASSWORD_BCRYPT, array('salt' => 1234)));
+try {
+    var_dump(password_hash(array(), PASSWORD_BCRYPT));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: password_hash() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: password_hash() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: password_hash() expects parameter 2 to be int, array given in %s on line %d
-NULL
-
-Warning: password_hash(): Unknown password hashing algorithm: 19 in %s on line %d
-NULL
-
-Warning: password_hash() expects parameter 3 to be array, string given in %s on line %d
-NULL
-
-Warning: password_hash() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprecated in %s on line %d
-
-Warning: password_hash(): Non-string salt parameter supplied in %s on line %d
-NULL
-
-Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprecated in %s on line %d
-
-Warning: password_hash(): Provided salt is too short: 4 expecting 22 in %s on line %d
-NULL
+--EXPECT--
+password_hash() expects at least 2 arguments, 1 given
+password_hash(): Argument #2 ($algo) must be of type string|int|null, array given
+password_hash(): Argument #3 ($options) must be of type array, stdClass given
+password_hash(): Argument #3 ($options) must be of type array, string given
+password_hash(): Argument #1 ($password) must be of type string, array given

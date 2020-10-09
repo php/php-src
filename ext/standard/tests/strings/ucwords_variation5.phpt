@@ -2,11 +2,6 @@
 Test ucwords() function : usage variations - custom delimiters
 --FILE--
 <?php
-/* Prototype  : string ucwords ( string $str )
- * Description: Uppercase the first character of each word in a string
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing ucwords() : usage variations ***\n";
 
 var_dump(ucwords('testing-dashed-words', '-'));

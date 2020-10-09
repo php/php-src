@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,7 @@ static zend_always_inline void zval_ptr_dtor_nogc(zval *zval_ptr)
 	}
 }
 
-static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
+static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr)
 {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
@@ -81,10 +81,6 @@ ZEND_API void zval_internal_ptr_dtor(zval *zvalue);
 
 /* Kept for compatibility */
 #define zval_dtor(zvalue) zval_ptr_dtor_nogc(zvalue)
-#define zval_internal_dtor(zvalue) zval_internal_ptr_dtor(zvalue)
-#define zval_dtor_func rc_dtor_func
-#define zval_ptr_dtor_wrapper zval_ptr_dtor
-#define zval_internal_ptr_dtor_wrapper zval_internal_ptr_dtor
 
 ZEND_API void zval_add_ref(zval *p);
 
@@ -94,13 +90,3 @@ END_EXTERN_C()
 #define ZVAL_INTERNAL_PTR_DTOR zval_internal_ptr_dtor
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

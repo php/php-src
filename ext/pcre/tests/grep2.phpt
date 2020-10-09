@@ -7,8 +7,6 @@ pcre.jit=1
 --FILE--
 <?php
 
-var_dump(preg_grep(1,array(),3,4));
-var_dump(preg_grep(1, 2));
 var_dump(preg_grep('/+/', array()));
 
 $array = array(5=>'a', 'x' => '1', 'xyz'=>'q6', 'h20');
@@ -23,13 +21,7 @@ var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
 
 ?>
 --EXPECTF--
-Warning: preg_grep() expects at most 3 parameters, 4 given in %sgrep2.php on line 3
-NULL
-
-Warning: preg_grep() expects parameter 2 to be array, int given in %sgrep2.php on line 4
-NULL
-
-Warning: preg_grep(): Compilation failed: quantifier does not follow a repeatable item at offset 0 in %sgrep2.php on line 5
+Warning: preg_grep(): Compilation failed: quantifier does not follow a repeatable item at offset 0 in %sgrep2.php on line %d
 bool(false)
 array(3) {
   [5]=>

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -377,7 +375,7 @@ void phpdbg_print_opcodes_class(const char *class) {
 	phpdbg_print_opcodes_ce(ce);
 }
 
-PHPDBG_API void phpdbg_print_opcodes(char *function)
+PHPDBG_API void phpdbg_print_opcodes(const char *function)
 {
 	if (function == NULL) {
 		phpdbg_print_opcodes_main();
@@ -403,12 +401,12 @@ PHPDBG_API void phpdbg_print_opcodes(char *function)
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		function = zend_str_tolower_dup(function, strlen(function));
+		char *function_lowercase = zend_str_tolower_dup(function, strlen(function));
 
-		if (strstr(function, "::") == NULL) {
-			phpdbg_print_opcodes_function(function, strlen(function));
+		if (strstr(function_lowercase, "::") == NULL) {
+			phpdbg_print_opcodes_function(function_lowercase, strlen(function_lowercase));
 		} else {
-			char *method_name, *class_name = strtok(function, "::");
+			char *method_name, *class_name = strtok(function_lowercase, "::");
 			if ((method_name = strtok(NULL, "::")) == NULL) {
 				phpdbg_print_opcodes_class(class_name);
 			} else {
@@ -416,6 +414,6 @@ PHPDBG_API void phpdbg_print_opcodes(char *function)
 			}
 		}
 
-		efree(function);
+		efree(function_lowercase);
 	}
 }

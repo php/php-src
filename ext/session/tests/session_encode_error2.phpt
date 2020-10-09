@@ -7,12 +7,6 @@ Test session_encode() function : error functionality
 
 ob_start();
 
-/*
- * Prototype : string session_encode(void)
- * Description : Encodes the current session data as a string
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_encode() : error functionality ***\n";
 
 // Get an unset variable
@@ -84,7 +78,11 @@ $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     var_dump(session_start());
-    $_SESSION[$input] = "Hello World!";
+    try {
+        $_SESSION[$input] = "Hello World!";
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump(session_encode());
     var_dump(session_destroy());
     $iterator++;
@@ -100,63 +98,63 @@ ob_end_flush();
 -- Iteration 1 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0 in %s on line %d
+Warning: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 2 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 1 in %s on line %d
+Warning: session_encode(): Skipping numeric key 1 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 3 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 12345 in %s on line %d
+Warning: session_encode(): Skipping numeric key 12345 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 4 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key -2345 in %s on line %d
+Warning: session_encode(): Skipping numeric key -2345 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 5 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 10 in %s on line %d
+Warning: session_encode(): Skipping numeric key 10 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 6 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key -10 in %s on line %d
+Warning: session_encode(): Skipping numeric key -10 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 7 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key %s in %s on line %d
+Warning: session_encode(): Skipping numeric key %s in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 8 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0 in %s on line %d
+Warning: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 9 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0 in %s on line %d
+Warning: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
@@ -173,28 +171,28 @@ bool(true)
 -- Iteration 12 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 1 in %s on line %d
+Warning: session_encode(): Skipping numeric key 1 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 13 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0 in %s on line %d
+Warning: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 14 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 1 in %s on line %d
+Warning: session_encode(): Skipping numeric key 1 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 15 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0 in %s on line %d
+Warning: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
@@ -225,8 +223,7 @@ bool(true)
 
 -- Iteration 21 --
 bool(true)
-
-Warning: Illegal offset type in %s on line 82
+Illegal offset type
 bool(false)
 bool(true)
 
@@ -243,9 +240,9 @@ bool(true)
 -- Iteration 24 --
 bool(true)
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Notice: session_encode(): Skipping numeric key %d in %s on line %d
+Warning: session_encode(): Skipping numeric key %d in %s on line %d
 bool(false)
 bool(true)
 Done

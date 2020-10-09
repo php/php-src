@@ -2,17 +2,6 @@
 Test fopen and fclose() functions - usage variations - "x+" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "x+" mode,
    checking for the file creation, write & read operations,
@@ -20,7 +9,7 @@ Test fopen and fclose() functions - usage variations - "x+" mode
    checking for the warning msg when trying to open an existing file in "x+" mode,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation8.tmp";
 
@@ -40,7 +29,7 @@ $file_handle = fopen($file, "x+");  //Opening the existing data file in "x+" mod
 echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation8.tmp");
+unlink(__DIR__."/007_variation8.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'x+' mode ***
@@ -56,5 +45,5 @@ int(37)
 bool(true)
 string(7) "Unknown"
 
-Warning: fopen(%s): failed to open stream: File exists in %s on line %d
+Warning: fopen(%s): Failed to open stream: File exists in %s on line %d
 *** Done ***

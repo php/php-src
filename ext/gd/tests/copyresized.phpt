@@ -8,32 +8,32 @@ imagecopyresized
 <?php
 
 function get_hexcolor($im, $c) {
-	if (imageistruecolor($im)) {
-		return $c;
-	}
-	$colors = imagecolorsforindex($im, $c);
-	return ($colors['red'] << 16)  + ($colors['green'] << 8) + ($colors['blue']);
+    if (imageistruecolor($im)) {
+        return $c;
+    }
+    $colors = imagecolorsforindex($im, $c);
+    return ($colors['red'] << 16)  + ($colors['green'] << 8) + ($colors['blue']);
 }
 
 function check_doublesize($dst) {
-	$im = imagecreatetruecolor(38,38);
-	imagefill($im,0,0, 0xffffff);
-	imagefilledrectangle($im, 0,0,9,9, 0xff0000);
-	imagefilledrectangle($im, 0,28,9,37, 0xff0000);
-	imagefilledrectangle($im, 28,0,37,9, 0xff0000);
-	imagefilledrectangle($im, 28,28,37,37, 0xff0000);
-	imagefilledrectangle($im, 14,14,23,23, 0xff0000);
+    $im = imagecreatetruecolor(38,38);
+    imagefill($im,0,0, 0xffffff);
+    imagefilledrectangle($im, 0,0,9,9, 0xff0000);
+    imagefilledrectangle($im, 0,28,9,37, 0xff0000);
+    imagefilledrectangle($im, 28,0,37,9, 0xff0000);
+    imagefilledrectangle($im, 28,28,37,37, 0xff0000);
+    imagefilledrectangle($im, 14,14,23,23, 0xff0000);
 
-	for ($x = 0; $x < 38; $x++) {
-		for ($y = 0; $y < 38; $y++) {
-			$p1 = imagecolorat($im, $x, $y);
-			$p2 = imagecolorat($dst, $x, $y);
-			if (get_hexcolor($im, $p1) != get_hexcolor($dst, $p2)) {
-				return false;
-			}
-		}
-	}
-	return true;
+    for ($x = 0; $x < 38; $x++) {
+        for ($y = 0; $y < 38; $y++) {
+            $p1 = imagecolorat($im, $x, $y);
+            $p2 = imagecolorat($dst, $x, $y);
+            if (get_hexcolor($im, $p1) != get_hexcolor($dst, $p2)) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 $src_tc = imagecreatetruecolor(19,19);

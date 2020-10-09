@@ -6,56 +6,69 @@ if (!extension_loaded('sockets')) {
     die('SKIP The sockets extension is not loaded.');
 }
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip Not valid for Windows');
+    die('skip Not valid for Windows');
 }
 require 'ipv6_skipif.inc';
+?>
 --FILE--
 <?php
-    $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
-    if (!$socket) {
-        die('Unable to create AF_INET6 socket');
-    }
-    if (!socket_set_nonblock($socket)) {
-        die('Unable to set nonblocking mode for socket');
-    }
-    var_dump(socket_recvfrom($socket, $buf, 12, 0, $from, $port)); // false (EAGAIN, no warning)
-    $address = '::1';
-    socket_sendto($socket, '', 1, 0, $address); // cause warning
-    if (!socket_bind($socket, $address, 1223)) {
-        die("Unable to bind to $address:1223");
+$socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
+if (!$socket) {
+    die('Unable to create AF_INET6 socket');
+}
+
+if (!socket_bind($socket, '::1', 0)) {
+    die(sprintf(
+        'An error occurred while binding socket: %s',
+        socket_strerror(socket_last_error($socket))));
+}
+
+socket_getsockname($socket, $address, $port);
+
+$msg = "Ping!";
+$len = strlen($msg);
+$sent = socket_sendto($socket, $msg, $len, 0, $address, $port);
+if ($sent === false) {
+    die(sprintf(
+        'An error occurred while sending to the socket: %s',
+        socket_strerror(socket_last_error($socket))));
+} else if ($sent != $len) {
+    die(sprintf(
+        '%d bytes have been sent instead of the %d bytes expected',
+        $sent, $len));
+}
+
+$wants = $len;
+$recvd = 0;
+$buf   = null;
+
+while ($recvd < $len) {
+    $bytes = socket_recvfrom(
+        $socket, $buffering, $wants, 0, $address, $port);
+
+    if (($bytes === false) && ($errno = socket_last_error($socket))) {
+        if ($errno = SOCKET_EAGAIN) {
+            socket_clear_error($socket);
+            continue;
+        }
+
+        die(sprintf(
+            'An error occurred while sending to the socket: %s',
+            socket_strerror($errno)));
     }
 
-    $msg = "Ping!";
-    $len = strlen($msg);
-    $bytes_sent = socket_sendto($socket, $msg, $len, 0, $address, 1223);
-    if ($bytes_sent == -1) {
-        die('An error occurred while sending to the socket');
-    } else if ($bytes_sent != $len) {
-        die($bytes_sent . ' bytes have been sent instead of the ' . $len . ' bytes expected');
-    }
+    $recvd += $bytes;
+    $wants -= $bytes;
+    $buf .= $buffering;
+}
 
-    $from = "";
-    $port = 0;
-    socket_recvfrom($socket, $buf, 12, 0); // cause warning
-    socket_recvfrom($socket, $buf, 12, 0, $from); // cause warning
-    $bytes_received = socket_recvfrom($socket, $buf, 12, 0, $from, $port);
-    if ($bytes_received == -1) {
-        die('An error occurred while receiving from the socket');
-    } else if ($bytes_received != $len) {
-        die($bytes_received . ' bytes have been received instead of the ' . $len . ' bytes expected');
-    }
-    echo "Received $buf from remote address $from and remote port $port" . PHP_EOL;
+if ($recvd != $len) {
+    die(sprintf(
+        '%d bytes have been received instead of the %d bytes expected',
+        $recvd, $len));
+}
 
-    socket_close($socket);
+echo "Received $buf from remote address $address and remote port $port" . PHP_EOL;
+?>
 --EXPECTF--
-bool(false)
-
-Warning: Wrong parameter count for socket_sendto() in %s on line %d
-
-Warning: socket_recvfrom() expects at least 5 parameters, 4 given in %s on line %d
-
-Warning: Wrong parameter count for socket_recvfrom() in %s on line %d
-Received Ping! from remote address ::1 and remote port 1223
---CREDITS--
-Falko Menge <mail at falko-menge dot de>
-PHP Testfest Berlin 2009-05-09
+Received Ping! from remote address %s and remote port %d

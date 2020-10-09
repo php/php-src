@@ -8,7 +8,7 @@ $_a = 7111222333000001;
 $_b = 5000001;
 
 for ($j=0; $j<10; $j++) {
-	$find_replace[$_a + $j] = $_b + $j;
+    $find_replace[$_a + $j] = $_b + $j;
 }
 
 echo strtr('Hello', $find_replace), "\n";

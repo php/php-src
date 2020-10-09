@@ -1,7 +1,5 @@
 --TEST--
-ripemd320 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: ripemd320 algorithm
 --FILE--
 <?php
 echo hash('ripemd320', '') . "\n";
@@ -13,6 +11,7 @@ echo hash('ripemd320', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq
 echo hash('ripemd320', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') . "\n";
 echo hash('ripemd320', '12345678901234567890123456789012345678901234567890123456789012345678901234567890') . "\n";
 echo hash('ripemd320', str_repeat('a', 1000000)) . "\n";
+?>
 --EXPECT--
 22d65d5661536cdc75c1fdf5c6de7b41b9f27325ebc61e8557177d705a0ec880151c3a32a00899b8
 ce78850638f92658a5a585097579926dda667a5716562cfcf6fbe77f63542f99b04705d6970dff5d

@@ -3,17 +3,17 @@ Test readgzfile() function : variation: use include path (relative directories i
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
+$testName = 'readgzfile_variation15';
 require_once('reading_include_path.inc');
 
 //define the files to go into these directories, create one in dir2
 set_include_path($newIncludePath);
 test_readgzfile();
-restore_include_path();
 
 // remove the directory structure
 chdir($baseDir);
@@ -83,11 +83,9 @@ function test_readgzfile() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 file content:This is a file in dir2
 file content:This is a file in dir1
 file content:This is a file in dir1
 file content:This is a file in working dir
 file content:This is a file in script dir
-===DONE===

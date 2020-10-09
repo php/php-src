@@ -6,16 +6,16 @@ Phar: bug #46032: PharData::__construct wrong memory read
 --FILE--
 <?php
 
-$a = dirname(__FILE__) .'/mytest';
+$a = __DIR__ .'/mytest';
 
 try {
-	new phar($a);
+    new phar($a);
 } catch (exception $e) { }
 
 var_dump($a);
 
 try {
-	new phar($a);
+    new phar($a);
 } catch (exception $e) { }
 
 var_dump($a);

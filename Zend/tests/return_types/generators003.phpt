@@ -15,6 +15,8 @@ class SomeCollection implements Collection {
 }
 
 $some = new SomeCollection();
-var_dump($some->getIterator());
---EXPECTF--
-Fatal error: Declaration of SomeCollection::getIterator(): Generator must be compatible with Collection::getIterator(): Iterator in %sgenerators003.php on line 6
+echo get_class($some->getIterator());
+
+?>
+--EXPECT--
+Generator

@@ -5,15 +5,15 @@ oci_statement_type()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $sqls = Array(
     "SELECT * FROM table",
     "DELETE FROM table WHERE id = 1",
     "INSERT INTO table VALUES(1)",
     "UPDATE table SET id = 1",
-	"DROP TABLE table",
-	"CREATE OR REPLACE PROCEDURE myproc(v1 NUMBER) as BEGIN DBMS_OUTPUT.PUT_LINE(v1); END;",
+    "DROP TABLE table",
+    "CREATE OR REPLACE PROCEDURE myproc(v1 NUMBER) as BEGIN DBMS_OUTPUT.PUT_LINE(v1); END;",
     "CREATE TABLE table (id NUMBER)",
     "ALTER TABLE table ADD (col1 NUMBER)",
     "BEGIN NULL; END;",
@@ -24,8 +24,8 @@ $sqls = Array(
 );
 
 foreach ($sqls as $sql) {
-	$s = oci_parse($c, $sql);
-	var_dump(oci_statement_type($s));
+    $s = oci_parse($c, $sql);
+    var_dump(oci_statement_type($s));
 }
 
 echo "Done\n";

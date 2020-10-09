@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -111,7 +109,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 			}
 			/* Position at the first row */
 			set->data_cursor = set->data;
-		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
+		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_C) {
 			/*TODO*/
 		}
 
@@ -122,7 +120,6 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	} else {
 		COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
 		stmt->result->m.free_result_contents(stmt->result);
-		mysqlnd_mempool_destroy(stmt->result->memory_pool);
 		stmt->result = NULL;
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
@@ -341,7 +338,6 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 	if (FAIL == (ret = PACKET_READ(conn, &fields_eof))) {
 		if (stmt->result) {
 			stmt->result->m.free_result_contents(stmt->result);
-			mnd_efree(stmt->result);
 			/* XXX: This will crash, because we will null also the methods.
 				But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
 				(from mysqlnd_driver.c?) to do the reset.
@@ -409,7 +405,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		enum_func_status ret = FAIL;
 		const MYSQLND_CSTRING query_string = {query, query_len};
 
-		ret = conn->run_command(COM_STMT_PREPARE, conn, query_string);
+		ret = conn->command->stmt_prepare(conn, query_string);
 		if (FAIL == ret) {
 			goto fail;
 		}
@@ -641,39 +637,6 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 	if (stmt->result && stmt->state >= MYSQLND_STMT_PREPARED && stmt->field_count) {
-		/*
-		  We don need to copy the data from the buffers which we will clean.
-		  Because it has already been copied. See
-		  #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-		*/
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-		if (stmt->result_bind &&
-			stmt->result_zvals_separated_once == TRUE &&
-			stmt->state >= MYSQLND_STMT_USER_FETCHING)
-		{
-			/*
-			  We need to copy the data from the buffers which we will clean.
-			  The bound variables point to them only if the user has started
-			  to fetch data (MYSQLND_STMT_USER_FETCHING).
-			  We need to check 'result_zvals_separated_once' or we will leak
-			  in the following scenario
-			  prepare("select 1 from dual");
-			  execute();
-			  fetch(); <-- no binding, but that's not a problem
-			  bind_result();
-			  execute(); <-- here we will leak because we separate without need
-			  */
-			unsigned int i;
-			for (i = 0; i < stmt->field_count; i++) {
-				if (stmt->result_bind[i].bound == TRUE) {
-					zval *result = &stmt->result_bind[i].zv;
-					ZVAL_DEREF(result);
-					Z_TRY_ADDREF_P(result);
-				}
-			}
-		}
-#endif
-
 		s->m->flush(s);
 
 		/*
@@ -719,7 +682,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 	if (ret == PASS) {
 		const MYSQLND_CSTRING payload = {(const char*) request, request_len};
 
-		ret = conn->run_command(COM_STMT_EXECUTE, conn, payload);
+		ret = conn->command->stmt_execute(conn, payload);
 	} else {
 		SET_CLIENT_ERROR(stmt->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Couldn't generate the request. Possibly OOM.");
 	}
@@ -794,32 +757,11 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 				}
 
 				for (i = 0; i < result->field_count; i++) {
-					zval *result = &stmt->result_bind[i].zv;
-
-					ZVAL_DEREF(result);
-					/* Clean what we copied last time */
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_ptr_dtor(result);
-#endif
 					/* copy the type */
+					zval *resultzv = &stmt->result_bind[i].zv;
 					if (stmt->result_bind[i].bound == TRUE) {
 						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE(current_row[i]));
-						if (Z_TYPE(current_row[i]) != IS_NULL) {
-							/*
-							  Copy the value.
-							  Pre-condition is that the zvals in the result_bind buffer
-							  have been  ZVAL_NULL()-ed or to another simple type
-							  (int, double, bool but not string). Because of the reference
-							  counting the user can't delete the strings the variables point to.
-							*/
-
-							ZVAL_COPY_VALUE(result, &current_row[i]);
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-							Z_TRY_ADDREF_P(result);
-#endif
-						} else {
-							ZVAL_NULL(result);
-						}
+						ZEND_TRY_ASSIGN_COPY_EX(resultzv, &current_row[i], 0);
 					}
 				}
 			}
@@ -905,28 +847,17 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 			}
 
 			for (i = 0; i < field_count; i++) {
+				zval *resultzv = &stmt->result_bind[i].zv;
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
-					zval *result = &stmt->result_bind[i].zv;
 
-					ZVAL_DEREF(result);
-					/*
-					  stmt->result_bind[i].zv has been already destructed
-					  in result->unbuf->m.free_last_data()
-					*/
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_ptr_dtor(result);
-#endif
-					if (!Z_ISNULL_P(data)) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
-							meta->fields[i].max_length = Z_STRLEN_P(data);
-						}
-						ZVAL_COPY_VALUE(result, data);
-						/* copied data, thus also the ownership. Thus null data */
-						ZVAL_NULL(data);
-					} else {
-						ZVAL_NULL(result);
+					if (Z_TYPE_P(data) == IS_STRING && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
+						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
+
+					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
+					/* copied data, thus also the ownership. Thus null data */
+					ZVAL_NULL(data);
 				}
 			}
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_UNBUF);
@@ -1058,7 +989,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 	{
 		const MYSQLND_CSTRING payload = {(const char*) buf, sizeof(buf)};
 
-		ret = conn->run_command(COM_STMT_FETCH, conn, payload);
+		ret = conn->command->stmt_fetch(conn, payload);
 		if (ret == FAIL) {
 			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			DBG_RETURN(FAIL);
@@ -1093,33 +1024,22 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 
 			/* If no result bind, do nothing. We consumed the data */
 			for (i = 0; i < field_count; i++) {
+				zval *resultzv = &stmt->result_bind[i].zv;
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
-					zval *result = &stmt->result_bind[i].zv;
 
-					ZVAL_DEREF(result);
-					/*
-					  stmt->result_bind[i].zv has been already destructed
-					  in result->unbuf->m.free_last_data()
-					*/
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_ptr_dtor(result);
-#endif
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, &stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
 							   	Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
 
-					if (!Z_ISNULL_P(data)) {
-						if ((Z_TYPE_P(data) == IS_STRING) &&
-								(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
-							meta->fields[i].max_length = Z_STRLEN_P(data);
-						}
-						ZVAL_COPY_VALUE(result, data);
-						/* copied data, thus also the ownership. Thus null data */
-						ZVAL_NULL(data);
-					} else {
-						ZVAL_NULL(result);
+					if (Z_TYPE_P(data) == IS_STRING &&
+							(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
+						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
+
+					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
+					/* copied data, thus also the ownership. Thus null data */
+					ZVAL_NULL(data);
 				}
 			}
 		} else {
@@ -1197,28 +1117,6 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);
 
-	DBG_INF_FMT("result_bind=%p separated_once=%u", &stmt->result_bind, stmt->result_zvals_separated_once);
-	/*
-	  The user might have not bound any variables for result.
-	  Do the binding once she does it.
-	*/
-	if (stmt->result_bind && !stmt->result_zvals_separated_once) {
-		unsigned int i;
-		/*
-		  mysqlnd_stmt_store_result() has been called free the bind
-		  variables to prevent leaking of their previous content.
-		*/
-		for (i = 0; i < stmt->result->field_count; i++) {
-			if (stmt->result_bind[i].bound == TRUE) {
-				zval *result = &stmt->result_bind[i].zv;
-				ZVAL_DEREF(result);
-				zval_ptr_dtor(result);
-				ZVAL_NULL(result);
-			}
-		}
-		stmt->result_zvals_separated_once = TRUE;
-	}
-
 	ret = stmt->result->m.fetch_row(stmt->result, (void*)s, 0, fetched_anything);
 	DBG_RETURN(ret);
 }
@@ -1266,7 +1164,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			size_t stmt_id = stmt->stmt_id;
 
-			ret = stmt->conn->run_command(COM_STMT_RESET, stmt->conn, stmt_id);
+			ret = stmt->conn->command->stmt_reset(stmt->conn, stmt_id);
 			if (ret == FAIL) {
 				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			}
@@ -1372,7 +1270,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 			{
 				const MYSQLND_CSTRING payload = {(const char *) cmd_buf, packet_len};
 
-				ret = conn->run_command(COM_STMT_SEND_LONG_DATA, conn, payload);
+				ret = conn->command->stmt_send_long_data(conn, payload);
 				if (ret == FAIL) {
 					COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 				}
@@ -1401,7 +1299,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 		  max_allowed_packet_size on the server and resending the data.
 		*/
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-#if HAVE_USLEEP && !defined(PHP_WIN32)
+#if defined(HAVE_USLEEP) && !defined(PHP_WIN32)
 		usleep(120000);
 #endif
 		if ((packet_len = conn->protocol_frame_codec->m.consume_uneaten_data(conn->protocol_frame_codec, COM_STMT_SEND_LONG_DATA))) {
@@ -1614,7 +1512,6 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const s,
 		}
 
 		mysqlnd_stmt_separate_result_bind(s);
-		stmt->result_zvals_separated_once = FALSE;
 		stmt->result_bind = result_bind;
 		for (i = 0; i < stmt->field_count; i++) {
 			/* Prevent from freeing */
@@ -1899,8 +1796,8 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			break;
 		}
 		case STMT_ATTR_CURSOR_TYPE: {
-			unsigned int ival = *(unsigned int *) value;
-			if (ival > (zend_ulong) CURSOR_TYPE_READ_ONLY) {
+			unsigned long ival = *(unsigned long *) value;
+			if (ival > (unsigned long) CURSOR_TYPE_READ_ONLY) {
 				SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
 				DBG_RETURN(FAIL);
@@ -1909,7 +1806,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			break;
 		}
 		case STMT_ATTR_PREFETCH_ROWS: {
-			unsigned int ival = *(unsigned int *) value;
+			unsigned long ival = *(unsigned long *) value;
 			if (ival == 0) {
 				ival = MYSQLND_DEFAULT_PREFETCH_ROWS;
 			} else if (ival > 1) {
@@ -1948,10 +1845,10 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 			*(zend_bool *) value= stmt->update_max_length;
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
-			*(zend_ulong *) value= stmt->flags;
+			*(unsigned long *) value= stmt->flags;
 			break;
 		case STMT_ATTR_PREFETCH_ROWS:
-			*(zend_ulong *) value= stmt->prefetch_rows;
+			*(unsigned long *) value= stmt->prefetch_rows;
 			break;
 		default:
 			DBG_RETURN(FAIL);
@@ -2197,9 +2094,9 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, ze
 
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			enum_func_status ret = FAIL;
-			size_t stmt_id = stmt->stmt_id;
+			const size_t stmt_id = stmt->stmt_id;
 
-			ret = conn->run_command(COM_STMT_CLOSE, conn, stmt_id);
+			ret = conn->command->stmt_close(conn, stmt_id);
 			if (ret == FAIL) {
 				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 				DBG_RETURN(FAIL);
@@ -2376,13 +2273,3 @@ void _mysqlnd_init_ps_subsystem()
 	_mysqlnd_init_ps_fetch_subsystem();
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

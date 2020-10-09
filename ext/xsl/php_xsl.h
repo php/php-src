@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -34,13 +32,12 @@ extern zend_module_entry xsl_module_entry;
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
 #include <libxslt/security.h>
-#if HAVE_XSL_EXSLT
+#ifdef HAVE_XSL_EXSLT
 #include <libexslt/exslt.h>
 #include <libexslt/exsltconfig.h>
 #endif
 
 #include "../dom/xml_common.h"
-#include "xsl_fe.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>
@@ -83,50 +80,10 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
 
-#define REGISTER_XSL_CLASS(ce, name, parent_ce, funcs, entry) \
-INIT_CLASS_ENTRY(ce, name, funcs); \
-ce.create_object = xsl_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce);
-
-#define XSL_DOMOBJ_NEW(zval, obj, ret) \
-	zval = php_xsl_create_object(obj, ret, zval, return_value); \
-	if (ZVAL_IS_NULL(zval)) { \
-		php_error_docref(NULL, E_WARNING, "Cannot create required DOM object"); \
-		RETURN_FALSE; \
-	}
-
-
 PHP_MINIT_FUNCTION(xsl);
 PHP_MSHUTDOWN_FUNCTION(xsl);
 PHP_RINIT_FUNCTION(xsl);
 PHP_RSHUTDOWN_FUNCTION(xsl);
 PHP_MINFO_FUNCTION(xsl);
 
-
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(xsl)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(xsl)
-*/
-
-#ifdef ZTS
-#define XSL_G(v) TSRMG(xsl_globals_id, zend_xsl_globals *, v)
-#else
-#define XSL_G(v) (xsl_globals.v)
-#endif
-
 #endif	/* PHP_XSL_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

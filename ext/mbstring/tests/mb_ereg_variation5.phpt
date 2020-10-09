@@ -7,11 +7,6 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * Test mb_ereg with anchors (start and end of string) in $pattern
  */
@@ -45,20 +40,20 @@ echo "Done";
  * @param array $regs
  */
 function base64_encode_var_dump($regs) {
-	if ($regs) {
-		echo "array(" . count($regs) . ") {\n";
-		foreach ($regs as $key => $value) {
-			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
-				var_dump(base64_encode($value));
-			} else {
-				var_dump($value);
-			}
-		}
-		echo "}\n";
-	} else {
-		echo "NULL\n";
-	}
+    if ($regs) {
+        echo "array(" . count($regs) . ") {\n";
+        foreach ($regs as $key => $value) {
+            echo "  [$key]=>\n  ";
+            if (is_string($value)) {
+                var_dump(base64_encode($value));
+            } else {
+                var_dump($value);
+            }
+        }
+        echo "}\n";
+    } else {
+        echo "NULL\n";
+    }
 }
 ?>
 --EXPECT--

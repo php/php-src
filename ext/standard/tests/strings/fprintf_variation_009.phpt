@@ -1,12 +1,5 @@
 --TEST--
 Test fprintf() function (variation - 9)
---SKIPIF--
-<?php
-$data_file = dirname(__FILE__) . '/dump.txt';
-if (!($fp = fopen($data_file, 'w'))) {
-  die('skip File dump.txt could not be created');
-}
-?>
 --FILE--
 <?php
 
@@ -14,7 +7,7 @@ $string_variation = array( "%5s", "%-5s", "%05s", "%'#5s" );
 $strings = array( NULL, "abc", 'aaa' );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = __DIR__ . '/fprintf_variation_009.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

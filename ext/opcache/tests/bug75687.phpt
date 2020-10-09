@@ -11,9 +11,9 @@ opcache.optimization_level=-1
 
 function x($y)
 {
-	if (is_array($y)) {
-		$z = is_array($y) ? array() : array($y);
-	}
+    if (is_array($y)) {
+        $z = is_array($y) ? array() : array($y);
+    }
 }
 ?>
 okey

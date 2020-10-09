@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.77 2017/05/24 19:17:50 christos Exp $")
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.81 2019/07/16 13:30:32 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -46,11 +46,14 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.77 2017/05/24 19:17:50 christos Exp $")
 # include <sys/mkdev.h>
 # define HAVE_MAJOR
 #endif
-#ifdef MAJOR_IN_SYSMACROS
+#ifdef HAVE_SYS_SYSMACROS_H
 # include <sys/sysmacros.h>
+#endif
+#ifdef MAJOR_IN_SYSMACROS
 # define HAVE_MAJOR
 #endif
-#ifdef major			/* Might be defined in sys/types.h.  */
+#if defined(major) && !defined(HAVE_MAJOR)
+/* Might be defined in sys/types.h.  */
 # define HAVE_MAJOR
 #endif
 #ifdef WIN32
@@ -84,39 +87,27 @@ handle_mime(struct magic_set *ms, int mime, const char *str)
 }
 
 protected int
-file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *stream)
+file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb)
 {
 	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;
 	int silent = ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION);
 
-	if (ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION))
+	if (fn == NULL)
 		return 0;
-
-	if (fn == NULL && !stream) {
-		return 0;
-	}
 
 #define COMMA	(did++ ? ", " : "")
+	ret = php_sys_stat(fn, sb);
 
-	if (stream) {
-		php_stream_statbuf ssb;
-		if (php_stream_stat(stream, &ssb) < 0) {
-			if (ms->flags & MAGIC_ERROR) {
-				file_error(ms, errno, "cannot stat `%s'", fn);
-				return -1;
-			}
-			return 0;
+	if (ret) {
+		if (ms->flags & MAGIC_ERROR) {
+			file_error(ms, errno, "cannot stat `%s'", fn);
+			return -1;
 		}
-		memcpy(sb, &ssb.sb, sizeof(struct stat));
-	} else {
-		if (php_sys_stat(fn, sb) != 0) {
-			if (ms->flags & MAGIC_ERROR) {
-				file_error(ms, errno, "cannot stat `%s'", fn);
-				return -1;
-			}
-			return 0;
-		}
+		if (file_printf(ms, "cannot open `%s' (%s)",
+		    fn, strerror(errno)) == -1)
+			return -1;
+		return 0;
 	}
 
 	ret = 1;
@@ -183,6 +174,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "fifo") == -1)
 				return -1;
+		} else if (silent) {
 		} else if (file_printf(ms, "%sfifo (named pipe)", COMMA) == -1)
 			return -1;
 		break;
@@ -192,6 +184,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "door") == -1)
 				return -1;
+		} else if (silent) {
 		} else if (file_printf(ms, "%sdoor", COMMA) == -1)
 			return -1;
 		break;
@@ -253,5 +246,11 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 	    if (file_printf(ms, " ") == -1)
 		    return -1;
 	}
+	/*
+	 * If we were looking for extensions or apple (silent) it is not our
+	 * job to print here, so don't count this as a match.
+	 */
+	if (ret == 1 && silent)
+		return 0;
 	return ret;
 }

@@ -1,0 +1,3 @@
+# FPM tests have many spurious failures on Azure recently,
+# try to run them without parallelism.
+all

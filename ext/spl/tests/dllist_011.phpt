@@ -7,7 +7,5 @@ $dll->rewind();
 $dll->prev();
 var_dump($dll->current());
 ?>
-===DONE===
 --EXPECT--
 NULL
-===DONE===

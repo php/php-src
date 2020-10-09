@@ -7,18 +7,13 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-/* Prototype  : bool curl_exec(resource ch)
- * Description: Perform a cURL session
- * Source code: ext/curl/interface.c
- * Alias to functions:
- */
   include 'server.inc';
   $host = curl_cli_server_start();
 
   // start testing
   echo "*** Testing curl_exec() : basic functionality ***\n";
 
-  $url = "{$host}/get.php?test=get";
+  $url = "{$host}/get.inc?test=get";
   $ch = curl_init();
 
   ob_start(); // start output buffering
@@ -34,9 +29,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
     echo "curl_exec returned false";
   }
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl_exec() : basic functionality ***
 string(25) "Hello World!
 Hello World!"
-===DONE===

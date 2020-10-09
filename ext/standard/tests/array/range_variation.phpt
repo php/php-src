@@ -18,7 +18,11 @@ for( $i = 0; $i < count($low_arr); $i++) {
 
 echo "\n*** Possible variatins with steps ***\n";
 var_dump( range( 1, 5, TRUE ) );
-var_dump( range( 1, 5, array(1, 2) ) );
+try {
+    var_dump( range( 1, 5, array(1, 2) ) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
@@ -107,13 +111,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = '-10.5555' --
@@ -139,15 +143,15 @@ array(12) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
   [11]=>
-  float(0.4445)
+  float(0.4444999999999997)
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
@@ -167,13 +171,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
@@ -193,13 +197,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
@@ -219,13 +223,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = 'Array' --
@@ -245,15 +249,15 @@ array(12) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
   [11]=>
-  float(0.4445)
+  float(0.4444999999999997)
 }
 
 -- creating an array with low = '1' and high = 'ABCD' --
@@ -611,16 +615,5 @@ array(5) {
   [4]=>
   int(5)
 }
-array(5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  int(5)
-}
+range(): Argument #3 ($step) must be of type int|float, array given
 Done

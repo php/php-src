@@ -3,16 +3,6 @@ Scalar type nullability
 --FILE--
 <?php
 
-$errnames = [
-    E_NOTICE => 'E_NOTICE',
-    E_WARNING => 'E_WARNING',
-    E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
-];
-set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
-    echo "$errnames[$errno]: $errmsg on line $line\n";
-    return true;
-});
-
 $functions = [
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
@@ -37,13 +27,13 @@ echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
 Testing int:
-*** Caught Argument 1 passed to {closure}() must be of the type int, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, null given, called in %s on line %d
 Testing float:
-*** Caught Argument 1 passed to {closure}() must be of the type float, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, null given, called in %s on line %d
 Testing string:
-*** Caught Argument 1 passed to {closure}() must be of the type string, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, null given, called in %s on line %d
 Testing bool:
-*** Caught Argument 1 passed to {closure}() must be of the type bool, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, null given, called in %s on line %d
 Testing int nullable:
 NULL
 Testing float nullable:

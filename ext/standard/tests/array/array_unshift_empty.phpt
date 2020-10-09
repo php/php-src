@@ -2,11 +2,6 @@
 Test array_unshift() function : prepend array with empty set
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array[, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 $array = [1,2,3];
 $values = [];
 
@@ -16,7 +11,7 @@ var_dump( $array );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
 int(3)
 array(3) {

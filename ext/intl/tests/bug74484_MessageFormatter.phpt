@@ -3,9 +3,7 @@ Bug #74484 MessageFormatter::formatMessage memory corruption with 11+ named plac
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
-	die('skip for ICU 4.8+');
+    die('skip intl extension not enabled');
 ?>
 --FILE--
 <?php
@@ -29,7 +27,5 @@ $vars = array(
 var_dump(MessageFormatter::formatMessage('en_US', $text, $vars));
 
 ?>
-==DONE==
 --EXPECT--
 string(26) "1 2 3 4 5 6 7 8 9 10 11 12"
-==DONE==

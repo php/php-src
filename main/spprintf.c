@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,20 +83,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 
-#ifdef HAVE_LOCALE_H
 #include <locale.h>
 #ifdef ZTS
 #include "ext/standard/php_string.h"
 #define LCONV_DECIMAL_POINT (*lconv.decimal_point)
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
-#endif
-#else
-#define LCONV_DECIMAL_POINT '.'
 #endif
 
 #include "snprintf.h"
@@ -215,12 +207,10 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 	struct lconv lconv;
 #else
 	struct lconv *lconv = NULL;
-#endif
 #endif
 
 	/*
@@ -319,25 +309,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 				case 'L':
 					fmt++;
 					modifier = LM_LONG_DOUBLE;
-					break;
-				case 'I':
-					fmt++;
-#if SIZEOF_LONG_LONG
-					if (*fmt == '6' && *(fmt+1) == '4') {
-						fmt += 2;
-						modifier = LM_LONG_LONG;
-					} else
-#endif
-						if (*fmt == '3' && *(fmt+1) == '2') {
-							fmt += 2;
-							modifier = LM_LONG;
-						} else {
-#ifdef _WIN64
-							modifier = LM_LONG_LONG;
-#else
-							modifier = LM_LONG;
-#endif
-						}
 					break;
 				case 'l':
 					fmt++;
@@ -595,7 +566,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
 
 				case 's':
-				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						if (!adjust_precision) {
@@ -633,14 +603,12 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 						s = "inf";
 						s_len = 3;
 					} else {
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 						localeconv_r(&lconv);
 #else
 						if (!lconv) {
 							lconv = localeconv();
 						}
-#endif
 #endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
@@ -693,14 +661,12 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 					localeconv_r(&lconv);
 #else
 					if (!lconv) {
 						lconv = localeconv();
 					}
-#endif
 #endif
 					s = php_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
 					if (*s == '-')
@@ -836,12 +802,3 @@ PHPAPI void php_printf_to_smart_str(smart_str *buf, const char *format, va_list 
 	xbuf_format_converter(buf, 0, format, ap);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

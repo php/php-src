@@ -7,13 +7,11 @@ output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-$infile = dirname(__FILE__).'/bug50660-1.jpg';
+$infile = __DIR__.'/bug50660-1.jpg';
 var_dump(exif_read_data($infile) !== false);
-$infile = dirname(__FILE__).'/bug50660-2.jpg';
+$infile = __DIR__.'/bug50660-2.jpg';
 var_dump(exif_read_data($infile) !== false);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

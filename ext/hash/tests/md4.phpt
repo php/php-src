@@ -1,7 +1,5 @@
 --TEST--
-md4 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: md4 algorithm
 --FILE--
 <?php
 /* RFC 1320 vectors */
@@ -12,6 +10,7 @@ echo hash('md4', 'message digest') . "\n";
 echo hash('md4', 'abcdefghijklmnopqrstuvwxyz') . "\n";
 echo hash('md4', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') . "\n";
 echo hash('md4', '12345678901234567890123456789012345678901234567890123456789012345678901234567890') . "\n";
+?>
 --EXPECT--
 31d6cfe0d16ae931b73c59d7e0c089c0
 bde52cb31de33e46245e05fbdbd6fb24

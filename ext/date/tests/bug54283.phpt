@@ -4,9 +4,9 @@ Bug #54283 (new DatePeriod(NULL) causes crash)
 <?php
 
 try {
-	var_dump(new DatePeriod(NULL));
+    var_dump(new DatePeriod(NULL));
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>

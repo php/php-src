@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -49,9 +49,6 @@
 #include "ext/standard/sha1.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_versioning.h"
-#ifndef PHP_WIN32
-#include "TSRM/tsrm_strtok_r.h"
-#endif
 #include "Zend/zend_virtual_cwd.h"
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
@@ -59,10 +56,8 @@
 #include "ext/spl/spl_exceptions.h"
 #include "ext/spl/spl_iterators.h"
 #include "php_phar.h"
-#ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
-#endif
 
 /* PHP_ because this is public information via MINFO */
 #define PHP_PHAR_API_VERSION      "1.1.1"
@@ -217,6 +212,17 @@ enum phar_fp_type {
 	PHAR_TMP
 };
 
+/*
+ * Represents the metadata of the phar file or a file entry within the phar.
+ * Can contain any combination of serialized data and the value as needed.
+ */
+typedef struct _phar_metadata_tracker {
+	/* Can be IS_UNDEF or a regular value */
+	zval val;
+	/* Nullable string with the serialized value, if the serialization was performed or read from a file. */
+	zend_string *str;
+} phar_metadata_tracker;
+
 /* entry for one file in a phar file */
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
@@ -228,8 +234,7 @@ typedef struct _phar_entry_info {
 	/* remainder */
 	/* when changing compression, save old flags in case fp is NULL */
 	uint32_t                 old_flags;
-	zval                     metadata;
-	uint32_t                 metadata_len; /* only used for cached manifests */
+	phar_metadata_tracker metadata_tracker;
 	uint32_t                 filename_len;
 	char                     *filename;
 	enum phar_fp_type        fp_type;
@@ -244,7 +249,6 @@ typedef struct _phar_entry_info {
 	int                      fp_refcount;
 	char                     *tmp;
 	phar_archive_data        *phar;
-	smart_str                metadata_str;
 	char                     *link; /* symbolic link to another file */
 	char                     tar_type;
 	/* position in the manifest */
@@ -296,8 +300,7 @@ struct _phar_archive_data {
 	uint32_t                 sig_flags;
 	uint32_t                 sig_len;
 	char                     *signature;
-	zval                     metadata;
-	uint32_t                 metadata_len; /* only used for cached manifests */
+	phar_metadata_tracker metadata_tracker;
 	uint32_t                 phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
 	uint32_t             is_temporary_alias:1;
@@ -479,8 +482,6 @@ extern zend_string *(*phar_save_resolve_path)(const char *filename, size_t filen
 BEGIN_EXTERN_C()
 
 #ifdef PHP_WIN32
-char *tsrm_strtok_r(char *s, const char *delim, char **last);
-
 static inline void phar_unixify_path_separators(char *path, size_t path_len)
 {
 	char *s;
@@ -512,7 +513,9 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 	tmp_len = MIN(MAXPATHLEN, entry->filename_len + entry->phar->fname_len);
 
 	len1 = MIN(entry->phar->fname_len, tmp_len);
-	memcpy(tmp, entry->phar->fname, len1);
+	if (entry->phar->fname) {
+		memcpy(tmp, entry->phar->fname, len1);
+	}
 
 	len2 = MIN(tmp_len - len1, entry->filename_len);
 	memcpy(tmp + len1, entry->filename, len2);
@@ -549,7 +552,16 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_le
 zend_string *phar_find_in_include_path(char *file, size_t file_len, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len);
+void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, int persistent);
+zend_bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, int persistent);
+/* If this has data, free it and set all values to undefined. */
+void phar_metadata_tracker_free(phar_metadata_tracker* val, int persistent);
+void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata_tracker *source, int persistent);
+void phar_metadata_tracker_clone(phar_metadata_tracker* tracker);
+void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker* tracker, int persistent);
+int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker* tracker, zval *value, int persistent, HashTable *unserialize_options, const char* method_name);
+void phar_release_entry_metadata(phar_entry_info *entry);
+void phar_release_archive_metadata(phar_archive_data *phar);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);
@@ -606,12 +618,3 @@ typedef enum {
 phar_path_check_result phar_path_check(char **p, size_t *len, const char **error);
 
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

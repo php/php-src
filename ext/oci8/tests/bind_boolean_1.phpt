@@ -3,7 +3,7 @@ Basic PL/SQL "BOOLEAN" (SQLT_BOL) bind test
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) && $matches[1] >= 12)) {
     die("skip expected output only valid when using Oracle Database 12c or greater");
@@ -16,7 +16,7 @@ if (!(isset($matches[0]) && $matches[0] >= 12)) {
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 
@@ -100,8 +100,6 @@ oci_execute($s);
 var_dump($b1, $b2);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 bool(true)
@@ -135,4 +133,3 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-===DONE===

@@ -9,9 +9,9 @@ Chris Wright <info@daverandom.com>
 
 $doc = new DOMDocument;
 
-$doc->load(dirname(__FILE__)."/book-attr.xml");
+$doc->load(__DIR__."/book-attr.xml");
 
-$xsd = file_get_contents(dirname(__FILE__)."/book.xsd");
+$xsd = file_get_contents(__DIR__."/book.xsd");
 
 $doc->schemaValidateSource($xsd);
 

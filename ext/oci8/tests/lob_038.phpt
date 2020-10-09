@@ -3,13 +3,13 @@ Array fetch CLOB and BLOB
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 echo "Test 1: CLOB\n";
 
@@ -55,11 +55,11 @@ while ($row = oci_fetch_array($s, OCI_ASSOC)) {
 }
 
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Test 2: BLOB\n";
 
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -99,7 +99,7 @@ while ($row = oci_fetch_array($s, OCI_ASSOC)) {
 }
 
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 
@@ -125,7 +125,7 @@ Test 1b
 bool(true)
 array(1) {
   ["CLOB"]=>
-  object(OCI-Lob)#2 (1) {
+  object(OCILob)#2 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -133,7 +133,7 @@ array(1) {
 string(11) "clob test 1"
 array(1) {
   ["CLOB"]=>
-  object(OCI-Lob)#3 (1) {
+  object(OCILob)#3 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -141,7 +141,7 @@ array(1) {
 string(11) "clob test 2"
 array(1) {
   ["CLOB"]=>
-  object(OCI-Lob)#2 (1) {
+  object(OCILob)#2 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -167,7 +167,7 @@ Test 2b
 bool(true)
 array(1) {
   ["BLOB"]=>
-  object(OCI-Lob)#3 (1) {
+  object(OCILob)#3 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -175,7 +175,7 @@ array(1) {
 string(11) "blob test 1"
 array(1) {
   ["BLOB"]=>
-  object(OCI-Lob)#4 (1) {
+  object(OCILob)#4 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -183,7 +183,7 @@ array(1) {
 string(11) "blob test 2"
 array(1) {
   ["BLOB"]=>
-  object(OCI-Lob)#3 (1) {
+  object(OCILob)#3 (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

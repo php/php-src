@@ -5,12 +5,10 @@ Phar: unable to process zip (zip spanning multiple archives)
 --FILE--
 <?php
 try {
-	new PharData(dirname(__FILE__) . '/files/disknumber.zip');
+    new PharData(__DIR__ . '/files/disknumber.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: split archives spanning multiple zips cannot be processed in zip-based phar "%sdisknumber.zip"
-===DONE===

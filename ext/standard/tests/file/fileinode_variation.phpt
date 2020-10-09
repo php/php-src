@@ -2,19 +2,15 @@
 Test fileinode() function: Variations
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no link()/symlink() on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 echo "*** Testing fileinode() with files, links and directories ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file1 = $file_path."/fileinode1_variation.tmp";
 $file2 = $file_path."/fileinode2_variation.tmp";
 $link1 = $file_path."/fileinode1_variation_link.tmp";
@@ -85,27 +81,28 @@ rmdir("$file_path/dir/subdir");
 rmdir("$file_path/dir");
 
 echo "\n*** Done ***";
+?>
 --EXPECTF--
 *** Testing fileinode() with files, links and directories ***
 -- Testing with files --
-%d
-%d
+%i
+%i
 -- Testing with links: hard link --
-%d
-%d
+%i
+%i
 -- Testing with links: soft link --
-%d
-%d
+%i
+%i
 -- Testing after copying a file --
-%d
-%d
+%i
+%i
 -- Testing after renaming the file --
-%d
-%d
+%i
+%i
 -- Testing with directories --
-%d
-%d
+%i
+%i
 -- Testing with binary input --
-%d
-%d
+%i
+%i
 *** Done ***

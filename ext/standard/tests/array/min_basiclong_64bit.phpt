@@ -28,8 +28,6 @@ $longVals = array(
    var_dump(min($longVals));
 
 ?>
-===DONE===
 --EXPECT--
 int(-9223372036854775808)
 int(-9223372036854775808)
-===DONE===

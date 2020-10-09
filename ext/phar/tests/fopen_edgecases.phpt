@@ -7,15 +7,15 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.3.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.phar.php';
 $pname = 'phar://' . $fname;
 $pname2 = 'phar://' . $fname2;
 $pname3 = 'phar://' . $fname3;
 
 // create in cwd
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 file_put_contents('phar://fopen_edgetest.phar/hi', 'hi');
 // append
 $a = fopen($pname . '/b/c.php', 'a');
@@ -66,22 +66,21 @@ $a = fopen("./notfound.php", "r");
 include $pname . '/test.php';
 ?>
 
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/fopen_edgetest.phar');
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
+<?php unlink(__DIR__ . '/fopen_edgetest.phar'); ?>
 --EXPECTF--
-Warning: fopen(phar://%sfopen_edgecases.phar.php/b/c.php): failed to open stream: phar error: open mode append not supported in %sfopen_edgecases.php on line %d
+Warning: fopen(phar://%sfopen_edgecases.phar.php/b/c.php): Failed to open stream: phar error: open mode append not supported in %sfopen_edgecases.php on line %d
 
-Warning: fopen(phar://%sfopen_edgecases.phar.php.phar.gz): failed to open stream: phar error: invalid url or non-existent phar "phar://%sfopen_edgecases.phar.php.phar.gz" in %sfopen_edgecases.php on line %d
+Warning: fopen(phar://%sfopen_edgecases.phar.php.phar.gz): Failed to open stream: phar error: invalid url or non-existent phar "phar://%sfopen_edgecases.phar.php.phar.gz" in %sfopen_edgecases.php on line %d
 bool(false)
 
-Warning: fopen(phar://%sfopen_edgecases.2.phar.php/hi): failed to open stream: internal corruption of phar "%sfopen_edgecases.2.phar.php" (truncated manifest at stub end) in %sfopen_edgecases.php on line %d
+Warning: fopen(phar://%sfopen_edgecases.2.phar.php/hi): Failed to open stream: internal corruption of phar "%sfopen_edgecases.2.phar.php" (truncated manifest at stub end) in %sfopen_edgecases.php on line %d
 
-Warning: fopen(phar://): failed to open stream: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar) in %sfopen_edgecases.php on line %d
+Warning: fopen(phar://): Failed to open stream: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar) in %sfopen_edgecases.php on line %d
 
-Warning: fopen(phar://foo.phar): failed to open stream: %s in %sfopen_edgecases.php on line %d
+Warning: fopen(phar://foo.phar): Failed to open stream: %s in %sfopen_edgecases.php on line %d
 int(0)
 int(1)
 int(0)
@@ -119,6 +118,5 @@ Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/
 
 Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/hi" to "phar://%sfopen_edgecases.phar.php/there": invalid or non-writable url "phar://%sfopen_edgecases.phar.php/hi" in %sfopen_edgecases.php on line %d
 
-Warning: fopen(./notfound.php): failed to open stream: No such file or directory in phar://%sfopen_edgecases.phar.php/test.php on line %d
+Warning: fopen(./notfound.php): Failed to open stream: No such file or directory in phar://%sfopen_edgecases.phar.php/test.php on line %d
 
-===DONE===

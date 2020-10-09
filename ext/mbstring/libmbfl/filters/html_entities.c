@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "html_entities.h"
 
@@ -289,10 +285,3 @@ const mbfl_html_entity_entry mbfl_html_entity_list[] = {
   {"diams",    9830},
   {NULL,         -1}  /* mark end of table */
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

@@ -1256,7 +1256,7 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 	if (dx == 0 && dy == 0) {
 		return;
 	}
-	if (abs(dx) > abs(dy)) {
+	if (abs((int)dx) > abs((int)dy)) {
 		if (dx < 0) {
 			tmp = x1;
 			x1 = x2;
@@ -1463,6 +1463,8 @@ void gdImageChar (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 	int cx, cy;
 	int px, py;
 	int fline;
+	const int xuppper = (x > INT_MAX - f->w) ? INT_MAX : x + f->w;
+	const int yuppper = (y > INT_MAX - f->h) ? INT_MAX : y + f->h;
 	cx = 0;
 	cy = 0;
 #ifdef CHARSET_EBCDIC
@@ -1472,8 +1474,8 @@ void gdImageChar (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 		return;
 	}
 	fline = (c - f->offset) * f->h * f->w;
-	for (py = y; (py < (y + f->h)); py++) {
-		for (px = x; (px < (x + f->w)); px++) {
+	for (py = y; py < yuppper; py++) {
+		for (px = x; px < xuppper; px++) {
 			if (f->data[fline + cy * f->w + cx]) {
 				gdImageSetPixel(im, px, py, color);
 			}
@@ -1489,6 +1491,8 @@ void gdImageCharUp (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 	int cx, cy;
 	int px, py;
 	int fline;
+	const int xuppper = (x > INT_MAX - f->h) ? INT_MAX : x + f->h;
+	const int ylower = (y < INT_MIN + f->w) ? INT_MIN : y - f->w;
 	cx = 0;
 	cy = 0;
 #ifdef CHARSET_EBCDIC
@@ -1498,8 +1502,8 @@ void gdImageCharUp (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 		return;
 	}
 	fline = (c - f->offset) * f->h * f->w;
-	for (py = y; py > (y - f->w); py--) {
-		for (px = x; px < (x + f->h); px++) {
+	for (py = y; py > ylower; py--) {
+		for (px = x; px < xuppper; px++) {
 			if (f->data[fline + cy * f->w + cx]) {
 				gdImageSetPixel(im, px, py, color);
 			}
@@ -1593,7 +1597,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	int i, pti;
 	int lx = 0, ly = 0;
 	int fx = 0, fy = 0;
-	int startx, starty, endx, endy;
+	int startx = -1, starty = -1, endx = -1, endy = -1;
 
     if ((s % 360)  == (e % 360)) {
 		s = 0; e = 360;
@@ -1990,7 +1994,8 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 			if (x>x2+1) {
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
-skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
+skip:
+			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 
 			l = x;
 		} while (x<=x2);
@@ -2062,7 +2067,8 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 			if (x>x2+1) {
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
-skip:		for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
+skip:
+			for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
 			l = x;
 		} while (x<=x2);
 	}

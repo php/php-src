@@ -9,4 +9,7 @@ test(1);
 
 ?>
 --EXPECTF--
-Fatal error: Only variables can be passed by reference in %s on line %d
+Fatal error: Uncaught Error: test(): Argument #1 cannot be passed by reference in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

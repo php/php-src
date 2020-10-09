@@ -2,11 +2,6 @@
 Test array_merge() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of array_merge()
  */

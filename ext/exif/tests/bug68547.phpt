@@ -6,7 +6,6 @@ Bug #68547 (Exif Header component value check error)
 <?php
 var_dump(exif_read_data(__DIR__ . DIRECTORY_SEPARATOR . 'bug68547.jpg'));
 ?>
-===DONE===
 --EXPECTF--
 array(12) {
   ["FileName"]=>
@@ -48,4 +47,3 @@ Line4"
   ["Title"]=>
   string(8) "Title..."
 }
-===DONE===

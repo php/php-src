@@ -34,10 +34,6 @@ echo file_get_contents($test_file);
 // cleanup
 unlink($test_file);
 unlink($log_file);
-
 ?>
-
-===DONE===
 --EXPECT--
 testtest
-===DONE===

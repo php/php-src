@@ -14,11 +14,13 @@ phpinfo();
 $info = ob_get_contents();
 ob_end_clean();
 
-preg_match(",Openssl default config .* (.*),", $info, $m);
+preg_match(",Openssl default config [^ ]* (.*),", $info, $m);
 
 if (isset($m[1])) {
     var_dump(str_replace('/', '\\', strtolower($m[1])));
+} else {
+    echo $info;
 }
 ?>
---EXPECT--
-string(28) "c:\usr\local\ssl\openssl.cnf"
+--EXPECTF--
+string(%d) "c:\program files%r( \(x86\)|)%r\common files\ssl\openssl.cnf"

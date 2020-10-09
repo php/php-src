@@ -8,15 +8,12 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_executable ( string $filename );
-   Description: Tells whether the filename is executable
-*/
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 echo "*** Testing is_executable(): basic functionality ***\n";
 
 // create a file
-$filename = dirname(__FILE__)."/私はガラスを食べられますis_executable.tmp";
+$filename = __DIR__."/私はガラスを食べられますis_executable.tmp";
 create_file($filename);
 
 $counter = 1;

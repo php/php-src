@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +15,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes
- */
+/* {{{ includes */
 #include "php.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -75,14 +72,8 @@ Allows any change to open_basedir setting in during Startup and Shutdown events,
 or a tightening during activation/runtime/deactivation */
 PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 {
-	char **p, *pathbuf, *ptr, *end;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (char **) (base + (size_t) mh_arg1);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	char *pathbuf, *ptr, *end;
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
@@ -275,8 +266,7 @@ PHPAPI int php_check_open_basedir(const char *path)
 	return php_check_open_basedir_ex(path, 1);
 }
 
-/* {{{ php_check_open_basedir
- */
+/* {{{ php_check_open_basedir */
 PHPAPI int php_check_open_basedir_ex(const char *path, int warn)
 {
 	/* Only check when open_basedir is available */
@@ -324,8 +314,7 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn)
 }
 /* }}} */
 
-/* {{{ php_fopen_and_set_opened_path
- */
+/* {{{ php_fopen_and_set_opened_path */
 static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, zend_string **opened_path)
 {
 	FILE *fp;
@@ -346,8 +335,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, z
 }
 /* }}} */
 
-/* {{{ php_fopen_primary_script
- */
+/* {{{ php_fopen_primary_script */
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 {
 	char *path_info;
@@ -558,8 +546,11 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 				if (wrapper->wops->url_stat) {
 					php_stream_statbuf ssb;
 
-					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
+					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL)) {
 						return zend_string_init(trypath, strlen(trypath), 0);
+					}
+					if (EG(exception)) {
+						return NULL;
 					}
 				}
 				continue;
@@ -595,8 +586,11 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 					if (wrapper->wops->url_stat) {
 						php_stream_statbuf ssb;
 
-						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
+						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL)) {
 							return zend_string_init(trypath, strlen(trypath), 0);
+						}
+						if (EG(exception)) {
+							return NULL;
 						}
 					}
 					return NULL;
@@ -697,8 +691,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 }
 /* }}} */
 
-/* {{{ php_strip_url_passwd
- */
+/* {{{ php_strip_url_passwd */
 PHPAPI char *php_strip_url_passwd(char *url)
 {
 	register char *p, *url_start;
@@ -737,24 +730,21 @@ PHPAPI char *php_strip_url_passwd(char *url)
 }
 /* }}} */
 
-/* {{{ expand_filepath
- */
+/* {{{ expand_filepath */
 PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 {
 	return expand_filepath_ex(filepath, real_path, NULL, 0);
 }
 /* }}} */
 
-/* {{{ expand_filepath_ex
- */
+/* {{{ expand_filepath_ex */
 PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len)
 {
 	return expand_filepath_with_mode(filepath, real_path, relative_to, relative_to_len, CWD_FILEPATH);
 }
 /* }}} */
 
-/* {{{ expand_filepath_use_realpath
- */
+/* {{{ expand_filepath_use_realpath */
 PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode)
 {
 	cwd_state new_state;
@@ -828,12 +818,3 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	return real_path;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

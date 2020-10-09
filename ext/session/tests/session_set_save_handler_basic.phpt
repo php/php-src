@@ -12,12 +12,6 @@ session.save_handler=files
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() : basic functionality ***\n";
 
 require_once "save_handler.inc";
@@ -26,7 +20,7 @@ var_dump(session_module_name(FALSE));
 var_dump(session_module_name("blah"));
 var_dump(session_module_name("foo"));
 
-$path = dirname(__FILE__);
+$path = __DIR__;
 session_save_path($path);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 
@@ -66,13 +60,13 @@ ob_end_flush();
 *** Testing session_set_save_handler() : basic functionality ***
 string(%d) "%s"
 
-Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d
+Warning: session_module_name(): Session handler module "" cannot be found in %s on line %d
 bool(false)
 
-Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
+Warning: session_module_name(): Session handler module "blah" cannot be found in %s on line %d
 bool(false)
 
-Warning: session_module_name(): Cannot find named PHP session module (foo) in %s on line %d
+Warning: session_module_name(): Session handler module "foo" cannot be found in %s on line %d
 bool(false)
 Open [%s,PHPSESSID]
 Read [%s,%s]

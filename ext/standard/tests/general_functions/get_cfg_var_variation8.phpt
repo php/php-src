@@ -5,6 +5,8 @@ Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
 --INI--
 magic_quotes_gpc=1
+--SKIPIF--
+<?php if (getenv('SKIP_ASAN')) die('xfail Startup failure leak'); ?>
 --FILE--
 <?php
 echo "*** Test by calling method or function with deprecated option ***\n";

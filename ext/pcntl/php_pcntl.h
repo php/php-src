@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +55,7 @@ PHP_FUNCTION(pcntl_strerror);
 PHP_FUNCTION(pcntl_sigprocmask);
 #endif
 #ifdef HAVE_STRUCT_SIGINFO_T
-# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+# if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 PHP_FUNCTION(pcntl_sigwaitinfo);
 PHP_FUNCTION(pcntl_sigtimedwait);
 # endif
@@ -70,6 +68,9 @@ PHP_FUNCTION(pcntl_getpriority);
 PHP_FUNCTION(pcntl_setpriority);
 #endif
 PHP_FUNCTION(pcntl_async_signals);
+#ifdef HAVE_UNSHARE
+PHP_FUNCTION(pcntl_unshare);
+#endif
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
@@ -88,21 +89,13 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	zend_bool async_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
-#ifdef ZTS
-#define PCNTL_G(v) TSRMG(pcntl_globals_id, zend_pcntl_globals *, v)
-#else
-#define PCNTL_G(v)	(pcntl_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_PCNTL)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(pcntl)
+#define PCNTL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pcntl, v)
 
 #define REGISTER_PCNTL_ERRNO_CONSTANT(name) REGISTER_LONG_CONSTANT("PCNTL_" #name, name, CONST_CS | CONST_PERSISTENT)
 
 #endif	/* PHP_PCNTL_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

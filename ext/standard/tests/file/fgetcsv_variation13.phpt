@@ -2,17 +2,12 @@
 Test fgetcsv() : usage variations - with line without any csv fields
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to read a line from a file which doesn't have any CSV field */
 
 echo "*** Testing fgetcsv() : reading the line which is without csv fields ***\n";
 
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation13.tmp';
+$filename = __DIR__ . '/fgetcsv_variation13.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",

@@ -1,7 +1,5 @@
 --TEST--
-ripemd128 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: ripemd128 algorithm
 --FILE--
 <?php
 echo hash('ripemd128', '') . "\n";
@@ -13,6 +11,7 @@ echo hash('ripemd128', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq
 echo hash('ripemd128', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') . "\n";
 echo hash('ripemd128', '12345678901234567890123456789012345678901234567890123456789012345678901234567890') . "\n";
 echo hash('ripemd128', str_repeat('a', 1000000)) . "\n";
+?>
 --EXPECT--
 cdf26213a150dc3ecb610f18f6b38b46
 86be7afa339d0fc7cfc785e72f578d33

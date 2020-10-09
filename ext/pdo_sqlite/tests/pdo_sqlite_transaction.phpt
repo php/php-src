@@ -5,7 +5,8 @@ PDO_sqlite: Testing transaction
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $db->beginTransaction();
 
@@ -24,5 +25,7 @@ var_dump($r->rowCount());
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECT--
+--EXPECTF--
 int(0)
+
+Warning: PDO::query(): SQLSTATE[HY000]: General error: 6 database table is locked in %s on line %d

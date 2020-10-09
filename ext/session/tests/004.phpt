@@ -33,7 +33,7 @@ class handler {
     function write($key, $val)
     {
         print "WRITE: $key, $val\n";
-		$GLOBALS["hnd"]->data = $val;
+        $GLOBALS["hnd"]->data = $val;
         return true;
     }
 

@@ -39,7 +39,7 @@ $base64_1x1_jpeg="/9j/4AAQSkZJRgABAQEAYABgAAD//gA8Q1JFQVRPUjogZ2QtanBlZyB2MS4wIC
 #write file
 $fd=fopen($file,"wb");
 if ($fd) { fputs($fd,base64_decode($base64_1x1_jpeg)); fclose($fd); }
-else { echo "error cant write $file".PHP_EOL;exit(1); }
+else { echo "error can't write $file".PHP_EOL;exit(1); }
 #check file md5
 $md5=md5_file($file);
 if ($md5!="07dd8594450e8c18ab8a79d7cb4573c7") { echo "md5 error".PHP_EOL;exit(1); }
@@ -70,7 +70,7 @@ $content = iptcembed($iptc, $file,0);
 if ($content === false) {echo "iptcembed error".PHP_EOL;exit(1); }
 $fd=fopen($file2,"wb");
 if ($fd) { fputs($fd,$content); fclose($fd); }
-else { echo "error cant write $file2".PHP_EOL;exit(1); }
+else { echo "error can't write $file2".PHP_EOL;exit(1); }
 
 
 #check jpeg properties for new image with iptc tags

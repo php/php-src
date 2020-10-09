@@ -2,13 +2,6 @@
 Test in_array() function : usage variations - different needdle values
 --FILE--
 <?php
-/*
- * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns TRUE
- *              if it is found in the array, FALSE otherwise.
- * Source Code: ext/standard/array.c
-*/
-
 /* Test in_array() with different possible needle values */
 
 echo "*** Testing in_array() with different needle values ***\n";
@@ -76,9 +69,9 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 4 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
@@ -100,13 +93,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 10 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 11 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 12 --
 bool(false)
 bool(false)
@@ -116,13 +109,13 @@ bool(true)
 bool(false)
 bool(true)
 -- Iteration 14 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 15 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 16 --
 bool(true)
 bool(false)
@@ -132,9 +125,9 @@ bool(true)
 bool(true)
 bool(true)
 -- Iteration 18 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 19 --
 bool(true)
 bool(true)
@@ -340,13 +333,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 70 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 71 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 72 --
 bool(false)
 bool(false)
@@ -484,13 +477,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 106 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 107 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 108 --
 bool(false)
 bool(false)
@@ -556,13 +549,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 124 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 125 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 126 --
 bool(true)
 bool(true)
@@ -628,13 +621,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 142 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 143 --
-bool(true)
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 144 --
 bool(false)
 bool(false)

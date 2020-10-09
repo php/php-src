@@ -10,5 +10,6 @@ $e = NULL;
 $dummy =& $r[0];
 
 print stream_select($r, $w, $e, 0.5);
+?>
 --EXPECT--
 0

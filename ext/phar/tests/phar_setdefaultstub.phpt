@@ -7,7 +7,7 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 
 $phar = new Phar($fname);
 $phar['a.php'] = '<php echo "this is a\n"; ?>';
@@ -35,23 +35,22 @@ echo "==========================================================================
 echo "============================================================================\n";
 
 try {
-	$phar->setDefaultStub(str_repeat('a', 400));
-	$phar->stopBuffering();
-	var_dump(strlen($phar->getStub()));
+    $phar->setDefaultStub(str_repeat('a', 400));
+    $phar->stopBuffering();
+    var_dump(strlen($phar->getStub()));
 
-	$phar->setDefaultStub(str_repeat('a', 401));
-	$phar->stopBuffering();
-	var_dump(strlen($phar->getStub()));
+    $phar->setDefaultStub(str_repeat('a', 401));
+    $phar->stopBuffering();
+    var_dump(strlen($phar->getStub()));
 
 } catch(Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECT--
 string(6643) "<?php
@@ -941,4 +940,3 @@ __HALT_COMPILER(); ?>
 ============================================================================
 int(7034)
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
-===DONE===

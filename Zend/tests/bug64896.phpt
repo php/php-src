@@ -7,18 +7,18 @@ zend.enable_gc=1
 $bar = NULL;
 class bad
 {
-	private $_private = array();
+    private $_private = array();
 
-	public function __construct()
-	{
-		$this->_private[] = 'php';
-	}
+    public function __construct()
+    {
+        $this->_private[] = 'php';
+    }
 
-	public function __destruct()
-	{
-		global $bar;
-		$bar = $this;
-	}
+    public function __destruct()
+    {
+        global $bar;
+        $bar = $this;
+    }
 }
 
 $foo = new stdclass;

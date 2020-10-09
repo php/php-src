@@ -3,13 +3,13 @@ collection methods
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__)."/create_type.inc";
+require __DIR__."/connect.inc";
+require __DIR__."/create_type.inc";
 
 $coll1 = oci_new_collection($c, $type_name);
 
@@ -22,14 +22,14 @@ var_dump($coll1->assignElem(0,2));
 
 echo "Done\n";
 
-require dirname(__FILE__)."/drop_type.inc";
+require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECTF--
 int(0)
 int(0)
 
-Warning: OCI-Collection::trim(): OCI-22167: given trim size [3] must be less than or equal to [0] in %s on line %d
+Warning: OCICollection::trim(): OCI-22167: given trim size [3] must be less than or equal to [0] in %s on line %d
 bool(false)
 bool(true)
 float(1)

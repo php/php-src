@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,15 +84,14 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 		const char *lc_header_name)
 {
 	char *lc_header_start = strstr(lc_header_bag, lc_header_name);
-	char *header_start = header_bag + (lc_header_start - lc_header_bag);
-
 	if (lc_header_start
 	&& (lc_header_start == lc_header_bag || *(lc_header_start-1) == '\n')
 	) {
+		char *header_start = header_bag + (lc_header_start - lc_header_bag);
 		char *lc_eol = strchr(lc_header_start, '\n');
-		char *eol = header_start + (lc_eol - lc_header_start);
 
 		if (lc_eol) {
+			char *eol = header_start + (lc_eol - lc_header_start);
 			size_t eollen = strlen(lc_eol);
 
 			memmove(lc_header_start, lc_eol+1, eollen);
@@ -104,6 +101,17 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 			*header_start = '\0';
 		}
 	}
+}
+
+static zend_bool check_has_header(const char *headers, const char *header) {
+	const char *s = headers;
+	while ((s = strstr(s, header))) {
+		if (s == headers || *(s-1) == '\n') {
+			return 1;
+		}
+		s++;
+	}
+	return 0;
 }
 
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
@@ -411,7 +419,7 @@ finish:
 		smart_str_appends(&req_buf, "\r\n");
 		efree(protocol_version);
 	} else {
-		smart_str_appends(&req_buf, " HTTP/1.0\r\n");
+		smart_str_appends(&req_buf, " HTTP/1.1\r\n");
 	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
@@ -460,45 +468,31 @@ finish:
 				strip_header(user_headers, t, "content-type:");
 			}
 
-			if ((s = strstr(t, "user-agent:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_USER_AGENT;
+			if (check_has_header(t, "user-agent:")) {
+				have_header |= HTTP_HEADER_USER_AGENT;
 			}
-			if ((s = strstr(t, "host:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_HOST;
+			if (check_has_header(t, "host:")) {
+				have_header |= HTTP_HEADER_HOST;
 			}
-			if ((s = strstr(t, "from:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_FROM;
-				}
-			if ((s = strstr(t, "authorization:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_AUTH;
+			if (check_has_header(t, "from:")) {
+				have_header |= HTTP_HEADER_FROM;
 			}
-			if ((s = strstr(t, "content-length:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_CONTENT_LENGTH;
+			if (check_has_header(t, "authorization:")) {
+				have_header |= HTTP_HEADER_AUTH;
 			}
-			if ((s = strstr(t, "content-type:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_TYPE;
+			if (check_has_header(t, "content-length:")) {
+				have_header |= HTTP_HEADER_CONTENT_LENGTH;
 			}
-			if ((s = strstr(t, "connection:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_CONNECTION;
+			if (check_has_header(t, "content-type:")) {
+				have_header |= HTTP_HEADER_TYPE;
 			}
+			if (check_has_header(t, "connection:")) {
+				have_header |= HTTP_HEADER_CONNECTION;
+			}
+
 			/* remove Proxy-Authorization header */
 			if (use_proxy && use_ssl && (s = strstr(t, "proxy-authorization:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
+			    (s == t || *(s-1) == '\n')) {
 				char *p = s + sizeof("proxy-authorization:") - 1;
 
 				while (s > t && (*(s-1) == ' ' || *(s-1) == '\t')) s--;
@@ -661,11 +655,11 @@ finish:
 		array_init(response_header);
 	}
 
-	if (!php_stream_eof(stream)) {
-		size_t tmp_line_len;
+	{
 		/* get response header */
-
-		if (php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
+		size_t tmp_line_len;
+		if (!php_stream_eof(stream) &&
+			php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval http_response;
 
 			if (tmp_line_len > 9) {
@@ -732,9 +726,6 @@ finish:
 			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed!");
 			goto out;
 		}
-	} else {
-		php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
-		goto out;
 	}
 
 	/* read past HTTP headers */
@@ -1026,12 +1017,3 @@ PHPAPI const php_stream_wrapper php_stream_http_wrapper = {
 	NULL,
 	1 /* is_url */
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

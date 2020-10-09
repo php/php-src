@@ -3,12 +3,12 @@ oci_fetch_object() with CLOB and NULL
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -50,7 +50,7 @@ if (!oci_execute($s)) {
 
 while ($row = oci_fetch_object($s)) {
     echo $row->COL1 . "\n";
-    echo $row->COL2->load(100) . "\n";
+    echo $row->COL2->load() . "\n";
     echo $row->COL3 . "\n";
 }
 
@@ -63,15 +63,13 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "123"
   ["COL2"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -82,7 +80,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "456"
   ["COL2"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -93,7 +91,7 @@ object(stdClass)#%d (3) {
   ["COL1"]=>
   string(3) "789"
   ["COL2"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -110,4 +108,3 @@ Test 2
 789
 3rd row col2 string
 3 more text
-===DONE===

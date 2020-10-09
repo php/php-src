@@ -13,7 +13,7 @@ Rick Buitenman <rick@meritos.nl>
 
   echo '*** Testing curl copy handle with simple GET ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost&get_param=Hello%20World";
+  $url = "{$host}/get.inc?test=getpost&get_param=Hello%20World";
   $ch = curl_init();
 
   ob_start(); // start output buffering
@@ -28,7 +28,6 @@ Rick Buitenman <rick@meritos.nl>
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl copy handle with simple GET ***
 string(106) "array(2) {
@@ -40,4 +39,3 @@ string(106) "array(2) {
 array(0) {
 }
 "
-===DONE=== 

@@ -31,10 +31,8 @@ $people = simplexml_load_string($xml);
 traverse_xml($people);
 
 ?>
-===DONE===
 --EXPECT--
 <people>
   <person>Jane
   </person>
 </people>
-===DONE===

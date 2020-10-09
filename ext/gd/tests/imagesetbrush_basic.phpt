@@ -6,7 +6,7 @@ Erick Belluci Tedeschi <erickbt86 [at] gmail [dot] com>
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) {
-	die('skip gd extension is not loaded');
+    die('skip gd extension is not loaded');
 }
 ?>
 --FILE--

@@ -2,11 +2,6 @@
 Test strrpos() function : usage variations - unexpected inputs for 'haystack' and 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of last occurrence of 'needle' in 'haystack'.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrpos() function with unexpected inputs for 'haystack' and 'needle' arguments */
 
 echo "*** Testing strrpos() function with unexpected values for haystack and needle ***\n";
@@ -81,191 +76,100 @@ $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $haystack = $values[$index];
-  var_dump( strrpos($values[$index], $values[$index]) );
-  var_dump( strrpos($values[$index], $values[$index], 1) );
+  try {
+    var_dump( strrpos($values[$index], $values[$index]) );
+  } catch (Error $e) {
+    echo get_class($e) . ": " . $e->getMessage(), "\n";
+  }
+
+  try {
+    var_dump( strrpos($values[$index], $values[$index], 1) );
+  } catch (Error $e) {
+    echo get_class($e) . ": " . $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 2 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 3 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 4 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 5 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 6 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 7 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 8 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 9 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 10 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 11 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 12 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 13 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 14 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 15 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 16 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 17 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 18 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 19 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
+int(0)
 bool(false)
 -- Iteration 20 --
-bool(false)
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 21 --
-bool(false)
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 22 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 23 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 24 --
-
-Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
-bool(false)
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, resource given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, resource given
 -- Iteration 25 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 -- Iteration 26 --
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(0)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 *** Done ***

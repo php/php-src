@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -83,23 +81,8 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 #define DOM_RET_OBJ(obj, ret, domobject) \
 	*ret = php_dom_create_object(obj, return_value, domobject)
 
-#define DOM_GET_THIS(zval) \
-	if (NULL == (zval = getThis())) { \
-		php_error_docref(NULL, E_WARNING, "Underlying object missing"); \
-		RETURN_FALSE; \
-	}
-
 #define DOM_GET_THIS_OBJ(__ptr, __id, __prtype, __intern) \
-	DOM_GET_THIS(__id); \
+	__id = ZEND_THIS; \
 	DOM_GET_OBJ(__ptr, __id, __prtype, __intern);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

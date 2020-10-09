@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -20,16 +18,11 @@
 
 #include "php_intl.h"
 #include "formatter_class.h"
-#include "formatter_attr.h"
 #include "intl_convert.h"
 
 #include <unicode/ustring.h>
 
-/* {{{ proto mixed NumberFormatter::getAttribute( int $attr )
- * Get formatter attribute value. }}} */
-/* {{{ proto mixed numfmt_get_attribute( NumberFormatter $nf, int $attr )
- * Get formatter attribute value.
- */
+/* {{{ Get formatter attribute value. */
 PHP_FUNCTION( numfmt_get_attribute )
 {
 	zend_long attribute, value;
@@ -39,10 +32,7 @@ PHP_FUNCTION( numfmt_get_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &attribute ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_get_attribute: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -94,11 +84,7 @@ PHP_FUNCTION( numfmt_get_attribute )
 }
 /* }}} */
 
-/* {{{ proto string NumberFormatter::getTextAttribute( int $attr )
- * Get formatter attribute value. }}} */
-/* {{{ proto string numfmt_get_text_attribute( NumberFormatter $nf, int $attr )
- * Get formatter attribute value.
- */
+/* {{{ Get formatter attribute value. */
 PHP_FUNCTION( numfmt_get_text_attribute )
 {
 	zend_long   attribute;
@@ -112,10 +98,7 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &attribute ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_get_text_attribute: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -138,11 +121,7 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 }
 /* }}} */
 
-/* {{{ proto bool NumberFormatter::setAttribute( int $attr, mixed $value )
- * Get formatter attribute value. }}} */
-/* {{{ proto bool numfmt_set_attribute( NumberFormatter $nf, int $attr, mixed $value )
- * Get formatter attribute value.
- */
+/* {{{ Get formatter attribute value. */
 PHP_FUNCTION( numfmt_set_attribute )
 {
 	zend_long attribute;
@@ -150,13 +129,10 @@ PHP_FUNCTION( numfmt_set_attribute )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Olz",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oln",
 		&object, NumberFormatter_ce_ptr, &attribute, &value ) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_set_attribute: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -198,11 +174,7 @@ PHP_FUNCTION( numfmt_set_attribute )
 }
 /* }}} */
 
-/* {{{ proto bool NumberFormatter::setTextAttribute( int $attr, string $value )
- * Get formatter attribute value. }}} */
-/* {{{ proto bool numfmt_set_text_attribute( NumberFormatter $nf, int $attr, string $value )
- * Get formatter attribute value.
- */
+/* {{{ Get formatter attribute value. */
 PHP_FUNCTION( numfmt_set_text_attribute )
 {
 	int32_t slength = 0;
@@ -216,10 +188,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ols",
 		&object, NumberFormatter_ce_ptr, &attribute, &value, &len ) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_set_text_attribute: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -240,11 +209,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 }
 /* }}} */
 
-/* {{{ proto string NumberFormatter::getSymbol( int $attr )
- * Get formatter symbol value. }}} */
-/* {{{ proto string numfmt_get_symbol( NumberFormatter $nf, int $attr )
- * Get formatter symbol value.
- */
+/* {{{ Get formatter symbol value. */
 PHP_FUNCTION( numfmt_get_symbol )
 {
 	zend_long symbol;
@@ -257,10 +222,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &symbol ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_get_symbol: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
@@ -288,11 +250,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 }
 /* }}} */
 
-/* {{{ proto bool NumberFormatter::setSymbol( int $attr, string $symbol )
- * Set formatter symbol value. }}} */
-/* {{{ proto bool numfmt_set_symbol( NumberFormatter $nf, int $attr, string $symbol )
- * Set formatter symbol value.
- */
+/* {{{ Set formatter symbol value. */
 PHP_FUNCTION( numfmt_set_symbol )
 {
 	zend_long  symbol;
@@ -306,10 +264,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ols",
 		&object, NumberFormatter_ce_ptr, &symbol, &value, &value_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_set_symbol: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
@@ -335,11 +290,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 }
 /* }}} */
 
-/* {{{ proto string NumberFormatter::getPattern( )
- * Get formatter pattern. }}} */
-/* {{{ proto string numfmt_get_pattern( NumberFormatter $nf )
- * Get formatter pattern.
- */
+/* {{{ Get formatter pattern. */
 PHP_FUNCTION( numfmt_get_pattern )
 {
 	UChar   value_buf[64];
@@ -351,10 +302,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_get_pattern: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -377,11 +325,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 }
 /* }}} */
 
-/* {{{ proto bool NumberFormatter::setPattern( string $pattern )
- * Set formatter pattern. }}} */
-/* {{{ proto bool numfmt_set_pattern( NumberFormatter $nf, string $pattern )
- * Set formatter pattern.
- */
+/* {{{ Set formatter pattern. */
 PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
@@ -394,10 +338,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, NumberFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_set_pattern: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	FORMATTER_METHOD_FETCH_OBJECT;
@@ -417,11 +358,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 }
 /* }}} */
 
-/* {{{ proto string NumberFormatter::getLocale([int type])
- * Get formatter locale. }}} */
-/* {{{ proto string numfmt_get_locale( NumberFormatter $nf[, int type] )
- * Get formatter locale.
- */
+/* {{{ Get formatter locale. */
 PHP_FUNCTION( numfmt_get_locale )
 {
 	zend_long type = ULOC_ACTUAL_LOCALE;
@@ -432,10 +369,7 @@ PHP_FUNCTION( numfmt_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O|l",
 		&object, NumberFormatter_ce_ptr, &type ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_get_locale: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -446,12 +380,3 @@ PHP_FUNCTION( numfmt_get_locale )
 	RETURN_STRING(loc);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

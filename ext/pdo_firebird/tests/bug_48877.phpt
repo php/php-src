@@ -1,15 +1,15 @@
 --TEST--
 PDO_Firebird: bug 48877 The "bindValue" and "bindParam" do not work for PDO Firebird if we use named parameters (:parameter).
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 
 require("testdb.inc");
 
-$dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 $value = '2';
+
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz (A integer)');
 $dbh->exec("INSERT INTO testz VALUES ('1')");

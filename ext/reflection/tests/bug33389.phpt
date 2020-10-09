@@ -19,10 +19,8 @@ class Test {
     function foo() {
     }
 }
-Reflection::export(new ReflectionClass('Test'));
+echo new ReflectionClass('Test');
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Class [ <user> class Test ] {
   @@ %sbug33389.php 3-18
@@ -93,5 +91,3 @@ Class [ <user> class Test ] {
     }
   }
 }
-
-===DONE===

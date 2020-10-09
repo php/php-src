@@ -1,15 +1,16 @@
-dnl config.m4 for extension posix
-
-PHP_ARG_ENABLE(posix,whether to enable POSIX-like functions,
-[  --disable-posix         Disable POSIX-like functions], yes)
+PHP_ARG_ENABLE([posix],
+  [whether to enable POSIX-like functions],
+  [AS_HELP_STRING([--disable-posix],
+    [Disable POSIX-like functions])],
+  [yes])
 
 if test "$PHP_POSIX" = "yes"; then
   AC_DEFINE(HAVE_POSIX, 1, [whether to include POSIX-like functions])
-  PHP_NEW_EXTENSION(posix, posix.c, $ext_shared)
+  PHP_NEW_EXTENSION(posix, posix.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
   AC_CHECK_HEADERS([sys/mkdev.h sys/sysmacros.h])
 
-  AC_CHECK_FUNCS(seteuid setegid setsid getsid setpgid getpgid ctermid mkfifo mknod setrlimit getrlimit getlogin getgroups makedev initgroups getpwuid_r getgrgid_r)
+  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups makedev initgroups getgrgid_r)
 
   AC_MSG_CHECKING([for working ttyname_r() implementation])
   AC_RUN_IFELSE([AC_LANG_SOURCE([[

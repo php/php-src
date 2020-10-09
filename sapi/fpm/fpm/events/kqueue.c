@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +19,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_KQUEUE
+#ifdef HAVE_KQUEUE
 
 #include <sys/types.h>
 #include <sys/event.h>
@@ -56,7 +54,7 @@ static int kfd = 0;
  */
 struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
 {
-#if HAVE_KQUEUE
+#ifdef HAVE_KQUEUE
 	return &kqueue_module;
 #else
 	return NULL;
@@ -64,7 +62,7 @@ struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_KQUEUE
+#ifdef HAVE_KQUEUE
 
 /*
  * init kqueue and stuff

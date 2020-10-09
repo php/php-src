@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,19 +17,37 @@
 
 #include "php.h"
 #include "winutil.h"
+#include "codepage.h"
 #include <bcrypt.h>
 #include <lmcons.h>
 
+
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 {/*{{{*/
-	char *buf = NULL;
+	wchar_t *bufw = NULL;
+	char *buf;
 
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	(LPTSTR)&buf, 0, NULL
+	DWORD ret = FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	(LPWSTR)&bufw, 0, NULL
 	);
 
-	return (buf ? (char *) buf : "");
+	if (!ret || !bufw) {
+		return "";
+	}
+
+	buf = php_win32_cp_conv_w_to_any(bufw, ret, PHP_WIN32_CP_IGNORE_LEN_P);
+
+	LocalFree(bufw);
+
+	return (buf ? buf : "");
+}/*}}}*/
+
+PHP_WINUTIL_API void php_win32_error_msg_free(char *msg)
+{/*{{{*/
+	if (msg && msg[0]) {
+		free(msg);
+	}
 }/*}}}*/
 
 int php_win32_check_trailing_space(const char * path, const size_t path_len)
@@ -378,8 +394,11 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 1113 */   ,  {   ERROR_NO_UNICODE_TRANSLATION    ,   EINVAL          }
         /* 1168 */   ,  {   ERROR_NOT_FOUND                 ,   ENOENT          }
         /* 1224 */   ,  {   ERROR_USER_MAPPED_FILE          ,   EACCES          }
+        /* 1314 */   ,  {   ERROR_PRIVILEGE_NOT_HELD        ,   EACCES          }
         /* 1816 */  ,   {   ERROR_NOT_ENOUGH_QUOTA          ,   ENOMEM          }
 					,   {   ERROR_ABANDONED_WAIT_0          ,   EIO }
+		/* 1464 */	,	{	ERROR_SYMLINK_NOT_SUPPORTED		,	EINVAL			}
+		/* 4390 */	,	{	ERROR_NOT_A_REPARSE_POINT		,	EINVAL			}
     };
 
     for(i = 0; i < sizeof(errmap)/sizeof(struct code_to_errno_map); ++i)
@@ -416,11 +435,64 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	return uname;
 }/*}}}*/
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+static zend_always_inline BOOL is_compatible(HMODULE handle, BOOL is_smaller, char *format, char **err)
+{/*{{{*/
+	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER) handle;
+	PIMAGE_NT_HEADERS pNTHeader = (PIMAGE_NT_HEADERS)((char *) dosHeader + dosHeader->e_lfanew);
+
+	DWORD major = pNTHeader->OptionalHeader.MajorLinkerVersion;
+	DWORD minor = pNTHeader->OptionalHeader.MinorLinkerVersion;
+
+#if PHP_LINKER_MAJOR == 14
+	/* VS 2015, 2017 and 2019 are binary compatible, but only forward compatible.
+		It should be fine, if we load a module linked with an older one into
+		the core linked with the newer one, but not the otherway round.
+		Analogously, it should be fine, if a PHP build linked with an older version
+		is used with a newer CRT, but not the other way round.
+		Otherwise, if the linker major version is not same, it is an error, as
+		per the current knowledge.
+
+		This check is to be extended as new VS versions come out. */
+	DWORD core_minor = (DWORD)(PHP_LINKER_MINOR/10);
+	DWORD comp_minor = (DWORD)(minor/10);
+	if (14 == major && (is_smaller ? core_minor < comp_minor : core_minor > comp_minor) || PHP_LINKER_MAJOR != major)
+#else
+	if (PHP_LINKER_MAJOR != major)
+#endif
+	{
+		char buf[MAX_PATH];
+		if (GetModuleFileName(handle, buf, sizeof(buf)) != 0) {
+			spprintf(err, 0, format, buf, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
+		} else {
+			spprintf(err, 0, "Can't retrieve the module name (error %u)", GetLastError());
+		}
+		return FALSE;
+	}
+
+	return TRUE;
+}/*}}}*/
+
+PHP_WINUTIL_API BOOL php_win32_image_compatible(HMODULE handle, char **err)
+{/*{{{*/
+	return is_compatible(handle, TRUE, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", err);
+}/*}}}*/
+
+/* Expect a CRT module handle */
+PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err)
+{/*{{{*/
+#if PHP_LINKER_MAJOR == 14
+	/* Extend for other CRT if needed. */
+# if PHP_DEBUG
+	const char *crt_name = "vcruntime140d.dll";
+# else
+	const char *crt_name = "vcruntime140.dll";
+# endif
+	HMODULE handle = GetModuleHandle(crt_name);
+	if (handle == NULL) {
+		spprintf(err, 0, "Can't get handle of module %s (error %u)", crt_name, GetLastError());
+		return FALSE;
+	}
+	return is_compatible(handle, FALSE, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);
+#endif
+	return TRUE;
+}/*}}}*/

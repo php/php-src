@@ -1,7 +1,7 @@
-dnl config.m4 for extension sysvmsg
-
-PHP_ARG_ENABLE(sysvmsg,whether to enable System V IPC support,
-[  --enable-sysvmsg        Enable sysvmsg support])
+PHP_ARG_ENABLE([sysvmsg],
+  [whether to enable System V IPC support],
+  [AS_HELP_STRING([--enable-sysvmsg],
+    [Enable sysvmsg support])])
 
 if test "$PHP_SYSVMSG" != "no"; then
   AC_CHECK_HEADER([sys/msg.h],

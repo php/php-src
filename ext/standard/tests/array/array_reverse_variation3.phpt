@@ -2,11 +2,6 @@
 Test array_reverse() function : usage variations - different array values for 'array' argument
 --FILE--
 <?php
-/* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
- * Description: Return input as a new array with the order of the entries reversed
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_reverse() by giving
  * different array values for $array argument
@@ -57,7 +52,7 @@ $arrays = array (
        array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
        array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
 
-       // array with repetative keys
+       // array with repetitive keys
 /*18*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
 );
 

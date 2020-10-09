@@ -4,7 +4,7 @@ gethostbyname() function - basic invalid parameter test
 "Sylvain R." <sracine@phpquebec.org>
 --FILE--
 <?php
-	var_dump(gethostbyname(".toto.toto.toto"));
+    var_dump(gethostbyname(".toto.toto.toto"));
 ?>
---EXPECTF--
+--EXPECT--
 string(15) ".toto.toto.toto"

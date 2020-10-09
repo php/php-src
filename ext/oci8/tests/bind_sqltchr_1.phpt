@@ -5,7 +5,7 @@ Bind with SQLT_CHR
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -133,8 +133,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 TEST241 bind SQLT_CHR
 array(1) {
@@ -225,4 +223,3 @@ array(1) {
     NULL
   }
 }
-===DONE===

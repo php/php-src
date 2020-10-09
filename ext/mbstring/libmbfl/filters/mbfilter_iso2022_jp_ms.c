@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso2022_jp_ms.h"
 
@@ -48,7 +44,7 @@ const mbfl_encoding mbfl_encoding_2022jpms = {
 	"ISO-2022-JP",
 	(const char *(*)[])&mbfl_encoding_2022jpms_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jpms_wchar,
 	&vtbl_wchar_2022jpms
 };
@@ -56,7 +52,6 @@ const mbfl_encoding mbfl_encoding_2022jpms = {
 const struct mbfl_identify_vtbl vtbl_identify_2022jpms = {
 	mbfl_no_encoding_2022jpms,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_2022jpms
 };
 
@@ -64,18 +59,20 @@ const struct mbfl_convert_vtbl vtbl_2022jpms_wchar = {
 	mbfl_no_encoding_2022jpms,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_2022jpms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jpms = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_2022jpms,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_2022jpms,
-	mbfl_filt_conv_any_2022jpms_flush
+	mbfl_filt_conv_any_2022jpms_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -408,9 +405,7 @@ mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s1 & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

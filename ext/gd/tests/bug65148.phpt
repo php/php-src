@@ -45,7 +45,6 @@ foreach ($interpolations as $name => $interpolation) {
 imagedestroy($img);
 print_r($results);
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -176,4 +175,3 @@ Array
         )
 
 )
-===DONE===

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +23,6 @@
 
 extern HashTable pdo_driver_hash;
 extern zend_class_entry *pdo_exception_ce;
-PDO_API zend_class_entry *php_pdo_get_exception_base(int root);
 int php_pdo_list_entry(void);
 
 void pdo_dbh_init(void);
@@ -43,13 +40,14 @@ void pdo_dbstmt_free_storage(zend_object *std);
 zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int by_ref);
 extern zend_object_handlers pdo_dbstmt_object_handlers;
 int pdo_stmt_describe_columns(pdo_stmt_t *stmt);
-int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip_first_arg);
+bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_arg_num,
+	zval *args, uint32_t variadic_num_args);
 
 extern zend_object *pdo_row_new(zend_class_entry *ce);
 extern const zend_function_entry pdo_row_functions[];
 extern zend_class_entry *pdo_row_ce;
 void pdo_row_free_storage(zend_object *std);
-extern const zend_object_handlers pdo_row_object_handlers;
+extern zend_object_handlers pdo_row_object_handlers;
 
 zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object);
 
@@ -59,13 +57,3 @@ int pdo_sqlstate_init_error_table(void);
 void pdo_sqlstate_fini_error_table(void);
 const char *pdo_sqlstate_state_to_description(char *state);
 int pdo_hash_methods(pdo_dbh_object_t *dbh, int kind);
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

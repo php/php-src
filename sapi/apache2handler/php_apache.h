@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,11 +27,11 @@
 
 /* Enable per-module logging in Apache 2.4+ */
 #ifdef APLOG_USE_MODULE
-APLOG_USE_MODULE(php7);
+APLOG_USE_MODULE(php);
 #endif
 
 /* Declare this so we can get to it from outside the sapi_apache2.c file */
-extern module AP_MODULE_DECLARE_DATA php7_module;
+extern module AP_MODULE_DECLARE_DATA php_module;
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 extern char *apache2_php_ini_path_override;

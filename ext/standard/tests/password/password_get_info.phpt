@@ -17,7 +17,7 @@ echo "OK!";
 --EXPECT--
 array(3) {
   ["algo"]=>
-  int(1)
+  string(2) "2y"
   ["algoName"]=>
   string(6) "bcrypt"
   ["options"]=>
@@ -28,7 +28,7 @@ array(3) {
 }
 array(3) {
   ["algo"]=>
-  int(1)
+  string(2) "2y"
   ["algoName"]=>
   string(6) "bcrypt"
   ["options"]=>
@@ -39,7 +39,7 @@ array(3) {
 }
 array(3) {
   ["algo"]=>
-  int(0)
+  NULL
   ["algoName"]=>
   string(7) "unknown"
   ["options"]=>
@@ -48,7 +48,7 @@ array(3) {
 }
 array(3) {
   ["algo"]=>
-  int(0)
+  NULL
   ["algoName"]=>
   string(7) "unknown"
   ["options"]=>

@@ -2,7 +2,6 @@
 ReflectionExtension::getFunctions() ##6218 zend_register_functions breaks reflection
 --SKIPIF--
 <?php
-if (PHP_SAPI != "cli") die("skip CLI only test");
 if (!function_exists("dl")) die("skip need dl");
 ?>
 --FILE--

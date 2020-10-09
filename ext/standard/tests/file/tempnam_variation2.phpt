@@ -7,20 +7,16 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype:  string tempnam ( string $dir, string $prefix );
-   Description: Create file with unique file name.
-*/
-
 /* Creating unique files in various dirs by passing relative paths to $dir arg */
 
 echo "*** Testing tempnam() with absolute and relative paths ***\n";
-$dir_name = dirname(__FILE__)."/tempnam_variation2";
+$dir_name = __DIR__."/tempnam_variation2";
 mkdir($dir_name);
 $dir_path = $dir_name."/tempnam_variation2_sub";
 mkdir($dir_path);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $dir_paths = array(
   // absolute paths

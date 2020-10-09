@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,10 +18,7 @@
 #define PHP_SESSION_H
 
 #include "ext/standard/php_var.h"
-
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-# include "ext/hash/php_hash.h"
-#endif
+#include "ext/hash/php_hash.h"
 
 #define PHP_SESSION_API 20161017
 
@@ -252,7 +247,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
 PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS);
 PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
-PHPAPI void session_adapt_url(const char *, size_t, char **, size_t *);
+PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, size_t *new_len);
 
 PHPAPI int php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
@@ -265,12 +260,11 @@ PHPAPI int php_session_register_serializer(const char *name,
 	        zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS),
 	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
-PHPAPI void php_session_set_id(char *id);
 PHPAPI int php_session_start(void);
 PHPAPI int php_session_flush(int write);
 
-PHPAPI const ps_module *_php_find_ps_module(char *name);
-PHPAPI const ps_serializer *_php_find_ps_serializer(char *name);
+PHPAPI const ps_module *_php_find_ps_module(const char *name);
+PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);
 
 PHPAPI int php_session_valid_key(const char *key);
 PHPAPI int php_session_reset_id(void);
@@ -297,7 +291,7 @@ PHPAPI int php_session_reset_id(void);
 	HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
-			php_error_docref(NULL, E_NOTICE,						\
+			php_error_docref(NULL, E_WARNING,						\
 					"Skipping numeric key " ZEND_LONG_FMT, num_key);\
 			continue;												\
 		}															\
@@ -330,7 +324,5 @@ extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
 extern PHP_METHOD(SessionHandler, create_sid);
-extern PHP_METHOD(SessionHandler, validateId);
-extern PHP_METHOD(SessionHandler, updateTimestamp);
 
 #endif

@@ -14,6 +14,6 @@ var_dump(constant('__COMPILER_HALT_OFFSET__1'.chr(0)));
 
 ?>
 --EXPECTF--
-Notice: Constant __COMPILER_HALT_OFFSET__ already defined in %s on line %d
+Warning: Constant __COMPILER_HALT_OFFSET__ already defined in %s on line %d
 int(1)
 int(4)
