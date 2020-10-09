@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php_version.h"
 #include <ZendAccelerator.h>
 #include "zend_shared_alloc.h"
 #include "Zend/zend_execute.h"
