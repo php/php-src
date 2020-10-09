@@ -76,7 +76,7 @@ function pg_prepare($pgsql, string $stmt, string $query = UNKNOWN) {}
 
 /**
  * @param resource|string $pgsql
- * @param string|array $stmt_name
+ * @param string|array $stmt
  * @return resource|false
  */
 function pg_execute($pgsql, $stmt, array $params = UNKNOWN) {}
