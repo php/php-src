@@ -19,7 +19,7 @@ foreach (array('', '.', '..') as $table) {
 ?>
 Done
 --EXPECTF--
-pg_insert(): Argument #2 ($table_name) cannot be empty
+pg_insert(): Argument #2 ($table) cannot be empty
 
 Warning: pg_insert(): The table name must be specified in %s on line %d
 bool(false)
