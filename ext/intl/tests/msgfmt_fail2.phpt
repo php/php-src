@@ -116,9 +116,9 @@ Warning: msgfmt_create() expects parameter 1 to be string, array given in %s on 
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
 
 IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
