@@ -12,6 +12,15 @@ trigger:
       - UPGRADING
       - UPGRADING.INTERNALS
 
+schedules:
+  - cron: 0 1 * * *
+    displayName: Nightly build
+    branches:
+      include:
+        - PHP-7.4
+        - PHP-8.0
+        - master
+
 jobs:
   - template: azure/job.yml
     parameters:
