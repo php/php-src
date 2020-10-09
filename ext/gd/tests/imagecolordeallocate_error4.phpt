@@ -22,4 +22,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] imagecolordeallocate(): Argument #2 ($index) must be between 0 and 1
+!! [ValueError] imagecolordeallocate(): Argument #2 ($color) must be between 0 and 1

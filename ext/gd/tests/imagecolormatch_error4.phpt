@@ -22,4 +22,4 @@ try {
 
 ?>
 --EXPECT--
-imagecolormatch(): Argument #2 ($im2) must be the same size as argument #1 ($im1)
+imagecolormatch(): Argument #2 ($image2) must be the same size as argument #1 ($im1)

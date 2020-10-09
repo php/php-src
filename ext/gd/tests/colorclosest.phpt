@@ -84,7 +84,7 @@ print_r(imagecolorsforindex($im, $c));
 ?>
 --EXPECT--
 FF00FF
-imagecolorsforindex(): Argument #2 ($index) is out of range
+imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255
@@ -107,7 +107,7 @@ Array
     [alpha] => 0
 )
 64FF00FF
-imagecolorsforindex(): Argument #2 ($index) is out of range
+imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255
