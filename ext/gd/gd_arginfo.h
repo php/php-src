@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d1d685a94d05e8d6208217f78de3970fe52dc6fa */
+ * Stub hash: 59256d0de105f1a2f5d5fc1e20f8090031b42a76 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -516,8 +516,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagescale, 0, 2, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
-	ZEND_ARG_TYPE_INFO(0, new_width, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, new_height, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO(0, width, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, height, IS_LONG, 0, "-1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "IMG_BILINEAR_FIXED")
 ZEND_END_ARG_INFO()
 

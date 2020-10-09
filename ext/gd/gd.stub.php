@@ -240,7 +240,7 @@ function imagecrop(GdImage $image, array $rectangle): GdImage|false {}
 
 function imagecropauto(GdImage $image, int $mode = IMG_CROP_DEFAULT, float $threshold = 0.5, int $color = -1): GdImage|false {}
 
-function imagescale(GdImage $image, int $new_width, int $new_height = -1, int $mode = IMG_BILINEAR_FIXED): GdImage|false {}
+function imagescale(GdImage $image, int $width, int $height = -1, int $mode = IMG_BILINEAR_FIXED): GdImage|false {}
 
 function imageaffine(GdImage $image, array $affine, ?array $clip = null): GdImage|false {}
 
