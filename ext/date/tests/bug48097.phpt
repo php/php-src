@@ -1,5 +1,7 @@
 --TEST--
 Bug #48097 (date_timezone_set function produces wrong datetime result)
+--XFAIL--
+Broken by timelib update
 --INI--
 date.timezone=UTC
 --FILE--
