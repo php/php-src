@@ -3280,8 +3280,19 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			uint32_t info = ssa->var_info[i].type;
 
 			if (!(info & MAY_BE_GUARD) && has_concrete_type(info)) {
-				SET_STACK_TYPE(stack, i, concrete_type(info),
-					(i >= parent_vars_count || STACK_REG(parent_stack, i) >= ZREG_NUM));
+				uint8_t type, mem_type;
+
+				type = concrete_type(info);
+				if (i < parent_vars_count
+				 && STACK_TYPE(parent_stack, i) == type) {
+					mem_type = STACK_MEM_TYPE(parent_stack, i);
+					if (mem_type != IS_UNKNOWN) {
+						SET_STACK_TYPE(stack, i, mem_type, 1);
+					}
+					SET_STACK_TYPE(stack, i, type, 0);
+				} else {
+					SET_STACK_TYPE(stack, i, type, 1);
+				}
 			} else if (zend_jit_var_may_alias(op_array, op_array_ssa, i) != NO_ALIAS) {
 				SET_STACK_TYPE(stack, i, IS_UNKNOWN, 1);
 			} else if (i < parent_vars_count
