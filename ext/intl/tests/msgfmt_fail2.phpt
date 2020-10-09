@@ -146,9 +146,9 @@ TypeError: msgfmt_create(): Argument #1 ($locale) must be of type string, array 
 'U_ZERO_ERROR'
 
 IntlException: Constructor failed in %s on line %d
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
 
 IntlException: Constructor failed in %s on line %d
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
