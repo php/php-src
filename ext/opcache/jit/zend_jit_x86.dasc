@@ -12413,19 +12413,18 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 		} else {
 			|	ADDR_OP2_2 mov, aword EX->opline, opline, r0
 		}
-		|.if X64
-			|	LOAD_ZVAL_ADDR CARG1, res_addr
-			|	mov r0, EX->func
-			|	mov CARG2, [r0 + offsetof(zend_op_array, scope)]
-			|	EXT_CALL zval_update_constant_ex, r0
-		|.else
-			|	sub r4, 8
-			|	mov r0, EX->func
-			|	push dword [r0 + offsetof(zend_op_array, scope)]
-			|	PUSH_ZVAL_ADDR res_addr, r0
-			|	EXT_CALL zval_update_constant_ex, r0
-			|	add r4, 16
-		|.endif
+		|	LOAD_ZVAL_ADDR FCARG1a, res_addr
+		|	mov r0, EX->func
+		|	mov FCARG2a, [r0 + offsetof(zend_op_array, scope)]
+		|	.if X64
+		|		EXT_CALL zval_update_constant_ex, r0
+		|	.else
+		||#if (PHP_VERSION_ID <= 80000)
+		|		EXT_CALL zval_jit_update_constant_ex, r0
+		||#else
+		|		EXT_CALL zval_update_constant_ex, r0
+		||#endif
+		|	.endif
 		|	test al, al
 		|	jnz >1
 		|.cold_code
