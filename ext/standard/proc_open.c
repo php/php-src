@@ -56,6 +56,8 @@
 #    include <termios.h>
 #  endif
 extern int openpty(int *, int *, char *, struct termios *, struct winsize *);
+# elif defined(__sun)
+#    include <termios.h>
 # else
 /* Mac OS X (and some BSDs) define `openpty` in <util.h> */
 #  include <util.h>
@@ -66,7 +68,7 @@ extern int openpty(int *, int *, char *, struct termios *, struct winsize *);
 # include <termios.h>
 # define HAVE_OPENPTY 1
 
-/* Solaris/Illumos does not have any openpty implementation */
+/* Solaris before version 11.4 and Illumos do not have any openpty implementation */
 int openpty(int *master, int *slave, char *name, struct termios *termp, struct winsize *winp)
 {
 	int fd, sd;
