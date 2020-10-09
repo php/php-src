@@ -63,6 +63,6 @@ function xml_parser_set_option(XmlParser $parser, int $option, $value): bool {}
 
 function xml_parser_get_option(XmlParser $parser, int $option): string|int {}
 
-final class XMLParser
+final class XmlParser
 {
 }
