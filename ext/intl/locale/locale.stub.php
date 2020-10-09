@@ -44,31 +44,31 @@ class Locale
      * @return string|false
      * @alias locale_get_display_script
      */
-    public static function getDisplayScript(string $locale, ?string $in_locale = null) {}
+    public static function getDisplayScript(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_region
      */
-    public static function getDisplayRegion(string $locale, ?string $in_locale = null) {}
+    public static function getDisplayRegion(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_name
      */
-    public static function getDisplayName(string $locale, ?string $in_locale = null) {}
+    public static function getDisplayName(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_language
      */
-    public static function getDisplayLanguage(string $locale, ?string $in_locale = null) {}
+    public static function getDisplayLanguage(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_variant
      */
-    public static function getDisplayVariant(string $locale, ?string $in_locale = null) {}
+    public static function getDisplayVariant(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
@@ -92,13 +92,13 @@ class Locale
      * @return bool|null
      * @alias locale_filter_matches
      */
-    public static function filterMatches(string $langtag, string $locale, bool $canonicalize = false) {}
+    public static function filterMatches(string $languageTag, string $locale, bool $canonicalize = false) {}
 
     /**
      * @return string|null
      * @alias locale_lookup
      */
-    public static function lookup(array $langtag, string $locale, bool $canonicalize = false, ?string $def = null) {}
+    public static function lookup(array $languageTag, string $locale, bool $canonicalize = false, ?string $defaultLocale = null) {}
 
     /**
      * @return string|null

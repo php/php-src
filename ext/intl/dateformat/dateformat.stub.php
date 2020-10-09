@@ -8,14 +8,14 @@ class IntlDateFormatter
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @param IntlCalendar|int|null $calendar
      */
-    public function __construct(?string $locale, int $datetype, int $timetype, $timezone = null, $calendar = null, string $pattern = "") {}
+    public function __construct(?string $locale, int $dateType, int $timeType, $timezone = null, $calendar = null, string $pattern = "") {}
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @return IntlDateFormatter|null
      * @alias datefmt_create
      */
-    public static function create(?string $locale, int $datetype, int $timetype, $timezone = null, IntlCalendar|int|null $calendar = null, string $pattern = "") {}
+    public static function create(?string $locale, int $dateType, int $timeType, $timezone = null, IntlCalendar|int|null $calendar = null, string $pattern = "") {}
 
     /**
      * @return int|false
@@ -39,7 +39,7 @@ class IntlDateFormatter
      * @return bool
      * @alias datefmt_set_calendar
      */
-    public function setCalendar(IntlCalendar|int|null $which) {}
+    public function setCalendar(IntlCalendar|int|null $calendar) {}
 
     /**
      * @return string|false
@@ -60,11 +60,11 @@ class IntlDateFormatter
     public function getTimeZone() {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $zone
+     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @return bool|null
      * @alias datefmt_set_timezone
      */
-    public function setTimeZone($zone) {}
+    public function setTimeZone($timezone) {}
 
     /**
      * @return bool
@@ -82,7 +82,7 @@ class IntlDateFormatter
      * @return string|false
      * @alias datefmt_get_locale
      */
-    public function getLocale(int $which = ULOC_ACTUAL_LOCALE) {}
+    public function getLocale(int $type = ULOC_ACTUAL_LOCALE) {}
 
     /**
      * @return void
@@ -97,33 +97,33 @@ class IntlDateFormatter
     public function isLenient() {}
 
     /**
-     * @param IntlCalendar|DateTimeInterface|array|string|int|float $value
+     * @param IntlCalendar|DateTimeInterface|array|string|int|float $datetime
      * @return string|false
      * @alias datefmt_format
      */
-    public function format($value) {}
+    public function format($datetime) {}
 
     /**
-     * @param IntlCalendar|DateTime $object
+     * @param IntlCalendar|DateTime $datetime
      * @param array|int|string|null $format
      * @return string|false
      * @alias datefmt_format_object
      */
-    public static function formatObject($object, $format = null, ?string $locale = null) {}
+    public static function formatObject($datetime, $format = null, ?string $locale = null) {}
 
     /**
-     * @param int $position
+     * @param int $offset
      * @return int|float|false
      * @alias datefmt_parse
      */
-    public function parse(string $value, &$position = null) {}
+    public function parse(string $string, &$offset = null) {}
 
     /**
-     * @param int $position
+     * @param int $offset
      * @return array|false
      * @alias datefmt_localtime
      */
-    public function localtime(string $value, &$position = null) {}
+    public function localtime(string $string, &$offset = null) {}
 
     /**
      * @return int

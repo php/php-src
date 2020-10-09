@@ -7,41 +7,41 @@ class IntlCalendar
     private function __construct() {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timeZone
+     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @return IntlCalendar|IntlGregorianCalendar|null
      * @alias intlcal_create_instance
      */
-    public static function createInstance($timeZone = null, ?string $locale = null) {}
+    public static function createInstance($timezone = null, ?string $locale = null) {}
 
     /**
      * @return bool
      * @alias intlcal_equals
      */
-    public function equals(IntlCalendar $calendar) {}
+    public function equals(IntlCalendar $other) {}
 
     /**
      * @return int
      * @alias intlcal_field_difference
      */
-    public function fieldDifference(float $when, int $field) {}
+    public function fieldDifference(float $timestamp, int $field) {}
 
     /**
      * @return bool
      * @alias intlcal_add
      */
-    public function add(int $field, int $amount) {}
+    public function add(int $field, int $value) {}
 
     /**
      * @return bool
      * @alias intlcal_after
      */
-    public function after(IntlCalendar $calendar) {}
+    public function after(IntlCalendar $other) {}
 
     /**
      * @return bool
      * @alias intlcal_before
      */
-    public function before(IntlCalendar $calendar) {}
+    public function before(IntlCalendar $other) {}
 
     /**
      * @return bool
@@ -53,7 +53,7 @@ class IntlCalendar
      * @return IntlCalendar|null
      * @alias intlcal_from_date_time
      */
-    public static function fromDateTime(DateTime|string $dateTime, ?string $locale = null) {}
+    public static function fromDateTime(DateTime|string $datetime, ?string $locale = null) {}
 
     /**
      * @return int
@@ -113,7 +113,7 @@ class IntlCalendar
      * @return IntlIterator|false
      * @alias intlcal_get_keyword_values_for_locale
      */
-    public static function getKeywordValuesForLocale(string $key, string $locale, bool $commonlyUsed) {}
+    public static function getKeywordValuesForLocale(string $keyword, string $locale, bool $onlyCommon) {}
 
     /**
      * @return int
@@ -125,7 +125,7 @@ class IntlCalendar
      * @return string
      * @alias intlcal_get_locale
      */
-    public function getLocale(int $localeType) {}
+    public function getLocale(int $type) {}
 
     /**
      * @return int
@@ -143,7 +143,7 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_set_minimal_days_in_first_week
      */
-    public function setMinimalDaysInFirstWeek(int $numberOfDays) {}
+    public function setMinimalDaysInFirstWeek(int $days) {}
 
     /**
      * @return int
@@ -203,7 +203,7 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_is_equivalent_to
      */
-    public function isEquivalentTo(IntlCalendar $calendar) {}
+    public function isEquivalentTo(IntlCalendar $other) {}
 
     /**
      * @return bool
@@ -215,7 +215,7 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_is_weekend
      */
-    public function isWeekend(?float $date = null) {}
+    public function isWeekend(?float $timestamp = null) {}
 
     /**
      * @param int|bool $amountOrUpOrDown
@@ -246,32 +246,32 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_set_lenient
      */
-    public function setLenient(bool $isLenient) {}
+    public function setLenient(bool $lenient) {}
 
     /**
      * @return bool
      * @alias intlcal_set_repeated_wall_time_option
      */
-    public function setRepeatedWallTimeOption(int $wallTimeOption) {}
+    public function setRepeatedWallTimeOption(int $option) {}
 
     /**
      * @return bool
      * @alias intlcal_set_skipped_wall_time_option
      */
-    public function setSkippedWallTimeOption(int $wallTimeOption) {}
+    public function setSkippedWallTimeOption(int $option) {}
 
     /**
      * @return bool
      * @alias intlcal_set_time
      */
-    public function setTime(float $date) {}
+    public function setTime(float $timestamp) {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timeZone
+     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @return bool
      * @alias intlcal_set_time_zone
      */
-    public function setTimeZone($timeZone) {}
+    public function setTimeZone($timezone) {}
 
     /**
      * @return DateTime|false
@@ -283,20 +283,20 @@ class IntlCalendar
 class IntlGregorianCalendar extends IntlCalendar
 {
     /**
-     * @param DateTimeZone|IntlTimeZone|string|int|null $timeZoneOrYear
+     * @param DateTimeZone|IntlTimeZone|string|int|null $timezoneOrYear
      * @param string|int|null $localeOrMonth
-     * @param int $dayOfMonth
+     * @param int $day
      * @param int $hour
      * @param int $minute
      * @param int $second
      */
-    public function __construct($timeZoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $dayOfMonth = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN) {}
+    public function __construct($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN) {}
 
     /**
      * @return bool
      * @alias intlgregcal_set_gregorian_change
      */
-    public function setGregorianChange(float $change) {}
+    public function setGregorianChange(float $timestamp) {}
 
     /**
      * @return float

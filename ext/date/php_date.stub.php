@@ -98,7 +98,7 @@ function date_interval_create_from_date_string(string $datetime): DateInterval|f
 
 function date_interval_format(DateInterval $object, string $format): string {}
 
-function date_default_timezone_set(string $timezoneID): bool {}
+function date_default_timezone_set(string $timezoneId): bool {}
 
 function date_default_timezone_get(): string {}
 

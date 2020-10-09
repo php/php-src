@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 61f9c0a6c5048d25e070379f2f98fa10f8ce25ee */
+ * Stub hash: 05ea5d884642e75721f90728fb24b7ad5ce46897 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -15,15 +15,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlChar_charDirection arginfo_class_IntlChar_charAge
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_charFromName, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, characterName, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nameChoice, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlChar_charMirror arginfo_class_IntlChar_charAge
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_charName, 0, 0, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nameChoice, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlChar_charType arginfo_class_IntlChar_charAge
@@ -32,14 +32,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_digit, 0, 0, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, radix, IS_LONG, 0, "10")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_enumCharNames, 0, 0, 3)
 	ZEND_ARG_TYPE_MASK(0, start, MAY_BE_LONG|MAY_BE_STRING, NULL)
-	ZEND_ARG_TYPE_MASK(0, limit, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_MASK(0, end, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nameChoice, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_enumCharTypes, 0, 0, 1)
@@ -53,7 +53,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_forDigit, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, digit, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, radix, IS_LONG, 0, "10")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
@@ -84,7 +84,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getPropertyName, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nameChoice, IS_LONG, 0, "IntlChar::LONG_PROPERTY_NAME")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::LONG_PROPERTY_NAME")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getPropertyValueEnum, 0, 0, 2)
@@ -95,7 +95,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getPropertyValueName, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nameChoice, IS_LONG, 0, "IntlChar::LONG_PROPERTY_NAME")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::LONG_PROPERTY_NAME")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getUnicodeVersion, 0, 0, 0)
