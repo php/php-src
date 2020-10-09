@@ -3345,7 +3345,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		 && trace_buffer->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 		 && trace_buffer->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 			for (i = 0; i < last_var; i++) {
-				if (ra[i] && (ra[i]->flags & ZREG_LOAD) != 0) {
+				if (ra[i]
+				 && (ra[i]->flags & ZREG_LOAD) != 0
+				 && ra[i]->reg != stack[i].reg) {
 					SET_STACK_REG_EX(stack, i, ra[i]->reg, ZREG_LOAD);
 					if (!zend_jit_load_var(&dasm_state, ssa->var_info[i].type, i, ra[i]->reg)) {
 						goto jit_failure;
