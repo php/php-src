@@ -19,5 +19,5 @@ trycatch_dump(
 ?>
 DONE
 --EXPECT--
-!! [ValueError] imagetruecolortopalette(): Argument #3 ($colorWanted) must be greater than 0 and less than 2147483647
+!! [ValueError] imagetruecolortopalette(): Argument #3 ($num_colors) must be greater than 0 and less than 2147483647
 DONE

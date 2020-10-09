@@ -27,4 +27,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] imageconvolution(): Argument #2 ($matrix3x3) must be a 3x3 array
+!! [ValueError] imageconvolution(): Argument #2 ($matrix) must be a 3x3 array

@@ -18,4 +18,4 @@ try {
 }
 ?>
 --EXPECT--
-imagewbmp(): Argument #2 ($to) must not contain null bytes
+imagewbmp(): Argument #2 ($file) must not contain null bytes

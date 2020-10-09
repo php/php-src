@@ -22,4 +22,4 @@ try {
 
 ?>
 --EXPECT--
-imagecolormatch(): Argument #1 ($im1) must be TrueColor
+imagecolormatch(): Argument #1 ($image1) must be TrueColor

@@ -18,4 +18,4 @@ try {
 }
 ?>
 --EXPECT--
-imagejpeg(): Argument #2 ($to) must not contain null bytes
+imagejpeg(): Argument #2 ($file) must not contain null bytes
