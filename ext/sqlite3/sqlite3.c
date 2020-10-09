@@ -1950,6 +1950,11 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
+	if (sqlite3_column_count(result_obj->stmt_obj->stmt) == 0) {
+		result_obj->complete = 1;
+		RETURN_FALSE;
+	}
+
 	ret = sqlite3_step(result_obj->stmt_obj->stmt);
 	switch (ret) {
 		case SQLITE_ROW:
