@@ -218,13 +218,13 @@ function imagegetclip(GdImage $image): array {}
 #ifdef HAVE_GD_FREETYPE
 function imageftbbox(float $size, float $angle, string $font_filename, string $string, array $options = []): array|false {}
 
-function imagefttext(GdImage $image, float $size, float $angle, int $x, int $y, int $color, string $font_filename, string $string, array $options = []): array|false {}
+function imagefttext(GdImage $image, float $size, float $angle, int $x, int $y, int $color, string $font_filename, string $text, array $options = []): array|false {}
 
 /** @alias imageftbbox */
 function imagettfbbox(float $size, float $angle, string $font_filename, string $string, array $options = []): array|false {}
 
 /** @alias imagefttext */
-function imagettftext(GdImage $image, float $size, float $angle, int $x, int $y, int $color, string $font_filename, string $string, array $options = []): array|false {}
+function imagettftext(GdImage $image, float $size, float $angle, int $x, int $y, int $color, string $font_filename, string $text, array $options = []): array|false {}
 #endif
 
 /** @param array|int|float|bool $args */
