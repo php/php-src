@@ -36,6 +36,7 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	int         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
+	UParseError parse_error;
 	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 	intl_error_reset( NULL );
 
@@ -79,10 +80,24 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	(mfo)->mf_data.orig_format_len = pattern_len;
 
 	/* Create an ICU message formatter. */
-	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(mfo));
+	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, locale, &parse_error, &INTL_DATA_ERROR_CODE(mfo));
 
 	if(spattern) {
 		efree(spattern);
+	}
+
+	if (INTL_DATA_ERROR_CODE( mfo ) == U_PATTERN_SYNTAX_ERROR) {
+		char *msg = NULL;
+		smart_str parse_error_str;
+		parse_error_str = intl_parse_error_to_string( &parse_error );
+		spprintf( &msg, 0, "pattern syntax error (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "unknown parser error" );
+		smart_str_free( &parse_error_str );
+
+		intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( mfo ) );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P( mfo ), msg, 1 );
+
+		efree( msg );
+		return FAILURE;
 	}
 
 	INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: message formatter creation failed");
@@ -116,7 +131,9 @@ PHP_METHOD( MessageFormatter, __construct )
 	return_value = ZEND_THIS;
 	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+			zend_string *err = intl_error_get_message(NULL);
+			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));
+			zend_string_release_ex(err, 0);
 		}
 	}
 	zend_restore_error_handling(&error_handling);
