@@ -97,7 +97,7 @@ class IntlDateFormatter
     public function isLenient() {}
 
     /**
-     * @param object|array|string|int|float $value
+     * @param IntlCalendar|DateTimeInterface|array|string|int|float $value
      * @return string|false
      * @alias datefmt_format
      */

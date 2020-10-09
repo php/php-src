@@ -183,7 +183,7 @@ function datefmt_set_lenient(IntlDateFormatter $df, bool $lenient): void {}
 
 function datefmt_is_lenient(IntlDateFormatter $df): bool {}
 
-/** @param object|array|string|int|float $value */
+/** @param IntlCalendar|DateTimeInterface|array|string|int|float $value */
 function datefmt_format(IntlDateFormatter $df, $value): string|false {}
 
 /**
