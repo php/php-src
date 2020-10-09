@@ -19,11 +19,11 @@ class NumberFormatter
     public function format(int|float $num, int $type = NumberFormatter::TYPE_DEFAULT) {}
 
     /**
-     * @param int $index
+     * @param int $offset
      * @return int|float|false
      * @alias numfmt_parse
      */
-    public function parse(string $string, int $type = NumberFormatter::TYPE_DOUBLE, &$index = null) {}
+    public function parse(string $string, int $type = NumberFormatter::TYPE_DOUBLE, &$offset = null) {}
 
     /**
      * @return string|false
@@ -33,11 +33,11 @@ class NumberFormatter
 
     /**
      * @param string $currency
-     * @param int $index
+     * @param int $offset
      * @return float|false
      * @alias numfmt_parse_currency
      */
-    public function parseCurrency(string $string, &$currency, &$index = null) {}
+    public function parseCurrency(string $string, &$currency, &$offset = null) {}
 
     /**
      * @return bool

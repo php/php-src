@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8d863177914d8d89db5f7bc707bb43105cbbf211 */
+ * Stub hash: 05ea5d884642e75721f90728fb24b7ad5ce46897 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -36,8 +36,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_digit, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_enumCharNames, 0, 0, 3)
-	ZEND_ARG_TYPE_MASK(0, offset, MAY_BE_LONG|MAY_BE_STRING, NULL)
-	ZEND_ARG_TYPE_MASK(0, limit, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_MASK(0, start, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_MASK(0, end, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
 ZEND_END_ARG_INFO()

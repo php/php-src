@@ -44,31 +44,31 @@ class Locale
      * @return string|false
      * @alias locale_get_display_script
      */
-    public static function getDisplayScript(string $locale, ?string $displayedLocale = null) {}
+    public static function getDisplayScript(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_region
      */
-    public static function getDisplayRegion(string $locale, ?string $displayedLocale = null) {}
+    public static function getDisplayRegion(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_name
      */
-    public static function getDisplayName(string $locale, ?string $displayedLocale = null) {}
+    public static function getDisplayName(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_language
      */
-    public static function getDisplayLanguage(string $locale, ?string $displayedLocale = null) {}
+    public static function getDisplayLanguage(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false
      * @alias locale_get_display_variant
      */
-    public static function getDisplayVariant(string $locale, ?string $displayedLocale = null) {}
+    public static function getDisplayVariant(string $locale, ?string $displayLocale = null) {}
 
     /**
      * @return string|false

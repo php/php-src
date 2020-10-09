@@ -44,17 +44,17 @@ class IntlTimeZone
     public static function fromDateTimeZone(DateTimeZone $timezone) {}
 
     /**
-     * @param bool $systemId
+     * @param bool $isSystemId
      * @return string|false
      * @alias intltz_get_canonical_id
      */
-    public static function getCanonicalID(string $timezoneId, &$systemId = null) {}
+    public static function getCanonicalID(string $timezoneId, &$isSystemId = null) {}
 
     /**
      * @return string|false
      * @alias intltz_get_display_name
      */
-    public function getDisplayName(bool $daylight = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null) {}
+    public function getDisplayName(bool $dst = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null) {}
 
     /**
      * @return int

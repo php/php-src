@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9eb50b6706fdf3e80f5f97b73e1ba11b87e11b7f */
+ * Stub hash: 2608fb0ac5daf91506bbad9217ec544d68854d37 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -28,11 +28,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getCanonicalID, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, systemId, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, isSystemId, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getDisplayName, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, daylight, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dst, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, style, IS_LONG, 0, "IntlTimeZone::DISPLAY_LONG")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()

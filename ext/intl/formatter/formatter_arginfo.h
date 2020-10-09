@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f9f7dd289dc254d23125ae2c89e66fe79a60acbe */
+ * Stub hash: 0f285bbaa6f4f37060eb8325956f41bd86e9dea3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -17,7 +17,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter_parse, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "NumberFormatter::TYPE_DOUBLE")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, index, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter_formatCurrency, 0, 0, 2)
@@ -28,7 +28,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter_parseCurrency, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_INFO(1, currency)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, index, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter_setAttribute, 0, 0, 2)

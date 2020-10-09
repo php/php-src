@@ -36,7 +36,7 @@ class IntlChar
     public static function digit(int|string $codepoint, int $base = 10) {}
 
     /** @return bool|null */
-    public static function enumCharNames(int|string $offset, int|string $limit, callable $callback, int $type = IntlChar::UNICODE_CHAR_NAME) {}
+    public static function enumCharNames(int|string $start, int|string $end, callable $callback, int $type = IntlChar::UNICODE_CHAR_NAME) {}
 
     /** @return void */
     public static function enumCharTypes(callable $callback) {}

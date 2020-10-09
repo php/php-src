@@ -113,7 +113,7 @@ class IntlCalendar
      * @return IntlIterator|false
      * @alias intlcal_get_keyword_values_for_locale
      */
-    public static function getKeywordValuesForLocale(string $keyword, string $locale, bool $common) {}
+    public static function getKeywordValuesForLocale(string $keyword, string $locale, bool $onlyCommon) {}
 
     /**
      * @return int
@@ -285,18 +285,18 @@ class IntlGregorianCalendar extends IntlCalendar
     /**
      * @param DateTimeZone|IntlTimeZone|string|int|null $timezoneOrYear
      * @param string|int|null $localeOrMonth
-     * @param int $dayOfMonth
+     * @param int $day
      * @param int $hour
      * @param int $minute
      * @param int $second
      */
-    public function __construct($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $dayOfMonth = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN) {}
+    public function __construct($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN) {}
 
     /**
      * @return bool
      * @alias intlgregcal_set_gregorian_change
      */
-    public function setGregorianChange(float $timestamo) {}
+    public function setGregorianChange(float $timestamp) {}
 
     /**
      * @return float

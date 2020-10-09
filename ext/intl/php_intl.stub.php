@@ -7,7 +7,7 @@
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
 function intlcal_create_instance($timezone = null, ?string $locale = null): ?IntlCalendar {}
 
-function intlcal_get_keyword_values_for_locale(string $keyword, string $locale, bool $common): IntlIterator|false {}
+function intlcal_get_keyword_values_for_locale(string $keyword, string $locale, bool $onlyCommon): IntlIterator|false {}
 
 function intlcal_get_now(): float {}
 
@@ -100,12 +100,12 @@ function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
 /**
  * @param DateTimeZone|IntlTimeZone|string|int|null $timezoneOrYear
  * @param string|int|null $localeOrMonth
- * @param int $dayOfMonth
+ * @param int $day
  * @param int $hour
  * @param int $minute
  * @param int $second
  */
-function intlgregcal_create_instance($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $dayOfMonth = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
+function intlgregcal_create_instance($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, float $timestamp): bool {}
 
@@ -285,15 +285,15 @@ function locale_get_region(string $locale): ?string {}
 
 function locale_get_keywords(string $locale): array|false|null {}
 
-function locale_get_display_script(string $locale, ?string $displayedLocale = null): string|false {}
+function locale_get_display_script(string $locale, ?string $displayLocale = null): string|false {}
 
-function locale_get_display_region(string $locale, ?string $displayedLocale = null): string|false {}
+function locale_get_display_region(string $locale, ?string $displayLocale = null): string|false {}
 
-function locale_get_display_name(string $locale, ?string $displayedLocale = null): string|false {}
+function locale_get_display_name(string $locale, ?string $displayLocale = null): string|false {}
 
-function locale_get_display_language(string $locale, ?string $displayedLocale = null): string|false {}
+function locale_get_display_language(string $locale, ?string $displayLocale = null): string|false {}
 
-function locale_get_display_variant(string $locale, ?string $displayedLocale = null): string|false {}
+function locale_get_display_variant(string $locale, ?string $displayLocale = null): string|false {}
 
 function locale_compose(array $subtags): string|false {}
 
@@ -377,10 +377,10 @@ function intltz_create_time_zone_id_enumeration(int $type, ?string $region = nul
 
 function intltz_from_date_time_zone(DateTimeZone $timezone): ?IntlTimeZone {}
 
-/** @param bool $systemId */
-function intltz_get_canonical_id(string $timezoneId, &$systemId = null): string|false {}
+/** @param bool $isSystemId */
+function intltz_get_canonical_id(string $timezoneId, &$isSystemId = null): string|false {}
 
-function intltz_get_display_name(IntlTimeZone $timezone, bool $daylight = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null): string|false {}
+function intltz_get_display_name(IntlTimeZone $timezone, bool $dst = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null): string|false {}
 
 function intltz_get_dst_savings(IntlTimeZone $timezone): int {}
 
@@ -430,7 +430,7 @@ function transliterator_list_ids(): array|false {}
 
 function transliterator_create_inverse(Transliterator $transliterator): ?Transliterator {}
 
-function transliterator_transliterate(Transliterator|string $transliterator, string $string, int $offset = 0, int $end = -1): string|false {}
+function transliterator_transliterate(Transliterator|string $transliterator, string $string, int $start = 0, int $end = -1): string|false {}
 
 function transliterator_get_error_code(Transliterator $transliterator): int|false {}
 

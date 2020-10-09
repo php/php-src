@@ -24,7 +24,7 @@ Function [ <internal:intl> function locale_get_display_language ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $displayedLocale = null ]
+    Parameter #1 [ <optional> ?string $displayLocale = null ]
   }
   - Return [ string|false ]
 }
@@ -32,7 +32,7 @@ Function [ <internal:intl> function locale_get_display_name ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $displayedLocale = null ]
+    Parameter #1 [ <optional> ?string $displayLocale = null ]
   }
   - Return [ string|false ]
 }
@@ -40,7 +40,7 @@ Function [ <internal:intl> function locale_get_display_region ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $displayedLocale = null ]
+    Parameter #1 [ <optional> ?string $displayLocale = null ]
   }
   - Return [ string|false ]
 }
@@ -48,7 +48,7 @@ Function [ <internal:intl> function locale_get_display_script ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $displayedLocale = null ]
+    Parameter #1 [ <optional> ?string $displayLocale = null ]
   }
   - Return [ string|false ]
 }
@@ -56,7 +56,7 @@ Function [ <internal:intl> function locale_get_display_variant ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> string $locale ]
-    Parameter #1 [ <optional> ?string $displayedLocale = null ]
+    Parameter #1 [ <optional> ?string $displayLocale = null ]
   }
   - Return [ string|false ]
 }

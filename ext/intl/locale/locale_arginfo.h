@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2b093f22f17999f90b9ddde870c7c00ff8d29558 */
+ * Stub hash: 4135dc9df49d3fe20275d49bad428a2e3e0a8752 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -18,7 +18,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_getDisplayScript, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayedLocale, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Locale_getDisplayRegion arginfo_class_Locale_getDisplayScript
