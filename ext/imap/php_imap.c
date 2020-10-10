@@ -3195,6 +3195,7 @@ PHP_FUNCTION(imap_mail_compose)
 				if(Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
 						convert_to_string_ex(disp_data);
@@ -3227,6 +3228,7 @@ PHP_FUNCTION(imap_mail_compose)
 				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
 						convert_to_string_ex(disp_data);
@@ -3295,6 +3297,7 @@ PHP_FUNCTION(imap_mail_compose)
 				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
 						convert_to_string_ex(disp_data);
@@ -3327,6 +3330,7 @@ PHP_FUNCTION(imap_mail_compose)
 				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
 						convert_to_string_ex(disp_data);
