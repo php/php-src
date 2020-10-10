@@ -64,7 +64,7 @@ jobs:
         php vendor/bin/phpunit
       displayName: 'Test Laravel'
     - script: |
-        git clone https://github.com/symfony/symfony.git --branch=master --depth=1
+        git clone https://github.com/symfony/symfony.git --depth=1
         cd symfony
         php7.3 /usr/bin/composer install --no-progress
         php7.3 ./phpunit install
