@@ -141,6 +141,17 @@ else
   BUILD_CC=$CC
 fi
 
+dnl The macro AC_PROG_CC_C99 sets the shell variable ac_cv_prog_cc_c99 to 'no'
+dnl if the compiler does not support C99.i.e. does not support any of _Bool,
+dnl flexible arrays, inline, long long int, mixed code and declarations,
+dnl named initialization of structs, restrict, varargs macros, variable
+dnl declarations in for loops and variable length arrays.
+dnl
+dnl https://www.gnu.org/software/autoconf/manual/autoconf-2.60/html_node/C-Compiler.html
+if test "$ac_cv_prog_cc_c99" = no; then
+  AC_MSG_ERROR([C compiler would not accept C99 code])
+fi
+
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
   [for system library directory],
