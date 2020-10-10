@@ -343,7 +343,7 @@ function normalizer_get_raw_decomposition(string $string, int $form = Normalizer
 
 /* resourceboundle */
 
-function resourcebundle_create(?string $locale, ?string $path, bool $fallback = true): ?ResourceBundle {}
+function resourcebundle_create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
 /**
  * @param string|int $index
@@ -353,7 +353,7 @@ function resourcebundle_get(ResourceBundle $bundle, $index) {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 
-function resourcebundle_locales(string $path): array|false {}
+function resourcebundle_locales(string $bundle): array|false {}
 
 function resourcebundle_get_error_code(ResourceBundle $bundle): int {}
 
