@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Calendar:
   . Fixed bug #80185 (jdtounix() fails after 2037). (cmb)
 
+- IMAP:
+  . Fixed bug #80213 (imap_mail_compose() segfaults on certain $bodies). (cmb)
+
 - MySQLnd:
   . Fixed bug #80115 (mysqlnd.debug doesn't recognize absolute paths with
     slashes). (cmb)
