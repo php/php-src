@@ -3556,7 +3556,7 @@ PHP_FUNCTION(imap_mail_compose)
 	int toppart = 0;
 	int first;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "aa", &envelope, &body) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/a/", &envelope, &body) == FAILURE) {
 		return;
 	}
 
@@ -3614,6 +3614,7 @@ PHP_FUNCTION(imap_mail_compose)
 	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "custom_headers", sizeof("custom_headers") - 1)) != NULL) {
 		if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 			custom_headers_param = tmp_param = NULL;
+			SEPARATE_ARRAY(pvalue);
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pvalue), env_data) {
 				custom_headers_param = mail_newbody_parameter();
 				convert_to_string_ex(env_data);
@@ -3635,6 +3636,7 @@ PHP_FUNCTION(imap_mail_compose)
 				php_error_docref(NULL, E_WARNING, "body parameter must be a non-empty array");
 				RETURN_FALSE;
 			}
+			SEPARATE_ARRAY(data);
 
 			bod = mail_newbody();
 			topbod = bod;
@@ -3656,6 +3658,7 @@ PHP_FUNCTION(imap_mail_compose)
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
 				if(Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
+					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
@@ -3689,6 +3692,7 @@ PHP_FUNCTION(imap_mail_compose)
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
 				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
+					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
@@ -3724,6 +3728,7 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 		} else if (Z_TYPE_P(data) == IS_ARRAY) {
 			short type = -1;
+			SEPARATE_ARRAY(data);
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
 				type = (short) zval_get_long(pvalue);
 			}
@@ -3758,6 +3763,7 @@ PHP_FUNCTION(imap_mail_compose)
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
 				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
+					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
@@ -3791,6 +3797,7 @@ PHP_FUNCTION(imap_mail_compose)
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
 				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 					disp_param = tmp_param = NULL;
+					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();

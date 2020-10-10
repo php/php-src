@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 
 - IMAP:
   . Fixed bug #80213 (imap_mail_compose() segfaults on certain $bodies). (cmb)
+  . Fixed bug #80215 (imap_mail_compose() may modify by-val parameters). (cmb)
 
 - MySQLnd:
   . Fixed bug #80115 (mysqlnd.debug doesn't recognize absolute paths with
