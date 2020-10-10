@@ -504,6 +504,26 @@ if test "$ac_cv_alignof_exists" = "yes"; then
   AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
 fi
 
+
+dnl Check for 'for loop initial declaration'
+dnl
+AC_CACHE_CHECK([for 'for loop initial declaration'], ac_cv__for_initial_declaration,
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+int main(void) {
+    for(int i = 0; i <= 20; ++i) {}
+    return 0;
+}
+  ]])], [
+  ac_cv__for_initial_declaration=yes
+], [
+  ac_cv__for_initial_declaration=no
+], [
+  ac_cv__for_initial_declaration=no
+])])
+if test "$ac_cv__for_initial_declaration" != yes; then
+  AC_MSG_ERROR([Compiler does not support for loop initial declaration. Check you're using a C99+ compiler])
+fi
+
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
