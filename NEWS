@@ -11,5 +11,8 @@ PHP                                                                        NEWS
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSPellConfig. (Sara)
+- SPL:
+  . Add SplFixedArray::__set_state (FR #75268) (levim). Note this converts
+    SplFixedArray from get_properties to get_properties_for.
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
