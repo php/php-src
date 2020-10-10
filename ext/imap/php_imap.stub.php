@@ -112,7 +112,7 @@ function imap_mail_copy($imap, string $message_nums, string $mailbox, int $flags
 /** @param resource $imap */
 function imap_mail_move($imap, string $message_nums, string $mailbox, int $flags = 0): bool {}
 
-function imap_mail_compose(array $envelope, array $body): string|false {}
+function imap_mail_compose(array $envelope, array $bodies): string|false {}
 
 /** @param resource $imap */
 function imap_createmailbox($imap, string $mailbox): bool {}
