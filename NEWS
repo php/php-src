@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - hash:
   . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
 
+- OpenSSL:
+  . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
+
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSPellConfig. (Sara)

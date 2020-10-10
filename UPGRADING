@@ -58,6 +58,9 @@ PHP 8.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- OpenSSL:
+  . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
+
 ========================================
 10. New Global Constants
 ========================================

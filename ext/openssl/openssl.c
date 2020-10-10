@@ -1149,13 +1149,6 @@ PHP_MINIT_FUNCTION(openssl)
 	OpenSSL_add_all_ciphers();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_algorithms();
-
-#if !defined(OPENSSL_NO_AES) && defined(EVP_CIPH_CCM_MODE) && OPENSSL_VERSION_NUMBER < 0x100020000
-	EVP_add_cipher(EVP_aes_128_ccm());
-	EVP_add_cipher(EVP_aes_192_ccm());
-	EVP_add_cipher(EVP_aes_256_ccm());
-#endif
-
 	SSL_load_error_strings();
 #else
 	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
@@ -3671,26 +3664,18 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 			case OPENSSL_KEYTYPE_RSA:
 				{
 					RSA* rsaparam;
-#if OPENSSL_VERSION_NUMBER < 0x10002000L
-					/* OpenSSL 1.0.2 deprecates RSA_generate_key */
-					PHP_OPENSSL_RAND_ADD_TIME();
-					rsaparam = (RSA*)RSA_generate_key(req->priv_key_bits, RSA_F4, NULL, NULL);
-#else
-					{
-						BIGNUM *bne = (BIGNUM *)BN_new();
-						if (BN_set_word(bne, RSA_F4) != 1) {
-							BN_free(bne);
-							php_error_docref(NULL, E_WARNING, "Failed setting exponent");
-							return NULL;
-						}
-						rsaparam = RSA_new();
-						PHP_OPENSSL_RAND_ADD_TIME();
-						if (rsaparam == NULL || !RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL)) {
-							php_openssl_store_errors();
-						}
+					BIGNUM *bne = (BIGNUM *)BN_new();
+					if (BN_set_word(bne, RSA_F4) != 1) {
 						BN_free(bne);
+						php_error_docref(NULL, E_WARNING, "Failed setting exponent");
+						return NULL;
 					}
-#endif
+					rsaparam = RSA_new();
+					PHP_OPENSSL_RAND_ADD_TIME();
+					if (rsaparam == NULL || !RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL)) {
+						php_openssl_store_errors();
+					}
+					BN_free(bne);
 					if (rsaparam && EVP_PKEY_assign_RSA(req->priv_key, rsaparam)) {
 						return_val = req->priv_key;
 					} else {
