@@ -389,7 +389,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 		/* PUE => Microsoft extended (pseudo 95ku - 114ku) */
 		/* See http://www.opengroup.or.jp/jvc/cde/ucs-conv.html#ch4_2 */
 		s = c - 0xe000;
-		s = (s / 94 + 0x75) << 8 | (s % 94 + 0x21);
+		s = ((s / 94) + 0x7F) << 8 | ((s % 94) + 0x21);
 	} else if (c >= (0xe000 + 10 * 94) && c <= (0xe000 + 20 * 94)) {
 		/* PUE => JISX0212 user-defined (G3 85ku - 94ku) */
 		/* See http://www.opengroup.or.jp/jvc/cde/ucs-conv.html#ch4_2 */
@@ -489,8 +489,8 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
 			}
 			filter->status = 0x200;
-			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
+			CK((*filter->output_function)(s & 0xff, filter->data));
 		} else if (s < 0x10000) { /* X 0212 */
 			if ((filter->status & 0xff00) != 0x300) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
@@ -600,16 +600,10 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 		s = ucs_i_jis_table[c - ucs_i_jis_table_min];
 	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
 		s = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	} else if (c >= 0xe000 && c < (0xe000 + 10 * 94)) {
-		/* PUE => Microsoft extended */
-		/* See http://www.opengroup.or.jp/jvc/cde/ucs-conv.html#ch4_2 */
-		s = c - 0xe000;
-		s = (s / 94 + 0x75) << 8 | (s % 94 + 0x21);
-	} else if (c >= (0xe000 + 10 * 94) && c <= (0xe000 + 20 * 94)) {
-		/* PUE => JISX0212 user-defined (G3 85ku - 94ku) */
-		/* See http://www.opengroup.or.jp/jvc/cde/ucs-conv.html#ch4_2 */
-		s = c - (0xe000 + 10 * 94);
-		s = (s / 94 + 0xf5) << 8 | (s % 94 + 0xa1);
+	} else if (c >= 0xE000 && c <= 0xE757) {
+		/* 'private'/'user' codepoints */
+		s = c - 0xE000;
+		s = ((s / 94) + 0x7F) << 8 | ((s % 94) + 0x21);
 	}
 
 	if (s <= 0) {
@@ -631,7 +625,16 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
+
+	/* Above, we do a series of lookups in `ucs_*_jis_table` to find a
+	 * corresponding kuten code for this Unicode codepoint
+	 * If we get zero, that means the codepoint is not in JIS X 0208
+	 * On the other hand, if we get a result with the high bits set on both
+	 * upper and lower bytes, that is not a code in JIS X 0208 but rather
+	 * in JIS X 0213
+	 * In either case, check if this codepoint is one of the extensions added
+	 * to JIS X 0208 by MicroSoft (to make CP932) */
+	if (s == 0 || ((s & 0x8000) && (s & 0x80))) {
 		int i;
 		s = -1;
 
@@ -697,15 +700,15 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 				filter->status = 0x500;
 			}
 			CK((*filter->output_function)(s - 0x80, filter->data));
-		} else if (s < 0x8080) { /* X 0208 */
+		} else if (s <= 0x927E) { /* X 0208 + extensions */
 			if ((filter->status & 0xff00) != 0x200) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
 				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
 				filter->status = 0x200;
 			}
-			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
+			CK((*filter->output_function)(s & 0xff, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
 			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
@@ -742,16 +745,10 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 		s = ucs_i_jis_table[c - ucs_i_jis_table_min];
 	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
 		s = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	} else if (c >= 0xe000 && c < (0xe000 + 10 * 94)) {
-		/* PUE => Microsoft extended */
-		/* See http://www.opengroup.or.jp/jvc/cde/ucs-conv.html#ch4_2 */
-		s = c - 0xe000;
-		s = (s / 94 + 0x75) << 8 | (s % 94 + 0x21);
-	} else if (c >= (0xe000 + 10 * 94) && c <= (0xe000 + 20 * 94)) {
-		/* PUE => JISX0212 user-defined (G3 85ku - 94ku) */
-		/* See http://www.opengroup.or.jp/jvc/cde/ucs-conv.html#ch4_2 */
-		s = c - (0xe000 + 10 * 94);
-		s = (s / 94 + 0xf5) << 8 | (s % 94 + 0xa1);
+	} else if (c >= 0xE000 && c <= 0xE757) {
+		/* 'private'/'user' codepoints */
+		s = c - 0xE000;
+		s = ((s / 94) + 0x7F) << 8 | ((s % 94) + 0x21);
 	}
 
 	if (s <= 0) {
@@ -773,7 +770,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
+	if (s == 0 || ((s & 0x8000) && (s & 0x80))) {
 		int i;
 		s = -1;
 
@@ -839,7 +836,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 				filter->status = 0x500;
 			}
 			CK((*filter->output_function)(s - 0x80, filter->data));
-		} else if (s < 0x8080) { /* X 0208 */
+		} else if (s <= 0x927E) { /* X 0208 */
 			if ((filter->status & 0xff00) == 0x500) {
 				CK((*filter->output_function)(0x0f, filter->data));		/* SO */
 				filter->status = 0;
@@ -850,8 +847,8 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
 				filter->status = 0x200;
 			}
-			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
+			CK((*filter->output_function)(s & 0xff, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
 			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
