@@ -67,6 +67,7 @@
 #endif
 
 #include <mysql.h>
+#include <mysql_version.h>
 #if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
 typedef _Bool		my_bool;
 #endif
