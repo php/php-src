@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #64060 (lstat_stat_variation7.phpt fails on certain file systems).
     (M. Voelker, cmb)
 
+- XMLWriter:
+  . Removed return types from XMLWriter stubs. (cmb)
+
 01 Oct 2020, PHP 8.0.0rc1
 
 - CLI:
