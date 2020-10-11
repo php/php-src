@@ -247,10 +247,10 @@ retry:
 		if (c > 0x20 && c < 0x7f) {
 			s = (c1 - 0x21)*94 + c - 0x21;
 			if (filter->status == 0x80) {
-				if (s >= 0 && s < jisx0208_ucs_table_size) {
-					w = jisx0208_ucs_table[s];
-				} else if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {
+				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {
 					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
+				} else if (s >= 0 && s < jisx0208_ucs_table_size) {
+					w = jisx0208_ucs_table[s];
 				} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {
 					w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
 				} else if (s >= cp932ext3_ucs_table_min && s < cp932ext3_ucs_table_max) {
