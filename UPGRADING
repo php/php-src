@@ -653,6 +653,11 @@ PHP 8.0 UPGRADE NOTES
     instead the XmlParser instance is automatically destroyed if it is no longer
     referenced.
 
+- XMLReader:
+  . XMLReader::open() and XMLReader::xml() are now static methods. They still
+    can be called dynamically, though, but inheriting classes need to declare
+    them as static if they override these methods.
+
 - XMLWriter:
   . The XMLWriter functions now accept and return, respectively, XMLWriter
     objects instead of resources.
