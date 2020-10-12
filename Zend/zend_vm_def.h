@@ -6327,15 +6327,18 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 			}
 
 			properties = Z_OBJPROP_P(array_ptr);
-			if (zend_hash_num_elements(properties) == 0) {
-				ZEND_VM_C_GOTO(fe_reset_r_empty);
-			}
-
 			result = EX_VAR(opline->result.var);
 			ZVAL_COPY_VALUE(result, array_ptr);
 			if (OP1_TYPE != IS_TMP_VAR) {
 				Z_ADDREF_P(array_ptr);
 			}
+
+			if (zend_hash_num_elements(properties) == 0) {
+				Z_FE_ITER_P(result) = (uint32_t) -1;
+				FREE_OP1_IF_VAR();
+				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+			}
+
 			Z_FE_ITER_P(result) = zend_hash_iterator_add(properties, 0);
 			FREE_OP1_IF_VAR();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -6353,7 +6356,6 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 		}
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-ZEND_VM_C_LABEL(fe_reset_r_empty):
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 		FREE_OP1();
@@ -6427,6 +6429,7 @@ ZEND_VM_COLD_CONST_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 			properties = Z_OBJPROP_P(array_ptr);
 			if (zend_hash_num_elements(properties) == 0) {
 				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t) -1;
+				FREE_OP1_VAR_PTR();
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
 
