@@ -3622,7 +3622,8 @@ PHP_FUNCTION(imap_mail_compose)
 
 			if (Z_TYPE_P(data) != IS_ARRAY) {
 				php_error_docref(NULL, E_WARNING, "body parameter must be a non-empty array");
-				RETURN_FALSE;
+				RETVAL_FALSE;
+				goto done;
 			}
 			SEPARATE_ARRAY(data);
 
@@ -3824,7 +3825,8 @@ PHP_FUNCTION(imap_mail_compose)
 
 	if (first) {
 		php_error_docref(NULL, E_WARNING, "body parameter must be a non-empty array");
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto done;
 	}
 
 	if (bod && bod->type == TYPEMULTIPART && (!bod->nested.part || !bod->nested.part->next)) {
