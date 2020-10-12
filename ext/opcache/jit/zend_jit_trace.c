@@ -2918,6 +2918,7 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
                                          const zend_op           *opline,
                                          zend_jit_trace_stack    *parent_stack,
                                          int                      parent_vars_count,
+                                         zend_ssa                *ssa,
                                          zend_jit_trace_stack    *stack,
                                          zend_lifetime_interval **ra)
 {
@@ -2931,7 +2932,9 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 
 		if (reg != ZREG_NONE) {
 			if (reg < ZREG_NUM) {
-				if (ra && ra[i] && ra[i]->reg == reg) {
+				if (ssa && ssa->vars[i].no_val) {
+					/* pass */
+				} else if (ra && ra[i] && ra[i]->reg == reg) {
 					/* register already loaded by parent trace */
 					if (stack) {
 						SET_STACK_REG_EX(stack, i, reg, STACK_FLAGS(parent_stack, i));
@@ -2964,7 +2967,9 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 
 			if (reg != ZREG_NONE) {
 				if (reg < ZREG_NUM) {
-					if (ra && ra[i] && ra[i]->reg == reg) {
+					if (ssa && ssa->vars[i].no_val) {
+						/* pass */
+					} else if (ra && ra[i] && ra[i]->reg == reg) {
 						uint8_t type = STACK_TYPE(parent_stack, i);
 
 					    if (stack) {
@@ -3336,7 +3341,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			if (!zend_jit_trace_deoptimization(&dasm_state,
 					zend_jit_traces[parent_trace].exit_info[exit_num].flags,
 					zend_jit_traces[parent_trace].exit_info[exit_num].opline,
-					parent_stack, parent_vars_count, stack, ra)) {
+					parent_stack, parent_vars_count, ssa, stack, ra)) {
 				goto jit_failure;
 			}
 		}
@@ -5746,7 +5751,7 @@ done:
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK
 	        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
 		if (!zend_jit_trace_deoptimization(&dasm_state, 0, NULL,
-				stack, op_array->last_var + op_array->T, NULL, NULL)) {
+				stack, op_array->last_var + op_array->T, NULL, NULL, NULL)) {
 			goto jit_failure;
 		}
 		if (p->stop == ZEND_JIT_TRACE_STOP_LINK) {
@@ -5910,7 +5915,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	if (!zend_jit_trace_deoptimization(&dasm_state,
 			zend_jit_traces[trace_num].exit_info[exit_num].flags,
 			zend_jit_traces[trace_num].exit_info[exit_num].opline,
-			stack, stack_size, NULL, NULL)) {
+			stack, stack_size, NULL, NULL, NULL)) {
 		goto jit_failure;
 	}
 
