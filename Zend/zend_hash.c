@@ -1999,7 +1999,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source
 {
     uint32_t idx;
 	Bucket *p;
-	zval *t;
+	zval *t, *s;
 
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
@@ -2008,18 +2008,20 @@ ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source
 	if (overwrite) {
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
-			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
-			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
-			    continue;
+			s = &p->val;
+			if (UNEXPECTED(Z_TYPE_P(s) == IS_INDIRECT)) {
+				s = Z_INDIRECT_P(s);
+			}
+			if (UNEXPECTED(Z_TYPE_P(s) == IS_UNDEF)) {
+				continue;
 			}
 			if (p->key) {
-				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_UPDATE | HASH_UPDATE_INDIRECT);
+				t = _zend_hash_add_or_update_i(target, p->key, s, HASH_UPDATE | HASH_UPDATE_INDIRECT);
 				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			} else {
-				t = zend_hash_index_update(target, p->h, &p->val);
+				t = zend_hash_index_update(target, p->h, s);
 				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
@@ -2028,18 +2030,20 @@ ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source
 	} else {
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
-			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
-			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
-			    continue;
+			s = &p->val;
+			if (UNEXPECTED(Z_TYPE_P(s) == IS_INDIRECT)) {
+				s = Z_INDIRECT_P(s);
+			}
+			if (UNEXPECTED(Z_TYPE_P(s) == IS_UNDEF)) {
+				continue;
 			}
 			if (p->key) {
-				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_ADD | HASH_UPDATE_INDIRECT);
+				t = _zend_hash_add_or_update_i(target, p->key, s, HASH_ADD | HASH_UPDATE_INDIRECT);
 				if (t && pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			} else {
-				t = zend_hash_index_add(target, p->h, &p->val);
+				t = zend_hash_index_add(target, p->h, s);
 				if (t && pCopyConstructor) {
 					pCopyConstructor(t);
 				}
