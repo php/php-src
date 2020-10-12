@@ -64,7 +64,7 @@ class IntlBreakIterator implements IteratorAggregate
     public function previous() {}
 
     /** @return bool|null */
-    public function setText(string $string) {}
+    public function setText(string $text) {}
 
     public function getIterator(): Iterator {}
 }
