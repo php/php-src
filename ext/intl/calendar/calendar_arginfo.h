@@ -1,26 +1,26 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0ac7a1d4e011518fc956fb05624b45b061fa9710 */
+ * Stub hash: cac6d4040481ab7de4775315079b1d28a44cbcac */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_createInstance, 0, 0, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timeZone, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_equals, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
+	ZEND_ARG_OBJ_INFO(0, other, IntlCalendar, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_fieldDifference, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, when, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_add, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, amount, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_after arginfo_class_IntlCalendar_equals
@@ -32,7 +32,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_clear, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_fromDateTime, 0, 0, 1)
-	ZEND_ARG_OBJ_TYPE_MASK(0, dateTime, DateTime, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, datetime, DateTime, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -59,15 +59,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlCalendar_getGreatestMinimum arginfo_class_IntlCalendar_get
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_getKeywordValuesForLocale, 0, 0, 3)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, commonlyUsed, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, onlyCommon, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_getLeastMaximum arginfo_class_IntlCalendar_get
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_getLocale, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, localeType, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_getMaximum arginfo_class_IntlCalendar_get
@@ -75,7 +75,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlCalendar_getMinimalDaysInFirstWeek arginfo_class_IntlCalendar___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setMinimalDaysInFirstWeek, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, numberOfDays, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, days, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_getMinimum arginfo_class_IntlCalendar_get
@@ -101,7 +101,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlCalendar_isLenient arginfo_class_IntlCalendar___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_isWeekend, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, date, IS_DOUBLE, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp, IS_DOUBLE, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_roll, 0, 0, 2)
@@ -123,37 +123,35 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlCalendar_setFirstDayOfWeek arginfo_class_IntlCalendar_getDayOfWeekType
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setLenient, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, isLenient, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, lenient, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setRepeatedWallTimeOption, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, wallTimeOption, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_setSkippedWallTimeOption arginfo_class_IntlCalendar_setRepeatedWallTimeOption
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setTime, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, date, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setTimeZone, 0, 0, 1)
-	ZEND_ARG_INFO(0, timeZone)
+	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_toDateTime arginfo_class_IntlCalendar___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlGregorianCalendar___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, timeZoneOrYear)
+	ZEND_ARG_INFO(0, timezoneOrYear)
 	ZEND_ARG_INFO(0, localeOrMonth)
-	ZEND_ARG_INFO(0, dayOfMonth)
+	ZEND_ARG_INFO(0, day)
 	ZEND_ARG_INFO(0, hour)
 	ZEND_ARG_INFO(0, minute)
 	ZEND_ARG_INFO(0, second)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlGregorianCalendar_setGregorianChange, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, change, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_IntlGregorianCalendar_setGregorianChange arginfo_class_IntlCalendar_setTime
 
 #define arginfo_class_IntlGregorianCalendar_getGregorianChange arginfo_class_IntlCalendar___construct
 

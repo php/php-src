@@ -26,7 +26,7 @@ echo "Done.\n";
 --EXPECTF--
 Warning: transliterator_transliterate(): transliterator_transliterate: Neither "start" nor the "end" arguments can exceed the number of UTF-16 code units (in this case, 3) in %s on line %d
 bool(false)
-transliterator_transliterate(): Argument #2 ($subject) must be less than or equal to argument #3 ($end)
+transliterator_transliterate(): Argument #2 ($string) must be less than or equal to argument #3 ($end)
 
 Warning: transliterator_transliterate(): String conversion of string to UTF-16 failed in %s on line %d
 Done.

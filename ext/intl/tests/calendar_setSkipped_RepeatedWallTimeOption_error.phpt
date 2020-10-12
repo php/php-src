@@ -30,6 +30,6 @@ try {
 }
 ?>
 --EXPECT--
-IntlCalendar::setSkippedWallTimeOption(): Argument #1 ($wallTimeOption) must be one of IntlCalendar::WALLTIME_FIRST, IntlCalendar::WALLTIME_LAST, or IntlCalendar::WALLTIME_NEXT_VALID
-IntlCalendar::setRepeatedWallTimeOption(): Argument #1 ($wallTimeOption) must be either IntlCalendar::WALLTIME_FIRST or IntlCalendar::WALLTIME_LAST
+IntlCalendar::setSkippedWallTimeOption(): Argument #1 ($option) must be one of IntlCalendar::WALLTIME_FIRST, IntlCalendar::WALLTIME_LAST, or IntlCalendar::WALLTIME_NEXT_VALID
+IntlCalendar::setRepeatedWallTimeOption(): Argument #1 ($option) must be either IntlCalendar::WALLTIME_FIRST or IntlCalendar::WALLTIME_LAST
 intlcal_set_repeated_wall_time_option(): Argument #1 ($calendar) must be of type IntlCalendar, int given

@@ -18,13 +18,13 @@ class IntlChar
     public static function charDirection(int|string $codepoint) {}
 
     /** @return int|null */
-    public static function charFromName(string $characterName, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
+    public static function charFromName(string $name, int $type = IntlChar::UNICODE_CHAR_NAME) {}
 
     /** @return int|string|null */
     public static function charMirror(int|string $codepoint) {}
 
     /** @return string|null */
-    public static function charName(int|string $codepoint, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
+    public static function charName(int|string $codepoint, int $type = IntlChar::UNICODE_CHAR_NAME) {}
 
     /** @return int|null */
     public static function charType(int|string $codepoint) {}
@@ -33,10 +33,10 @@ class IntlChar
     public static function chr(int|string $codepoint) {}
 
     /** @return int|false|null */
-    public static function digit(int|string $codepoint, int $radix = 10) {}
+    public static function digit(int|string $codepoint, int $base = 10) {}
 
     /** @return bool|null */
-    public static function enumCharNames(int|string $start, int|string $limit, callable $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
+    public static function enumCharNames(int|string $start, int|string $end, callable $callback, int $type = IntlChar::UNICODE_CHAR_NAME) {}
 
     /** @return void */
     public static function enumCharTypes(callable $callback) {}
@@ -47,7 +47,7 @@ class IntlChar
     public static function foldCase(int|string $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT) {}
 
     /** @return int */
-    public static function forDigit(int $digit, int $radix = 10) {}
+    public static function forDigit(int $digit, int $base = 10) {}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @return int|string|null */
@@ -79,13 +79,13 @@ class IntlChar
     public static function getPropertyEnum(string $alias) {}
 
     /** @return string|false */
-    public static function getPropertyName(int $property, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) {}
+    public static function getPropertyName(int $property, int $type = IntlChar::LONG_PROPERTY_NAME) {}
 
     /** @return int */
     public static function getPropertyValueEnum(int $property, string $name) {}
 
     /** @return string|false */
-    public static function getPropertyValueName(int $property, int $value, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) {}
+    public static function getPropertyValueName(int $property, int $value, int $type = IntlChar::LONG_PROPERTY_NAME) {}
 
     /** @return array */
     public static function getUnicodeVersion() {}

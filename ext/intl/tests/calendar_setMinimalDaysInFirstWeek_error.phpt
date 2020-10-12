@@ -30,6 +30,6 @@ try {
 
 ?>
 --EXPECT--
-IntlCalendar::setMinimalDaysInFirstWeek(): Argument #1 ($numberOfDays) must be between 1 and 7
-intlcal_set_minimal_days_in_first_week(): Argument #2 ($numberOfDays) must be between 1 and 7
+IntlCalendar::setMinimalDaysInFirstWeek(): Argument #1 ($days) must be between 1 and 7
+intlcal_set_minimal_days_in_first_week(): Argument #2 ($days) must be between 1 and 7
 intlcal_set_minimal_days_in_first_week(): Argument #1 ($calendar) must be of type IntlCalendar, int given
