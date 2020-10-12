@@ -843,7 +843,6 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 	uint32_t line;
 	zend_op *opline;
 	zend_ssa_op *ssa_op;
-	zend_long op1_min, op2_min, op1_max, op2_max;
 
 	if (ssa->vars[var].definition_phi) {
 		zend_ssa_phi *p = ssa->vars[var].definition_phi;
@@ -983,6 +982,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 	line = ssa->vars[var].definition;
 	opline = op_array->opcodes + line;
 	ssa_op = &ssa->ops[line];
+
+	return zend_inference_propagate_range(op_array, ssa, opline, ssa_op, var, tmp);
+}
+
+int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp)
+{
+	zend_long op1_min, op2_min, op1_max, op2_max;
 
 	tmp->underflow = 0;
 	tmp->overflow = 0;
