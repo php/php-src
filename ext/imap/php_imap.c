@@ -3643,10 +3643,16 @@ PHP_FUNCTION(imap_mail_compose)
 			topbod = bod;
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				bod->type = (short) zval_get_long(pvalue);
+				zend_long type = zval_get_long(pvalue);
+				if (type >= 0 && type <= TYPEMAX && body_types[type] != NULL) {
+					bod->type = (short) type;
+				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				bod->encoding = (short) zval_get_long(pvalue);
+				zend_long encoding = zval_get_long(pvalue);
+				if (encoding >= 0 && encoding <= ENCMAX && body_encodings[encoding] != NULL) {
+					bod->encoding = (short) encoding;
+				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);
@@ -3728,10 +3734,13 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->md5 = cpystr(Z_STRVAL_P(pvalue));
 			}
 		} else if (Z_TYPE_P(data) == IS_ARRAY && topbod->type == TYPEMULTIPART) {
-			short type = -1;
+			short type = 0;
 			SEPARATE_ARRAY(data);
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				type = (short) zval_get_long(pvalue);
+				zend_long tmp_type = zval_get_long(pvalue);
+				if (tmp_type >= 0 && tmp_type <= TYPEMAX && tmp_type != TYPEMULTIPART && body_types[tmp_type] != NULL) {
+					type = (short) tmp_type;
+				}
 			}
 
 			if (!toppart) {
@@ -3744,13 +3753,13 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 
 			bod = &mypart->body;
-
-			if (type != TYPEMULTIPART) {
-				bod->type = type;
-			}
+			bod->type = type;
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				bod->encoding = (short) zval_get_long(pvalue);
+				zend_long encoding = zval_get_long(pvalue);
+				if (encoding >= 0 && encoding <= ENCMAX && body_encodings[encoding] != NULL) {
+					bod->encoding = (short) encoding;
+				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);

@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Fixed bug #80220 (imap_mail_compose() may leak memory). (cmb)
   . Fixed bug #80223 (imap_mail_compose() leaks envelope on malformed bodies).
     (cmb)
+  . Fixed bug #80216 (imap_mail_compose() does not validate types/encodings).
+    (cmb)
 
 - MySQLnd:
   . Fixed bug #80115 (mysqlnd.debug doesn't recognize absolute paths with
