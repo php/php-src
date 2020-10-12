@@ -1497,9 +1497,6 @@ PHP_FUNCTION(mb_preferred_mime_name)
 }
 /* }}} */
 
-#define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
-#define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
-
 /* {{{ Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
 {
