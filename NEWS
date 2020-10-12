@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0rc2
 
+- Core:
+  . Fixed bug #80225 (broken namespace usage in eval code). (Nikita)
+
 - Curl:
   . Fixed bug #80121 (Null pointer deref if CurlHandle directly instantiated).
     (Nikita)
