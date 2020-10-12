@@ -5865,7 +5865,7 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 /* }}} */
 
 /* Check whether this is the first statement, not counting declares. */
-static zend_result zend_is_first_statement(zend_ast *ast) /* {{{ */
+static zend_result zend_is_first_statement(zend_ast *ast, zend_bool allow_nop) /* {{{ */
 {
 	uint32_t i = 0;
 	zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
@@ -5874,8 +5874,9 @@ static zend_result zend_is_first_statement(zend_ast *ast) /* {{{ */
 		if (file_ast->child[i] == ast) {
 			return SUCCESS;
 		} else if (file_ast->child[i] == NULL) {
-			/* Empty statements count as statements. */
-			return FAILURE;
+			if (!allow_nop) {
+				return FAILURE;
+			}
 		} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
 			return FAILURE;
 		}
@@ -5909,14 +5910,14 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zval_ptr_dtor_nogc(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
-			if (FAILURE == zend_is_first_statement(ast)) {
+			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ 0)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 
-			if (FAILURE == zend_is_first_statement(ast)) {
+			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ 0)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must be "
 					"the very first statement in the script");
 			}
@@ -7669,7 +7670,7 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 
 	zend_bool is_first_namespace = (!with_bracket && !FC(current_namespace))
 		|| (with_bracket && !FC(has_bracketed_namespaces));
-	if (is_first_namespace && FAILURE == zend_is_first_statement(ast)) {
+	if (is_first_namespace && FAILURE == zend_is_first_statement(ast, /* allow_nop */ 1)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Namespace declaration statement has to be "
 			"the very first statement or after any declare call in the script");
 	}
