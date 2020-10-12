@@ -3726,7 +3726,7 @@ PHP_FUNCTION(imap_mail_compose)
 				convert_to_string_ex(pvalue);
 				bod->md5 = cpystr(Z_STRVAL_P(pvalue));
 			}
-		} else if (Z_TYPE_P(data) == IS_ARRAY) {
+		} else if (Z_TYPE_P(data) == IS_ARRAY && topbod->type == TYPEMULTIPART) {
 			short type = -1;
 			SEPARATE_ARRAY(data);
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
