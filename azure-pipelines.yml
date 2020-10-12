@@ -13,7 +13,7 @@ trigger:
       - UPGRADING.INTERNALS
 
 schedules:
-  - cron: 0 1 * * *
+  - cron: "0 1 * * *"
     displayName: Nightly build
     branches:
       include:
