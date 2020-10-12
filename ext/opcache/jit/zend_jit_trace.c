@@ -5270,6 +5270,8 @@ done:
 			}
 
 			if (ssa_op) {
+				zend_ssa_range tmp;
+
 				/* Keep information about known types on abstract stack */
 				if (ssa_op->result_def >= 0) {
 					zend_uchar type = IS_UNKNOWN;
@@ -5323,6 +5325,15 @@ done:
 							}
 						}
 					}
+
+					if (type == IS_LONG
+					 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->result_def, &tmp)) {
+						ssa->var_info[ssa_op->result_def].range.min = tmp.min;
+						ssa->var_info[ssa_op->result_def].range.max = tmp.max;
+						ssa->var_info[ssa_op->result_def].range.underflow = 0;
+						ssa->var_info[ssa_op->result_def].range.overflow = 0;
+						ssa->var_info[ssa_op->result_def].has_range = 1;
+					}
 				}
 				if (ssa_op->op1_def >= 0) {
 					zend_uchar type = IS_UNKNOWN;
@@ -5357,6 +5368,14 @@ done:
 								ra[ssa_op->op1_def]->flags & ZREG_STORE);
 						}
 					}
+					if (type == IS_LONG
+					 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->op1_def, &tmp)) {
+						ssa->var_info[ssa_op->op1_def].range.min = tmp.min;
+						ssa->var_info[ssa_op->op1_def].range.max = tmp.max;
+						ssa->var_info[ssa_op->op1_def].range.underflow = 0;
+						ssa->var_info[ssa_op->op1_def].range.overflow = 0;
+						ssa->var_info[ssa_op->op1_def].has_range = 1;
+					}
 				}
 				if (ssa_op->op2_def >= 0) {
 					zend_uchar type = IS_UNKNOWN;
@@ -5376,6 +5395,14 @@ done:
 							SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op2.var), ra[ssa_op->op2_def]->reg,
 								ra[ssa_op->op2_def]->flags & ZREG_STORE);
 						}
+					}
+					if (type == IS_LONG
+					 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->op2_def, &tmp)) {
+						ssa->var_info[ssa_op->op2_def].range.min = tmp.min;
+						ssa->var_info[ssa_op->op2_def].range.max = tmp.max;
+						ssa->var_info[ssa_op->op2_def].range.underflow = 0;
+						ssa->var_info[ssa_op->op2_def].range.overflow = 0;
+						ssa->var_info[ssa_op->op2_def].has_range = 1;
 					}
 				}
 
@@ -5411,6 +5438,14 @@ done:
 									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
 										ra[ssa_op->op1_def]->reg & ZREG_STORE);
 								}
+							}
+							if (type == IS_LONG
+							 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->op1_def, &tmp)) {
+								ssa->var_info[ssa_op->op1_def].range.min = tmp.min;
+								ssa->var_info[ssa_op->op1_def].range.max = tmp.max;
+								ssa->var_info[ssa_op->op1_def].range.underflow = 0;
+								ssa->var_info[ssa_op->op1_def].range.overflow = 0;
+								ssa->var_info[ssa_op->op1_def].has_range = 1;
 							}
 						}
 						ssa_op++;
