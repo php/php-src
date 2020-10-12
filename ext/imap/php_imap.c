@@ -2700,14 +2700,15 @@ PHP_FUNCTION(imap_sort)
 {
 	zval *streamind;
 	zend_string *criteria = NULL, *charset = NULL;
-	zend_long sort, rev, flags = 0;
+	zend_long sort, flags = 0;
+	zend_bool rev;
 	pils *imap_le_struct;
 	unsigned long *slst, *sl;
 	char *search_criteria;
 	SORTPGM *mypgm=NIL;
 	SEARCHPGM *spg=NIL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll|lS!S!", &streamind, &sort, &rev, &flags, &criteria, &charset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlb|lS!S!", &streamind, &sort, &rev, &flags, &criteria, &charset) == FAILURE) {
 		RETURN_THROWS();
 	}
 

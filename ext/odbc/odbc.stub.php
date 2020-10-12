@@ -108,7 +108,7 @@ function odbc_field_scale($result_id, int $field_number): int|false {}
 function odbc_field_num($result_id, string $field_name): int|false {}
 
 /** @param resource $connection_id */
-function odbc_autocommit($connection_id, int $onoff = 0): int|bool {}
+function odbc_autocommit($connection_id, bool $onoff = false): int|bool {}
 
 /** @param resource $connection_id */
 function odbc_commit($connection_id): bool {}
