@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2608fb0ac5daf91506bbad9217ec544d68854d37 */
+ * Stub hash: 6bdd65d7ba5a32b32c96511e391beb876d9d20c3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -81,7 +81,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_hasSameRules, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, timezone2, IntlTimeZone, 0)
+	ZEND_ARG_OBJ_INFO(0, other, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlTimeZone_toDateTimeZone arginfo_class_IntlTimeZone___construct

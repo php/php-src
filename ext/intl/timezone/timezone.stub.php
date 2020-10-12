@@ -141,7 +141,7 @@ class IntlTimeZone
      * @return bool
      * @alias intltz_has_same_rules
      */
-    public function hasSameRules(IntlTimeZone $timezone2) {}
+    public function hasSameRules(IntlTimeZone $other) {}
 
     /**
      * @return DateTimeZone|false

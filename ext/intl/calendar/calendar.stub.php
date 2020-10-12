@@ -17,7 +17,7 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_equals
      */
-    public function equals(IntlCalendar $calendar) {}
+    public function equals(IntlCalendar $other) {}
 
     /**
      * @return int
@@ -35,13 +35,13 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_after
      */
-    public function after(IntlCalendar $calendar) {}
+    public function after(IntlCalendar $other) {}
 
     /**
      * @return bool
      * @alias intlcal_before
      */
-    public function before(IntlCalendar $calendar) {}
+    public function before(IntlCalendar $other) {}
 
     /**
      * @return bool
@@ -203,7 +203,7 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_is_equivalent_to
      */
-    public function isEquivalentTo(IntlCalendar $calendar) {}
+    public function isEquivalentTo(IntlCalendar $other) {}
 
     /**
      * @return bool

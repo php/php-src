@@ -414,7 +414,7 @@ function intltz_get_windows_id(string $timezoneId): string|false {}
 function intltz_get_id_for_windows_id(string $timezoneId, ?string $region = null): string|false {}
 #endif
 
-function intltz_has_same_rules(IntlTimeZone $timezone1, IntlTimeZone $timezone2): bool {}
+function intltz_has_same_rules(IntlTimeZone $timezone, IntlTimeZone $other): bool {}
 
 function intltz_to_date_time_zone(IntlTimeZone $timezone): DateTimeZone|false {}
 
