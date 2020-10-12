@@ -173,7 +173,7 @@ function imap_setflag_full($imap, string $sequence, string $flag, int $options =
 function imap_clearflag_full($imap, string $sequence, string $flag, int $options = 0): bool {}
 
 /** @param resource $imap */
-function imap_sort($imap, int $criteria, int $reverse, int $flags = 0, ?string $search_criteria = null, ?string $charset = null): array|false {}
+function imap_sort($imap, int $criteria, bool $reverse, int $flags = 0, ?string $search_criteria = null, ?string $charset = null): array|false {}
 
 /** @param resource $imap */
 function imap_uid($imap, int $message_num): int|false {}
