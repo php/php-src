@@ -889,7 +889,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         'session' => ['session.auto_start=0'],
         'tidy' => ['tidy.clean_output=0'],
         'zlib' => ['zlib.output_compression=Off'],
-        'xdebug' => ['xdebug.default_enable=0','xdebug.mode=off'],
+        'xdebug' => ['xdebug.mode=off'],
         'mbstring' => ['mbstring.func_overload=0'],
     ];
 
