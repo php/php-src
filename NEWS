@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #80213 (imap_mail_compose() segfaults on certain $bodies). (cmb)
   . Fixed bug #80215 (imap_mail_compose() may modify by-val parameters). (cmb)
   . Fixed bug #80220 (imap_mail_compose() may leak memory). (cmb)
+  . Fixed bug #80223 (imap_mail_compose() leaks envelope on malformed bodies).
+    (cmb)
 
 - Opcache:
   . Fixed bug #80184 (Complex expression in while / if statements resolves to
