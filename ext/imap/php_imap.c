@@ -1257,7 +1257,9 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 #endif
 
+	ZEND_IGNORE_LEAKS_BEGIN();
 	imap_stream = mail_open(NIL, ZSTR_VAL(mailbox), flags);
+	ZEND_IGNORE_LEAKS_END();
 
 	if (imap_stream == NIL) {
 		php_error_docref(NULL, E_WARNING, "Couldn't open stream %s", ZSTR_VAL(mailbox));
@@ -2227,7 +2229,9 @@ PHP_FUNCTION(imap_lsub)
 	IMAPG(folderlist_style) = FLIST_ARRAY;
 
 	IMAPG(imap_sfolders) = NIL;
+	ZEND_IGNORE_LEAKS_BEGIN();
 	mail_lsub(imap_le_struct->imap_stream, ZSTR_VAL(ref), ZSTR_VAL(pat));
+	ZEND_IGNORE_LEAKS_END();
 	if (IMAPG(imap_sfolders) == NIL) {
 		RETURN_FALSE;
 	}
@@ -2266,7 +2270,9 @@ PHP_FUNCTION(imap_lsub_full)
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 
 	IMAPG(imap_sfolder_objects) = IMAPG(imap_sfolder_objects_tail) = NIL;
+	ZEND_IGNORE_LEAKS_BEGIN();
 	mail_lsub(imap_le_struct->imap_stream, ZSTR_VAL(ref), ZSTR_VAL(pat));
+	ZEND_IGNORE_LEAKS_END();
 	if (IMAPG(imap_sfolder_objects) == NIL) {
 		RETURN_FALSE;
 	}
