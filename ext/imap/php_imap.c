@@ -2742,6 +2742,7 @@ PHP_FUNCTION(imap_sort)
 
 	slst = mail_sort(imap_le_struct->imap_stream, (charset ? ZSTR_VAL(charset) : NIL), spg, mypgm, flags);
 
+	mail_free_sortpgm(&mypgm);
 	if (spg && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&spg);
 	}
