@@ -36,39 +36,39 @@ function sodium_crypto_auth(string $message, string $key): string {}
 
 function sodium_crypto_auth_keygen(): string {}
 
-function sodium_crypto_auth_verify(string $signature, string $message, string $key): bool {}
+function sodium_crypto_auth_verify(string $mac, string $message, string $key): bool {}
 
-function sodium_crypto_box(string $message, string $nonce, string $key): string {}
+function sodium_crypto_box(string $message, string $nonce, string $key_pair): string {}
 
 function sodium_crypto_box_keypair(): string {}
 
-function sodium_crypto_box_seed_keypair(string $key): string {}
+function sodium_crypto_box_seed_keypair(string $seed): string {}
 
 function sodium_crypto_box_keypair_from_secretkey_and_publickey(string $secret_key, string $public_key): string {}
 
-function sodium_crypto_box_open(string $ciphertext, string $nonce, string $key): string|false {}
+function sodium_crypto_box_open(string $ciphertext, string $nonce, string $key_pair): string|false {}
 
-function sodium_crypto_box_publickey(string $key): string {}
+function sodium_crypto_box_publickey(string $key_pair): string {}
 
-function sodium_crypto_box_publickey_from_secretkey(string $key): string {}
+function sodium_crypto_box_publickey_from_secretkey(string $secret_key): string {}
 
-function sodium_crypto_box_seal(string $message, string $key): string {}
+function sodium_crypto_box_seal(string $message, string $key_pair): string {}
 
-function sodium_crypto_box_seal_open(string $ciphertext, string $key): string|false {}
+function sodium_crypto_box_seal_open(string $ciphertext, string $key_pair): string|false {}
 
-function sodium_crypto_box_secretkey(string $key): string {}
+function sodium_crypto_box_secretkey(string $key_pair): string {}
 
 function sodium_crypto_kx_keypair(): string {}
 
-function sodium_crypto_kx_publickey(string $key): string {}
+function sodium_crypto_kx_publickey(string $key_pair): string {}
 
-function sodium_crypto_kx_secretkey(string $key): string {}
+function sodium_crypto_kx_secretkey(string $key_pair): string {}
 
 function sodium_crypto_kx_seed_keypair(string $seed): string {}
 
-function sodium_crypto_kx_client_session_keys(string $client_keypair, string $server_key): array {}
+function sodium_crypto_kx_client_session_keys(string $client_key_pair, string $server_key): array {}
 
-function sodium_crypto_kx_server_session_keys(string $server_keypair, string $client_key): array {}
+function sodium_crypto_kx_server_session_keys(string $server_key_pair, string $client_key): array {}
 
 function sodium_crypto_generichash(string $message, string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
@@ -76,7 +76,7 @@ function sodium_crypto_generichash_keygen(): string {}
 
 function sodium_crypto_generichash_init(string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
-function sodium_crypto_generichash_update(string &$state, string $string): bool {}
+function sodium_crypto_generichash_update(string &$state, string $message): bool {}
 
 function sodium_crypto_generichash_final(string &$state, int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
@@ -130,29 +130,29 @@ function sodium_crypto_shorthash(string $message, string $key): string {}
 
 function sodium_crypto_shorthash_keygen(): string {}
 
-function sodium_crypto_sign(string $message, string $keypair): string {}
+function sodium_crypto_sign(string $message, string $secret_key): string {}
 
-function sodium_crypto_sign_detached(string $message, string $keypair): string {}
+function sodium_crypto_sign_detached(string $message, string $secret_key): string {}
 
-function sodium_crypto_sign_ed25519_pk_to_curve25519(string $key): string {}
+function sodium_crypto_sign_ed25519_pk_to_curve25519(string $public_key): string {}
 
-function sodium_crypto_sign_ed25519_sk_to_curve25519(string $key): string {}
+function sodium_crypto_sign_ed25519_sk_to_curve25519(string $secret_key): string {}
 
 function sodium_crypto_sign_keypair(): string {}
 
 function sodium_crypto_sign_keypair_from_secretkey_and_publickey(string $secret_key, string $public_key): string {}
 
-function sodium_crypto_sign_open(string $ciphertext, string $keypair): string|false {}
+function sodium_crypto_sign_open(string $ciphertext, string $public_key): string|false {}
 
-function sodium_crypto_sign_publickey(string $key): string {}
+function sodium_crypto_sign_publickey(string $key_pair): string {}
 
-function sodium_crypto_sign_secretkey(string $key): string {}
+function sodium_crypto_sign_secretkey(string $key_pair): string {}
 
-function sodium_crypto_sign_publickey_from_secretkey(string $key): string {}
+function sodium_crypto_sign_publickey_from_secretkey(string $secret_key): string {}
 
-function sodium_crypto_sign_seed_keypair(string $key): string {}
+function sodium_crypto_sign_seed_keypair(string $seed): string {}
 
-function sodium_crypto_sign_verify_detached(string $signature, string $message, string $key): bool {}
+function sodium_crypto_sign_verify_detached(string $signature, string $message, string $public_key): bool {}
 
 function sodium_crypto_stream(int $length, string $nonce, string $key): string {}
 
@@ -185,4 +185,4 @@ function sodium_base642bin(string $string, int $id, string $ignore  = ""): strin
 #endif
 
 /** @alias sodium_crypto_box_publickey_from_secretkey */
-function sodium_crypto_scalarmult_base(string $key): string {}
+function sodium_crypto_scalarmult_base(string $secret_key): string {}
