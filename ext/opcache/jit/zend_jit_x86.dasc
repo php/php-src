@@ -5533,7 +5533,9 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|	// retval = Z_INDIRECT_P(retval);
 				|	GET_Z_PTR r0, r0
 				|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
-				if (type == BP_VAR_IS && not_found_exit_addr) {
+				if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
+					|	jmp &exit_addr
+				} else if (type == BP_VAR_IS && not_found_exit_addr) {
 					|	jmp &not_found_exit_addr
 				}
 				|2:
