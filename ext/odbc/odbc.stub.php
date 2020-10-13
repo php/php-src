@@ -4,11 +4,11 @@
 
 function odbc_close_all(): void {}
 
-/** @param resource $stmt */
-function odbc_binmode($stmt, int $mode): bool {}
+/** @param resource $statement */
+function odbc_binmode($statement, int $mode): bool {}
 
-/** @param resource $stmt */
-function odbc_longreadlen($stmt, int $length): bool {}
+/** @param resource $statement */
+function odbc_longreadlen($statement, int $length): bool {}
 
 /**
  * @param resource $odbc
@@ -16,11 +16,11 @@ function odbc_longreadlen($stmt, int $length): bool {}
  */
 function odbc_prepare($odbc, string $query) {}
 
-/** @param resource $stmt */
-function odbc_execute($stmt, array $params = []): bool {}
+/** @param resource $statement */
+function odbc_execute($statement, array $params = []): bool {}
 
-/** @param resource $stmt */
-function odbc_cursor($stmt): string|false {}
+/** @param resource $statement */
+function odbc_cursor($statement): string|false {}
 
 #ifdef HAVE_SQLDATASOURCES
 /** @param resource $odbc */
@@ -41,30 +41,30 @@ function odbc_exec($odbc, string $query) {}
 function odbc_do($odbc, string $query) {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
-/** @param resource $stmt */
-function odbc_fetch_object($stmt, int $row = -1): stdClass|false {}
+/** @param resource $statement */
+function odbc_fetch_object($statement, int $row = -1): stdClass|false {}
 
-/** @param resource $stmt */
-function odbc_fetch_array($stmt, int $row = -1): array|false {}
+/** @param resource $statement */
+function odbc_fetch_array($statement, int $row = -1): array|false {}
 #endif
 
 /**
- * @param resource $stmt
+ * @param resource $statement
  * @param array $array
  */
-function odbc_fetch_into($stmt, &$array, int $row = 0): int|false {}
+function odbc_fetch_into($statement, &$array, int $row = 0): int|false {}
 
-/** @param resource $stmt */
-function odbc_fetch_row($stmt, ?int $row = null): bool {}
+/** @param resource $statement */
+function odbc_fetch_row($statement, ?int $row = null): bool {}
 
-/** @param resource $stmt */
-function odbc_result($stmt, string|int $field): string|bool|null {}
+/** @param resource $statement */
+function odbc_result($statement, string|int $field): string|bool|null {}
 
-/** @param resource $stmt */
-function odbc_result_all($stmt, string $format = ""): int|false {}
+/** @param resource $statement */
+function odbc_result_all($statement, string $format = ""): int|false {}
 
-/** @param resource $stmt */
-function odbc_free_result($stmt): bool {}
+/** @param resource $statement */
+function odbc_free_result($statement): bool {}
 
 /** @return resource|false */
 function odbc_connect(string $dsn, string $user, string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
@@ -75,37 +75,37 @@ function odbc_pconnect(string $dsn, string $user, string $password, int $cursor_
 /** @param resource $odbc */
 function odbc_close($odbc): void {}
 
-/** @param resource $stmt */
-function odbc_num_rows($stmt): int {}
+/** @param resource $statement */
+function odbc_num_rows($statement): int {}
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
-/** @param resource $stmt */
-function odbc_next_result($stmt): bool {}
+/** @param resource $statement */
+function odbc_next_result($statement): bool {}
 #endif
 
-/** @param resource $stmt */
-function odbc_num_fields($stmt): int {}
+/** @param resource $statement */
+function odbc_num_fields($statement): int {}
 
-/** @param resource $stmt */
-function odbc_field_name($stmt, int $field_number): string|false {}
+/** @param resource $statement */
+function odbc_field_name($statement, int $field_number): string|false {}
 
-/** @param resource $stmt */
-function odbc_field_type($stmt, int $field_number): string|false {}
+/** @param resource $statement */
+function odbc_field_type($statement, int $field_number): string|false {}
 
-/** @param resource $stmt */
-function odbc_field_len($stmt, int $field_number): int|false {}
+/** @param resource $statement */
+function odbc_field_len($statement, int $field_number): int|false {}
 
 /**
- * @param resource $stmt
+ * @param resource $statement
  * @alias odbc_field_len
  */
-function odbc_field_precision($stmt, int $field_number): int|false {}
+function odbc_field_precision($statement, int $field_number): int|false {}
 
-/** @param resource $stmt */
-function odbc_field_scale($stmt, int $field_number): int|false {}
+/** @param resource $statement */
+function odbc_field_scale($statement, int $field_number): int|false {}
 
-/** @param resource $stmt */
-function odbc_field_num($stmt, string $field_name): int|false {}
+/** @param resource $statement */
+function odbc_field_num($statement, string $field_name): int|false {}
 
 /** @param resource $odbc */
 function odbc_autocommit($odbc, bool $enable = false): int|bool {}
