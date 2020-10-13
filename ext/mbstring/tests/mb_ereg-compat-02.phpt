@@ -19,7 +19,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
   echo "\n";
 ?>
 --EXPECT--
-32
+1
 This is a nice and simple string
 is
 is

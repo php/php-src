@@ -26,5 +26,5 @@ echo 'OK';
 --EXPECT--
 bool(false)
 bool(false)
-int(1)
+bool(true)
 OK
