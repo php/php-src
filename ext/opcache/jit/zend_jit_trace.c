@@ -2157,6 +2157,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		vars_op_array[i] = op_array;
 		/* We don't start intervals for variables used in Phi */
 		if ((ssa->vars[i].use_chain >= 0 /*|| ssa->vars[i].phi_use_chain*/)
+		 && !zend_ssa_is_no_val_use(ssa_opcodes[ssa->vars[i].use_chain], ssa->ops + ssa->vars[i].use_chain, i)
 		 && zend_jit_var_supports_reg(ssa, i)
 		 && zend_jit_var_may_alias(op_array, op_array_ssa, i) == NO_ALIAS) {
 			start[i] = 0;
