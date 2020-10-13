@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7f000371ef4b61c401b5a59d2ab19c0e0f9a1987 */
+ * Stub hash: 7fc2631cb9b0ec3c50c895e2789774dec45adf15 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -128,6 +128,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_export, 0, 2, _IS_BOOL, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_write_temporary, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, lob, OCILob, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "OCI_TEMP_CLOB")
+ZEND_END_ARG_INFO()
+
+#define arginfo_oci_lob_close arginfo_oci_free_descriptor
 
 #define arginfo_ociwritelobtofile arginfo_oci_lob_export
 
@@ -470,7 +478,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_OCILob_size arginfo_class_OCILob_load
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_write, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -565,6 +573,8 @@ ZEND_FUNCTION(ocigetbufferinglob);
 ZEND_FUNCTION(oci_lob_copy);
 ZEND_FUNCTION(oci_lob_is_equal);
 ZEND_FUNCTION(oci_lob_export);
+ZEND_FUNCTION(oci_lob_write_temporary);
+ZEND_FUNCTION(oci_lob_close);
 ZEND_FUNCTION(oci_new_descriptor);
 ZEND_FUNCTION(oci_rollback);
 ZEND_FUNCTION(oci_commit);
@@ -619,8 +629,6 @@ ZEND_FUNCTION(oci_collection_trim);
 ZEND_FUNCTION(oci_new_collection);
 ZEND_FUNCTION(oci_register_taf_callback);
 ZEND_FUNCTION(oci_unregister_taf_callback);
-ZEND_FUNCTION(oci_lob_write_temporary);
-ZEND_FUNCTION(oci_lob_close);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -653,6 +661,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(oci_lob_copy, arginfo_oci_lob_copy)
 	ZEND_FE(oci_lob_is_equal, arginfo_oci_lob_is_equal)
 	ZEND_FE(oci_lob_export, arginfo_oci_lob_export)
+	ZEND_FE(oci_lob_write_temporary, arginfo_oci_lob_write_temporary)
+	ZEND_FE(oci_lob_close, arginfo_oci_lob_close)
 	ZEND_DEP_FALIAS(ociwritelobtofile, oci_lob_export, arginfo_ociwritelobtofile)
 	ZEND_FE(oci_new_descriptor, arginfo_oci_new_descriptor)
 	ZEND_DEP_FALIAS(ocinewdescriptor, oci_new_descriptor, arginfo_ocinewdescriptor)

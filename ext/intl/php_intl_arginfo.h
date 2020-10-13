@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8340252225ea91a68fe61657f20c08a1876949c8 */
+ * Stub hash: c890e3cde79ffeade4623001cc369aa734812959 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -162,7 +162,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_intlcal_set_skipped_wall_time_option arginfo_intlcal_set_repeated_wall_time_option
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_from_date_time, 0, 1, IntlCalendar, 1)
-	ZEND_ARG_OBJ_TYPE_MASK(0, dateTime, DateTime, MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, datetime, DateTime, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -242,11 +242,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_sort_with_sort_keys, 0,
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_asort, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Collator::SORT_REGULAR")
-ZEND_END_ARG_INFO()
+#define arginfo_collator_asort arginfo_collator_sort
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_collator_get_locale, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
@@ -637,6 +633,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_resourcebundle_get, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, bundle, ResourceBundle, 0)
 	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_resourcebundle_count, 0, 1, IS_LONG, 0)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cc90d40e43462557087c123f0583e7865f281179 */
+ * Stub hash: 0c4478112ac85b80838c47eee6ff726319edae49 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -60,7 +60,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_mysqli_dump_debug_info arginfo_mysqli_close
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_debug, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, debug, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_errno, 0, 1, IS_LONG, 0)
@@ -89,7 +89,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_fetch_field_direct, 0, 2, MAY_BE_OBJECT|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, result, mysqli_result, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_fetch_lengths, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -461,7 +461,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_mysqli_dump_debug_info arginfo_class_mysqli_character_set_name
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_get_charset arginfo_class_mysqli_character_set_name
@@ -811,7 +811,7 @@ ZEND_FUNCTION(mysqli_use_result);
 ZEND_FUNCTION(mysqli_warning_count);
 ZEND_FUNCTION(mysqli_refresh);
 ZEND_METHOD(mysqli, __construct);
-ZEND_FUNCTION(mysqli_init_method);
+ZEND_METHOD(mysqli, init);
 ZEND_METHOD(mysqli_result, __construct);
 ZEND_METHOD(mysqli_result, getIterator);
 ZEND_METHOD(mysqli_stmt, __construct);
@@ -967,7 +967,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 #endif
 	ZEND_ME_MAPPING(get_server_info, mysqli_get_server_info, arginfo_class_mysqli_get_server_info, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_warnings, mysqli_get_warnings, arginfo_class_mysqli_get_warnings, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(init, mysqli_init_method, arginfo_class_mysqli_init, ZEND_ACC_PUBLIC)
+	ZEND_ME(mysqli, init, arginfo_class_mysqli_init, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(kill, mysqli_kill, arginfo_class_mysqli_kill, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(multi_query, mysqli_multi_query, arginfo_class_mysqli_multi_query, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(more_results, mysqli_more_results, arginfo_class_mysqli_more_results, ZEND_ACC_PUBLIC)

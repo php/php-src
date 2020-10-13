@@ -12,7 +12,12 @@ use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
 
-function processDirectory(string $dir, Context $context) {
+/**
+ * @return FileInfo[]
+ */
+function processDirectory(string $dir, Context $context): array {
+    $fileInfos = [];
+
     $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
@@ -20,12 +25,17 @@ function processDirectory(string $dir, Context $context) {
     foreach ($it as $file) {
         $pathName = $file->getPathName();
         if (preg_match('/\.stub\.php$/', $pathName)) {
-            processStubFile($pathName, $context);
+            $fileInfo = processStubFile($pathName, $context);
+            if ($fileInfo) {
+                $fileInfos[] = $fileInfo;
+            }
         }
     }
+
+    return $fileInfos;
 }
 
-function processStubFile(string $stubFile, Context $context) {
+function processStubFile(string $stubFile, Context $context): ?FileInfo {
     try {
         if (!file_exists($stubFile)) {
             throw new Exception("File $stubFile does not exist");
@@ -39,13 +49,13 @@ function processStubFile(string $stubFile, Context $context) {
         $oldStubHash = extractStubHash($arginfoFile);
         if ($stubHash === $oldStubHash && $context->forceRegeneration === false) {
             /* Stub file did not change, do not regenerate. */
-            return;
+            return null;
         }
 
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-        if (file_put_contents($arginfoFile, $arginfoCode)) {
+        if ($context->forceRegeneration === true && file_put_contents($arginfoFile, $arginfoCode)) {
             echo "Saved $arginfoFile\n";
         }
 
@@ -54,20 +64,12 @@ function processStubFile(string $stubFile, Context $context) {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
             $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-            if (file_put_contents($legacyFile, $arginfoCode)) {
+            if ($context->forceRegeneration === true && file_put_contents($legacyFile, $arginfoCode)) {
                 echo "Saved $legacyFile\n";
             }
 		}
 
-        // Collect parameter name statistics.
-        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
-            foreach ($funcInfo->args as $argInfo) {
-                if (!isset($context->parameterStats[$argInfo->name])) {
-                    $context->parameterStats[$argInfo->name] = 0;
-                }
-                $context->parameterStats[$argInfo->name]++;
-            }
-        }
+        return $fileInfo;
     } catch (Exception $e) {
         echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
@@ -92,10 +94,8 @@ function extractStubHash(string $arginfoFile): ?string {
 }
 
 class Context {
-    /** @var bool */
+    /** @var bool|null */
     public $forceRegeneration = false;
-    /** @var array */
-    public $parameterStats = [];
 }
 
 class SimpleType {
@@ -1262,29 +1262,89 @@ function initPhpParser() {
 }
 
 $optind = null;
-$options = getopt("fh", ["force-regeneration", "parameter-stats", "help"], $optind);
+$options = getopt("fh", ["force-regeneration", "parameter-stats", "help", "verify"], $optind);
 
 $context = new Context;
 $printParameterStats = isset($options["parameter-stats"]);
+$verify = isset($options["verify"]);
 $context->forceRegeneration =
-    isset($options["f"]) || isset($options["force-regeneration"]) || $printParameterStats;
+    isset($options["f"]) || isset($options["force-regeneration"]) ? true : ($printParameterStats || $verify ? null : false);
 
 if (isset($options["h"]) || isset($options["help"])) {
-    die("\nusage: gen-stub.php [ -f | --force-regeneration ] [ --parameter-stats ] [ -h | --help ] [ name.stub.php | directory ]\n\n");
+    die("\nusage: gen-stub.php [ -f | --force-regeneration ] [ --parameter-stats ] [ --verify ] [ -h | --help ] [ name.stub.php | directory ]\n\n");
 }
 
+$fileInfos = [];
 $location = $argv[$optind] ?? ".";
 if (is_file($location)) {
     // Generate single file.
-    processStubFile($location, $context);
+    $fileInfo = processStubFile($location, $context);
+    if ($fileInfo) {
+        $fileInfos[] = $fileInfo;
+    }
 } else if (is_dir($location)) {
-    processDirectory($location, $context);
+    $fileInfos = processDirectory($location, $context);
 } else {
     echo "$location is neither a file nor a directory.\n";
     exit(1);
 }
 
 if ($printParameterStats) {
-    arsort($context->parameterStats);
-    echo json_encode($context->parameterStats, JSON_PRETTY_PRINT), "\n";
+    $parameterStats = [];
+
+    foreach ($fileInfos as $fileInfo) {
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            foreach ($funcInfo->args as $argInfo) {
+                if (!isset($context->parameterStats[$argInfo->name])) {
+                    $parameterStats[$argInfo->name] = 0;
+                }
+                $parameterStats[$argInfo->name]++;
+            }
+        }
+    }
+
+    arsort($parameterStats);
+    echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
+}
+
+if ($verify) {
+    $errors = [];
+    $funcMap = [];
+    $aliases = [];
+
+    foreach ($fileInfos as $fileInfo) {
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            /** @var FuncInfo $funcInfo */
+            $funcMap[$funcInfo->name->__toString()] = $funcInfo;
+
+            if ($funcInfo->aliasType === "alias") {
+                $aliases[] = $funcInfo;
+            }
+        }
+    }
+
+    foreach ($aliases as $alias) {
+        if ($alias->alias === null || !isset($funcMap[$alias->alias->__toString()])) {
+            $errors[] = "Aliased function {$alias->alias}() cannot be found";
+            continue;
+        }
+
+        $aliasedFunc = $funcMap[$alias->alias->__toString()];
+
+        $aliasedArgMap = [];
+        foreach ($aliasedFunc->args as $arg) {
+            $aliasedArgMap[$arg->name] = $arg;
+        }
+
+        foreach ($alias->args as $arg) {
+            if (!isset($aliasedArgMap[$arg->name])) {
+                $errors[] = "{$alias->name}(): Argument \$$arg->name of aliased function {$aliasedFunc->name}() is missing";
+            }
+        }
+    }
+
+    echo implode("\n", $errors), "\n";
+    if (!empty($errors)) {
+        exit(1);
+    }
 }

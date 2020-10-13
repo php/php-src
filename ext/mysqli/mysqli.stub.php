@@ -76,7 +76,7 @@ class mysqli
      * @return bool
      * @alias mysqli_debug
      */
-    public function debug(string $options) {}
+    public function debug(string $message) {}
 
     /**
      * @return object|null
@@ -112,7 +112,6 @@ class mysqli
 
     /**
      * @return mysqli|false
-     * @alias mysqli_init_method
      */
     public function init() {}
 
@@ -551,7 +550,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
-function mysqli_debug(string $debug): bool {}
+function mysqli_debug(string $message): bool {}
 
 function mysqli_errno(mysqli $mysql): int {}
 
@@ -568,7 +567,7 @@ function mysqli_fetch_field(mysqli_result $result): object|false {}
 
 function mysqli_fetch_fields(mysqli_result $result): array {}
 
-function mysqli_fetch_field_direct(mysqli_result $result, int $offset): object|false {}
+function mysqli_fetch_field_direct(mysqli_result $result, int $index): object|false {}
 
 function mysqli_fetch_lengths(mysqli_result $result): array|false {}
 
