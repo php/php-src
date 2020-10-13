@@ -34,8 +34,7 @@
 #define MBFL_ENCTYPE_SBCS		0x00000001 /* single-byte encoding */
 #define MBFL_ENCTYPE_MBCS		0x00000002 /* multi-byte encoding */
 #define MBFL_ENCTYPE_WCS2		0x00000010 /* 2 bytes/char */
-#define MBFL_ENCTYPE_MWC2BE		0x00000040 /* 2+ bytes/char, big endian */
-#define MBFL_ENCTYPE_MWC2LE		0x00000080 /* 2+ bytes/char, little endian */
+#define MBFL_ENCTYPE_MWC2		0x00000040 /* 2+ bytes/char */
 #define MBFL_ENCTYPE_WCS4		0x00000100 /* 4 bytes/char */
 #define MBFL_ENCTYPE_GL_UNSAFE	0x00004000
 
