@@ -144,6 +144,13 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
+static zend_always_inline zend_bool is_handle_exception_set() {
+	zend_execute_data *execute_data = EG(current_execute_data);
+	return !execute_data->func
+		|| !ZEND_USER_CODE(execute_data->func->common.type)
+		|| execute_data->opline->opcode == ZEND_HANDLE_EXCEPTION;
+}
+
 ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /* {{{ */
 {
 #ifdef HAVE_DTRACE
@@ -161,6 +168,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 		zend_exception_set_previous(exception, EG(exception));
 		EG(exception) = exception;
 		if (previous) {
+			ZEND_ASSERT(is_handle_exception_set() && "HANDLE_EXCEPTION not set?");
 			return;
 		}
 	}
@@ -179,9 +187,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 		zend_throw_exception_hook(exception);
 	}
 
-	if (!EG(current_execute_data)->func ||
-	    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
-	    EG(current_execute_data)->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+	if (is_handle_exception_set()) {
 		/* no need to rethrow the exception */
 		return;
 	}

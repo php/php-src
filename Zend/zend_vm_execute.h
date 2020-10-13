@@ -9707,8 +9707,11 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYP
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
 			}
 		}
 
@@ -20051,8 +20054,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
 			}
 		}
 
@@ -27656,8 +27662,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		if (IS_VAR == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
 			}
 		}
 
@@ -34853,8 +34862,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 		if (IS_UNUSED == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
 			}
 		}
 
@@ -46545,8 +46557,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		if (IS_CV == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
 			}
 		}
 
