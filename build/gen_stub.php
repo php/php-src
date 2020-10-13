@@ -1326,7 +1326,7 @@ if ($verify) {
     }
 
     foreach ($aliases as $alias) {
-        if ($alias->alias === null || !isset($funcMap[$alias->alias->__toString()])) {
+        if (!isset($funcMap[$alias->alias->__toString()])) {
             $errors[] = "Aliased function {$alias->alias}() cannot be found";
             continue;
         }
