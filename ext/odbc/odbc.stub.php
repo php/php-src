@@ -42,20 +42,20 @@ function odbc_do($odbc, string $query) {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
 /** @param resource $stmt */
-function odbc_fetch_object($stmt, int $row_number = -1): stdClass|false {}
+function odbc_fetch_object($stmt, int $row = -1): stdClass|false {}
 
 /** @param resource $stmt */
-function odbc_fetch_array($stmt, int $row_number = -1): array|false {}
+function odbc_fetch_array($stmt, int $row = -1): array|false {}
 #endif
 
 /**
  * @param resource $stmt
- * @param array $row
+ * @param array $array
  */
-function odbc_fetch_into($stmt, &$row, int $row_number = 0): int|false {}
+function odbc_fetch_into($stmt, &$array, int $row = 0): int|false {}
 
 /** @param resource $stmt */
-function odbc_fetch_row($stmt, ?int $row_number = null): bool {}
+function odbc_fetch_row($stmt, ?int $row = null): bool {}
 
 /** @param resource $stmt */
 function odbc_result($stmt, string|int $field): string|bool|null {}
