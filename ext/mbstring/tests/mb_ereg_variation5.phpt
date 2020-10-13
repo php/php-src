@@ -59,17 +59,17 @@ function base64_encode_var_dump($regs) {
 --EXPECT--
 *** Testing mb_ereg() : usage variations ***
 
-ASCII String without $regs arg:		int(1)
+ASCII String without $regs arg:		bool(true)
 ASCII String with $regs arg:
-int(38)
+bool(true)
 array(1) {
   [0]=>
   string(52) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4OS4="
 }
 
-Multibyte String without $regs arg:	int(1)
+Multibyte String without $regs arg:	bool(true)
 Multubyte String with $regs arg:
-int(53)
+bool(true)
 array(1) {
   [0]=>
   string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="

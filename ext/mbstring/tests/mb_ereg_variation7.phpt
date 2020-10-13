@@ -60,7 +60,7 @@ echo "Done";
 --EXPECT--
 *** Testing mb_ereg() : usage variations ***
 Regex encoding set to utf-8
-int(38)
+bool(true)
 array(5) {
   [0]=>
   string(52) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4OS4="
@@ -73,7 +73,7 @@ array(5) {
   [4]=>
   string(4) "ODk="
 }
-int(64)
+bool(true)
 array(5) {
   [0]=>
   string(88) "zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg=="

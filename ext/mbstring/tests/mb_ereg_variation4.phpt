@@ -72,21 +72,21 @@ echo "Done";
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --
-int(47)
+bool(true)
 array(1) {
   [0]=>
   string(64) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJk="
 }
 
 -- Iteration 2 --
-int(27)
+bool(true)
 array(1) {
   [0]=>
   string(36) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ"
 }
 
 -- Iteration 3 --
-int(5)
+bool(true)
 array(1) {
   [0]=>
   string(8) "MDEyMzQ="
@@ -99,14 +99,14 @@ bool(false)
 bool(false)
 
 -- Iteration 6 --
-int(20)
+bool(true)
 array(1) {
   [0]=>
   string(28) "MDEyMzTvvJXvvJbvvJfvvJjvvJk="
 }
 
 -- Iteration 7 --
-int(50)
+bool(true)
 array(1) {
   [0]=>
   string(68) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
@@ -116,14 +116,14 @@ array(1) {
 bool(false)
 
 -- Iteration 9 --
-int(50)
+bool(true)
 array(1) {
   [0]=>
   string(68) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
 }
 
 -- Iteration 10 --
-int(3)
+bool(true)
 array(1) {
   [0]=>
   string(4) "44CC"
@@ -136,7 +136,7 @@ bool(false)
 bool(false)
 
 -- Iteration 13 --
-int(5)
+bool(true)
 array(1) {
   [0]=>
   string(8) "MDEyMzQ="
