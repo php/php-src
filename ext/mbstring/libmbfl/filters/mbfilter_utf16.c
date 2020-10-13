@@ -33,6 +33,7 @@
 static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_utf16le(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_utf16be(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
 
@@ -93,7 +94,7 @@ const struct mbfl_convert_vtbl vtbl_utf16_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf16_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_utf16_wchar_flush,
 	NULL,
 };
 
@@ -113,7 +114,7 @@ const struct mbfl_convert_vtbl vtbl_utf16be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf16be_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_utf16_wchar_flush,
 	NULL,
 };
 
@@ -133,7 +134,7 @@ const struct mbfl_convert_vtbl vtbl_utf16le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf16le_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_utf16_wchar_flush,
 	NULL,
 };
 
@@ -341,6 +342,24 @@ int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
+{
+	int status = filter->status;
+	int cache = filter->cache;
+	filter->status = filter->cache = 0;
+
+	if (status & 0xF) {
+		/* Input string was truncated */
+		CK((*filter->output_function)(cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
 
 static int mbfl_filt_ident_utf16(int c, mbfl_identify_filter *filter)
