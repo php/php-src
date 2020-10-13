@@ -1,13 +1,13 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5d064655caf10f5e0dd126009755bf3552c63f59 */
+ * Stub hash: 60259c3fefaf8ba8ac22bf80147c3525387ec763 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_AESGCM)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_aead_aes256gcm_decrypt, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ad, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -15,8 +15,8 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_AESGCM)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_encrypt, 0, 4, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ad, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -28,15 +28,15 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_aead_chacha20poly1305_decrypt, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ad, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_chacha20poly1305_encrypt, 0, 4, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ad, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -52,8 +52,8 @@ ZEND_END_ARG_INFO()
 
 #if defined(crypto_aead_xchacha20poly1305_IETF_NPUBBYTES)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ad, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -66,36 +66,36 @@ ZEND_END_ARG_INFO()
 
 #if defined(crypto_aead_xchacha20poly1305_IETF_NPUBBYTES)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, 0, 4, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ad, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_auth, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_auth_keygen arginfo_sodium_crypto_aead_chacha20poly1305_keygen
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_auth_verify, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, signature, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, mac, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box, 0, 3, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key_pair, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_box_keypair arginfo_sodium_crypto_aead_chacha20poly1305_keygen
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box_seed_keypair, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, seed, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box_keypair_from_secretkey_and_publickey, 0, 2, IS_STRING, 0)
@@ -104,46 +104,51 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box_keypair_from_s
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_box_open, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key_pair, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_box_publickey arginfo_sodium_crypto_box_seed_keypair
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box_publickey, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key_pair, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_box_publickey_from_secretkey arginfo_sodium_crypto_box_seed_keypair
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box_publickey_from_secretkey, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, secret_key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_box_seal arginfo_sodium_crypto_auth
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box_seal, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key_pair, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_box_seal_open, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key_pair, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_box_secretkey arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_box_secretkey arginfo_sodium_crypto_box_publickey
 
 #define arginfo_sodium_crypto_kx_keypair arginfo_sodium_crypto_aead_chacha20poly1305_keygen
 
-#define arginfo_sodium_crypto_kx_publickey arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_kx_publickey arginfo_sodium_crypto_box_publickey
 
-#define arginfo_sodium_crypto_kx_secretkey arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_kx_secretkey arginfo_sodium_crypto_box_publickey
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kx_seed_keypair, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_sodium_crypto_kx_seed_keypair arginfo_sodium_crypto_box_seed_keypair
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kx_client_session_keys, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, client_keypair, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, client_key_pair, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, server_key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kx_server_session_keys, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, server_keypair, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, server_key_pair, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, client_key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_generichash, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, key, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "SODIUM_CRYPTO_GENERICHASH_BYTES")
 ZEND_END_ARG_INFO()
@@ -157,7 +162,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_generichash_update, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(1, state, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_generichash_final, 0, 1, IS_STRING, 0)
@@ -166,7 +171,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_generichash_final,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kdf_derive_from_key, 0, 4, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, subkey_len, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, subkey_length, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, subkey_id, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, context, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
@@ -181,7 +186,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_pwhash, 0, 5, IS_S
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, opslimit, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, memlimit, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alg, IS_LONG, 0, "SODIUM_CRYPTO_PWHASH_ALG_DEFAULT")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, algo, IS_LONG, 0, "SODIUM_CRYPTO_PWHASH_ALG_DEFAULT")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -234,15 +239,23 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_scalarmult, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string_1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string_2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, n, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, p, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_secretbox arginfo_sodium_crypto_box
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_secretbox, 0, 3, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_secretbox_keygen arginfo_sodium_crypto_aead_chacha20poly1305_keygen
 
-#define arginfo_sodium_crypto_secretbox_open arginfo_sodium_crypto_box_open
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_secretbox_open, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_secretstream_xchacha20poly1305_keygen, 0, 0, IS_STRING, 0)
@@ -258,15 +271,15 @@ ZEND_END_ARG_INFO()
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_secretstream_xchacha20poly1305_push, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(1, state, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, msg, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ad, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, additional_data, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tag, IS_LONG, 0, "SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_pull, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -274,8 +287,8 @@ ZEND_END_ARG_INFO()
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_secretstream_xchacha20poly1305_pull, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, state, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, c, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ad, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, additional_data, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -290,34 +303,40 @@ ZEND_END_ARG_INFO()
 #define arginfo_sodium_crypto_shorthash_keygen arginfo_sodium_crypto_aead_chacha20poly1305_keygen
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_sign, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, keypair, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, secret_key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_sign_detached arginfo_sodium_crypto_sign
 
-#define arginfo_sodium_crypto_sign_ed25519_pk_to_curve25519 arginfo_sodium_crypto_box_seed_keypair
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_sign_ed25519_pk_to_curve25519, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, public_key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_sign_ed25519_sk_to_curve25519 arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_sign_ed25519_sk_to_curve25519 arginfo_sodium_crypto_box_publickey_from_secretkey
 
 #define arginfo_sodium_crypto_sign_keypair arginfo_sodium_crypto_aead_chacha20poly1305_keygen
 
 #define arginfo_sodium_crypto_sign_keypair_from_secretkey_and_publickey arginfo_sodium_crypto_box_keypair_from_secretkey_and_publickey
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_sign_open, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, keypair, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, public_key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_sign_publickey arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_sign_publickey arginfo_sodium_crypto_box_publickey
 
-#define arginfo_sodium_crypto_sign_secretkey arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_sign_secretkey arginfo_sodium_crypto_box_publickey
 
-#define arginfo_sodium_crypto_sign_publickey_from_secretkey arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_sign_publickey_from_secretkey arginfo_sodium_crypto_box_publickey_from_secretkey
 
 #define arginfo_sodium_crypto_sign_seed_keypair arginfo_sodium_crypto_box_seed_keypair
 
-#define arginfo_sodium_crypto_sign_verify_detached arginfo_sodium_crypto_auth_verify
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_sign_verify_detached, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, signature, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, public_key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_stream, 0, 3, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
@@ -327,16 +346,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_stream_keygen arginfo_sodium_crypto_aead_chacha20poly1305_keygen
 
-#define arginfo_sodium_crypto_stream_xor arginfo_sodium_crypto_box
+#define arginfo_sodium_crypto_stream_xor arginfo_sodium_crypto_secretbox
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_add, 0, 2, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(1, string_1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string_2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(1, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_compare, 0, 2, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, string_1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string_2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_increment, 0, 1, IS_VOID, 0)
@@ -345,9 +364,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_memcmp arginfo_sodium_compare
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_memzero, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(1, reference, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_sodium_memzero arginfo_sodium_increment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_pad, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -359,7 +376,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_unpad, 0, 2, IS_STRING, 0
 	ZEND_ARG_TYPE_INFO(0, block_size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_bin2hex arginfo_sodium_crypto_kx_seed_keypair
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_bin2hex, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_hex2bin, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -381,7 +400,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_base642bin, 0, 2, IS_STRI
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_sodium_crypto_scalarmult_base arginfo_sodium_crypto_box_seed_keypair
+#define arginfo_sodium_crypto_scalarmult_base arginfo_sodium_crypto_box_publickey_from_secretkey
 
 
 ZEND_FUNCTION(sodium_crypto_aead_aes256gcm_is_available);
