@@ -47,7 +47,7 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
         $stubCode = file_get_contents($stubFile);
         $stubHash = computeStubHash($stubCode);
         $oldStubHash = extractStubHash($arginfoFile);
-        if ($stubHash === $oldStubHash && $context->forceRegeneration === false) {
+        if ($stubHash === $oldStubHash && !$context->forceParse) {
             /* Stub file did not change, do not regenerate. */
             return null;
         }
@@ -55,7 +55,7 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-        if ($context->forceRegeneration === true && file_put_contents($arginfoFile, $arginfoCode)) {
+        if ($context->forceRegeneration && file_put_contents($arginfoFile, $arginfoCode)) {
             echo "Saved $arginfoFile\n";
         }
 
@@ -94,7 +94,9 @@ function extractStubHash(string $arginfoFile): ?string {
 }
 
 class Context {
-    /** @var bool|null */
+    /** @var bool */
+    public $forceParse = false;
+    /** @var bool */
     public $forceRegeneration = false;
 }
 
@@ -1267,8 +1269,8 @@ $options = getopt("fh", ["force-regeneration", "parameter-stats", "help", "verif
 $context = new Context;
 $printParameterStats = isset($options["parameter-stats"]);
 $verify = isset($options["verify"]);
-$context->forceRegeneration =
-    isset($options["f"]) || isset($options["force-regeneration"]) ? true : ($printParameterStats || $verify ? null : false);
+$context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
+$context->forceParse = $context->forceRegeneration || $printParameterStats || $verify;
 
 if (isset($options["h"]) || isset($options["help"])) {
     die("\nusage: gen-stub.php [ -f | --force-regeneration ] [ --parameter-stats ] [ --verify ] [ -h | --help ] [ name.stub.php | directory ]\n\n");
