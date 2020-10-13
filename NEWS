@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug #80216 (imap_mail_compose() does not validate types/encodings).
     (cmb)
   . Fixed bug #80226 (imap_sort() leaks sortpgm memory). (cmb)
+  . Fixed bug #64076 (imap_sort() does not return FALSE on failure). (cmb)
 
 - Opcache:
   . Fixed bug #80184 (Complex expression in while / if statements resolves to
