@@ -559,10 +559,10 @@ function mysqli_error(mysqli $mysql): ?string {}
 
 function mysqli_error_list(mysqli $mysql): array {}
 
-function mysqli_stmt_execute(mysqli_stmt $stmt): bool {}
+function mysqli_stmt_execute(mysqli_stmt $statement): bool {}
 
 /** @alias mysqli_stmt_execute */
-function mysqli_execute(mysqli_stmt $stmt): bool {}
+function mysqli_execute(mysqli_stmt $statement): bool {}
 
 function mysqli_fetch_field(mysqli_result $result): object|false {}
 
@@ -678,63 +678,63 @@ function mysqli_select_db(mysqli $mysql, string $database): bool {}
 
 function mysqli_set_charset(mysqli $mysql, string $charset): bool {}
 
-function mysqli_stmt_affected_rows(mysqli_stmt $stmt): int|string {}
+function mysqli_stmt_affected_rows(mysqli_stmt $statement): int|string {}
 
-function mysqli_stmt_attr_get(mysqli_stmt $stmt, int $attribute): int {}
+function mysqli_stmt_attr_get(mysqli_stmt $statement, int $attribute): int {}
 
-function mysqli_stmt_attr_set(mysqli_stmt $stmt, int $attribute, int $value): bool {}
+function mysqli_stmt_attr_set(mysqli_stmt $statement, int $attribute, int $value): bool {}
 
-function mysqli_stmt_bind_param(mysqli_stmt $stmt, string $types, mixed &...$vars): bool {}
+function mysqli_stmt_bind_param(mysqli_stmt $statement, string $types, mixed &...$vars): bool {}
 
-function mysqli_stmt_bind_result(mysqli_stmt $stmt, mixed &...$vars): bool {}
+function mysqli_stmt_bind_result(mysqli_stmt $statement, mixed &...$vars): bool {}
 
-function mysqli_stmt_close(mysqli_stmt $stmt): bool {}
+function mysqli_stmt_close(mysqli_stmt $statement): bool {}
 
-function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset): void {}
+function mysqli_stmt_data_seek(mysqli_stmt $statement, int $offset): void {}
 
-function mysqli_stmt_errno(mysqli_stmt $stmt): int {}
+function mysqli_stmt_errno(mysqli_stmt $statement): int {}
 
-function mysqli_stmt_error(mysqli_stmt $stmt): ?string {}
+function mysqli_stmt_error(mysqli_stmt $statement): ?string {}
 
-function mysqli_stmt_error_list(mysqli_stmt $stmt): array {}
+function mysqli_stmt_error_list(mysqli_stmt $statement): array {}
 
-function mysqli_stmt_fetch(mysqli_stmt $stmt): ?bool {}
+function mysqli_stmt_fetch(mysqli_stmt $statement): ?bool {}
 
-function mysqli_stmt_field_count(mysqli_stmt $stmt): int {}
+function mysqli_stmt_field_count(mysqli_stmt $statement): int {}
 
-function mysqli_stmt_free_result(mysqli_stmt $stmt): void {}
+function mysqli_stmt_free_result(mysqli_stmt $statement): void {}
 
 #if defined(MYSQLI_USE_MYSQLND)
-function mysqli_stmt_get_result(mysqli_stmt $stmt): mysqli_result|false {}
+function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
 #endif
 
-function mysqli_stmt_get_warnings(mysqli_stmt $stmt): mysqli_warning|false {}
+function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
 
 function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
 
-function mysqli_stmt_insert_id(mysqli_stmt $stmt): int|string {}
+function mysqli_stmt_insert_id(mysqli_stmt $statement): int|string {}
 
 #if defined(MYSQLI_USE_MYSQLND)
-function mysqli_stmt_more_results(mysqli_stmt $stmt): bool {}
+function mysqli_stmt_more_results(mysqli_stmt $statement): bool {}
 
-function mysqli_stmt_next_result(mysqli_stmt $stmt): bool {}
+function mysqli_stmt_next_result(mysqli_stmt $statement): bool {}
 #endif
 
-function mysqli_stmt_num_rows(mysqli_stmt $stmt): int|string {}
+function mysqli_stmt_num_rows(mysqli_stmt $statement): int|string {}
 
-function mysqli_stmt_param_count(mysqli_stmt $stmt): int {}
+function mysqli_stmt_param_count(mysqli_stmt $statement): int {}
 
-function mysqli_stmt_prepare(mysqli_stmt $stmt, string $query): bool {}
+function mysqli_stmt_prepare(mysqli_stmt $statement, string $query): bool {}
 
-function mysqli_stmt_reset(mysqli_stmt $stmt): bool {}
+function mysqli_stmt_reset(mysqli_stmt $statement): bool {}
 
-function mysqli_stmt_result_metadata(mysqli_stmt $stmt): mysqli_result|false {}
+function mysqli_stmt_result_metadata(mysqli_stmt $statement): mysqli_result|false {}
 
-function mysqli_stmt_send_long_data(mysqli_stmt $stmt, int $param_num, string $data): bool {}
+function mysqli_stmt_send_long_data(mysqli_stmt $statement, int $param_num, string $data): bool {}
 
-function mysqli_stmt_store_result(mysqli_stmt $stmt): bool {}
+function mysqli_stmt_store_result(mysqli_stmt $statement): bool {}
 
-function mysqli_stmt_sqlstate(mysqli_stmt $stmt): ?string {}
+function mysqli_stmt_sqlstate(mysqli_stmt $statement): ?string {}
 
 function mysqli_sqlstate(mysqli $mysql): ?string {}
 
