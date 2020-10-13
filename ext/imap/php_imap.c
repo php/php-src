@@ -3181,6 +3181,9 @@ PHP_FUNCTION(imap_sort)
 	} else {
 		spg = mail_newsearchpgm();
 	}
+	if (spg == NIL) {
+		RETURN_FALSE;
+	}
 
 	mypgm = mail_newsortpgm();
 	mypgm->reverse = rev;
