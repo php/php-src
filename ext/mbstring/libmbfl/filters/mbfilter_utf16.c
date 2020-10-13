@@ -43,7 +43,7 @@ const mbfl_encoding mbfl_encoding_utf16 = {
 	"UTF-16",
 	mbfl_encoding_utf16_aliases,
 	NULL,
-	MBFL_ENCTYPE_MWC2BE,
+	MBFL_ENCTYPE_MWC2,
 	&vtbl_utf16_wchar,
 	&vtbl_wchar_utf16
 };
@@ -54,7 +54,7 @@ const mbfl_encoding mbfl_encoding_utf16be = {
 	"UTF-16BE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MWC2BE,
+	MBFL_ENCTYPE_MWC2,
 	&vtbl_utf16be_wchar,
 	&vtbl_wchar_utf16be
 };
@@ -65,7 +65,7 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	"UTF-16LE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MWC2LE,
+	MBFL_ENCTYPE_MWC2,
 	&vtbl_utf16le_wchar,
 	&vtbl_wchar_utf16le
 };
