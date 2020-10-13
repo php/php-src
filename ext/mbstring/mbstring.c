@@ -1193,7 +1193,7 @@ PHP_FUNCTION(mb_language)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(name)
+		Z_PARAM_STR_OR_NULL(name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
@@ -1221,7 +1221,7 @@ PHP_FUNCTION(mb_internal_encoding)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING_OR_NULL(name, name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
@@ -1252,7 +1252,7 @@ PHP_FUNCTION(mb_http_input)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(type, type_len)
+		Z_PARAM_STRING_OR_NULL(type, type_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (type == NULL) {
@@ -1328,7 +1328,7 @@ PHP_FUNCTION(mb_http_output)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING_OR_NULL(name, name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
@@ -1866,7 +1866,7 @@ PHP_FUNCTION(mb_strpos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -1900,7 +1900,7 @@ PHP_FUNCTION(mb_strrpos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -1934,7 +1934,7 @@ PHP_FUNCTION(mb_stripos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -1969,7 +1969,7 @@ PHP_FUNCTION(mb_strripos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -2010,7 +2010,7 @@ static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int va
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(part)
-		Z_PARAM_STR(encoding_name)
+		Z_PARAM_STR_OR_NULL(encoding_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -2093,7 +2093,7 @@ PHP_FUNCTION(mb_substr_count)
 		Z_PARAM_STRING(haystack_val, haystack.len)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -2135,7 +2135,7 @@ PHP_FUNCTION(mb_substr)
 		Z_PARAM_LONG(from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.encoding = php_mb_get_encoding(encoding, 4);
@@ -2199,7 +2199,7 @@ PHP_FUNCTION(mb_strcut)
 		Z_PARAM_LONG(from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char*)string_val;
@@ -2255,7 +2255,7 @@ PHP_FUNCTION(mb_strwidth)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(string_val, string.len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char*)string_val;
@@ -2285,7 +2285,7 @@ PHP_FUNCTION(mb_strimwidth)
 		Z_PARAM_LONG(width)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(trimmarker, trimmarker_len)
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.encoding = marker.encoding = php_mb_get_encoding(encoding, 5);
@@ -2587,7 +2587,7 @@ PHP_FUNCTION(mb_convert_case)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_LONG(case_mode)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 3);
@@ -2620,7 +2620,7 @@ PHP_FUNCTION(mb_strtoupper)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
@@ -2651,7 +2651,7 @@ PHP_FUNCTION(mb_strtolower)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	enc = php_mb_get_encoding(from_encoding, 2);
@@ -2863,7 +2863,7 @@ PHP_FUNCTION(mb_convert_kana)
 		Z_PARAM_STRING(string_val, string.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(optstr, optstr_len)
-		Z_PARAM_STR(encname)
+		Z_PARAM_STR_OR_NULL(encname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char*)string_val;
@@ -3194,7 +3194,7 @@ PHP_FUNCTION(mb_encode_numericentity)
 		Z_PARAM_STRING(str, string.len)
 		Z_PARAM_ARRAY_HT(target_hash)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 		Z_PARAM_BOOL(is_hex)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3231,7 +3231,7 @@ PHP_FUNCTION(mb_decode_numericentity)
 		Z_PARAM_STRING(str, string.len)
 		Z_PARAM_ARRAY_HT(target_hash)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char *)str;
