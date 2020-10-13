@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.24
+?? ??? ????, PHP 7.3.25
+
+
+29 Oct 2020, PHP 7.3.24
 
 - Core:
   . Fixed bug #79423 (copy command is limited to size of file it can copy).
