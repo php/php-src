@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2256dc582b4869c84f5168ebe6bd51dcfd059134 */
+ * Stub hash: 6733b22afa059adf9f42a3b46c509f7678589fb6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -58,13 +58,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_prepare, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_TYPE_INFO(0, stmt_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_execute, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, stmt_name)
+	ZEND_ARG_INFO(0, statement_name)
 	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
@@ -372,7 +372,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_send_prepare, 0, 3, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_TYPE_INFO(0, stmt_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

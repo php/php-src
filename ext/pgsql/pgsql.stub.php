@@ -72,14 +72,14 @@ function pg_query_params($connection, $query, array $params = UNKNOWN) {}
  * @param resource|string $connection
  * @return resource|false
  */
-function pg_prepare($connection, string $stmt_name, string $query = UNKNOWN) {}
+function pg_prepare($connection, string $statement_name, string $query = UNKNOWN) {}
 
 /**
  * @param resource|string $connection
- * @param string|array $stmt_name
+ * @param string|array $statement_name
  * @return resource|false
  */
-function pg_execute($connection, $stmt_name, array $params = UNKNOWN) {}
+function pg_execute($connection, $statement_name, array $params = UNKNOWN) {}
 
 /** @param resource $result */
 function pg_num_rows($result): int {}
@@ -461,7 +461,7 @@ function pg_send_query($connection, string $query): int|bool {}
 function pg_send_query_params($connection, string $query, array $params): int|bool {}
 
 /** @param resource $connection */
-function pg_send_prepare($connection, string $stmt_name, string $query): int|bool {}
+function pg_send_prepare($connection, string $statement_name, string $query): int|bool {}
 
 /** @param resource $connection */
 function pg_send_execute($connection, string $query, array $params): int|bool {}
