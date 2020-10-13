@@ -19,5 +19,5 @@ var_dump(mb_ereg($regex, $str));
 
 ?>
 --EXPECT--
-int(1)
+bool(true)
 bool(false)
