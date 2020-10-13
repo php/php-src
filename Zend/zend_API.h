@@ -1311,6 +1311,7 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	} while (0)
 
 #define ZEND_PARSE_PARAMETERS_END_EX(failure) \
+			ZEND_ASSERT(_i == _max_num_args || _max_num_args == (uint32_t) -1); \
 		} while (0); \
 		if (UNEXPECTED(_error_code != ZPP_ERROR_OK)) { \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
