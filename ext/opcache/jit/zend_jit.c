@@ -964,7 +964,8 @@ static zend_lifetime_interval *zend_jit_sort_intervals(zend_lifetime_interval **
 		if (ival) {
 			if ((ival->range.start > last->range.start) ||
 			    (ival->range.start == last->range.start &&
-			     ival->range.end > last->range.end)) {
+			     ((!ival->hint && last->hint) ||
+			      ival->range.end > last->range.end))) {
 				last->list_next = ival;
 				last = ival;
 				ival->list_next = NULL;
@@ -978,7 +979,8 @@ static zend_lifetime_interval *zend_jit_sort_intervals(zend_lifetime_interval **
 						break;
 					} else if ((ival->range.start < (*p)->range.start) ||
 					           (ival->range.start == (*p)->range.start &&
-					            ival->range.end < (*p)->range.end)) {
+					            ((ival->hint && !(*p)->hint) ||
+					             ival->range.end < (*p)->range.end))) {
 						ival->list_next = *p;
 						*p = ival;
 						break;
