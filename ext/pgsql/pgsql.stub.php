@@ -503,13 +503,13 @@ function pg_convert($connection, string $table_name, array $values, int $flags =
  * @param resource $connection
  * @return resource|string|bool
  */
-function pg_insert($connection, string $table_name, array $values, int $flags = 0) {}
+function pg_insert($connection, string $table_name, array $values, int $flags = PGSQL_DML_EXEC) {}
 
 /** @param resource $connection */
-function pg_update($connection, string $table_name, array $values, array $conditions, int $flags = 0): string|bool {}
+function pg_update($connection, string $table_name, array $values, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
 
 /** @param resource $connection */
-function pg_delete($connection, string $table_name, array $conditions, int $flags = 0): string|bool {}
+function pg_delete($connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
 
 /** @param resource $connection */
-function pg_select($connection, string $table_name, array $conditions, int $flags = 0, int $mode = PGSQL_ASSOC): array|string|false {}
+function pg_select($connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
