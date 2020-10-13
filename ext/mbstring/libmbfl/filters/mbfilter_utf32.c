@@ -131,7 +131,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
 
 static int emit_char_if_valid(int n, mbfl_convert_filter *filter)
 {
-	if (n < MBFL_WCSPLANE_UTF32MAX && (n < 0xD800 || n > 0xDFFF)) {
+	if (n >= 0 && n < MBFL_WCSPLANE_UTF32MAX && (n < 0xD800 || n > 0xDFFF)) {
 		CK((*filter->output_function)(n, filter->data));
 	} else {
 		n = (n & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH;
