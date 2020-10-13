@@ -13,7 +13,7 @@ Content-type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/frontcontroller16.phar
 --EXPECTF--
-Fatal error: Uncaught TypeError: Phar::webPhar(): Argument #5 ($rewrites) must be a valid callback or null, class "fail" not found in %s:%d
+Fatal error: Uncaught TypeError: Phar::webPhar(): Argument #5 ($rewrite) must be a valid callback or null, class "fail" not found in %s:%d
 Stack trace:
 #0 %s(%d): Phar::webPhar('test.phar', '/index.php', '', Array, Array)
 #1 {main}
