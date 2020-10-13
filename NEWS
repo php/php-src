@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2020, PHP 7.4.13
 
+- IMAP:
+  . Fixed bug #64076 (imap_sort() does not return FALSE on failure). (cmb)
 
 29 Oct 2020, PHP 7.4.12
 
