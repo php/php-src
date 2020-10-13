@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7f000371ef4b61c401b5a59d2ab19c0e0f9a1987 */
+ * Stub hash: e7a7a9402b2668136f9f47d6e547e3af46a78a50 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -470,7 +470,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_OCILob_size arginfo_class_OCILob_load
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCILob_write, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -619,8 +619,8 @@ ZEND_FUNCTION(oci_collection_trim);
 ZEND_FUNCTION(oci_new_collection);
 ZEND_FUNCTION(oci_register_taf_callback);
 ZEND_FUNCTION(oci_unregister_taf_callback);
-ZEND_FUNCTION(oci_lob_write_temporary);
-ZEND_FUNCTION(oci_lob_close);
+ZEND_METHOD(OCILob, writetemporary);
+ZEND_METHOD(OCILob, close);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -771,8 +771,8 @@ static const zend_function_entry class_OCILob_methods[] = {
 	ZEND_ME_MAPPING(getbuffering, ocigetbufferinglob, arginfo_class_OCILob_getbuffering, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(writetofile, oci_lob_export, arginfo_class_OCILob_writetofile, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(export, oci_lob_export, arginfo_class_OCILob_export, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writetemporary, oci_lob_write_temporary, arginfo_class_OCILob_writetemporary, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(close, oci_lob_close, arginfo_class_OCILob_close, ZEND_ACC_PUBLIC)
+	ZEND_ME(OCILob, writetemporary, arginfo_class_OCILob_writetemporary, ZEND_ACC_PUBLIC)
+	ZEND_ME(OCILob, close, arginfo_class_OCILob_close, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(free, oci_free_descriptor, arginfo_class_OCILob_free, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

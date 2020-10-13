@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: df2a62a48636bd2c7b1e62ac28480ae27233f100 */
+ * Stub hash: a0ece6bc77b0a9811cb09a604b175e2295efc7a0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)

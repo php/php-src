@@ -1482,13 +1482,6 @@ PHP_FUNCTION(mysqli_init)
 }
 /* }}} */
 
-/* {{{ Initialize mysqli and return a resource for use with mysql_real_connect */
-PHP_FUNCTION(mysqli_init_method)
-{
-	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
-}
-/* }}} */
-
 /* {{{ Get the ID generated from the previous INSERT operation */
 PHP_FUNCTION(mysqli_insert_id)
 {

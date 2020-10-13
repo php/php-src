@@ -89,7 +89,7 @@ function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $opti
 
 function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): bool {}
 
-function intlcal_from_date_time(DateTime|string $dateTime, ?string $locale = null): ?IntlCalendar {}
+function intlcal_from_date_time(DateTime|string $datetime, ?string $locale = null): ?IntlCalendar {}
 
 function intlcal_to_date_time(IntlCalendar $calendar): DateTime|false {}
 
@@ -131,7 +131,7 @@ function collator_sort(Collator $object, array &$array, int $flags = Collator::S
 
 function collator_sort_with_sort_keys(Collator $object, array &$array): bool {}
 
-function collator_asort(Collator $object, array &$arr, int $flags = Collator::SORT_REGULAR): bool {}
+function collator_asort(Collator $object, array &$array, int $flags = Collator::SORT_REGULAR): bool {}
 
 function collator_get_locale(Collator $object, int $type): string|false {}
 
@@ -349,7 +349,7 @@ function resourcebundle_create(?string $locale, ?string $bundle, bool $fallback 
  * @param string|int $index
  * @return mixed
  */
-function resourcebundle_get(ResourceBundle $bundle, $index) {}
+function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true) {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 

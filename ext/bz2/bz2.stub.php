@@ -13,19 +13,19 @@ function bzread($bz, int $length = 1024): string|false {}
 
 /**
  * @param resource $bz
- * @alias fwrite
+ * @implementation-alias fwrite
  */
 function bzwrite($bz, string $data, ?int $length = null): int|false {}
 
 /**
  * @param resource $bz
- * @alias fflush
+ * @implementation-alias fflush
  */
 function bzflush($bz): bool {}
 
 /**
  * @param resource $bz
- * @alias fclose
+ * @implementation-alias fclose
  */
 function bzclose($bz): bool {}
 

@@ -637,6 +637,7 @@ PHP 8.0 UPGRADE NOTES
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
     removed from tidy_repair_string().
+  . tidy::repairString() and tidy::repairFile() became static methods
 
 - Tokenizer:
   . T_COMMENT tokens will no longer include a trailing newline. The newline will
