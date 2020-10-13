@@ -2130,7 +2130,7 @@ PHP_FUNCTION(mb_substr)
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
-	ZEND_PARSE_PARAMETERS_START(2, 5)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_LONG(from)
 		Z_PARAM_OPTIONAL
@@ -2194,7 +2194,7 @@ PHP_FUNCTION(mb_strcut)
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
-	ZEND_PARSE_PARAMETERS_START(2, 5)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(string_val, string.len)
 		Z_PARAM_LONG(from)
 		Z_PARAM_OPTIONAL
