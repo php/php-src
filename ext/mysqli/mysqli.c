@@ -1143,7 +1143,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ca", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ca!", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (ce == NULL) {
@@ -1200,7 +1200,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.param_count = 0;
 			fci.named_params = NULL;
 
-			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+			if (ctor_params) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
 					/* Two problems why we throw exceptions here: PHP is typeless
 					 * and hence passing one argument that's not an array could be
@@ -1224,7 +1224,10 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 			zend_fcall_info_args_clear(&fci, 1);
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
+			zend_throw_exception_ex(zend_ce_exception, 0,
+				"Class %s does not have a constructor hence argument #%d ($ctor_params) must be null",
+				ZSTR_VAL(ce->name), getThis() ? 2 : 3
+			);
 		}
 	}
 }

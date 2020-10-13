@@ -57,7 +57,7 @@ object(mysqli_fetch_object_test)#%d (%d) {
 }
 
 Exception with mysqli. Note that at all other places we throws errors but no exceptions unless the error mode has been changed:
-Exception: Class mysqli_fetch_object_test does not have a constructor hence you cannot use ctor_params
+Exception: Class mysqli_fetch_object_test does not have a constructor hence argument #3 ($ctor_args) must be null
 
 Fatal error with PHP (but no exception!):
 
