@@ -87,25 +87,25 @@ function odbc_next_result($statement): bool {}
 function odbc_num_fields($statement): int {}
 
 /** @param resource $statement */
-function odbc_field_name($statement, int $field_number): string|false {}
+function odbc_field_name($statement, int $field): string|false {}
 
 /** @param resource $statement */
-function odbc_field_type($statement, int $field_number): string|false {}
+function odbc_field_type($statement, int $field): string|false {}
 
 /** @param resource $statement */
-function odbc_field_len($statement, int $field_number): int|false {}
+function odbc_field_len($statement, int $field): int|false {}
 
 /**
  * @param resource $statement
  * @alias odbc_field_len
  */
-function odbc_field_precision($statement, int $field_number): int|false {}
+function odbc_field_precision($statement, int $field): int|false {}
 
 /** @param resource $statement */
-function odbc_field_scale($statement, int $field_number): int|false {}
+function odbc_field_scale($statement, int $field): int|false {}
 
 /** @param resource $statement */
-function odbc_field_num($statement, string $field_name): int|false {}
+function odbc_field_num($statement, string $field): int|false {}
 
 /** @param resource $odbc */
 function odbc_autocommit($odbc, bool $enable = false): int|bool {}
