@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3479aee134cb8d952c846d120f51a8cf75e55e86 */
+ * Stub hash: deb01afb2b4e645c00684fae61a6042ebfbaaaa1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -327,8 +327,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pg_escape_bytea arginfo_pg_escape_string
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_unescape_bytea, 0, 0, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, string, IS_STRING, 1, "null")
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_unescape_bytea, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_escape_literal, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)

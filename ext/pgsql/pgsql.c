@@ -3359,8 +3359,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 	char *from, *tmp;
 	size_t to_len;
 	size_t from_len;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!",
-							  &from, &from_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &from, &from_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
