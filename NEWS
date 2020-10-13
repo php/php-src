@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2020, PHP 7.4.12
+?? ??? 2020, PHP 7.4.13
+
+
+29 Oct 2020, PHP 7.4.12
 
 - Core:
   . Fixed bug #80061 (Copying large files may have suboptimal performance).
