@@ -1345,7 +1345,7 @@ if ($verify) {
         }
     }
 
-    echo implode("\n", $errors), "\n";
+    echo implode("\n", $errors);
     if (!empty($errors)) {
         exit(1);
     }
