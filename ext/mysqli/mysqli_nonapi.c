@@ -769,8 +769,8 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-		  		php_error_docref(NULL, E_WARNING, "[%d] Couldn't fetch %s", i, ZSTR_VAL(intern->zo.ce->name));
-				continue;
+		  		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
+				return FAILURE;
 		  	}
 			mysql = (MY_MYSQL *) my_res->ptr;
 			if (mysql->mysql == *p) {
