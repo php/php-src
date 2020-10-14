@@ -1202,17 +1202,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 			if (ctor_params) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
-					/* Two problems why we throw exceptions here: PHP is typeless
-					 * and hence passing one argument that's not an array could be
-					 * by mistake and the other way round is possible, too. The
-					 * single value is an array. Also we'd have to make that one
-					 * argument passed by reference.
-					 */
-					zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
-						"must be of type array when the specified class (%s) has a constructor",
-						ZSTR_VAL(ce->name)
-					);
-					RETURN_THROWS();
+					ZEND_UNREACHABLE();
 				}
 			}
 
