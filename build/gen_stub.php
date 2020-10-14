@@ -55,7 +55,7 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-        if ($context->forceRegeneration && file_put_contents($arginfoFile, $arginfoCode)) {
+        if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
             echo "Saved $arginfoFile\n";
         }
 
@@ -64,7 +64,7 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
             $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-            if ($context->forceRegeneration === true && file_put_contents($legacyFile, $arginfoCode)) {
+            if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($legacyFile, $arginfoCode)) {
                 echo "Saved $legacyFile\n";
             }
 		}
@@ -360,6 +360,8 @@ interface FunctionOrMethodName {
     public function getArgInfoName(): string;
     public function __toString(): string;
     public function isMagicMethod(): bool;
+    public function isMethod(): bool;
+    public function isConstructor(): bool;
 }
 
 class FunctionName implements FunctionOrMethodName {
@@ -404,6 +406,14 @@ class FunctionName implements FunctionOrMethodName {
     public function isMagicMethod(): bool {
         return false;
     }
+
+    public function isMethod(): bool {
+        return false;
+    }
+
+    public function isConstructor(): bool {
+        return false;
+    }
 }
 
 class MethodName implements FunctionOrMethodName {
@@ -435,6 +445,14 @@ class MethodName implements FunctionOrMethodName {
 
     public function isMagicMethod(): bool {
         return strpos($this->methodName, '__') === 0;
+    }
+
+    public function isMethod(): bool {
+        return true;
+    }
+
+    public function isConstructor(): bool {
+        return $this->methodName === "__construct";
     }
 }
 
@@ -495,6 +513,11 @@ class FuncInfo {
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
         $this->cond = $cond;
+    }
+
+    public function isInstanceMethod(): bool
+    {
+        return !($this->flags & Class_::MODIFIER_STATIC) && $this->name->isMethod() && $this->name->isConstructor() === false;
     }
 
     public function equalsApartFromName(FuncInfo $other): bool {
@@ -1325,28 +1348,60 @@ if ($verify) {
         }
     }
 
-    foreach ($aliases as $alias) {
-        if (!isset($funcMap[$alias->alias->__toString()])) {
-            $errors[] = "Aliased function {$alias->alias}() cannot be found";
+    foreach ($aliases as $aliasFunc) {
+        if (!isset($funcMap[$aliasFunc->alias->__toString()])) {
+            $errors[] = "Aliased function {$aliasFunc->alias}() cannot be found";
             continue;
         }
 
-        $aliasedFunc = $funcMap[$alias->alias->__toString()];
+        $aliasedFunc = $funcMap[$aliasFunc->alias->__toString()];
+        $aliasedArgs = $aliasedFunc->args;
+        $aliasArgs = $aliasFunc->args;
 
-        $aliasedArgMap = [];
-        foreach ($aliasedFunc->args as $arg) {
-            $aliasedArgMap[$arg->name] = $arg;
-        }
+        if ($aliasFunc->isInstanceMethod() !== $aliasedFunc->isInstanceMethod()) {
+            if ($aliasFunc->isInstanceMethod()) {
+                $aliasedArgs = array_slice($aliasedArgs, 1);
+            }
 
-        foreach ($alias->args as $arg) {
-            if (!isset($aliasedArgMap[$arg->name])) {
-                $errors[] = "{$alias->name}(): Argument \$$arg->name of aliased function {$aliasedFunc->name}() is missing";
+            if ($aliasedFunc->isInstanceMethod()) {
+                $aliasArgs = array_slice($aliasArgs, 1);
             }
         }
+
+        array_map(
+            function(?ArgInfo $aliasArg, ?ArgInfo $aliasedArg) use ($aliasFunc, $aliasedFunc, &$errors) {
+                if ($aliasArg === null) {
+                    assert($aliasedArg !== null);
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() is missing";
+                    return null;
+                }
+
+                if ($aliasedArg === null) {
+                    assert($aliasArg !== null);
+                    $errors[] = "{$aliasedFunc->name}(): Argument \$$aliasArg->name of alias function {$aliasFunc->name}() is missing";
+                    return null;
+                }
+
+                if ($aliasArg->name !== $aliasedArg->name) {
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasArg->name and argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() must have the same name";
+                    return null;
+                }
+
+                if ($aliasArg->type != $aliasedArg->type) {
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasArg->name and argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() must have the same type";
+                }
+
+                if ($aliasArg->defaultValue !== $aliasedArg->defaultValue) {
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasArg->name and argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() must have the same default value";
+                }
+            },
+            $aliasArgs, $aliasedArgs
+        );
     }
 
     echo implode("\n", $errors);
     if (!empty($errors)) {
+        echo "\n";
         exit(1);
     }
 }

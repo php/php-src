@@ -9,7 +9,7 @@ final class mysqli_driver
 class mysqli
 {
     public function __construct(
-        ?string $host = null,
+        ?string $hostname = null,
         ?string $username = null,
         ?string $password = null,
         ?string $database = null,
@@ -57,8 +57,8 @@ class mysqli
      * @return mysqli|null|false
      * @alias mysqli_connect
      */
-    public function connect(
-        ?string $host = null,
+    public static function connect(
+        ?string $hostname = null,
         ?string $username = null,
         ?string $password = null,
         ?string $database = null,
@@ -76,7 +76,7 @@ class mysqli
      * @return bool
      * @alias mysqli_debug
      */
-    public function debug(string $message) {}
+    public static function debug(string $options) {}
 
     /**
      * @return object|null
@@ -170,7 +170,7 @@ class mysqli
      * @alias mysqli_real_connect
      */
     public function real_connect(
-        ?string $host = null,
+        ?string $hostname = null,
         ?string $username = null,
         ?string $password = null,
         ?string $database = null,
@@ -534,7 +534,7 @@ function mysqli_close(mysqli $mysql): bool {}
 function mysqli_commit(mysqli $mysql, int $flags = -1, ?string $name = null): bool {}
 
 function mysqli_connect(
-    ?string $host = null,
+    ?string $hostname = null,
     ?string $username = null,
     ?string $password = null,
     ?string $database = null,
@@ -550,7 +550,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
-function mysqli_debug(string $message): bool {}
+function mysqli_debug(string $options): bool {}
 
 function mysqli_errno(mysqli $mysql): int {}
 
@@ -650,7 +650,7 @@ function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_ST
 
 function mysqli_real_connect(
     mysqli $mysql,
-    ?string $host = null,
+    ?string $hostname = null,
     ?string $username = null,
     ?string $password = null,
     ?string $database = null,

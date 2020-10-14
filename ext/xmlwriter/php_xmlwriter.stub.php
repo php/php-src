@@ -92,7 +92,7 @@ class XMLWriter
      * @return bool
      * @alias xmlwriter_open_uri
      */
-    public function openUri(string $uri) {}
+    public static function openUri(string $uri) {}
 
     /**
      * @return bool

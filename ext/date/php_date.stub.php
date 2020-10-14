@@ -337,7 +337,7 @@ class DateTimeZone
      * @return int
      * @alias timezone_offset_get
      */
-    public function getOffset(DateTimeInterface $object) {}
+    public function getOffset(DateTimeInterface $datetime) {}
 
     /**
      * @return array|false
