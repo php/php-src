@@ -28,9 +28,16 @@ var_dump(rtrim($output));
 $encrypted = openssl_encrypt($data, "bf-ecb", $password, OPENSSL_DONT_ZERO_PAD_KEY);
 $output = openssl_decrypt($encrypted, "bf-ecb", $password, OPENSSL_DONT_ZERO_PAD_KEY);
 var_dump($output);
+
+// It's okay to pass $tag for a non-authenticated cipher.
+// It will be populated with null in that case.
+openssl_encrypt($data, $method, $password, 0, $iv, $tag);
+var_dump($tag);
+
 ?>
 --EXPECT--
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
+NULL
