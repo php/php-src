@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 200fdd7f3ae0ded20b43486f162d207b7fd09712 */
+ * Stub hash: b156847f2617389de5381e5bd5e2fedb27bd7eed */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -957,7 +957,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(character_set_name, mysqli_character_set_name, arginfo_class_mysqli_character_set_name, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(close, mysqli_close, arginfo_class_mysqli_close, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(commit, mysqli_commit, arginfo_class_mysqli_commit, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(connect, mysqli_connect, arginfo_class_mysqli_connect, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(connect, mysqli_connect, arginfo_class_mysqli_connect, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(dump_debug_info, mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(debug, mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(get_charset, mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC)

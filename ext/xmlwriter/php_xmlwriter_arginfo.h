@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1dac866f8b92d14862818a3350cc4f902c35dc65 */
+ * Stub hash: 8607fe498af4c678f099231d52c3c8aabf5b7e9e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -420,7 +420,7 @@ static const zend_function_entry ext_functions[] = {
 
 
 static const zend_function_entry class_XMLWriter_methods[] = {
-	ZEND_ME_MAPPING(openUri, xmlwriter_open_uri, arginfo_class_XMLWriter_openUri, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(openUri, xmlwriter_open_uri, arginfo_class_XMLWriter_openUri, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(openMemory, xmlwriter_open_memory, arginfo_class_XMLWriter_openMemory, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setIndent, xmlwriter_set_indent, arginfo_class_XMLWriter_setIndent, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setIndentString, xmlwriter_set_indent_string, arginfo_class_XMLWriter_setIndentString, ZEND_ACC_PUBLIC)

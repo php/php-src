@@ -55,9 +55,9 @@ class mysqli
 
     /**
      * @return mysqli|null|false
-     * @alias mysqli_connect
+     * @static-method-alias mysqli_connect
      */
-    public static function connect(
+    public function connect(
         ?string $hostname = null,
         ?string $username = null,
         ?string $password = null,

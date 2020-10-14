@@ -89,10 +89,6 @@ function oci_lob_is_equal(OCILob $lob1, OCILob $lob2): bool {}
 
 function oci_lob_export(OCILob $lob, string $filename, ?int $offset = null, ?int $length = null): bool {}
 
-function oci_lob_write_temporary(OCILob $lob, string $data, int $type = OCI_TEMP_CLOB): bool {}
-
-function oci_lob_close(OCILob $lob): bool {}
-
 /**
  * @alias oci_lob_export
  * @deprecated
@@ -658,16 +654,10 @@ class OCILob {
      */
     public function export(string $filename, ?int $offset = null, ?int $length = null) {}
 
-    /**
-     * @alias oci_lob_write_temporary
-     * @return bool
-     */
+    /** @return bool */
     public function writetemporary(string $data, int $type = OCI_TEMP_CLOB) {}
 
-    /**
-     * @alias oci_lob_close
-     * @return bool
-     */
+    /** @return bool */
     public function close() {}
 
     /**

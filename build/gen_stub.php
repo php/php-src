@@ -778,7 +778,7 @@ function parseFunctionLike(
                     $paramMeta[$varName] = [];
                 }
                 $paramMeta[$varName]['preferRef'] = true;
-            } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias') {
+            } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias' || $tag->name === 'static-method-alias') {
                 $aliasType = $tag->name;
                 $aliasParts = explode("::", $tag->getValue());
                 if (count($aliasParts) === 1) {
@@ -1342,7 +1342,7 @@ if ($verify) {
             /** @var FuncInfo $funcInfo */
             $funcMap[$funcInfo->name->__toString()] = $funcInfo;
 
-            if ($funcInfo->aliasType === "alias") {
+            if ($funcInfo->aliasType === "alias" || $funcInfo->aliasType === "static-method-alias") {
                 $aliases[] = $funcInfo;
             }
         }
@@ -1358,7 +1358,7 @@ if ($verify) {
         $aliasedArgs = $aliasedFunc->args;
         $aliasArgs = $aliasFunc->args;
 
-        if ($aliasFunc->isInstanceMethod() !== $aliasedFunc->isInstanceMethod()) {
+        if ($aliasFunc->isInstanceMethod() !== $aliasedFunc->isInstanceMethod() && $aliasFunc->aliasType !== "static-method-alias") {
             if ($aliasFunc->isInstanceMethod()) {
                 $aliasedArgs = array_slice($aliasedArgs, 1);
             }
