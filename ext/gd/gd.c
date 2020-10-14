@@ -1956,7 +1956,7 @@ PHP_FUNCTION(imagewbmp)
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!l!", &imgind, gd_image_ce, &to_zval, &foreground_color) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!l!", &imgind, gd_image_ce, &to_zval, &foreground_color, &foreground_color_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
