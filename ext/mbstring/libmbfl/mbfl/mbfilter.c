@@ -200,7 +200,6 @@ size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *str
 	size_t n;
 	unsigned char *p;
 	mbfl_convert_filter *filter;
-	int (*filter_function)(int c, mbfl_convert_filter *filter);
 
 	ZEND_ASSERT(convd);
 	ZEND_ASSERT(string);
@@ -212,9 +211,8 @@ size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *str
 
 	filter = convd->filter1;
 	if (filter != NULL) {
-		filter_function = filter->filter_function;
 		while (n > 0) {
-			if ((*filter_function)(*p++, filter) < 0) {
+			if ((*filter->filter_function)(*p++, filter) < 0) {
 				return p - string->val;
 			}
 			n--;
