@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 42f7118d8380424cd4178759cae6cb47b6d9b44f */
+ * Stub hash: 0c02f5e91a47e9664c8c41332bf8040e93592753 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
@@ -297,7 +297,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, request_oid, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_data, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "[]")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_data, "null")
+	ZEND_ARG_INFO(1, response_data)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_oid, "null")
 ZEND_END_ARG_INFO()
 #endif
