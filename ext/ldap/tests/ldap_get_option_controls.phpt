@@ -52,7 +52,7 @@ var_dump(
     ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_set2),
     ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get),
     $controls_get,
-    $result = ldap_search($link, $base, "(objectClass=person)", array('cn'), 0, -1, -1, LDAP_DEREF_NEVER),
+    $result = ldap_search($link, $base, "(objectClass=person)", array('cn'), 0, -1, -1, LDAP_DEREF_NEVER, []),
     ldap_get_entries($link, $result)['count'],
     ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, array()),
     ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get)
