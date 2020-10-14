@@ -279,7 +279,7 @@ function ldap_8859_to_t61(string $value): string|false {}
  * @param string $response_oid
  * @return resource|bool
  */
-function ldap_exop($ldap, string $request_oid, ?string $request_data = null, ?array $controls = [], &$response_data = null, &$response_oid = null) {}
+function ldap_exop($ldap, string $request_oid, ?string $request_data = null, ?array $controls = [], &$response_data = UNKNOWN, &$response_oid = null) {}
 #endif
 
 #ifdef HAVE_LDAP_PASSWD
