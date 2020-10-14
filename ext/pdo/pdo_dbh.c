@@ -517,7 +517,7 @@ PHP_METHOD(PDO, prepare)
 		}
 		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
 			zend_value_error("PDO::ATTR_STATEMENT_CLASS value must be an array with the format "
-				"array(classname, array(constructor_args))");
+				"array(classname, constructor_args)");
 			RETURN_THROWS();
 		}
 		if (Z_TYPE_P(item) != IS_STRING || (pce = zend_lookup_class(Z_STR_P(item))) == NULL) {
@@ -765,7 +765,7 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
 				zend_value_error("PDO::ATTR_STATEMENT_CLASS value must be an array with the format "
-					"array(classname, array(constructor_args))");
+					"array(classname, constructor_args)");
 				return FAILURE;
 			}
 			if (Z_TYPE_P(item) != IS_STRING || (pce = zend_lookup_class(Z_STR_P(item))) == NULL) {
