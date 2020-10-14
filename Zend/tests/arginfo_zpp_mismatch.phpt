@@ -17,12 +17,19 @@ function test($function) {
      || (is_string($function) && str_starts_with($function, 'ob_'))
      || $function === 'output_add_rewrite_var'
      || $function === 'error_log'
+        /* may spend a lot of time waiting for connection timeouts */
+     || (is_string($function) && str_contains($function, 'connect'))
+     || (is_string($function) && str_starts_with($function, 'snmp'))
+     || (is_array($function) && get_class($function[0]) === mysqli::class
+         && in_array($function[1], ['__construct', 'connect', 'real_connect']))
         /* misc */
      || $function === 'mail'
      || $function === 'mb_send_mail'
      || $function === 'pcntl_fork'
      || $function === 'posix_kill'
      || $function === 'posix_setrlimit'
+     || $function === 'sapi_windows_generate_ctrl_event'
+     || $function === 'imagegrabscreen'
     ) {
         return;
     }
