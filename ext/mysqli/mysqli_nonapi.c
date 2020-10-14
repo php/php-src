@@ -754,12 +754,11 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 	MYSQLND **p = in_array;
 	zval dest_array;
 	zval *elem, *dest_elem;
-	int ret = 0, i = 0;
+	int ret = 0;
 
 	array_init_size(&dest_array, zend_hash_num_elements(Z_ARRVAL_P(out_array)));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(out_array), elem) {
-		i++;
 		if (Z_TYPE_P(elem) != IS_OBJECT ||
 				!instanceof_function(Z_OBJCE_P(elem), mysqli_link_class_entry)) {
 			continue;
