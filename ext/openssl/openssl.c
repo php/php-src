@@ -5907,7 +5907,7 @@ PHP_FUNCTION(openssl_cms_sign)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_LONG(encoding)
-		Z_PARAM_PATH(extracertsfilename, extracertsfilename_len)
+		Z_PARAM_PATH_OR_NULL(extracertsfilename, extracertsfilename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;
