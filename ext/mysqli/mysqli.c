@@ -1208,7 +1208,10 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					 * single value is an array. Also we'd have to make that one
 					 * argument passed by reference.
 					 */
-					zend_argument_error(zend_ce_exception, 3, "must be of type array, %s given", zend_zval_type_name(ctor_params));
+					zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
+						"must be of type array when the specified class (%s) has a constructor",
+						ZSTR_VAL(ce->name)
+					);
 					RETURN_THROWS();
 				}
 			}
@@ -1224,9 +1227,9 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 			zend_fcall_info_args_clear(&fci, 1);
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_ce_exception, 0,
-				"Class %s does not have a constructor hence argument #%d ($ctor_params) must be null",
-				ZSTR_VAL(ce->name), getThis() ? 2 : 3
+			zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
+				"must be null when the specified class (%s) does not have a constructor",
+				ZSTR_VAL(ce->name)
 			);
 		}
 	}

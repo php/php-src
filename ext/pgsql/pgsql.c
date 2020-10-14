@@ -1941,7 +1941,10 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 					 * single value is an array. Also we'd have to make that one
 					 * argument passed by reference.
 					 */
-					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
+					zend_argument_error(zend_ce_exception, 3,
+						"must be of type array when the specified class (%s) has a constructor",
+						ZSTR_VAL(ce->name)
+					);
 					RETURN_THROWS();
 				}
 			}
@@ -1959,7 +1962,10 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				efree(fci.params);
 			}
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
+			zend_argument_error(zend_ce_exception, 3,
+				"must be null when the specified class (%s) does not have a constructor",
+				ZSTR_VAL(ce->name)
+			);
 		}
 	}
 }
