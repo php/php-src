@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0RC3
 
+- Core:
+  . Fixed bug #8055 (Abstract trait methods returning "self" cannot be
+    fulfilled by traits). (Nikita)
+
 - IMAP:
   . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
 
