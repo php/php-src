@@ -608,10 +608,14 @@ function main(): void
                     $shuffle = true;
                     break;
                 case '--asan':
+                case '--msan':
                     $environment['USE_ZEND_ALLOC'] = 0;
                     $environment['USE_TRACKED_ALLOC'] = 1;
                     $environment['SKIP_ASAN'] = 1;
                     $environment['SKIP_PERF_SENSITIVE'] = 1;
+                    if ($switch === '--msan') {
+                        $environment['SKIP_MSAN'] = 1;
+                    }
 
                     $lsanSuppressions = __DIR__ . '/azure/lsan-suppressions.txt';
                     if (file_exists($lsanSuppressions)) {

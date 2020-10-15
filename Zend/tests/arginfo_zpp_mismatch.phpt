@@ -1,5 +1,9 @@
 --TEST--
 Test that there is no arginfo/zpp mismatch
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die("skip msan misses interceptors for some functions");
+?>
 --FILE--
 <?php
 
