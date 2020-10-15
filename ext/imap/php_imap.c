@@ -1849,6 +1849,7 @@ PHP_FUNCTION(imap_subscribe)
 	} else {
 		RETURN_FALSE;
 	}
+	mail_free_address(&addr);
 }
 /* }}} */
 

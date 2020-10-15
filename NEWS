@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0RC3
 
+- IMAP:
+  . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
 
 15 Oct 2020, PHP 8.0.0RC2
 
