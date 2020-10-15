@@ -11387,8 +11387,17 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		}
 		|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R0, ZREG_R2
 		if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || (op1_info & MAY_BE_REF) || (return_value_used != 1)) {
-			|	// TODO: JIT: if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr); ???
-			|	TRY_ADDREF op1_info, ah, r2
+			if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+				if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+				 && !(op1_info & MAY_BE_REF)
+				 && op_array->function_name
+				 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_OBJECT) {
+					|	// if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr);
+					|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
+				} else {
+					|	TRY_ADDREF op1_info, ah, r2
+				}
+			}
 		}
 	} else {
 		if (op1_info & MAY_BE_REF) {

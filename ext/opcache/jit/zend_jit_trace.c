@@ -4494,16 +4494,19 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								uint32_t info;
 								zend_uchar type;
 
-								if (opline->op1_type == IS_CV
-								 && EX_VAR_TO_NUM(opline->op1.var) == j
-								 && !(op1_info & MAY_BE_REF)
-								 && JIT_G(current_frame)
-								 && TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
-									continue;
-								}
 								info = zend_ssa_cv_info(op_array, op_array_ssa, j);
 								type = STACK_TYPE(stack, j);
 								info = zend_jit_trace_type_to_info_ex(type, info);
+								if (opline->op1_type == IS_CV
+								 && EX_VAR_TO_NUM(opline->op1.var) == j
+								 && !(op1_info & MAY_BE_REF)
+								 && JIT_G(current_frame)) {
+									if (TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
+										continue;
+									} else if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_OBJECT) {
+										info |= MAY_BE_NULL;
+									}
+								}
 								if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 									if (!left_frame) {
 										left_frame = 1;
