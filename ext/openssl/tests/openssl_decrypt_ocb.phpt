@@ -49,16 +49,12 @@ bool(true)
 TEST 4
 bool(true)
 TEST 5
-
-Warning: openssl_decrypt(): Setting tag for AEAD cipher decryption failed in %s on line %d
-bool(false)
+bool(true)
 
 Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
 
 Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
-
-Warning: openssl_decrypt(): Setting tag for AEAD cipher decryption failed in %s on line %d
 bool(false)
 bool(false)

@@ -6611,12 +6611,15 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	if (php_openssl_validate_iv(piv, piv_len, max_iv_len, free_iv, cipher_ctx, mode) == FAILURE) {
 		return FAILURE;
 	}
-	if (enc && mode->should_set_tag_length) {
+	if (mode->should_set_tag_length) {
+		/* Explicitly set the tag length even when decrypting,
+		 * see https://github.com/openssl/openssl/issues/8331. */
 		if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL)) {
 			php_error_docref(NULL, E_WARNING, "Setting tag length for AEAD cipher failed");
 			return FAILURE;
 		}
-	} else if (!enc && tag && tag_len > 0) {
+	}
+	if (!enc && tag && tag_len > 0) {
 		if (!mode->is_aead) {
 			php_error_docref(NULL, E_WARNING, "The tag cannot be used because the cipher method does not support AEAD");
 		} else if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag)) {
