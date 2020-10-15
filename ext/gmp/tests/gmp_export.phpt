@@ -50,6 +50,9 @@ foreach ($export as $k => $test) {
 
 var_dump($passed);
 
+// Argument converted from int to GMP
+var_dump(bin2hex(gmp_export(0xff)));
+
 // Invalid word sizes
 try {
     var_dump(gmp_export(123, -1));
@@ -76,6 +79,7 @@ try {
 ?>
 --EXPECT--
 bool(true)
+string(2) "ff"
 gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
 gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
 gmp_export(): Argument #3 ($flags) cannot use multiple word order options
