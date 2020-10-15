@@ -55,8 +55,8 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-        if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
-            $context->generatedArginfoFiles[$arginfoFile] = $arginfoCode;
+        if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
+            echo "Saved $arginfoFile\n";
         }
 
         if ($fileInfo->generateLegacyArginfo) {
@@ -64,8 +64,8 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
             $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-            if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
-                $context->generatedArginfoFiles[$legacyFile] = $arginfoCode;
+            if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($legacyFile, $arginfoCode)) {
+                echo "Saved $legacyFile\n";
             }
 		}
 
@@ -98,8 +98,6 @@ class Context {
     public $forceParse = false;
     /** @var bool */
     public $forceRegeneration = false;
-    /** @var array */
-    public $generatedArginfoFiles = [];
 }
 
 class SimpleType {
@@ -532,12 +530,12 @@ class FuncInfo {
 
     public function isFinalMethod(): bool
     {
-        return $this->flags & Class_::MODIFIER_FINAL || $this->classFlags & Class_::MODIFIER_FINAL;
+        return ($this->flags & Class_::MODIFIER_FINAL) || ($this->classFlags & Class_::MODIFIER_FINAL);
     }
 
     public function isInstanceMethod(): bool
     {
-        return !($this->flags & Class_::MODIFIER_STATIC) && $this->isMethod() && $this->name->isConstructor() === false;
+        return !($this->flags & Class_::MODIFIER_STATIC) && $this->isMethod() && !$this->name->isConstructor();
     }
 
     public function equalsApartFromName(FuncInfo $other): bool {
@@ -1347,6 +1345,24 @@ if (is_file($location)) {
     exit(1);
 }
 
+if ($printParameterStats) {
+    $parameterStats = [];
+
+    foreach ($fileInfos as $fileInfo) {
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            foreach ($funcInfo->args as $argInfo) {
+                if (!isset($context->parameterStats[$argInfo->name])) {
+                    $parameterStats[$argInfo->name] = 0;
+                }
+                $parameterStats[$argInfo->name]++;
+            }
+        }
+    }
+
+    arsort($parameterStats);
+    echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
+}
+
 if ($verify) {
     $errors = [];
     $funcMap = [];
@@ -1430,30 +1446,4 @@ if ($verify) {
         echo "\n";
         exit(1);
     }
-}
-
-foreach ($context->generatedArginfoFiles as $arginfoFile => $arginfoCode) {
-    if (file_put_contents($arginfoFile, $arginfoCode)) {
-        echo "Saved $arginfoFile\n";
-    } else {
-        echo "Saving $arginfoFile was unsuccessful\n";
-    }
-}
-
-if ($printParameterStats) {
-    $parameterStats = [];
-
-    foreach ($fileInfos as $fileInfo) {
-        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
-            foreach ($funcInfo->args as $argInfo) {
-                if (!isset($context->parameterStats[$argInfo->name])) {
-                    $parameterStats[$argInfo->name] = 0;
-                }
-                $parameterStats[$argInfo->name]++;
-            }
-        }
-    }
-
-    arsort($parameterStats);
-    echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
 }
