@@ -24,7 +24,7 @@ foreach ($tests as $idx => $test) {
 // Empty IV error
 var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, $tag, ''));
 
-// Failing to retrieve tag (must be exactly 16 bytes)
+// Failing to retrieve tag (must be at most 16 bytes)
 var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 12), $tag, '', 20));
 
 // Failing when no tag supplied
@@ -46,11 +46,14 @@ bool(true)
 TEST 4
 bool(true)
 bool(true)
+TEST 5
+bool(true)
+bool(true)
 
 Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
 
-Warning: openssl_encrypt(): Retrieving verification tag failed in %s on line %d
+Warning: openssl_encrypt(): Setting tag length for AEAD cipher failed in %s on line %d
 bool(false)
 
 Warning: openssl_encrypt(): A tag should be provided when using AEAD mode in %s on line %d

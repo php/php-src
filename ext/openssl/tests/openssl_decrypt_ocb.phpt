@@ -23,9 +23,15 @@ foreach ($tests as $idx => $test) {
 // no IV
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
 	NULL, $test['tag'], $test['aad']));
+
+// IV too long
+var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
+	str_repeat('x', 32), $test['tag'], $test['aad']));
+
 // failed because no AAD
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
 	$test['iv'], $test['tag']));
+
 // failed because wrong tag
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
 	$test['iv'], str_repeat('x', 16), $test['aad']));
@@ -42,8 +48,17 @@ TEST 3
 bool(true)
 TEST 4
 bool(true)
+TEST 5
+
+Warning: openssl_decrypt(): Setting tag for AEAD cipher decryption failed in %s on line %d
+bool(false)
 
 Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
+
+Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed in %s on line %d
+bool(false)
+
+Warning: openssl_decrypt(): Setting tag for AEAD cipher decryption failed in %s on line %d
 bool(false)
 bool(false)

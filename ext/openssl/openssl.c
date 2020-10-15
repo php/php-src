@@ -6483,6 +6483,7 @@ PHP_FUNCTION(openssl_digest)
 /* Cipher mode info */
 struct php_openssl_cipher_mode {
 	zend_bool is_aead;
+	zend_bool should_set_tag_length;
 	zend_bool is_single_run_aead;
 	int aead_get_tag_flag;
 	int aead_set_tag_flag;
@@ -6498,6 +6499,8 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 		case EVP_CIPH_OCB_MODE:
 		case EVP_CIPH_CCM_MODE:
 			mode->is_aead = 1;
+			mode->should_set_tag_length =
+				cipher_mode == EVP_CIPH_CCM_MODE || cipher_mode == EVP_CIPH_OCB_MODE;
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->aead_get_tag_flag = EVP_CTRL_AEAD_GET_TAG;
 			mode->aead_set_tag_flag = EVP_CTRL_AEAD_SET_TAG;
@@ -6507,6 +6510,7 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 # ifdef EVP_CIPH_GCM_MODE
 		case EVP_CIPH_GCM_MODE:
 			mode->is_aead = 1;
+			mode->should_set_tag_length = 0;
 			mode->is_single_run_aead = 0;
 			mode->aead_get_tag_flag = EVP_CTRL_GCM_GET_TAG;
 			mode->aead_set_tag_flag = EVP_CTRL_GCM_SET_TAG;
@@ -6516,6 +6520,7 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 # ifdef EVP_CIPH_CCM_MODE
 		case EVP_CIPH_CCM_MODE:
 			mode->is_aead = 1;
+			mode->should_set_tag_length = 1;
 			mode->is_single_run_aead = 1;
 			mode->aead_get_tag_flag = EVP_CTRL_CCM_GET_TAG;
 			mode->aead_set_tag_flag = EVP_CTRL_CCM_SET_TAG;
@@ -6606,7 +6611,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	if (php_openssl_validate_iv(piv, piv_len, max_iv_len, free_iv, cipher_ctx, mode) == FAILURE) {
 		return FAILURE;
 	}
-	if (mode->is_single_run_aead && enc) {
+	if (enc && mode->should_set_tag_length) {
 		if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL)) {
 			php_error_docref(NULL, E_WARNING, "Setting tag length for AEAD cipher failed");
 			return FAILURE;
