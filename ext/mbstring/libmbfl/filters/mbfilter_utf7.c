@@ -30,6 +30,8 @@
 #include "mbfilter.h"
 #include "mbfilter_utf7.h"
 
+static int mbfl_filt_conv_utf7_wchar_flush(mbfl_convert_filter *filter);
+
 static const unsigned char mbfl_base64_table[] = {
  /* 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', */
    0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48,0x49,0x4a,0x4b,0x4c,0x4d,
@@ -62,7 +64,7 @@ const struct mbfl_convert_vtbl vtbl_utf7_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf7_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_utf7_wchar_flush,
 	NULL,
 };
 
@@ -102,6 +104,11 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 	if (filter->status) { /* Modified Base64 */
 		n = decode_base64_char(c);
 		if (n < 0) {
+			if (filter->cache) {
+				/* Either we were expecting the 2nd half of a surrogate pair which
+				 * never came, or else the last Base64 data was not padded with zeroes */
+				(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			if (c == '-') {
 				if (filter->status == 1) { /* "+-" -> "+" */
 					CK((*filter->output_function)('+', filter->data));
@@ -143,6 +150,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		n = (n & 0x3) << 14;
 		filter->status = 5;
 		if (s >= 0xd800 && s < 0xdc00) {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			s = (((s & 0x3ff) << 16) + 0x400000) | n;
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
@@ -155,6 +166,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s | MBFL_WCSGROUP_THROUGH, filter->data));
 			}
 		} else {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			filter->cache = n;
 			CK((*filter->output_function)(s, filter->data));
 		}
@@ -173,6 +188,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		n = (n & 0xf) << 12;
 		filter->status = 8;
 		if (s >= 0xd800 && s < 0xdc00) {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			s = (((s & 0x3ff) << 16) + 0x400000) | n;
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
@@ -185,6 +204,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s | MBFL_WCSGROUP_THROUGH, filter->data));
 			}
 		} else {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			filter->cache = n;
 			CK((*filter->output_function)(s, filter->data));
 		}
@@ -198,6 +221,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		s = n | (filter->cache & 0xffff);
 		filter->status = 2;
 		if (s >= 0xd800 && s < 0xdc00) {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			s = (((s & 0x3ff) << 16) + 0x400000);
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
@@ -212,6 +239,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s, filter->data));
 			}
 		} else {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			filter->cache = 0;
 			CK((*filter->output_function)(s, filter->data));
 		}
@@ -223,6 +254,21 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_utf7_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->cache) {
+		/* Either we were expecting the 2nd half of a surrogate pair which
+		 * never came, or else the last Base64 data was not padded with zeroes */
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
