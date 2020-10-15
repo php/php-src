@@ -1136,7 +1136,7 @@ ZEND_FUNCTION(gmp_export)
 	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
 
 	if (mpz_sgn(gmpnumber) == 0) {
-		RETURN_EMPTY_STRING();
+		RETVAL_EMPTY_STRING();
 	} else {
 		size_t bits_per_word = size * 8;
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
@@ -1145,7 +1145,7 @@ ZEND_FUNCTION(gmp_export)
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
 		ZSTR_VAL(out_string)[ZSTR_LEN(out_string)] = '\0';
 
-		RETURN_NEW_STR(out_string);
+		RETVAL_NEW_STR(out_string);
 	}
 
 	FREE_GMP_TEMP(temp_a);
