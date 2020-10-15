@@ -2305,7 +2305,6 @@ PHP_FUNCTION(imap_subscribe)
 	} else {
 		RETURN_FALSE;
 	}
-	mail_free_address(&addr);
 }
 /* }}} */
 
@@ -2693,8 +2692,9 @@ PHP_FUNCTION(imap_rfc822_write_address)
 	if (string) {
 		RETVAL_STR(string);
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	mail_free_address(&addr);
 }
 /* }}} */
 
