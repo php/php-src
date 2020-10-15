@@ -55,8 +55,8 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
         $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-        if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
-            echo "Saved $arginfoFile\n";
+        if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+            $context->generatedArginfoFiles[$arginfoFile] = $arginfoCode;
         }
 
         if ($fileInfo->generateLegacyArginfo) {
@@ -64,8 +64,8 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
             $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-            if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($legacyFile, $arginfoCode)) {
-                echo "Saved $legacyFile\n";
+            if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+                $context->generatedArginfoFiles[$legacyFile] = $arginfoCode;
             }
 		}
 
@@ -98,6 +98,8 @@ class Context {
     public $forceParse = false;
     /** @var bool */
     public $forceRegeneration = false;
+    /** @var array */
+    public $generatedArginfoFiles = [];
 }
 
 class SimpleType {
@@ -477,6 +479,8 @@ class FuncInfo {
     /** @var FunctionOrMethodName */
     public $name;
     /** @var int */
+    public $classFlags;
+    /** @var int */
     public $flags;
     /** @var string|null */
     public $aliasType;
@@ -484,6 +488,8 @@ class FuncInfo {
     public $alias;
     /** @var bool */
     public $isDeprecated;
+    /** @var bool */
+    public $verify;
     /** @var ArgInfo[] */
     public $args;
     /** @var ReturnInfo */
@@ -495,29 +501,43 @@ class FuncInfo {
 
     public function __construct(
         FunctionOrMethodName $name,
+        int $classFlags,
         int $flags,
         ?string $aliasType,
         ?FunctionOrMethodName $alias,
         bool $isDeprecated,
+        bool $verify,
         array $args,
         ReturnInfo $return,
         int $numRequiredArgs,
         ?string $cond
     ) {
         $this->name = $name;
+        $this->classFlags = $classFlags;
         $this->flags = $flags;
         $this->aliasType = $aliasType;
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
+        $this->verify = $verify;
         $this->args = $args;
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
         $this->cond = $cond;
     }
 
+    public function isMethod(): bool
+    {
+        return $this->name->isMethod();
+    }
+
+    public function isFinalMethod(): bool
+    {
+        return $this->flags & Class_::MODIFIER_FINAL || $this->classFlags & Class_::MODIFIER_FINAL;
+    }
+
     public function isInstanceMethod(): bool
     {
-        return !($this->flags & Class_::MODIFIER_STATIC) && $this->name->isMethod() && $this->name->isConstructor() === false;
+        return !($this->flags & Class_::MODIFIER_STATIC) && $this->isMethod() && $this->name->isConstructor() === false;
     }
 
     public function equalsApartFromName(FuncInfo $other): bool {
@@ -757,6 +777,7 @@ function parseDocComment(DocComment $comment): array {
 function parseFunctionLike(
     PrettyPrinterAbstract $prettyPrinter,
     FunctionOrMethodName $name,
+    int $classFlags,
     int $flags,
     Node\FunctionLike $func,
     ?string $cond
@@ -766,6 +787,7 @@ function parseFunctionLike(
     $aliasType = null;
     $alias = null;
     $isDeprecated = false;
+    $verify = true;
     $haveDocReturnType = false;
     $docParamTypes = [];
 
@@ -778,7 +800,7 @@ function parseFunctionLike(
                     $paramMeta[$varName] = [];
                 }
                 $paramMeta[$varName]['preferRef'] = true;
-            } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias' || $tag->name === 'static-method-alias') {
+            } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias') {
                 $aliasType = $tag->name;
                 $aliasParts = explode("::", $tag->getValue());
                 if (count($aliasParts) === 1) {
@@ -788,6 +810,8 @@ function parseFunctionLike(
                 }
             } else if ($tag->name === 'deprecated') {
                 $isDeprecated = true;
+            }  else if ($tag->name === 'no-verify') {
+                $verify = false;
             } else if ($tag->name === 'return') {
                 $haveDocReturnType = true;
             } else if ($tag->name === 'param') {
@@ -868,10 +892,12 @@ function parseFunctionLike(
 
     return new FuncInfo(
         $name,
+        $classFlags,
         $flags,
         $aliasType,
         $alias,
         $isDeprecated,
+        $verify,
         $args,
         $return,
         $numRequiredArgs,
@@ -942,6 +968,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 $prettyPrinter,
                 new FunctionName($stmt->namespacedName),
                 0,
+                0,
                 $stmt,
                 $cond
             );
@@ -961,6 +988,11 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
 
+                $classFlags = 0;
+                if ($stmt instanceof Class_) {
+                    $classFlags = $stmt->flags;
+                }
+
                 $flags = $classStmt->flags;
                 if ($stmt instanceof Stmt\Interface_) {
                     $flags |= Class_::MODIFIER_ABSTRACT;
@@ -973,6 +1005,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 $methodInfos[] = parseFunctionLike(
                     $prettyPrinter,
                     new MethodName($className, $classStmt->name->toString()),
+                    $classFlags,
                     $flags,
                     $classStmt,
                     $cond
@@ -1314,24 +1347,6 @@ if (is_file($location)) {
     exit(1);
 }
 
-if ($printParameterStats) {
-    $parameterStats = [];
-
-    foreach ($fileInfos as $fileInfo) {
-        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
-            foreach ($funcInfo->args as $argInfo) {
-                if (!isset($context->parameterStats[$argInfo->name])) {
-                    $parameterStats[$argInfo->name] = 0;
-                }
-                $parameterStats[$argInfo->name]++;
-            }
-        }
-    }
-
-    arsort($parameterStats);
-    echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
-}
-
 if ($verify) {
     $errors = [];
     $funcMap = [];
@@ -1342,7 +1357,7 @@ if ($verify) {
             /** @var FuncInfo $funcInfo */
             $funcMap[$funcInfo->name->__toString()] = $funcInfo;
 
-            if ($funcInfo->aliasType === "alias" || $funcInfo->aliasType === "static-method-alias") {
+            if ($funcInfo->aliasType === "alias") {
                 $aliases[] = $funcInfo;
             }
         }
@@ -1354,11 +1369,15 @@ if ($verify) {
             continue;
         }
 
+        if ($aliasFunc->verify === false) {
+            continue;
+        }
+
         $aliasedFunc = $funcMap[$aliasFunc->alias->__toString()];
         $aliasedArgs = $aliasedFunc->args;
         $aliasArgs = $aliasFunc->args;
 
-        if ($aliasFunc->isInstanceMethod() !== $aliasedFunc->isInstanceMethod() && $aliasFunc->aliasType !== "static-method-alias") {
+        if ($aliasFunc->isInstanceMethod() !== $aliasedFunc->isInstanceMethod()) {
             if ($aliasFunc->isInstanceMethod()) {
                 $aliasedArgs = array_slice($aliasedArgs, 1);
             }
@@ -1397,6 +1416,13 @@ if ($verify) {
             },
             $aliasArgs, $aliasedArgs
         );
+
+        if ((!$aliasedFunc->isMethod() || $aliasedFunc->isFinalMethod()) &&
+            (!$aliasFunc->isMethod() || $aliasFunc->isFinalMethod()) &&
+            $aliasFunc->return != $aliasedFunc->return
+        ) {
+            $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same return type";
+        }
     }
 
     echo implode("\n", $errors);
@@ -1404,4 +1430,30 @@ if ($verify) {
         echo "\n";
         exit(1);
     }
+}
+
+foreach ($context->generatedArginfoFiles as $arginfoFile => $arginfoCode) {
+    if (file_put_contents($arginfoFile, $arginfoCode)) {
+        echo "Saved $arginfoFile\n";
+    } else {
+        echo "Saving $arginfoFile was unsuccessful\n";
+    }
+}
+
+if ($printParameterStats) {
+    $parameterStats = [];
+
+    foreach ($fileInfos as $fileInfo) {
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            foreach ($funcInfo->args as $argInfo) {
+                if (!isset($context->parameterStats[$argInfo->name])) {
+                    $parameterStats[$argInfo->name] = 0;
+                }
+                $parameterStats[$argInfo->name]++;
+            }
+        }
+    }
+
+    arsort($parameterStats);
+    echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
 }

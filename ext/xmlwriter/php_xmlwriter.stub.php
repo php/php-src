@@ -90,13 +90,15 @@ class XMLWriter
 {
     /**
      * @return bool
-     * @static-method-alias xmlwriter_open_uri
+     * @alias xmlwriter_open_uri
+     * @no-verify
      */
     public function openUri(string $uri) {}
 
     /**
      * @return bool
-     * @static-method-alias xmlwriter_open_memory
+     * @alias xmlwriter_open_memory
+     * @no-verify
      */
     public function openMemory() {}
 
