@@ -74,7 +74,7 @@ require_once('skipifconnectfailure.inc');
 
     try {
         $res->fetch_object('mysqli_fetch_object_construct', null);
-    } catch (ArgumentCountError $e) {
+    } catch (Throwable $e) {
         echo $exception->getMessage() . "\n";
     }
 

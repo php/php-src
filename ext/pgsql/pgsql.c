@@ -1836,7 +1836,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l!Ca!", &result, &row, &row_is_null, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l!Ca", &result, &row, &row_is_null, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (!ce) {
@@ -1933,19 +1933,9 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			fci.param_count = 0;
 			fci.named_params = NULL;
 
-			if (ctor_params) {
+			if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) != 0) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
-					/* Two problems why we throw exceptions here: PHP is typeless
-					 * and hence passing one argument that's not an array could be
-					 * by mistake and the other way round is possible, too. The
-					 * single value is an array. Also we'd have to make that one
-					 * argument passed by reference.
-					 */
-					zend_argument_error(zend_ce_exception, 3,
-						"must be of type array when the specified class (%s) has a constructor",
-						ZSTR_VAL(ce->name)
-					);
-					RETURN_THROWS();
+					ZEND_UNREACHABLE();
 				}
 			}
 
@@ -1961,11 +1951,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			if (fci.params) {
 				efree(fci.params);
 			}
-		} else if (ctor_params) {
-			zend_argument_error(zend_ce_exception, 3,
-				"must be null when the specified class (%s) does not have a constructor",
-				ZSTR_VAL(ce->name)
-			);
 		}
 	}
 }

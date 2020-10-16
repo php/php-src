@@ -1143,7 +1143,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ca!", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ca", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (ce == NULL) {
@@ -1200,7 +1200,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.param_count = 0;
 			fci.named_params = NULL;
 
-			if (ctor_params) {
+			if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) != 0) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
 					ZEND_UNREACHABLE();
 				}
@@ -1216,11 +1216,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				zval_ptr_dtor(&retval);
 			}
 			zend_fcall_info_args_clear(&fci, 1);
-		} else if (ctor_params) {
-			zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
-				"must be null when the specified class (%s) does not have a constructor",
-				ZSTR_VAL(ce->name)
-			);
 		}
 	}
 }
