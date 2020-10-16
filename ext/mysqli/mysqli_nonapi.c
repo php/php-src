@@ -859,6 +859,7 @@ PHP_FUNCTION(mysqli_poll)
 	if (e_array != NULL) {
 		if (mysqlnd_zval_array_to_mysqlnd_array(e_array, &new_e_array) == FAILURE) {
 			efree(new_e_array);
+			efree(new_r_array); // free the array from the previous if statement
 			RETURN_THROWS();
 		}
 	}
