@@ -758,7 +758,7 @@ PHPAPI void php_output_set_implicit_flush(int flush)
  * Get the file name where output has started */
 PHPAPI const char *php_output_get_start_filename(void)
 {
-	return ZSTR_VAL(OG(output_start_filename_str));
+	return OG(output_start_filename_str) ? ZSTR_VAL(OG(output_start_filename_str)) : NULL;
 }
 /* }}} */
 
