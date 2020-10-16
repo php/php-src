@@ -137,9 +137,10 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	zend_stack handlers;
 	php_output_handler *active;
 	php_output_handler *running;
-	const char *output_start_filename;
+	const char *output_start_filename; /* TODO: Unused, remove */
 	int output_start_lineno;
 	int flags;
+	zend_string *output_start_filename_str;
 ZEND_END_MODULE_GLOBALS(output)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output)
