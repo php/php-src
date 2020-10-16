@@ -121,9 +121,6 @@ int mbfl_filt_conv_wchar_8859_3(int c, mbfl_convert_filter *filter)
 			}
 			n--;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_8859_3) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
 	}
 
 	if (s >= 0) {
