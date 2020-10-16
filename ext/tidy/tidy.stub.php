@@ -78,13 +78,13 @@ class tidy
      * @return bool
      * @alias tidy_repair_string
      */
-    public function repairString(string $string, array|string|null $config = null, ?string $encoding = null) {}
+    public static function repairString(string $string, array|string|null $config = null, ?string $encoding = null) {}
 
     /**
      * @return bool
      * @alias tidy_repair_file
      */
-    public function repairFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
+    public static function repairFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
 
     /**
      * @return bool

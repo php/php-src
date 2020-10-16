@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ac4cd960d6c65653994b8b044dcc52c179a57d45 */
+ * Stub hash: 4042c33d3ea3f5fb87cfb696488f6280b6ec7e7f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -248,8 +248,8 @@ static const zend_function_entry class_tidy_methods[] = {
 	ZEND_ME_MAPPING(cleanRepair, tidy_clean_repair, arginfo_class_tidy_cleanRepair, ZEND_ACC_PUBLIC)
 	ZEND_ME(tidy, parseFile, arginfo_class_tidy_parseFile, ZEND_ACC_PUBLIC)
 	ZEND_ME(tidy, parseString, arginfo_class_tidy_parseString, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(repairString, tidy_repair_string, arginfo_class_tidy_repairString, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(repairFile, tidy_repair_file, arginfo_class_tidy_repairFile, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(repairString, tidy_repair_string, arginfo_class_tidy_repairString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(repairFile, tidy_repair_file, arginfo_class_tidy_repairFile, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(diagnose, tidy_diagnose, arginfo_class_tidy_diagnose, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getRelease, tidy_get_release, arginfo_class_tidy_getRelease, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getConfig, tidy_get_config, arginfo_class_tidy_getConfig, ZEND_ACC_PUBLIC)

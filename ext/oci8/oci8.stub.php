@@ -604,7 +604,7 @@ class OCILob {
      * @alias oci_lob_write
      * @return int|false
      */
-    public function write(string $string, ?int $length = null) {}
+    public function write(string $data, ?int $length = null) {}
 
     /**
      * @alias oci_lob_append
@@ -654,16 +654,10 @@ class OCILob {
      */
     public function export(string $filename, ?int $offset = null, ?int $length = null) {}
 
-    /**
-     * @alias oci_lob_write_temporary
-     * @return bool
-     */
+    /** @return bool */
     public function writetemporary(string $data, int $type = OCI_TEMP_CLOB) {}
 
-    /**
-     * @alias oci_lob_close
-     * @return bool
-     */
+    /** @return bool */
     public function close() {}
 
     /**

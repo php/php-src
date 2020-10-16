@@ -299,8 +299,8 @@ function pg_lo_open($connection, $oid = UNKNOWN, string $mode = UNKNOWN) {}
  */
 function pg_loopen($connection, $oid = UNKNOWN, string $mode = UNKNOWN) {}
 
-/** @param resource $large_object */
-function pg_lo_close($large_object): bool {}
+/** @param resource $lob */
+function pg_lo_close($lob): bool {}
 
 /**
  * @param resource $lob

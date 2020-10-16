@@ -383,6 +383,13 @@ PHP_METHOD(mysqli, __construct)
 	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, TRUE);
 }
 
+/* {{{ Initialize mysqli and return a resource for use with mysql_real_connect */
+PHP_METHOD(mysqli, init)
+{
+	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
+}
+/* }}} */
+
 /* {{{ Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {

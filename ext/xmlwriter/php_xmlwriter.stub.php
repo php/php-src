@@ -91,12 +91,14 @@ class XMLWriter
     /**
      * @return bool
      * @alias xmlwriter_open_uri
+     * @no-verify Behaviour differs from the aliased function
      */
     public function openUri(string $uri) {}
 
     /**
      * @return bool
      * @alias xmlwriter_open_memory
+     * @no-verify Behaviour differs from the aliased function
      */
     public function openMemory() {}
 

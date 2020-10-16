@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cac6d4040481ab7de4775315079b1d28a44cbcac */
+ * Stub hash: ee755d4a500e2d1ba4d589c233b7d09a06b5cce8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -106,7 +106,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_roll, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
-	ZEND_ARG_INFO(0, amountOrUpOrDown)
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_isSet arginfo_class_IntlCalendar_get

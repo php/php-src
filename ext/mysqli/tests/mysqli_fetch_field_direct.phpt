@@ -44,7 +44,7 @@ require_once('skipifconnectfailure.inc');
     require_once("clean_table.inc");
 ?>
 --EXPECTF--
-mysqli_fetch_field_direct(): Argument #2 ($offset) must be greater than or equal to 0
+mysqli_fetch_field_direct(): Argument #2 ($index) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
@@ -73,6 +73,6 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(%d)
 }
-mysqli_fetch_field_direct(): Argument #2 ($offset) must be less than the number of fields for this result set
+mysqli_fetch_field_direct(): Argument #2 ($index) must be less than the number of fields for this result set
 mysqli_result object is already closed
 done!

@@ -99,7 +99,7 @@ function gzread($stream, int $length): string|false {}
 
 /**
  * @param resource $stream
- * @alias fgets
+ * @implementation-alias fgets
  */
 function gzgets($stream, int $length = 1024): string|false {}
 
