@@ -772,11 +772,10 @@ found:
 	} else {
 		ZEND_ASSERT(!IS_WRONG_PROPERTY_OFFSET(property_offset));
 write_std_property:
-		Z_TRY_ADDREF_P(value);
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
-
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 
+			Z_TRY_ADDREF_P(value);
 			if (UNEXPECTED(prop_info)) {
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, property_uses_strict_types()))) {
@@ -794,6 +793,8 @@ write_std_property:
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
+
+			Z_TRY_ADDREF_P(value);
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
 			}
