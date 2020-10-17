@@ -130,7 +130,6 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_8859_16,
 	&vtbl_identify_armscii8,
 	&vtbl_identify_cp850,
-	&vtbl_identify_jis_ms,
 	&vtbl_identify_cp50220,
 	&vtbl_identify_cp50221,
 	&vtbl_identify_cp50222,
