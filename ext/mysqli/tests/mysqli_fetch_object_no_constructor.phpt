@@ -57,7 +57,7 @@ object(mysqli_fetch_object_test)#%d (%d) {
 }
 
 Exception with mysqli. Note that at all other places we throws errors but no exceptions unless the error mode has been changed:
-Exception: mysqli_fetch_object(): Argument #3 ($constructor_args) must be null when the specified class (mysqli_fetch_object_test) does not have a constructor
+Exception: mysqli_fetch_object(): Argument #3 ($constructor_args) must be empty when the specified class (mysqli_fetch_object_test) does not have a constructor
 
 Fatal error with PHP (but no exception!):
 

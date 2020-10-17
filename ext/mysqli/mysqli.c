@@ -1200,7 +1200,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.param_count = 0;
 			fci.named_params = NULL;
 
-			if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) != 0) {
+			if (ctor_params) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
 					ZEND_UNREACHABLE();
 				}
@@ -1216,6 +1216,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				zval_ptr_dtor(&retval);
 			}
 			zend_fcall_info_args_clear(&fci, 1);
+		} else if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) > 0) {
+			zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
+				"must be empty when the specified class (%s) does not have a constructor",
+				ZSTR_VAL(ce->name)
+			);
 		}
 	}
 }
