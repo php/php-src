@@ -528,8 +528,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
-/** @param string|callable|null $value */
-function assert_options(int $option, $value = UNKNOWN): array|object|int|string|null {}
+function assert_options(int $option, mixed $value = UNKNOWN): array|object|int|string|null {}
 
 /* string.c */
 
