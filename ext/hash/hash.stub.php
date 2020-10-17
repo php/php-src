@@ -48,9 +48,16 @@ function mhash(int $algo, string $data, ?string $key = null): string|false {}
 
 final class HashContext
 {
-    private function __construct() {}
+    public function __construct(string $algo, int $flags = 0, string $key = '') {}
+    public function update(string $data): HashContext {}
+    /** @param resource|null $stream_context */
+    public function updateFile(string $filename, $stream_context = null): HashContext {}
+    /** @param resource $stream */
+    public function updateStream($stream, int $length = -1): HashContext {}
+    public function final(bool $binary = false): string {}
+
+    public function getAlgo(): string {}
 
     public function __serialize(): array {}
-
     public function __unserialize(array $data): void {}
 }

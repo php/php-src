@@ -595,7 +595,7 @@ PHP_FUNCTION(hash_hmac_file)
 /* }}} */
 
 /* {{{ Initialize a hashing context */
-PHP_FUNCTION(hash_init)
+static void do_hash_init(INTERNAL_FUNCTION_PARAMETERS, zval *thisObj)
 {
 	zend_string *algo, *key = NULL;
 	zend_long options = 0;
@@ -625,8 +625,12 @@ PHP_FUNCTION(hash_init)
 		}
 	}
 
-	object_init_ex(return_value, php_hashcontext_ce);
-	hash = php_hashcontext_from_object(Z_OBJ_P(return_value));
+	if (!thisObj) {
+		/* Called as hash_init(), create a new object */
+		object_init_ex(return_value, php_hashcontext_ce);
+		thisObj = return_value;
+	} /* otherwise, called as new HashContext() */
+	hash = php_hashcontext_from_object(Z_OBJ_P(thisObj));
 
 	context = php_hash_alloc_context(ops);
 	ops->hash_init(context);
@@ -663,47 +667,10 @@ PHP_FUNCTION(hash_init)
 }
 /* }}} */
 
-#define PHP_HASHCONTEXT_VERIFY(hash) { \
-	if (!hash->context) { \
-		zend_argument_type_error(1, "must be a valid Hash Context resource"); \
-		RETURN_THROWS(); \
-	} \
-}
-
-/* {{{ Pump data into the hashing algorithm */
-PHP_FUNCTION(hash_update)
-{
-	zval *zhash;
-	php_hashcontext_object *hash;
-	zend_string *data;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &zhash, php_hashcontext_ce, &data) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY(hash);
-	hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
-
-	RETURN_TRUE;
-}
-/* }}} */
-
 /* {{{ Pump data into the hashing algorithm from an open stream */
-PHP_FUNCTION(hash_update_stream)
+static zend_long do_update_stream(php_hashcontext_object *hash, php_stream *stream, zend_long length, zend_bool throwOnError)
 {
-	zval *zhash, *zstream;
-	php_hashcontext_object *hash;
-	php_stream *stream = NULL;
-	zend_long length = -1, didread = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Or|l", &zhash, php_hashcontext_ce, &zstream, &length) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY(hash);
-	php_stream_from_zval(stream, zstream);
+	zend_long didread = 0;
 
 	while (length) {
 		char buf[1024];
@@ -715,69 +682,54 @@ PHP_FUNCTION(hash_update_stream)
 		}
 
 		if ((n = php_stream_read(stream, buf, toread)) <= 0) {
-			RETURN_LONG(didread);
+			if (throwOnError && (n < 0) && !EG(exception)) {
+				zend_throw_exception_ex(NULL, 0, "Stream read encountered error, %zd bytes copied", didread);
+			}
+			return didread;
 		}
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 		length -= n;
 		didread += n;
 	}
 
-	RETURN_LONG(didread);
+	return didread;
 }
 /* }}} */
 
 /* {{{ Pump data into the hashing algorithm from a file */
-PHP_FUNCTION(hash_update_file)
+static zend_bool do_update_file(php_hashcontext_object *hash, zend_string *filename, php_stream_context *context, zend_bool throwOnError)
 {
-	zval *zhash, *zcontext = NULL;
-	php_hashcontext_object *hash;
-	php_stream_context *context = NULL;
-	php_stream *stream;
-	zend_string *filename;
+	php_stream *stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", throwOnError ? 0 : REPORT_ERRORS, NULL, context);
 	char buf[1024];
-	ssize_t n;
+	ssize_t n, didcopy = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r!", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY(hash);
-	context = php_stream_context_from_zval(zcontext, 0);
-
-	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {
 		/* Stream will report errors opening file */
-		RETURN_FALSE;
+		if (throwOnError && !EG(exception)) {
+			zend_throw_exception_ex(NULL, 0, "Error opening '%s'", ZSTR_VAL(filename));
+		}
+		return false;
 	}
 
 	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
+		didcopy += n;
 	}
 	php_stream_close(stream);
 
-	RETURN_BOOL(n >= 0);
+	if (throwOnError && (n < 0) && !EG(exception)) {
+		zend_throw_exception_ex(NULL, 0, "Error while reading file, %zd bytes copied", didcopy);
+	}
+	return (n >= 0);
 }
 /* }}} */
 
 /* {{{ Output resulting digest */
-PHP_FUNCTION(hash_final)
+static void do_hash_final(zval *return_value, php_hashcontext_object *hash, zend_bool raw_output)
 {
-	zval *zhash;
-	php_hashcontext_object *hash;
-	zend_bool raw_output = 0;
-	zend_string *digest;
-	size_t digest_len;
+	size_t digest_len = hash->ops->digest_size;
+	zend_string *digest = zend_string_alloc(digest_len, 0);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &zhash, php_hashcontext_ce, &raw_output) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY(hash);
-
-	digest_len = hash->ops->digest_size;
-	digest = zend_string_alloc(digest_len, 0);
 	hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
 		size_t i, block_size;
@@ -815,6 +767,97 @@ PHP_FUNCTION(hash_final)
 		zend_string_release_ex(digest, 0);
 		RETURN_NEW_STR(hex_digest);
 	}
+}
+/* }}} */
+
+/* {{{ Initialize a hashing context */
+PHP_FUNCTION(hash_init)
+{
+	do_hash_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL);
+}
+/* {{{ */
+
+#define PHP_HASHCONTEXT_VERIFY(hash) { \
+	if (!hash->context) { \
+		zend_argument_type_error(1, "must be a valid Hash Context resource"); \
+		RETURN_THROWS(); \
+	} \
+}
+
+/* {{{ Pump data into the hashing algorithm */
+PHP_FUNCTION(hash_update)
+{
+	zval *zhash;
+	php_hashcontext_object *hash;
+	zend_string *data;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &zhash, php_hashcontext_ce, &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
+	PHP_HASHCONTEXT_VERIFY(hash);
+	hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ Pump data into the hashing algorithm from an open stream */
+PHP_FUNCTION(hash_update_stream)
+{
+	zval *zhash, *zstream;
+	php_hashcontext_object *hash;
+	php_stream *stream = NULL;
+	zend_long length = -1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Or|l", &zhash, php_hashcontext_ce, &zstream, &length) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
+	PHP_HASHCONTEXT_VERIFY(hash);
+	php_stream_from_zval(stream, zstream);
+
+	RETURN_LONG(do_update_stream(hash, stream, length, 0));
+}
+/* }}} */
+
+/* {{{ Pump data into the hashing algorithm from a file */
+PHP_FUNCTION(hash_update_file)
+{
+	zval *zhash, *zcontext = NULL;
+	php_hashcontext_object *hash;
+	php_stream_context *context = NULL;
+	zend_string *filename;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r!", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
+	PHP_HASHCONTEXT_VERIFY(hash);
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	RETURN_BOOL(do_update_file(hash, filename, context, 0));
+}
+/* }}} */
+
+/* {{{ Output resulting digest */
+PHP_FUNCTION(hash_final)
+{
+	zval *zhash;
+	php_hashcontext_object *hash;
+	zend_bool raw_output = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &zhash, php_hashcontext_ce, &raw_output) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
+	PHP_HASHCONTEXT_VERIFY(hash);
+
+	do_hash_final(return_value, hash, raw_output);
 }
 /* }}} */
 
@@ -1129,10 +1172,100 @@ PHP_FUNCTION(hash_equals)
 }
 /* }}} */
 
-/* {{{ */
-PHP_METHOD(HashContext, __construct) {
-	/* Normally unreachable as private/final */
-	zend_throw_exception(zend_ce_error, "Illegal call to private/final constructor", 0);
+/* {{{ HashContext::__construct() */
+PHP_METHOD(HashContext, __construct)
+{
+	do_hash_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, getThis());
+}
+/* }}} */
+
+/* {{{ HashContext::update() */
+PHP_METHOD(HashContext, update)
+{
+	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(getThis()));
+	zend_string *data;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PHP_HASHCONTEXT_VERIFY(hash);
+	hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
+
+	RETURN_ZVAL(getThis(), 1, 0);
+}
+/* }}} */
+
+/* {{{ HashContext::updateStream() */
+PHP_METHOD(HashContext, updateStream)
+{
+	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(getThis()));
+	zval *zstream;
+	php_stream *stream = NULL;
+	zend_long length = -1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &zstream, &length) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PHP_HASHCONTEXT_VERIFY(hash);
+	php_stream_from_zval(stream, zstream);
+
+	do_update_stream(hash, stream, length, 1);
+	RETURN_ZVAL(getThis(), 1, 0);
+}
+/* }}} */
+
+/* {{{ HashContext::updateFile() */
+PHP_METHOD(HashContext, updateFile)
+{
+	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(getThis()));
+	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
+	zend_string *filename;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|r!", &filename, &zcontext) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PHP_HASHCONTEXT_VERIFY(hash);
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	do_update_file(hash, filename, context, 1);
+	RETURN_ZVAL(getThis(), 1, 0);
+}
+/* }}} */
+
+/* {{{ HashContext::final() */
+PHP_METHOD(HashContext, final)
+{
+	php_hashcontext_object *hash;
+	zend_bool raw_output = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &raw_output) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	hash = php_hashcontext_from_object(Z_OBJ_P(getThis()));
+	PHP_HASHCONTEXT_VERIFY(hash);
+
+	do_hash_final(return_value, hash, raw_output);
+}
+/* }}} */
+
+/* {{{ HashContext::getAlgo() */
+PHP_METHOD(HashContext, getAlgo)
+{
+	php_hashcontext_object *hash;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	hash = php_hashcontext_from_object(Z_OBJ_P(getThis()));
+	PHP_HASHCONTEXT_VERIFY(hash);
+
+	RETURN_STRING(hash->ops->algo);
 }
 /* }}} */
 
