@@ -72,62 +72,31 @@ const struct mbfl_convert_vtbl vtbl_cp866_wchar = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-/*
- * cp866 => wchar
- */
-int
-mbfl_filt_conv_cp866_wchar(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_cp866_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s;
 
-	if (c >= 0 && c < cp866_ucs_table_min) {
+	if (c < cp866_ucs_table_min) {
 		s = c;
-	} else if (c >= cp866_ucs_table_min && c < 0x100) {
-		s = cp866_ucs_table[c - cp866_ucs_table_min];
-		if (s <= 0) {
-			s = c;
-			s &= MBFL_WCSPLANE_MASK;
-			s |= MBFL_WCSPLANE_CP866;
-		}
 	} else {
-		s = c;
-		s &= MBFL_WCSGROUP_MASK;
-		s |= MBFL_WCSGROUP_THROUGH;
+		s = cp866_ucs_table[c - cp866_ucs_table_min];
 	}
 
 	CK((*filter->output_function)(s, filter->data));
-
 	return c;
 }
 
-/*
- * wchar => cp866
- */
-int
-mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter)
 {
-	int s, n;
-
 	if (c < 0x80) {
-		s = c;
+		CK((*filter->output_function)(c, filter->data));
 	} else {
-		s = -1;
-		n = cp866_ucs_table_len-1;
-		while (n >= 0) {
+		for (int n = 0; n < cp866_ucs_table_len; n++) {
 			if (c == cp866_ucs_table[n]) {
-				s = cp866_ucs_table_min + n;
-				break;
+				CK((*filter->output_function)(cp866_ucs_table_min + n, filter->data));
+				return c;
 			}
-			n--;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_CP866) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
-	}
-
-	if (s >= 0) {
-		CK((*filter->output_function)(s, filter->data));
-	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
