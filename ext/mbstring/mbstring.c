@@ -4088,13 +4088,6 @@ MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *e
 }
 /* }}} */
 
-/* {{{ MBSTRING_API size_t php_mb_mbchar_bytes() */
-MBSTRING_API size_t php_mb_mbchar_bytes(const char *s)
-{
-	return php_mb_mbchar_bytes_ex(s, MBSTRG(internal_encoding));
-}
-/* }}} */
-
 /* {{{ MBSTRING_API char *php_mb_safe_strrchr_ex() */
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
 {
