@@ -1669,11 +1669,7 @@ PHP_FUNCTION(mb_strlen)
 		RETURN_THROWS();
 	}
 
-	size_t n = mbfl_strlen(&string);
-	/* Only way this can fail is if the conversion creation fails
-	 * this would imply some sort of memory allocation failure which is a bug */
-	ZEND_ASSERT(!mbfl_is_error(n));
-	RETVAL_LONG(n);
+	RETVAL_LONG(mbfl_strlen(&string));
 }
 /* }}} */
 
