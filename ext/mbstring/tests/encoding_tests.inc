@@ -3,6 +3,32 @@
 // Common code for tests which focus on conversion and verification of text
 // in some specific encoding
 
+// Read a file with one character and its equivalent Unicode codepoint on each
+// line, delimited by tabs
+function readConversionTable($path, &$from, &$to, $utf32 = false) {
+    $from = array();
+    $to   = array();
+
+    $fp = fopen($path, 'r+');
+    while ($line = fgets($fp, 256)) {
+        if ($line[0] == '#')
+            continue;
+        if (sscanf($line, "0x%x\t0x%x", $char, $codepoint) == 2) {
+            $codepoint = $utf32 ? pack('N', $codepoint) : pack('n', $codepoint);
+            if ($char <= 0xFF)
+                $char = chr($char); // hex codes must not have leading zero bytes
+            else if ($char <= 0xFFFF)
+                $char = pack('n', $char);
+            else if ($char <= 0xFFFFFF)
+                $char = chr($char >> 16) . pack('n', $char & 0xFFFF);
+            else
+                $char = pack('N', $char);
+            $from[$char] = $codepoint;
+            $to[$codepoint] = $char;
+        }
+    }
+}
+
 function dbgPrint($str) {
     $result = '';
     if (mb_check_encoding($str, 'ASCII'))
@@ -60,8 +86,7 @@ function testInvalidString($fromString, $toString, $fromEncoding, $toEncoding) {
 
 // Only for encodings where valid characters can be concatenated together in any
 // way, without any escape sequences
-// Also only for encodings which can be converted losslessly to and from $toEncoding
-function testAllValidChars($charMap, $fromEncoding, $toEncoding) {
+function testAllValidChars($charMap, $fromEncoding, $toEncoding, $bothWays = true) {
     $goodChars = array_keys($charMap);
     shuffle($goodChars);
     while (!empty($goodChars)) {
@@ -73,15 +98,13 @@ function testAllValidChars($charMap, $fromEncoding, $toEncoding) {
             $toString .= $charMap[$goodChar];
         }
 
-        testValidString($fromString, $toString, $fromEncoding, $toEncoding);
+        testValidString($fromString, $toString, $fromEncoding, $toEncoding, $bothWays);
     }
 }
 
 function testAllInvalidChars($badChars, $charMap, $fromEncoding, $toEncoding, $replacement) {
     $badChars = array_keys($badChars);
-    shuffle($badChars);
-    $goodChars = array_keys($charMap);
-    shuffle($goodChars);
+    $goodChars = array();
     while (!empty($badChars)) {
         if (empty($goodChars)) {
             $goodChars = array_keys($charMap);
@@ -93,6 +116,86 @@ function testAllInvalidChars($badChars, $charMap, $fromEncoding, $toEncoding, $r
 
         testInvalidString($fromString, $toString, $fromEncoding, $toEncoding);
     }
+}
+
+function testTruncatedChars($truncated, $fromEncoding, $toEncoding, $replacement) {
+    $truncatedChars = array_keys($truncated);
+    foreach ($truncatedChars as $truncatedChar) {
+        testInvalidString($truncatedChar, $replacement, $fromEncoding, $toEncoding);
+    }
+}
+
+// For variable-width encodings, where we have an exhaustive list of
+// all valid characters of any width
+//
+// `$startBytes` maps from first-byte values to the corresponding character length
+// (For encodings where the first byte can tell you the length of a multi-byte
+// character)
+// Note that `$startBytes` can be partial!
+function findInvalidChars($valid, &$invalid, &$truncated, $startBytes = array()) {
+    $invalid    = array();
+    $truncated  = array();
+    $prefixes   = array(); /* All sequences which are not (but can start) a valid character */
+
+    foreach ($valid as $char => $unicode) {
+        for ($len = 1; $len < strlen($char); $len++)
+            $prefixes[substr($char, 0, $len)] = true;
+    }
+
+    $varLength = function($prefix) use($valid, $invalid, $truncated) {
+        for ($byte = 0; $byte < 256; $byte++) {
+            $str = $prefix . chr($byte);
+            if (!isset($valid[$str])) {
+                if (isset($prefixes[$str])) {
+                    $truncated[$str] = true;
+                    $varLength($str);
+                } else {
+                    $invalid[$str] = true;
+                }
+            }
+        }
+    };
+
+    $fixedLength = function($prefix, $remaining) use($valid, $invalid, $truncated) {
+        if ($remaining == 0) {
+            if (!isset($valid[$prefix]))
+                $invalid[$prefix] = true;
+        } else if ($remaining == 1) {
+            $truncated[$prefix] = true;
+            for ($i = 0; $i < 256; $i++) {
+                $str = $prefix . chr($i);
+                if (!isset($valid[$str]))
+                    $invalid[$str] = true;
+            }
+        } else {
+            $truncated[$prefix] = true;
+            for ($i = 0; $i < 256; $i++)
+                $fixedLength($prefix . chr($i), $remaining - 1);
+        }
+    };
+
+    for ($byte = 0; $byte < 256; $byte++) {
+        if (isset($startBytes[$byte])) {
+            $fixedLength(chr($byte), $startBytes[$byte] - 1);
+        } else {
+            $str = chr($byte);
+            if (!isset($valid[$str])) {
+                if (isset($prefixes[$str])) {
+                    $truncated[$str] = true;
+                    $varLength($str);
+                } else {
+                    $invalid[$str] = true;
+                }
+            }
+        }
+    }
+}
+
+// Helper for building `$startBytes` map for above function
+function map($keys, $value, $array = array()) {
+    foreach ($keys as $key)
+        $array[$key] = $value;
+    return $array;
 }
 
 ?>
