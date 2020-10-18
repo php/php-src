@@ -424,37 +424,17 @@ static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *a
 static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from)
 {
 	mbfl_string string, result;
-	mbfl_buffer_converter *convd;
 
-	/* new encoding */
-	/* initialize string */
 	string.encoding = (const mbfl_encoding*)encoding_from;
 	string.val = (unsigned char*)from;
 	string.len = from_length;
 
-	/* initialize converter */
-	convd = mbfl_buffer_converter_new((const mbfl_encoding *)encoding_from, (const mbfl_encoding *)encoding_to, string.len);
-	if (convd == NULL) {
-		return (size_t) -1;
-	}
-
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-
-	/* do it */
-	mbfl_buffer_converter_feed(convd, &string);
-
-	mbfl_string_init(&result);
-	if (!mbfl_buffer_converter_result(convd, &result)) {
-		mbfl_buffer_converter_delete(convd);
+	if (!mbfl_convert_encoding(&string, &result, (const mbfl_encoding*)encoding_to)) {
 		return (size_t)-1;
 	}
 
 	*to = result.val;
 	*to_length = result.len;
-
-	mbfl_buffer_converter_delete(convd);
-
 	return from_length;
 }
 
