@@ -550,9 +550,6 @@ END_EXTERN_C()
 /* Allow blocking reads on anonymous pipes on Windows. */
 #define STREAM_USE_BLOCKING_PIPE        0x00008000
 
-/* Antique - no longer has meaning */
-#define IGNORE_URL_WIN 0
-
 int php_init_stream_wrappers(int module_number);
 int php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);

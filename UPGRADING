@@ -63,6 +63,8 @@ PHP 8.1 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+. The macro IGNORE_URL_WIN has been removed; it had no effect as of PHP 5.0.0.
+
 ========================================
 13. Other Changes
 ========================================

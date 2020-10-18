@@ -625,7 +625,7 @@ PHP_FUNCTION(imageloadfont)
 		RETURN_THROWS();
 	}
 
-	stream = php_stream_open_wrapper(ZSTR_VAL(file), "rb", IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(ZSTR_VAL(file), "rb", IGNORE_PATH | REPORT_ERRORS, NULL);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -1584,7 +1584,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	}
 
 
-	stream = php_stream_open_wrapper(file, "rb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+	stream = php_stream_open_wrapper(file, "rb", REPORT_ERRORS|IGNORE_PATH, NULL);
 	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
@@ -1883,7 +1883,7 @@ PHP_FUNCTION(imagexbm)
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
 	if (file != NULL) {
-		stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+		stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH, NULL);
 		if (stream == NULL) {
 			RETURN_FALSE;
 		}
@@ -4092,7 +4092,7 @@ static gdIOCtx *create_stream_context_from_zval(zval *to_zval) {
 			return NULL;
 		}
 
-		stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+		stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH, NULL);
 		if (stream == NULL) {
 			return NULL;
 		}
