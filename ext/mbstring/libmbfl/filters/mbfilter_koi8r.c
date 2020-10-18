@@ -31,8 +31,6 @@
 #include "mbfilter_koi8r.h"
 #include "unicode_table_koi8r.h"
 
-static int mbfl_filt_ident_koi8r(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_koi8r_aliases[] = {"KOI8-R", "KOI8R", NULL};
 
 const mbfl_encoding mbfl_encoding_koi8r = {
@@ -49,7 +47,7 @@ const mbfl_encoding mbfl_encoding_koi8r = {
 const struct mbfl_identify_vtbl vtbl_identify_koi8r = {
 	mbfl_no_encoding_koi8r,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_koi8r
+	mbfl_filt_ident_true
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_koi8r = {
@@ -133,14 +131,5 @@ mbfl_filt_conv_wchar_koi8r(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
-}
-
-static int mbfl_filt_ident_koi8r(int c, mbfl_identify_filter *filter)
-{
-	if (c >= 0x80 && c < 0xff)
-		filter->flag = 0;
-	else
-		filter->flag = 1; /* not it */
 	return c;
 }
