@@ -3916,7 +3916,7 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	const mbfl_encoding *enc;
 	enum mbfl_no_encoding no_enc;
 	zend_string *ret;
-	char buf[5];
+	char buf[4];
 
 	enc = php_mb_get_encoding(enc_name, enc_name_arg_num);
 	if (!enc) {
@@ -3967,7 +3967,6 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	buf[1] = (cp >> 16) & 0xff;
 	buf[2] = (cp >>  8) & 0xff;
 	buf[3] = cp & 0xff;
-	buf[4] = 0;
 
 	size_t ret_len;
 	long orig_illegalchars = MBSTRG(illegalchars);
