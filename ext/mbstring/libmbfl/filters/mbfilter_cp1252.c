@@ -74,32 +74,22 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp1252 = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-/*
- * wchar => cp1252
- */
 int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 {
-	int s=-1, n;
+	int s = -1;
 
 	if (c >= 0x100)	{
-		/* look it up from the cp1252 table */
-		s = -1;
-		n = 31;
-		while (n >= 0) {
-			if (c == cp1252_ucs_table[n] && c != 0xfffe) {
+		/* Look it up from the CP1252 table */
+		for (int n = 31; n >= 0; n--) {
+			if (c == cp1252_ucs_table[n]) {
 				s = 0x80 + n;
 				break;
 			}
-			n--;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_8859_1)
-		{
-			s = c & MBFL_WCSPLANE_MASK;
-		}
-	}
-	else if (c >= 0 && c < 0x100) {
+	} else if (c <= 0x7F || c >= 0xA0) {
 		s = c;
 	}
+
 	if (s >= 0) {
 		CK((*filter->output_function)(s, filter->data));
 	} else {
@@ -108,15 +98,15 @@ int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-/*
- * cp1252 => wchar
- */
 int mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s;
 
-	if (c >= 0x80 && c < 0xa0) {
+	if (c >= 0x80 && c < 0xA0) {
 		s = cp1252_ucs_table[c - 0x80];
+		if (!s) {
+			s = c | MBFL_WCSGROUP_THROUGH;
+		}
 	} else {
 		s = c;
 	}
@@ -126,17 +116,10 @@ int mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-/* We only distinguish the MS extensions to ISO-8859-1.
- * Actually, this is pretty much a NO-OP, since the identification
- * system doesn't allow us to discriminate between a positive match,
- * a possible match and a definite non-match.
- * The problem here is that cp1252 looks like SJIS for certain chars.
- * */
 static int mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter)
 {
-	if (c >= 0x80 && c < 0xa0)
-		filter->flag = 0;
-	else
-		filter->flag = 1; /* not it */
+	if (c >= 0x80 && c < 0xA0 && !cp1252_ucs_table[c - 0x80]) {
+		filter->flag = 1;
+	}
 	return c;
 }
