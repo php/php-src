@@ -1250,10 +1250,7 @@ mbfl_strwidth(mbfl_string *string)
 		    string->encoding,
 		    &mbfl_encoding_wchar,
 		    filter_count_width, 0, &len);
-		if (filter == NULL) {
-			mbfl_convert_filter_delete(filter);
-			return -1;
-		}
+		ZEND_ASSERT(filter);
 
 		/* feed data */
 		p = string->val;
