@@ -2099,9 +2099,7 @@ PHP_FUNCTION(mb_strwidth)
 		RETURN_THROWS();
 	}
 
-	size_t n = mbfl_strwidth(&string);
-	ZEND_ASSERT(n != (size_t) -1);
-	RETVAL_LONG(n);
+	RETVAL_LONG(mbfl_strwidth(&string));
 }
 /* }}} */
 
