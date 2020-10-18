@@ -4183,13 +4183,6 @@ MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t 
 }
 /* }}} */
 
-/* {{{ MBSTRING_API char *php_mb_safe_strrchr() */
-MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes)
-{
-	return php_mb_safe_strrchr_ex(s, c, nbytes, MBSTRG(internal_encoding));
-}
-/* }}} */
-
 /* {{{ MBSTRING_API int php_mb_stripos() */
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *enc)
 {

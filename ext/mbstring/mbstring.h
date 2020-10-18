@@ -55,8 +55,6 @@ PHP_MINFO_FUNCTION(mbstring);
 
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
-MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
-                                 size_t nbytes);
 
 MBSTRING_API char *php_mb_convert_encoding_ex(
 		const char *input, size_t length,
