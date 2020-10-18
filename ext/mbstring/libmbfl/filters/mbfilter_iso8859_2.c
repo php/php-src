@@ -84,11 +84,6 @@ int mbfl_filt_conv_8859_2_wchar(int c, mbfl_convert_filter *filter)
 		s = c;
 	} else if (c >= 0xa0 && c < 0x100) {
 		s = iso8859_2_ucs_table[c - 0xa0];
-		if (s <= 0) {
-			s = c;
-			s &= MBFL_WCSPLANE_MASK;
-			s |= MBFL_WCSPLANE_8859_2;
-		}
 	} else {
 		s = c;
 		s &= MBFL_WCSGROUP_MASK;
@@ -118,9 +113,6 @@ int mbfl_filt_conv_wchar_8859_2(int c, mbfl_convert_filter *filter)
 				break;
 			}
 			n--;
-		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_8859_2) {
-			s = c & MBFL_WCSPLANE_MASK;
 		}
 	}
 

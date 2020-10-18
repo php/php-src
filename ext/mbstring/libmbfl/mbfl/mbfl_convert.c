@@ -287,9 +287,6 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 					case MBFL_WCSPLANE_GB18030:
 						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"GB+");
 						break;
-					case MBFL_WCSPLANE_8859_1:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"I8859_1+");
-						break;
 					default:
 						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"?+");
 						break;
