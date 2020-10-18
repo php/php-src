@@ -90,13 +90,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-#define sjistoidx(c1, c2) \
-        (((c1) > 0x9f) \
-        ? (((c1) - 0xc1) * 188 + (c2) - (((c2) > 0x7e) ? 0x41 : 0x40)) \
-        : (((c1) - 0x81) * 188 + (c2) - (((c2) > 0x7e) ? 0x41 : 0x40)))
-#define idxtoeuc1(c) (((c) / 94) + 0xa1)
-#define idxtoeuc2(c) (((c) % 94) + 0xa1)
-
 /*
  * cp51932 => wchar
  */
