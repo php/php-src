@@ -63,7 +63,10 @@ Build PHP. To speed up the build, specify the maximum number of jobs using `-j`:
     make -j4
 
 The number of jobs should usually match the number of available cores, which
-can be determined using `nproc`.
+can be determined using `nproc`, e.g
+
+    make -j $(nproc)
+
 
 ## Testing PHP source code
 
