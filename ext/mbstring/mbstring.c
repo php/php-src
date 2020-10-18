@@ -3916,8 +3916,7 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	const mbfl_encoding *enc;
 	enum mbfl_no_encoding no_enc;
 	zend_string *ret;
-	char* buf;
-	size_t buf_len;
+	char buf[5];
 
 	enc = php_mb_get_encoding(enc_name, enc_name_arg_num);
 	if (!enc) {
@@ -3964,21 +3963,17 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 		return ret;
 	}
 
-	buf_len = 4;
-	buf = (char *) emalloc(buf_len + 1);
 	buf[0] = (cp >> 24) & 0xff;
 	buf[1] = (cp >> 16) & 0xff;
 	buf[2] = (cp >>  8) & 0xff;
 	buf[3] = cp & 0xff;
 	buf[4] = 0;
 
-	char *ret_str;
 	size_t ret_len;
 	long orig_illegalchars = MBSTRG(illegalchars);
 	MBSTRG(illegalchars) = 0;
-	ret_str = php_mb_convert_encoding_ex(buf, buf_len, enc, &mbfl_encoding_ucs4be, &ret_len);
+	char *ret_str = php_mb_convert_encoding_ex(buf, 4, enc, &mbfl_encoding_ucs4be, &ret_len);
 	if (MBSTRG(illegalchars) != 0) {
-		efree(buf);
 		efree(ret_str);
 		MBSTRG(illegalchars) = orig_illegalchars;
 		return NULL;
@@ -3988,7 +3983,6 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	efree(ret_str);
 	MBSTRG(illegalchars) = orig_illegalchars;
 
-	efree(buf);
 	return ret;
 }
 
