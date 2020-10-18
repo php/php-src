@@ -34,6 +34,8 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
+static int mbfl_filt_conv_cp51932_wchar_flush(mbfl_convert_filter *filter);
+
 static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -72,7 +74,7 @@ const struct mbfl_convert_vtbl vtbl_cp51932_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_cp51932_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_cp51932_wchar_flush,
 	NULL,
 };
 
@@ -105,17 +107,15 @@ mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 
 	switch (filter->status) {
 	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
+		if (c >= 0 && c < 0x80) { /* latin */
 			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff) {	/* CP932 first char */
+		} else if (c >= 0xA1 && c <= 0xFE) { /* CP932, first byte */
 			filter->status = 1;
 			filter->cache = c;
-		} else if (c == 0x8e) {	/* kana first char */
+		} else if (c == 0x8e) { /* kana first char */
 			filter->status = 2;
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 		}
 		break;
 
@@ -152,17 +152,11 @@ mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 				}
 			}
 			if (w <= 0) {
-				w = ((c1 & 0x7f) << 8) | (c & 0x7f);
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_WINCP932;
+				w = ((c1 & 0x7f) << 8) | (c & 0x7f) | MBFL_WCSPLANE_WINCP932;
 			}
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
+			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(w, filter->data));
 		}
 		break;
@@ -172,12 +166,8 @@ mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 		if (c > 0xa0 && c < 0xe0) {
 			w = 0xfec0 + c;
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = 0x8e00 | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
+			w = 0x8e00 | c | MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(w, filter->data));
 		}
 		break;
@@ -188,6 +178,20 @@ mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_cp51932_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status) {
+		/* Input string was truncated */
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
 
 /*
