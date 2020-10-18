@@ -75,13 +75,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
 	mbfl_filt_conv_any_jis_flush
 };
 
-#define sjistoidx(c1, c2) \
-        (((c1) > 0x9f) \
-        ? (((c1) - 0xc1) * 188 + (c2) - (((c2) > 0x7e) ? 0x41 : 0x40)) \
-        : (((c1) - 0x81) * 188 + (c2) - (((c2) > 0x7e) ? 0x41 : 0x40)))
-#define idxtojis1(c) (((c) / 94) + 0x21)
-#define idxtojis2(c) (((c) % 94) + 0x21)
-
 #define SJIS_ENCODE(c1,c2,s1,s2)	\
 		do {						\
 			s1 = c1;				\
