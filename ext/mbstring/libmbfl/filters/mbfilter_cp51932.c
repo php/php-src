@@ -34,6 +34,7 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
+static void mbfl_filt_conv_cp51932_wchar_flush(mbfl_convert_filter *filter);
 static void mbfl_filt_ident_cp51932(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
@@ -81,7 +82,7 @@ const struct mbfl_convert_vtbl vtbl_cp51932_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_cp51932_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_cp51932_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
@@ -104,7 +105,7 @@ void mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 	case 0:
 		if (c >= 0 && c < 0x80) {	/* latin */
 			(*filter->output_function)(c, filter->data);
-		} else if (c > 0xa0 && c < 0xff) {	/* CP932 first char */
+		} else if (c >= 0xA1 && c <= 0xFE) { /* CP932 first char */
 			filter->status = 1;
 			filter->cache = c;
 		} else if (c == 0x8e) {	/* kana first char */
@@ -154,8 +155,6 @@ void mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 				w |= MBFL_WCSPLANE_WINCP932;
 			}
 			(*filter->output_function)(w, filter->data);
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			(*filter->output_function)(c, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
@@ -169,8 +168,6 @@ void mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 		if (c > 0xa0 && c < 0xe0) {
 			w = 0xfec0 + c;
 			(*filter->output_function)(w, filter->data);
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			(*filter->output_function)(c, filter->data);
 		} else {
 			w = 0x8e00 | c;
 			w &= MBFL_WCSGROUP_MASK;
@@ -182,6 +179,18 @@ void mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 	default:
 		filter->status = 0;
 		break;
+	}
+}
+
+static void mbfl_filt_conv_cp51932_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status) {
+		/* Input string was truncated */
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
 	}
 }
 
@@ -269,36 +278,53 @@ void mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 	}
 }
 
+int is_unused_cp932_range(unsigned char byte1, unsigned char byte2)
+{
+	int kuten = (byte1 - 0xA1) * 94 + byte2 - 0xA1;
+	if (kuten <= 137) {
+		if (kuten == 31 || kuten == 32 || kuten == 33 || kuten == 60 || kuten == 80 || kuten == 81 || kuten == 137) {
+			return 0;
+		}
+	}
+
+	int wchar = 0;
+	if (kuten >= cp932ext1_ucs_table_min && kuten < cp932ext1_ucs_table_max) {
+		wchar = cp932ext1_ucs_table[kuten - cp932ext1_ucs_table_min];
+	} else if (kuten >= 0 && kuten < jisx0208_ucs_table_size) {
+		wchar = jisx0208_ucs_table[kuten];
+	} else if (kuten >= cp932ext2_ucs_table_min && kuten < cp932ext2_ucs_table_max) {
+		wchar = cp932ext2_ucs_table[kuten - cp932ext2_ucs_table_min];
+	}
+
+	return !wchar;
+}
+
 static void mbfl_filt_ident_cp51932(unsigned char c, mbfl_identify_filter *filter)
 {
-	switch (filter->status) {
-	case  0:	/* latin */
-		if (c < 0x80) {	/* ok */
+	switch (filter->status & 0xF) {
+	case 0: /* ASCII */
+		if (c < 0x80) { /* ok */
 			;
-		} else if (c > 0xa0 && c < 0xff) {	/* kanji first char */
-			filter->status = 1;
-		} else if (c == 0x8e) {				/* kana first char */
+		} else if (c >= 0xA1 && c <= 0xFC) { /* CP932, first byte */
+			filter->status = (c << 8) | 1;
+		} else if (c == 0x8E) { /* Kana, first char */
 			filter->status = 2;
-		} else {							/* bad */
-			filter->flag = 1;
+		} else {
+			filter->flag = 1; /* bad */
 		}
 		break;
 
-	case  1:	/* got first half */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case  2:	/* got 0x8e */
-		if (c < 0xa1 || c > 0xdf) {		/* bad */
+	case 1: /* Second byte of CP932 character */
+		if (c < 0xA1 || c > 0xFE || is_unused_cp932_range(filter->status >> 8, c)) { /* bad */
 			filter->flag = 1;
 		}
 		filter->status = 0;
 		break;
 
-	default:
+	case 2:	/* JIS X 0201 Kana */
+		if (c < 0xA1 || c > 0xDF) { /* bad */
+			filter->flag = 1;
+		}
 		filter->status = 0;
 		break;
 	}
