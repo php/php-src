@@ -461,9 +461,7 @@ mbfl_strlen(const mbfl_string *string)
 		  string->encoding,
 		  &mbfl_encoding_wchar,
 		  filter_count_output, 0, &len);
-		if (filter == NULL) {
-			return (size_t) -1;
-		}
+		ZEND_ASSERT(filter);
 		/* count */
 		n = string->len;
 		p = string->val;
