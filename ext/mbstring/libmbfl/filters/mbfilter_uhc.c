@@ -59,7 +59,7 @@ const mbfl_encoding mbfl_encoding_uhc = {
 	"UHC",
 	mbfl_encoding_uhc_aliases,
 	mblen_table_uhc,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_uhc_wchar,
 	&vtbl_wchar_uhc
 };

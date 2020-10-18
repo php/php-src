@@ -86,7 +86,7 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	NULL,
 	mbfl_encoding_utf7imap_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_utf7imap_wchar,
 	&vtbl_wchar_utf7imap
 };

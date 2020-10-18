@@ -403,13 +403,7 @@ static const char *php_mb_zend_encoding_name_getter(const zend_encoding *encodin
 static bool php_mb_zend_encoding_lexer_compatibility_checker(const zend_encoding *_encoding)
 {
 	const mbfl_encoding *encoding = (const mbfl_encoding*)_encoding;
-	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
-		return 1;
-	}
-	if ((encoding->flag & (MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE)) == MBFL_ENCTYPE_MBCS) {
-		return 1;
-	}
-	return 0;
+	return !(encoding->flag & MBFL_ENCTYPE_GL_UNSAFE);
 }
 
 static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *arg_string, size_t arg_length, const zend_encoding **list, size_t list_size)
@@ -4210,10 +4204,10 @@ static int php_mb_encoding_translation(void)
 /* {{{ MBSTRING_API size_t php_mb_mbchar_bytes_ex() */
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
 {
-	if (enc != NULL) {
-		if (enc->flag & MBFL_ENCTYPE_MBCS) {
-			if (enc->mblen_table != NULL) {
-				if (s != NULL) return enc->mblen_table[*(unsigned char *)s];
+	if (enc) {
+		if (enc->mblen_table) {
+			if (s) {
+				return enc->mblen_table[*(unsigned char *)s];
 			}
 		} else if (enc->flag & MBFL_ENCTYPE_WCS2) {
 			return 2;

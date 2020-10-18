@@ -63,7 +63,7 @@ const mbfl_encoding mbfl_encoding_cp51932 = {
 	"CP51932",
 	mbfl_encoding_cp51932_aliases,
 	mblen_table_eucjp,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_cp51932_wchar,
 	&vtbl_wchar_cp51932
 };
