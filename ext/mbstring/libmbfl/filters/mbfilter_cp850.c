@@ -27,8 +27,6 @@
 #include "mbfilter_cp850.h"
 #include "unicode_table_cp850.h"
 
-static int mbfl_filt_ident_cp850(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_cp850_aliases[] = {"CP850", "CP-850", "IBM850", "IBM-850", NULL};
 
 const mbfl_encoding mbfl_encoding_cp850 = {
@@ -45,7 +43,7 @@ const mbfl_encoding mbfl_encoding_cp850 = {
 const struct mbfl_identify_vtbl vtbl_identify_cp850 = {
 	mbfl_no_encoding_cp850,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_cp850
+	mbfl_filt_ident_true
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp850 = {
@@ -129,14 +127,5 @@ mbfl_filt_conv_wchar_cp850(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
-}
-
-static int mbfl_filt_ident_cp850(int c, mbfl_identify_filter *filter)
-{
-	if (c >= 0x80 && c < 0xff)
-		filter->flag = 0;
-	else
-		filter->flag = 1; /* not it */
 	return c;
 }
