@@ -62,7 +62,7 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	"EUC-JP",
 	mbfl_encoding_euc_jp_aliases,
 	mblen_table_eucjp,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_eucjp_wchar,
 	&vtbl_wchar_eucjp
 };

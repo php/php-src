@@ -49,7 +49,7 @@ const mbfl_encoding mbfl_encoding_sjis_docomo = {
  	"Shift_JIS",
 	mbfl_encoding_sjis_docomo_aliases,
  	mblen_table_sjis,
- 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_docomo_wchar,
 	&vtbl_wchar_sjis_docomo
 };
@@ -60,7 +60,7 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
  	"Shift_JIS",
 	mbfl_encoding_sjis_kddi_aliases,
  	mblen_table_sjis,
- 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_kddi_wchar,
 	&vtbl_wchar_sjis_kddi
 };
@@ -71,7 +71,7 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
  	"Shift_JIS",
 	mbfl_encoding_sjis_sb_aliases,
  	mblen_table_sjis,
- 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_sb_wchar,
 	&vtbl_wchar_sjis_sb
 };

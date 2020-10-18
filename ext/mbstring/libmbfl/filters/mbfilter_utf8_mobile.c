@@ -48,7 +48,7 @@ const mbfl_encoding mbfl_encoding_utf8_docomo = {
 	"UTF-8",
 	mbfl_encoding_utf8_docomo_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_utf8_docomo_wchar,
 	&vtbl_wchar_utf8_docomo
 };
@@ -59,7 +59,7 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
 	"UTF-8",
 	mbfl_encoding_utf8_kddi_a_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_utf8_kddi_a_wchar,
 	&vtbl_wchar_utf8_kddi_a
 };
@@ -70,7 +70,7 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_b = {
 	"UTF-8",
 	mbfl_encoding_utf8_kddi_b_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_utf8_kddi_b_wchar,
 	&vtbl_wchar_utf8_kddi_b
 };
@@ -81,7 +81,7 @@ const mbfl_encoding mbfl_encoding_utf8_sb = {
 	"UTF-8",
 	mbfl_encoding_utf8_sb_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_utf8_sb_wchar,
 	&vtbl_wchar_utf8_sb
 };
