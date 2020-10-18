@@ -74,7 +74,6 @@
 #define MBFL_WCSPLANE_8859_16		0x70fa0000		/*  00h - FFh */
 #define MBFL_WCSPLANE_ARMSCII8 		0x70fb0000
 #define MBFL_WCSPLANE_KOI8U 		0x70fc0000
-#define MBFL_WCSPLANE_CP850	        0x70fe0000              /*  00h - FFh */
 #define MBFL_WCSPLANE_GB18030		0x70ff0000		/* a1a1h-e3329a35h  */
 #define MBFL_WCSGROUP_MASK                0xffffff
 #define MBFL_WCSGROUP_UCS4MAX		0x70000000
