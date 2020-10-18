@@ -1943,13 +1943,7 @@ PHP_FUNCTION(mb_substr_count)
 		RETURN_THROWS();
 	}
 
-	size_t n = mbfl_substr_count(&haystack, &needle);
-	/* An error can only occur if needle is empty,
-	 * an encoding error happens (which should not happen at this stage and is a bug)
-	 * or the haystack is more than sizeof(size_t) bytes
-	 * If one of these things occur this is a bug and should be flagged as such */
-	ZEND_ASSERT(!mbfl_is_error(n));
-	RETVAL_LONG(n);
+	RETVAL_LONG(mbfl_substr_count(&haystack, &needle));
 }
 /* }}} */
 
