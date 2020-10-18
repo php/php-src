@@ -1677,9 +1677,6 @@ static void handle_strpos_error(size_t error) {
 	switch (error) {
 	case MBFL_ERROR_NOT_FOUND:
 		break;
-	case MBFL_ERROR_ENCODING:
-		php_error_docref(NULL, E_WARNING, "Conversion error");
-		break;
 	case MBFL_ERROR_OFFSET:
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		break;
