@@ -562,7 +562,7 @@ static char *php_mb_rfc1867_substring_conf(const zend_encoding *encoding, char *
 		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {
 			*resp++ = start[++i];
 		} else {
-			size_t j = php_mb_mbchar_bytes_ex(start+i, (const mbfl_encoding *)encoding);
+			size_t j = php_mb_mbchar_bytes(start+i, (const mbfl_encoding *)encoding);
 
 			while (j-- > 0 && i < len) {
 				*resp++ = start[i++];
@@ -594,7 +594,7 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 				++pos;
 			}
 		} else {
-			pos += php_mb_mbchar_bytes_ex(pos, (const mbfl_encoding *)encoding);
+			pos += php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
 
 		}
 	}
@@ -607,7 +607,7 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 	res = estrndup(*line, pos - *line);
 
 	while (*pos == stop) {
-		pos += php_mb_mbchar_bytes_ex(pos, (const mbfl_encoding *)encoding);
+		pos += php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
 	}
 
 	*line = pos;
@@ -4203,8 +4203,7 @@ static int php_mb_encoding_translation(void)
 }
 /* }}} */
 
-/* {{{ MBSTRING_API size_t php_mb_mbchar_bytes_ex() */
-MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
+MBSTRING_API size_t php_mb_mbchar_bytes(const char *s, const mbfl_encoding *enc)
 {
 	if (enc) {
 		if (enc->mblen_table) {
@@ -4219,14 +4218,6 @@ MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *e
 	}
 	return 1;
 }
-/* }}} */
-
-/* {{{ MBSTRING_API size_t php_mb_mbchar_bytes() */
-MBSTRING_API size_t php_mb_mbchar_bytes(const char *s)
-{
-	return php_mb_mbchar_bytes_ex(s, MBSTRG(internal_encoding));
-}
-/* }}} */
 
 MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
 {
@@ -4241,7 +4232,7 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 				if ((unsigned char)*p == (unsigned char)c) {
 					last = (char *)p;
 				}
-				nb = php_mb_mbchar_bytes_ex(p, enc);
+				nb = php_mb_mbchar_bytes(p, enc);
 				if (nb == 0) {
 					return NULL; /* something is going wrong! */
 				}
@@ -4256,7 +4247,7 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 			if ((unsigned char)*p == (unsigned char)c) {
 				last = (char *)p;
 			}
-			nbytes_char = php_mb_mbchar_bytes_ex(p, enc);
+			nbytes_char = php_mb_mbchar_bytes(p, enc);
 			if (bcnt < nbytes_char) {
 				return NULL;
 			}
