@@ -61,7 +61,6 @@
 #define MBFL_WCSPLANE_BIG5		0x70f40000		/*  2121h - 9898h */
 #define MBFL_WCSPLANE_CNS11643		0x70f50000		/*  2121h - 9898h */
 #define MBFL_WCSPLANE_UHC		0x70f60000		/*  8141h - fefeh */
-#define MBFL_WCSPLANE_ARMSCII8 		0x70fb0000
 #define MBFL_WCSPLANE_GB18030		0x70ff0000		/* a1a1h-e3329a35h  */
 #define MBFL_WCSGROUP_MASK                0xffffff
 #define MBFL_WCSGROUP_UCS4MAX		0x70000000

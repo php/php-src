@@ -73,63 +73,36 @@ const struct mbfl_convert_vtbl vtbl_armscii8_wchar = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-/*
- * armscii8 => wchar
- */
 int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s;
 
-	if (c >= 0 && c < armscii8_ucs_table_min) {
+	if (c < armscii8_ucs_table_min) {
 		s = c;
-	} else if (c >= armscii8_ucs_table_min && c < 0x100) {
-		s = armscii8_ucs_table[c - armscii8_ucs_table_min];
-		if (s <= 0) {
-			s = c;
-			s &= MBFL_WCSPLANE_MASK;
-			s |= MBFL_WCSPLANE_ARMSCII8;
-		}
 	} else {
-		s = c;
-		s &= MBFL_WCSGROUP_MASK;
-		s |= MBFL_WCSGROUP_THROUGH;
+		s = armscii8_ucs_table[c - armscii8_ucs_table_min];
+		if (!s) {
+			s = c | MBFL_WCSGROUP_THROUGH;
+		}
 	}
 
 	CK((*filter->output_function)(s, filter->data));
-
 	return c;
 }
 
-/*
- * wchar => armscii8
- */
 int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
 {
-
-	int s, n;
-
-	if (c >= 0x28 && c < 0x30) {
-		s = ucs_armscii8_table[c-0x28];
+	if (c >= 0x28 && c <= 0x2F) {
+		CK((*filter->output_function)(ucs_armscii8_table[c - 0x28], filter->data));
 	} else if (c < armscii8_ucs_table_min) {
-		s = c;
+		CK((*filter->output_function)(c, filter->data));
 	} else {
-		s = -1;
-		n = armscii8_ucs_table_len-1;
-		while (n >= 0) {
+		for (int n = 0; n < armscii8_ucs_table_len; n++) {
 			if (c == armscii8_ucs_table[n]) {
-				s = armscii8_ucs_table_min + n;
-				break;
+				CK((*filter->output_function)(armscii8_ucs_table_min + n, filter->data));
+				return c;
 			}
-			n--;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_ARMSCII8) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
-	}
-
-	if (s >= 0) {
-		CK((*filter->output_function)(s, filter->data));
-	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
@@ -138,9 +111,8 @@ int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_ident_armscii8(int c, mbfl_identify_filter *filter)
 {
-	if (c >= armscii8_ucs_table_min && c <= 0xff)
-		filter->flag = 0;
-	else
-		filter->flag = 1; /* not it */
+	if (c >= armscii8_ucs_table_min && !armscii8_ucs_table[c - armscii8_ucs_table_min]) {
+		filter->flag = 1;
+	}
 	return c;
 }
