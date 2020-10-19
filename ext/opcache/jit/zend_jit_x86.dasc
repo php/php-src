@@ -539,11 +539,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro UNDEF_OPLINE_RESULT
 |	mov r0, EX->opline
-|.if X64
-	|	movsxd r0, dword OP:r0->result.var
-|.else
-	|	mov r0, OP:r0->result.var
-|.endif
+|	mov eax, dword OP:r0->result.var
 |	SET_Z_TYPE_INFO FP + r0, IS_UNDEF
 |.endmacro
 
@@ -1808,11 +1804,7 @@ static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 	|	MEM_OP2_2_ZTS mov, r0, aword, executor_globals, opline_before_exception, r0
 	|	test byte OP:r0->result_type, (IS_TMP_VAR|IS_VAR)
 	|	jnz >1
-	|	.if X64
-	|		movsxd r0, dword OP:r0->result.var
-	|	.else
-	|		mov r0, aword OP:r0->result.var
-	|	.endif
+	|	mov eax, dword OP:r0->result.var
 	|	SET_Z_TYPE_INFO FP + r0, IS_UNDEF
 	|1:
 	|	jmp ->exception_handler
@@ -1911,11 +1903,7 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 {
 	|->throw_cannot_pass_by_ref:
 	|	mov r0, EX->opline
-	|.if X64
-		|	movsxd r1, dword OP:r0->result.var
-	|.else
-		|	mov r1, OP:r0->result.var
-	|.endif
+	|	mov ecx, dword OP:r0->result.var
 	|	SET_Z_TYPE_INFO RX+r1, IS_UNDEF
 	|	// last EX(call) frame may be delayed
 	|	cmp RX, EX->call
@@ -1929,11 +1917,7 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 	|	EXT_CALL zend_cannot_pass_by_reference, r0
 	|	cmp byte OP:RX->op1_type, IS_TMP_VAR
 	|	jne >9
-	|.if X64
-		|	movsxd r0, dword OP:RX->op1.var
-	|.else
-		|	mov r0, OP:RX->op1.var
-	|.endif
+	|	mov eax, dword OP:RX->op1.var
 	|	add r0, FP
 	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
 	|9:
@@ -1962,11 +1946,7 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 		|	sub r4, 12
 	|.endif
 	|	mov r0, EX->opline
-	|.if X64
-		|	movsxd r1, dword OP:r0->result.var
-	|.else
-		|	mov r1, OP:r0->result.var
-	|.endif
+	|	mov ecx, dword OP:r0->result.var
 	|	cmp byte OP:r0->op2_type, IS_CONST
 	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
 	|	jne >2
@@ -1978,11 +1958,7 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	|.endif
 	|	jmp >3
 	|2:
-	|.if X64
-		|	movsxd r0, dword OP:r0->op2.var
-	|.else
-		|	mov r0, OP:r0->op2.var
-	|.endif
+	|	mov eax, dword OP:r0->op2.var
 	|	add r0, FP
 	|3:
 	|.if X64WIN
@@ -2030,11 +2006,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 		|	sub r4, 12
 	|.endif
 	|	mov r0, EX->opline
-	|.if X64
-		|	movsxd r1, dword OP:r0->result.var
-	|.else
-		|	mov r1, OP:r0->result.var
-	|.endif
+	|	mov ecx, dword OP:r0->result.var
 	|	cmp byte OP:r0->op2_type, IS_CONST
 	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
 	|	jne >2
@@ -2046,11 +2018,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 	|.endif
 	|	jmp >3
 	|2:
-	|.if X64
-		|	movsxd r0, dword OP:r0->op2.var
-	|.else
-		|	mov r0, OP:r0->op2.var
-	|.endif
+	|	mov eax, dword OP:r0->op2.var
 	|	add r0, FP
 	|3:
 	|.if X64WIN
@@ -2104,11 +2072,7 @@ static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 	|	mov r0, EX->opline
 	|	cmp byte OP:r0->result_type, IS_UNUSED
 	|	jz >1
-	|.if X64
-		|	movsxd r0, dword OP:r0->result.var
-	|.else
-		|	mov r0, OP:r0->result.var
-	|.endif
+	|	mov eax, dword OP:r0->result.var
 	|	SET_Z_TYPE_INFO FP + r0, IS_NULL
 	|1:
 	|.if X64WIN
@@ -5257,7 +5221,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				}
 				|	// if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed))
 				|.if X64
-					|	movsxd r0, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
+					|	mov eax, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
 					if (val == 0) {
 						|	test r0, r0
 					} else if (val > 0 && !op2_loaded) {
@@ -8664,7 +8628,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 		|.if X64
 			|	movsxd r2, edx
 		|.endif
-			|	sub FCARG1a, r2
+		|	sub FCARG1a, r2
 		|1:
 	}
 
@@ -9921,8 +9885,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				}
 				|	// opline += num_args;
 				|.if X64
-					|	movsxd r2, ecx
-					|	imul r2, r2, sizeof(zend_op)
+					||	ZEND_ASSERT(sizeof(zend_op) == 32);
+					|	mov edx, ecx
+					|	shl r2, 5
 				|.else
 					|	imul r2, ecx, sizeof(zend_op)
 				|.endif
@@ -9938,9 +9903,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	sub edx, ecx
 			|	jle >3 //???
 			|	// zval *var = EX_VAR_NUM(num_args);
-			|.if X64
-				|	movsxd r1, ecx
-			|.endif
+//			|.if X64
+//				|	movsxd r1, ecx
+//			|.endif
 			|	shl r1, 4
 			|	lea r1, [FP + r1 + (ZEND_CALL_FRAME_SLOT * sizeof(zval))]
 			|2:
@@ -12205,11 +12170,10 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	|	mov r0, aword [r0 + opline->extended_value]
 	|	sub r0, 1
 	|	// if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
+	|	MEM_OP2_2_ZTS mov, ecx, dword, executor_globals, symbol_table.nNumUsed, r1
 	|.if X64
-		|	MEM_OP2_2_ZTS movsxd, r1, dword, executor_globals, symbol_table.nNumUsed, r1
 		|	shl r1, 5
 	|.else
-		|	MEM_OP2_2_ZTS mov, r1, dword, executor_globals, symbol_table.nNumUsed, r1
 		|	imul r1, sizeof(Bucket)
 	|.endif
 	|	cmp r0, r1
@@ -14659,7 +14623,8 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 	|	mov FCARG1d, dword [FP + opline->op1.var + offsetof(zval, u2.fe_pos)]
 	|	// p = fe_ht->arData + pos;
 	|.if X64
-		|	movsxd r0, FCARG1d
+		||	ZEND_ASSERT(sizeof(Bucket) == 32);
+		|	mov eax, FCARG1d
 		|	shl r0, 5
 	|.else
 		|	imul r0, FCARG1a, sizeof(Bucket)
