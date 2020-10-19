@@ -28,9 +28,8 @@
 #endif
 #include "ZendAccelerator.h"
 
-void zend_accel_error(int type, const char *format, ...)
+static void zend_accel_error_va_args(int type, const char *format, va_list args)
 {
-	va_list args;
 	time_t timestamp;
 	char *time_string;
 	FILE * fLog = NULL;
@@ -77,9 +76,7 @@ void zend_accel_error(int type, const char *format, ...)
 				break;
 		}
 
-		va_start(args, format);
 		vfprintf(fLog, format, args);
-		va_end(args);
 		fprintf(fLog, "\n");
 
 		fflush(fLog);
@@ -97,4 +94,23 @@ void zend_accel_error(int type, const char *format, ...)
 			break;
 	}
 
+}
+
+void zend_accel_error(int type, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	zend_accel_error_va_args(type, format, args);
+	va_end(args);
+}
+
+ZEND_NORETURN void zend_accel_error_noreturn(int type, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	ZEND_ASSERT(type == ACCEL_LOG_FATAL || type == ACCEL_LOG_ERROR);
+	zend_accel_error_va_args(type, format, args);
+	va_end(args);
+	/* Should never reach this. */
+	abort();
 }

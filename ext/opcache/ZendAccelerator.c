@@ -802,7 +802,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 			/* errno is not ESRCH or we ran out of tries to kill the locker */
 			ZCSG(force_restart_time) = time(NULL); /* restore forced restart request */
 			/* cannot kill the locker, bail out with error */
-			zend_accel_error(ACCEL_LOG_ERROR, "Cannot kill process %d!", mem_usage_check->l_pid);
+			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Cannot kill process %d!", mem_usage_check->l_pid);
 		}
 
 		mem_usage_check->l_type = F_WRLCK;
@@ -2637,7 +2637,7 @@ static int zend_accel_init_shm(void)
 		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
 	}
 	if (!accel_shared_globals) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
@@ -2977,7 +2977,7 @@ static zend_result accel_post_startup(void)
 			page_size = getpagesize();
 # endif
 			if (!page_size || (page_size & (page_size - 1))) {
-				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
 				abort();
 			}
 			jit_size = JIT_G(buffer_size);
@@ -2997,7 +2997,7 @@ static zend_result accel_post_startup(void)
 				break;
 			case ALLOC_FAILURE:
 				accel_startup_ok = 0;
-				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
 #if defined(HAVE_JIT) && !defined(ZEND_WIN32)
@@ -3010,7 +3010,7 @@ static zend_result accel_post_startup(void)
 				break;
 			case FAILED_REATTACHED:
 				accel_startup_ok = 0;
-				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can not reattach to exiting shared memory.");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can not reattach to exiting shared memory.");
 				return SUCCESS;
 				break;
 #if ENABLE_FILE_CACHE_FALLBACK
@@ -3050,7 +3050,7 @@ static zend_result accel_post_startup(void)
 		SHM_PROTECT();
 	} else if (!ZCG(accel_directives).file_cache) {
 		accel_startup_ok = 0;
-		zend_accel_error(ACCEL_LOG_FATAL, "opcache.file_cache_only is set without a proper setting of opcache.file_cache");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache_only is set without a proper setting of opcache.file_cache");
 		return SUCCESS;
 	} else {
 		accel_shared_globals = calloc(1, sizeof(zend_accel_shared_globals));
@@ -4213,7 +4213,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	uint32_t checkpoint;
 
 	if (zend_accel_hash_is_full(&ZCSG(hash))) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Not enough entries in hash table for preloading. Consider increasing the value for the opcache.max_accelerated_files directive in php.ini.");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Not enough entries in hash table for preloading. Consider increasing the value for the opcache.max_accelerated_files directive in php.ini.");
 		return NULL;
 	}
 
@@ -4265,7 +4265,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	}
 #endif
 	if (!ZCG(mem)) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Not enough shared memory for preloading. Consider increasing the value for the opcache.memory_consumption directive in php.ini.");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Not enough shared memory for preloading. Consider increasing the value for the opcache.memory_consumption directive in php.ini.");
 		return NULL;
 	}
 
@@ -4583,7 +4583,7 @@ static int accel_preload(const char *config, zend_bool in_child)
 		CG(map_ptr_last) = orig_map_ptr_last;
 
 		if (EG(full_tables_cleanup)) {
-			zend_accel_error(ACCEL_LOG_FATAL, "Preloading is not compatible with dl() function.");
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading is not compatible with dl() function.");
 			ret = FAILURE;
 			goto finish;
 		}
@@ -4666,7 +4666,7 @@ static int accel_preload(const char *config, zend_bool in_child)
 		zend_hash_sort_ex(&script->script.class_table, preload_sort_classes, NULL, 0);
 
 		if (preload_optimize(script) != SUCCESS) {
-			zend_accel_error(ACCEL_LOG_FATAL, "Optimization error during preloading!");
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Optimization error during preloading!");
 			return FAILURE;
 		}
 
@@ -4765,7 +4765,7 @@ static int accel_finish_startup(void)
 
 	if (ZCG(accel_directives).preload && *ZCG(accel_directives).preload) {
 #ifdef ZEND_WIN32
-		zend_accel_error(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
+		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
 		return FAILURE;
 #else
 		int in_child = 0;
@@ -4808,21 +4808,21 @@ static int accel_finish_startup(void)
 			if (!ZCG(accel_directives).preload_user
 			 || !*ZCG(accel_directives).preload_user) {
 				zend_shared_alloc_unlock();
-				zend_accel_error(ACCEL_LOG_FATAL, "\"opcache.preload_user\" has not been defined");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload_user\" has not been defined");
 				return FAILURE;
 			}
 
 			pw = getpwnam(ZCG(accel_directives).preload_user);
 			if (pw == NULL) {
 				zend_shared_alloc_unlock();
-				zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
 				return FAILURE;
 			}
 
 			pid = fork();
 			if (pid == -1) {
 				zend_shared_alloc_unlock();
-				zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to fork()");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to fork()");
 				return FAILURE;
 			} else if (pid == 0) { /* children */
 				if (setgid(pw->pw_gid) < 0) {
@@ -4843,7 +4843,7 @@ static int accel_finish_startup(void)
 
 				if (waitpid(pid, &status, 0) < 0) {
 					zend_shared_alloc_unlock();
-					zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
+					zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
 					return FAILURE;
 				}
 
