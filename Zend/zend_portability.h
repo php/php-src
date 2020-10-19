@@ -651,6 +651,46 @@ extern "C++" {
 # define ZEND_INTRIN_AVX2_FUNC_DECL(func)
 #endif
 
+#if PHP_HAVE_AVX512_SUPPORTS && defined(HAVE_FUNC_ATTRIBUTE_TARGET) || defined(ZEND_WIN32)
+#define ZEND_INTRIN_AVX512_RESOLVER 1
+#endif
+
+#if defined(ZEND_INTRIN_AVX512_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
+# define ZEND_INTRIN_AVX512_FUNC_PROTO 1
+#elif defined(ZEND_INTRIN_AVX512_RESOLVER)
+# define ZEND_INTRIN_AVX512_FUNC_PTR 1
+#endif
+
+#ifdef ZEND_INTRIN_AVX512_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
+#  define ZEND_INTRIN_AVX512_FUNC_DECL(func) ZEND_API func __attribute__((target("avx512f,avx512cd,avx512vl,avx512dq,avx512bw")))
+# else
+#  define ZEND_INTRIN_AVX512_FUNC_DECL(func) func
+# endif
+#else
+# define ZEND_INTRIN_AVX512_FUNC_DECL(func)
+#endif
+
+#if PHP_HAVE_AVX512_VBMI_SUPPORTS && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#define ZEND_INTRIN_AVX512_VBMI_RESOLVER 1
+#endif
+
+#if defined(ZEND_INTRIN_AVX512_VBMI_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
+# define ZEND_INTRIN_AVX512_VBMI_FUNC_PROTO 1
+#elif defined(ZEND_INTRIN_AVX512_VBMI_RESOLVER)
+# define ZEND_INTRIN_AVX512_VBMI_FUNC_PTR 1
+#endif
+
+#ifdef ZEND_INTRIN_AVX512_VBMI_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
+#  define ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(func) ZEND_API func __attribute__((target("avx512f,avx512cd,avx512vl,avx512dq,avx512bw,avx512vbmi")))
+# else
+#  define ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(func) func
+# endif
+#else
+# define ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(func)
+#endif
+
 /* Intrinsics macros end. */
 
 #ifdef ZEND_WIN32
