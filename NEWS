@@ -239,8 +239,6 @@ PHP                                                                        NEWS
   . Use libenchant-2 when available.
 
 - FPM:
-  . Fixed bug #64865 (Search for .user.ini files from script dir up to
-    CONTEXT_DOCUMENT_ROOT). (Will Bender)
   . Add pm.status_listen option. (Jakub Zelenka)
 
 - GD:
