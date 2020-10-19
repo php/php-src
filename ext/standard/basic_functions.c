@@ -463,8 +463,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BG(strtok_last) = NULL;
 	BG(ctype_string) = NULL;
 	BG(locale_changed) = 0;
-	BG(array_walk_fci) = empty_fcall_info;
-	BG(array_walk_fci_cache) = empty_fcall_info_cache;
 	BG(user_compare_fci) = empty_fcall_info;
 	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 	BG(page_uid) = -1;
