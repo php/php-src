@@ -602,8 +602,10 @@ static void* dasm_labels[zend_lb_MAX];
 |			mov r0, lval
 |.endif
 ||			if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+|				vxorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 |				vcvtsi2sd, xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), r0
 ||			} else {
+|				xorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 |				cvtsi2sd, xmm(reg-ZREG_XMM0), r0
 ||			}
 ||		}
@@ -614,14 +616,18 @@ static void* dasm_labels[zend_lb_MAX];
 |		SSE_GET_LONG reg, Z_LVAL_P(Z_ZV(addr))
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 ||		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+|			vxorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 |			vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||		} else {
+|			xorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 |			cvtsi2sd xmm(reg-ZREG_XMM0), aword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||		}
 ||	} else if (Z_MODE(addr) == IS_REG) {
 ||		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+|			vxorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 |			vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), Ra(Z_REG(addr))
 ||		} else {
+|			xorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
 |			cvtsi2sd xmm(reg-ZREG_XMM0), Ra(Z_REG(addr))
 ||		}
 ||	} else {
