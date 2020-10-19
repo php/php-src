@@ -2287,15 +2287,18 @@ static const zend_object_iterator_funcs pdo_stmt_iter_funcs = {
 
 zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int by_ref)
 {
-	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
-	struct php_pdo_iterator *I;
-
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 
-	I = ecalloc(1, sizeof(struct php_pdo_iterator));
+	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
+	if (!stmt->dbh) {
+		zend_throw_error(NULL, "PDO object is uninitialized");
+		return NULL;
+	}
+
+	struct php_pdo_iterator *I = ecalloc(1, sizeof(struct php_pdo_iterator));
 	zend_iterator_init(&I->iter);
 	I->iter.funcs = &pdo_stmt_iter_funcs;
 	Z_ADDREF_P(object);
