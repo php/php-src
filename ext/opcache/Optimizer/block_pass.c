@@ -1516,16 +1516,16 @@ optimize_jmpznz:
 				target = op_array->opcodes + follow_block->start;
 
 				if (target->opcode == ZEND_JMP) {
-					/* JMPZNZ(X, L1, L2), L1: JMP(L3) -> JMPZNZ(X, L3, L2) */
+					/* JMPZNZ(X, L1, L2), L2: JMP(L3) -> JMPZNZ(X, L1, L3) */
 					next = follow_block->successors[0];
 				} else if (target->opcode == ZEND_JMPNZ &&
 				           SAME_VAR(target->op1, last_op->op1)) {
-					/* JMPZNZ(X, L1, L2), L1: X = JMPNZ(X, L3) -> JMPZNZ(X, L1+1, L2) */
+					/* JMPZNZ(X, L1, L2), L2: X = JMPNZ(X, L3) -> JMPZNZ(X, L1, L3) */
 					next = follow_block->successors[0];
 				} else if ((target->opcode == ZEND_JMPZ || target->opcode == ZEND_JMPZNZ) &&
 				           SAME_VAR(target->op1, last_op->op1)) {
-					/* JMPZNZ(X, L1, L2), L1: JMPZ(X, L3) -> JMPZNZ(X, L3, L2) */
-					next = target_block->successors[1];
+					/* JMPZNZ(X, L1, L2), L2: JMPZ(X, L3) -> JMPZNZ(X, L1, L2+1) */
+					next = follow_block->successors[1];
 				} else {
 					break;
 				}
