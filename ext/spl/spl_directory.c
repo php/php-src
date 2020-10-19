@@ -899,6 +899,11 @@ PHP_METHOD(SplFileInfo, getFilename)
 		RETURN_THROWS();
 	}
 
+	if (!intern->file_name) {
+		zend_throw_error(NULL, "Object not initialized");
+		RETURN_THROWS();
+	}
+
 	spl_filesystem_object_get_path(intern, &path_len);
 
 	if (path_len && path_len < intern->file_name_len) {
@@ -934,6 +939,11 @@ PHP_METHOD(SplFileInfo, getExtension)
 	zend_string *ret;
 
 	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!intern->file_name) {
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -997,6 +1007,11 @@ PHP_METHOD(SplFileInfo, getBasename)
 	size_t slen = 0, path_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &suffix, &slen) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!intern->file_name) {
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
