@@ -48,21 +48,21 @@ jobs:
         echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
         echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
-    - script: |
-        git clone https://github.com/laravel/framework.git --branch=master --depth=1
-        cd framework
-        php7.3 /usr/bin/composer install --no-progress
-        export USE_ZEND_ALLOC=0
-        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
-        # Avoid test using exit(), which thus leaks.
-        # We can use USE_TRACKED_ALLOC=1 if more of these show up.
-        sed -i "s/function_exists('pcntl_fork')/false/" tests/Filesystem/FilesystemTest.php
-        # Work around PHP 8 incompatibility in Doctrine
-        sed -i 's/function query()/function query(...$args)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
-        sed -i 's/function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)/function setFetchMode($fetchMode, $arg2 = null, $arg3 = null, ...$args)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php
-        sed -i 's/public function getMessage();//' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/DriverException.php
-        php vendor/bin/phpunit
-      displayName: 'Test Laravel'
+    #- script: |
+    #    git clone https://github.com/laravel/framework.git --branch=master --depth=1
+    #    cd framework
+    #    php7.3 /usr/bin/composer install --no-progress
+    #    export USE_ZEND_ALLOC=0
+    #    sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
+    #    # Avoid test using exit(), which thus leaks.
+    #    # We can use USE_TRACKED_ALLOC=1 if more of these show up.
+    #    sed -i "s/function_exists('pcntl_fork')/false/" tests/Filesystem/FilesystemTest.php
+    #    # Work around PHP 8 incompatibility in Doctrine
+    #    sed -i 's/function query()/function query(...$args)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
+    #    sed -i 's/function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)/function setFetchMode($fetchMode, $arg2 = null, $arg3 = null, ...$args)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php
+    #    sed -i 's/public function getMessage();//' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/DriverException.php
+    #    php vendor/bin/phpunit
+    #  displayName: 'Test Laravel'
     - script: |
         git clone https://github.com/symfony/symfony.git --depth=1
         cd symfony
