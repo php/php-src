@@ -1343,16 +1343,20 @@ int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa,
 			break;
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
-			if (ssa_op->op1_def == var) {
-				if ((opline+1)->opcode == ZEND_OP_DATA) {
-					opline++;
-					ssa_op++;
+		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_DIM_OP:
+		case ZEND_ASSIGN_OBJ_OP:
+		case ZEND_ASSIGN_STATIC_PROP_OP:
+			if ((ssa_op+1)->op1_def == var) {
+				opline++;
+				ssa_op++;
+				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
 					tmp->overflow  = OP1_RANGE_OVERFLOW();
-					return 1;
 				}
+				return 1;
 			}
 			break;
 		case ZEND_ASSIGN_OP:
@@ -1365,31 +1369,14 @@ int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa,
 				}
 			}
 			break;
-		case ZEND_ASSIGN_DIM_OP:
-		case ZEND_ASSIGN_OBJ_OP:
-		case ZEND_ASSIGN_STATIC_PROP_OP:
-			if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if ((ssa_op+1)->op1_def == var) {
-					opline++;
-					ssa_op++;
-					if (OP1_HAS_RANGE()) {
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
 		case ZEND_OP_DATA:
-			if ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-			    (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
-			    ((opline-1)->opcode == ZEND_ASSIGN_OP &&
-			     ((opline-1)->extended_value == ZEND_ADD ||
-			      (opline-1)->extended_value == ZEND_SUB ||
-			      (opline-1)->extended_value == ZEND_MUL))) {
-				if (ssa_op->op1_def == var) {
+			if (ssa_op->op1_def == var) {
+				if ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
+				    (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
+				    (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP ||
+				    (opline-1)->opcode == ZEND_ASSIGN_DIM_OP ||
+				    (opline-1)->opcode == ZEND_ASSIGN_OBJ_OP ||
+				    (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
