@@ -207,8 +207,14 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		}
 		p = strrchr(((struct sockaddr_un *) sa)->sun_path, DEFAULT_SLASH);
 		if (p) {
+			struct stat st;
 			*p = 0;
-			mkdir(((struct sockaddr_un *) sa)->sun_path, 0755);
+			if (stat(((struct sockaddr_un *) sa)->sun_path, &st)) {
+				if (mkdir(((struct sockaddr_un *) sa)->sun_path, 0755)) {
+					zlog(ZLOG_SYSERROR, "unable to create directory '%s'", ((struct sockaddr_un *) sa)->sun_path);
+					return -1;
+				}
+			}
 			*p = DEFAULT_SLASH;
 		}
 		unlink( ((struct sockaddr_un *) sa)->sun_path);

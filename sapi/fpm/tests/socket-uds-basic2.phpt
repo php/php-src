@@ -15,6 +15,7 @@ $sock_exp = "$dir/fpm.sock";
 $cfg = <<<EOT
 [global]
 error_log = {{FILE:LOG}}
+pid = $dir/fpm.pid
 [default]
 listen = $sock
 ping.path = /ping
@@ -30,6 +31,7 @@ $tester = new FPM\Tester($cfg);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester->ping($sock_exp);
+var_dump(file_exists("$dir/fpm.pid"));
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
@@ -39,6 +41,7 @@ var_dump(rmdir($dir));
 ?>
 Done
 --EXPECT--
+bool(true)
 bool(true)
 Done
 --CLEAN--
