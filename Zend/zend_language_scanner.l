@@ -1366,6 +1366,7 @@ DNUM	({LNUM}?"."{LNUM})|({LNUM}"."{LNUM}?)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM	"0x"[0-9a-fA-F]+(_[0-9a-fA-F]+)*
 BNUM	"0b"[01]+(_[01]+)*
+ONUM	"0o"[0-7]+(_[0-7]+)*
 LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
@@ -1950,6 +1951,51 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 }
 
+<ST_IN_SCRIPTING>{ONUM} {
+	/* The +/- 2 skips "0o" */
+	size_t len = yyleng - 2;
+	char *end, *octal = yytext + 2;
+	zend_bool contains_underscores = (memchr(octal, '_', len) != NULL);
+
+	/* Skip any leading 0s */
+	while (len > 0 && (*octal == '0' || *octal == '_')) {
+		++octal;
+		--len;
+	}
+
+	if (contains_underscores) {
+		octal = estrndup(octal, len);
+		strip_underscores(octal, &len);
+	}
+
+	errno = 0;
+
+	ZVAL_LONG(zendlval, ZEND_STRTOL(octal, &end, 8));
+
+	ZEND_ASSERT(end == octal + len);
+
+	if (!errno) {
+		if (contains_underscores) {
+			efree(octal);
+		}
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+	}
+
+	/* Overflow */
+	ZEND_ASSERT(errno == ERANGE);
+	/* Reset errno */
+	errno = 0;
+
+	/* zend_oct_strtod skips leading '0' */
+	ZVAL_DOUBLE(zendlval, zend_oct_strtod(octal, (const char **)&end));
+	ZEND_ASSERT(!errno);
+	ZEND_ASSERT(end == octal + len);
+	if (contains_underscores) {
+		efree(octal);
+	}
+	RETURN_TOKEN_WITH_VAL(T_DNUMBER);
+}
+
 <ST_IN_SCRIPTING>{LNUM} {
 	size_t len = yyleng;
 	char *end, *lnum = yytext;
@@ -2071,7 +2117,7 @@ string:
 	RETURN_TOKEN_WITH_VAL(T_NUM_STRING);
 }
 
-<ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
+<ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM}|{ONUM} { /* Offset must be treated as a string */
 	if (yyleng == 1) {
 		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext)));
 	} else {

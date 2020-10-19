@@ -65,6 +65,11 @@ PHP 8.1 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . It is now possible to specify octal integer by using the explicit "0o"/"0O"
+    prefix similar to hexadecimal ("0x"/"0X) and binary ("0b"/"0B") integer literals
+    RFC: https://wiki.php.net/rfc/explicit_octal_notation
+
 - hash:
   . The following functions have changed signatures:
 
@@ -100,6 +105,15 @@ PHP 8.1 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- Filter:
+  . The FILTER_FLAG_ALLOW_OCTAL flag of the FILTER_VALIDATE_INT filter now accept
+    octal string with the leading octal prefix ("0o"/"0O")
+    RFC: https://wiki.php.net/rfc/explicit_octal_notation
+
+- GMP:
+  . All GMP function now accept octal string with the leading octal prefix ("0o"/"0O")
+    RFC: https://wiki.php.net/rfc/explicit_octal_notation
 
 ========================================
 6. New Functions

@@ -605,6 +605,9 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 			if ((base == 0 || base == 16) && (numstr[1] == 'x' || numstr[1] == 'X')) {
 				base = 16;
 				skip_lead = 1;
+			} else if ((base == 0 || base == 8) && (numstr[1] == 'o' || numstr[1] == 'O')) {
+				base = 8;
+				skip_lead = 1;
 			} else if ((base == 0 || base == 2) && (numstr[1] == 'b' || numstr[1] == 'B')) {
 				base = 2;
 				skip_lead = 1;
