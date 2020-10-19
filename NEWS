@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
 
+- Opcache:
+  . Fixed bug #80255 (Opcache bug (bad condition result) in 8.0.0rc1). (Nikita)
+
 15 Oct 2020, PHP 8.0.0RC2
 
 - Core:
