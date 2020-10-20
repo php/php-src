@@ -37,6 +37,8 @@ DONE
 @unlink(__DIR__ . '/bug64342.zip');
 --EXPECTF--
 %s.txt
+
+Warning: ZipArchive::addFile(): No such file or directory in %s on line %d
 add failed
 close ok
 DONE

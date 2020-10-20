@@ -37,6 +37,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 }
 @unlink($file);
 ?>
---EXPECT--
+--EXPECTF--
+Warning: ZipArchive::addFile(): No such file or directory in %s on line %d
 failed
 OK
