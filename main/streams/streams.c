@@ -1294,6 +1294,10 @@ PHPAPI zend_off_t _php_stream_tell(php_stream *stream)
 
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
+	if (php_stream_is_filtered(stream)) {
+		return -1;
+	}
+
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 		/* flush to commit data written to the fopencookie FILE* */
 		fflush(stream->stdiocast);
