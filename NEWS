@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #64076 (imap_sort() does not return FALSE on failure). (cmb)
   . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
   . Fixed minor regression caused by fixing bug #80220. (cmb)
+  . Fixed bug #80242 (imap_mail_compose() segfaults for multipart with rfc822).
+    (cmb)
 
 29 Oct 2020, PHP 7.3.24
 
