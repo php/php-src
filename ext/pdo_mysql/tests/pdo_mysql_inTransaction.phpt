@@ -38,6 +38,18 @@ for ($b = 0; $b < count(BEGIN); $b++) {
         }
     }
 }
+echo "\n";
+
+// DDL query causes an implicit commit.
+$db->beginTransaction();
+var_dump($db->inTransaction());
+$db->exec('DROP TABLE IF EXISTS test');
+var_dump($db->inTransaction());
+
+// We should be able to start a new transaction after the implicit commit.
+$db->beginTransaction();
+var_dump($db->inTransaction());
+$db->commit();
 
 ?>
 --EXPECT--
@@ -65,3 +77,7 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
+
+bool(true)
+bool(false)
+bool(true)
