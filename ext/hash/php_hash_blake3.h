@@ -8,8 +8,8 @@
 
 // typedef struct blake3_hasher PHP_BLAKE3_CTX;
 #define PHP_BLAKE3_CTX blake3_hasher
-// help: what is V supposed to be?
-#define PHP_BLAKE3_SPEC "l.I_HAVE_NO_IDEA_WHAT_THIS_IS_SUPPOSED_TO_BE"
+// help: is V correct?
+#define PHP_BLAKE3_SPEC "b8b8qb64bbbbb1760"
 
 PHP_HASH_API void PHP_BLAKE3Init(PHP_BLAKE3_CTX *context);
 PHP_HASH_API void PHP_BLAKE3Update(PHP_BLAKE3_CTX *context, const unsigned char *input, size_t len);
@@ -27,7 +27,7 @@ const php_hash_ops php_hash_blake3_ops = {
 	PHP_BLAKE3_SPEC, // << don't know what this should be, hopefully a dev that knows can remove this comment
 	BLAKE3_OUT_LEN /*32*/,
 	BLAKE3_CHUNK_LEN /*1024*/,
-	sizeof(*((PHP_BLAKE3_CTX*)NULL)), // << bet there's a better way to write that
+	sizeof(PHP_BLAKE3_CTX),
 	1
 };
 
