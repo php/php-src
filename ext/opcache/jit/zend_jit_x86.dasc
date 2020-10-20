@@ -11758,7 +11758,11 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 			|	ZVAL_COPY_VALUE_V res_addr, -1, val_addr, res_info, ZREG_R0, ZREG_R1
 			if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
 				if (type < IS_STRING) {
-					|	SET_ZVAL_TYPE_INFO res_addr, type
+					if (Z_REG(res_addr) != ZREG_FP ||
+					    JIT_G(current_frame) == NULL ||
+					    STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(res_addr))) != type) {
+						|	SET_ZVAL_TYPE_INFO res_addr, type
+					}
 				} else {
 					|	SET_ZVAL_TYPE_INFO res_addr, edx
 					if (!result_avoid_refcounting) {
@@ -12825,7 +12829,11 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	// ZVAL_COPY
 			|	ZVAL_COPY_VALUE_V res_addr, -1, val_addr, res_info, ZREG_R0, ZREG_R1
 			if (type < IS_STRING) {
-				|	SET_ZVAL_TYPE_INFO res_addr, type
+				if (Z_REG(res_addr) != ZREG_FP ||
+				    JIT_G(current_frame) == NULL ||
+				    STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(res_addr))) != type) {
+					|	SET_ZVAL_TYPE_INFO res_addr, type
+				}
 			} else {
 				|	SET_ZVAL_TYPE_INFO res_addr, edx
 				if (!result_avoid_refcounting) {
