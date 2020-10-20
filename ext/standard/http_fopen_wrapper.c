@@ -842,6 +842,11 @@ finish:
 		php_stream_close(stream);
 		stream = NULL;
 
+		if (transfer_encoding) {
+			php_stream_filter_free(transfer_encoding);
+			transfer_encoding = NULL;
+		}
+
 		if (location[0] != '\0') {
 
 			char new_path[HTTP_HEADER_BLOCK_SIZE];
@@ -957,10 +962,6 @@ out:
 
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
-		}
-	} else {
-		if (transfer_encoding) {
-			php_stream_filter_free(transfer_encoding);
 		}
 	}
 

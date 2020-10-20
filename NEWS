@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #80255 (Opcache bug (bad condition result) in 8.0.0rc1). (Nikita)
 
+- Standard:
+  . Fixed bug #80256 (file_get_contents strip first line with chunked encoding
+    redirect). (Nikita)
+
 15 Oct 2020, PHP 8.0.0RC2
 
 - Core:
