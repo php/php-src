@@ -4430,6 +4430,8 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 		result_reg = Z_REG(res_addr);
 	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
 		result_reg = Z_REG(op1_addr);
+	} else if (zend_is_commutative(opcode) && Z_MODE(op2_addr) == IS_REG && Z_LAST_USE(op2_addr)) {
+		result_reg = Z_REG(op2_addr);
 	} else {
 		result_reg = ZREG_XMM0;
 	}
@@ -15279,7 +15281,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 				}
 				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_DOUBLE)) {
 					if (ssa_op->result_def != current_var &&
-					    (ssa_op->op1_use != current_var || !last_use)) {
+					    (ssa_op->op1_use != current_var || !last_use) &&
+					    (!zend_is_commutative(opline->opcode) || ssa_op->op2_use != current_var || !last_use)) {
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
