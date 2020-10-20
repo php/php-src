@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
   . Fixed minor regression caused by fixing bug #80220. (cmb)
+  . Fixed bug #80242 (imap_mail_compose() segfaults for multipart with rfc822).
+    (cmb)
 
 - Opcache:
   . Fixed bug #80255 (Opcache bug (bad condition result) in 8.0.0rc1). (Nikita)

@@ -3375,15 +3375,19 @@ PHP_FUNCTION(imap_mail_compose)
 					bod->disposition.parameter = disp_param;
 				}
 			}
-			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
-				bod->contents.text.data = fs_get(Z_STRLEN_P(pvalue) + 1);
-				memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue) + 1);
-				bod->contents.text.size = Z_STRLEN_P(pvalue);
+			if (bod->type == TYPEMESSAGE && bod->subtype && !strcmp(bod->subtype, "RFC822")) {
+				bod->nested.msg = mail_newmsg();
 			} else {
-				bod->contents.text.data = fs_get(1);
-				memcpy(bod->contents.text.data, "", 1);
-				bod->contents.text.size = 0;
+				if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
+					convert_to_string_ex(pvalue);
+					bod->contents.text.data = fs_get(Z_STRLEN_P(pvalue) + 1);
+					memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue) + 1);
+					bod->contents.text.size = Z_STRLEN_P(pvalue);
+				} else {
+					bod->contents.text.data = fs_get(1);
+					memcpy(bod->contents.text.data, "", 1);
+					bod->contents.text.size = 0;
+				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
 				bod->size.lines = zval_get_long(pvalue);
@@ -3485,7 +3489,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 				bod=&part->body;
 
-				spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data, CRLF);
+				spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data ? (char *) bod->contents.text.data : "", CRLF);
 				efree(mystring);
 				mystring=tempstring;
 			} while ((part = part->next)); /* until done */
