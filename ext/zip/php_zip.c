@@ -288,11 +288,13 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 	}
 
 	if (!expand_filepath(filename, resolved_path)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		return -1;
 	}
 
 	php_stat(resolved_path, strlen(resolved_path), FS_EXISTS, &exists_flag);
 	if (Z_TYPE(exists_flag) == IS_FALSE) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		return -1;
 	}
 
@@ -1163,6 +1165,7 @@ PHP_FUNCTION(zip_open)
 	}
 
 	if(!expand_filepath(ZSTR_VAL(filename), resolved_path)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
@@ -1444,6 +1447,7 @@ PHP_METHOD(ZipArchive, open)
 	}
 
 	if (!(resolved_path = expand_filepath(ZSTR_VAL(filename), NULL))) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
