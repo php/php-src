@@ -3927,7 +3927,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 				bod=&part->body;
 
-				spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data ? bod->contents.text.data : "", CRLF);
+				spprintf(&tempstring, 0, "%s%s%s", mystring, bod->contents.text.data ? (char *) bod->contents.text.data : "", CRLF);
 				efree(mystring);
 				mystring=tempstring;
 			} while ((part = part->next)); /* until done */
