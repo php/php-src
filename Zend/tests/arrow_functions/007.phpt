@@ -8,10 +8,10 @@ assert.exception=0
 
 // TODO We're missing parentheses for the direct call
 assert((fn() => false)());
-assert((fn() => { return false; })());
+assert((fn() { return false; })());
 
 assert((fn&(int... $args): ?bool => $args[0])(false));
-assert((fn&(int... $args): ?bool => { return $args[0]; })(false));
+assert((fn&(int... $args): ?bool { return $args[0]; })(false));
 
 ?>
 --EXPECTF--

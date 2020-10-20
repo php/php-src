@@ -10,46 +10,46 @@ class Test {
         $r = new ReflectionFunction($fn);
         var_dump($r->getClosureThis());
 
-        $fn = fn() => {};
+        $fn = fn() {};
         $r = new ReflectionFunction($fn);
         var_dump($r->getClosureThis());
 
         $fn = fn() => $this;
         var_dump($fn());
 
-        $fn = fn() => { return $this; };
+        $fn = fn() { return $this; };
         var_dump($fn());
 
         $fn = fn() => Test::method2();
         $fn();
 
-        $fn = fn() => { return Test::method2(); };
+        $fn = fn() { return Test::method2(); };
         $fn();
 
         $fn = fn() => call_user_func('Test::method2');
         $fn();
 
-        $fn = fn() => { return call_user_func('Test::method2'); };
+        $fn = fn() { return call_user_func('Test::method2'); };
         $fn();
 
         $thisName = "this";
         $fn = fn() => $$thisName;
         var_dump($fn());
 
-        $fn = fn() => { return $$thisName; };
+        $fn = fn() { return $$thisName; };
         var_dump($fn());
 
         $fn = fn() => self::class;
         var_dump($fn());
 
-        $fn = fn() => { return self::class; };
+        $fn = fn() { return self::class; };
         var_dump($fn());
 
         // static can be used to unbind $this
         $fn = static fn() => isset($this);
         var_dump($fn());
 
-        $fn = static fn() => { return isset($this); };
+        $fn = static fn() { return isset($this); };
         var_dump($fn());
     }
 

@@ -10,7 +10,7 @@ foreach ($fn() as $val) {
     var_dump($val);
 }
 
-$fn = fn() => { return yield 2; };
+$fn = fn() { return yield 2; };
 foreach ($fn() as $val) {
     var_dump($val);
 }
@@ -20,7 +20,7 @@ foreach ($fn() as $val) {
     var_dump($val);
 }
 
-$fn = fn() => { yield from [5, 6]; };
+$fn = fn() { yield from [5, 6]; };
 foreach ($fn() as $val) {
     var_dump($val);
 }
@@ -30,7 +30,7 @@ foreach ($fn()() as $val) {
     var_dump($val);
 }
 
-$fn = fn() => fn() => { yield 8; };
+$fn = fn() => fn() { yield 8; };
 foreach ($fn()() as $val) {
     var_dump($val);
 }

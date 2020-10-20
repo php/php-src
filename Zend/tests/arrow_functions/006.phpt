@@ -10,7 +10,7 @@ $ref =& $id($var);
 $ref++;
 var_dump($var);
 
-$id = fn&(&$x) => { return $x; };
+$id = fn&(&$x) { return $x; };
 $ref =& $id($var);
 $ref++;
 var_dump($var);
@@ -26,7 +26,7 @@ try {
 }
 
 $var = 11;
-$int_fn = fn(int $x): int => { return $x; };
+$int_fn = fn(int $x): int { return $x; };
 var_dump($int_fn($var));
 try {
     $int_fn("foo");
@@ -42,7 +42,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$varargs = fn(?int... $args): array => { return $args; };
+$varargs = fn(?int... $args): array { return $args; };
 var_dump($varargs(40, null, 50));
 try {
     $varargs(60, "foo");

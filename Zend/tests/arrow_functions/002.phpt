@@ -8,7 +8,7 @@ $b = 1;
 var_dump((fn() => $b + $c)());
 
 $d = 2;
-var_dump((fn() => { return $d + $e; } )());
+var_dump((fn() { return $d + $e; } )());
 
 ?>
 --EXPECTF--

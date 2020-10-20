@@ -9,7 +9,7 @@ $fn = fn() => $GLOBALS['a'];
 var_dump($fn());
 
 $a = 456;
-$fn = fn() => { return $GLOBALS['a']; };
+$fn = fn() { return $GLOBALS['a']; };
 var_dump($fn());
 
 ?>

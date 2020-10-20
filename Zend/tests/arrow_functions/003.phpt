@@ -10,7 +10,7 @@ var_dump($fn());
 
 $b = 2;
 $var = "b";
-$fn = fn() => { return $$var; };
+$fn = fn() { return $$var; };
 var_dump($fn());
 
 ${5} = 3;
@@ -18,7 +18,7 @@ $fn = fn() => ${5};
 var_dump($fn());
 
 ${6} = 4;
-$fn = fn() => { return ${6}; };
+$fn = fn() { return ${6}; };
 var_dump($fn());
 
 ?>

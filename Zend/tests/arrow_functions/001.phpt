@@ -4,26 +4,26 @@ Basic arrow function functionality check
 <?php
 
 // No return value
-$foo = fn() => {};
+$foo = fn() {};
 var_dump($foo());
 
 // Return value
 $foo = fn() => 1;
 var_dump($foo());
 
-$foo = fn() => { return 2; };
+$foo = fn() { return 2; };
 var_dump($foo());
 
 $foo = fn($x) => $x;
 var_dump($foo(3));
 
-$foo = fn($x) => { return $x; };
+$foo = fn($x) { return $x; };
 var_dump($foo(4));
 
 $foo = fn($x, $y) => $x + $y;
 var_dump($foo(4, 1));
 
-$foo = fn($x, $y) => { return $x + $y; };
+$foo = fn($x, $y) { return $x + $y; };
 var_dump($foo(5, 1));
 
 // Closing over $var
@@ -32,14 +32,14 @@ $foo = fn() => $var;
 var_dump($foo());
 
 $var = 8;
-$foo = fn() => { return $var; };
+$foo = fn() { return $var; };
 var_dump($foo());
 
 // Not closing over $var, it's a parameter
 $foo = fn($var) => $var;
 var_dump($foo(9));
 
-$foo = fn($var) => { return $var; };
+$foo = fn($var) { return $var; };
 var_dump($foo(10));
 
 // Close over $var by-value, not by-reference
@@ -50,7 +50,7 @@ var_dump($foo());
 var_dump($var);
 
 $var = 13;
-$foo = fn() => { return ++$var; };
+$foo = fn() { return ++$var; };
 var_dump($var);
 var_dump($foo());
 var_dump($var);
@@ -63,10 +63,10 @@ $var = 15;
 var_dump((fn() => function() use($var) { return $var; })()());
 
 $var = 16;
-var_dump((fn() => { return fn() => { return $var; }; })()());
+var_dump((fn() { return fn() { return $var; }; })()());
 
 // Nested arrow functions with null return value
-var_dump((fn() => { return fn() => {}; })()());
+var_dump((fn() { return fn() {}; })()());
 
 ?>
 --EXPECT--
