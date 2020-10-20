@@ -102,3 +102,4 @@ jobs:
       parameters:
         configurationName: DEBUG_NTS_FILE_CACHE
         configurationParameters: '--enable-debug --disable-zts'
+        timeoutInMinutes: 90
