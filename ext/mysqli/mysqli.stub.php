@@ -364,7 +364,7 @@ class mysqli_result implements IteratorAggregate
      * @return object|null
      * @alias mysqli_fetch_object
      */
-    public function fetch_object(string $class = "stdClass", array $params = []) {}
+    public function fetch_object(string $class = "stdClass", array $constructor_args = []) {}
 
     /**
      * @return array|null
@@ -581,7 +581,7 @@ function mysqli_fetch_array(mysqli_result $result, int $mode = MYSQLI_BOTH): arr
 
 function mysqli_fetch_assoc(mysqli_result $result): ?array {}
 
-function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $params = []): ?object {}
+function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $constructor_args = []): ?object {}
 
 function mysqli_fetch_row(mysqli_result $result): ?array {}
 
