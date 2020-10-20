@@ -421,6 +421,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_is_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_isset_helper);
+	REGISTER_HELPER(zend_jit_fetch_dim_str_offset_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_is_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_r_helper);

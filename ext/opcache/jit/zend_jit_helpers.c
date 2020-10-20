@@ -834,7 +834,30 @@ try_again:
 	return _zval_get_long_func(dim);
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval *dim, zval *result)
+static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string *str, zend_long offset)
+{
+	if (UNEXPECTED((zend_ulong)offset >= (zend_ulong)ZSTR_LEN(str))) {
+		if (EXPECTED(offset < 0)) {
+			/* Handle negative offset */
+			zend_long real_offset = (zend_long)ZSTR_LEN(str) + offset;
+
+			if (EXPECTED(real_offset >= 0)) {
+				return ZSTR_CHAR((zend_uchar)ZSTR_VAL(str)[real_offset]);
+			}
+		}
+		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
+		return ZSTR_EMPTY_ALLOC();
+	} else {
+		return ZSTR_CHAR((zend_uchar)ZSTR_VAL(str)[offset]);
+	}
+}
+
+static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_offset_r_helper(zend_string *str, zend_long offset)
+{
+	return zend_jit_fetch_dim_str_offset(str, offset);
+}
+
+static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *str, zval *dim)
 {
 	zend_long offset;
 
@@ -843,22 +866,10 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval 
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
-
-	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
-		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
-		ZVAL_EMPTY_STRING(result);
-	} else {
-		zend_uchar c;
-		zend_long real_offset;
-
-		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
-			? (zend_long)Z_STRLEN_P(container) + offset : offset;
-		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-		ZVAL_CHAR(result, c);
-	}
+	return zend_jit_fetch_dim_str_offset(str, offset);
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_dim_str_is_helper(zval *container, zval *dim, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_dim_str_is_helper(zend_string *str, zval *dim, zval *result)
 {
 	zend_long offset;
 
@@ -892,16 +903,19 @@ try_string_offset:
 		offset = Z_LVAL_P(dim);
 	}
 
-	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
+	if ((zend_ulong)offset >= (zend_ulong)ZSTR_LEN(str)) {
+		if (offset < 0) {
+			/* Handle negative offset */
+			zend_long real_offset = (zend_long)ZSTR_LEN(str) + offset;
+
+			if (real_offset >= 0) {
+				ZVAL_CHAR(result, (zend_uchar)ZSTR_VAL(str)[real_offset]);
+				return;
+			}
+		}
 		ZVAL_NULL(result);
 	} else {
-		zend_uchar c;
-		zend_long real_offset;
-
-		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
-			? (zend_long)Z_STRLEN_P(container) + offset : offset;
-		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-		ZVAL_CHAR(result, c);
+		ZVAL_CHAR(result, (zend_uchar)ZSTR_VAL(str)[offset]);
 	}
 }
 

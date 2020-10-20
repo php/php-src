@@ -11623,24 +11623,30 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 				}
 			}
 			|	SET_EX_OPLINE opline, r0
-		    if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
-				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-		    }
-			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
-			|.if X64
-				|   LOAD_ZVAL_ADDR CARG3, res_addr
-			|.else
-				|	sub r4, 12
-				|   PUSH_ZVAL_ADDR res_addr, r0
-			|.endif
+			|	GET_ZVAL_LVAL ZREG_FCARG1a, op1_addr
 			if (opline->opcode != ZEND_FETCH_DIM_IS) {
-				|	EXT_CALL zend_jit_fetch_dim_str_r_helper, r0
+				if ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_LONG) {
+					|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
+					|	EXT_CALL zend_jit_fetch_dim_str_offset_r_helper, r0
+				} else {
+					|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+					|	EXT_CALL zend_jit_fetch_dim_str_r_helper, r0
+				}
+				|	SET_ZVAL_PTR res_addr, r0
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING
 			} else {
+				|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+				|.if X64
+					|   LOAD_ZVAL_ADDR CARG3, res_addr
+				|.else
+					|	sub r4, 12
+					|   PUSH_ZVAL_ADDR res_addr, r0
+				|.endif
 				|	EXT_CALL zend_jit_fetch_dim_str_is_helper, r0
+				|.if not(X64)
+				|	add r4, 12
+				|.endif
 			}
-			|.if not(X64)
-			|	add r4, 12
-			|.endif
 			if ((op1_info & MAY_BE_ARRAY) ||
 				(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_STRING)))) {
 				|	jmp >9 // END
