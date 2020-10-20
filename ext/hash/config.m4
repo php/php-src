@@ -11,7 +11,9 @@ if test "$PHP_MHASH" != "no"; then
   AC_DEFINE(PHP_MHASH_BC, 1, [ ])
 fi
 
+
 if test $ac_cv_c_bigendian_php = yes; then
+  dnl todo: check if blake3/blake3_neon.c is applicable
   EXT_HASH_SHA3_SOURCES="hash_sha3.c"
   AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define is hash3 algo is available])
   AC_MSG_WARN("Use SHA3 slow implementation on bigendian")
@@ -33,13 +35,23 @@ else
   PHP_ADD_BUILD_DIR(ext/hash/$SHA3_DIR, 1)
 fi
 
+EXT_HASH_BLAKE3_SOURCES="hash_blake3.c blake3/blake3.c blake3/blake3_dispatch.c blake3/blake3_portable.c"
+dnl todo: add optimized versions of blake3 for sse2/sse4.1/avx2/avx512/arm+neon 
+dnl ...when applicable...
+dnl EXT_HASH_BLAKE3_SOURCES="$EXT_HASH_BLAKE3_SOURCES blake3/blake3_sse2.c blake3/blake3_sse41.c blake3/blake3_avx2.c blake3/blake3_avx512.c"
+
+PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_AVX512"
+
+
+
 EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
   hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c hash_adler32.c \
-  hash_crc32.c hash_fnv.c hash_joaat.c $EXT_HASH_SHA3_SOURCES"
+  hash_crc32.c hash_fnv.c hash_joaat.c $EXT_HASH_SHA3_SOURCES \
+  $EXT_HASH_BLAKE3_SOURCES"
 EXT_HASH_HEADERS="php_hash.h php_hash_md.h php_hash_sha.h php_hash_ripemd.h \
   php_hash_haval.h php_hash_tiger.h php_hash_gost.h php_hash_snefru.h \
   php_hash_whirlpool.h php_hash_adler32.h php_hash_crc32.h \
-  php_hash_fnv.h php_hash_joaat.h php_hash_sha3.h"
+  php_hash_fnv.h php_hash_joaat.h php_hash_sha3.h php_hash_blake3.h"
 
 PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, 0,,$PHP_HASH_CFLAGS)
 PHP_INSTALL_HEADERS(ext/hash, $EXT_HASH_HEADERS)
