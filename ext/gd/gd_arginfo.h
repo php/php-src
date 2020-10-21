@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 59256d0de105f1a2f5d5fc1e20f8090031b42a76 */
+ * Stub hash: 23b7c8395c628239fb10d746ca6bba72871ee9f3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageloadfont, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imageloadfont, 0, 1, GdFont, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -380,14 +380,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_imagefilledpolygon arginfo_imagepolygon
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefontwidth, 0, 1, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, font, IS_LONG, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_imagefontheight arginfo_imagefontwidth
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagechar, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
-	ZEND_ARG_TYPE_INFO(0, font, IS_LONG, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, char, IS_STRING, 0)
@@ -398,7 +398,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagestring, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
-	ZEND_ARG_TYPE_INFO(0, font, IS_LONG, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -829,5 +829,10 @@ static const zend_function_entry ext_functions[] = {
 
 
 static const zend_function_entry class_GdImage_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_GdFont_methods[] = {
 	ZEND_FE_END
 };

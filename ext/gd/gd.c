@@ -57,8 +57,6 @@
 
 #include "gd_compat.h"
 
-static int le_gd_font;
-
 #include <gd.h>
 #include <gd_errors.h>
 #include <gdfontt.h>  /* 1 Tiny font */
@@ -235,6 +233,75 @@ static void php_gd_object_minit_helper()
 	php_gd_image_object_handlers.offset = XtOffsetOf(php_gd_image_object, std);
 }
 
+static zend_class_entry *gd_font_ce = NULL;
+static zend_object_handlers php_gd_font_object_handlers;
+
+typedef struct _php_gd_font_object {
+	gdFontPtr font;
+	zend_object std;
+} php_gd_font_object;
+
+static php_gd_font_object *php_gd_font_object_from_zend_object(zend_object *zobj)
+{
+	return ((php_gd_font_object*)(zobj + 1)) - 1;
+}
+
+static zend_object *php_gd_font_object_to_zend_object(php_gd_font_object *obj)
+{
+	return ((zend_object*)(obj + 1)) - 1;
+}
+
+static zend_object *php_gd_font_object_create(zend_class_entry *ce)
+{
+	php_gd_font_object *obj = zend_object_alloc(sizeof(php_gd_font_object), ce);
+	zend_object *zobj = php_gd_font_object_to_zend_object(obj);
+
+	obj->font = NULL;
+	zend_object_std_init(zobj, ce);
+	object_properties_init(zobj, ce);
+	zobj->handlers = &php_gd_font_object_handlers;
+
+	return zobj;
+}
+
+static void php_gd_font_object_free(zend_object *zobj)
+{
+	php_gd_font_object *obj = php_gd_font_object_from_zend_object(zobj);
+
+	if (obj->font) {
+		if (obj->font->data) {
+			efree(obj->font->data);
+		}
+		efree(obj->font);
+		obj->font = NULL;
+	}
+
+	zend_object_std_dtor(zobj);
+}
+
+static zend_function *php_gd_font_object_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "You cannot initialize a GdImage object except through helper functions");
+	return NULL;
+}
+
+static void php_gd_font_minit_helper()
+{
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "GdFont", class_GdFont_methods);
+	gd_font_ce = zend_register_internal_class(&ce);
+	gd_font_ce->ce_flags |= ZEND_ACC_FINAL;
+	gd_font_ce->create_object = php_gd_font_object_create;
+	gd_font_ce->serialize = zend_class_serialize_deny;
+	gd_font_ce->unserialize = zend_class_unserialize_deny;
+
+	/* setting up the object handlers for the GdFont class */
+	memcpy(&php_gd_font_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	php_gd_font_object_handlers.clone_obj = NULL;
+	php_gd_font_object_handlers.free_obj = php_gd_font_object_free;
+	php_gd_font_object_handlers.get_constructor = php_gd_font_object_get_constructor;
+	php_gd_font_object_handlers.offset = XtOffsetOf(php_gd_font_object, std);
+}
 
 /*********************************************************
  *
@@ -265,19 +332,6 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_free_gd_font */
-static void php_free_gd_font(zend_resource *rsrc)
-{
-	gdFontPtr fp = (gdFontPtr) rsrc->ptr;
-
-	if (fp->data) {
-		efree(fp->data);
-	}
-
-	efree(fp);
-}
-/* }}} */
-
 /* {{{ php_gd_error_method */
 void php_gd_error_method(int type, const char *format, va_list args)
 {
@@ -302,8 +356,8 @@ void php_gd_error_method(int type, const char *format, va_list args)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(gd)
 {
-	le_gd_font = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
 	php_gd_object_minit_helper();
+	php_gd_font_minit_helper();
 
 #if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 	gdFontCacheMutexSetup();
@@ -614,7 +668,6 @@ PHP_FUNCTION(gd_info)
 /* {{{ Load a new font */
 PHP_FUNCTION(imageloadfont)
 {
-	zval *ind;
 	zend_string *file;
 	int hdr_size = sizeof(gdFont) - sizeof(char *);
 	int body_size, n = 0, b, i, body_size_check;
@@ -704,13 +757,8 @@ PHP_FUNCTION(imageloadfont)
 	}
 	php_stream_close(stream);
 
-	ind = zend_list_insert(font, le_gd_font);
-
-	/* Adding 5 to the font index so we will never have font indices
-	 * that overlap with the old fonts (with indices 1-5).  The first
-	 * list index given out is always 1.
-	 */
-	RETURN_LONG(Z_RES_HANDLE_P(ind) + 5);
+	object_init_ex(return_value, gd_font_ce);
+	php_gd_font_object_from_zend_object(Z_OBJ_P(return_value))->font = font;
 }
 /* }}} */
 
@@ -2695,42 +2743,26 @@ PHP_FUNCTION(imagefilledpolygon)
 /* }}} */
 
 /* {{{ php_find_gd_font */
-static gdFontPtr php_find_gd_font(int size)
+static gdFontPtr php_find_gd_font(zval *zfont)
 {
-	gdFontPtr font;
-
-	switch (size) {
-		case 1:
-			font = gdFontTiny;
-			break;
-		case 2:
-			font = gdFontSmall;
-			break;
-		case 3:
-			font = gdFontMediumBold;
-			break;
-		case 4:
-			font = gdFontLarge;
-			break;
-		case 5:
-			font = gdFontGiant;
-			break;
-		default: {
-			 zval *zv = zend_hash_index_find(&EG(regular_list), size - 5);
-			 if (!zv || (Z_RES_P(zv))->type != le_gd_font) {
-				 if (size < 1) {
-					 font = gdFontTiny;
-				 } else {
-					 font = gdFontGiant;
-				 }
-			 } else {
-				 font = (gdFontPtr)Z_RES_P(zv)->ptr;
-			 }
-		 }
-		 break;
+	if ((Z_TYPE_P(zfont) == IS_OBJECT) && instanceof_function(Z_OBJCE_P(zfont), gd_font_ce)) {
+		return php_gd_font_object_from_zend_object(Z_OBJ_P(zfont))->font;
 	}
 
-	return font;
+	if (Z_TYPE_P(zfont) != IS_LONG) {
+		/* In practice, type checks should prevent us from reaching here. */
+		return gdFontTiny;
+	}
+
+	switch (Z_LVAL_P(zfont)) {
+		case 1: return gdFontTiny;
+		case 2: return gdFontSmall;
+		case 3: return gdFontMediumBold;
+		case 4: return gdFontLarge;
+		case 5: return gdFontGiant;
+	}
+
+	return (Z_LVAL_P(zfont) < 1) ? gdFontTiny : gdFontGiant;
 }
 /* }}} */
 
@@ -2740,14 +2772,14 @@ static gdFontPtr php_find_gd_font(int size)
  */
 static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 {
-	zend_long SIZE;
+	zval *zfont;
 	gdFontPtr font;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &SIZE) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zfont) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	font = php_find_gd_font(SIZE);
+	font = php_find_gd_font(zfont);
 	RETURN_LONG(arg ? font->h : font->w);
 }
 /* }}} */
@@ -2801,15 +2833,16 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, i
 static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval *IM;
-	zend_long SIZE, X, Y, COL;
+	zend_long X, Y, COL;
 	char *C;
 	size_t C_len;
 	gdImagePtr im;
-	int ch = 0, col, x, y, size, i, l = 0;
+	int ch = 0, col, x, y, i, l = 0;
 	unsigned char *str = NULL;
+	zval *zfont;
 	gdFontPtr font;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olllsl", &IM, gd_image_ce, &SIZE, &X, &Y, &C, &C_len, &COL) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozllsl", &IM, gd_image_ce, &zfont, &X, &Y, &C, &C_len, &COL) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2826,9 +2859,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	y = Y;
 	x = X;
-	size = SIZE;
 
-	font = php_find_gd_font(size);
+	font = php_find_gd_font(zfont);
 
 	switch (mode) {
 		case 0:

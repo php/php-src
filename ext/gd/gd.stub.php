@@ -2,13 +2,12 @@
 
 /** @generate-function-entries */
 
-final class GdImage
-{
-}
+final class GdImage {}
+final class GdFont {}
 
 function gd_info(): array {}
 
-function imageloadfont(string $filename): int|false {}
+function imageloadfont(string $filename): GdFont|false {}
 
 function imagesetstyle(GdImage $image, array $style): bool {}
 
@@ -187,17 +186,17 @@ function imageopenpolygon(GdImage $image, array $points, int $num_points_or_colo
 
 function imagefilledpolygon(GdImage $image, array $points, int $num_points_or_color, ?int $color = null): bool {}
 
-function imagefontwidth(int $font): int {}
+function imagefontwidth(GdFont|int $font): int {}
 
-function imagefontheight(int $font): int {}
+function imagefontheight(GdFont|int $font): int {}
 
-function imagechar(GdImage $image, int $font, int $x, int $y, string $char, int $color): bool {}
+function imagechar(GdImage $image, GdFont|int $font, int $x, int $y, string $char, int $color): bool {}
 
-function imagecharup(GdImage $image, int $font, int $x, int $y, string $char, int $color): bool {}
+function imagecharup(GdImage $image, GdFont|int $font, int $x, int $y, string $char, int $color): bool {}
 
-function imagestring(GdImage $image, int $font, int $x, int $y, string $string, int $color): bool {}
+function imagestring(GdImage $image, GdFont|int $font, int $x, int $y, string $string, int $color): bool {}
 
-function imagestringup(GdImage $image, int $font, int $x, int $y, string $string, int $color): bool {}
+function imagestringup(GdImage $image, GdFont|int $font, int $x, int $y, string $string, int $color): bool {}
 
 function imagecopy(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_width, int $src_height): bool {}
 
