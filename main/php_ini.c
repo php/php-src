@@ -374,13 +374,13 @@ static void php_load_zend_extension_cb(void *arg)
 
 			efree(orig_libpath);
 			efree(err1);
-			efree(libpath);
 		}
 
 #ifdef PHP_WIN32
 		if (!php_win32_image_compatible(handle, &err1)) {
 				php_error(E_CORE_WARNING, err1);
 				efree(err1);
+				efree(libpath);
 				DL_UNLOAD(handle);
 				return;
 		}
