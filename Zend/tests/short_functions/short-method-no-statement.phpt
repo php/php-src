@@ -7,7 +7,7 @@ class Test {
 
     public function __construct(private int $b) {}
 
-    public function out(array $a) => foreach ($a as $v) print $v;
+    public fn out(array $a) => foreach ($a as $v) print $v;
 }
 
 $t = new Test(1);

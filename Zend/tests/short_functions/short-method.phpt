@@ -7,10 +7,9 @@ class Test {
 
     public function __construct(private int $b) {}
 
-    public function addUp(int $a) => $a + $this->b;
+    public fn addUp(int $a) => $a + $this->b;
 
-    public function addUp2(int $a): int
-        => $a + $this->b;
+    public fn addUp2(int $a): int => $a + $this->b;
 }
 
 $t = new Test(1);

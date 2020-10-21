@@ -3,7 +3,7 @@ Non-expression statements parse error in short functions.
 --FILE--
 <?php
 
-function test(array $a) => foreach ($a as $v) print $v;
+fn test(array $a) => foreach ($a as $v) print $v;
 
 test([1, 2, 3]);
 

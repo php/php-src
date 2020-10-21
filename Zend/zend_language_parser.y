@@ -548,7 +548,7 @@ function_declaration_statement:
 	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
 		      zend_ast_get_str($3), $6, NULL, $11, $8, NULL); CG(extra_fn_flags) = $9; }
-   | function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+   | fn returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
         backup_fn_flags T_DOUBLE_ARROW expr ';' backup_fn_flags
      		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $4,
      		      zend_ast_get_str($3), $6, NULL, zend_ast_create(ZEND_AST_RETURN, $11), $8, NULL); CG(extra_fn_flags) = $9; }
@@ -863,6 +863,11 @@ attributed_class_statement:
 		return_type backup_fn_flags method_body backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
+	|	method_modifiers fn returns_ref identifier backup_doc_comment '(' parameter_list ')'
+		return_type backup_fn_flags T_DOUBLE_ARROW expr ';' backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $14, $2, $5,
+				  zend_ast_get_str($4), $7, NULL, zend_ast_create(ZEND_AST_RETURN, $12), $9, NULL);
+				  CG(extra_fn_flags) = $10; }
 ;
 
 class_statement:

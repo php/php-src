@@ -3,7 +3,7 @@ Short functions with match statements.
 --FILE--
 <?php
 
-function pick_one(int $a) => match($a) {
+fn pick_one(int $a) => match($a) {
     1 => 'One',
     2 => 'Two',
     3 => 'Three',
