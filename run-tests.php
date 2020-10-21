@@ -147,7 +147,7 @@ function main(): void
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
-           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache;
+           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -405,6 +405,7 @@ function main(): void
     $shuffle = false;
     $workers = null;
     $context_line_count = 3;
+    $num_repeats = 1;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -622,6 +623,10 @@ function main(): void
                         $environment['LSAN_OPTIONS'] = 'suppressions=' . $lsanSuppressions
                             . ':print_suppressions=0';
                     }
+                    break;
+                case '--repeat':
+                    $num_repeats = (int) $argv[++$i];
+                    $environment['SKIP_REPEAT'] = 1;
                     break;
                 //case 'w'
                 case '-':
@@ -1802,6 +1807,13 @@ function show_file_block(string $file, string $block, ?string $section = null): 
     }
 }
 
+function skip_test(string $tested, string $tested_file, string $shortname, string $reason) {
+    show_result('SKIP', $tested, $tested_file, "reason: $reason");
+    junit_init_suite(junit_get_suitename_for($shortname));
+    junit_mark_test_as('SKIP', $shortname, $tested, 0, $reason);
+    return 'SKIPPED';
+}
+
 //
 //  Run an individual test case.
 //
@@ -1818,6 +1830,7 @@ function run_test(string $php, $file, array $env): string
     global $no_file_cache;
     global $slow_min_ms;
     global $preload, $file_cache;
+    global $num_repeats;
     // Parallel testing
     global $workerID;
     $temp_filenames = null;
@@ -1911,6 +1924,10 @@ TEST $file
         }
     }
 
+    $shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
+    $tested_file = $shortname;
+    $tested = trim($section_text['TEST']);
+
     // the redirect section allows a set of tests to be reused outside of
     // a given test dir
     if ($bork_info === null) {
@@ -1926,6 +1943,10 @@ TEST $file
             if (isset($section_text['FILEEOF'])) {
                 $section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
                 unset($section_text['FILEEOF']);
+            }
+
+            if ($num_repeats > 1 && isset($section_text['FILE_EXTERNAL'])) {
+                return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
             }
 
             foreach (['FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX'] as $prefix) {
@@ -1950,9 +1971,6 @@ TEST $file
         }
     }
     fclose($fp);
-
-    $shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
-    $tested_file = $shortname;
 
     if ($bork_info !== null) {
         show_result("BORK", $bork_info, $tested_file);
@@ -1983,8 +2001,6 @@ TEST $file
         $cmdRedirect = '';
     }
 
-    $tested = trim($section_text['TEST']);
-
     /* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
     if (array_key_exists('CGI', $section_text) || !empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
         if (isset($php_cgi)) {
@@ -1999,12 +2015,11 @@ TEST $file
             } elseif (file_exists(dirname($php) . "/php-cgi")) {
                 $php = realpath(dirname($php) . "/php-cgi") . ' -C ';
             } else {
-                show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
-
-                junit_init_suite(junit_get_suitename_for($shortname));
-                junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
-                return 'SKIPPED';
+                return skip_test($tested, $tested_file, $shortname, 'CGI not available');
             }
+        }
+        if ($num_repeats > 1) {
+            return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
         }
         $uses_cgi = true;
     }
@@ -2023,11 +2038,22 @@ TEST $file
             // be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.
             $extra_options = '-rr';
         } else {
-            show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
+            return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
+        }
+        if ($num_repeats > 1) {
+            return skip_test($tested, $tested_file, $shortname, 'phpdbg does not support --repeat');
+        }
+    }
 
-            junit_init_suite(junit_get_suitename_for($shortname));
-            junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
-            return 'SKIPPED';
+    if ($num_repeats > 1) {
+        if (array_key_exists('CLEAN', $section_text)) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with CLEAN might not be repeatable');
+        }
+        if (array_key_exists('STDIN', $section_text)) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with STDIN might not be repeatable');
+        }
+        if (array_key_exists('CAPTURE_STDIO', $section_text)) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with CAPTURE_STDIO might not be repeatable');
         }
     }
 
@@ -2173,6 +2199,9 @@ TEST $file
             // even though all the files are re-created.
             $ini_settings['opcache.validate_timestamps'] = '0';
         }
+    } else if ($num_repeats > 1) {
+        // Make sure warnings still show up on the second run.
+        $ini_settings['opcache.record_warnings'] = '1';
     }
 
     // Any special ini settings
@@ -2183,6 +2212,10 @@ TEST $file
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
         $section_text['INI'] = preg_replace('/{MAIL:(\S+)}/', $replacement, $section_text['INI']);
         settings2array(preg_split("/[\n\r]+/", $section_text['INI']), $ini_settings);
+
+        if ($num_repeats > 1 && isset($ini_settings['opcache.opt_debug_level'])) {
+            return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
+        }
     }
 
     $ini_settings = settings2params($ini_settings);
@@ -2484,7 +2517,8 @@ TEST $file
         $env['CONTENT_TYPE'] = '';
         $env['CONTENT_LENGTH'] = '';
 
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args$cmdRedirect";
+        $repeat_option = $num_repeats > 1 ? "--repeat $num_repeats" : "";
+        $cmd = "$php $pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
     }
 
     if ($valgrind) {
@@ -2554,6 +2588,25 @@ COMMAND $cmd
 
         if (!$leaked) {
             @unlink($memcheck_filename);
+        }
+    }
+
+    if ($num_repeats > 1) {
+        // In repeat mode, retain the output before the first execution,
+        // and of the last execution. Do this early, because the trimming below
+        // makes the newline handling complicated.
+        $separator1 = "Executing for the first time...\n";
+        $separator1_pos = strpos($out, $separator1);
+        if ($separator1_pos !== false) {
+            $separator2 = "Finished execution, repeating...\n";
+            $separator2_pos = strrpos($out, $separator2);
+            if ($separator2_pos !== false) {
+                $out = substr($out, 0, $separator1_pos)
+                     . substr($out, $separator2_pos + strlen($separator2));
+            } else {
+                $out = substr($out, 0, $separator1_pos)
+                     . substr($out, $separator1_pos + strlen($separator1));
+            }
         }
     }
 

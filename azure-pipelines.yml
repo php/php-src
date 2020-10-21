@@ -103,3 +103,8 @@ jobs:
         configurationName: DEBUG_NTS_FILE_CACHE
         configurationParameters: '--enable-debug --disable-zts'
         timeoutInMinutes: 90
+    - template: azure/job.yml
+      parameters:
+        configurationName: DEBUG_NTS_REPEAT
+        configurationParameters: '--enable-debug --disable-zts'
+        runTestsParameters: '--repeat 2'
