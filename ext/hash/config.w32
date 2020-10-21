@@ -11,8 +11,9 @@ PHP_HASH = 'yes';
 EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c ' +
 					'hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c ' +
 					'hash_adler32.c hash_crc32.c hash_joaat.c hash_fnv.c ' +
-					'hash_sha3.c hash_blake3.c blake3/blake3.c ' +
-					'blake3/blake3_dispatch.c blake3/blake3_portable.c', false);
+					'hash_sha3.c hash_blake3.c', false);
+
+ADD_SOURCES('ext/hash/blake3', 'blake3.c blake3_dispatch.c blake3_portable.c');
 
 var hash_sha3_dir = 'ext/hash/sha3/generic' + (X64 ? '64' : '32') + 'lc';
 
