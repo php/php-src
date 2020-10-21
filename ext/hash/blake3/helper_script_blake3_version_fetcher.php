@@ -51,7 +51,7 @@ foreach ($files as $file) {
         )
     );
     $name = $file["name"];
-    if ($file["type"] !== "file" || ! preg_match('/^blake3.*\\.(?:c|h|S)$/', $name)) {
+    if ($file["type"] !== "file" || ! preg_match('/^blake3.*\\.(?:c|h|S|asm)$/', $name)) {
         // the dir contains several things we're not interested in.
         continue;
     }
