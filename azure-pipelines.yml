@@ -26,6 +26,7 @@ jobs:
     parameters:
       configurationName: DEBUG_NTS
       configurationParameters: '--enable-debug --disable-zts'
+      runTestsParameters: '--repeat 2'
   - template: azure/job.yml
     parameters:
       configurationName: RELEASE_ZTS
