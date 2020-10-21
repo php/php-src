@@ -2476,7 +2476,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 		while (phi) {
 			i = phi->sources[1];
-			if (start[i] >= 0) {
+			if (start[i] >= 0 && !ssa->vars[phi->ssa_var].no_val) {
 				end[i] = idx;
 				flags[i] &= ~ZREG_LAST_USE;
 			}
@@ -2487,6 +2487,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			if (start[i] >= 0 && !ssa->vars[i].phi_use_chain) {
 				end[i] = idx;
 				flags[i] &= ~ZREG_LAST_USE;
+			} else {
+				zend_jit_close_var(stack, i, start, end, flags, idx);
 			}
 		}
 	} else {
