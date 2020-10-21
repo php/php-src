@@ -4962,7 +4962,9 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|	LONG_MATH opcode, result_reg, op2_addr
 	}
 
-	|	SET_ZVAL_LVAL res_addr, Ra(result_reg)
+	if (Z_MODE(res_addr) != IS_REG || Z_REG(res_addr) != result_reg) {
+		|	SET_ZVAL_LVAL res_addr, Ra(result_reg)
+	}
 	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
 		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
 			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
@@ -13138,7 +13140,9 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 		zend_jit_addr var_addr = prop_addr;
 
 		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
-		|	LOAD_ZVAL_ADDR FCARG1a, prop_addr
+		if (Z_REG(prop_addr) != ZREG_FCARG1a || Z_OFFSET(prop_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1a, prop_addr
+		}
 
 		|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, >2
 		|	GET_ZVAL_PTR FCARG1a, var_addr
