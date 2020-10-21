@@ -11,6 +11,7 @@ if test "$PHP_MHASH" != "no"; then
   AC_DEFINE(PHP_MHASH_BC, 1, [ ])
 fi
 
+EXT_HASH_BLAKE3_SOURCES="hash_blake3.c blake3/blake3.c blake3/blake3_dispatch.c blake3/blake3_portable.c"
 
 if test $ac_cv_c_bigendian_php = yes; then
   dnl todo: check if blake3/blake3_neon.c is applicable
@@ -22,27 +23,38 @@ else
   AC_MSG_CHECKING([if we're at 64-bit platform])
   AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
     AC_MSG_RESULT([no])
+    if test $ac_cv_target_x86 = yes; then 
+      dnl i think there are some 32bit x86 cpus with SSE2 but.. cba
+      PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_AVX512"
+    fi
     SHA3_DIR="sha3/generic32lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-inplace32BI.c"
   ],[
     AC_MSG_RESULT([yes])
     SHA3_DIR="sha3/generic64lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
+    if test $ac_cv_target_x86 = yes; then 
+      if test $ac_cv_target_windows = yes; then
+        dnl x86_64 windows gnuc
+        EXT_HASH_BLAKE3_SOURCES="$EXT_HASH_BLAKE3_SOURCES blake3/blake3_avx512_x86-64_windows_gnu.S blake3/blake3_avx2_x86-64_windows_gnu.S blake3/blake3_sse41_x86-64_windows_gnu.S blake3/blake3_sse2_x86-64_windows_gnu.S"
+      else
+        if test $ac_cv_target_unix = yes; then 
+          dnl x86_64 unix gnuc
+          EXT_HASH_BLAKE3_SOURCES="$EXT_HASH_BLAKE3_SOURCES blake3/blake3_avx512_x86-64_unix.S blake3/blake3_avx2_x86-64_unix.S blake3/blake3_sse41_x86-64_unix.S blake3/blake3_sse2_x86-64_unix.S"
+        else
+          dnl blake still has C instrictics versions (eg ext/hash/blake3/blake3_avx512.c  ) which COULD be used in this situation, 
+          dnl we're targeting x86_64 but neither windows nor unix-ish.. 
+          dnl i have nothing to test this on, so i'm just disabling it for now, feel free to fix it.
+          PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_AVX512"
+        fi
+      fi
+    fi
   ])
   EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c hash_sha3.c"
   PHP_HASH_CFLAGS="-I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
   PHP_ADD_BUILD_DIR(ext/hash/$SHA3_DIR, 1)
 fi
-
-EXT_HASH_BLAKE3_SOURCES="hash_blake3.c blake3/blake3.c blake3/blake3_dispatch.c blake3/blake3_portable.c"
-dnl todo: add optimized versions of blake3 for sse2/sse4.1/avx2/avx512/arm+neon 
-dnl ...when applicable...
-dnl EXT_HASH_BLAKE3_SOURCES="$EXT_HASH_BLAKE3_SOURCES blake3/blake3_sse2.c blake3/blake3_sse41.c blake3/blake3_avx2.c blake3/blake3_avx512.c"
-
-PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_AVX512"
-
-
 
 EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
   hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c hash_adler32.c \
