@@ -61,5 +61,5 @@ Output:
 Warning: Failed loading Zend extension '%Sunknown_ext%S' (tried: %s) in Unknown on line 0
 Done.
 Absolute path (unknown):
-Output: Failed loading %s: %s
+Output: Failed loading %s
 Done.
