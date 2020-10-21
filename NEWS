@@ -2,4 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0alpha1
 
+- FTP:
+  . Convert resource<ftp> to object \FTPConnection. (Sara)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
