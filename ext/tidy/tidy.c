@@ -66,6 +66,13 @@
 	}	\
 	obj = Z_TIDY_P(object);	\
 
+#define TIDY_FETCH_INITIALIZED_OBJECT \
+	TIDY_FETCH_OBJECT; \
+	if (!obj->ptdoc->initialized) { \
+		zend_throw_error(NULL, "tidy object is not initialized"); \
+		return; \
+	}
+
 #define TIDY_FETCH_ONLY_OBJECT	\
 	PHPTidyObj *obj;	\
 	TIDY_SET_CONTEXT; \
@@ -1474,7 +1481,7 @@ static PHP_FUNCTION(tidy_get_status)
    Get the Detected HTML version for the specified document. */
 static PHP_FUNCTION(tidy_get_html_ver)
 {
-	TIDY_FETCH_OBJECT;
+	TIDY_FETCH_INITIALIZED_OBJECT;
 
 	RETURN_LONG(tidyDetectedHtmlVersion(obj->ptdoc->doc));
 }
@@ -1484,7 +1491,7 @@ static PHP_FUNCTION(tidy_get_html_ver)
    Indicates if the document is a XHTML document. */
 static PHP_FUNCTION(tidy_is_xhtml)
 {
-	TIDY_FETCH_OBJECT;
+	TIDY_FETCH_INITIALIZED_OBJECT;
 
 	RETURN_BOOL(tidyDetectedXhtml(obj->ptdoc->doc));
 }
@@ -1494,7 +1501,7 @@ static PHP_FUNCTION(tidy_is_xhtml)
    Indicates if the document is a generic (non HTML/XHTML) XML document. */
 static PHP_FUNCTION(tidy_is_xml)
 {
-	TIDY_FETCH_OBJECT;
+	TIDY_FETCH_INITIALIZED_OBJECT;
 
 	RETURN_BOOL(tidyDetectedGenericXml(obj->ptdoc->doc));
 }
