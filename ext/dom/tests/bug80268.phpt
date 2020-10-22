@@ -15,6 +15,10 @@ $doc->loadHTMLFile(__DIR__ . '/80268.html');
 $html = $doc->saveHTML();
 var_dump(strpos($html, '<p>foo</p>') !== false);
 ?>
+--CLEAN--
+<?
+unlink(__DIR__ . '/80268.html');
+?>
 --EXPECT--
 bool(true)
 bool(true)
