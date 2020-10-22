@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c5195a21d76b23878f26d592ee75bea68941ce51 */
+ * Stub hash: efc4c20a1507cfba58ec265a2fe6f61b1e0f8a61 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pspell_new, 0, 1, PSpell, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, language, IS_STRING, 0)
@@ -85,7 +85,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_pspell_config_repl arginfo_pspell_config_personal
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pspell_config_save_repl, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, dictionary, PSpellConfig, 0)
+	ZEND_ARG_OBJ_INFO(0, config, PSpellConfig, 0)
 	ZEND_ARG_TYPE_INFO(0, save, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 

@@ -34,4 +34,4 @@ function pspell_config_personal(PSpellConfig $config, string $filename): bool {}
 function pspell_config_dict_dir(PSpellConfig $config, string $directory): bool {}
 function pspell_config_data_dir(PSpellConfig $config, string $directory): bool {}
 function pspell_config_repl(PSpellConfig $config, string $filename): bool {}
-function pspell_config_save_repl(PSpellConfig $dictionary, bool $save): bool {}
+function pspell_config_save_repl(PSpellConfig $config, bool $save): bool {}
