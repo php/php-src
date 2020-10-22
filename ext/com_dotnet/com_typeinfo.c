@@ -267,18 +267,20 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 
 	if (obj) {
 		if (dispname == NULL && sink) {
-			IProvideClassInfo2 *pci2;
-			IProvideClassInfo *pci;
+			if (V_VT(&obj->v) == VT_DISPATCH) {
+				IProvideClassInfo2 *pci2;
+				IProvideClassInfo *pci;
 
-			if (SUCCEEDED(IDispatch_QueryInterface(V_DISPATCH(&obj->v), &IID_IProvideClassInfo2, (void**)&pci2))) {
-				gotguid = SUCCEEDED(IProvideClassInfo2_GetGUID(pci2, GUIDKIND_DEFAULT_SOURCE_DISP_IID, &iid));
-				IProvideClassInfo2_Release(pci2);
-			}
-			if (!gotguid && SUCCEEDED(IDispatch_QueryInterface(V_DISPATCH(&obj->v), &IID_IProvideClassInfo, (void**)&pci))) {
-				/* examine the available interfaces */
-				/* TODO: write some code here */
-				php_error_docref(NULL, E_WARNING, "IProvideClassInfo: this code not yet written!");
-				IProvideClassInfo_Release(pci);
+				if (SUCCEEDED(IDispatch_QueryInterface(V_DISPATCH(&obj->v), &IID_IProvideClassInfo2, (void**)&pci2))) {
+					gotguid = SUCCEEDED(IProvideClassInfo2_GetGUID(pci2, GUIDKIND_DEFAULT_SOURCE_DISP_IID, &iid));
+					IProvideClassInfo2_Release(pci2);
+				}
+				if (!gotguid && SUCCEEDED(IDispatch_QueryInterface(V_DISPATCH(&obj->v), &IID_IProvideClassInfo, (void**)&pci))) {
+					/* examine the available interfaces */
+					/* TODO: write some code here */
+					php_error_docref(NULL, E_WARNING, "IProvideClassInfo: this code not yet written!");
+					IProvideClassInfo_Release(pci);
+				}
 			}
 		} else if (dispname == NULL) {
 			if (obj->typeinfo) {
@@ -295,15 +297,17 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 			/* get the library from the object; the rest will be dealt with later */
 			ITypeInfo_GetContainingTypeLib(obj->typeinfo, &typelib, &idx);
 		} else if (typelibname == NULL) {
-			IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &typeinfo);
-			if (dispname) {
-				unsigned int idx;
-				/* get the library from the object; the rest will be dealt with later */
-				ITypeInfo_GetContainingTypeLib(typeinfo, &typelib, &idx);
+			if (V_VT(&obj->v) == VT_DISPATCH) {
+				IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &typeinfo);
+				if (dispname) {
+					unsigned int idx;
+					/* get the library from the object; the rest will be dealt with later */
+					ITypeInfo_GetContainingTypeLib(typeinfo, &typelib, &idx);
 
-				if (typelib) {
-					ITypeInfo_Release(typeinfo);
-					typeinfo = NULL;
+					if (typelib) {
+						ITypeInfo_Release(typeinfo);
+						typeinfo = NULL;
+					}
 				}
 			}
 		}
