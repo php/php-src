@@ -21,36 +21,6 @@ if (!$socket) {
 
 $pid = pcntl_fork();
 
-function pasv_listen($action){
-    global $pasv_port, $tmp_file;
-    $tmp_file = 'nm2.php';
-    $pid = pcntl_fork();
-    if($pid === 0){
-        $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port");
-        $fs = stream_socket_accept($soc, 3);
-        switch ($action) {
-            case 'fget':
-            case 'get':
-            //listen for 3 seconds 3 seconds
-            fputs($fs, "I am passive.\r\n");
-            break;
-            case 'put':
-            file_put_contents($tmp_file,  stream_get_contents($fs));
-            break;
-            case 'list':
-            fputs($fs, "drwxr-x---   3 owner  group      4096 Jul 12 12:16 .\r\n");
-            fputs($fs, "drwxr-x---   3 owner  group      4096 Jul 12 12:16 ..\r\n");
-            fputs($fs, "drwxr-x---   3 owner  group      4096 Jul 12 12:16 public_ftp\r\n");
-            break;
-            case 'list_null':
-            fputs($fs, "\r\n");
-            break;
-        }
-        fclose($fs);
-        exit;
-    }
-}
-
 if ($pid) {
 
     function dump_and_exit($buf)
