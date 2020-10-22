@@ -1951,12 +1951,8 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	// TODO: Accept zend_string in highlight_string API.
-	zval str_zv;
-	ZVAL_STR_COPY(&str_zv, str);
-	highlight_string(&str_zv, &syntax_highlighter_ini, hicompiled_string_description);
+	highlight_string(str, &syntax_highlighter_ini, hicompiled_string_description);
 	efree(hicompiled_string_description);
-	zval_ptr_dtor(&str_zv);
 
 	EG(error_reporting) = old_error_reporting;
 
