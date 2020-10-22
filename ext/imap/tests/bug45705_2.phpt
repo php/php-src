@@ -18,7 +18,7 @@ $envelope = array('return_path' => 'John Doe <john@example.com>',
 );
 
 var_dump($envelope);
-imap_mail_compose($envelope, array(1 => array()));
+imap_mail_compose($envelope, [1 => ['cc' => 'Steve Doe <steve@example.com>',]]);
 var_dump($envelope);
 
 ?>
