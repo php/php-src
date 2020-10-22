@@ -1560,6 +1560,15 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 		if (ssa->ops[line].op1_def == current->ssa_var ||
 		    ssa->ops[line].op2_def == current->ssa_var ||
 		    ssa->ops[line].result_def == current->ssa_var) {
+			regset = zend_jit_get_def_scratch_regset(
+				ssa_opcodes ? ssa_opcodes[line] : op_array->opcodes + line,
+				ssa->ops + line,
+				op_array, ssa, current->ssa_var, line == last_use_line);
+			ZEND_REGSET_FOREACH(regset, reg) {
+				if (line < freeUntilPos[reg]) {
+					freeUntilPos[reg] = line;
+				}
+			} ZEND_REGSET_FOREACH_END();
 			line++;
 		}
 		while (line <= range->end) {

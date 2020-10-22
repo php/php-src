@@ -11714,7 +11714,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		}
 
 		if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_OBJECT|may_be_string)))
-		 && !exit_addr) {
+		 && (!exit_addr || !(op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_STRING)))) {
 			if (opline->opcode != ZEND_FETCH_DIM_IS && opline->opcode != ZEND_FETCH_LIST_R) {
 				if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
 					|	LOAD_ZVAL_ADDR FCARG1a, orig_op1_addr
@@ -15160,6 +15160,28 @@ static zend_bool zend_needs_extra_reg_for_const(const zend_op *opline, zend_ucha
 ||	}
 |.endif
 	return 0;
+}
+
+static zend_regset zend_jit_get_def_scratch_regset(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, int current_var, zend_bool last_use)
+{
+	uint32_t op1_info, op2_info;
+
+	switch (opline->opcode) {
+		case ZEND_FETCH_DIM_R:
+			op1_info = OP1_INFO();
+			op2_info = OP2_INFO();
+			if (((opline->op1_type & (IS_TMP_VAR|IS_VAR)) &&
+			     (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) ||
+			    ((opline->op2_type & (IS_TMP_VAR|IS_VAR)) &&
+			     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)))) {
+				return ZEND_REGSET(ZREG_FCARG1a);
+			}
+			break;
+		default:
+			break;
+	}
+
+	return ZEND_REGSET_EMPTY;
 }
 
 static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, int current_var, zend_bool last_use)
