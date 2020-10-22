@@ -486,6 +486,7 @@ static PHP_RINIT_FUNCTION(pcre)
 	mdata_used = 0;
 #endif
 
+	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	PCRE_G(gctx_zmm) = pcre2_general_context_create(php_pcre_emalloc, php_pcre_efree, NULL);
 	if (!PCRE_G(gctx_zmm)) {
 		return FAILURE;
