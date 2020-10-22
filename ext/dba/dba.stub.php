@@ -36,7 +36,7 @@ function dba_exists($key, $dba): bool {}
  */
 function dba_fetch($key, $skip, $dba = UNKNOWN): string|false {}
 
-function dba_key_split(string $key): array|false {}
+function dba_key_split(string|false|null $key): array|false {}
 
 /** @param resource $dba */
 function dba_firstkey($dba): string|false {}
