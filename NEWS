@@ -8,4 +8,8 @@ PHP                                                                        NEWS
 - GD:
   . Convert resource<gd font> to object \GdFont. (Sara)
 
+- PSpell:
+  . Convert resource<pspell> to object \PSpell. (Sara)
+  . Convert resource<pspell config> to object \PSPellConfig. (Sara)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
