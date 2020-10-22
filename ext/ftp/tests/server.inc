@@ -4,20 +4,14 @@ $socket = null;
 $errno = 0;
 $context = stream_context_create(array('ssl' => array('local_cert' => dirname(__FILE__).'/cert.pem')));
 
-for ($i=0; $i<10 && !$socket; ++$i) {
-    $port = rand(50000, 65535);
-
-    $socket = @stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-}
-//set anther random port that is not the same as $port
-do{
-    $pasv_port = rand(50000, 65535);
-}while($pasv_port == $port);
-
+$socket = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 if (!$socket) {
     echo "$errstr ($errno)\n";
     die("could not start/bind the ftp server\n");
 }
+
+$socket_name = stream_socket_get_name($socket, false);
+$port = (int) substr($socket_name, strrpos($socket_name, ':') + 1);
 
 $pid = pcntl_fork();
 
@@ -402,25 +396,20 @@ if ($pid) {
             $i=0;
 
             if (empty($bug73457)) {
-                do {
-                    if (!empty($ssl)) {
-                        $soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-                    } else {
-                        $soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port");
-                    }
-                    /* Could bind port, Try another port */
-                    if (!$soc) {
-                        $pasv_port = rand(50000, 65535);
-                    }
-                    $i++;
-                } while ($i<10 && !$soc);
-
+                if (!empty($ssl)) {
+                    $soc = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+                } else {
+                    $soc = stream_socket_server("tcp://127.0.0.1:0");
+                }
                 if (!$soc) {
                     echo "$errstr ($errno)\n";
                     die("could not bind passive port\n");
                 }
+
+                $soc_name = stream_socket_get_name($soc, false);
+                $pasv_port = (int) substr($socket_name, strrpos($soc_name, ':') + 1);
             } else {
-                $pasv_port=1234;
+                $pasv_port = 1234;
             }
 
             $p2 = $pasv_port % ((int) 1 << 8);
