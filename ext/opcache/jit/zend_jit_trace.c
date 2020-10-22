@@ -3379,6 +3379,18 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				if (ra[i]
 				 && (ra[i]->flags & ZREG_LOAD) != 0
 				 && ra[i]->reg != stack[i].reg) {
+
+					if ((ssa->var_info[i].type & MAY_BE_GUARD) != 0) {
+						uint8_t op_type;
+
+						ssa->var_info[i].type &= ~MAY_BE_GUARD;
+						op_type = concrete_type(ssa->var_info[i].type);
+						if (!zend_jit_type_guard(&dasm_state, opline, i, op_type)) {
+							goto jit_failure;
+						}
+						SET_STACK_TYPE(stack, i, op_type, 1);
+					}
+
 					SET_STACK_REG_EX(stack, i, ra[i]->reg, ZREG_LOAD);
 					if (!zend_jit_load_var(&dasm_state, ssa->var_info[i].type, i, ra[i]->reg)) {
 						goto jit_failure;
