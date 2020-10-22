@@ -11714,7 +11714,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		}
 
 		if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_OBJECT|may_be_string)))
-		 && !exit_addr) {
+		 && (!exit_addr || !(op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_STRING)))) {
 			if (opline->opcode != ZEND_FETCH_DIM_IS && opline->opcode != ZEND_FETCH_LIST_R) {
 				if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
 					|	LOAD_ZVAL_ADDR FCARG1a, orig_op1_addr
