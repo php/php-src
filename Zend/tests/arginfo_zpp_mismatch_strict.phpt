@@ -1,11 +1,13 @@
 --TEST--
-Test that there is no arginfo/zpp mismatch
+Test that there is no arginfo/zpp mismatch in strict mode
 --SKIPIF--
 <?php
 if (getenv('SKIP_MSAN')) die("skip msan misses interceptors for some functions");
 ?>
 --FILE--
 <?php
+
+declare(strict_types=1);
 
 require __DIR__ . "/arginfo_zpp_mismatch.inc";
 
