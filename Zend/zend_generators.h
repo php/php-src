@@ -41,10 +41,7 @@ struct _zend_generator_node {
 	uint32_t children;
 	union {
 		HashTable *ht; /* if multiple children */
-		struct { /* if one child */
-			zend_generator *leaf; /* TODO: Unused, remove. */
-			zend_generator *child;
-		} single;
+		zend_generator *single; /* if one child */
 	} child;
 	/* One generator can cache a direct pointer to the current root.
 	 * The leaf member points back to the generator using the root cache. */

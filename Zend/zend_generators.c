@@ -165,14 +165,14 @@ static void zend_generator_remove_child(zend_generator_node *node, zend_generato
 {
 	ZEND_ASSERT(node->children >= 1);
 	if (node->children == 1) {
-		node->child.single.child = NULL;
+		node->child.single = NULL;
 	} else {
 		HashTable *ht = node->child.ht;
 		zend_hash_index_del(ht, (zend_ulong) child);
 		if (node->children == 2) {
 			zend_generator *other_child;
 			ZEND_HASH_FOREACH_PTR(ht, other_child) {
-				node->child.single.child = other_child;
+				node->child.single = other_child;
 				break;
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(ht);
@@ -469,13 +469,13 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 	zend_generator_node *node = &generator->node;
 
 	if (node->children == 0) {
-		node->child.single.child = child;
+		node->child.single = child;
 	} else {
 		if (node->children == 1) {
 			HashTable *ht = emalloc(sizeof(HashTable));
 			zend_hash_init(ht, 0, NULL, NULL, 0);
 			zend_hash_index_add_new_ptr(ht,
-				(zend_ulong) node->child.single.child, node->child.single.child);
+				(zend_ulong) node->child.single, node->child.single);
 			node->child.ht = ht;
 		}
 
@@ -514,7 +514,7 @@ ZEND_API zend_generator *zend_generator_update_root(zend_generator *generator)
 static zend_generator *get_new_root(zend_generator *generator, zend_generator *root)
 {
 	while (!root->execute_data && root->node.children == 1) {
-		root = root->node.child.single.child;
+		root = root->node.child.single;
 	}
 
 	if (root->execute_data) {
