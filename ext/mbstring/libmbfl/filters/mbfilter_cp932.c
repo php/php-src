@@ -33,6 +33,7 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
+static void mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter);
 static void mbfl_filt_ident_cp932(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
@@ -79,7 +80,7 @@ const struct mbfl_convert_vtbl vtbl_cp932_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_cp932_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_cp932_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp932 = {
@@ -212,6 +213,17 @@ void mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 	default:
 		filter->status = 0;
 		break;
+	}
+}
+
+static void mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status) {
+		(*filter->filter_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter);
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
 	}
 }
 
