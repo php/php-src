@@ -1931,21 +1931,17 @@ PHP_FUNCTION(php_strip_whitespace)
 /* {{{ Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
 {
-	zval *expr;
+	zend_string *str;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	char *hicompiled_string_description;
 	zend_bool i = 0;
 	int old_error_reporting = EG(error_reporting);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(expr)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (!try_convert_to_string(expr)) {
-		RETURN_THROWS();
-	}
 
 	if (i) {
 		php_output_start_default();
@@ -1957,8 +1953,12 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description);
+	// TODO: Accept zend_string in highlight_string API.
+	zval str_zv;
+	ZVAL_STR_COPY(&str_zv, str);
+	highlight_string(&str_zv, &syntax_highlighter_ini, hicompiled_string_description);
 	efree(hicompiled_string_description);
+	zval_ptr_dtor(&str_zv);
 
 	EG(error_reporting) = old_error_reporting;
 
