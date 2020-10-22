@@ -2216,7 +2216,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			 && opline->opcode == ZEND_ASSIGN
 			 && opline->op1_type == IS_CV
 			 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) != NO_ALIAS) {
-				/* avoid register allocation in case of possiblity of indirect modification*/
+				/* avoid register allocation in case of possibility of indirect modification*/
 				support_opline = 0;
 			}
 
@@ -5937,7 +5937,7 @@ jit_failure:
 	}
 
 jit_cleanup:
-	/* Clenup used op_arrays */
+	/* Clean up used op_arrays */
 	while (num_op_arrays > 0) {
 		op_array = op_arrays[--num_op_arrays];
 		jit_extension =
