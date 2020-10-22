@@ -281,7 +281,7 @@ static void php_gd_font_object_free(zend_object *zobj)
 
 static zend_function *php_gd_font_object_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "You cannot initialize a GdImage object except through helper functions");
+	zend_throw_error(NULL, "You cannot initialize a GdFont object except through helper functions");
 	return NULL;
 }
 
@@ -290,7 +290,7 @@ static void php_gd_font_minit_helper()
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "GdFont", class_GdFont_methods);
 	gd_font_ce = zend_register_internal_class(&ce);
-	gd_font_ce->ce_flags |= ZEND_ACC_FINAL;
+	gd_font_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	gd_font_ce->create_object = php_gd_font_object_create;
 	gd_font_ce->serialize = zend_class_serialize_deny;
 	gd_font_ce->unserialize = zend_class_unserialize_deny;

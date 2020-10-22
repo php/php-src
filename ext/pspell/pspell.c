@@ -153,7 +153,7 @@ static PHP_MINIT_FUNCTION(pspell)
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "PSpell", class_PSpell_methods);
 	php_pspell_ce = zend_register_internal_class(&ce);
-	php_pspell_ce->ce_flags |= ZEND_ACC_FINAL;
+	php_pspell_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	php_pspell_ce->create_object = php_pspell_object_create;
 	php_pspell_ce->serialize = zend_class_serialize_deny;
 	php_pspell_ce->unserialize = zend_class_unserialize_deny;
@@ -166,7 +166,7 @@ static PHP_MINIT_FUNCTION(pspell)
 
 	INIT_CLASS_ENTRY(ce, "PSpellConfig", class_PSpellConfig_methods);
 	php_pspell_config_ce = zend_register_internal_class(&ce);
-	php_pspell_config_ce->ce_flags |= ZEND_ACC_FINAL;
+	php_pspell_config_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	php_pspell_config_ce->create_object = php_pspell_config_object_create;
 	php_pspell_config_ce->serialize = zend_class_serialize_deny;
 	php_pspell_config_ce->unserialize = zend_class_unserialize_deny;
