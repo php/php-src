@@ -3532,6 +3532,7 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 
 	ZEND_ASSERT(to && ZSTR_LEN(to) != 0);
 	ZEND_ASSERT(subject && ZSTR_LEN(subject) != 0);
+	ZEND_ASSERT(message);
 
 #ifdef PHP_WIN32
 	char *tempMailTo;
@@ -3661,14 +3662,23 @@ bool _php_imap_mail(zend_string *to, zend_string *subject, zend_string *message,
 	}
 	sendmail = popen(INI_STR("sendmail_path"), "w");
 	if (sendmail) {
-		if (ZSTR_LEN(rpath) != 0) fprintf(sendmail, "From: %s\n", ZSTR_VAL(rpath));
+		if (rpath && ZSTR_LEN(rpath) != 0) {
+			fprintf(sendmail, "From: %s\n", ZSTR_VAL(rpath));
+		}
+		/* to cannot be a null pointer, asserted earlier on */
 		fprintf(sendmail, "To: %s\n", ZSTR_VAL(to));
-		if (ZSTR_LEN(cc) != 0) fprintf(sendmail, "Cc: %s\n", ZSTR_VAL(cc));
-		if (ZSTR_LEN(bcc) != 0) fprintf(sendmail, "Bcc: %s\n", ZSTR_VAL(bcc));
+		if (cc && ZSTR_LEN(cc) != 0) {
+			fprintf(sendmail, "Cc: %s\n", ZSTR_VAL(cc));
+		}
+		if (bcc && ZSTR_LEN(bcc) != 0) {
+			fprintf(sendmail, "Bcc: %s\n", ZSTR_VAL(bcc));
+		}
+		/* subject cannot be a null pointer, asserted earlier on */
 		fprintf(sendmail, "Subject: %s\n", ZSTR_VAL(subject));
-		if (headers != NULL) {
+		if (headers && ZSTR_LEN(headers) != 0) {
 			fprintf(sendmail, "%s\n", ZSTR_VAL(headers));
 		}
+		/* message cannot be a null pointer, asserted earlier on */
 		fprintf(sendmail, "\n%s\n", ZSTR_VAL(message));
 		ret = pclose(sendmail);
 
