@@ -104,6 +104,11 @@ static PHP_GINIT_FUNCTION(json)
 }
 /* }}} */
 
+static PHP_RINIT_FUNCTION(json)
+{
+	JSON_G(error_code) = 0;
+	return SUCCESS;
+}
 
 /* {{{ json_module_entry */
 zend_module_entry json_module_entry = {
@@ -112,7 +117,7 @@ zend_module_entry json_module_entry = {
 	ext_functions,
 	PHP_MINIT(json),
 	NULL,
-	NULL,
+	PHP_RINIT(json),
 	NULL,
 	PHP_MINFO(json),
 	PHP_JSON_VERSION,
