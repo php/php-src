@@ -1323,7 +1323,7 @@ PHP_FUNCTION(imap_reopen)
 
 	imap_le_struct->imap_stream = mail_open(imap_le_struct->imap_stream, ZSTR_VAL(mailbox), flags);
 	if (imap_le_struct->imap_stream == NIL) {
-		zend_list_delete(Z_RES_P(streamind));
+		zend_list_close(Z_RES_P(streamind));
 		php_error_docref(NULL, E_WARNING, "Couldn't re-open stream");
 		RETURN_FALSE;
 	}
