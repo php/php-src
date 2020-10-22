@@ -45,4 +45,4 @@ function pspell_config_data_dir(int $config, string $directory): bool {}
 
 function pspell_config_repl(int $config, string $filename): bool {}
 
-function pspell_config_save_repl(int $dictionary, bool $save): bool {}
+function pspell_config_save_repl(int $config, bool $save): bool {}
