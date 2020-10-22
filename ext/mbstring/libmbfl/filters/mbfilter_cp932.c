@@ -54,7 +54,7 @@ static const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 };
 
-static const char *mbfl_encoding_cp932_aliases[] = {"MS932", "Windows-31J", "MS_Kanji", NULL};
+static const char *mbfl_encoding_cp932_aliases[] = {"MS932", "Windows-31J", "MS_Kanji", "SJIS-win", "SJIS-ms", "SJIS-open", NULL};
 
 const mbfl_encoding mbfl_encoding_cp932 = {
 	mbfl_no_encoding_cp932,

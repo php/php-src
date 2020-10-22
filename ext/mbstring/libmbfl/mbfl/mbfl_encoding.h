@@ -68,7 +68,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_eucjp2004,
 	mbfl_no_encoding_sjis,
 	mbfl_no_encoding_eucjp_win,
-	mbfl_no_encoding_sjis_open,
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_no_encoding_sjis_sb,

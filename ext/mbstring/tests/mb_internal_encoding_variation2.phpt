@@ -176,10 +176,10 @@ string(9) "eucJP-win"
 -- Iteration 20 --
 string(9) "eucJP-win"
 bool(true)
-string(8) "SJIS-win"
+string(5) "CP932"
 
 -- Iteration 21 --
-string(8) "SJIS-win"
+string(5) "CP932"
 bool(true)
 string(11) "ISO-2022-JP"
 
