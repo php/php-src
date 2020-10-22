@@ -2211,6 +2211,15 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 			support_opline =
 				zend_jit_opline_supports_reg(op_array, ssa, opline, ssa_op, p);
+
+			if (support_opline
+			 && opline->opcode == ZEND_ASSIGN
+			 && opline->op1_type == IS_CV
+			 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) != NO_ALIAS) {
+				/* avoid register allocation in case of possiblity of indirect modification*/
+				support_opline = 0;
+			}
+
 			if (ssa_op->op1_use >= 0
 			 && start[ssa_op->op1_use] >= 0
 			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
@@ -3370,6 +3379,18 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				if (ra[i]
 				 && (ra[i]->flags & ZREG_LOAD) != 0
 				 && ra[i]->reg != stack[i].reg) {
+
+					if ((ssa->var_info[i].type & MAY_BE_GUARD) != 0) {
+						uint8_t op_type;
+
+						ssa->var_info[i].type &= ~MAY_BE_GUARD;
+						op_type = concrete_type(ssa->var_info[i].type);
+						if (!zend_jit_type_guard(&dasm_state, opline, i, op_type)) {
+							goto jit_failure;
+						}
+						SET_STACK_TYPE(stack, i, op_type, 1);
+					}
+
 					SET_STACK_REG_EX(stack, i, ra[i]->reg, ZREG_LOAD);
 					if (!zend_jit_load_var(&dasm_state, ssa->var_info[i].type, i, ra[i]->reg)) {
 						goto jit_failure;
