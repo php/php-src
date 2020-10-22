@@ -3109,6 +3109,10 @@ PHP_FUNCTION(imap_mail_compose)
 		RETURN_THROWS();
 	}
 
+	if (zend_hash_num_elements(body) == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+	}
+
 #define PHP_RFC822_PARSE_ADRLIST(target, value) \
 	str_copy = estrndup(Z_STRVAL_P(value), Z_STRLEN_P(value)); \
 	rfc822_parse_adrlist(target, str_copy, "NO HOST"); \
@@ -3182,9 +3186,12 @@ PHP_FUNCTION(imap_mail_compose)
 			first = 0;
 
 			if (Z_TYPE_P(data) != IS_ARRAY) {
-				// TODO ValueError
-				php_error_docref(NULL, E_WARNING, "body parameter must be a non-empty array");
-				RETVAL_FALSE;
+				zend_argument_type_error(2, "individual body must be of type array, %s given",
+					zend_zval_type_name(data));
+				goto done;
+			}
+			if (zend_hash_num_elements(Z_ARRVAL_P(data)) == 0) {
+				zend_argument_value_error(2, "individual body cannot be empty");
 				goto done;
 			}
 			SEPARATE_ARRAY(data);
@@ -3401,13 +3408,6 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	if (first) {
-		// TODO ValueError
-		php_error_docref(NULL, E_WARNING, "body parameter must be a non-empty array");
-		RETVAL_FALSE;
-		goto done;
-	}
 
 	if (bod && bod->type == TYPEMULTIPART && (!bod->nested.part || !bod->nested.part->next)) {
 		php_error_docref(NULL, E_WARNING, "Cannot generate multipart e-mail without components.");
