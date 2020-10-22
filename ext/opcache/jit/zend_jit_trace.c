@@ -2211,6 +2211,15 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 			support_opline =
 				zend_jit_opline_supports_reg(op_array, ssa, opline, ssa_op, p);
+
+			if (support_opline
+			 && opline->opcode == ZEND_ASSIGN
+			 && opline->op1_type == IS_CV
+			 && zend_jit_var_may_alias(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var)) != NO_ALIAS) {
+				/* avoid register allocation in case of possiblity of indirect modification*/
+				support_opline = 0;
+			}
+
 			if (ssa_op->op1_use >= 0
 			 && start[ssa_op->op1_use] >= 0
 			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
