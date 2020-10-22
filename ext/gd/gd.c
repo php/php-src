@@ -2743,18 +2743,13 @@ PHP_FUNCTION(imagefilledpolygon)
 /* }}} */
 
 /* {{{ php_find_gd_font */
-static gdFontPtr php_find_gd_font(zval *zfont)
+static gdFontPtr php_find_gd_font(zend_object *font_obj, zend_long font_int)
 {
-	if ((Z_TYPE_P(zfont) == IS_OBJECT) && instanceof_function(Z_OBJCE_P(zfont), gd_font_ce)) {
-		return php_gd_font_object_from_zend_object(Z_OBJ_P(zfont))->font;
+	if (font_obj) {
+		return php_gd_font_object_from_zend_object(font_obj)->font;
 	}
 
-	if (Z_TYPE_P(zfont) != IS_LONG) {
-		/* In practice, type checks should prevent us from reaching here. */
-		return gdFontTiny;
-	}
-
-	switch (Z_LVAL_P(zfont)) {
+	switch (font_int) {
 		case 1: return gdFontTiny;
 		case 2: return gdFontSmall;
 		case 3: return gdFontMediumBold;
@@ -2762,7 +2757,7 @@ static gdFontPtr php_find_gd_font(zval *zfont)
 		case 5: return gdFontGiant;
 	}
 
-	return (Z_LVAL_P(zfont) < 1) ? gdFontTiny : gdFontGiant;
+	return font_int < 1 ? gdFontTiny : gdFontGiant;
 }
 /* }}} */
 
@@ -2772,14 +2767,15 @@ static gdFontPtr php_find_gd_font(zval *zfont)
  */
 static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 {
-	zval *zfont;
+	zend_object *font_obj;
+	zend_long font_int;
 	gdFontPtr font;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zfont) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(font_obj, gd_font_ce, font_int)
+	ZEND_PARSE_PARAMETERS_END();
 
-	font = php_find_gd_font(zfont);
+	font = php_find_gd_font(font_obj, font_int);
 	RETURN_LONG(arg ? font->h : font->w);
 }
 /* }}} */
@@ -2839,12 +2835,18 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	gdImagePtr im;
 	int ch = 0, col, x, y, i, l = 0;
 	unsigned char *str = NULL;
-	zval *zfont;
+	zend_object *font_obj;
+	zend_long font_int;
 	gdFontPtr font;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozllsl", &IM, gd_image_ce, &zfont, &X, &Y, &C, &C_len, &COL) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(6, 6)
+		Z_PARAM_OBJECT_OF_CLASS(IM, gd_image_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(font_obj, gd_font_ce, font_int)
+		Z_PARAM_LONG(X)
+		Z_PARAM_LONG(Y)
+		Z_PARAM_STRING(C, C_len)
+		Z_PARAM_LONG(COL)
+	ZEND_PARSE_PARAMETERS_END();
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
@@ -2860,7 +2862,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	y = Y;
 	x = X;
 
-	font = php_find_gd_font(zfont);
+	font = php_find_gd_font(font_obj, font_int);
 
 	switch (mode) {
 		case 0:
