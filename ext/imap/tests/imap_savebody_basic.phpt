@@ -4,13 +4,13 @@ imap_savebody() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = setup_test_mailbox('', 1);
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = setup_test_mailbox('imapsavebodybasic', 1);
 
 $file = __DIR__.'/tmpsavebody.txt';
 
@@ -31,11 +31,12 @@ imap_close($stream_id);
 --CLEAN--
 <?php
 @unlink(__DIR__.'/tmpsavebody.txt');
-require_once('clean.inc');
+$mailbox_suffix = 'imapsavebodybasic';
+require_once(__DIR__ . '/setup/clean.inc');
 ?>
 --EXPECTF--
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{127.0.0.1:143/norsh}INBOX.phpttest' created
+New mailbox created
 bool(true)
 Size: %d
 bool(true)

@@ -4,13 +4,13 @@ imap_headerinfo() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = setup_test_mailbox('', 1);
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = setup_test_mailbox('imapheaderinfobasic', 1);
 
 $z = imap_headerinfo($stream_id, 1);
 
@@ -85,11 +85,12 @@ imap_close($stream_id);
 ?>
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imapheaderinfobasic';
+require_once('setup/clean.inc');
 ?>
 --EXPECTF--
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 Check general fields
 bool(true)
 bool(true)

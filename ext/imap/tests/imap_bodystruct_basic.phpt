@@ -2,15 +2,15 @@
 Test imap_bodystruct() function : basic functionality
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 echo "*** Testing string imap_bodystruct : basic functionality ***\n";
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 echo "Create a new mailbox for test and add a multipart msgs\n";
-$imap_stream = setup_test_mailbox("", 1, $mailbox, "multipart");
+$imap_stream = setup_test_mailbox("imapbodystructbasic", 1, $mailbox, "multipart");
 if (!is_resource($imap_stream)) {
     exit("TEST FAILED: Unable to create test mailbox\n");
 }
@@ -65,13 +65,14 @@ return $result;
 ?>
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imapbodystructbasic';
+require_once(__DIR__ . '/setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing string imap_bodystruct : basic functionality ***
 Create a new mailbox for test and add a multipart msgs
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
 Get and validate structure of body part 1
 ifsubtype is 0 or 1

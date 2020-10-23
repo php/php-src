@@ -2,9 +2,7 @@
 Bug #35669 (imap_mail_compose() crashes with multipart-multiboundary-email)
 --SKIPIF--
 <?php
-        if (!extension_loaded("imap")) {
-                die("skip imap extension not available");
-        }
+extension_loaded('imap') or die('skip imap extension not available in this build');
 ?>
 --FILE--
 <?php

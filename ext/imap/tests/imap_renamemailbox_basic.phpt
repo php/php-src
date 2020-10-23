@@ -4,20 +4,20 @@ imap_renamemailbox() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
-$stream_id = setup_test_mailbox('', 1);
+$stream_id = setup_test_mailbox('imaprenamemailbox', 1);
 
 if (!is_resource($stream_id)) {
     exit("TEST FAILED: Unable to create test mailbox\n");
 }
 
-$newbox = $default_mailbox . "." . $mailbox_prefix;
+$newbox = IMAP_DEFAULT_MAILBOX . "." . IMAP_MAILBOX_PHPT_PREFIX;
 
 //commented because of bug #49901
 //$ancError = error_reporting(0);
@@ -34,11 +34,12 @@ imap_close($stream_id);
 ?>
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imaprenamemailbox';
+require_once('setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 Checking OK
 bool(true)
 bool(true)

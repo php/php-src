@@ -4,20 +4,22 @@ imap_list() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = imap_open($default_mailbox, $username, $password) or
-    die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = imap_open(IMAP_DEFAULT_MAILBOX, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD) or
+    die("Cannot connect to mailbox " .IMAP_DEFAULT_MAILBOX.": " . imap_last_error());
 
-imap_list($stream_id,$default_mailbox,'ezerz');
+imap_list($stream_id, IMAP_DEFAULT_MAILBOX,'ezerz');
 
 
-$z = imap_list($stream_id,$default_mailbox,'*');
+$z = imap_list($stream_id, IMAP_DEFAULT_MAILBOX,'*');
 var_dump(is_array($z));
+
+// e.g. "{127.0.0.1:143/norsh}INBOX"
 var_dump($z[0]);
 
 imap_close($stream_id);
