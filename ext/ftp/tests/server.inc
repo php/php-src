@@ -407,7 +407,7 @@ if ($pid) {
                 }
 
                 $soc_name = stream_socket_get_name($soc, false);
-                $pasv_port = (int) substr($socket_name, strrpos($soc_name, ':') + 1);
+                $pasv_port = (int) substr($soc_name, strrpos($soc_name, ':') + 1);
             } else {
                 $pasv_port = 1234;
             }
