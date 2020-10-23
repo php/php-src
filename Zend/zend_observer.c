@@ -38,12 +38,19 @@ typedef struct _zend_observer_fcall_data {
 	zend_observer_fcall_handlers handlers[1];
 } zend_observer_fcall_data;
 
+typedef struct _zend_observer_frame {
+	zend_execute_data *execute_data;
+	struct _zend_observer_frame *prev;
+} zend_observer_frame;
+
 zend_llist zend_observers_fcall_list;
 zend_llist zend_observer_error_callbacks;
 
 int zend_observer_fcall_op_array_extension = -1;
 
 ZEND_TLS zend_arena *fcall_handlers_arena = NULL;
+ZEND_TLS zend_arena *observed_stack_arena = NULL;
+ZEND_TLS zend_observer_frame *current_observed_frame = NULL;
 
 // Call during minit/startup ONLY
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
@@ -75,12 +82,15 @@ ZEND_API void zend_observer_startup(void) {
 ZEND_API void zend_observer_activate(void) {
 	if (ZEND_OBSERVER_ENABLED) {
 		fcall_handlers_arena = zend_arena_create(4096);
+		// TODO: How big should the arena be?
+		observed_stack_arena = zend_arena_create(2048);
 	}
 }
 
 ZEND_API void zend_observer_deactivate(void) {
 	if (fcall_handlers_arena) {
 		zend_arena_destroy(fcall_handlers_arena);
+		zend_arena_destroy(observed_stack_arena);
 	}
 }
 
@@ -137,6 +147,7 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 	uint32_t fn_flags;
 	zend_observer_fcall_data *fcall_data;
 	zend_observer_fcall_handlers *handlers, *end;
+	zend_observer_frame *frame;
 
 	if (!ZEND_OBSERVER_ENABLED) {
 		return;
@@ -159,6 +170,11 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 	if (fcall_data == ZEND_OBSERVER_NOT_OBSERVED) {
 		return;
 	}
+
+	frame = zend_arena_alloc(&observed_stack_arena, sizeof(zend_observer_frame));
+	frame->execute_data = execute_data;
+	frame->prev = current_observed_frame;
+	current_observed_frame = frame;
 
 	end = fcall_data->end;
 	for (handlers = fcall_data->handlers; handlers != end; ++handlers) {
@@ -188,6 +204,7 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 	zend_function *func = execute_data->func;
 	zend_observer_fcall_data *fcall_data;
 	zend_observer_fcall_handlers *handlers, *end;
+	zend_observer_frame *frame;
 
 	if (!ZEND_OBSERVER_ENABLED
 	 || !ZEND_OBSERVABLE_FN(func->common.fn_flags)) {
@@ -207,6 +224,17 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 		if (handlers->end) {
 			handlers->end(execute_data, return_value);
 		}
+	}
+
+	frame = current_observed_frame;
+	current_observed_frame = frame->prev;
+	zend_arena_release(&observed_stack_arena, frame);
+}
+
+ZEND_API void zend_observer_fcall_end_all(void)
+{
+	while (current_observed_frame != NULL) {
+		zend_observer_fcall_end(current_observed_frame->execute_data, NULL);
 	}
 }
 

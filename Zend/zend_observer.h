@@ -70,6 +70,8 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 	zend_execute_data *execute_data,
 	zval *return_value);
 
+ZEND_API void zend_observer_fcall_end_all(void);
+
 typedef void (*zend_observer_error_cb)(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
 
 ZEND_API void zend_observer_error_register(zend_observer_error_cb callback);
