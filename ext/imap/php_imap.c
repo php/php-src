@@ -3093,7 +3093,7 @@ PHP_FUNCTION(imap_fetch_overview)
 /* {{{ Create a MIME message based on given envelope and body sections */
 PHP_FUNCTION(imap_mail_compose)
 {
-	zval *envelope, *body;
+	HashTable *envelope, *body;
 	zend_string *key;
 	zval *data, *pvalue, *disp_data, *env_data;
 	char *cookie = NIL;
@@ -3105,8 +3105,12 @@ PHP_FUNCTION(imap_mail_compose)
 	int toppart = 0;
 	int first;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/a/", &envelope, &body) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h/h/", &envelope, &body) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (zend_hash_num_elements(body) == 0) {
+		zend_argument_value_error(2, "cannot be empty");
 	}
 
 #define PHP_RFC822_PARSE_ADRLIST(target, value) \
@@ -3115,52 +3119,52 @@ PHP_FUNCTION(imap_mail_compose)
 	efree(str_copy);
 
 	env = mail_newenvelope();
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "remail", sizeof("remail") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "remail", sizeof("remail") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		env->remail = cpystr(Z_STRVAL_P(pvalue));
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "return_path", sizeof("return_path") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "return_path", sizeof("return_path") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->return_path, pvalue);
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "date", sizeof("date") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "date", sizeof("date") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		env->date = (unsigned char*)cpystr(Z_STRVAL_P(pvalue));
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "from", sizeof("from") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "from", sizeof("from") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->from, pvalue);
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "reply_to", sizeof("reply_to") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "reply_to", sizeof("reply_to") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->reply_to, pvalue);
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "in_reply_to", sizeof("in_reply_to") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "in_reply_to", sizeof("in_reply_to") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		env->in_reply_to = cpystr(Z_STRVAL_P(pvalue));
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "subject", sizeof("subject") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "subject", sizeof("subject") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		env->subject = cpystr(Z_STRVAL_P(pvalue));
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "to", sizeof("to") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "to", sizeof("to") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->to, pvalue);
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "cc", sizeof("cc") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "cc", sizeof("cc") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->cc, pvalue);
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "bcc", sizeof("bcc") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "bcc", sizeof("bcc") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->bcc, pvalue);
 	}
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "message_id", sizeof("message_id") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "message_id", sizeof("message_id") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
 		env->message_id=cpystr(Z_STRVAL_P(pvalue));
 	}
 
-	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "custom_headers", sizeof("custom_headers") - 1)) != NULL) {
+	if ((pvalue = zend_hash_str_find(envelope, "custom_headers", sizeof("custom_headers") - 1)) != NULL) {
 		if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 			custom_headers_param = tmp_param = NULL;
 			SEPARATE_ARRAY(pvalue);
@@ -3177,14 +3181,17 @@ PHP_FUNCTION(imap_mail_compose)
 	}
 
 	first = 1;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(body), data) {
+	ZEND_HASH_FOREACH_VAL(body, data) {
 		if (first) {
 			first = 0;
 
 			if (Z_TYPE_P(data) != IS_ARRAY) {
-				// TODO ValueError
-				php_error_docref(NULL, E_WARNING, "body parameter must be a non-empty array");
-				RETVAL_FALSE;
+				zend_argument_type_error(2, "individual body must be of type array, %s given",
+					zend_zval_type_name(data));
+				goto done;
+			}
+			if (zend_hash_num_elements(Z_ARRVAL_P(data)) == 0) {
+				zend_argument_value_error(2, "individual body cannot be empty");
 				goto done;
 			}
 			SEPARATE_ARRAY(data);
@@ -3401,13 +3408,6 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	if (first) {
-		// TODO ValueError
-		php_error_docref(NULL, E_WARNING, "body parameter must be a non-empty array");
-		RETVAL_FALSE;
-		goto done;
-	}
 
 	if (bod && bod->type == TYPEMULTIPART && (!bod->nested.part || !bod->nested.part->next)) {
 		php_error_docref(NULL, E_WARNING, "Cannot generate multipart e-mail without components.");
