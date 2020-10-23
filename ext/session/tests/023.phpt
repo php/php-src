@@ -17,7 +17,7 @@ class foo {
     function method() { $this->yes++; }
 }
 
-session_id("abtest");
+session_id("test023");
 session_start();
 session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
 $baz = $_SESSION['baz'];

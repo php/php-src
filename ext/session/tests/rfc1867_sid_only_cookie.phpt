@@ -17,15 +17,15 @@ session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --COOKIE--
-PHPSESSID=rfc1867-tests
+PHPSESSID=rfc1867-sid-only-cookie
 --GET--
-PHPSESSID=rfc1867-tests-get
+PHPSESSID=rfc1867-sid-only-cookie-get
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHPSESSID"
 
-rfc1867-tests-post
+rfc1867-sid-only-cookie-post
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"
 
@@ -49,7 +49,7 @@ var_dump($_SESSION["upload_progress_" . basename(__FILE__)]);
 session_destroy();
 ?>
 --EXPECTF--
-string(%d) "rfc1867-tests"
+string(%d) "rfc1867-sid-only-cookie"
 bool(true)
 array(2) {
   ["file1"]=>

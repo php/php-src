@@ -23,7 +23,7 @@ class TFoo {
     }
 }
 
-session_id("abtest");
+session_id("test019");
 session_start();
 
 $_SESSION["o1"] = new TFoo(42);

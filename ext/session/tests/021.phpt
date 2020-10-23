@@ -19,7 +19,7 @@ error_reporting(E_ALL);
 ini_set('session.trans_sid_hosts', 'php.net');
 $_SERVER['HTTP_HOST'] = 'php.net';
 
-session_id("abtest");
+session_id("test021");
 session_start();
 ?>
 <form action="//bad.net/do.php">
@@ -60,11 +60,11 @@ session_destroy();
 --EXPECT--
 <form action="//bad.net/do.php">
 <fieldset>
-<form action="//php.net/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
+<form action="//php.net/do.php"><input type="hidden" name="PHPSESSID" value="test021" />
 <fieldset>
-<form action="../do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
+<form action="../do.php"><input type="hidden" name="PHPSESSID" value="test021" />
 <fieldset>
-<form action="/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
+<form action="/do.php"><input type="hidden" name="PHPSESSID" value="test021" />
 <fieldset>
-<form action="/foo/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
+<form action="/foo/do.php"><input type="hidden" name="PHPSESSID" value="test021" />
 <fieldset>
