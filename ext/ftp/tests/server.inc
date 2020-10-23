@@ -16,11 +16,9 @@ $port = (int) substr($socket_name, strrpos($socket_name, ':') + 1);
 $pid = pcntl_fork();
 
 if ($pid) {
-
     function dump_and_exit($buf)
     {
         var_dump($buf);
-        fclose($GLOBALS['s']);
         exit;
     }
 
@@ -54,9 +52,13 @@ if ($pid) {
 
     if (!$s) die("Error accepting a new connection\n");
 
+    register_shutdown_function(function() use($pid, $s) {
+        fclose($s);
+        pcntl_waitpid($pid, $status);
+    });
+
     fputs($s, "220----- PHP FTP server 0.3 -----\r\n220 Service ready\r\n");
     $buf = fread($s, 2048);
-
 
     function user_auth($buf) {
         global $user, $s, $ssl, $bug37799;
@@ -107,7 +109,6 @@ if ($pid) {
         $user = $m[1];
         if ($user !== 'user' && $user !== 'anonymous') {
             fputs($s, "530 Not logged in.\r\n");
-            fclose($s);
             exit;
         }
 
@@ -127,7 +128,6 @@ if ($pid) {
                 fputs($s, "230 User logged in\r\n");
             } else {
                 fputs($s, "530 Not logged in.\r\n");
-                fclose($s);
                 exit;
             }
         }
@@ -507,7 +507,6 @@ if ($pid) {
             dump_and_exit($buf);
         }
     }
-    fclose($s);
     exit;
 }
 
