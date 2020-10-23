@@ -22,10 +22,11 @@ interface Throwable extends Stringable
 
 class Exception implements Throwable
 {
-    final private function __clone() {}
+    final private function __clone(): void {}
 
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     final public function getMessage(): string {}
@@ -56,12 +57,15 @@ class ErrorException extends Exception
 class Error implements Throwable
 {
     /** @implementation-alias Exception::__clone */
-    final private function __clone() {}
+    final private function __clone(): void {}
 
     /** @implementation-alias Exception::__construct */
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
-    /** @implementation-alias Exception::__wakeup */
+    /**
+     * @return void
+     * @implementation-alias Exception::__wakeup
+     */
     public function __wakeup() {}
 
     /** @implementation-alias Exception::getMessage */

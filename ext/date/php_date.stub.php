@@ -134,6 +134,7 @@ interface DateTimeInterface
     /** @return DateInterval|false */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false);
 
+    /** @return void */
     public function __wakeup();
 }
 
@@ -141,6 +142,7 @@ class DateTime implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateTime */
@@ -246,6 +248,7 @@ class DateTimeImmutable implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateTimeZone */
@@ -363,6 +366,7 @@ class DateTimeZone
      */
     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateTimeZone */
@@ -385,6 +389,7 @@ class DateInterval
      */
     public function format(string $format) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateInterval */
@@ -413,6 +418,7 @@ class DatePeriod implements IteratorAggregate
     /** @return int|null */
     public function getRecurrences() {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DatePeriod */

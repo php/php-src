@@ -359,9 +359,9 @@ interface FunctionOrMethodName {
     public function getDeclaration(): string;
     public function getArgInfoName(): string;
     public function __toString(): string;
-    public function isMagicMethod(): bool;
     public function isMethod(): bool;
     public function isConstructor(): bool;
+    public function isDestructor(): bool;
 }
 
 class FunctionName implements FunctionOrMethodName {
@@ -403,15 +403,15 @@ class FunctionName implements FunctionOrMethodName {
         return $this->name->toString();
     }
 
-    public function isMagicMethod(): bool {
-        return false;
-    }
-
     public function isMethod(): bool {
         return false;
     }
 
     public function isConstructor(): bool {
+        return false;
+    }
+
+    public function isDestructor(): bool {
         return false;
     }
 }
@@ -443,16 +443,16 @@ class MethodName implements FunctionOrMethodName {
         return "$this->className::$this->methodName";
     }
 
-    public function isMagicMethod(): bool {
-        return strpos($this->methodName, '__') === 0;
-    }
-
     public function isMethod(): bool {
         return true;
     }
 
     public function isConstructor(): bool {
         return $this->methodName === "__construct";
+    }
+
+    public function isDestructor(): bool {
+        return $this->methodName === "__destruct";
     }
 }
 
@@ -879,7 +879,7 @@ function parseFunctionLike(
     }
 
     $returnType = $func->getReturnType();
-    if ($returnType === null && !$haveDocReturnType && !$name->isMagicMethod()) {
+    if ($returnType === null && !$haveDocReturnType && !$name->isConstructor() && !$name->isDestructor()) {
         throw new Exception("Missing return type for function $name()");
     }
 

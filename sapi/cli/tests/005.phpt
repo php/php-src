@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(2170) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
+string(2194) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
 
   - Constants [0] {
   }
@@ -63,6 +63,7 @@ string(2170) "Class [ <internal:Core> class Exception implements Throwable, Stri
 
       - Parameters [0] {
       }
+      - Return [ void ]
     }
 
     Method [ <internal:Core, ctor> public method __construct ] {
