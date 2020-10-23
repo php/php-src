@@ -9,10 +9,9 @@ display_errors=1
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('require("syntax_error.php");');
-$dir = realpath(__DIR__);
+$doc_root = php_cli_server_start('require("syntax_error.php");')->docRoot;
 
-file_put_contents($dir . "/syntax_error.php", "<?php non_exists_function(); ?>");
+file_put_contents($doc_root . "/syntax_error.php", "<?php non_exists_function(); ?>");
 
 $output = '';
 $host = PHP_CLI_SERVER_HOSTNAME;
@@ -30,7 +29,7 @@ HEADER
     }
 }
 echo $output;
-@unlink($dir . "/syntax_error.php");
+@unlink($doc_root . "/syntax_error.php");
 fclose($fp);
 ?>
 --EXPECTF--
