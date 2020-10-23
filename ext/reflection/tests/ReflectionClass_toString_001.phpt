@@ -32,6 +32,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [0] {
       }
+      - Return [ void ]
     }
 
     Method [ <internal:Reflection, ctor> public method __construct ] {
