@@ -16,7 +16,7 @@ $html = $doc->saveHTML();
 var_dump(strpos($html, '<p>foo</p>') !== false);
 ?>
 --CLEAN--
-<?
+<?php
 unlink(__DIR__ . '/80268.html');
 ?>
 --EXPECT--
