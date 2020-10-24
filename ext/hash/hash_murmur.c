@@ -19,8 +19,6 @@
 
 #include "murmur/PMurHash.h"
 #include "murmur/PMurHash128.h"
-#define FORCE_INLINE zend_always_inline
-#include "murmur/endianness.h"
 
 
 const php_hash_ops php_hash_murmur3a_ops = {/*{{{*/
