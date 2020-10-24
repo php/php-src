@@ -671,14 +671,14 @@ PHP_FUNCTION(get_headers)
 	size_t url_len;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL;
-	zend_long format = 0;
+	zend_bool format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(url, url_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(format)
+		Z_PARAM_BOOL(format)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
