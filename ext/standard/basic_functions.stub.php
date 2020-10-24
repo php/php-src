@@ -285,7 +285,7 @@ function time_sleep_until(float $timestamp): bool {}
 
 function get_current_user(): string {}
 
-function get_cfg_var(string $name): string|array|false {}
+function get_cfg_var(string $option): string|array|false {}
 
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
@@ -312,16 +312,16 @@ function php_strip_whitespace(string $filename): string {}
 
 function highlight_string(string $string, bool $return = false): string|bool {}
 
-function ini_get(string $name): string|false {}
+function ini_get(string $option): string|false {}
 
 function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
-function ini_set(string $name, string $value): string|false {}
+function ini_set(string $option, string $value): string|false {}
 
 /** @alias ini_set */
-function ini_alter(string $name, string $value): string|false {}
+function ini_alter(string $option, string $value): string|false {}
 
-function ini_restore(string $name): void {}
+function ini_restore(string $option): void {}
 
 function set_include_path(string $include_path): string|false {}
 
@@ -722,7 +722,7 @@ function rewinddir($dir_handle = null): void {}
 function readdir($dir_handle = null): string|false {}
 
 /** @param resource|null $context */
-function scandir(string $directory, int $sorting_order = 0, $context = null): array|false {}
+function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
 #ifdef HAVE_GLOB
 function glob(string $pattern, int $flags = 0): array|false {}
@@ -1110,7 +1110,7 @@ function dechex(int $num): string {}
 
 function base_convert(string $num, int $from_base, int $to_base): string {}
 
-function number_format(float $num, int $decimals = 0, ?string $decimal_separator = "." , ?string $thousands_separator = ","): string {}
+function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
 
 function fmod(float $num1, float $num2): float {}
 
@@ -1125,7 +1125,7 @@ function gettimeofday(bool $as_float = false): array|float {}
 #endif
 
 #ifdef HAVE_GETRUSAGE
-function getrusage(bool $mode = 0): array|false {}
+function getrusage(int $mode = 0): array|false {}
 #endif
 
 /* pack.c */
@@ -1277,7 +1277,7 @@ function stream_socket_sendto($socket, string $data, int $flags = 0, string $add
  * @param resource $stream
  * @param resource|null $session_stream
  */
-function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_type = null, $session_stream = null): int|bool {}
+function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method = null, $session_stream = null): int|bool {}
 
 #ifdef HAVE_SHUTDOWN
 /** @param resource $stream */
@@ -1439,8 +1439,7 @@ function rawurlencode(string $string): string {}
 function rawurldecode(string $string): string {}
 
 /** @param resource $context */
-// TODO: Make bool argument?
-function get_headers(string $url, int $as_assoc_array = 0, $context = null): array|false {}
+function get_headers(string $url, bool $associative = false, $context = null): array|false {}
 
 /* user_filters.c */
 

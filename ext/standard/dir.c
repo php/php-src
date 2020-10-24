@@ -530,7 +530,7 @@ PHP_FUNCTION(scandir)
 {
 	char *dirn;
 	size_t dirn_len;
-	zend_long flags = 0;
+	zend_long flags = PHP_SCANDIR_SORT_ASCENDING;
 	zend_string **namelist;
 	int n, i;
 	zval *zcontext = NULL;
