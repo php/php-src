@@ -558,7 +558,7 @@ PHP 8.0 UPGRADE NOTES
   . money_format() has been removed.
   . ezmlm_hash() has been removed.
   . restore_include_path() has been removed.
-  . get_magic_quotes_gpc() and get_magic_quotes_gpc_runtime() has been removed.
+  . get_magic_quotes_gpc() and get_magic_quotes_runtime() has been removed.
   . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
   . Calling implode() with parameters in a reverse order ($pieces, $glue) is no
     longer supported.
@@ -586,7 +586,7 @@ PHP 8.0 UPGRADE NOTES
   . Removed deprecated DES fallback in crypt(). If an unknown salt format is
     passed to crypt(), the function will fail with *0 instead of falling back
     to a weak DES hash now.
-  . Specifying out of range rounds for sha256/sha526 crypt() will now fail with
+  . Specifying out of range rounds for sha256/sha512 crypt() will now fail with
     *0 instead of clamping to the closest limit. This matches glibc behavior.
   . The result of sorting functions may have changed, if the array contains
     elements that compare as equal.
