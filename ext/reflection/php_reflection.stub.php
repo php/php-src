@@ -568,7 +568,7 @@ class ReflectionNamedType extends ReflectionType
     public function isBuiltin() {}
 }
 
-class ReflectionUnionType extends ReflectionType
+final class ReflectionUnionType extends ReflectionType
 {
     public function getTypes(): array {}
 }
