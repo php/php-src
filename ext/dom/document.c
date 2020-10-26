@@ -2050,7 +2050,6 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		}
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
-		source_len = xmlStrlen((xmlChar *) source);
 		if (ZEND_SIZE_T_INT_OVFL(source_len)) {
 			php_error_docref(NULL, E_WARNING, "Input string is too long");
 			RETURN_FALSE;
