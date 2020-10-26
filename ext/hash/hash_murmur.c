@@ -21,7 +21,7 @@
 #include "murmur/PMurHash128.h"
 
 
-const php_hash_ops php_hash_murmur3a_ops = {/*{{{*/
+const php_hash_ops php_hash_murmur3a_ops = {
 	"murmur3a",
 	(php_hash_init_func_t) PHP_MURMUR3AInit,
 	(php_hash_update_func_t) PHP_MURMUR3AUpdate,
@@ -34,40 +34,40 @@ const php_hash_ops php_hash_murmur3a_ops = {/*{{{*/
 	4,
 	sizeof(PHP_MURMUR3A_CTX),
 	0
-};/*}}}*/
+};
 
 PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx)
-{/*{{{*/
+{
 	ctx->h = 0;
 	ctx->carry = 0;
 	ctx->len = 0;
-}/*}}}*/
+}
 
 PHP_HASH_API void PHP_MURMUR3AUpdate(PHP_MURMUR3A_CTX *ctx, const unsigned char *in, size_t len)
-{/*{{{*/
+{
 	ctx->len += len;
 	PMurHash32_Process(&ctx->h, &ctx->carry, in, len);
-}/*}}}*/
+}
 
 PHP_HASH_API void PHP_MURMUR3AFinal(unsigned char digest[4], PHP_MURMUR3A_CTX *ctx)
-{/*{{{*/
+{
 	ctx->h = PMurHash32_Result(ctx->h, ctx->carry, ctx->len);
 
 	digest[0] = (unsigned char)((ctx->h >> 24) & 0xff);
 	digest[1] = (unsigned char)((ctx->h >> 16) & 0xff);
 	digest[2] = (unsigned char)((ctx->h >> 8) & 0xff);
 	digest[3] = (unsigned char)(ctx->h & 0xff);
-}/*}}}*/
+}
 
 PHP_HASH_API int PHP_MURMUR3ACopy(const php_hash_ops *ops, PHP_MURMUR3A_CTX *orig_context, PHP_MURMUR3A_CTX *copy_context)
-{/*{{{*/
+{
 	copy_context->h = orig_context->h;
 	copy_context->carry = orig_context->carry;
 	copy_context->len = orig_context->len;
 	return SUCCESS;
-}/*}}}*/
+}
 
-const php_hash_ops php_hash_murmur3c_ops = {/*{{{*/
+const php_hash_ops php_hash_murmur3c_ops = {
 	"murmur3c",
 	(php_hash_init_func_t) PHP_MURMUR3CInit,
 	(php_hash_update_func_t) PHP_MURMUR3CUpdate,
@@ -80,23 +80,23 @@ const php_hash_ops php_hash_murmur3c_ops = {/*{{{*/
 	4,
 	sizeof(PHP_MURMUR3C_CTX),
 	0
-};/*}}}*/
+};
 
 PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx)
-{/*{{{*/
+{
 	memset(&ctx->h, 0, sizeof ctx->h);
 	memset(&ctx->carry, 0, sizeof ctx->carry);
 	ctx->len = 0;
-}/*}}}*/
+}
 
 PHP_HASH_API void PHP_MURMUR3CUpdate(PHP_MURMUR3C_CTX *ctx, const unsigned char *in, size_t len)
-{/*{{{*/
+{
 	ctx->len += len;
 	PMurHash128x86_Process(ctx->h, ctx->carry, in, len);
-}/*}}}*/
+}
 
 PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[4], PHP_MURMUR3C_CTX *ctx)
-{/*{{{*/
+{
 	uint32_t h[4] = {0};
 	PMurHash128x86_Result(ctx->h, ctx->carry, ctx->len, h);
 
@@ -116,17 +116,17 @@ PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[4], PHP_MURMUR3C_CTX *c
 	digest[13] = (unsigned char)((h[3] >> 16) & 0xff);
 	digest[14] = (unsigned char)((h[3] >> 8) & 0xff);
 	digest[15] = (unsigned char)(h[3] & 0xff);
-}/*}}}*/
+}
 
 PHP_HASH_API int PHP_MURMUR3CCopy(const php_hash_ops *ops, PHP_MURMUR3C_CTX *orig_context, PHP_MURMUR3C_CTX *copy_context)
-{/*{{{*/
+{
 	memcpy(&copy_context->h, &orig_context->h, sizeof orig_context->h);
 	memcpy(&copy_context->carry, &orig_context->carry, sizeof orig_context->carry);
 	copy_context->len = orig_context->len;
 	return SUCCESS;
-}/*}}}*/
+}
 
-const php_hash_ops php_hash_murmur3f_ops = {/*{{{*/
+const php_hash_ops php_hash_murmur3f_ops = {
 	"murmur3f",
 	(php_hash_init_func_t) PHP_MURMUR3FInit,
 	(php_hash_update_func_t) PHP_MURMUR3FUpdate,
@@ -139,23 +139,23 @@ const php_hash_ops php_hash_murmur3f_ops = {/*{{{*/
 	8,
 	sizeof(PHP_MURMUR3F_CTX),
 	0
-};/*}}}*/
+};
 
 PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx)
-{/*{{{*/
+{
 	memset(&ctx->h, 0, sizeof ctx->h);
 	memset(&ctx->carry, 0, sizeof ctx->carry);
 	ctx->len = 0;
-}/*}}}*/
+}
 
 PHP_HASH_API void PHP_MURMUR3FUpdate(PHP_MURMUR3F_CTX *ctx, const unsigned char *in, size_t len)
-{/*{{{*/
+{
 	ctx->len += len;
 	PMurHash128x64_Process(ctx->h, ctx->carry, in, len);
-}/*}}}*/
+}
 
 PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[4], PHP_MURMUR3F_CTX *ctx)
-{/*{{{*/
+{
 	uint64_t h[2] = {0};
 	PMurHash128x64_Result(ctx->h, ctx->carry, ctx->len, h);
 
@@ -175,12 +175,12 @@ PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[4], PHP_MURMUR3F_CTX *c
 	digest[13] = (unsigned char)((h[1] >> 16) & 0xff);
 	digest[14] = (unsigned char)((h[1] >> 8) & 0xff);
 	digest[15] = (unsigned char)(h[1] & 0xff);
-}/*}}}*/
+}
 
 PHP_HASH_API int PHP_MURMUR3FCopy(const php_hash_ops *ops, PHP_MURMUR3F_CTX *orig_context, PHP_MURMUR3F_CTX *copy_context)
-{/*{{{*/
+{
 	memcpy(&copy_context->h, &orig_context->h, sizeof orig_context->h);
 	memcpy(&copy_context->carry, &orig_context->carry, sizeof orig_context->carry);
 	copy_context->len = orig_context->len;
 	return SUCCESS;
-}/*}}}*/
+}
