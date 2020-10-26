@@ -15,7 +15,7 @@ function test() {}
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Attribute "MyAttribute" cannot target function (allowed targets: class) in %s:%d
+Fatal error: Uncaught Error: Attribute MyAttribute cannot target function (allowed targets: class) in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionAttribute->newInstance()
 #1 {main}

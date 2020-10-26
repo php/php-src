@@ -7,4 +7,4 @@ Bug #77660 (Segmentation fault on break 2147483648)
 for(;;) break 2147483648;
 ?>
 --EXPECTF--
-Fatal error: Cannot 'break' 2147483648 levels in %sbug77660.php on line %d
+Fatal error: Cannot break 2147483648 levels in %s on line %d

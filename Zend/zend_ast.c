@@ -471,7 +471,7 @@ static zend_result zend_ast_add_array_element(zval *result, zval *offset, zval *
 			zend_hash_index_update(Z_ARRVAL_P(result), Z_RES_HANDLE_P(offset), expr);
 			break;
 		default:
-			zend_type_error("Illegal offset type");
+			zend_type_error("Illegal array key type: %s", zend_zval_type_name(offset));
 			return FAILURE;
  	}
 	return SUCCESS;

@@ -16,4 +16,4 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'static' as method modifier in %s on line %d
+Fatal error: Cannot use "static" as a trait method alias in %s on line %d

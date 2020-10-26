@@ -7,4 +7,4 @@ trait self {}
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'self' as class name as it is reserved in %s on line %d
+Fatal error: Class "self" cannot be declared, self is a reserved class name in %s on line %d

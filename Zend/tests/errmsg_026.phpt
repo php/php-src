@@ -9,4 +9,4 @@ class stdclass {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Cannot declare class stdclass, because the name is already in use in %s on line %d
+Fatal error: class stdclass has already been declared in %s on line %d

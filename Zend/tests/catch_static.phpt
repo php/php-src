@@ -14,4 +14,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Bad class name in the catch statement in %s on line %d
+Fatal error: Illegal class name in the catch statement in %s on line %d

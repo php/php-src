@@ -15,4 +15,4 @@ namespace {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use const foo\bar as bar because the name is already in use in %s on line %d
+Fatal error: Cannot import constant foo\bar as bar, bar has already been declared in %s on line %d

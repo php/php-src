@@ -10,4 +10,4 @@ use A\B as Foo;
 new Foo();
 ?>
 --EXPECTF--
-Fatal error: Cannot use A\B as Foo because the name is already in use in %sns_030.php on line 5
+Fatal error: Cannot import class A\B as Foo, Foo has already been declared in %s on line %d

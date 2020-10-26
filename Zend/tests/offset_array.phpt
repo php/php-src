@@ -46,6 +46,6 @@ int(1)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-Illegal offset type
-Illegal offset type
+Illegal array key type: stdClass
+Illegal array key type: array
 Done

@@ -9,4 +9,4 @@ trait foo {
 
 ?>
 --EXPECTF--
-Fatal error: Traits cannot have constants in %s on line %d
+Fatal error: Trait foo cannot define constants in %s on line %d

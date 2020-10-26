@@ -7,4 +7,4 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Default value for property of type stdClass may not be null. Use the nullable type ?stdClass to allow null default value in %s on line %d
+Fatal error: Property Foo:$bar of type stdClass cannot have a default value of null. Use the nullable type ?stdClass to allow a null default value in %s on line %d

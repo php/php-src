@@ -12,4 +12,4 @@ class C1 {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'final' as method modifier in %s on line %d
+Fatal error: Cannot use "final" as a trait method alias in %s on line %d

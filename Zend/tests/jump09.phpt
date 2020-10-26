@@ -10,4 +10,4 @@ switch (0) {
 goto L1;
 ?>
 --EXPECTF--
-Fatal error: 'goto' into loop or switch statement is disallowed in %sjump09.php on line 7
+Fatal error: goto into loop or switch statement is disallowed in %s on line %d

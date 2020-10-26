@@ -12,4 +12,4 @@ match (1) {
 
 ?>
 --EXPECTF--
-Fatal error: Match expressions may only contain one default arm in %s on line 7
+Fatal error: Match expressions cannot contain more than one default arms in %s on line %d

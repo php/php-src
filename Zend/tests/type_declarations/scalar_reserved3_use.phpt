@@ -6,4 +6,4 @@ Scalar type names cannot be used as class, trait or interface names (3) - use
 use foobar as float;
 ?>
 --EXPECTF--
-Fatal error: Cannot use foobar as float because 'float' is a special class name in %s on line %d
+Fatal error: Cannot import class foobar as "float", float is a reserved class nam in %s on line %d

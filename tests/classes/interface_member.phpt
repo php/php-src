@@ -8,4 +8,4 @@ interface if_a {
 }
 ?>
 --EXPECTF--
-Fatal error: Interfaces may not include member variables in %s on line %d
+Fatal error: Interface if_a cannot have properties in %s on line %d

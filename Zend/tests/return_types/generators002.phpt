@@ -7,4 +7,4 @@ function test1() : StdClass {
 }
 ?>
 --EXPECTF--
-Fatal error: Generator return type must be a supertype of Generator, StdClass given in %s on line %d
+Fatal error: test1(): Generator return type must be a supertype of Generator, StdClass declared in %s on line %d

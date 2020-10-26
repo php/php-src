@@ -11,4 +11,4 @@ list(
 ) = $array;
 ?>
 --EXPECTF--
-Fatal error: Cannot mix keyed and unkeyed array entries in assignments in %sbug72441.php on line %d
+Fatal error: Cannot mix array elements with and without keys in assignments in %s on line %d

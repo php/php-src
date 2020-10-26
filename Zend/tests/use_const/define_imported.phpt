@@ -11,4 +11,4 @@ namespace {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot declare const bar because the name is already in use in %s on line %d
+Fatal error: Constant bar has already been declared in %s on line %d

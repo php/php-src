@@ -9,4 +9,4 @@ function &get_bar_ref($foo) {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot take reference of a nullsafe chain in %s.php on line 4
+Fatal error: Cannot take reference of a null-safe chain in %s on line %d

@@ -10,4 +10,4 @@ namespace {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use function foo\BAR as BAR because the name is already in use in %s on line %d
+Fatal error: Cannot import function foo\BAR as BAR, BAR has already been declared in %s on line %d

@@ -7,4 +7,4 @@ namespace NAMEspace;
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'NAMEspace' as namespace name in %s on line %d
+Fatal error: Cannot use "NAMEspace" as namespace name in %s on line %d

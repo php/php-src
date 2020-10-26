@@ -6,4 +6,4 @@ Return type of parent is not allowed in function
 function test(): parent {}
 ?>
 --EXPECTF--
-Fatal error: Cannot use "parent" when no class scope is active in %s on line %d
+Fatal error: "parent" must be used only in a class scope in %s on line %d

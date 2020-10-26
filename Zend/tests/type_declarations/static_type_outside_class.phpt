@@ -7,4 +7,4 @@ function test(): static {}
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use "static" when no class scope is active in %s on line %d
+Fatal error: Type static cannot be used in the global scope in %s on line %d

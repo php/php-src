@@ -41,7 +41,7 @@ Warning: "double" will be interpreted as a class name. Did you mean "float"? Wri
 
 Warning: "boolean" will be interpreted as a class name. Did you mean "bool"? Write "\boolean" to suppress this warning in %s on line %d
 
-Warning: "resource" is not a supported builtin type and will be interpreted as a class name. Write "\resource" to suppress this warning in %s on line %d
+Warning: "resource" is not a supported built-in type and will be interpreted as a class name. Write "\resource" to suppress this warning in %s on line %d
 
 Warning: "boolean" will be interpreted as a class name. Did you mean "bool"? Write "\Foo\boolean" or import the class with "use" to suppress this warning in %s on line %d
 

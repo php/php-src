@@ -9,4 +9,4 @@ class parent {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'parent' as class name as it is reserved in %s on line %d
+Fatal error: Class "parent" cannot be declared, parent is a reserved class name in %s on line %d

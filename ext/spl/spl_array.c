@@ -375,7 +375,7 @@ num_index:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		zend_type_error("Illegal offset type");
+		zend_type_error("Illegal array key type: %s", zend_zval_type_name(offset));
 		return (type == BP_VAR_W || type == BP_VAR_RW) ?
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
@@ -499,7 +499,7 @@ num_index:
 			ZVAL_DEREF(offset);
 			goto try_again;
 		default:
-			zend_type_error("Illegal offset type");
+			zend_type_error("Illegal array key type: %s", zend_zval_type_name(offset));
 			zval_ptr_dtor(value);
 			return;
 	}

@@ -5,4 +5,4 @@ Bug #70240 (Segfault when doing unset($var()))
 unset($var());
 ?>
 --EXPECTF--
-Fatal error: Can't use function return value in write context in %sbug70240.php on line %d
+Fatal error: Cannot use function return value in write context in %s on line %d

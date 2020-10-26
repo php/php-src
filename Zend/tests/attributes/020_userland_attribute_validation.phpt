@@ -56,7 +56,7 @@ string(2) "A1"
 bool(true)
 bool(false)
 string(7) "ERROR 1"
-string(70) "Attribute "A1" cannot target class (allowed targets: function, method)"
+string(68) "Attribute A1 cannot target class (allowed targets: function, method)"
 
 string(2) "A1"
 bool(true)

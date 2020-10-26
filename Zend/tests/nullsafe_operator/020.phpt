@@ -16,4 +16,4 @@ $foo?->bar->baz = bar();
 
 ?>
 --EXPECTF--
-Fatal error: Can't use nullsafe operator in write context in %s.php on line 12
+Fatal error: Cannot use the null-safe operator in write context in %s on line %d

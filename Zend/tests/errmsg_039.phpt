@@ -11,4 +11,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare test::$var in %s on line %d
+Fatal error: Property test::$var has already been declared in %s on line %d

@@ -7,4 +7,4 @@ function foo () {
 }
 ?>
 --EXPECTF--
-Fatal error: 'break' operator accepts only positive integers in %sbreak_error_001.php on line 3
+Fatal error: The break statement accepts only an integer argument greater than or equal to 0 in %s on line %d

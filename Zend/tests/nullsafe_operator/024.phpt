@@ -8,4 +8,4 @@ foreach ([1, 2, 3] as $foo?->bar) {}
 
 ?>
 --EXPECTF--
-Fatal error: Can't use nullsafe operator in write context in %s.php on line 4
+Fatal error: Cannot use the null-safe operator in write context in %s on line %d

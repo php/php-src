@@ -14,4 +14,4 @@ echo "Done";
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use function bar\foo as foo because the name is already in use in %s on line %d
+Fatal error: Cannot import function bar\foo as foo, foo has already been declared in %s on line %d

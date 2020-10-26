@@ -72,12 +72,12 @@ test();
 ?>
 --EXPECT--
 Cannot add element to the array as the next element is already occupied
-Illegal offset type
-Illegal offset type
+Illegal array key type: array
+Illegal array key type: stdClass
 Cannot use a scalar value as an array
 Cannot add element to the array as the next element is already occupied
-Illegal offset type
-Illegal offset type
+Illegal array key type: array
+Illegal array key type: stdClass
 Cannot use a scalar value as an array
 Attempt to assign property "foo" on bool
 Attempt to assign property "foo" on bool

@@ -10,4 +10,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Properties cannot be declared abstract in %s on line %d
+Fatal error: Class test cannot declare properties as abstract in %s on line %d

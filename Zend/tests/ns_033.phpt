@@ -6,6 +6,6 @@ use A;
 use \B;
 ?>
 --EXPECTF--
-Warning: The use statement with non-compound name 'A' has no effect in %sns_033.php on line 2
+Warning: Importing the global symbol A has no effect in the global scope in %s on line %d
 
-Warning: The use statement with non-compound name 'B' has no effect in %sns_033.php on line 3
+Warning: Importing the global symbol B has no effect in the global scope in %s on line %d

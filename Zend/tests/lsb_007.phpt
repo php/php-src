@@ -9,4 +9,4 @@ class Foo implements static {
 ?>
 ==DONE==
 --EXPECTF--
-Fatal error: Cannot use 'static' as interface name, as it is reserved in %s on line %d
+Fatal error: Cannot use "static" as interface name, static is a reserved class name in %s on line %d

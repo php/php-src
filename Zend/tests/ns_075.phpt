@@ -8,4 +8,4 @@ const NULL = 1;
 echo NULL;
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare constant 'NULL' in %sns_075.php on line %d
+Fatal error: Constant "NULL" cannot be declared, NULL is a reserved constant name in %s on line %d

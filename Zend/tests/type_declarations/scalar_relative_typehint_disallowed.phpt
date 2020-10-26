@@ -11,4 +11,4 @@ foo(10);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'bar\int' as class name as it is reserved in %s on line %d
+Fatal error: Class "bar\int" cannot be declared, bar\int is a reserved class name in %s on line %d

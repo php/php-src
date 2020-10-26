@@ -7,4 +7,4 @@ class foobar {}
 class_alias("foobar", "string");
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'string' as class name as it is reserved in %s on line %d
+Fatal error: Class "string" cannot be declared, string is a reserved class name in %s on line %d

@@ -7,4 +7,4 @@ class A {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'final' as constant modifier in %s on line 3
+Fatal error: Constant A::X cannot be declared final in %s on line %d

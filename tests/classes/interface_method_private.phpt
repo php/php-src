@@ -9,4 +9,4 @@ interface if_a {
 
 ?>
 --EXPECTF--
-Fatal error: Access type for interface method if_a::err() must be omitted in %s on line %d
+Fatal error: Interface method if_a::err() must have public visibility in %s on line %d

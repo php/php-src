@@ -7,4 +7,4 @@ class foobar {}
 class_alias("foobar", "float");
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'float' as class name as it is reserved in %s on line %d
+Fatal error: Class "float" cannot be declared, float is a reserved class name in %s on line %d

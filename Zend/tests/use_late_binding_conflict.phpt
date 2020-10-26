@@ -10,4 +10,4 @@ use Foo\B;
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use Foo\B as B because the name is already in use in %s on line %d
+Fatal error: Cannot import class Foo\B as B, B has already been declared in %s on line %d

@@ -7,4 +7,4 @@ class A {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'abstract' as constant modifier in %s on line 3
+Fatal error: Constant A::X cannot be declared abstract in %s on line %d

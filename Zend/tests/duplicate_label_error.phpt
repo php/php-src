@@ -9,4 +9,4 @@ goto foo;
 
 ?>
 --EXPECTF--
-Fatal error: Label 'foo' already defined in %s on line %d
+Fatal error: Label foo has already been defined in %s on line %d

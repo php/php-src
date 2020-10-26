@@ -6389,7 +6389,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 			zend_string *location = zend_get_attribute_target_names(attr->target);
 			zend_string *allowed = zend_get_attribute_target_names(flags);
 
-			zend_throw_error(NULL, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+			zend_throw_error(NULL, "Attribute %s cannot target %s (allowed targets: %s)",
 				ZSTR_VAL(attr->data->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
 			);
 
