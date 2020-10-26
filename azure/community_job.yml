@@ -67,8 +67,6 @@ jobs:
         cd symfony
         php7.3 /usr/bin/composer install --no-progress
         php7.3 ./phpunit install
-        # Work around PHP 8 incompatibility in Doctrine
-        sed -i 's/function query()/function query(...$args)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
