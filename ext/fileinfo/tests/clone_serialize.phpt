@@ -14,7 +14,7 @@ try {
 try {
     $finfo3 = unserialize(serialize($finfo));
     var_dump($finfo3->buffer("Test string"));
-} catch (Error $e) {
+} catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -22,4 +22,4 @@ try {
 --EXPECTF--
 string(%d) "%s"
 Trying to clone an uncloneable object of class finfo
-Invalid finfo object
+Serialization of 'finfo' is not allowed
