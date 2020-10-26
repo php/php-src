@@ -218,6 +218,7 @@ PHP_MINIT_FUNCTION(finfo)
 	memcpy(&finfo_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	finfo_object_handlers.offset = XtOffsetOf(finfo_object, zo);
 	finfo_object_handlers.free_obj = finfo_objects_free;
+	finfo_object_handlers.clone_obj = NULL;
 
 	le_fileinfo = zend_register_list_destructors_ex(finfo_resource_destructor, NULL, "file_info", module_number);
 
