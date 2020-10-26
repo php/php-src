@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #8055 (Abstract trait methods returning "self" cannot be
     fulfilled by traits). (Nikita)
+  . Fixed bug #80280 (ADD_EXTENSION_DEP() fails for ext/standard and ext/date).
+    (cmb)
 
 - IMAP:
   . Fixed bug #76618 (segfault on imap_reopen). (girgias)
