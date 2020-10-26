@@ -728,6 +728,11 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 	}
 #endif
 
+    /* TODO: move this to zend_cfg.c ? */
+	if (!op_array->function_name) {
+		ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	}
+
 	if ((JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
 	 && op_array->last_try_catch == 0
