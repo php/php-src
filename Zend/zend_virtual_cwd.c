@@ -486,12 +486,13 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void)
 static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, time_t *t, int use_realpath, bool is_dir, int *link_is_dir) /* {{{ */
 {
 	size_t i, j;
-	int directory = 0, save, may_retry_reparse_point;
+	int directory = 0, save;
 #ifdef ZEND_WIN32
 	WIN32_FIND_DATAW dataw;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	ALLOCA_FLAG(use_heap_large)
 	wchar_t *pathw = NULL;
+	int may_retry_reparse_point;
 #define FREE_PATHW() \
 	do { free(pathw); } while(0);
 
