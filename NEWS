@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #80258 (Windows Deduplication Enabled, randon permission errors).
     (cmb)
 
+- COM:
+  . Fixed bug #62474 (com_event_sink crashes on certain arguments). (cmb)
+
 - IMAP:
   . Fixed bug #76618 (segfault on imap_reopen). (girgias)
   . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
