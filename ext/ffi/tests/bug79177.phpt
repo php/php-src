@@ -18,14 +18,14 @@ typedef char (*zend_write_func_t)(const char *str, size_t str_length);
 extern zend_write_func_t zend_write;
 ", ffi_get_php_dll_name());
 
-echo "Before", PHP_EOL;
+echo "Before\n";
 
 $originalHandler = clone $php->zend_write;
 $php->zend_write = function($str, $len): string {
     throw new \RuntimeException('Not allowed');
 };
 try { 
-    echo "After", PHP_EOL;
+    echo "After\n";
 } catch (\Throwable $exception) {
     // Do not output anything here, as handler is overridden
 } finally {
@@ -35,6 +35,15 @@ if (isset($exception)) {
     echo $exception->getMessage(), PHP_EOL;
 }
 ?>
---EXPECT--
+--EXPECTF--
 Before
-Not allowed
+
+Fatal error: Uncaught RuntimeException: Not allowed in %s:%d
+Stack trace:
+#0 %s(15): {closure}('After\n', 6)
+#1 {main}
+
+Next FFI\Exception: Uncaught RuntimeException in PHP FFI callback in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
