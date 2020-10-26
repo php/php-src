@@ -1984,6 +1984,9 @@ uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int
 	}
 	if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		tmp |= MAY_BE_NULL;
+		if (write) {
+			tmp |= MAY_BE_INDIRECT;
+		}
 	}
 	if (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
 		if (!write) {
