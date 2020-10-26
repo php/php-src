@@ -34,11 +34,11 @@
 
 extern void mbfl_filt_ident_utf8(unsigned char c, mbfl_identify_filter *filter);
 extern void mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter);
+extern void mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter);
 
 extern const unsigned char mblen_table_utf8[];
 
 static const char *mbfl_encoding_utf8_docomo_aliases[] = {"UTF-8-DOCOMO", "UTF8-DOCOMO", NULL};
-static const char *mbfl_encoding_utf8_kddi_a_aliases[] = {NULL};
 static const char *mbfl_encoding_utf8_kddi_b_aliases[] = {"UTF-8-Mobile#KDDI", "UTF-8-KDDI", "UTF8-KDDI", NULL};
 static const char *mbfl_encoding_utf8_sb_aliases[] = {"UTF-8-SOFTBANK", "UTF8-SOFTBANK", NULL};
 
@@ -57,7 +57,7 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
 	mbfl_no_encoding_utf8_kddi_a,
 	"UTF-8-Mobile#KDDI-A",
 	"UTF-8",
-	mbfl_encoding_utf8_kddi_a_aliases,
+	NULL,
 	mblen_table_utf8,
 	0,
 	&vtbl_utf8_kddi_a_wchar,
@@ -182,52 +182,48 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_sb = {
 	mbfl_filt_conv_common_flush
 };
 
-void mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter);
-
-/*
- * UTF-8 => wchar
- */
 void mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s, s1 = 0, c1 = 0, snd = 0;
 
 retry:
-	switch (filter->status & 0xff) {
+	switch (filter->status & 0xFF) {
 	case 0x00:
 		if (c < 0x80) {
 			(*filter->output_function)(c, filter->data);
-		} else if (c >= 0xc2 && c <= 0xdf) { /* 2byte code first char: 0xc2-0xdf */
+		} else if (c >= 0xc2 && c <= 0xdf) { /* 2-byte char, first byte: 0xC2-0xDF */
 			filter->status = 0x10;
 			filter->cache = c & 0x1f;
-		} else if (c >= 0xe0 && c <= 0xef) { /* 3byte code first char: 0xe0-0xef */
+		} else if (c >= 0xe0 && c <= 0xef) { /* 3-byte char, first byte: 0xE0-0xEF */
 			filter->status = 0x20;
 			filter->cache = c & 0xf;
-		} else if (c >= 0xf0 && c <= 0xf4) { /* 3byte code first char: 0xf0-0xf4 */
+		} else if (c >= 0xf0 && c <= 0xf4) { /* 4-byte char, first byte: 0xF0-0xF4 */
 			filter->status = 0x30;
 			filter->cache = c & 0x7;
 		} else {
 			mbfl_filt_put_invalid_char(c, filter);
 		}
 		break;
-	case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
-	case 0x21: /* 3byte code 3rd char: 0x80-0xbf */
-	case 0x32: /* 4byte code 4th char: 0x80-0xbf */
+
+	case 0x10: /* 2-byte char, 2nd byte: 0x80-0xBF */
+	case 0x21: /* 3-byte char, 3rd byte: 0x80-0xBF */
+	case 0x32: /* 4-byte char, 4th byte: 0x80-0xBF */
 		filter->status = 0;
 		if (c >= 0x80 && c <= 0xbf) {
-			s = (filter->cache<<6) | (c & 0x3f);
+			s = (filter->cache << 6) | (c & 0x3f);
 			filter->cache = 0;
 
-			if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo &&
-				mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4) > 0) {
+			if (filter->from == &mbfl_encoding_utf8_docomo &&
+				mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4)) {
 				s = mbfilter_sjis_emoji_docomo2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_a &&
-					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua, 7) > 0) {
+			} else if (filter->from == &mbfl_encoding_utf8_kddi_a &&
+					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua, 7)) {
 				s = mbfilter_sjis_emoji_kddi2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_b &&
-					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua_b, 8) > 0) {
+			} else if (filter->from == &mbfl_encoding_utf8_kddi_b &&
+					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua_b, 8)) {
 				s = mbfilter_sjis_emoji_kddi2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_sb &&
-					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_sb2uni_pua, 6) > 0) {
+			} else if (filter->from == &mbfl_encoding_utf8_sb &&
+					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_sb2uni_pua, 6)) {
 				s = mbfilter_sjis_emoji_sb2unicode(s1, &snd);
 			}
 
@@ -240,14 +236,13 @@ retry:
 			goto retry;
 		}
 		break;
-	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
-		s = (filter->cache<<6) | (c & 0x3f);
-		c1 = filter->cache & 0xf;
 
-		if ((c >= 0x80 && c <= 0xbf) &&
-			((c1 == 0x0 && c >= 0xa0) ||
-			 (c1 == 0xd && c < 0xa0) ||
-			 (c1 > 0x0 && c1 != 0xd))) {
+	case 0x20: /* 3-byte char, 2nd byte: 0:0xA0-0xBF,D:0x80-9F,1-C,E-F:0x80-0x9F */
+		s = (filter->cache << 6) | (c & 0x3f);
+		c1 = filter->cache & 0xF;
+
+		if ((c >= 0x80 && c <= 0xBF) &&
+			 ((c1 == 0 && c >= 0xA0) || (c1 == 0xD && c < 0xA0) || (c1 > 0 && c1 != 0xD))) {
 			filter->cache = s;
 			filter->status++;
 		} else {
@@ -255,14 +250,13 @@ retry:
 			goto retry;
 		}
 		break;
-	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
-		s = (filter->cache<<6) | (c & 0x3f);
+
+	case 0x30: /* 4-byte char, 2nd byte: 0:0x90-0xBF,1-3:0x80-0xBF,4:0x80-0x8F */
+		s = (filter->cache << 6) | (c & 0x3f);
 		c1 = filter->cache & 0x7;
 
-		if ((c >= 0x80 && c <= 0xbf) &&
-			((c1 == 0x0 && c >= 0x90) ||
-			 (c1 == 0x4 && c < 0x90) ||
-			 (c1 > 0x0 && c1 != 0x4))) {
+		if ((c >= 0x80 && c <= 0xBF) &&
+			 ((c1 == 0 && c >= 0x90) || (c1 == 0x4 && c < 0x90) || (c1 > 0 && c1 != 0x4))) {
 			filter->cache = s;
 			filter->status++;
 		} else {
@@ -270,45 +264,44 @@ retry:
 			goto retry;
 		}
 		break;
-	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
-		if (c >= 0x80 && c <= 0xbf) {
-			filter->cache = (filter->cache<<6) | (c & 0x3f);
+
+	case 0x31: /* 4-byte char, 3rd byte: 0x80-0xBF */
+		if (c >= 0x80 && c <= 0xBF) {
+			filter->cache = (filter->cache << 6) | (c & 0x3f);
 			filter->status++;
 		} else {
 			mbfl_filt_put_invalid_char(filter->cache, filter);
 			goto retry;
 		}
 		break;
+
 	default:
 		filter->status = 0;
 		break;
 	}
 }
 
-/*
- * wchar => UTF-8
- */
 void mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x110000) {
 		int s1, c1;
 
-		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo &&
-			 mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) ||
-			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a &&
-			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7) > 0) ||
-			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b &&
-			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8) > 0) ||
-			(filter->to->no_encoding == mbfl_no_encoding_utf8_sb &&
-			 mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_sb2uni_pua, 6) > 0)) {
+		if ((filter->to == &mbfl_encoding_utf8_docomo &&
+			 mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) &&
+			 mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4)) ||
+			(filter->to == &mbfl_encoding_utf8_kddi_a &&
+			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) &&
+			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7)) ||
+			(filter->to == &mbfl_encoding_utf8_kddi_b &&
+			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) &&
+			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8)) ||
+			(filter->to == &mbfl_encoding_utf8_sb &&
+			 mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) &&
+			 mbfilter_conv_map_tbl(s1, &c1, mbfl_sb2uni_pua, 6))) {
 			c = c1;
 		}
 
-		if (filter->status == 1 && filter->cache > 0) {
+		if (filter->status) {
 			return;
 		}
 
