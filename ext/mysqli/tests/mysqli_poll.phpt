@@ -40,6 +40,14 @@ if (!$IS_MYSQLND)
         echo $e->getMessage() . \PHP_EOL;
     }
 
+    $link->close();
+    $read[0] = get_connection();
+    try {
+        mysqli_poll($read, $error, $reject, 0, 1);
+    } catch (\Error $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
     function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
         if ($exp_ready !== ($tmp = mysqli_poll($links, $errors, $reject, 0, 1000)))
@@ -116,6 +124,7 @@ if (!$IS_MYSQLND)
 --EXPECTF--
 mysqli_poll(): Argument #4 ($seconds) must be greater than or equal to 0
 mysqli_poll(): Argument #5 ($microseconds) must be greater than or equal to 0
+mysqli object is already closed
 [012 + 6] Rejecting thread %d: 0/
 [013 + 6] Rejecting thread %d: 0/
 [014 + 6] Rejecting thread %d: 0/
