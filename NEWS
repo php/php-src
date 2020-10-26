@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     fulfilled by traits). (Nikita)
   . Fixed bug #80280 (ADD_EXTENSION_DEP() fails for ext/standard and ext/date).
     (cmb)
+  . Fixed bug #80258 (Windows Deduplication Enabled, randon permission errors).
+    (cmb)
 
 - IMAP:
   . Fixed bug #76618 (segfault on imap_reopen). (girgias)
