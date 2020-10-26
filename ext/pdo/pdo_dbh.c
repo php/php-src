@@ -577,6 +577,14 @@ PHP_METHOD(PDO, prepare)
 }
 /* }}} */
 
+
+static zend_bool pdo_is_in_transaction(pdo_dbh_t *dbh) {
+	if (dbh->methods->in_transaction) {
+		return dbh->methods->in_transaction(dbh);
+	}
+	return dbh->in_txn;
+}
+
 /* {{{ Initiates a transaction */
 PHP_METHOD(PDO, beginTransaction)
 {
@@ -586,7 +594,7 @@ PHP_METHOD(PDO, beginTransaction)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (dbh->in_txn) {
+	if (pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is already an active transaction");
 		RETURN_THROWS();
 	}
@@ -617,7 +625,7 @@ PHP_METHOD(PDO, commit)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (!dbh->in_txn) {
+	if (!pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
 		RETURN_THROWS();
 	}
@@ -641,7 +649,7 @@ PHP_METHOD(PDO, rollBack)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (!dbh->in_txn) {
+	if (!pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
 		RETURN_THROWS();
 	}
@@ -665,11 +673,7 @@ PHP_METHOD(PDO, inTransaction)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (!dbh->methods->in_transaction) {
-		RETURN_BOOL(dbh->in_txn);
-	}
-
-	RETURN_BOOL(dbh->methods->in_transaction(dbh));
+	RETURN_BOOL(pdo_is_in_transaction(dbh));
 }
 /* }}} */
 
