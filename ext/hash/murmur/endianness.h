@@ -55,6 +55,9 @@ FORCE_INLINE uint64_t BSWAP64(uint64_t u)
 }
 #endif
 
+#ifdef __clang__
+__attribute__((no_sanitize("alignment")))
+#endif
 FORCE_INLINE uint32_t getblock32 ( const uint32_t * const p, const int i)
 {
   if (IsBigEndian()) {
@@ -64,6 +67,9 @@ FORCE_INLINE uint32_t getblock32 ( const uint32_t * const p, const int i)
   }
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("alignment")))
+#endif
 FORCE_INLINE uint64_t getblock64 ( const uint64_t * const p, const int i)
 {
   if (IsBigEndian()) {
