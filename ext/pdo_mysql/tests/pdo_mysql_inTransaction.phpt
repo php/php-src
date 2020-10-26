@@ -14,11 +14,11 @@ const BEGIN = ['BEGIN', 'START TRANSACTION'];
 const END = ['COMMIT', 'ROLLBACK'];
 
 $db = MySQLPDOTest::factory();
-// $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false); // mysql does not support
-for ($b = 0; $b < count(BEGIN); $b++) {
-    for ($e = 0; $e < count(END); $e++) {
+// $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false); // mysql does not support
+foreach (BEGIN as $begin) {
+    foreach (END as $end) {
         foreach (['exec', 'query', 'execute'] as $w) {
-            foreach ([BEGIN[$b], END[$e]] as $command) {
+            foreach ([$begin, $end] as $command) {
                 switch ($w) {
                     case 'exec':
                         $db->exec($command);
@@ -40,6 +40,24 @@ for ($b = 0; $b < count(BEGIN); $b++) {
 }
 echo "\n";
 
+// Mixing PDO transaction API and explicit queries.
+foreach (END as $end) {
+    $db->beginTransaction();
+    var_dump($db->inTransaction());
+    $db->exec($end);
+    var_dump($db->inTransaction());
+}
+
+$db->exec('START TRANSACTION');
+var_dump($db->inTransaction());
+$db->rollBack();
+var_dump($db->inTransaction());
+$db->exec('START TRANSACTION');
+var_dump($db->inTransaction());
+$db->commit();
+var_dump($db->inTransaction());
+echo "\n";
+
 // DDL query causes an implicit commit.
 $db->beginTransaction();
 var_dump($db->inTransaction());
@@ -50,6 +68,7 @@ var_dump($db->inTransaction());
 $db->beginTransaction();
 var_dump($db->inTransaction());
 $db->commit();
+var_dump($db->inTransaction());
 
 ?>
 --EXPECT--
@@ -81,3 +100,13 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+
+bool(true)
+bool(false)
+bool(true)
+bool(false)
