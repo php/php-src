@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #80258 (Windows Deduplication Enabled, randon permission errors).
     (cmb)
 
+- COM:
+  . Fixed bug #62474 (com_event_sink crashes on certain arguments). (cmb)
+
 - IMAP:
   . Fixed bug #64076 (imap_sort() does not return FALSE on failure). (cmb)
   . Fixed bug #76618 (segfault on imap_reopen). (girgias)
