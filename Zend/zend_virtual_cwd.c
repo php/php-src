@@ -492,7 +492,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void)
 static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, time_t *t, int use_realpath, int is_dir, int *link_is_dir) /* {{{ */
 {
 	size_t i, j;
-	int directory = 0, save;
+	int directory = 0, save, may_retry_reparse_point;
 #ifdef ZEND_WIN32
 	WIN32_FIND_DATAW dataw;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
@@ -597,6 +597,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 
 #ifdef ZEND_WIN32
 retry_reparse_point:
+		may_retry_reparse_point = 0;
 		if (save) {
 			pathw = php_win32_ioutil_any_to_w(path);
 			if (!pathw) {
@@ -691,6 +692,7 @@ retry_reparse_tag_cloud:
 			CloseHandle(hLink);
 
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+				may_retry_reparse_point = 1;
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
 				isabsolute = pbuffer->SymbolicLinkReparseBuffer.Flags == 0;
 #if VIRTUAL_CWD_DEBUG
@@ -827,7 +829,7 @@ retry_reparse_tag_cloud:
 			free_alloca(pbuffer, use_heap_large);
 			free(substitutename);
 
-			{
+			if (may_retry_reparse_point) {
 				DWORD attrs;
 
 				FREE_PATHW()
