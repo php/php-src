@@ -1351,7 +1351,7 @@ if ($printParameterStats) {
     foreach ($fileInfos as $fileInfo) {
         foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
             foreach ($funcInfo->args as $argInfo) {
-                if (!isset($context->parameterStats[$argInfo->name])) {
+                if (!isset($parameterStats[$argInfo->name])) {
                     $parameterStats[$argInfo->name] = 0;
                 }
                 $parameterStats[$argInfo->name]++;
