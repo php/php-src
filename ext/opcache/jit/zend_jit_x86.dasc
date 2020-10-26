@@ -15382,7 +15382,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 				regset = ZEND_REGSET_EMPTY;
 				if (opline->op2_type == IS_CONST &&
 				    Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG &&
-				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(opline, opline->op2)))) {
+				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(opline, opline->op2))) &&
+				    OP1_HAS_RANGE() &&
+				    OP1_MIN_RANGE() >= 0) {
 					if (ssa_op->result_def != current_var &&
 					    (ssa_op->op1_use != current_var || !last_use)) {
 						ZEND_REGSET_INCL(regset, ZREG_R0);
