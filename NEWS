@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #62474 (com_event_sink crashes on certain arguments). (cmb)
 
+- DOM:
+  . Fixed bug #80268 (loadHTML() truncates at NUL bytes). (cmb)
+
 - IMAP:
   . Fixed bug #76618 (segfault on imap_reopen). (girgias)
   . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
