@@ -6529,7 +6529,6 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionUnionType", class_ReflectionUnionType_methods);
 	reflection_init_class_handlers(&_reflection_entry);
-	_reflection_entry.ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	reflection_union_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", class_ReflectionMethod_methods);
