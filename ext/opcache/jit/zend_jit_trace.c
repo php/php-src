@@ -5743,9 +5743,9 @@ done:
 			 && (init_opline->opcode != ZEND_INIT_METHOD_CALL
 			  || init_opline->op1_type == IS_UNDEF)
 			 && (init_opline->opcode != ZEND_INIT_USER_CALL
-			  || init_opline->op2_type == IS_CONST) /* no closure */
+			  || (p->func && (!p->func->common.scope || (p->func->common.fn_flags & ZEND_ACC_STATIC))))
 			 && (init_opline->opcode != ZEND_INIT_DYNAMIC_CALL
-			  || init_opline->op2_type == IS_CONST) /* no closure */
+			  || (p->func && (!p->func->common.scope || (p->func->common.fn_flags & ZEND_ACC_STATIC))))
 			) {
 				TRACE_FRAME_SET_NO_NEED_RELEASE_THIS(call);
 			}
