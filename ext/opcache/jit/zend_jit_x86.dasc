@@ -12739,10 +12739,19 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				}
 			} else if (flags == ZEND_FETCH_REF) {
 				|	IF_TYPE dl, IS_REFERENCE, >1
+				if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+					|	LOAD_ADDR FCARG2a, prop_info
+				} else {
+					int prop_info_offset =
+						(((prop_info->offset - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
+
+					|	mov r0, aword [FCARG1a + offsetof(zend_object, ce)]
+					|	mov	r0, aword [r0 + offsetof(zend_class_entry, properties_info_table)]
+					|	mov FCARG2a, aword[r0 + prop_info_offset]
+				}
 				if (Z_REG(prop_addr) != ZREG_FCARG1a || Z_OFFSET(prop_addr) != 0) {
 					|	LOAD_ZVAL_ADDR FCARG1a, prop_addr
 				}
-				|	LOAD_ADDR FCARG2a, prop_info
 				|.if X64
 					|	LOAD_ZVAL_ADDR CARG3, res_addr
 				|.else
@@ -13466,8 +13475,32 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 		if (ZEND_TYPE_IS_SET(prop_info->type)) {
 			uint32_t info = val_info;
 
+			if (opline) {
+				|	SET_EX_OPLINE opline, r0
+			}
+
+			|	IF_ZVAL_TYPE prop_addr, IS_REFERENCE, >1
+			|.cold_code
+			|1:
+			|	GET_ZVAL_PTR FCARG1a, prop_addr
+			if (Z_MODE(val_addr) != IS_MEM_ZVAL || Z_REG(val_addr) != ZREG_FCARG2a || Z_OFFSET(val_addr) != 0) {
+				|	LOAD_ZVAL_ADDR FCARG2a, val_addr
+			}
+			|.if X64
+				|	LOAD_ADDR CARG3, binary_op
+			|.else
+				|	sub r4, 12
+				|	PUSH_ADDR binary_op, r0
+			|.endif
+			|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			|.if not(X64)
+				|	add r4, 12
+			|.endif
+			|	jmp >9
+			|.code
+
 			|	// value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
-			|	SET_EX_OPLINE opline, r0
+
 			if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 				|	LOAD_ADDR FCARG2a, prop_info
 			} else {
