@@ -3,7 +3,8 @@
 
 error_reporting(E_ALL);
 
-$data = file_get_contents(__FILE__);
+// 2240 comes from the fact that it used to be file_get_contents(__FILE__);
+$data = str_repeat("\x00", 2240);
 $time = array();
 foreach (hash_algos() as $algo) {
     $time[$algo] = 0;
