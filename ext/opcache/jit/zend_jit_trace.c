@@ -372,10 +372,12 @@ static zend_always_inline void zend_jit_trace_add_op_guard(zend_ssa             
 {
 	zend_ssa_var_info *info = &tssa->var_info[ssa_var];
 
-	if (tssa->vars[ssa_var].alias != NO_ALIAS) {
-		info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info(op_type);
-	} else if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op_type)) {
-		info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op_type, info->type);
+	if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op_type)) {
+		if (UNEXPECTED(tssa->vars[ssa_var].alias != NO_ALIAS)) {
+			info->type |= MAY_BE_GUARD;
+		} else {
+			info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op_type, info->type);
+		}
 	}
 }
 
@@ -387,14 +389,13 @@ static zend_always_inline void zend_jit_trace_add_op_guard(zend_ssa             
 
 #define CHECK_OP_TRACE_TYPE(_var, _ssa_var, op_info, op_type) do { \
 		if (op_type != IS_UNKNOWN) { \
-			if ((op_info & MAY_BE_GUARD) != 0 \
-			 && op_type != STACK_TYPE(stack, EX_VAR_TO_NUM(_var))) { \
+			if ((op_info & MAY_BE_GUARD) != 0) { \
 				if (!zend_jit_type_guard(&dasm_state, opline, _var, op_type)) { \
 					goto jit_failure; \
 				} \
 				if (ssa->vars[_ssa_var].alias != NO_ALIAS) { \
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(_var), IS_UNKNOWN, 1); \
-					op_info &= ~MAY_BE_GUARD; \
+					op_info = zend_jit_trace_type_to_info(op_type); \
 				} else { \
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(_var), op_type, 1); \
 					op_info &= ~MAY_BE_GUARD; \
@@ -3615,6 +3616,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							res_addr = 0;
 						}
 						op1_def_info = OP1_DEF_INFO();
+						if (op1_def_info & MAY_BE_GUARD
+						 && !has_concrete_type(op1_def_info)) {
+							op1_def_info &= ~MAY_BE_GUARD;
+						}
 						if (!zend_jit_inc_dec(&dasm_state, opline,
 								op1_info, OP1_REG_ADDR(),
 								op1_def_info, OP1_DEF_REG_ADDR(),
@@ -3894,6 +3899,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 						op1_def_info = OP1_DEF_INFO();
+						if (op1_def_info & MAY_BE_GUARD
+						 && !has_concrete_type(op1_def_info)) {
+							op1_def_info &= ~MAY_BE_GUARD;
+						}
 						if (!zend_jit_assign_op(&dasm_state, opline,
 								op1_info, op1_def_info, OP1_RANGE(),
 								op2_info, OP2_RANGE(),
@@ -5057,6 +5066,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 							} else {
 								CHECK_OP1_TRACE_TYPE();
+								if (!(op1_info & MAY_BE_OBJECT)) {
+									break;
+								}
 							}
 							if (ssa->var_info && ssa->ops) {
 								if (ssa_op->op1_use >= 0) {
