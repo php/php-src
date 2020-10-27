@@ -265,7 +265,7 @@ function long2ip(int $ip): string|false {}
 function getenv(?string $name = null, bool $local_only = false): string|array|false {}
 
 #ifdef HAVE_PUTENV
-function putenv(string $env_var): bool {}
+function putenv(string $assignment): bool {}
 #endif
 
 /** @param int $rest_index */
@@ -285,7 +285,7 @@ function time_sleep_until(float $timestamp): bool {}
 
 function get_current_user(): string {}
 
-function get_cfg_var(string $setting): string|array|false {}
+function get_cfg_var(string $option): string|array|false {}
 
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
@@ -312,16 +312,16 @@ function php_strip_whitespace(string $filename): string {}
 
 function highlight_string(string $string, bool $return = false): string|bool {}
 
-function ini_get(string $setting): string|false {}
+function ini_get(string $option): string|false {}
 
 function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
-function ini_set(string $setting, string $value): string|false {}
+function ini_set(string $option, string $value): string|false {}
 
 /** @alias ini_set */
-function ini_alter(string $setting, string $value): string|false {}
+function ini_alter(string $option, string $value): string|false {}
 
-function ini_restore(string $setting): void {}
+function ini_restore(string $option): void {}
 
 function set_include_path(string $include_path): string|false {}
 
@@ -1125,7 +1125,7 @@ function gettimeofday(bool $as_float = false): array|float {}
 #endif
 
 #ifdef HAVE_GETRUSAGE
-function getrusage(bool $mode = false): array|false {}
+function getrusage(int $mode = 0): array|false {}
 #endif
 
 /* pack.c */
