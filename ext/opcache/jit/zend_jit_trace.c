@@ -6976,6 +6976,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	const zend_op *orig_opline = EX(opline);
 	const zend_op *opline;
 	zend_jit_trace_info *t = &zend_jit_traces[trace_num];
+	int repeat_last_opline = 0;
 
 	/* Deoptimizatoion of VM stack state */
 	uint32_t i;
@@ -7030,19 +7031,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 
 				if (UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
 					/* Undefined array index or property */
-					if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT) {
-						fprintf(stderr, "     TRACE %d exit %d %s%s%s() %s:%d\n",
-							trace_num,
-							exit_num,
-							EX(func)->op_array.scope ? ZSTR_VAL(EX(func)->op_array.scope->name) : "",
-							EX(func)->op_array.scope ? "::" : "",
-							EX(func)->op_array.function_name ?
-								ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
-							ZSTR_VAL(EX(func)->op_array.filename),
-							EX(opline)->lineno);
-					}
-					EX(opline) = t->exit_info[exit_num].opline - 1;
-					return 0;
+					repeat_last_opline = 1;
 				} else {
 					ZVAL_COPY(EX_VAR_NUM(i), val);
 				}
@@ -7104,6 +7093,11 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
 			ZSTR_VAL(EX(func)->op_array.filename),
 			EX(opline)->lineno);
+	}
+
+	if (repeat_last_opline) {
+		EX(opline) = t->exit_info[exit_num].opline - 1;
+		return (EX(opline) == t->opline);
 	}
 
 	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_TO_VM) {
