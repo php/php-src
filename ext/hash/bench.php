@@ -3,7 +3,7 @@
 
 error_reporting(E_ALL);
 
-$data = file_get_contents(__FILE__);
+$data = str_repeat("\x00", (int) ($argv[1] ?? (2 * 1024)));
 $time = array();
 foreach (hash_algos() as $algo) {
     $time[$algo] = 0;
