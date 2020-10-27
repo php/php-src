@@ -455,6 +455,10 @@ struct _zend_jit_trace_stack_frame {
 		(frame)->_info |= TRACE_FRAME_MASK_LAST_SEND_BY_VAL; \
 		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_REF; \
 	} while (0)
+#define TRACE_FRAME_SET_LAST_SEND_UNKNOWN(frame) do { \
+		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_VAL; \
+		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_REF; \
+	} while (0)
 #define TRACE_FRAME_SET_RETURN_VALUE_USED(frame) do { \
 		(frame)->_info |= TRACE_FRAME_MASK_RETURN_VALUE_USED; \
 		(frame)->_info &= ~TRACE_FRAME_MASK_RETURN_VALUE_UNUSED; \

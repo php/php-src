@@ -1626,6 +1626,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_VAR_NO_REF_EX:
+					if (opline->op2_type == IS_CONST) {
+						/* Named parameters not supported in JIT */
+						break;
+					}
 					if (opline->op2.num > MAX_ARG_FLAG_NUM) {
 						goto propagate_arg;
 					}
@@ -1634,6 +1638,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_SEND_VAR:
 				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_FUNC_ARG:
+					if (opline->op2_type == IS_CONST) {
+						/* Named parameters not supported in JIT */
+						break;
+					}
 					ADD_OP1_TRACE_GUARD();
 propagate_arg:
 					/* Propagate argument type */
@@ -1691,16 +1699,21 @@ propagate_arg:
 					}
 					break;
 				case ZEND_CHECK_FUNC_ARG:
-					if (frame
-					 && frame->call
-					 && frame->call->func) {
-						uint32_t arg_num = opline->op2.num;
-
-						if (ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, arg_num)) {
-							TRACE_FRAME_SET_LAST_SEND_BY_REF(frame->call);
-						} else {
-							TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame->call);
-						}
+					if (!frame
+					 || !frame->call
+					 || !frame->call->func) {
+						break;
+					}
+					if (opline->op2_type == IS_CONST
+					 || opline->op2.num > MAX_ARG_FLAG_NUM) {
+						/* Named parameters not supported in JIT */
+						TRACE_FRAME_SET_LAST_SEND_UNKNOWN(frame->call);
+						break;
+					}
+					if (ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, opline->op2.num)) {
+						TRACE_FRAME_SET_LAST_SEND_BY_REF(frame->call);
+					} else {
+						TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame->call);
 					}
 					break;
 				case ZEND_FETCH_OBJ_FUNC_ARG:
@@ -1799,17 +1812,13 @@ propagate_arg:
 			if (ssa->var_info) {
 				/* Add statically inferred restrictions */
 				if (ssa_ops[idx].op1_def >= 0) {
-					if ((opline->opcode == ZEND_SEND_VAR_EX
-					  || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
-					  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG)
+					if (opline->opcode == ZEND_SEND_VAR_EX
 					 && frame
 					 && frame->call
 					 && frame->call->func
 					 && !ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, opline->op2.num)) {
 						ssa_var_info[ssa_ops[idx].op1_def] = ssa_var_info[ssa_ops[idx].op1_use];
-						if (opline->opcode == ZEND_SEND_VAR_EX) {
-							ssa_var_info[ssa_ops[idx].op1_def].type &= ~MAY_BE_GUARD;
-						}
+						ssa_var_info[ssa_ops[idx].op1_def].type &= ~MAY_BE_GUARD;
 						if (ssa_var_info[ssa_ops[idx].op1_def].type & MAY_BE_RC1) {
 							ssa_var_info[ssa_ops[idx].op1_def].type |= MAY_BE_RCN;
 						}
@@ -2674,6 +2683,10 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 						}
 						break;
 					case ZEND_SEND_VAR:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT */
+							break;
+						}
 					case ZEND_PRE_INC:
 					case ZEND_PRE_DEC:
 						if (i == ssa->ops[line].op1_def &&
@@ -3651,6 +3664,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						   && frame->call->func
 						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
 						 && (opline+1)->op1.var == opline->result.var) {
 							p++;
 							if (frame->call) {
@@ -3725,6 +3739,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						   && frame->call->func
 						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
 						 && (opline+1)->op1.var == opline->result.var) {
 							p++;
 							if (frame->call
@@ -3808,6 +3823,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						   && frame->call->func
 						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
 						 && (opline+1)->op1.var == opline->result.var) {
 							p++;
 							if (frame->call
@@ -4242,6 +4258,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							   && frame->call->func
 							   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 							 && (opline+1)->op1_type == IS_TMP_VAR
+							 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
 							 && (opline+1)->op1.var == opline->result.var) {
 								p++;
 								if (frame->call
@@ -4397,14 +4414,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_CHECK_FUNC_ARG:
-						if (opline->op2_type == IS_CONST) {
-							/* Named parameters not supported in JIT */
+						if (!JIT_G(current_frame)
+						 || !JIT_G(current_frame)->call
+						 || !JIT_G(current_frame)->call->func) {
 							break;
 						}
-						if (opline->op2.num > MAX_ARG_FLAG_NUM
-						 && (!JIT_G(current_frame)
-						  || !JIT_G(current_frame)->call
-						  || !JIT_G(current_frame)->call->func)) {
+						if (opline->op2_type == IS_CONST
+						 || opline->op2.num > MAX_ARG_FLAG_NUM) {
+							/* Named parameters not supported in JIT */
+							TRACE_FRAME_SET_LAST_SEND_UNKNOWN(JIT_G(current_frame)->call);
 							break;
 						}
 						if (!zend_jit_check_func_arg(&dasm_state, opline)) {
