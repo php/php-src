@@ -4,6 +4,8 @@ Test imap_fetch_overview() function : usage variations - multipart message
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
+--CONFLICTS--
+fetchoverview
 --FILE--
 <?php
 /*

@@ -4,6 +4,8 @@ Test imap_fetch_overview() function : basic functionality
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
+--CONFLICTS--
+fetchoverview
 --FILE--
 <?php
 echo "*** Testing imap_fetch_overview() : basic functionality ***\n";
