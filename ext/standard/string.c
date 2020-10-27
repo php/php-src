@@ -258,22 +258,25 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
+	size_t remain_len = ZSTR_LEN(s11);
 	if (start < 0) {
-		start += (zend_long)ZSTR_LEN(s11);
-	}
-	if (start < 0 || (size_t)start > ZSTR_LEN(s11)) {
-		zend_argument_value_error(3, "must be contained in argument #1 ($str)");
-		RETURN_THROWS();
+		start += remain_len;
+		if (start < 0) {
+			start = 0;
+		}
+	} else if ((size_t) start > remain_len) {
+		start = remain_len;
 	}
 
-	size_t remain_len = ZSTR_LEN(s11) - start;
+	remain_len -= start;
 	if (!len_is_null) {
 		if (len < 0) {
 			len += remain_len;
-		}
-		if (len < 0 || (size_t)len > remain_len) {
-			zend_argument_value_error(4, "must be contained in argument #1 ($str)");
-			RETURN_THROWS();
+			if (len < 0) {
+				len = 0;
+			}
+		} else if ((size_t) len > remain_len) {
+			len = remain_len;
 		}
 	} else {
 		len = remain_len;

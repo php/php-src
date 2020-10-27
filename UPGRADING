@@ -532,8 +532,6 @@ PHP 8.0 UPGRADE NOTES
   . parse_str() can no longer be used without specifying a result array.
   . fgetss() has been removed.
   . The string.strip_tags filter has been removed.
-  . strspn() and strcspn() now throw a ValueError when the start or length
-    argument exceed the bounds of the string.
   . The needle argument of strpos(), strrpos(), stripos(), strripos(), strstr(),
     strchr(), strrchr(), and stristr() will now always be interpreted as a
     string. Previously non-string needles were interpreted as an ASCII code
