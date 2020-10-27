@@ -104,12 +104,6 @@
 #else
 #endif
 
-#define _CONST_CODE  0
-#define _TMP_CODE    1
-#define _VAR_CODE    2
-#define _UNUSED_CODE 3
-#define _CV_CODE     4
-
 typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 
 #define get_zval_ptr(op_type, node, type) _get_zval_ptr(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)

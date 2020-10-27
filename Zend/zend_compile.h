@@ -706,11 +706,26 @@ struct _zend_execute_data {
 #define ZEND_OP_ARRAY_EXTENSION(op_array, handle) \
 	((void**)RUN_TIME_CACHE(op_array))[handle]
 
-#define IS_UNUSED	0		/* Unused operand */
-#define IS_CONST	(1<<0)
-#define IS_TMP_VAR	(1<<1)
-#define IS_VAR		(1<<2)
-#define IS_CV		(1<<3)	/* Compiled variable */
+#define OP_TYPE_MAP(XX) \
+    XX(IS_UNUSED, 0) \
+    XX(IS_CONST, 1<<0) \
+    XX(IS_TMP_VAR, 1<<1) \
+    XX(IS_VAR, 1<<2) \
+    XX(IS_CV, 1<<3) \
+
+enum op_type_e
+{
+#define OP_TYPE_GEN(name, value) name = value,
+    OP_TYPE_MAP(OP_TYPE_GEN)
+#undef OP_TYPE_GEN
+};
+
+enum op_type_code_e
+{
+#define OP_TYPE_CODE_GEN(name, value) _##name##_CODE,
+    OP_TYPE_MAP(OP_TYPE_CODE_GEN)
+#undef OP_TYPE_CODE_GEN
+};
 
 /* Used for result.type of smart branch instructions */
 #define IS_SMART_BRANCH_JMPZ  (1<<4)
