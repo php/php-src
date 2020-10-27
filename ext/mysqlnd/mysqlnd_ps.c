@@ -152,7 +152,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 
 	if (stmt->cursor_exists) {
 		/* Silently convert buffered to unbuffered, for now */
-		// DBG_RETURN(s->m->use_result(s));
+		DBG_RETURN(s->m->use_result(s));
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
@@ -178,7 +178,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 			break;
 		}
 
-		if ((result = result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY))) {
+		if (result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY)) {
 			UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, result->stored_data->row_count);
 			stmt->state = MYSQLND_STMT_PREPARED;
 			result->type = MYSQLND_RES_PS_BUF;

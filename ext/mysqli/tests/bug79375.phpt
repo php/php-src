@@ -19,7 +19,7 @@ $mysqli->query('CREATE TABLE test (first int) ENGINE = InnoDB');
 $mysqli->query('INSERT INTO test VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9)');
 
 function testStmtStoreResult(mysqli $mysqli, string $name) {
-    $mysqli->query("SET innodb_lock_wait_timeout = 2");
+    $mysqli->query("SET innodb_lock_wait_timeout = 1");
     $mysqli->query("START TRANSACTION");
     $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
     echo "Running query on $name\n";
@@ -33,7 +33,7 @@ function testStmtStoreResult(mysqli $mysqli, string $name) {
     }
 }
 function testStmtGetResult(mysqli $mysqli, string $name) {
-    $mysqli->query("SET innodb_lock_wait_timeout = 2");
+    $mysqli->query("SET innodb_lock_wait_timeout = 1");
     $mysqli->query("START TRANSACTION");
     $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
     echo "Running query on $name\n";
@@ -47,7 +47,7 @@ function testStmtGetResult(mysqli $mysqli, string $name) {
     }
 }
 function testNormalQuery(mysqli $mysqli, string $name) {
-    $mysqli->query("SET innodb_lock_wait_timeout = 2");
+    $mysqli->query("SET innodb_lock_wait_timeout = 1");
     $mysqli->query("START TRANSACTION");
     $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
     echo "Running query on $name\n";
@@ -59,7 +59,7 @@ function testNormalQuery(mysqli $mysqli, string $name) {
     }
 }
 function testStmtUseResult(mysqli $mysqli, string $name) {
-    $mysqli->query("SET innodb_lock_wait_timeout = 2");
+    $mysqli->query("SET innodb_lock_wait_timeout = 1");
     $mysqli->query("START TRANSACTION");
     $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
     echo "Running query on $name\n";
@@ -70,6 +70,20 @@ function testStmtUseResult(mysqli $mysqli, string $name) {
         $stmt->fetch();
         echo "Got {$stmt->num_rows} for $name\n";
     } catch (mysqli_sql_exception $e) {
+        echo $e->getMessage()."\n";
+    }
+}
+function testResultFetchRow(mysqli $mysqli, string $name) {
+    $mysqli->query("SET innodb_lock_wait_timeout = 1");
+    $mysqli->query("START TRANSACTION");
+    $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
+    echo "Running query on $name\n";
+    $res = $mysqli->query($query, MYSQLI_USE_RESULT);
+    try {
+        $res->fetch_row();
+        $res->fetch_row();
+        echo "Got {$res->num_rows} for $name\n";
+    } catch(mysqli_sql_exception $e) {
         echo $e->getMessage()."\n";
     }
 }
@@ -113,6 +127,17 @@ testStmtUseResult($mysqli2, 'second connection');
 $mysqli->close();
 $mysqli2->close();
 
+echo "\n";
+//  try it again using fetch_row on a result object
+$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+$mysqli2 = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+
+testResultFetchRow($mysqli, 'first connection');
+testResultFetchRow($mysqli2, 'second connection');
+
+$mysqli->close();
+$mysqli2->close();
+
 ?>
 --CLEAN--
 <?php
@@ -138,3 +163,10 @@ Running query on first connection
 Got %d for first connection
 Running query on second connection
 Lock wait timeout exceeded; try restarting transaction
+
+Running query on first connection
+Got 1 for first connection
+Running query on second connection
+
+Warning: mysqli_result::fetch_row(): Error while reading a row in %s on line %d
+Got 0 for second connection

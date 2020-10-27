@@ -255,7 +255,7 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 
 			/* if buffered, pre-fetch all the data */
 			if (H->buffered) {
-				if(mysql_stmt_store_result(S->stmt)) {
+				if (mysql_stmt_store_result(S->stmt)) {
 					pdo_mysql_error_stmt(stmt);
 					PDO_DBG_RETURN(0);
 				}
