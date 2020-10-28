@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)
 
+- SNMP:
+  . Fixed bug #70461 (disable md5 code when it is not supported in net-snmp).
+    (Alexander Bergmann, cmb)
+
 29 Oct 2020, PHP 7.3.24
 
 - Core:
