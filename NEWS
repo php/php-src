@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #79643 (PHP with Opcache crashes when a file with specific name
     is included). (twosee)
+  . Fixed run-time binding of preloaded dynamically declared function. (Dmitry)
 
 - OpenSSL:
   . Fixed bug #79983 (openssl_encrypt / openssl_decrypt fail with OCB mode).

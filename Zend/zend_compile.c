@@ -1050,7 +1050,11 @@ ZEND_API int do_bind_function(zval *lcname) /* {{{ */
 		return FAILURE;
 	}
 	function = (zend_function*)Z_PTR_P(zv);
-	zv = zend_hash_set_bucket_key(EG(function_table), (Bucket*)zv, Z_STR_P(lcname));
+	if (UNEXPECTED(function->common.fn_flags & ZEND_ACC_PRELOADED)) {
+		zv = zend_hash_add(EG(function_table), Z_STR_P(lcname), zv);
+	} else {
+		zv = zend_hash_set_bucket_key(EG(function_table), (Bucket*)zv, Z_STR_P(lcname));
+	}
 	if (UNEXPECTED(!zv)) {
 		do_bind_function_error(Z_STR_P(lcname), &function->op_array, 0);
 		return FAILURE;
