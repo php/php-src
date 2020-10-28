@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #80268 (loadHTML() truncates at NUL bytes). (cmb)
 
+- FFI:
+  . Fixed bug #79177 (FFI doesn't handle well PHP exceptions within callback).
+    (cmb, Dmitry, Nikita)
+
 - IMAP:
   . Fixed bug #64076 (imap_sort() does not return FALSE on failure). (cmb)
   . Fixed bug #76618 (segfault on imap_reopen). (girgias)
