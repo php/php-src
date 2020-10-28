@@ -175,7 +175,7 @@ array(3) {
 }
 bool(false)
 
-Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'INSERT INTO test (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
+Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'INSERT INTO test (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
 string(5) "42000"
 
 Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to true
