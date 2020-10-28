@@ -38,12 +38,10 @@ if (isset($exception)) {
 --EXPECTF--
 Before
 
-Fatal error: Uncaught RuntimeException: Not allowed in %s:%d
+Warning: Uncaught RuntimeException: Not allowed in %s:%d
 Stack trace:
-#0 %s(15): {closure}('After\n', 6)
+#0 %s(%d): {closure}('After\n', 6)
 #1 {main}
-
-Next FFI\Exception: Throwing from FFI callbacks is not allowed in %s:%d
-Stack trace:
-#0 {main}
   thrown in %s on line %d
+
+Fatal error: Throwing from FFI callbacks is not allowed in %s on line %d
