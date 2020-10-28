@@ -32,11 +32,13 @@ imap_close($imap_stream);
 $mailbox_suffix = 'imapbodybasic';
 require_once __DIR__.'/setup/clean.inc';
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing imap_body() : basic functionality ***
 Create a new mailbox for test
 Create a temporary mailbox and add 1 msgs
 New mailbox created
 Msg Count in new mailbox: 1
-string(%d) "1: this is a test message, please ignore%n"
-string(%d) "1: this is a test message, please ignore%n"
+string(49) "1: this is a test message, please ignore
+newline"
+string(49) "1: this is a test message, please ignore
+newline"

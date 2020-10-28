@@ -139,7 +139,7 @@ function populate_mailbox($imap_stream, string $mailbox, int $message_count, boo
                 . "To: ". IMAP_USERS[0] . "@" . IMAP_MAIL_DOMAIN . "\r\n"
                 . "Subject: test$i\r\n"
                 . "\r\n"
-                . "$i: this is a test message, please ignore\r\n";
+                . "$i: this is a test message, please ignore\r\nnewline";
         } else {
             $envelope["from"]= "foo@anywhere.com";
             $envelope["to"]  = IMAP_USERS[0] . "@" . IMAP_MAIL_DOMAIN;
