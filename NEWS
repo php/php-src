@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 - PDO MySQL:
   . Fixed bug #66528 (No PDOException or errorCode if database becomes
     unavailable before PDO::commit). (Nikita)
+  . Fixed bug #65825 (PDOStatement::fetch() does not throw exception on broken
+    server connection). (Nikita)
 
 29 Oct 2020, PHP 7.4.12
 

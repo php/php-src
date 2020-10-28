@@ -1354,6 +1354,15 @@ premature_end:
 }
 /* }}} */
 
+/* Like SET_CLIENT_ERROR, but for packet error_info. The type is the same,
+ * but only some parts of it are used. */
+static void set_packet_error(
+		MYSQLND_ERROR_INFO *info, unsigned err_no, const char *sqlstate, const char *error)
+{
+	info->error_no = err_no;
+	strlcpy(info->sqlstate, sqlstate, sizeof(info->sqlstate));
+	strlcpy(info->error, error, sizeof(info->error));
+}
 
 /* {{{ php_mysqlnd_read_row_ex */
 static enum_func_status
@@ -1396,7 +1405,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 		if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
 			DBG_ERR("Empty row packet body");
-			php_error(E_WARNING, "Empty row packet body");
+			set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		} else {
 			while (header.size >= MYSQLND_MAX_PACKET_SIZE) {
 				if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
@@ -1425,7 +1434,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 				if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
 					DBG_ERR("Empty row packet body");
-					php_error(E_WARNING, "Empty row packet body");
+					set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 					break;
 				}
 			}
@@ -1720,8 +1729,8 @@ php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 static enum_func_status
 php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
-	MYSQLND_PACKET_ROW *packet= (MYSQLND_PACKET_ROW *) _packet;
-	MYSQLND_ERROR_INFO * error_info = conn->error_info;
+	MYSQLND_PACKET_ROW *packet = (MYSQLND_PACKET_ROW *) _packet;
+	MYSQLND_ERROR_INFO * error_info = &packet->error_info;
 	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
