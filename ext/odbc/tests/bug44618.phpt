@@ -34,7 +34,8 @@ include __DIR__ . "/config.inc";
 $conn = odbc_connect($dsn, $user, $pass);
 odbc_exec($conn, "DROP TABLE bug44618");
 ?>
---EXPECT--
+--EXPECTF--
+Warning: odbc_fetch_array(): Can't get data of column #3 (retcode 100) in %s on line %d
 array(3) {
   ["ID"]=>
   string(1) "1"
@@ -43,6 +44,8 @@ array(3) {
   ["text1"]=>
   bool(false)
 }
+
+Warning: odbc_fetch_into(): Can't get data of column #3 (retcode 100) in %s on line %d
 array(3) {
   [0]=>
   string(1) "1"
@@ -51,6 +54,9 @@ array(3) {
   [2]=>
   bool(false)
 }
+
+Warning: odbc_result(): Can't get data of column #3 (retcode 100) in %s on line %d
 bool(false)
 <table><tr><th>ID</th><th>real1</th><th>text1</th></tr>
 <tr><td>1</td><td>10.02</td><td></td></tr></table>
+Warning: odbc_result_all(): Can't get data of column #3 (retcode 100) in %s on line %d

@@ -1811,6 +1811,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
 				} else if (rc != SQL_SUCCESS) {
+					php_error_docref(NULL, E_WARNING, "Can't get data of column #%d (retcode %u)", i + 1, rc);
 					ZVAL_FALSE(&tmp);
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
@@ -1965,6 +1966,7 @@ PHP_FUNCTION(odbc_fetch_into)
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
 				} else if (rc != SQL_SUCCESS) {
+					php_error_docref(NULL, E_WARNING, "Can't get data of column #%d (retcode %u)", i + 1, rc);
 					ZVAL_FALSE(&tmp);
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
@@ -2205,6 +2207,7 @@ PHP_FUNCTION(odbc_result)
 
 			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				zend_string_efree(field_str);
+				php_error_docref(NULL, E_WARNING, "Can't get data of column #%d (retcode %u)", field_ind + 1, rc);
 				RETURN_FALSE;
 			} else if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 				zend_string_efree(field_str);
@@ -2255,6 +2258,7 @@ PHP_FUNCTION(odbc_result)
 		}
 
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+			php_error_docref(NULL, E_WARNING, "Can't get data of column #%d (retcode %u)", field_ind + 1, rc);
 			efree(field);
 			RETURN_FALSE;
 		}
@@ -2370,6 +2374,7 @@ PHP_FUNCTION(odbc_result_all)
 						PHPWRITE(buf, result->longreadlen);
 					} else if (rc != SQL_SUCCESS) {
 						php_printf("</td></tr></table>");
+						php_error_docref(NULL, E_WARNING, "Can't get data of column #%d (retcode %u)", i + 1, rc);
 						efree(buf);
 						RETURN_FALSE;
 					} else if (result->values[i].vallen == SQL_NULL_DATA) {
