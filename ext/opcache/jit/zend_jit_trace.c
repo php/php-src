@@ -4623,11 +4623,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								info = zend_jit_trace_type_to_info_ex(type, info);
 								if (opline->op1_type == IS_CV
 								 && EX_VAR_TO_NUM(opline->op1.var) == j
-								 && !(op1_info & MAY_BE_REF)
-								 && JIT_G(current_frame)) {
-									if (TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
+								 && !(op1_info & (MAY_BE_REF|MAY_BE_OBJECT))) {
+									if (JIT_G(current_frame)
+									 && TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
 										continue;
-									} else if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_OBJECT) {
+									} else {
 										info |= MAY_BE_NULL;
 									}
 								}
