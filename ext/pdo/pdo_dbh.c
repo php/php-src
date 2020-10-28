@@ -1297,7 +1297,7 @@ static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(object);
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zend_get_gc_buffer_add_zval(gc_buffer, &dbh->def_stmt_ctor_args);
-	if (dbh->methods->get_gc) {
+	if (dbh->methods && dbh->methods->get_gc) {
 		dbh->methods->get_gc(dbh, gc_buffer);
 	}
 	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_count);
