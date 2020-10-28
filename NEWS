@@ -2,8 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0RC4
 
-- Standard:
+- Opcache:
+  . Fixed run-time binding of preloaded dynamically declared function. (Dmitry)
 
+- Standard:
   . Don't force rebuild of symbol table, when populating $http_response_header
     variable by the HTTP stream wrapper. (Dmitry)
 
