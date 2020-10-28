@@ -2713,8 +2713,6 @@ COMMAND $cmd
             $wanted_re = str_replace('%a', '.+', $wanted_re);
             $wanted_re = str_replace('%A', '.*', $wanted_re);
             $wanted_re = str_replace('%w', '\s*', $wanted_re);
-            $wanted_re = str_replace('%n', '\R+', $wanted_re); // At least one new line
-            $wanted_re = str_replace('%N', '\R*', $wanted_re); // Optional new lines
             $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
             $wanted_re = str_replace('%d', '\d+', $wanted_re);
             $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
