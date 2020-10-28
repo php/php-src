@@ -49,6 +49,20 @@ require_once('skipifconnectfailure.inc');
         printf("[009] select_db should have failed\n");
     // mysqli_store_result() and mysqli_use_result() cannot be tested, because one would need to cause an error inside the C function to test it
 
+    mysqli_multi_query($link, "SELECT 1; FOO;");
+    mysqli_autocommit($link, true);
+    mysqli_commit($link);
+    mysqli_rollback($link);
+    $stmt = mysqli_stmt_init($link);
+    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
+    while(mysqli_more_results($link)) {
+        mysqli_next_result($link);
+        $res = mysqli_store_result($link);
+    }
+    mysqli_next_result($link);
+
+    $stmt = mysqli_prepare($link, "SELECT 1");
+    mysqli_stmt_attr_set($stmt, MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE);
 
     // Check that none of the above would have caused any error messages if MYSQL_REPORT_ERROR would
     // not have been set. If that would be the case, the test would be broken.
@@ -64,6 +78,21 @@ require_once('skipifconnectfailure.inc');
     mysqli_prepare($link, "FOO");
     mysqli_real_query($link, "FOO");
     mysqli_select_db($link, "Oh lord, let this be an unknown database name");
+
+    mysqli_multi_query($link, "SELECT 1; FOO;");
+    mysqli_autocommit($link, true);
+    mysqli_commit($link);
+    mysqli_rollback($link);
+    $stmt = mysqli_stmt_init($link);
+    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
+    while(mysqli_more_results($link)) {
+        mysqli_next_result($link);
+        $res = mysqli_store_result($link);
+    }
+    mysqli_next_result($link);
+
+    $stmt = mysqli_prepare($link, "SELECT 1");
+    mysqli_stmt_attr_set($stmt, MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE);
 
     /*
     Internal macro MYSQL_REPORT_STMT_ERROR
@@ -292,6 +321,18 @@ mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 Warning: mysqli_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+
+Warning: mysqli_autocommit(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
+
+Warning: mysqli_commit(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
+
+Warning: mysqli_rollback(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
+
+Warning: mysqli_stmt_prepare(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
+
+Warning: mysqli_store_result(): (%s/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+
+Warning: mysqli_stmt_attr_set(): (%s/%d): Not implemented in %s on line %d
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_stmt_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
