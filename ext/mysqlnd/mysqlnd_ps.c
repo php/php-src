@@ -409,6 +409,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 
 		ret = conn->command->stmt_prepare(conn, query_string);
 		if (FAIL == ret) {
+			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			goto fail;
 		}
 	}
