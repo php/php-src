@@ -887,7 +887,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	free_alloca(fci.params, use_heap);
 
 	if (EG(exception)) {
-		zend_throw_error(zend_ffi_exception_ce, "Uncaught %s in PHP FFI callback", ZSTR_VAL(EG(exception)->ce->name));
+		zend_throw_error(zend_ffi_exception_ce, "Throwing from FFI callbacks is not allowed");
 		zend_exception_error(EG(exception), E_ERROR);
 	}
 

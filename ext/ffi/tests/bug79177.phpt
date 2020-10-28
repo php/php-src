@@ -43,7 +43,7 @@ Stack trace:
 #0 %s(15): {closure}('After\n', 6)
 #1 {main}
 
-Next FFI\Exception: Uncaught RuntimeException in PHP FFI callback in %s:%d
+Next FFI\Exception: Throwing from FFI callbacks is not allowed in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
