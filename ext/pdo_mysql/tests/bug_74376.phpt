@@ -23,5 +23,7 @@ $stmt = $db->query("select (select 1 union select 2)");
 
 print "ok";
 ?>
---EXPECT--
+--EXPECTF--
+
+Warning: PDO::query(): SQLSTATE[21000]: Cardinality violation: 1242 Subquery returns more than 1 row in %s on line %d
 ok
