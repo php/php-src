@@ -814,9 +814,7 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 	}
 
 fail:
-	if (attr == PDO_ATTR_AUTOCOMMIT) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0, "The auto-commit mode cannot be changed for this driver");
-	} else if (!dbh->methods->set_attribute) {
+	if (!dbh->methods->set_attribute) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support setting attributes");
 	} else {
 		PDO_HANDLE_DBH_ERR();

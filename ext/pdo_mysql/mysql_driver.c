@@ -349,7 +349,11 @@ static int mysql_handle_commit(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_commit");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_RETURN(0 == mysql_commit(((pdo_mysql_db_handle *)dbh->driver_data)->server));
+	if (mysql_commit(((pdo_mysql_db_handle *)dbh->driver_data)->server)) {
+		pdo_mysql_error(dbh);
+		PDO_DBG_RETURN(0);
+	}
+	PDO_DBG_RETURN(1);
 }
 /* }}} */
 
@@ -358,7 +362,11 @@ static int mysql_handle_rollback(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_rollback");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_RETURN(0 == mysql_rollback(((pdo_mysql_db_handle *)dbh->driver_data)->server));
+	if (mysql_rollback(((pdo_mysql_db_handle *)dbh->driver_data)->server)) {
+		pdo_mysql_error(dbh);
+		PDO_DBG_RETURN(0);
+	}
+	PDO_DBG_RETURN(1);
 }
 /* }}} */
 
@@ -368,7 +376,11 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 	PDO_DBG_ENTER("mysql_handle_autocommit");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("dbh->autocommit=%d", dbh->auto_commit);
-	PDO_DBG_RETURN(0 == mysql_autocommit(((pdo_mysql_db_handle *)dbh->driver_data)->server, dbh->auto_commit));
+	if (mysql_autocommit(((pdo_mysql_db_handle *)dbh->driver_data)->server, dbh->auto_commit)) {
+		pdo_mysql_error(dbh);
+		PDO_DBG_RETURN(0);
+	}
+	PDO_DBG_RETURN(1);
 }
 /* }}} */
 
@@ -385,7 +397,9 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			/* ignore if the new value equals the old one */
 			if (dbh->auto_commit ^ bval) {
 				dbh->auto_commit = bval;
-				mysql_handle_autocommit(dbh);
+				if (!mysql_handle_autocommit(dbh)) {
+					PDO_DBG_RETURN(0);
+				}
 			}
 			PDO_DBG_RETURN(1);
 
