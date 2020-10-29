@@ -217,6 +217,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_debug, 0, 0, 1)
 	ZEND_ARG_INFO(0, debug_options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_disable_cleanup, 0, 0, 2)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_result_and_fieldnr, 0, 0, 2)
 	MYSQLI_ZEND_ARG_OBJ_INFO_RESULT()
 	ZEND_ARG_INFO(0, field_nr)
@@ -401,7 +406,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_no_options, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
 /* {{{ mysqli_functions[]
  *
  * Every user visible function must have an entry in mysqli_functions[].
@@ -420,6 +424,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_data_seek,							arginfo_mysqli_data_seek)
 	PHP_FE(mysqli_dump_debug_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_debug,								arginfo_mysqli_debug)
+	PHP_FE(mysqli_disable_cleanup,						arginfo_mysqli_disable_cleanup)
 	PHP_FE(mysqli_errno,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error_list,							arginfo_mysqli_only_link)
@@ -549,6 +554,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(connect, mysqli_connect, arginfo_mysqli_connect)
 	PHP_FALIAS(dump_debug_info, mysqli_dump_debug_info, arginfo_mysqli_no_params)
 	PHP_FALIAS(debug, mysqli_debug, arginfo_mysqli_debug)
+	PHP_FALIAS(disable_cleanup, mysqli_disable_cleanup, arginfo_mysqli_disable_cleanup)
 #ifdef HAVE_MYSQLI_GET_CHARSET
 	PHP_FALIAS(get_charset, mysqli_get_charset, arginfo_mysqli_no_params)
 #endif
