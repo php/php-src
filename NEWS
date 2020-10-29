@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #79177 (FFI doesn't handle well PHP exceptions within callback).
     (cmb, Dmitry, Nikita)
 
+- ODBC:
+  . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)
+
 - Opcache:
   . Fixed run-time binding of preloaded dynamically declared function. (Dmitry)
 
