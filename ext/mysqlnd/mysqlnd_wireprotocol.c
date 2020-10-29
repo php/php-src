@@ -1370,6 +1370,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 						MYSQLND_VIO * vio,
 						MYSQLND_STATS * stats,
 						MYSQLND_ERROR_INFO * error_info,
+						MYSQLND_CONNECTION_STATE * connection_state,
 						MYSQLND_MEMORY_POOL * pool,
 						MYSQLND_ROW_BUFFER * buffer,
 						size_t * const data_size)
@@ -1405,6 +1406,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 		if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
 			DBG_ERR("Empty row packet body");
+			SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 			set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		} else {
 			while (header.size >= MYSQLND_MAX_PACKET_SIZE) {
@@ -1434,6 +1436,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 				if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
 					DBG_ERR("Empty row packet body");
+					SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 					set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 					break;
 				}
@@ -1740,7 +1743,7 @@ php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_ENTER("php_mysqlnd_rowp_read");
 
-	ret = php_mysqlnd_read_row_ex(pfc, vio, stats, error_info,
+	ret = php_mysqlnd_read_row_ex(pfc, vio, stats, error_info, &conn->state,
 								  packet->result_set_memory_pool, &packet->row_buffer, &data_size);
 	if (FAIL == ret) {
 		goto end;

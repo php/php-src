@@ -888,7 +888,9 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 				COPY_CLIENT_ERROR(stmt->error_info, row_packet->error_info);
 			}
 		}
-		SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		if (GET_CONNECTION_STATE(&conn->state) != CONN_QUIT_SENT) {
+			SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		}
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		DBG_INF("EOF");

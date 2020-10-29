@@ -743,7 +743,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 			COPY_CLIENT_ERROR(conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
-		SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		if (GET_CONNECTION_STATE(&conn->state) != CONN_QUIT_SENT) {
+			SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		}
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		/* Mark the connection as usable again */
@@ -881,7 +883,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 			COPY_CLIENT_ERROR(conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
-		SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		if (GET_CONNECTION_STATE(&conn->state) != CONN_QUIT_SENT) {
+			SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		}
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		/* Mark the connection as usable again */
