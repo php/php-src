@@ -4,7 +4,7 @@ Exceptions cannot be cloned
 <?php
 $exception = new Exception();
 $newException = clone $exception;
-
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Trying to clone an uncloneable object of class Exception in %s:%d
 Stack trace:

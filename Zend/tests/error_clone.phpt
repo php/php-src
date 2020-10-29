@@ -4,7 +4,7 @@ Errors cannot be cloned
 <?php
 $error = new Error();
 $newError = clone $error;
-
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Trying to clone an uncloneable object of class Error in %s:%d
 Stack trace:
