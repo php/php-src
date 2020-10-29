@@ -2374,7 +2374,7 @@ PHP_FUNCTION(odbc_result_all)
 						PHPWRITE(buf, result->longreadlen);
 					} else if (rc != SQL_SUCCESS) {
 						php_printf("</td></tr></table>");
-						php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", i + 1, rc);
+						php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (retcode %u)", i + 1, rc);
 						efree(buf);
 						RETURN_FALSE;
 					} else if (result->values[i].vallen == SQL_NULL_DATA) {
