@@ -1440,6 +1440,9 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
+				} else if (rc != SQL_SUCCESS) {
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", i + 1, rc);
+					ZVAL_FALSE(&tmp);
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
 					break;
@@ -1590,6 +1593,9 @@ PHP_FUNCTION(odbc_fetch_into)
 				}
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
+				} else if (rc != SQL_SUCCESS) {
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", i + 1, rc);
+					ZVAL_FALSE(&tmp);
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
 					break;
@@ -1822,12 +1828,13 @@ PHP_FUNCTION(odbc_result)
 				RETURN_FALSE;
 			}
 
-			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
+			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+				zend_string_efree(field_str);
+				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", field_ind + 1, rc);
+				RETURN_FALSE;
+			} else if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 				zend_string_efree(field_str);
 				RETURN_NULL();
-			} else if (rc == SQL_NO_DATA_FOUND) {
-				zend_string_efree(field_str);
-				RETURN_FALSE;
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might
 			   have binary strings... */
@@ -1869,6 +1876,12 @@ PHP_FUNCTION(odbc_result)
 
 		if (rc == SQL_ERROR) {
 			odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
+			efree(field);
+			RETURN_FALSE;
+		}
+
+		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+			php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", field_ind + 1, rc);
 			efree(field);
 			RETURN_FALSE;
 		}
@@ -1981,6 +1994,11 @@ PHP_FUNCTION(odbc_result_all)
 					}
 					if (rc == SQL_SUCCESS_WITH_INFO) {
 						PHPWRITE(buf, result->longreadlen);
+					} else if (rc != SQL_SUCCESS) {
+						php_printf("</td></tr></table>");
+						php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", i + 1, rc);
+						efree(buf);
+						RETURN_FALSE;
 					} else if (result->values[i].vallen == SQL_NULL_DATA) {
 						php_printf("<td>NULL</td>");
 						break;
