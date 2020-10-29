@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #80242 (imap_mail_compose() segfaults for multipart with rfc822).
     (cmb)
 
+- ODBC:
+  . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)
+
 - Opcache:
   . Fixed bug #79643 (PHP with Opcache crashes when a file with specific name
     is included). (twosee)
