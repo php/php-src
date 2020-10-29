@@ -1399,6 +1399,8 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	*data_size = 0;
 	if (UNEXPECTED(FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info))) {
 		ret = FAIL;
+		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
+		set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	} else {
 		*data_size += header.size;
 		buffer->ptr = pool->get_chunk(pool, *data_size + prealloc_more_bytes);
