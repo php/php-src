@@ -9,6 +9,5 @@ if (!extension_loaded('imap')) die('skip imap extension not available');
 @imap_mail('1', 1, NULL);
 echo 'done'
 ?>
---EXPECTF--
-%S
+--EXPECT--
 done
