@@ -6,6 +6,7 @@ require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --CONFLICTS--
 fetchoverview
+defaultmailbox
 --FILE--
 <?php
 /*
