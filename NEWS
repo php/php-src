@@ -26,6 +26,12 @@ PHP                                                                        NEWS
   . Fixed bug #80242 (imap_mail_compose() segfaults for multipart with rfc822).
     (cmb)
 
+- MySQLi:
+  . Fixed bug #79375 (mysqli_store_result does not report error from lock wait
+    timeout). (Kamil Tekiela, Nikita)
+  . Fixed bug #76525 (mysqli::commit does not throw if MYSQLI_REPORT_ERROR
+    enabled and mysqlnd used). (Kamil Tekiela)
+
 - ODBC:
   . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)
 
@@ -37,12 +43,6 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #79983 (openssl_encrypt / openssl_decrypt fail with OCB mode).
     (Nikita)
-
-- MySQLi:
-  . Fixed bug #79375 (mysqli_store_result does not report error from lock wait
-    timeout). (Kamil Tekiela, Nikita)
-  . Fixed bug #76525 (mysqli::commit does not throw if MYSQLI_REPORT_ERROR
-    enabled and mysqlnd used). (Kamil Tekiela)
 
 - PDO MySQL:
   . Fixed bug #66528 (No PDOException or errorCode if database becomes
