@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #80242 (imap_mail_compose() segfaults for multipart with rfc822).
     (cmb)
 
+- ODBC:
+  . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)
+
 29 Oct 2020, PHP 7.3.24
 
 - Core:
