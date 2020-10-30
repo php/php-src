@@ -340,5 +340,5 @@ void bug79532(off_t *array, size_t elems)
 ZEND_TEST_API int *(*bug79177_cb)(void);
 void bug79177(void)
 {
-	int *dummy = bug79177_cb();
+	bug79177_cb();
 }
