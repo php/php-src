@@ -437,7 +437,7 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint3
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim, zval *result)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -478,6 +478,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -509,7 +512,7 @@ num_undef:
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim, zval *result)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -550,6 +553,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -578,7 +584,7 @@ num_undef:
 
 static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *dim)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -618,6 +624,9 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -645,7 +654,7 @@ num_undef:
 
 static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *dim)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -688,6 +697,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -726,7 +738,7 @@ num_undef:
 
 static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -769,6 +781,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
