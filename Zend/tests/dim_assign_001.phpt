@@ -1,7 +1,5 @@
 --TEST--
 JIT - Assigning to arrays using string key which parses to an integer
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 /* We are going to store a value in an array, using the key "1"
