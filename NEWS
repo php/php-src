@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed run-time binding of preloaded dynamically declared function. (Dmitry)
 
+- Reflection:
+  . Fixed bug #80299 (ReflectionFunction->invokeArgs confused in arguments).
+    (Nikita)
+
 - Standard:
   . Don't force rebuild of symbol table, when populating $http_response_header
     variable by the HTTP stream wrapper. (Dmitry)

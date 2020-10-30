@@ -807,8 +807,8 @@ cleanup_args:
 		zval *arg;
 		uint32_t arg_num = ZEND_CALL_NUM_ARGS(call) + 1;
 		zend_bool have_named_params = 0;
-		zend_bool must_wrap = 0;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(fci->named_params, name, arg) {
+			zend_bool must_wrap = 0;
 			zval *target;
 			if (name) {
 				void *cache_slot[2] = {NULL, NULL};
