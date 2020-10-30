@@ -181,15 +181,11 @@ PHP_FUNCTION(assert)
 		if (description_str) {
 			ZVAL_STR(&args[3], description_str);
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 4, args);
-			zval_ptr_dtor(&(args[3]));
-			zval_ptr_dtor(&(args[2]));
-			zval_ptr_dtor(&(args[0]));
 		} else {
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
-			zval_ptr_dtor(&(args[2]));
-			zval_ptr_dtor(&(args[0]));
 		}
 
+		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&retval);
 	}
 

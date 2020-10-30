@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Standard:
   . Don't force rebuild of symbol table, when populating $http_response_header
     variable by the HTTP stream wrapper. (Dmitry)
+  . Fixed bug #80290 (Double free when ASSERT_CALLBACK is used with a dynamic
+    message). (Nikita)
 
 29 Oct 2020, PHP 8.0.0RC3
 
