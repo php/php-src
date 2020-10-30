@@ -620,3 +620,9 @@ PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems)
 		array[i] = i;
 	}
 }
+
+PHP_ZEND_TEST_API int *(*bug79177_cb)(void);
+void bug79177(void)
+{
+	bug79177_cb();
+}
