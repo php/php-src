@@ -2,46 +2,41 @@
 Bug #79177 (FFI doesn't handle well PHP exceptions within callback)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('utils.inc');
-try {
-    ffi_cdef("extern void *zend_printf;", ffi_get_php_dll_name());
-} catch (Throwable $e) {
-    die('skip PHP symbols not available');
-}
+if (!extension_loaded('ffi')) die('skip ffi extension not available');
+if (!extension_loaded('zend-test')) die('skip zend-test extension not available');
 ?>
 --FILE--
 <?php
-require_once('utils.inc');
-$php = ffi_cdef("
-typedef char (*zend_write_func_t)(const char *str, size_t str_length);
-extern zend_write_func_t zend_write;
-", ffi_get_php_dll_name());
+require_once __DIR__ . '/utils.inc';
+$header = <<<HEADER
+extern int *(*bug79177_cb)(void);
+void bug79177(void);
+HEADER;
 
-echo "Before\n";
+if (PHP_OS_FAMILY !== 'Windows') {
+    $ffi = FFI::cdef($header);
+} else {
+    try {
+        $ffi = FFI::cdef($header, 'php_zend_test.dll');
+    } catch (FFI\Exception $ex) {
+        $ffi = FFI::cdef($header, ffi_get_php_dll_name());
+    }
+}
 
-$originalHandler = clone $php->zend_write;
-$php->zend_write = function($str, $len): string {
+$ffi->bug79177_cb = function() {
     throw new \RuntimeException('Not allowed');
 };
 try { 
-    echo "After\n";
-} catch (\Throwable $exception) {
-    // Do not output anything here, as handler is overridden
-} finally {
-    $php->zend_write = $originalHandler;
-}
-if (isset($exception)) {
-    echo $exception->getMessage(), PHP_EOL;
-}
+    $ffi->bug79177(); // this is supposed to raise a fatal error
+} catch (\Throwable $exception) {}
+echo "done\n";
 ?>
 --EXPECTF--
-Before
-
 Warning: Uncaught RuntimeException: Not allowed in %s:%d
 Stack trace:
-#0 %s(%d): {closure}('After\n', 6)
-#1 {main}
+#0 %s(%d): {closure}()
+#1 %s(%d): FFI->bug79177()
+#2 {main}
   thrown in %s on line %d
 
 Fatal error: Throwing from FFI callbacks is not allowed in %s on line %d
