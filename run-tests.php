@@ -2052,6 +2052,9 @@ TEST $file
         if (array_key_exists('STDIN', $section_text)) {
             return skip_test($tested, $tested_file, $shortname, 'Test with STDIN might not be repeatable');
         }
+        if (array_key_exists('CAPTURE_STDIO', $section_text)) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with CAPTURE_STDIO might not be repeatable');
+        }
     }
 
     if (!$SHOW_ONLY_GROUPS && !$workerID) {
