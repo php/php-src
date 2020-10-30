@@ -2106,24 +2106,28 @@ static uint32_t assign_dim_result_type(
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	if (tmp & MAY_BE_ARRAY) {
-		if (value_type & MAY_BE_UNDEF) {
-			tmp |= MAY_BE_ARRAY_OF_NULL;
-		}
-		if (dim_op_type == IS_UNUSED) {
-			tmp |= MAY_BE_ARRAY_KEY_LONG;
-		} else {
-			if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
-				tmp |= MAY_BE_ARRAY_KEY_LONG;
+		/* Only add key type if we have a value type. We want to maintain the invariant that a
+		 * key type exists iff a value type exists even in dead code that may use empty types. */
+		if (value_type & (MAY_BE_ANY|MAY_BE_UNDEF)) {
+			if (value_type & MAY_BE_UNDEF) {
+				tmp |= MAY_BE_ARRAY_OF_NULL;
 			}
-			if (dim_type & MAY_BE_STRING) {
-				tmp |= MAY_BE_ARRAY_KEY_STRING;
-				if (dim_op_type != IS_CONST) {
-					// FIXME: numeric string
+			if (dim_op_type == IS_UNUSED) {
+				tmp |= MAY_BE_ARRAY_KEY_LONG;
+			} else {
+				if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
 					tmp |= MAY_BE_ARRAY_KEY_LONG;
 				}
-			}
-			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
-				tmp |= MAY_BE_ARRAY_KEY_STRING;
+				if (dim_type & MAY_BE_STRING) {
+					tmp |= MAY_BE_ARRAY_KEY_STRING;
+					if (dim_op_type != IS_CONST) {
+						// FIXME: numeric string
+						tmp |= MAY_BE_ARRAY_KEY_LONG;
+					}
+				}
+				if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+					tmp |= MAY_BE_ARRAY_KEY_STRING;
+				}
 			}
 		}
 		/* Only add value type if we have a key type. It might be that the key type is illegal
