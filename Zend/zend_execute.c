@@ -1553,7 +1553,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	if ((size_t)offset >= Z_STRLEN_P(str)) {
 		/* Extend string if needed */
 		zend_long old_len = Z_STRLEN_P(str);
-		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), offset + 1, 0));
+		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), (size_t)offset + 1, 0));
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else if (!Z_REFCOUNTED_P(str)) {
