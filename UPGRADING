@@ -23,6 +23,13 @@ PHP 8.1 UPGRADE NOTES
 2. New Features
 ========================================
 
+- hash:
+  . Added MurmurHash3 with streaming support. The following variants are implemented
+
+    - murmur3a, 32-bit hash
+    - murmur3c, 128-bit hash for x86
+    - murmur3f, 128-bit hash for x64
+
 ========================================
 3. Changes in SAPI modules
 ========================================
