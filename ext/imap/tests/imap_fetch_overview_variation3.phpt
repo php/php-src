@@ -5,7 +5,7 @@ Test imap_fetch_overview() function : usage variations - FT_UID option
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --CONFLICTS--
-fetchoverview
+defaultmailbox
 --FILE--
 <?php
 /*
@@ -19,7 +19,7 @@ echo "*** Testing imap_fetch_overview() : usage variations ***\n";
 require_once __DIR__.'/setup/imap_include.inc';
 
 // Initialise required variables
-$stream_id = setup_test_mailbox('imapfetchoverview3', 1); // set up temporary mailbox with one simple message
+$stream_id = setup_test_mailbox('', 1); // set up temporary mailbox with one simple message
 $msg_no = 1;
 $msg_uid = imap_uid($stream_id, $msg_no);
 
@@ -48,7 +48,7 @@ foreach($flags as $option) {
 ?>
 --CLEAN--
 <?php
-$mailbox_suffix = 'imapfetchoverview3';
+$mailbox_suffix = '';
 require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECT--

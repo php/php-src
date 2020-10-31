@@ -61,7 +61,6 @@ function displayOverviewFields($resp, array $fields = MANDATORY_OVERVIEW_FIELDS)
  *
  * @param string mailbox_suffix Suffix used to uniquely identify mailboxes
  * @param int message_count number of test msgs to be written to new mailbox
- *
  * @param null $new_mailbox
  * @param bool $simpleMessages
  * @return resource IMAP stream to new mailbox
