@@ -19,6 +19,8 @@
 #include "config.h"
 #endif
 
+#include "blake3.h"
+
 #include <math.h>
 #include "php_hash.h"
 #include "ext/standard/info.h"
@@ -1586,6 +1588,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("fnv164",		&php_hash_fnv164_ops);
 	php_hash_register_algo("fnv1a64",		&php_hash_fnv1a64_ops);
 	php_hash_register_algo("joaat",			&php_hash_joaat_ops);
+	php_hash_register_algo("blake3",		&php_hash_blake3_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);
@@ -1650,6 +1653,11 @@ PHP_MINFO_FUNCTION(hash)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "hash support", "enabled");
 	php_info_print_table_row(2, "Hashing Engines", buffer);
+#ifdef PHP_BLAKE3_UPSTREAM_C_SOURCE_DIR
+	php_info_print_table_row(2, "blake3 implementation", "upstream " BLAKE3_VERSION_STRING);
+#else
+	php_info_print_table_row(2, "blake3 implementation", "portable " BLAKE3_VERSION_STRING);
+#endif
 	php_info_print_table_end();
 
 #ifdef PHP_MHASH_BC

@@ -83,6 +83,8 @@ string(4) "gost"
 HashContext with HASH_HMAC option cannot be serialized
 string(11) "gost-crypto"
 HashContext with HASH_HMAC option cannot be serialized
+string(6) "blake3"
+HashContext with HASH_HMAC option cannot be serialized
 string(10) "haval128,3"
 HashContext with HASH_HMAC option cannot be serialized
 string(10) "haval160,3"
