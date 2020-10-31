@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - GD:
   . Convert resource<gd font> to object \GdFont. (Sara)
 
+- hash:
+  . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
+
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSPellConfig. (Sara)
