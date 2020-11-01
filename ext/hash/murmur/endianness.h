@@ -55,9 +55,13 @@ FORCE_INLINE uint64_t BSWAP64(uint64_t u)
 }
 #endif
 
-#ifdef __clang__
-__attribute__((no_sanitize("alignment")))
+#if defined(__clang__) || defined(__GNUC__) && ( __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+# define NO_SANITIZE_ALIGNMENT __attribute__((no_sanitize("alignment")))
+#else
+# define NO_SANITIZE_ALIGNMENT
 #endif
+
+NO_SANITIZE_ALIGNMENT
 FORCE_INLINE uint32_t getblock32 ( const uint32_t * const p, const int i)
 {
   if (IsBigEndian()) {
@@ -67,9 +71,7 @@ FORCE_INLINE uint32_t getblock32 ( const uint32_t * const p, const int i)
   }
 }
 
-#ifdef __clang__
-__attribute__((no_sanitize("alignment")))
-#endif
+NO_SANITIZE_ALIGNMENT
 FORCE_INLINE uint64_t getblock64 ( const uint64_t * const p, const int i)
 {
   if (IsBigEndian()) {
@@ -78,3 +80,5 @@ FORCE_INLINE uint64_t getblock64 ( const uint64_t * const p, const int i)
     return p[i];
   }
 }
+
+#undef NO_SANITIZE_ALIGNMENT
