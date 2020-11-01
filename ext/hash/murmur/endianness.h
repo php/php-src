@@ -55,7 +55,7 @@ FORCE_INLINE uint64_t BSWAP64(uint64_t u)
 }
 #endif
 
-#if defined(__clang__) || defined(__GNUC__) && ( __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+#if defined(__clang__) || defined(__GNUC__) &&  __GNUC__ >= 8
 # define NO_SANITIZE_ALIGNMENT __attribute__((no_sanitize("alignment")))
 #else
 # define NO_SANITIZE_ALIGNMENT
