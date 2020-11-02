@@ -934,10 +934,13 @@ static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
    Set the authentication protocol in the snmpv3 session */
 static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
 {
+#ifndef DISABLE_MD5
 	if (!strcasecmp(prot, "MD5")) {
 		s->securityAuthProto = usmHMACMD5AuthProtocol;
 		s->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-	} else if (!strcasecmp(prot, "SHA")) {
+	} else
+#endif
+	if (!strcasecmp(prot, "SHA")) {
 		s->securityAuthProto = usmHMACSHA1AuthProtocol;
 		s->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
 	} else {
