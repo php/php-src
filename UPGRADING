@@ -164,7 +164,7 @@ PHP 8.0 UPGRADE NOTES
         }
 
     If both T1::func() and T2::func() exist, this code was previously silently
-    accepted, and func as assumed to refer to T1::func. Now it will generate a
+    accepted, and func was assumed to refer to T1::func. Now it will generate a
     fatal error instead, and either T1::func or T2::func needs to be written
     explicitly.
   . The signature of abstract methods defined in traits is now checked against
