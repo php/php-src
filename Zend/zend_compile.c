@@ -7042,10 +7042,16 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 					&& !zend_is_valid_default_value(type, &value_zv)) {
 				zend_string *str = zend_type_to_string(type);
 				if (Z_TYPE(value_zv) == IS_NULL) {
+					zend_string *nullable_string;
+					if (!str || memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL) {
+						nullable_string = add_type_string(str, ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE));
+					} else {
+						nullable_string = zend_string_concat2("?", 1, ZSTR_VAL(str), ZSTR_LEN(str));
+					}
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Default value for property of type %s may not be null. "
-						"Use the nullable type ?%s to allow null default value",
-						ZSTR_VAL(str), ZSTR_VAL(str));
+						"Use the nullable type %s to allow null default value",
+						ZSTR_VAL(str), ZSTR_VAL(nullable_string));
 				} else {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot use %s as default value for property %s::$%s of type %s",
