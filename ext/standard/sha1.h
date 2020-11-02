@@ -27,7 +27,8 @@ typedef struct {
 } PHP_SHA1_CTX;
 #define PHP_SHA1_SPEC "l5l2b64."
 
-PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX *);
+#define PHP_SHA1Init(ctx) PHP_SHA1InitArgs(ctx, NULL)
+PHPAPI void PHP_SHA1InitArgs(PHP_SHA1_CTX *, ZEND_ATTRIBUTE_UNUSED HashTable *);
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, size_t);
 PHPAPI void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
 PHPAPI void make_sha1_digest(char *sha1str, const unsigned char *digest);

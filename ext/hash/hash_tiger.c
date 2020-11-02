@@ -174,7 +174,7 @@ static inline void TigerDigest(unsigned char *digest_str, unsigned int digest_le
 	}
 }
 
-PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context)
+PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 	context->state[0] = L64(0x0123456789ABCDEF);
@@ -182,7 +182,7 @@ PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context)
 	context->state[2] = L64(0xF096A5B4C3B2E187);
 }
 
-PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context)
+PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 	context->passes = 1;

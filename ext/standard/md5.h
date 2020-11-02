@@ -42,7 +42,8 @@ typedef struct {
 } PHP_MD5_CTX;
 #define PHP_MD5_SPEC "llllllb64l16."
 
-PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx);
+#define PHP_MD5Init(ctx) PHP_MD5InitArgs(ctx, NULL)
+PHPAPI void PHP_MD5InitArgs(PHP_MD5_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args);
 PHPAPI void PHP_MD5Update(PHP_MD5_CTX *ctx, const void *data, size_t size);
 PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx);
 

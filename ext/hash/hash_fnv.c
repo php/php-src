@@ -83,7 +83,7 @@ const php_hash_ops php_hash_fnv1a64_ops = {
 /* {{{ PHP_FNV132Init
  * 32-bit FNV-1 hash initialisation
  */
-PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context)
+PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = PHP_FNV1_32_INIT;
 }
@@ -118,7 +118,7 @@ PHP_HASH_API void PHP_FNV132Final(unsigned char digest[4], PHP_FNV132_CTX * cont
 /* {{{ PHP_FNV164Init
  * 64-bit FNV-1 hash initialisation
  */
-PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context)
+PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = PHP_FNV1_64_INIT;
 }
