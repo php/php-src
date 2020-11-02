@@ -101,7 +101,7 @@ typedef struct _zend_jit_globals {
 	zend_long   hot_side_exit;         /* number of exits before taking side trace */
 	zend_long   blacklist_root_trace;  /* number of attempts to JIT a root trace before blacklist it */
 	zend_long   blacklist_side_trace;  /* number of attempts to JIT a side trace before blacklist it */
-	zend_long   max_loops_unroll;      /* max number of unrolled loops */
+	zend_long   max_loop_unrolls;      /* max number of unrolled loops */
 	zend_long   max_recursive_calls;   /* max number of recursive inlined call unrolls */
 	zend_long   max_recursive_returns; /* max number of recursive inlined return unrolls */
 	zend_long   max_polymorphic_calls; /* max number of inlined polymorphic calls */

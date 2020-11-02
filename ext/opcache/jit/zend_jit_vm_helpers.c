@@ -1022,7 +1022,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					stop = ZEND_JIT_TRACE_STOP_LOOP;
 					ret_level = 0;
 					break;
-				} else if (loop_unroll_limit < JIT_G(max_loops_unroll)) {
+				} else if (loop_unroll_limit < JIT_G(max_loop_unrolls)) {
 					last_loop = idx;
 					last_loop_opline = opline;
 					last_loop_level = level;
