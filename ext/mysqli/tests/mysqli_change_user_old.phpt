@@ -9,7 +9,7 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
         $host, $user, $db, $port, $socket));
 
-if (mysqli_get_server_version($link) >= 50600)
+if (mysqli_get_server_version($link) >= 50600 && mysqli_get_server_version($link) < 10_00_00)
     die("SKIP For MySQL < 5.6.0");
 ?>
 --FILE--
@@ -102,10 +102,14 @@ if (mysqli_get_server_version($link) >= 50600)
 
     mysqli_close($link);
 
-    if (false !== ($tmp = @mysqli_change_user($link, $user, $passwd, $db)))
-        printf("[026] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_change_user($link, $user, $passwd, $db);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     print "done!";
 ?>
 --EXPECT--
+mysqli object is already closed
 done!
