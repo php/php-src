@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #80299 (ReflectionFunction->invokeArgs confused in arguments).
     (Nikita)
 
+- SNMP:
+  . Fixed bug #70461 (disable md5 code when it is not supported in net-snmp).
+    (Alexander Bergmann, cmb)
+
 - Standard:
   . Don't force rebuild of symbol table, when populating $http_response_header
     variable by the HTTP stream wrapper. (Dmitry)
