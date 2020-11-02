@@ -1162,14 +1162,35 @@ zend_result validate_timestamp_and_record(zend_persistent_script *persistent_scr
 {
 	if (persistent_script->timestamp == 0) {
 		return SUCCESS; /* Don't check timestamps of preloaded scripts */
-	} else if (ZCG(accel_directives).revalidate_freq &&
-	    persistent_script->dynamic_members.revalidate >= ZCG(request_time)) {
-		return SUCCESS;
-	} else if (do_validate_timestamps(persistent_script, file_handle) == FAILURE) {
-		return FAILURE;
+	}
+
+	if (ZCG(cli_mode)) {
+		struct timeval tp = {0};
+
+		//check current time as opposed to the "time of request"
+		if (gettimeofday(&tp, NULL) != 0) {
+			return SUCCESS;
+		}
+
+		double now = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+
+		if (ZCG(accel_directives).revalidate_freq && persistent_script->dynamic_members.revalidate >= now) {
+			return SUCCESS;
+		} else if (do_validate_timestamps(persistent_script, file_handle) == FAILURE) {
+			return FAILURE;
+		} else {
+			persistent_script->dynamic_members.revalidate = now + ZCG(accel_directives).revalidate_freq;
+			return SUCCESS;
+		}
 	} else {
-		persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;
-		return SUCCESS;
+		if (ZCG(accel_directives).revalidate_freq && persistent_script->dynamic_members.revalidate >= ZCG(request_time)) {
+			return SUCCESS;
+		} else if (do_validate_timestamps(persistent_script, file_handle) == FAILURE) {
+			return FAILURE;
+		} else {
+			persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;
+			return SUCCESS;
+		}
 	}
 }
 
@@ -2832,6 +2853,7 @@ static inline zend_result accel_find_sapi(void)
 		if (ZCG(accel_directives).enable_cli && (
 		    strcmp(sapi_module.name, "cli") == 0
 		  || strcmp(sapi_module.name, "phpdbg") == 0)) {
+			ZCG(cli_mode) = true;
 			return SUCCESS;
 		}
 	}
