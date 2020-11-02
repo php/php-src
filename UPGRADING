@@ -390,7 +390,7 @@ PHP 8.0 UPGRADE NOTES
     aliases for better interoperability with the iconv extension. The mbregex
     ISO 8859 aliases with underscores (ISO_8859_* and ISO8859_*) have also been
     removed.
-  . mb_ereg() and mb_eregi() will now return boolean true on a successfuly
+  . mb_ereg() and mb_eregi() will now return boolean true on a successful
     match. Previously they returned integer 1 if $matches was not passed, or
     max(1, strlen($reg[0])) is $matches was passed.
 
