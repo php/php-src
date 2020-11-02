@@ -198,4 +198,20 @@ function map($keys, $value, $array = array()) {
     return $array;
 }
 
+function testEncodingFromUTF16ConversionTable($path, $encoding, $replacement = '%', $startBytes = array()) {
+    srand(1000); // Make results consistent
+    mb_substitute_character(0x25); // '%'
+    readConversionTable($path, $toUnicode, $fromUnicode);
+
+    findInvalidChars($toUnicode, $invalid, $truncated, $startBytes);
+    testAllValidChars($toUnicode, $encoding, 'UTF-16BE');
+    testAllInvalidChars($invalid, $toUnicode, $encoding, 'UTF-16BE', "\x00%");
+    testTruncatedChars($truncated, $encoding, 'UTF-16BE', "\x00%");
+    echo "Tested $encoding -> UTF-16BE\n";
+
+    findInvalidChars($fromUnicode, $invalid, $truncated, map(range(0,0xFF), 2));
+    testAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', $encoding, $replacement);
+    testTruncatedChars($truncated, 'UTF-16BE', $encoding, $replacement);
+    echo "Tested UTF-16BE -> $encoding\n";
+}
 ?>
