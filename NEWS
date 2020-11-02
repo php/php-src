@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Fixed bug #65825 (PDOStatement::fetch() does not throw exception on broken
     server connection). (Nikita)
 
+- SNMP:
+  . Fixed bug #70461 (disable md5 code when it is not supported in net-snmp).
+    (Alexander Bergmann, cmb)
+
 29 Oct 2020, PHP 7.4.12
 
 - Core:
