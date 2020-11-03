@@ -7385,7 +7385,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 	if (toplevel
 		/* We currently don't early-bind classes that implement interfaces or use traits */
 	 && !ce->num_interfaces && !ce->num_traits
-	 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
+	 && !(CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)) {
 		if (extends_ast) {
 			zend_class_entry *parent_ce = zend_lookup_class_ex(
 				ce->parent_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
