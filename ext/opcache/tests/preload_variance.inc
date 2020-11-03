@@ -13,10 +13,12 @@ class B extends Z {
 class C extends Z {
     public function method($a): self {}
     public function method2($a): C {}
+    public function method3($a): object {}
 }
 class D extends C {
     public function method($a): self {}
     public function method2($a): D {}
+    public function method3($a): stdClass {}
 }
 
 // Works.
