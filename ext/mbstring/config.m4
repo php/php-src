@@ -94,16 +94,10 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
   PHP_MBSTRING_ADD_SOURCES([
     libmbfl/filters/html_entities.c
     libmbfl/filters/mbfilter_7bit.c
-    libmbfl/filters/mbfilter_ascii.c
     libmbfl/filters/mbfilter_base64.c
     libmbfl/filters/mbfilter_big5.c
-    libmbfl/filters/mbfilter_cp1251.c
-    libmbfl/filters/mbfilter_cp1252.c
-    libmbfl/filters/mbfilter_cp1254.c
     libmbfl/filters/mbfilter_cp5022x.c
     libmbfl/filters/mbfilter_cp51932.c
-    libmbfl/filters/mbfilter_cp850.c
-    libmbfl/filters/mbfilter_cp866.c
     libmbfl/filters/mbfilter_cp932.c
     libmbfl/filters/mbfilter_cp936.c
     libmbfl/filters/mbfilter_gb18030.c
@@ -119,24 +113,9 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/filters/mbfilter_iso2022jp_2004.c
     libmbfl/filters/mbfilter_iso2022jp_mobile.c
     libmbfl/filters/mbfilter_iso2022_kr.c
-    libmbfl/filters/mbfilter_iso8859_1.c
-    libmbfl/filters/mbfilter_iso8859_10.c
-    libmbfl/filters/mbfilter_iso8859_13.c
-    libmbfl/filters/mbfilter_iso8859_14.c
-    libmbfl/filters/mbfilter_iso8859_15.c
-    libmbfl/filters/mbfilter_iso8859_16.c
-    libmbfl/filters/mbfilter_iso8859_2.c
-    libmbfl/filters/mbfilter_iso8859_3.c
-    libmbfl/filters/mbfilter_iso8859_4.c
-    libmbfl/filters/mbfilter_iso8859_5.c
-    libmbfl/filters/mbfilter_iso8859_6.c
-    libmbfl/filters/mbfilter_iso8859_7.c
-    libmbfl/filters/mbfilter_iso8859_8.c
-    libmbfl/filters/mbfilter_iso8859_9.c
     libmbfl/filters/mbfilter_jis.c
-    libmbfl/filters/mbfilter_koi8r.c
-    libmbfl/filters/mbfilter_armscii8.c
     libmbfl/filters/mbfilter_qprint.c
+    libmbfl/filters/mbfilter_singlebyte.c
     libmbfl/filters/mbfilter_sjis.c
     libmbfl/filters/mbfilter_sjis_open.c
     libmbfl/filters/mbfilter_sjis_mobile.c
@@ -153,7 +132,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/filters/mbfilter_utf8.c
     libmbfl/filters/mbfilter_utf8_mobile.c
     libmbfl/filters/mbfilter_uuencode.c
-    libmbfl/filters/mbfilter_koi8u.c
     libmbfl/mbfl/mbfilter.c
     libmbfl/mbfl/mbfilter_8bit.c
     libmbfl/mbfl/mbfilter_pass.c

@@ -34,12 +34,12 @@
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "libmbfl/mbfl/mbfilter_wchar.h"
-#include "libmbfl/filters/mbfilter_ascii.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_qprint.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
 #include "libmbfl/filters/mbfilter_tl_jisx0201_jisx0208.h"
+#include "libmbfl/filters/mbfilter_singlebyte.h"
 
 #include "php_variables.h"
 #include "php_globals.h"
