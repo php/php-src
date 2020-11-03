@@ -51,6 +51,13 @@ class TraitAliasTest {
     }
 }
 
+// Create reference to a property declared in an internal parent class.
+class MyException extends Exception {
+    public function __construct($message) {
+        $this->message =& $message;
+    }
+}
+
 function get_anon() {
     return new class {};
 }

@@ -914,8 +914,11 @@ static void zend_persist_class_entry(zval *zv)
 
 			for (i = 0; i < ce->default_properties_count; i++) {
 				if (ce->properties_info_table[i]) {
-					ce->properties_info_table[i] = zend_shared_alloc_get_xlat_entry(
+					zend_property_info *prop_info = zend_shared_alloc_get_xlat_entry(
 						ce->properties_info_table[i]);
+					if (prop_info) {
+						ce->properties_info_table[i] = prop_info;
+					}
 				}
 			}
 		}
