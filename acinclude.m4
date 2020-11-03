@@ -2254,6 +2254,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
       fi
     fi
   fi
+
+  ICU_CFLAGS="$ICU_CFLAGS -DU_DEFINE_FALSE_AND_TRUE=1"
 ])
 
 dnl

@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug #80242 (imap_mail_compose() segfaults for multipart with rfc822).
     (cmb)
 
+- Intl:
+  . Fixed bug #80310 (ext-intl with icu4c 68.1: use of undeclared identifier
+    'TRUE'). (Alexander M. Turek)
+
 - ODBC:
   . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)
 
