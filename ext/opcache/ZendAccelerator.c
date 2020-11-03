@@ -4147,11 +4147,13 @@ static void preload_fix_trait_methods(zend_class_entry *ce)
 		if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
 			zend_op_array *orig_op_array = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
 			if (orig_op_array) {
+				zend_string *function_name = op_array->function_name;
 				zend_class_entry *scope = op_array->scope;
 				uint32_t fn_flags = op_array->fn_flags;
 				zend_function *prototype = op_array->prototype;
 				HashTable *ht = op_array->static_variables;
 				*op_array = *orig_op_array;
+				op_array->function_name = function_name;
 				op_array->scope = scope;
 				op_array->fn_flags = fn_flags;
 				op_array->prototype = prototype;

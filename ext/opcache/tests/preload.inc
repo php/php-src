@@ -45,6 +45,12 @@ class Z {
 
 class Z2 extends Z {}
 
+class TraitAliasTest {
+    use T1 {
+        T1::foo as bar;
+    }
+}
+
 function get_anon() {
     return new class {};
 }
