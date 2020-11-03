@@ -11299,7 +11299,11 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 				trace_info->flags |= ZEND_JIT_TRACE_LOOP;
 				|	CMP_IP next_opline
 				|	je =>0 // LOOP
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+				|	JMP_IP
+#else
 				|	jmp ->trace_escape
+#endif
 			} else {
 				|	CMP_IP next_opline
 				|	jne ->trace_escape
