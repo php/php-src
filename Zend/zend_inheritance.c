@@ -239,10 +239,9 @@ static zend_bool class_visible(zend_class_entry *ce) {
 
 static zend_class_entry *lookup_class(
 		zend_class_entry *scope, zend_string *name, zend_bool register_unresolved) {
-	zend_class_entry *ce;
+	uint32_t flags = ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD;
+	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, flags);
 	if (!CG(in_compilation)) {
-		uint32_t flags = ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD;
-		ce = zend_lookup_class_ex(name, NULL, flags);
 		if (ce) {
 			return ce;
 		}
@@ -256,7 +255,6 @@ static zend_class_entry *lookup_class(
 			zend_hash_add_empty_element(CG(delayed_autoloads), name);
 		}
 	} else {
-		ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		if (ce && class_visible(ce)) {
 			return ce;
 		}
