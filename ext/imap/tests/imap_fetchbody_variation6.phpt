@@ -2,7 +2,7 @@
 Test imap_fetchbody() function : usage variations - $message_num arg
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -13,10 +13,10 @@ require_once(__DIR__.'/skipif.inc');
 
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 //Initialise required variables
-$stream_id = setup_test_mailbox('', 3); // set up temp mailbox with  simple msgs
+$stream_id = setup_test_mailbox('imapfetchbodyvar6', 3); // set up temp mailbox with  simple msgs
 $section = 1;
 
 $sequences = [0, /* out of range */ 4, 1];
@@ -32,12 +32,13 @@ foreach($sequences as $message_num) {
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapfetchbodyvar6';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchbody() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
 -- $message_num is 0 --
 imap_fetchbody(): Argument #2 ($message_num) must be greater than 0
@@ -48,5 +49,5 @@ Warning: imap_fetchbody(): Bad message number in %s on line %d
 bool(false)
 
 -- $message_num is 1 --
-string(%s) "1: this is a test message, please ignore
-%A"
+string(%d) "1: this is a test message, please ignore
+newline%r\R?%r"

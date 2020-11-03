@@ -1,18 +1,18 @@
 --TEST--
-imap_gc() incorrect parameter count
+imap_gc() ValueError
 --CREDITS--
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = imap_open($default_mailbox, $username, $password) or
-    die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = imap_open(IMAP_DEFAULT_MAILBOX, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD) or
+    die("Cannot connect to mailbox ". IMAP_DEFAULT_MAILBOX .": " . imap_last_error());
 
 try {
     imap_gc($stream_id, -1);
