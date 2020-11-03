@@ -4480,6 +4480,10 @@ static int accel_preload(const char *config, zend_bool in_child)
 			destroy_op_array(op_array);
 			efree_size(op_array, sizeof(zend_op_array));
 		} else {
+			if (EG(exception)) {
+				zend_exception_error(EG(exception), E_ERROR);
+			}
+
 			CG(unclean_shutdown) = 1;
 			ret = FAILURE;
 		}
