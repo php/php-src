@@ -25,9 +25,11 @@ class D extends C {
 interface I {}
 interface J extends I {}
 class E {
+    public I|J $prop;
     public function method($a): I {}
 }
 class F extends E {
+    public J|I $prop;
     public function method($a): J {}
 }
 
