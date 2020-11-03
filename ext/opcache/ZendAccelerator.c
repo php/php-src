@@ -4450,7 +4450,6 @@ static int accel_preload(const char *config, zend_bool in_child)
 	}
 	CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
 	CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
-	CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
 	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 	CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
