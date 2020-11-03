@@ -6,6 +6,8 @@ Olivier Doucet
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
+--CONFLICTS--
+defaultmailbox
 --FILE--
 <?php
 
