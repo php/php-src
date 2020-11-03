@@ -97,7 +97,7 @@ PHP_HASH_API void PHP_MURMUR3CUpdate(PHP_MURMUR3C_CTX *ctx, const unsigned char 
 
 PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[4], PHP_MURMUR3C_CTX *ctx)
 {
-	uint32_t h[4] = {0};
+	uint32_t h[4] = {0, 0, 0, 0};
 	PMurHash128x86_Result(ctx->h, ctx->carry, ctx->len, h);
 
 	digest[0]  = (unsigned char)((h[0] >> 24) & 0xff);
@@ -156,7 +156,7 @@ PHP_HASH_API void PHP_MURMUR3FUpdate(PHP_MURMUR3F_CTX *ctx, const unsigned char 
 
 PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[4], PHP_MURMUR3F_CTX *ctx)
 {
-	uint64_t h[2] = {0};
+	uint64_t h[2] = {0, 0};
 	PMurHash128x64_Result(ctx->h, ctx->carry, ctx->len, h);
 
 	digest[0]  = (unsigned char)((h[0] >> 56) & 0xff);
