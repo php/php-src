@@ -86,11 +86,11 @@
 #include "mbfl_filter_output.h"
 #include "mbfilter_8bit.h"
 #include "mbfilter_wchar.h"
-#include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_tl_jisx0201_jisx0208.h"
 #include "filters/mbfilter_utf8.h"
+#include "../mbstring_singlebyte.h"
 
 #include "eaw_table.h"
 
