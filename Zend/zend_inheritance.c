@@ -90,19 +90,21 @@ static zend_function *zend_duplicate_user_function(zend_function *func) /* {{{ *
 
 	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_function, func, sizeof(zend_op_array));
-	if (ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr)) {
-		/* See: Zend/tests/method_static_var.phpt */
-		new_function->op_array.static_variables = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
-	}
-	if (!(GC_FLAGS(new_function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-		GC_ADDREF(new_function->op_array.static_variables);
-	}
 
 	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 		ZEND_ASSERT(new_function->op_array.fn_flags & ZEND_ACC_PRELOADED);
 		ZEND_MAP_PTR_NEW(new_function->op_array.static_variables_ptr);
 	} else {
 		ZEND_MAP_PTR_INIT(new_function->op_array.static_variables_ptr, &new_function->op_array.static_variables);
+	}
+
+	HashTable *static_properties_ptr = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
+	if (static_properties_ptr) {
+		/* See: Zend/tests/method_static_var.phpt */
+		ZEND_MAP_PTR_SET(new_function->op_array.static_variables_ptr, static_properties_ptr);
+		GC_TRY_ADDREF(static_properties_ptr);
+	} else {
+		GC_TRY_ADDREF(new_function->op_array.static_variables);
 	}
 
 	return new_function;
