@@ -4,6 +4,8 @@ Bug #77153 (imap_open allows to run arbitrary shell commands via mailbox paramet
 <?php
 extension_loaded('imap') or die('skip imap extension not available in this build');
 ?>
+--CONFLICTS--
+defaultmailbox
 --FILE--
 <?php
 $payload = "echo 'BUG'> " . __DIR__ . '/__bug';

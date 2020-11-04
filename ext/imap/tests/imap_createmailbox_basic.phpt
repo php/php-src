@@ -4,16 +4,13 @@ Test imap_createmailbox() function : basic functionality
 <?php
 require_once __DIR__.'/setup/skipif.inc';
 ?>
---CONFLICTS--
-defaultmailbox
 --FILE--
 <?php
 echo "*** Testing imap_createmailbox() : basic functionality ***\n";
 
 require_once __DIR__.'/setup/imap_include.inc';
 
-$imap_stream = imap_open(IMAP_DEFAULT_MAILBOX, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD) or
-    die("Cannot connect to mailbox ". IMAP_DEFAULT_MAILBOX. ": " . imap_last_error());
+$imap_stream = setup_test_mailbox("imapcreatemailboxbasic", 0);
 
 $newname = "phpnewbox";
 
@@ -53,11 +50,13 @@ imap_close($imap_stream);
 ?>
 --CLEAN--
 <?php
-$mailbox_suffix = '';
+$mailbox_suffix = 'imapcreatemailboxbasic';
 require_once __DIR__ . '/setup/clean.inc';
 ?>
 --EXPECTF--
 *** Testing imap_createmailbox() : basic functionality ***
+Create a temporary mailbox and add 0 msgs
+New mailbox created
 Newname will be 'phpnewbox'
 Add a couple of msgs to 'phpnewbox' mailbox
 Your new mailbox 'phpnewbox' has the following status:

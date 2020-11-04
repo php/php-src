@@ -4,8 +4,6 @@ Test imap_fetchheader() function : usage variations - $message_num argument
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
---CONFLICTS--
-defaultmailbox
 --FILE--
 <?php
 /*

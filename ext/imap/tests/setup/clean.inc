@@ -15,7 +15,7 @@ $mailboxes = imap_getmailboxes($imap_stream, IMAP_SERVER, '*');
 
 foreach($mailboxes as $value) {
     // Only delete mailbox with our prefix (+ optional test suffix)
-    if (preg_match('/\{.*?\}INBOX\.' . IMAP_MAILBOX_PHPT_PREFIX . $mailbox_suffix .'/', $value->name, $match) == 1) {
+    if (preg_match('/\{.*?\}INBOX\.' . IMAP_MAILBOX_PHPT_PREFIX . $mailbox_suffix .'$/', $value->name, $match) == 1) {
         imap_deletemailbox($imap_stream, $value->name);
     }
 }

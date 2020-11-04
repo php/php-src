@@ -4,8 +4,6 @@ Test imap_fetchbody() function : basic functionality
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
---CONFLICTS--
-defaultmailbox
 --FILE--
 <?php
 /*           [, int $options])
@@ -19,7 +17,7 @@ require_once(__DIR__.'/setup/imap_include.inc');
 // Initialise all required variables
 
 // set up mailbox with one message
-$stream_id = setup_test_mailbox('', 1, $mailbox, false);
+$stream_id = setup_test_mailbox('imapfetchbodybasic', 1, $mailbox, false);
 
 $msg_no = 1;
 $section = '2';
@@ -59,7 +57,7 @@ var_dump( $overview[0]->seen );
 ?>
 --CLEAN--
 <?php
-$mailbox_suffix = '';
+$mailbox_suffix = 'imapfetchbodybasic';
 require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--

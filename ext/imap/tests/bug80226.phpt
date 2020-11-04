@@ -4,14 +4,23 @@ Bug #80226 (imap_sort() leaks sortpgm memory)
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
---CONFLICTS--
-defaultmailbox
 --FILE--
 <?php
 require_once(__DIR__.'/setup/imap_include.inc');
-$stream = imap_open(IMAP_DEFAULT_MAILBOX, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD);
+
+echo "Create a new mailbox for test\n";
+
+$stream = setup_test_mailbox("bug80226", 0);
 var_dump(imap_sort($stream, SORTFROM, 0));
 ?>
+--CLEAN--
+<?php
+$mailbox_suffix = 'bug80226';
+require_once(__DIR__ . '/setup/clean.inc');
+?>
 --EXPECT--
+Create a new mailbox for test
+Create a temporary mailbox and add 0 msgs
+New mailbox created
 array(0) {
 }

@@ -4,8 +4,6 @@ Test imap_fetch_overview() function : usage variations - $msg_no argument
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
---CONFLICTS--
-defaultmailbox
 --FILE--
 <?php
 /*
@@ -16,7 +14,7 @@ defaultmailbox
 echo "*** Testing imap_fetch_overview() : usage variations ***\n";
 require_once __DIR__.'/setup/imap_include.inc';
 
-$stream_id = setup_test_mailbox('', 3, $mailbox, false); // set up temp mailbox with 3 msgs
+$stream_id = setup_test_mailbox('imapfetchoverviewvar5', 3, $mailbox, false); // set up temp mailbox with 3 msgs
 
 $sequences = [
     0,
@@ -46,7 +44,7 @@ imap_errors();
 ?>
 --CLEAN--
 <?php
-$mailbox_suffix = '';
+$mailbox_suffix = 'imapfetchoverviewvar5';
 require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--

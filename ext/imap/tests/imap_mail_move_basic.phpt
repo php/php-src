@@ -17,9 +17,6 @@ require_once(__DIR__.'/setup/imap_include.inc');
 
 echo "Create a new mailbox for test\n";
 $imap_stream = setup_test_mailbox("", 1);
-if (!is_resource($imap_stream)) {
-    exit("TEST FAILED: Unable to create test mailbox\n");
-}
 
 $check = imap_check($imap_stream);
 echo "Msg Count in new mailbox: ". $check->Nmsgs . "\n";

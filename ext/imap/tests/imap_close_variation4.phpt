@@ -4,9 +4,6 @@ Test imap_close() function : usage variations - different ints as $flags arg
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
---CONFLICTS--
-# It should be possible to use a custom mailbox instead of conflicting with the default one
-defaultmailbox
 --FILE--
 <?php
 /*

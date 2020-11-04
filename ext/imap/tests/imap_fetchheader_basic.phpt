@@ -4,8 +4,6 @@ Test imap_fetchheader() function : basic function
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
---CONFLICTS--
-defaultmailbox
 --FILE--
 <?php
 echo "*** Testing imap_fetchheader() : basic functionality ***\n";

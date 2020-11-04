@@ -4,8 +4,6 @@ Test imap_fetchbody() function : usage variations - $message_num arg
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
 ?>
---CONFLICTS--
-defaultmailbox
 --FILE--
 <?php
 /*
@@ -18,7 +16,7 @@ echo "*** Testing imap_fetchbody() : usage variations ***\n";
 require_once(__DIR__.'/setup/imap_include.inc');
 
 //Initialise required variables
-$stream_id = setup_test_mailbox('', 3); // set up temp mailbox with  simple msgs
+$stream_id = setup_test_mailbox('imapfetchbodyvar6', 3); // set up temp mailbox with  simple msgs
 $section = 1;
 
 $sequences = [0, /* out of range */ 4, 1];
@@ -34,7 +32,7 @@ foreach($sequences as $message_num) {
 ?>
 --CLEAN--
 <?php
-$mailbox_suffix = '';
+$mailbox_suffix = 'imapfetchbodyvar6';
 require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--
