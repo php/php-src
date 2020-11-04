@@ -230,15 +230,6 @@ static void zend_persist_zval(zval *z)
 				}
 			}
 			break;
-		case IS_REFERENCE:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_REF_P(z));
-			if (new_ptr) {
-				Z_REF_P(z) = new_ptr;
-			} else {
-				Z_REF_P(z) = zend_shared_memdup_put_free(Z_REF_P(z), sizeof(zend_reference));
-				zend_persist_zval(Z_REFVAL_P(z));
-			}
-			break;
 		case IS_CONSTANT_AST:
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
 			if (new_ptr) {
@@ -254,8 +245,7 @@ static void zend_persist_zval(zval *z)
 			}
 			break;
 		default:
-			ZEND_ASSERT(Z_TYPE_P(z) != IS_OBJECT);
-			ZEND_ASSERT(Z_TYPE_P(z) != IS_RESOURCE);
+			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;
 	}
 }
