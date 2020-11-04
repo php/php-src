@@ -461,7 +461,7 @@ function getmypid(): int|false {}
 
 function getmyinode(): int|false {}
 
-function getlastmod(): int {}
+function getlastmod(): int|false {}
 
 /* sha1.c */
 

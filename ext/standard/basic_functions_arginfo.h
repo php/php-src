@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e38af54610d415ef27b19137645d8f6481953624 */
+ * Stub hash: 4edb7cad23ccb051dbe267b3979e98892607c98f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -687,7 +687,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_getmyinode arginfo_ob_get_length
 
-#define arginfo_getlastmod arginfo_ob_get_level
+#define arginfo_getlastmod arginfo_ob_get_length
 
 #define arginfo_sha1 arginfo_md5
 
