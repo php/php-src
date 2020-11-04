@@ -128,13 +128,6 @@ static void zend_persist_zval_calc(zval *z)
 				} ZEND_HASH_FOREACH_END();
 			}
 			break;
-		case IS_REFERENCE:
-			size = zend_shared_memdup_size(Z_REF_P(z), sizeof(zend_reference));
-			if (size) {
-				ADD_SIZE(size);
-				zend_persist_zval_calc(Z_REFVAL_P(z));
-			}
-			break;
 		case IS_CONSTANT_AST:
 			size = zend_shared_memdup_size(Z_AST_P(z), sizeof(zend_ast_ref));
 			if (size) {
@@ -143,8 +136,7 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			break;
 		default:
-			ZEND_ASSERT(Z_TYPE_P(z) != IS_OBJECT);
-			ZEND_ASSERT(Z_TYPE_P(z) != IS_RESOURCE);
+			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;
 	}
 }
