@@ -1,7 +1,5 @@
 --TEST--
 Bug #78379 (Cast to object confuses GC, causes crash)
---INI--
-opcache.enable=0
 --FILE--
 <?php
 class C {
