@@ -4519,6 +4519,7 @@ static int accel_preload(const char *config, zend_bool in_child)
 
 		php_call_shutdown_functions();
 		zend_call_destructors();
+		php_output_end_all();
 		php_free_shutdown_functions();
 
 		/* Release stored values to avoid dangling pointers */
