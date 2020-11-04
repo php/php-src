@@ -33,6 +33,8 @@ PHP                                                                        NEWS
     enabled and mysqlnd used). (Kamil Tekiela)
   . Fixed bug #72413 (mysqlnd segfault (fetch_row second parameter
     typemismatch)). (Kamil Tekiela)
+  . Fixed bug #80312: change default engine from MyISAM to InnoDB.
+    (Darek Slusarczyk)
 
 - ODBC:
   . Fixed bug #44618 (Fetching may rely on uninitialized data). (cmb)
@@ -51,6 +53,8 @@ PHP                                                                        NEWS
     unavailable before PDO::commit). (Nikita)
   . Fixed bug #65825 (PDOStatement::fetch() does not throw exception on broken
     server connection). (Nikita)
+  . Fixed bug #80312: change default engine from MyISAM to InnoDB.
+    (Darek Slusarczyk)
 
 - SNMP:
   . Fixed bug #70461 (disable md5 code when it is not supported in net-snmp).
@@ -127,7 +131,7 @@ PHP                                                                        NEWS
   . Fixed bug #80048 (Bug #69100 has not been fixed for Windows). (cmb)
   . Fixed bug #80049 (Memleak when coercing integers to string via variadic
     argument). (Nikita)
-  . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-` 
+  . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-`
     cookies can be sent). (CVE-2020-7070) (Stas)
 
 - Calendar:
@@ -146,7 +150,7 @@ PHP                                                                        NEWS
     handlers changed). (SammyK)
 
 - OpenSSL:
-  . Fixed bug #79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12 
+  . Fixed bug #79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12
     bytes IV). (CVE-2020-7069) (Jakub Zelenka)
 
 - PDO:
@@ -228,7 +232,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - Core:
-  . Fixed bug #79877 (getimagesize function silently truncates after a null 
+  . Fixed bug #79877 (getimagesize function silently truncates after a null
     byte) (cmb)
   . Fixed bug #79740 (serialize() and unserialize() methods can not be called
     statically). (Nikita)
@@ -289,7 +293,7 @@ PHP                                                                        NEWS
   . Fixed possibly unsupported timercmp() usage. (cmb)
 
 - Exif:
-  . Fixed bug #79687 (Sony picture - PHP Warning - Make, Model, MakerNotes). 
+  . Fixed bug #79687 (Sony picture - PHP Warning - Make, Model, MakerNotes).
     (cmb)
 
 - Fileinfo:
@@ -505,7 +509,7 @@ PHP                                                                        NEWS
   . Fixed bug #79014 (PHP-FPM & Primary script unknown). (Jakub Zelenka)
 
 - MBstring:
-  . Fixed bug #79371 (mb_strtolower (UTF-32LE): stack-buffer-overflow at 
+  . Fixed bug #79371 (mb_strtolower (UTF-32LE): stack-buffer-overflow at
     php_unicode_tolower_full). (CVE-2020-7065) (cmb)
 
 - MySQLi:

@@ -13,7 +13,7 @@
 	$user      = getenv("MYSQL_TEST_USER")     ?: "root";
 	$passwd    = getenv("MYSQL_TEST_PASSWD")   ?: "";
 	$db        = getenv("MYSQL_TEST_DB")       ?: "test";
-	$engine    = getenv("MYSQL_TEST_ENGINE")   ?: "MyISAM";
+	$engine    = getenv("MYSQL_TEST_ENGINE")   ?: "InnoDB";
 	$socket    = getenv("MYSQL_TEST_SOCKET")   ?: null;
 	$skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ?: true;
 	$connect_flags = (int)getenv("MYSQL_TEST_CONNECT_FLAGS") ?: 0;
