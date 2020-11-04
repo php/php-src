@@ -32,6 +32,12 @@
 
 static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
 
+/* This library historically had encodings called 'byte4be' and 'byte4le'
+ * which were almost identical to UCS-4
+ * Maintain minimal support by aliasing to UCS-2 */
+static const char *mbfl_encoding_ucs4be_aliases[] = {"byte4be", NULL};
+static const char *mbfl_encoding_ucs4le_aliases[] = {"byte4le", NULL};
+
 const mbfl_encoding mbfl_encoding_ucs4 = {
 	mbfl_no_encoding_ucs4,
 	"UCS-4",
@@ -47,7 +53,7 @@ const mbfl_encoding mbfl_encoding_ucs4be = {
 	mbfl_no_encoding_ucs4be,
 	"UCS-4BE",
 	"UCS-4BE",
-	NULL,
+	mbfl_encoding_ucs4be_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS4BE,
 	&vtbl_ucs4be_wchar,
@@ -58,7 +64,7 @@ const mbfl_encoding mbfl_encoding_ucs4le = {
 	mbfl_no_encoding_ucs4le,
 	"UCS-4LE",
 	"UCS-4LE",
-	NULL,
+	mbfl_encoding_ucs4le_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS4LE,
 	&vtbl_ucs4le_wchar,

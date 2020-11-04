@@ -90,8 +90,6 @@
 #include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_utf16.h"
 #include "filters/mbfilter_utf32.h"
-#include "filters/mbfilter_byte2.h"
-#include "filters/mbfilter_byte4.h"
 #include "filters/mbfilter_ucs4.h"
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"

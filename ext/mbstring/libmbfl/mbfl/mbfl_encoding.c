@@ -95,8 +95,6 @@
 #include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_utf16.h"
 #include "filters/mbfilter_utf32.h"
-#include "filters/mbfilter_byte2.h"
-#include "filters/mbfilter_byte4.h"
 #include "filters/mbfilter_ucs4.h"
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
@@ -112,10 +110,6 @@
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_wchar,
-	&mbfl_encoding_byte2be,
-	&mbfl_encoding_byte2le,
-	&mbfl_encoding_byte4be,
-	&mbfl_encoding_byte4le,
 	&mbfl_encoding_base64,
 	&mbfl_encoding_uuencode,
 	&mbfl_encoding_html_ent,
