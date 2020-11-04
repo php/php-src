@@ -41,7 +41,6 @@ echo "== ARRAY ENCODING LIST ==\n";
 
 $a = array(0=>'UTF-8',1=>'EUC-JP', 2=>'SJIS', 3=>'JIS');
 
-// Note: Due to detect order, detected as UTF-8
 $s = $jis;
 $s = mb_detect_encoding($s, $a);
 print("JIS: $s\n");
@@ -98,7 +97,7 @@ JIS: JIS
 EUC-JP: EUC-JP
 EUC-JP: EUC-JP
 == ARRAY ENCODING LIST ==
-JIS: UTF-8
+JIS: JIS
 EUC-JP: EUC-JP
 SJIS: SJIS
 == DETECT ORDER ==

@@ -31,8 +31,6 @@
 #include "mbfilter.h"
 #include "mbfilter_ascii.h"
 
-static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "IBM-367", "cp367", "csASCII", NULL};
 
 const mbfl_encoding mbfl_encoding_ascii = {
@@ -44,12 +42,6 @@ const mbfl_encoding mbfl_encoding_ascii = {
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_ascii_wchar,
 	&vtbl_wchar_ascii
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_ascii = {
-	mbfl_no_encoding_ascii,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_ascii
 };
 
 const struct mbfl_convert_vtbl vtbl_ascii_wchar = {
@@ -97,19 +89,6 @@ int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter)
-{
-	if (c >= 0x20 && c < 0x80) {
-		;
-	} else if (c == 0x0d || c == 0x0a || c == 0x09 || c == 0) {	/* CR or LF or HTAB or null */
-		;
-	} else {
-		filter->flag = 1;
 	}
 
 	return c;

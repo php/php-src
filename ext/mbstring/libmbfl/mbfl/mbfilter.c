@@ -86,6 +86,8 @@
 #include "mbfl_filter_output.h"
 #include "mbfilter_8bit.h"
 #include "mbfilter_wchar.h"
+#include "mbstring.h"
+#include "php_unicode.h"
 #include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
@@ -289,114 +291,102 @@ size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd)
 /*
  * encoding detector
  */
-mbfl_encoding_detector *
-mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict)
+static int mbfl_estimate_encoding_likelihood(int c, void* data)
 {
-	mbfl_encoding_detector *identd;
+	mbfl_convert_filter *filter = *((mbfl_convert_filter**)data);
+	uintptr_t *score = (uintptr_t*)(&filter->opaque);
 
-	int i, num;
-	mbfl_identify_filter *filter;
+	/* Receive wchars decoded from test string using candidate encoding
+	 * If the test string was invalid in the candidate encoding, we assume
+	 * it's the wrong one. */
+	if (c & MBFL_WCSGROUP_THROUGH) {
+		filter->num_illegalchar++;
+	} else if (php_unicode_is_cntrl(c) || php_unicode_is_private(c)) {
+		/* Otherwise, count how many control characters and 'private use'
+		 * codepoints we see. Those are rarely used and may indicate that
+		 * the candidate encoding is not the right one. */
+		*score += 10;
+	} else if (php_unicode_is_punct(c)) {
+		/* Punctuation is also less common than letters/digits */
+		(*score)++;
+	}
+	return c;
+}
 
-	if (elist == NULL || elistsz <= 0) {
+mbfl_encoding_detector *mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict)
+{
+	if (!elistsz) {
 		return NULL;
 	}
 
-	/* allocate */
-	identd = emalloc(sizeof(mbfl_encoding_detector));
-	identd->filter_list = ecalloc(elistsz, sizeof(mbfl_identify_filter *));
-
-	/* create filters */
-	i = 0;
-	num = 0;
-	while (i < elistsz) {
-		filter = mbfl_identify_filter_new2(elist[i]);
-		if (filter != NULL) {
-			identd->filter_list[num] = filter;
-			num++;
-		}
-		i++;
+	mbfl_encoding_detector *identd = emalloc(sizeof(mbfl_encoding_detector));
+	identd->filter_list = ecalloc(elistsz, sizeof(mbfl_convert_filter*));
+	for (int i = 0; i < elistsz; i++) {
+		identd->filter_list[i] = mbfl_convert_filter_new(elist[i], &mbfl_encoding_wchar,
+			mbfl_estimate_encoding_likelihood, NULL, &identd->filter_list[i]);
+		identd->filter_list[i]->opaque = (void*)0;
 	}
-	identd->filter_list_size = num;
-
-	/* set strict flag */
+	identd->filter_list_size = elistsz;
 	identd->strict = strict;
-
 	return identd;
 }
 
-
-void
-mbfl_encoding_detector_delete(mbfl_encoding_detector *identd)
+void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd)
 {
-	int i;
-
-	if (identd != NULL) {
-		if (identd->filter_list != NULL) {
-			i = identd->filter_list_size;
-			while (i > 0) {
-				i--;
-				mbfl_identify_filter_delete(identd->filter_list[i]);
-			}
-			efree((void *)identd->filter_list);
-		}
-		efree((void *)identd);
+	for (int i = 0; i < identd->filter_list_size; i++) {
+		mbfl_convert_filter_delete(identd->filter_list[i]);
 	}
+	efree(identd->filter_list);
+	efree(identd);
 }
 
-int
-mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *string)
+int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *string)
 {
-	int res = 0;
-	/* feed data */
-	if (identd != NULL && string != NULL && string->val != NULL) {
-		int num = identd->filter_list_size;
-		size_t n = string->len;
-		unsigned char *p = string->val;
-		int bad = 0;
-		while (n > 0) {
-			int i;
-			for (i = 0; i < num; i++) {
-				mbfl_identify_filter *filter = identd->filter_list[i];
-				if (!filter->flag) {
-					(*filter->filter_function)(*p, filter);
-					if (filter->flag) {
-						bad++;
-					}
+	int num = identd->filter_list_size;
+	size_t n = string->len;
+	unsigned char *p = string->val;
+	int bad = 0;
+
+	while (n--) {
+		for (int i = 0; i < num; i++) {
+			mbfl_convert_filter *filter = identd->filter_list[i];
+			if (!filter->num_illegalchar) {
+				(*filter->filter_function)(*p, filter);
+				if (filter->num_illegalchar) {
+					bad++;
 				}
 			}
-			if ((num - 1) <= bad) {
-				res = 1;
-				break;
-			}
-			p++;
-			n--;
+		}
+		if ((num - 1) <= bad && !identd->strict) {
+			return 1;
+		}
+		p++;
+	}
+
+	if (identd->strict) {
+		for (int i = 0; i < num; i++) {
+			mbfl_convert_filter *filter = identd->filter_list[i];
+			(filter->filter_flush)(filter);
 		}
 	}
 
-	return res;
+	return 0;
 }
 
 const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd)
 {
-	mbfl_identify_filter *filter;
-	const mbfl_encoding *encoding = NULL;
-	int n;
+	uintptr_t best_score = UINT_MAX; /* Low score is 'better' */
+	const mbfl_encoding *enc = NULL;
 
-	/* judge */
-	if (identd != NULL) {
-		n = identd->filter_list_size - 1;
-		while (n >= 0) {
-			filter = identd->filter_list[n];
-			if (!filter->flag) {
-				if (!identd->strict || !filter->status) {
-					encoding = filter->encoding;
-				}
-			}
-			n--;
+	for (int i = 0; i < identd->filter_list_size; i++) {
+		mbfl_convert_filter *filter = identd->filter_list[i];
+		if (!filter->num_illegalchar && (uintptr_t)filter->opaque < best_score) {
+			enc = filter->from;
+			best_score = (uintptr_t)filter->opaque;
 		}
 	}
 
-	return encoding;
+	return enc;
 }
 
 /*
@@ -465,80 +455,19 @@ mbfl_convert_encoding(
 	return mbfl_memory_device_result(&device, result);
 }
 
-
 /*
  * identify encoding
  */
-const mbfl_encoding *
-mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int elistsz, int strict)
+const mbfl_encoding *mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int elistsz, int strict)
 {
-	int i, bad;
-	size_t n;
-	unsigned char *p;
-	mbfl_identify_filter *flist, *filter;
-	const mbfl_encoding *encoding;
-
-	/* flist is an array of mbfl_identify_filter instances */
-	flist = ecalloc(elistsz, sizeof(mbfl_identify_filter));
-
-	if (elist != NULL) {
-		for (i = 0; i < elistsz; i++) {
-			mbfl_identify_filter_init2(&flist[i], elist[i]);
-		}
+	if (!elistsz) {
+		return NULL;
 	}
-
-	/* feed data */
-	n = string->len;
-	p = string->val;
-
-	if (p != NULL) {
-		bad = 0;
-		while (n > 0) {
-			for (i = 0; i < elistsz; i++) {
-				filter = &flist[i];
-				if (!filter->flag) {
-					(*filter->filter_function)(*p, filter);
-					if (filter->flag) {
-						bad++;
-					}
-				}
-			}
-			if ((elistsz - 1) <= bad && !strict) {
-				break;
-			}
-			p++;
-			n--;
-		}
-	}
-
-	/* judge */
-	encoding = NULL;
-
-	for (i = 0; i < elistsz; i++) {
-		filter = &flist[i];
-		if (!filter->flag) {
-			if (strict && filter->status) {
- 				continue;
- 			}
-			encoding = filter->encoding;
-			break;
-		}
-	}
-
-	/* fall-back judge */
-	if (!encoding) {
-		for (i = 0; i < elistsz; i++) {
-			filter = &flist[i];
-			if (!filter->flag && (!strict || !filter->status)) {
-				encoding = filter->encoding;
-				break;
-			}
-		}
-	}
-
-	efree((void *)flist);
-
-	return encoding;
+	mbfl_encoding_detector *identd = mbfl_encoding_detector_new(elist, elistsz, strict);
+	mbfl_encoding_detector_feed(identd, string);
+	const mbfl_encoding *enc = mbfl_encoding_detector_judge(identd);
+	mbfl_encoding_detector_delete(identd);
+	return enc;
 }
 
 /*

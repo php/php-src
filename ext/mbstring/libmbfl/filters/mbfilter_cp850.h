@@ -27,7 +27,6 @@
 #define MBFL_MBFILTER_CP850_H
 
 extern const mbfl_encoding mbfl_encoding_cp850;
-extern const struct mbfl_identify_vtbl vtbl_identify_cp850;
 extern const struct mbfl_convert_vtbl vtbl_wchar_cp850;
 extern const struct mbfl_convert_vtbl vtbl_cp850_wchar;
 

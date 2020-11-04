@@ -31,8 +31,6 @@
 #include "mbfilter_cp1252.h"
 #include "unicode_table_cp1252.h"
 
-static int mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_cp1252_aliases[] = {"cp1252", NULL};
 
 const mbfl_encoding mbfl_encoding_cp1252 = {
@@ -44,12 +42,6 @@ const mbfl_encoding mbfl_encoding_cp1252 = {
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_cp1252_wchar,
 	&vtbl_wchar_cp1252
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_cp1252 = {
-	mbfl_no_encoding_cp1252,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_cp1252
 };
 
 const struct mbfl_convert_vtbl vtbl_cp1252_wchar = {
@@ -113,13 +105,5 @@ int mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
 
 	CK((*filter->output_function)(s, filter->data));
 
-	return c;
-}
-
-static int mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter)
-{
-	if (c >= 0x80 && c < 0xA0 && !cp1252_ucs_table[c - 0x80]) {
-		filter->flag = 1;
-	}
 	return c;
 }

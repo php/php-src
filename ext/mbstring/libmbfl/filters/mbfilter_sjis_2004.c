@@ -35,7 +35,6 @@
 
 extern const unsigned char mblen_table_sjis[];
 
-extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern int mbfl_bisec_srch(int w, const unsigned short *tbl, int n);
 extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
 
@@ -50,12 +49,6 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis2004_wchar,
 	&vtbl_wchar_sjis2004
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_sjis2004 = {
-	mbfl_no_encoding_sjis2004,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {

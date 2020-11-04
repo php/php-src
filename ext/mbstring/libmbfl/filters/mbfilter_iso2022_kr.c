@@ -31,8 +31,6 @@
 #include "mbfilter_iso2022_kr.h"
 #include "unicode_table_uhc.h"
 
-static int mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter);
-
 const mbfl_encoding mbfl_encoding_2022kr = {
 	mbfl_no_encoding_2022kr,
 	"ISO-2022-KR",
@@ -42,12 +40,6 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022kr_wchar,
 	&vtbl_wchar_2022kr
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_2022kr = {
-	mbfl_no_encoding_2022kr,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_2022kr
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
@@ -281,74 +273,4 @@ mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
-}
-
-static int mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 KSC5601 mode */
-/*	case 0x20:	 KSC5601 DBCS */
-/*	case 0x40:	 KSC5601 SBCS */
-	case 0:
-		if (!(filter->status & 0x10)) {
-			if (c == 0x1b)
-				filter->status += 2;
-		} else if (filter->status == 0x20 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x21:	 KSC5601 second char */
-	case 1:
-		filter->status &= ~0xf;
-		if (c < 0x21 || c > 0x7e) {		/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x29) {		/* ')' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $) */
-	case 5:
-		if (c == 0x43) {		/* 'C' */
-			filter->status = 0x10;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
 }

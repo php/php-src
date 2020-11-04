@@ -44,12 +44,6 @@ const mbfl_encoding mbfl_encoding_8859_10 = {
 	&vtbl_wchar_8859_10
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_8859_10 = {
-	mbfl_no_encoding_8859_10,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_true
-};
-
 const struct mbfl_convert_vtbl vtbl_8859_10_wchar = {
 	mbfl_no_encoding_8859_10,
 	mbfl_no_encoding_wchar,

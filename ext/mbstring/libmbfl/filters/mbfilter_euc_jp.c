@@ -33,7 +33,6 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
-int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_conv_eucjp_wchar_flush(mbfl_convert_filter *filter);
 
 const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
@@ -66,12 +65,6 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_eucjp_wchar,
 	&vtbl_wchar_eucjp
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_eucjp = {
-	mbfl_no_encoding_euc_jp,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_eucjp
 };
 
 const struct mbfl_convert_vtbl vtbl_eucjp_wchar = {
@@ -248,84 +241,6 @@ mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-/* Not all byte sequences in JIS X 0208 which would otherwise be valid are
- * actually mapped to a character */
-static inline int in_unused_jisx0208_range(int c1, int c2)
-{
-	/* `c1`, `c2` are kuten codes */
-	unsigned int s = (c1 - 0x21)*94 + c2 - 0x21;
-	return s >= jisx0208_ucs_table_size || !jisx0208_ucs_table[s];
-}
-
-static inline int in_unused_jisx0212_range(int c1, int c2)
-{
-	unsigned int s = (c1 - 0x21)*94 + c2 - 0x21;
-	return s >= jisx0212_ucs_table_size || !jisx0212_ucs_table[s];
-}
-
-int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
-{
-	unsigned char ku, ten;
-
-	switch (filter->status & 0xF) {
-	case 0: /* latin */
-		if (c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {
-			/* JIS X 0208, first byte
-			 * In EUC-JP, each such byte ranges from 0xA1-0xFE; however,
-			 * the bytes of JIS X 0208 kuten codes range from 0x21-0x7E */
-			filter->status = ((c - 0xA1 + 0x21) << 8) | 1;
-		} else if (c == 0x8e) { /* JIS X 0201 */
-			filter->status = 2;
-		} else if (c == 0x8f) { /* JIS X 0212 */
-			filter->status = 3;
-		} else { /* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	case 1: /* 2nd byte of JIS X 0208 */
-		ku  = filter->status >> 8;
-		ten = c - 0xA1 + 0x21;
-		if (c < 0xa1 || c > 0xfe || in_unused_jisx0208_range(ku, ten)) { /* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case 2:	/* JIS X 0201 */
-		if (c < 0xa1 || c > 0xdf) { /* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case 3: /* JIS X 0212 */
-		if (c < 0xa1 || c > 0xfe) { /* bad */
-			filter->flag = 1;
-		} else {
-			filter->status = ((c - 0xA1 + 0x21) << 8) | 4;
-		}
-		break;
-
-	case 4: /* JIS X 0212, final byte */
-		ku  = filter->status >> 8;
-		ten = c - 0xA1 + 0x21;
-		if (c < 0xa1 || c > 0xfe || in_unused_jisx0212_range(ku, ten)) { /* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	default:
-		filter->status = 0;
-		break;
 	}
 
 	return c;

@@ -32,8 +32,6 @@
 
 #include "unicode_table_big5.h"
 
-static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter);
-
 static const unsigned char mblen_table_big5[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -75,18 +73,6 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp950_wchar,
 	&vtbl_wchar_cp950
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_big5 = {
-	mbfl_no_encoding_big5,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_big5
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_cp950 = {
-	mbfl_no_encoding_cp950,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_big5
 };
 
 const struct mbfl_convert_vtbl vtbl_big5_wchar = {
@@ -318,31 +304,6 @@ mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter)
-{
-	int c1;
-	if (filter->encoding->no_encoding == mbfl_no_encoding_cp950) {
-		c1 = 0x80;
-	} else {
-		c1 = 0xa0;
-	}
-
-	if (filter->status) {		/* kanji second char */
-		if (c < 0x40 || (c > 0x7e && c < 0xa1) ||c > 0xfe) {	/* bad */
-		    filter->flag = 1;
-		}
-		filter->status = 0;
-	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
-		;
-	} else if (c > c1 && c < 0xff) {	/* DBCS lead byte */
-		filter->status = 1;
-	} else {							/* bad */
-		filter->flag = 1;
 	}
 
 	return c;

@@ -33,9 +33,7 @@
 extern const mbfl_encoding mbfl_encoding_utf32;
 extern const mbfl_encoding mbfl_encoding_utf32be;
 extern const mbfl_encoding mbfl_encoding_utf32le;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf32;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf32be;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf32le;
+
 extern const struct mbfl_convert_vtbl vtbl_utf32_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_utf32;
 extern const struct mbfl_convert_vtbl vtbl_utf32be_wchar;

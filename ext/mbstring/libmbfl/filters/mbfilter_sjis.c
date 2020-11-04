@@ -37,7 +37,6 @@
 #include "unicode_table_jis.h"
 
 static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter);
-int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 
 const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -69,12 +68,6 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_wchar,
 	&vtbl_wchar_sjis
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_sjis = {
-	mbfl_no_encoding_sjis,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_wchar = {
@@ -263,31 +256,6 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter)
-{
-	if (filter->status) { /* Kanji, second byte */
-		if (c < 0x40 || c > 0xFC || c == 0x7F) {
-		    filter->flag = 1;
-		} else {
-			int s1, s2;
-			SJIS_DECODE(filter->status, c, s1, s2);
-			int w = ((s1 - 0x21) * 94) + s2 - 0x21;
-			if (w >= jisx0208_ucs_table_size || !jisx0208_ucs_table[w]) {
-				filter->flag = 1;
-			}
-		}
-		filter->status = 0;
-	} else if (c < 0x80 || (c > 0xA0 && c < 0xE0)) { /* Latin/Kana */
-		;
-	} else if (c > 0x80 && c < 0xF0 && c != 0xA0) { /* Kanji, first byte */
-		filter->status = c;
-	} else {
-		filter->flag = 1;
 	}
 
 	return c;

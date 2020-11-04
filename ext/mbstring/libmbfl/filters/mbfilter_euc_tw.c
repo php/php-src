@@ -32,8 +32,6 @@
 
 #include "unicode_table_cns11643.h"
 
-static int mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter);
-
 static const unsigned char mblen_table_euctw[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -65,12 +63,6 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_euctw_wchar,
 	&vtbl_wchar_euctw
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_euctw = {
-	mbfl_no_encoding_euc_tw,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_euctw
 };
 
 const struct mbfl_convert_vtbl vtbl_euctw_wchar = {
@@ -269,57 +261,5 @@ mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
-}
-
-static int mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter)
-{
-	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
-			filter->status = 1;
-		} else if (c == 0x8e) {	/* DBCS lead byte */
-			filter->status = 2;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	case  1:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case  2:	/* got lead byte */
-		if (c >= 0xa1 && c < 0xaf) {	/* ok */
-			filter->status = 3;
-		} else {
-			filter->flag = 1; /* bad */
-		}
-		break;
-
-	case  3:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 4;
-		break;
-
-	case  4:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
 	return c;
 }

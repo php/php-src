@@ -34,8 +34,6 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_2022jpms_aliases[] = {"ISO2022JPMS", NULL};
 
 const mbfl_encoding mbfl_encoding_2022jpms = {
@@ -47,12 +45,6 @@ const mbfl_encoding mbfl_encoding_2022jpms = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jpms_wchar,
 	&vtbl_wchar_2022jpms
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_2022jpms = {
-	mbfl_no_encoding_2022jpms,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_2022jpms
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jpms_wchar = {
@@ -428,98 +420,4 @@ mbfl_filt_conv_any_2022jpms_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
-}
-
-int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x20:	 X 0201 kana */
-/*	case 0x80:	 X 0208 */
-/*	case 0xa0:	 X UDC */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if ((filter->status == 0x80 || filter->status == 0xa0) && c > 0x20 && c < 0x80) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x81:	 X 0208 second char */
-/*	case 0xa1:	 UDC second char */
-	case 1:
-		filter->status &= ~0xf;
-		if (c == 0x1b) {
-			goto retry;
-		} else if (c < 0x21 || c > 0x7e) {		/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x28) {     /* '(' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ ( */
-	case 4:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x3f) {		/* '?' */
-			filter->status = 0xa0;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0;
-		} else if (c == 0x49) {		/* 'I' */
-			filter->status = 0x20;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
 }

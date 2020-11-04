@@ -20,11 +20,11 @@ $euc_jp = '日本語テキストです。01234５６７８９。';
 // Note: For some reason it complains, results are different. Not researched.
 echo "== BASIC TEST ==\n";
 $s = $sjis;
-$s = mb_convert_encoding($s, 'EUC-JP', 'SJIS');
+$s = bin2hex(mb_convert_encoding($s, 'EUC-JP', 'SJIS'));
 print("EUC-JP: $s\n"); // EUC-JP
 
 $s = $jis;
-$s = mb_convert_encoding($s, 'EUC-JP', 'JIS');
+$s = bin2hex(mb_convert_encoding($s, 'EUC-JP', 'JIS'));
 print("EUC-JP: $s\n"); // EUC-JP
 
 $s = $euc_jp;
@@ -41,7 +41,7 @@ echo "== STRING ENCODING LIST ==\n";
 
 $a = 'JIS,UTF-8,EUC-JP,SJIS';
 $s = $jis;
-$s = mb_convert_encoding($s, 'EUC-JP', $a);
+$s = bin2hex(mb_convert_encoding($s, 'EUC-JP', $a));
 print("EUC-JP: $s\n"); // EUC-JP
 
 $s = $euc_jp;
@@ -58,7 +58,7 @@ echo "== ARRAY ENCODING LIST ==\n";
 
 $a = array(0=>'JIS', 1=>'UTF-8', 2=>'EUC-JP', 3=>'SJIS');
 $s = $jis;
-$s = mb_convert_encoding($s, 'EUC-JP', $a);
+$s = bin2hex(mb_convert_encoding($s, 'EUC-JP', $a));
 print("EUC-JP: $s\n"); // EUC-JP
 
 $s = $euc_jp;
@@ -74,7 +74,7 @@ print("JIS: ".base64_encode($s)."\n"); // JIS
 echo "== DETECT ORDER ==\n";
 
 $s = $jis;
-$s = mb_convert_encoding($s, 'EUC-JP', 'auto');
+$s = bin2hex(mb_convert_encoding($s, 'EUC-JP', 'auto'));
 print("EUC-JP: $s\n"); // EUC-JP
 
 $s = $euc_jp;
@@ -86,18 +86,18 @@ $s = mb_convert_encoding($s, 'JIS', 'auto');
 print("JIS: ".base64_encode($s)."\n"); // JIS
 
 
-// Invalid(?) Parameters
+// Invalid Parameters
 echo "== INVALID PARAMETER ==\n";
 
 $s = mb_convert_encoding(1234, 'EUC-JP');
-print("INT: $s\n"); // EUC-JP
+print("INT: $s\n");
 
 $s = mb_convert_encoding('', 'EUC-JP');
 print("EUC-JP: $s\n");  // SJIS
 
 $s = $euc_jp;
 try {
-    var_dump( mb_convert_encoding($s, 'BAD') );
+    var_dump(mb_convert_encoding($s, 'BAD'));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
@@ -105,20 +105,20 @@ try {
 ?>
 --EXPECT--
 == BASIC TEST ==
-EUC-JP: 日本語テキストです。01234５６７８９。
-EUC-JP: 日本語テキストです。01234５６７８９。
+EUC-JP: c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3
+EUC-JP: c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3
 SJIS: k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==
 JIS: GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==
 == STRING ENCODING LIST ==
-EUC-JP: 日本語テキストです。01234５６７８９。
+EUC-JP: c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3
 SJIS: k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==
 JIS: GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==
 == ARRAY ENCODING LIST ==
-EUC-JP: 日本語テキストです。01234５６７８９。
+EUC-JP: c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3
 SJIS: k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==
 JIS: GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==
 == DETECT ORDER ==
-EUC-JP: 日本語テキストです。01234５６７８９。
+EUC-JP: c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3
 SJIS: k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==
 JIS: GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==
 == INVALID PARAMETER ==
