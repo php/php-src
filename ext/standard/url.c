@@ -95,10 +95,19 @@ static const char *binary_strcspn(const char *s, const char *e, const char *char
 /* {{{ php_url_parse */
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 {
+	zend_bool has_port;
+	return php_url_parse_ex2(str, length, &has_port);
+}
+
+/* {{{ php_url_parse_ex2
+ */
+PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, zend_bool *has_port)
+{
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char const *s, *e, *p, *pp, *ue;
 
+	*has_port = 0;
 	s = str;
 	ue = s + length;
 
@@ -188,6 +197,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 			port_buf[pp - p] = '\0';
 			port = ZEND_STRTOL(port_buf, &end, 10);
 			if (port >= 0 && port <= 65535 && end != port_buf) {
+				*has_port = 1;
 				ret->port = (unsigned short) port;
 				if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 				    s += 2;
@@ -253,6 +263,7 @@ parse_host:
 				port_buf[e - p] = '\0';
 				port = ZEND_STRTOL(port_buf, &end, 10);
 				if (port >= 0 && port <= 65535 && end != port_buf) {
+					*has_port = 1;
 					ret->port = (unsigned short)port;
 				} else {
 					php_url_free(ret);
@@ -324,6 +335,7 @@ PHP_FUNCTION(parse_url)
 	php_url *resource;
 	zend_long key = -1;
 	zval tmp;
+	zend_bool has_port;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
@@ -331,7 +343,7 @@ PHP_FUNCTION(parse_url)
 		Z_PARAM_LONG(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	resource = php_url_parse_ex(str, str_len);
+	resource = php_url_parse_ex2(str, str_len, &has_port);
 	if (resource == NULL) {
 		/* @todo Find a method to determine why php_url_parse_ex() failed */
 		RETURN_FALSE;
@@ -346,7 +358,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->host != NULL) RETVAL_STR_COPY(resource->host);
 				break;
 			case PHP_URL_PORT:
-				if (resource->port != 0) RETVAL_LONG(resource->port);
+				if (has_port) RETVAL_LONG(resource->port);
 				break;
 			case PHP_URL_USER:
 				if (resource->user != NULL) RETVAL_STR_COPY(resource->user);
@@ -382,7 +394,7 @@ PHP_FUNCTION(parse_url)
 		ZVAL_STR_COPY(&tmp, resource->host);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
 	}
-	if (resource->port != 0) {
+	if (has_port) {
 		ZVAL_LONG(&tmp, resource->port);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
 	}
