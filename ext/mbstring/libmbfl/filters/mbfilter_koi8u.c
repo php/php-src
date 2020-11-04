@@ -41,12 +41,6 @@ const mbfl_encoding mbfl_encoding_koi8u = {
 	&vtbl_wchar_koi8u
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_koi8u = {
-	mbfl_no_encoding_koi8u,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_true
-};
-
 const struct mbfl_convert_vtbl vtbl_wchar_koi8u = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_koi8u,

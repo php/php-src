@@ -33,8 +33,6 @@
 #include "unicode_table_cp936.h"
 #include "unicode_table_gb18030.h"
 
-static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_gb18030_aliases[] = {"gb-18030", "gb-18030-2000", NULL};
 
 const mbfl_encoding mbfl_encoding_gb18030 = {
@@ -46,12 +44,6 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_gb18030_wchar,
 	&vtbl_wchar_gb18030
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_gb18030 = {
-	mbfl_no_encoding_gb18030,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_gb18030
 };
 
 const struct mbfl_convert_vtbl vtbl_gb18030_wchar = {
@@ -410,58 +402,6 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
-{
-	int c1;
-
-	c1 = (filter->status >> 8) & 0xff;
-	filter->status &= 0xff;
-
-	if (filter->status == 0) {
-		if (c <= 0x80 || c == 0xff) {
-			filter->status = 0;
-		} else {
-			filter->status = 1;
-			filter->status |= (c << 8);
-		}
-	} else if (filter->status == 1) { /* dbcs/qbcs 2nd byte */
-		if (((c1 >= 0x81 && c1 <= 0x84) || (c1 >= 0x90 && c1 <= 0xe3)) && c >= 0x30 && c <= 0x39) { /* qbcs */
-			filter->status = 2;
-		} else if (((c1 >= 0xaa && c1 <= 0xaf) || (c1 >= 0xf8 && c1 <= 0xfe)) && (c >= 0xa1 && c <= 0xfe)) {
-			filter->status = 0; /* UDA part 1,2 */
-		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) {
-			filter->status = 0; /* UDA part 3 */
-		} else if ((c1 >= 0xa1 && c1 <= 0xa9 && c >= 0xa1 && c <= 0xfe) ||
-				   (c1 >= 0xb0 && c1 <= 0xf7 && c >= 0xa1 && c <= 0xfe) ||
-				   (c1 >= 0x81 && c1 <= 0xa0 && c >= 0x40 && c <= 0xfe && c != 0x7f) ||
-				   (c1 >= 0xaa && c1 <= 0xfe && c >= 0x40 && c <= 0xa0 && c != 0x7f) ||
-				   (c1 >= 0xa8 && c1 <= 0xa9 && c >= 0x40 && c <= 0xa0 && c != 0x7f)) {
-			filter->status = 0; /* DBCS */
-		} else {
-			filter->flag = 1; /* bad */
-			filter->status = 0;
-		}
-	} else if (filter->status == 2) { /* qbcs 3rd byte */
-		if (c > 0x80 && c < 0xff) {
-			filter->status = 3;
-		} else {
-			filter->flag = 1; /* bad */
-			filter->status = 0;
-		}
-	} else if (filter->status == 3) { /* qbcs 4th byte */
-		if (c >= 0x30 && c < 0x40) {
-			filter->status = 0;
-		} else {
-			filter->flag = 1; /* bad */
-			filter->status = 0;
-		}
-	} else {							/* bad */
-		filter->flag = 1;
 	}
 
 	return c;

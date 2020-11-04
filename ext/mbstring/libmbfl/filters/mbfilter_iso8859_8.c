@@ -31,8 +31,6 @@
 #include "mbfilter_iso8859_8.h"
 #include "unicode_table_iso8859_8.h"
 
-static int mbfl_filt_ident_iso8859_8(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_8859_8_aliases[] = {"ISO8859-8", "hebrew", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_8 = {
@@ -44,12 +42,6 @@ const mbfl_encoding mbfl_encoding_8859_8 = {
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8859_8_wchar,
 	&vtbl_wchar_8859_8
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_8859_8 = {
-	mbfl_no_encoding_8859_8,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_iso8859_8
 };
 
 const struct mbfl_convert_vtbl vtbl_8859_8_wchar = {
@@ -128,13 +120,5 @@ int mbfl_filt_conv_wchar_8859_8(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
-}
-
-static int mbfl_filt_ident_iso8859_8(int c, mbfl_identify_filter *filter)
-{
-	if (c >= 0xA0 && !iso8859_8_ucs_table[c - 0xA0]) {
-		filter->status = 1;
-	}
 	return c;
 }

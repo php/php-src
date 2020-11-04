@@ -44,12 +44,6 @@ const mbfl_encoding mbfl_encoding_cp866 = {
 	&vtbl_wchar_cp866
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_cp866 = {
-	mbfl_no_encoding_cp866,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_true
-};
-
 const struct mbfl_convert_vtbl vtbl_wchar_cp866 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp866,

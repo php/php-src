@@ -30,8 +30,6 @@
 #include "mbfilter_armscii8.h"
 #include "unicode_table_armscii8.h"
 
-static int mbfl_filt_ident_armscii8(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_armscii8_aliases[] = {"ArmSCII-8", "ArmSCII8", "ARMSCII-8", "ARMSCII8", NULL};
 
 const mbfl_encoding mbfl_encoding_armscii8 = {
@@ -43,12 +41,6 @@ const mbfl_encoding mbfl_encoding_armscii8 = {
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_armscii8_wchar,
 	&vtbl_wchar_armscii8
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_armscii8 = {
-	mbfl_no_encoding_armscii8,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_armscii8
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_armscii8 = {
@@ -106,13 +98,5 @@ int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
-}
-
-static int mbfl_filt_ident_armscii8(int c, mbfl_identify_filter *filter)
-{
-	if (c >= armscii8_ucs_table_min && !armscii8_ucs_table[c - armscii8_ucs_table_min]) {
-		filter->flag = 1;
-	}
 	return c;
 }

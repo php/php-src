@@ -31,7 +31,6 @@
 #define MBFL_MBFILTER_CP866_H
 
 extern const mbfl_encoding mbfl_encoding_cp866;
-extern const struct mbfl_identify_vtbl vtbl_identify_cp866;
 extern const struct mbfl_convert_vtbl vtbl_wchar_cp866;
 extern const struct mbfl_convert_vtbl vtbl_cp866_wchar;
 

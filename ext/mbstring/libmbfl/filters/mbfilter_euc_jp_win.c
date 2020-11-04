@@ -34,8 +34,6 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter);
-
 static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -55,15 +53,7 @@ static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
 };
 
-
-static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open",
-							"eucJP-ms", NULL};
-
-const struct mbfl_identify_vtbl vtbl_identify_eucjpwin = {
-	mbfl_no_encoding_eucjp_win,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_eucjp_win
-};
+static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open", "eucJP-ms", NULL};
 
 const mbfl_encoding mbfl_encoding_eucjp_win = {
 	mbfl_no_encoding_eucjp_win,
@@ -369,58 +359,6 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter)
-{
-	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* kanji first char */
-			filter->status = 1;
-		} else if (c == 0x8e) {				/* kana first char */
-			filter->status = 2;
-		} else if (c == 0x8f) {				/* X 0212 first char */
-			filter->status = 3;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	case  1:	/* got first half */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case  2:	/* got 0x8e */
-		if (c < 0xa1 || c > 0xdf) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case  3:	/* got 0x8f */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status++;
-		break;
-	case  4:	/* got 0x8f */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	default:
-		filter->status = 0;
-		break;
 	}
 
 	return c;

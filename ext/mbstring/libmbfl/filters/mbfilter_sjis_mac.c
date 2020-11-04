@@ -35,7 +35,6 @@
 
 #include "sjis_mac2uni.h"
 
-extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_sjis[];
 
 static int mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter);
@@ -51,12 +50,6 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_mac_wchar,
 	&vtbl_wchar_sjis_mac
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_sjis_mac = {
-	mbfl_no_encoding_sjis_mac,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {

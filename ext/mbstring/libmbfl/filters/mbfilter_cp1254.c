@@ -31,8 +31,6 @@
 #include "mbfilter_cp1254.h"
 #include "unicode_table_cp1254.h"
 
-static int mbfl_filt_ident_cp1254(int c, mbfl_identify_filter *filter);
-
 static const char *mbfl_encoding_cp1254_aliases[] = {"CP1254", "CP-1254", "WINDOWS-1254", NULL};
 
 const mbfl_encoding mbfl_encoding_cp1254 = {
@@ -44,12 +42,6 @@ const mbfl_encoding mbfl_encoding_cp1254 = {
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_cp1254_wchar,
 	&vtbl_wchar_cp1254
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_cp1254 = {
-	mbfl_no_encoding_cp1254,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_cp1254
 };
 
 const struct mbfl_convert_vtbl vtbl_cp1254_wchar = {
@@ -105,13 +97,5 @@ int mbfl_filt_conv_cp1254_wchar(int c, mbfl_convert_filter *filter)
 	}
 
 	CK((*filter->output_function)(s, filter->data));
-	return c;
-}
-
-static int mbfl_filt_ident_cp1254(int c, mbfl_identify_filter *filter)
-{
-	if (c >= 0x81 && c <= 0x9E && !cp1254_ucs_table[c - cp1254_ucs_table_min]) {
-		filter->flag = 1;
-	}
 	return c;
 }

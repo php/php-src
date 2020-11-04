@@ -113,7 +113,7 @@ static const struct mbfl_convert_vtbl *mbfl_special_filter_list[] = {
 	NULL
 };
 
-static void mbfl_convert_filter_common_init(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to,
+static void mbfl_convert_filter_init(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to,
 	const struct mbfl_convert_vtbl *vtbl, output_function_t output_function, flush_function_t flush_function, void* data)
 {
 	/* encoding structure */
@@ -140,7 +140,6 @@ static void mbfl_convert_filter_common_init(mbfl_convert_filter *filter, const m
 	(*filter->filter_ctor)(filter);
 }
 
-
 mbfl_convert_filter* mbfl_convert_filter_new(const mbfl_encoding *from, const mbfl_encoding *to, output_function_t output_function,
 	flush_function_t flush_function, void* data)
 {
@@ -150,7 +149,7 @@ mbfl_convert_filter* mbfl_convert_filter_new(const mbfl_encoding *from, const mb
 	}
 
 	mbfl_convert_filter *filter = emalloc(sizeof(mbfl_convert_filter));
-	mbfl_convert_filter_common_init(filter, from, to, vtbl, output_function, flush_function, data);
+	mbfl_convert_filter_init(filter, from, to, vtbl, output_function, flush_function, data);
 	return filter;
 }
 
@@ -161,7 +160,7 @@ mbfl_convert_filter* mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vt
 	const mbfl_encoding *to_encoding = mbfl_no2encoding(vtbl->to);
 
 	mbfl_convert_filter *filter = emalloc(sizeof(mbfl_convert_filter));
-	mbfl_convert_filter_common_init(filter, from_encoding, to_encoding, vtbl, output_function, flush_function, data);
+	mbfl_convert_filter_init(filter, from_encoding, to_encoding, vtbl, output_function, flush_function, data);
 	return filter;
 }
 
@@ -208,8 +207,7 @@ void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding 
 		vtbl = &vtbl_pass;
 	}
 
-	mbfl_convert_filter_common_init(filter, from, to, vtbl,
-			filter->output_function, filter->flush_function, filter->data);
+	mbfl_convert_filter_init(filter, from, to, vtbl, filter->output_function, filter->flush_function, filter->data);
 }
 
 void mbfl_convert_filter_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)

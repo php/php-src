@@ -3855,23 +3855,30 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
+static int mbfl_filt_check_errors(int c, void* data)
+{
+	if (c & MBFL_WCSGROUP_THROUGH) {
+		(*((mbfl_convert_filter**)data))->num_illegalchar++;
+	}
+	return c;
+}
 
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
 {
-	mbfl_identify_filter *ident = mbfl_identify_filter_new2(encoding);
+	mbfl_convert_filter *filter = mbfl_convert_filter_new(encoding, &mbfl_encoding_wchar, mbfl_filt_check_errors, NULL, &filter);
 
 	while (length--) {
 		unsigned char c = *input++;
-		(ident->filter_function)(c, ident);
-		if (ident->flag) {
-			mbfl_identify_filter_delete(ident);
+		(filter->filter_function)(c, filter);
+		if (filter->num_illegalchar) {
+			mbfl_convert_filter_delete(filter);
 			return 0;
 		}
 	}
 
-	/* String must not end in the middle of a multi-byte character */
-	int result = (ident->status == 0);
-	mbfl_identify_filter_delete(ident);
+	(filter->filter_flush)(filter);
+	int result = !filter->num_illegalchar;
+	mbfl_convert_filter_delete(filter);
 	return result;
 }
 

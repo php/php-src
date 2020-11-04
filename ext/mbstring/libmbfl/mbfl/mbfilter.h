@@ -93,7 +93,6 @@
 #include "mbfl_language.h"
 #include "mbfl_string.h"
 #include "mbfl_convert.h"
-#include "mbfl_ident.h"
 
 /* Prefer local fix, otherwise need to include too much. */
 #ifndef ssize_t
@@ -156,7 +155,7 @@ MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
 typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
 
 struct _mbfl_encoding_detector {
-	mbfl_identify_filter **filter_list;
+	mbfl_convert_filter **filter_list;
 	int filter_list_size;
 	int strict;
 };

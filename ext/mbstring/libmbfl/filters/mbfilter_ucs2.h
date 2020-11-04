@@ -35,9 +35,6 @@
 extern const mbfl_encoding mbfl_encoding_ucs2;
 extern const mbfl_encoding mbfl_encoding_ucs2be;
 extern const mbfl_encoding mbfl_encoding_ucs2le;
-extern const struct mbfl_identify_vtbl vtbl_identify_ucs2;
-extern const struct mbfl_identify_vtbl vtbl_identify_ucs2be;
-extern const struct mbfl_identify_vtbl vtbl_identify_ucs2le;
 extern const struct mbfl_convert_vtbl vtbl_ucs2_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_ucs2;
 extern const struct mbfl_convert_vtbl vtbl_ucs2be_wchar;

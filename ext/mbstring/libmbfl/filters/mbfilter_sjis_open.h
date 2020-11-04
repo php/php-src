@@ -34,7 +34,6 @@
 
 extern const mbfl_encoding mbfl_encoding_sjis_open;
 
-extern const struct mbfl_identify_vtbl vtbl_identify_sjis_open;
 extern const struct mbfl_convert_vtbl vtbl_sjis_open_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_open;
 
