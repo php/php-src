@@ -1,7 +1,5 @@
 --TEST--
 Bug #72594 (Calling an earlier instance of an included anonymous class fatals)
---INI--
-opcache.enable=0
 --FILE--
 <?php
 if (isset($runtime)) {
