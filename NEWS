@@ -56,6 +56,9 @@ PHP                                                                        NEWS
   . Fixed bug #70461 (disable md5 code when it is not supported in net-snmp).
     (Alexander Bergmann, cmb)
 
+- Standard:
+  . Fixed bug #80266 (parse_url silently drops port number 0). (cmb, Nikita)
+
 29 Oct 2020, PHP 7.4.12
 
 - Core:

@@ -859,11 +859,13 @@ echo "Done";
   string(3) "%:x"
 }
 
---> https://example.com:0/: array(3) {
+--> https://example.com:0/: array(4) {
   ["scheme"]=>
   string(5) "https"
   ["host"]=>
   string(11) "example.com"
+  ["port"]=>
+  int(0)
   ["path"]=>
   string(1) "/"
 }
