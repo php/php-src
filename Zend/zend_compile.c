@@ -1082,7 +1082,8 @@ ZEND_API zend_result do_bind_function(zval *lcname) /* {{{ */
 		return FAILURE;
 	}
 	function = (zend_function*)Z_PTR_P(zv);
-	if (UNEXPECTED(function->common.fn_flags & ZEND_ACC_PRELOADED)) {
+	if (UNEXPECTED(function->common.fn_flags & ZEND_ACC_PRELOADED)
+			&& !(CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
 		zv = zend_hash_add(EG(function_table), Z_STR_P(lcname), zv);
 	} else {
 		zv = zend_hash_set_bucket_key(EG(function_table), (Bucket*)zv, Z_STR_P(lcname));
