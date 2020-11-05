@@ -79,7 +79,12 @@ const struct mbfl_convert_vtbl vtbl_wchar_ascii = {
  */
 int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter)
 {
-	return (*filter->output_function)(c, filter->data);
+	if (c < 0x80) {
+		(*filter->output_function)(c, filter->data);
+	} else {
+		(*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data);
+	}
+	return c;
 }
 
 
