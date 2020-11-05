@@ -4134,7 +4134,8 @@ static void preload_register_trait_methods(zend_class_entry *ce) {
 	zend_op_array *op_array;
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 		if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
-			zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array);
+			ZEND_ASSERT(op_array->refcount && "Must have refcount pointer");
+			zend_shared_alloc_register_xlat_entry(op_array->refcount, op_array);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -4145,20 +4146,20 @@ static void preload_fix_trait_methods(zend_class_entry *ce)
 
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 		if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
-			zend_op_array *orig_op_array = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
-			if (orig_op_array) {
-				zend_string *function_name = op_array->function_name;
-				zend_class_entry *scope = op_array->scope;
-				uint32_t fn_flags = op_array->fn_flags;
-				zend_function *prototype = op_array->prototype;
-				HashTable *ht = op_array->static_variables;
-				*op_array = *orig_op_array;
-				op_array->function_name = function_name;
-				op_array->scope = scope;
-				op_array->fn_flags = fn_flags;
-				op_array->prototype = prototype;
-				op_array->static_variables = ht;
-			}
+			zend_op_array *orig_op_array = zend_shared_alloc_get_xlat_entry(op_array->refcount);
+			ZEND_ASSERT(orig_op_array && "Must be in xlat table");
+
+			zend_string *function_name = op_array->function_name;
+			zend_class_entry *scope = op_array->scope;
+			uint32_t fn_flags = op_array->fn_flags;
+			zend_function *prototype = op_array->prototype;
+			HashTable *ht = op_array->static_variables;
+			*op_array = *orig_op_array;
+			op_array->function_name = function_name;
+			op_array->scope = scope;
+			op_array->fn_flags = fn_flags;
+			op_array->prototype = prototype;
+			op_array->static_variables = ht;
 		}
 	} ZEND_HASH_FOREACH_END();
 }
