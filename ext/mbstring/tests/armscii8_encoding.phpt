@@ -23,9 +23,8 @@ testAllInvalidChars($invalid, $toUnicode, 'ARMSCII-8', 'UTF-16BE', "\x00%");
 testTruncatedChars($truncated, 'ARMSCII-8', 'UTF-16BE', "\x00%");
 echo "Tested ARMSCII-8 -> UTF-16BE\n";
 
-findInvalidChars($fromUnicode, $invalid, $truncated, map(range(0,0xFF), 2));
-testAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', 'ARMSCII-8', '%');
-testTruncatedChars($truncated, 'UTF-16BE', 'ARMSCII-8', '%');
+findInvalidChars($fromUnicode, $invalid, $unused, map(range(0,0xFF), 2));
+convertAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', 'ARMSCII-8', '%');
 echo "Tested UTF-16BE -> ARMSCII-8\n";
 ?>
 --EXPECT--
