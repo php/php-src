@@ -3213,11 +3213,14 @@ static PHP_MINFO_FUNCTION(zip)
 	php_info_print_table_row(2, "Zip", "enabled");
 	php_info_print_table_row(2, "Zip version", PHP_ZIP_VERSION);
 #ifdef HAVE_LIBZIP_VERSION
-	php_info_print_table_row(2, "Libzip headers version", LIBZIP_VERSION);
-	php_info_print_table_row(2, "Libzip library version", zip_libzip_version());
-#else
-	php_info_print_table_row(2, "Libzip version", LIBZIP_VERSION);
+	if (strcmp(LIBZIP_VERSION, zip_libzip_version())) {
+		php_info_print_table_row(2, "Libzip headers version", LIBZIP_VERSION);
+		php_info_print_table_row(2, "Libzip library version", zip_libzip_version());
+	} else
 #endif
+	{
+		php_info_print_table_row(2, "Libzip version", LIBZIP_VERSION);
+	}
 #ifdef HAVE_METHOD_SUPPORTED
 	php_info_print_table_row(2, "BZIP2 compression",
 		zip_compression_method_supported(ZIP_CM_BZIP2, 1) ? "Yes" : "No");
