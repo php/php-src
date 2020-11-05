@@ -3226,6 +3226,12 @@ static PHP_MINFO_FUNCTION(zip)
 		zip_compression_method_supported(ZIP_CM_BZIP2, 1) ? "Yes" : "No");
 	php_info_print_table_row(2, "XZ compression",
 		zip_compression_method_supported(ZIP_CM_XZ, 1) ? "Yes" : "No");
+#ifdef ZIP_CM_ZSTD
+	php_info_print_table_row(2, "ZSTD compression",
+		zip_compression_method_supported(ZIP_CM_ZSTD, 1) ? "Yes" : "No");
+#else
+	php_info_print_table_row(2, "ZSTD compression", "No");
+#endif
 	php_info_print_table_row(2, "AES-128 encryption",
 		zip_encryption_method_supported(ZIP_EM_AES_128, 1) ? "Yes" : "No");
 	php_info_print_table_row(2, "AES-192 encryption",
