@@ -118,6 +118,22 @@ function testAllInvalidChars($badChars, $charMap, $fromEncoding, $toEncoding, $r
     }
 }
 
+function convertAllInvalidChars($badChars, $charMap, $fromEncoding, $toEncoding, $replacement) {
+    $badChars = array_keys($badChars);
+    $goodChars = array();
+    while (!empty($badChars)) {
+        if (empty($goodChars)) {
+            $goodChars = array_keys($charMap);
+            shuffle($goodChars);
+        }
+        $goodChar   = array_pop($goodChars);
+        $fromString = array_pop($badChars) . $goodChar;
+        $toString   = $replacement . $charMap[$goodChar];
+
+        convertInvalidString($fromString, $toString, $fromEncoding, $toEncoding);
+    }
+}
+
 function testTruncatedChars($truncated, $fromEncoding, $toEncoding, $replacement) {
     $truncatedChars = array_keys($truncated);
     foreach ($truncatedChars as $truncatedChar) {
@@ -142,7 +158,7 @@ function findInvalidChars($valid, &$invalid, &$truncated, $startBytes = array())
             $prefixes[substr($char, 0, $len)] = true;
     }
 
-    $varLength = function($prefix) use($valid, $invalid, $truncated) {
+    $varLength = function($prefix) use($valid, &$invalid, &$truncated) {
         for ($byte = 0; $byte < 256; $byte++) {
             $str = $prefix . chr($byte);
             if (!isset($valid[$str])) {
@@ -156,7 +172,7 @@ function findInvalidChars($valid, &$invalid, &$truncated, $startBytes = array())
         }
     };
 
-    $fixedLength = function($prefix, $remaining) use($valid, $invalid, $truncated) {
+    $fixedLength = function($prefix, $remaining) use($valid, &$invalid, &$truncated, &$fixedLength) {
         if ($remaining == 0) {
             if (!isset($valid[$prefix]))
                 $invalid[$prefix] = true;
@@ -209,9 +225,8 @@ function testEncodingFromUTF16ConversionTable($path, $encoding, $replacement = '
     testTruncatedChars($truncated, $encoding, 'UTF-16BE', "\x00%");
     echo "Tested $encoding -> UTF-16BE\n";
 
-    findInvalidChars($fromUnicode, $invalid, $truncated, map(range(0,0xFF), 2));
-    testAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', $encoding, $replacement);
-    testTruncatedChars($truncated, 'UTF-16BE', $encoding, $replacement);
+    findInvalidChars($fromUnicode, $invalid, $unused, map(range(0,0xFF), 2));
+    convertAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', $encoding, $replacement);
     echo "Tested UTF-16BE -> $encoding\n";
 }
 ?>
