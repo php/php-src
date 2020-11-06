@@ -102,10 +102,6 @@ require_once('skipifconnectfailure.inc');
     $driver->reconnect = false;
     $driver->reconnect = $reconnect;
 
-    if (!is_bool($embedded = $driver->embedded))
-        printf("[020] Expecting boolean/any, got %s/%s\n",
-            gettype($embedded), $embedded);
-
     print "done!";
 ?>
 --EXPECTF--
