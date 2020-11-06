@@ -1,9 +1,8 @@
 --TEST--
-locale_get_display_name() icu >= 65.0 && icu < 68.1
+locale_get_display_name() icu >= 68.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '65.0') < 0) die('skip for ICU >= 65.0'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '68.1') >= 0) die('skip for ICU < 68.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '68.1') < 0) die('skip for ICU >= 68.1'); ?>
 --FILE--
 <?php
 
@@ -278,7 +277,7 @@ disp_locale=de :  display_name=Deutsch #Schweiz, Privatnutzung=phonebk#
 -----------------
 locale='az-Arab-x-AZE-derbend'
 disp_locale=en :  display_name=Azerbaijani #Arabic, Private-Use=aze-derbend#
-disp_locale=fr :  display_name=azéri #arabe, usage privé=aze-derbend#
+disp_locale=fr :  display_name=azerbaïdjanais #arabe, usage privé=aze-derbend#
 disp_locale=de :  display_name=Aserbaidschanisch #Arabisch, Privatnutzung=aze-derbend#
 -----------------
 locale='zh-min'

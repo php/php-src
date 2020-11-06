@@ -1,8 +1,8 @@
 --TEST--
-locale_get_display_language() icu < 68.1
+locale_get_display_language() icu >= 68.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '68.1') >=  0) die('skip for ICU < 68.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '68.1') <  0) die('skip for ICU >= 68.1'); ?>
 --FILE--
 <?php
 
@@ -216,7 +216,7 @@ disp_locale=de :  display_language=Deutsch
 -----------------
 locale='az-Arab-x-AZE-derbend'
 disp_locale=en :  display_language=Azerbaijani
-disp_locale=fr :  display_language=azéri
+disp_locale=fr :  display_language=azerbaïdjanais
 disp_locale=de :  display_language=Aserbaidschanisch
 -----------------
 locale='zh-min'
