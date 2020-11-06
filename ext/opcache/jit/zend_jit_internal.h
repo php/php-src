@@ -392,6 +392,7 @@ struct _zend_jit_trace_stack_frame {
 	const zend_op              *call_opline;
 	uint32_t                    call_level;
 	uint32_t                    _info;
+	int                         used_stack;
 	zend_jit_trace_stack        stack[1];
 };
 
