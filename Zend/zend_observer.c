@@ -82,8 +82,7 @@ ZEND_API void zend_observer_startup(void) {
 ZEND_API void zend_observer_activate(void) {
 	if (ZEND_OBSERVER_ENABLED) {
 		fcall_handlers_arena = zend_arena_create(4096);
-		// TODO: How big should the arena be?
-		observed_stack_arena = zend_arena_create(2048);
+		observed_stack_arena = zend_arena_create(4096);
 	}
 }
 

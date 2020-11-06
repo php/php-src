@@ -1747,14 +1747,14 @@ void php_request_shutdown(void *dummy)
 
 	php_deactivate_ticks();
 
+	/* 0. Call any open observer end handlers that are still open after a zend_bailout */
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_observer_fcall_end_all();
+	}
+
 	/* 1. Call all possible shutdown functions registered with register_shutdown_function() */
 	if (PG(modules_activated)) {
 		php_call_shutdown_functions();
-	}
-
-	/* 1.5. Call any open end handlers that are still open after a zend_bailout */
-	if (ZEND_OBSERVER_ENABLED) {
-		zend_observer_fcall_end_all();
 	}
 
 	/* 2. Call all possible __destruct() functions */
