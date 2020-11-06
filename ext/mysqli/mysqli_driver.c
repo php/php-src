@@ -78,16 +78,6 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 }
 /* }}} */
 
-/* {{{ property driver_embedded_read */
-static int driver_embedded_read(mysqli_object *obj, zval *retval, zend_bool quiet)
-{
-	/* No longer supported */
-	ZVAL_FALSE(retval);
-
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ property driver_client_version_read */
 static int driver_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
@@ -135,7 +125,6 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{"client_info", sizeof("client_info") - 1, driver_client_info_read, NULL},
 	{"client_version", sizeof("client_version") - 1, driver_client_version_read, NULL},
 	{"driver_version", sizeof("driver_version") - 1, driver_driver_version_read, NULL},
-	{"embedded", sizeof("embedded") - 1, driver_embedded_read, NULL},
 	{"reconnect", sizeof("reconnect") - 1, driver_reconnect_read, driver_reconnect_write},
 	{"report_mode", sizeof("report_mode") - 1, driver_report_read, driver_report_write},
 	{NULL, 0, NULL, NULL}

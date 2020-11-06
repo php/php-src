@@ -577,7 +577,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "client_info", 		sizeof("client_info") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "client_version", 	sizeof("client_version") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "driver_version", 	sizeof("driver_version") - 1, ZEND_ACC_PUBLIC);
-	zend_declare_property_null(ce, "embedded", 			sizeof("embedded") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "reconnect",			sizeof("reconnect") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "report_mode", 		sizeof("report_mode") - 1, ZEND_ACC_PUBLIC);
 	ce->ce_flags |= ZEND_ACC_FINAL;
