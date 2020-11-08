@@ -2,11 +2,6 @@
 Test prev() function : usage variation - Multi-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : mixed prev(array $array_arg)
- * Description: Move array argument's internal pointer to the previous element and return it
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test prev() when passed:
  * 1. a two-dimensional array
@@ -29,7 +24,6 @@ var_dump(prev($array_arg));
 echo "\n-- Pass a sub-array as \$array_arg --\n";
 var_dump(prev($array_arg[0]));
 ?>
-===DONE===
 --EXPECT--
 *** Testing prev() : usage variations ***
 
@@ -46,4 +40,3 @@ bool(false)
 
 -- Pass a sub-array as $array_arg --
 int(8)
-===DONE===

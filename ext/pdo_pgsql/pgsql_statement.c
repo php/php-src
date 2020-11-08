@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -29,7 +27,7 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -149,7 +147,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 
 		if (S->is_prepared) {
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			S->result = PQexec(H->server, q);
+			PQclear(PQexec(H->server, q));
 			efree(q);
 		}
 
@@ -399,7 +397,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				}
 				break;
 		}
-	} else if (param->is_param) {
+	} else if (param->is_param && event_type == PDO_PARAM_EVT_NORMALIZE) {
 		/* We need to manually convert to a pg native boolean value */
 		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
 			((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {

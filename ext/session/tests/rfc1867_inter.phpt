@@ -2,8 +2,6 @@
 session rfc1867
 --INI--
 file_uploads=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1024
 session.save_path=
 session.name=PHPSESSID
@@ -20,15 +18,15 @@ session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --COOKIE--
-PHPSESSID=rfc1867-tests
+PHPSESSID=rfc1867-inter
 --GET--
-PHPSESSID=rfc1867-tests-get
+PHPSESSID=rfc1867-inter-get
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHPSESSID"
 
-rfc1867-tests-post
+rfc1867-inter-post
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"
 
@@ -52,11 +50,11 @@ session_start();
 var_dump(session_id());
 var_dump($_FILES);
 var_dump($_SESSION["upload_progress_" . basename(__FILE__) . "_1"]);
-var_dump($_SESSION["upload_progress_" . basename(__FILE__) . "_2"]);
+var_dump(isset($_SESSION["upload_progress_" . basename(__FILE__) . "_2"]));
 session_destroy();
 ?>
 --EXPECTF--
-string(%d) "rfc1867-tests"
+string(%d) "rfc1867-inter"
 array(2) {
   ["file1"]=>
   array(5) {
@@ -132,4 +130,4 @@ array(5) {
     }
   }
 }
-NULL
+bool(false)

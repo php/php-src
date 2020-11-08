@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
@@ -35,12 +33,5 @@ extern zend_module_entry fileinfo_module_entry;
 #endif
 
 PHP_MINFO_FUNCTION(fileinfo);
-
-PHP_FUNCTION(finfo_open);
-PHP_FUNCTION(finfo_close);
-PHP_FUNCTION(finfo_set_flags);
-PHP_FUNCTION(finfo_file);
-PHP_FUNCTION(finfo_buffer);
-PHP_FUNCTION(mime_content_type);
 
 #endif	/* PHP_FILEINFO_H */

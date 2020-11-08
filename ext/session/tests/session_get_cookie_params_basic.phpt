@@ -14,12 +14,6 @@ session.cookie_samesite=""
 
 ob_start();
 
-/*
- * Prototype : array session_get_cookie_params(void)
- * Description : Get the session cookie parameters
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_get_cookie_params() : basic functionality ***\n";
 
 var_dump(session_get_cookie_params());

@@ -17,20 +17,18 @@ odbc_exec($conn, "INSERT INTO FOO(ID, VARCHAR_COL) VALUES (1, '" . str_repeat("a
 
 $res = odbc_exec($conn,"select VARCHAR_COL from FOO");
 if ($res) {
-	if (odbc_fetch_row($res)) {
-		$ret = odbc_result($res,'varchar_col');
-		echo strlen($ret), "\n";
-		echo $ret[0], "\n";
-		echo $ret[strlen($ret)-1], "\n";
-	}
+    if (odbc_fetch_row($res)) {
+        $ret = odbc_result($res,'varchar_col');
+        echo strlen($ret), "\n";
+        echo $ret[0], "\n";
+        echo $ret[strlen($ret)-1], "\n";
+    }
 }
 ?>
-==DONE==
 --EXPECT--
 100
 a
 a
-==DONE==
 --CLEAN--
 <?php
 include 'config.inc';

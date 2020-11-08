@@ -15,14 +15,14 @@ var_dump(shm_remove($s));
 
 shm_detach($s);
 try {
-    var_dump(shm_remove($s));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    shm_remove($s);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
 bool(true)
-shm_remove(): supplied resource is not a valid sysvshm resource
+Shared memory block has already been destroyed
 Done

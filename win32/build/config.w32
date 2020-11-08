@@ -215,6 +215,7 @@ if (PHP_ANALYZER == "vs") {
 		pvscfg.WriteLine("platform = " + (X64 ? 'x64' : 'Win32'));
 		pvscfg.WriteLine("preprocessor = visualcpp");
 		pvscfg.WriteLine("language = C");
+		pvscfg.WriteLine("skip-cl-exe = no");
 	}
 } else {
 	PHP_ANALYZER = "no"
@@ -230,13 +231,13 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_execute_API.c zend_highlight.c \
 	zend_llist.c zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
-	zend_hash.c zend_list.c zend_builtin_functions.c \
+	zend_hash.c zend_list.c zend_builtin_functions.c zend_attributes.c \
 	zend_ini.c zend_sort.c zend_multibyte.c zend_ts_hash.c \
 	zend_stream.c zend_iterators.c zend_interfaces.c zend_objects.c \
 	zend_object_handlers.c zend_objects_API.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c zend_weakrefs.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
-	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c");
+	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_observer.c zend_system_id.c");
 
 ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {
@@ -248,7 +249,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
+	strlcat.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c \
 	php_syslog.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
@@ -289,10 +290,9 @@ if (PHP_IPV6 == "yes") {
 }
 if (main_network_has_ipv6) {
 	STDOUT.WriteLine("Enabling IPv6 support");
+	AC_DEFINE('HAVE_GAI_STRERROR', 1);
+	AC_DEFINE('HAVE_IPV6', 1);
 }
-AC_DEFINE('HAVE_GETADDRINFO', main_network_has_ipv6);
-AC_DEFINE('HAVE_GAI_STRERROR', main_network_has_ipv6);
-AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 
 /* this allows up to 256 sockets to be select()ed in a single
  * call to select(), instead of the usual 64 */
@@ -327,7 +327,7 @@ if (CLANG_TOOLSET) {
 		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
 	}
 
-	ARG_ENABLE("sanitizer", "Enable address sanitizer extension", "no");
+	ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {
 			ERROR("Clang at least 5.0.0 required for sanitation plugins");

@@ -22,7 +22,6 @@ __HALT_COMPILER();
 var_dump($p->getStub());
 var_dump($p->isFileFormat(Phar::ZIP));
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/phar_commitwrite.phar.zip');
@@ -39,4 +38,3 @@ include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER(); ?>
 "
 bool(true)
-===DONE===

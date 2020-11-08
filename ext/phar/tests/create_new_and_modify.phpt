@@ -5,6 +5,7 @@ Phar: create and modify phar
 --INI--
 phar.readonly=0
 phar.require_hash=1
+opcache.validate_timestamps=1
 --FILE--
 <?php
 
@@ -44,7 +45,6 @@ include $pname . '/a.php';
 include $pname . '/b.php';
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -54,4 +54,3 @@ string(40) "%s"
 bool(true)
 modified!
 another!
-===DONE===

@@ -63,4 +63,3 @@ Directory::close(): supplied argument is not a valid Directory resource
 Unable to find my handle property
 Unable to find my handle property
 Unable to find my handle property
-

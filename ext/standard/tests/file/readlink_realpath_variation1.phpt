@@ -3,18 +3,11 @@ Test readlink() and realpath() functions: usage variation - linkname/filename st
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+    die('skip not for Windows');
 }
 ?>
 --FILE--
 <?php
-/* Prototype: string readlink ( string $path );
-   Description: Returns the target of a symbolic link
-
-   Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 $name_prefix = __DIR__;
 $filename = "$name_prefix/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp";

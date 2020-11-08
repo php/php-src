@@ -12,5 +12,8 @@ zip_close($zip);
 echo "OK";
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function zip_open() is deprecated in %s on line %d
+
+Deprecated: Function zip_close() is deprecated in %s on line %d
 OK

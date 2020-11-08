@@ -13,13 +13,13 @@ opcache.jit_buffer_size=1M
 namespace A;
 
 class A {
-	private $evalParameters;
-	public function evaluate() {
-		$this->evalParameters = array("a" => "okey");
-		extract($this->evalParameters, EXTR_SKIP);
-		echo $a;
-		return false;
-	}
+    private $evalParameters;
+    public function evaluate() {
+        $this->evalParameters = array("a" => "okey");
+        extract($this->evalParameters, EXTR_SKIP);
+        echo $a;
+        return false;
+    }
 }
 
 $a = new A();

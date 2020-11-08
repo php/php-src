@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - associative array with different values
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_merge_recursive() by passing different
  * associative arrays having different values to $arr1 argument.
@@ -199,7 +194,7 @@ array(4) {
   ["f2"]=>
   float(3.33)
   [0]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   array(2) {
     [0]=>
@@ -215,7 +210,7 @@ array(8) {
   ["f2"]=>
   float(3.33)
   [0]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   array(2) {
     [0]=>

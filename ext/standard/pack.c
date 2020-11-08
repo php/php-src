@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -49,8 +47,8 @@
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
 		efree(formatcodes);	\
 		efree(formatargs);	\
-		php_error_docref(NULL, E_WARNING, "Type %c: integer overflow in format string", code); \
-		RETURN_FALSE; \
+		zend_value_error("Type %c: integer overflow in format string", code); \
+		RETURN_THROWS(); \
 	} \
 	outputpos += (a)*(b);
 
@@ -80,8 +78,7 @@ static int big_endian_longlong_map[8];
 static int little_endian_longlong_map[8];
 #endif
 
-/* {{{ php_pack
- */
+/* {{{ php_pack */
 static void php_pack(zval *val, size_t size, int *map, char *output)
 {
 	size_t i;
@@ -96,8 +93,7 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 }
 /* }}} */
 
-/* {{{ php_pack_reverse_int32
- */
+/* {{{ php_pack_reverse_int32 */
 static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
     uint32_t result;
@@ -107,8 +103,7 @@ static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 }
 /* }}} */
 
-/* {{{ php_pack
- */
+/* {{{ php_pack */
 static inline uint64_t php_pack_reverse_int64(uint64_t arg)
 {
 	union Swap64 {
@@ -123,8 +118,7 @@ static inline uint64_t php_pack_reverse_int64(uint64_t arg)
 }
 /* }}} */
 
-/* {{{ php_pack_copy_float
- */
+/* {{{ php_pack_copy_float */
 static void php_pack_copy_float(int is_little_endian, void * dst, float f)
 {
 	union Copy32 {
@@ -147,8 +141,7 @@ static void php_pack_copy_float(int is_little_endian, void * dst, float f)
 }
 /* }}} */
 
-/* {{{ php_pack_copy_double
- */
+/* {{{ php_pack_copy_double */
 static void php_pack_copy_double(int is_little_endian, void * dst, double d)
 {
 	union Copy64 {
@@ -171,8 +164,7 @@ static void php_pack_copy_double(int is_little_endian, void * dst, double d)
 }
 /* }}} */
 
-/* {{{ php_pack_parse_float
- */
+/* {{{ php_pack_parse_float */
 static float php_pack_parse_float(int is_little_endian, void * src)
 {
 	union Copy32 {
@@ -195,8 +187,7 @@ static float php_pack_parse_float(int is_little_endian, void * src)
 }
 /* }}} */
 
-/* {{{ php_pack_parse_double
- */
+/* {{{ php_pack_parse_double */
 static double php_pack_parse_double(int is_little_endian, void * src)
 {
 	union Copy64 {
@@ -223,8 +214,7 @@ static double php_pack_parse_double(int is_little_endian, void * src)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
  */
-/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
-   Takes one or more arguments and packs them into a binary string according to the format argument */
+/* {{{ Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
 	zval *argv = NULL;
@@ -292,15 +282,15 @@ PHP_FUNCTION(pack)
 				if (currentarg >= num_args) {
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL, E_WARNING, "Type %c: not enough arguments", code);
-					RETURN_FALSE;
+					zend_value_error("Type %c: not enough arguments", code);
+					RETURN_THROWS();
 				}
 
 				if (arg < 0) {
 					if (!try_convert_to_string(&argv[currentarg])) {
 						efree(formatcodes);
 						efree(formatargs);
-						return;
+						RETURN_THROWS();
 					}
 
 					arg = Z_STRLEN(argv[currentarg]);
@@ -323,8 +313,8 @@ PHP_FUNCTION(pack)
 #if SIZEOF_ZEND_LONG < 8
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
-					RETURN_FALSE;
+					zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
+					RETURN_THROWS();
 #endif
 			case 'c':
 			case 'C':
@@ -347,22 +337,25 @@ PHP_FUNCTION(pack)
 				if (arg < 0) {
 					arg = num_args - currentarg;
 				}
-
+				if (currentarg > INT_MAX - arg) {
+					goto too_few_args;
+				}
 				currentarg += arg;
 
 				if (currentarg > num_args) {
+too_few_args:
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL, E_WARNING, "Type %c: too few arguments", code);
-					RETURN_FALSE;
+					zend_value_error("Type %c: too few arguments", code);
+					RETURN_THROWS();
 				}
 				break;
 
 			default:
 				efree(formatcodes);
 				efree(formatargs);
-				php_error_docref(NULL, E_WARNING, "Type %c: unknown format code", code);
-				RETURN_FALSE;
+				zend_value_error("Type %c: unknown format code", code);
+				RETURN_THROWS();
 		}
 
 		formatcodes[formatcount] = code;
@@ -684,8 +677,7 @@ PHP_FUNCTION(pack)
 }
 /* }}} */
 
-/* {{{ php_unpack
- */
+/* {{{ php_unpack */
 static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
 {
 	zend_long result;
@@ -715,8 +707,7 @@ static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
  */
-/* {{{ proto array|false unpack(string format, string input)
-   Unpack binary string into named array elements according to format argument */
+/* {{{ Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
 	char *format, *input;
@@ -740,9 +731,10 @@ PHP_FUNCTION(unpack)
 
 
 	if (offset < 0 || offset > inputlen) {
-		php_error_docref(NULL, E_WARNING, "Offset " ZEND_LONG_FMT " is out of input range" , offset);
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be contained in argument #2 ($data)");
+		RETURN_THROWS();
 	}
+
 	input += offset;
 	inputlen -= offset;
 
@@ -853,9 +845,8 @@ PHP_FUNCTION(unpack)
 				size = 8;
 				break;
 #else
-				php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
-				zend_array_destroy(Z_ARR_P(return_value));
-				RETURN_FALSE;
+				zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
+				RETURN_THROWS();
 #endif
 
 			/* Use sizeof(float) bytes of input */
@@ -873,10 +864,8 @@ PHP_FUNCTION(unpack)
 				break;
 
 			default:
-				php_error_docref(NULL, E_WARNING, "Invalid format type %c", type);
-				zend_array_destroy(Z_ARR_P(return_value));
-				RETURN_FALSE;
-				break;
+				zend_value_error("Invalid format type %c", type);
+				RETURN_THROWS();
 		}
 
 		if (size != 0 && size != -1 && size < 0) {
@@ -1209,8 +1198,7 @@ PHP_FUNCTION(unpack)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pack)
 {
 	int machine_endian_check = 1;

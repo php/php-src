@@ -14,9 +14,7 @@ var_dump($fo->getPath());
 var_dump($fo->getFilename());
 var_dump($fo->getRealPath());
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "%sspl%stests"
 string(19) "fileobject_004.phpt"
 string(%d) "%sspl%stests%sfileobject_004.phpt"
-==DONE==

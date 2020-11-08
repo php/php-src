@@ -3,13 +3,6 @@ Test array_map() function : usage variations - string keys
 --FILE--
 <?php
 
-/* Prototype  : array array_map(mixed callback, array input1 [, array input2 ,...])
- * Description: Applies the callback to the elements in given arrays.
- * Source code: ext/standard/array.c
-*/
-
-
-
 echo "*** Testing array_map() : string keys ***\n";
 
 $arr = array("stringkey" => "value");

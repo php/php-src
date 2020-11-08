@@ -10,29 +10,29 @@ Interface ExtendsIterator extends Iterator {
 Interface ExtendsIteratorAggregate extends IteratorAggregate {
 }
 Class IteratorImpl implements Iterator {
-	public function next() {}
-	public function key() {}
-	public function rewind() {}
-	public function current() {}
-	public function valid() {}
+    public function next() {}
+    public function key() {}
+    public function rewind() {}
+    public function current() {}
+    public function valid() {}
 }
-Class IterarorAggregateImpl implements IteratorAggregate {
-	public function getIterator() {}
+Class IteratorAggregateImpl implements IteratorAggregate {
+    public function getIterator() {}
 }
 Class ExtendsIteratorImpl extends IteratorImpl {
 }
-Class ExtendsIteratorAggregateImpl extends IterarorAggregateImpl {
+Class ExtendsIteratorAggregateImpl extends IteratorAggregateImpl {
 }
 Class A {
 }
 
 $classes = array('Traversable', 'Iterator', 'IteratorAggregate', 'ExtendsIterator', 'ExtendsIteratorAggregate',
-	  'IteratorImpl', 'IterarorAggregateImpl', 'ExtendsIteratorImpl', 'ExtendsIteratorAggregateImpl', 'A');
+      'IteratorImpl', 'IteratorAggregateImpl', 'ExtendsIteratorImpl', 'ExtendsIteratorAggregateImpl', 'A');
 
 foreach($classes as $class) {
-	$rc = new ReflectionClass($class);
-	echo "Is $class iterable? ";
-	var_dump($rc->isIterateable());
+    $rc = new ReflectionClass($class);
+    echo "Is $class iterable? ";
+    var_dump($rc->isIterateable());
 }
 
 echo "\nTest static invocation:\n";
@@ -46,7 +46,7 @@ Is IteratorAggregate iterable? bool(false)
 Is ExtendsIterator iterable? bool(false)
 Is ExtendsIteratorAggregate iterable? bool(false)
 Is IteratorImpl iterable? bool(true)
-Is IterarorAggregateImpl iterable? bool(true)
+Is IteratorAggregateImpl iterable? bool(true)
 Is ExtendsIteratorImpl iterable? bool(true)
 Is ExtendsIteratorAggregateImpl iterable? bool(true)
 Is A iterable? bool(false)

@@ -2,12 +2,6 @@
 Test stream_get_meta_data() function : error conditions
 --FILE--
 <?php
-/* Prototype  : proto array stream_get_meta_data(resource fp)
- * Description: Retrieves header/meta data from streams/file pointers
- * Source code: ext/standard/streamsfuncs.c
- * Alias to functions: socket_get_status
- */
-
 echo "*** Testing stream_get_meta_data() : error conditions ***\n";
 
 echo "\n-- Testing stream_get_meta_data() function with closed stream resource --\n";

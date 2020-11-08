@@ -1,144 +1,124 @@
 <?php
 
-/* TODO: Convert "uninitialized" into an exception. This will remove many
- * possibilities for false return values in here. */
+/** @generate-function-entries */
 
-/** @return int|false */
-function strtotime(string $time, int $now = UNKNOWN) {}
+function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
 
-function date(string $format, int $timestamp = UNKNOWN): string {}
+function date(string $format, ?int $timestamp = null): string {}
 
-/** @return int|false */
-function idate(string $format, int $timestamp = UNKNOWN) {}
+function idate(string $format, ?int $timestamp = null): int|false {}
 
-function gmdate(string $format, int $timestamp = UNKNOWN): string {}
+function gmdate(string $format, ?int $timestamp = null): string {}
 
-/** @return int|false */
 function mktime(
-    int $hour, int $min = UNKNOWN, int $sec = UNKNOWN,
-    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN) {}
+    int $hour, ?int $minute = null, ?int $second = null,
+    ?int $month = null, ?int $day = null, ?int $year = null): int|false {}
 
-/** @return int|false */
 function gmmktime(
-    int $hour, int $min = UNKNOWN, int $sec = UNKNOWN,
-    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN) {}
+    int $hour, ?int $minute = null, ?int $second = null,
+    ?int $month = null, ?int $day = null, ?int $year = null): int|false {}
 
-function checkdate(int $m, int $d, int $y): bool {}
+function checkdate(int $month, int $day, int $year): bool {}
 
-/** @return string|false */
-function strftime(string $format, int $timestamp = UNKNOWN) {}
+function strftime(string $format, ?int $timestamp = null): string|false {}
 
-/** @return string|false */
-function gmstrftime(string $format, int $timestamp = UNKNOWN) {}
+function gmstrftime(string $format, ?int $timestamp = null): string|false {}
 
 function time(): int {}
 
-function localtime(int $timestamp = UNKNOWN, bool $associative = false): array {}
+function localtime(?int $timestamp = null, bool $associative = false): array {}
 
-function getdate(int $timestamp = UNKNOWN): array {}
+function getdate(?int $timestamp = null): array {}
 
-/** @return DateTime|false */
-function date_create(string $time, ?DateTimeZone $timezone = null) {}
+function date_create(string $datetime = "now", ?DateTimeZone $timezone = null): DateTime|false {}
 
-/** @return DateTime|false */
-function date_create_immutable(string $time, ?DateTimeZone $timezone = null) {}
+function date_create_immutable(
+    string $datetime = "now", ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
 
-/** @return DateTime|false */
-function date_create_from_format(string $format, string $time, ?DateTimeZone $timezone = null) {}
+function date_create_from_format(
+    string $format, string $datetime, ?DateTimeZone $timezone = null): DateTime|false {}
 
-/** @return DateTimeImmutable|false */
 function date_create_immutable_from_format(
-    string $format, string $time, ?DateTimeZone $timezone = null) {}
+    string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
 
-function date_parse(string $date): array {}
+function date_parse(string $datetime): array {}
 
-function date_parse_from_format(string $format, string $date): array {}
+function date_parse_from_format(string $format, string $datetime): array {}
 
-/** @return array|false */
-function date_get_last_errors() {}
+function date_get_last_errors(): array|false {}
 
 function date_format(DateTimeInterface $object, string $format): string {}
 
-/** @return DateTime|false */
-function date_modify(DateTime $object, string $modify) {}
+function date_modify(DateTime $object, string $modifier): DateTime|false {}
 
 function date_add(DateTime $object, DateInterval $interval): DateTime {}
 
 function date_sub(DateTime $object, DateInterval $interval): DateTime {}
 
-/** @return DateTimeZone|false */
-function date_timezone_get(DateTimeInterface $object) {}
+function date_timezone_get(DateTimeInterface $object): DateTimeZone|false {}
 
 function date_timezone_set(DateTimeInterface $object, DateTimeZone $timezone): DateTime {}
 
 function date_offset_get(DateTimeInterface $object): int {}
 
 function date_diff(
-    DateTimeInterface $object, DateTimeInterface $object2, bool $absolute = false): DateInterval {}
+    DateTimeInterface $baseObject, DateTimeInterface $targetObject, bool $absolute = false): DateInterval {}
 
 function date_time_set(
-    DateTime $object, int $hour, int $minute, int $second = 0, int $microseconds = 0): DateTime {}
+    DateTime $object, int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTime {}
 
 function date_date_set(DateTime $object, int $year, int $month, int $day): DateTime {}
 
-function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1): DateTime {}
+function date_isodate_set(DateTime $object, int $year, int $week, int $dayOfWeek = 1): DateTime {}
 
 function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
-/** @return int|false */
-function date_timestamp_get(DateTimeInterface $object) {}
+function date_timestamp_get(DateTimeInterface $object): int {}
 
-/** @return DateTimeZone|false */
-function timezone_open(string $timezone) {}
+function timezone_open(string $timezone): DateTimeZone|false {}
 
 function timezone_name_get(DateTimeZone $object): string {}
 
-/** @return string|false */
-function timezone_name_from_abbr(string $abbr, int $gmtoffset = -1, int $isdst = -1) {}
+function timezone_name_from_abbr(string $abbr, int $utcOffset = -1, int $isDST = -1): string|false {}
 
 function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime): int {}
 
-/** @return array|false */
 function timezone_transitions_get(
-    DateTimeZone $object, int $timestamp_begin = PHP_INT_MIN, int $timestamp_end = PHP_INT_MAX) {}
+    DateTimeZone $object, int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
 
-/** @return array|false */
-function timezone_location_get(DateTimeZone $object) {}
+function timezone_location_get(DateTimeZone $object): array|false {}
 
-/** @return array|false */
-function timezone_identifiers_list(int $what = DateTimeZone::ALL, ?string $country = null) {}
+function timezone_identifiers_list(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array {}
 
 function timezone_abbreviations_list(): array {}
 
 function timezone_version_get(): string {}
 
-/** @return DateInterval|false */
-function date_interval_create_from_date_string(string $time) {}
+function date_interval_create_from_date_string(string $datetime): DateInterval|false {}
 
 function date_interval_format(DateInterval $object, string $format): string {}
 
-function date_default_timezone_set(string $timezone_identifier): bool {}
+function date_default_timezone_set(string $timezoneId): bool {}
 
 function date_default_timezone_get(): string {}
 
-/** @return string|int|float|false */
 function date_sunrise(
-    int $time, int $retformat = SUNFUNCS_RET_STRING,
-    float $latitude = UNKNOWN, float $longitude = UNKNOWN, float $zenith = UNKNOWN,
-    float $gmt_offset = 0) {}
+    int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
+    ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
+    float $utcOffset = 0): string|int|float|false {}
 
-/** @return string|int|float|false */
 function date_sunset(
-    int $time, int $retformat = SUNFUNCS_RET_STRING,
-    float $latitude = UNKNOWN, float $longitude = UNKNOWN, float $zenith = UNKNOWN,
-    float $gmt_offset = 0) {}
+    int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
+    ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
+    float $utcOffset = 0): string|int|float|false {}
 
-function date_sun_info(int $time, float $latitude, float $longitude): array {}
+function date_sun_info(int $timestamp, float $latitude, float $longitude): array {}
 
 // NB: Adding return types to methods is a BC break!
 // For now only using @return annotations here.
 
-interface DateTimeInterface {
+interface DateTimeInterface
+{
     /** @return string */
     public function format(string $format);
 
@@ -152,147 +132,297 @@ interface DateTimeInterface {
     public function getTimestamp();
 
     /** @return DateInterval|false */
-    public function diff(DateTimeInterface $object, bool $absolute = false);
+    public function diff(DateTimeInterface $targetObject, bool $absolute = false);
 
+    /** @return void */
     public function __wakeup();
 }
 
-class DateTime implements DateTimeInterface {
-    public function __construct(string $time, ?DateTimeZone $timezone = null);
+class DateTime implements DateTimeInterface
+{
+    public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
+
+    /** @return void */
+    public function __wakeup() {}
 
     /** @return DateTime */
-    public static function __set_state(array $array);
+    public static function __set_state(array $array) {}
 
     /** @return DateTime */
-    public static function createFromImmutable(DateTimeImmutable $object);
+    public static function createFromImmutable(DateTimeImmutable $object) {}
 
-    /** @return DateTime|false */
-    public static function createFromFormat(
-        string $format, string $time, ?DateTimeZone $timezone = null);
+    public static function createFromInterface(DateTimeInterface $object): DateTime {}
 
-    /** @return array|false */
-    public static function getLastErrors();
+    /**
+     * @return DateTime|false
+     * @alias date_create_from_format
+     */
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null) {}
 
-    /** @return DateTime|false */
-    public function modify(string $modify);
+    /**
+     * @return array|false
+     * @alias date_get_last_errors
+     */
+    public static function getLastErrors() {}
 
-    /** @return DateTime */
-    public function add(DateInterval $interval);
+    /**
+     * @return string
+     * @alias date_format
+     */
+    public function format(string $format) {}
 
-    /** @return DateTime */
-    public function sub(DateInterval $interval);
+    /**
+     * @return DateTime|false
+     * @alias date_modify
+     */
+    public function modify(string $modifier) {}
 
-    /** @return DateTime */
-    public function setTimezone(DateTimeZone $timezone);
+    /**
+     * @return DateTime
+     * @alias date_add
+     */
+    public function add(DateInterval $interval) {}
 
-    /** @return DateTime */
-    public function setTime(int $hour, int $minute, int $second = 0, int $microseconds = 0);
+    /**
+     * @return DateTime
+     * @alias date_sub
+     */
+    public function sub(DateInterval $interval) {}
 
-    /** @return DateTime */
-    public function setDate(int $year, int $month, int $day);
+    /**
+     * @return DateTimeZone|false
+     * @alias date_timezone_get
+     */
+    public function getTimezone() {}
 
-    /** @return DateTime */
-    public function setISODate(int $year, int $week, int $day = 1);
+    /**
+     * @return DateTime
+     * @alias date_timezone_set
+     */
+    public function setTimezone(DateTimeZone $timezone) {}
 
-    /** @return DateTime */
-    public function setTimestamp(int $timestampt);
+    /**
+     * @return int|false
+     * @alias date_offset_get
+     */
+    public function getOffset() {}
+
+    /**
+     * @return DateTime
+     * @alias date_time_set
+     */
+    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0) {}
+
+    /**
+     * @return DateTime
+     * @alias date_date_set
+     */
+    public function setDate(int $year, int $month, int $day) {}
+
+    /**
+     * @return DateTime
+     * @alias date_isodate_set
+     */
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1) {}
+
+    /**
+     * @return DateTime
+     * @alias date_timestamp_set
+     */
+    public function setTimestamp(int $timestamp) {}
+
+    /**
+     * @return int
+     * @alias date_timestamp_get
+     */
+    public function getTimestamp() {}
+
+    /**
+     * @return DateInterval|false
+     * @alias date_diff
+     */
+    public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
 }
 
-class DateTimeImmutable implements DateTimeInterface {
-    public function __construct(string $time, ?DateTimeZone $timezone = null);
+class DateTimeImmutable implements DateTimeInterface
+{
+    public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
+
+    /** @return void */
+    public function __wakeup() {}
 
     /** @return DateTimeZone */
-    public static function __set_state(array $array);
+    public static function __set_state(array $array) {}
 
-    /** @return DateTimeImmutable */
-    public static function createFromMutable(DateTime $object);
+    /**
+     * @return DateTimeImmutable|false
+     * @alias date_create_immutable_from_format
+     */
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null) {}
+
+    /**
+     * @return array|false
+     * @alias date_get_last_errors
+     */
+    public static function getLastErrors() {}
+
+    /**
+     * @return string
+     * @alias date_format
+     */
+    public function format(string $format) {}
+
+    /**
+     * @return DateTimeZone|false
+     * @alias date_timezone_get
+     */
+    public function getTimezone() {}
+
+    /**
+     * @return int|false
+     * @alias date_offset_get
+     */
+    public function getOffset() {}
+
+    /**
+     * @return int
+     * @alias date_timestamp_get
+     */
+    public function getTimestamp() {}
+
+    /**
+     * @return DateInterval|false
+     * @alias date_diff
+     */
+    public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
 
     /** @return DateTimeImmutable|false */
-    public function modify(string $modify);
+    public function modify(string $modifier) {}
 
     /** @return DateTimeImmutable */
-    public function add(DateInterval $interval);
+    public function add(DateInterval $interval) {}
 
     /** @return DateTimeImmutable */
-    public function sub(DateInterval $interval);
+    public function sub(DateInterval $interval) {}
 
     /** @return DateTimeImmutable */
-    public function setTimezone(DateTimeZone $timezone);
+    public function setTimezone(DateTimeZone $timezone) {}
 
     /** @return DateTimeImmutable */
-    public function setTime(int $hour, int $minute, int $second = 0, int $microseconds = 0);
+    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0) {}
 
     /** @return DateTimeImmutable */
-    public function setDate(int $year, int $month, int $day);
+    public function setDate(int $year, int $month, int $day) {}
 
     /** @return DateTimeImmutable */
-    public function setISODate(int $year, int $week, int $day = 1);
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1) {}
 
     /** @return DateTimeImmutable */
-    public function setTimestamp(int $timestamp);
+    public function setTimestamp(int $timestamp) {}
+
+    /** @return DateTimeImmutable */
+    public static function createFromMutable(DateTime $object) {}
+
+    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {}
 }
 
-class DateTimeZone {
-    public function __construct(string $timezone);
+class DateTimeZone
+{
+    public function __construct(string $timezone) {}
 
-    /** @return string */
-    public function getName();
+    /**
+     * @return string
+     * @alias timezone_name_get
+     */
+    public function getName() {}
 
-    /** @return int */
-    public function getOffset(DateTimeInterface $datetime);
+    /**
+     * @return int
+     * @alias timezone_offset_get
+     */
+    public function getOffset(DateTimeInterface $datetime) {}
 
-    /** @return array|false */
-    public function getTransitions(
-        int $timestamp_begin = PHP_INT_MIN, int $timestamp_end = PHP_INT_MAX);
+    /**
+     * @return array|false
+     * @alias timezone_transitions_get
+     */
+    public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX) {}
 
-    /** @return array|false */
-    public function getLocation();
+    /**
+     * @return array|false
+     * @alias timezone_location_get
+     */
+    public function getLocation() {}
 
-    /** @return array */
-    public static function listAbbreviations();
+    /**
+     * @return array
+     * @alias timezone_abbreviations_list
+     */
+    public static function listAbbreviations() {}
 
-    /** @return array|false */
-    public static function listIdentifiers(int $what = DateTimeZone::ALL, ?string $country = null);
+    /**
+     * @return array|false
+     * @alias timezone_identifiers_list
+     */
+    public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null) {}
 
-    public function __wakeup();
+    /** @return void */
+    public function __wakeup() {}
 
     /** @return DateTimeZone */
-    public static function __set_state(array $array);
+    public static function __set_state(array $array) {}
 }
 
-class DateInterval {
-    public function __construct(string $interval_spec);
+class DateInterval
+{
+    public function __construct(string $duration) {}
 
-    /** @return DateInterval|false */
-    public static function createFromDateString(string $time);
+    /**
+     * @return DateInterval|false
+     * @alias date_interval_create_from_date_string
+     */
+    public static function createFromDateString(string $datetime) {}
 
-    /** @return string */
-    public function format(string $format);
+    /**
+     * @return string
+     * @alias date_interval_format
+     */
+    public function format(string $format) {}
 
-    public function __wakeup();
+    /** @return void */
+    public function __wakeup() {}
 
     /** @return DateInterval */
-    public static function __set_state(array $array);
+    public static function __set_state(array $array) {}
 }
 
-class DatePeriod implements Traversable {
-    /* Has an overloaded signature */
-    public function __construct($start, $interval = UNKNOWN, $end = UNKNOWN);
+class DatePeriod implements IteratorAggregate
+{
+    /**
+     * @param DateTimeInterface|string $start
+     * @param DateInterval|int $interval
+     * @param DateTimeInterface|int $end
+     * @param int $options
+     */
+    public function __construct($start, $interval = UNKNOWN, $end = UNKNOWN, $options = UNKNOWN) {}
 
     /** @return DateTimeInterface */
-    public function getStartDate();
+    public function getStartDate() {}
 
     /** @return DateTimeInterface|null */
-    public function getEndDate();
+    public function getEndDate() {}
 
     /** @return DateInterval */
-    public function getDateInterval();
+    public function getDateInterval() {}
 
     /** @return int|null */
-    public function getRecurrences();
+    public function getRecurrences() {}
 
-    public function __wakeup();
+    /** @return void */
+    public function __wakeup() {}
 
     /** @return DatePeriod */
-    public static function __set_state(array $array);
+    public static function __set_state(array $array) {}
+
+    public function getIterator(): Iterator {}
 }

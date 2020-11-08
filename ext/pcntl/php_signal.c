@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,7 +19,7 @@
 #include "Zend/zend.h"
 #include "Zend/zend_signal.h"
 
-/* php_signal using sigaction is derived from Advanced Programing
+/* php_signal using sigaction is derived from Advanced Programming
  * in the Unix Environment by W. Richard Stevens p 298. */
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
@@ -41,7 +39,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 #ifdef HAVE_STRUCT_SIGINFO_T
 	act.sa_flags |= SA_SIGINFO;
 #endif
-	if (signo == SIGALRM || (! restart)) {
+	if (!restart) {
 #ifdef SA_INTERRUPT
 		act.sa_flags |= SA_INTERRUPT; /* SunOS */
 #endif
@@ -50,9 +48,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 		act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
 #endif
 	}
-	if (zend_sigaction(signo, &act, &oact) < 0) {
-		return (Sigfunc*)SIG_ERR;
-	}
+	zend_sigaction(signo, &act, &oact);
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 	return oact.sa_sigaction;

@@ -54,14 +54,14 @@ void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
 	/* set up hash pointers table */
 	accel_hash->hash_table = zend_shared_alloc(sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
 	if (!accel_hash->hash_table) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return;
 	}
 
 	/* set up hash values table */
 	accel_hash->hash_entries = zend_shared_alloc(sizeof(zend_accel_hash_entry)*accel_hash->max_num_entries);
 	if (!accel_hash->hash_entries) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return;
 	}
 	memset(accel_hash->hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);

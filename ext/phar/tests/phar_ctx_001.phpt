@@ -58,7 +58,6 @@ var_dump(file_get_contents($pname . '/b'));
 var_dump($phar['b']->isCompressed());
 var_dump($phar['b']->getMetaData());
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -97,4 +96,3 @@ array(1) {
   [0]=>
   int(4)
 }
-===DONE===

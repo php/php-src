@@ -12,7 +12,7 @@ fread($reader, 1);
 fwrite($writer, "foo");
 
 if (strlen(fread($reader, 10)) > 0) {
-	echo "OK\n";
+    echo "OK\n";
 }
 
 fclose($writer);

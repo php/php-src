@@ -4,10 +4,10 @@ SplFileObject::fgetcsv with alternative delimiter
 <?php
 $fp = fopen('SplFileObject__fgetcsv2.csv', 'w+');
 fputcsv($fp, array(
-	'field1',
-	'field2',
-	'field3',
-	5
+    'field1',
+    'field2',
+    'field3',
+    5
 ), '|');
 fclose($fp);
 

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -201,7 +199,7 @@ enum pdo_null_handling {
 };
 
 /* {{{ utils for reading attributes set as driver_options */
-static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type option_name, zend_long defval)
+static inline zend_long pdo_attr_lval(zval *options, unsigned option_name, zend_long defval)
 {
 	zval *v;
 
@@ -210,7 +208,7 @@ static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	}
 	return defval;
 }
-static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, zend_string *defval)
+static inline zend_string *pdo_attr_strval(zval *options, unsigned option_name, zend_string *defval)
 {
 	zval *v;
 
@@ -288,6 +286,10 @@ typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh);
  * scope */
 typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh);
 
+/* Called when the PDO handle is scanned for GC. Should populate the get_gc buffer
+ * with any zvals in the driver_data that would be freed if the handle is destroyed. */
+typedef void (*pdo_dbh_get_gc_func)(pdo_dbh_t *dbh, zend_get_gc_buffer *buffer);
+
 /* for adding methods to the dbh or stmt objects
 pointer to a list of driver specific functions. The convention is
 to prefix the function names using the PDO driver name; this will
@@ -318,6 +320,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
 	pdo_dbh_txn_func		in_transaction;
+	pdo_dbh_get_gc_func		get_gc;
 };
 
 /* }}} */
@@ -468,9 +471,12 @@ struct _pdo_dbh_t {
 	/* when set, convert int/floats to strings */
 	unsigned stringify:1;
 
+	/* bitmap for pdo_param_event(s) to skip in dispatch_param_event */
+	unsigned skip_param_evt:7;
+
 	/* the sum of the number of bits here and the bit fields preceding should
 	 * equal 32 */
-	unsigned _reserved_flags:21;
+	unsigned _reserved_flags:14;
 
 	/* data source string used to open this handle */
 	const char *data_source;
@@ -679,7 +685,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len,
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inquery_len,
 	char **outquery, size_t *outquery_len);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
@@ -691,4 +697,5 @@ PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 
 
+PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
 #endif /* PHP_PDO_DRIVER_H */

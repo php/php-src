@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7														  |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is		  |
    | available through the world-wide-web at the following url:			  |
@@ -26,7 +24,6 @@
 #endif
 #include "normalizer.h"
 #include "normalizer_class.h"
-#include "normalizer_normalize.h"
 #include "intl_convert.h"
 #include <unicode/utf8.h>
 
@@ -79,11 +76,7 @@ static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uin
 }/*}}}*/
 #endif
 
-/* {{{ proto string Normalizer::normalize( string $input [, string $form = FORM_C] )
- * Normalize a string. }}} */
-/* {{{ proto string normalizer_normalize( string $input [, string $form = FORM_C] )
- * Normalize a string.
- */
+/* {{{ Normalize a string. */
 PHP_FUNCTION( normalizer_normalize )
 {
 	char*			input = NULL;
@@ -109,7 +102,7 @@ PHP_FUNCTION( normalizer_normalize )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	expansion_factor = 1;
@@ -128,9 +121,8 @@ PHP_FUNCTION( normalizer_normalize )
 #endif
 			break;
 		default:
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"normalizer_normalize: illegal normalization form", 0 );
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a a valid normalization form");
+			RETURN_THROWS();
 	}
 
 	/*
@@ -222,11 +214,7 @@ PHP_FUNCTION( normalizer_normalize )
 }
 /* }}} */
 
-/* {{{ proto bool Normalizer::isNormalized( string $input [, string $form = FORM_C] )
- * Test if a string is in a given normalization form. }}} */
-/* {{{ proto bool normalizer_is_normalized( string $input [, string $form = FORM_C] )
- * Test if a string is in a given normalization form.
- */
+/* {{{ Test if a string is in a given normalization form. */
 PHP_FUNCTION( normalizer_is_normalized )
 {
 	char*	 	input = NULL;
@@ -246,7 +234,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	switch(form) {
@@ -259,9 +247,8 @@ PHP_FUNCTION( normalizer_is_normalized )
 #endif
 			break;
 		default:
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"normalizer_normalize: illegal normalization form", 0 );
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a a valid normalization form");
+			RETURN_THROWS();
 	}
 
 
@@ -309,11 +296,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 }
 /* }}} */
 
-/* {{{ proto string|null Normalizer::getRawDecomposition( string $input [, string $form = FORM_C] )
- * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. }}} */
-/* {{{ proto string|null normalizer_get_raw_decomposition( string $input [, string $form = FORM_C] )
- * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
- */
+/* {{{ Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. */
 #if U_ICU_VERSION_MAJOR_NUM >= 56
 PHP_FUNCTION( normalizer_get_raw_decomposition )
 {
@@ -333,7 +316,7 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 	intl_error_reset(NULL);
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &input, &input_length, &form) == FAILURE)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	norm = intl_get_normalizer(form, &status);

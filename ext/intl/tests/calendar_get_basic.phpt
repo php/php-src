@@ -3,7 +3,7 @@ IntlCalendar::get() basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -16,8 +16,6 @@ var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH));
 var_dump(intlcal_get($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH));
 
 ?>
-==DONE==
 --EXPECT--
 int(4)
-int(4)
-==DONE==
+int(4)

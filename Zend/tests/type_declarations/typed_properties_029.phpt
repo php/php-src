@@ -5,14 +5,14 @@ Test typed properties respect strict types (on)
 declare(strict_types=1);
 
 class Foo {
-	public int $bar;
+    public int $bar;
 }
 
 $foo = new Foo;
 $foo->bar = "1";
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property Foo::$bar must be int, string used in %s:9
+Fatal error: Uncaught TypeError: Cannot assign string to property Foo::$bar of type int in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line 9
+  thrown in %s on line %d

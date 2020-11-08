@@ -3,11 +3,11 @@ Check that SplDoublyLinkedList::add throws an exception with an invalid offset a
 --FILE--
 <?php
 try {
-	$dll = new SplDoublyLinkedList();
-	var_dump($dll->add(NULL,2));
-} catch (OutOfRangeException $e) {
-	echo "Exception: ".$e->getMessage()."\n";
+    $dll = new SplDoublyLinkedList();
+    var_dump($dll->add([],2));
+} catch (TypeError $e) {
+    echo "Exception: ".$e->getMessage()."\n";
 }
 ?>
 --EXPECT--
-Exception: Offset invalid or out of range
+Exception: SplDoublyLinkedList::add(): Argument #1 ($index) must be of type int, array given

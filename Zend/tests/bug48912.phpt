@@ -6,7 +6,7 @@ namespace A;
 
 function test()
 {
-	extract(func_get_arg(0));
+    extract(func_get_arg(0));
 }
 
 test(array('x' => 1));

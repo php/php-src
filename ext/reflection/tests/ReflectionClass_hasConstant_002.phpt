@@ -6,7 +6,7 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class C {
-	const myConst = 1;
+    const myConst = 1;
 }
 
 $rc = new ReflectionClass("C");

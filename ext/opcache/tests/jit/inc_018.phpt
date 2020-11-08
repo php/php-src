@@ -11,10 +11,11 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {	
-	$x = false;	
-	return ++$x; // reg -> reg, reg
+function foo() {
+    $x = false;
+    return ++$x; // reg -> reg, reg
 }
 var_dump(foo());
+?>
 --EXPECT--
 bool(false)

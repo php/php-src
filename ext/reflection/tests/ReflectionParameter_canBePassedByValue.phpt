@@ -27,7 +27,7 @@ aux('sort');
 
 echo "=> user function:\n\n";
 
-function ufunc(&$arg1, $arg2) {}
+function ufunc(&$array1, $array2) {}
 
 aux('ufunc');
 
@@ -37,39 +37,31 @@ echo "Done.\n";
 --EXPECT--
 => array_multisort:
 
-Name: arr1
+Name: array
 Is passed by reference: yes
 Can be passed by value: yes
 
-Name: sort_order
-Is passed by reference: yes
-Can be passed by value: yes
-
-Name: sort_flags
-Is passed by reference: yes
-Can be passed by value: yes
-
-Name: arr2
+Name: rest
 Is passed by reference: yes
 Can be passed by value: yes
 
 => sort:
 
-Name: arg
+Name: array
 Is passed by reference: yes
 Can be passed by value: no
 
-Name: sort_flags
+Name: flags
 Is passed by reference: no
 Can be passed by value: yes
 
 => user function:
 
-Name: arg1
+Name: array1
 Is passed by reference: yes
 Can be passed by value: no
 
-Name: arg2
+Name: array2
 Is passed by reference: no
 Can be passed by value: yes
 

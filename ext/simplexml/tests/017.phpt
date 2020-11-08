@@ -52,7 +52,6 @@ print_xml2(simplexml_load_string($xml));
 echo "---22---\n";
 print_xml2(simplexml_load_string($xml1));
 ?>
-===DONE===
 --EXPECT--
 ---11---
 person: Joe
@@ -74,4 +73,3 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
-===DONE===

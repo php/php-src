@@ -3,7 +3,7 @@ socket_import_stream: effects of closing
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
-	die('SKIP sockets extension not available.');
+    die('SKIP sockets extension not available.');
 }
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
   die("skip Not Valid for Windows");
@@ -12,32 +12,32 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 <?php
 
 function test($stream, $sock) {
-	if ($stream !== null) {
-		echo "stream_set_blocking ";
-		try {
-			print_r(stream_set_blocking($stream, 0));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-	}
-	if ($sock !== null) {
-		echo "socket_set_block ";
-		try {
-			print_r(socket_set_block($sock));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-		echo "socket_get_option ";
-		try {
-			print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-	}
-	echo "\n";
+    if ($stream !== null) {
+        echo "stream_set_blocking ";
+        try {
+            print_r(stream_set_blocking($stream, 0));
+        } catch (Error $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
+        }
+        echo "\n";
+    }
+    if ($sock !== null) {
+        echo "socket_set_block ";
+        try {
+            print_r(socket_set_block($sock));
+        } catch (Error $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
+        }
+        echo "\n";
+        echo "socket_get_option ";
+        try {
+            print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
+        } catch (Error $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
+        }
+        echo "\n";
+    }
+    echo "\n";
 }
 
 echo "normal\n";
@@ -70,6 +70,7 @@ socket_close($sock4);
 test($stream4, $sock4);
 
 echo "Done.\n";
+?>
 --EXPECTF--
 normal
 stream_set_blocking 1
@@ -87,22 +88,22 @@ stream_set_blocking 1
 
 
 close stream
-stream_set_blocking stream_set_blocking(): supplied resource is not a valid stream resource
+stream_set_blocking TypeError: stream_set_blocking(): supplied resource is not a valid stream resource
 
 socket_set_block 
 Warning: socket_set_block(): unable to set blocking mode [%d]: %s in %s on line %d
 
 socket_get_option 
-Warning: socket_get_option(): unable to retrieve socket option [%d]: %s in %s on line %d
+Warning: socket_get_option(): Unable to retrieve socket option [%d]: %s in %s on line %d
 
 
 
 close socket
-stream_set_blocking stream_set_blocking(): supplied resource is not a valid stream resource
+stream_set_blocking TypeError: stream_set_blocking(): supplied resource is not a valid stream resource
 
-socket_set_block socket_set_block(): supplied resource is not a valid Socket resource
+socket_set_block Error: socket_set_block(): Argument #1 ($socket) has already been closed
 
-socket_get_option socket_get_option(): supplied resource is not a valid Socket resource
+socket_get_option Error: socket_get_option(): Argument #1 ($socket) has already been closed
 
 
 Done.

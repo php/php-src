@@ -3,12 +3,6 @@ Test rtrim() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : string rtrim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the end of a string.
- * Source code: ext/standard/string.c
-*/
-
-
 echo "*** Testing rtrim() : error conditions ***\n";
 
 $hello = "  Hello World\n";
@@ -19,7 +13,6 @@ var_dump(rtrim($hello, "z..a"));
 var_dump(rtrim($hello, "a..b..c"));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing rtrim() : error conditions ***
 
@@ -40,4 +33,3 @@ string(14) "  Hello World
 Warning: rtrim(): Invalid '..'-range in %s on line %d
 string(14) "  Hello World
 "
-===DONE===

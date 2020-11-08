@@ -9,7 +9,7 @@ $server = stream_socket_server('tcp://127.0.0.1:31333');
 /* Connect to it */
 $client = fsockopen('tcp://127.0.0.1:31333');
 if (!$client) {
-	die("Unable to create socket");
+    die("Unable to create socket");
 }
 
 /* Accept that connection */

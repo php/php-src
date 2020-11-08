@@ -13,7 +13,7 @@ var_dump(gzfile(__DIR__."/004.txt.gz", 1));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gzfile(nonexistent_file_gzfile): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(nonexistent_file_gzfile): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 array(6) {
   [0]=>

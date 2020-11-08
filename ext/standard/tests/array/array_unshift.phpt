@@ -12,7 +12,7 @@ var_dump($a);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 array(1) {
   [0]=>

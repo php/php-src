@@ -13,6 +13,7 @@ $proc->importStylesheet($xsl);
 $proc->setParameter('', 'key', 'value');
 $proc->removeParameter('', 'key');
 var_dump($proc->getParameter('', 'key'));
+?>
 --EXPECT--
 bool(false)
 --CREDITS--

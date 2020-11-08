@@ -48,14 +48,14 @@ $obj = new class2();
 $col = new collection();
 
 try {
-	foreach($col as $co) {
-  	//irrelevant
-	}
-	echo 'shouldn`t get here';
-	//$dummy = 'this will not crash';
-	$obj->dummy = 'this will crash';
+    foreach($col as $co) {
+    //irrelevant
+    }
+    echo 'shouldn`t get here';
+    //$dummy = 'this will not crash';
+    $obj->dummy = 'this will crash';
 } catch (Exception $e) {
-	echo "ok\n";
+    echo "ok\n";
 }
 ?>
 --EXPECT--

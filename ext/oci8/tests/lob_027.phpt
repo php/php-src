@@ -39,15 +39,19 @@ oci_commit($c);
 
 for ($i = 5; $i >= 0; $i--) {
 
-	$select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";
-	$s = oci_parse($c, $select_sql);
-	oci_execute($s, OCI_DEFAULT);
+    $select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";
+    $s = oci_parse($c, $select_sql);
+    oci_execute($s, OCI_DEFAULT);
 
-	$row = oci_fetch_array($s);
-	var_dump($row['BLOB']->load());
-	var_dump($row['BLOB']->truncate(($i-1)*10));
+    $row = oci_fetch_array($s);
+    var_dump($row['BLOB']->load());
+    try {
+        var_dump($row['BLOB']->truncate(($i-1)*10));
+    } catch (ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
-	oci_commit($c);
+    oci_commit($c);
 }
 
 $select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";
@@ -56,8 +60,13 @@ oci_execute($s, OCI_DEFAULT);
 
 $row = oci_fetch_array($s);
 var_dump($row['BLOB']->load());
-var_dump($row['BLOB']->truncate(-1));
 var_dump($row['BLOB']->truncate(0));
+
+try {
+    var_dump($row['BLOB']->truncate(-1));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 oci_commit($c);
 
@@ -67,19 +76,19 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 int(72)
 array(2) {
   [0]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -95,12 +104,8 @@ bool(true)
 string(10) "this is a "
 bool(true)
 string(0) ""
-
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
-bool(false)
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 string(0) ""
-
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
-bool(false)
 bool(true)
+OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 Done

@@ -6,15 +6,15 @@ error_reporting=8191
 <?php
 
 class test {
-	function &foo() {}
+    function &foo() {}
 }
 
 class test2 extends test {
-	function &foo() {}
+    function &foo() {}
 }
 
 class test3 extends test {
-	function foo() {}
+    function foo() {}
 }
 
 ?>

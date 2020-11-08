@@ -3,15 +3,18 @@ Test error operation of password_hash() with bcrypt hashing
 --FILE--
 <?php
 //-=-=-=-
+try {
+    password_hash("foo", PASSWORD_BCRYPT, array("cost" => 3));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(password_hash("foo", PASSWORD_BCRYPT, array("cost" => 3)));
-
-var_dump(password_hash("foo", PASSWORD_BCRYPT, array("cost" => 32)));
-
+try {
+    var_dump(password_hash("foo", PASSWORD_BCRYPT, array("cost" => 32)));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: password_hash(): Invalid bcrypt cost parameter specified: 3 in %s on line %d
-NULL
-
-Warning: password_hash(): Invalid bcrypt cost parameter specified: 32 in %s on line %d
-NULL
+--EXPECT--
+Invalid bcrypt cost parameter specified: 3
+Invalid bcrypt cost parameter specified: 32

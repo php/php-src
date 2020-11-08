@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +17,7 @@
 #ifndef PHP_SYSVMSG_H
 #define PHP_SYSVMSG_H
 
-#if HAVE_SYSVMSG
+#ifdef HAVE_SYSVMSG
 
 extern zend_module_entry sysvmsg_module_entry;
 #define phpext_sysvmsg_ptr &sysvmsg_module_entry

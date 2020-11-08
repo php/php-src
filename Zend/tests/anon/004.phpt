@@ -26,5 +26,6 @@ $outer = new Outer(array(
 
 /* not null because inheritance */
 var_dump($outer->getArrayAccess()[0]);
+?>
 --EXPECTF--
 int(%d)

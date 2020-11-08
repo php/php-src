@@ -3,65 +3,73 @@ mysqli_fetch_field()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-	$mysqli = new mysqli();
-	$res = @new mysqli_result($mysqli);
+    // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
+    $mysqli = new mysqli();
+    $res = false;
+    try {
+        new mysqli_result($mysqli);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	require('table.inc');
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-			$host, $user, $db, $port, $socket);
+    require('table.inc');
+    if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
+        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
 
-	// Make sure that client, connection and result charsets are all the
-	// same. Not sure whether this is strictly necessary.
-	if (!$mysqli->set_charset('utf8'))
-		printf("[%d] %s\n", $mysqli->errno, $mysqli->errno);
+    // Make sure that client, connection and result charsets are all the
+    // same. Not sure whether this is strictly necessary.
+    if (!$mysqli->set_charset('utf8'))
+        printf("[%d] %s\n", $mysqli->errno, $mysqli->errno);
 
-	$charsetInfo = $mysqli->get_charset();
+    $charsetInfo = $mysqli->get_charset();
 
-	if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
-	}
+    if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
+    }
 
-	var_dump($res->fetch_field());
+    var_dump($res->fetch_field());
 
-	$tmp = $res->fetch_field();
-	var_dump($tmp);
-	if ($tmp->charsetnr != $charsetInfo->number) {
-		printf("[005] Expecting charset %s/%d got %d\n",
-			$charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
-	}
-	if ($tmp->length != $charsetInfo->max_length) {
-		printf("[006] Expecting length %d got %d\n",
-			$charsetInfo->max_length, $tmp->max_length);
-	}
-	if ($tmp->db != $db) {
-		printf("[007] Expecting database '%s' got '%s'\n",
-		  $db, $tmp->db);
-	}
+    $tmp = $res->fetch_field();
+    var_dump($tmp);
+    if ($tmp->charsetnr != $charsetInfo->number) {
+        printf("[005] Expecting charset %s/%d got %d\n",
+            $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
+    }
+    if ($tmp->length != $charsetInfo->max_length) {
+        printf("[006] Expecting length %d got %d\n",
+            $charsetInfo->max_length, $tmp->max_length);
+    }
+    if ($tmp->db != $db) {
+        printf("[007] Expecting database '%s' got '%s'\n",
+          $db, $tmp->db);
+    }
 
-	var_dump($res->fetch_field());
+    var_dump($res->fetch_field());
 
-	$res->free_result();
+    $res->free_result();
 
-	if (false !== ($tmp = $res->fetch_field()))
-		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_field();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	$mysqli->close();
-	print "done!";
+    $mysqli->close();
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
+mysqli object is not fully initialized
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
@@ -119,6 +127,5 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-
-Warning: mysqli_result::fetch_field(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

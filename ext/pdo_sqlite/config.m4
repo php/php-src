@@ -14,22 +14,17 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
   PKG_CHECK_MODULES([SQLITE], [sqlite3 > 3.7.4])
 
-  PHP_CHECK_LIBRARY(sqlite3, sqlite3_open_v2,
-  [
-    PHP_EVAL_INCLINE($SQLITE_CFLAGS)
-    PHP_EVAL_LIBLINE($SQLITE_LIBS, PDO_SQLITE_SHARED_LIBADD)
-    AC_DEFINE(HAVE_PDO_SQLITELIB, 1, [Define to 1 if you have the pdo_sqlite extension enabled.])
-  ], [
-    AC_MSG_ERROR([Please install SQLite 3.7.4 first or check libsqlite3 is present])
-  ])
+  PHP_EVAL_INCLINE($SQLITE_CFLAGS)
+  PHP_EVAL_LIBLINE($SQLITE_LIBS, PDO_SQLITE_SHARED_LIBADD)
+  AC_DEFINE(HAVE_PDO_SQLITELIB, 1, [Define to 1 if you have the pdo_sqlite extension enabled.])
 
   PHP_CHECK_LIBRARY(sqlite3, sqlite3_close_v2, [
     AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
-  ])
+  ], [], [$PDO_SQLITE_SHARED_LIBADD])
 
   PHP_CHECK_LIBRARY(sqlite3, sqlite3_column_table_name, [
     AC_DEFINE(HAVE_SQLITE3_COLUMN_TABLE_NAME, 1, [have sqlite3_column_table_name])
-  ])
+  ], [], [$PDO_SQLITE_SHARED_LIBADD])
 
   PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
   PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,

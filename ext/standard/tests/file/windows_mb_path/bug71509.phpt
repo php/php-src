@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts("zip");
 
 ?>
+--CONFLICTS--
+bug71509
 --FILE--
 <?PHP
 // וצה
@@ -37,8 +39,6 @@ var_dump(file_exists($outputfile_zip));
 
 remove_data("bug71509");
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

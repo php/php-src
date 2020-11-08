@@ -4,7 +4,7 @@ SQLite3Stmt::getSQL expanded test
 <?php require_once(__DIR__ . '/skipif.inc');
 
 if (SQLite3::version()['versionNumber'] < 3014000) {
-	die('skip SQLite < 3.14 installed, requires SQLite >= 3.14');
+    die('skip SQLite < 3.14 installed, requires SQLite >= 3.14');
 }
 ?>
 --FILE--
@@ -44,7 +44,7 @@ var_dump($db->close());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Getting expanded SQL statement
 string(21) "SELECT 42, 'php', 43;"
 Execute statement

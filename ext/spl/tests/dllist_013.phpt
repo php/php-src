@@ -5,9 +5,9 @@ SPL: DoublyLinkedList: insert operations
 $dll = new SplDoublyLinkedList();
 // errors
 try {
-	$dll->add(2,5);
+    $dll->add(2,5);
 } catch (OutOfRangeException $e) {
-	echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: ".$e->getMessage()."\n";
 }
 
 $dll->add(0,6);						//	6
@@ -30,10 +30,8 @@ echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
-Exception: Offset invalid or out of range
+Exception: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range
 7
 7
 6
@@ -42,4 +40,3 @@ Exception: Offset invalid or out of range
 3
 2
 1
-===DONE===

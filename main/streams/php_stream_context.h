@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -102,7 +100,7 @@ END_EXTERN_C()
 	(context)->notifier->mask |= PHP_STREAM_NOTIFIER_PROGRESS; \
 	php_stream_notify_progress((context), (sofar), (bmax)); } } while (0)
 
-#define php_stream_notify_progress_increment(context, dsofar, dmax) do { if ((context) && (context)->notifier && (context)->notifier->mask & PHP_STREAM_NOTIFIER_PROGRESS) { \
+#define php_stream_notify_progress_increment(context, dsofar, dmax) do { if ((context) && (context)->notifier && ((context)->notifier->mask & PHP_STREAM_NOTIFIER_PROGRESS)) { \
 	(context)->notifier->progress += (dsofar); \
 	(context)->notifier->progress_max += (dmax); \
 	php_stream_notify_progress((context), (context)->notifier->progress, (context)->notifier->progress_max); } } while (0)

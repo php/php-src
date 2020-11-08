@@ -22,23 +22,23 @@ odbc_exec($conn, "INSERT INTO FOO(ID, VARCHAR_COL, DATE_COL) VALUES (2, 'helloag
 $res = odbc_exec($conn, 'SELECT * FROM FOO ORDER BY ID ASC');
 
 while(odbc_fetch_row($res)) {
-	$id = odbc_result($res, "ID");
-	$varchar_col = odbc_result($res, "VARCHAR_COL");
-	$date = odbc_result($res, "DATE_COL");
+    $id = odbc_result($res, "ID");
+    $varchar_col = odbc_result($res, "VARCHAR_COL");
+    $date = odbc_result($res, "DATE_COL");
 
-	if ($id == 1) {
-		if ($date != $id_1_date) {
-			print "Date_1 mismatched\n";
-		} else {
-			print "Date_1 matched\n";
-		}
-	} else {
-		if ($date != $id_2_date) {
-			print "Date_2 mismatched\n";
-		} else {
-			print "Date_2 matched\n";
-		}
-	}
+    if ($id == 1) {
+        if ($date != $id_1_date) {
+            print "Date_1 mismatched\n";
+        } else {
+            print "Date_1 matched\n";
+        }
+    } else {
+        if ($date != $id_2_date) {
+            print "Date_2 mismatched\n";
+        } else {
+            print "Date_2 matched\n";
+        }
+    }
 }
 
 ?>

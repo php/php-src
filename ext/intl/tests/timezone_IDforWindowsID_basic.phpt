@@ -3,7 +3,7 @@ IntlTimeZone::getIDForWindowsID basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled'); ?>
+    die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '52') < 0)die('skip for ICU >= 52'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '58.1') >= 0) die('skip for ICU <= 57.1'); ?>
 --FILE--
@@ -25,6 +25,7 @@ foreach ($tzs as $tz => $regions) {
     }
   }
 }
+?>
 --EXPECT--
 ** Gnomeregan
 bool(false)

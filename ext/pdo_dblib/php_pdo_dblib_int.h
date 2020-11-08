@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,7 +22,7 @@
 # define PDO_DBLIB_FLAVOUR "Generic DB-lib"
 #endif
 
-#if PHP_DBLIB_IS_MSSQL
+#ifdef PHP_DBLIB_IS_MSSQL
 # include <sqlfront.h>
 # include <sqldb.h>
 

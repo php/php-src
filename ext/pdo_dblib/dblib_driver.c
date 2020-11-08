@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -419,7 +417,8 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	NULL  /* in transaction */
+	NULL, /* in transaction */
+	NULL /* get gc */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
@@ -522,7 +521,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 
 	if (!dbh->username && vars[6].optval) {
-		dbh->username = vars[6].optval;
+		dbh->username = pestrdup(vars[6].optval, dbh->is_persistent);
 	}
 
 	if (dbh->username) {
@@ -532,7 +531,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 
 	if (!dbh->password && vars[7].optval) {
-		dbh->password = vars[7].optval;
+		dbh->password = pestrdup(vars[7].optval, dbh->is_persistent);
 	}
 
 	if (dbh->password) {
@@ -541,7 +540,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 	}
 
-#if !PHP_DBLIB_IS_MSSQL
+#ifndef PHP_DBLIB_IS_MSSQL
 	if (vars[0].optval) {
 		DBSETLCHARSET(H->login, vars[0].optval);
 	}
@@ -572,7 +571,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 #endif
 
-#if PHP_DBLIB_IS_MSSQL
+#ifdef PHP_DBLIB_IS_MSSQL
 	/* dblib do not return more than this length from text/image */
 	DBSETOPT(H->link, DBTEXTLIMIT, "2147483647");
 #endif
@@ -609,7 +608,7 @@ cleanup:
 }
 
 const pdo_driver_t pdo_dblib_driver = {
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
 #elif defined(PHP_WIN32)
 #define PDO_DBLIB_IS_SYBASE

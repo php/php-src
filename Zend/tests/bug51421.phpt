@@ -6,11 +6,11 @@ Bug #51421 (Abstract __construct constructor argument list not enforced)
 class ExampleClass {}
 
 abstract class TestInterface {
-	abstract public function __construct(ExampleClass $var);
+    abstract public function __construct(ExampleClass $var);
 }
 
 class Test extends TestInterface {
-	public function __construct() {}
+    public function __construct() {}
 }
 
 ?>

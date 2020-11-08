@@ -3,7 +3,7 @@ IntlCalendar::setTimeZone(): different ways to specify time zone
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -23,6 +23,7 @@ var_dump($intlcal->getTimeZone()->getID());
 $offsetdate = new DateTime('2012-01-01 00:00:00 -02:30');
 $intlcal->setTimeZone($offsetdate->getTimeZone());
 var_dump($intlcal->getTimeZone()->getID());
+?>
 --EXPECTF--
 string(12) "Europe/Paris"
 string(13) "Europe/Madrid"

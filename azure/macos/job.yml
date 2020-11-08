@@ -5,7 +5,7 @@ parameters:
 jobs:
   - job: ${{ parameters.configurationName }}
     pool:
-      vmImage: 'macOS-10.14'
+      vmImage: 'macOS-10.15'
     steps:
     - template: brew.yml
     - script: |
@@ -25,8 +25,8 @@ jobs:
             --enable-fpm \
             --with-pdo-mysql=mysqlnd \
             --with-mysqli=mysqlnd \
-            --with-pgsql \
-            --with-pdo-pgsql \
+            --with-pgsql=/usr/local/opt/libpq \
+            --with-pdo-pgsql=/usr/local/opt/libpq \
             --with-pdo-sqlite \
             --without-pear \
             --enable-gd \
@@ -40,7 +40,6 @@ jobs:
             --enable-xmlreader \
             --with-xsl \
             --with-tidy=/usr/local/opt/tidyp \
-            --with-xmlrpc \
             --with-libxml \
             --enable-sysvsem \
             --enable-sysvshm \
@@ -64,6 +63,9 @@ jobs:
             --with-ffi \
             --enable-zend-test \
             --enable-intl \
+            --with-mhash \
+            --with-sodium \
+            --enable-dba \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
@@ -78,13 +80,20 @@ jobs:
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
+    - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+      - template: test.yml
+        parameters:
+          configurationName: ${{ parameters.configurationName }}
+          runTestsName: 'OpCache'
+          runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1
+    - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+      - template: test.yml
+        parameters:
+          configurationName: ${{ parameters.configurationName }}
+          runTestsName: 'Function JIT'
+          runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M -d opcache.jit=1205
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'JIT'
+        runTestsName: 'Tracing JIT'
         runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M

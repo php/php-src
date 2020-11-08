@@ -19,51 +19,62 @@ $db->exec("INSERT INTO test VALUES (1)");
 
 
 // Bug entry [2] -- 1 is PDO::FETCH_LAZY
-$stmt = $db->query("SELECT * FROM test", PDO::FETCH_LAZY, 0, 0);
-var_dump($stmt);
+try {
+    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_LAZY, 0, []);
+    var_dump($stmt);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 
 // Bug entry [3]
-$stmt = $db->query("SELECT * FROM test", 'abc');
-var_dump($stmt);
-
+try {
+    $stmt = $db->query("SELECT * FROM test", 'abc');
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // Bug entry [4]
-$stmt = $db->query("SELECT * FROM test", PDO::FETCH_CLASS, 0, 0, 0);
-var_dump($stmt);
+try {
+    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_CLASS, 0, 0, 0);
+    var_dump($stmt);
+} catch (\ArgumentCountError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 
 // Bug entry [5]
-$stmt = $db->query("SELECT * FROM test", PDO::FETCH_INTO);
-var_dump($stmt);
+try {
+    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_INTO);
+    var_dump($stmt);
+} catch (\ArgumentCountError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 
 // Bug entry [6]
-$stmt = $db->query("SELECT * FROM test", PDO::FETCH_COLUMN);
-var_dump($stmt);
+try {
+    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_COLUMN);
+    var_dump($stmt);
+} catch (\ArgumentCountError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 
 // Bug entry [7]
-$stmt = $db->query("SELECT * FROM test", PDO::FETCH_CLASS);
-var_dump($stmt);
+try {
+    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_CLASS);
+    var_dump($stmt);
+} catch (\ArgumentCountError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 
 ?>
---EXPECTF--
-Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode doesn't allow any extra arguments in %s
-bool(false)
-
-Warning: PDO::query(): SQLSTATE[HY000]: General error: mode must be an integer in %s
-bool(false)
-
-Warning: PDO::query(): SQLSTATE[HY000]: General error: too many arguments in %s
-bool(false)
-
-Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode requires the object parameter in %s
-bool(false)
-
-Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode requires the colno argument in %s
-bool(false)
-
-Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode requires the classname argument in %s
-bool(false)
+--EXPECT--
+PDO::query() expects exactly 2 arguments for the fetch mode provided, 4 given
+PDO::query(): Argument #2 ($fetchMode) must be of type ?int, string given
+PDO::query() expects at most 4 arguments for the fetch mode provided, 5 given
+PDO::query() expects exactly 3 arguments for the fetch mode provided, 2 given
+PDO::query() expects exactly 3 arguments for the fetch mode provided, 2 given
+PDO::query() expects at least 3 arguments for the fetch mode provided, 2 given

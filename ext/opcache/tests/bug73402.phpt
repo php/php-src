@@ -8,22 +8,23 @@ opcache.enable_cli=1
 --FILE--
 <?php
 class Logger {
-	public function info($msg) {
-		echo $msg;
-	}
+    public function info($msg) {
+        echo $msg;
+    }
 }
 
 class B
 {
-	const LOG_LEVEL = 'Info';
-	public function test()
-	{
-		$logger = new \Logger();
-		$logger->{self::LOG_LEVEL}('test');
-	}
+    const LOG_LEVEL = 'Info';
+    public function test()
+    {
+        $logger = new \Logger();
+        $logger->{self::LOG_LEVEL}('test');
+    }
 }
 
 $b = new B;
 $b->test();
+?>
 --EXPECT--
 test

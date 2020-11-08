@@ -4,15 +4,15 @@ Testing __call and __callstatic
 <?php
 
 class a {
-	public function __call($a, $b) {
-		print "__call: ". $a ."\n";
-	}
-	static public function __callStatic($a, $b) {
-		print "__callstatic: ". $a ."\n";
-	}
-	public function baz() {
-		self::Bar();
-	}
+    public function __call($a, $b) {
+        print "__call: ". $a ."\n";
+    }
+    static public function __callStatic($a, $b) {
+        print "__callstatic: ". $a ."\n";
+    }
+    public function baz() {
+        self::Bar();
+    }
 }
 
 

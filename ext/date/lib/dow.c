@@ -144,7 +144,7 @@ void timelib_isodate_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 	*id = timelib_day_of_week_ex(y, m, d, 1);
 }
 
-static timelib_sll timelib_daynr_from_weeknr_ex(timelib_sll iy, timelib_sll iw, timelib_sll id, timelib_sll *y)
+timelib_sll timelib_daynr_from_weeknr(timelib_sll iy, timelib_sll iw, timelib_sll id)
 {
 	timelib_sll dow, day;
 
@@ -152,54 +152,41 @@ static timelib_sll timelib_daynr_from_weeknr_ex(timelib_sll iy, timelib_sll iw, 
 	dow = timelib_day_of_week(iy, 1, 1);
 	/* then use that to figure out the offset for day 1 of week 1 */
 	day = 0 - (dow > 4 ? dow - 7 : dow);
-	/* and adjust the year to the natural year if we need to */
-	*y = (iw == 1 && day < 0 && id < dow) ? iy - 1 : iy;
 
 	/* Add weeks and days */
 	return day + ((iw - 1) * 7) + id;
 }
 
-timelib_sll timelib_daynr_from_weeknr(timelib_sll iy, timelib_sll iw, timelib_sll id)
-{
-	timelib_sll dummy_iso_year;
-
-	return timelib_daynr_from_weeknr_ex(iy, iw, id, &dummy_iso_year);
-}
-
 void timelib_date_from_isodate(timelib_sll iy, timelib_sll iw, timelib_sll id, timelib_sll *y, timelib_sll *m, timelib_sll *d)
 {
-	timelib_sll daynr = timelib_daynr_from_weeknr_ex(iy, iw, id, y) + 1;
+	timelib_sll daynr = timelib_daynr_from_weeknr(iy, iw, id) + 1;
 	int *table;
+	bool is_leap_year;
 
-	*m = 0;
+	// Invariant: is_leap_year == timelib_is_leap(*y)
+	*y = iy;
+	is_leap_year = timelib_is_leap(*y);
 
-	if (daynr <= 0) {
-		*y += 1;
-	}
-
-	if (timelib_is_leap(*y)) {
-		table = ml_table_leap;
-		if (daynr > 366) {
-			*y += 1;
-			daynr -= 366;
-		}
-	} else {
-		table = ml_table_common;
-		if (daynr > 365) {
-			*y += 1;
-			daynr -= 365;
-		}
-	}
-
-	do {
-		daynr -= table[*m];
-		(*m)++;
-	} while (daynr > table[*m]);
-
-	if (daynr <= 0) {
-		daynr += 31;
+	// Establish invariant that daynr >= 0
+	while (daynr <= 0) {
 		*y -= 1;
-		*m = 12;
+		daynr += (is_leap_year = timelib_is_leap(*y)) ? 366 : 365;
+	}
+
+	// Establish invariant that daynr <= number of days in *yr
+	while (daynr > (is_leap_year ? 366 : 365)) {
+		daynr -= is_leap_year ? 366 : 365;
+		*y += 1;
+		is_leap_year = timelib_is_leap(*y);
+	}
+
+	table = is_leap_year ? ml_table_leap : ml_table_common;
+
+	// Establish invariant that daynr <= number of days in *m
+	*m = 1;
+	while (daynr > table[*m]) {
+		daynr -= table[*m];
+		*m += 1;
 	}
 
 	*d = daynr;

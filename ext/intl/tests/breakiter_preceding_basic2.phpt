@@ -3,7 +3,7 @@ IntlBreakIterator::preceding(): basic test, ICU >= 58.1
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 if (version_compare(INTL_ICU_VERSION, '57.1') <= 0) die('skip for ICU >= 58.1');
 --FILE--
 <?php
@@ -17,9 +17,7 @@ var_dump($bi->preceding(5));
 var_dump($bi->preceding(50));
 var_dump($bi->preceding(-1));
 ?>
-==DONE==
 --EXPECTF--
 int(4)
 int(21)
 int(%i)
-==DONE==

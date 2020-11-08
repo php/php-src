@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +22,7 @@
 typedef struct {
 	uint32_t state;
 } PHP_CRC32_CTX;
+#define PHP_CRC32_SPEC "l."
 
 PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context);
 PHP_HASH_API void PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *input, size_t len);

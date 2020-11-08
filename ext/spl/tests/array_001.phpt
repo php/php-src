@@ -33,8 +33,6 @@ $ar[] = 4;
 var_dump($ar);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
@@ -79,15 +77,15 @@ object(ArrayObject)#%d (1) {
 }
 int(0)
 
-Notice: Undefined offset: 6 in %sarray_001.php on line %d
+Warning: Undefined array key 6 in %s on line %d
 NULL
 
-Notice: Undefined index: b in %sarray_001.php on line %d
+Warning: Undefined array key "b" in %s on line %d
 NULL
 
-Notice: Undefined offset: 7 in %sarray_001.php on line %d
+Warning: Undefined array key 7 in %s on line %d
 
-Notice: Undefined index: c in %sarray_001.php on line %d
+Warning: Undefined array key "c" in %s on line %d
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
@@ -110,4 +108,3 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-===DONE===

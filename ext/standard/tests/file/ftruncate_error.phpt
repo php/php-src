@@ -2,11 +2,6 @@
 Test ftruncate() function : error conditions
 --FILE--
 <?php
-/*
- Prototype: bool ftruncate ( resource $handle, int $size );
- Description: truncates a file to a given length
-*/
-
 echo "*** Testing ftruncate() : error conditions ***\n";
 
 $filename = __DIR__."/ftruncate_error.tmp";

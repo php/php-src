@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 printf("SCANDIR_SORT_ASCENDING: %d\n", SCANDIR_SORT_ASCENDING);
 printf("SCANDIR_SORT_DESCENDING: %d\n", SCANDIR_SORT_DESCENDING);
 printf("SCANDIR_SORT_NONE: %d\n", SCANDIR_SORT_NONE);
@@ -46,7 +41,6 @@ var_dump(in_array('私はガラスを食べられますfile2.tmp', $files));
 
 delete_files($dir, 2, "私はガラスを食べられますfile");
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/私はガラスを食べられますscandir_variation10';
@@ -82,4 +76,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

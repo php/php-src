@@ -11,9 +11,9 @@ var_dump($p);
 
 FFI::free($p);
 try {
-	var_dump($p);
+    var_dump($p);
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 ?>
 --EXPECTF--

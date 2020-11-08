@@ -1,15 +1,9 @@
 --TEST--
-Test array_diff() function : usage variations - unexpected values for 'arr2' argument
+Test array_diff() function : usage variations - unexpected values for 'array2' argument
 --FILE--
 <?php
-/* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are
- * not present in any of the others arguments.
- * Source code: ext/standard/array.c
- */
-
 /*
- * Test array_diff by passing non array values in place of $arr2
+ * Test array_diff by passing non array values in place of $array2
  */
 
 echo "*** Testing array_diff() : usage variations ***\n";
@@ -73,7 +67,7 @@ $inputs = array(
 
        // binary data
 /*21*/ b"binary",
-	   (binary)"binary",
+       (binary)"binary",
 
        // object data
 /*23*/ new classA(),
@@ -105,55 +99,55 @@ echo "Done";
 --EXPECT--
 *** Testing array_diff() : usage variations ***
 
--- Iteration 1 --Expected parameter 2 to be an array, int given
+-- Iteration 1 --array_diff(): Argument #2 must be of type array, int given
 
--- Iteration 2 --Expected parameter 2 to be an array, int given
+-- Iteration 2 --array_diff(): Argument #2 must be of type array, int given
 
--- Iteration 3 --Expected parameter 2 to be an array, int given
+-- Iteration 3 --array_diff(): Argument #2 must be of type array, int given
 
--- Iteration 4 --Expected parameter 2 to be an array, int given
+-- Iteration 4 --array_diff(): Argument #2 must be of type array, int given
 
--- Iteration 5 --Expected parameter 2 to be an array, float given
+-- Iteration 5 --array_diff(): Argument #2 must be of type array, float given
 
--- Iteration 6 --Expected parameter 2 to be an array, float given
+-- Iteration 6 --array_diff(): Argument #2 must be of type array, float given
 
--- Iteration 7 --Expected parameter 2 to be an array, float given
+-- Iteration 7 --array_diff(): Argument #2 must be of type array, float given
 
--- Iteration 8 --Expected parameter 2 to be an array, float given
+-- Iteration 8 --array_diff(): Argument #2 must be of type array, float given
 
--- Iteration 9 --Expected parameter 2 to be an array, float given
+-- Iteration 9 --array_diff(): Argument #2 must be of type array, float given
 
--- Iteration 10 --Expected parameter 2 to be an array, null given
+-- Iteration 10 --array_diff(): Argument #2 must be of type array, null given
 
--- Iteration 11 --Expected parameter 2 to be an array, null given
+-- Iteration 11 --array_diff(): Argument #2 must be of type array, null given
 
--- Iteration 12 --Expected parameter 2 to be an array, bool given
+-- Iteration 12 --array_diff(): Argument #2 must be of type array, bool given
 
--- Iteration 13 --Expected parameter 2 to be an array, bool given
+-- Iteration 13 --array_diff(): Argument #2 must be of type array, bool given
 
--- Iteration 14 --Expected parameter 2 to be an array, bool given
+-- Iteration 14 --array_diff(): Argument #2 must be of type array, bool given
 
--- Iteration 15 --Expected parameter 2 to be an array, bool given
+-- Iteration 15 --array_diff(): Argument #2 must be of type array, bool given
 
--- Iteration 16 --Expected parameter 2 to be an array, string given
+-- Iteration 16 --array_diff(): Argument #2 must be of type array, string given
 
--- Iteration 17 --Expected parameter 2 to be an array, string given
+-- Iteration 17 --array_diff(): Argument #2 must be of type array, string given
 
--- Iteration 18 --Expected parameter 2 to be an array, string given
+-- Iteration 18 --array_diff(): Argument #2 must be of type array, string given
 
--- Iteration 19 --Expected parameter 2 to be an array, string given
+-- Iteration 19 --array_diff(): Argument #2 must be of type array, string given
 
--- Iteration 20 --Expected parameter 2 to be an array, string given
+-- Iteration 20 --array_diff(): Argument #2 must be of type array, string given
 
--- Iteration 21 --Expected parameter 2 to be an array, string given
+-- Iteration 21 --array_diff(): Argument #2 must be of type array, string given
 
--- Iteration 22 --Expected parameter 2 to be an array, string given
+-- Iteration 22 --array_diff(): Argument #2 must be of type array, string given
 
--- Iteration 23 --Expected parameter 2 to be an array, object given
+-- Iteration 23 --array_diff(): Argument #2 must be of type array, classA given
 
--- Iteration 24 --Expected parameter 2 to be an array, null given
+-- Iteration 24 --array_diff(): Argument #2 must be of type array, null given
 
--- Iteration 25 --Expected parameter 2 to be an array, null given
+-- Iteration 25 --array_diff(): Argument #2 must be of type array, null given
 
--- Iteration 26 --Expected parameter 2 to be an array, resource given
+-- Iteration 26 --array_diff(): Argument #2 must be of type array, resource given
 Done

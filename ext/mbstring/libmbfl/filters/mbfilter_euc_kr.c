@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_euc_kr.h"
 #include "unicode_table_uhc.h"
@@ -62,7 +58,7 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	mbfl_no_encoding_euc_kr,
 	"EUC-KR",
 	"EUC-KR",
-	(const char *(*)[])&mbfl_encoding_euc_kr_aliases,
+	mbfl_encoding_euc_kr_aliases,
 	mblen_table_euckr,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_euckr_wchar,
@@ -72,7 +68,6 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 const struct mbfl_identify_vtbl vtbl_identify_euckr = {
 	mbfl_no_encoding_euc_kr,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_euckr
 };
 
@@ -80,18 +75,20 @@ const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_no_encoding_euc_kr,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_euckr_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_kr,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_euckr,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 

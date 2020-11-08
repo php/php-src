@@ -12,10 +12,11 @@ opcache.protect_memory=1
 --FILE--
 <?php
 function bar() {
-	$a = strlen("a");
-	$a++;
-	return $a;
+    $a = strlen("a");
+    $a++;
+    return $a;
 }
 var_dump(bar());
+?>
 --EXPECT--
 int(2)

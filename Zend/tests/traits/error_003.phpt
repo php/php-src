@@ -7,7 +7,7 @@ interface abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
 ?>

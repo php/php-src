@@ -36,7 +36,7 @@ $stmt = $db->query('SELECT * FROM test');
 
 foreach(new RecursiveTreeIterator(new RecursiveArrayIterator($stmt->fetchAll(PDO::FETCH_ASSOC)), RecursiveTreeIterator::BYPASS_KEY) as $c=>$v)
 {
-	echo "$v [$c]\n";
+    echo "$v [$c]\n";
 }
 
 echo "===DONE===\n";

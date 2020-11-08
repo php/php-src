@@ -30,42 +30,42 @@ bool(true)
 
 Warning: dir(): open_basedir restriction in effect. File(../bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(../bad): failed to open dir: %s in %s on line %d
+Warning: dir(../bad): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: dir(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(../bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: dir(../bad/bad.txt): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: dir(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(..): failed to open dir: %s in %s on line %d
+Warning: dir(..): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: dir(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(../): failed to open dir: %s in %s on line %d
+Warning: dir(../): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: dir(): open_basedir restriction in effect. File(/) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(/): failed to open dir: %s in %s on line %d
+Warning: dir(/): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: dir(): open_basedir restriction in effect. File(../bad/.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(../bad/.): failed to open dir: %s in %s on line %d
+Warning: dir(../bad/.): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: dir(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(%s/test/bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: dir(%s/test/bad/bad.txt): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: dir(): open_basedir restriction in effect. File(%s/test/bad/../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: dir(%s/test/bad/../bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: dir(%s/test/bad/../bad/bad.txt): Failed to open directory: %s in %s on line %d
 bool(false)
 object(Directory)#%d (2) {
   ["path"]=>

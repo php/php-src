@@ -5,24 +5,10 @@ Test dir() function : usage variations - different directory permissions
 if( substr(PHP_OS, 0, 3) == 'WIN') {
   die('skip Not for Windows');
 }
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/dir_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip...cannot be run as root\n');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Providing various permissions to the directory to be opened and checking
  * to see if dir() function opens the directory successfully.
@@ -66,7 +52,7 @@ for($count = 0; $count < count($permission_values); $count++) {
   // create the dir now
   @mkdir($dir_path);
 
-  // change the dir permisson to test dir on it
+  // change the dir permission to test dir on it
   var_dump( chmod($dir_path, $permission_values[$count]) );
 
   // try to get dir handle

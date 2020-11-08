@@ -10,7 +10,7 @@ if(!extension_loaded('zip')) die('skip');
 echo "Procedural\n";
 $zip = zip_open(__DIR__ . '/test.zip');
 if (!is_resource($zip)) {
-	die("Failure");
+    die("Failure");
 }
 var_dump(zip_close($zip));
 try {
@@ -22,24 +22,32 @@ try {
 echo "Object\n";
 $zip = new ZipArchive();
 if (!$zip->open(__DIR__ . '/test.zip')) {
-	die('Failure');
+    die('Failure');
 }
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-	var_dump($zip->close());
-	var_dump($zip->close());
+    var_dump($zip->close());
+    try {
+        $zip->close();
+    } catch (ValueError $err) {
+        echo $err->getMessage(), PHP_EOL;
+    }
 } else {
-	die("Failure");
+    die("Failure");
 }
 
 ?>
 Done
 --EXPECTF--
 Procedural
+
+Deprecated: Function zip_open() is deprecated in %s on line %d
+
+Deprecated: Function zip_close() is deprecated in %s on line %d
 NULL
+
+Deprecated: Function zip_close() is deprecated in %s on line %d
 zip_close(): supplied resource is not a valid Zip Directory resource
 Object
 bool(true)
-
-Warning: ZipArchive::close(): Invalid or uninitialized Zip object in %s on line %d
-bool(false)
+Invalid or uninitialized Zip object
 Done

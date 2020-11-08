@@ -7,7 +7,7 @@ finfo_open(): Testing magic_file names
 
 try {
     var_dump(finfo_open(FILEINFO_MIME, "\0"));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -19,27 +19,27 @@ var_dump(finfo_open(FILEINFO_MIME, '/foo/bar/inexistent'));
 
 ?>
 --EXPECTF--
-finfo_open() expects parameter 2 to be a valid path, string given
+finfo_open(): Argument #2 ($magic_database) must not contain any null bytes
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 
-Warning: finfo_open(%s123): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%s123): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(%s123): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%s123): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(): Failed to load magic database at '%s123'. in %s on line %d
+Warning: finfo_open(): Failed to load magic database at "%s123" in %s on line %d
 bool(false)
 
-Warning: finfo_open(%s1): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%s1): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(%s1): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%s1): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(): Failed to load magic database at '%s1'. in %s on line %d
+Warning: finfo_open(): Failed to load magic database at "%s1" in %s on line %d
 bool(false)
 
-Warning: finfo_open(%sinexistent): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%sinexistent): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(%sinexistent): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%sinexistent): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(): Failed to load magic database at '%sinexistent'. in %s on line %d
+Warning: finfo_open(): Failed to load magic database at "%sinexistent" in %s on line %d
 bool(false)

@@ -5,14 +5,17 @@ tidy_get_opt_doc()
 --FILE--
 <?php
 
-var_dump(tidy_get_opt_doc(new tidy, 'some_bogus_cfg'));
+try {
+    tidy_get_opt_doc(new tidy, 'some_bogus_cfg');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 $t = new tidy;
 var_dump($t->getOptDoc('ncr'));
 var_dump(strlen(tidy_get_opt_doc($t, 'wrap')) > 99);
 ?>
---EXPECTF--
-Warning: tidy_get_opt_doc(): Unknown Tidy Configuration Option 'some_bogus_cfg' in %s021.php on line 3
-bool(false)
+--EXPECT--
+tidy_get_opt_doc(): Argument #2 ($option) is an invalid configuration option, "some_bogus_cfg" given
 string(73) "This option specifies if Tidy should allow numeric character references. "
 bool(true)

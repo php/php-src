@@ -4,26 +4,26 @@ imap_rfc822_parse_headers() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = setup_test_mailbox('', 1);
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = setup_test_mailbox('imaprfc822parseheadersbasic', 1);
 
 $z = imap_headerinfo($stream_id, 1);
 
 $fields = array ('toaddress','to','fromaddress','from',
 'reply_toaddress','reply_to',
-	'senderaddress', 'sender',
+    'senderaddress', 'sender',
 'subject','Subject',
-	'MailDate','Size','udate');
+    'MailDate','Size','udate');
 
 
 echo "Check general fields\n";
 foreach ($fields as $key) {
-	var_dump(isset($z->$key));
+    var_dump(isset($z->$key));
 }
 
 echo "Check type\n";
@@ -35,44 +35,44 @@ var_dump($z->subject);
 var_dump($z->Subject);
 
 if ($z->Recent == 'R' || $z->Recent == 'N' || $z->Recent == ' ') {
-	echo "Recent: OK";
+    echo "Recent: OK";
 } else {
-	echo "Recent: error";
+    echo "Recent: error";
 }
 echo "\n";
 
 if ($z->Unseen == 'U' || $z->Unseen == ' ') {
-	echo "Unseen: OK";
+    echo "Unseen: OK";
 } else {
-	echo "Unseen: error";
+    echo "Unseen: error";
 }
 echo "\n";
 
 if ($z->Flagged == 'F' || $z->Flagged == ' ') {
-	echo "Flagged: OK";
+    echo "Flagged: OK";
 } else {
-	echo "Flagged: error";
+    echo "Flagged: error";
 }
 echo "\n";
 
 if ($z->Answered == 'A' || $z->Answered == ' ') {
-	echo "Answered: OK";
+    echo "Answered: OK";
 } else {
-	echo "Answered: error";
+    echo "Answered: error";
 }
 echo "\n";
 
 if ($z->Deleted == 'D' || $z->Deleted == ' ') {
-	echo "Deleted: OK";
+    echo "Deleted: OK";
 } else {
-	echo "Deleted: error";
+    echo "Deleted: error";
 }
 echo "\n";
 
 if ($z->Draft == 'X' || $z->Draft == ' ') {
-	echo "Draft: OK";
+    echo "Draft: OK";
 } else {
-	echo "Draft: error";
+    echo "Draft: error";
 }
 echo "\n";
 
@@ -85,11 +85,12 @@ imap_close($stream_id);
 ?>
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imaprfc822parseheadersbasic';
+require_once(__DIR__ . '/setup/clean.inc');
 ?>
 --EXPECTF--
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 Check general fields
 bool(true)
 bool(true)

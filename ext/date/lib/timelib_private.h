@@ -131,7 +131,7 @@ struct _tlinfo
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 
 /* From parse_tz.c */
-void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr);
+void timelib_time_tz_abbr_update(timelib_time* tm, const char* tz_abbr);
 
 /* From timelib.c */
 int timelib_strcasecmp(const char *s1, const char *s2);

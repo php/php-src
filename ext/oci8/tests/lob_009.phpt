@@ -35,7 +35,7 @@ oci_execute($s, OCI_DEFAULT);
 var_dump($row = oci_fetch_array($s));
 
 while (!$row[0]->eof()) {
-	var_dump(str_replace("\r", "", $row[0]->read(1024)));
+    var_dump(str_replace("\r", "", $row[0]->read(1024)));
 }
 
 require __DIR__.'/drop_table.inc';
@@ -44,7 +44,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
@@ -52,12 +52,12 @@ bool(true)
 bool(true)
 array(2) {
   [0]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

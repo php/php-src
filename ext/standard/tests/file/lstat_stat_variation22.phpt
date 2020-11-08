@@ -7,14 +7,11 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip ... not for Windows');
 }
+?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
 echo "*** testing stat ***\n";
 var_dump(stat(NULL));
 var_dump(stat(false));
@@ -28,7 +25,6 @@ var_dump(lstat(false));
 var_dump(lstat(''));
 var_dump(lstat(' '));
 var_dump(lstat('|'));
-echo "Done";
 ?>
 --EXPECTF--
 *** testing stat ***
@@ -51,4 +47,3 @@ bool(false)
 
 Warning: lstat(): Lstat failed for | in %s on line %d
 bool(false)
-Done

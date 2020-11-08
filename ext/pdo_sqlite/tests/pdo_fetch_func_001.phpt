@@ -8,6 +8,8 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 <?php
 
 $db = new PDO('sqlite::memory:');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
 $db->exec('CREATE TABLE testing (id INTEGER , name VARCHAR)');
 $db->exec('INSERT INTO testing VALUES(1, "php")');
 $db->exec('INSERT INTO testing VALUES(2, "")');
@@ -18,43 +20,63 @@ $st->fetchAll(PDO::FETCH_FUNC, function($x, $y) use ($st) { var_dump($st); print
 $st = $db->query('SELECT name FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, 'strtoupper'));
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, 'nothing'));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, 'nothing'));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, ''));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, ''));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, NULL));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, NULL));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, 1));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 class foo {
-	public function method($x) {
-		return "--- $x ---";
-	}
+    public function method($x) {
+        return "--- $x ---";
+    }
 }
 class bar extends foo {
-	public function __construct($db) {
-		$st = $db->query('SELECT * FROM testing');
-		var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
-	}
+    public function __construct($db) {
+        $st = $db->query('SELECT * FROM testing');
+        var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
+    }
 
-	static public function test($x, $y) {
-		return $x .'---'. $y;
-	}
+    static public function test($x, $y) {
+        return $x .'---'. $y;
+    }
 
-	private function test2($x, $y) {
-		return $x;
-	}
+    private function test2($x, $y) {
+        return $x;
+    }
 
-	public function test3($x, $y) {
-		return $x .'==='. $y;
-	}
+    public function test3($x, $y) {
+        return $x .'==='. $y;
+    }
 }
 
 new bar($db);
@@ -62,14 +84,26 @@ new bar($db);
 $st = $db->query('SELECT * FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test')));
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test2')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test2')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test3')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test3')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
-$st = $db->query('SELECT * FROM testing');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'inexistent')));
+try {
+    $st = $db->query('SELECT * FROM testing');
+    var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'inexistent')));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
@@ -89,21 +123,11 @@ array(2) {
   [1]=>
   string(0) ""
 }
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function 'nothing' not found or invalid function name in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function '' not found or invalid function name in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'PDOStatement' does not have a method 'foo' in %s on line %d
-bool(false)
+function "nothing" not found or invalid function name
+function "" not found or invalid function name
+PDOStatement::fetchAll(): Argument #2 must be a callable, null given
+no array or string given
+cannot access "self" when no class scope is active
 array(2) {
   [0]=>
   string(9) "--- 1 ---"
@@ -116,12 +140,6 @@ array(2) {
   [1]=>
   string(4) "2---"
 }
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test2() cannot be called statically in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test3() cannot be called statically in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'bar' does not have a method 'inexistent' in %s on line %d
-bool(false)
+non-static method bar::test2() cannot be called statically
+non-static method bar::test3() cannot be called statically
+class bar does not have a method "inexistent"

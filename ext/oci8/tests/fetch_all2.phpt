@@ -16,7 +16,7 @@ $insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value) VALUES (1,1)";
 $s = oci_parse($c, $insert_sql);
 
 for ($i = 0; $i<3; $i++) {
-	oci_execute($s);
+    oci_execute($s);
 }
 
 oci_commit($c);

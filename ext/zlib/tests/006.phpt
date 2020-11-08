@@ -5,7 +5,12 @@ gzdeflate()/gzinflate() and invalid params
 --FILE--
 <?php
 
-var_dump(gzdeflate("", 1000));
+try {
+    var_dump(gzcompress("", 1000));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump(gzdeflate("", -1));
 
 var_dump(gzdeflate(""));
@@ -20,7 +25,12 @@ var_dump($data2 = gzdeflate($string, 9));
 
 var_dump(gzinflate(""));
 var_dump(gzinflate("asfwe", 1000));
-var_dump(gzinflate("asdf", -1));
+
+try {
+    var_dump(gzinflate("asdf", -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(gzinflate("asdf"));
 var_dump(gzinflate("asdf", 9));
@@ -30,11 +40,9 @@ var_dump(gzinflate($data2));
 $data2[4] = 0;
 var_dump(gzinflate($data2));
 
-echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gzdeflate(): compression level (1000) must be within -1..9 in %s on line %d
-bool(false)
+gzcompress(): Argument #2 ($level) must be between -1 and 9
 string(%d) "%a"
 string(%d) "%a"
 string(%d) "%a"
@@ -46,9 +54,7 @@ bool(false)
 
 Warning: gzinflate(): data error in %s on line %d
 bool(false)
-
-Warning: gzinflate(): length (-1) must be greater or equal zero in %s on line %d
-bool(false)
+gzinflate(): Argument #2 ($max_length) must be greater than or equal to 0
 
 Warning: gzinflate(): data error in %s on line %d
 bool(false)
@@ -64,4 +70,3 @@ Desolation, grief and agony"
 
 Warning: gzinflate(): data error in %s on line %d
 bool(false)
-Done

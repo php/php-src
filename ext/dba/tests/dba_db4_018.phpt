@@ -48,10 +48,9 @@ echo dba_fetch("key1", $db_file1), "\n";
 echo dba_fetch("key2", $db_file1), "\n";
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --XFAIL--
 Test 6 crashes with dba pointer of NULL, bug http://bugs.php.net/bug.php?id=51278
@@ -73,4 +72,3 @@ resource(%d) of type (Unknown)
 Test 6 - query after closing 2nd resource
 This is a test insert 1
 This is a test insert 2
-===DONE===

@@ -4,9 +4,9 @@ get_class() tests
 <?php
 
 class foo {
-	function bar () {
-		var_dump(get_class());
-	}
+    function bar () {
+        var_dump(get_class());
+    }
     function testNull ()
     {
         try {
@@ -26,7 +26,11 @@ $f2 = new foo2;
 $f1->bar();
 $f2->bar();
 
-var_dump(get_class());
+try {
+    var_dump(get_class());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 try {
     var_dump(get_class("qwerty"));
 } catch (TypeError $e) {
@@ -40,14 +44,12 @@ $f1->testNull();
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"
 string(3) "foo"
-
-Warning: get_class() called without object from outside a class in %s on line %d
-bool(false)
-get_class() expects parameter 1 to be object, string given
+get_class() without arguments must be called from within a class
+get_class(): Argument #1 ($object) must be of type object, string given
 string(3) "foo"
 string(4) "foo2"
-get_class() expects parameter 1 to be object, null given
+get_class(): Argument #1 ($object) must be of type object, null given
 Done

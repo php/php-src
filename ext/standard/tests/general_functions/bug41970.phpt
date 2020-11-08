@@ -21,11 +21,11 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line %d
+Warning: sort(): Argument #1 ($array) must be passed by reference, value given in %s on line %d
 bool(true)
-strlen() expects parameter 1 to be string, array given
+strlen(): Argument #1 ($string) must be of type string, array given
 
-Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line %d
+Warning: sort(): Argument #1 ($array) must be passed by reference, value given in %s on line %d
 bool(true)
-strlen() expects parameter 1 to be string, array given
+strlen(): Argument #1 ($string) must be of type string, array given
 Done

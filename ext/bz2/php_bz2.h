@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +17,7 @@
 #ifndef PHP_BZ2_H
 #define PHP_BZ2_H
 
-#if HAVE_BZ2
+#ifdef HAVE_BZ2
 
 extern zend_module_entry bz2_module_entry;
 #define phpext_bz2_ptr &bz2_module_entry

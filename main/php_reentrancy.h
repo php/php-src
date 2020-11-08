@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -99,12 +97,6 @@ PHPAPI char *php_strtok_r(char *s, const char *delim, char **last);
 #ifdef MISSING_STRTOK_R_DECL
 char *strtok_r(char *s, const char *delim, char **last);
 #endif
-#endif
-
-#if !defined(HAVE_RAND_R)
-PHPAPI int php_rand_r(unsigned int *seed);
-#else
-#define php_rand_r rand_r
 #endif
 
 END_EXTERN_C()

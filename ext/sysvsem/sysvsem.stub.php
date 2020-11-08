@@ -1,22 +1,15 @@
 <?php
 
-/**
- * @todo use bool for $auto_release
- * @return resource|false
- */
-function sem_get(int $key, int $max_acquire = 1, int $perm = 0666, int $auto_release = 1) {}
+/** @generate-function-entries */
 
-/**
- * @param resource $sem_identifier
- */
-function sem_acquire($sem_identifier, bool $nowait = false): bool {}
+final class SysvSemaphore
+{
+}
 
-/**
- * @param resource $sem_identifier
- */
-function sem_release($sem_identifier): bool {}
+function sem_get(int $key, int $max_acquire = 1, int $permissions = 0666, bool $auto_release = true): SysvSemaphore|false {}
 
-/**
- * @param resource $sem_identifier
- */
-function sem_remove($sem_identifier): bool {}
+function sem_acquire(SysvSemaphore $semaphore, bool $non_blocking = false): bool {}
+
+function sem_release(SysvSemaphore $semaphore): bool {}
+
+function sem_remove(SysvSemaphore $semaphore): bool {}

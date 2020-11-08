@@ -9,6 +9,7 @@ if (!extension_loaded('pdo')) die('skip');
 <?php
 var_dump(is_array(PDO::getAvailableDrivers()));
 var_dump(is_array(pdo_drivers()));
+?>
 --EXPECT--
 bool(true)
 bool(true)

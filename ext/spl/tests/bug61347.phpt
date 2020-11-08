@@ -12,7 +12,6 @@ var_dump(isset($b['no_exists'])); //false
 var_dump(empty($b['b'])); //true
 var_dump(empty($b[37])); //true
 
-var_dump(array_key_exists('b', $b)); //true
 var_dump($b['b']);
 
 $a = array('b' => '', 37 => false);
@@ -22,15 +21,13 @@ var_dump(isset($b[37])); //true
 var_dump(isset($b['no_exists'])); //false
 var_dump(empty($b['b'])); //true
 var_dump(empty($b[37])); //true
---EXPECTF--
+?>
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 bool(true)
-bool(true)
-
-Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(true)
 NULL
 bool(true)

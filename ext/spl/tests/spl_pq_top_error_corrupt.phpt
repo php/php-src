@@ -8,13 +8,13 @@ Nathaniel McHugh nat@fishtrap.co.uk
 
 class myPriorityQueue extends SplPriorityQueue{
 
-	public function compare($a, $b){
-	 	 if ($b == 2) {
-		throw new Exception('ignore me');
-		}  else {
-		return parent::compare($a, $b);
-		}
-	}
+    public function compare($a, $b){
+         if ($b == 2) {
+        throw new Exception('ignore me');
+        }  else {
+        return parent::compare($a, $b);
+        }
+    }
 }
 
 $priorityQueue = new myPriorityQueue();

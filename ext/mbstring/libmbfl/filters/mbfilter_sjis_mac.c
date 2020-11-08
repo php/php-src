@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_sjis_mac.h"
 
@@ -50,7 +46,7 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	"SJIS-mac",
 	"Shift_JIS",
-	(const char *(*)[])&mbfl_encoding_sjis_mac_aliases,
+	mbfl_encoding_sjis_mac_aliases,
 	mblen_table_sjis,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_mac_wchar,
@@ -60,7 +56,6 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis
 };
 
@@ -68,18 +63,20 @@ const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
 	mbfl_no_encoding_sjis_mac,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_sjis_mac_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_sjis_mac,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_sjis_mac,
-	mbfl_filt_conv_sjis_mac_flush
+	mbfl_filt_conv_sjis_mac_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

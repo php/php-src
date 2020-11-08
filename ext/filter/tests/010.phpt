@@ -55,6 +55,10 @@ array(7) {
 string(1) "1"
 string(1) "1"
 string(1) "1"
+
+Warning: filter_var(): Unknown filter with ID -1 in %s on line %d
 bool(false)
+
+Warning: filter_var(): Unknown filter with ID 0 in %s on line %d
 bool(false)
 Done

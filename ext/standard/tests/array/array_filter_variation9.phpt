@@ -2,11 +2,6 @@
 Test array_filter() function : usage variations - built-in functions as 'callback' argument
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing built-in functions and different language constructs as 'callback' argument
 */
@@ -37,7 +32,7 @@ try {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***
 array(6) {
   [0]=>
@@ -69,6 +64,6 @@ array(7) {
   [6]=>
   NULL
 }
-array_filter() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name
-array_filter() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name
+array_filter(): Argument #2 ($callback) must be a valid callback, function "echo" not found or invalid function name
+array_filter(): Argument #2 ($callback) must be a valid callback, function "exit" not found or invalid function name
 Done

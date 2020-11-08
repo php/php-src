@@ -2,11 +2,6 @@
 Test array_rand() function : usage variation - with associative arrays for 'input' parameter
 --FILE--
 <?php
-/* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Test behaviour of array_rand() function when associative array is passed to
 * the 'input' parameter in the function call

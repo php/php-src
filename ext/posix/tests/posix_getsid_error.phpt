@@ -7,7 +7,7 @@ Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10
 --SKIPIF--
 <?php
-	if(!extension_loaded("posix")) {
+    if(!extension_loaded("posix")) {
         die("SKIP - POSIX extension not loaded");
     }
 ?>
@@ -15,7 +15,5 @@ PHP Testfest Berlin 2009-05-10
 <?php
 var_dump( posix_getsid(-1) );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(false)
-===DONE===

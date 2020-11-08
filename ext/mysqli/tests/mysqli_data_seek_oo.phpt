@@ -3,68 +3,80 @@ mysqli_result->data_seek()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
-	require('table.inc');
+    require_once("connect.inc");
+    require('table.inc');
 
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-	printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-		$host, $user, $db, $port, $socket);
+    if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
+    printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+        $host, $user, $db, $port, $socket);
 
-	$res = new mysqli_result($mysqli);
-	if (false !== ($tmp = @$res->data_seek(0)))
-		printf("[002] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    $res = new mysqli_result($mysqli);
 
-	if (!$res = $mysqli->query('SELECT * FROM test ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    try {
+        $res->data_seek(0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	if (true !== ($tmp = $res->data_seek(3)))
-		printf("[007] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    if (!$res = $mysqli->query('SELECT * FROM test ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$row = $res->fetch_assoc();
-	if (4 != $row['id'])
-		printf("[008] Expecting record 4/d, got record %s/%s\n", $row['id'], $row['label']);
+    if (true !== ($tmp = $res->data_seek(3)))
+        printf("[007] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (true !== ($tmp = $res->data_seek(0)))
-		printf("[009] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    $row = $res->fetch_assoc();
+    if (4 != $row['id'])
+        printf("[008] Expecting record 4/d, got record %s/%s\n", $row['id'], $row['label']);
 
-	$row = $res->fetch_assoc();
-	if (1 != $row['id'])
-		printf("[010] Expecting record 1/a, got record %s/%s\n", $row['id'], $row['label']);
+    if (true !== ($tmp = $res->data_seek(0)))
+        printf("[009] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = $res->data_seek(4)))
-		printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    $row = $res->fetch_assoc();
+    if (1 != $row['id'])
+        printf("[010] Expecting record 1/a, got record %s/%s\n", $row['id'], $row['label']);
 
-	if (false !== ($tmp = $res->data_seek(-1)))
-		printf("[012] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    if (false !== ($tmp = $res->data_seek(4)))
+        printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	$res->free_result();
+    try {
+        $res->data_seek(-1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
-	if (!$res = $mysqli->query('SELECT * FROM test ORDER BY id', MYSQLI_USE_RESULT))
-		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $res->free_result();
 
-	if (false !== ($tmp = $res->data_seek(3)))
-		printf("[014] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    if (!$res = $mysqli->query('SELECT * FROM test ORDER BY id', MYSQLI_USE_RESULT))
+        printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$res->free_result();
+    try {
+        var_dump($res->data_seek(3));
+    } catch (\Error $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
-	if (false !== ($tmp = $res->data_seek(1)))
-		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    $res->free_result();
 
-	$mysqli->close();
+    try {
+        $res->data_seek(1);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	print "done!";
-?>
+    $mysqli->close();
+
+    print "done!";
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_result::data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
-
-Warning: mysqli_result::data_seek(): Couldn't fetch mysqli_result in %s on line %d
+--EXPECT--
+mysqli_result object is already closed
+mysqli_result::data_seek(): Argument #1 ($offset) must be greater than or equal to 0
+mysqli_result::data_seek() cannot be used in MYSQLI_USE_RESULT mode
+mysqli_result object is already closed
 done!

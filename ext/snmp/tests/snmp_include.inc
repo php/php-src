@@ -18,9 +18,9 @@ $timeout = 	getenv('SNMP_TIMEOUT') ?:	-1;
 $retries = 	getenv('SNMP_RETRIES') ?:	1;
 
 if (stristr(PHP_OS, "FreeBSD")) {
-	$mibdir = 	getenv('SNMP_MIBDIR')	?:		"/usr/local/share/snmp/mibs";
+    $mibdir = 	getenv('SNMP_MIBDIR')	?:		"/usr/local/share/snmp/mibs";
 } else {
-	$mibdir = 	getenv('SNMP_MIBDIR')	?:		"/usr/share/snmp/mibs";
+    $mibdir = 	getenv('SNMP_MIBDIR')	?:		"/usr/share/snmp/mibs";
 }
 
 

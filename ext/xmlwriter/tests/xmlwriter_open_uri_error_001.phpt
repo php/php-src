@@ -4,12 +4,15 @@ xmlwriter_open_uri with empty string as parameter
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
 <?php
-var_dump(xmlwriter_open_uri(''));
+try {
+    xmlwriter_open_uri('');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
 --CREDITS--
 Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009
---EXPECTF--
-Warning: xmlwriter_open_uri(): Empty string as source in %s on line %d
-bool(false)
+--EXPECT--
+xmlwriter_open_uri(): Argument #1 ($uri) cannot be empty

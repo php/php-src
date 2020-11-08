@@ -2,36 +2,10 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - link & dir perms.
 --SKIPIF--
 <?php
-if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
-    die('skip no symlinks on Windows');
-}
-
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/symlink_link_linkinfo_is_link6_check_root.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool symlink ( string $target, string $link );
-   Description: creates a symbolic link to the existing target with the specified name link
-
-   Prototype: bool is_link ( string $filename );
-   Description: Tells whether the given file is a symbolic link.
-
-   Prototype: bool link ( string $target, string $link );
-   Description: Create a hard link
-
-   Prototype: int linkinfo ( string $path );
-   Description: Gets information about a link
-*/
-
 /* Variation 6 : Change permission of directory and try creating links inside that directory */
 $file_path = __DIR__;
 

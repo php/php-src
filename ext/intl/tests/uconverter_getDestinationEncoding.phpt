@@ -10,5 +10,6 @@ intl.error_level = E_WARNING
 <?php
 $c = new UConverter('UTF-7', 'ascii');
 var_dump($c->getDestinationEncoding());
+?>
 --EXPECT--
 string(5) "UTF-7"

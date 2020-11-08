@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -942,7 +940,7 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 
 static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	static char hexconvtab[] = "0123456789ABCDEF";
+	static const char hexconvtab[] = "0123456789ABCDEF";
 	xmlNodePtr ret, text;
 	unsigned char *str;
 	zval tmp;
@@ -1165,14 +1163,14 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, zval *data, int style, xmlNode
 
 static void set_zval_property(zval* object, char* name, zval* val)
 {
-	zend_update_property(Z_OBJCE_P(object), object, name, strlen(name), val);
+	zend_update_property(Z_OBJCE_P(object), Z_OBJ_P(object), name, strlen(name), val);
 	Z_TRY_DELREF_P(val);
 }
 
 static zval* get_zval_property(zval* object, char* name, zval *rv)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval *data = zend_read_property(Z_OBJCE_P(object), object, name, strlen(name), 1, rv);
+		zval *data = zend_read_property(Z_OBJCE_P(object), Z_OBJ_P(object), name, strlen(name), 1, rv);
 		if (data == &EG(uninitialized_zval)) {
 			return NULL;
 		}
@@ -1187,7 +1185,7 @@ static zval* get_zval_property(zval* object, char* name, zval *rv)
 static void unset_zval_property(zval* object, char* name)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zend_unset_property(Z_OBJCE_P(object), object, name, strlen(name));
+		zend_unset_property(Z_OBJCE_P(object), Z_OBJ_P(object), name, strlen(name));
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_hash_str_del(Z_ARRVAL_P(object), name, strlen(name));
 	}
@@ -2719,7 +2717,7 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			} else if (Z_TYPE(key) == IS_LONG) {
 				zend_hash_index_update(Z_ARRVAL_P(ret), Z_LVAL(key), &value);
 			} else {
-				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowd as keys");
+				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowed as keys");
 			}
 			zval_ptr_dtor(&key);
 		}

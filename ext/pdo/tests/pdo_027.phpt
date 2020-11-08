@@ -19,7 +19,7 @@ $db->exec("INSERT INTO test (id,name) VALUES(1,'test1')");
 $db->exec("INSERT INTO test (id,name) VALUES(2,'test2')");
 
 foreach ($db->query("SELECT * FROM test", PDO::FETCH_LAZY) as $v) {
-	echo "lazy: " . $v->id.$v->name."\n";
+    echo "lazy: " . $v->id.$v->name."\n";
 }
 echo "End\n";
 ?>

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -198,19 +196,19 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 		                                    "%sbreak at %s#%ld if %s\n",
 		                                    *str, conditional->param.str, conditional->param.num, conditional->code);
 		                            break;
-		                            
+
 		                            case NUMERIC_METHOD_PARAM:
 		                                phpdbg_asprintf(&new_str,
 		                                    "%sbreak at %s::%s#%ld if %s\n",
 		                                    *str, conditional->param.method.class, conditional->param.method.name, conditional->param.num, conditional->code);
 		                            break;
-		                            
+
 		                            case ADDR_PARAM:
 		                                phpdbg_asprintf(&new_str,
 		                                    "%sbreak at 0X%lx if %s\n",
 		                                    *str, conditional->param.addr, conditional->code);
 		                            break;
-		                            
+
 									case STR_PARAM:
 										phpdbg_asprintf(&new_str,
 											"%sbreak at %s if %s\n", *str, conditional->param.str, conditional->code);
@@ -830,7 +828,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 {
 	phpdbg_breakcond_t new_break;
 	uint32_t cops = CG(compiler_options);
-	zval pv;
+	zend_string *bp_code;
 
 	switch (param->type) {
 	    case STR_PARAM:
@@ -841,7 +839,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 		case ADDR_PARAM:
 		    /* do nothing */
 		break;
-		
+
 		default:
 			phpdbg_error("eval", "type=\"invalidparameter\"", "Invalid parameter type for conditional breakpoint");
 			return;
@@ -857,10 +855,10 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	    if (new_break.param.type == FILE_PARAM ||
 	        new_break.param.type == NUMERIC_FILE_PARAM) {
 	        char realpath[MAXPATHLEN];
-	        
+
 	        if (VCWD_REALPATH(new_break.param.file.name, realpath)) {
 	            efree(new_break.param.file.name);
-	            
+
 	            new_break.param.file.name = estrdup(realpath);
 	        } else {
 	            phpdbg_error("eval", "type=\"invalidparameter\"", "Invalid file for conditional break %s", new_break.param.file.name);
@@ -879,16 +877,10 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	new_break.code = estrndup(expr, expr_len);
 	new_break.code_len = expr_len;
 
-	Z_STR(pv) = zend_string_alloc(expr_len + sizeof("return ;") - 1, 0);
-	memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
-	memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, expr, expr_len);
-	Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
-	Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
-	Z_TYPE_INFO(pv) = IS_STRING;
-
-	new_break.ops = zend_compile_string(&pv, "Conditional Breakpoint Code");
-
-	zval_ptr_dtor_str(&pv);
+	bp_code = zend_string_concat3(
+		"return ", sizeof("return ")-1, expr, expr_len, ";", sizeof(";")-1);
+	new_break.ops = zend_compile_string(bp_code, "Conditional Breakpoint Code");
+	zend_string_release(bp_code);
 
 	if (new_break.ops) {
 		brake = zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash, &new_break, sizeof(phpdbg_breakcond_t));
@@ -908,7 +900,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 
 PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_len) /* {{{ */
 {
-	zend_ulong expr_hash = zend_inline_hash_func(expr, expr_len);
+	zend_ulong expr_hash = zend_hash_func(expr, expr_len);
 	phpdbg_breakcond_t new_break;
 
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], expr_hash)) {
@@ -927,7 +919,7 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param) /* {{{ */
 
 	if (param->next) {
 		condition = param->next;
-		hash = zend_inline_hash_func(condition->str, condition->len);
+		hash = zend_hash_func(condition->str, condition->len);
 
 		if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash)) {
 			phpdbg_create_conditional_break(&new_break, param, condition->str, condition->len, hash);

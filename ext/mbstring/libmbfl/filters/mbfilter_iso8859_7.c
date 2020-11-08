@@ -27,21 +27,19 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso8859_7.h"
 #include "unicode_table_iso8859_7.h"
 
-static const char *mbfl_encoding_8859_7_aliases[] = {"ISO_8859-7", "greek", NULL};
+static int mbfl_filt_ident_iso8859_7(int c, mbfl_identify_filter *filter);
+
+static const char *mbfl_encoding_8859_7_aliases[] = {"ISO8859-7", "greek", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_7 = {
 	mbfl_no_encoding_8859_7,
 	"ISO-8859-7",
 	"ISO-8859-7",
-	(const char *(*)[])&mbfl_encoding_8859_7_aliases,
+	mbfl_encoding_8859_7_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8859_7_wchar,
@@ -51,26 +49,27 @@ const mbfl_encoding mbfl_encoding_8859_7 = {
 const struct mbfl_identify_vtbl vtbl_identify_8859_7 = {
 	mbfl_no_encoding_8859_7,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true
+	mbfl_filt_ident_iso8859_7
 };
 
 const struct mbfl_convert_vtbl vtbl_8859_7_wchar = {
 	mbfl_no_encoding_8859_7,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_8859_7_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_8859_7 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_7,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_8859_7,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -122,9 +121,6 @@ int mbfl_filt_conv_wchar_8859_7(int c, mbfl_convert_filter *filter)
 			}
 			n--;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_8859_7) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
 	}
 
 	if (s >= 0) {
@@ -133,5 +129,13 @@ int mbfl_filt_conv_wchar_8859_7(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
+	return c;
+}
+
+static int mbfl_filt_ident_iso8859_7(int c, mbfl_identify_filter *filter)
+{
+	/* These bytes are not mapped to any character in ISO-8859-7 */
+	if (c == 0xAE || c == 0xD2 || c == 0xFF)
+		filter->status = 1;
 	return c;
 }

@@ -10,9 +10,10 @@ opcache.file_update_protection=0
 --FILE--
 <?php
 function foo() {
-	$speed = 'slow' || 'fast';
+    $speed = 'slow' || 'fast';
 }
 foo();
 echo "ok\n";
+?>
 --EXPECT--
 ok

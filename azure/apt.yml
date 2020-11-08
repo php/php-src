@@ -7,6 +7,9 @@ steps:
       sudo apt install bison \
                        re2c \
                        locales \
+                       ldap-utils \
+                       openssl \
+                       slapd \
                        language-pack-de \
                        re2c \
                        libgmp-dev \
@@ -29,10 +32,21 @@ steps:
                        libpq-dev \
                        libreadline-dev \
                        libldap2-dev \
-                       libsasl2-dev \
+                       libsodium-dev \
                        libargon2-0-dev \
+                       libmm-dev \
+                       libsnmp-dev \
                        postgresql \
                        postgresql-contrib \
+                       snmpd \
+                       snmp-mibs-downloader \
+                       unixodbc-dev \
                        llvm \
+                       libc-client-dev \
+                       libkrb5-dev \
+                       dovecot-core \
+                       dovecot-pop3d \
+                       dovecot-imapd \
+                       sendmail \
                        ${{ parameters.packages }}
     displayName: 'APT'

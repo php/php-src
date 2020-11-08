@@ -5,7 +5,11 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.file_cache_only=0
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+require_once('skipif.inc');
+// We don't invalidate the file after the second write.
+if (getenv('SKIP_REPEAT')) die("skip Not repeatable");
+?>
 --FILE--
 <?php
 $tmp = __DIR__ . "/bug65915.inc.php";

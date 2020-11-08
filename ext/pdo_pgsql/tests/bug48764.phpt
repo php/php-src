@@ -37,7 +37,7 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 bug($db);
 
 putenv('PDOTEST_ATTR='.serialize(array(
-	PDO::ATTR_EMULATE_PREPARES => 1,
+    PDO::ATTR_EMULATE_PREPARES => 1,
 )));
 $db = PDOTest::factory('PDO', false);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -50,15 +50,16 @@ putenv('PDOTEST_ATTR');
 
 
 function bug($db, $options = array()) {
-	try {
-		$stmt = $db->prepare("SELECT ?", $options);
-		$stmt->execute(array(1));
-		echo "OK\n";
-	} catch (PDOException $e) {
-		// Indetermined data type when using native prepared statements
-		echo $e->getCode()."\n";
-	}
+    try {
+        $stmt = $db->prepare("SELECT ?", $options);
+        $stmt->execute(array(1));
+        echo "OK\n";
+    } catch (PDOException $e) {
+        // Indetermined data type when using native prepared statements
+        echo $e->getCode()."\n";
+    }
 }
+?>
 --EXPECT--
 Test 1
 42P18

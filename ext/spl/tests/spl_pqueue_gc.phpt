@@ -1,7 +1,7 @@
 --TEST--
 Bug #78436: Broken GC for SplPriorityQueue
 --FILE--
-<?php 
+<?php
 
 $pqueue = new SplPriorityQueue();
 $pqueue->insert($pqueue, 1);

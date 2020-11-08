@@ -1,15 +1,9 @@
 --TEST--
-Test array_diff_assoc() function : usage variations  - unexpected values for 'arr1' argument
+Test array_diff_assoc() function : usage variations  - unexpected values for 'array1' argument
 --FILE--
 <?php
-/* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present
- * in any of the others arguments but do additional checks whether the keys are equal
- * Source code: ext/standard/array.c
- */
-
 /*
- * pass array_diff_assoc arguments which are not arrays in place of $arr2
+ * pass array_diff_assoc arguments which are not arrays in place of $array2
  */
 
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
@@ -36,7 +30,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-//array of unexpected values to be passed to $arr1 argument
+//array of unexpected values to be passed to $array1 argument
 $inputs = array(
 
        // int data
@@ -73,7 +67,7 @@ $inputs = array(
 
        // binary data
 /*21*/ b"binary",
-	   (binary)"binary",
+       (binary)"binary",
 
        // object data
 /*23*/ new classA(),
@@ -106,80 +100,80 @@ echo "Done";
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
-Expected parameter 2 to be an array, int given
+array_diff_assoc(): Argument #2 must be of type array, int given
 
 -- Iteration 2 --
-Expected parameter 2 to be an array, int given
+array_diff_assoc(): Argument #2 must be of type array, int given
 
 -- Iteration 3 --
-Expected parameter 2 to be an array, int given
+array_diff_assoc(): Argument #2 must be of type array, int given
 
 -- Iteration 4 --
-Expected parameter 2 to be an array, int given
+array_diff_assoc(): Argument #2 must be of type array, int given
 
 -- Iteration 5 --
-Expected parameter 2 to be an array, float given
+array_diff_assoc(): Argument #2 must be of type array, float given
 
 -- Iteration 6 --
-Expected parameter 2 to be an array, float given
+array_diff_assoc(): Argument #2 must be of type array, float given
 
 -- Iteration 7 --
-Expected parameter 2 to be an array, float given
+array_diff_assoc(): Argument #2 must be of type array, float given
 
 -- Iteration 8 --
-Expected parameter 2 to be an array, float given
+array_diff_assoc(): Argument #2 must be of type array, float given
 
 -- Iteration 9 --
-Expected parameter 2 to be an array, float given
+array_diff_assoc(): Argument #2 must be of type array, float given
 
 -- Iteration 10 --
-Expected parameter 2 to be an array, null given
+array_diff_assoc(): Argument #2 must be of type array, null given
 
 -- Iteration 11 --
-Expected parameter 2 to be an array, null given
+array_diff_assoc(): Argument #2 must be of type array, null given
 
 -- Iteration 12 --
-Expected parameter 2 to be an array, bool given
+array_diff_assoc(): Argument #2 must be of type array, bool given
 
 -- Iteration 13 --
-Expected parameter 2 to be an array, bool given
+array_diff_assoc(): Argument #2 must be of type array, bool given
 
 -- Iteration 14 --
-Expected parameter 2 to be an array, bool given
+array_diff_assoc(): Argument #2 must be of type array, bool given
 
 -- Iteration 15 --
-Expected parameter 2 to be an array, bool given
+array_diff_assoc(): Argument #2 must be of type array, bool given
 
 -- Iteration 16 --
-Expected parameter 2 to be an array, string given
+array_diff_assoc(): Argument #2 must be of type array, string given
 
 -- Iteration 17 --
-Expected parameter 2 to be an array, string given
+array_diff_assoc(): Argument #2 must be of type array, string given
 
 -- Iteration 18 --
-Expected parameter 2 to be an array, string given
+array_diff_assoc(): Argument #2 must be of type array, string given
 
 -- Iteration 19 --
-Expected parameter 2 to be an array, string given
+array_diff_assoc(): Argument #2 must be of type array, string given
 
 -- Iteration 20 --
-Expected parameter 2 to be an array, string given
+array_diff_assoc(): Argument #2 must be of type array, string given
 
 -- Iteration 21 --
-Expected parameter 2 to be an array, string given
+array_diff_assoc(): Argument #2 must be of type array, string given
 
 -- Iteration 22 --
-Expected parameter 2 to be an array, string given
+array_diff_assoc(): Argument #2 must be of type array, string given
 
 -- Iteration 23 --
-Expected parameter 2 to be an array, object given
+array_diff_assoc(): Argument #2 must be of type array, classA given
 
 -- Iteration 24 --
-Expected parameter 2 to be an array, null given
+array_diff_assoc(): Argument #2 must be of type array, null given
 
 -- Iteration 25 --
-Expected parameter 2 to be an array, null given
+array_diff_assoc(): Argument #2 must be of type array, null given
 
 -- Iteration 26 --
-Expected parameter 2 to be an array, resource given
+array_diff_assoc(): Argument #2 must be of type array, resource given
 Done

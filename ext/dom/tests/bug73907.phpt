@@ -13,6 +13,7 @@ $doc->loadXML($xmlString);
 $attr = $doc->documentElement;
 
 var_dump($attr);
+?>
 --EXPECTF--
 object(DOMElement)#%d (%d) {%A
   ["nextSibling"]=>

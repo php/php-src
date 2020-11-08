@@ -6,12 +6,6 @@ if (getenv("USE_ZEND_ALLOC") === "0") die("skip ZMM is disabled");
 ?>
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 $chunk_length = 1;
 
 echo "*** Testing chunk_split() : unexpected large 'end' string argument variation 2 ***\n";

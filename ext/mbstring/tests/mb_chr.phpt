@@ -12,31 +12,48 @@ var_dump(
 );
 
 // Invalid
-var_dump(
-	mb_chr(0xd800, "typo"),
-	mb_chr(0xd800, "pass"),
-	mb_chr(0xd800, "jis"),
-	mb_chr(0xd800, "cp50222"),
-	mb_chr(0xd800, "utf-7")
-);
+try {
+    var_dump( mb_chr(0xd800, "typo") );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump( mb_chr(0xd800, "pass") );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump( mb_chr(0xd800, "jis") );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump( mb_chr(0xd800, "cp50222") );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump( mb_chr(0xd800, "utf-7") );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+mb_internal_encoding("utf-7");
+try {
+    var_dump( mb_chr(0xd800) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)
 bool(true)
-
-Warning: mb_chr(): Unknown encoding "typo" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "pass" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "jis" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "cp50222" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "utf-7" in %s on line %d
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+mb_chr(): Argument #2 ($encoding) must be a valid encoding, "typo" given
+mb_chr(): Argument #2 ($encoding) must be a valid encoding, "pass" given
+mb_chr() does not support the "JIS" encoding
+mb_chr() does not support the "CP50222" encoding
+mb_chr() does not support the "UTF-7" encoding
+mb_chr() does not support the "UTF-7" encoding

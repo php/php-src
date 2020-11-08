@@ -10,6 +10,7 @@ Check xsltprocessor::getParameter with undefined parameter
 <?php
 include __DIR__ .'/prepare.inc';
 var_dump($proc->getParameter('', 'doesnotexist'));
+?>
 --EXPECT--
 bool(false)
 --CREDITS--

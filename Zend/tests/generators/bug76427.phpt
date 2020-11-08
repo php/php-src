@@ -3,7 +3,7 @@ Bug #76427 (Segfault in zend_objects_store_put)
 --FILE--
 <?php
 $func = function () {
-	yield 2;
+    yield 2;
 };
 
 $a  = new stdclass();

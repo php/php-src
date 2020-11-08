@@ -11,11 +11,14 @@ class test {
     }
 }
 
-var_dump(register_shutdown_function(array("test","__call")));
+try {
+    register_shutdown_function(array("test","__call"));
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: register_shutdown_function(): Invalid shutdown callback 'test::__call' passed in %s on line %d
-bool(false)
+--EXPECT--
+register_shutdown_function(): Argument #1 ($callback) must be a valid callback, non-static method test::__call() cannot be called statically
 Done

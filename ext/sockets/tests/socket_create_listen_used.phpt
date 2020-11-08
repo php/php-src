@@ -21,7 +21,8 @@ fa@php.net
     socket_close($s_c_l);
 ?>
 --EXPECTF--
-resource(%i) of type (Socket)
+object(Socket)#%d (0) {
+}
 
 Warning: socket_create_listen(): unable to bind to given address [%i]: %a in %s on line %d
 bool(false)

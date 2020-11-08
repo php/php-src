@@ -3,7 +3,7 @@ Bug #70332 (Wrong behavior while returning reference on object)
 --FILE--
 <?php
 function & test($arg) {
-	return $arg;
+    return $arg;
 }
 
 $arg = new Stdclass();

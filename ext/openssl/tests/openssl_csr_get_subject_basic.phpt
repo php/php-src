@@ -13,7 +13,7 @@ $phex = 'dcf93a0b883972ec0e19989ac5a2ce310e1d37717e8d9571bb7623731866e61e' .
         '6634af1949e5b535cc829a483b8a76223e5d490a257f05bdff16f2fb22c583ab';
 $dh_details = array('p' => $phex, 'g' => '2');
 $dh = openssl_pkey_new(array(
-	'dh'=> array('p' => hex2bin($phex), 'g' => '2'))
+    'dh'=> array('p' => hex2bin($phex), 'g' => '2'))
 );
 
 $dn = array(

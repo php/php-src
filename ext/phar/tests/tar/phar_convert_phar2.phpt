@@ -37,7 +37,6 @@ var_dump($phar->isCompressed() == Phar::GZ);
 var_dump(strlen($phar->getStub()));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
@@ -59,4 +58,3 @@ int(6641)
 bool(true)
 bool(true)
 int(6641)
-===DONE===

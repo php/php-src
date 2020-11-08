@@ -11,19 +11,19 @@ require(__DIR__.'/skipif.inc');
 require __DIR__."/connect.inc";
 
 $ora_sql = "DROP TYPE
-						".$type_name."
-		   ";
+                        ".$type_name."
+           ";
 
-$statement = OCIParse($c,$ora_sql);
-@OCIExecute($statement);
+$statement = oci_parse($c,$ora_sql);
+@oci_execute($statement);
 
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF NUMBER";
 
-$statement = OCIParse($c,$ora_sql);
-OCIExecute($statement);
+$statement = oci_parse($c,$ora_sql);
+oci_execute($statement);
 
 
-$coll1 = ocinewcollection($c, $type_name);
+$coll1 = oci_new_collection($c, $type_name);
 
 var_dump($coll1->append(1));
 var_dump($coll1->assignElem(-1,2345));
@@ -40,10 +40,10 @@ require __DIR__."/drop_type.inc";
 --EXPECTF--
 bool(true)
 
-Warning: OCI-Collection::assignelem(): OCI-22165: given index [%d] must be in the range of %s to [0] in %s on line %d
+Warning: OCICollection::assignelem(): OCI-22165: given index [%d] must be in the range of %s to [0] in %s on line %d
 bool(false)
 
-Warning: OCI-Collection::assignelem(): OCI-22165: given index [5000] must be in the range of %s to [0] in %s on line %d
+Warning: OCICollection::assignelem(): OCI-22165: given index [5000] must be in the range of %s to [0] in %s on line %d
 bool(false)
 bool(false)
 bool(false)

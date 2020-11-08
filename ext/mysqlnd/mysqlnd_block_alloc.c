@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -134,6 +132,9 @@ PHPAPI void
 mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
 {
 	DBG_ENTER("mysqlnd_mempool_restore_state");
+#if ZEND_DEBUG
+	ZEND_ASSERT(pool->checkpoint);
+#endif
 	if (pool->checkpoint) {
 		zend_arena_release(&pool->arena, pool->checkpoint);
 		pool->last = NULL;

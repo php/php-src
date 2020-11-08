@@ -5,7 +5,7 @@ Testing null byte injection in imagewebp
 if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 $support = gd_info();
 if (!isset($support['WebP Support']) || $support['WebP Support'] === false) {
-	print 'skip webp support not available';
+    print 'skip webp support not available';
 }
 ?>
 --FILE--
@@ -18,4 +18,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid 2nd parameter, filename must not contain null bytes
+imagewebp(): Argument #2 ($file) must not contain null bytes

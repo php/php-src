@@ -1,45 +1,39 @@
 <?php
 
-/** @return int|false */
-function cal_days_in_month(int $calendar, int $month, int $year) {}
+/** @generate-function-entries */
 
-/** @return array<string, array<int, string>&int&string>|false */
-function cal_from_jd(int $jd, int $calendar) {}
+function cal_days_in_month(int $calendar, int $month, int $year): int {}
 
-/** @return array|false */
-function cal_info(?int $calendar = UNKNOWN) {}
+function cal_from_jd(int $julian_day, int $calendar): array {}
 
-/** @return int|false */
-function cal_to_jd(int $calendar, int $month, int $day, int $year) {}
+function cal_info(int $calendar = -1): array {}
 
-function easter_date(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
+function cal_to_jd(int $calendar, int $month, int $day, int $year): int {}
 
-function easter_days(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
+function easter_date(?int $year = null, int $mode = CAL_EASTER_DEFAULT): int {}
+
+function easter_days(?int $year = null, int $mode = CAL_EASTER_DEFAULT): int {}
 
 function frenchtojd(int $month, int $day, int $year): int {}
 
 function gregoriantojd(int $month, int $day, int $year): int {}
 
-/** @return int|string */
-function jddayofweek(int $juliandaycount, int $mode = CAL_DOW_DAYNO) {}
+function jddayofweek(int $julian_day, int $mode = CAL_DOW_DAYNO): int|string {}
 
-function jdmonthname(int $juliandaycount, int $mode): string {}
+function jdmonthname(int $julian_day, int $mode): string {}
 
-function jdtofrench(int $juliandaycount): string {}
+function jdtofrench(int $julian_day): string {}
 
-function jdtogregorian(int $juliandaycount): string {}
+function jdtogregorian(int $julian_day): string {}
 
-/** @return string|false */
-function jdtojewish(int $juliandaycount, bool $hebrew = false, int $fl = 0) {}
+function jdtojewish(int $julian_day, bool $hebrew = false, int $flags = 0): string {}
 
-function jdtojulian(int $juliandaycount): string {}
+function jdtojulian(int $julian_day): string {}
 
-/** @return int|false */
-function jdtounix(int $jday) {}
+function jdtounix(int $julian_day): int {}
 
 function jewishtojd(int $month, int $day, int $year): int {}
 
 function juliantojd(int $month, int $day, int $year): int {}
 
-/** @return int|false */
-function unixtojd(int $timestamp = UNKNOWN) {}
+function unixtojd(?int $timestamp = null): int|false {}

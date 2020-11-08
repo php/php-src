@@ -10,8 +10,8 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 <?php
 
 $descs = array(
-	0 => array('pipe', 'r'), // stdin
-	1 => array('pipe', 'w'), // stdout
+    0 => array('pipe', 'r'), // stdin
+    1 => array('pipe', 'w'), // stdout
 );
 
 $p = proc_open("ls", $descs, $pipes, '.', NULL, NULL);

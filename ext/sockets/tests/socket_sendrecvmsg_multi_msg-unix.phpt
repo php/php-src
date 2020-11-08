@@ -3,14 +3,14 @@ sendmsg()/recvmsg(): test ability to receive multiple messages
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets'))
-	die('skip sockets extension not available.');
+    die('skip sockets extension not available.');
 
 require 'ipv6_skipif.inc';
 
 if (!defined('IPPROTO_IPV6'))
-	die('skip IPv6 not available.');
+    die('skip IPv6 not available.');
 if (substr(PHP_OS, 0, 3) == 'WIN')
-	die('skip Not for the Windows!');
+    die('skip Not for the Windows!');
 /* Windows supports IPV6_RECVTCLASS and is able to receive the tclass via
  * WSARecvMsg (though only the top 6 bits seem to reported), but WSASendMsg
  * does not accept IPV6_TCLASS messages */
@@ -41,13 +41,13 @@ socket_set_option($s, IPPROTO_IPV6, IPV6_RECVPKTINFO, 1) or die("err");
 socket_set_option($s, IPPROTO_IPV6, IPV6_RECVTCLASS, 1) or die("err");
 
 $r = socket_sendmsg($sends1, [
-	"name" => [ "addr" => "::1", "port" => 3002],
-	"iov" => ["test ", "thing", "\n"],
-	"control" => [[
-		"level" => IPPROTO_IPV6,
-		"type" => IPV6_TCLASS,
-		"data" => 40,
-	]]
+    "name" => [ "addr" => "::1", "port" => 3002],
+    "iov" => ["test ", "thing", "\n"],
+    "control" => [[
+        "level" => IPPROTO_IPV6,
+        "type" => IPV6_TCLASS,
+        "data" => 40,
+    ]]
 ], 0);
 var_dump($r);
 checktimeout($s, 500);
@@ -56,16 +56,19 @@ $data = [
     "name" => ["family" => AF_INET6, "addr" => "::1"],
     "buffer_size" => 2000,
     "controllen" => socket_cmsg_space(IPPROTO_IPV6, IPV6_PKTINFO) +
-			socket_cmsg_space(IPPROTO_IPV6, IPV6_TCLASS),
+            socket_cmsg_space(IPPROTO_IPV6, IPV6_TCLASS),
 ];
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
 print_r($data);
+?>
 --EXPECTF--
 creating send socket
-resource(5) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 creating receive socket
-resource(6) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(11)
 Array

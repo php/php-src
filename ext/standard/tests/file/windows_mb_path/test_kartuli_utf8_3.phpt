@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+file_kartuli
 --FILE--
 <?php
 /*
@@ -31,10 +33,8 @@ system("dir /b " . $fn);
 remove_data("file_kartuli");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\ქართველები55"
 bool(true)
 bool(true)
 ქართველები55
-===DONE===

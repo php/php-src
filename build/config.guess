@@ -1,8 +1,8 @@
 #! /bin/sh
 # Attempt to guess a canonical system name.
-#   Copyright 1992-2019 Free Software Foundation, Inc.
+#   Copyright 1992-2020 Free Software Foundation, Inc.
 
-timestamp='2019-04-28'
+timestamp='2020-01-01'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ version="\
 GNU config.guess ($timestamp)
 
 Originally written by Per Bothner.
-Copyright 1992-2019 Free Software Foundation, Inc.
+Copyright 1992-2020 Free Software Foundation, Inc.
 
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
@@ -99,6 +99,8 @@ tmp=
 trap 'test -z "$tmp" || rm -fr "$tmp"' 0 1 2 13 15
 
 set_cc_for_build() {
+    # prevent multiple calls if $tmp is already set
+    test "$tmp" && return 0
     : "${TMPDIR=/tmp}"
     # shellcheck disable=SC2039
     { tmp=`(umask 077 && mktemp -d "$TMPDIR/cgXXXXXX") 2>/dev/null` && test -n "$tmp" && test -d "$tmp" ; } ||
@@ -262,6 +264,9 @@ case "$UNAME_MACHINE:$UNAME_SYSTEM:$UNAME_RELEASE:$UNAME_VERSION" in
     *:SolidBSD:*:*)
 	echo "$UNAME_MACHINE"-unknown-solidbsd"$UNAME_RELEASE"
 	exit ;;
+    *:OS108:*:*)
+	echo "$UNAME_MACHINE"-unknown-os108_"$UNAME_RELEASE"
+	exit ;;
     macppc:MirBSD:*:*)
 	echo powerpc-unknown-mirbsd"$UNAME_RELEASE"
 	exit ;;
@@ -271,12 +276,15 @@ case "$UNAME_MACHINE:$UNAME_SYSTEM:$UNAME_RELEASE:$UNAME_VERSION" in
     *:Sortix:*:*)
 	echo "$UNAME_MACHINE"-unknown-sortix
 	exit ;;
+    *:Twizzler:*:*)
+	echo "$UNAME_MACHINE"-unknown-twizzler
+	exit ;;
     *:Redox:*:*)
 	echo "$UNAME_MACHINE"-unknown-redox
 	exit ;;
     mips:OSF1:*.*)
-        echo mips-dec-osf1
-        exit ;;
+	echo mips-dec-osf1
+	exit ;;
     alpha:OSF1:*:*)
 	case $UNAME_RELEASE in
 	*4.0)
@@ -918,7 +926,7 @@ EOF
 	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
 	exit ;;
     alpha:Linux:*:*)
-	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
+	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' /proc/cpuinfo 2>/dev/null` in
 	  EV5)   UNAME_MACHINE=alphaev5 ;;
 	  EV56)  UNAME_MACHINE=alphaev56 ;;
 	  PCA56) UNAME_MACHINE=alphapca56 ;;
@@ -1325,38 +1333,39 @@ EOF
 	echo "$UNAME_MACHINE"-apple-rhapsody"$UNAME_RELEASE"
 	exit ;;
     *:Darwin:*:*)
-	UNAME_PROCESSOR=`uname -p` || UNAME_PROCESSOR=unknown
-	set_cc_for_build
-	if test "$UNAME_PROCESSOR" = unknown ; then
-	    UNAME_PROCESSOR=powerpc
+	UNAME_PROCESSOR=`uname -p`
+	case $UNAME_PROCESSOR in
+	    unknown) UNAME_PROCESSOR=powerpc ;;
+	esac
+	if command -v xcode-select > /dev/null 2> /dev/null && \
+		! xcode-select --print-path > /dev/null 2> /dev/null ; then
+	    # Avoid executing cc if there is no toolchain installed as
+	    # cc will be a stub that puts up a graphical alert
+	    # prompting the user to install developer tools.
+	    CC_FOR_BUILD=no_compiler_found
+	else
+	    set_cc_for_build
 	fi
-	if test "`echo "$UNAME_RELEASE" | sed -e 's/\..*//'`" -le 10 ; then
-	    if [ "$CC_FOR_BUILD" != no_compiler_found ]; then
-		if (echo '#ifdef __LP64__'; echo IS_64BIT_ARCH; echo '#endif') | \
-		       (CCOPTS="" $CC_FOR_BUILD -E - 2>/dev/null) | \
-		       grep IS_64BIT_ARCH >/dev/null
-		then
-		    case $UNAME_PROCESSOR in
-			i386) UNAME_PROCESSOR=x86_64 ;;
-			powerpc) UNAME_PROCESSOR=powerpc64 ;;
-		    esac
-		fi
-		# On 10.4-10.6 one might compile for PowerPC via gcc -arch ppc
-		if (echo '#ifdef __POWERPC__'; echo IS_PPC; echo '#endif') | \
-		       (CCOPTS="" $CC_FOR_BUILD -E - 2>/dev/null) | \
-		       grep IS_PPC >/dev/null
-		then
-		    UNAME_PROCESSOR=powerpc
-		fi
+	if [ "$CC_FOR_BUILD" != no_compiler_found ]; then
+	    if (echo '#ifdef __LP64__'; echo IS_64BIT_ARCH; echo '#endif') | \
+		   (CCOPTS="" $CC_FOR_BUILD -E - 2>/dev/null) | \
+		   grep IS_64BIT_ARCH >/dev/null
+	    then
+		case $UNAME_PROCESSOR in
+		    i386) UNAME_PROCESSOR=x86_64 ;;
+		    powerpc) UNAME_PROCESSOR=powerpc64 ;;
+		esac
+	    fi
+	    # On 10.4-10.6 one might compile for PowerPC via gcc -arch ppc
+	    if (echo '#ifdef __POWERPC__'; echo IS_PPC; echo '#endif') | \
+		   (CCOPTS="" $CC_FOR_BUILD -E - 2>/dev/null) | \
+		   grep IS_PPC >/dev/null
+	    then
+		UNAME_PROCESSOR=powerpc
 	    fi
 	elif test "$UNAME_PROCESSOR" = i386 ; then
-	    # Avoid executing cc on OS X 10.9, as it ships with a stub
-	    # that puts up a graphical alert prompting to install
-	    # developer tools.  Any system running Mac OS X 10.7 or
-	    # later (Darwin 11 and later) is required to have a 64-bit
-	    # processor. This is not true of the ARM version of Darwin
-	    # that Apple uses in portable devices.
-	    UNAME_PROCESSOR=x86_64
+	    # uname -m returns i386 or x86_64
+	    UNAME_PROCESSOR=$UNAME_MACHINE
 	fi
 	echo "$UNAME_PROCESSOR"-apple-darwin"$UNAME_RELEASE"
 	exit ;;

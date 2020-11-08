@@ -3,9 +3,9 @@ odbc_exec(): Basic test
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 <?php
-	if ("unixODBC" != ODBC_TYPE) {
-		die("skip ODBC_TYPE != unixODBC");
-	}
+    if ("unixODBC" != ODBC_TYPE) {
+        die("skip ODBC_TYPE != unixODBC");
+    }
 ?>
 --FILE--
 <?php
@@ -28,11 +28,11 @@ odbc_exec($conn, NULL);
 
 ?>
 --EXPECTF--
-Warning: odbc_exec() expects parameter 3 to be int, string given in %s on line %d
+Warning: odbc_exec(): Argument #3 must be of type int, string given in %s on line %d
 
 Warning: odbc_exec(): SQL error: %s in %s on line %d
 
-Warning: odbc_exec() expects parameter 3 to be int, string given in %s on line %d
+Warning: odbc_exec(): Argument #3 must be of type int, string given in %s on line %d
 
 Warning: odbc_exec(): SQL error: %s in %s on line %d
 

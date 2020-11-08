@@ -4,15 +4,20 @@ Testing imagecreatetruecolor(): error on out of bound parameters
 Rafael Dohms <rdohms [at] gmail [dot] com>
 --SKIPIF--
 <?php
-	if (!extension_loaded("gd")) die("skip GD not present");
-	if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
+    if (!extension_loaded("gd")) die("skip GD not present");
+    if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
 ?>
 --FILE--
 <?php
-$image = imagecreatetruecolor(-1, 30);
-$image = imagecreatetruecolor(30, -1);
-?>
---EXPECTF--
-Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
 
-Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
+require __DIR__ . '/func.inc';
+
+trycatch_dump(
+    fn() => imagecreatetruecolor(-1, 30),
+    fn() => imagecreatetruecolor(30, -1)
+);
+
+?>
+--EXPECT--
+!! [ValueError] imagecreatetruecolor(): Argument #1 ($width) must be greater than 0
+!! [ValueError] imagecreatetruecolor(): Argument #2 ($height) must be greater than 0

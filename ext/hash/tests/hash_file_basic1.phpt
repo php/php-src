@@ -3,18 +3,12 @@ Hash: hash_file() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string hash_file ( string algo, string filename [, bool raw_output] )
- * Description: Generate a hash value using the contents of a given file
- * Source code: ext/hash/hash.c
- * Alias to functions:
-*/
-
 echo "*** Testing hash_file() : basic functionality ***\n";
 
 $file = __DIR__ . "hash_file.txt";
 /* Creating a temporary file file */
 if (($fp = fopen( $file, "w+")) == FALSE) {
-	echo "Cannot create file ($file)";
+    echo "Cannot create file ($file)";
     exit;
 }
 
@@ -56,7 +50,6 @@ echo "sha256(raw): " . bin2hex(hash_file('sha256', $file, TRUE)). "\n";
 unlink($file);
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_file() : basic functionality ***
 adler32: ff87222e
@@ -80,4 +73,3 @@ whirlpool: 4248b149e000477269a4a5f1a84d97cfc3d0199b7aaf505913e6f010a6f83276029d1
 adler32(raw): ff87222e
 md5(raw): 704bf818448f5bbb94061332d2c889aa
 sha256(raw): a0f5702fa5d3670b80033d668e8732b70550392abb53841355447f8bb0f72245
-===Done===

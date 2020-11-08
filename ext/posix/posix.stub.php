@@ -1,6 +1,8 @@
 <?php
 
-function posix_kill(int $pid, int $sig): bool {}
+/** @generate-function-entries */
+
+function posix_kill(int $process_id, int $signal): bool {}
 
 function posix_getpid(): int {}
 
@@ -8,32 +10,30 @@ function posix_getppid(): int {}
 
 function posix_getuid(): int {}
 
-function posix_setuid(int $uid): bool {}
+function posix_setuid(int $user_id): bool {}
 
 function posix_geteuid(): int {}
 
 #ifdef HAVE_SETEUID
-function posix_seteuid(int $uid): bool {}
+function posix_seteuid(int $user_id): bool {}
 #endif
 
 function posix_getgid(): int {}
 
-function posix_setgid(int $gid): bool {}
+function posix_setgid(int $group_id): bool {}
 
 function posix_getegid(): int {}
 
 #ifdef HAVE_SETEGID
-function posix_setegid(int $gid): bool {}
+function posix_setegid(int $group_id): bool {}
 #endif
 
 #ifdef HAVE_GETGROUPS
-/** @return array|false */
-function posix_getgroups() {}
+function posix_getgroups(): array|false {}
 #endif
 
 #ifdef HAVE_GETLOGIN
-/** @return string|false */
-function posix_getlogin() {}
+function posix_getlogin(): string|false {}
 #endif
 
 function posix_getpgrp(): int {}
@@ -42,77 +42,66 @@ function posix_getpgrp(): int {}
 function posix_setsid(): int {}
 #endif
 
-function posix_setpgid(int $pid, int $pgid): bool {}
+function posix_setpgid(int $process_id, int $process_group_id): bool {}
 
 #ifdef HAVE_GETPGID
-/** @return int|false */
-function posix_getpgid(int $pid) {}
+function posix_getpgid(int $process_id): int|false {}
 #endif
 
 #ifdef HAVE_GETSID
-/** @return int|false */
-function posix_getsid(int $pid) {}
+function posix_getsid(int $process_id): int|false {}
 #endif
 
-/** @return array|false */
-function posix_uname() {}
+function posix_uname(): array|false {}
 
-/** @return array|false */
-function posix_times() {}
+function posix_times(): array|false {}
 
 
 #ifdef HAVE_CTERMID
-/** @return string|false */
-function posix_ctermid() {}
+function posix_ctermid(): string|false {}
 #endif
 
-/**
- * @return string|false
- */
-function posix_ttyname($fd) {}
+/** @param resource|int $file_descriptor */
+function posix_ttyname($file_descriptor): string|false {}
 
-function posix_isatty($fd): bool {}
+/** @param resource|int $file_descriptor */
+function posix_isatty($file_descriptor): bool {}
 
-/** @return string|false */
-function posix_getcwd() {}
+function posix_getcwd(): string|false {}
 
 #ifdef HAVE_MKFIFO
-function posix_mkfifo(string $pathname, int $mode): bool {}
+function posix_mkfifo(string $filename, int $permissions): bool {}
 #endif
 
 #ifdef HAVE_MKNOD
-function posix_mknod(string $pathname, int $mode, int $major = 0, int $minor = 0): bool {}
+function posix_mknod(string $filename, int $flags, int $major = 0, int $minor = 0): bool {}
 #endif
 
-function posix_access(string $file, int $mode = 0): bool {}
+function posix_access(string $filename, int $flags = 0): bool {}
 
-/** @return array|false */
-function posix_getgrnam(string $name) {}
+function posix_getgrnam(string $name): array|false {}
 
-/** @return array|false */
-function posix_getgrgid(int $gid) {}
+function posix_getgrgid(int $group_id): array|false {}
 
-/** @return array|false */
-function posix_getpwnam(string $username) {}
+function posix_getpwnam(string $username): array|false {}
 
-/** @return array|false */
-function posix_getpwuid(int $uid) {}
+function posix_getpwuid(int $user_id): array|false {}
 
 #ifdef HAVE_GETRLIMIT
-/** @return array|false */
-function posix_getrlimit() {}
+function posix_getrlimit(): array|false {}
 #endif
 
 #ifdef HAVE_SETRLIMIT
-function posix_setrlimit(int $resource, int $softlimit, int $hardlimit): bool {}
+function posix_setrlimit(int $resource, int $soft_limit, int $hard_limit): bool {}
 #endif
 
 function posix_get_last_error(): int {}
 
+/** @alias posix_get_last_error */
 function posix_errno(): int {}
 
-function posix_strerror(int $errno): string {}
+function posix_strerror(int $error_code): string {}
 
 #ifdef HAVE_INITGROUPS
-function posix_initgroups(string $name, int $base_group_id): bool {}
+function posix_initgroups(string $username, int $group_id): bool {}
 #endif

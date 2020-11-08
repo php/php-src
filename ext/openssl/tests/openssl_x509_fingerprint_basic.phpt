@@ -36,9 +36,9 @@ string(32) "ac77008e172897e06c0b065294487a67"
 string(40) "6e6fd1ea10a5a23071d61c728ee9b40df6dbc33c"
 ** Testing bad certification **
 
-Warning: openssl_x509_fingerprint(): cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_fingerprint(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 ** Testing bad hash method **
 
-Warning: openssl_x509_fingerprint(): Unknown signature algorithm in %s on line %d
+Warning: openssl_x509_fingerprint(): Unknown digest algorithm in %s on line %d
 bool(false)

@@ -103,8 +103,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht);
 
 #define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent) \
 	_zend_hash_init((ht), (nSize), (pDestructor), (persistent))
-#define zend_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection) \
-	_zend_hash_init((ht), (nSize), (pDestructor), (persistent))
 
 ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed);
 ZEND_API void ZEND_FASTCALL zend_hash_real_init_packed(HashTable *ht);
@@ -164,11 +162,11 @@ ZEND_API void ZEND_FASTCALL zend_hash_reverse_apply(HashTable *ht, apply_func_t 
 
 
 /* Deletes */
-ZEND_API int ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key);
-ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key);
-ZEND_API int ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *key, size_t len);
-ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *key, size_t len);
-ZEND_API int ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *key, size_t len);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *key, size_t len);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h);
 ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p);
 
 /* Data retrieval */
@@ -229,8 +227,8 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *h
 
 #define zend_hash_has_more_elements_ex(ht, pos) \
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
-ZEND_API int   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int   ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
+ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
+ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
 ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
@@ -264,9 +262,11 @@ ZEND_API void  ZEND_FASTCALL zend_hash_merge_ex(HashTable *target, HashTable *so
 ZEND_API void  zend_hash_bucket_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
+
+typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
 ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered);
-ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber);
-ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
+ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, zend_bool renumber);
+ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, bucket_compare_func_t compar, uint32_t flag);
 
 #define zend_hash_sort(ht, compare_func, renumber) \
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber)
@@ -305,7 +305,7 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate);
 
-ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
+ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
 
 ZEND_API uint32_t     ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPosition pos);
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos(uint32_t idx, HashTable *ht);
@@ -322,6 +322,26 @@ static zend_always_inline void zend_hash_iterators_update(HashTable *ht, HashPos
 	}
 }
 
+/* For regular arrays (non-persistent, storing zvals). */
+static zend_always_inline void zend_array_release(zend_array *array)
+{
+	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
+		if (GC_DELREF(array) == 0) {
+			zend_array_destroy(array);
+		}
+	}
+}
+
+/* For general hashes (possibly persistent, storing any kind of value). */
+static zend_always_inline void zend_hash_release(zend_array *array)
+{
+	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
+		if (GC_DELREF(array) == 0) {
+			zend_hash_destroy(array);
+			pefree(array, GC_FLAGS(array) & IS_ARRAY_PERSISTENT);
+		}
+	}
+}
 
 END_EXTERN_C()
 
@@ -331,7 +351,7 @@ END_EXTERN_C()
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
-static zend_always_inline int _zend_handle_numeric_str(const char *key, size_t length, zend_ulong *idx)
+static zend_always_inline bool _zend_handle_numeric_str(const char *key, size_t length, zend_ulong *idx)
 {
 	const char *tmp = key;
 
@@ -376,7 +396,7 @@ static zend_always_inline zval *zend_hash_find_ex_ind(const HashTable *ht, zend_
 }
 
 
-static zend_always_inline int zend_hash_exists_ind(const HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_hash_exists_ind(const HashTable *ht, zend_string *key)
 {
 	zval *zv;
 
@@ -396,7 +416,7 @@ static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, cons
 }
 
 
-static zend_always_inline int zend_hash_str_exists_ind(const HashTable *ht, const char *str, size_t len)
+static zend_always_inline bool zend_hash_str_exists_ind(const HashTable *ht, const char *str, size_t len)
 {
 	zval *zv;
 
@@ -440,7 +460,7 @@ static zend_always_inline zval *zend_symtable_update_ind(HashTable *ht, zend_str
 }
 
 
-static zend_always_inline int zend_symtable_del(HashTable *ht, zend_string *key)
+static zend_always_inline zend_result zend_symtable_del(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -452,7 +472,7 @@ static zend_always_inline int zend_symtable_del(HashTable *ht, zend_string *key)
 }
 
 
-static zend_always_inline int zend_symtable_del_ind(HashTable *ht, zend_string *key)
+static zend_always_inline zend_result zend_symtable_del_ind(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -488,7 +508,7 @@ static zend_always_inline zval *zend_symtable_find_ind(const HashTable *ht, zend
 }
 
 
-static zend_always_inline int zend_symtable_exists(HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_symtable_exists(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -500,7 +520,7 @@ static zend_always_inline int zend_symtable_exists(HashTable *ht, zend_string *k
 }
 
 
-static zend_always_inline int zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_symtable_exists_ind(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -536,7 +556,7 @@ static zend_always_inline zval *zend_symtable_str_update_ind(HashTable *ht, cons
 }
 
 
-static zend_always_inline int zend_symtable_str_del(HashTable *ht, const char *str, size_t len)
+static zend_always_inline zend_result zend_symtable_str_del(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -548,7 +568,7 @@ static zend_always_inline int zend_symtable_str_del(HashTable *ht, const char *s
 }
 
 
-static zend_always_inline int zend_symtable_str_del_ind(HashTable *ht, const char *str, size_t len)
+static zend_always_inline zend_result zend_symtable_str_del_ind(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -572,7 +592,7 @@ static zend_always_inline zval *zend_symtable_str_find(HashTable *ht, const char
 }
 
 
-static zend_always_inline int zend_symtable_str_exists(HashTable *ht, const char *str, size_t len)
+static zend_always_inline bool zend_symtable_str_exists(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -845,6 +865,14 @@ static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, cons
 	}
 }
 
+/* Will lowercase the str; use only if you don't need the lowercased string for
+ * anything else. If you have a lowered string, use zend_hash_str_find_ptr. */
+ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len);
+
+/* Will lowercase the str; use only if you don't need the lowercased string for
+ * anything else. If you have a lowered string, use zend_hash_find_ptr. */
+ZEND_API void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key);
+
 static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, zend_ulong h)
 {
 	zval *zv;
@@ -965,28 +993,57 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	ZEND_HASH_FOREACH(ht, 0); \
 	_bucket = _p;
 
+#define ZEND_HASH_REVERSE_FOREACH_BUCKET(ht, _bucket) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_bucket = _p;
+
 #define ZEND_HASH_FOREACH_VAL(ht, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_val = _z;
+
+#define ZEND_HASH_REVERSE_FOREACH_VAL(ht, _val) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_VAL_IND(ht, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
 	_val = _z;
 
+#define ZEND_HASH_REVERSE_FOREACH_VAL_IND(ht, _val) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
+	_val = _z;
+
 #define ZEND_HASH_FOREACH_PTR(ht, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_HASH_REVERSE_FOREACH_PTR(ht, _ptr) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_NUM_KEY(ht, _h) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_h = _p->h;
 
+#define ZEND_HASH_REVERSE_FOREACH_NUM_KEY(ht, _h) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_h = _p->h;
+
 #define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_key = _p->key;
 
+#define ZEND_HASH_REVERSE_FOREACH_STR_KEY(ht, _key) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_key = _p->key;
+
 #define ZEND_HASH_FOREACH_KEY(ht, _h, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_key = _p->key;
+
+#define ZEND_HASH_REVERSE_FOREACH_KEY(ht, _h, _key) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_h = _p->h; \
 	_key = _p->key;
 
@@ -995,8 +1052,18 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_h = _p->h; \
 	_val = _z;
 
+#define ZEND_HASH_REVERSE_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_val = _z;
+
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key; \
+	_val = _z;
+
+#define ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(ht, _key, _val) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_key = _p->key; \
 	_val = _z;
 
@@ -1006,8 +1073,19 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_key = _p->key; \
 	_val = _z;
 
+#define ZEND_HASH_REVERSE_FOREACH_KEY_VAL(ht, _h, _key, _val) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_key = _p->key; \
+	_val = _z;
+
 #define ZEND_HASH_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
+	_key = _p->key; \
+	_val = _z;
+
+#define ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
 	_key = _p->key; \
 	_val = _z;
 
@@ -1017,13 +1095,29 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_key = _p->key; \
 	_val = _z;
 
+#define ZEND_HASH_REVERSE_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
+	_h = _p->h; \
+	_key = _p->key; \
+	_val = _z;
+
 #define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_h = _p->h; \
 	_ptr = Z_PTR_P(_z);
 
+#define ZEND_HASH_REVERSE_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_ptr = Z_PTR_P(_z);
+
 #define ZEND_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key; \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_HASH_REVERSE_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_key = _p->key; \
 	_ptr = Z_PTR_P(_z);
 
@@ -1033,38 +1127,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_key = _p->key; \
 	_ptr = Z_PTR_P(_z);
 
-#define ZEND_HASH_REVERSE_FOREACH_BUCKET(ht, _bucket) \
+#define ZEND_HASH_REVERSE_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_bucket = _p;
-
-#define ZEND_HASH_REVERSE_FOREACH_VAL(ht, _val) \
-	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_val = _z;
-
-#define ZEND_HASH_REVERSE_FOREACH_PTR(ht, _ptr) \
-	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_key = _p->key; \
 	_ptr = Z_PTR_P(_z);
-
-#define ZEND_HASH_REVERSE_FOREACH_VAL_IND(ht, _val) \
-	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
-	_val = _z;
-
-#define ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(ht, _key, _val) \
-	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_key = _p->key; \
-	_val = _z;
-
-#define ZEND_HASH_REVERSE_FOREACH_KEY_VAL(ht, _h, _key, _val) \
-	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
-	_val = _z;
-
-#define ZEND_HASH_REVERSE_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
-	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
-	_h = _p->h; \
-	_key = _p->key; \
-	_val = _z;
 
 /* The following macros are useful to insert a sequence of new elements
  * of packed array. They may be used instead of series of
@@ -1110,14 +1177,18 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		ZEND_HASH_FILL_NEXT(); \
 	} while (0)
 
-#define ZEND_HASH_FILL_END() \
+#define ZEND_HASH_FILL_FINISH() do { \
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \
 		__fill_ht->nNextFreeElement = __fill_idx; \
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)
 
-static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string *key, zval *zv, int interned)
+#define ZEND_HASH_FILL_END() \
+		ZEND_HASH_FILL_FINISH(); \
+	} while (0)
+
+static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string *key, zval *zv, bool interned)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;
@@ -1143,7 +1214,7 @@ static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *ke
 	return _zend_hash_append_ex(ht, key, zv, 0);
 }
 
-static zend_always_inline zval *_zend_hash_append_ptr_ex(HashTable *ht, zend_string *key, void *ptr, int interned)
+static zend_always_inline zval *_zend_hash_append_ptr_ex(HashTable *ht, zend_string *key, void *ptr, bool interned)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;

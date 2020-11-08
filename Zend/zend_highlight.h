@@ -39,8 +39,8 @@ typedef struct _zend_syntax_highlighter_ini {
 BEGIN_EXTERN_C()
 ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini);
 ZEND_API void zend_strip(void);
-ZEND_API int highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini);
-ZEND_API int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *str_name);
+ZEND_API zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini);
+ZEND_API void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *str_name);
 ZEND_API void zend_html_putc(char c);
 ZEND_API void zend_html_puts(const char *s, size_t len);
 END_EXTERN_C()

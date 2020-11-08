@@ -3,20 +3,20 @@ Bug #72508 (strange references after recursive function call and "switch" statem
 --FILE--
 <?php
 function a ($option) {
-	b($option['bla']);
-	c($option);
-	var_dump($option);
+    b($option['bla']);
+    c($option);
+    var_dump($option);
 }
 function b (&$string) {
-	$string = 'changed';
+    $string = 'changed';
 }
 function c ($option) {
-	switch ($option['bla']) {
-	default:
-		$copy = $option;
-		$copy['bla'] = 'copy';
-		break;
-	}
+    switch ($option['bla']) {
+    default:
+        $copy = $option;
+        $copy['bla'] = 'copy';
+        break;
+    }
 }
 a(array('bla' => 'fasel'));
 

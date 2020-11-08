@@ -27,12 +27,10 @@ $sql = "SELECT bit_column_1 FROM $tbl";
 $result = $mysqli->query($sql);
 
 while ($row = $result->fetch_assoc()) {
-	var_dump($row['bit_column_1']);
+    var_dump($row['bit_column_1']);
 }
 
 ?>
-==DONE==
 --EXPECT--
 string(1) "0"
 string(4) "1365"
-==DONE==

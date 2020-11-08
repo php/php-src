@@ -2,7 +2,7 @@
 Bug #51671 (imagefill does not work correctly for small images)
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 ?>
 --FILE--
 <?php

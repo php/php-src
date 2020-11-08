@@ -1,5 +1,5 @@
 --TEST--
-JIT CMP: 003 Comparisoin with NaN
+JIT CMP: 003 Comparison with NaN
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -11,12 +11,12 @@ opcache.protect_memory=1
 --FILE--
 <?php
 function t() {
-	echo "!";
-	return true;
+    echo "!";
+    return true;
 }
 function f() {
-	echo "!";
-	return false;
+    echo "!";
+    return false;
 }
 $a = 0.0;
 $i = 0;
@@ -37,27 +37,27 @@ var_dump($a <= $b ? 1 : 0);
 var_dump($a >= $b ? 1 : 0);
 if ($a == $b) {
 } else {
-	echo "1\n";
+    echo "1\n";
 }
 if ($a != $b) {
 } else {
-	echo "2\n";
+    echo "2\n";
 }
 if ($a < $b) {
 } else {
-	echo "3\n";
+    echo "3\n";
 }
 if ($a > $b) {
 } else {
-	echo "4\n";
+    echo "4\n";
 }
 if ($a <= $b) {
 } else {
-	echo "5\n";
+    echo "5\n";
 }
 if ($a >= $b) {
 } else {
-	echo "6\n";
+    echo "6\n";
 }
 var_dump($i == $b ? 1 : 0);
 var_dump($i != $b ? 1 : 0);
@@ -67,27 +67,27 @@ var_dump($i <= $b ? 1 : 0);
 var_dump($i >= $b ? 1 : 0);
 if ($i == $b) {
 } else {
-	echo "1\n";
+    echo "1\n";
 }
 if ($i != $b) {
 } else {
-	echo "2\n";
+    echo "2\n";
 }
 if ($i < $b) {
 } else {
-	echo "3\n";
+    echo "3\n";
 }
 if ($i > $b) {
 } else {
-	echo "4\n";
+    echo "4\n";
 }
 if ($i <= $b) {
 } else {
-	echo "5\n";
+    echo "5\n";
 }
 if ($i >= $b) {
 } else {
-	echo "6\n";
+    echo "6\n";
 }
 var_dump($a == $b && t());
 var_dump($a != $b && t());

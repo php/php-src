@@ -21,8 +21,8 @@ var_dump($y);
 
 ?>
 --EXPECTF--
-Warning: Parameter 1 to Foo\bar() expected to be a reference, value given in %s on line %d
+Warning: Foo\bar(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 int(42)
 
-Warning: Parameter 1 to Foo\bar() expected to be a reference, value given in %s on line %d
+Warning: Foo\bar(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 int(42)

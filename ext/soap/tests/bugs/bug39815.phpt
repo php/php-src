@@ -40,8 +40,9 @@ echo $x->__getLastResponse();
 setlocale(LC_ALL,"en_US","en_US.ISO8859-1");
 var_dump($x->test());
 echo $x->__getLastResponse();
+?>
 --EXPECT--
-float(123,456)
+float(123.456)
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:testResponse><return xsi:type="xsd:float">123.456</return></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
 float(123.456)

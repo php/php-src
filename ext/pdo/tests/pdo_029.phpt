@@ -25,19 +25,19 @@ class PDOStatementX extends PDOStatement
 
     protected function __construct($dbh)
     {
-    	$this->dbh = $dbh;
-    	echo __METHOD__ . "()\n";
+        $this->dbh = $dbh;
+        echo __METHOD__ . "()\n";
     }
 
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
 
     function execute($params = array())
     {
-    	echo __METHOD__ . "()\n";
-		parent::execute();
+        echo __METHOD__ . "()\n";
+        parent::execute();
     }
 }
 
@@ -45,16 +45,16 @@ class PDODatabase extends PDO
 {
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
 
-    function query($sql)
+    function query($sql, ...$rest)
     {
-    	echo __METHOD__ . "()\n";
-    	$stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
-    	$stmt->setFetchMode(PDO::FETCH_ASSOC);
-    	$stmt->execute();
-    	return $stmt;
+        echo __METHOD__ . "()\n";
+        $stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute();
+        return $stmt;
     }
 }
 
@@ -80,7 +80,7 @@ var_dump(get_class($stmt->dbh));
 echo "===FOREACH===\n";
 
 foreach($stmt as $obj) {
-	var_dump($obj);
+    var_dump($obj);
 }
 
 echo "===DONE===\n";

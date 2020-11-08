@@ -11,15 +11,16 @@ opcache.optimization_level=-1
 <?php
 
 switch (PHP_OS) {
-	case "Windows":
-	break;
-	case "Darwin":
-	break;
-	case "Linux":
-		echo "okey";
-	break;
-	default:
-	break;
+    case "Windows":
+    break;
+    case "Darwin":
+    break;
+    case "Linux":
+        echo "okey";
+    break;
+    default:
+    break;
 }
+?>
 --EXPECT--
 okey

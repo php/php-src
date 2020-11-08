@@ -16,7 +16,12 @@ var_dump(define("test const", 3));
 var_dump(define("test const", 3));
 var_dump(define("test", array(1)));
 var_dump(define("test1", fopen(__FILE__, 'r')));
+
+try {
 var_dump(define("test2", new stdclass));
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 var_dump(constant(" "));
 var_dump(constant("[[["));
@@ -25,21 +30,19 @@ var_dump(constant("test const"));
 echo "Done\n";
 ?>
 --EXPECTF--
-TypeError: define() expects parameter 1 to be string, array given
+TypeError: define(): Argument #1 ($constant_name) must be of type string, array given
 
-Notice: Constant TRUE already defined in %s on line %d
+Warning: Constant TRUE already defined in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 bool(true)
 
-Notice: Constant test const already defined in %s on line %d
+Warning: Constant test const already defined in %s on line %d
 bool(false)
 bool(true)
 bool(true)
-
-Warning: Constants may only evaluate to scalar values, arrays or resources in %s on line %d
-bool(false)
+define(): Argument #2 ($value) cannot be an object, stdClass given
 int(1)
 int(2)
 int(3)

@@ -37,7 +37,6 @@ $df->setTimeZone(new DateTimeZone('Europe/Amsterdam'));
 d($df);
 
 ?>
-==DONE==
 --EXPECTF--
 Domingo, 1 de Janeiro de 2012 às 03:00:00 GMT+03:00
 string(12) "Europe/Minsk"
@@ -59,4 +58,3 @@ Domingo, 1 de Janeiro de 2012 às 01:00:00 Hor%s %Sda Europa Central
 string(16) "Europe/Amsterdam"
 string(16) "Europe/Amsterdam"
 
-==DONE==

@@ -12,6 +12,7 @@ $t = transliterator_create("any-latin");
 echo $t->id,"\n";
 
 echo "Done.\n";
+?>
 --EXPECT--
 any-latin
 any-latin

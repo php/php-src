@@ -3,46 +3,57 @@ mysqli_field_tell()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	require('table.inc');
-	if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    require('table.inc');
+    if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	var_dump(mysqli_field_tell($res));
-	var_dump(mysqli_field_tell($res));
-	var_dump(mysqli_fetch_field($res));
-	var_dump(mysqli_fetch_field($res));
-	var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_fetch_field($res));
+    var_dump(mysqli_fetch_field($res));
+    var_dump(mysqli_field_tell($res));
 
-	var_dump(mysqli_field_seek($res, 2));
-	var_dump(mysqli_field_tell($res));
+    try {
+        var_dump(mysqli_field_seek($res, 2));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    var_dump(mysqli_field_tell($res));
 
-	var_dump(mysqli_field_seek($res, -1));
-	var_dump(mysqli_field_tell($res));
+    try {
+        var_dump(mysqli_field_seek($res, -1));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    var_dump(mysqli_field_tell($res));
 
-	var_dump(mysqli_field_seek($res, 0));
-	var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_seek($res, 0));
+    var_dump(mysqli_field_tell($res));
 
 
 
-	mysqli_free_result($res);
+    mysqli_free_result($res);
 
-	var_dump(mysqli_field_tell($res));
+    try {
+        mysqli_field_tell($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	mysqli_close($link);
+    mysqli_close($link);
 
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 int(0)
@@ -77,17 +88,11 @@ object(stdClass)#%d (13) {
 }
 bool(false)
 int(1)
-
-Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
-bool(false)
+mysqli_field_seek(): Argument #2 ($index) must be less than the number of fields for this result set
 int(1)
-
-Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
-bool(false)
+mysqli_field_seek(): Argument #2 ($index) must be greater than or equal to 0
 int(1)
 bool(true)
 int(0)
-
-Warning: mysqli_field_tell(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
+mysqli_result object is already closed
 done!

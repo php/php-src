@@ -11,8 +11,8 @@ $timestamp = "2005-11-08T11:22:07+03:00";
 $wsdl = __DIR__."/bug35142.wsdl";
 
 function PostEvents($x) {
-	var_dump($x);
-	exit();
+    var_dump($x);
+    exit();
   return $x;
 }
 
@@ -25,7 +25,7 @@ class TestSoapClient extends SoapClient {
   }
 
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
-		echo "$request\n";
+        echo "$request\n";
     $this->server->handle($request);
     return $response;
   }
@@ -33,11 +33,11 @@ class TestSoapClient extends SoapClient {
 }
 
 $soapClient = new TestSoapClient($wsdl,
-	array('trace' => 1, 'exceptions' => 0,
-		'classmap' => array('logOnEvent' => 'LogOnEvent',
-			'logOffEvent' => 'LogOffEvent',
-			'events' => 'IVREvents'),
-		'features' => SOAP_SINGLE_ELEMENT_ARRAYS));
+    array('trace' => 1, 'exceptions' => 0,
+        'classmap' => array('logOnEvent' => 'LogOnEvent',
+            'logOffEvent' => 'LogOffEvent',
+            'events' => 'IVREvents'),
+        'features' => SOAP_SINGLE_ELEMENT_ARRAYS));
 
 $logOnEvent = new LogOnEvent(34567, $timestamp);
 $logOffEvents[] = new LogOffEvent(34567, $timestamp, "Smoked");

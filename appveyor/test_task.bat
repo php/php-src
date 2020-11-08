@@ -49,23 +49,26 @@ set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 rem prepare for ext/openssl
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win64 >NUL 2>NUL
-mkdir c:\usr\local\ssl
+if "%PLATFORM%" == "x64" (
+	set OPENSSLDIR="C:\Program Files\Common Files\SSL"
+) else (
+	set OPENSSLDIR="C:\Program Files (x86)\Common Files\SSL"
+)
+mkdir %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\template\ssl\openssl.cnf c:\usr\local\ssl
+copy %DEPS_DIR%\template\ssl\openssl.cnf %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
-set OPENSSL_CONF=c:\usr\local\ssl\openssl.cnf
-rem set OPENSSL_CONF=
+rem set OPENSSL_CONF=%OPENSSLDIR%\openssl.cnf
+set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
 rem prepare for Opcache
-if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1
+if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M
 
 rem prepare for enchant
-mkdir c:\enchant_plugins
+mkdir C:\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\bin\libenchant_ispell.dll c:\enchant_plugins
-if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\bin\libenchant_myspell.dll c:\enchant_plugins
+copy %DEPS_DIR%\bin\libenchant2_hunspell.dll C:\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
 reg add HKEY_CURRENT_USER\SOFTWARE\Enchant\Config /v Module_Dir /t REG_SZ /d c:\enchant_plugins
 if %errorlevel% neq 0 exit /b 3
@@ -83,15 +86,19 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 	del /q dict.zip
 	popd
 )
-mkdir %USERPROFILE%\enchant\myspell
-copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %USERPROFILE%\enchant\myspell
+mkdir %LOCALAPPDATA%\enchant\hunspell
+copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
+
+set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_OBJ_DIR%\Release
+if "%THREAD_SAFE%" equ "1" set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%_TS
+set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%\phpdbg.exe
 
 mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
 
 cd "%APPVEYOR_BUILD_FOLDER%"
-nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
 

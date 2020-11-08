@@ -5,7 +5,7 @@ openssl_pkey_new() error tests
 --FILE--
 <?php
 /* openssl_pkey_get_details() segfaults when getting the information
-	from openssl_pkey_new() with an empty sub-array arg 		*/
+    from openssl_pkey_new() with an empty sub-array arg 		*/
 
 $rsa = array("rsa" => array());
 $dsa = array("dsa" => array());
@@ -28,6 +28,6 @@ try {
 }
 ?>
 --EXPECT--
-openssl_pkey_get_details() expects parameter 1 to be resource, bool given
-openssl_pkey_get_details() expects parameter 1 to be resource, bool given
-openssl_pkey_get_details() expects parameter 1 to be resource, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given

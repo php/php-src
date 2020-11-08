@@ -19,5 +19,5 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Notice: Undefined variable: undef in %swrong_inlining_003.php on line 7
+Warning: Undefined variable $undef in %s on line %d
 int(42)

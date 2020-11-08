@@ -27,5 +27,5 @@ try {
 ?>
 --EXPECT--
 Called function foo:bar(1)
-call_user_func_array() expects parameter 1 to be a valid callback, cannot access private method foo::bar()
-Call to private method foo::bar() from context ''
+call_user_func_array(): Argument #1 ($function) must be a valid callback, cannot access private method foo::bar()
+Call to private method foo::bar() from global scope

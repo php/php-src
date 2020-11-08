@@ -824,7 +824,7 @@ void gdImageFlipHorizontal(gdImagePtr im);
 void gdImageFlipVertical(gdImagePtr im);
 void gdImageFlipBoth(gdImagePtr im);
 
-#define GD_FLIP_HORINZONTAL 1
+#define GD_FLIP_HORIZONTAL 1
 #define GD_FLIP_VERTICAL 2
 #define GD_FLIP_BOTH 3
 
@@ -902,7 +902,7 @@ int gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6], gdRectPt
 
 
 #define GD_CMP_IMAGE		1	/* Actual image IS different */
-#define GD_CMP_NUM_COLORS	2	/* Number of Colours in pallette differ */
+#define GD_CMP_NUM_COLORS	2	/* Number of Colours in palette differ */
 #define GD_CMP_COLOR		4	/* Image colours differ */
 #define GD_CMP_SIZE_X		8	/* Image width differs */
 #define GD_CMP_SIZE_Y		16	/* Image heights differ */

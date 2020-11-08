@@ -13,7 +13,7 @@ var_dump(strcasecmp("01", "01"));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(-3)
 int(-1)

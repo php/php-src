@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -255,9 +253,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	if (filter == NULL) {
 		/* TODO: these need correct docrefs */
 		if (factory == NULL)
-			php_error_docref(NULL, E_WARNING, "unable to locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to locate filter \"%s\"", filtername);
 		else
-			php_error_docref(NULL, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to create or locate filter \"%s\"", filtername);
 	}
 
 	return filter;
@@ -360,8 +358,6 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 			case PSFS_PASS_ON:
 				/* If any data is consumed, we cannot rely upon the existing read buffer,
 				   as the filtered data must replace the existing data, so invalidate the cache */
-				/* note that changes here should be reflected in
-				   main/streams/streams.c::php_stream_fill_read_buffer */
 				stream->writepos = 0;
 				stream->readpos = 0;
 

@@ -19,4 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-openssl_spki_new(): supplied resource is not a valid OpenSSL X.509/key resource
+openssl_spki_new(): Argument #1 ($private_key) must be of type OpenSSLAsymmetricKey, resource given

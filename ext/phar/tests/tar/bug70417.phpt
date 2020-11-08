@@ -9,11 +9,14 @@ exec('lsof -p ' . getmypid(), $out, $status);
 if ($status !== 0) {
     die("skip lsof(8) not available");
 }
+if (!str_starts_with($out[0], 'COMMAND')) {
+    die("skip Might be a different lsof");
+}
 ?>
 --FILE--
 <?php
 function countOpenFiles() {
-    exec('lsof -p ' . escapeshellarg(getmypid()) . ' 2> /dev/null', $out);
+    exec('lsof -p ' . escapeshellarg(getmypid()) . ' 2> /dev/null', $out);  // Note: valgrind can produce false positives for /usr/bin/lsof
     return count($out);
 }
 $filename = __DIR__ . '/bug70417.tar';

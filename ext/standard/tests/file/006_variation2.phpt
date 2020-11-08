@@ -5,29 +5,10 @@ Test fileperms() & chmod() functions: usage variation - misc. perms
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not on Windows');
 }
-// Skip if being run by root
-$filename = __DIR__."/006_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-
-unlink($filename);
-
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*
-  Prototype: int fileperms ( string $filename );
-  Description: Returns the permissions on the file, or FALSE in case of an error
-
-  Prototype: bool chmod ( string $filename, int $mode );
-  Description: Attempts to change the mode of the file specified by
-               filename to that given in mode
-*/
-
 /* Testing with miscellaneous Permission */
 
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
@@ -96,7 +77,7 @@ chmod(__DIR__."/006_variation2", 0777);
 unlink(__DIR__."/006_variation2.tmp");
 rmdir(__DIR__."/006_variation2");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fileperms() & chmod() : usage variations ***
 
 *** Testing fileperms(), chmod() with miscellaneous permissions ***
@@ -156,15 +137,15 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-chmod() expects parameter 2 to be int, string given
-chmod() expects parameter 2 to be int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 13 --
-chmod() expects parameter 2 to be int, string given
-chmod() expects parameter 2 to be int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 14 --
-chmod() expects parameter 2 to be int, string given
-chmod() expects parameter 2 to be int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 15 --
-chmod() expects parameter 2 to be int, string given
-chmod() expects parameter 2 to be int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 *** Done ***

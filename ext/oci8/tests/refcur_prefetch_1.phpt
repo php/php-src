@@ -7,7 +7,7 @@ require(__DIR__."/connect.inc");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) &&
       ($matches[1] >= 10))) {
-       	die("skip expected output only valid when using Oracle 10g or greater database server");
+        die("skip expected output only valid when using Oracle 10g or greater database server");
 }
 preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
 if (!(isset($matches[0]) &&
@@ -23,25 +23,25 @@ require(__DIR__."/connect.inc");
 
 // Creates the necessary package and tables.
 $stmtarray = array(
-	   "DROP TABLE refcurtest",
-	   "CREATE TABLE refcurtest (c1 NUMBER, c2 VARCHAR(20))",
+       "DROP TABLE refcurtest",
+       "CREATE TABLE refcurtest (c1 NUMBER, c2 VARCHAR(20))",
            "CREATE or REPLACE PACKAGE refcurpkg is
            type refcursortype is ref cursor;
            procedure open_ref_cur(cur1 out refcursortype);
            procedure fetch_ref_cur(cur1 in refcursortype, c1 out number,c2 out varchar2);
            end refcurpkg;",
           "CREATE or REPLACE PACKAGE body refcurpkg is
-  	    procedure open_ref_cur(cur1 out refcursortype) is
+        procedure open_ref_cur(cur1 out refcursortype) is
               begin
-	        open cur1 for select * from refcurtest order by c1;
-	      end open_ref_cur;
-  	     procedure fetch_ref_cur(cur1 in refcursortype, c1 out number,
-		c2 out varchar2) is
-  	      begin
-	    	fetch cur1 into c1,c2;
-	    end fetch_ref_cur;
+            open cur1 for select * from refcurtest order by c1;
+          end open_ref_cur;
+         procedure fetch_ref_cur(cur1 in refcursortype, c1 out number,
+        c2 out varchar2) is
+          begin
+            fetch cur1 into c1,c2;
+        end fetch_ref_cur;
          end refcurpkg;"
-	);
+    );
 
 oci8_test_sql_execute($c, $stmtarray);
 
@@ -61,7 +61,7 @@ for ($i = 0; $i<=500; $i++) {
 }
 
 // Various values for prefetch
-$pref = array(0,1,501,499,250,12345,-12345,-1);
+$pref = array(0,1,501,499,250,12345);
 foreach($pref as $value) {
     echo"-----------------------------------------------\n";
     echo "Test with Prefetch value set to $value \n";
@@ -69,6 +69,21 @@ foreach($pref as $value) {
     $cur1 = oci_new_cursor($c);
     fetch_frm_php($c,$cur1,$value);
     fetch_frm_plsql($c,$cur1);
+}
+
+// Various invalid values for prefetch
+$pref = array(-12345,-1);
+foreach($pref as $value) {
+    try {
+        echo "-----------------------------------------------\n";
+        echo "Test with Prefetch (invalid) value set to $value \n";
+        echo "-----------------------------------------------\n";
+        $cur1 = oci_new_cursor($c);
+        fetch_frm_php($c,$cur1,$value);
+        fetch_frm_plsql($c,$cur1);
+    } catch(ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 
@@ -206,33 +221,11 @@ Fetch Row from PL/SQL
 int(0)
 NULL
 -----------------------------------------------
-Test with Prefetch value set to -12345 
+Test with Prefetch (invalid) value set to -12345 
 -----------------------------------------------
-
-Warning: oci_set_prefetch(): Number of rows to be prefetched has to be greater than or equal to 0 in %s on line %d
-Fetch Row from PHP
-array(2) {
-  [0]=>
-  string(%d) "0"
-  [1]=>
-  string(%d) "test0"
-}
-Fetch Row from PL/SQL
-int(101)
-string(%d) "test101"
+oci_set_prefetch(): Argument #2 ($rows) must be greater than or equal to 0
 -----------------------------------------------
-Test with Prefetch value set to -1 
+Test with Prefetch (invalid) value set to -1 
 -----------------------------------------------
-
-Warning: oci_set_prefetch(): Number of rows to be prefetched has to be greater than or equal to 0 in %s on line %d
-Fetch Row from PHP
-array(2) {
-  [0]=>
-  string(%d) "0"
-  [1]=>
-  string(%d) "test0"
-}
-Fetch Row from PL/SQL
-int(101)
-string(%d) "test101"
+oci_set_prefetch(): Argument #2 ($rows) must be greater than or equal to 0
 Done

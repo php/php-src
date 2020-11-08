@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
@@ -28,12 +26,6 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-/* {{{ pdo_odbc_functions[] */
-static const zend_function_entry pdo_odbc_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -46,7 +38,7 @@ zend_module_entry pdo_odbc_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_odbc_deps,
 	"PDO_ODBC",
-	pdo_odbc_functions,
+	NULL,
 	PHP_MINIT(pdo_odbc),
 	PHP_MSHUTDOWN(pdo_odbc),
 	NULL,
@@ -95,7 +87,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	} else if (*pooling_val == '\0' || strcasecmp(pooling_val, "off") == 0) {
 		pdo_odbc_pool_on = SQL_CP_OFF;
 	} else {
-		php_error_docref(NULL, E_CORE_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
+		php_error_docref(NULL, E_CORE_ERROR, "Error in pdo_odbc.connection_pooling configuration. Value must be one of \"strict\", \"relaxed\", or \"off\"");
 		return FAILURE;
 	}
 
@@ -114,8 +106,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 {
 	php_pdo_unregister_driver(&pdo_odbc_driver);
@@ -123,8 +114,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo_odbc)
 {
 	php_info_print_table_start();

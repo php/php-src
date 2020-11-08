@@ -17,6 +17,7 @@ foo("foo");
 foo($closure);
 foo(array("bar", "foo"));
 foo(array("bar", "baz"));
+?>
 --EXPECTF--
 string(6) "strpos"
 string(3) "foo"
@@ -29,7 +30,7 @@ array(2) {
   string(3) "foo"
 }
 
-Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be callable, array given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: foo(): Argument #1 ($bar) must be of type callable, array given, called in %s:%d
 Stack trace:
 #0 %s(%d): foo(Array)
 #1 {main}

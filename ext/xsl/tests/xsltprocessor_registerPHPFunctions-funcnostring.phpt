@@ -21,6 +21,7 @@ if(!$phpfuncxsl) {
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions());
 var_dump($proc->transformToXml($dom));
+?>
 --EXPECTF--
 NULL
 

@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplHeap with overriden compare()
+SPL: SplHeap with overridden compare()
 --FILE--
 <?php
 class SplMinHeap2 extends SplMinHeap {

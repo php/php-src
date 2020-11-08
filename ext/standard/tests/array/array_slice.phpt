@@ -68,7 +68,7 @@ foreach ($var_array as $sub_array)
   var_dump (array_slice($var_array[2], -3, -2, false) );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Iteration 1 ***
 
 *** Variation with first two Arguments ***

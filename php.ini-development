@@ -88,6 +88,7 @@
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
 ;;;;;;;;;;;;;;;;;;;
+
 ; The following are all the settings which are different in either the production
 ; or development versions of the INIs with respect to PHP's default behavior.
 ; Please see the actual settings later in the document for more details as to why
@@ -99,12 +100,12 @@
 ;   Production Value: Off
 
 ; display_startup_errors
-;   Default Value: Off
+;   Default Value: On
 ;   Development Value: On
 ;   Production Value: Off
 
 ; error_reporting
-;   Default Value: E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
+;   Default Value: E_ALL
 ;   Development Value: E_ALL
 ;   Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
 
@@ -152,6 +153,16 @@
 ;   Default Value: "EGPCS"
 ;   Development Value: "GPCS"
 ;   Production Value: "GPCS"
+
+; zend.exception_ignore_args
+;   Default Value: Off
+;   Development Value: Off
+;   Production Value: On
+
+; zend.exception_string_param_max_len
+;   Default Value: 15
+;   Development Value: 15
+;   Production Value: 0
 
 ;;;;;;;;;;;;;;;;;;;;
 ; php.ini Options  ;
@@ -284,6 +295,13 @@ implicit_flush = Off
 ; callback-function.
 unserialize_callback_func =
 
+; The unserialize_max_depth specifies the default depth limit for unserialized
+; structures. Setting the depth limit too high may result in stack overflows
+; during unserialization. The unserialize_max_depth ini setting can be
+; overridden by the max_depth option on individual unserialize() calls.
+; A value of 0 disables the depth limit.
+;unserialize_max_depth = 4096
+
 ; When floats & doubles are serialized, store serialize_precision significant
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
@@ -299,12 +317,12 @@ serialize_precision = -1
 ; http://php.net/open-basedir
 ;open_basedir =
 
-; This directive allows you to disable certain functions for security reasons.
+; This directive allows you to disable certain functions.
 ; It receives a comma-delimited list of function names.
 ; http://php.net/disable-functions
 disable_functions =
 
-; This directive allows you to disable certain classes for security reasons.
+; This directive allows you to disable certain classes.
 ; It receives a comma-delimited list of class names.
 ; http://php.net/disable-classes
 disable_classes =
@@ -345,18 +363,28 @@ zend.enable_gc = On
 ; If enabled, scripts may be written in encodings that are incompatible with
 ; the scanner.  CP936, Big5, CP949 and Shift_JIS are the examples of such
 ; encodings.  To use this feature, mbstring extension must be enabled.
-; Default: Off
 ;zend.multibyte = Off
 
 ; Allows to set the default encoding for the scripts.  This value will be used
 ; unless "declare(encoding=...)" directive appears at the top of the script.
 ; Only affects if zend.multibyte is set.
-; Default: ""
 ;zend.script_encoding =
 
-; Allows to include or exclude arguments from stack traces generated for exceptions
-; Default: Off
+; Allows to include or exclude arguments from stack traces generated for exceptions.
+; In production, it is recommended to turn this setting on to prohibit the output
+; of sensitive information in stack traces
+; Default Value: Off
+; Development Value: Off
+; Production Value: On
 zend.exception_ignore_args = Off
+
+; Allows setting the maximum string length in an argument of a stringified stack trace
+; to a value between 0 and 1000000.
+; This has no effect when zend.exception_ignore_args is enabled.
+; Default Value: 15
+; Development Value: 15
+; Production Value: 0
+zend.exception_string_param_max_len = 15
 
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
@@ -395,7 +423,7 @@ max_input_time = 60
 ; How many GET/POST/COOKIE input variables may be accepted
 ;max_input_vars = 1000
 
-; Maximum amount of memory a script may consume (128MB)
+; Maximum amount of memory a script may consume
 ; http://php.net/memory-limit
 memory_limit = 128M
 
@@ -449,7 +477,7 @@ memory_limit = 128M
 ;   E_ALL & ~E_NOTICE  (Show all errors, except for notices)
 ;   E_ALL & ~E_NOTICE & ~E_STRICT  (Show all errors, except for notices and coding standards warnings.)
 ;   E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR  (Show only errors)
-; Default Value: E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
+; Default Value: E_ALL
 ; Development Value: E_ALL
 ; Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
 ; http://php.net/error-reporting
@@ -473,11 +501,9 @@ error_reporting = E_ALL
 display_errors = On
 
 ; The display of errors which occur during PHP's startup sequence are handled
-; separately from display_errors. PHP's default behavior is to suppress those
-; errors from clients. Turning the display of startup errors on can be useful in
-; debugging configuration problems. We strongly recommend you
-; set this to 'off' for production servers.
-; Default Value: Off
+; separately from display_errors. We strongly recommend you set this to 'off'
+; for production servers to avoid leaking configuration details.
+; Default Value: On
 ; Development Value: On
 ; Production Value: Off
 ; http://php.net/display-startup-errors
@@ -515,7 +541,7 @@ ignore_repeated_source = Off
 ; http://php.net/report-memleaks
 report_memleaks = On
 
-; This setting is on by default.
+; This setting is off by default.
 ;report_zend_debug = 0
 
 ; Turn off normal error reporting and emit XML-RPC error XML
@@ -894,8 +920,9 @@ default_socket_timeout = 60
 ;extension=bz2
 ;extension=curl
 ;extension=ffi
+;extension=ftp
 ;extension=fileinfo
-;extension=gd2
+;extension=gd
 ;extension=gettext
 ;extension=gmp
 ;extension=intl
@@ -925,8 +952,9 @@ default_socket_timeout = 60
 ;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
-;extension=xmlrpc
 ;extension=xsl
+
+;zend_extension=opcache
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -1368,7 +1396,8 @@ session.cookie_domain =
 session.cookie_httponly =
 
 ; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
-; Current valid values are "Lax" or "Strict"
+; Current valid values are "Strict", "Lax" or "None". When using "None",
+; make sure to include the quotes, as `none` is interpreted like `false` in ini files.
 ; https://tools.ietf.org/html/draft-west-first-party-cookies-07
 session.cookie_samesite =
 
@@ -1376,12 +1405,9 @@ session.cookie_samesite =
 ; http://php.net/session.serialize-handler
 session.serialize_handler = php
 
-; Defines the probability that the 'garbage collection' process is started
-; on every session initialization. The probability is calculated by using
-; gc_probability/gc_divisor. Where session.gc_probability is the numerator
-; and gc_divisor is the denominator in the equation. Setting this value to 1
-; when the session.gc_divisor value is 100 will give you approximately a 1% chance
-; the gc will run on any given request.
+; Defines the probability that the 'garbage collection' process is started on every
+; session initialization. The probability is calculated by using gc_probability/gc_divisor,
+; e.g. 1/100 means there is a 1% chance that the GC process starts on each request.
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: 1
@@ -1389,13 +1415,9 @@ session.serialize_handler = php
 session.gc_probability = 1
 
 ; Defines the probability that the 'garbage collection' process is started on every
-; session initialization. The probability is calculated by using the following equation:
-; gc_probability/gc_divisor. Where session.gc_probability is the numerator and
-; session.gc_divisor is the denominator in the equation. Setting this value to 100
-; when the session.gc_probability value is 1 will give you approximately a 1% chance
-; the gc will run on any given request. Increasing this value to 1000 will give you
-; a 0.1% chance the gc will run on any given request. For high volume production servers,
-; this is a more efficient approach.
+; session initialization. The probability is calculated by using gc_probability/gc_divisor,
+; e.g. 1/100 means there is a 1% chance that the GC process starts on each request.
+; For high volume production servers, using a value of 1000 is a more efficient approach.
 ; Default Value: 100
 ; Development Value: 1000
 ; Production Value: 1000
@@ -1411,8 +1433,8 @@ session.gc_maxlifetime = 1440
 ;       (see session.save_path above), then garbage collection does *not*
 ;       happen automatically.  You will need to do your own garbage
 ;       collection through a shell script, cron entry, or some other method.
-;       For example, the following script would is the equivalent of
-;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
+;       For example, the following script is the equivalent of setting
+;       session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
 ;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
@@ -1594,6 +1616,10 @@ zend.assertions = 1
 ; Default: system ANSI code page
 ;com.code_page=
 
+; The version of the .NET framework to use. The value of the setting are the first three parts
+; of the framework's version number, separated by dots, and prefixed with "v", e.g. "v4.0.30319".
+;com.dotnet_version=
+
 [mbstring]
 ; language for internal character representation.
 ; This affects mb_send_mail() and mbstring.detect_order.
@@ -1643,9 +1669,8 @@ zend.assertions = 1
 ; http://php.net/mbstring.substitute-character
 ;mbstring.substitute_character = none
 
-; enable strict encoding detection.
-; Default: Off
-;mbstring.strict_detection = On
+; Enable strict encoding detection.
+;mbstring.strict_detection = Off
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
@@ -1654,8 +1679,11 @@ zend.assertions = 1
 
 ; This directive specifies maximum stack depth for mbstring regular expressions. It is similar
 ; to the pcre.recursion_limit for PCRE.
-; Default: 100000
 ;mbstring.regex_stack_limit=100000
+
+; This directive specifies maximum retry count for mbstring regular expressions. It is similar
+; to the pcre.backtrack_limit for PCRE.
+;mbstring.regex_retry_limit=1000000
 
 [gd]
 ; Tell the jpeg decode to ignore warnings and try to create
@@ -1769,6 +1797,11 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
+; If enabled, compilation warnings (including notices and deprecations) will
+; be recorded and replayed each time a file is included. Otherwise, compilation
+; warnings will only be emitted when the file is first cached.
+;opcache.record_warnings=0
+
 ; Allow file existence override (file_exists, etc.) performance feature.
 ;opcache.enable_file_override=0
 
@@ -1863,6 +1896,11 @@ ldap.max_links = -1
 ; http://php.net/opcache.preload
 ;opcache.preload=
 
+; Preloading code as root is not allowed for security reasons. This directive
+; facilitates to let the preloading to be run as another user.
+; http://php.net/opcache.preload_user
+;opcache.preload_user=
+
 ; Prevents caching files that are less than this number of seconds old. It
 ; protects from caching of incompletely updated files. In case all file updates
 ; on your site are atomic, you may increase performance by setting it to "0".
@@ -1895,8 +1933,11 @@ ldap.max_links = -1
 ;openssl.capath=
 
 [ffi]
-; FFI API restriction. Possibe values:
+; FFI API restriction. Possible values:
 ; "preload" - enabled in CLI scripts and preloaded files (default)
 ; "false"   - always disabled
 ; "true"    - always enabled
 ;ffi.enable=preload
+
+; List of headers files to preload, wildcard patterns allowed.
+;ffi.preload=

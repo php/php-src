@@ -8,7 +8,7 @@ skip_if_not_win();
 
 $start = realpath(__DIR__);
 if (strlen($start) > 260 || strlen($start) > 248) {
-	die("skip the starting path length is unsuitable for this test");
+    die("skip the starting path length is unsuitable for this test");
 }
 
 ?>
@@ -20,15 +20,15 @@ $s = str_repeat('a', 50);
 $how_many = 32;
 
 for ($i = 0; $i < $how_many; $i++) {
-	$p .= "$s\\";
+    $p .= "$s\\";
 }
 
 $start = realpath(__DIR__);
 $newstart = false;
 if (strlen($start) <= 248) {
-	// create the exact length
-	$start = $start . "\\" . str_repeat('a', 251 - strlen($start) - 1);
-	$newstart = true;
+    // create the exact length
+    $start = $start . "\\" . str_repeat('a', 251 - strlen($start) - 1);
+    $newstart = true;
 }
 
 var_dump($start);
@@ -46,15 +46,14 @@ var_dump(file_get_contents($p7));
 // cleanup
 unlink($p7);
 for ($i = 0; $i < $how_many; $i++) {
-	$p0 = substr($p, 0, strlen($p) - $i*51);
-	rmdir($p0);
+    $p0 = substr($p, 0, strlen($p) - $i*51);
+    rmdir($p0);
 }
 if ($newstart) {
-	rmdir($start);
+    rmdir($start);
 }
 
 ?>
-===DONE===
 --EXPECTF--
 string(251) "%s"
 string(1884) "%s"
@@ -62,4 +61,3 @@ bool(true)
 bool(true)
 int(5)
 string(5) "hello"
-===DONE===

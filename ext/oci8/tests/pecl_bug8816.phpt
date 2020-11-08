@@ -29,17 +29,17 @@ $values = array("1234567890111111111", "122222222222222", "985456745674567654567
 
 $i = 0;
 foreach ($values as $val) {
-	$i++;
-	$insert = "INSERT INTO t1 VALUES($i, ".$val.")";
-	$s = oci_parse($c, $insert);
-	oci_execute($s);
+    $i++;
+    $insert = "INSERT INTO t1 VALUES($i, ".$val.")";
+    $s = oci_parse($c, $insert);
+    oci_execute($s);
 }
 
 foreach ($values as $val) {
-	$insert = "INSERT INTO t2 VALUES($i, ".$val.")";
-	$s = oci_parse($c, $insert);
-	oci_execute($s);
-	$i--;
+    $insert = "INSERT INTO t2 VALUES($i, ".$val.")";
+    $s = oci_parse($c, $insert);
+    oci_execute($s);
+    $i--;
 }
 
 $query ="
@@ -56,7 +56,7 @@ $sth = oci_parse($c, $query);
 oci_execute($sth);
 
 while ( $row = oci_fetch_assoc($sth) ) {
-	var_dump($row);
+    var_dump($row);
 }
 
 $s1 = oci_parse($c, $drop_1);

@@ -19,14 +19,14 @@ $lens = array();
 
 for ( $i=0 ; $i < 100 ; $i++ ) {
 
-	// can't use ob_gzhandler with zlib.output_compression
-	ob_start();//"ob_gzhandler");
-	phpinfo();
-	$html = ob_get_clean();
+    // can't use ob_gzhandler with zlib.output_compression
+    ob_start();//"ob_gzhandler");
+    phpinfo();
+    $html = ob_get_clean();
 
-	$len = strlen($html);
+    $len = strlen($html);
 
-	$lens[$len] = $len;
+    $lens[$len] = $len;
 }
 
 $lens = array_values($lens);

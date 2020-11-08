@@ -7,11 +7,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/* Prototype: bool is_dir ( string $dirname );
-   Description: Tells whether the dirname is a directory
-     Returns TRUE if the dirname exists and is a directory, FALSE  otherwise.
-*/
-
 /* Testing is_dir() with dir, soft & hard link to dir,
      and with file, soft & hard link to file */
 

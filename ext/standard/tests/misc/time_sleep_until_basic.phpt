@@ -30,7 +30,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 
 // Add some tolerance for early wake on macos. Reason unknown.
-if ($now + 0.001 >= $sleepUntil) {
+if ($now + 0.002 >= $sleepUntil) {
     echo "Success\n";
 } else {
     echo "Sleep until (before truncation): ", $time, "\n";

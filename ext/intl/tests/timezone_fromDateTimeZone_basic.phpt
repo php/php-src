@@ -3,7 +3,7 @@ IntlTimeZone::fromDateTimeZone(): basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -29,6 +29,7 @@ $dtz = $dt->getTimeZone();
 var_dump($dtz->getName());
 $tz = IntlTimeZone::fromDateTimeZone($dtz);
 var_dump($tz->getID(), $tz->getRawOffset() /* (3*60+40)*60000 */);
+?>
 --EXPECTF--
 string(16) "Europe/Amsterdam"
 int(3600000)

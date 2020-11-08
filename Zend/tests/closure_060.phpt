@@ -4,13 +4,13 @@ runtime cache must be invalidated for Closure::call()
 <?php
 
 class A {
-	private static $priv = 7;
+    private static $priv = 7;
 
-	static function get() {
-		return function() {
-			var_dump(isset(A::$priv));
-		};
-	}
+    static function get() {
+        return function() {
+            var_dump(isset(A::$priv));
+        };
+    }
 }
 
 $closure = A::get();

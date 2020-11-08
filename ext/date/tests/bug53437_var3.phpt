@@ -10,7 +10,6 @@ $di = unserialize($s);
 var_dump($di);
 
 ?>
-==DONE==
 --EXPECTF--
 object(DateInterval)#%d (16) {
   ["y"]=>
@@ -46,4 +45,3 @@ object(DateInterval)#%d (16) {
   ["f"]=>
   float(-1)
 }
-==DONE==

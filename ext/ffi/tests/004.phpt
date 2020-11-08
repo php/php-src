@@ -25,10 +25,10 @@ enum _f;
 typedef enum _f f;
 
 enum _g {
-	_c1,
-	_c2,
-	_c3 = 1,
-	_c4,
+    _c1,
+    _c2,
+    _c3 = 1,
+    _c4,
 };
 EOF
 );
@@ -40,14 +40,14 @@ var_dump($ffi->new("int[_c2]"));
 var_dump($ffi->new("int[_c3]"));
 var_dump($ffi->new("int[_c4]"));
 try {
-	var_dump($ffi->new("enum _e"));
+    var_dump($ffi->new("enum _e"));
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	var_dump($ffi->new("f"));
+    var_dump($ffi->new("f"));
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 echo "ok\n";
 ?>
@@ -82,6 +82,6 @@ object(FFI\CData:int32_t[2])#%d (2) {
   [1]=>
   int(0)
 }
-FFI\ParserException: incomplete 'enum _e' at line 1
-FFI\ParserException: incomplete 'enum _f' at line 1
+FFI\ParserException: Incomplete enum "_e" at line 1
+FFI\ParserException: Incomplete enum "_f" at line 1
 ok

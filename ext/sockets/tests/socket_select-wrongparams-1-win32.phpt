@@ -3,7 +3,7 @@ Test parameter handling in socket_select().
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-	die('skip.. Not valid for non Windows');
+    die('skip.. Not valid for non Windows');
 }
 if (!extension_loaded('sockets')) {
     die('SKIP The sockets extension is not loaded.');
@@ -18,6 +18,7 @@ $write  = null;
 $except = null;
 $time   = -1;
 var_dump(socket_select($sockets, $write, $except, $time));
+?>
 --EXPECT--
 int(0)
 --CREDITS--

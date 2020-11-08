@@ -2,11 +2,7 @@
 Test pathinfo() function: usage variations
 --FILE--
 <?php
-/* Prototype: mixed pathinfo ( string $path [, int $options] );
-   Description: Returns information about a file path
-*/
-
-echo "*** Testing pathinfo() with miscelleneous input arguments ***\n";
+echo "*** Testing pathinfo() with miscellaneous input arguments ***\n";
 
 $fp = fopen(__FILE__, "r");
 unset($fp);
@@ -88,9 +84,9 @@ foreach($paths as $path) {
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing pathinfo() with miscelleneous input arguments ***
+*** Testing pathinfo() with miscellaneous input arguments ***
 
-Notice: Undefined variable: fp in %s on line %d
+Warning: Undefined variable $fp in %s on line %d
 -- Iteration 1 --
 array(3) {
   ["dirname"]=>

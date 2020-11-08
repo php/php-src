@@ -36,15 +36,16 @@ xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   }
 }
 $client = new TestSoapClient(NULL, array(
-			"location" => "test://",
-			"uri"      => 'urn:TestSOAP',
-			"style"    => SOAP_RPC,
-			"use"      => SOAP_ENCODED
-			));
+            "location" => "test://",
+            "uri"      => 'urn:TestSOAP',
+            "style"    => SOAP_RPC,
+            "use"      => SOAP_ENCODED
+            ));
 var_dump($client->test(0.1));
 var_dump($client->test(NAN));
 var_dump($response = $client->test(INF));
 var_dump($response = $client->test(-INF));
+?>
 --EXPECT--
 float(0.1)
 float(NAN)

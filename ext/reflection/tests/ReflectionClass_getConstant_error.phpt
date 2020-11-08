@@ -3,7 +3,7 @@ ReflectionClass::getConstant() - bad params
 --FILE--
 <?php
 class C {
-	const myConst = 1;
+    const myConst = 1;
 }
 
 $rc = new ReflectionClass("C");

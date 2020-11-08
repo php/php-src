@@ -25,7 +25,7 @@ reflectProperty("TestClass", "prot");
 reflectProperty("TestClass", "priv");
 
 ?>
---EXPECTF--
+--EXPECT--
 **********************************
 Reflecting on property TestClass::pub
 

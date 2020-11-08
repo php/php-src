@@ -17,7 +17,7 @@ $db->sqliteCreateFunction('testing', function($v) { return strtolower($v); });
 
 
 foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
-	var_dump($row);
+    var_dump($row);
 }
 
 $db->query('DROP TABLE foobar');

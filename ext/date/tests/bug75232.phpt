@@ -14,7 +14,7 @@ echo $d2->date, "\n";
 
 ?>
 --EXPECTF--
-Notice: Undefined property: DateTime::$date in %s on line %d
+Warning: Undefined property: DateTime::$date in %s on line %d
 
 DateTime Object
 (
@@ -23,4 +23,4 @@ DateTime Object
     [timezone] => UTC
 )
 
-Notice: Undefined property: DateTime::$date in %s on line %d
+Warning: Undefined property: DateTime::$date in %s on line %d

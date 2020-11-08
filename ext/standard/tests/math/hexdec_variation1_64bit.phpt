@@ -8,11 +8,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number hexdec  ( string $hex_string  )
- * Description: Returns the decimal equivalent of the hexadecimal number represented by the hex_string  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing hexdec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -76,17 +71,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of hexdec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try {
-		var_dump(hexdec($input));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(hexdec($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing hexdec() : usage variations ***
 
@@ -158,7 +152,7 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-hexdec() expects parameter 1 to be string, array given
+hexdec(): Argument #1 ($hex_string) must be of type string, array given
 
 -- Iteration 21 --
 
@@ -182,5 +176,4 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-hexdec() expects parameter 1 to be string, resource given
-===Done===
+hexdec(): Argument #1 ($hex_string) must be of type string, resource given

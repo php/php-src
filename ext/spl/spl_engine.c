@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,13 +29,6 @@
 
 #include "spl_array.h"
 
-/* {{{ spl_instantiate */
-PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object)
-{
-	object_init_ex(object, pce);
-}
-/* }}} */
-
 PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 {
 	zend_ulong idx;
@@ -50,7 +41,7 @@ try_again:
 		}
 		break;
 	case IS_DOUBLE:
-		return (zend_long)Z_DVAL_P(offset);
+		return zend_dval_to_lval(Z_DVAL_P(offset));
 	case IS_LONG:
 		return Z_LVAL_P(offset);
 	case IS_FALSE:

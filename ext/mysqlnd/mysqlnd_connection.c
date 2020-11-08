@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -671,13 +669,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	{
 		const MYSQLND_CSTRING scheme = { transport.s, transport.l };
-		/* This will be overwritten below with a copy, but we can use it during authentication */
-		conn->unix_socket.s = (char *)socket_or_pipe.s;
 		if (FAIL == conn->m->connect_handshake(conn, &scheme, &username, &password, &database, mysql_flags)) {
-			conn->unix_socket.s = NULL;
 			goto err;
 		}
-		conn->unix_socket.s = NULL;
 	}
 
 	{
@@ -1158,8 +1152,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_charset)(MYSQLND_CONN_DATA * const conn, c
 	DBG_INF_FMT("conn=%llu cs=%s", conn->thread_id, csname);
 
 	if (!charset) {
-		SET_CLIENT_ERROR(conn->error_info, CR_CANT_FIND_CHARSET, UNKNOWN_SQLSTATE,
-						 "Invalid characterset or character set not supported");
+		SET_CLIENT_ERROR(conn->error_info, CR_CANT_FIND_CHARSET, UNKNOWN_SQLSTATE, "Invalid character set was provided");
 		DBG_RETURN(ret);
 	}
 
@@ -1167,9 +1160,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_charset)(MYSQLND_CONN_DATA * const conn, c
 		char * query;
 		size_t query_len = mnd_sprintf(&query, 0, "SET NAMES %s", csname);
 
-		if (FAIL == (ret = conn->m->query(conn, query, query_len))) {
-			php_error_docref(NULL, E_WARNING, "Error executing query");
-		} else if (conn->error_info->error_no) {
+		if (FAIL == (ret = conn->m->query(conn, query, query_len)) || conn->error_info->error_no) {
 			ret = FAIL;
 		} else {
 			conn->charset = charset;
@@ -1372,7 +1363,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 
 
 /* {{{ mysqlnd_get_client_info */
-PHPAPI const char * mysqlnd_get_client_info()
+PHPAPI const char * mysqlnd_get_client_info(void)
 {
 	return PHP_MYSQLND_VERSION;
 }
@@ -1380,7 +1371,7 @@ PHPAPI const char * mysqlnd_get_client_info()
 
 
 /* {{{ mysqlnd_get_client_version */
-PHPAPI unsigned long mysqlnd_get_client_version()
+PHPAPI unsigned long mysqlnd_get_client_version(void)
 {
 	return MYSQLND_VERSION_ID;
 }
@@ -1445,7 +1436,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * 
 
 #define MARIA_DB_VERSION_HACK_PREFIX "5.5.5-"
 
-	if (conn->server_capabilities & CLIENT_PLUGIN_AUTH
+	if ((conn->server_capabilities & CLIENT_PLUGIN_AUTH)
 		&& !strncmp(p, MARIA_DB_VERSION_HACK_PREFIX, sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1))
 	{
 		p += sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1;
@@ -2006,24 +1997,24 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_rollback)(MYSQLND_CONN_DATA * conn)
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const unsigned int mode)
 {
-	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
+	if ((mode & TRANS_COR_AND_CHAIN) && !(mode & TRANS_COR_AND_NO_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
-	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
+	} else if ((mode & TRANS_COR_AND_NO_CHAIN) && !(mode & TRANS_COR_AND_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
 	}
 
-	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
+	if ((mode & TRANS_COR_RELEASE) && !(mode & TRANS_COR_NO_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
-	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
+	} else if ((mode & TRANS_COR_NO_RELEASE) && !(mode & TRANS_COR_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
@@ -2063,7 +2054,7 @@ mysqlnd_escape_string_for_tx_name_in_comment(const char * const name)
 			{
 				*p_copy++ = v;
 			} else if (warned == FALSE) {
-				php_error_docref(NULL, E_WARNING, "Transaction name truncated. Must be only [0-9A-Za-z\\-_=]+");
+				php_error_docref(NULL, E_WARNING, "Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, \"\\\", \"-\", \"_\", and \"=\" characters");
 				warned = TRUE;
 			}
 			++p_orig;
@@ -2138,23 +2129,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 				}
 				smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
 			}
-			if (mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY)) {
-				zend_ulong server_version = conn->m->get_server_version(conn);
-				if (server_version < 50605L) {
-					php_error_docref(NULL, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
-					smart_str_free(&tmp_str);
-					break;
-				} else if (mode & TRANS_START_READ_WRITE) {
-					if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
-						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
-					}
-					smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
-				} else if (mode & TRANS_START_READ_ONLY) {
-					if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
-						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
-					}
-					smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
+			if (mode & TRANS_START_READ_WRITE) {
+				if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
+					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 				}
+				smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+			} else if (mode & TRANS_START_READ_ONLY) {
+				if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
+					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+				}
+				smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
 			}
 			smart_str_0(&tmp_str);
 
@@ -2173,6 +2157,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 				}
 				ret = conn->m->query(conn, query, query_len);
 				mnd_sprintf_free(query);
+				if (ret && mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY) &&
+					mysqlnd_stmt_errno(conn) == 1064) {
+					php_error_docref(NULL, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
+					break;
+				}
 			}
 		} while (0);
 		conn->m->local_tx_end(conn, this_func, ret);
@@ -2647,7 +2636,7 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
-		php_error_docref(NULL, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
+		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
 						errno, strerror(errno), max_fd);
 		DBG_RETURN(FAIL);
 	}

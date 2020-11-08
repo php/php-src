@@ -3,9 +3,9 @@ openssl_decrypt() with GCM cipher algorithm tests
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl"))
-	die("skip");
+    die("skip");
 if (!in_array('aes-128-gcm', openssl_get_cipher_methods()))
-	die("skip: aes-128-gcm not available");
+    die("skip: aes-128-gcm not available");
 ?>
 --FILE--
 <?php
@@ -22,13 +22,13 @@ foreach ($tests as $idx => $test) {
 
 // no IV
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	NULL, $test['tag'], $test['aad']));
+    NULL, $test['tag'], $test['aad']));
 // failed because no AAD
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	$test['iv'], $test['tag']));
+    $test['iv'], $test['tag']));
 // failed because wrong tag
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	$test['iv'], str_repeat('x', 16), $test['aad']));
+    $test['iv'], str_repeat('x', 16), $test['aad']));
 
 ?>
 --EXPECTF--

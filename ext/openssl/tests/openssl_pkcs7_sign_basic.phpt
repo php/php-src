@@ -40,21 +40,21 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: openssl_pkcs7_sign(): error opening input file %s in %s on line %d
+Warning: openssl_pkcs7_sign(): Error opening input file wrong! in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_sign(): error opening input file %s in %s on line %d
+Warning: openssl_pkcs7_sign(): Error opening input file ! in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_sign(): error opening output file %s in %s on line %d
+Warning: openssl_pkcs7_sign(): Error opening output file ! in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_sign(): error getting cert in %s on line %d
+Warning: openssl_pkcs7_sign(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_sign(): error getting cert in %s on line %d
+Warning: openssl_pkcs7_sign(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_sign(): error getting private key in %s on line %d
+Warning: openssl_pkcs7_sign(): Error getting private key in %s on line %d
 bool(false)
 true

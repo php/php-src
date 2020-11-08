@@ -5,14 +5,14 @@
 namespace X;
 use X as Y;
 class X {
-	const C = "const ok\n";
-	static $var = "var ok\n";
-	function __construct() {
-		echo "class ok\n";
-	}
-	static function bar() {
-		echo "method ok\n";
-	}
+    const C = "const ok\n";
+    static $var = "var ok\n";
+    function __construct() {
+        echo "class ok\n";
+    }
+    static function bar() {
+        echo "method ok\n";
+    }
 }
 new X();
 new Y\X();
@@ -26,6 +26,7 @@ echo \X\X::C;
 echo X::$var;
 echo Y\X::$var;
 echo \X\X::$var;
+?>
 --EXPECT--
 class ok
 class ok

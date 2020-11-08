@@ -9,7 +9,6 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   $ch = curl_init();
   var_dump($ch);
 ?>
-===DONE===
---EXPECTF--
-resource(%d) of type (curl)
-===DONE===
+--EXPECT--
+object(CurlHandle)#1 (0) {
+}

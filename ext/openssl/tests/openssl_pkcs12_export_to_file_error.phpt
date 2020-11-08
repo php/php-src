@@ -23,15 +23,15 @@ var_dump(openssl_pkcs12_export_to_file($cert, '.', $priv, $pass));
 <?php
 $pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
 if (file_exists($pkcsfile)) {
-	unlink($pkcsfile);
+    unlink($pkcsfile);
 }
 ?>
 --EXPECTF--
-Warning: openssl_pkcs12_export_to_file(): cannot get private key from parameter 3 in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): Cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export_to_file(): private key does not correspond to cert in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): Private key does not correspond to cert in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export_to_file(): error opening file . in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): Error opening file . in %s on line %d
 bool(false)

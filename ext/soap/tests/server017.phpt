@@ -5,7 +5,7 @@ SOAP Server 17: user fault (through return)
 --FILE--
 <?php
 function test() {
-	return new SoapFault("MyFault","My fault string");
+    return new SoapFault("MyFault","My fault string");
 }
 
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));

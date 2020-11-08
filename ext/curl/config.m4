@@ -4,7 +4,7 @@ PHP_ARG_WITH([curl],
     [Include cURL support])])
 
 if test "$PHP_CURL" != "no"; then
-  PKG_CHECK_MODULES([CURL], [libcurl >= 7.15.5])
+  PKG_CHECK_MODULES([CURL], [libcurl >= 7.29.0])
   PKG_CHECK_VAR([CURL_FEATURES], [libcurl], [supported_features])
 
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)
@@ -23,14 +23,10 @@ if test "$PHP_CURL" != "no"; then
   esac
 
   if test "$CURL_SSL" = yes; then
-    AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with  SSL support])
-
-    save_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS $CURL_CFLAGS"
     save_LDFLAGS="$LDFLAGS"
     LDFLAGS="$LDFLAGS $CURL_LIBS"
 
-    AC_MSG_CHECKING([for openssl support in libcurl])
+    AC_MSG_CHECKING([for libcurl linked against old openssl])
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <strings.h>
 #include <curl/curl.h>
@@ -43,21 +39,34 @@ int main(int argc, char *argv[])
     const char *ptr = data->ssl_version;
 
     while(*ptr == ' ') ++ptr;
-    return strncasecmp(ptr, "OpenSSL", sizeof("OpenSSL")-1);
+    if (strncasecmp(ptr, "OpenSSL/1.1", sizeof("OpenSSL/1.1")-1) == 0) {
+      /* New OpenSSL version */
+      return 3;
+    }
+    if (strncasecmp(ptr, "OpenSSL", sizeof("OpenSSL")-1) == 0) {
+      /* Old OpenSSL version */
+      return 0;
+    }
+    /* Different SSL library */
+    return 2;
   }
+  /* No SSL support */
   return 1;
 }
     ]])],[
       AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_CURL_OPENSSL], [1], [Have cURL with OpenSSL support])
-      AC_CHECK_HEADERS([openssl/crypto.h])
+      AC_DEFINE([HAVE_CURL_OLD_OPENSSL], [1], [Have cURL with old OpenSSL])
+      PKG_CHECK_MODULES([OPENSSL], [openssl], [
+        PHP_EVAL_LIBLINE($OPENSSL_LIBS, CURL_SHARED_LIBADD)
+        PHP_EVAL_INCLINE($OPENSSL_CFLAGS)
+        AC_CHECK_HEADERS([openssl/crypto.h])
+      ], [])
     ], [
       AC_MSG_RESULT([no])
     ], [
       AC_MSG_RESULT([no])
     ])
 
-    CFLAGS="$save_CFLAGS"
     LDFLAGS="$save_LDFLAGS"
   else
     AC_MSG_RESULT([no])
@@ -73,5 +82,6 @@ int main(int argc, char *argv[])
   ])
 
   PHP_NEW_EXTENSION(curl, interface.c multi.c share.c curl_file.c, $ext_shared)
+  PHP_INSTALL_HEADERS([ext/curl], [php_curl.h])
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi

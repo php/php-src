@@ -2,11 +2,6 @@
 Test sscanf() function : basic functionality - string format
 --FILE--
 <?php
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Testing sscanf() : basic functionality
 */
@@ -27,7 +22,6 @@ $res = sscanf($str, $format, $part, $number, $stock);
 var_dump($res, $part, $number, $stock);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - using string format ***
 
@@ -41,4 +35,3 @@ int(3)
 string(6) "Widget"
 string(7) "1234789"
 string(2) "25"
-===DONE===

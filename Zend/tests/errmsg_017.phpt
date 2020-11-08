@@ -4,8 +4,8 @@ errmsg: __unset() must take exactly 1 argument
 <?php
 
 class test {
-	function __unset() {
-	}
+    function __unset() {
+    }
 }
 
 echo "Done\n";

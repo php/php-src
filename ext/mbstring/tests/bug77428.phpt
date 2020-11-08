@@ -10,7 +10,7 @@ if (!function_exists('mb_ereg_replace')) die('skip mb_ereg_replace() not availab
 
 // This behavior is broken, but kept for BC reasons
 var_dump(mb_ereg_replace('(%)', '\\\1', 'a%c'));
-// For clarify, the above line is equivalent to:
+// For clarity, the above line is equivalent to:
 var_dump(mb_ereg_replace('(%)', '\\\\1', 'a%c'));
 
 ?>

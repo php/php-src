@@ -3,13 +3,13 @@ Bug #28325 (Problem in serialisation of circular references)
 --FILE--
 <?php
 class a {
-	public $b;
+    public $b;
 }
 class b {
-	public $c;
+    public $c;
 }
 class c {
-	public $d;
+    public $d;
 }
 $a = new a();
 $a->b = new b();

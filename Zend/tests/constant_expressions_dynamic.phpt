@@ -5,7 +5,7 @@ Dynamic Constant Expressions
 
 const C_0 = 0;
 const C_1 = 1;
-const C_foo = "foo";
+const C_foo = "0foo";
 const C_arr = [0 => 0, "foo" => "foo"];
 
 const T_1 = C_1 | 2;

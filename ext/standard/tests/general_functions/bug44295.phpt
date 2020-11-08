@@ -25,5 +25,5 @@ try {
 <?php exit(0); ?>
 --EXPECT--
 before
-in catch: DirectoryIterator::__construct(/this/path/does/not/exist): failed to open dir: No such file or directory
+in catch: DirectoryIterator::__construct(/this/path/does/not/exist): Failed to open directory: No such file or directory
 ==DONE==

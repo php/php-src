@@ -3,7 +3,7 @@ ReflectionObject::__toString() - ensure dynamic property with same name as inher
 --FILE--
 <?php
 class C {
-	private $p = 1;
+    private $p = 1;
 }
 
 class D extends C{

@@ -3,7 +3,6 @@ Hash: hash_hmac() function : basic functionality
 --FILE--
 <?php
 /*
-* proto string hash_hmac ( string algo, string data, string key [, bool raw_output] )
 * Function is implemented in ext/hash/hash.c
 */
 
@@ -21,7 +20,7 @@ catch (\Error $e) {
 }
 
 echo "\n-- Testing hash_hmac() function with non-cryptographic hash algorithm --\n";
-try { 
+try {
     var_dump(hash_hmac('crc32', $data, $key));
 }
 catch (\Error $e) {
@@ -29,13 +28,11 @@ catch (\Error $e) {
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_hmac() : error conditions ***
 
 -- Testing hash_hmac() function with invalid hash algorithm --
-Unknown hashing algorithm: foo
+hash_hmac(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac() function with non-cryptographic hash algorithm --
-Non-cryptographic hashing algorithm: crc32
-===Done===
+hash_hmac(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm

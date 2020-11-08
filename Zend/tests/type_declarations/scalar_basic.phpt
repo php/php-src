@@ -19,7 +19,7 @@ $functions = [
     'bool' => function (bool $b) { return $b; }
 ];
 
-class Stringable {
+class StringCapable implements Stringable {
     public function __toString() {
         return "foobar";
     }
@@ -40,7 +40,7 @@ $values = [
     NULL,
     [],
     new StdClass,
-    new Stringable,
+    new StringCapable,
     fopen("data:text/plain,foobar", "r")
 ];
 
@@ -74,20 +74,19 @@ int(1)
 int(1)
 
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-int(1)
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be of the type int, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be of the type int, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying int(%d)
 int(%d)
 
 *** Trying float(NAN)
-*** Caught Argument 1 passed to {closure}() must be of the type int, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying bool(true)
 int(1)
@@ -96,22 +95,22 @@ int(1)
 int(0)
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type int, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type int, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, array given, called in %s on line %d
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, stdClass given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, StringCapable given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type int, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, resource given, called in %s on line %d
 
 Testing 'float' type:
 
@@ -128,14 +127,13 @@ float(1)
 float(1.5)
 
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-float(1)
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying int(%d)
 float(%s)
@@ -150,22 +148,22 @@ float(1)
 float(0)
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type float, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type float, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, array given, called in %s on line %d
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, stdClass given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, StringCapable given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type float, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, resource given, called in %s on line %d
 
 Testing 'string' type:
 
@@ -203,22 +201,22 @@ string(1) "1"
 string(0) ""
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type string, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type string, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, array given, called in %s on line %d
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, stdClass given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
 string(6) "foobar"
 
 *** Trying resource(%d) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type string, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, resource given, called in %s on line %d
 
 Testing 'bool' type:
 
@@ -256,21 +254,21 @@ bool(true)
 bool(false)
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type bool, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type bool, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, array given, called in %s on line %d
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, stdClass given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, StringCapable given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type bool, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, resource given, called in %s on line %d
 
 Done

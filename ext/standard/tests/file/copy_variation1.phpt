@@ -2,11 +2,6 @@
 Test copy() function: usage variations - destination file names(numerics/strings)
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy() function: In creation of destination file names containing numerics/strings
      and checking the existence and size of destination files
 */

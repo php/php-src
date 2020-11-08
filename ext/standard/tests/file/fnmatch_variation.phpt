@@ -7,10 +7,6 @@ if (!function_exists('fnmatch'))
 ?>
 --FILE--
 <?php
-/* Prototype: bool fnmatch ( string $pattern, string $string [, int $flags] )
-   Description: fnmatch() checks if the passed string would match
-     the given shell wildcard pattern.
-*/
 
 echo "*** Testing fnmatch() with file and various patterns ***\n";
 $file_name = __DIR__."/match.tmp";
@@ -68,7 +64,7 @@ for( $i = 0; $i<count($pattern_arr); $i++ ) {
   echo "-- Iteration $i --\n";
   try {
     var_dump( fnmatch($pattern_arr[$i], $file_name) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
 }
@@ -78,13 +74,13 @@ unlink($file_name);
 echo "\n*** Testing fnmatch() with other types other than files ***";
 
 /* defining a common function */
-function match( $pattern, $string ) {
+function match_( $pattern, $string ) {
   for( $i = 0; $i<count($pattern); $i++ ) {
     echo "-- Iteration $i --\n";
     for( $j = 0; $j<count($string); $j++ ) {
       try {
         var_dump( fnmatch($pattern[$i], $string[$j]) );
-      } catch (TypeError $e) {
+      } catch (Error $e) {
         echo $e->getMessage(), "\n";
       }
     }
@@ -100,7 +96,7 @@ $int_arr = array(
   0xF,
   0xF0000
 );
-match($int_arr, $int_arr);
+match_($int_arr, $int_arr);
 
 echo "\n--- With Strings ---\n";
 $str_arr = array(
@@ -113,7 +109,7 @@ $str_arr = array(
   /* binary input */
   b"string"
 );
-match($str_arr, $str_arr);
+match_($str_arr, $str_arr);
 
 echo "\n--- With booleans ---\n";
 $bool_arr = array(
@@ -127,7 +123,7 @@ $bool_arr = array(
   "",
   "string"
 );
-match($bool_arr, $bool_arr);
+match_($bool_arr, $bool_arr);
 
 echo "\n--- With NULL ---\n";
 $null_arr = array(
@@ -138,7 +134,7 @@ $null_arr = array(
   "string",
   0
 );
-match($null_arr, $null_arr);
+match_($null_arr, $null_arr);
 
 echo "\n*** Done ***\n";
 ?>
@@ -191,9 +187,9 @@ bool(false)
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
-fnmatch() expects parameter 1 to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 24 --
-fnmatch() expects parameter 1 to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
@@ -267,44 +263,44 @@ bool(true)
 --- With Strings ---
 -- Iteration 0 --
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 -- Iteration 1 --
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 2 --
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 -- Iteration 3 --
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 4 --
 bool(false)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 
@@ -405,42 +401,42 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(false)
 -- Iteration 1 --
 bool(true)
 bool(true)
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(false)
 -- Iteration 2 --
 bool(true)
 bool(true)
 bool(true)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(false)
 -- Iteration 3 --
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
-fnmatch() expects parameter 1 to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 4 --
 bool(false)
 bool(false)
 bool(false)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
 bool(false)
-fnmatch() expects parameter 2 to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 

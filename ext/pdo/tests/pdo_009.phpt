@@ -28,26 +28,26 @@ $stmt = $db->prepare('SELECT classtypes.name, test.id AS id, test.val AS val FRO
 
 class Test1
 {
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    public function __construct()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 class Test2
 {
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    public function __construct()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 class Test3
 {
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    public function __construct()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 $stmt->execute();

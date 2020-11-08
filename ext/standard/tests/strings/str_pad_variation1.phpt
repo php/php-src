@@ -8,11 +8,6 @@ if (getenv("USE_ZEND_ALLOC") === "0") {
 ?>
 --FILE--
 <?php
-/* Prototype  : string str_pad  ( string $input  , int $pad_length  [, string $pad_string  [, int $pad_type  ]] )
- * Description: Pad a string to a certain length with another string
- * Source code: ext/standard/string.c
-*/
-
 /* Test str_pad() function: with unexpected inputs for '$pad_length'
  *  and expected type for '$input'
 */
@@ -36,7 +31,6 @@ var_dump( str_pad($input, $php_int_max_pad_length) );
 ?>
 --EXPECTF--
 *** Testing str_pad() function: with large value for for 'pad_length' argument ***
-str_pad() expects parameter 2 to be int, float given
+str_pad(): Argument #2 ($length) must be of type int, float given
 
 Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
-

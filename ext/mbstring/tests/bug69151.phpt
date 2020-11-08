@@ -8,13 +8,14 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 --FILE--
 <?php
 $str = "\x80";
-var_dump(
-    false === mb_eregi('.', $str, $matches),
-    [] === $matches,
-    NULL === mb_ereg_replace('.', "\\0", $str),
-    false === mb_ereg_search_init("\x80", '.'),
-    false === mb_ereg_search()
-);
+
+var_dump(false === mb_eregi('.', $str, $matches));
+var_dump([] === $matches);
+
+var_dump(NULL === mb_ereg_replace('.', "\\0", $str));
+
+var_dump(false === mb_ereg_search_init("\x80", '.'));
+var_dump(false === mb_ereg_search());
 ?>
 --EXPECT--
 bool(true)

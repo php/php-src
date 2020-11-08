@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - unexpected values for $arr2 argument
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Passing non array values to 'arr2' argument of array_merge_recursive() and see
  * that the function outputs proper warning messages wherever expected.
@@ -105,51 +100,51 @@ echo "Done";
 --EXPECT--
 *** Testing array_merge_recursive() : Passing non array values to $arr2 argument ***
 
--- Iteration 1 --Expected parameter 2 to be an array, int given
+-- Iteration 1 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 2 --Expected parameter 2 to be an array, int given
+-- Iteration 2 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 3 --Expected parameter 2 to be an array, int given
+-- Iteration 3 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 4 --Expected parameter 2 to be an array, int given
+-- Iteration 4 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 5 --Expected parameter 2 to be an array, float given
+-- Iteration 5 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 6 --Expected parameter 2 to be an array, float given
+-- Iteration 6 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 7 --Expected parameter 2 to be an array, float given
+-- Iteration 7 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 8 --Expected parameter 2 to be an array, float given
+-- Iteration 8 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 9 --Expected parameter 2 to be an array, float given
+-- Iteration 9 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 10 --Expected parameter 2 to be an array, null given
+-- Iteration 10 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 11 --Expected parameter 2 to be an array, null given
+-- Iteration 11 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 12 --Expected parameter 2 to be an array, bool given
+-- Iteration 12 --array_merge_recursive(): Argument #2 must be of type array, bool given
 
--- Iteration 13 --Expected parameter 2 to be an array, bool given
+-- Iteration 13 --array_merge_recursive(): Argument #2 must be of type array, bool given
 
--- Iteration 14 --Expected parameter 2 to be an array, bool given
+-- Iteration 14 --array_merge_recursive(): Argument #2 must be of type array, bool given
 
--- Iteration 15 --Expected parameter 2 to be an array, bool given
+-- Iteration 15 --array_merge_recursive(): Argument #2 must be of type array, bool given
 
--- Iteration 16 --Expected parameter 2 to be an array, string given
+-- Iteration 16 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 17 --Expected parameter 2 to be an array, string given
+-- Iteration 17 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 18 --Expected parameter 2 to be an array, string given
+-- Iteration 18 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 19 --Expected parameter 2 to be an array, string given
+-- Iteration 19 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 20 --Expected parameter 2 to be an array, string given
+-- Iteration 20 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 21 --Expected parameter 2 to be an array, null given
+-- Iteration 21 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 22 --Expected parameter 2 to be an array, null given
+-- Iteration 22 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 23 --Expected parameter 2 to be an array, resource given
+-- Iteration 23 --array_merge_recursive(): Argument #2 must be of type array, resource given
 
--- Iteration 24 --Expected parameter 2 to be an array, object given
+-- Iteration 24 --array_merge_recursive(): Argument #2 must be of type array, A given
 Done

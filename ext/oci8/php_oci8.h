@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,7 +23,7 @@
    +----------------------------------------------------------------------+
 */
 
-#if HAVE_OCI8
+#ifdef HAVE_OCI8
 # ifndef PHP_OCI8_H
 #  define PHP_OCI8_H
 
@@ -43,7 +41,7 @@
  */
 #undef PHP_OCI8_VERSION
 #endif
-#define PHP_OCI8_VERSION "2.2.0"
+#define PHP_OCI8_VERSION "3.0.0"
 
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry

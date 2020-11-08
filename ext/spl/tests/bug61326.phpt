@@ -11,6 +11,7 @@ var_dump($aobj1 == $aobj3);
 
 $aobj3->foo = 'bar';
 var_dump($aobj1 == $aobj3);
+?>
 --EXPECT--
 bool(false)
 bool(true)

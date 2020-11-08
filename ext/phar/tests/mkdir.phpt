@@ -25,7 +25,6 @@ $a->addEmptyDir('.phar');
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -44,4 +43,3 @@ Warning: rmdir(): phar error: cannot remove directory "" in phar "foo.phar", dir
 
 Warning: rmdir(): phar error: cannot remove directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is a not a directory in %smkdir.php on line %d
 Cannot create a directory in magic ".phar" directory
-===DONE===

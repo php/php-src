@@ -3,10 +3,6 @@ Test stristr() function : usage variations - test values for $needle argument
 --FILE--
 <?php
 
-/* Prototype: string stristr ( string $haystack, string $needle );
-   Description: Case-insensitive strstr().
-*/
-
 echo "*** Testing stristr() function: with unexpected inputs for 'needle' argument ***\n";
 
 //get an unset variable
@@ -26,42 +22,42 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values for $input
 $inputs =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  -2,
-		  -PHP_INT_MAX,
+          1,
+          -2,
+          -PHP_INT_MAX,
 
-		  // float values
+          // float values
 /*5*/	  10.5,
-		  -20.5,
-		  10.1234567e10,
+          -20.5,
+          10.1234567e10,
 
-		  // array values
+          // array values
 /*8*/	  array(),
-		  array(0),
-		  array(1, 2),
+          array(0),
+          array(1, 2),
 
-		  // boolean values
+          // boolean values
 /*11*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // null values
+          // null values
 /*15*/	  NULL,
-		  null,
+          null,
 
-		  // objects
+          // objects
 /*17*/	  new sample(),
 
-		  // resource
+          // resource
 /*18*/	  $file_handle,
 
-		  // undefined variable
+          // undefined variable
 /*19*/	  @$undefined_var,
 
-		  // unset variable
+          // unset variable
 /*20*/	  @$unset_var
 );
 
@@ -83,7 +79,6 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing stristr() function: with unexpected inputs for 'needle' argument ***
 -- Iteration 1 --
@@ -101,11 +96,11 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-stristr() expects parameter 2 to be string, array given
+stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 9 --
-stristr() expects parameter 2 to be string, array given
+stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 10 --
-stristr() expects parameter 2 to be string, array given
+stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 11 --
 bool(false)
 -- Iteration 12 --
@@ -121,9 +116,8 @@ string(11) "Hello World"
 -- Iteration 17 --
 bool(false)
 -- Iteration 18 --
-stristr() expects parameter 2 to be string, resource given
+stristr(): Argument #2 ($needle) must be of type string, resource given
 -- Iteration 19 --
 string(11) "Hello World"
 -- Iteration 20 --
 string(11) "Hello World"
-===DONE===

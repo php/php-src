@@ -4,6 +4,7 @@ If SIGQUIT and SIGTERM during reloading fail, SIGKILL should be sent
 <?php
 include "skipif.inc";
 if (!function_exists('pcntl_sigprocmask')) die('skip Requires pcntl_sigprocmask()');
+if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 ?>
 --FILE--
 <?php
@@ -38,6 +39,9 @@ $tester->request()->expectEmptyBody();
 $tester->signal('USR2');
 $tester->expectLogNotice('Reloading in progress ...');
 $tester->expectLogNotice('reloading: .*');
+// The timeout needs to elapse twice until the process will be killed,
+// so we have to wait at least two seconds.
+sleep(2);
 $tester->expectLogNotice('using inherited socket fd=\d+, "127.0.0.1:\d+"');
 $tester->expectLogStartNotices();
 $tester->ping('{{ADDR}}');

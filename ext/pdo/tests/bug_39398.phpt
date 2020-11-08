@@ -23,7 +23,6 @@ $stmt->execute();
 
 var_dump($db->query("SELECT * FROM test")->fetchAll(PDO::FETCH_ASSOC));
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
@@ -32,4 +31,3 @@ array(1) {
     string(1) "1"
   }
 }
-===DONE===

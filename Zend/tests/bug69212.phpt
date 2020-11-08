@@ -22,17 +22,17 @@ try {
 }
 
 try {
-	$f = function () {};
-	$f->__invoke(do_throw());
+    $f = function () {};
+    $f->__invoke(do_throw());
 } catch (Exception $e) {
-	echo "Caught!\n";
+    echo "Caught!\n";
 }
 
 try {
-	$t = new Test;
-	$f->__invoke($t->bar(Test::foo(do_throw())));
+    $t = new Test;
+    $f->__invoke($t->bar(Test::foo(do_throw())));
 } catch (Exception $e) {
-	echo "Caught!\n";
+    echo "Caught!\n";
 }
 
 ?>

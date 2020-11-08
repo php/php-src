@@ -2,11 +2,6 @@
 Test vfprintf() function : basic functionality - octal format
 --FILE--
 <?php
-/* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
- * Description: Write a formatted string to a stream
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vfprintf() : basic functionality - using octal format ***\n";
 
 // Initialise all required variables
@@ -37,10 +32,8 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using octal format ***
 21
 21 347
 21 347 567
-===DONE===

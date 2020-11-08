@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,9 +17,9 @@
 #include "php.h"
 #include "basic_functions.h"
 #include "crc32.h"
+#include "crc32_x86.h"
 
-#if defined(__aarch64__)
-# pragma GCC target ("+nothing+crc")
+#if HAVE_AARCH64_CRC32
 # include <arm_acle.h>
 # if defined(__linux__)
 #  include <sys/auxv.h>
@@ -44,16 +42,40 @@ static inline int has_crc32_insn() {
 	return res;
 # endif
 }
+
+# pragma GCC push_options
+# pragma GCC target ("+nothing+crc")
+static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
+	while (nr >= sizeof(uint64_t)) {
+		crc = __crc32d(crc, *(uint64_t *)p);
+		p += sizeof(uint64_t);
+		nr -= sizeof(uint64_t);
+	}
+	if (nr >= sizeof(int32_t)) {
+		crc = __crc32w(crc, *(uint32_t *)p);
+		p += sizeof(uint32_t);
+		nr -= sizeof(uint32_t);
+	}
+	if (nr >= sizeof(int16_t)) {
+		crc = __crc32h(crc, *(uint16_t *)p);
+		p += sizeof(uint16_t);
+		nr -= sizeof(uint16_t);
+	}
+	if (nr) {
+		crc = __crc32b(crc, *p);
+	}
+	return crc;
+}
+# pragma GCC pop_options
 #endif
 
-/* {{{ proto string crc32(string str)
-   Calculate the crc32 polynomial of a string */
-PHP_NAMED_FUNCTION(php_if_crc32)
+/* {{{ Calculate the crc32 polynomial of a string */
+PHP_FUNCTION(crc32)
 {
 	char *p;
 	size_t nr;
 	uint32_t crcinit = 0;
-	register uint32_t crc;
+	uint32_t crc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(p, nr)
@@ -61,33 +83,22 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 
 	crc = crcinit^0xFFFFFFFF;
 
-#if defined(__aarch64__)
+#if HAVE_AARCH64_CRC32
 	if (has_crc32_insn()) {
-		while(nr >= sizeof(uint64_t)) {
-			crc = __crc32d(crc, *(uint64_t *)p);
-			p += sizeof(uint64_t);
-			nr -= sizeof(uint64_t);
-		}
-		if (nr >= sizeof(int32_t)) {
-			crc = __crc32w(crc, *(uint32_t *)p);
-			p += sizeof(uint32_t);
-			nr -= sizeof(uint32_t);
-		}
-		if (nr >= sizeof(int16_t)) {
-			crc = __crc32h(crc, *(uint16_t *)p);
-			p += sizeof(uint16_t);
-			nr -= sizeof(uint16_t);
-		}
-		if (nr) {
-			crc = __crc32b(crc, *p);
-			p += sizeof(uint8_t);
-			nr -= sizeof(uint8_t);
-		}
+		crc = crc32_aarch64(crc, p, nr);
+		RETURN_LONG(crc^0xFFFFFFFF);
 	}
 #endif
+
+#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+	size_t nr_simd = crc32_x86_simd_update(X86_CRC32B, &crc, (const unsigned char *)p, nr);
+	nr -= nr_simd;
+	p += nr_simd;
+#endif
+
 	for (; nr--; ++p) {
 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}
-	RETVAL_LONG(crc^0xFFFFFFFF);
+	RETURN_LONG(crc^0xFFFFFFFF);
 }
 /* }}} */

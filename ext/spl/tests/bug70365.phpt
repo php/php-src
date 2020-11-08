@@ -3,10 +3,10 @@ SPL: Bug #70365 use-after-free vulnerability in unserialize() with SplObjectStor
 --FILE--
 <?php
 class obj {
-	var $ryat;
-	function __wakeup() {
-		$this->ryat = 1;
-	}
+    var $ryat;
+    function __wakeup() {
+        $this->ryat = 1;
+    }
 }
 
 $fakezval = ptr2str(1122334455);
@@ -25,13 +25,14 @@ var_dump($data);
 
 function ptr2str($ptr)
 {
-	$out = '';
-	for ($i = 0; $i < 8; $i++) {
-		$out .= chr($ptr & 0xff);
-		$ptr >>= 8;
-	}
-	return $out;
+    $out = '';
+    for ($i = 0; $i < 8; $i++) {
+        $out .= chr($ptr & 0xff);
+        $ptr >>= 8;
+    }
+    return $out;
 }
+?>
 --EXPECTF--
 array(5) {
   [0]=>

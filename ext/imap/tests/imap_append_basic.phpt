@@ -2,27 +2,19 @@
 Test imap_append() function : basic functionality
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__. '/setup/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_append  ( resource $imap_stream  , string $mailbox  , string $message  [, string $options  ] )
- * Description: Append a string message to a specified mailbox.
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_append() : basic functionality ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__. '/setup/imap_include.inc');
 
 echo "Create a new mailbox for test\n";
-$imap_stream = setup_test_mailbox("", 0);
-if (!is_resource($imap_stream)) {
-	exit("TEST FAILED: Unable to create test mailbox\n");
-}
+$imap_stream = setup_test_mailbox("imapappendbaisc", 0);
 
 $mb_details = imap_mailboxmsginfo($imap_stream);
-echo "Add a couple of msgs to new mailbox " . $mb_details->Mailbox . "\n";
+echo "Add a couple of msgs to the new mailbox\n";
 var_dump(imap_append($imap_stream, $mb_details->Mailbox
                    , "From: webmaster@something.com\r\n"
                    . "To: info@something.com\r\n"
@@ -47,17 +39,17 @@ var_dump(imap_headers($imap_stream));
 
 imap_close($imap_stream);
 ?>
-===Done===
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imapappendbaisc';
+require_once(__DIR__ . '/setup/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_append() : basic functionality ***
 Create a new mailbox for test
 Create a temporary mailbox and add 0 msgs
-.. mailbox '%s' created
-Add a couple of msgs to new mailbox {%s}INBOX.%s
+New mailbox created
+Add a couple of msgs to the new mailbox
 bool(true)
 bool(true)
 Msg Count after append : 2
@@ -68,4 +60,3 @@ array(2) {
   [1]=>
   string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
 }
-===Done===

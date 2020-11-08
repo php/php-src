@@ -42,32 +42,32 @@ function2($user,$password,$dbase,$conn_type);
 
 function function1($user,$password,$dbase,$conn_type)
 {
-	switch($conn_type)
-	{
-	case 1:
-		var_dump($conn1 = oci_new_connect($user,$password,$dbase));
-		break;
-	case 2:
-		var_dump($conn1 = oci_connect($user,$password,$dbase));
-		break;
-	}
-	drcp_update_table($conn1);
+    switch($conn_type)
+    {
+    case 1:
+        var_dump($conn1 = oci_new_connect($user,$password,$dbase));
+        break;
+    case 2:
+        var_dump($conn1 = oci_connect($user,$password,$dbase));
+        break;
+    }
+    drcp_update_table($conn1);
 }
 
 // This is the second scope
 
 function function2($user,$password,$dbase,$conn_type)
 {
-	switch($conn_type)
-	{
-	case 1:
-		var_dump($conn1 = oci_new_connect($user,$password,$dbase));
-		break;
-	case 2:
-		var_dump($conn1 = oci_connect($user,$password,$dbase));
-		break;
-	}
-	drcp_select_value($conn1);
+    switch($conn_type)
+    {
+    case 1:
+        var_dump($conn1 = oci_new_connect($user,$password,$dbase));
+        break;
+    case 2:
+        var_dump($conn1 = oci_connect($user,$password,$dbase));
+        break;
+    }
+    drcp_select_value($conn1);
 }
 drcp_drop_table($c);
 oci_close($c);

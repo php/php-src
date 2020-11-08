@@ -4,7 +4,7 @@ executing a file with -F
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
@@ -32,7 +32,6 @@ file_put_contents($filename_txt, $txt);
 var_dump(`cat "$filename_txt" | "$php" -n -F "$filename"`);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__."/010.test.php");
@@ -43,4 +42,3 @@ string(25) "
 string(10) "test
 hello"
 "
-===DONE===

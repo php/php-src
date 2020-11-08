@@ -4,20 +4,23 @@ Bug #78154: SEND_VAR_NO_REF does not always send reference
 <?php
 
 namespace {
-    var_dump(similar_text('a', 'a', $c=0x44444444));
-    var_dump($c);
+    try {
+        var_dump(similar_text('a', 'a', $c=0x44444444));
+        var_dump($c);
+    } catch (Throwable $e) {
+        echo "Exception: " . $e->getMessage() . "\n";
+    }
 }
 namespace Foo {
-    var_dump(similar_text('a', 'a', $d=0x44444444));
-    var_dump($d);
+    try {
+        var_dump(similar_text('a', 'a', $d=0x44444444));
+        var_dump($d);
+    } catch (\Throwable $e) {
+        echo "Exception: " . $e->getMessage() . "\n";
+    }
 }
 
 ?>
---EXPECTF--
-Notice: Only variables should be passed by reference in %s on line %d
-int(1)
-int(1145324612)
-
-Notice: Only variables should be passed by reference in %s on line %d
-int(1)
-int(1145324612)
+--EXPECT--
+Exception: similar_text(): Argument #3 ($percent) cannot be passed by reference
+Exception: similar_text(): Argument #3 ($percent) cannot be passed by reference

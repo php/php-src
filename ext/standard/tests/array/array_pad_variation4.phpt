@@ -2,11 +2,6 @@
 Test array_pad() function : usage variations - binary safe checking
 --FILE--
 <?php
-/* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
- * Description: Returns a copy of input array padded with pad_value to size pad_size
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing binary values to $pad_value argument and testing whether
 * array_pad() behaves in an expected way with the other arguments passed to the function.

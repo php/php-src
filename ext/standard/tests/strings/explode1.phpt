@@ -5,13 +5,6 @@ error_reporting=2047
 precision=14
 --FILE--
 <?php
-/* Prototype: array explode ( string $delimiter, string $string [, int $limit] );
-   Description: Returns an array of strings, each of which is a substring of string
-                formed by splitting it on boundaries formed by the string delimiter.
-                If limit is set, the returned array will contain a maximum of limit
-                elements with the last element containing the rest of string.
-*/
-
 echo "*** Testing explode() for basic operations ***\n";
 $delimiters = array (
   "",  // len=0
@@ -36,28 +29,28 @@ foreach($delimiters as $delimiter) {
 
     try {
         var_dump( explode($delimiter, $string, -1) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
-	    var_dump( explode($delimiter, $string, 0) );
-    } catch (\Error $e) {
+        var_dump( explode($delimiter, $string, 0) );
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
-	    var_dump( explode($delimiter, $string, 1) );
-    } catch (\Error $e) {
+        var_dump( explode($delimiter, $string, 1) );
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
-	    var_dump( explode($delimiter, $string, 2) );
-    } catch (\Error $e) {
+        var_dump( explode($delimiter, $string, 2) );
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     $counter++;
 }
 
-echo "\n*** Testing explode() with miscelleneous input arguments ***\n";
+echo "\n*** Testing explode() with miscellaneous input arguments ***\n";
 
 echo "\n-- Passing positive values of Limit to explode() --\n";
 /* LIMIT=2 */
@@ -94,20 +87,19 @@ class string1 {
 $obj = new string1;
 var_dump( explode("b", $obj) );
 
-echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
-Empty delimiter
-Empty delimiter
-Empty delimiter
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
 -- Iteration 2 --
-Empty delimiter
-Empty delimiter
-Empty delimiter
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
 -- Iteration 3 --
 array(1) {
   [0]=>
@@ -209,10 +201,10 @@ array(2) {
   string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 7 --
-Empty delimiter
-Empty delimiter
-Empty delimiter
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
 -- Iteration 8 --
 array(2) {
   [0]=>
@@ -304,7 +296,7 @@ array(2) {
   string(8) "PHP%ZEND"
 }
 
-*** Testing explode() with miscelleneous input arguments ***
+*** Testing explode() with miscellaneous input arguments ***
 
 -- Passing positive values of Limit to explode() --
 array(2) {
@@ -486,4 +478,3 @@ array(2) {
   [1]=>
   string(4) "ject"
 }
-Done

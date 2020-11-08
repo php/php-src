@@ -17,7 +17,6 @@ print $xml_element->node2."\n";
 print $xml_element->asXML();
 
 ?>
-===DONE===
 --EXPECT--
 a &#38; b
 a &#38; b
@@ -25,5 +24,4 @@ a & b
 a & b
 <?xml version="1.0"?>
 <root><node1>a &amp;#38; b</node1><node2>a &amp; b</node2></root>
-===DONE===
 	

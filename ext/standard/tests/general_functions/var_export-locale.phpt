@@ -14,11 +14,6 @@ if (PHP_INT_SIZE < 8) {
 --FILE--
 <?php
 setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8");
-/* Prototype: mixed var_export( mixed expression [, bool return]);
- * Description: Returns the variable representation when the return parameter is used and evaluates to TRUE. Otherwise, this function will return NULL.
-
-*/
-
 echo "*** Testing var_export() with integer values ***\n";
 // different integer values
 $valid_ints = array(
@@ -58,12 +53,12 @@ $counter++;
 echo "*** Testing var_export() with valid boolean values ***\n";
 // different valid  boolean values
 $valid_bool = array(
-		    1,
-		    TRUE,
+            1,
+            TRUE,
                 true,
                 0,
-		    FALSE,
-		    false
+            FALSE,
+            false
                );
 $counter = 1;
 /* Loop to check for above boolean values with var_export() */
@@ -307,7 +302,7 @@ echo "\nDone";
 
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing var_export() with integer values ***
 
 *** Output for integer values ***

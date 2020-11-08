@@ -4,11 +4,6 @@ Test token_get_all() function : usage variations - with predefined language cons
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP language tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Testing token_get_all() with following predefined language constants:
  *   __FILE__     - T_FILE
@@ -23,7 +18,7 @@ echo "*** Testing token_get_all() : with language constants ***\n";
 
 // parsing __FILE__ token
 echo "-- with FILE --\n";
-$source = "<?php 
+$source = "<?php
 \$fp =  fopen(__FILE__, 'r');
 ?>";
 var_dump( token_get_all($source));
@@ -54,13 +49,14 @@ echo "Done"
 --EXPECTF--
 *** Testing token_get_all() : with language constants ***
 -- with FILE --
-array(16) {
+array(15) {
   [0]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "<?php "
+    string(6) "<?php
+"
     [2]=>
     int(1)
   }
@@ -69,21 +65,11 @@ array(16) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) "
-"
-    [2]=>
-    int(1)
-  }
-  [2]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
     string(3) "$fp"
     [2]=>
     int(2)
   }
-  [3]=>
+  [2]=>
   array(3) {
     [0]=>
     int(%d)
@@ -92,9 +78,9 @@ array(16) {
     [2]=>
     int(2)
   }
-  [4]=>
+  [3]=>
   string(1) "="
-  [5]=>
+  [4]=>
   array(3) {
     [0]=>
     int(%d)
@@ -103,7 +89,7 @@ array(16) {
     [2]=>
     int(2)
   }
-  [6]=>
+  [5]=>
   array(3) {
     [0]=>
     int(%d)
@@ -112,9 +98,9 @@ array(16) {
     [2]=>
     int(2)
   }
-  [7]=>
+  [6]=>
   string(1) "("
-  [8]=>
+  [7]=>
   array(3) {
     [0]=>
     int(%d)
@@ -123,9 +109,9 @@ array(16) {
     [2]=>
     int(2)
   }
-  [9]=>
+  [8]=>
   string(1) ","
-  [10]=>
+  [9]=>
   array(3) {
     [0]=>
     int(%d)
@@ -134,7 +120,7 @@ array(16) {
     [2]=>
     int(2)
   }
-  [11]=>
+  [10]=>
   array(3) {
     [0]=>
     int(%d)
@@ -143,11 +129,11 @@ array(16) {
     [2]=>
     int(2)
   }
-  [12]=>
+  [11]=>
   string(1) ")"
-  [13]=>
+  [12]=>
   string(1) ";"
-  [14]=>
+  [13]=>
   array(3) {
     [0]=>
     int(%d)
@@ -157,7 +143,7 @@ array(16) {
     [2]=>
     int(2)
   }
-  [15]=>
+  [14]=>
   array(3) {
     [0]=>
     int(%d)

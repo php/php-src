@@ -75,7 +75,7 @@ local function wline(line, needindent)
   g_synclineno = g_synclineno + 1
 end
 
--- Write assembler line as a comment, if requestd.
+-- Write assembler line as a comment, if requested.
 local function wcomment(aline)
   if g_opt.comment then
     wline(g_opt.comment..aline..g_opt.endcomment, true)

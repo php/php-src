@@ -2,11 +2,6 @@
 Test base_convert() function : usage variations - different data types as $number argument
 --FILE--
 <?php
-/* Prototype  : string base_convert  ( string $number  , int $frombase  , int $tobase  )
- * Description: Convert a number between arbitrary bases.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing base_convert() : usage variations ***\n";
 
 //get an unset variable
@@ -70,13 +65,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of base_convert()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(base_convert($input, 10, 8));
-	$iterator++;
-};
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(base_convert($input, 10, 8));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+    $iterator++;
+}
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing base_convert() : usage variations ***
 
@@ -147,11 +145,7 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 19 --
-
-Notice: Array to string conversion in %s on line %d
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 20 --
 
@@ -175,7 +169,4 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 25 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "5"
-===Done===
+base_convert(): Argument #1 ($num) must be of type string, resource given

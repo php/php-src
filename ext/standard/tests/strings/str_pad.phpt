@@ -67,13 +67,13 @@ echo "\n--- padding string as null ---\n";
 
 try {
     str_pad($input_string, 12, NULL);
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     str_pad($input_string, 12, "");
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -81,11 +81,10 @@ try {
 
 try {
     str_pad($input_string, $pad_length, "+", 15);
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
-echo "Done\n";
 ?>
 --EXPECT--
 #### Basic operations ####
@@ -340,7 +339,6 @@ string(16) "\t\variation\t\t"
 #### error conditions ####
 
 --- padding string as null ---
-Padding string cannot be empty
-Padding string cannot be empty
-Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH
-Done
+str_pad(): Argument #3 ($pad_string) must be a non-empty string
+str_pad(): Argument #3 ($pad_string) must be a non-empty string
+str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH

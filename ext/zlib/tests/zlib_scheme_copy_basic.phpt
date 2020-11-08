@@ -3,7 +3,7 @@ Test compress.zlib:// scheme with the copy function: compressed to compressed
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -31,7 +31,5 @@ else {
 }
 unlink($outputFileName);
 ?>
-===DONE===
 --EXPECT--
 OK: Copy identical
-===DONE===

@@ -5,8 +5,8 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
 <?php
-	if (!extension_loaded("gd")) die("skip GD not present");
-	if (!GD_BUNDLED) die('skip function only available in bundled, external GD detected');
+    if (!extension_loaded("gd")) die("skip GD not present");
+    if (!GD_BUNDLED) die('skip function only available in bundled, external GD detected');
 ?>
 --FILE--
 <?php

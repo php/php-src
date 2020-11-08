@@ -11,11 +11,12 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo() {
-	$a = 1;
-	$b = 2;
-	$c = $a = $b;
-	return $c;
+    $a = 1;
+    $b = 2;
+    $c = $a = $b;
+    return $c;
 }
 var_dump(foo());
+?>
 --EXPECT--
 int(2)

@@ -11,7 +11,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /*
- * proto string basename(string path [, string suffix])
  * Function is implemented in ext/standard/string.c
  */
 $file_paths = array (
@@ -117,7 +116,7 @@ check_basename( $file_path_variations );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 
 --Iteration 1--

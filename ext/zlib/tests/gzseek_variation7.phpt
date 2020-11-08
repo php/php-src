@@ -3,7 +3,7 @@ Test function gzseek() by calling it with SEEK_END when writing
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -32,7 +32,6 @@ gzclose($h);
 echo "\n";
 unlink($f);
 ?>
-===DONE===
 --EXPECTF--
 tell=int(23)
 move to the end of the file
@@ -44,4 +43,3 @@ tell=int(47)
 
 reading the output file
 This is the first line.This is the second line.
-===DONE===

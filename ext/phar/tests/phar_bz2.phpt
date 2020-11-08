@@ -46,7 +46,6 @@ $b->isFileFormat(25);
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/phar_bz2.phar');
@@ -58,4 +57,3 @@ string(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 Unknown file format specified
-===DONE===

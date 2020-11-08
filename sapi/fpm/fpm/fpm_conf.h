@@ -73,6 +73,7 @@ struct fpm_worker_pool_config_s {
 	int pm_process_idle_timeout;
 	int pm_max_requests;
 	char *pm_status_path;
+	char *pm_status_listen;
 	char *ping_path;
 	char *ping_response;
 	char *access_log;
@@ -81,6 +82,7 @@ struct fpm_worker_pool_config_s {
 	int request_slowlog_timeout;
 	int request_slowlog_trace_depth;
 	int request_terminate_timeout;
+	int request_terminate_timeout_track_finished;
 	int rlimit_files;
 	int rlimit_core;
 	char *chroot;

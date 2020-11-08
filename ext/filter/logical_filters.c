@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,7 +23,7 @@
 
 #include "zend_multiply.h"
 
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
 
@@ -362,7 +360,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (decimal_set) {
 		if (decimal_len != 1) {
-			php_error_docref(NULL, E_WARNING, "decimal separator must be one char");
+			zend_value_error("%s(): \"decimal\" option must be one character long", get_active_function_name());
 			RETURN_VALIDATION_FAILED
 		} else {
 			dec_sep = *decimal;
@@ -373,7 +371,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (thousand_set) {
 		if (thousand_len < 1) {
-			php_error_docref(NULL, E_WARNING, "thousand separator must be at least one char");
+			zend_value_error("%s(): \"thousand\" option cannot be empty", get_active_function_name());
 			RETURN_VALIDATION_FAILED
 		} else {
 			tsd_sep = thousand;
@@ -474,7 +472,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	FETCH_STR_OPTION(regexp, "regexp");
 
 	if (!regexp_set) {
-		php_error_docref(NULL, E_WARNING, "'regexp' option missing");
+		zend_value_error("%s(): \"regexp\" option is missing", get_active_function_name());
 		RETURN_VALIDATION_FAILED
 	}
 
@@ -921,7 +919,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	FETCH_STRING_OPTION(exp_separator, "separator");
 
 	if (exp_separator_set && exp_separator_len != 1) {
-		php_error_docref(NULL, E_WARNING, "Separator must be exactly one character long");
+		zend_value_error("%s(): \"separator\" option must be one character long", get_active_function_name());
 		RETURN_VALIDATION_FAILED;
 	}
 

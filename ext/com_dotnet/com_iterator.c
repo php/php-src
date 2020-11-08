@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -129,7 +127,8 @@ static const zend_object_iterator_funcs com_iter_funcs = {
 	com_iter_get_data,
 	com_iter_get_key,
 	com_iter_move_forwards,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref)
@@ -150,7 +149,8 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) != VT_DISPATCH && !V_ISARRAY(&obj->v)) {
-		php_error_docref(NULL, E_WARNING, "variant is not an object or array VT=%d", V_VT(&obj->v));
+		/* TODO Promote to TypeError? */
+		php_error_docref(NULL, E_WARNING, "Variant is not an object or array VT=%d", V_VT(&obj->v));
 		return NULL;
 	}
 
@@ -173,6 +173,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		dims = SafeArrayGetDim(V_ARRAY(&obj->v));
 
 		if (dims != 1) {
+			/* TODO Promote to ValueError? */
 			php_error_docref(NULL, E_WARNING,
 				   "Can only handle single dimension variant arrays (this array has %d)", dims);
 			goto fail;
@@ -187,7 +188,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		SafeArrayGetUBound(V_ARRAY(&I->safe_array), 1, &I->sa_max);
 
 		/* pre-fetch the element */
-		if (php_com_safearray_get_elem(&I->safe_array, &I->v, bound)) {
+		if (I->sa_max >= bound && php_com_safearray_get_elem(&I->safe_array, &I->v, bound)) {
 			I->key = bound;
 			ZVAL_NULL(&ptr);
 			php_com_zval_from_variant(&ptr, &I->v, I->code_page);

@@ -12,7 +12,7 @@ require_once __DIR__ . '/skipif.inc';
 require_once __DIR__ . '/skipifconnectfailure.inc';
 require_once __DIR__ . '/connect.inc';
 if (!$IS_MYSQLND) {
-	die('skip mysqlnd only');
+    die('skip mysqlnd only');
 }
 ?>
 --FILE--
@@ -26,9 +26,9 @@ $mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $stmt   = $mysqli->prepare('SELECT 1');
 
 var_dump(
-	$mysqli->close(),
-	$stmt->free_result(),
-	$stmt->close()
+    $mysqli->close(),
+    $stmt->free_result(),
+    $stmt->close()
 );
 
 ?>

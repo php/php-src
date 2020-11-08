@@ -4,13 +4,13 @@ non-existent imported functions should not be looked up in the global table
 <?php
 
 namespace {
-	function test() {
-		echo "NO!";
-	}
+    function test() {
+        echo "NO!";
+    }
 }
 namespace foo {
-	use function bar\test;
-	test();
+    use function bar\test;
+    test();
 }
 
 ?>

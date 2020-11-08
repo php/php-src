@@ -4,10 +4,10 @@ There must be a difference between label: try { ... } and try { label: ... }
 <?php
 
 label: try {
-	goto label;
+    goto label;
 } finally {
-	print "success";
-	return; // don't loop
+    print "success";
+    return; // don't loop
 }
 
 ?>

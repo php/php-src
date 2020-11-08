@@ -4,8 +4,8 @@ tidy_parse_file()
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php
-	$a = tidy_parse_file(__DIR__."/005.html");
-	echo tidy_get_output($a);
+    $a = tidy_parse_file(__DIR__."/005.html");
+    echo tidy_get_output($a);
 
 ?>
 --EXPECT--

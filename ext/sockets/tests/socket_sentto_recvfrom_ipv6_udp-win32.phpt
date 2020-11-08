@@ -6,7 +6,7 @@ if (!extension_loaded('sockets')) {
     die('SKIP The sockets extension is not loaded.');
 }
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-	die('skip only for Windows');
+    die('skip only for Windows');
 }
 require 'ipv6_skipif.inc';
 --FILE--
@@ -44,6 +44,7 @@ require 'ipv6_skipif.inc';
     echo "Received $buf from remote address $from and remote port $port" . PHP_EOL;
 
     socket_close($socket);
+?>
 --EXPECTF--
 Warning: socket_recvfrom(): unable to recvfrom [10022]: %s
  in %s on line %d

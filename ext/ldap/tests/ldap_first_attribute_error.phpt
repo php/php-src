@@ -16,7 +16,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 ldap_first_attribute(): supplied resource is not a valid ldap result entry resource
-===DONE===

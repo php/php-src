@@ -35,7 +35,6 @@ var_dump($phar->isFileFormat(Phar::PHAR));
 var_dump(strlen($phar->getStub()));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
@@ -55,4 +54,3 @@ bool(true)
 int(6641)
 bool(true)
 int(6641)
-===DONE===

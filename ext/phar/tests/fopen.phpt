@@ -31,10 +31,8 @@ include "index.php";
 __HALT_COMPILER();');
 include $fname;
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 hihi
-Warning: fopen(notfound.txt): failed to open stream: No such file or directory in phar://%sfopen.phar.php/index.php on line %d
-===DONE===
+Warning: fopen(notfound.txt): Failed to open stream: No such file or directory in phar://%sfopen.phar.php/index.php on line %d

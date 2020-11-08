@@ -12,14 +12,12 @@ $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.zip';
 $phar = new PharData($fname);
 $phar['x'] = 'hi';
 try {
-	$phar->convertToData(Phar::ZIP, Phar::NONE, 'phar.zip');
+    $phar->convertToData(Phar::ZIP, Phar::NONE, 'phar.zip');
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');?>
 --EXPECTF--
 data phar "%sbug48377.2.phar.zip" has invalid extension phar.zip
-===DONE===

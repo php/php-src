@@ -5,37 +5,37 @@ precision=14
 --FILE--
 <?php
 $values1 = array(234,
-				-234,
-				23.45e1,
-				-23.45e1,
-				0xEA,
-				0352,
-				"234",
-				"234.5",
-				"23.45e1",
-				null,
-				true,
-				false);
+                -234,
+                23.45e1,
+                -23.45e1,
+                0xEA,
+                0352,
+                "234",
+                "234.5",
+                "23.45e1",
+                null,
+                true,
+                false);
 
 $values2 = array(2,
-				-2,
-				2.3e1,
-				-2.3e1,
-				0x2,
-				02,
-				"2",
-				"2.3",
-				"2.3e1",
-				null,
-				true,
-				false);
+                -2,
+                2.3e1,
+                -2.3e1,
+                0x2,
+                02,
+                "2",
+                "2.3",
+                "2.3e1",
+                null,
+                true,
+                false);
 for ($i = 0; $i < count($values1); $i++) {
-	echo "\niteration ", $i, "\n";
+    echo "\niteration ", $i, "\n";
 
-	for ($j = 0; $j < count($values2); $j++) {
-		$res = fmod($values1[$i], $values2[$j]);
-		var_dump($res);
-	}
+    for ($j = 0; $j < count($values2); $j++) {
+        $res = fmod($values1[$i], $values2[$j]);
+        var_dump($res);
+    }
 }
 ?>
 --EXPECT--
@@ -47,7 +47,7 @@ float(4)
 float(0)
 float(0)
 float(0)
-float(1.7)
+float(1.700000000000018)
 float(4)
 float(NAN)
 float(0)
@@ -61,7 +61,7 @@ float(-4)
 float(-0)
 float(-0)
 float(-0)
-float(-1.7)
+float(-1.700000000000018)
 float(-4)
 float(NAN)
 float(-0)
@@ -75,7 +75,7 @@ float(4.5)
 float(0.5)
 float(0.5)
 float(0.5)
-float(2.2)
+float(2.200000000000018)
 float(4.5)
 float(NAN)
 float(0.5)
@@ -89,7 +89,7 @@ float(-4.5)
 float(-0.5)
 float(-0.5)
 float(-0.5)
-float(-2.2)
+float(-2.200000000000018)
 float(-4.5)
 float(NAN)
 float(-0.5)
@@ -103,7 +103,7 @@ float(4)
 float(0)
 float(0)
 float(0)
-float(1.7)
+float(1.700000000000018)
 float(4)
 float(NAN)
 float(0)
@@ -117,7 +117,7 @@ float(4)
 float(0)
 float(0)
 float(0)
-float(1.7)
+float(1.700000000000018)
 float(4)
 float(NAN)
 float(0)
@@ -131,7 +131,7 @@ float(4)
 float(0)
 float(0)
 float(0)
-float(1.7)
+float(1.700000000000018)
 float(4)
 float(NAN)
 float(0)
@@ -145,7 +145,7 @@ float(4.5)
 float(0.5)
 float(0.5)
 float(0.5)
-float(2.2)
+float(2.200000000000018)
 float(4.5)
 float(NAN)
 float(0.5)
@@ -159,7 +159,7 @@ float(4.5)
 float(0.5)
 float(0.5)
 float(0.5)
-float(2.2)
+float(2.200000000000018)
 float(4.5)
 float(NAN)
 float(0.5)

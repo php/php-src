@@ -13,15 +13,6 @@ PHP_ARG_ENABLE([mysqlnd_compression_support],
   [yes],
   [no])
 
-if test -z "$PHP_ZLIB_DIR"; then
-  PHP_ARG_WITH([zlib-dir],
-    [for the location of libz],
-    [AS_HELP_STRING([[--with-zlib-dir[=DIR]]],
-      [mysqlnd: Set the path to libz install prefix])],
-    [no],
-    [no])
-fi
-
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   mysqlnd_ps_sources="mysqlnd_ps.c mysqlnd_ps_codec.c"
@@ -33,7 +24,10 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
 
 
   if test "$PHP_MYSQLND_COMPRESSION_SUPPORT" != "no"; then
-    AC_DEFINE([MYSQLND_COMPRESSION_WANTED], 1, [Enable compressed protocol support])
+    PKG_CHECK_MODULES([ZLIB], [zlib])
+    PHP_EVAL_LIBLINE($ZLIB_LIBS, MYSQLND_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($ZLIB_CFLAGS)
+    AC_DEFINE([MYSQLND_COMPRESSION_ENABLED], 1, [Enable compressed protocol support])
   fi
 
   AC_DEFINE([MYSQLND_SSL_SUPPORTED], 1, [Enable core mysqlnd SSL code])

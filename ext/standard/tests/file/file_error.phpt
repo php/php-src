@@ -2,11 +2,6 @@
 Test file() function : error conditions
 --FILE--
 <?php
-/*
-   Prototype: array file ( string filename [,int use-include_path [,resource context]] );
-   Description: Reads entire file into an array
-                Returns the  file in an array
-*/
 $file_path = __DIR__;
 echo "\n*** Testing error conditions ***\n";
 $file_handle = fopen($file_path."/file.tmp", "w");
@@ -29,7 +24,7 @@ unlink($file_path."/file.tmp");
 array(0) {
 }
 
-Warning: file(temp.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(temp.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 --- Done ---

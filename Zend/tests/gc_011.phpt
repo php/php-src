@@ -5,10 +5,10 @@ zend.enable_gc=1
 --FILE--
 <?php
 class Foo {
-	public $a;
-	function __destruct() {
-		echo __FUNCTION__,"\n";
-	}
+    public $a;
+    function __destruct() {
+        echo __FUNCTION__,"\n";
+    }
 }
 $a = new Foo();
 $a->a = $a;

@@ -17,11 +17,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 # include <assert.h>
-# define TSRM_ASSERT assert
+# define TSRM_ASSERT(c) assert(c)
 #else
-# define TSRM_ASSERT
+# define TSRM_ASSERT(c)
 #endif
 
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
@@ -74,7 +74,7 @@ int tsrm_error(int level, const char *format, ...);
 static int tsrm_error_level;
 static FILE *tsrm_error_file;
 
-#if TSRM_DEBUG
+#ifdef TSRM_DEBUG
 #define TSRM_ERROR(args) tsrm_error args
 #define TSRM_SAFE_RETURN_RSRC(array, offset, range)																		\
 	{																													\
@@ -102,7 +102,7 @@ static FILE *tsrm_error_file;
 	}
 #endif
 
-#if defined(TSRM_WIN32)
+#ifdef TSRM_WIN32
 static DWORD tls_key;
 # define tsrm_tls_set(what)		TlsSetValue(tls_key, (void*)(what))
 # define tsrm_tls_get()			TlsGetValue(tls_key)
@@ -116,9 +116,9 @@ TSRM_TLS uint8_t in_main_thread = 0;
 TSRM_TLS uint8_t is_thread_shutdown = 0;
 
 /* Startup TSRM (call once for the entire process) */
-TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, char *debug_filename)
+TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, const char *debug_filename)
 {/*{{{*/
-#if defined(TSRM_WIN32)
+#ifdef TSRM_WIN32
 	tls_key = TlsAlloc();
 #else
 	pthread_key_create(&tls_key, 0);
@@ -209,7 +209,7 @@ TSRM_API void tsrm_shutdown(void)
 	if (tsrm_error_file!=stderr) {
 		fclose(tsrm_error_file);
 	}
-#if defined(TSRM_WIN32)
+#ifdef TSRM_WIN32
 	TlsFree(tls_key);
 #else
 	pthread_setspecific(tls_key, 0);
@@ -228,11 +228,11 @@ TSRM_API void tsrm_shutdown(void)
 
 /* {{{ */
 /* environ lock api */
-TSRM_API void tsrm_env_lock() {
+TSRM_API void tsrm_env_lock(void) {
     tsrm_mutex_lock(tsrm_env_mutex);
 }
 
-TSRM_API void tsrm_env_unlock() {
+TSRM_API void tsrm_env_unlock(void) {
     tsrm_mutex_unlock(tsrm_env_mutex);
 } /* }}} */
 
@@ -677,7 +677,7 @@ TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler)
  * Debug support
  */
 
-#if TSRM_DEBUG
+#ifdef TSRM_DEBUG
 int tsrm_error(int level, const char *format, ...)
 {/*{{{*/
 	if (level<=tsrm_error_level) {
@@ -698,11 +698,11 @@ int tsrm_error(int level, const char *format, ...)
 #endif
 
 
-void tsrm_error_set(int level, char *debug_filename)
+void tsrm_error_set(int level, const char *debug_filename)
 {/*{{{*/
 	tsrm_error_level = level;
 
-#if TSRM_DEBUG
+#ifdef TSRM_DEBUG
 	if (tsrm_error_file!=stderr) { /* close files opened earlier */
 		fclose(tsrm_error_file);
 	}
@@ -758,7 +758,7 @@ TSRM_API uint8_t tsrm_is_shutdown(void)
 
 TSRM_API const char *tsrm_api_name(void)
 {/*{{{*/
-#if defined(TSRM_WIN32)
+#ifdef TSRM_WIN32
 	return "Windows Threads";
 #else
 	return "POSIX Threads";

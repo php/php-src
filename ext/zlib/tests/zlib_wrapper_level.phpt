@@ -29,6 +29,7 @@ var_dump(10 * strlen($thisfile));
 var_dump($size1);
 var_dump($size9);
 var_dump($size9 < $size1);
+?>
 --EXPECTF--
 int(%d)
 int(%d)

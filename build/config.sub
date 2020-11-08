@@ -1,8 +1,8 @@
 #! /bin/sh
 # Configuration validation subroutine script.
-#   Copyright 1992-2019 Free Software Foundation, Inc.
+#   Copyright 1992-2020 Free Software Foundation, Inc.
 
-timestamp='2019-01-05'
+timestamp='2020-01-01'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ Report bugs and patches to <config-patches@gnu.org>."
 version="\
 GNU config.sub ($timestamp)
 
-Copyright 1992-2019 Free Software Foundation, Inc.
+Copyright 1992-2020 Free Software Foundation, Inc.
 
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
@@ -337,16 +337,13 @@ case $1 in
 				basic_machine=m88k-harris
 				os=sysv3
 				;;
-			hp300)
+			hp300 | hp300hpux)
 				basic_machine=m68k-hp
+				os=hpux
 				;;
 			hp300bsd)
 				basic_machine=m68k-hp
 				os=bsd
-				;;
-			hp300hpux)
-				basic_machine=m68k-hp
-				os=hpux
 				;;
 			hppaosf)
 				basic_machine=hppa1.1-hp
@@ -359,10 +356,6 @@ case $1 in
 			i386mach)
 				basic_machine=i386-mach
 				os=mach
-				;;
-			vsta)
-				basic_machine=i386-pc
-				os=vsta
 				;;
 			isi68 | isi)
 				basic_machine=m68k-isi
@@ -611,6 +604,10 @@ case $1 in
 			vms)
 				basic_machine=vax-dec
 				os=vms
+				;;
+			vsta)
+				basic_machine=i386-pc
+				os=vsta
 				;;
 			vxworks960)
 				basic_machine=i960-wrs
@@ -1172,7 +1169,7 @@ case $cpu-$vendor in
 			| asmjs \
 			| ba \
 			| be32 | be64 \
-			| bfin | bs2000 \
+			| bfin | bpf | bs2000 \
 			| c[123]* | c30 | [cjt]90 | c4x \
 			| c8051 | clipper | craynv | csky | cydra \
 			| d10v | d30v | dlx | dsp16xx \
@@ -1346,11 +1343,11 @@ case $os in
 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
 	     | sym* | kopensolaris* | plan9* \
 	     | amigaos* | amigados* | msdos* | newsos* | unicos* | aof* \
-	     | aos* | aros* | cloudabi* | sortix* \
+	     | aos* | aros* | cloudabi* | sortix* | twizzler* \
 	     | nindy* | vxsim* | vxworks* | ebmon* | hms* | mvs* \
 	     | clix* | riscos* | uniplus* | iris* | isc* | rtu* | xenix* \
 	     | knetbsd* | mirbsd* | netbsd* \
-	     | bitrig* | openbsd* | solidbsd* | libertybsd* \
+	     | bitrig* | openbsd* | solidbsd* | libertybsd* | os108* \
 	     | ekkobsd* | kfreebsd* | freebsd* | riscix* | lynxos* \
 	     | bosx* | nextstep* | cxux* | aout* | elf* | oabi* \
 	     | ptx* | coff* | ecoff* | winnt* | domain* | vsta* \
@@ -1368,7 +1365,8 @@ case $os in
 	     | powermax* | dnix* | nx6 | nx7 | sei* | dragonfly* \
 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
-	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi*)
+	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+	     | nsk* | powerunix)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	qnx*)
@@ -1451,9 +1449,6 @@ case $os in
 		;;
 	ns2)
 		os=nextstep2
-		;;
-	nsk*)
-		os=nsk
 		;;
 	# Preserve the version number of sinix5.
 	sinix5.*)

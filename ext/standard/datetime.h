@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,10 +17,6 @@
 
 #ifndef DATETIME_H
 #define DATETIME_H
-
-#if HAVE_STRPTIME
-PHP_FUNCTION(strptime);
-#endif
 
 PHPAPI char *php_std_date(time_t t);
 

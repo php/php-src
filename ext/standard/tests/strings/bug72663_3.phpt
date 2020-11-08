@@ -3,10 +3,10 @@ Bug #72663: Create an Unexpected Object and Don't Invoke __wakeup() in Deseriali
 --FILE--
 <?php
 class obj {
-	var $ryat;
-	function __wakeup() {
-		$this->ryat = str_repeat('A', 0x112);
-	}
+    var $ryat;
+    function __wakeup() {
+        $this->ryat = str_repeat('A', 0x112);
+    }
 }
 
 $poc = 'O:8:"stdClass":1:{i:0;O:3:"obj":1:{s:4:"ryat";R:1;';

@@ -6,11 +6,11 @@ class Whatever {}
 class Thing extends Whatever {}
 
 class Foo {
-	public Whatever $qux;
+    public Whatever $qux;
 }
 
 class Bar extends Foo {
-	public Thing $qux;
+    public Thing $qux;
 }
 ?>
 --EXPECTF--

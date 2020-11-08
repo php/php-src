@@ -10,12 +10,12 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator {
     echo "dummy\n";
   }
   function endChildren() {
-	  global $count;
-	  echo $this->getDepth();
-	  if (--$count > 0) {
-		  // Trigger use-after-free
-		  parent::rewind();
-	  }
+      global $count;
+      echo $this->getDepth();
+      if (--$count > 0) {
+          // Trigger use-after-free
+          parent::rewind();
+      }
   }
 }
 $arr = array("a", array("ba", array("bba", "bbb")));

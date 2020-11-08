@@ -15,24 +15,26 @@ function test($var) {
         return;
     }
 
-    var_dump($username); 
+    var_dump($username);
 }
 ?>
 --EXPECTF--
-$_main: ; (lines=1, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %s:1-10
-L0 (10):    RETURN int(1)
+$_main:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %s:1-10
+0000 RETURN int(1)
 
-test: ; (lines=9, args=1, vars=2, tmps=1)
-    ; (after optimizer)
-    ; %s:2-8
-L0 (2):     CV0($var) = RECV 1
-L1 (3):     T2 = TYPE_CHECK (string) CV0($var)
-L2 (3):     JMPZ T2 L4
-L3 (3):     JMP L5
-L4 (4):     RETURN null
-L5 (7):     INIT_FCALL 1 %d string("var_dump")
-L6 (7):     SEND_VAR CV1($username) 1
-L7 (7):     DO_ICALL
-L8 (8):     RETURN null
+test:
+     ; (lines=9, args=1, vars=2, tmps=1)
+     ; (after optimizer)
+     ; %s:2-8
+0000 CV0($var) = RECV 1
+0001 T2 = TYPE_CHECK (string) CV0($var)
+0002 JMPZ T2 0004
+0003 JMP 0005
+0004 RETURN null
+0005 INIT_FCALL 1 %d string("var_dump")
+0006 SEND_VAR CV1($username) 1
+0007 DO_ICALL
+0008 RETURN null

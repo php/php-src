@@ -18,7 +18,9 @@ var_dump(fread($fp,1));
 var_dump(fread($fp,1));
 fclose($fp);
 echo "Done.\n";
---EXPECT--
+?>
+--EXPECTF--
+Notice: fread(): zlib: data error in %s on line %d
 bool(false)
 string(0) ""
 Done.

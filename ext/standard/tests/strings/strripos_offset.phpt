@@ -9,25 +9,36 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-var_dump(strripos(1024, 1024, -PHP_INT_MAX));
-var_dump(strripos(1024, "te", -PHP_INT_MAX));
-var_dump(strripos(1024, 1024, -PHP_INT_MAX-1));
-var_dump(strripos(1024, "te", -PHP_INT_MAX-1));
+try {
+    strripos(1024, 1024, -PHP_INT_MAX);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    strripos(1024, "te", -PHP_INT_MAX);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    strripos(1024, 1024, -PHP_INT_MAX-1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    strripos(1024, "te", -PHP_INT_MAX-1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-strripos() expects parameter 3 to be int, float given
-
-Warning: strripos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: strripos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: strripos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: strripos(): Offset not contained in string in %s on line %d
-bool(false)
+--EXPECT--
+strripos(): Argument #3 ($offset) must be of type int, float given
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 Done

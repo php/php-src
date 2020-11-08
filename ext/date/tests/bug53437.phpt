@@ -22,7 +22,6 @@ foreach($dpu as $dt) {
         echo $dt->format('Y-m-d H:i:s')."\r\n";
 }
 ?>
-==DONE==
 --EXPECTF--
 Original:
 2010-01-01 00:00:00
@@ -136,7 +135,7 @@ object(DatePeriod)#%d (6) {
     ["invert"]=>
     int(0)
     ["days"]=>
-    int(0)
+    bool(false)
     ["special_type"]=>
     int(0)
     ["special_amount"]=>
@@ -155,4 +154,3 @@ Unserialized:
 2010-01-01 00:00:00
 2010-01-02 00:00:00
 2010-01-03 00:00:00
-==DONE==

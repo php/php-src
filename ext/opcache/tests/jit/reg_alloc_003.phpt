@@ -1,5 +1,5 @@
 --TEST--
-Register Alloction 003: Reuse temporay register
+Register Alloction 003: Reuse temporary register
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

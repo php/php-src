@@ -212,6 +212,17 @@ enum phar_fp_type {
 	PHAR_TMP
 };
 
+/*
+ * Represents the metadata of the phar file or a file entry within the phar.
+ * Can contain any combination of serialized data and the value as needed.
+ */
+typedef struct _phar_metadata_tracker {
+	/* Can be IS_UNDEF or a regular value */
+	zval val;
+	/* Nullable string with the serialized value, if the serialization was performed or read from a file. */
+	zend_string *str;
+} phar_metadata_tracker;
+
 /* entry for one file in a phar file */
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
@@ -223,8 +234,7 @@ typedef struct _phar_entry_info {
 	/* remainder */
 	/* when changing compression, save old flags in case fp is NULL */
 	uint32_t                 old_flags;
-	zval                     metadata;
-	uint32_t                 metadata_len; /* only used for cached manifests */
+	phar_metadata_tracker metadata_tracker;
 	uint32_t                 filename_len;
 	char                     *filename;
 	enum phar_fp_type        fp_type;
@@ -239,7 +249,6 @@ typedef struct _phar_entry_info {
 	int                      fp_refcount;
 	char                     *tmp;
 	phar_archive_data        *phar;
-	smart_str                metadata_str;
 	char                     *link; /* symbolic link to another file */
 	char                     tar_type;
 	/* position in the manifest */
@@ -291,8 +300,7 @@ struct _phar_archive_data {
 	uint32_t                 sig_flags;
 	uint32_t                 sig_len;
 	char                     *signature;
-	zval                     metadata;
-	uint32_t                 metadata_len; /* only used for cached manifests */
+	phar_metadata_tracker metadata_tracker;
 	uint32_t                 phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
 	uint32_t             is_temporary_alias:1;
@@ -544,7 +552,16 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_le
 zend_string *phar_find_in_include_path(char *file, size_t file_len, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len);
+void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, int persistent);
+zend_bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, int persistent);
+/* If this has data, free it and set all values to undefined. */
+void phar_metadata_tracker_free(phar_metadata_tracker* val, int persistent);
+void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata_tracker *source, int persistent);
+void phar_metadata_tracker_clone(phar_metadata_tracker* tracker);
+void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker* tracker, int persistent);
+int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker* tracker, zval *value, int persistent, HashTable *unserialize_options, const char* method_name);
+void phar_release_entry_metadata(phar_entry_info *entry);
+void phar_release_archive_metadata(phar_archive_data *phar);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);

@@ -2,7 +2,7 @@
 Bug #77088 (Segfault when using SoapClient with null options)
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
+    require_once('skipif.inc');
 ?>
 --FILE--
 <?php
@@ -11,7 +11,7 @@ try
 {
     $options = NULL;
     $sClient = new SoapClient("test.wsdl", $options);
-} 
+}
 catch(TypeError $e)
 {
     var_dump($e);
@@ -21,7 +21,7 @@ catch(TypeError $e)
 --EXPECTF--
 object(TypeError)#%d (%d) {
   ["message":protected]=>
-  string(%d) "SoapClient::__construct() expects parameter 2 to be array, null given"
+  string(%d) "SoapClient::__construct(): Argument #2 ($options) must be of type array, null given"
   ["string":"Error":private]=>
   string(0) ""
   ["code":protected]=>

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +16,7 @@
 
 #ifndef _PSPELL_H
 #define _PSPELL_H
-#if HAVE_PSPELL
+#ifdef HAVE_PSPELL
 extern zend_module_entry pspell_module_entry;
 #define pspell_module_ptr &pspell_module_entry
 

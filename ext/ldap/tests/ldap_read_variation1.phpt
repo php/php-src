@@ -2,7 +2,7 @@
 ldap_read() does not modify $attributes array
 --SKIPIF--
 <?php
-if (!extension_loaded('ldap')) die('ldap extension not available');
+if (!extension_loaded('ldap')) die('skip ldap extension not available');
 ?>
 --FILE--
 <?php

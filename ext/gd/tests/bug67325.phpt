@@ -26,7 +26,5 @@ var_dump($white);
 
 imagedestroy($im);
 ?>
-===DONE===
 --EXPECT--
 int(0)
-===DONE===

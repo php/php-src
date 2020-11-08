@@ -10,7 +10,5 @@ zlib.output_compression=0
 $infile = __DIR__.'/bug72819.jpg';
 var_dump(strlen(exif_thumbnail($infile)));
 ?>
-===DONE===
 --EXPECT--
 int(5448)
-===DONE===

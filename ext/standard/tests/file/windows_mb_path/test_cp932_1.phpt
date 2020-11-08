@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(932, "oem");
 
 ?>
+--CONFLICTS--
+dir_cp932
 --INI--
 default_charset=cp932
 --FILE--
@@ -39,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp932");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s\テストマルチバイト・パス42\テストマルチバイト・パス4"
 Active code page: %d
 bool(true)
-===DONE===

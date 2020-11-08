@@ -6,16 +6,17 @@ Bug #48227 (NumberFormatter::format leaks memory)
 <?php
 
 $x = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
-var_dump($x->format(''));
-var_dump($x->format(1));
-var_dump($x->format(NULL));
-var_dump($x->format($x));
+foreach (['', 1, NULL, $x] as $value) {
+    try {
+        var_dump($x->format($value));
+    } catch (TypeError $ex) {
+        echo $ex->getMessage(), PHP_EOL;
+    }
+}
 
 ?>
---EXPECTF--
-string(1) "0"
+--EXPECT--
+NumberFormatter::format(): Argument #1 ($num) must be of type int|float, string given
 string(1) "1"
 string(1) "0"
-
-Notice: Object of class NumberFormatter could not be converted to number in %s on line %d
-string(1) "1"
+NumberFormatter::format(): Argument #1 ($num) must be of type int|float, NumberFormatter given

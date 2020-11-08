@@ -2,13 +2,6 @@
 Test fsockopen() function : error conditions
 --FILE--
 <?php
-/* Prototype  : proto resource fsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]])
- * Description: Open Internet or Unix domain socket connection
- * Source code: ext/standard/fsock.c
- * Alias to functions:
- */
-
-
 echo "*** Testing fsockopen() : basic error conditions ***\n";
 
 echo "\n-- Attempting to connect to a non-existent socket --\n";
@@ -36,13 +29,13 @@ echo "Done";
 
 -- Attempting to connect to a non-existent socket --
 
-Warning: fsockopen(): unable to connect to tcp://127.0.0.1:31337 (%a) in %s on line %d
+Warning: fsockopen(): Unable to connect to tcp://127.0.0.1:31337 (%a) in %s on line %d
 bool(false)
 string(%d) "%a"
 
 -- Attempting to connect using an invalid protocol --
 
-Warning: fsockopen(): unable to connect to invalid://127.0.0.1:31337 (Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?) in %s on line %d
+Warning: fsockopen(): Unable to connect to invalid://127.0.0.1:31337 (Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?) in %s on line %d
 bool(false)
 string(100) "Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?"
 Done

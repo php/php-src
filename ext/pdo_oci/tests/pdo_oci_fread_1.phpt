@@ -19,7 +19,7 @@ $dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 // Initialization
 $stmtarray = array(
     "begin execute immediate 'drop table pdo_oci_fread_tab'; exception when others then null; end;",
-	"create table pdo_oci_fread_tab (id number, data clob)",
+    "create table pdo_oci_fread_tab (id number, data clob)",
     "declare
     lob1 clob := 'abc' || lpad('j',4020,'j') || 'xyz';
    begin
@@ -28,7 +28,7 @@ $stmtarray = array(
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 echo "Test 1\n";
@@ -47,11 +47,11 @@ fclose($sh);
 // Clean up
 
 $stmtarray = array(
-	"drop table pdo_oci_fread_tab"
+    "drop table pdo_oci_fread_tab"
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 ?>

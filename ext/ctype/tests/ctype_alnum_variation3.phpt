@@ -4,11 +4,6 @@ Test ctype_alnum() function : usage variations - different string values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different strings to ctype_alnum to test behaviour
  */
@@ -54,7 +49,6 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_alnum() : usage variations ***
 
@@ -126,4 +120,3 @@ bool(false)
 
 -- Iteration 23 --
 bool(false)
-===DONE===

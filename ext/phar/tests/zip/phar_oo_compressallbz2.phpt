@@ -42,7 +42,6 @@ var_dump($c['a']->isCompressed(Phar::GZ));
 var_dump($c['a']->isCompressed(Phar::BZ2));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
@@ -67,4 +66,3 @@ bool(true)
 string(1) "a"
 bool(false)
 bool(true)
-===DONE===

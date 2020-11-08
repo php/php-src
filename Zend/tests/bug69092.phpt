@@ -13,7 +13,7 @@ zend.multibyte=On
 echo "Hi";
 
 function foo() {
-	declare(encoding="utf-8");
+    declare(encoding="utf-8");
 }
 
 echo "Bye"

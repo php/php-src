@@ -31,7 +31,5 @@ while ($reader->read()) {
 }
 $reader->close();
 ?>
-===DONE===
 --EXPECT--
 base book
-===DONE===

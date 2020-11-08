@@ -2,11 +2,6 @@
 Test strrchr() function : usage variations - unexpected inputs for haystack and needle
 --FILE--
 <?php
-/* Prototype  : string strrchr(string $haystack, string $needle);
- * Description: Finds the last occurrence of a character in a string.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrchr() function with unexpected inputs for haystack and needle */
 
 echo "*** Testing strrchr() function: with unexpected inputs for haystack and needle ***\n";
@@ -113,15 +108,15 @@ string(4) "1E-9"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
-strrchr() expects parameter 1 to be string, array given
+strrchr(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 11 --
-strrchr() expects parameter 1 to be string, array given
+strrchr(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 12 --
-strrchr() expects parameter 1 to be string, array given
+strrchr(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 13 --
-strrchr() expects parameter 1 to be string, array given
+strrchr(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 14 --
-strrchr() expects parameter 1 to be string, array given
+strrchr(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 15 --
 string(1) "1"
 -- Iteration 16 --
@@ -141,7 +136,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-strrchr() expects parameter 1 to be string, resource given
+strrchr(): Argument #1 ($haystack) must be of type string, resource given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

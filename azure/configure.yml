@@ -29,7 +29,6 @@ steps:
         --enable-xmlreader \
         --with-xsl \
         --with-tidy \
-        --with-xmlrpc \
         --enable-sysvsem \
         --enable-sysvshm \
         --enable-shmop \
@@ -54,6 +53,14 @@ steps:
         --with-ldap \
         --with-ldap-sasl \
         --with-password-argon2 \
+        --with-mhash \
+        --with-sodium \
+        --enable-dba \
+        --with-snmp \
+        --with-unixODBC \
+        --with-imap \
+        --with-kerberos \
+        --with-imap-ssl \
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d

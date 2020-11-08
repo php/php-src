@@ -2,14 +2,6 @@
 Test fwrite() function : error conditions
 --FILE--
 <?php
-/*
- Prototype: int fwrite ( resource $handle,string string, [, int $length] );
- Description: fwrite() writes the contents of string to the file stream pointed to by handle.
-              If the length arquement is given,writing will stop after length bytes have been
-              written or the end of string reached, whichever comes first.
-              fwrite() returns the number of bytes written or FALSE on error
-*/
-
 // include the file.inc for Function: function delete_file($filename)
 include ("file.inc");
 

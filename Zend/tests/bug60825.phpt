@@ -5,11 +5,11 @@ run this with valgrind
 --FILE--
 <?php
 class test {
-	public static $x;
-	public function __toString() {
-		self::$x = $this;
-		return __FILE__;
-	}
+    public static $x;
+    public function __toString() {
+        self::$x = $this;
+        return __FILE__;
+    }
 }
 $a = new test;
 require_once $a;

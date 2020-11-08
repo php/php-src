@@ -15,9 +15,7 @@ while ($value = pg_fetch_result($result, 0)) {
 }
 
 ?>
-==DONE==
 --EXPECT--
 string(1) "1"
 string(1) "2"
 string(1) "3"
-==DONE==

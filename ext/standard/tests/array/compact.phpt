@@ -13,7 +13,7 @@ $result = compact("event", $location_vars);
 var_dump($result);
 ?>
 --EXPECTF--
-Notice: compact(): Undefined variable: c\u0327ity in %s on line %d
+Warning: compact(): Undefined variable $c\u0327ity in %s on line %d
 array(2) {
   ["event"]=>
   string(8) "SIGGRAPH"

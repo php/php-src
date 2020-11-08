@@ -7,11 +7,9 @@ $y = new ArrayObject();
 var_dump($y[NULL]);
 var_dump($y[NULL]++);
 ?>
-===DONE===
 --EXPECTF--
-Notice: Undefined index:  in %s on line %d
+Warning: Undefined array key "" in %s on line %d
 NULL
 
-Notice: Undefined index:  in %s on line %d
+Warning: Undefined array key "" in %s on line %d
 NULL
-===DONE===

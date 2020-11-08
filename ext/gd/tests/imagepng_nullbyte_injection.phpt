@@ -5,7 +5,7 @@ Testing null byte injection in imagepng
 if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 $support = gd_info();
 if (!isset($support['PNG Support']) || $support['PNG Support'] === false) {
-	print 'skip png support not available';
+    print 'skip png support not available';
 }
 ?>
 --FILE--
@@ -17,5 +17,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-Invalid 2nd parameter, filename must not contain null bytes
+--EXPECT--
+imagepng(): Argument #2 ($file) must not contain null bytes

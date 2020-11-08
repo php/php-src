@@ -7,7 +7,6 @@ $contents = <<<EOS
 EOS;
 print_r(str_getcsv($contents, ',', '"', ''));
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -16,4 +15,3 @@ Array
     [2] => cell3
     [3] => cell4
 )
-===DONE===

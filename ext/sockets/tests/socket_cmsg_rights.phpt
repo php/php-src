@@ -13,12 +13,12 @@ die('skip not for AIX');
 }
 --CLEAN--
 <?php
-$path = __DIR__ . "/unix_sock";
+$path = __DIR__ . "/socket_cmsg_rights.sock";
 @unlink($path);
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";
-$path = __DIR__ . "/unix_sock";
+$path = __DIR__ . "/socket_cmsg_rights.sock";
 
 @unlink($path);
 
@@ -77,11 +77,14 @@ if ($data["control"]) {
     echo "FAIL CONTROL\n";
     var_dump($data);
 }
+?>
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 creating receive socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(11)
 array(3) {

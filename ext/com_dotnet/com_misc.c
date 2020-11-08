@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -107,6 +105,7 @@ PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest,
 	dims = SafeArrayGetDim(V_ARRAY(array));
 
 	if (dims != 1) {
+		/* TODO Promote to ValueError? */
 		php_error_docref(NULL, E_WARNING,
 			   "Can only handle single dimension variant arrays (this array has %d)", dims);
 		return 0;

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -103,7 +101,7 @@ static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t siz
 }
 
 # ifdef COOKIE_SEEKER_USES_OFF64_T
-static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
+static int stream_cookie_seeker(void *cookie, off64_t *position, int whence)
 {
 
 	*position = php_stream_seek((php_stream *)cookie, (zend_off_t)*position, whence);
@@ -295,7 +293,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	}
 
 	if (php_stream_is_filtered(stream)) {
-		php_error_docref(NULL, E_WARNING, "cannot cast a filtered stream on this system");
+		php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
 		return FAILURE;
 	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
 		goto exit_success;
@@ -310,7 +308,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			"select()able descriptor"
 		};
 
-		php_error_docref(NULL, E_WARNING, "cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
+		php_error_docref(NULL, E_WARNING, "Cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
 	}
 
 	return FAILURE;

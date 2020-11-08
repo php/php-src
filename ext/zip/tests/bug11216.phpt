@@ -18,6 +18,7 @@ unlink('__test.zip');
 bool(true)
 ZipArchive Object
 (
+    [lastId] => 0
     [status] => 0
     [statusSys] => 0
     [numFiles] => 1

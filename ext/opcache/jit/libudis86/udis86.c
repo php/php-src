@@ -336,7 +336,7 @@ ud_lookup_mnemonic(enum ud_mnemonic_code c)
   if (c < UD_MAX_MNEMONIC_CODE) {
     return ud_mnemonics_str[c];
   } else {
-    return NULL;
+    return "???";
   }
 }
 

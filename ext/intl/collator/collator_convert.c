@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -196,6 +194,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
 			&ustr, &ustr_len,
 			Z_STRVAL_P( utf8_zval ), Z_STRLEN_P( utf8_zval ),
 			&status );
+	// FIXME Or throw error or use intl internal error handler
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_zstr_utf8_to_utf16()" );
 
@@ -226,16 +225,13 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	}
 
 	/* Try object's handlers. */
-	if( Z_OBJ_HT_P(obj)->cast_object )
-	{
-		zstr = rv;
+	zstr = rv;
 
-		if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
-		{
-			/* cast_object failed => bail out. */
-			zval_ptr_dtor( zstr );
-			COLLATOR_CONVERT_RETURN_FAILED( obj );
-		}
+	if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
+	{
+		/* cast_object failed => bail out. */
+		zval_ptr_dtor( zstr );
+		COLLATOR_CONVERT_RETURN_FAILED( obj );
 	}
 
 	/* Object wasn't successfully converted => bail out. */
@@ -249,6 +245,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 			&ustr, &ustr_len,
 			Z_STRVAL_P( zstr ), Z_STRLEN_P( zstr ),
 			&status );
+	// FIXME Or throw error or use intl internal error handler
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
 
@@ -323,7 +320,7 @@ zval* collator_convert_string_to_double( zval* str, zval *rv )
  */
 zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 {
-	int is_numeric = 0;
+	zend_uchar is_numeric = 0;
 	zend_long lval      = 0;
 	double dval    = 0;
 
@@ -332,7 +329,7 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 		COLLATOR_CONVERT_RETURN_FAILED( str );
 	}
 
-	if( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, 1 ) ) )
+	if ( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, /* allow_errors */ 1 ) ) )
 	{
 		if( is_numeric == IS_LONG ) {
 			ZVAL_LONG(rv, lval);

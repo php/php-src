@@ -3,7 +3,7 @@ Test function gzeof while writing.
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -25,9 +25,7 @@ try {
 }
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
 gzeof(): supplied resource is not a valid stream resource
-===DONE===

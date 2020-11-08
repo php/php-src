@@ -6,12 +6,12 @@ Emmanuel Dreyfus <manu@netbsd.org>
 <?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
-	$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-	$r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees'));
-	$info = ldap_get_entries($link, $r)[0];
-	if (!isset($info['dynamicsubtrees'])) {
-		die("skip Overlay DDS not available");
-	}
+    $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+    $r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees'));
+    $info = ldap_get_entries($link, $r)[0];
+    if (!isset($info['dynamicsubtrees'])) {
+        die("skip Overlay DDS not available");
+    }
 ?>
 --FILE--
 <?php
@@ -21,15 +21,14 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 insert_dummy_data($link, $base);
 ldap_add($link, "cn=tmp,$base", array(
-	"objectclass" => array("person", "dynamicObject"),
-	"cn" => "tmp",
-	"sn" => "tmp"
+    "objectclass" => array("person", "dynamicObject"),
+    "cn" => "tmp",
+    "sn" => "tmp"
 ));
 var_dump(
-	ldap_exop_refresh($link, "cn=tmp,$base", 1234)
+    ldap_exop_refresh($link, "cn=tmp,$base", 1234)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -40,4 +39,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECT--
 int(1234)
-===DONE===

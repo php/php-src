@@ -42,7 +42,6 @@ var_dump($phar->getStub() == $stub);
 var_dump($phar->getStub() == $sexp);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -62,4 +61,3 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-===DONE===

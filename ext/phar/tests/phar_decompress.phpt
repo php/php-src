@@ -45,7 +45,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -63,4 +62,3 @@ int(4096)
 %sphar_decompress.hooba.phar
 Cannot decompress phar archive, phar is read-only
 Cannot decompress zip-based archives with whole-archive compression
-===DONE===

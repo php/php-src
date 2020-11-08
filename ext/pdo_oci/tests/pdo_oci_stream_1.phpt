@@ -20,11 +20,11 @@ $dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 @$dbh->exec("drop table pdo_oci_stream_1_tab");
 
 $stmtarray = array(
-	"create table pdo_oci_stream_1_tab (id number, data clob)",
+    "create table pdo_oci_stream_1_tab (id number, data clob)",
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 $dbh->exec("
@@ -76,11 +76,11 @@ echo 'Read '.stream_get_contents($r['data'], -1, 30000)."\n";      // jjjxyz
 // Clean up
 
 $stmtarray = array(
-	"drop table pdo_oci_stream_1_tab"
+    "drop table pdo_oci_stream_1_tab"
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 ?>

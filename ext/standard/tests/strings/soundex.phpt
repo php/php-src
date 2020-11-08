@@ -25,13 +25,13 @@ $array = array(
 );
 
 foreach ($array as $str) {
-	var_dump(soundex($str));
+    var_dump(soundex($str));
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
-bool(false)
+--EXPECT--
+string(4) "0000"
 string(4) "0000"
 string(4) "F650"
 string(4) "T300"

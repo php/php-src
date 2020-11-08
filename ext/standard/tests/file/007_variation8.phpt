@@ -2,17 +2,6 @@
 Test fopen and fclose() functions - usage variations - "x+" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "x+" mode,
    checking for the file creation, write & read operations,
@@ -56,5 +45,5 @@ int(37)
 bool(true)
 string(7) "Unknown"
 
-Warning: fopen(%s): failed to open stream: File exists in %s on line %d
+Warning: fopen(%s): Failed to open stream: File exists in %s on line %d
 *** Done ***

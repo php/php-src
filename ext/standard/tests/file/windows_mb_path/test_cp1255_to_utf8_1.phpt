@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+dir_cp1255
 --FILE--
 <?php
 /*
@@ -36,7 +38,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1255");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -48,4 +49,3 @@ bool(true)
 string(%s) "%s\כללים מרובים42\כללים מרובים4"
 Active code page: %d
 bool(true)
-===DONE===

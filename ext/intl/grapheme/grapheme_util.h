@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -39,6 +37,6 @@ int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
 
 /* OUTSIDE_STRING: check if (possibly negative) long offset is outside the string with int32_t length */
-#define OUTSIDE_STRING(offset, max_len) ( offset <= INT32_MIN || offset > INT32_MAX || (offset < 0 ? -offset > (zend_long) max_len : offset >= (zend_long) max_len) )
+#define OUTSIDE_STRING(offset, max_len) ( offset <= INT32_MIN || offset > INT32_MAX || (offset < 0 ? -offset > (zend_long) max_len : offset > (zend_long) max_len) )
 
 #endif // GRAPHEME_GRAPHEME_UTIL_H

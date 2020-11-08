@@ -1,7 +1,5 @@
 --TEST--
 parse_ini_file() multiple calls
---SKIPIF--
-<?php if( substr(PHP_OS, 0, 3) == 'WIN' ) die("skip Windows has different error message");?>
 --FILE--
 <?php
 
@@ -119,10 +117,10 @@ var_dump(parse_ini_file($filename, true));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line %d
+Warning: parse_ini_file(%sparse_ini_file.dat): Failed to open stream: No such file or directory in %sparse_ini_file.php on line %d
 bool(false)
 
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line %d
+Warning: parse_ini_file(%sparse_ini_file.dat): Failed to open stream: No such file or directory in %sparse_ini_file.php on line %d
 bool(false)
 array(1) {
   ["test"]=>

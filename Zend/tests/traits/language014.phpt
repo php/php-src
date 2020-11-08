@@ -27,4 +27,4 @@ $o->world();
 
 ?>
 --EXPECTF--
-Fatal error: Trait method hello has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
+Fatal error: Trait method World::world has not been applied as MyClass::hello, because of collision with Hello::hello in %s on line %d

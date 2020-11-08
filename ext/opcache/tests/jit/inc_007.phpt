@@ -12,10 +12,11 @@ opcache.protect_memory=1
 --FILE--
 <?php
 function foo() {
-	$x = 1;	
-	$x += 0;
-	return ++$x; // mem -> reg, reg
+    $x = 1;
+    $x += 0;
+    return ++$x; // mem -> reg, reg
 }
 var_dump(foo());
+?>
 --EXPECT--
 int(2)

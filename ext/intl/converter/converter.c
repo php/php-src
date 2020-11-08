@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -15,6 +13,7 @@
  */
 
 #include "converter.h"
+#include "converter_arginfo.h"
 #include "zend_exceptions.h"
 
 #include <unicode/utypes.h>
@@ -63,9 +62,6 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 
 /* {{{ php_converter_default_callback */
 static void php_converter_default_callback(zval *return_value, zval *zobj, zend_long reason, zval *error) {
-	ZVAL_DEREF(error);
-	zval_ptr_dtor(error);
-	ZVAL_LONG(error, U_ZERO_ERROR);
 	/* Basic functionality so children can call parent::toUCallback() */
 	switch (reason) {
 		case UCNV_UNASSIGNED:
@@ -81,7 +77,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, zend_
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
-                ZVAL_LONG(error, U_INVALID_STATE_ERROR);
+				ZEND_TRY_ASSIGN_REF_LONG(error, U_INVALID_STATE_ERROR);
                 RETVAL_STRINGL(chars, chars_len);
                 return;
             }
@@ -99,52 +95,38 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, zend_
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
-            	ZVAL_LONG(error, uerror);
 			}
+			ZEND_TRY_ASSIGN_REF_LONG(error, uerror);
 			RETVAL_STRINGL(chars, chars_len);
 		}
 	}
 }
 /* }}} */
 
-/* {{{ proto void UConverter::toUCallback(int $reason,
-                                          string $source, string $codeUnits,
-                                          int &$error) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
-	ZEND_ARG_INFO(0, reason)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, codeUnits)
-	ZEND_ARG_INFO(1, error)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, toUCallback) {
+/* {{{ */
+PHP_METHOD(UConverter, toUCallback) {
 	zend_long reason;
-	zval *source, *codeUnits, *error;
+	zend_string *source, *codeUnits;
+	zval *error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lzzz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lSSz",
 		&reason, &source, &codeUnits, &error) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_converter_default_callback(return_value, ZEND_THIS, reason, error);
 }
 /* }}} */
 
-/* {{{ proto void UConverter::fromUCallback(int $reason,
-                                            Array $source, int $codePoint,
-                                            int &$error) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
-	ZEND_ARG_INFO(0, reason)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, codePoint)
-	ZEND_ARG_INFO(1, error)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, fromUCallback) {
+/* {{{ */
+PHP_METHOD(UConverter, fromUCallback) {
 	zend_long reason;
-	zval *source, *codePoint, *error;
+	zval *source, *error;
+	zend_long codePoint;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lzzz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lalz",
 		&reason, &source, &codePoint, &error) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_converter_default_callback(return_value, ZEND_THIS, reason, error);
@@ -242,11 +224,11 @@ static void php_converter_to_u_callback(const void *context,
 		ZVAL_EMPTY_STRING(&zargs[2]);
 	}
 	ZVAL_LONG(&zargs[3], *pErrorCode);
+	ZVAL_MAKE_REF(&zargs[3]);
 
 	objval->to_cb.param_count    = 4;
 	objval->to_cb.params = zargs;
 	objval->to_cb.retval = &retval;
-	objval->to_cb.no_separation  = 0;
 	if (zend_call_function(&(objval->to_cb), &(objval->to_cache)) == FAILURE) {
 		/* Unlikely */
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Unexpected failure calling toUCallback()");
@@ -324,11 +306,11 @@ static void php_converter_from_u_callback(const void *context,
 	}
 	ZVAL_LONG(&zargs[2], codePoint);
 	ZVAL_LONG(&zargs[3], *pErrorCode);
+	ZVAL_MAKE_REF(&zargs[3]);
 
 	objval->from_cb.param_count = 4;
 	objval->from_cb.params = zargs;
 	objval->from_cb.retval = &retval;
-	objval->from_cb.no_separation  = 0;
 	if (zend_call_function(&(objval->from_cb), &(objval->from_cache)) == FAILURE) {
 		/* Unlikely */
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Unexpected failure calling fromUCallback()");
@@ -418,18 +400,13 @@ static zend_bool php_converter_set_encoding(php_converter_object *objval,
 /* }}} */
 
 /* {{{ php_converter_do_set_encoding */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_set_encoding_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO();
 static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_PARAMETERS) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *enc;
 	size_t enc_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &enc, &enc_len) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Bad arguments, "
-				"expected one string argument", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_errors_reset(&objval->error);
 
@@ -437,29 +414,26 @@ static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_P
 }
 /* }}} */
 
-/* {{{ proto bool UConverter::setSourceEncoding(string encoding) */
-static PHP_METHOD(UConverter, setSourceEncoding) {
+/* {{{ */
+PHP_METHOD(UConverter, setSourceEncoding) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_set_encoding(&(objval->src), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto bool UConverter::setDestinationEncoding(string encoding) */
-static PHP_METHOD(UConverter, setDestinationEncoding) {
+/* {{{ */
+PHP_METHOD(UConverter, setDestinationEncoding) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_set_encoding(&(objval->dest), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ php_converter_do_get_encoding */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_get_encoding_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
 static void php_converter_do_get_encoding(php_converter_object *objval, UConverter *cnv, INTERNAL_FUNCTION_PARAMETERS) {
 	const char *name;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Expected no arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	intl_errors_reset(&objval->error);
@@ -478,29 +452,26 @@ static void php_converter_do_get_encoding(php_converter_object *objval, UConvert
 }
 /* }}} */
 
-/* {{{ proto string UConverter::getSourceEncoding() */
-static PHP_METHOD(UConverter, getSourceEncoding) {
+/* {{{ */
+PHP_METHOD(UConverter, getSourceEncoding) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_get_encoding(objval, objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto string UConverter::getDestinationEncoding() */
-static PHP_METHOD(UConverter, getDestinationEncoding) {
+/* {{{ */
+PHP_METHOD(UConverter, getDestinationEncoding) {
         php_converter_object *objval = CONV_GET(ZEND_THIS);
         php_converter_do_get_encoding(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ php_converter_do_get_type */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_get_type_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
 static void php_converter_do_get_type(php_converter_object *objval, UConverter *cnv, INTERNAL_FUNCTION_PARAMETERS) {
 	UConverterType t;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Expected no arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_errors_reset(&objval->error);
 
@@ -518,15 +489,15 @@ static void php_converter_do_get_type(php_converter_object *objval, UConverter *
 }
 /* }}} */
 
-/* {{{ proto int UConverter::getSourceType() */
-static PHP_METHOD(UConverter, getSourceType) {
+/* {{{ */
+PHP_METHOD(UConverter, getSourceType) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_get_type(objval, objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto int UConverter::getDestinationType() */
-static PHP_METHOD(UConverter, getDestinationType) {
+/* {{{ */
+PHP_METHOD(UConverter, getDestinationType) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_get_type(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -556,13 +527,8 @@ static void php_converter_resolve_callback(zval *zobj,
 }
 /* }}} */
 
-/* {{{ proto UConverter::__construct([string dest = 'utf-8',[string src = 'utf-8']]) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_arginfo, 0, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, destination_encoding)
-	ZEND_ARG_INFO(0, source_encoding)
-ZEND_END_ARG_INFO();
-
-static PHP_METHOD(UConverter, __construct) {
+/* {{{ */
+PHP_METHOD(UConverter, __construct) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *src = "utf-8";
 	size_t src_len = sizeof("utf-8") - 1;
@@ -571,8 +537,8 @@ static PHP_METHOD(UConverter, __construct) {
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|s!s!", &dest, &dest_len, &src, &src_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!", &dest, &dest_len, &src, &src_len) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	php_converter_set_encoding(objval, &(objval->src),  src,  src_len );
@@ -582,19 +548,15 @@ static PHP_METHOD(UConverter, __construct) {
 }
 /* }}} */
 
-/* {{{ proto bool UConverter::setSubstChars(string $chars) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_setSubstChars_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, chars)
-ZEND_END_ARG_INFO();
-
-static PHP_METHOD(UConverter, setSubstChars) {
+/* {{{ */
+PHP_METHOD(UConverter, setSubstChars) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *chars;
 	size_t chars_len;
 	int ret = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &chars, &chars_len) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_errors_reset(&objval->error);
 
@@ -626,20 +588,15 @@ static PHP_METHOD(UConverter, setSubstChars) {
 }
 /* }}} */
 
-/* {{{ proto string UConverter::getSubstChars() */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_getSubstChars_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
-
-static PHP_METHOD(UConverter, getSubstChars) {
+/* {{{ */
+PHP_METHOD(UConverter, getSubstChars) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char chars[127];
 	int8_t chars_len = sizeof(chars);
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::getSubstChars(): expected no arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_errors_reset(&objval->error);
 
@@ -718,16 +675,13 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 }
 /* }}} */
 
-/* {{{ proto string UConverter::reasonText(int reason) */
+/* {{{ */
 #define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1);
-ZEND_BEGIN_ARG_INFO_EX(php_converter_reasontext_arginfo, 0, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, reason)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, reasonText) {
+PHP_METHOD(UConverter, reasonText) {
 	zend_long reason;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &reason) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_error_reset(NULL);
 
@@ -739,19 +693,14 @@ static PHP_METHOD(UConverter, reasonText) {
 		UCNV_REASON_CASE(CLOSE)
 		UCNV_REASON_CASE(CLONE)
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown UConverterCallbackReason: " ZEND_LONG_FMT, reason);
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be a UConverter::REASON_* constant");
+			RETURN_THROWS();
 	}
 }
 /* }}} */
 
-/* {{{ proto string UConverter::convert(string str[, bool reverse]) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_convert_arginfo, 0, ZEND_RETURN_VALUE, 1)
-        ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, reverse)
-ZEND_END_ARG_INFO();
-
-static PHP_METHOD(UConverter, convert) {
+/* {{{ */
+PHP_METHOD(UConverter, convert) {
         php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *str;
 	size_t str_len;
@@ -760,7 +709,7 @@ static PHP_METHOD(UConverter, convert) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 	                          &str, &str_len, &reverse) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_errors_reset(&objval->error);
 
@@ -776,15 +725,8 @@ static PHP_METHOD(UConverter, convert) {
 }
 /* }}} */
 
-/* {{{ proto string UConverter::transcode(string $str, string $toEncoding, string $fromEncoding[, Array $options = array()]) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_transcode_arginfo, 0, ZEND_RETURN_VALUE, 3)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, toEncoding)
-	ZEND_ARG_INFO(0, fromEncoding)
-	ZEND_ARG_ARRAY_INFO(0, options, 1)
-ZEND_END_ARG_INFO();
-
-static PHP_METHOD(UConverter, transcode) {
+/* {{{ */
+PHP_METHOD(UConverter, transcode) {
 	char *str, *src, *dest;
 	size_t str_len, src_len, dest_len;
 	zval *options = NULL;
@@ -792,7 +734,7 @@ static PHP_METHOD(UConverter, transcode) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|a!",
 			&str, &str_len, &dest, &dest_len, &src, &src_len, &options) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_error_reset(NULL);
 
@@ -840,35 +782,27 @@ static PHP_METHOD(UConverter, transcode) {
 }
 /* }}} */
 
-/* {{{ proto int UConverter::getErrorCode() */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_geterrorcode_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, getErrorCode) {
+/* {{{ */
+PHP_METHOD(UConverter, getErrorCode) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::getErrorCode(): expected no arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intl_error_get_code(&(objval->error)));
 }
 /* }}} */
 
-/* {{{ proto string UConverter::getErrorMessage() */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_geterrormsg_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, getErrorMessage) {
+/* {{{ */
+PHP_METHOD(UConverter, getErrorMessage) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
-	zend_string *message = intl_error_get_message(&(objval->error));
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::getErrorMessage(): expected no arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
+	zend_string *message = intl_error_get_message(&(objval->error));
 	if (message) {
 		RETURN_STR(message);
 	} else {
@@ -877,17 +811,13 @@ static PHP_METHOD(UConverter, getErrorMessage) {
 }
 /* }}} */
 
-/* {{{ proto array UConverter::getAvailable() */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_getavailable_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, getAvailable) {
+/* {{{ */
+PHP_METHOD(UConverter, getAvailable) {
 	int32_t i,
 			count = ucnv_countAvailable();
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::getErrorMessage(): expected no arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_error_reset(NULL);
 
@@ -899,18 +829,15 @@ static PHP_METHOD(UConverter, getAvailable) {
 }
 /* }}} */
 
-/* {{{ proto array UConverter::getAliases(string name) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_getaliases_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, getAliases) {
+/* {{{ */
+PHP_METHOD(UConverter, getAliases) {
 	char *name;
 	size_t name_len;
 	UErrorCode error = U_ZERO_ERROR;
 	uint16_t i, count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_error_reset(NULL);
 
@@ -936,16 +863,12 @@ static PHP_METHOD(UConverter, getAliases) {
 }
 /* }}} */
 
-/* {{{ proto array UConverter::getStandards() */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_getstandards_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
-static PHP_METHOD(UConverter, getStandards) {
+/* {{{ */
+PHP_METHOD(UConverter, getStandards) {
 	uint16_t i, count;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::getStandards(): expected no arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	intl_error_reset(NULL);
 
@@ -963,43 +886,6 @@ static PHP_METHOD(UConverter, getStandards) {
 	}
 }
 /* }}} */
-
-static const zend_function_entry php_converter_methods[] = {
-	PHP_ME(UConverter, __construct,            php_converter_arginfo,                   ZEND_ACC_PUBLIC)
-
-	/* Encoding selection */
-	PHP_ME(UConverter, setSourceEncoding,      php_converter_set_encoding_arginfo,      ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, setDestinationEncoding, php_converter_set_encoding_arginfo,      ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, getSourceEncoding,      php_converter_get_encoding_arginfo,      ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, getDestinationEncoding, php_converter_get_encoding_arginfo,      ZEND_ACC_PUBLIC)
-
-	/* Introspection for algorithmic converters */
-	PHP_ME(UConverter, getSourceType,          php_converter_get_type_arginfo,          ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, getDestinationType,     php_converter_get_type_arginfo,          ZEND_ACC_PUBLIC)
-
-	/* Basic codeunit error handling */
-	PHP_ME(UConverter, getSubstChars,          php_converter_getSubstChars_arginfo,     ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, setSubstChars,          php_converter_setSubstChars_arginfo,     ZEND_ACC_PUBLIC)
-
-	/* Default callback handlers */
-	PHP_ME(UConverter, toUCallback,            php_converter_toUCallback_arginfo,       ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, fromUCallback,          php_converter_fromUCallback_arginfo,     ZEND_ACC_PUBLIC)
-
-	/* Core conversion workhorses */
-	PHP_ME(UConverter, convert,                php_converter_convert_arginfo,           ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, transcode,              php_converter_transcode_arginfo,         ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-
-	/* Error inspection */
-	PHP_ME(UConverter, getErrorCode,           php_converter_geterrorcode_arginfo,      ZEND_ACC_PUBLIC)
-	PHP_ME(UConverter, getErrorMessage,        php_converter_geterrormsg_arginfo,       ZEND_ACC_PUBLIC)
-
-	/* Ennumeration and lookup */
-	PHP_ME(UConverter, reasonText,             php_converter_reasontext_arginfo,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(UConverter, getAvailable,           php_converter_getavailable_arginfo,      ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(UConverter, getAliases,             php_converter_getaliases_arginfo,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(UConverter, getStandards,           php_converter_getstandards_arginfo,      ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_FE_END
-};
 
 /* {{{ Converter create/clone/destroy */
 static void php_converter_dtor_object(zend_object *obj) {
@@ -1082,7 +968,7 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 int php_converter_minit(INIT_FUNC_ARGS) {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "UConverter", php_converter_methods);
+	INIT_CLASS_ENTRY(ce, "UConverter", class_UConverter_methods);
 	php_converter_ce = zend_register_internal_class(&ce);
 	php_converter_ce->create_object = php_converter_create_object;
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));

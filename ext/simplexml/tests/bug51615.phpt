@@ -14,7 +14,7 @@ $html = simplexml_import_dom($dom);
 var_dump($html->body->span);
 
 foreach ($html->body->span as $obj) {
-	var_dump((string)$obj->title);
+    var_dump((string)$obj->title);
 }
 
 ?>

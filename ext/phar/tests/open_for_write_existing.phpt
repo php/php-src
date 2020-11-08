@@ -23,9 +23,7 @@ fclose($fp);
 include $pname . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 extra
-===DONE===

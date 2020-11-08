@@ -28,6 +28,9 @@ $period->dynamic2 = [];
 $period->dynamic2[] = "array";
 var_dump($period->dynamic2);
 
+$period->dynamic3[] = "array";
+var_dump($period->dynamic3);
+
 ?>
 --EXPECT--
 string(5) "stuff"
@@ -38,6 +41,10 @@ array(1) {
 }
 bool(false)
 string(7) "dynamic"
+array(1) {
+  [0]=>
+  string(5) "array"
+}
 array(1) {
   [0]=>
   string(5) "array"

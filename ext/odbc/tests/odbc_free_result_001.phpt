@@ -43,7 +43,7 @@ odbc_exec($conn, 'DROP TABLE FOO');
 odbc_exec($conn, 'DROP DATABASE odbcTEST');
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(1) "1"
 bool(true)

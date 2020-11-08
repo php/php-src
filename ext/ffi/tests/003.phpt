@@ -30,14 +30,14 @@ var_dump($ffi->new("struct _b"));
 var_dump($ffi->new("c"));
 var_dump($ffi->new("d"));
 try {
-	var_dump($ffi->new("struct _e"));
+    var_dump($ffi->new("struct _e"));
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	var_dump($ffi->new("f"));
+    var_dump($ffi->new("f"));
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 echo "ok\n";
 ?>
@@ -58,6 +58,6 @@ object(FFI\CData:struct _d)#%d (1) {
   ["x"]=>
   int(0)
 }
-FFI\ParserException: incomplete 'struct _e' at line 1
-FFI\ParserException: incomplete 'struct _f' at line 1
+FFI\ParserException: Incomplete struct "_e" at line 1
+FFI\ParserException: Incomplete struct "_f" at line 1
 ok

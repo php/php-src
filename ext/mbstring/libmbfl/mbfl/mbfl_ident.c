@@ -28,14 +28,9 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stddef.h>
 
 #include "mbfl_ident.h"
-#include "mbfl_allocators.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
 #include "mbfilter_wchar.h"
@@ -83,6 +78,7 @@
 #include "filters/mbfilter_iso8859_13.h"
 #include "filters/mbfilter_iso8859_14.h"
 #include "filters/mbfilter_iso8859_15.h"
+#include "filters/mbfilter_iso8859_16.h"
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_uuencode.h"
@@ -103,9 +99,8 @@
 static const struct mbfl_identify_vtbl vtbl_identify_false = {
 	mbfl_no_encoding_pass,
 	mbfl_filt_ident_false_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_false };
-
+	mbfl_filt_ident_false
+};
 
 static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf8,
@@ -158,6 +153,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_8859_13,
 	&vtbl_identify_8859_14,
 	&vtbl_identify_8859_15,
+	&vtbl_identify_8859_16,
 	&vtbl_identify_armscii8,
 	&vtbl_identify_cp850,
 	&vtbl_identify_jis_ms,
@@ -165,125 +161,82 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_cp50221,
 	&vtbl_identify_cp50222,
 	&vtbl_identify_gb18030,
+	&vtbl_identify_7bit,
+	&vtbl_identify_utf16,
+	&vtbl_identify_utf16le,
+	&vtbl_identify_utf16be,
+	&vtbl_identify_8bit,
+	&vtbl_identify_ucs2,
+	&vtbl_identify_ucs2be,
+	&vtbl_identify_ucs2le,
+	&vtbl_identify_utf32,
+	&vtbl_identify_utf32be,
+	&vtbl_identify_utf32le,
 	&vtbl_identify_false,
 	NULL
 };
 
-
-
-/*
- * identify filter
- */
-const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding)
+const struct mbfl_identify_vtbl* mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding)
 {
-	const struct mbfl_identify_vtbl * vtbl;
-	int i;
+	const struct mbfl_identify_vtbl** vtbl;
 
-	i = 0;
-	while ((vtbl = mbfl_identify_filter_list[i++]) != NULL) {
-		if (vtbl->encoding == encoding) {
-			break;
+	for (vtbl = mbfl_identify_filter_list; *vtbl; vtbl++) {
+		if ((*vtbl)->encoding == encoding) {
+			return *vtbl;
 		}
 	}
 
-	return vtbl;
+	return NULL;
 }
 
 mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 {
-	mbfl_identify_filter *filter;
-
-	/* allocate */
-	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
-
-	if (mbfl_identify_filter_init(filter, encoding)) {
-		mbfl_free(filter);
-		return NULL;
-	}
-
+	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
+	mbfl_identify_filter_init(filter, encoding);
 	return filter;
 }
 
 mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
 {
-	mbfl_identify_filter *filter;
-
-	/* allocate */
-	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
-
-	if (mbfl_identify_filter_init2(filter, encoding)) {
-		mbfl_free(filter);
-		return NULL;
-	}
-
+	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
+	mbfl_identify_filter_init2(filter, encoding);
 	return filter;
 }
 
-
-int mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
+void mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
 {
 	const mbfl_encoding *enc = mbfl_no2encoding(encoding);
-	return mbfl_identify_filter_init2(filter, enc ? enc: &mbfl_encoding_pass);
+	mbfl_identify_filter_init2(filter, enc ? enc : &mbfl_encoding_pass);
 }
 
-int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
+void mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
 {
-	const struct mbfl_identify_vtbl *vtbl;
-
-	/* encoding structure */
 	filter->encoding = encoding;
-
-	filter->status = 0;
-	filter->flag = 0;
-	filter->score = 0;
+	filter->status = filter->flag = filter->score = 0;
 
 	/* setup the function table */
-	vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
+	const struct mbfl_identify_vtbl *vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
 	if (vtbl == NULL) {
 		vtbl = &vtbl_identify_false;
 	}
 	filter->filter_ctor = vtbl->filter_ctor;
-	filter->filter_dtor = vtbl->filter_dtor;
 	filter->filter_function = vtbl->filter_function;
 
-	/* constructor */
 	(*filter->filter_ctor)(filter);
-
-	return 0;
 }
 
 void mbfl_identify_filter_delete(mbfl_identify_filter *filter)
 {
-	if (filter == NULL) {
-		return;
-	}
-
-	mbfl_identify_filter_cleanup(filter);
-	mbfl_free((void*)filter);
-}
-
-void mbfl_identify_filter_cleanup(mbfl_identify_filter *filter)
-{
-	(*filter->filter_dtor)(filter);
+	efree(filter);
 }
 
 void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter)
 {
-	filter->status = 0;
-	filter->flag = 0;
+	filter->status = filter->flag = 0;
 }
 
-void mbfl_filt_ident_common_dtor(mbfl_identify_filter *filter)
-{
-	filter->status = 0;
-}
-
+/* A (useless) filter which says that _every_ string is invalid in a certain encoding.
+ * Obviously, that cannot be true. Remove after all encodings have proper identify filters */
 int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter)
 {
 	filter->flag = 1;	/* bad */
@@ -296,6 +249,7 @@ void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter)
 	filter->flag = 1;
 }
 
+/* For encodings in which _every_ possible input string is valid */
 int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter)
 {
 	return c;

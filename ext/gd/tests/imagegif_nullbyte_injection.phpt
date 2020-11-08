@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid 2nd parameter, filename must not contain null bytes
+imagegif(): Argument #2 ($file) must not contain null bytes

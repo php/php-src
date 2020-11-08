@@ -7,23 +7,23 @@ arg_separator.input=&
 --FILE--
 <?php
 $queries = array(
-	"foo=abc&bar=def",
-	"%2bfoo=def&-bar=jkl",
-	"foo[]=abc&foo[]=def&foo[]=ghi&bar[]=jkl"
+    "foo=abc&bar=def",
+    "%2bfoo=def&-bar=jkl",
+    "foo[]=abc&foo[]=def&foo[]=ghi&bar[]=jkl"
 );
 function test($query) {
-	$foo = '';
-	$bar = '';
-	mb_parse_str($query, $array);
-	var_dump($array);
-	var_dump($foo);
-	var_dump($bar);
+    $foo = '';
+    $bar = '';
+    mb_parse_str($query, $array);
+    var_dump($array);
+    var_dump($foo);
+    var_dump($bar);
 }
 foreach ($queries as $query) {
-	test($query);
+    test($query);
 }
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["foo"]=>
   string(3) "abc"

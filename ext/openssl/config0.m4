@@ -1,7 +1,7 @@
 PHP_ARG_WITH([openssl],
   [for OpenSSL support],
   [AS_HELP_STRING([--with-openssl],
-    [Include OpenSSL support (requires OpenSSL >= 1.0.1)])])
+    [Include OpenSSL support (requires OpenSSL >= 1.0.2)])])
 
 PHP_ARG_WITH([kerberos],
   [for Kerberos support],

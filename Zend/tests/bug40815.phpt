@@ -4,9 +4,9 @@ Bug #40815 (using strings like "class::func" and static methods in set_exception
 <?php
 
 class ehandle{
-	static public function exh ($ex) {
-		echo 'foo';
-	}
+    static public function exh ($ex) {
+        echo 'foo';
+    }
 }
 
 set_exception_handler("ehandle::exh");

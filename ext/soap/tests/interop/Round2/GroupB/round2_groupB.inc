@@ -11,8 +11,8 @@ class SOAP_Interop_GroupB {
     function echoSimpleTypesAsStruct($string, $int, $float)
     {
       return (object)array("varString" => $string,
-      										 "varInt"    => $int,
-      										 "varFloat"  => $float);
+                                             "varInt"    => $int,
+                                             "varFloat"  => $float);
     }
 
     function echoNestedStruct($struct)

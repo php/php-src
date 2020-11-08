@@ -1,54 +1,43 @@
 <?php
 
+/** @generate-function-entries */
+
 /**
  * @param string|resource $file
  * @return resource|false
  */
  function bzopen($file, string $mode) {}
 
-/**
- * @param resource $bz
- * @return string|false
- */
-function bzread ($bz, int $length = 1024) {}
+/** @param resource $bz */
+function bzread($bz, int $length = 1024): string|false {}
 
 /**
  * @param resource $bz
- * @return int|false
+ * @implementation-alias fwrite
  */
-function bzwrite ($bz, string $str, int $length = UNKNOWN) {}
+function bzwrite($bz, string $data, ?int $length = null): int|false {}
 
 /**
  * @param resource $bz
+ * @implementation-alias fflush
  */
-function bzflush ($bz): bool {}
+function bzflush($bz): bool {}
 
 /**
  * @param resource $bz
+ * @implementation-alias fclose
  */
-function bzclose ($bz): bool {}
+function bzclose($bz): bool {}
 
-/**
- * @param resource $bz
- */
-function bzerrno ($bz): int {}
+/** @param resource $bz */
+function bzerrno($bz): int {}
 
-/**
- * @param resource $bz
- */
-function bzerrstr ($bz): string {}
+/** @param resource $bz */
+function bzerrstr($bz): string {}
 
-/**
- * @param resource $bz
- */
-function bzerror ($bz): array {}
+/** @param resource $bz */
+function bzerror($bz): array {}
 
-/**
- * @return string|int
- */
-function bzcompress (string $source, int $blocksize = 4, int $workfactor = 0) {}
+function bzcompress(string $data, int $block_size = 4, int $work_factor = 0): string|int {}
 
-/**
- * @return string|int
- */
-function bzdecompress (string $source, int $small = 0) {}
+function bzdecompress(string $data, bool $use_less_memory = false): string|int|false {}

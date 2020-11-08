@@ -4,7 +4,7 @@ Bug #52827 (curl_setopt with CURLOPT_STDERR erroneously increments the resource 
 <?php
 
 if (!extension_loaded('curl')) {
-	exit("skip curl extension not loaded");
+    exit("skip curl extension not loaded");
 }
 
 ?>
@@ -28,5 +28,6 @@ $handle=curl_init('http://www.example.com');
 curl_setopt($handle, CURLOPT_STDERR, $s);
 
 echo "Done.";
+?>
 --EXPECT--
 Done.

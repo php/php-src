@@ -5,45 +5,65 @@ Bug #44660 (Indexed and reference assignment to property of non-object don't tri
 $s = "hello";
 $a = true;
 
-echo "--> read access: ";
+echo "--> read access:";
 echo $a->p;
 
-echo "\n--> direct assignment: ";
-$a->p = $s;
+echo "\n--> direct assignment:\n";
+try {
+    $a->p = $s;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n--> increment: ";
-$a->p++;
+echo "\n--> increment:\n";
+try {
+    $a->p++;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n--> reference assignment:";
-$a->p =& $s;
+echo "\n--> reference assignment:\n";
+try {
+    $a->p =& $s;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n--> reference assignment:";
-$s =& $a->p;
+echo "\n--> reference assignment:\n";
+try {
+    $s =& $a->p;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n--> indexed assignment:";
-$a->p[0] = $s;
+echo "\n--> indexed assignment:\n";
+try {
+    $a->p[0] = $s;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n--> Confirm assignments have had no impact:\n";
 var_dump($a);
 ?>
 --EXPECTF--
---> read access: 
-Notice: Trying to get property 'p' of non-object in %sbug44660.php on line 6
+--> read access:
+Warning: Attempt to read property "p" on bool in %s on line %d
 
---> direct assignment: 
-Warning: Attempt to assign property 'p' of non-object in %sbug44660.php on line 9
+--> direct assignment:
+Attempt to assign property "p" on bool
 
---> increment: 
-Warning: Attempt to increment/decrement property 'p' of non-object in %sbug44660.php on line 12
-
---> reference assignment:
-Warning: Attempt to modify property 'p' of non-object in %sbug44660.php on line 15
+--> increment:
+Attempt to increment/decrement property "p" on bool
 
 --> reference assignment:
-Warning: Attempt to modify property 'p' of non-object in %sbug44660.php on line 18
+Attempt to modify property "p" on bool
+
+--> reference assignment:
+Attempt to modify property "p" on bool
 
 --> indexed assignment:
-Warning: Attempt to modify property 'p' of non-object in %sbug44660.php on line 21
+Attempt to modify property "p" on bool
 
 --> Confirm assignments have had no impact:
 bool(true)

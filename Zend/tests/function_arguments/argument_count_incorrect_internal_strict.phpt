@@ -4,20 +4,21 @@ Call internal function with incorrect number of arguments with strict types
 <?php
 declare(strict_types=1);
 try {
-	substr("foo");
+    substr("foo");
 } catch (ArgumentCountError $e) {
-	echo get_class($e) . PHP_EOL;
-	echo $e->getMessage() . PHP_EOL;
+    echo get_class($e) . PHP_EOL;
+    echo $e->getMessage() . PHP_EOL;
 }
 
 try {
-    array_diff([]);
+    array_diff();
 } catch (ArgumentCountError $e) {
-	echo get_class($e) . PHP_EOL;
+    echo get_class($e) . PHP_EOL;
     echo $e->getMessage(), "\n";
 }
+?>
 --EXPECT--
 ArgumentCountError
-substr() expects at least 2 parameters, 1 given
+substr() expects at least 2 arguments, 1 given
 ArgumentCountError
-At least 2 parameters are required, 1 given
+array_diff() expects at least 1 argument, 0 given

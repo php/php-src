@@ -7,7 +7,11 @@ Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --FILE--
 <?php
 $proc = new XSLTProcessor();
-var_dump($proc->hasExsltSupport('stringValue'));
+try {
+    $proc->hasExsltSupport('stringValue');
+} catch (ArgumentCountError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
 --EXPECT--
-bool(true)
+XSLTProcessor::hasExsltSupport() expects exactly 0 arguments, 1 given

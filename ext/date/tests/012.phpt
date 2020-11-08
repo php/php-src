@@ -13,7 +13,7 @@ var_dump(date_isodate_set($dto, 2006, 100, 15));
 var_dump($dto->format("Y/m/d H:i:s"));
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 object(DateTime)#1 (3) {
   ["date"]=>
   string(26) "2006-01-23 00:00:00.000000"

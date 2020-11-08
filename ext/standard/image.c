@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,9 +26,6 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
-#ifdef PHP_WIN32
-#include "win32/php_stdint.h"
-#endif
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
@@ -122,8 +117,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_psd
- */
+/* {{{ php_handle_psd */
 static struct gfxinfo *php_handle_psd (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
@@ -143,8 +137,7 @@ static struct gfxinfo *php_handle_psd (php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_bmp
- */
+/* {{{ php_handle_bmp */
 static struct gfxinfo *php_handle_bmp (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
@@ -194,8 +187,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 /* }}} */
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-/* {{{ php_handle_swc
- */
+/* {{{ php_handle_swc */
 static struct gfxinfo *php_handle_swc(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
@@ -276,8 +268,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 /* }}} */
 #endif
 
-/* {{{ php_handle_swf
- */
+/* {{{ php_handle_swf */
 static struct gfxinfo *php_handle_swf (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
@@ -370,8 +361,7 @@ static struct gfxinfo *php_handle_png (php_stream * stream)
 
 #define M_PSEUDO 0xFFD8			/* pseudo marker for start of image(byte 0) */
 
-/* {{{ php_read2
- */
+/* {{{ php_read2 */
 static unsigned short php_read2(php_stream * stream)
 {
 	unsigned char a[2];
@@ -400,7 +390,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int ff
 			extraneous++;
 	}
 		if (extraneous) {
-			php_error_docref(NULL, E_WARNING, "corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
+			php_error_docref(NULL, E_WARNING, "Corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
 		}
 	}
 	a = 1;
@@ -434,11 +424,10 @@ static int php_skip_variable(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_read_APP
- */
+/* {{{ php_read_APP */
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
-	unsigned short length;
+	size_t length;
 	char *buffer;
 	char markername[16];
 	zval *tmp;
@@ -451,7 +440,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (zend_long) length) != length) {
+	if (php_stream_read(stream, buffer, (size_t) length) != length) {
 		efree(buffer);
 		return 0;
 	}
@@ -557,8 +546,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 }
 /* }}} */
 
-/* {{{ php_read4
- */
+/* {{{ php_read4 */
 static unsigned int php_read4(php_stream * stream)
 {
 	unsigned char a[4];
@@ -728,8 +716,7 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream)
 }
 /* }}} */
 
-/* {{{ tiff constants
- */
+/* {{{ tiff constants */
 PHPAPI const int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 
 /* uncompressed only */
@@ -876,8 +863,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 }
 /* }}} */
 
-/* {{{ php_handle_psd
- */
+/* {{{ php_handle_psd */
 static struct gfxinfo *php_handle_iff(php_stream * stream)
 {
 	struct gfxinfo * result;
@@ -999,8 +985,7 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 }
 /* }}} */
 
-/* {{{ php_handle_wbmp
-*/
+/* {{{ php_handle_wbmp */
 static struct gfxinfo *php_handle_wbmp(php_stream * stream)
 {
 	struct gfxinfo *result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
@@ -1014,8 +999,7 @@ static struct gfxinfo *php_handle_wbmp(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_get_xbm
- */
+/* {{{ php_get_xbm */
 static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 {
     char *fline;
@@ -1074,8 +1058,7 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 }
 /* }}} */
 
-/* {{{ php_handle_xbm
- */
+/* {{{ php_handle_xbm */
 static struct gfxinfo *php_handle_xbm(php_stream * stream)
 {
 	struct gfxinfo *result;
@@ -1084,8 +1067,7 @@ static struct gfxinfo *php_handle_xbm(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_ico
- */
+/* {{{ php_handle_ico */
 static struct gfxinfo *php_handle_ico(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
@@ -1120,8 +1102,7 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_webp
- */
+/* {{{ php_handle_webp */
 static struct gfxinfo *php_handle_webp(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
@@ -1209,8 +1190,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 }
 /* }}} */
 
-/* {{{ proto string image_type_to_mime_type(int imagetype)
-   Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
+/* {{{ Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
 	zend_long p_image_type;
@@ -1223,8 +1203,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 }
 /* }}} */
 
-/* {{{ proto string|false image_type_to_extension(int imagetype [, bool include_dot])
-   Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
+/* {{{ Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
 	zend_long image_type;
@@ -1235,7 +1214,7 @@ PHP_FUNCTION(image_type_to_extension)
 		Z_PARAM_LONG(image_type)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(inc_dot)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
@@ -1298,14 +1277,14 @@ PHP_FUNCTION(image_type_to_extension)
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
+PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filetype)
 {
 	char tmp[12];
     int twelve_bytes_read;
 
 	if ( !filetype) filetype = tmp;
 	if((php_stream_read(stream, filetype, 3)) != 3) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 
@@ -1316,7 +1295,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_JPEG;
 	} else if (!memcmp(filetype, php_sig_png, 3)) {
 		if (php_stream_read(stream, filetype+3, 5) != 5) {
-			php_error_docref(NULL, E_NOTICE, "Read error!");
+			php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 			return IMAGE_FILETYPE_UNKNOWN;
 		}
 		if (!memcmp(filetype, php_sig_png, 8)) {
@@ -1337,7 +1316,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_JPC;
 	} else if (!memcmp(filetype, php_sig_riff, 3)) {
 		if (php_stream_read(stream, filetype+3, 9) != 9) {
-			php_error_docref(NULL, E_NOTICE, "Read error!");
+			php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 			return IMAGE_FILETYPE_UNKNOWN;
 		}
 		if (!memcmp(filetype+8, php_sig_webp, 4)) {
@@ -1348,7 +1327,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 	}
 
 	if (php_stream_read(stream, filetype+3, 1) != 1) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 /* BYTES READ: 4 */
@@ -1375,7 +1354,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_WBMP;
 	}
     if (!twelve_bytes_read) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
     }
 	if (php_get_xbm(stream, NULL)) {
@@ -1385,7 +1364,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 }
 /* }}} */
 
-static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	int itype = 0;
 	struct gfxinfo *result = NULL;
@@ -1394,7 +1373,7 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 		RETURN_FALSE;
 	}
 
-	itype = php_getimagetype(stream, NULL);
+	itype = php_getimagetype(stream, input, NULL);
 	switch( itype) {
 		case IMAGE_FILETYPE_GIF:
 			result = php_handle_gif(stream);
@@ -1496,10 +1475,15 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 		Z_PARAM_ZVAL(info)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (mode == FROM_PATH && CHECK_NULL_PATH(input, input_len)) {
+		zend_argument_value_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
+	}
+
 	if (argc == 2) {
 		info = zend_try_array_init(info);
 		if (!info) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1513,21 +1497,19 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 		RETURN_FALSE;
 	}
 
-	php_getimagesize_from_stream(stream, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_getimagesize_from_stream(stream, input, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	php_stream_close(stream);
 }
 /* }}} */
 
-/* {{{ proto array|false getimagesize(string imagefile [, array info])
-   Get the size of an image as 4-element array */
+/* {{{ Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_PATH);
 }
 /* }}} */
 
-/* {{{ proto array|false getimagesizefromstring(string data [, array info])
-   Get the size of an image as 4-element array */
+/* {{{ Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesizefromstring)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);

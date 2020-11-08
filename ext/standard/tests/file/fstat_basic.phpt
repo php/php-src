@@ -6,7 +6,6 @@ $fp = fopen (__FILE__, 'r');
 var_dump(fstat( $fp ) );
 fclose($fp);
 ?>
-===DONE===
 --EXPECTF--
 array(26) {
   [0]=>
@@ -62,4 +61,3 @@ array(26) {
   ["blocks"]=>
   int(%i)
 }
-===DONE===

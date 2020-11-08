@@ -5,16 +5,13 @@ Test setlocale() function : usage variations - Setting all available locales in 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
+exec("locale -a", $output, $exit_code);
+if ($exit_code !== 0) {
+    die("skip locale -a not available");
+}
 ?>
 --FILE--
 <?php
-/* Prototype  : string setlocale (int $category , string $locale [,string $..] )
-              : string setlocale(int $category , array $locale);
- * Description: Sets locale information.Returns the new current locale , or FALSE
-                if locale functionality is not implemented in this platform.
- * Source code: ext/standard/string.c
-*/
-
 /* setlocale() to set all available locales in the system and check the success count */
 echo "*** Testing setlocale() : usage variations ***\n";
 
@@ -22,14 +19,9 @@ function good_locale($locale) {
     /**
     * Note: no_NO is a bogus locale and should not be used, see https://bugzilla.redhat.com/971416
     **/
-	return $locale !== 'tt_RU@iqtelif.UTF-8' && $locale !== 'no_NO.ISO-8859-1';
+    return $locale !== 'tt_RU@iqtelif.UTF-8' && $locale !== 'no_NO.ISO-8859-1';
 }
 
-/* Prototype  : array list_system_locales( void )
- * Description: To get the currently installed locle in this platform
- * Arguments  : Nil
- * Returns    : set of locale as array
-*/
 function list_system_locales() {
   // start the buffering of next command to internal output buffer
   ob_start();

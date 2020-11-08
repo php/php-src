@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1255, "ansi");
 
 ?>
+--CONFLICTS--
+dir_cp1255
 --INI--
 default_charset=cp1255
 --FILE--
@@ -39,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1255");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s\כללים מרובים42\כללים מרובים4"
 Active code page: %d
 bool(true)
-===DONE===

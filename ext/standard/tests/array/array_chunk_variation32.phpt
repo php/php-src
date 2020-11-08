@@ -5,11 +5,11 @@ array_chunk() - variation 32
 $array = array (2 => 1);
 var_dump ($array);
 for ($i = 1; $i < (sizeof($array) + 1); $i++) {
-	echo "[$i]\n";
-	var_dump (array_chunk ($array, $i));
-	var_dump (array_chunk ($array, $i, TRUE));
-	var_dump (array_chunk ($array, $i, FALSE));
-	echo "\n";
+    echo "[$i]\n";
+    var_dump (array_chunk ($array, $i));
+    var_dump (array_chunk ($array, $i, TRUE));
+    var_dump (array_chunk ($array, $i, FALSE));
+    echo "\n";
 }
 ?>
 --EXPECT--

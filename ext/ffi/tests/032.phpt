@@ -7,20 +7,20 @@ ffi.enable=1
 --FILE--
 <?php
 $p = FFI::new("
-	union {
-		struct __attribute__((packed)) {
-			int a:2;
-			unsigned long long b:64;
-			int c:3;
-			unsigned int d:3;
-		} s;
-	uint8_t i[9];
+    union {
+        struct __attribute__((packed)) {
+            int a:2;
+            unsigned long long b:64;
+            int c:3;
+            unsigned int d:3;
+        } s;
+    uint8_t i[9];
 }");
 var_dump(FFI::sizeof($p));
 for ($i = -5; $i < 9; $i++) {
-	$p->s->c = $i;
-	$p->s->d = $i;
-	echo "$i => 3-bit int {$p->s->c}, 3-bit uint {$p->s->d}\n";
+    $p->s->c = $i;
+    $p->s->d = $i;
+    echo "$i => 3-bit int {$p->s->c}, 3-bit uint {$p->s->d}\n";
 }
 $p->s->a = 0;
 $p->s->c = 0;
@@ -28,7 +28,7 @@ $p->s->d = 0;
 $p->s->b = 0x7fffffff;
 echo "0x";
 for ($i = 9; $i > 0;) {
-	printf("%02x", $p->i[--$i]);
+    printf("%02x", $p->i[--$i]);
 }
 echo "\n";
 ?>

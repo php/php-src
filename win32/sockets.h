@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +22,7 @@
 #ifndef PHP_WIN32_SOCKETS_H
 #define PHP_WIN32_SOCKETS_H
 
+PHPAPI int socketpair_win32(int domain, int type, int protocol, SOCKET sock[2], int overlapped);
 PHPAPI int socketpair(int domain, int type, int protocol, SOCKET sock[2]);
 
 #endif

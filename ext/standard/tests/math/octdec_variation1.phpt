@@ -4,11 +4,6 @@ Test octdec() function : usage variations - different data types as $octal_strin
 precision=14
 --FILE--
 <?php
-/* Prototype  : number octdec  ( string $octal_string  )
- * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing octdec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -72,13 +67,13 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of octdec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try {
-		var_dump(octdec($input));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(octdec($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
@@ -160,7 +155,7 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-octdec() expects parameter 1 to be string, array given
+octdec(): Argument #1 ($octal_string) must be of type string, array given
 
 -- Iteration 21 --
 
@@ -184,5 +179,5 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-octdec() expects parameter 1 to be string, resource given
+octdec(): Argument #1 ($octal_string) must be of type string, resource given
 ---Done---

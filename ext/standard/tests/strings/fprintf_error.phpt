@@ -29,9 +29,9 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing Error Conditions ***
-Wrong parameter count for fprintf()
-Wrong parameter count for fprintf()
-Wrong parameter count for fprintf()
+fprintf() expects at least 2 arguments, 0 given
+fprintf() expects at least 2 arguments, 1 given
+fprintf() expects at least 2 arguments, 1 given
 Done

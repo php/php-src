@@ -2,11 +2,6 @@
 Test chdir() function : usage variations - relative paths
 --FILE--
 <?php
-/* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test chdir() with variations of relative paths
  */
@@ -59,7 +54,6 @@ var_dump(chdir("../../$level2_one_dir_name"));
 var_dump(getcwd());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $file_path = __DIR__;
@@ -101,4 +95,3 @@ string(%d) "%slevel2_one%elevel2_two"
 bool(true)
 bool(true)
 string(%d) "%slevel2_one"
-===DONE===

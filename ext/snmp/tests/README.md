@@ -34,12 +34,13 @@ in `snmp_include.inc`.
 
 ### On Linux/FreeBSD
 
-* Install package `net-snmpd` (name may differ based on your distribution).
+* On Ubuntu, install `snmpd` and `snmp-mibs-downloader`. (May be `net-snmpd`
+  on other distributions.)
 * Replace config file (by default this is `/etc/snmp/snmpd.conf` on Linux and
   `/usr/local/etc/snmp/snmpd.conf` on FreeBSD) with `snmpd.conf` supplied.
 
 Before launching daemon make sure that there is no file
-`/var/net-snmp/snmpd.conf`. Delete it if exists. Ingoring to to so will fail
+`/var/net-snmp/snmpd.conf`. Delete it if exists. Forgetting to do so will fail
 SNMPv3 tests.
 
 * Place `ext/snmp/tests/bigtest` near `snmpd.conf`, tune path to it in

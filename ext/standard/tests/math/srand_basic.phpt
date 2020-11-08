@@ -2,11 +2,6 @@
 Test srand() - basic function test for srand()
 --FILE--
 <?php
-/* Prototype  : void srand  ([ int $seed  ] )
- * Description: Seed the random number generator.
- * Source code: ext/standard/rand.c
- */
-
 echo "*** Testing srand() : basic functionality ***\n";
 
 // Should return NULL if given anything that it can convert to long
@@ -20,7 +15,6 @@ var_dump(srand(true));
 var_dump(srand(false));
 var_dump(srand(NULL));
 ?>
-===Done===
 --EXPECT--
 *** Testing srand() : basic functionality ***
 NULL
@@ -31,4 +25,3 @@ NULL
 NULL
 NULL
 NULL
-===Done===

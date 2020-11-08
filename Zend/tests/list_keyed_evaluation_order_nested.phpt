@@ -5,11 +5,11 @@ list() with keys, evaluation order: nested
 
 require_once "list_keyed_evaluation_order.inc";
 
-$a = new Stringable("A");
-$c = new Stringable("C");
-$f = new Stringable("F");
-$g = new Stringable("G");
-$i = new Stringable("I");
+$a = new StringCapable("A");
+$c = new StringCapable("C");
+$f = new StringCapable("F");
+$g = new StringCapable("G");
+$i = new StringCapable("I");
 
 $k = new IndexableRetrievable("K", new Indexable([
     "A" => "offset value for A",

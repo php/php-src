@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -415,13 +413,13 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 
 	zend_stream_init_fp(&fh, VCWD_FOPEN(filename, "r"), filename);
 	if (!fh.handle.fp) {
-		zend_error(E_CORE_WARNING, "Cannot open '%s' for reading", filename);
+		zend_error(E_CORE_WARNING, "Cannot open \"%s\" for reading", filename);
 		return FAILURE;
 	}
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
-	zend_hash_init_ex(browdata->htab, 0, NULL,
-		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent, 0);
+	zend_hash_init(browdata->htab, 0, NULL,
+		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent);
 
 	browdata->kv_size = 16 * 1024;
 	browdata->kv_used = 0;
@@ -476,8 +474,7 @@ static void browscap_bdata_dtor(browser_data *bdata, int persistent) /* {{{ */
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 PHP_INI_MH(OnChangeBrowscap)
 {
 	if (stage == PHP_INI_STAGE_STARTUP) {
@@ -678,8 +675,7 @@ static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed get_browser([string browser_name [, bool return_array]])
-   Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
+/* {{{ Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
 PHP_FUNCTION(get_browser)
 {
 	zend_string *agent_name = NULL, *lookup_browser_name;
@@ -687,6 +683,12 @@ PHP_FUNCTION(get_browser)
 	browser_data *bdata;
 	browscap_entry *found_entry = NULL;
 	HashTable *agent_ht;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_EX(agent_name, 1, 0)
+		Z_PARAM_BOOL(return_array)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (BROWSCAP_G(activation_bdata).filename[0] != '\0') {
 		bdata = &BROWSCAP_G(activation_bdata);
@@ -702,12 +704,6 @@ PHP_FUNCTION(get_browser)
 		}
 		bdata = &global_bdata;
 	}
-
-	ZEND_PARSE_PARAMETERS_START(0, 2)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(agent_name, 1, 0)
-		Z_PARAM_BOOL(return_array)
-	ZEND_PARSE_PARAMETERS_END();
 
 	if (agent_name == NULL) {
 		zval *http_user_agent = NULL;

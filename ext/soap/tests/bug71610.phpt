@@ -11,7 +11,7 @@ $exploit = unserialize('O:10:"SoapClient":3:{s:3:"uri";s:1:"a";s:8:"location";s:
 try {
 $exploit->blahblah();
 } catch(SoapFault $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 ?>
 --EXPECT--

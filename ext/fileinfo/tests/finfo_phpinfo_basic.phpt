@@ -14,8 +14,6 @@ $output = ob_get_clean();
 var_dump(preg_match("/fileinfo support => enabled/", $output));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing finfo extension : loading info phpinfo() ***
 int(1)
-===DONE===

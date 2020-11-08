@@ -2,13 +2,14 @@
 Bug #46739 (array returned by curl_getinfo should contain content_type key)
 --SKIPIF--
 <?php
-if (!extension_loaded("curl")) {
-	exit("skip curl extension not loaded");
-}
+include 'skipif.inc';
 ?>
 --FILE--
 <?php
-$ch = curl_init('http://127.0.0.1:9/');
+include 'server.inc';
+$host = curl_cli_server_start();
+$ch = curl_init("{$host}/get.inc");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 curl_exec($ch);
 $info = curl_getinfo($ch);

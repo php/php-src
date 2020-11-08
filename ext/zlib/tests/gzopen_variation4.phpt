@@ -3,17 +3,11 @@ Test gzopen() function : variation: use include path (relative directories in pa
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
-/* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer
- * Source code: ext/zlib/zlib.c
- * Alias to functions:
- */
-
 echo "*** Testing gzopen() : usage variation ***\n";
 
 $testName = 'gzopen_variation4';
@@ -110,7 +104,6 @@ function test_gzopen($mode) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gzopen() : usage variation ***
 
@@ -125,15 +118,15 @@ This is a file in script dir
 
 ** testing with mode=r+ **
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
 ** testing with mode=rt **
 This is a file in dir2
@@ -141,4 +134,3 @@ This is a file in dir1
 This is a file in dir1
 This is a file in working dir
 This is a file in script dir
-===DONE===

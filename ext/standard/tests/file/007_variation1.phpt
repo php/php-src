@@ -2,17 +2,6 @@
 Test fopen and fclose() functions - usage variations - "r" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "r" mode,
    checking for the file creation, write & read operations,
@@ -49,7 +38,7 @@ string(20) "line
 line of text
 li"
 
-Notice: fwrite(): write of 37 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fwrite(): Write of 37 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 bool(true)
 string(7) "Unknown"

@@ -1,19 +1,17 @@
 --TEST--
 Bug #70557 (Memleak on return type verifying failed).
---INI--
-opcache.enable=0
 --FILE--
 <?php
 
 function getNumber() : int {
-	return "foo";
+    return "foo";
 }
 
 try {
-	getNumber();
+    getNumber();
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 ?>
 --EXPECT--
-string(68) "Return value of getNumber() must be of the type int, string returned"
+string(62) "getNumber(): Return value must be of type int, string returned"

@@ -111,13 +111,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = '-10.5555' --
@@ -143,15 +143,15 @@ array(12) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
   [11]=>
-  float(0.4445)
+  float(0.4444999999999997)
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
@@ -171,13 +171,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
@@ -197,13 +197,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = '' --
@@ -223,13 +223,13 @@ array(11) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
 }
 
 -- creating an array with low = '-10.5555' and high = 'Array' --
@@ -249,15 +249,15 @@ array(12) {
   [6]=>
   float(-4.5555)
   [7]=>
-  float(-3.5555)
+  float(-3.5555000000000003)
   [8]=>
-  float(-2.5555)
+  float(-2.5555000000000003)
   [9]=>
-  float(-1.5555)
+  float(-1.5555000000000003)
   [10]=>
-  float(-0.5555)
+  float(-0.5555000000000003)
   [11]=>
-  float(0.4445)
+  float(0.4444999999999997)
 }
 
 -- creating an array with low = '1' and high = 'ABCD' --
@@ -615,5 +615,5 @@ array(5) {
   [4]=>
   int(5)
 }
-range() expects parameter 3 to be int or float, array given
+range(): Argument #3 ($step) must be of type int|float, array given
 Done

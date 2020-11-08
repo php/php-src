@@ -2,7 +2,7 @@
 Bug #67072 Echoing unserialized "SplFileObject" crash
 --FILE--
 <?php
-	echo unserialize('O:13:"SplFileObject":1:{s:9:"*filename";s:15:"/home/flag/flag";}');
+    echo unserialize('O:13:"SplFileObject":1:{s:9:"*filename";s:15:"/home/flag/flag";}');
 ?>
 ===DONE==
 --EXPECTF--

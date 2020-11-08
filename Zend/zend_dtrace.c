@@ -109,6 +109,13 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *ret
 	}
 }
 
+void dtrace_error_notify_cb(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	if (DTRACE_ERROR_ENABLED()) {
+		DTRACE_ERROR(ZSTR_VAL(message), (char *)error_filename, error_lineno);
+	}
+}
+
 /* }}} */
 
 #endif /* HAVE_DTRACE */

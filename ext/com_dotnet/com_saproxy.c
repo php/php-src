@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -107,12 +105,17 @@ static zval *saproxy_read_dimension(zend_object *object, zval *offset, int type,
 		}
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return rv;
+		}
 		VariantInit(&v);
 
 		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
 			   	Z_STRLEN(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
 			   	proxy->dimensions, args, 0);
+
+		efree(args);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(rv, &v, proxy->obj->code_page);
@@ -220,7 +223,10 @@ static void saproxy_write_dimension(zend_object *object, zval *offset, zval *val
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 		ZVAL_COPY_VALUE(&args[i], value);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return;
+		}
 		VariantInit(&v);
 		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
 					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
@@ -282,18 +288,19 @@ static int saproxy_property_exists(zend_object *object, zend_string *member, int
 
 static int saproxy_dimension_exists(zend_object *object, zval *member, int check_empty)
 {
-	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
+	/* TODO Add support */
+	zend_throw_error(NULL, "Cannot check dimension on a COM object");
 	return 0;
 }
 
 static void saproxy_property_delete(zend_object *object, zend_string *member, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete properties from a COM object");
 }
 
 static void saproxy_dimension_delete(zend_object *object, zval *offset)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete dimension from a COM object");
 }
 
 static HashTable *saproxy_properties_get(zend_object *object)
@@ -321,6 +328,7 @@ static zend_string* saproxy_class_name_get(const zend_object *object)
 
 static int saproxy_objects_compare(zval *object1, zval *object2)
 {
+	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
 	return -1;
 }
 
@@ -373,7 +381,7 @@ static zend_object* saproxy_clone(zend_object *object)
 	memcpy(cloneproxy, proxy, sizeof(*cloneproxy));
 
 	GC_ADDREF(&cloneproxy->obj->zo);
-	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(zval *), 0);
+	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(zval), 0);
 	clone_indices(cloneproxy, proxy, proxy->dimensions);
 
 	return &cloneproxy->std;
@@ -397,9 +405,14 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_method_get,
 	saproxy_constructor_get,
 	saproxy_class_name_get,
-	saproxy_objects_compare,
 	saproxy_object_cast,
-	saproxy_count_elements
+	saproxy_count_elements,
+	NULL,									/* get_debug_info */
+	NULL,									/* get_closure */
+	NULL,									/* get_gc */
+	NULL,									/* do_operation */
+	saproxy_objects_compare,				/* compare */
+	NULL,									/* get_properties_for */
 };
 
 int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)
@@ -418,7 +431,7 @@ int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index
 	}
 
 	GC_ADDREF(&proxy->obj->zo);
-	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval *), 0);
+	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval), 0);
 
 	if (rel) {
 		clone_indices(proxy, rel, rel->dimensions);
@@ -508,7 +521,8 @@ static const zend_object_iterator_funcs saproxy_iter_funcs = {
 	saproxy_iter_get_data,
 	saproxy_iter_get_key,
 	saproxy_iter_move_forwards,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 

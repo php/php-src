@@ -13,8 +13,8 @@ require __DIR__.'/connect.inc';
 // Initialization
 
 $stmtarray = array(
-	"create table bug37220_tab( mycolumn xmltype not null)",
-	"insert into bug37220_tab values(xmltype('<THETAG myID=\"1234\"></THETAG>'))"
+    "create table bug37220_tab( mycolumn xmltype not null)",
+    "insert into bug37220_tab values(xmltype('<THETAG myID=\"1234\"></THETAG>'))"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -24,8 +24,8 @@ oci8_test_sql_execute($c, $stmtarray);
 // bug37220_tab a normal Oracle table)
 
 $query = "UPDATE  bug37220_tab
-  		  SET     bug37220_tab.mycolumn = updateXML(bug37220_tab.mycolumn,'/THETAG',xmltype.createXML(:data))
-		  WHERE   existsNode(bug37220_tab.mycolumn,'/THETAG[@myID=\"1234\"]') = 1";
+          SET     bug37220_tab.mycolumn = updateXML(bug37220_tab.mycolumn,'/THETAG',xmltype.createXML(:data))
+          WHERE   existsNode(bug37220_tab.mycolumn,'/THETAG[@myID=\"1234\"]') = 1";
 $stmt = oci_parse ($c, $query);
 $clob = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($stmt, ':data', $clob, -1, OCI_B_CLOB);
@@ -42,16 +42,16 @@ $stmt = oci_parse ($c, $query);
 oci_execute($stmt);
 
 while ($row = oci_fetch_array($stmt, OCI_ASSOC+OCI_RETURN_NULLS)) {
-	foreach ($row as $item) {
-		echo trim($item)."\n";
-	}
-	echo "\n";
+    foreach ($row as $item) {
+        echo trim($item)."\n";
+    }
+    echo "\n";
 }
 
 // Cleanup
 
 $stmtarray = array(
-	"drop table bug37220_tab"
+    "drop table bug37220_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

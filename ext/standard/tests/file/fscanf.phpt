@@ -18,7 +18,11 @@ var_dump($v);
 fclose($fp);
 
 $fp = fopen($filename, "rt");
-var_dump(fscanf($fp, "%s", $v, $v1));
+try {
+    fscanf($fp, "%s", $v, $v1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump($v);
 var_dump($v1);
 fclose($fp);
@@ -26,7 +30,11 @@ fclose($fp);
 $v = array();
 $v1 = array();
 $fp = fopen($filename, "rt");
-var_dump(fscanf($fp, "", $v, $v1));
+try {
+    fscanf($fp, "", $v, $v1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump($v);
 var_dump($v1);
 fclose($fp);
@@ -34,7 +42,11 @@ fclose($fp);
 $v = array();
 $v1 = array();
 $fp = fopen($filename, "rt");
-var_dump(fscanf($fp, "%.a", $v, $v1));
+try {
+    fscanf($fp, "%.a", $v, $v1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump($v);
 var_dump($v1);
 fclose($fp);
@@ -50,7 +62,11 @@ fclose($fp);
 file_put_contents($filename, "data");
 
 $fp = fopen($filename, "rt");
-var_dump(fscanf($fp, "%s%d", $v));
+try {
+    var_dump(fscanf($fp, "%s%d", $v));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
@@ -59,26 +75,20 @@ echo "Done\n";
 $filename = __DIR__."/fscanf.dat";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 NULL
 int(1)
 string(4) "data"
-
-Warning: fscanf(): Variable is not assigned by any conversion specifiers in %s on line %d
-int(-1)
+Variable is not assigned by any conversion specifiers
 string(4) "data"
 NULL
-
-Warning: fscanf(): Variable is not assigned by any conversion specifiers in %s on line %d
-int(-1)
+Variable is not assigned by any conversion specifiers
 array(0) {
 }
 array(0) {
 }
-
-Warning: fscanf(): Bad scan conversion character "." in %s on line %d
-int(-1)
+Bad scan conversion character "."
 array(0) {
 }
 array(0) {
@@ -86,7 +96,5 @@ array(0) {
 bool(false)
 array(0) {
 }
-
-Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d
-int(-1)
+Different numbers of variable names and field specifiers
 Done

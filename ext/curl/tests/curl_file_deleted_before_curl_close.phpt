@@ -13,7 +13,7 @@ $ch = curl_init($host);
 
 $temp_file = __DIR__ . '/curl_file_deleted_before_curl_close.tmp';
 if (file_exists($temp_file)) {
-	unlink($temp_file); // file should not exist before test
+    unlink($temp_file); // file should not exist before test
 }
 
 $handle = fopen($temp_file, 'w');

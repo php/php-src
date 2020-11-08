@@ -9,15 +9,15 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 function foo() {
-	static $a = UNDEFINED_CONST;
+    static $a = UNDEFINED_CONST;
 }
 try {
-	foo();
+    foo();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 ?>
 OK
 --EXPECT--
-Exception: Undefined constant 'UNDEFINED_CONST'
+Exception: Undefined constant "UNDEFINED_CONST"
 OK

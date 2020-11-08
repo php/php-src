@@ -2,11 +2,6 @@
 Test array_unique() function : usage variations - binary safe checking
 --FILE--
 <?php
-/* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unique() by passing an array having binary values.
 */

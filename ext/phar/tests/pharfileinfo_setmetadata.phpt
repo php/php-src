@@ -37,13 +37,11 @@ $b->delMetadata();
 echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
---EXPECTF--
+--EXPECT--
 Phar entry is a temporary directory (not an actual entry in the archive), cannot set metadata
 Phar entry is a temporary directory (not an actual entry in the archive), cannot delete metadata
 Write operations disabled by the php.ini setting phar.readonly
 Write operations disabled by the php.ini setting phar.readonly
-===DONE===

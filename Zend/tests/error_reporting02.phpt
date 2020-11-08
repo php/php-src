@@ -9,12 +9,12 @@ function foo($arg) {
 }
 
 function bar() {
-	error_reporting(E_ALL);
-	throw new Exception("test");
+    error_reporting(E_ALL);
+    throw new Exception("test");
 }
 
 try {
-	@foo(@bar());
+    @foo(@bar());
 } catch (Exception $e) {
 }
 

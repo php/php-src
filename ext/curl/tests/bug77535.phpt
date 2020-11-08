@@ -4,11 +4,11 @@ Bug #77535 (Invalid callback, h2 server push)
 <?php
 include 'skipif.inc';
 if (getenv("SKIP_ONLINE_TESTS")) {
-	die("skip online test");
+    die("skip online test");
 }
 $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x073d00) {
-	exit("skip: test may crash with curl < 7.61.0");
+    exit("skip: test may crash with curl < 7.61.0");
 }
 ?>
 --FILE--
@@ -41,7 +41,7 @@ class MyHttpClient
             return \strlen($data);
         });
         curl_multi_add_handle($this->mh, $this->curl);
-        
+
         $stillRunning = null;
         while (true) {
             do {
@@ -53,7 +53,8 @@ class MyHttpClient
                 if (CURLMSG_DONE !== $info['msg']) {
                     continue;
                 }
-                die("Start handle request.");
+                echo "Start handle request.\n";
+                return;
             }
         }
     }
@@ -72,6 +73,7 @@ class MyHttpClient
 
 $buzz = new MyHttpClient();
 $buzz->sendRequest();
+?>
 --EXPECT--
 Start handle request.
 

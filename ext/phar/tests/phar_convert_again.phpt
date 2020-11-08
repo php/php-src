@@ -152,7 +152,6 @@ $tgz->convertToData(Phar::TAR, Phar::GZ, '.phar/.tgz.oops');
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
@@ -202,4 +201,3 @@ A Phar stub cannot be set in a plain tar archive
 data phar "%sphar_convert_again2.phar.tgz.oops" has invalid extension phar.tgz.oops
 phar "%sphar_convert_again2.tgz.oops" has invalid extension tgz.oops
 data phar "%sphar_convert_again2.phar/.tgz.oops" has invalid extension phar/.tgz.oops
-===DONE===

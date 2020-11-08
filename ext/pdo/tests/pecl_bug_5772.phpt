@@ -18,11 +18,12 @@ $db->exec("CREATE TABLE test (id int NOT NULL, PRIMARY KEY (id))");
 $db->exec("INSERT INTO test (id) VALUES (1)");
 
 function heLLO($row) {
-	return $row;
+    return $row;
 }
 
 foreach ($db->query("SELECT * FROM test")->fetchAll(PDO::FETCH_FUNC, 'heLLO') as $row) {
-	var_dump($row);
+    var_dump($row);
 }
+?>
 --EXPECT--
 string(1) "1"

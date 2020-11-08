@@ -15,10 +15,10 @@ try {
   $comment->replaceData(-1,4,'-inserted');
 } catch (DOMException $e ) {
   if ($e->getMessage() == 'Index Size Error'){
-    echo "Throws DOMException for -ve offest\n";
+    echo "Throws DOMException for -ve offset\n";
   }
 }
 
 ?>
 --EXPECT--
-Throws DOMException for -ve offest
+Throws DOMException for -ve offset

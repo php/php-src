@@ -2,25 +2,10 @@
 Test is_writable() and its alias is_writeable() function: basic functionality
 --SKIPIF--
 <?php
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/is_readable_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-	unlink ($filename);
-	die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_writable ( string $filename );
-   Description: Tells whether the filename is writable.
-
-   is_writeable() is an alias of is_writable()
-*/
-
 // include common file test functions
 require __DIR__.'/file.inc';
 

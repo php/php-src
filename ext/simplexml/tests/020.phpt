@@ -14,8 +14,6 @@ if ($doc->name["attr"] == "foo") {
          print "Error\n";
 }
 ?>
-===DONE===
 --EXPECT--
 foo
 Works
-===DONE===

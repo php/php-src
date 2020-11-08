@@ -1,0 +1,996 @@
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: ec7607b8087ddd4297bf51cc4072465d2a0f27af */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract___clone, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunctionAbstract_inNamespace, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionFunctionAbstract_isClosure arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_isDeprecated arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_isInternal arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_isUserDefined arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_isGenerator arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_isVariadic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getClosureThis arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getClosureScopeClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getDocComment arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getEndLine arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getExtension arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getExtensionName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getFileName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getNamespaceName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getNumberOfParameters arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getNumberOfRequiredParameters arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getParameters arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getShortName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getStartLine arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getStaticVariables arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_returnsReference arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_hasReturnType arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getReturnType arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getAttributes, 0, 0, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_TYPE_MASK(0, function, Closure, MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunction___toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionFunction_isDisabled arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction_invoke, 0, 0, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction_invokeArgs, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionFunction_getClosure arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionGenerator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, generator, Generator, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionGenerator_getExecutingLine arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionGenerator_getExecutingFile arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionGenerator_getTrace, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "DEBUG_BACKTRACE_PROVIDE_OBJECT")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionGenerator_getFunction arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionGenerator_getThis arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionGenerator_getExecutingGenerator arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_MASK(0, objectOrMethod, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, method, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionMethod___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionMethod_isPublic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isPrivate arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isProtected arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isAbstract arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isFinal arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isStatic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isConstructor arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isDestructor arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_getClosure, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionMethod_getModifiers arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_invoke, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 1)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_invokeArgs, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 1)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionMethod_getDeclaringClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_getPrototype arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_setAccessible, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, accessible, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_MASK(0, objectOrClass, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionClass_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isInternal arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isUserDefined arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isAnonymous arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isInstantiable arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isCloneable arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getFileName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getStartLine arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getEndLine arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getDocComment arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getConstructor arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_hasMethod, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_getMethod arginfo_class_ReflectionClass_hasMethod
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_getMethods, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_hasProperty arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionClass_getProperty arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionClass_getProperties arginfo_class_ReflectionClass_getMethods
+
+#define arginfo_class_ReflectionClass_hasConstant arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionClass_getConstants arginfo_class_ReflectionClass_getMethods
+
+#define arginfo_class_ReflectionClass_getReflectionConstants arginfo_class_ReflectionClass_getMethods
+
+#define arginfo_class_ReflectionClass_getConstant arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionClass_getReflectionConstant arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionClass_getInterfaces arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getInterfaceNames arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isInterface arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getTraits arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getTraitNames arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getTraitAliases arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isTrait arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isAbstract arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isFinal arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getModifiers arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_isInstance, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_newInstance arginfo_class_ReflectionFunction_invoke
+
+#define arginfo_class_ReflectionClass_newInstanceWithoutConstructor arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_newInstanceArgs, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_getParentClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_isSubclassOf, 0, 0, 1)
+	ZEND_ARG_OBJ_TYPE_MASK(0, class, ReflectionClass, MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_getStaticProperties arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_getStaticPropertyValue, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, default, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_setStaticPropertyValue, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_getDefaultProperties arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isIterable arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_isIterateable arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_implementsInterface, 0, 0, 1)
+	ZEND_ARG_OBJ_TYPE_MASK(0, interface, ReflectionClass, MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_getExtension arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getExtensionName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_inNamespace arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getNamespaceName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getShortName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClass_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
+#define arginfo_class_ReflectionObject___construct arginfo_class_ReflectionClass_isInstance
+
+#define arginfo_class_ReflectionProperty___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty___construct, 0, 0, 2)
+	ZEND_ARG_TYPE_MASK(0, class, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, property, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionProperty___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionProperty_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_getValue arginfo_class_ReflectionMethod_getClosure
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_setValue, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, objectOrValue, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionProperty_isInitialized arginfo_class_ReflectionMethod_getClosure
+
+#define arginfo_class_ReflectionProperty_isPublic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_isPrivate arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_isProtected arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_isStatic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_isDefault arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_isPromoted, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionProperty_getModifiers arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_getDeclaringClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_getDocComment arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_setAccessible arginfo_class_ReflectionMethod_setAccessible
+
+#define arginfo_class_ReflectionProperty_getType arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_hasType arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_hasDefaultValue arginfo_class_ReflectionProperty_isPromoted
+
+#define arginfo_class_ReflectionProperty_getDefaultValue arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
+#define arginfo_class_ReflectionClassConstant___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClassConstant___construct, 0, 0, 2)
+	ZEND_ARG_TYPE_MASK(0, class, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, constant, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClassConstant___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionClassConstant_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_getValue arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_isPublic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_isPrivate arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_isProtected arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_getModifiers arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_getDeclaringClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_getDocComment arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionClassConstant_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
+#define arginfo_class_ReflectionParameter___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
+	ZEND_ARG_INFO(0, function)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionParameter___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionParameter_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isPassedByReference arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_canBePassedByValue arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_getDeclaringFunction arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_getDeclaringClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_getClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_hasType arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_getType arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isArray arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isCallable arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_allowsNull arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_getPosition arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isOptional arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isDefaultValueAvailable arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_getDefaultValue arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isDefaultValueConstant arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_getDefaultValueConstantName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isVariadic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionParameter_isPromoted arginfo_class_ReflectionProperty_isPromoted
+
+#define arginfo_class_ReflectionParameter_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
+#define arginfo_class_ReflectionType___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+#define arginfo_class_ReflectionType_allowsNull arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionType___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionNamedType_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionNamedType_isBuiltin arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionUnionType_getTypes, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionExtension___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+#define arginfo_class_ReflectionExtension___construct arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionExtension___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionExtension_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_getVersion arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_getFunctions arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_getConstants arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_getINIEntries arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_getClasses arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_getClassNames arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_getDependencies arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_info arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_isPersistent arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionExtension_isTemporary arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionZendExtension___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+#define arginfo_class_ReflectionZendExtension___construct arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionZendExtension___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionZendExtension_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionZendExtension_getVersion arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionZendExtension_getAuthor arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionZendExtension_getURL arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionZendExtension_getCopyright arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionReference_fromArrayElement, 0, 2, ReflectionReference, 1)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionReference_getId arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionReference___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+#define arginfo_class_ReflectionReference___construct arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionAttribute_getName arginfo_class_ReflectionFunction___toString
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionAttribute_getTarget, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionAttribute_isRepeated arginfo_class_ReflectionProperty_isPromoted
+
+#define arginfo_class_ReflectionAttribute_getArguments arginfo_class_ReflectionUnionType_getTypes
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionAttribute_newInstance, 0, 0, IS_OBJECT, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionAttribute___clone arginfo_class_ReflectionFunctionAbstract___clone
+
+#define arginfo_class_ReflectionAttribute___construct arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+
+ZEND_METHOD(Reflection, getModifierNames);
+ZEND_METHOD(ReflectionClass, __clone);
+ZEND_METHOD(ReflectionFunctionAbstract, inNamespace);
+ZEND_METHOD(ReflectionFunctionAbstract, isClosure);
+ZEND_METHOD(ReflectionFunctionAbstract, isDeprecated);
+ZEND_METHOD(ReflectionFunctionAbstract, isInternal);
+ZEND_METHOD(ReflectionFunctionAbstract, isUserDefined);
+ZEND_METHOD(ReflectionFunctionAbstract, isGenerator);
+ZEND_METHOD(ReflectionFunctionAbstract, isVariadic);
+ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis);
+ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass);
+ZEND_METHOD(ReflectionFunctionAbstract, getDocComment);
+ZEND_METHOD(ReflectionFunctionAbstract, getEndLine);
+ZEND_METHOD(ReflectionFunctionAbstract, getExtension);
+ZEND_METHOD(ReflectionFunctionAbstract, getExtensionName);
+ZEND_METHOD(ReflectionFunctionAbstract, getFileName);
+ZEND_METHOD(ReflectionFunctionAbstract, getName);
+ZEND_METHOD(ReflectionFunctionAbstract, getNamespaceName);
+ZEND_METHOD(ReflectionFunctionAbstract, getNumberOfParameters);
+ZEND_METHOD(ReflectionFunctionAbstract, getNumberOfRequiredParameters);
+ZEND_METHOD(ReflectionFunctionAbstract, getParameters);
+ZEND_METHOD(ReflectionFunctionAbstract, getShortName);
+ZEND_METHOD(ReflectionFunctionAbstract, getStartLine);
+ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables);
+ZEND_METHOD(ReflectionFunctionAbstract, returnsReference);
+ZEND_METHOD(ReflectionFunctionAbstract, hasReturnType);
+ZEND_METHOD(ReflectionFunctionAbstract, getReturnType);
+ZEND_METHOD(ReflectionFunctionAbstract, getAttributes);
+ZEND_METHOD(ReflectionFunction, __construct);
+ZEND_METHOD(ReflectionFunction, __toString);
+ZEND_METHOD(ReflectionFunction, isDisabled);
+ZEND_METHOD(ReflectionFunction, invoke);
+ZEND_METHOD(ReflectionFunction, invokeArgs);
+ZEND_METHOD(ReflectionFunction, getClosure);
+ZEND_METHOD(ReflectionGenerator, __construct);
+ZEND_METHOD(ReflectionGenerator, getExecutingLine);
+ZEND_METHOD(ReflectionGenerator, getExecutingFile);
+ZEND_METHOD(ReflectionGenerator, getTrace);
+ZEND_METHOD(ReflectionGenerator, getFunction);
+ZEND_METHOD(ReflectionGenerator, getThis);
+ZEND_METHOD(ReflectionGenerator, getExecutingGenerator);
+ZEND_METHOD(ReflectionMethod, __construct);
+ZEND_METHOD(ReflectionMethod, __toString);
+ZEND_METHOD(ReflectionMethod, isPublic);
+ZEND_METHOD(ReflectionMethod, isPrivate);
+ZEND_METHOD(ReflectionMethod, isProtected);
+ZEND_METHOD(ReflectionMethod, isAbstract);
+ZEND_METHOD(ReflectionMethod, isFinal);
+ZEND_METHOD(ReflectionMethod, isStatic);
+ZEND_METHOD(ReflectionMethod, isConstructor);
+ZEND_METHOD(ReflectionMethod, isDestructor);
+ZEND_METHOD(ReflectionMethod, getClosure);
+ZEND_METHOD(ReflectionMethod, getModifiers);
+ZEND_METHOD(ReflectionMethod, invoke);
+ZEND_METHOD(ReflectionMethod, invokeArgs);
+ZEND_METHOD(ReflectionMethod, getDeclaringClass);
+ZEND_METHOD(ReflectionMethod, getPrototype);
+ZEND_METHOD(ReflectionMethod, setAccessible);
+ZEND_METHOD(ReflectionClass, __construct);
+ZEND_METHOD(ReflectionClass, __toString);
+ZEND_METHOD(ReflectionClass, getName);
+ZEND_METHOD(ReflectionClass, isInternal);
+ZEND_METHOD(ReflectionClass, isUserDefined);
+ZEND_METHOD(ReflectionClass, isAnonymous);
+ZEND_METHOD(ReflectionClass, isInstantiable);
+ZEND_METHOD(ReflectionClass, isCloneable);
+ZEND_METHOD(ReflectionClass, getFileName);
+ZEND_METHOD(ReflectionClass, getStartLine);
+ZEND_METHOD(ReflectionClass, getEndLine);
+ZEND_METHOD(ReflectionClass, getDocComment);
+ZEND_METHOD(ReflectionClass, getConstructor);
+ZEND_METHOD(ReflectionClass, hasMethod);
+ZEND_METHOD(ReflectionClass, getMethod);
+ZEND_METHOD(ReflectionClass, getMethods);
+ZEND_METHOD(ReflectionClass, hasProperty);
+ZEND_METHOD(ReflectionClass, getProperty);
+ZEND_METHOD(ReflectionClass, getProperties);
+ZEND_METHOD(ReflectionClass, hasConstant);
+ZEND_METHOD(ReflectionClass, getConstants);
+ZEND_METHOD(ReflectionClass, getReflectionConstants);
+ZEND_METHOD(ReflectionClass, getConstant);
+ZEND_METHOD(ReflectionClass, getReflectionConstant);
+ZEND_METHOD(ReflectionClass, getInterfaces);
+ZEND_METHOD(ReflectionClass, getInterfaceNames);
+ZEND_METHOD(ReflectionClass, isInterface);
+ZEND_METHOD(ReflectionClass, getTraits);
+ZEND_METHOD(ReflectionClass, getTraitNames);
+ZEND_METHOD(ReflectionClass, getTraitAliases);
+ZEND_METHOD(ReflectionClass, isTrait);
+ZEND_METHOD(ReflectionClass, isAbstract);
+ZEND_METHOD(ReflectionClass, isFinal);
+ZEND_METHOD(ReflectionClass, getModifiers);
+ZEND_METHOD(ReflectionClass, isInstance);
+ZEND_METHOD(ReflectionClass, newInstance);
+ZEND_METHOD(ReflectionClass, newInstanceWithoutConstructor);
+ZEND_METHOD(ReflectionClass, newInstanceArgs);
+ZEND_METHOD(ReflectionClass, getParentClass);
+ZEND_METHOD(ReflectionClass, isSubclassOf);
+ZEND_METHOD(ReflectionClass, getStaticProperties);
+ZEND_METHOD(ReflectionClass, getStaticPropertyValue);
+ZEND_METHOD(ReflectionClass, setStaticPropertyValue);
+ZEND_METHOD(ReflectionClass, getDefaultProperties);
+ZEND_METHOD(ReflectionClass, isIterable);
+ZEND_METHOD(ReflectionClass, implementsInterface);
+ZEND_METHOD(ReflectionClass, getExtension);
+ZEND_METHOD(ReflectionClass, getExtensionName);
+ZEND_METHOD(ReflectionClass, inNamespace);
+ZEND_METHOD(ReflectionClass, getNamespaceName);
+ZEND_METHOD(ReflectionClass, getShortName);
+ZEND_METHOD(ReflectionClass, getAttributes);
+ZEND_METHOD(ReflectionObject, __construct);
+ZEND_METHOD(ReflectionProperty, __construct);
+ZEND_METHOD(ReflectionProperty, __toString);
+ZEND_METHOD(ReflectionProperty, getName);
+ZEND_METHOD(ReflectionProperty, getValue);
+ZEND_METHOD(ReflectionProperty, setValue);
+ZEND_METHOD(ReflectionProperty, isInitialized);
+ZEND_METHOD(ReflectionProperty, isPublic);
+ZEND_METHOD(ReflectionProperty, isPrivate);
+ZEND_METHOD(ReflectionProperty, isProtected);
+ZEND_METHOD(ReflectionProperty, isStatic);
+ZEND_METHOD(ReflectionProperty, isDefault);
+ZEND_METHOD(ReflectionProperty, isPromoted);
+ZEND_METHOD(ReflectionProperty, getModifiers);
+ZEND_METHOD(ReflectionProperty, getDeclaringClass);
+ZEND_METHOD(ReflectionProperty, getDocComment);
+ZEND_METHOD(ReflectionProperty, setAccessible);
+ZEND_METHOD(ReflectionProperty, getType);
+ZEND_METHOD(ReflectionProperty, hasType);
+ZEND_METHOD(ReflectionProperty, hasDefaultValue);
+ZEND_METHOD(ReflectionProperty, getDefaultValue);
+ZEND_METHOD(ReflectionProperty, getAttributes);
+ZEND_METHOD(ReflectionClassConstant, __construct);
+ZEND_METHOD(ReflectionClassConstant, __toString);
+ZEND_METHOD(ReflectionClassConstant, getName);
+ZEND_METHOD(ReflectionClassConstant, getValue);
+ZEND_METHOD(ReflectionClassConstant, isPublic);
+ZEND_METHOD(ReflectionClassConstant, isPrivate);
+ZEND_METHOD(ReflectionClassConstant, isProtected);
+ZEND_METHOD(ReflectionClassConstant, getModifiers);
+ZEND_METHOD(ReflectionClassConstant, getDeclaringClass);
+ZEND_METHOD(ReflectionClassConstant, getDocComment);
+ZEND_METHOD(ReflectionClassConstant, getAttributes);
+ZEND_METHOD(ReflectionParameter, __construct);
+ZEND_METHOD(ReflectionParameter, __toString);
+ZEND_METHOD(ReflectionParameter, getName);
+ZEND_METHOD(ReflectionParameter, isPassedByReference);
+ZEND_METHOD(ReflectionParameter, canBePassedByValue);
+ZEND_METHOD(ReflectionParameter, getDeclaringFunction);
+ZEND_METHOD(ReflectionParameter, getDeclaringClass);
+ZEND_METHOD(ReflectionParameter, getClass);
+ZEND_METHOD(ReflectionParameter, hasType);
+ZEND_METHOD(ReflectionParameter, getType);
+ZEND_METHOD(ReflectionParameter, isArray);
+ZEND_METHOD(ReflectionParameter, isCallable);
+ZEND_METHOD(ReflectionParameter, allowsNull);
+ZEND_METHOD(ReflectionParameter, getPosition);
+ZEND_METHOD(ReflectionParameter, isOptional);
+ZEND_METHOD(ReflectionParameter, isDefaultValueAvailable);
+ZEND_METHOD(ReflectionParameter, getDefaultValue);
+ZEND_METHOD(ReflectionParameter, isDefaultValueConstant);
+ZEND_METHOD(ReflectionParameter, getDefaultValueConstantName);
+ZEND_METHOD(ReflectionParameter, isVariadic);
+ZEND_METHOD(ReflectionParameter, isPromoted);
+ZEND_METHOD(ReflectionParameter, getAttributes);
+ZEND_METHOD(ReflectionType, allowsNull);
+ZEND_METHOD(ReflectionType, __toString);
+ZEND_METHOD(ReflectionNamedType, getName);
+ZEND_METHOD(ReflectionNamedType, isBuiltin);
+ZEND_METHOD(ReflectionUnionType, getTypes);
+ZEND_METHOD(ReflectionExtension, __construct);
+ZEND_METHOD(ReflectionExtension, __toString);
+ZEND_METHOD(ReflectionExtension, getName);
+ZEND_METHOD(ReflectionExtension, getVersion);
+ZEND_METHOD(ReflectionExtension, getFunctions);
+ZEND_METHOD(ReflectionExtension, getConstants);
+ZEND_METHOD(ReflectionExtension, getINIEntries);
+ZEND_METHOD(ReflectionExtension, getClasses);
+ZEND_METHOD(ReflectionExtension, getClassNames);
+ZEND_METHOD(ReflectionExtension, getDependencies);
+ZEND_METHOD(ReflectionExtension, info);
+ZEND_METHOD(ReflectionExtension, isPersistent);
+ZEND_METHOD(ReflectionExtension, isTemporary);
+ZEND_METHOD(ReflectionZendExtension, __construct);
+ZEND_METHOD(ReflectionZendExtension, __toString);
+ZEND_METHOD(ReflectionZendExtension, getName);
+ZEND_METHOD(ReflectionZendExtension, getVersion);
+ZEND_METHOD(ReflectionZendExtension, getAuthor);
+ZEND_METHOD(ReflectionZendExtension, getURL);
+ZEND_METHOD(ReflectionZendExtension, getCopyright);
+ZEND_METHOD(ReflectionReference, fromArrayElement);
+ZEND_METHOD(ReflectionReference, getId);
+ZEND_METHOD(ReflectionReference, __construct);
+ZEND_METHOD(ReflectionAttribute, getName);
+ZEND_METHOD(ReflectionAttribute, getTarget);
+ZEND_METHOD(ReflectionAttribute, isRepeated);
+ZEND_METHOD(ReflectionAttribute, getArguments);
+ZEND_METHOD(ReflectionAttribute, newInstance);
+ZEND_METHOD(ReflectionAttribute, __clone);
+ZEND_METHOD(ReflectionAttribute, __construct);
+
+
+static const zend_function_entry class_ReflectionException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Reflection_methods[] = {
+	ZEND_ME(Reflection, getModifierNames, arginfo_class_Reflection_getModifierNames, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Reflector_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionFunctionAbstract_methods[] = {
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionFunctionAbstract___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionFunctionAbstract, inNamespace, arginfo_class_ReflectionFunctionAbstract_inNamespace, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, isClosure, arginfo_class_ReflectionFunctionAbstract_isClosure, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, isDeprecated, arginfo_class_ReflectionFunctionAbstract_isDeprecated, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, isInternal, arginfo_class_ReflectionFunctionAbstract_isInternal, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, isUserDefined, arginfo_class_ReflectionFunctionAbstract_isUserDefined, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, isGenerator, arginfo_class_ReflectionFunctionAbstract_isGenerator, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, isVariadic, arginfo_class_ReflectionFunctionAbstract_isVariadic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getClosureThis, arginfo_class_ReflectionFunctionAbstract_getClosureThis, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getClosureScopeClass, arginfo_class_ReflectionFunctionAbstract_getClosureScopeClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getDocComment, arginfo_class_ReflectionFunctionAbstract_getDocComment, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getEndLine, arginfo_class_ReflectionFunctionAbstract_getEndLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getExtension, arginfo_class_ReflectionFunctionAbstract_getExtension, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getExtensionName, arginfo_class_ReflectionFunctionAbstract_getExtensionName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getFileName, arginfo_class_ReflectionFunctionAbstract_getFileName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getName, arginfo_class_ReflectionFunctionAbstract_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getNamespaceName, arginfo_class_ReflectionFunctionAbstract_getNamespaceName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getNumberOfParameters, arginfo_class_ReflectionFunctionAbstract_getNumberOfParameters, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getNumberOfRequiredParameters, arginfo_class_ReflectionFunctionAbstract_getNumberOfRequiredParameters, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getParameters, arginfo_class_ReflectionFunctionAbstract_getParameters, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getShortName, arginfo_class_ReflectionFunctionAbstract_getShortName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getStartLine, arginfo_class_ReflectionFunctionAbstract_getStartLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getStaticVariables, arginfo_class_ReflectionFunctionAbstract_getStaticVariables, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, returnsReference, arginfo_class_ReflectionFunctionAbstract_returnsReference, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, hasReturnType, arginfo_class_ReflectionFunctionAbstract_hasReturnType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getReturnType, arginfo_class_ReflectionFunctionAbstract_getReturnType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getAttributes, arginfo_class_ReflectionFunctionAbstract_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionFunction_methods[] = {
+	ZEND_ME(ReflectionFunction, __construct, arginfo_class_ReflectionFunction___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunction, __toString, arginfo_class_ReflectionFunction___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunction, isDisabled, arginfo_class_ReflectionFunction_isDisabled, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(ReflectionFunction, invoke, arginfo_class_ReflectionFunction_invoke, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunction, invokeArgs, arginfo_class_ReflectionFunction_invokeArgs, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunction, getClosure, arginfo_class_ReflectionFunction_getClosure, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionGenerator_methods[] = {
+	ZEND_ME(ReflectionGenerator, __construct, arginfo_class_ReflectionGenerator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenerator, getExecutingLine, arginfo_class_ReflectionGenerator_getExecutingLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenerator, getExecutingFile, arginfo_class_ReflectionGenerator_getExecutingFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenerator, getTrace, arginfo_class_ReflectionGenerator_getTrace, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenerator, getFunction, arginfo_class_ReflectionGenerator_getFunction, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenerator, getThis, arginfo_class_ReflectionGenerator_getThis, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenerator, getExecutingGenerator, arginfo_class_ReflectionGenerator_getExecutingGenerator, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionMethod_methods[] = {
+	ZEND_ME(ReflectionMethod, __construct, arginfo_class_ReflectionMethod___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, __toString, arginfo_class_ReflectionMethod___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isPublic, arginfo_class_ReflectionMethod_isPublic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isPrivate, arginfo_class_ReflectionMethod_isPrivate, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isProtected, arginfo_class_ReflectionMethod_isProtected, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isAbstract, arginfo_class_ReflectionMethod_isAbstract, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isFinal, arginfo_class_ReflectionMethod_isFinal, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isStatic, arginfo_class_ReflectionMethod_isStatic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isConstructor, arginfo_class_ReflectionMethod_isConstructor, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isDestructor, arginfo_class_ReflectionMethod_isDestructor, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, getClosure, arginfo_class_ReflectionMethod_getClosure, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, getModifiers, arginfo_class_ReflectionMethod_getModifiers, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, invoke, arginfo_class_ReflectionMethod_invoke, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, invokeArgs, arginfo_class_ReflectionMethod_invokeArgs, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, getDeclaringClass, arginfo_class_ReflectionMethod_getDeclaringClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, getPrototype, arginfo_class_ReflectionMethod_getPrototype, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, setAccessible, arginfo_class_ReflectionMethod_setAccessible, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionClass_methods[] = {
+	ZEND_ME(ReflectionClass, __clone, arginfo_class_ReflectionClass___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionClass, __construct, arginfo_class_ReflectionClass___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, __toString, arginfo_class_ReflectionClass___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getName, arginfo_class_ReflectionClass_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isInternal, arginfo_class_ReflectionClass_isInternal, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isUserDefined, arginfo_class_ReflectionClass_isUserDefined, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isAnonymous, arginfo_class_ReflectionClass_isAnonymous, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isInstantiable, arginfo_class_ReflectionClass_isInstantiable, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isCloneable, arginfo_class_ReflectionClass_isCloneable, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getFileName, arginfo_class_ReflectionClass_getFileName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getStartLine, arginfo_class_ReflectionClass_getStartLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getEndLine, arginfo_class_ReflectionClass_getEndLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getDocComment, arginfo_class_ReflectionClass_getDocComment, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getConstructor, arginfo_class_ReflectionClass_getConstructor, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, hasMethod, arginfo_class_ReflectionClass_hasMethod, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getMethod, arginfo_class_ReflectionClass_getMethod, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getMethods, arginfo_class_ReflectionClass_getMethods, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, hasProperty, arginfo_class_ReflectionClass_hasProperty, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getProperty, arginfo_class_ReflectionClass_getProperty, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getProperties, arginfo_class_ReflectionClass_getProperties, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, hasConstant, arginfo_class_ReflectionClass_hasConstant, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getConstants, arginfo_class_ReflectionClass_getConstants, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getReflectionConstants, arginfo_class_ReflectionClass_getReflectionConstants, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getConstant, arginfo_class_ReflectionClass_getConstant, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getReflectionConstant, arginfo_class_ReflectionClass_getReflectionConstant, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getInterfaces, arginfo_class_ReflectionClass_getInterfaces, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getInterfaceNames, arginfo_class_ReflectionClass_getInterfaceNames, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isInterface, arginfo_class_ReflectionClass_isInterface, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getTraits, arginfo_class_ReflectionClass_getTraits, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getTraitNames, arginfo_class_ReflectionClass_getTraitNames, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getTraitAliases, arginfo_class_ReflectionClass_getTraitAliases, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isTrait, arginfo_class_ReflectionClass_isTrait, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isAbstract, arginfo_class_ReflectionClass_isAbstract, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isFinal, arginfo_class_ReflectionClass_isFinal, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getModifiers, arginfo_class_ReflectionClass_getModifiers, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isInstance, arginfo_class_ReflectionClass_isInstance, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, newInstance, arginfo_class_ReflectionClass_newInstance, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, newInstanceWithoutConstructor, arginfo_class_ReflectionClass_newInstanceWithoutConstructor, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, newInstanceArgs, arginfo_class_ReflectionClass_newInstanceArgs, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getParentClass, arginfo_class_ReflectionClass_getParentClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isSubclassOf, arginfo_class_ReflectionClass_isSubclassOf, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getStaticProperties, arginfo_class_ReflectionClass_getStaticProperties, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getStaticPropertyValue, arginfo_class_ReflectionClass_getStaticPropertyValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, setStaticPropertyValue, arginfo_class_ReflectionClass_setStaticPropertyValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getDefaultProperties, arginfo_class_ReflectionClass_getDefaultProperties, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isIterable, arginfo_class_ReflectionClass_isIterable, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(ReflectionClass, isIterateable, isIterable, arginfo_class_ReflectionClass_isIterateable, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, implementsInterface, arginfo_class_ReflectionClass_implementsInterface, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getExtension, arginfo_class_ReflectionClass_getExtension, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getExtensionName, arginfo_class_ReflectionClass_getExtensionName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, inNamespace, arginfo_class_ReflectionClass_inNamespace, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getNamespaceName, arginfo_class_ReflectionClass_getNamespaceName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getShortName, arginfo_class_ReflectionClass_getShortName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getAttributes, arginfo_class_ReflectionClass_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionObject_methods[] = {
+	ZEND_ME(ReflectionObject, __construct, arginfo_class_ReflectionObject___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionProperty_methods[] = {
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionProperty___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionProperty, __construct, arginfo_class_ReflectionProperty___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, __toString, arginfo_class_ReflectionProperty___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getName, arginfo_class_ReflectionProperty_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getValue, arginfo_class_ReflectionProperty_getValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, setValue, arginfo_class_ReflectionProperty_setValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isInitialized, arginfo_class_ReflectionProperty_isInitialized, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isPublic, arginfo_class_ReflectionProperty_isPublic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isPrivate, arginfo_class_ReflectionProperty_isPrivate, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isProtected, arginfo_class_ReflectionProperty_isProtected, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isStatic, arginfo_class_ReflectionProperty_isStatic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isDefault, arginfo_class_ReflectionProperty_isDefault, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isPromoted, arginfo_class_ReflectionProperty_isPromoted, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getModifiers, arginfo_class_ReflectionProperty_getModifiers, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getDeclaringClass, arginfo_class_ReflectionProperty_getDeclaringClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getDocComment, arginfo_class_ReflectionProperty_getDocComment, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, setAccessible, arginfo_class_ReflectionProperty_setAccessible, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getType, arginfo_class_ReflectionProperty_getType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, hasType, arginfo_class_ReflectionProperty_hasType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, hasDefaultValue, arginfo_class_ReflectionProperty_hasDefaultValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getDefaultValue, arginfo_class_ReflectionProperty_getDefaultValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getAttributes, arginfo_class_ReflectionProperty_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionClassConstant_methods[] = {
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionClassConstant___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionClassConstant, __construct, arginfo_class_ReflectionClassConstant___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, __toString, arginfo_class_ReflectionClassConstant___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, getName, arginfo_class_ReflectionClassConstant_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, getValue, arginfo_class_ReflectionClassConstant_getValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, isPublic, arginfo_class_ReflectionClassConstant_isPublic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, isPrivate, arginfo_class_ReflectionClassConstant_isPrivate, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, isProtected, arginfo_class_ReflectionClassConstant_isProtected, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, getModifiers, arginfo_class_ReflectionClassConstant_getModifiers, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, getDeclaringClass, arginfo_class_ReflectionClassConstant_getDeclaringClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, getDocComment, arginfo_class_ReflectionClassConstant_getDocComment, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, getAttributes, arginfo_class_ReflectionClassConstant_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionParameter_methods[] = {
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionParameter___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionParameter, __construct, arginfo_class_ReflectionParameter___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, __toString, arginfo_class_ReflectionParameter___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getName, arginfo_class_ReflectionParameter_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isPassedByReference, arginfo_class_ReflectionParameter_isPassedByReference, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, canBePassedByValue, arginfo_class_ReflectionParameter_canBePassedByValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getDeclaringFunction, arginfo_class_ReflectionParameter_getDeclaringFunction, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getDeclaringClass, arginfo_class_ReflectionParameter_getDeclaringClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getClass, arginfo_class_ReflectionParameter_getClass, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(ReflectionParameter, hasType, arginfo_class_ReflectionParameter_hasType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getType, arginfo_class_ReflectionParameter_getType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isArray, arginfo_class_ReflectionParameter_isArray, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(ReflectionParameter, isCallable, arginfo_class_ReflectionParameter_isCallable, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(ReflectionParameter, allowsNull, arginfo_class_ReflectionParameter_allowsNull, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getPosition, arginfo_class_ReflectionParameter_getPosition, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isOptional, arginfo_class_ReflectionParameter_isOptional, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isDefaultValueAvailable, arginfo_class_ReflectionParameter_isDefaultValueAvailable, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getDefaultValue, arginfo_class_ReflectionParameter_getDefaultValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isDefaultValueConstant, arginfo_class_ReflectionParameter_isDefaultValueConstant, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getDefaultValueConstantName, arginfo_class_ReflectionParameter_getDefaultValueConstantName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isVariadic, arginfo_class_ReflectionParameter_isVariadic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isPromoted, arginfo_class_ReflectionParameter_isPromoted, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getAttributes, arginfo_class_ReflectionParameter_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionType_methods[] = {
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionType___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionType, allowsNull, arginfo_class_ReflectionType_allowsNull, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionType, __toString, arginfo_class_ReflectionType___toString, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionNamedType_methods[] = {
+	ZEND_ME(ReflectionNamedType, getName, arginfo_class_ReflectionNamedType_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionNamedType, isBuiltin, arginfo_class_ReflectionNamedType_isBuiltin, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionUnionType_methods[] = {
+	ZEND_ME(ReflectionUnionType, getTypes, arginfo_class_ReflectionUnionType_getTypes, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionExtension_methods[] = {
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionExtension___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionExtension, __construct, arginfo_class_ReflectionExtension___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, __toString, arginfo_class_ReflectionExtension___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getName, arginfo_class_ReflectionExtension_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getVersion, arginfo_class_ReflectionExtension_getVersion, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getFunctions, arginfo_class_ReflectionExtension_getFunctions, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getConstants, arginfo_class_ReflectionExtension_getConstants, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getINIEntries, arginfo_class_ReflectionExtension_getINIEntries, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getClasses, arginfo_class_ReflectionExtension_getClasses, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getClassNames, arginfo_class_ReflectionExtension_getClassNames, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, getDependencies, arginfo_class_ReflectionExtension_getDependencies, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, info, arginfo_class_ReflectionExtension_info, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, isPersistent, arginfo_class_ReflectionExtension_isPersistent, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionExtension, isTemporary, arginfo_class_ReflectionExtension_isTemporary, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionZendExtension_methods[] = {
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionZendExtension___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(ReflectionZendExtension, __construct, arginfo_class_ReflectionZendExtension___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionZendExtension, __toString, arginfo_class_ReflectionZendExtension___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionZendExtension, getName, arginfo_class_ReflectionZendExtension_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionZendExtension, getVersion, arginfo_class_ReflectionZendExtension_getVersion, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionZendExtension, getAuthor, arginfo_class_ReflectionZendExtension_getAuthor, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionZendExtension, getURL, arginfo_class_ReflectionZendExtension_getURL, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionZendExtension, getCopyright, arginfo_class_ReflectionZendExtension_getCopyright, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionReference_methods[] = {
+	ZEND_ME(ReflectionReference, fromArrayElement, arginfo_class_ReflectionReference_fromArrayElement, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(ReflectionReference, getId, arginfo_class_ReflectionReference_getId, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionReference___clone, ZEND_ACC_PRIVATE)
+	ZEND_ME(ReflectionReference, __construct, arginfo_class_ReflectionReference___construct, ZEND_ACC_PRIVATE)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ReflectionAttribute_methods[] = {
+	ZEND_ME(ReflectionAttribute, getName, arginfo_class_ReflectionAttribute_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionAttribute, getTarget, arginfo_class_ReflectionAttribute_getTarget, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionAttribute, isRepeated, arginfo_class_ReflectionAttribute_isRepeated, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionAttribute, getArguments, arginfo_class_ReflectionAttribute_getArguments, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionAttribute, newInstance, arginfo_class_ReflectionAttribute_newInstance, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionAttribute, __clone, arginfo_class_ReflectionAttribute___clone, ZEND_ACC_PRIVATE)
+	ZEND_ME(ReflectionAttribute, __construct, arginfo_class_ReflectionAttribute___construct, ZEND_ACC_PRIVATE)
+	ZEND_FE_END
+};

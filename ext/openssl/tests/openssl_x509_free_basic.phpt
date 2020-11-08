@@ -9,5 +9,9 @@ openssl_x509_free($res);
 var_dump($res);
 ?>
 --EXPECTF--
-resource(%d) of type (OpenSSL X.509)
-resource(%d) of type (Unknown)
+object(OpenSSLCertificate)#1 (0) {
+}
+
+Deprecated: Function openssl_x509_free() is deprecated in %s on line %d
+object(OpenSSLCertificate)#1 (0) {
+}

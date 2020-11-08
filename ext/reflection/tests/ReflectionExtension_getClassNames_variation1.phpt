@@ -11,8 +11,6 @@ extension_loaded('ctype') or die("skip Requires 'ctype' extension");
 $extension = new ReflectionExtension('ctype');
 var_dump($extension->getClassNames());
 ?>
-==DONE==
 --EXPECT--
 array(0) {
 }
-==DONE==

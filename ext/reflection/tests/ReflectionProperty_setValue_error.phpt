@@ -32,9 +32,9 @@ $propInfo = new ReflectionProperty('TestClass', 'pub2');
 var_dump($propInfo->setValue($instanceWithNoProperties, "NewValue"));
 var_dump($instanceWithNoProperties->pub2);
 ?>
---EXPECTF--
+--EXPECT--
 Protected property:
-Cannot access non-public member TestClass::$prot
+Cannot access non-public property TestClass::$prot
 
 Instance without property:
 NULL

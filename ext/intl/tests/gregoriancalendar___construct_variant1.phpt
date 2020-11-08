@@ -3,7 +3,7 @@ IntlGregorianCalendar::__construct(): argument variants
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -19,7 +19,6 @@ var_dump($intlcal->getTime(), (float)strtotime('2012-02-29 16:07:08') * 1000);
 
 var_dump($intlcal->getType());
 ?>
-==DONE==
 --EXPECT--
 string(16) "Europe/Amsterdam"
 float(1330527600000)
@@ -27,4 +26,3 @@ float(1330527600000)
 float(1330528028000)
 float(1330528028000)
 string(9) "gregorian"
-==DONE==

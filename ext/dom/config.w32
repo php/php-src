@@ -7,14 +7,14 @@ if (PHP_DOM == "yes") {
 		ADD_EXTENSION_DEP('dom', 'libxml') &&
 		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
-		EXTENSION("dom", "php_dom.c attr.c document.c domerrorhandler.c \
-			domstringlist.c domexception.c namelist.c processinginstruction.c \
+		EXTENSION("dom", "php_dom.c attr.c document.c \
+			domexception.c parentnode.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \
-			node.c string_extend.c characterdata.c documenttype.c \
-			domimplementationlist.c entity.c nodelist.c text.c comment.c \
-			domconfiguration.c domimplementationsource.c entityreference.c \
-			notation.c xpath.c dom_iterators.c typeinfo.c domerror.c \
-			domlocator.c namednodemap.c userdatahandler.c");
+			node.c characterdata.c documenttype.c \
+			entity.c nodelist.c text.c comment.c \
+			entityreference.c \
+			notation.c xpath.c dom_iterators.c \
+			namednodemap.c");
 
 		AC_DEFINE("HAVE_DOM", 1, "DOM support");
 

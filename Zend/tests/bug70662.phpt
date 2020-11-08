@@ -14,5 +14,5 @@ var_dump($a);
 --EXPECT--
 array(1) {
   ["b"]=>
-  int(1)
+  int(2)
 }

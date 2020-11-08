@@ -13,20 +13,20 @@ $jd_days = Array(
     );
 
 foreach ($jd_days as $jd_day) {
-	echo "=== ", $jd_day, "\n";
+    echo "=== ", $jd_day, "\n";
     var_dump(jdmonthname($jd_day,0));
     var_dump(jdmonthname($jd_day,1));
     var_dump(jdmonthname($jd_day,2));
     var_dump(jdmonthname($jd_day,3));
     var_dump(jdmonthname($jd_day,4));
     var_dump(jdmonthname($jd_day,5));
-	echo "\n";
+    echo "\n";
 }
 
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 === 2453396
 string(3) "Jan"
 string(7) "January"

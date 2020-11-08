@@ -6,7 +6,7 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class C {
-	public $a;
+    public $a;
 }
 
 $rc = new ReflectionClass("C");
@@ -16,7 +16,7 @@ var_dump($rc->hasProperty(1));
 var_dump($rc->hasProperty(1.5));
 var_dump($rc->hasProperty(true));
 ?>
---EXPECTF--
+--EXPECT--
 Check invalid params:
 bool(false)
 bool(false)

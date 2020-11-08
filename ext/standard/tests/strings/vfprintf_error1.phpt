@@ -6,12 +6,6 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 precision=14
 --FILE--
 <?php
-/* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream
- * Source code: ext/standard/formatted_print.c
- * Alias to functions:
- */
-
 // Open handle
 $file = 'vfprintf_error1.txt';
 $fp = fopen( $file, "a+" );
@@ -35,7 +29,6 @@ try {
 fclose($fp);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -43,8 +36,7 @@ $file = 'vfprintf_error1.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing vfprintf() function with more than expected no. of arguments --
-Wrong parameter count for vfprintf()
-Wrong parameter count for vfprintf()
-===DONE===
+vfprintf() expects exactly 3 arguments, 4 given
+vfprintf() expects exactly 3 arguments, 4 given

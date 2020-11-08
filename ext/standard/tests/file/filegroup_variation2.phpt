@@ -2,12 +2,10 @@
 Test filegroup() function: usage variations - invalid filenames
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype: int filegroup ( string $filename )
- * Description: Returns the group ID of the file, or FALSE in case of an error.
- */
-
 /* Testing filegroup() with invalid arguments -int, float, bool, NULL, resource */
 
 $file_path = __DIR__;
@@ -32,8 +30,6 @@ foreach( $filenames as $filename ) {
   var_dump( filegroup($filename) );
   clearstatcache();
 }
-
-echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
@@ -60,5 +56,3 @@ bool(false)
 
 Warning: filegroup(): stat failed for 0 in %s on line %d
 bool(false)
-
-*** Done ***

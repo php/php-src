@@ -2,12 +2,6 @@
 Test stream_set_timeout() function : error conditions
 --FILE--
 <?php
-/* Prototype  : proto bool stream_set_timeout(resource stream, int seconds, int microseconds)
- * Description: Set timeout on stream read to seconds + microseonds
- * Source code: ext/standard/streamsfuncs.c
- * Alias to functions: socket_set_timeout
- */
-
 echo "*** Testing stream_set_timeout() : error conditions ***\n";
 
 for ($i=0; $i<100; $i++) {
@@ -41,7 +35,7 @@ fclose($server);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stream_set_timeout() : error conditions ***
 
 -- Testing stream_set_timeout() function with a closed socket --

@@ -15,7 +15,7 @@ $key = random_bytes(SODIUM_CRYPTO_SHORTHASH_KEYBYTES);
 $hash = do_crypto_shorthash($m, $key);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: sodium_crypto_shorthash() expects parameter 1 to be string, int given in %s:%d
+Fatal error: Uncaught TypeError: sodium_crypto_shorthash(): Argument #1 ($message) must be of type string, int given in %s:%d
 Stack trace:
 #0 %s(%d): sodium_crypto_shorthash()
 #1 %s(%d): do_crypto_shorthash()

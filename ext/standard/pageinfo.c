@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,11 +28,7 @@
 #endif
 #endif
 #if HAVE_GRP_H
-# ifdef PHP_WIN32
-#  include "win32/grp.h"
-# else
-#  include <grp.h>
-# endif
+# include <grp.h>
 #endif
 #ifdef PHP_WIN32
 #undef getgid
@@ -53,8 +47,7 @@
 
 #include "ext/standard/basic_functions.h"
 
-/* {{{ php_statpage
- */
+/* {{{ php_statpage */
 PHPAPI void php_statpage(void)
 {
 	zend_stat_t *pstat;
@@ -75,8 +68,7 @@ PHPAPI void php_statpage(void)
 }
 /* }}} */
 
-/* {{{ php_getuid
- */
+/* {{{ php_getuid */
 zend_long php_getuid(void)
 {
 	php_statpage();
@@ -90,15 +82,12 @@ zend_long php_getgid(void)
 	return (BG(page_gid));
 }
 
-/* {{{ proto int getmyuid(void)
-   Get PHP script owner's UID */
+/* {{{ Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
 {
 	zend_long uid;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	uid = php_getuid();
 	if (uid < 0) {
@@ -109,15 +98,12 @@ PHP_FUNCTION(getmyuid)
 }
 /* }}} */
 
-/* {{{ proto int getmygid(void)
-   Get PHP script owner's GID */
+/* {{{ Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
 {
 	zend_long gid;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	gid = php_getgid();
 	if (gid < 0) {
@@ -128,15 +114,12 @@ PHP_FUNCTION(getmygid)
 }
 /* }}} */
 
-/* {{{ proto int getmypid(void)
-   Get current process ID */
+/* {{{ Get current process ID */
 PHP_FUNCTION(getmypid)
 {
 	zend_long pid;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	pid = getpid();
 	if (pid < 0) {
@@ -147,13 +130,10 @@ PHP_FUNCTION(getmypid)
 }
 /* }}} */
 
-/* {{{ proto int getmyinode(void)
-   Get the inode of the current script being parsed */
+/* {{{ Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_statpage();
 	if (BG(page_inode) < 0) {
@@ -170,15 +150,12 @@ PHPAPI time_t php_getlastmod(void)
 	return BG(page_mtime);
 }
 
-/* {{{ proto int getlastmod(void)
-   Get time of last page modification */
+/* {{{ Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
 	zend_long lm;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	lm = php_getlastmod();
 	if (lm < 0) {

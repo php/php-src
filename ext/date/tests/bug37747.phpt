@@ -4,7 +4,7 @@ Bug #37747 (strtotime segfaults when given "nextyear")
 <?php
     date_default_timezone_set("Europe/Oslo");
     var_dump(strtotime("nextyear"));
-	echo "ALIVE\n";
+    echo "ALIVE\n";
 ?>
 --EXPECT--
 bool(false)

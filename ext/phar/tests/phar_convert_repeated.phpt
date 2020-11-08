@@ -85,7 +85,6 @@ var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -146,4 +145,3 @@ bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
 NULL
-===DONE===

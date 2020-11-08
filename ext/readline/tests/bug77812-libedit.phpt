@@ -29,7 +29,7 @@ bar
 xx
 xxx
 
-Warning: Uncaught Error: Undefined constant 'FOO' in php shell code:1
+Warning: Uncaught Error: Undefined constant "FOO" in php shell code:1
 Stack trace:
 #0 {main}
   thrown in php shell code on line 1

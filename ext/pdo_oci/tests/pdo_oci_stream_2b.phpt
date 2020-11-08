@@ -1,5 +1,5 @@
 --TEST--
-PDO OCI: Fetches 10K records from a table that contains 1 number and 2 LOB columns (stress test)
+PDO OCI: Fetches 1K records from a table that contains 1 number and 2 LOB columns (stress test)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
@@ -26,16 +26,16 @@ $j = 9;
 $a_val = ord('a');
 foreach($db->query("select data1 as d4_1, data2 as d4_2 from pdo_oci_stream_2 order by id") as $row) {
     $a = $row['d4_1'];
-	$a1 = $row['d4_2'];
+    $a1 = $row['d4_2'];
 
     $str1 = stream_get_contents($a);
-	$str2 = stream_get_contents($a1);
+    $str2 = stream_get_contents($a1);
 
     $str1len = strlen($str1);
-	$str2len = strlen($str2);
+    $str2len = strlen($str2);
 
     $b = ord($str1[0]);
-	$b1 = ord($str2[0]);
+    $b1 = ord($str2[0]);
 
     if (($b != ($a_val + $i)) && ($str1len != (4086 + $i)) &&
         ($b1 != ($a_val + $j)) && ($str2len != (4086 + $j))) {
@@ -56,8 +56,8 @@ foreach($db->query("select data1 as d4_1, data2 as d4_2 from pdo_oci_stream_2 or
     $i++;
     if ($i>9)
         $i = 0;
-	$j--;
-	if ($j<0)
+    $j--;
+    if ($j<0)
         $j = 9;
 }
 echo "Fetch operation done!\n";

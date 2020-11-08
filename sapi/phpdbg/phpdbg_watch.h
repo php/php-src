@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
@@ -119,6 +117,7 @@ typedef struct {
 
 void phpdbg_setup_watchpoints(void);
 void phpdbg_destroy_watchpoints(void);
+void phpdbg_purge_watchpoint_tree(void);
 
 #ifndef _WIN32
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context);

@@ -4,12 +4,12 @@ Bug #70478 (**= does no longer work)
 <?php
 
 class foo {
-	public $a = 3;
-	private $b = 4;
+    public $a = 3;
+    private $b = 4;
 
-	function __construct() {
-		$this->a **= $this->b;
-	}
+    function __construct() {
+        $this->a **= $this->b;
+    }
 }
 
 $a = new foo;

@@ -14,7 +14,7 @@ function test() {
 try {
     test();
 } catch (Exception $e) {
-	echo "exception\n";
+    echo "exception\n";
 }
 ?>
 --EXPECT--

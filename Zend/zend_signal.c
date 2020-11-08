@@ -223,7 +223,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 
 /* {{{ zend_sigaction
  *  Register a signal handler that will be deferred in critical sections */
-ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact)
+ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact)
 {
 	struct sigaction sa;
 	sigset_t sigset;
@@ -259,14 +259,12 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 		sigaddset(&sigset, signo);
 		zend_sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
-
-	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ zend_signal
  *  Register a signal handler that will be deferred in critical sections */
-ZEND_API int zend_signal(int signo, void (*handler)(int))
+ZEND_API void zend_signal(int signo, void (*handler)(int))
 {
 	struct sigaction sa;
 
@@ -275,7 +273,7 @@ ZEND_API int zend_signal(int signo, void (*handler)(int))
 	sa.sa_handler = handler;
 	sa.sa_mask    = global_sigmask;
 
-	return zend_sigaction(signo, &sa, NULL);
+	zend_sigaction(signo, &sa, NULL);
 }
 /* }}} */
 
@@ -283,7 +281,7 @@ ZEND_API int zend_signal(int signo, void (*handler)(int))
  *  Set a handler for a signal we want to defer.
  *  Previously set handler must have been saved before.
  */
-static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
+static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
 {
 	struct sigaction sa;
 
@@ -328,11 +326,9 @@ void zend_signal_activate(void)
 
 	SIGG(active) = 1;
 	SIGG(depth)  = 0;
-	SIGG(check)  = ZEND_DEBUG;
 } /* }}} */
 
-/* {{{ zend_signal_deactivate
- * */
+/* {{{ zend_signal_deactivate */
 void zend_signal_deactivate(void)
 {
 	if (SIGG(check)) {

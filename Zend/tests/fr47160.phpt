@@ -4,36 +4,36 @@ Calling method from array
 <?php
 
 class Hello {
-	public function world($x) {
-		echo "Hello, $x\n";return $this;
-	}
+    public function world($x) {
+        echo "Hello, $x\n";return $this;
+    }
 }
 
 class Hello2 {
-	static public function world($x) {
-		echo "Hello, $x\n";
-	}
+    static public function world($x) {
+        echo "Hello, $x\n";
+    }
 }
 
 class Magic {
-	public function __call($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+    public function __call($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
 class Magic2 {
-	public static function __callStatic($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+    public static function __callStatic($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
 class Magic3 {
-	public static function __callStatic($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
-	public function __call($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+    public static function __callStatic($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
+    public function __call($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
 $h= new Hello;
@@ -44,7 +44,7 @@ var_dump(call_user_func($f, 'again'));
 printf("-----\n");
 
 function bar() {
-	return array(new Hello,'world');
+    return array(new Hello,'world');
 }
 $f = bar();
 var_dump($f('there'));

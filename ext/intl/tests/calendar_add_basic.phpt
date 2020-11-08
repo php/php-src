@@ -5,7 +5,7 @@ date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -22,12 +22,10 @@ $intlcal->add(IntlCalendar::FIELD_MINUTE, 6);
 intlcal_add($intlcal, IntlCalendar::FIELD_SECOND, 7);
 
 var_dump(
-	(float)$time2*1000,
-	$intlcal->getTime());
+    (float)$time2*1000,
+    $intlcal->getTime());
 
 ?>
-==DONE==
 --EXPECT--
 float(1330578367000)
-float(1330578367000)
-==DONE==
+float(1330578367000)

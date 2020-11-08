@@ -2,9 +2,6 @@
 Test unlink() function : usage variations - unlink file in use
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 /* Try to unlink file when file handle is still in use */
 

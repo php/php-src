@@ -2,12 +2,6 @@
 Test strtr() function : usage variations - unexpected inputs for 'from' argument
 --FILE--
 <?php
-/* Prototype  : string strtr(string $str, string $from[, string $to]);
-                string strtr(string $str, array $replace_pairs);
- * Description: Translates characters in str using given translation tables
- * Source code: ext/standard/string.c
-*/
-
 /* Test strtr() function: with unexpected inputs for 'from'
  *  and expected type for 'str' & 'to' arguments
 */
@@ -34,41 +28,41 @@ $str = "012atm";
 // array of values for 'from'
 $from_arr =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  -2,
+          1,
+          -2,
 
-		  // float values
+          // float values
 /*4*/	  10.5,
-		  -20.5,
-		  10.1234567e10,
+          -20.5,
+          10.1234567e10,
 
-		  // array values
+          // array values
 /*7*/	  array(),
-		  array(0),
-		  array(1, 2),
+          array(0),
+          array(1, 2),
 
-		  // boolean values
+          // boolean values
 /*10*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // null values
+          // null values
 /*14*/	  NULL,
-		  null,
+          null,
 
-		  // objects
+          // objects
 /*16*/	  new sample(),
 
-		  // resource
+          // resource
 /*17*/	  $file_handle,
 
-		  // undefined variable
+          // undefined variable
 /*18*/	  @$undefined_var,
 
-		  // unset variable
+          // unset variable
 /*19*/	  @$unset_var
 );
 
@@ -80,14 +74,17 @@ $count = 1;
 for($index = 0; $index < count($from_arr); $index++) {
   echo "-- Iteration $count --\n";
   $from = $from_arr[$index];
-  var_dump( strtr($str, $from, $to) );
-  $count ++;
+  try {
+    var_dump(strtr($str, $from, $to));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
+  $count++;
 }
 
 fclose($file_handle);  //closing the file handle
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strtr() function: with unexpected inputs for 'from' ***
 -- Iteration 1 --
 string(6) "a12atm"
@@ -102,17 +99,11 @@ string(6) "m1tatm"
 -- Iteration 6 --
 string(6) "tm0atm"
 -- Iteration 7 --
-
-Notice: Array to string conversion in %s on line %d
-string(6) "0120tm"
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 8 --
-
-Notice: Array to string conversion in %s on line %d
-string(6) "0120tm"
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 9 --
-
-Notice: Array to string conversion in %s on line %d
-string(6) "0120tm"
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 10 --
 string(6) "0a2atm"
 -- Iteration 11 --
@@ -128,9 +119,8 @@ string(6) "012atm"
 -- Iteration 16 --
 string(6) "012ttm"
 -- Iteration 17 --
-string(6) "012atm"
+strtr(): Argument #2 ($from) must be of type array|string, resource given
 -- Iteration 18 --
 string(6) "012atm"
 -- Iteration 19 --
 string(6) "012atm"
-===DONE===

@@ -24,6 +24,7 @@ var_dump(ZipArchive::CM_TERSE);
 var_dump(ZipArchive::CM_LZ77);
 var_dump(ZipArchive::CM_WAVPACK);
 var_dump(ZipArchive::CM_PPMD);
+?>
 --EXPECT--
 int(-1)
 int(0)

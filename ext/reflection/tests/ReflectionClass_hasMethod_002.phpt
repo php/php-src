@@ -6,7 +6,7 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class C {
-	function f() {}
+    function f() {}
 }
 
 $rc = new ReflectionClass("C");

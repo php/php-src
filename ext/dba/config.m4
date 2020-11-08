@@ -141,6 +141,10 @@ if test "$PHP_QDBM" != "no"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/depot.h
       break
+    elif test -f "$i/include/qdbm/depot.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/qdbm/depot.h
+      break
     fi
   done
 

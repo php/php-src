@@ -5,15 +5,15 @@ Reflection Bug #29828 (Interfaces no longer work)
 
 interface Bla
 {
-	function bla();
+    function bla();
 }
 
 class BlaMore implements Bla
 {
-	function bla()
-	{
-		echo "Hello\n";
-	}
+    function bla()
+    {
+        echo "Hello\n";
+    }
 }
 
 $r = new ReflectionClass('BlaMore');
@@ -26,10 +26,8 @@ $o=new BlaMore;
 $o->bla();
 
 ?>
-===DONE===
 --EXPECT--
 int(1)
 bool(false)
 bool(false)
 Hello
-===DONE===

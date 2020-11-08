@@ -3,7 +3,7 @@ Test typed properties disallow void
 --FILE--
 <?php
 class Foo {
-	public void $int;
+    public void $int;
 }
 
 $foo = new Foo();

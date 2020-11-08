@@ -10,11 +10,19 @@ gmp_clrbit($n, 0);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(-1);
-var_dump(gmp_clrbit($n, -1));
+try {
+    gmp_clrbit($n, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gmp_strval($n));
 
 $n = gmp_init("1000000");
-gmp_clrbit($n, -1);
+try {
+    gmp_clrbit($n, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gmp_strval($n));
 
 $n = gmp_init("1000000");
@@ -36,16 +44,13 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "0"
-
-Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d
-bool(false)
+gmp_clrbit(): Argument #2 ($index) must be greater than or equal to 0
 string(2) "-1"
-
-Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d
+gmp_clrbit(): Argument #2 ($index) must be greater than or equal to 0
 string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"
-gmp_clrbit() expects parameter 1 to be GMP, array given
+gmp_clrbit(): Argument #1 ($num) must be of type GMP, array given
 Done

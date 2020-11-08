@@ -39,7 +39,5 @@ if (!isset($grp['gid'])) {
 }
 var_dump($grp['gid']);
 ?>
-===DONE===
 --EXPECT--
 int(0)
-===DONE===

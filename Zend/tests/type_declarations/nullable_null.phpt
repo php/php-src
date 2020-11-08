@@ -3,7 +3,7 @@ nullable class
 --FILE--
 <?php
 function test(Foo $a = null) {
-	echo "ok\n";
+    echo "ok\n";
 }
 test(null);
 ?>

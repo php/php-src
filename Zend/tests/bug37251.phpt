@@ -3,15 +3,16 @@ Bug #37251 (deadlock when custom error handler is to catch array type hint error
 --FILE--
 <?php
 class Foo {
-	function bar(array $foo) {
-	}
+    function bar(array $foo) {
+    }
 }
 
 try {
-	$foo = new Foo();
-	$foo->bar();
+    $foo = new Foo();
+    $foo->bar();
 } catch (Error $e) {
-	echo 'OK';
+    echo 'OK';
 }
+?>
 --EXPECT--
 OK

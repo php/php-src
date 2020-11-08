@@ -39,9 +39,9 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-[TypeError] Expected known_string to be a string, int given
-[TypeError] Expected user_string to be a string, int given
-[TypeError] Expected known_string to be a string, int given
-[TypeError] Expected known_string to be a string, null given
-[TypeError] Expected known_string to be a string, null given
-[TypeError] Expected known_string to be a string, null given
+[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, int given
+[TypeError] hash_equals(): Argument #2 ($user_string) must be of type string, int given
+[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, int given
+[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, null given
+[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, null given
+[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, null given

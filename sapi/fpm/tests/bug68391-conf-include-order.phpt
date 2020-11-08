@@ -3,6 +3,7 @@ FPM: bug68391 - Configuration inclusion in alphabetical order
 --SKIPIF--
 <?php
 include "skipif.inc";
+FPM\Tester::skipIfRoot();
 ?>
 --FILE--
 <?php

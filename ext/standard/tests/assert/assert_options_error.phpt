@@ -5,9 +5,9 @@ assert_options() - unknown assert option.
 <?php
 try {
     assert_options(1000);
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage();
 }
 ?>
 --EXPECT--
-Unknown value 1000
+assert_options(): Argument #1 ($option) must be an ASSERT_* constant

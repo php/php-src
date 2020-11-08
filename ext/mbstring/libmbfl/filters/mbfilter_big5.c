@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_big5.h"
 
@@ -63,7 +59,7 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	mbfl_no_encoding_big5,
 	"BIG-5",
 	"BIG5",
-	(const char *(*)[])&mbfl_encoding_big5_aliases,
+	mbfl_encoding_big5_aliases,
 	mblen_table_big5,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_big5_wchar,
@@ -84,14 +80,12 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 const struct mbfl_identify_vtbl vtbl_identify_big5 = {
 	mbfl_no_encoding_big5,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_big5
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp950 = {
 	mbfl_no_encoding_cp950,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_big5
 };
 
@@ -99,36 +93,40 @@ const struct mbfl_convert_vtbl vtbl_big5_wchar = {
 	mbfl_no_encoding_big5,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_big5,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
 	mbfl_no_encoding_cp950,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp950,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -145,10 +143,10 @@ static unsigned short cp950_pua_tbl[][4] = {
 static inline int is_in_cp950_pua(int c1, int c) {
 	if ((c1 >= 0xfa && c1 <= 0xfe) || (c1 >= 0x8e && c1 <= 0xa0) ||
 			(c1 >= 0x81 && c1 <= 0x8d) || (c1 >= 0xc7 && c1 <= 0xc8)) {
-		return (c > 0x39 && c < 0x7f) || (c > 0xa0 && c < 0xff);
+		return (c >=0x40 && c <= 0x7e) || (c >= 0xa1 && c <= 0xfe);
 	}
 	if (c1 == 0xc6) {
-		return c > 0xa0 && c < 0xff;
+		return c >= 0xa1 && c <= 0xfe;
 	}
 	return 0;
 }

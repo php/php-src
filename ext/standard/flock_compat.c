@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,17 +17,6 @@
 #include "php.h"
 #include <errno.h>
 #include "ext/standard/flock_compat.h"
-
-#if HAVE_STRUCT_FLOCK
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/file.h>
-#endif
-
-#ifdef PHP_WIN32
-#include <io.h>
-#include "config.w32.h"
-#endif
 
 #ifndef HAVE_FLOCK
 PHPAPI int flock(int fd, int operation)
@@ -60,7 +47,7 @@ PHPAPI int php_flock(int fd, int operation)
 
 	ret = fcntl(fd, operation & LOCK_NB ? F_SETLK : F_SETLKW, &flck);
 
-	if (operation & LOCK_NB && ret == -1 &&
+	if ((operation & LOCK_NB) && ret == -1 &&
 			(errno == EACCES || errno == EAGAIN))
 		errno = EWOULDBLOCK;
 

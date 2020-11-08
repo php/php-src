@@ -20,8 +20,6 @@ var_dump(openssl_decrypt($wrong, $wrong, $password));
 var_dump(openssl_decrypt($encrypted, $wrong, $wrong));
 var_dump(openssl_decrypt($wrong, $wrong, $wrong));
 
-// invalid using of an authentication tag
-var_dump(openssl_encrypt($data, $method, $password, 0, $iv, $wrong));
 ?>
 --EXPECTF--
 Warning: openssl_encrypt(): Using an empty Initialization Vector (iv) is potentially insecure and not recommended in %s on line %d
@@ -41,6 +39,3 @@ bool(false)
 
 Warning: openssl_decrypt(): Unknown cipher algorithm in %s on line %d
 bool(false)
-
-Warning: openssl_encrypt(): The authenticated tag cannot be provided for cipher that doesn not support AEAD in %s on line %d
-string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="

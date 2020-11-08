@@ -6,12 +6,12 @@ testing @ and error_reporting - 5
 error_reporting(E_ALL);
 
 class test {
-	function __get($name) {
-		return $undef_name;
-	}
-	function __set($name, $value) {
-		return $undef_value;
-	}
+    function __get($name) {
+        return $undef_name;
+    }
+    function __set($name, $value) {
+        return $undef_value;
+    }
 }
 
 $test = new test;
@@ -27,8 +27,8 @@ var_dump(error_reporting());
 echo "Done\n";
 ?>
 --EXPECTF--
-Notice: Undefined variable: undef_value in %s on line %d
+Warning: Undefined variable $undef_value in %s on line %d
 
-Notice: Undefined variable: undef_name in %s on line %d
+Warning: Undefined variable $undef_name in %s on line %d
 int(32767)
 Done

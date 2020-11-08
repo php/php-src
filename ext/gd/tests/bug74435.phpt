@@ -21,7 +21,6 @@ for ($i = 0; $i < $width; $i += 16) {
     }
 }
 ?>
-===DONE===
---EXPECTF--
-resource(%d) of type (gd)
-===DONE===
+--EXPECT--
+object(GdImage)#1 (0) {
+}

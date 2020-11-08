@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -51,7 +49,9 @@ void formatter_register_constants( INIT_FUNC_ARGS )
 	FORMATTER_EXPOSE_CLASS_CONST( DURATION );
 	FORMATTER_EXPOSE_CLASS_CONST( PATTERN_RULEBASED );
 	FORMATTER_EXPOSE_CLASS_CONST( IGNORE );
-
+#if U_ICU_VERSION_MAJOR_NUM >= 53
+	FORMATTER_EXPOSE_CLASS_CONST( CURRENCY_ACCOUNTING );
+#endif
 	FORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "DEFAULT_STYLE",  UNUM_DEFAULT );
 
 	/* UNumberFormatRoundingMode */

@@ -5,9 +5,13 @@ gzcompress()/gzuncompress() and invalid params
 --FILE--
 <?php
 
-var_dump(gzcompress("", 1000));
-var_dump(gzcompress("", -1));
+try {
+    var_dump(gzcompress("", 1000));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
+var_dump(gzcompress("", -1));
 var_dump(gzcompress(""));
 var_dump(gzcompress("", 9));
 
@@ -18,8 +22,17 @@ Desolation, grief and agony";
 var_dump($data1 = gzcompress($string));
 var_dump($data2 = gzcompress($string, 9));
 
-var_dump(gzuncompress("", 1000));
-var_dump(gzuncompress("", -1));
+try {
+    var_dump(gzuncompress("", 1000));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(gzuncompress("", -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(gzuncompress(""));
 var_dump(gzuncompress("", 9));
@@ -29,11 +42,9 @@ var_dump(gzuncompress($data2));
 $data2[4] = 0;
 var_dump(gzuncompress($data2));
 
-echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gzcompress(): compression level (1000) must be within -1..9 in %s on line %d
-bool(false)
+gzcompress(): Argument #2 ($level) must be between -1 and 9
 string(%d) "%a"
 string(%d) "%a"
 string(%d) "%a"
@@ -42,9 +53,7 @@ string(%d) "%a"
 
 Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
-
-Warning: gzuncompress(): length (-1) must be greater or equal zero in %s on line %d
-bool(false)
+gzuncompress(): Argument #2 ($max_length) must be greater than or equal to 0
 
 Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
@@ -60,4 +69,3 @@ Desolation, grief and agony"
 
 Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
-Done

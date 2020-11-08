@@ -15,7 +15,7 @@ class A {
     {
         switch ($this->returnType) {
             case 'float':  return $this->returnTypeNullable ? null : 0;
-            default: return; 
+            default: return;
         }
     }
 }

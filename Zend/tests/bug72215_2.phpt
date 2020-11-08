@@ -8,7 +8,7 @@ function &test(&$b) {
         return $a;
     } finally {
         $a =& $c;
-	$a = 2;
+    $a = 2;
     }
 }
 $x = 1;

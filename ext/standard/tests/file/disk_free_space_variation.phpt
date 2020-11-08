@@ -2,13 +2,6 @@
 Test disk_free_space and its alias diskfreespace() functions : Usage Variations
 --FILE--
 <?php
-/*
- *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function
- *               will return the number of bytes available on the corresponding
- *               filesystem or disk partition
- */
-
 $file_path = __DIR__;
 
 echo "*** Testing with a directory ***\n";
@@ -20,7 +13,7 @@ $return_value = disk_free_space($file_path);
 var_dump( is_float($return_value) );
 
 echo "\n*** Testing with different directory combinations ***";
-$dir = "/disk_free_space";
+$dir = "/disk_free_space_variation";
 mkdir($file_path.$dir);
 
 $dirs_arr = array(
@@ -50,12 +43,12 @@ foreach($dirs_arr as $dir1) {
   echo "\n-- Iteration $count --\n";
   try {
     var_dump( disk_free_space( $dir1 ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   try {
     var_dump( diskfreespace( $dir1 ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   $count++;
@@ -66,63 +59,63 @@ echo"\n--- Done ---";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-rmdir($file_path."/disk_free_space");
+rmdir($file_path."/disk_free_space_variation");
 ?>
 --EXPECTF--
 *** Testing with a directory ***
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 Testing for the return type ***
 bool(true)
 
 *** Testing with different directory combinations ***
 -- Iteration 1 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 2 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 3 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 4 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 5 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 6 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 7 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 8 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 9 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space(): Argument #1 ($directory) must not contain any null bytes
+diskfreespace(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 10 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space(): Argument #1 ($directory) must not contain any null bytes
+diskfreespace(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 11 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space(): Argument #1 ($directory) must not contain any null bytes
+diskfreespace(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 12 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space(): Argument #1 ($directory) must not contain any null bytes
+diskfreespace(): Argument #1 ($directory) must not contain any null bytes
 
 --- Done ---

@@ -2,11 +2,6 @@
 Test array_merge() function : usage variations - Pass different data types as $arr2 arg
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass different data types as $arr2 argument to array_merge() to test behaviour
  */
@@ -105,55 +100,55 @@ echo "Done";
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1 --
-Expected parameter 2 to be an array, int given
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 2 --
-Expected parameter 2 to be an array, int given
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 3 --
-Expected parameter 2 to be an array, int given
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 4 --
-Expected parameter 2 to be an array, int given
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 5 --
-Expected parameter 2 to be an array, float given
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 6 --
-Expected parameter 2 to be an array, float given
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 7 --
-Expected parameter 2 to be an array, float given
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 8 --
-Expected parameter 2 to be an array, float given
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 9 --
-Expected parameter 2 to be an array, float given
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 10 --
-Expected parameter 2 to be an array, null given
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 11 --
-Expected parameter 2 to be an array, null given
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 12 --
-Expected parameter 2 to be an array, bool given
+array_merge(): Argument #2 must be of type array, bool given
 
 -- Iteration 13 --
-Expected parameter 2 to be an array, bool given
+array_merge(): Argument #2 must be of type array, bool given
 
 -- Iteration 14 --
-Expected parameter 2 to be an array, bool given
+array_merge(): Argument #2 must be of type array, bool given
 
 -- Iteration 15 --
-Expected parameter 2 to be an array, bool given
+array_merge(): Argument #2 must be of type array, bool given
 
 -- Iteration 16 --
-Expected parameter 2 to be an array, string given
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 17 --
-Expected parameter 2 to be an array, string given
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 18 --
 array(2) {
@@ -164,23 +159,23 @@ array(2) {
 }
 
 -- Iteration 19 --
-Expected parameter 2 to be an array, string given
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 20 --
-Expected parameter 2 to be an array, string given
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 21 --
-Expected parameter 2 to be an array, string given
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 22 --
-Expected parameter 2 to be an array, object given
+array_merge(): Argument #2 must be of type array, classA given
 
 -- Iteration 23 --
-Expected parameter 2 to be an array, null given
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 24 --
-Expected parameter 2 to be an array, null given
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 25 --
-Expected parameter 2 to be an array, resource given
+array_merge(): Argument #2 must be of type array, resource given
 Done

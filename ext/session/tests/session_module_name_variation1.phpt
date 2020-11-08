@@ -7,12 +7,6 @@ Test session_module_name() function : variation
 
 ob_start();
 
-/*
- * Prototype : string session_module_name([string $module])
- * Description : Get and/or set the current session module
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_module_name() : variation ***\n";
 var_dump(session_module_name("blah"));
 var_dump(session_start());
@@ -26,7 +20,7 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_module_name() : variation ***
 
-Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
+Warning: session_module_name(): Session handler module "blah" cannot be found in %s on line %d
 bool(false)
 bool(true)
 string(%d) "%s"

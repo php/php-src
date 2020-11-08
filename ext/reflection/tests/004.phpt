@@ -4,8 +4,8 @@ ReflectionMethod::invoke() with non object or null value
 <?php
 
 class a {
-	function __construct(){
-	}
+    function __construct(){
+    }
 }
 class b {
 }

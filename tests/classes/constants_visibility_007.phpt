@@ -3,7 +3,7 @@ Final constants are not allowed
 --FILE--
 <?php
 class A {
-	final const X = 1;
+    final const X = 1;
 }
 ?>
 --EXPECTF--

@@ -7,7 +7,7 @@ Edgar Ferreira da Silva <contato [at] edgarfs [dot] com [dot] br>
 <?php
 if (!extension_loaded("gd")) die("skip GD not present");
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
-	die("skip test requires GD 2.2.2 or higher");
+    die("skip test requires GD 2.2.2 or higher");
 }
 ?>
 --FILE--

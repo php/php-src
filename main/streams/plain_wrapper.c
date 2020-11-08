@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -125,20 +123,21 @@ typedef struct {
 	FILE *file;
 	int fd;					/* underlying file descriptor */
 	unsigned is_process_pipe:1;	/* use pclose instead of fclose */
-	unsigned is_pipe:1;			/* don't try and seek */
+	unsigned is_pipe:1;		/* stream is an actual pipe, currently Windows only*/
 	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe_blocking:1; /* allow blocking read() on pipes, currently Windows only */
 	unsigned no_forced_fstat:1;  /* Use fstat cache even if forced */
-	unsigned _reserved:28;
+	unsigned is_seekable:1;		/* don't try and seek, if not set */
+	unsigned _reserved:26;
 
 	int lock_flag;			/* stores the lock state */
 	zend_string *temp_name;	/* if non-null, this is the path to a temporary file that
 							 * is to be deleted when the stream is closed */
-#if HAVE_FLUSHIO
+#ifdef HAVE_FLUSHIO
 	char last_op;
 #endif
 
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 	char *last_mapped_addr;
 	size_t last_mapped_len;
 #endif
@@ -173,6 +172,7 @@ static php_stream *_php_stream_fopen_from_fd_int(int fd, const char *mode, const
 	self = pemalloc_rel_orig(sizeof(*self), persistent_id);
 	memset(self, 0, sizeof(*self));
 	self->file = NULL;
+	self->is_seekable = 1;
 	self->is_pipe = 0;
 	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 0;
@@ -192,6 +192,7 @@ static php_stream *_php_stream_fopen_from_file_int(FILE *file, const char *mode 
 	self = emalloc_rel_orig(sizeof(*self));
 	memset(self, 0, sizeof(*self));
 	self->file = file;
+	self->is_seekable = 1;
 	self->is_pipe = 0;
 	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 0;
@@ -230,7 +231,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 		}
 		close(fd);
 
-		php_error_docref(NULL, E_WARNING, "unable to allocate stream");
+		php_error_docref(NULL, E_WARNING, "Unable to allocate stream");
 
 		return NULL;
 	}
@@ -242,6 +243,29 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC)
 	return php_stream_fopen_temporary_file(NULL, "php", NULL);
 }
 
+static void detect_is_seekable(php_stdio_stream_data *self) {
+#if defined(S_ISFIFO) && defined(S_ISCHR)
+	if (self->fd >= 0 && do_fstat(self, 0) == 0) {
+		self->is_seekable = !(S_ISFIFO(self->sb.st_mode) || S_ISCHR(self->sb.st_mode));
+		self->is_pipe = S_ISFIFO(self->sb.st_mode);
+	}
+#elif defined(PHP_WIN32)
+	zend_uintptr_t handle = _get_osfhandle(self->fd);
+
+	if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
+		DWORD file_type = GetFileType((HANDLE)handle);
+
+		self->is_seekable = !(file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR);
+		self->is_pipe = file_type == FILE_TYPE_PIPE;
+
+		/* Additional check needed to distinguish between pipes and sockets. */
+		if (self->is_pipe && !GetNamedPipeInfo((HANDLE) handle, NULL, NULL, NULL, NULL)) {
+			self->is_pipe = 0;
+		}
+	}
+#endif
+}
+
 PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC)
 {
 	php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id);
@@ -249,30 +273,17 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 	if (stream) {
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-#ifdef S_ISFIFO
-		/* detect if this is a pipe */
-		if (self->fd >= 0) {
-			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
-		}
-#elif defined(PHP_WIN32)
-		{
-			zend_uintptr_t handle = _get_osfhandle(self->fd);
-
-			if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
-				self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
-			}
-		}
-#endif
-
-		if (self->is_pipe) {
+		detect_is_seekable(self);
+		if (!self->is_seekable) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+			stream->position = -1;
 		} else {
 			stream->position = zend_lseek(self->fd, 0, SEEK_CUR);
 #ifdef ESPIPE
+			/* FIXME: Is this code still needed? */
 			if (stream->position == (zend_off_t)-1 && errno == ESPIPE) {
-				stream->position = 0;
 				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
-				self->is_pipe = 1;
+				self->is_seekable = 0;
 			}
 #endif
 		}
@@ -288,23 +299,10 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	if (stream) {
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-#ifdef S_ISFIFO
-		/* detect if this is a pipe */
-		if (self->fd >= 0) {
-			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
-		}
-#elif defined(PHP_WIN32)
-		{
-			zend_uintptr_t handle = _get_osfhandle(self->fd);
-
-			if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
-				self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
-			}
-		}
-#endif
-
-		if (self->is_pipe) {
+		detect_is_seekable(self);
+		if (!self->is_seekable) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+			stream->position = -1;
 		} else {
 			stream->position = zend_ftell(file);
 		}
@@ -321,6 +319,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self = emalloc_rel_orig(sizeof(*self));
 	memset(self, 0, sizeof(*self));
 	self->file = file;
+	self->is_seekable = 0;
 	self->is_pipe = 1;
 	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 1;
@@ -352,20 +351,20 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif
 		if (bytes_written < 0) {
-			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+			if (PHP_IS_TRANSIENT_ERROR(errno)) {
 				return 0;
 			}
 			if (errno == EINTR) {
 				/* TODO: Should this be treated as a proper error or not? */
 				return bytes_written;
 			}
-			php_error_docref(NULL, E_NOTICE, "write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+			php_error_docref(NULL, E_NOTICE, "Write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
 		}
 		return bytes_written;
 	} else {
 
-#if HAVE_FLUSHIO
-		if (!data->is_pipe && data->last_op == 'r') {
+#ifdef HAVE_FLUSHIO
+		if (data->is_seekable && data->last_op == 'r') {
 			zend_fseek(data->file, 0, SEEK_CUR);
 		}
 		data->last_op = 'w';
@@ -398,7 +397,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
 					break;
 				}
-				/* If there's nothing to read, wait in 10ms periods. */
+				/* If there's nothing to read, wait in 10us periods. */
 				if (0 == avail_read) {
 					usleep(10);
 				}
@@ -421,13 +420,13 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 		}
 
 		if (ret < 0) {
-			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+			if (PHP_IS_TRANSIENT_ERROR(errno)) {
 				/* Not an error. */
 				ret = 0;
 			} else if (errno == EINTR) {
 				/* TODO: Should this be treated as a proper error or not? */
 			} else {
-				php_error_docref(NULL, E_NOTICE, "read of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+				php_error_docref(NULL, E_NOTICE, "Read of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
 
 				/* TODO: Remove this special-case? */
 				if (errno != EBADF) {
@@ -439,8 +438,8 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 		}
 
 	} else {
-#if HAVE_FLUSHIO
-		if (!data->is_pipe && data->last_op == 'w')
+#ifdef HAVE_FLUSHIO
+		if (data->is_seekable && data->last_op == 'w')
 			zend_fseek(data->file, 0, SEEK_CUR);
 		data->last_op = 'r';
 #endif
@@ -459,7 +458,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 
 	assert(data != NULL);
 
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 	if (data->last_mapped_addr) {
 		munmap(data->last_mapped_addr, data->last_mapped_len);
 		data->last_mapped_addr = NULL;
@@ -481,7 +480,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 				errno = 0;
 				ret = pclose(data->file);
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 				if (WIFEXITED(ret)) {
 					ret = WEXITSTATUS(ret);
 				}
@@ -541,8 +540,8 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 
 	assert(data != NULL);
 
-	if (data->is_pipe) {
-		php_error_docref(NULL, E_WARNING, "cannot seek on a pipe");
+	if (!data->is_seekable) {
+		php_error_docref(NULL, E_WARNING, "Cannot seek on this stream");
 		return -1;
 	}
 
@@ -710,7 +709,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			break;
 
 		case PHP_STREAM_OPTION_MMAP_API:
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 			{
 				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
 				int prot, flags;
@@ -775,6 +774,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
 				HANDLE hfile = (HANDLE)_get_osfhandle(fd);
 				DWORD prot, acc, loffs = 0, delta = 0;
+				LARGE_INTEGER file_size;
 
 				switch (value) {
 					case PHP_STREAM_MMAP_SUPPORTED:
@@ -811,16 +811,27 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							return PHP_STREAM_OPTION_RETURN_ERR;
 						}
 
-						size = GetFileSize(hfile, NULL);
-						if (range->length == 0 && range->offset > 0 && range->offset < size) {
-							range->length = size - range->offset;
+						if (!GetFileSizeEx(hfile, &file_size)) {
+							CloseHandle(data->file_mapping);
+							data->file_mapping = NULL;
+							return PHP_STREAM_OPTION_RETURN_ERR;
 						}
-						if (range->length == 0 || range->length > size) {
-							range->length = size;
+# if defined(_WIN64)
+						size = file_size.QuadPart;
+# else
+						if (file_size.HighPart) {
+							CloseHandle(data->file_mapping);
+							data->file_mapping = NULL;
+							return PHP_STREAM_OPTION_RETURN_ERR;
+						} else {
+							size = file_size.LowPart;
 						}
-						if (range->offset >= size) {
+# endif
+						if (range->offset > size) {
 							range->offset = size;
-							range->length = 0;
+						}
+						if (range->length == 0 || range->length > size - range->offset) {
+							range->length = size - range->offset;
 						}
 
 						/* figure out how big a chunk to map to be able to view the part that we need */
@@ -832,6 +843,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							gran = info.dwAllocationGranularity;
 							loffs = ((DWORD)range->offset / gran) * gran;
 							delta = (DWORD)range->offset - loffs;
+						}
+
+						/* MapViewOfFile()ing zero bytes would map to the end of the file; match *nix behavior instead */
+						if (range->length + delta == 0) {
+							return PHP_STREAM_OPTION_RETURN_ERR;
 						}
 
 						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, 0, loffs, range->length + delta);
@@ -888,7 +904,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 
-#if defined(_WIN64)
+#ifdef _WIN64
 					sz.QuadPart = new_size;
 #else
 					sz.HighPart = 0;
@@ -909,6 +925,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #endif
 				}
 			}
+			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
 #ifdef PHP_WIN32
 		case PHP_STREAM_OPTION_PIPE_BLOCKING:
@@ -1034,9 +1051,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 	char *persistent_id = NULL;
 
 	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
-		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "`%s' is not a valid mode for fopen", mode);
-		}
+		php_stream_wrapper_log_error(&php_plain_files_wrapper, options, "`%s' is not a valid mode for fopen", mode);
 		return NULL;
 	}
 
@@ -1232,7 +1247,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 			if (php_copy_file(url_from, url_to) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
 					success = 1;
-#  if !defined(TSRM_WIN32)
+#  ifndef TSRM_WIN32
 					/*
 					 * Try to set user and permission info on the target.
 					 * If we're not root, then some of these may fail.
@@ -1299,7 +1314,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	if (!recursive) {
 		ret = php_mkdir(dir, mode);
 	} else {
-		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
+		/* we look for directory separator from the end of string, thus hopefully reducing our work load */
 		char *e;
 		zend_stat_t sb;
 		size_t dir_len = strlen(dir), offset = 0;
@@ -1470,7 +1485,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			ret = VCWD_CHMOD(url, mode);
 			break;
 		default:
-			php_error_docref1(NULL, url, E_WARNING, "Unknown option %d for stream_metadata", option);
+			zend_value_error("Unknown option %d for stream_metadata", option);
 			return 0;
 	}
 	if (ret == -1) {

@@ -2,11 +2,6 @@
 Test usort() function : usage variations - duplicate keys and values
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass an array with duplicate keys and values to usort() to test behaviour
  */
@@ -41,7 +36,6 @@ echo "\n-- Array with default/assigned keys --\n";
 var_dump( usort($array_arg, 'cmp') );
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECT--
 *** Testing usort() : usage variation ***
 
@@ -76,4 +70,3 @@ array(4) {
   [3]=>
   string(9) "Pineapple"
 }
-===DONE===

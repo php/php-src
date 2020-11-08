@@ -7,7 +7,7 @@ class Test {
     public function __construct() {
         throw new Exception();
     }
-    
+
     public function __destruct() {
         echo "__destruct\n";
     }

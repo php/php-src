@@ -4,11 +4,6 @@ Test strnatcmp() function : left align, whitespace, digits
 Sol Richardson <sr5732358@hotmail.com>
 --FILE--
 <?php
-/* Prototype  : int strnatcmp  ( string $str1  , string $str2  )
-* Description: String comparisons using a "natural order" algorithm
-* Source code: ext/standard/string.c
-*/
-
 echo "-- Testing strnatcmp() function whitespace, left-align, digit --\n";
 echo "-- Leading whitespace, digits, string 1 longer --\n";
 $str1 = " 00";

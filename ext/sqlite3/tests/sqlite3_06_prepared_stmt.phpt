@@ -24,7 +24,7 @@ $foo = 'a';
 $results = $stmt->execute();
 while ($result = $results->fetchArray(SQLITE3_NUM))
 {
-	var_dump($result);
+    var_dump($result);
 }
 $results->finalize();
 

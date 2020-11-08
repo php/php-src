@@ -3,7 +3,7 @@ Test function gzrewind() by calling it with its expected arguments when reading
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -23,7 +23,6 @@ echo "first 20 characters=".gzread($h,20)."\n";
 
 gzclose($h);
 ?>
-===DONE===
 --EXPECT--
 read to the end of the file, then rewind
 bool(true)
@@ -31,4 +30,3 @@ int(176)
 bool(false)
 int(0)
 first 20 characters=When you're taught t
-===DONE===

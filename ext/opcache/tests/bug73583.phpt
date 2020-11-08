@@ -10,9 +10,9 @@ opcache.file_update_protection=0
 --FILE--
 <?php
 if (true) {
-	class A { }
-	function A() { }
-	function A() { }
+    class A { }
+    function A() { }
+    function A() { }
 }
 ?>
 --EXPECTF--

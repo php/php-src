@@ -2,9 +2,7 @@
 SPL: Test ArrayObject::asort() function : basic functionality with array based store
 --FILE--
 <?php
-/* Prototype  : int ArrayObject::asort()
- * Description: proto int ArrayIterator::asort()
- * Sort the entries by values.
+/* Sort the entries by values.
  * Source code: ext/spl/spl_array.c
  * Alias to functions:
  */
@@ -24,7 +22,6 @@ var_dump($ao2);
 var_dump($ao2->asort(SORT_NUMERIC));
 var_dump($ao2);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
@@ -39,7 +36,7 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-asort() expects parameter 2 to be int, string given
+ArrayObject::asort(): Argument #1 ($flags) must be of type int, string given
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
@@ -63,4 +60,3 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-===DONE===

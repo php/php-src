@@ -30,9 +30,7 @@ Rick Buitenman <rick@meritos.nl>
   curl_close($copy);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl copy handle with User Agent ***
 string(9) "cURL phpt"
 string(9) "cURL phpt"
-===DONE===  

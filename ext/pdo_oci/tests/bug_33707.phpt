@@ -12,9 +12,10 @@ require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-$rs = $db->query('select blah from a_table_that_doesnt_exist');
+$rs = $db->query('select blah from a_table_that_does_not_exist');
 var_dump($rs);
 var_dump($db->errorInfo());
+?>
 --EXPECTF--
 bool(false)
 array(3) {

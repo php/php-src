@@ -23,7 +23,5 @@ imageline($im, 10, 0, $width, $height-10, $blue);
 
 test_image_equals_file(__DIR__ . '/bug77943.png', $im);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

@@ -7,15 +7,15 @@ ffi.enable=1
 --FILE--
 <?php
 function test_size($size, $type) {
-	if (FFI::sizeof(FFI::new($type)) !== $size) {
-		echo "FAIL: sizeof($type) != $size\n";
-	}
+    if (FFI::sizeof(FFI::new($type)) !== $size) {
+        echo "FAIL: sizeof($type) != $size\n";
+    }
 }
 
 function test_align($align, $type) {
-	if (FFI::alignof(FFI::new($type)) !== $align) {
-		echo "FAIL: alignof($type) != $align\n";
-	}
+    if (FFI::alignof(FFI::new($type)) !== $align) {
+        echo "FAIL: alignof($type) != $align\n";
+    }
 }
 
 test_size(8, "struct {uint32_t a; uint32_t b;}");
@@ -61,8 +61,8 @@ test_size(32, "struct {char a; uint32_t b __attribute__((aligned(16)));}");
 test_align(16, "struct {char a; uint32_t b __attribute__((aligned(16)));}");
 
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-	test_size(32, "struct  {char a; uint32_t b __attribute__((aligned));}");
-	test_align(16, "struct  {char a; uint32_t b __attribute__((aligned));}");
+    test_size(FFI::__BIGGEST_ALIGNMENT__ * 2, "struct  {char a; uint32_t b __attribute__((aligned));}");
+    test_align(FFI::__BIGGEST_ALIGNMENT__, "struct  {char a; uint32_t b __attribute__((aligned));}");
 }
 
 test_size(16, "struct  __declspec(align(16)) {char a; uint32_t b;}");

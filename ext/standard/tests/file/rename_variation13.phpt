@@ -7,14 +7,10 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip. Not for Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype  : bool rename(string old_name, string new_name[, resource context])
- * Description: Rename a file
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing rename() with obscure files ***\n";
 $file_path = __DIR__."/renameVar13";
 $aFile = $file_path.'/afile.tmp';
@@ -55,7 +51,6 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 }
 
 rmdir($file_path);
-echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing rename() with obscure files ***
@@ -109,5 +104,3 @@ bool(false)
 
 Warning: rename(php/php,%s/renameVar13/afile.tmp): %s directory in %s on line %d
 bool(false)
-
-*** Done ***

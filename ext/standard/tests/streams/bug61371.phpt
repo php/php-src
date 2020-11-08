@@ -6,21 +6,21 @@ function test($doFclose) {
 $previous = null;
 $current = null;
 for($test=1;$test<=3;$test++) {
-	$current = memory_get_usage(true);
-	if (!is_null($previous)) {
-		var_dump($previous == $current);
-	}
-	$previous = $current;
-	echo 'memory: '.round($current / 1024, 0)."kb\n";
-	for($i=0;$i<=100;$i++) {
-		$context = stream_context_create(array());
-		$stream = stream_socket_client('udp://127.0.0.1:80', $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $context);
-		if ($doFclose) fclose($stream);
-		unset($context);
-		unset($stream);
-		unset($errno);
-		unset($errstr);
-	}
+    $current = memory_get_usage(true);
+    if (!is_null($previous)) {
+        var_dump($previous == $current);
+    }
+    $previous = $current;
+    echo 'memory: '.round($current / 1024, 0)."kb\n";
+    for($i=0;$i<=100;$i++) {
+        $context = stream_context_create(array());
+        $stream = stream_socket_client('udp://127.0.0.1:80', $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $context);
+        if ($doFclose) fclose($stream);
+        unset($context);
+        unset($stream);
+        unset($errno);
+        unset($errstr);
+    }
 }
 }
 

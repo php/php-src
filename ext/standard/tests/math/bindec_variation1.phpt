@@ -6,11 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number bindec  ( string $binary_string  )
- * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing bindec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -72,17 +67,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of bindec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try {
-		var_dump(bindec($input));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(bindec($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing bindec() : usage variations ***
 
@@ -152,7 +146,7 @@ int(0)
 int(0)
 
 -- Iteration 18 --
-bindec() expects parameter 1 to be string, array given
+bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 19 --
 
@@ -176,5 +170,4 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-bindec() expects parameter 1 to be string, resource given
-===Done===
+bindec(): Argument #1 ($binary_string) must be of type string, resource given

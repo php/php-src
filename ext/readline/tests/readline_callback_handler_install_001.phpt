@@ -8,15 +8,17 @@ if (READLINE_LIB == "libedit") die("skip readline only");
 <?php
 
 function foo() {
-	readline_callback_handler_remove();
+    readline_callback_handler_remove();
 }
 
 var_dump(readline_callback_handler_install('testing: ', 'foo'));
-var_dump(readline_callback_handler_install('testing: ', 'foobar!'));
+try {
+    var_dump(readline_callback_handler_install('testing: ', 'foobar!'));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-%Atesting: bool(true)
-
-Warning: readline_callback_handler_install(): foobar! is not callable in %s on line %d
-bool(false)
+--EXPECT--
+testing: bool(true)
+readline_callback_handler_install(): Argument #2 ($callback) must be a valid callback, function "foobar!" not found or invalid function name

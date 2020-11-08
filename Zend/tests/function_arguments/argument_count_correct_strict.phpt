@@ -16,5 +16,6 @@ $fp = fopen(__FILE__, "r");
 fclose($fp);
 
 echo "done";
+?>
 --EXPECT--
 done

@@ -16,7 +16,6 @@ $a = fopen('phar://' . __DIR__ . '/files/links.phar.tar/link2', 'r');
 fseek($a, 3);
 echo fread($a, 10);
 ?>
-===DONE===
 --EXPECT--
 hi there
 
@@ -26,4 +25,3 @@ hi there
 
 there
 
-===DONE===

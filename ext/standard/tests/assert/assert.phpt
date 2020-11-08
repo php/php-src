@@ -5,19 +5,20 @@ assert.active = 0
 assert.warning = 1
 assert.callback =
 assert.bail = 0
+assert.exception=0
 --FILE--
 <?php
 function a($file, $line, $unused, $desc)
 {
-	echo "assertion failed $line,\"$desc\"\n";
+    echo "assertion failed $line,\"$desc\"\n";
 }
 
 class a
 {
-	static function assert($file, $line, $unused, $desc)
-	{
-		echo "class assertion failed $line,\"$desc\"\n";
-	}
+    static function assert($file, $line, $unused, $desc)
+    {
+        echo "class assertion failed $line,\"$desc\"\n";
+    }
 }
 
 assert_options(ASSERT_ACTIVE,1);

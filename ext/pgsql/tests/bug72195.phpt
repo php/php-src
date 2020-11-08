@@ -5,13 +5,12 @@ Bug #72195 (pg_pconnect/pg_connect cause use-after-free)
 --FILE--
 <?php
 $val = [];
-$var1 = $val;
-printf("%x\n", count($val));
-@pg_pconnect($var1, "2", "3", "4");
-$var1 = "";
-tempnam(sys_get_temp_dir(), 'ABCDEFGHI');
-printf("%x\n", count($val));
+try {
+    pg_pconnect($var1, "2", "3", "4");
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECT--
-0
-0
+--EXPECTF--
+Warning: Undefined variable $var1 in %s on line %d
+pg_pconnect() expects at most 2 arguments, 4 given

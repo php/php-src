@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,12 +19,13 @@
 #endif
 
 #include "php.h"
+#include "zend_interfaces.h"
 
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
 
-#if HAVE_PSPELL
+#ifdef HAVE_PSPELL
 
 /* this will enforce compatibility in .12 version (broken after .11.2) */
 #define USE_ORIGINAL_MANAGER_FUNCS
@@ -34,6 +33,7 @@
 #include "php_pspell.h"
 #include <pspell.h>
 #include "ext/standard/info.h"
+#include "pspell_arginfo.h"
 
 #define PSPELL_FAST 1L
 #define PSPELL_NORMAL 2L
@@ -48,222 +48,151 @@
 
 static PHP_MINIT_FUNCTION(pspell);
 static PHP_MINFO_FUNCTION(pspell);
-static PHP_FUNCTION(pspell_new);
-static PHP_FUNCTION(pspell_new_personal);
-static PHP_FUNCTION(pspell_new_config);
-static PHP_FUNCTION(pspell_check);
-static PHP_FUNCTION(pspell_suggest);
-static PHP_FUNCTION(pspell_store_replacement);
-static PHP_FUNCTION(pspell_add_to_personal);
-static PHP_FUNCTION(pspell_add_to_session);
-static PHP_FUNCTION(pspell_clear_session);
-static PHP_FUNCTION(pspell_save_wordlist);
-static PHP_FUNCTION(pspell_config_create);
-static PHP_FUNCTION(pspell_config_runtogether);
-static PHP_FUNCTION(pspell_config_mode);
-static PHP_FUNCTION(pspell_config_ignore);
-static PHP_FUNCTION(pspell_config_personal);
-static PHP_FUNCTION(pspell_config_dict_dir);
-static PHP_FUNCTION(pspell_config_data_dir);
-static PHP_FUNCTION(pspell_config_repl);
-static PHP_FUNCTION(pspell_config_save_repl);
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new, 0, 0, 1)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, personal)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_config, 0, 0, 1)
-	ZEND_ARG_INFO(0, config)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_check, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_suggest, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_store_replacement, 0, 0, 3)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, misspell)
-	ZEND_ARG_INFO(0, correct)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_session, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_clear_session, 0, 0, 1)
-	ZEND_ARG_INFO(0, pspell)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_save_wordlist, 0, 0, 1)
-	ZEND_ARG_INFO(0, pspell)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_create, 0, 0, 1)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_runtogether, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, runtogether)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_mode, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_ignore, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, ignore)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, personal)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_dict_dir, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, directory)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_data_dir, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, directory)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_repl, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, repl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_save_repl, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, save)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ pspell_functions[]
- */
-static const zend_function_entry pspell_functions[] = {
-	PHP_FE(pspell_new,					arginfo_pspell_new)
-	PHP_FE(pspell_new_personal,			arginfo_pspell_new_personal)
-	PHP_FE(pspell_new_config,			arginfo_pspell_new_config)
-	PHP_FE(pspell_check,				arginfo_pspell_check)
-	PHP_FE(pspell_suggest,				arginfo_pspell_suggest)
-	PHP_FE(pspell_store_replacement,	arginfo_pspell_store_replacement)
-	PHP_FE(pspell_add_to_personal,		arginfo_pspell_add_to_personal)
-	PHP_FE(pspell_add_to_session,		arginfo_pspell_add_to_session)
-	PHP_FE(pspell_clear_session,		arginfo_pspell_clear_session)
-	PHP_FE(pspell_save_wordlist,		arginfo_pspell_save_wordlist)
-	PHP_FE(pspell_config_create,		arginfo_pspell_config_create)
-	PHP_FE(pspell_config_runtogether,	arginfo_pspell_config_runtogether)
-	PHP_FE(pspell_config_mode,			arginfo_pspell_config_mode)
-	PHP_FE(pspell_config_ignore,		arginfo_pspell_config_ignore)
-	PHP_FE(pspell_config_personal,		arginfo_pspell_config_personal)
-	PHP_FE(pspell_config_dict_dir,		arginfo_pspell_config_dict_dir)
-	PHP_FE(pspell_config_data_dir,		arginfo_pspell_config_data_dir)
-	PHP_FE(pspell_config_repl,			arginfo_pspell_config_repl)
-	PHP_FE(pspell_config_save_repl,		arginfo_pspell_config_save_repl)
-	PHP_FE_END
-};
-/* }}} */
-
-static int le_pspell, le_pspell_config;
+static zend_class_entry *php_pspell_ce = NULL;
+static zend_object_handlers php_pspell_handlers;
+static zend_class_entry *php_pspell_config_ce = NULL;
+static zend_object_handlers php_pspell_config_handlers;
 
 zend_module_entry pspell_module_entry = {
     STANDARD_MODULE_HEADER,
-	"pspell", pspell_functions, PHP_MINIT(pspell), NULL, NULL, NULL, PHP_MINFO(pspell), PHP_PSPELL_VERSION, STANDARD_MODULE_PROPERTIES
+	"pspell",
+	ext_functions,
+	PHP_MINIT(pspell),
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(pspell),
+	PHP_PSPELL_VERSION,
+	STANDARD_MODULE_PROPERTIES,
 };
 
 #ifdef COMPILE_DL_PSPELL
 ZEND_GET_MODULE(pspell)
 #endif
 
-static void php_pspell_close(zend_resource *rsrc)
-{
-	PspellManager *manager = (PspellManager *)rsrc->ptr;
+/* class PSpell */
 
-	delete_pspell_manager(manager);
+typedef struct _php_pspell_object {
+	PspellManager *mgr;
+	zend_object std;
+} php_pspell_object;
+
+static php_pspell_object *php_pspell_object_from_zend_object(zend_object *zobj) {
+	return ((php_pspell_object*)(zobj + 1)) - 1;
 }
 
-static void php_pspell_close_config(zend_resource *rsrc)
-{
-	PspellConfig *config = (PspellConfig *)rsrc->ptr;
-
-	delete_pspell_config(config);
+static zend_object *php_pspell_object_to_zend_object(php_pspell_object *obj) {
+	return ((zend_object*)(obj + 1)) - 1;
 }
 
-#define PSPELL_FETCH_CONFIG  do { \
-	zval *res = zend_hash_index_find(&EG(regular_list), conf); \
-	if (res == NULL || Z_RES_P(res)->type != le_pspell_config) { \
-		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a PSPELL config index", conf); \
-		RETURN_FALSE; \
-	} \
-	config = (PspellConfig *)Z_RES_P(res)->ptr; \
-} while (0)
+static zend_function *php_pspell_object_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "You cannot initialize a PSpell object except through helper functions");
+	return NULL;
+}
 
-#define PSPELL_FETCH_MANAGER do { \
-	zval *res = zend_hash_index_find(&EG(regular_list), scin); \
-	if (res == NULL || Z_RES_P(res)->type != le_pspell) { \
-		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a PSPELL result index", scin); \
-		RETURN_FALSE; \
-	} \
-	manager = (PspellManager *)Z_RES_P(res)->ptr; \
-} while (0);
+static zend_object *php_pspell_object_create(zend_class_entry *ce)
+{
+	php_pspell_object *obj = zend_object_alloc(sizeof(php_pspell_object), ce);
+	zend_object *zobj = php_pspell_object_to_zend_object(obj);
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+	obj->mgr = NULL;
+	zend_object_std_init(zobj, ce);
+	object_properties_init(zobj, ce);
+	zobj->handlers = &php_pspell_handlers;
+
+	return zobj;
+}
+
+static void php_pspell_object_free(zend_object *zobj) {
+	delete_pspell_manager(php_pspell_object_from_zend_object(zobj)->mgr);
+}
+
+/* class PSpellConfig */
+
+typedef struct _php_pspell_config_object {
+	PspellConfig *cfg;
+	zend_object std;
+} php_pspell_config_object;
+
+static php_pspell_config_object *php_pspell_config_object_from_zend_object(zend_object *zobj) {
+	return ((php_pspell_config_object*)(zobj + 1)) - 1;
+}
+
+static zend_object *php_pspell_config_object_to_zend_object(php_pspell_config_object *obj) {
+	return ((zend_object*)(obj + 1)) - 1;
+}
+
+static zend_function *php_pspell_config_object_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "You cannot initialize a PSpellConfig object except through helper functions");
+	return NULL;
+}
+
+static zend_object *php_pspell_config_object_create(zend_class_entry *ce)
+{
+	php_pspell_config_object *obj = zend_object_alloc(sizeof(php_pspell_config_object), ce);
+	zend_object *zobj = php_pspell_config_object_to_zend_object(obj);
+
+	obj->cfg = NULL;
+	zend_object_std_init(zobj, ce);
+	object_properties_init(zobj, ce);
+	zobj->handlers = &php_pspell_config_handlers;
+
+	return zobj;
+}
+
+static void php_pspell_config_object_free(zend_object *zobj) {
+	delete_pspell_config(php_pspell_config_object_from_zend_object(zobj)->cfg);
+}
+
+/* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(pspell)
 {
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "PSpell", class_PSpell_methods);
+	php_pspell_ce = zend_register_internal_class(&ce);
+	php_pspell_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_pspell_ce->create_object = php_pspell_object_create;
+	php_pspell_ce->serialize = zend_class_serialize_deny;
+	php_pspell_ce->unserialize = zend_class_unserialize_deny;
+
+	memcpy(&php_pspell_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	php_pspell_handlers.clone_obj = NULL;
+	php_pspell_handlers.free_obj = php_pspell_object_free;
+	php_pspell_handlers.get_constructor = php_pspell_object_get_constructor;
+	php_pspell_handlers.offset = XtOffsetOf(php_pspell_object, std);
+
+	INIT_CLASS_ENTRY(ce, "PSpellConfig", class_PSpellConfig_methods);
+	php_pspell_config_ce = zend_register_internal_class(&ce);
+	php_pspell_config_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_pspell_config_ce->create_object = php_pspell_config_object_create;
+	php_pspell_config_ce->serialize = zend_class_serialize_deny;
+	php_pspell_config_ce->unserialize = zend_class_unserialize_deny;
+
+	memcpy(&php_pspell_config_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	php_pspell_config_handlers.clone_obj = NULL;
+	php_pspell_config_handlers.free_obj = php_pspell_config_object_free;
+	php_pspell_config_handlers.get_constructor = php_pspell_config_object_get_constructor;
+	php_pspell_config_handlers.offset = XtOffsetOf(php_pspell_config_object, std);
+
 	REGISTER_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("PSPELL_BAD_SPELLERS", PSPELL_BAD_SPELLERS, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("PSPELL_RUN_TOGETHER", PSPELL_RUN_TOGETHER, CONST_PERSISTENT | CONST_CS);
-	le_pspell = zend_register_list_destructors_ex(php_pspell_close, NULL, "pspell", module_number);
-	le_pspell_config = zend_register_list_destructors_ex(php_pspell_close_config, NULL, "pspell config", module_number);
+
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
-   Load a dictionary */
-static PHP_FUNCTION(pspell_new)
+/* {{{ Load a dictionary */
+PHP_FUNCTION(pspell_new)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	zend_long mode = Z_L(0),  speed = Z_L(0);
+	zend_long mode = Z_L(0), speed = Z_L(0);
 	int argc = ZEND_NUM_ARGS();
-	zval *ind;
 
 #ifdef PHP_WIN32
 	TCHAR aspell_dir[200];
@@ -274,12 +203,11 @@ static PHP_FUNCTION(pspell_new)
 #endif
 
 	PspellCanHaveError *ret;
-	PspellManager *manager;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(argc, "s|sssl", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -319,7 +247,7 @@ static PHP_FUNCTION(pspell_new)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 4) {
+	if (mode) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
@@ -346,21 +274,18 @@ static PHP_FUNCTION(pspell_new)
 		RETURN_FALSE;
 	}
 
-	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
-	RETURN_LONG(Z_RES_HANDLE_P(ind));
+	object_init_ex(return_value, php_pspell_ce);
+	php_pspell_object_from_zend_object(Z_OBJ_P(return_value))->mgr = to_pspell_manager(ret);
 }
 /* }}} */
 
-/* {{{ proto int pspell_new_personal(string personal, string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
-   Load a dictionary with a personal wordlist*/
-static PHP_FUNCTION(pspell_new_personal)
+/* {{{ Load a dictionary with a personal wordlist*/
+PHP_FUNCTION(pspell_new_personal)
 {
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	zend_long mode = Z_L(0),  speed = Z_L(0);
+	zend_long mode = Z_L(0), speed = Z_L(0);
 	int argc = ZEND_NUM_ARGS();
-	zval *ind;
 
 #ifdef PHP_WIN32
 	TCHAR aspell_dir[200];
@@ -371,12 +296,11 @@ static PHP_FUNCTION(pspell_new_personal)
 #endif
 
 	PspellCanHaveError *ret;
-	PspellManager *manager;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(argc, "ps|sssl", &personal, &personal_len, &language, &language_len,
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -424,7 +348,7 @@ static PHP_FUNCTION(pspell_new_personal)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 5) {
+	if (mode) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
@@ -451,27 +375,22 @@ static PHP_FUNCTION(pspell_new_personal)
 		RETURN_FALSE;
 	}
 
-	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
-	RETURN_LONG(Z_RES_HANDLE_P(ind));
+	object_init_ex(return_value, php_pspell_ce);
+	php_pspell_object_from_zend_object(Z_OBJ_P(return_value))->mgr = to_pspell_manager(ret);
 }
 /* }}} */
 
-/* {{{ proto int pspell_new_config(int config)
-   Load a dictionary based on the given config */
-static PHP_FUNCTION(pspell_new_config)
+/* {{{ Load a dictionary based on the given config */
+PHP_FUNCTION(pspell_new_config)
 {
-	zend_long conf;
-	zval *ind;
+	zval *zcfg;
 	PspellCanHaveError *ret;
-	PspellManager *manager;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &conf) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &zcfg, php_pspell_config_ce) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_CONFIG;
+	config = php_pspell_config_object_from_zend_object(Z_OBJ_P(zcfg))->cfg;
 
 	ret = new_pspell_manager(config);
 
@@ -481,28 +400,24 @@ static PHP_FUNCTION(pspell_new_config)
 		RETURN_FALSE;
 	}
 
-	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
-	RETURN_LONG(Z_RES_HANDLE_P(ind));
+	object_init_ex(return_value, php_pspell_ce);
+	php_pspell_object_from_zend_object(Z_OBJ_P(return_value))->mgr = to_pspell_manager(ret);
 }
 /* }}} */
 
-/* {{{ proto bool pspell_check(int pspell, string word)
-   Returns true if word is valid */
-static PHP_FUNCTION(pspell_check)
+/* {{{ Returns true if word is valid */
+PHP_FUNCTION(pspell_check)
 {
-	size_t word_len;
-	zend_long scin;
-	char *word;
+	zval *zmgr;
+	zend_string *word;
 	PspellManager *manager;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &zmgr, php_pspell_ce, &word) == FAILURE) {
+		RETURN_THROWS();
 	}
+	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
-	PSPELL_FETCH_MANAGER;
-
-	if (pspell_manager_check(manager, word)) {
+	if (pspell_manager_check(manager, ZSTR_VAL(word))) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -510,26 +425,23 @@ static PHP_FUNCTION(pspell_check)
 }
 /* }}} */
 
-/* {{{ proto array pspell_suggest(int pspell, string word)
-   Returns array of suggestions */
-static PHP_FUNCTION(pspell_suggest)
+/* {{{ Returns array of suggestions */
+PHP_FUNCTION(pspell_suggest)
 {
-	zend_long scin;
-	char *word;
-	size_t word_len;
+	zval *zmgr;
+	zend_string *word;
 	PspellManager *manager;
 	const PspellWordList *wl;
 	const char *sug;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &zmgr, php_pspell_ce, &word) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_MANAGER;
+	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
 	array_init(return_value);
 
-	wl = pspell_manager_suggest(manager, word);
+	wl = pspell_manager_suggest(manager, ZSTR_VAL(word));
 	if (wl) {
 		PspellStringEmulation *els = pspell_word_list_elements(wl);
 		while ((sug = pspell_string_emulation_next(els)) != 0) {
@@ -543,22 +455,19 @@ static PHP_FUNCTION(pspell_suggest)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_store_replacement(int pspell, string misspell, string correct)
-   Notify the dictionary of a user-selected replacement */
-static PHP_FUNCTION(pspell_store_replacement)
+/* {{{ Notify the dictionary of a user-selected replacement */
+PHP_FUNCTION(pspell_store_replacement)
 {
-	size_t miss_len, corr_len;
-	zend_long scin;
-	char *miss, *corr;
+	zval *zmgr;
+	zend_string *miss, *corr;
 	PspellManager *manager;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss", &scin, &miss, &miss_len, &corr, &corr_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OSS", &zmgr, php_pspell_ce, &miss, &corr) == FAILURE) {
+		RETURN_THROWS();
 	}
+	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
-	PSPELL_FETCH_MANAGER;
-
-	pspell_manager_store_replacement(manager, miss, corr);
+	pspell_manager_store_replacement(manager, ZSTR_VAL(miss), ZSTR_VAL(corr));
 	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
 	} else {
@@ -568,27 +477,24 @@ static PHP_FUNCTION(pspell_store_replacement)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_add_to_personal(int pspell, string word)
-   Adds a word to a personal list */
-static PHP_FUNCTION(pspell_add_to_personal)
+/* {{{ Adds a word to a personal list */
+PHP_FUNCTION(pspell_add_to_personal)
 {
-	size_t word_len;
-	zend_long scin;
-	char *word;
+	zval *zmgr;
+	zend_string *word;
 	PspellManager *manager;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &zmgr, php_pspell_ce, &word) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_MANAGER;
+	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
 	/*If the word is empty, we have to return; otherwise we'll segfault! ouch!*/
-	if (word_len == 0) {
+	if (ZSTR_LEN(word) == 0) {
 		RETURN_FALSE;
 	}
 
-	pspell_manager_add_to_personal(manager, word);
+	pspell_manager_add_to_personal(manager, ZSTR_VAL(word));
 	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
 	} else {
@@ -598,27 +504,24 @@ static PHP_FUNCTION(pspell_add_to_personal)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_add_to_session(int pspell, string word)
-   Adds a word to the current session */
-static PHP_FUNCTION(pspell_add_to_session)
+/* {{{ Adds a word to the current session */
+PHP_FUNCTION(pspell_add_to_session)
 {
-	size_t word_len;
-	zend_long scin;
-	char *word;
+	zval *zmgr;
+	zend_string *word;
 	PspellManager *manager;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &zmgr, php_pspell_ce, &word) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_MANAGER;
+	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
 	/*If the word is empty, we have to return; otherwise we'll segfault! ouch!*/
-	if (word_len == 0) {
+	if (ZSTR_LEN(word) == 0) {
 		RETURN_FALSE;
 	}
 
-	pspell_manager_add_to_session(manager, word);
+	pspell_manager_add_to_session(manager, ZSTR_VAL(word));
 	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
 	} else {
@@ -628,18 +531,16 @@ static PHP_FUNCTION(pspell_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_clear_session(int pspell)
-   Clears the current session */
-static PHP_FUNCTION(pspell_clear_session)
+/* {{{ Clears the current session */
+PHP_FUNCTION(pspell_clear_session)
 {
-	zend_long scin;
+	zval *zmgr;
 	PspellManager *manager;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &zmgr, php_pspell_ce) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_MANAGER;
+	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
 	pspell_manager_clear_session(manager);
 	if (pspell_manager_error_number(manager) == 0) {
@@ -651,18 +552,16 @@ static PHP_FUNCTION(pspell_clear_session)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_save_wordlist(int pspell)
-   Saves the current (personal) wordlist */
-static PHP_FUNCTION(pspell_save_wordlist)
+/* {{{ Saves the current (personal) wordlist */
+PHP_FUNCTION(pspell_save_wordlist)
 {
-	zend_long scin;
+	zval *zmgr;
 	PspellManager *manager;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &zmgr, php_pspell_ce) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_MANAGER;
+	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
 	pspell_manager_save_all_word_lists(manager);
 
@@ -676,13 +575,11 @@ static PHP_FUNCTION(pspell_save_wordlist)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_create(string language [, string spelling [, string jargon [, string encoding]]])
-   Create a new config to be used later to create a manager */
-static PHP_FUNCTION(pspell_config_create)
+/* {{{ Create a new config to be used later to create a manager */
+PHP_FUNCTION(pspell_config_create)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	zval *ind;
 	PspellConfig *config;
 
 #ifdef PHP_WIN32
@@ -695,7 +592,7 @@ static PHP_FUNCTION(pspell_config_create)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -739,24 +636,22 @@ static PHP_FUNCTION(pspell_config_create)
 	which is not what we want */
 	pspell_config_replace(config, "save-repl", "false");
 
-	ind = zend_list_insert(config, le_pspell_config);
-	RETURN_LONG(Z_RES_HANDLE_P(ind));
+	object_init_ex(return_value, php_pspell_config_ce);
+	php_pspell_config_object_from_zend_object(Z_OBJ_P(return_value))->cfg = config;
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_runtogether(int conf, bool runtogether)
-   Consider run-together words as valid components */
-static PHP_FUNCTION(pspell_config_runtogether)
+/* {{{ Consider run-together words as valid components */
+PHP_FUNCTION(pspell_config_runtogether)
 {
-	zend_long conf;
+	zval *zcfg;
 	zend_bool runtogether;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &runtogether) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &zcfg, php_pspell_config_ce, &runtogether) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_CONFIG;
+	config = php_pspell_config_object_from_zend_object(Z_OBJ_P(zcfg))->cfg;
 
 	pspell_config_replace(config, "run-together", runtogether ? "true" : "false");
 
@@ -764,18 +659,17 @@ static PHP_FUNCTION(pspell_config_runtogether)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_mode(int conf, int mode)
-   Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
-static PHP_FUNCTION(pspell_config_mode)
+/* {{{ Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
+PHP_FUNCTION(pspell_config_mode)
 {
-	zend_long conf, mode;
+	zval *zcfg;
+	zend_long mode;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &mode) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &zcfg, php_pspell_config_ce, &mode) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_CONFIG;
+	config = php_pspell_config_object_from_zend_object(Z_OBJ_P(zcfg))->cfg;
 
 	/* First check what mode we want (how many suggestions) */
 	if (mode == PSPELL_FAST) {
@@ -790,19 +684,18 @@ static PHP_FUNCTION(pspell_config_mode)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_ignore(int conf, int ignore)
-   Ignore words <= n chars */
-static PHP_FUNCTION(pspell_config_ignore)
+/* {{{ Ignore words <= n chars */
+PHP_FUNCTION(pspell_config_ignore)
 {
 	char ignore_str[MAX_LENGTH_OF_LONG + 1];
-	zend_long conf, ignore = 0L;
+	zval *zcfg;
+	zend_long ignore = 0L;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &ignore) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &zcfg, php_pspell_config_ce, &ignore) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_CONFIG;
+	config = php_pspell_config_object_from_zend_object(Z_OBJ_P(zcfg))->cfg;
 
 	snprintf(ignore_str, sizeof(ignore_str), ZEND_LONG_FMT, ignore);
 
@@ -813,90 +706,80 @@ static PHP_FUNCTION(pspell_config_ignore)
 
 static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 {
-	zend_long conf;
-	char *value;
-	size_t value_len;
+	zval *zcfg;
+	zend_string *value;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &value, &value_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP", &zcfg, php_pspell_config_ce, &value) == FAILURE) {
+		RETURN_THROWS();
 	}
+	config = php_pspell_config_object_from_zend_object(Z_OBJ_P(zcfg))->cfg;
 
-	PSPELL_FETCH_CONFIG;
-
-	if (php_check_open_basedir(value)) {
+	if (php_check_open_basedir(ZSTR_VAL(value))) {
 		RETURN_FALSE;
 	}
 
-	pspell_config_replace(config, option, value);
+	pspell_config_replace(config, option, ZSTR_VAL(value));
 
 	RETURN_TRUE;
 }
 
-/* {{{ proto bool pspell_config_personal(int conf, string personal)
-   Use a personal dictionary for this config */
-static PHP_FUNCTION(pspell_config_personal)
+/* {{{ Use a personal dictionary for this config */
+PHP_FUNCTION(pspell_config_personal)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "personal");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_dict_dir(int conf, string directory)
-   location of the main word list */
-static PHP_FUNCTION(pspell_config_dict_dir)
+/* {{{ location of the main word list */
+PHP_FUNCTION(pspell_config_dict_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "dict-dir");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_data_dir(int conf, string directory)
-    location of language data files */
-static PHP_FUNCTION(pspell_config_data_dir)
+/* {{{ location of language data files */
+PHP_FUNCTION(pspell_config_data_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "data-dir");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_repl(int conf, string repl)
-   Use a personal dictionary with replacement pairs for this config */
-static PHP_FUNCTION(pspell_config_repl)
+/* {{{ Use a personal dictionary with replacement pairs for this config */
+PHP_FUNCTION(pspell_config_repl)
 {
-	zend_long conf;
-	char *repl;
-	size_t repl_len;
+	zval *zcfg;
+	zend_string *repl;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &repl, &repl_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP", &zcfg, php_pspell_config_ce, &repl) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_CONFIG;
+	config = php_pspell_config_object_from_zend_object(Z_OBJ_P(zcfg))->cfg;
 
 	pspell_config_replace(config, "save-repl", "true");
 
-	if (php_check_open_basedir(repl)) {
+	if (php_check_open_basedir(ZSTR_VAL(repl))) {
 		RETURN_FALSE;
 	}
 
-	pspell_config_replace(config, "repl", repl);
+	pspell_config_replace(config, "repl", ZSTR_VAL(repl));
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_save_repl(int conf, bool save)
-   Save replacement pairs when personal list is saved for this config */
-static PHP_FUNCTION(pspell_config_save_repl)
+/* {{{ Save replacement pairs when personal list is saved for this config */
+PHP_FUNCTION(pspell_config_save_repl)
 {
-	zend_long conf;
+	zval *zcfg;
 	zend_bool save;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &save) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &zcfg, php_pspell_config_ce, &save) == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	PSPELL_FETCH_CONFIG;
+	config = php_pspell_config_object_from_zend_object(Z_OBJ_P(zcfg))->cfg;
 
 	pspell_config_replace(config, "save-repl", save ? "true" : "false");
 
@@ -904,8 +787,7 @@ static PHP_FUNCTION(pspell_config_save_repl)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(pspell)
 {
 	php_info_print_table_start();

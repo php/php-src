@@ -4,21 +4,21 @@ ZE2 The new constructor/destructor is called
 <?php
 
 class early {
-	function __construct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
-	function __destruct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
+    function __construct() {
+        echo __CLASS__ . "::" . __FUNCTION__ . "\n";
+    }
+    function __destruct() {
+        echo __CLASS__ . "::" . __FUNCTION__ . "\n";
+    }
 }
 
 class late {
-	function __construct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
-	function __destruct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
+    function __construct() {
+        echo __CLASS__ . "::" . __FUNCTION__ . "\n";
+    }
+    function __destruct() {
+        echo __CLASS__ . "::" . __FUNCTION__ . "\n";
+    }
 }
 
 $t = new early();

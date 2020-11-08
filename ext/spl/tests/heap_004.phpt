@@ -53,8 +53,6 @@ try {
     echo "Exception: ".$e->getMessage()."\n";
 }
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 inserted 1
 Exception: foo
@@ -64,4 +62,3 @@ Exception: Heap is corrupted, heap properties are no longer ensured.
 Recovering..
 int(1)
 int(2)
-===DONE===

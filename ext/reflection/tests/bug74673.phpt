@@ -5,9 +5,9 @@ Bug #74673 (Segfault when cast Reflection object to string with undefined consta
 
 class A
 {
-	public function method($test = PHP_SELF + 1)
-	{
-	}
+    public function method($test = PHP_SELF + 1)
+    {
+    }
 }
 
 $class = new ReflectionClass('A');
@@ -15,7 +15,7 @@ $class = new ReflectionClass('A');
 echo $class;
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Undefined constant 'PHP_SELF' in %s:%d
+Fatal error: Uncaught Error: Undefined constant "PHP_SELF" in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->__toString()
 #1 {main}

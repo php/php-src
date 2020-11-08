@@ -9,7 +9,7 @@ if (version_compare(LIBXML_DOTTED_VERSION, "2.6.20", "<")) {
 ?>
 --FILE--
 <?php
-$xml = '<node xmlns:pre="http://foo.com/tr/pre" 
+$xml = '<node xmlns:pre="http://foo.com/tr/pre"
               xmlns:post="http://foo.com/tr/post"
               pre:type="bar" type="foo" ><sub /></node>';
 $dom = new DomDocument();

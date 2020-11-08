@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,9 +24,12 @@ typedef struct {
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
 	uint32_t pos;
 #else
-	void *hashinstance;
+	unsigned char state[224]; // this must fit a Keccak_HashInstance
 #endif
 } PHP_SHA3_CTX;
+#ifdef HAVE_SLOW_HASH3
+#define PHP_SHA3_SPEC "b200l."
+#endif
 
 typedef PHP_SHA3_CTX PHP_SHA3_224_CTX;
 typedef PHP_SHA3_CTX PHP_SHA3_256_CTX;

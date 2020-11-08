@@ -10,7 +10,11 @@ echo "*** Testing fputcsv() : with default enclosure & delimiter of two chars **
 
 $fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv_variation13.csv', 'w');
 
-var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '"'));
+try {
+    var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '"'));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 unset($fo);
 
@@ -21,9 +25,7 @@ echo "Done\n";
 $file = __DIR__ . '/SplFileObject_fputcsv_variation13.csv';
 unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fputcsv() : with default enclosure & delimiter of two chars ***
-
-Warning: SplFileObject::fputcsv(): delimiter must be a character in %s on line %d
-bool(false)
+SplFileObject::fputcsv(): Argument #2 ($separator) must be a single character
 Done

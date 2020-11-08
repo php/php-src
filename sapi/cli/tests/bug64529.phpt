@@ -3,14 +3,14 @@ Bug #64529 (Ran out of opcode space)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == "WIN") {
-	die("skip non windows test");
+    die("skip non windows test");
 }
 if (!extension_loaded("readline") || !readline_info("done")) {
-	die("skip readline support required");
+    die("skip readline support required");
 }
 exec('which expect', $output, $ret);
 if ($ret) {
-	die("skip no expect installed");
+    die("skip no expect installed");
 }
 ?>
 --FILE--
@@ -20,7 +20,7 @@ $php_executable = getenv('TEST_PHP_EXECUTABLE');
 $script = __DIR__ . "/expect.sh";
 
 if (extension_loaded("readline")) {
-	$expect_script = <<<SCRIPT
+    $expect_script = <<<SCRIPT
 
 set php_executable [lindex \$argv 0]
 
@@ -38,7 +38,7 @@ exit
 SCRIPT;
 
 } else {
-	$expect_script = <<<SCRIPT
+    $expect_script = <<<SCRIPT
 
 set php_executable [lindex \$argv 0]
 

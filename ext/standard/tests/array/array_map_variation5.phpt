@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - associative array with different values
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing associative array with different values for $arr1 argument
  */
@@ -114,7 +109,7 @@ array(4) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   float(33333333.3333)
 }

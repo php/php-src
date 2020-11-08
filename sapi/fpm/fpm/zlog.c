@@ -734,14 +734,16 @@ ssize_t zlog_stream_format(struct zlog_stream *stream, const char *fmt, ...) /* 
 
 ssize_t zlog_stream_str(struct zlog_stream *stream, const char *str, size_t str_len) /* {{{ */
 {
+	/* do not write anything if the stream is full or str is empty */
+	if (str_len == 0 || stream->full) {
+		return 0;
+	}
+
 	/* reset stream if it is finished */
 	if (stream->finished) {
 		stream->finished = 0;
 		stream->len = 0;
 		stream->full = 0;
-	} else if (stream->full) {
-		/* do not write anything if the stream is full */
-		return 0;
 	}
 
 	if (stream->use_buffer) {

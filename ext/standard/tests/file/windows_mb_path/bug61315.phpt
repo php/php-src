@@ -44,7 +44,6 @@ rmdir($d1);
 rmdir($prefix);
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: 65001
 getting basename of %s\ソフト
@@ -60,4 +59,3 @@ string(%d) "%s\フォルダ"
 Active code page: %d
 bool(true)
 bool(true)
-===DONE===

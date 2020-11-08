@@ -3,7 +3,7 @@ IntlCalendar::isLenient(), ::setLenient() basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -17,12 +17,10 @@ var_dump($intlcal1->isLenient());
 var_dump(intlcal_set_lenient($intlcal1, true));
 var_dump($intlcal1->isLenient());
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
 bool(true)
 bool(false)
 bool(true)
-bool(true)
-==DONE==
+bool(true)

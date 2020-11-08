@@ -17,6 +17,6 @@ echo $_SESSION;
 echo "\nok\n";
 ?>
 --EXPECTF--
-Notice: Array to string conversion in %sunset_cv05.php on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 ok

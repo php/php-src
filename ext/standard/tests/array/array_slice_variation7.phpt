@@ -2,11 +2,6 @@
 Test array_slice() function : usage variations - different data types as keys in an array
 --FILE--
 <?php
-/* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass different data types as keys in an array to array_slice()
  * to test how $preserve_keys treats them

@@ -5,8 +5,8 @@ error_reporting=14335
 --FILE--
 <?php
 spl_autoload_register(function ($name) {
-	echo("AUTOLOAD '$name'\n");
-	eval("class $name {}");
+    echo("AUTOLOAD '$name'\n");
+    eval("class $name {}");
 });
 
 class BASE {

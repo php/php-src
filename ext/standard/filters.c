@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -210,7 +208,7 @@ typedef struct _php_conv_base64_encode {
 static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
 static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst);
 
-static unsigned char b64_tbl_enc[256] = {
+static const unsigned char b64_tbl_enc[256] = {
 	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
 	'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
 	'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
@@ -658,14 +656,14 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	unsigned int lb_cnt;
 	unsigned int trail_ws;
 	int opts;
-	static char qp_digits[] = "0123456789ABCDEF";
+	static const char qp_digits[] = "0123456789ABCDEF";
 
 	line_ccnt = inst->line_ccnt;
 	opts = inst->opts;
 	lb_ptr = inst->lb_ptr;
 	lb_cnt = inst->lb_cnt;
 
-	if ((in_pp == NULL || in_left_p == NULL) && (lb_ptr >=lb_cnt)) {
+	if (in_pp == NULL || in_left_p == NULL) {
 		return PHP_CONV_ERR_SUCCESS;
 	}
 
@@ -893,7 +891,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 	lb_ptr = inst->lb_ptr;
 	lb_cnt = inst->lb_cnt;
 
-	if ((in_pp == NULL || in_left_p == NULL) && lb_cnt == lb_ptr) {
+	if (in_pp == NULL || in_left_p == NULL) {
 		if (inst->scan_stat != 0) {
 			return PHP_CONV_ERR_UNEXPECTED_EOS;
 		}
@@ -990,8 +988,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					*ps == (unsigned char)inst->lbchars[lb_cnt]) {
 					lb_cnt++;
 					scan_stat = 5;
-				}
-				if (*ps != '\t' && *ps != ' ') {
+				} else if (*ps != '\t' && *ps != ' ') {
 					err = PHP_CONV_ERR_INVALID_SEQ;
 					goto out;
 				}
@@ -1371,14 +1368,14 @@ static int strfilter_convert_append_bucket(
 
 			switch (err) {
 				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): invalid byte sequence", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): invalid byte sequence", inst->filtername);
 					goto out_failure;
 
 				case PHP_CONV_ERR_MORE:
 					if (ps != NULL) {
 						if (icnt > 0) {
 							if (inst->stub_len >= sizeof(inst->stub)) {
-								php_error_docref(NULL, E_WARNING, "stream filter (%s): insufficient buffer", inst->filtername);
+								php_error_docref(NULL, E_WARNING, "Stream filter (%s): insufficient buffer", inst->filtername);
 								goto out_failure;
 							}
 							inst->stub[inst->stub_len++] = *(ps++);
@@ -1393,7 +1390,7 @@ static int strfilter_convert_append_bucket(
 					break;
 
 				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): unexpected end of stream", inst->filtername);
 					goto out_failure;
 
 				case PHP_CONV_ERR_TOO_BIG: {
@@ -1423,7 +1420,7 @@ static int strfilter_convert_append_bucket(
 				} break;
 
 				case PHP_CONV_ERR_UNKNOWN:
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): unknown error", inst->filtername);
 					goto out_failure;
 
 				default:
@@ -1439,13 +1436,13 @@ static int strfilter_convert_append_bucket(
 				php_conv_convert(inst->cd, &ps, &icnt, &pd, &ocnt)));
 		switch (err) {
 			case PHP_CONV_ERR_INVALID_SEQ:
-				php_error_docref(NULL, E_WARNING, "stream filter (%s): invalid byte sequence", inst->filtername);
+				php_error_docref(NULL, E_WARNING, "Stream filter (%s): invalid byte sequence", inst->filtername);
 				goto out_failure;
 
 			case PHP_CONV_ERR_MORE:
 				if (ps != NULL) {
 					if (icnt > sizeof(inst->stub)) {
-						php_error_docref(NULL, E_WARNING, "stream filter (%s): insufficient buffer", inst->filtername);
+						php_error_docref(NULL, E_WARNING, "Stream filter (%s): insufficient buffer", inst->filtername);
 						goto out_failure;
 					}
 					memcpy(inst->stub, ps, icnt);
@@ -1453,7 +1450,7 @@ static int strfilter_convert_append_bucket(
 					ps += icnt;
 					icnt = 0;
 				} else {
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): unexpected octet values", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): unexpected octet values", inst->filtername);
 					goto out_failure;
 				}
 				break;
@@ -1485,7 +1482,7 @@ static int strfilter_convert_append_bucket(
 			} break;
 
 			case PHP_CONV_ERR_UNKNOWN:
-				php_error_docref(NULL, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
+				php_error_docref(NULL, E_WARNING, "Stream filter (%s): unknown error", inst->filtername);
 				goto out_failure;
 
 			default:
@@ -1585,7 +1582,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	int conv_mode = 0;
 
 	if (filterparams != NULL && Z_TYPE_P(filterparams) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "stream filter (%s): invalid filter parameter", filtername);
+		php_error_docref(NULL, E_WARNING, "Stream filter (%s): invalid filter parameter", filtername);
 		return NULL;
 	}
 

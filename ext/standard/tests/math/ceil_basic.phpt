@@ -4,41 +4,35 @@ Test ceil() - basic function test for ceil()
 precision=14
 --FILE--
 <?php
-/* Prototype  : float ceil  ( float $value  )
- * Description: Round fractions up.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing ceil() : basic functionality ***\n";
 $values = array(0,
-				-0,
-				0.5,
-				-0.5,
-				1,
-				-1,
-				1.5,
-				-1.5,
-				2.6,
-				-2.6,
-				037,
-				0x5F,
-				"10.5",
-				"-10.5",
-				"3.95E3",
-				"-3.95E3",
-				"039",
-				true,
-				false,
-				null,
-				);
+                -0,
+                0.5,
+                -0.5,
+                1,
+                -1,
+                1.5,
+                -1.5,
+                2.6,
+                -2.6,
+                037,
+                0x5F,
+                "10.5",
+                "-10.5",
+                "3.95E3",
+                "-3.95E3",
+                "039",
+                true,
+                false,
+                null,
+                );
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = ceil($values[$i]);
-	var_dump($res);
+    $res = ceil($values[$i]);
+    var_dump($res);
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing ceil() : basic functionality ***
 float(0)
@@ -61,4 +55,3 @@ float(39)
 float(1)
 float(0)
 float(0)
-===Done===

@@ -3,7 +3,7 @@ Test stream_isatty with redirected STDOUT/STDERR
 --SKIPIF--
 <?php
 if (getenv("SKIP_IO_CAPTURE_TESTS")) {
-	die("skip I/O capture test");
+    die("skip I/O capture test");
 }
 ?>
 --CAPTURE_STDIO--
@@ -13,7 +13,7 @@ STDOUT STDERR
 require __DIR__.'/stream_isatty.inc';
 testToStdOut();
 ?>
---EXPECTF--
+--EXPECT--
 STDIN (constant): bool(true)
 STDIN (fopen): bool(true)
 STDIN (php://fd/0): bool(true)

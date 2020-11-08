@@ -8,4 +8,4 @@ Note: the closing ?> has been deliberately elided.
 echo <<<'END'
 
 --EXPECTF--
-Parse error: syntax error, unexpected end of file, expecting variable (T_VARIABLE) or heredoc end (T_END_HEREDOC) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN) in %s on line %d
+Parse error: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" in %s on line %d

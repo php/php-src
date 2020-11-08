@@ -4,7 +4,7 @@ Fully qualified (leading backslash) type names must fail
 <?php
 
 function foo(\int $foo) {
-	var_dump($foo);
+    var_dump($foo);
 }
 foo(1);
 

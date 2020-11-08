@@ -4,18 +4,18 @@ unserialize with references to typed properties shall skip the references or fai
 <?php
 
 class A {
-	public int $a;
-	public $b;
+    public int $a;
+    public $b;
 }
 
 class B {
-	public $a;
-	public int $b;
+    public $a;
+    public int $b;
 }
 
 class C {
-	public int $a;
-	public string $b;
+    public int $a;
+    public string $b;
 }
 
 class D {
@@ -66,8 +66,8 @@ object(B)#1 (2) {
   ["b"]=>
   &int(1)
 }
-Typed property A::$a must be int, null used
-Typed property B::$b must be int, null used
-Typed property C::$b must be string, int used
-Typed property C::$a must be int, string used
+Cannot assign null to property A::$a of type int
+Cannot assign null to property B::$b of type int
+Cannot assign int to property C::$b of type string
+Cannot assign string to property C::$a of type int
 Reference with value of type int held by property D::$a of type int is not compatible with property D::$b of type float

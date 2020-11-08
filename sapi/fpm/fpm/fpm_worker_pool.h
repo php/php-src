@@ -18,6 +18,7 @@ enum fpm_address_domain {
 
 struct fpm_worker_pool_s {
 	struct fpm_worker_pool_s *next;
+	struct fpm_worker_pool_s *shared;
 	struct fpm_worker_pool_config_s *config;
 	char *user, *home;									/* for setting env USER and HOME */
 	enum fpm_address_domain listen_address_domain;

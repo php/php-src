@@ -36,8 +36,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &filename, &filename_len, &zcontext) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|r!", &filename, &filename_len, &zcontext) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
@@ -97,7 +97,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = -1;
-	zend_long maxlen = PHP_STREAM_COPY_ALL;
+	zend_long maxlen;
+	zend_bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -110,8 +111,12 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	}
 
 	/* Parse arguments */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!ll!", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen, &maxlen_is_null) == FAILURE) {
 		goto skip_phar;
+	}
+
+	if (maxlen_is_null) {
+		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
 	}
 
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
@@ -135,10 +140,10 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 
-			if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
+			if (!maxlen_is_null && maxlen < 0) {
 				efree(arch);
-				php_error_docref(NULL, E_WARNING, "length must be greater than or equal to zero");
-				RETURN_FALSE;
+				zend_argument_value_error(5, "must be greater than or equal to 0");
+				RETURN_THROWS();
 			}
 
 			/* retrieving a file defaults to within the current directory, so use this if possible */
@@ -342,7 +347,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "ps|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "ps|br!", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		goto skip_phar;
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
@@ -432,8 +437,7 @@ skip_phar:
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 #define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
 
-/* {{{ php_stat
- */
+/* {{{ php_stat */
 static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
@@ -765,7 +769,7 @@ ZEND_NAMED_FUNCTION(fname) { \
 		size_t filename_len; \
 		\
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 		\
 		phar_file_stat(filename, filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
@@ -773,73 +777,59 @@ ZEND_NAMED_FUNCTION(fname) { \
 }
 /* }}} */
 
-/* {{{ proto int fileperms(string filename)
-   Get file permissions */
+/* {{{ Get file permissions */
 PharFileFunction(phar_fileperms, FS_PERMS, orig_fileperms)
 /* }}} */
 
-/* {{{ proto int fileinode(string filename)
-   Get file inode */
+/* {{{ Get file inode */
 PharFileFunction(phar_fileinode, FS_INODE, orig_fileinode)
 /* }}} */
 
-/* {{{ proto int filesize(string filename)
-   Get file size */
+/* {{{ Get file size */
 PharFileFunction(phar_filesize, FS_SIZE, orig_filesize)
 /* }}} */
 
-/* {{{ proto int fileowner(string filename)
-   Get file owner */
+/* {{{ Get file owner */
 PharFileFunction(phar_fileowner, FS_OWNER, orig_fileowner)
 /* }}} */
 
-/* {{{ proto int filegroup(string filename)
-   Get file group */
+/* {{{ Get file group */
 PharFileFunction(phar_filegroup, FS_GROUP, orig_filegroup)
 /* }}} */
 
-/* {{{ proto int fileatime(string filename)
-   Get last access time of file */
+/* {{{ Get last access time of file */
 PharFileFunction(phar_fileatime, FS_ATIME, orig_fileatime)
 /* }}} */
 
-/* {{{ proto int filemtime(string filename)
-   Get last modification time of file */
+/* {{{ Get last modification time of file */
 PharFileFunction(phar_filemtime, FS_MTIME, orig_filemtime)
 /* }}} */
 
-/* {{{ proto int filectime(string filename)
-   Get inode modification time of file */
+/* {{{ Get inode modification time of file */
 PharFileFunction(phar_filectime, FS_CTIME, orig_filectime)
 /* }}} */
 
-/* {{{ proto string filetype(string filename)
-   Get file type */
+/* {{{ Get file type */
 PharFileFunction(phar_filetype, FS_TYPE, orig_filetype)
 /* }}} */
 
-/* {{{ proto bool is_writable(string filename)
-   Returns true if file can be written */
+/* {{{ Returns true if file can be written */
 PharFileFunction(phar_is_writable, FS_IS_W, orig_is_writable)
 /* }}} */
 
-/* {{{ proto bool is_readable(string filename)
-   Returns true if file can be read */
+/* {{{ Returns true if file can be read */
 PharFileFunction(phar_is_readable, FS_IS_R, orig_is_readable)
 /* }}} */
 
-/* {{{ proto bool is_executable(string filename)
-   Returns true if file is executable */
+/* {{{ Returns true if file is executable */
 PharFileFunction(phar_is_executable, FS_IS_X, orig_is_executable)
 /* }}} */
 
-/* {{{ proto bool file_exists(string filename)
-   Returns true if filename exists */
+/* {{{ Returns true if filename exists */
 PharFileFunction(phar_file_exists, FS_EXISTS, orig_file_exists)
 /* }}} */
 
-/* {{{ proto bool is_dir(string filename)
-   Returns true if file is directory */
+/* {{{ Returns true if file is directory */
 PharFileFunction(phar_is_dir, FS_IS_DIR, orig_is_dir)
 /* }}} */
 
@@ -975,13 +965,11 @@ skip_phar:
 }
 /* }}} */
 
-/* {{{ proto array lstat(string filename)
-   Give information about a file or symbolic link */
+/* {{{ Give information about a file or symbolic link */
 PharFileFunction(phar_lstat, FS_LSTAT, orig_lstat)
 /* }}} */
 
-/* {{{ proto array stat(string filename)
-   Give information about a file */
+/* {{{ Give information about a file */
 PharFileFunction(phar_stat, FS_STAT, orig_stat)
 /* }}} */
 
@@ -1100,7 +1088,7 @@ static struct _phar_orig_functions {
 	zif_handler orig_lstat;
 	zif_handler orig_readfile;
 	zif_handler orig_stat;
-} phar_orig_functions = {NULL};
+} phar_orig_functions = {0};
 
 void phar_save_orig_functions(void) /* {{{ */
 {

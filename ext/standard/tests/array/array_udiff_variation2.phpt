@@ -2,16 +2,10 @@
 Test array_udiff() function : usage variation
 --FILE--
 <?php
-/* Prototype  : array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function.
- * Source code: ext/standard/array.c
- * Alias to functions:
- */
-
 echo "*** Testing array_udiff() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr1 = array(1, 2);
+$array1 = array(1, 2);
 
 include('compare_function.inc');
 $data_comp_func = 'compare_function';
@@ -23,9 +17,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -88,94 +82,92 @@ $inputs = array(
       'unset var' => @$unset_var,
 );
 
-// loop through each element of the array for arr2
+// loop through each element of the array for array2
 
 foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
-        var_dump( array_udiff($arr1, $value, $data_comp_func) );
+        var_dump( array_udiff($array1, $value, $data_comp_func) );
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
 };
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_udiff() : usage variation ***
 
 --int 0--
-Expected parameter 2 to be an array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --int 1--
-Expected parameter 2 to be an array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --int 12345--
-Expected parameter 2 to be an array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --int -12345--
-Expected parameter 2 to be an array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --float 10.5--
-Expected parameter 2 to be an array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float -10.5--
-Expected parameter 2 to be an array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float 12.3456789000e10--
-Expected parameter 2 to be an array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float -12.3456789000e10--
-Expected parameter 2 to be an array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float .5--
-Expected parameter 2 to be an array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --uppercase NULL--
-Expected parameter 2 to be an array, null given
+array_udiff(): Argument #2 must be of type array, null given
 
 --lowercase null--
-Expected parameter 2 to be an array, null given
+array_udiff(): Argument #2 must be of type array, null given
 
 --lowercase true--
-Expected parameter 2 to be an array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --lowercase false--
-Expected parameter 2 to be an array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --uppercase TRUE--
-Expected parameter 2 to be an array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --uppercase FALSE--
-Expected parameter 2 to be an array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --empty string DQ--
-Expected parameter 2 to be an array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --empty string SQ--
-Expected parameter 2 to be an array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --string DQ--
-Expected parameter 2 to be an array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --string SQ--
-Expected parameter 2 to be an array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --mixed case string--
-Expected parameter 2 to be an array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --heredoc--
-Expected parameter 2 to be an array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --instance of classWithToString--
-Expected parameter 2 to be an array, object given
+array_udiff(): Argument #2 must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-Expected parameter 2 to be an array, object given
+array_udiff(): Argument #2 must be of type array, classWithoutToString given
 
 --undefined var--
-Expected parameter 2 to be an array, null given
+array_udiff(): Argument #2 must be of type array, null given
 
 --unset var--
-Expected parameter 2 to be an array, null given
-===DONE===
+array_udiff(): Argument #2 must be of type array, null given

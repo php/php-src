@@ -11,7 +11,7 @@ $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 $fp = $zip->getStream('foo');
 
@@ -19,7 +19,7 @@ var_dump($fp);
 if(!$fp) exit("\n");
 $contents = '';
 while (!feof($fp)) {
-	$contents .= fread($fp, 255);
+    $contents .= fread($fp, 255);
 }
 
 fclose($fp);

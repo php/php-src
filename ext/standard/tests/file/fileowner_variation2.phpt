@@ -2,12 +2,10 @@
 Test fileowner() function: usage variations - invalid filenames
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype: int fileowner ( string $filename )
- * Description: Returns the user ID of the owner of the file, or
- *              FALSE in case of an error.
- */
 
 /* Testing fileowner() with invalid arguments -int, float, bool, NULL, resource */
 
@@ -33,8 +31,6 @@ foreach( $filenames as $filename ) {
   var_dump( fileowner($filename) );
   clearstatcache();
 }
-
-echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
@@ -61,5 +57,3 @@ bool(false)
 
 Warning: fileowner(): stat failed for 0 in %s on line %d
 bool(false)
-
-*** Done ***

@@ -10,7 +10,8 @@ opcache.file_update_protection=0
 --FILE--
 <?php
 if(constant('PHP_BINARY')) {
-	echo "OK\n";
+    echo "OK\n";
 }
+?>
 --EXPECT--
 OK

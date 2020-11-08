@@ -6,6 +6,7 @@ highlight.comment = #FF8000
 highlight.keyword = #007700
 highlight.default = #0000BB
 highlight.html    = #000000
+--WHITESPACE_SENSITIVE--
 --FILE--
 <?php
 $code = <<<'EOF'

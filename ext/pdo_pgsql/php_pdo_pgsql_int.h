@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -108,5 +106,7 @@ enum pdo_pgsql_specific_constants {
 
 php_stream *pdo_pgsql_create_lob_stream(zval *pdh, int lfd, Oid oid);
 extern const php_stream_ops pdo_pgsql_lob_stream_ops;
+
+void pdo_libpq_version(char *buf, size_t len);
 
 #endif /* PHP_PDO_PGSQL_INT_H */

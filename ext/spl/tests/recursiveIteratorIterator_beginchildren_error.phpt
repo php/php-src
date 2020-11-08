@@ -11,7 +11,7 @@ $recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
 
     function beginchildren() {
-    	throw new Exception;
+        throw new Exception;
     }
 }
 

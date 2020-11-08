@@ -4,7 +4,7 @@ Bug #69221: Segmentation fault when using a generator in combination with an Ite
 <?php
 
 function gen() {
-	yield 1;
+    yield 1;
 };
 
 $gen1 = gen();

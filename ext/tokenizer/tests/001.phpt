@@ -129,7 +129,7 @@ echo token_name(0x8000000F), "\n";
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 T_INCLUDE
 T_INCLUDE_ONCE
 T_EVAL

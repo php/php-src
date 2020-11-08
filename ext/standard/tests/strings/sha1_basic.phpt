@@ -3,9 +3,6 @@ sha1() with ASCII output.
 --FILE--
 <?php
 
-/* Prototype: string sha1  ( string $str  [, bool $raw_output  ] )
- * Description: Calculate the sha1 hash of a string
- */
 
 echo "*** Testing sha1() : basic functionality ***\n";
 
@@ -37,7 +34,6 @@ var_dump(bin2hex(sha1("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234
 var_dump(bin2hex(sha1("12345678901234567890123456789012345678901234567890123456789012345678901234567890", true)));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sha1() : basic functionality ***
 
@@ -67,4 +63,3 @@ string(40) "c12252ceda8be8994d5fa0290a47231c1d16aae3"
 string(40) "32d10c7b8cf96570ca04ce37f2a19d84240d3a89"
 string(40) "761c457bf73b14d27e9e9265c46f4b4dda11f940"
 string(40) "50abf5706a150990a08b2c5ea40fa0e585554732"
-===DONE===

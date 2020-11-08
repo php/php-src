@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplDoublyLinkedList with overriden count()
+SPL: SplDoublyLinkedList with overridden count()
 --FILE--
 <?php
 $obj = new SplDoublyLinkedList();

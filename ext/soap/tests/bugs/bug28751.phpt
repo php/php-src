@@ -5,11 +5,11 @@ Bug #28751 (SoapServer does not call _autoload())
 --FILE--
 <?php
 spl_autoload_register(function ($className) {
-	class SoapServerActions {
+    class SoapServerActions {
     function test() {
       return "Hello World";
     }
-	}
+    }
 });
 
 $server = new SoapServer(NULL, array('uri'=>"http://testuri.org"));

@@ -5,26 +5,27 @@ assert.active = 1
 assert.warning = 0
 assert.callback = f1
 assert.bail = 0
+assert.exception=0
 --FILE--
 <?php
 function f1()
 {
-	echo "f1 called\n";
+    echo "f1 called\n";
 }
 function f2()
 {
-	echo "f2 called\n";
+    echo "f2 called\n";
 }
 function f3()
 {
-	echo "f3 called\n";
+    echo "f3 called\n";
 }
 class c1
 {
-	static function assert($file, $line, $unused, $desc)
-	{
-		echo "Class assertion failed $line, \"$desc\"\n";
-	}
+    static function assert($file, $line, $unused, $desc)
+    {
+        echo "Class assertion failed $line, \"$desc\"\n";
+    }
 }
 echo "Initial values: assert_options(ASSERT_CALLBACK) => [".assert_options(ASSERT_CALLBACK)."]\n";
 echo "Initial values: ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n";
@@ -67,7 +68,8 @@ var_dump($rao=assert_options(ASSERT_CALLBACK));
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
 var_dump($r2=assert(0 != 0));
 echo"\n";
---EXPECTF--
+?>
+--EXPECT--
 Initial values: assert_options(ASSERT_CALLBACK) => [f1]
 Initial values: ini.get("assert.callback") => [f1]
 f1 called

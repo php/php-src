@@ -4,10 +4,10 @@ Testing __callstatic declaration with wrong modifier
 <?php
 
 class a {
-	static protected function __callstatic($a, $b) {
-	}
+    static protected function __callstatic($a, $b) {
+    }
 }
 
 ?>
 --EXPECTF--
-Warning: The magic method __callStatic() must have public visibility and be static in %s on line %d
+Warning: The magic method a::__callstatic() must have public visibility in %s on line %d

@@ -5,16 +5,17 @@ assert.active = 1
 assert.warning = 1
 assert.callback=f1
 assert.bail = 0
+assert.exception=0
 --FILE--
 <?php
 function f2()
 {
-	echo "f2 called\n";
+    echo "f2 called\n";
 }
 
 function f1()
 {
-	echo "f1 called\n";
+    echo "f1 called\n";
 }
 
 var_dump($o = assert_options(ASSERT_CALLBACK));

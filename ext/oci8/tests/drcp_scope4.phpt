@@ -35,16 +35,16 @@ function2($user,$password,$dbase);
 
 function function1($user,$password,$dbase)
 {
-	var_dump($c = oci_pconnect($user,$password,$dbase));
-	drcp_update_table($c);
+    var_dump($c = oci_pconnect($user,$password,$dbase));
+    drcp_update_table($c);
 }
 
 // This is the second scope
 
 function function2($user,$password,$dbase)
 {
-	var_dump($c = oci_pconnect($user,$password,$dbase));
-	drcp_select_value($c);
+    var_dump($c = oci_pconnect($user,$password,$dbase));
+    drcp_select_value($c);
 }
 
 drcp_drop_table($c);

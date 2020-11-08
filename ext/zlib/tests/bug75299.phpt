@@ -11,10 +11,8 @@ $r = new ReflectionFunction('inflate_add');
 var_dump($r->getNumberOfRequiredParameters());
 var_dump($r->getNumberOfParameters());
 ?>
-===DONE===
 --EXPECT--
 int(1)
 int(2)
 int(2)
 int(3)
-===DONE===

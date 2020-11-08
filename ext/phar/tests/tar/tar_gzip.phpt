@@ -38,7 +38,6 @@ $b = new Phar($fname2);
 var_dump($b->isFileFormat(Phar::TAR));
 var_dump($b->isCompressed() == Phar::GZ);
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tar_gzip.phar');
@@ -49,4 +48,3 @@ string(9) "it worked"
 string(%d) "phar://%star_gzip.phar/tar_004.php"
 bool(true)
 bool(true)
-===DONE===

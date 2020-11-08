@@ -3,7 +3,7 @@ Test typed properties error condition (fetch uninitialized by reference)
 --FILE--
 <?php
 $thing = new class() {
-	public int $int;
+    public int $int;
 };
 
 $var = &$thing->int;

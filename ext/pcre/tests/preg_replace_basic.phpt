@@ -3,7 +3,6 @@ Test preg_replace() function : basic functionality
 --FILE--
 <?php
 /*
-* proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 $string = '123456789 - Hello, world -           This is a string.';

@@ -29,13 +29,12 @@ $result = pg_query_params($conn, $sql, $params2);
 
 $r = pg_query("SELECT * FROM $table");
 while (false !== ($i = pg_fetch_assoc($r))) {
-	var_dump($i);
+    var_dump($i);
 }
 
 pg_query("DROP TABLE $table");
 
 ?>
-==DONE==
 --EXPECT--
 array(2) {
   ["value"]=>
@@ -49,4 +48,3 @@ array(2) {
   ["details"]=>
   string(37) "insert after looping with a reference"
 }
-==DONE==

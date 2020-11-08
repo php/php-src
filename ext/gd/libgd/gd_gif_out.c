@@ -333,7 +333,7 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
         /*
          * OR in the resolution
          */
-        B |= (Resolution - 1) << 5;
+        B |= (Resolution - 1) << 4;
 
         /*
          * OR in the Bits per Pixel
@@ -548,7 +548,7 @@ compress(int init_bits, gdIOCtxPtr outfile, gdImagePtr im, GifCtx *ctx)
     output( (code_int)ctx->ClearCode, ctx );
 
 #ifdef SIGNED_COMPARE_SLOW
-    while ( (c = GIFNextPixel( im )) != (unsigned) EOF ) {
+    while ( (c = GIFNextPixel( im, ctx )) != (unsigned) EOF ) {
 #else /*SIGNED_COMPARE_SLOW*/
     while ( (c = GIFNextPixel( im, ctx )) != EOF ) {  /* } */
 #endif /*SIGNED_COMPARE_SLOW*/

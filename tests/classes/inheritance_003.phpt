@@ -5,12 +5,12 @@ ZE2 method inheritance without interfaces
 
 class A
 {
-	function f($x) {}
+    function f($x) {}
 }
 
 class B extends A
 {
-	function f() {}
+    function f() {}
 }
 
 ?>

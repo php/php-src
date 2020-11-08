@@ -3,7 +3,7 @@ Test gzfile() function : variation: use include path (relative directories in pa
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -78,7 +78,6 @@ function test_gzfile() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
@@ -105,4 +104,3 @@ array(1) {
   string(28) "This is a file in script dir"
 }
 
-===DONE===

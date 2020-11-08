@@ -19,7 +19,6 @@ ini_set('phar.readonly',1);
 ini_set('phar.require_hash',1);
 phpinfo(INFO_MODULES);
 ?>
-===DONE===
 --EXPECTF--
 %aPhar
 
@@ -61,4 +60,3 @@ phar.cache_list => no value => no value
 phar.readonly => On => Off
 phar.require_hash => On => Off
 %a
-===DONE===

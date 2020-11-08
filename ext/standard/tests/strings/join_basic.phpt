@@ -2,19 +2,13 @@
 Test join() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
- * Source code: ext/standard/string.c
- * Alias of function: implode()
-*/
-
 echo "*** Testing join() : basic functionality ***\n";
 
 // Initialize all required variables
 $glue = ',';
 $pieces = array(1, 2, 3, 4);
 
-// pieces as arry with numeric values
+// pieces as array with numeric values
 var_dump( join($glue, $pieces) );
 
 // pieces as array with strings values

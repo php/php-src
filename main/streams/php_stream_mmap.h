@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -57,6 +55,8 @@ typedef struct {
 } php_stream_mmap_range;
 
 #define PHP_STREAM_MMAP_ALL 0
+
+#define PHP_STREAM_MMAP_MAX (512 * 1024 * 1024)
 
 #define php_stream_mmap_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_SUPPORTED, NULL) == 0 ? 1 : 0)
 

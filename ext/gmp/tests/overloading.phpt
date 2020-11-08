@@ -23,12 +23,20 @@ var_dump(42 * $b);
 var_dump($a / $b);
 var_dump($a / 17);
 var_dump(42 / $b);
-var_dump($a / 0);
+try {
+    var_dump($a / 0);
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump($a % $b);
 var_dump($a % 17);
 var_dump(42 % $b);
-var_dump($a % 0);
+try {
+    var_dump($a % 0);
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump($a ** $b);
 var_dump($a ** 17);
@@ -53,8 +61,17 @@ var_dump(42 << $b);
 var_dump($a >> 2);
 var_dump(-$a >> 2);
 
-var_dump($a << -1);
-var_dump($a >> -1);
+try {
+    $a << -1;
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $a >> -1;
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 var_dump(~$a);
 var_dump(-$a);
@@ -77,7 +94,11 @@ var_dump($a <= 42);
 var_dump($a > 42);
 var_dump($a >= 42);
 
-var_dump($a == new stdClass);
+try {
+    var_dump($a == new stdClass);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $a += 1;
 var_dump($a);
@@ -102,156 +123,148 @@ $a .= '17';
 var_dump($a);
 
 ?>
---EXPECTF--
-object(GMP)#%d (1) {
+--EXPECT--
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "25"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "25"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "25"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(3) "714"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(3) "714"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(3) "714"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(1) "2"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(1) "2"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(1) "2"
 }
-
-Warning: main(): Zero operand not allowed in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+Division by zero
+object(GMP)#4 (1) {
   ["num"]=>
   string(1) "8"
 }
-object(GMP)#%d (1) {
+object(GMP)#4 (1) {
   ["num"]=>
   string(1) "8"
 }
-object(GMP)#%d (1) {
+object(GMP)#4 (1) {
   ["num"]=>
   string(1) "8"
 }
-
-Warning: main(): Zero operand not allowed in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+Modulo by zero
+object(GMP)#3 (1) {
   ["num"]=>
   string(28) "3937657486715347520027492352"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(28) "3937657486715347520027492352"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(28) "3937657486715347520027492352"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(1) "0"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(1) "0"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(1) "0"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(7) "5505024"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(7) "5505024"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(7) "5505024"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "10"
 }
-object(GMP)#%d (1) {
+object(GMP)#5 (1) {
   ["num"]=>
   string(3) "-11"
 }
-
-Warning: main(): Shift cannot be negative in %s on line %d
-bool(false)
-
-Warning: main(): Shift cannot be negative in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+Shift must be greater than or equal to 0
+Shift must be greater than or equal to 0
+object(GMP)#5 (1) {
   ["num"]=>
   string(3) "-43"
 }
-object(GMP)#%d (1) {
+object(GMP)#5 (1) {
   ["num"]=>
   string(3) "-42"
 }
-object(GMP)#%d (1) {
+object(GMP)#5 (1) {
   ["num"]=>
   string(2) "42"
 }
@@ -269,38 +282,36 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-
-Warning: main(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+main(): Argument #2 must be of type GMP|string|int, stdClass given
+object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"
 }
-object(GMP)#%d (1) {
+object(GMP)#1 (1) {
   ["num"]=>
   string(2) "42"
 }
-object(GMP)#%d (1) {
+object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"
 }
-object(GMP)#%d (1) {
+object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"
 }
-object(GMP)#%d (1) {
+object(GMP)#1 (1) {
   ["num"]=>
   string(2) "44"
 }
-object(GMP)#%d (1) {
+object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"
 }
-object(GMP)#%d (1) {
+object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"
 }
-object(GMP)#%d (1) {
+object(GMP)#1 (1) {
   ["num"]=>
   string(2) "42"
 }

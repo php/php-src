@@ -61,7 +61,6 @@ function cell_color($im, $x, $y)
     }
 }
 ?>
-===DONE===
 --EXPECT--
 palette gamma (1, 2): The images are equal.
 truecolor gamma (1, 2): The images are equal.
@@ -69,4 +68,3 @@ palette gamma (1, 1): The images are equal.
 truecolor gamma (1, 1): The images are equal.
 palette gamma (2, 1): The images are equal.
 truecolor gamma (2, 1): The images are equal.
-===DONE===

@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 
 #include "mbfilter_utf8_mobile.h"
@@ -50,7 +46,7 @@ const mbfl_encoding mbfl_encoding_utf8_docomo = {
 	mbfl_no_encoding_utf8_docomo,
 	"UTF-8-Mobile#DOCOMO",
 	"UTF-8",
-	(const char *(*)[])&mbfl_encoding_utf8_docomo_aliases,
+	mbfl_encoding_utf8_docomo_aliases,
 	mblen_table_utf8,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf8_docomo_wchar,
@@ -61,7 +57,7 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
 	mbfl_no_encoding_utf8_kddi_a,
 	"UTF-8-Mobile#KDDI-A",
 	"UTF-8",
-	(const char *(*)[])&mbfl_encoding_utf8_kddi_a_aliases,
+	mbfl_encoding_utf8_kddi_a_aliases,
 	mblen_table_utf8,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf8_kddi_a_wchar,
@@ -72,7 +68,7 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_b = {
 	mbfl_no_encoding_utf8_kddi_b,
 	"UTF-8-Mobile#KDDI-B",
 	"UTF-8",
-	(const char *(*)[])&mbfl_encoding_utf8_kddi_b_aliases,
+	mbfl_encoding_utf8_kddi_b_aliases,
 	mblen_table_utf8,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf8_kddi_b_wchar,
@@ -83,7 +79,7 @@ const mbfl_encoding mbfl_encoding_utf8_sb = {
 	mbfl_no_encoding_utf8_sb,
 	"UTF-8-Mobile#SOFTBANK",
 	"UTF-8",
-	(const char *(*)[])&mbfl_encoding_utf8_sb_aliases,
+	mbfl_encoding_utf8_sb_aliases,
 	mblen_table_utf8,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf8_sb_wchar,
@@ -93,28 +89,24 @@ const mbfl_encoding mbfl_encoding_utf8_sb = {
 const struct mbfl_identify_vtbl vtbl_identify_utf8_docomo = {
 	mbfl_no_encoding_utf8_docomo,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi_a = {
 	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi_b = {
 	mbfl_no_encoding_utf8_kddi_b,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_utf8_sb = {
 	mbfl_no_encoding_utf8_sb,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
 };
 
@@ -122,72 +114,80 @@ const struct mbfl_convert_vtbl vtbl_utf8_docomo_wchar = {
 	mbfl_no_encoding_utf8_docomo,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
-	mbfl_filt_conv_utf8_wchar_flush
+	mbfl_filt_conv_utf8_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf8_docomo = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_docomo,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf8_kddi_a_wchar = {
 	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
-	mbfl_filt_conv_utf8_wchar_flush
+	mbfl_filt_conv_utf8_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi_a = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf8_kddi_b_wchar = {
 	mbfl_no_encoding_utf8_kddi_b,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
-	mbfl_filt_conv_utf8_wchar_flush
+	mbfl_filt_conv_utf8_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi_b = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_kddi_b,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf8_sb_wchar = {
 	mbfl_no_encoding_utf8_sb,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_mobile_wchar,
-	mbfl_filt_conv_utf8_wchar_flush
+	mbfl_filt_conv_utf8_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf8_sb = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8_sb,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

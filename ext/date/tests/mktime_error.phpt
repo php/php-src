@@ -2,12 +2,6 @@
 Test mktime() function : error conditions
 --FILE--
 <?php
-/* Prototype  : int mktime  ([ int $hour= date("H")  [, int $minute= date("i")  [, int $second= date("s")  [, int $month= date("n")  [, int $day= date("j")  [, int $year= date("Y")  [, int $is_dst= -1  ]]]]]]] )
- * Description: Get Unix timestamp for a date
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
@@ -35,13 +29,11 @@ try {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing mktime() : error conditions ***
 
 -- Testing mktime() function with Zero arguments --
-mktime() expects at least 1 parameter, 0 given
+mktime() expects at least 1 argument, 0 given
 
 -- Testing mktime() function with more than expected no. of arguments --
-mktime() expects at most 6 parameters, 7 given
-===DONE===
+mktime() expects at most 6 arguments, 7 given

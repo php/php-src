@@ -4,13 +4,13 @@ SQLite3::loadExtension with empty extension test
 Jelle Lampaert
 #Belgian Testfest 2009
 --INI--
-sqlite3.extension_dir={TMP}
+sqlite3.extension_dir="{TMP}"
 --SKIPIF--
 <?php
 require_once(__DIR__ . '/skipif.inc');
 
 if (!method_exists('SQLite3', 'loadExtension')) {
-	die("skip if SQLITE_OMIT_LOAD_EXTENSION defined");
+    die("skip if SQLITE_OMIT_LOAD_EXTENSION defined");
 }
 ?>
 --FILE--

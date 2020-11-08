@@ -15,14 +15,14 @@ class SOAPStruct {
 }
 
 $struct1 = new SoapVar(array(
-		new SoapVar('arg', XSD_STRING, null, null, 'varString'),
-		new SoapVar('34',  XSD_INT, null, null, 'varInt'),
-		new SoapVar('325.325',  XSD_FLOAT, null, null, 'varFloat')
+        new SoapVar('arg', XSD_STRING, null, null, 'varString'),
+        new SoapVar('34',  XSD_INT, null, null, 'varInt'),
+        new SoapVar('325.325',  XSD_FLOAT, null, null, 'varFloat')
   ),SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd");
 $struct2 = new SoapVar(array(
-		new SoapVar('arg', XSD_STRING, null, null, 'varString'),
-		new SoapVar('34',  XSD_INT, null, null, 'varInt'),
-		new SoapVar('325.325',  XSD_FLOAT, null, null, 'varFloat')
+        new SoapVar('arg', XSD_STRING, null, null, 'varString'),
+        new SoapVar('34',  XSD_INT, null, null, 'varInt'),
+        new SoapVar('325.325',  XSD_FLOAT, null, null, 'varFloat')
   ),SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd");
 
 $param =   new SoapParam(new SoapVar(array(

@@ -1,5 +1,7 @@
 --TEST--
 updateTimestamp never called when session data is empty
+--SKIPIF--
+<?php include('skipif.inc'); ?>
 --INI--
 session.use_strict_mode=0
 session.save_handler=files
@@ -34,13 +36,13 @@ class MySessionHandler extends SessionHandler implements SessionUpdateTimestampH
         return TRUE;
     }
 
-	public function create_sid() {
-		return sha1(random_bytes(32));
-	}
+    public function create_sid() {
+        return sha1(random_bytes(32));
+    }
 
-	public function validateId($sid) {
-		return TRUE;
-	}
+    public function validateId($sid) {
+        return TRUE;
+    }
 
     public function updateTimestamp($sessid, $sessdata) {
         echo __FUNCTION__, PHP_EOL;

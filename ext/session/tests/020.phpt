@@ -17,7 +17,7 @@ session.save_handler=files
 
 error_reporting(E_ALL);
 
-session_id("abtest");
+session_id("test020");
 session_start();
 ?>
 <a href="link.php?a=b">
@@ -25,4 +25,4 @@ session_start();
 session_destroy();
 ?>
 --EXPECT--
-<a href="link.php?a=b&amp;PHPSESSID=abtest">
+<a href="link.php?a=b&amp;PHPSESSID=test020">

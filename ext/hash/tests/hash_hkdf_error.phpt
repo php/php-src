@@ -5,11 +5,6 @@ Hash: hash_hkdf() function: error conditions
 
 error_reporting(E_ALL);
 
-/* Prototype  : string hkdf  ( string $algo  , string $ikm  [, int $length  , string $info = '' , string $salt = ''  ] )
- * Description: HMAC-based Key Derivation Function
- * Source code: ext/hash/hash.c
-*/
-
 function trycatch_dump(...$tests) {
     foreach ($tests as $test) {
         try {
@@ -49,25 +44,23 @@ trycatch_dump(
     fn() => hash_hkdf('sha1', $ikm, 20 * 255 + 1) // Length can't be more than 255 times the hash digest size
 )
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_hkdf(): error conditions ***
 
 -- Testing hash_hkdf() function with invalid hash algorithm --
-[Error] Unknown hashing algorithm: foo
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with non-cryptographic hash algorithm --
-[Error] Non-cryptographic hashing algorithm: adler32
-[Error] Non-cryptographic hashing algorithm: crc32
-[Error] Non-cryptographic hashing algorithm: crc32b
-[Error] Non-cryptographic hashing algorithm: fnv132
-[Error] Non-cryptographic hashing algorithm: fnv1a32
-[Error] Non-cryptographic hashing algorithm: fnv164
-[Error] Non-cryptographic hashing algorithm: fnv1a64
-[Error] Non-cryptographic hashing algorithm: joaat
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
+[ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with invalid parameters --
-[Error] Input keying material cannot be empty
-[Error] Length must be greater than or equal to 0: -1
-[Error] Length must be less than or equal to 5100: 5101
-===Done===
+[ValueError] hash_hkdf(): Argument #2 ($key) cannot be empty
+[ValueError] hash_hkdf(): Argument #3 ($length) must be greater than or equal to 0
+[ValueError] hash_hkdf(): Argument #3 ($length) must be less than or equal to 5100

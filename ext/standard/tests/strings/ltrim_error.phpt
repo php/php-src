@@ -3,12 +3,6 @@ Test ltrim() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : string ltrim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the beginning of a string.
- * Source code: ext/standard/string.c
-*/
-
-
 echo "*** Testing ltrim() : error conditions ***\n";
 
 $hello = "  Hello World\n";
@@ -19,7 +13,6 @@ var_dump(ltrim($hello, "z..a"));
 var_dump(ltrim($hello, "a..b..c"));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ltrim() : error conditions ***
 
@@ -40,4 +33,3 @@ string(14) "  Hello World
 Warning: ltrim(): Invalid '..'-range in %s on line %d
 string(14) "  Hello World
 "
-===DONE===

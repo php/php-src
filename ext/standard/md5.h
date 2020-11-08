@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,9 +21,6 @@
 PHPAPI void make_digest(char *md5str, const unsigned char *digest);
 PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len);
 
-PHP_NAMED_FUNCTION(php_if_md5);
-PHP_NAMED_FUNCTION(php_if_md5_file);
-
 #include "ext/standard/basic_functions.h"
 
 /*
@@ -45,6 +40,7 @@ typedef struct {
 	unsigned char buffer[64];
 	uint32_t block[16];
 } PHP_MD5_CTX;
+#define PHP_MD5_SPEC "llllllb64l16."
 
 PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx);
 PHPAPI void PHP_MD5Update(PHP_MD5_CTX *ctx, const void *data, size_t size);

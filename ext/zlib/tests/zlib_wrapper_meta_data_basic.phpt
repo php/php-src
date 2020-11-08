@@ -3,7 +3,7 @@ Test function stream_get_meta_data on a zlib stream
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -21,7 +21,6 @@ gzclose($h);
 
 
 ?>
-===DONE===
 --EXPECTF--
 no wrapper
 array(7) {
@@ -62,4 +61,3 @@ array(9) {
   ["uri"]=>
   string(%d) "compress.zlib://%s/004.txt.gz"
 }
-===DONE===

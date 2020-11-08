@@ -1,8 +1,9 @@
 --TEST--
-IntlRuleBasedBreakIterator::getRules(): basic test
+IntlRuleBasedBreakIterator::getRules(): basic test icu >= 61.1 && icu < 68.1
 --SKIPIF--
 <?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '61.1') < 0) die('skip for ICU >= 61.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '68.1') >= 0) die('skip for ICU < 68.1'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -25,7 +26,6 @@ $rbbi = new IntlRuleBasedBreakIterator($rules);
 var_dump($rbbi->getRules());
 
 ?>
-==DONE==
 --EXPECT--
 string(137) "$LN = [[:letter:] [:number:]];
 $S = [.;,:];
@@ -37,4 +37,3 @@ $LN+ {1};
 $S+ {42};
 !!safe_forward;
 !!safe_reverse;"
-==DONE==

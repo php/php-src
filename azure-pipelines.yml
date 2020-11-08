@@ -3,6 +3,7 @@ trigger:
   branches:
     include:
       - PHP-7.4
+      - PHP-8.0
       - master
   paths:
     exclude:
@@ -10,6 +11,15 @@ trigger:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
+
+schedules:
+  - cron: "0 1 * * *"
+    displayName: Nightly build
+    branches:
+      include:
+        - PHP-7.4
+        - PHP-8.0
+        - master
 
 jobs:
   - template: azure/job.yml
@@ -69,16 +79,32 @@ jobs:
             CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'
         runTestsParameters: --asan
-        timeoutInMinutes: 150
+        timeoutInMinutes: 310
     - template: azure/msan_job.yml
       parameters:
         configurationName: DEBUG_ZTS_MSAN
         configurationParameters: '--enable-debug --enable-zts'
-        runTestsParameters: --asan
+        runTestsParameters: --msan
+        timeoutInMinutes: 90
     - template: azure/community_job.yml
       parameters:
         configurationName: COMMUNITY
         configurationParameters: >-
             --enable-debug --enable-zts
-            CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
+            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'
+    - template: azure/coverage_job.yml
+      parameters:
+        configurationName: COVERAGE_DEBUG_ZTS
+        configurationParameters: '--enable-debug --disable-zts'
+        timeoutInMinutes: 90
+    - template: azure/file_cache_job.yml
+      parameters:
+        configurationName: DEBUG_NTS_FILE_CACHE
+        configurationParameters: '--enable-debug --disable-zts'
+        timeoutInMinutes: 90
+    - template: azure/job.yml
+      parameters:
+        configurationName: DEBUG_NTS_REPEAT
+        configurationParameters: '--enable-debug --disable-zts'
+        runTestsParameters: '--repeat 2'

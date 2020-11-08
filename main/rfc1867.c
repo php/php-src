@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,11 +30,6 @@
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
 #include "zend_smart_string.h"
-
-#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
-# define atoll(s) _atoi64(s)
-# define HAVE_ATOLL 1
-#endif
 
 #ifndef DEBUG_FILE_UPLOAD
 # define DEBUG_FILE_UPLOAD 0
@@ -606,7 +599,7 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 }
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes, int *end)
+static size_t multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes, int *end)
 {
 	size_t len, max;
 	char *bound;
@@ -645,7 +638,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes
 		self->buf_begin += len;
 	}
 
-	return (int)len;
+	return len;
 }
 
 /*
@@ -655,7 +648,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes
 static char *multipart_buffer_read_body(multipart_buffer *self, size_t *len)
 {
 	char buf[FILLUNIT], *out=NULL;
-	int total_bytes=0, read_bytes=0;
+	size_t total_bytes=0, read_bytes=0;
 
 	while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), NULL))) {
 		out = erealloc(out, total_bytes + read_bytes + 1);
@@ -682,7 +675,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
 	char *lbuf = NULL, *abuf = NULL;
 	zend_string *temp_filename = NULL;
-	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
+	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0;
+	size_t array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
 	int skip_upload = 0, anonindex = 0, is_anonymous;
 	HashTable *uploaded_files = NULL;
@@ -904,11 +898,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
-#ifdef HAVE_ATOLL
-					max_file_size = atoll(value);
-#else
 					max_file_size = strtoll(value, NULL, 10);
-#endif
 				}
 
 				efree(param);
@@ -1116,7 +1106,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			is_arr_upload =	(start_arr = strchr(param,'[')) && (param[strlen(param)-1] == ']');
 
 			if (is_arr_upload) {
-				array_len = (int)strlen(start_arr);
+				array_len = strlen(start_arr);
 				if (array_index) {
 					efree(array_index);
 				}
@@ -1138,11 +1128,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				snprintf(lbuf, llen, "%s_name", param);
 			}
 
-			/* The \ check should technically be needed for win32 systems only where
-			 * it is a valid path separator. However, IE in all it's wisdom always sends
-			 * the full path of the file on the user's filesystem, which means that unless
-			 * the user does basename() they get a bogus file name. Until IE's user base drops
-			 * to nill or problem is fixed this code must remain enabled for all systems. */
+			/* Pursuant to RFC 7578, strip any path components in the
+			 * user-supplied file name:
+			 *  > If a "filename" parameter is supplied ... do not use
+			 *  > directory path information that may be present."
+			 */
 			s = _basename(internal_encoding, filename);
 			if (!s) {
 				s = filename;
@@ -1199,7 +1189,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			{
 				/* store temp_filename as-is (in case upload_tmp_dir
-				 * contains escapeable characters. escape only the variable name.) */
+				 * contains escapable characters. escape only the variable name.) */
 				zval zfilename;
 
 				/* Initialize variables */

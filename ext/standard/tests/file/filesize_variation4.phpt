@@ -7,12 +7,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/*
- Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE
-   (and generates an error of level E_WARNING) in case of an error.
-*/
-
 /* Testing filesize() with data written using different file modes and by creating holes in file */
 
 $file_path = __DIR__;
@@ -62,7 +56,7 @@ clearstatcache();
 
 echo "-- writing data after hole and checking the size --\n";
 $file_handle = fopen($filename, "a");
-fwrite($file_handle, "Hello\0");  //wrting 6 bytes of data
+fwrite($file_handle, "Hello\0");  //writing 6 bytes of data
 fclose($file_handle);
 var_dump( filesize($filename) );  //226 bytes
 clearstatcache();

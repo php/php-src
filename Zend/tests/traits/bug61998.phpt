@@ -57,6 +57,7 @@ $b->func2(); //from Bar
 $b->newFunc2(); //from T2
 $b->newFunc3(); //from T2
 $b->func3(); //from Bar
+?>
 --EXPECT--
 From T1
 From Foo

@@ -3,15 +3,15 @@ ReflectionClass::__toString() - various parameters
 --FILE--
 <?php
 Class A {
-	public function privf(Exception $a) {}
-	public function pubf(A $a,
-						 $b,
-						 C $c = null,
-						 $d = K,
-						 $e = "15 chars long -",
-						 $f = null,
-						 $g = false,
-						 array $h = null) {}
+    public function privf(Exception $a) {}
+    public function pubf(A $a,
+                         $b,
+                         C $c = null,
+                         $d = K,
+                         $e = "15 chars long -",
+                         $f = null,
+                         $g = false,
+                         array $h = null) {}
 }
 
 Class C extends A { }
@@ -50,12 +50,12 @@ Class [ <user> class C extends A ] {
       - Parameters [8] {
         Parameter #0 [ <required> A $a ]
         Parameter #1 [ <required> $b ]
-        Parameter #2 [ <optional> C or NULL $c = NULL ]
+        Parameter #2 [ <optional> ?C $c = NULL ]
         Parameter #3 [ <optional> $d = '16 chars long -...' ]
         Parameter #4 [ <optional> $e = '15 chars long -' ]
         Parameter #5 [ <optional> $f = NULL ]
         Parameter #6 [ <optional> $g = false ]
-        Parameter #7 [ <optional> array or NULL $h = NULL ]
+        Parameter #7 [ <optional> ?array $h = NULL ]
       }
     }
   }

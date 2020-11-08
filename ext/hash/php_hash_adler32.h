@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +22,7 @@
 typedef struct {
 	uint32_t state;
 } PHP_ADLER32_CTX;
+#define PHP_ADLER32_SPEC "l."
 
 PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context);
 PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len);

@@ -35,5 +35,6 @@
 #include "mbfilter.h"
 
 MBFLAPI extern const mbfl_encoding mbfl_encoding_8bit;
+extern const struct mbfl_identify_vtbl vtbl_identify_8bit;
 
 #endif /* MBFL_MBFILTER_8BIT_H */

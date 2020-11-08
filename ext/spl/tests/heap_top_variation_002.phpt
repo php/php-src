@@ -7,9 +7,9 @@ TestFest London May 2009
 <?php
 // override heap to force corruption by throwing exception in compare
 class SplMinHeap2 extends SplMinHeap {
-	public function compare($a, $b) {
-		throw new Exception('Corrupt heap');
-	}
+    public function compare($a, $b) {
+        throw new Exception('Corrupt heap');
+    }
 }
 
 $h = new SplMinHeap2();
@@ -17,14 +17,14 @@ $h = new SplMinHeap2();
 // insert 2 elements to hit our overridden compare
 $h->insert(4);
 try {
-	$h->insert(5);
+    $h->insert(5);
 } catch (Exception $e) {}
 
 // call top, should fail with corrupted heap
 try {
-	$h->top();
+    $h->top();
 } catch (Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 ?>
 --EXPECT--

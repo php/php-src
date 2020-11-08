@@ -2,10 +2,6 @@
 Test is_object() function
 --FILE--
 <?php
-/* Prototype: bool is_object ( mixed $var );
- * Description: Finds whether the given variable is an object
- */
-
 echo "*** Testing is_object() with valid objects ***\n";
 
 // class with no members
@@ -145,7 +141,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_object() with valid objects ***
 -- Iteration 1 --
 bool(true)

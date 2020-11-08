@@ -13,7 +13,7 @@ if (empty($_ENV['PWD'])) die('skip PWD is empty');
 variables_order=GPCSE
 --FILE--
 <?php
-	var_dump(filter_input(INPUT_ENV, 'PWD'));
+    var_dump(filter_input(INPUT_ENV, 'PWD'));
 ?>
 --EXPECTF--
 string(%d) "%s"

@@ -11,34 +11,32 @@ $it->seek(4);
 var_dump($it->current());
 try
 {
-	$it->seek(-1);
-	var_dump($it->current());
+    $it->seek(-1);
+    var_dump($it->current());
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try
 {
-	$it->seek(12);
-	var_dump($it->current());
+    $it->seek(12);
+    var_dump($it->current());
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 $pos = 0;
 foreach($it as $v)
 {
-	$it->seek($pos++);
-	var_dump($v);
+    $it->seek($pos++);
+    var_dump($v);
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(11)
 int(5)
@@ -56,4 +54,3 @@ int(7)
 int(8)
 int(9)
 int(10)
-===DONE===

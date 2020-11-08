@@ -36,10 +36,10 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: shm_get_var(): variable key 1000 doesn't exist in %s005.php on line %d
+Warning: shm_get_var(): Variable key 1000 doesn't exist in %s005.php on line %d
 bool(false)
 
-Warning: shm_get_var(): variable key -10000 doesn't exist in %s005.php on line %d
+Warning: shm_get_var(): Variable key -10000 doesn't exist in %s005.php on line %d
 bool(false)
 string(11) "test string"
 object(stdClass)#%d (0) {
