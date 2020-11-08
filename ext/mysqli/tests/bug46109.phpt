@@ -14,5 +14,8 @@ require_once('skipifconnectfailure.inc');
     $mysqli->init();
     echo "done";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method mysqli::init() is deprecated in %s on line %d
+
+Deprecated: Method mysqli::init() is deprecated in %s on line %d
 done

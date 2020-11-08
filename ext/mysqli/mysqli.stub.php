@@ -114,6 +114,7 @@ class mysqli
 
     /**
      * @return mysqli|false
+     * @deprecated
      */
     public function init() {}
 
