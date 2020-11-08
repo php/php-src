@@ -39,21 +39,39 @@ typedef struct Scanner {
 	const char *ptr, *cur, *tok, *end;
 } Scanner;
 
+/*!re2c
+BINDCHR		= [:][a-zA-Z0-9_]+;
+QUESTION	= [?];
+ESCQUESTION	= [?][?];
+COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
+SPECIALS	= [:?"'-/];
+MULTICHAR	= [:]{2,};
+ANYNOEOF	= [\001-\377];
+*/
+
 static int scan(Scanner *s)
 {
 	const char *cursor = s->cur;
 
 	s->tok = cursor;
 	/*!re2c
-	BINDCHR		= [:][a-zA-Z0-9_]+;
-	QUESTION	= [?];
-	ESCQUESTION	= [?][?];
-	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
-	SPECIALS	= [:?"'-/];
-	MULTICHAR	= [:]{2,};
-	ANYNOEOF	= [\001-\377];
+		(["]([^"])*["])							{ RET(PDO_PARSER_TEXT); }
+		([']([^'])*['])							{ RET(PDO_PARSER_TEXT); }
+		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
+		ESCQUESTION								{ RET(PDO_PARSER_ESCAPED_QUESTION); }
+		BINDCHR									{ RET(PDO_PARSER_BIND); }
+		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
+		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
+		COMMENTS								{ RET(PDO_PARSER_TEXT); }
+		(ANYNOEOF\SPECIALS)+ 					{ RET(PDO_PARSER_TEXT); }
 	*/
+}
 
+static int scan_mysql(Scanner *s)
+{
+	const char *cursor = s->cur;
+
+	s->tok = cursor;
 	/*!re2c
 		(["](([\\]ANYNOEOF)|ANYNOEOF\["\\])*["]) { RET(PDO_PARSER_TEXT); }
 		(['](([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
@@ -95,13 +113,20 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inque
 	struct pdo_bound_param_data *param;
 	int query_type = PDO_PLACEHOLDER_NONE;
 	struct placeholder *placeholders = NULL, *placetail = NULL, *plc = NULL;
+	int (*scan_ptr)(Scanner*);
 
 	ptr = *outquery;
 	s.cur = inquery;
 	s.end = inquery + inquery_len + 1;
 
+	if (!stmt->mysql_compat) {
+		scan_ptr = &scan;
+	} else {
+		scan_ptr = &scan_mysql;
+	}
+
 	/* phase 1: look for args */
-	while((t = scan(&s)) != PDO_PARSER_EOI) {
+	while((t = (*scan_ptr)(&s)) != PDO_PARSER_EOI) {
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS || t == PDO_PARSER_ESCAPED_QUESTION) {
 			if (t == PDO_PARSER_ESCAPED_QUESTION && stmt->supports_placeholders == PDO_PLACEHOLDER_POSITIONAL) {
 				/* escaped question marks unsupported, treat as text */

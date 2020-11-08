@@ -577,8 +577,12 @@ struct _pdo_stmt_t {
 	 * bindParam() for its prepared statements, if false, PDO should
 	 * emulate prepare and bind on its behalf */
 	unsigned supports_placeholders:2;
+	/* if true, the statement SQL should be parsed using MySQL syntax */
+	unsigned mysql_compat:1;
 
-	unsigned _reserved:29;
+	/* the sum of the number of bits here and the bit fields preceding should
+	 * equal 32 */
+	unsigned _reserved:28;
 
 	/* the number of columns in the result set; not valid until after
 	 * the statement has been executed at least once.  In some cases, might

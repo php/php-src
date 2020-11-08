@@ -170,6 +170,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &mysql_stmt_methods;
+	stmt->mysql_compat = 1;
 
 	if (H->emulate_prepare) {
 		goto end;
