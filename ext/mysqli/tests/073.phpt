@@ -6,7 +6,6 @@ mysqli_driver properties
 <?php
     require_once("connect.inc");
 
-    var_dump($driver->embedded);
     var_dump($driver->client_version);
     var_dump($driver->client_info);
     var_dump($driver->driver_version);
@@ -15,7 +14,6 @@ mysqli_driver properties
     print "done!";
 ?>
 --EXPECTF--
-bool(false)
 int(%d)
 string(%d) "%s"
 int(%d)
