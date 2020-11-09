@@ -422,9 +422,9 @@ static zend_always_inline void zend_jit_trace_add_op_guard(zend_ssa             
 static zend_always_inline size_t zend_jit_trace_frame_size(const zend_op_array *op_array)
 {
 	if (op_array && op_array->type == ZEND_USER_FUNCTION) {
-		return offsetof(zend_jit_trace_stack_frame, stack) + ZEND_MM_ALIGNED_SIZE((op_array->last_var + op_array->T) * sizeof(zend_jit_trace_stack));
+		return ZEND_MM_ALIGNED_SIZE(offsetof(zend_jit_trace_stack_frame, stack) + ZEND_MM_ALIGNED_SIZE((op_array->last_var + op_array->T) * sizeof(zend_jit_trace_stack)));
 	} else {
-		return offsetof(zend_jit_trace_stack_frame, stack);
+		return ZEND_MM_ALIGNED_SIZE(offsetof(zend_jit_trace_stack_frame, stack));
 	}
 }
 
