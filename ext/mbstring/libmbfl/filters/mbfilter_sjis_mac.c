@@ -408,6 +408,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			}
 
 			if (c == 0xf860 || c == 0xf861 || c == 0xf862) {
+				/* Apple 'transcoding hint' codepoints (from private use area) */
 				filter->status = 2;
 				filter->cache = c;
 				return c;
@@ -527,8 +528,9 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 
 		if (filter->status == 0) {
+			/* Didn't find any of expected codepoints after Apple transcoding hint */
 			CK(mbfl_filt_conv_illegal_output(c1, filter));
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			return mbfl_filt_conv_wchar_sjis_mac(c, filter);
 		}
 
 		break;
