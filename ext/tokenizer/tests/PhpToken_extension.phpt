@@ -20,7 +20,7 @@ class MyPhpToken extends PhpToken {
     }
 }
 
-foreach (MyPhpToken::getAll($code) as $token) {
+foreach (MyPhpToken::tokenize($code) as $token) {
     echo $token->getLoweredText();
 
     if ($token->extra !== 123) {

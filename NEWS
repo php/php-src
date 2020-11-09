@@ -27,6 +27,9 @@ PHP                                                                        NEWS
     message). (Nikita)
   . Fixed bug #80266 (parse_url silently drops port number 0). (cmb, Nikita)
 
+- Tokenizer:
+  . Fixed bug #80328 (PhpToken::getAll() confusing name). (Nikita)
+
 29 Oct 2020, PHP 8.0.0RC3
 
 - Core:
