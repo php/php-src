@@ -81,3 +81,12 @@ jobs:
         php vendor/bin/phpunit
       displayName: 'Test Amphp'
       condition: or(succeeded(), failed())
+    - script: |
+        php7.3 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
+        cd symfony_demo
+        export USE_ZEND_ALLOC=0
+        export USE_TRACKED_ALLOC=1
+        sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
+        php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
+      displayName: 'Symfony Preloading'
+      condition: or(succeeded(), failed())
