@@ -327,7 +327,7 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 
 	int32_t rawOffset, dstOffset;
 	UDate now = Calendar::getNow();
-	tz->getOffset(now, FALSE, rawOffset, dstOffset, uec);
+	tz->getOffset(now, false, rawOffset, dstOffset, uec);
 	if (U_FAILURE(uec)) {
 		return debug_info;
 	}
