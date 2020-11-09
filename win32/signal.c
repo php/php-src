@@ -36,7 +36,9 @@ static void php_win32_signal_ctrl_interrupt_function(zend_execute_data *execute_
 		ZVAL_LONG(&params[0], ctrl_evt);
 
 		/* If the function returns, */
-		call_user_function(NULL, NULL, &ctrl_handler, &retval, 1, params);
+		if (FAILURE == call_user_function(NULL, NULL, &ctrl_handler, &retval, 1, params)) {
+			ZEND_ASSERT(Z_TYPE(retval) == IS_UNDEF);
+		}
 		zval_ptr_dtor(&retval);
 	}
 
