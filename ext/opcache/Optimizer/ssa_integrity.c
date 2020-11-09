@@ -287,8 +287,9 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 
 	/* Phis */
 	FOREACH_PHI(phi) {
-		int source;
-		FOREACH_PHI_SOURCE(phi, source) {
+		unsigned num_sources = NUM_PHI_SOURCES(phi);
+		for (i = 0; i < num_sources; i++) {
+			int source = phi->sources[i];
 			if (source < 0) {
 				FAIL(VARFMT " negative source\n", VAR(phi->ssa_var));
 			}
@@ -298,7 +299,16 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 			if (ssa->vars[source].var != ssa->vars[phi->ssa_var].var) {
 				FAIL(VARFMT " source of phi for " VARFMT "\n", VAR(source), VAR(phi->ssa_var));
 			}
-		} FOREACH_PHI_SOURCE_END();
+			if (phi->use_chains[i]) {
+				int j;
+				for (j = i + 1; j < num_sources; j++) {
+					if (phi->sources[j] == source && phi->use_chains[j]) {
+						FAIL("use chain for source " VARFMT " of phi " VARFMT
+							" at %d despite earlier use\n", VAR(source), VAR(phi->ssa_var), j);
+					}
+				}
+			}
+		}
 		if (ssa->vars[phi->ssa_var].definition_phi != phi) {
 			FAIL(VARFMT " does not define this phi\n", VAR(phi->ssa_var));
 		}
