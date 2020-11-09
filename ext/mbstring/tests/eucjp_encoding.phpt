@@ -43,7 +43,7 @@ $fromUnicode["\x00\x00\x00\x7E"] = "\x7E";
 /* Likewise with 0x005C */
 $fromUnicode["\x00\x00\x00\x5C"] = "\x5C";
 
-findInvalidChars($validChars, $invalidChars, $truncated, map(range(0xA1, 0xFE), 2, array(0x8E => 2, 0x8F => 3)));
+findInvalidChars($validChars, $invalidChars, $truncated, array_fill_keys(range(0xA1, 0xFE), 2) + array(0x8E => 2, 0x8F => 3));
 
 /* In the JIS X 0212 character set, kuten code 0x2237 (EUC-JP 0x8FA2B7)
  * is an ordinary tilde character
@@ -61,6 +61,9 @@ echo "Encoding verification and conversion work for all invalid characters\n";
 testValidString("\x8F\xA2\xB7", "\x00\x00\x00~", 'EUC-JP', 'UTF-32BE', false);
 echo "Irreversible mapping of 0x8FA2B7 follows JIS X 0212 correctly\n";
 
+testAllValidChars($fromUnicode, 'UTF-32BE', 'EUC-JP', false);
+echo "Unicode -> EUC-JP conversion works on all valid characters\n";
+
 $invalidChars = array();
 for ($cp = 0; $cp <= 0xFFFF; $cp++) {
   $char = pack('N', $cp);
@@ -74,4 +77,5 @@ echo "Unicode -> EUC-JP conversion works on all invalid characters\n";
 Encoding verification and conversion work for all valid characters
 Encoding verification and conversion work for all invalid characters
 Irreversible mapping of 0x8FA2B7 follows JIS X 0212 correctly
+Unicode -> EUC-JP conversion works on all valid characters
 Unicode -> EUC-JP conversion works on all invalid characters

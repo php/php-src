@@ -207,13 +207,6 @@ function findInvalidChars($valid, &$invalid, &$truncated, $startBytes = array())
     }
 }
 
-// Helper for building `$startBytes` map for above function
-function map($keys, $value, $array = array()) {
-    foreach ($keys as $key)
-        $array[$key] = $value;
-    return $array;
-}
-
 function testEncodingFromUTF16ConversionTable($path, $encoding, $replacement = '%', $startBytes = array()) {
     srand(1000); // Make results consistent
     mb_substitute_character(0x25); // '%'
@@ -225,7 +218,7 @@ function testEncodingFromUTF16ConversionTable($path, $encoding, $replacement = '
     testTruncatedChars($truncated, $encoding, 'UTF-16BE', "\x00%");
     echo "Tested $encoding -> UTF-16BE\n";
 
-    findInvalidChars($fromUnicode, $invalid, $unused, map(range(0,0xFF), 2));
+    findInvalidChars($fromUnicode, $invalid, $unused, array_fill_keys(range(0,0xFF), 2));
     convertAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', $encoding, $replacement);
     echo "Tested UTF-16BE -> $encoding\n";
 }

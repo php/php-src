@@ -46,16 +46,20 @@ testAllValidChars($validChars, 'Shift-JIS', 'UTF-16BE');
 echo "SJIS verification and conversion works on all valid characters\n";
 
 findInvalidChars($validChars, $invalidChars, $truncated,
-  map(range(0x81, 0x9F), 2, map(range(0xE0, 0xEF), 2)));
+  array_fill_keys(range(0x81, 0x9F), 2) + array_fill_keys(range(0xE0, 0xEF), 2));
 testAllInvalidChars($invalidChars, $validChars, 'Shift-JIS', 'UTF-16BE', "\x00%");
 testTruncatedChars($truncated, 'Shift-JIS', 'UTF-16BE', "\x00%");
 echo "SJIS verification and conversion works on all invalid characters\n";
 
-findInvalidChars($fromUnicode, $invalidChars, $unused, map(range(0, 0xFF), 2));
+testAllValidChars($fromUnicode, 'UTF-16BE', 'Shift-JIS', false);
+echo "Unicode -> SJIS conversion works on all valid characters\n";
+
+findInvalidChars($fromUnicode, $invalidChars, $unused, array_fill_keys(range(0, 0xFF), 2));
 convertAllInvalidChars($invalidChars, $fromUnicode, 'UTF-16BE', 'Shift-JIS', '%');
 echo "Unicode -> SJIS conversion works on all invalid characters\n";
 ?>
 --EXPECT--
 SJIS verification and conversion works on all valid characters
 SJIS verification and conversion works on all invalid characters
+Unicode -> SJIS conversion works on all valid characters
 Unicode -> SJIS conversion works on all invalid characters
