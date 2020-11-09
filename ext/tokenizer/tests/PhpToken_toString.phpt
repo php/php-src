@@ -3,7 +3,7 @@ PhpToken implements __toString()
 --FILE--
 <?php
 
-$tokens = PhpToken::getAll('<?php echo "Hello ". $what;');
+$tokens = PhpToken::tokenize('<?php echo "Hello ". $what;');
 var_dump(implode($tokens));
 
 var_dump($tokens[0] instanceof Stringable);

@@ -92,7 +92,7 @@ static zend_string *php_token_get_text(zval *obj) {
 static zend_bool tokenize_common(
 		zval *return_value, zend_string *source, zend_long flags, zend_class_entry *token_class);
 
-PHP_METHOD(PhpToken, getAll)
+PHP_METHOD(PhpToken, tokenize)
 {
 	zend_string *source;
 	zend_long flags = 0;

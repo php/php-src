@@ -1,5 +1,5 @@
 --TEST--
-PhpToken::getAll() method
+PhpToken::tokenize() method
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
 --FILE--
@@ -11,8 +11,8 @@ function foo() {
     echo "bar";
 }
 PHP;
-var_dump(PhpToken::getAll($code));
-var_dump(PhpToken::getAll($code, TOKEN_PARSE));
+var_dump(PhpToken::tokenize($code));
+var_dump(PhpToken::tokenize($code, TOKEN_PARSE));
 
 ?>
 --EXPECTF--
