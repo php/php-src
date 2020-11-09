@@ -502,12 +502,36 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
 			ZVAL_LONG(return_value, H->max_buffer_size);
 			break;
-#else
+#endif
+
 		case PDO_MYSQL_ATTR_LOCAL_INFILE:
-			ZVAL_BOOL(
-				return_value,
-				(H->server->data->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES);
+		{
+#ifdef PDO_USE_MYSQLND
+			zend_bool local_infile_enabled = (H->server->data->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES;
+#else
+			zend_bool local_infile_enabled = 0;
+			mysql_get_option(H->server, MYSQL_OPT_LOCAL_INFILE, &local_infile_enabled);
+#endif
+			ZVAL_BOOL(return_value, local_infile_enabled);
 			break;
+		}
+
+#if MYSQL_VERSION_ID > 80021 || defined(PDO_USE_MYSQLND)
+		case PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY:
+		{
+			const char* local_infile_directory = NULL;
+#ifdef PDO_USE_MYSQLND
+			local_infile_directory = H->server->data->options->local_infile_directory;
+#else
+			mysql_get_option(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, &local_infile_directory);
+#endif
+			if (local_infile_directory) {
+				ZVAL_STRING(return_value, local_infile_directory);
+			} else {
+				ZVAL_NULL(return_value);
+			}
+			break;
+		}
 #endif
 
 		default:
@@ -656,6 +680,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	if (driver_options) {
 		zend_long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
 		unsigned int local_infile = (unsigned int) pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
+		zend_string *local_infile_directory = NULL;
 		zend_string *init_cmd = NULL;
 #ifndef PDO_USE_MYSQLND
 		zend_string *default_file = NULL, *default_group = NULL;
@@ -698,6 +723,17 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
 			pdo_mysql_error(dbh);
 			goto cleanup;
+		}
+#endif
+#if MYSQL_VERSION_ID > 80021 || defined(PDO_USE_MYSQLND)
+		local_infile_directory = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, NULL);
+		if (local_infile_directory) {
+			if (mysql_options(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, (const char *)ZSTR_VAL(local_infile_directory))) {
+				zend_string_release(local_infile_directory);
+				pdo_mysql_error(dbh);
+				goto cleanup;
+			}
+			zend_string_release(local_infile_directory);
 		}
 #endif
 #ifdef MYSQL_OPT_RECONNECT

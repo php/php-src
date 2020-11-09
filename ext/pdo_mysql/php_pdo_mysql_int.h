@@ -31,6 +31,9 @@
 typedef _Bool       my_bool;
 #endif
 #	define PDO_MYSQL_PARAM_BIND MYSQL_BIND
+#	if MYSQL_VERSION_ID >= 80000
+#		define my_bool bool
+#	endif
 #endif
 
 #if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || defined(MYSQL_USE_MYSQLND)
@@ -129,7 +132,7 @@ typedef struct {
 #if PDO_USE_MYSQLND
 	const size_t			*current_lengths;
 #else
-	zend_long				*current_lengths;
+	unsigned long			*current_lengths;
 #endif
 	pdo_mysql_error_info 	einfo;
 #if PDO_USE_MYSQLND
@@ -182,6 +185,9 @@ enum {
 	PDO_MYSQL_ATTR_MULTI_STATEMENTS,
 #ifdef PDO_USE_MYSQLND
 	PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT,
+#endif
+#if MYSQL_VERSION_ID > 80021 || defined(PDO_USE_MYSQLND)
+	PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY,
 #endif
 };
 

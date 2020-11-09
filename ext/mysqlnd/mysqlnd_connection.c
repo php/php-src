@@ -253,6 +253,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->options->connect_attr, pers);
 		conn->options->connect_attr = NULL;
 	}
+	if (conn->options->local_infile_directory) {
+		mnd_pefree(conn->options->local_infile_directory, pers);
+		conn->options->local_infile_directory = NULL;
+	}
 }
 /* }}} */
 
@@ -1668,6 +1672,27 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				conn->options->flags &= ~CLIENT_LOCAL_FILES;
 			}
 			break;
+		case MYSQL_OPT_LOAD_DATA_LOCAL_DIR:
+		{
+			if (!value || (*value == '\0')) {
+				conn->options->local_infile_directory = NULL;
+				break;
+			}
+
+			php_stream *stream = php_stream_opendir(value, REPORT_ERRORS, NULL);
+			if (!stream) {
+				SET_CLIENT_ERROR(conn->error_info, CR_CANT_OPEN_DIR, UNKNOWN_SQLSTATE, "Cannot open directory");
+				ret = FAIL;
+				break;
+			}
+			php_stream_closedir(stream);
+
+			conn->options->local_infile_directory = mnd_pestrdup(value, conn->persistent);
+			if (!conn->options->local_infile_directory) {
+				goto oom;
+			}
+			break;
+		}
 		case MYSQL_INIT_COMMAND:
 		{
 			char ** new_init_commands;

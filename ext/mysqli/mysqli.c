@@ -535,6 +535,7 @@ PHP_INI_BEGIN()
 #endif
 	STD_PHP_INI_BOOLEAN("mysqli.reconnect",				"0",	PHP_INI_SYSTEM,		OnUpdateLong,		reconnect,			zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"0",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_ENTRY("mysqli.local_infile_directory",	NULL,	PHP_INI_SYSTEM,		OnUpdateString,		local_infile_directory,	zend_mysqli_globals,	mysqli_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -560,6 +561,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->report_mode = 0;
 	mysqli_globals->report_ht = 0;
 	mysqli_globals->allow_local_infile = 0;
+	mysqli_globals->local_infile_directory = NULL;
 	mysqli_globals->embedded = 0;
 	mysqli_globals->rollback_on_cached_plink = FALSE;
 }
@@ -690,6 +692,9 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_READ_DEFAULT_FILE", MYSQL_READ_DEFAULT_FILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
+#if MYSQL_VERSION_ID > 80021 || defined(MYSQLI_USE_MYSQLND)
+	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOAD_DATA_LOCAL_DIR", MYSQL_OPT_LOAD_DATA_LOCAL_DIR, CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_READ_TIMEOUT", MYSQL_OPT_READ_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 #if defined(MYSQLI_USE_MYSQLND)
@@ -1150,7 +1155,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	MYSQL_ROW row;
 	unsigned int	i, num_fields;
 	MYSQL_FIELD		*fields;
-	zend_ulong	*field_len;
+	unsigned long	*field_len;
 
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();

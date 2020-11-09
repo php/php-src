@@ -28,6 +28,7 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
 		"MYSQL_ATTR_COMPRESS"						=> true,
 		"MYSQL_ATTR_MULTI_STATEMENTS"					=> true,
 		"MYSQL_ATTR_SSL_VERIFY_SERVER_CERT"				=> true,
+		"MYSQL_ATTR_LOCAL_INFILE_DIRECTORY"				=> true,
 	);
 
 	if (!MySQLPDOTest::isPDOMySQLnd()) {

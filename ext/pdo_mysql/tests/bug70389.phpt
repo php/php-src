@@ -13,6 +13,7 @@ $flags = [
 	PDO::MYSQL_ATTR_FOUND_ROWS	=> true,
 	PDO::MYSQL_ATTR_LOCAL_INFILE	=> true,
 	PDO::ATTR_PERSISTENT 		=> true,
+	PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY	=> __DIR__,
 ];
 
 $std = new StdClass();
@@ -22,12 +23,14 @@ new PDO(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS, $flags);
 var_dump($flags);
 
 ?>
---EXPECT--
-array(3) {
-  [1005]=>
+--EXPECTF--
+array(4) {
+  [%d]=>
   bool(true)
-  [1001]=>
+  [%d]=>
   bool(true)
-  [12]=>
+  [%d]=>
   bool(true)
+  [%d]=>
+  string(%d) "%s"
 }
