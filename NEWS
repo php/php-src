@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0RC4
 
+- Core:
+  . Fixed bug #80334 (assert() vs named parameters - confusing error). (Nikita)
+
 - FFI:
   . Fixed bug #79177 (FFI doesn't handle well PHP exceptions within callback).
     (cmb, Dmitry, Nikita)
