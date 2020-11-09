@@ -140,12 +140,15 @@ static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S)
 static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
+	pdo_odbc_db_handle *H = S->H;
 
 	if (S->stmt != SQL_NULL_HANDLE) {
-		if (stmt->executed) {
-			SQLCloseCursor(S->stmt);
+		if (H != NULL && H->env != NULL) {
+			if (stmt->executed) {
+				SQLCloseCursor(S->stmt);
+			}
+			SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
 		}
-		SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
 		S->stmt = SQL_NULL_HANDLE;
 	}
 
