@@ -1907,6 +1907,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
   if test "$PKG_CONFIG icu-io --atleast-version=60"; then
     ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
   fi
+
+  ICU_CFLAGS="$ICU_CFLAGS -DU_DEFINE_FALSE_AND_TRUE=1"
 ])
 
 dnl
