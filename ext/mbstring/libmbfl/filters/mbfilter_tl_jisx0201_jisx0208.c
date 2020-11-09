@@ -22,20 +22,14 @@
  *
  */
 
+#include <stdint.h>
 #include "mbfilter_tl_jisx0201_jisx0208.h"
 #include "translit_kana_jisx0201_jisx0208.h"
 
-void
-mbfl_filt_tl_jisx0201_jisx0208_init(mbfl_convert_filter *filt)
-{
-	mbfl_filt_conv_common_ctor(filt);
-}
-
-int
-mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
+void mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 {
 	int s, n;
-	int mode = ((mbfl_filt_tl_jisx0201_jisx0208_param *)filt->opaque)->mode;
+	intptr_t mode = (intptr_t)filt->opaque;
 
 	s = c;
 
@@ -82,7 +76,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 				} else {
 					filt->status = 1;
 					filt->cache = c;
-					return c;
+					return;
 				}
 			} else {
 				if (filt->status) {
@@ -111,7 +105,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 				} else {
 					filt->status = 1;
 					filt->cache = c;
-					return c;
+					return;
 				}
 			} else {
 				if (filt->status) {
@@ -131,7 +125,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT1) {
+	if (mode & MBFL_FILT_TL_HAN2ZEN_SPECIAL) {
 		/* special ascii to symbol */
 		if (c == 0x5c) {
 			s = 0xffe5;				/* FULLWIDTH YEN SIGN */
@@ -145,17 +139,6 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 			s = 0x2019;				/* RIGHT SINGLE QUOTATION MARK */
 		} else if (c == 0x22) {
 			s = 0x201d;				/* RIGHT DOUBLE QUOTATION MARK */
-		}
-	} else if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT2) {
-		/* special ascii to symbol */
-		if (c == 0x5c) {
-			s = 0xff3c;				/* FULLWIDTH REVERSE SOLIDUS */
-		} else if (c == 0x7e) {
-			s = 0xff5e;				/* FULLWIDTH TILDE */
-		} else if (c == 0x27) {
-			s = 0xff07;				/* FULLWIDTH APOSTROPHE */
-		} else if (c == 0x22) {
-			s = 0xff02;				/* FULLWIDTH QUOTATION MARK */
 		}
 	}
 
@@ -216,20 +199,20 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 		} else if (c == 0x30fb) {
 			s = 0xff65;				/* HALFWIDTH KATAKANA MIDDLE DOT */
 		}
-	} else if (mode & (MBFL_FILT_TL_ZEN2HAN_HIRA2KANA
-			| MBFL_FILT_TL_ZEN2HAN_KANA2HIRA)) {
-		if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRA2KANA) &&
+	} else if (mode & (MBFL_FILT_TL_ZENKAKU_HIRA2KATA
+			| MBFL_FILT_TL_ZENKAKU_KATA2HIRA)) {
+		if ((mode & MBFL_FILT_TL_ZENKAKU_HIRA2KATA) &&
 				((c >= 0x3041 && c <= 0x3093) || c == 0x309d || c == 0x309e)) {
 			/* Zenkaku hiragana to Zenkaku katakana */
 			s = c + 0x60;
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_KANA2HIRA) &&
+		} else if ((mode & MBFL_FILT_TL_ZENKAKU_KATA2HIRA) &&
 				((c >= 0x30a1 && c <= 0x30f3) || c == 0x30fd || c == 0x30fe)) {
 			/* Zenkaku katakana to Zenkaku hiragana */
 			s = c - 0x60;
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT1) {	/* special symbol to ascii */
+	if (mode & MBFL_FILT_TL_ZEN2HAN_SPECIAL) {	/* special symbol to ascii */
 		if (c == 0xffe5) {			/* FULLWIDTH YEN SIGN */
 			s = 0x5c;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
@@ -249,51 +232,33 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT2) {	/* special symbol to ascii */
-		if (c == 0xff3c) {			/* FULLWIDTH REVERSE SOLIDUS */
-			s = 0x5c;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s = 0x7e;
-		} else if (c == 0xff07) {	/* FULLWIDTH APOSTROPHE */
-			s = 0x27;
-		} else if (c == 0xff02) {	/* FULLWIDTH QUOTATION MARK */
-			s = 0x22;
-		}
-	}
-
-	return (*filt->output_function)(s, filt->data);
+	(*filt->output_function)(s, filt->data);
 }
 
-int
-mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
+void mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
 {
-	int ret, n;
-	int mode = ((mbfl_filt_tl_jisx0201_jisx0208_param *)filt->opaque)->mode;
+	intptr_t mode = (intptr_t)filt->opaque;
 
-	ret = 0;
 	if (filt->status) {
-		n = (filt->cache - 0xff60) & 0x3f;
+		int n = (filt->cache - 0xff60) & 0x3f;
 		if (mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) {	/* hankaku kana to zenkaku katakana */
-			ret = (*filt->output_function)(0x3000 + hankana2zenkana_table[n], filt->data);
+			(*filt->output_function)(0x3000 + hankana2zenkana_table[n], filt->data);
 		} else if (mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA) {	/* hankaku kana to zenkaku hiragana */
-			ret = (*filt->output_function)(0x3000 + hankana2zenhira_table[n], filt->data);
+			(*filt->output_function)(0x3000 + hankana2zenhira_table[n], filt->data);
 		}
 		filt->status = 0;
 	}
 
-	if (filt->flush_function != NULL) {
-		return (*filt->flush_function)(filt->data);
+	if (filt->flush_function) {
+		(*filt->flush_function)(filt->data);
 	}
-
-	return ret;
 }
 
 const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_wchar,
-	mbfl_filt_tl_jisx0201_jisx0208_init,
+	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_tl_jisx0201_jisx0208,
-	mbfl_filt_tl_jisx0201_jisx0208_flush,
-	NULL,
+	mbfl_filt_tl_jisx0201_jisx0208_flush
 };

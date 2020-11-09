@@ -34,12 +34,13 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_base64;
+extern const struct mbfl_identify_vtbl vtbl_identify_base64;
 extern const struct mbfl_convert_vtbl vtbl_b64_8bit;
 extern const struct mbfl_convert_vtbl vtbl_8bit_b64;
 
-int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter);
-int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter);
+void mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter);
+void mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_BASE64_H */

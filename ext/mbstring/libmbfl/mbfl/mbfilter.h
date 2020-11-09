@@ -85,6 +85,8 @@
 #ifndef MBFL_MBFILTER_H
 #define MBFL_MBFILTER_H
 
+#include <limits.h>
+#include <stdint.h>
 #include "zend.h"
 
 #include "mbfl_defs.h"
@@ -103,6 +105,14 @@
 #define ssize_t __int32
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #define ssize_t long
+#endif
+#endif
+
+#ifndef SSIZE_MAX
+#if SIZEOF_SSIZE_T == SIZEOF_LONG_LONG
+#define SSIZE_MAX LLONG_MAX
+#elif SIZEOF_SSIZE_T == SIZEOF_LONG
+#define SSIZE_MAX LONG_MAX
 #endif
 #endif
 
@@ -128,6 +138,8 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
+MBFLAPI extern size_t char_offset_to_byte_offset(const mbfl_encoding *encoding, unsigned char *start, size_t length, ssize_t char_offset);
+
 /*
  * buffering converter
  */
@@ -142,10 +154,10 @@ struct _mbfl_buffer_converter {
 
 MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new(const mbfl_encoding *from, const mbfl_encoding *to, size_t buf_initsz);
 MBFLAPI extern void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd);
-MBFLAPI extern int mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
-MBFLAPI extern int mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar);
-MBFLAPI extern size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
-MBFLAPI extern int mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
+MBFLAPI extern void mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
+MBFLAPI extern void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar);
+MBFLAPI extern void mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
+MBFLAPI extern void mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
 MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
@@ -192,7 +204,6 @@ MBFLAPI extern size_t
 mbfl_strlen(const mbfl_string *string);
 
 #define MBFL_ERROR_NOT_FOUND ((size_t) -1)
-#define MBFL_ERROR_ENCODING ((size_t) -4)
 #define MBFL_ERROR_EMPTY ((size_t) -8)
 #define MBFL_ERROR_OFFSET ((size_t) -16)
 
@@ -212,7 +223,7 @@ mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle);
 /*
  * If specified as length, the substr until the end of the string is taken.
  */
-#define MBFL_SUBSTR_UNTIL_END ((size_t) -1)
+#define MBFL_SUBSTR_UNTIL_END (SSIZE_MAX)
 
 /*
  * substr
@@ -236,7 +247,7 @@ mbfl_strwidth(mbfl_string *string);
  *  strimwidth
  */
 MBFLAPI extern mbfl_string *
-mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t from, size_t width);
+mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t width);
 
 /*
  * MIME header encode
@@ -287,12 +298,19 @@ mbfl_mime_header_decode(
  * convert HTML numeric entity
  */
 MBFLAPI extern mbfl_string *
-mbfl_html_numeric_entity(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize, int type);
+mbfl_html_numeric_entity_encode(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize, bool hex);
+
+MBFLAPI extern mbfl_string *
+mbfl_html_numeric_entity_decode(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize);
 
 /*
- * convert of harfwidth and fullwidth for japanese
+ * conversion of halfwidth and fullwidth characters for Japanese
  */
-MBFLAPI extern mbfl_string *
-mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, int mode);
+MBFLAPI extern mbfl_string* mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, intptr_t mode);
+
+/*
+ * str_split
+ */
+MBFLAPI extern HashTable* mbfl_str_split(mbfl_string *string, unsigned int split_length);
 
 #endif	/* MBFL_MBFILTER_H */

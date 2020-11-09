@@ -42,7 +42,7 @@ extern const struct mbfl_identify_vtbl vtbl_identify_cp950;
 extern const struct mbfl_convert_vtbl vtbl_cp950_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_cp950;
 
-int mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_BIG5_H */

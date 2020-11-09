@@ -78,6 +78,8 @@
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
 
+static void mbfl_filt_ident_utf7imap(unsigned char c, mbfl_identify_filter *filter);
+
 static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
 
 const mbfl_encoding mbfl_encoding_utf7imap = {
@@ -86,9 +88,15 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	NULL,
 	mbfl_encoding_utf7imap_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_utf7imap_wchar,
 	&vtbl_wchar_utf7imap
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_utf7imap = {
+	mbfl_no_encoding_utf7imap,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_utf7imap
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
@@ -97,8 +105,7 @@ const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf7imap_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf7imap = {
@@ -107,16 +114,13 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf7imap = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_utf7imap,
-	mbfl_filt_conv_wchar_utf7imap_flush,
-	NULL,
+	mbfl_filt_conv_wchar_utf7imap_flush
 };
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * UTF7-IMAP => wchar
  */
-int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s, n;
 
@@ -136,18 +140,18 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		if (n < 0 || n > 63) {
 			if (c == 0x2d) {
 				if (filter->status == 1) {		/* "&-" -> "&" */
-					CK((*filter->output_function)(0x26, filter->data));
+					(*filter->output_function)(0x26, filter->data);
 				}
 			} else if (c >= 0 && c < 0x80) {	/* ASCII exclude '-' */
-				CK((*filter->output_function)(c, filter->data));
+				(*filter->output_function)(c, filter->data);
 			} else {		/* illegal character */
 				s = c & MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 			filter->cache = 0;
 			filter->status = 0;
-			return c;
+			return;
 		}
 	}
 
@@ -157,11 +161,11 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		if (c == 0x26) {	/* '&'  shift character */
 			filter->status++;
 		} else if (c >= 0x20 && c <= 0x7E) {	/* ASCII */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else {		/* illegal character */
 			s = c & MBFL_WCSGROUP_MASK;
 			s |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		}
 		break;
 
@@ -187,22 +191,22 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			s |= (filter->cache & 0xfff0000) >> 6;
 			filter->cache = n;
 			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {		/* illegal character */
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		} else {
 			filter->cache = n;
 			/* Characters which can be expressed as literal, ASCII characters
 			 * should not be Base64-encoded */
 			if (s < 0x20 || s > 0x7E || s == '&') {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		}
 		break;
@@ -227,22 +231,22 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			s |= (filter->cache & 0xfff0000) >> 6;
 			filter->cache = n;
 			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {		/* illegal character */
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		} else {
 			filter->cache = n;
 			/* Characters which can be expressed as literal, ASCII characters
 			 * should not be Base64-encoded */
 			if (s < 0x20 || s > 0x7E || s == '&') {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		}
 		break;
@@ -262,22 +266,22 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			s |= (filter->cache & 0xfff0000) >> 6;
 			filter->cache = 0;
 			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {		/* illegal character */
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		} else {
 			filter->cache = 0;
 			/* Characters which can be expressed as literal, ASCII characters
 			 * should not be Base64-encoded */
 			if (s < 0x20 || s > 0x7E || s == '&') {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		}
 		break;
@@ -286,8 +290,6 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 static const unsigned char mbfl_utf7imap_base64_table[] =
@@ -307,7 +309,7 @@ static const unsigned char mbfl_utf7imap_base64_table[] =
 /*
  * wchar => UTF7-IMAP
  */
-int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 {
 	int n, s;
 
@@ -320,24 +322,24 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 		;
 	} else if (c >= MBFL_WCSPLANE_SUPMIN && c < MBFL_WCSPLANE_SUPMAX) {
 		s = ((c >> 10) - 0x40) | 0xd800;
-		CK((*filter->filter_function)(s, filter));
+		(*filter->filter_function)(s, filter);
 		s = (c & 0x3ff) | 0xdc00;
-		CK((*filter->filter_function)(s, filter));
-		return c;
+		(*filter->filter_function)(s, filter);
+		return;
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-		return c;
+		mbfl_filt_conv_illegal_output(c, filter);
+		return;
 	}
 
 	switch (filter->status) {
 	case 0:
 		if (n != 0) {	/* directly encode characters */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 			if (n == 1) {
-				CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+				(*filter->output_function)(0x2d, filter->data);		/* '-' */
 			}
 		} else {	/* Modified Base64 */
-			CK((*filter->output_function)(0x26, filter->data));		/* '&' */
+			(*filter->output_function)(0x26, filter->data);		/* '&' */
 			filter->status = 1;
 			filter->cache = c;
 		}
@@ -346,14 +348,14 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 	/* encode Modified Base64 */
 	case 1:
 		s = filter->cache;
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 10) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 4) & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 10) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 4) & 0x3f], filter->data);
 		if (n != 0) {
-			CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s << 2) & 0x3c], filter->data));
-			CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(mbfl_utf7imap_base64_table[(s << 2) & 0x3c], filter->data);
+			(*filter->output_function)(0x2d, filter->data);		/* '-' */
+			(*filter->output_function)(c, filter->data);
 			if (n == 1) {
-				CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+				(*filter->output_function)(0x2d, filter->data);		/* '-' */
 			}
 			filter->status = 0;
 		} else {
@@ -364,15 +366,15 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 
 	case 2:
 		s = filter->cache;
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 14) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 8) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 2) & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 14) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 8) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 2) & 0x3f], filter->data);
 		if (n != 0) {
-			CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s << 4) & 0x30], filter->data));
-			CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(mbfl_utf7imap_base64_table[(s << 4) & 0x30], filter->data);
+			(*filter->output_function)(0x2d, filter->data);		/* '-' */
+			(*filter->output_function)(c, filter->data);
 			if (n == 1) {
-				CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+				(*filter->output_function)(0x2d, filter->data);		/* '-' */
 			}
 			filter->status = 0;
 		} else {
@@ -383,14 +385,14 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 
 	case 3:
 		s = filter->cache;
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 12) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 6) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[s & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 12) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(s >> 6) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[s & 0x3f], filter->data);
 		if (n != 0) {
-			CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(0x2d, filter->data);		/* '-' */
+			(*filter->output_function)(c, filter->data);
 			if (n == 1) {
-				CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+				(*filter->output_function)(0x2d, filter->data);		/* '-' */
 			}
 			filter->status = 0;
 		} else {
@@ -403,12 +405,9 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
-
 }
 
-int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
 {
 	int status, cache;
 
@@ -419,26 +418,195 @@ int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
 	/* flush fragments */
 	switch (status) {
 	case 1:
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 10) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 4) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache << 2) & 0x3c], filter->data));
-		CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 10) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 4) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache << 2) & 0x3c], filter->data);
+		(*filter->output_function)(0x2d, filter->data);		/* '-' */
 		break;
 
 	case 2:
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 14) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 8) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 2) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache << 4) & 0x30], filter->data));
-		CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 14) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 8) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 2) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache << 4) & 0x30], filter->data);
+		(*filter->output_function)(0x2d, filter->data);		/* '-' */
 		break;
 
 	case 3:
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 12) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 6) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_utf7imap_base64_table[cache & 0x3f], filter->data));
-		CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 12) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[(cache >> 6) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_utf7imap_base64_table[cache & 0x3f], filter->data);
+		(*filter->output_function)(0x2d, filter->data);		/* '-' */
 		break;
 	}
-	return 0;
+}
+
+/* IMAP has its own crazy variation on Base64 encoding where / is replaced by , */
+static inline int decode_modified_base64(int c)
+{
+	if (c >= 'A' && c <= 'Z') {
+		return c - 'A';
+	} else if (c >= 'a' && c <= 'z') {
+		return c - 'a' + 26;
+	} else if (c >= '0' && c <= '9') {
+		return c - '0' + 52;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == ',') {
+		return 63;
+	}
+	return -1;
+}
+
+/* After finishing a Base64-encoded block, UTF7imap does not allow another one
+ * to start immediately; use this function in such places */
+static void mbfl_filt_ident_utf7imap_finished_base64(unsigned char c, mbfl_identify_filter *filter)
+{
+	/* Another modified Base64-encoded section may not begin immediately after
+	 * one has just finished */
+	if (c == '&' || c <= 0x1F || c >= 0x7F) {
+		filter->flag = 1;
+	}
+	filter->filter_function = mbfl_filt_ident_utf7imap;
+}
+
+/* Make sure that decoded codepoint is one which is legal for Base64-encoded section
+ * Base64-encoding printable ASCII characters is verboten, except for '&' */
+static void check_legal_codepoint_for_base64(int cp, mbfl_identify_filter *filter)
+{
+	if (cp >= 0x20 && cp <= 0x7E && cp != '&') {
+		filter->flag = 1;
+	}
+}
+
+static void mbfl_filt_ident_utf7imap(unsigned char c, mbfl_identify_filter *filter)
+{
+	if (filter->status == 0) { /* Decoding ASCII characters */
+		if (c == '&') {
+			/* Enter modified Base64-encoded block
+			 * After reversing modified Base64 encoding, characters in such blocks
+			 * are interpreted using UTF-16BE
+			 * `status = 1` means we will be beginning a new UTF-16BE character */
+			filter->status = 1;
+		} else if (c <= 0x1F || c >= 0x7F) {
+			filter->flag = 1;
+		}
+		return;
+	}
+
+	/* Decoding modified Base64 */
+	if (c == '-') {
+		int cached_bits = filter->status >> 8;
+		if (cached_bits != 0) {
+			/* Data in Base64-encoded block truncated (ended in the middle of an incomplete character) */
+			filter->flag = 1;
+		}
+		filter->status = 0; /* End modified Base64-encoded block */
+		filter->filter_function = mbfl_filt_ident_utf7imap_finished_base64;
+		return;
+	}
+
+	int six_bits = decode_modified_base64(c);
+	if (six_bits < 0) {
+		filter->flag = 1; /* Not valid modified Base64 character */
+		return;
+	}
+
+	/* The following state machine has 23 possible states, depending on:
+	 * - How many bits we have already consumed of the current 16-bit code unit
+	 *   (0/2/4/6/8/10/12/14)
+	 * - Whether or not we are in the 2nd 16 bits of a surrogate pair
+	 * - If not, whether the bits already consumed appear to be part of the
+	 *   1st 16 bits of a surrogate pair */
+
+/* Get `n` low-order bits from `i` */
+#define EXTRACT_BITS(i,n) ((i) & ((1 << (n)) - 1))
+/* We might be in the 1st 16 bits of a surrogate pair; check if that's true
+ *
+ * Depending on where we are in the sequence of 6-bit chunks, we may need to compare
+ * the last part of `six_bits` with the first part of the mask which identifies
+ * surrogate pairs, or the first part of `six_bits` with the last part of the
+ * mask... or just take both of them straight up
+ *
+ * `shift1` is the number of low-order bits which should not be examined from
+ * the decoded 6 bits; `shift2` is the number of low-order bits which should
+ * not be examined from the (0xD8 >> 2) mask which identifies a surrogate pair */
+#define CHECK_SURROGATE_FIRST_PART(bits, shift1, shift2, offset_if_true, offset_if_false) \
+	if (((bits >> shift1) & (0x3F >> shift2)) == (((0xD8 >> 2) >> shift2) & (0x3F >> shift1))) { \
+		filter->status = (EXTRACT_BITS(bits, 6 - shift2) << 8) | (state + offset_if_true); \
+	} else if (((bits >> shift1) & (0x3F >> shift2)) == (((0xDC >> 2) >> shift2) & (0x3F >> shift1))) { \
+		filter->flag = 1; \
+	} else { \
+		filter->status = (EXTRACT_BITS(bits, 6 - shift2) << 8) | (state + offset_if_false); \
+	} \
+	break;
+/* We are in the 2nd 16 bits of a surrogate pair; make sure the right 'magic bits' are there */
+#define CHECK_SURROGATE_SECOND_PART(bits, shift1, shift2, offset) \
+	if (((bits >> shift1) & (0x3F >> shift2)) != (((0xDC >> 2) >> shift2) & (0x3F >> shift1))) { \
+		filter->flag = 1; \
+	} \
+	filter->status = (cache << (8 + shift1)) | (EXTRACT_BITS(bits, shift1) << 8) | (state + offset); \
+	break;
+
+	int cache = filter->status >> 8, state = filter->status & 0xFF;
+	switch (state) {
+		/* 1st 16 bits of a UTF-16 code unit, might be surrogate pair */
+		case 1: /* 0 bits consumed already */
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 0, 3, 10);
+		case 2: /* 2 bits consumed already */
+			CHECK_SURROGATE_FIRST_PART(six_bits, 2, 0, 3, 10);
+		case 3: /* 4 bits... */
+			CHECK_SURROGATE_FIRST_PART(six_bits, 4, 0, 3, 10);
+		case 4: /* 6 bits... */
+			/* We have definitely found a surrogate pair
+			 * Remove the top 6 cached bits which have the 'tag' for a surrogate pair */
+			filter->status = (six_bits << 8) | (state + 3); break;
+		case 5: /* 8 bits... */
+			/* Likewise */
+			filter->status = ((cache & 0x3) << 14) | (six_bits << 8) | (state + 3); break;
+		case 6: /* 10 bits... */
+			filter->status = ((cache & 0xF) << 14) | (six_bits << 8) | (state + 10); break;
+		case 7: /* 12 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 0, 4, 10);
+		case 8: /* 14 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 0, 2, 10);
+
+		/* 1st 16 bits of a UTF-16 code unit; definitely not a surrogate pair */
+		case 9: /* 2 bits consumed already */
+		case 10: /* 4 bits... */
+		case 11: /* 6 bits... */
+		case 12: /* 8 bits... */
+			filter->status = (cache << 14) | (six_bits << 8) | (state + 3); break;
+		case 13: /* 10 bits... */
+			check_legal_codepoint_for_base64((cache << 6) | six_bits, filter);
+			/* We will end exactly at a character boundary, so there is no need to keep cached bits */
+			filter->status = 1; break;
+		case 14: /* 12 bits... */
+			check_legal_codepoint_for_base64((cache << 4) | (six_bits >> 2), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 4, -12, -5);
+		case 15: /* 14 bits... */
+			check_legal_codepoint_for_base64((cache << 2) | (six_bits >> 4), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 2, -12, -5);
+
+		/* 2nd 16 bits of a surrogate pair */
+		case 16: /* 0 bits consumed already */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 0, 0, 3);
+		case 17: /* 2 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 2, 0, 3);
+		case 18: /* 4 bits... */
+			CHECK_SURROGATE_SECOND_PART(six_bits, 4, 0, 3);
+		case 19: /* 6 bits... */
+		case 20: /* 8 bits... */
+			filter->status = (cache << 14) | (six_bits << 8) | (state + 3); break;
+		case 21: /* 10 bits... */
+			check_legal_codepoint_for_base64((cache << 6) | six_bits, filter);
+			/* We will end exactly at a character boundary, so there is no need to keep cached bits */
+			filter->status = 1; break;
+		case 22: /* 12 bits... */
+			check_legal_codepoint_for_base64((cache << 4) | (six_bits >> 2), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 4, -20, -13);
+		case 23: /* 14 bits... */
+			check_legal_codepoint_for_base64((cache << 2) | (six_bits >> 4), filter);
+			CHECK_SURROGATE_FIRST_PART(six_bits, 0, 2, -20, -13);
+	}
 }

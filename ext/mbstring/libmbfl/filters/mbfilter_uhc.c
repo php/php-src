@@ -32,7 +32,7 @@
 #define UNICODE_TABLE_UHC_DEF
 #include "unicode_table_uhc.h"
 
-static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_uhc(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_uhc[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -61,7 +61,7 @@ const mbfl_encoding mbfl_encoding_uhc = {
 	"UHC",
 	mbfl_encoding_uhc_aliases,
 	mblen_table_uhc,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_uhc_wchar,
 	&vtbl_wchar_uhc
 };
@@ -78,8 +78,7 @@ const struct mbfl_convert_vtbl vtbl_uhc_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_uhc_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
@@ -88,31 +87,27 @@ const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_uhc,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * UHC => wchar
  */
-int
-mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, w = 0, flag = 0;
 
 	switch (filter->status) {
 	case 0:
 		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c > 0x80 && c < 0xff && c != 0xc9) {	/* dbcs lead byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -151,15 +146,15 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_UHC;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-				CK((*filter->output_function)(c, filter->data));
+				(*filter->output_function)(c, filter->data);
 			} else {
 				w = (c1 << 8) | c;
 				w &= MBFL_WCSGROUP_MASK;
 				w |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(w, filter->data));
+				(*filter->output_function)(w, filter->data);
 			}
 		}
 		break;
@@ -168,15 +163,12 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => UHC
  */
-int
-mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
 {
 	int c1, s;
 
@@ -209,23 +201,21 @@ mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
 	}
 	if (s >= 0) {
 		if (s < 0x80) {	/* latin */
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else {
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
+			(*filter->output_function)((s >> 8) & 0xff, filter->data);
+			(*filter->output_function)(s & 0xff, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
-static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_uhc(unsigned char c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case 0: /* latin */
-		if (c >= 0 && c < 0x80) { /* ok */
+		if (c < 0x80) { /* ok */
 			;
 		} else if (c >= 0x81 && c <= 0xa0) {	/* dbcs first char */
 		    filter->status= 1;
@@ -257,6 +247,4 @@ static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }

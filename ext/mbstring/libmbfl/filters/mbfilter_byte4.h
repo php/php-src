@@ -33,14 +33,16 @@
 
 extern const mbfl_encoding mbfl_encoding_byte4be;
 extern const mbfl_encoding mbfl_encoding_byte4le;
+extern const struct mbfl_identify_vtbl vtbl_identify_byte4be;
+extern const struct mbfl_identify_vtbl vtbl_identify_byte4le;
 extern const struct mbfl_convert_vtbl vtbl_byte4be_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_byte4be;
 extern const struct mbfl_convert_vtbl vtbl_byte4le_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_byte4le;
 
-int mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_BYTE4_H */

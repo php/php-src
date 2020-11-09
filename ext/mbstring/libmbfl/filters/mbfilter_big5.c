@@ -32,7 +32,7 @@
 
 #include "unicode_table_big5.h"
 
-static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_big5(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_big5[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -61,7 +61,7 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	"BIG5",
 	mbfl_encoding_big5_aliases,
 	mblen_table_big5,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_big5_wchar,
 	&vtbl_wchar_big5
 };
@@ -72,7 +72,7 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 	"BIG5",
 	NULL,
 	mblen_table_big5,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp950_wchar,
 	&vtbl_wchar_cp950
 };
@@ -95,8 +95,7 @@ const struct mbfl_convert_vtbl vtbl_big5_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
@@ -105,8 +104,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush,
-	NULL
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
@@ -115,8 +113,7 @@ const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
@@ -125,11 +122,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
 /* 63 + 94 = 157 or 94 */
 static unsigned short cp950_pua_tbl[][4] = {
@@ -154,8 +148,7 @@ static inline int is_in_cp950_pua(int c1, int c) {
 /*
  * Big5 => wchar
  */
-int
-mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 {
 	int k;
 	int c1, w, c2;
@@ -169,16 +162,16 @@ mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 		}
 
 		if (c >= 0 && c <= 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c == 0xff) {
-			CK((*filter->output_function)(0xf8f8, filter->data));
+			(*filter->output_function)(0xf8f8, filter->data);
 		} else if (c > c1 && c < 0xff) {	/* dbcs lead byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -221,14 +214,14 @@ mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_BIG5;
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -236,15 +229,12 @@ mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => Big5
  */
-int
-mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 {
 	int k;
 	int c1, s, c2;
@@ -311,19 +301,17 @@ mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 	}
 	if (s >= 0) {
 		if (s <= 0x80 || s == 0xff) {	/* latin */
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else {
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
+			(*filter->output_function)((s >> 8) & 0xff, filter->data);
+			(*filter->output_function)(s & 0xff, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
-static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_big5(unsigned char c, mbfl_identify_filter *filter)
 {
 	int c1;
 	if (filter->encoding->no_encoding == mbfl_no_encoding_cp950) {
@@ -337,13 +325,11 @@ static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter)
 		    filter->flag = 1;
 		}
 		filter->status = 0;
-	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
+	} else if (c < 0x80) {	/* latin  ok */
 		;
 	} else if (c > c1 && c < 0xff) {	/* DBCS lead byte */
 		filter->status = 1;
 	} else {							/* bad */
 		filter->flag = 1;
 	}
-
-	return c;
 }

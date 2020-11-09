@@ -21,7 +21,8 @@ $euc_jp = pack('H*', '30313233a4b3a4cecab8bbfacef3a4cfc6fccbdcb8eca4c7a4b9a1a345
 // UTF-8
 $utf8    = pack('H*', 'e288ae2045e28b856461203d2051'); // has 2 multi-byte characters: [e288ae 20 45 e28b85 64 61 20 3d 20 51]
 // UTF-16LE
-$utf16le = pack('H*', '1a043804400438043b043b04380446043004200069007300200043007900720069006c006c0069006300');
+// The second-to-last character is encoded with a surrogate pair; we will make sure to test with it
+$utf16le = pack('H*', '1a043804400438043b043b04380446043004200069007300200043007900720069006c006c0069006300200003d86dde2100');
 
 print "== EUC-JP ==\n";
 print MBStringChars(mb_strcut($euc_jp,  6,   5,'EUC-JP'), 'EUC-JP') . "\n";
@@ -50,9 +51,31 @@ print MBStringChars(mb_strcut($utf16le, 0, 0, 'UTF-16LE'), 'UTF-16LE') . "\n";
 print MBStringChars(mb_strcut($utf16le, 0, 1, 'UTF-16LE'), 'UTF-16LE') . "\n";
 print MBStringChars(mb_strcut($utf16le, 0, 2, 'UTF-16LE'), 'UTF-16LE') . "\n";
 print MBStringChars(mb_strcut($utf16le, 0, 3, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, 0, 4, 'UTF-16LE'), 'UTF-16LE') . "\n";
+
 print MBStringChars(mb_strcut($utf16le, 1, 2, 'UTF-16LE'), 'UTF-16LE') . "\n";
 print MBStringChars(mb_strcut($utf16le, 1, 3, 'UTF-16LE'), 'UTF-16LE') . "\n";
 print MBStringChars(mb_strcut($utf16le, 1, 4, 'UTF-16LE'), 'UTF-16LE') . "\n";
+
+// Now counting backwards from end of string
+print MBStringChars(mb_strcut($utf16le, -2, 1, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -2, 2, 'UTF-16LE'), 'UTF-16LE') . "\n";
+// Next we go back into the surrogate pair
+print MBStringChars(mb_strcut($utf16le, -3, 2, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -3, 3, 'UTF-16LE'), 'UTF-16LE') . "\n";
+// These ones should get the entire surrogate pair:
+print MBStringChars(mb_strcut($utf16le, -4, 4, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -5, 4, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -6, 4, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -5, 5, 'UTF-16LE'), 'UTF-16LE') . "\n";
+// This should also get the following exclamation mark
+print MBStringChars(mb_strcut($utf16le, -6, 6, 'UTF-16LE'), 'UTF-16LE') . "\n";
+
+// Now let's try also giving a negative 'length' argument
+print MBStringChars(mb_strcut($utf16le, -5, -1, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -5, -2, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -5, -3, 'UTF-16LE'), 'UTF-16LE') . "\n";
+print MBStringChars(mb_strcut($utf16le, -6, -2, 'UTF-16LE'), 'UTF-16LE') . "\n";
 
 ?>
 --EXPECT--
@@ -77,6 +100,20 @@ OK
 []
 [1a04]
 [1a04]
+[1a04 3804]
 [1a04]
 [1a04]
 [1a04 3804]
+[]
+[2100]
+[]
+[]
+[03d86dde]
+[03d86dde]
+[03d86dde]
+[03d86dde]
+[03d86dde 2100]
+[03d86dde]
+[]
+[]
+[03d86dde]

@@ -33,7 +33,7 @@
 #include "unicode_table_cp936.h"
 #include "unicode_table_gb18030.h"
 
-static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_gb18030(unsigned char c, mbfl_identify_filter *filter);
 
 static const char *mbfl_encoding_gb18030_aliases[] = {"gb-18030", "gb-18030-2000", NULL};
 
@@ -43,7 +43,7 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	"GB18030",
 	mbfl_encoding_gb18030_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_gb18030_wchar,
 	&vtbl_wchar_gb18030
 };
@@ -60,8 +60,7 @@ const struct mbfl_convert_vtbl vtbl_gb18030_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_gb18030_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_gb18030 = {
@@ -70,12 +69,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_gb18030 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_gb18030,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
 
 int
 mbfl_bisec_srch(int w, const unsigned short *tbl, int n)
@@ -120,8 +115,7 @@ mbfl_bisec_srch2(int w, const unsigned short tbl[], int n)
 /*
  * GB18030 => wchar
  */
-int
-mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 {
 	int k;
 	int c1, c2, c3, w = -1;
@@ -129,18 +123,18 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 	switch (filter->status) {
 	case 0:
 		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c == 0x80) {	/* euro sign */
-			CK((*filter->output_function)(0x20ac, filter->data));
+			(*filter->output_function)(0x20ac, filter->data);
 		} else if (c == 0xff) {
-			CK((*filter->output_function)(0x00ff, filter->data));
+			(*filter->output_function)(0x00ff, filter->data);
 		} else if (c > 0x80 && c < 0xff) {	/* dbcs/qbcs lead byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -151,20 +145,20 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 		if (c1 >= 0x81 && c1 <= 0x84 && c >= 0x30 && c <= 0x39) { /* 4 byte range: Unicode BMP */
 			filter->status = 2;
 			filter->cache = (c1 << 8) | c;
-			return c;
+			return;
 		} else if (c1 >= 0x90 && c1 <= 0xe3 && c >= 0x30 && c <= 0x39) {
 			/* 4 byte range: Unicode 16 planes */
 			filter->status = 2;
 			filter->cache = (c1 << 8) | c;
-			return c;
+			return;
 		} else if (((c1 >= 0xaa && c1 <= 0xaf) || (c1 >= 0xf8 && c1 <= 0xfe)) &&
 				   (c >= 0xa1 && c <= 0xfe)) { /* UDA part1,2: U+E000-U+E4C5 */
 			w = 94*(c1 >= 0xf8 ? c1 - 0xf2 : c1 - 0xaa) + (c - 0xa1) + 0xe000;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) {
 			/* UDA part3 : U+E4C6-U+E765*/
 			w = 96*(c1 - 0xa1) + c - (c >= 0x80 ? 0x41 : 0x40) + 0xe4c6;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 
 		c2 = (c1 << 8) | c;
@@ -178,7 +172,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 					c2 <= mbfl_gb18030_pua_tbl[k][2] +  mbfl_gb18030_pua_tbl[k][1]
 					-  mbfl_gb18030_pua_tbl[k][0]) {
 					w = c2 -  mbfl_gb18030_pua_tbl[k][2] + mbfl_gb18030_pua_tbl[k][0];
-					CK((*filter->output_function)(w, filter->data));
+					(*filter->output_function)(w, filter->data);
 					break;
 				}
 			}
@@ -201,14 +195,14 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 					w &= MBFL_WCSPLANE_MASK;
 					w |= MBFL_WCSPLANE_GB18030;
 				}
-				CK((*filter->output_function)(w, filter->data));
+				(*filter->output_function)(w, filter->data);
 			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-				CK((*filter->output_function)(c, filter->data));
+				(*filter->output_function)(c, filter->data);
 			} else {
 				w = (c1 << 8) | c;
 				w &= MBFL_WCSGROUP_MASK;
 				w |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(w, filter->data));
+				(*filter->output_function)(w, filter->data);
 			}
 		}
 		break;
@@ -225,7 +219,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			w = (c1 << 16) | (c2 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
  		break;
 
@@ -248,24 +242,24 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 						w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c;
 						w &= MBFL_WCSGROUP_MASK;
 						w |= MBFL_WCSGROUP_THROUGH;
-						CK((*filter->output_function)(w, filter->data));
-						return c;
+						(*filter->output_function)(w, filter->data);
+						return;
 					}
 					w += mbfl_gb_uni_ofst[k];
 				} else {
 					w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c;
 					w &= MBFL_WCSGROUP_MASK;
 					w |= MBFL_WCSGROUP_THROUGH;
-					CK((*filter->output_function)(w, filter->data));
-					return c;
+					(*filter->output_function)(w, filter->data);
+					return;
 				}
 			}
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
  		break;
 
@@ -273,15 +267,12 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => GB18030
  */
-int
-mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 {
 	int k, k1, k2;
 	int c1, s = 0, s1 = 0;
@@ -398,24 +389,22 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 	}
 	if (s >= 0) {
 		if (s <= 0x80) {	/* latin */
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else if (s1 > 0) { /* qbcs */
-			CK((*filter->output_function)(s1 & 0xff, filter->data));
-			CK((*filter->output_function)((s >> 16) & 0xff, filter->data));
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
+			(*filter->output_function)(s1 & 0xff, filter->data);
+			(*filter->output_function)((s >> 16) & 0xff, filter->data);
+			(*filter->output_function)((s >> 8) & 0xff, filter->data);
+			(*filter->output_function)(s & 0xff, filter->data);
 		} else { /* dbcs */
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
+			(*filter->output_function)((s >> 8) & 0xff, filter->data);
+			(*filter->output_function)(s & 0xff, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
-static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_gb18030(unsigned char c, mbfl_identify_filter *filter)
 {
 	int c1;
 
@@ -463,6 +452,4 @@ static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 	} else {							/* bad */
 		filter->flag = 1;
 	}
-
-	return c;
 }

@@ -43,10 +43,10 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_utf16be;
 extern const struct mbfl_convert_vtbl vtbl_utf16le_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_utf16le;
 
-int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_utf16be(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_utf16be(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_UTF16_H */

@@ -31,6 +31,7 @@
 #ifndef MBFL_ENCODING_H
 #define MBFL_ENCODING_H
 
+#include <stddef.h>
 #include "mbfl_defs.h"
 
 enum mbfl_no_encoding {
@@ -72,7 +73,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_eucjp2004,
 	mbfl_no_encoding_sjis,
 	mbfl_no_encoding_eucjp_win,
-	mbfl_no_encoding_sjis_open,
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_no_encoding_sjis_sb,
@@ -117,9 +117,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_8859_16,
 	mbfl_no_encoding_armscii8,
 	mbfl_no_encoding_cp850,
-	mbfl_no_encoding_jis_ms,
 	mbfl_no_encoding_cp50220,
-	mbfl_no_encoding_cp50220raw,
 	mbfl_no_encoding_cp50221,
 	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_charset_max
@@ -133,9 +131,8 @@ struct mbfl_convert_vtbl {
 	enum mbfl_no_encoding to;
 	void (*filter_ctor)(struct _mbfl_convert_filter *filter);
 	void (*filter_dtor)(struct _mbfl_convert_filter *filter);
-	int (*filter_function)(int c, struct _mbfl_convert_filter *filter);
-	int (*filter_flush)(struct _mbfl_convert_filter *filter);
-	void (*filter_copy)(struct _mbfl_convert_filter *src, struct _mbfl_convert_filter *dest);
+	void (*filter_function)(int c, struct _mbfl_convert_filter *filter);
+	void (*filter_flush)(struct _mbfl_convert_filter *filter);
 };
 
 /*
@@ -152,6 +149,7 @@ typedef struct _mbfl_encoding {
 	const struct mbfl_convert_vtbl *output_filter;
 } mbfl_encoding;
 
+MBFLAPI extern const mbfl_encoding *mbfl_namelen2encoding(const char *name, size_t len);
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
 MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);

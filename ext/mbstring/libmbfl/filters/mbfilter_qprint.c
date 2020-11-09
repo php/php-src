@@ -29,6 +29,7 @@
 
 #include "mbfilter.h"
 #include "mbfilter_qprint.h"
+#include "mbfilter_ascii.h"
 #include "unicode_prop.h"
 
 static const char *mbfl_encoding_qprint_aliases[] = {"qprint", NULL};
@@ -44,14 +45,19 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	NULL
 };
 
+const struct mbfl_identify_vtbl vtbl_identify_qprint = {
+	mbfl_no_encoding_qprint,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_ascii
+};
+
 const struct mbfl_convert_vtbl vtbl_8bit_qprint = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_qprint,
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_qprintenc,
-	mbfl_filt_conv_qprintenc_flush,
-	NULL,
+	mbfl_filt_conv_qprintenc_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
@@ -60,18 +66,22 @@ const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_qprintdec,
-	mbfl_filt_conv_qprintdec_flush,
-	NULL,
+	mbfl_filt_conv_qprintdec_flush
 };
-
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * any => Quoted-Printable
  */
+static inline int nibble2hex(int nibble)
+{
+	if (nibble < 10) {
+		return nibble + '0';
+	} else {
+		return nibble + 'A' - 10;
+	}
+}
 
-int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 {
 	int s, n;
 
@@ -85,76 +95,60 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 		filter->cache = c;
 		n = (filter->status & 0xff00) >> 8;
 
-		if (s == 0) {		/* null */
-			CK((*filter->output_function)(s, filter->data));
+		if (s == 0) { /* null */
+			(*filter->output_function)(s, filter->data);
 			filter->status &= ~0xff00;
 			break;
 		}
 
 		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-			if (s == 0x0a || (s == 0x0d && c != 0x0a)) {	/* line feed */
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+			if (s == '\n' || (s == '\r' && c != '\n')) { /* line feed */
+				(*filter->output_function)('\r', filter->data);
+				(*filter->output_function)('\n', filter->data);
 				filter->status &= ~0xff00;
 				break;
-			} else if (s == 0x0d) {
+			} else if (s == '\r') {
 				break;
 			}
 		}
 
-		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0  && n >= 72) {	/* soft line feed */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-			CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0 && n >= 72) { /* soft line feed */
+			(*filter->output_function)('=', filter->data);
+			(*filter->output_function)('\r', filter->data);
+			(*filter->output_function)('\n', filter->data);
 			filter->status &= ~0xff00;
 		}
 
-		if (s <= 0 || s >= 0x80 || s == 0x3d		/* not ASCII or '=' */
+		if (s <= 0 || s >= 0x80 || s == '=' /* not ASCII or '=' */
 		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) && mime_char_needs_qencode[s])) {
 			/* hex-octet */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			n = (s >> 4) & 0xf;
-			if (n < 10) {
-				n += 48;		/* '0' */
-			} else {
-				n += 55;		/* 'A' - 10 */
-			}
-			CK((*filter->output_function)(n, filter->data));
-			n = s & 0xf;
-			if (n < 10) {
-				n += 48;
-			} else {
-				n += 55;
-			}
-			CK((*filter->output_function)(n, filter->data));
+			(*filter->output_function)('=', filter->data);
+			(*filter->output_function)(nibble2hex((s >> 4) & 0xf), filter->data);
+			(*filter->output_function)(nibble2hex(s & 0xf), filter->data);
 			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
 				filter->status += 0x300;
 			}
 		} else {
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
 				filter->status += 0x100;
 			}
 		}
 		break;
 	}
-
-	return c;
 }
 
-int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
 {
-	/* flush filter cache */
 	(*filter->filter_function)('\0', filter);
 	filter->status &= ~0xffff;
 	filter->cache = 0;
-	return 0;
 }
 
 /*
  * Quoted-Printable => any
  */
-int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 {
 	int n, m;
 
@@ -182,61 +176,54 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 		if (hex2code_map[c & 0xff] >= 0) {
 			filter->cache = c;
 			filter->status = 2;
-		} else if (c == 0x0d) {	/* soft line feed */
+		} else if (c == '\r') {	/* soft line feed */
 			filter->status = 3;
-		} else if (c == 0x0a) {	/* soft line feed */
+		} else if (c == '\n') {	/* soft line feed */
 			filter->status = 0;
 		} else {
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)('=', filter->data);
+			(*filter->output_function)(c, filter->data);
 			filter->status = 0;
 		}
 		break;
 	case 2:
 		m = hex2code_map[c & 0xff];
 		if (m < 0) {
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(filter->cache, filter->data));
+			(*filter->output_function)('=', filter->data);
+			(*filter->output_function)(filter->cache, filter->data);
 			n = c;
 		} else {
 			n = hex2code_map[filter->cache] << 4 | m;
 		}
-		CK((*filter->output_function)(n, filter->data));
+		(*filter->output_function)(n, filter->data);
 		filter->status = 0;
 		break;
 	case 3:
-		if (c != 0x0a) {		/* LF */
-			CK((*filter->output_function)(c, filter->data));
+		if (c != '\n') {
+			(*filter->output_function)(c, filter->data);
 		}
 		filter->status = 0;
 		break;
 	default:
-		if (c == 0x3d) {		/* '=' */
+		if (c == '=') {
 			filter->status = 1;
 		} else {
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		}
 		break;
 	}
-
-	return c;
 }
 
-int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 {
-	int status, cache;
-
-	status = filter->status;
-	cache = filter->cache;
-	filter->status = 0;
-	filter->cache = 0;
+	int status = filter->status;
+	int cache = filter->cache;
+	filter->status = filter->cache = 0;
 	/* flush fragments */
 	if (status == 1) {
-		CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+		(*filter->output_function)('=', filter->data);
 	} else if (status == 2) {
-		CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-		CK((*filter->output_function)(cache, filter->data));
+		(*filter->output_function)('=', filter->data);
+		(*filter->output_function)(cache, filter->data);
 	}
-
-	return 0;
 }

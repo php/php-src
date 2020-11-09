@@ -30,7 +30,8 @@
 #include "mbfilter.h"
 #include "mbfilter_utf7.h"
 
-static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_conv_utf7_wchar_flush(mbfl_convert_filter *filter);
+static void mbfl_filt_ident_utf7(unsigned char c, mbfl_identify_filter *filter);
 
 static const unsigned char mbfl_base64_table[] = {
  /* 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', */
@@ -53,7 +54,7 @@ const mbfl_encoding mbfl_encoding_utf7 = {
 	"UTF-7",
 	mbfl_encoding_utf7_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_utf7_wchar,
 	&vtbl_wchar_utf7
 };
@@ -70,8 +71,7 @@ const struct mbfl_convert_vtbl vtbl_utf7_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf7_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_utf7_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
@@ -80,62 +80,61 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_utf7,
-	mbfl_filt_conv_wchar_utf7_flush,
-	NULL,
+	mbfl_filt_conv_wchar_utf7_flush
 };
 
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-/*
- * UTF-7 => wchar
- */
-int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
+static unsigned int decode_base64_char(unsigned char c)
 {
-	int s, n;
+	if (c >= 'A' && c <= 'Z') {
+		return c - 65;
+	} else if (c >= 'a' && c <= 'z') {
+		return c - 71;
+	} else if (c >= '0' && c <= '9') {
+		return c + 4;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == '/') {
+		return 63;
+	}
+	return -1;
+}
 
-	n = -1;
-	if (filter->status != 0) {		/* Modified Base64 */
-		if (c >= 0x41 && c <= 0x5a) {		/* A - Z */
-			n = c - 65;
-		} else if (c >= 0x61 && c <= 0x7a) {	/* a - z */
-			n = c - 71;
-		} else if (c >= 0x30 && c <= 0x39) {	/* 0 - 9 */
-			n = c + 4;
-		} else if (c == 0x2b) {			/* '+' */
-			n = 62;
-		} else if (c == 0x2f) {			/* '/' */
-			n = 63;
-		}
-		if (n < 0 || n > 63) {
-			if (c == 0x2d) {
-				if (filter->status == 1) {		/* "+-" -> "+" */
-					CK((*filter->output_function)(0x2b, filter->data));
+void mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
+{
+	int s, n = -1;
+
+	if (filter->status) { /* Modified Base64 */
+		n = decode_base64_char(c);
+		if (n < 0) {
+			if (filter->cache) {
+				/* Either we were expecting the 2nd half of a surrogate pair which
+				 * never came, or else the last Base64 data was not padded with zeroes */
+				(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
+			if (c == '-') {
+				if (filter->status == 1) { /* "+-" -> "+" */
+					(*filter->output_function)('+', filter->data);
 				}
-			} else if (c >= 0 && c < 0x80) {	/* ASCII exclude '-' */
-				CK((*filter->output_function)(c, filter->data));
-			} else {		/* illegal character */
+			} else if (c >= 0 && c < 0x80) { /* ASCII exclude '-' */
+				(*filter->output_function)(c, filter->data);
+			} else { /* illegal character */
 				s = c & MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
-			filter->cache = 0;
-			filter->status = 0;
-			return c;
+			filter->cache = filter->status = 0;
 		}
 	}
 
 	switch (filter->status) {
 	/* directly encoded characters */
 	case 0:
-		if (c == 0x2b) {	/* '+'  shift character */
+		if (c == '+') { /* '+' shift character */
 			filter->status = 1;
-		} else if (c >= 0 && c < 0x80) {	/* ASCII */
-			CK((*filter->output_function)(c, filter->data));
-		} else {		/* illegal character */
-			s = c & MBFL_WCSGROUP_MASK;
-			s |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(s, filter->data));
+		} else if (c >= 0 && c < 0x80) { /* ASCII */
+			(*filter->output_function)(c, filter->data);
+		} else { /* illegal character */
+			(*filter->output_function)((c & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data);
 		}
 		break;
 
@@ -154,6 +153,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		n = (n & 0x3) << 14;
 		filter->status = 5;
 		if (s >= 0xd800 && s < 0xdc00) {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			s = (((s & 0x3ff) << 16) + 0x400000) | n;
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
@@ -161,15 +164,19 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 			s |= (filter->cache & 0xfff0000) >> 6;
 			filter->cache = n;
 			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {		/* illegal character */
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		} else {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			filter->cache = n;
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		}
 		break;
 
@@ -186,6 +193,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		n = (n & 0xf) << 12;
 		filter->status = 8;
 		if (s >= 0xd800 && s < 0xdc00) {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			s = (((s & 0x3ff) << 16) + 0x400000) | n;
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
@@ -193,15 +204,19 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 			s |= (filter->cache & 0xfff0000) >> 6;
 			filter->cache = n;
 			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-				CK((*filter->output_function)(s, filter->data));
-			} else {		/* illegal character */
+				(*filter->output_function)(s, filter->data);
+			} else { /* illegal character */
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		} else {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			filter->cache = n;
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		}
 		break;
 
@@ -213,6 +228,10 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		s = n | (filter->cache & 0xffff);
 		filter->status = 2;
 		if (s >= 0xd800 && s < 0xdc00) {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			s = (((s & 0x3ff) << 16) + 0x400000);
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
@@ -220,15 +239,19 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 			s |= (filter->cache & 0xfff0000) >> 6;
 			filter->cache = 0;
 			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			} else {		/* illegal character */
 				s &= MBFL_WCSGROUP_MASK;
 				s |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(s, filter->data));
+				(*filter->output_function)(s, filter->data);
 			}
 		} else {
+			if (filter->cache & 0xfff0000) {
+				/* We were waiting for the 2nd part of a surrogate pair */
+				(*filter->output_function)(((filter->cache & 0xfff0000) >> 6) | MBFL_WCSGROUP_THROUGH, filter->data);
+			}
 			filter->cache = 0;
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		}
 		break;
 
@@ -236,18 +259,29 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
+}
 
-	return c;
+static void mbfl_filt_conv_utf7_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->cache) {
+		/* Either we were expecting the 2nd half of a surrogate pair which
+		 * never came, or else the last Base64 data was not padded with zeroes */
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
 }
 
 /*
  * wchar => UTF-7
  */
-int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 {
-	int s, n;
+	int s;
 
-	n = 0;
+	int n = 0;
 	if (c >= 0 && c < 0x80) {	/* ASCII */
 		if (c >= 0x41 && c <= 0x5a) {		/* A - Z */
 			n = 1;
@@ -287,23 +321,21 @@ int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 	} else if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
 		;
 	} else if (c >= MBFL_WCSPLANE_SUPMIN && c < MBFL_WCSPLANE_SUPMAX) {
-		s = ((c >> 10) - 0x40) | 0xd800;
-		CK((*filter->filter_function)(s, filter));
-		s = (c & 0x3ff) | 0xdc00;
-		CK((*filter->filter_function)(s, filter));
-		return c;
+		(*filter->filter_function)(((c >> 10) - 0x40) | 0xd800, filter);
+		(*filter->filter_function)((c & 0x3ff) | 0xdc00, filter);
+		return;
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-		return c;
+		mbfl_filt_conv_illegal_output(c, filter);
+		return;
 	}
 
 	switch (filter->status) {
 	case 0:
-		if (n != 0) {	/* directly encode characters */
-			CK((*filter->output_function)(c, filter->data));
-		} else {	/* Modified Base64 */
-			CK((*filter->output_function)(0x2b, filter->data));		/* '+' */
-			filter->status++;
+		if (n != 0) { /* directly encode characters */
+			(*filter->output_function)(c, filter->data);
+		} else { /* Modified Base64 */
+			(*filter->output_function)('+', filter->data);
+			filter->status = 1;
 			filter->cache = c;
 		}
 		break;
@@ -311,49 +343,49 @@ int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 	/* encode Modified Base64 */
 	case 1:
 		s = filter->cache;
-		CK((*filter->output_function)(mbfl_base64_table[(s >> 10) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(s >> 4) & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_base64_table[(s >> 10) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(s >> 4) & 0x3f], filter->data);
 		if (n != 0) {
-			CK((*filter->output_function)(mbfl_base64_table[(s << 2) & 0x3c], filter->data));
+			(*filter->output_function)(mbfl_base64_table[(s << 2) & 0x3c], filter->data);
 			if (n == 1) {
-				CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+				(*filter->output_function)('-', filter->data);
 			}
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 			filter->status = 0;
 		} else {
-			filter->status++;
+			filter->status = 2;
 			filter->cache = ((s & 0xf) << 16) | c;
 		}
 		break;
 
 	case 2:
 		s = filter->cache;
-		CK((*filter->output_function)(mbfl_base64_table[(s >> 14) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(s >> 8) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(s >> 2) & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_base64_table[(s >> 14) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(s >> 8) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(s >> 2) & 0x3f], filter->data);
 		if (n != 0) {
-			CK((*filter->output_function)(mbfl_base64_table[(s << 4) & 0x30], filter->data));
+			(*filter->output_function)(mbfl_base64_table[(s << 4) & 0x30], filter->data);
 			if (n == 1) {
-				CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+				(*filter->output_function)('-', filter->data);
 			}
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 			filter->status = 0;
 		} else {
-			filter->status++;
+			filter->status = 3;
 			filter->cache = ((s & 0x3) << 16) | c;
 		}
 		break;
 
 	case 3:
 		s = filter->cache;
-		CK((*filter->output_function)(mbfl_base64_table[(s >> 12) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(s >> 6) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[s & 0x3f], filter->data));
+		(*filter->output_function)(mbfl_base64_table[(s >> 12) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(s >> 6) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[s & 0x3f], filter->data);
 		if (n != 0) {
 			if (n == 1) {
-				CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+				(*filter->output_function)('-', filter->data);
 			}
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 			filter->status = 0;
 		} else {
 			filter->status = 1;
@@ -365,96 +397,157 @@ int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-
-	return c;
-
 }
 
-int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 {
-	int status, cache;
-
-	status = filter->status;
-	cache = filter->cache;
-	filter->status = 0;
-	filter->cache = 0;
+	int status = filter->status;
+	int cache = filter->cache;
+	filter->status = filter->cache = 0;
 	/* flush fragments */
 	switch (status) {
 	case 1:
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 10) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 4) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache << 2) & 0x3c], filter->data));
-		CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+		(*filter->output_function)(mbfl_base64_table[(cache >> 10) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 4) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache << 2) & 0x3c], filter->data);
+		(*filter->output_function)('-', filter->data);
 		break;
 
 	case 2:
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 14) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 8) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 2) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache << 4) & 0x30], filter->data));
-		CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+		(*filter->output_function)(mbfl_base64_table[(cache >> 14) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 8) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 2) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache << 4) & 0x30], filter->data);
+		(*filter->output_function)('-', filter->data);
 		break;
 
 	case 3:
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[(cache >> 6) & 0x3f], filter->data));
-		CK((*filter->output_function)(mbfl_base64_table[cache & 0x3f], filter->data));
-		CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
+		(*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[(cache >> 6) & 0x3f], filter->data);
+		(*filter->output_function)(mbfl_base64_table[cache & 0x3f], filter->data);
+		(*filter->output_function)('-', filter->data);
 		break;
 	}
 
-	if (filter->flush_function != NULL) {
+	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
-
-	return 0;
 }
 
-static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_utf7_base64(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_2(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_4(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_6(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_8(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_10(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_12(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_utf7_base64_14(unsigned char c, mbfl_identify_filter *filter);
+
+void (*filt_ident_utf7_functions[])(unsigned char, mbfl_identify_filter*) = {
+	mbfl_filt_ident_utf7_base64,
+	mbfl_filt_ident_utf7_base64_2,
+	mbfl_filt_ident_utf7_base64_4,
+	mbfl_filt_ident_utf7_base64_6,
+	mbfl_filt_ident_utf7_base64_8,
+	mbfl_filt_ident_utf7_base64_10,
+	mbfl_filt_ident_utf7_base64_12,
+	mbfl_filt_ident_utf7_base64_14
+};
+
+static void identify_utf7_base64(unsigned char c, unsigned char bits, mbfl_identify_filter *filter)
 {
-	int n;
+	/* Cached bits are in low 2 bytes of `filter->status`
+	 * If expecting the 2nd part of a UTF-16BE surrogate pair, bit 17 is set */
+	int cache, surr;
 
-	switch (filter->status) {
-	/* directly encoded characters */
-	case 0:
-		if (c == 0x2b) {	/* '+'  shift character */
-			filter->status++;
-		} else if (c == 0x5c || c == 0x7e || c < 0 || c > 0x7f) {	/* illegal character */
-			filter->flag = 1;	/* bad */
+	if (c == '\\' || c == '~' || c > 0x7F) {
+		filter->flag = 1;
+	} else if (c == '-' || ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '+' && c != '/')) {
+		cache = filter->status & 0xFFFF;
+		surr  = filter->status & 0x10000;
+		if (surr) {
+			/* Error; the 2nd part of a surrogate pair was missing */
+			filter->flag = 1;
+		} else if (cache & ((1 << bits) - 1)) {
+			/* Error; padding was bad */
+			filter->flag = 1;
 		}
-		break;
-
-	/* Modified Base64 */
-	case 1:
-	case 2:
-		n = 0;
-		if (c >= 0x41 && c <= 0x5a) {		/* A - Z */
-			n = 1;
-		} else if (c >= 0x61 && c <= 0x7a) {	/* a - z */
-			n = 1;
-		} else if (c >= 0x30 && c <= 0x39) {	/* 0 - 9 */
-			n = 1;
-		} else if (c == 0x2b) {			/* '+' */
-			n = 1;
-		} else if (c == 0x2f) {			/* '/' */
-			n = 1;
-		}
-		if (n <= 0) {
-			if (filter->status == 1 && c != 0x2d) {
-				filter->flag = 1;	/* bad */
-			} else if (c < 0 || c > 0x7f) {
-				filter->flag = 1;	/* bad */
-			}
-			filter->status = 0;
-		} else {
-			filter->status = 2;
-		}
-		break;
-
-	default:
 		filter->status = 0;
-		break;
-	}
+		filter->filter_function = mbfl_filt_ident_utf7;
+	} else {
+		cache = ((filter->status & 0xFFFF) << 6) | decode_base64_char(c);
+		surr  = filter->status & 0x10000;
+		bits += 6;
+		if (bits >= 16) {
+			unsigned short codeunit = cache >> (bits - 16);
+			bits -= 16;
+			cache &= ((1 << bits) - 1);
+			if (surr) {
+				if ((codeunit & 0xFC00) != 0xDC00) {
+					/* Error; the 2nd part of a surrogate pair was missing */
+					filter->flag = 1;
+				}
+				if ((codeunit & 0xFC00) != 0xD800) {
+					surr = 0;
+				}
+			} else if ((codeunit & 0xFC00) == 0xD800) {
+				surr = 0x10000;
+			} else if ((codeunit & 0xFC00) == 0xDC00) {
+				/* Error; 2nd part of a surrogate pair appeared when not expected */
+				filter->flag = 1;
+			}
+		}
 
-	return c;
+		filter->status = surr | cache;
+		filter->filter_function = filt_ident_utf7_functions[bits / 2];
+	}
+}
+
+static void mbfl_filt_ident_utf7_base64(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 0, filter);
+}
+
+static void mbfl_filt_ident_utf7_base64_2(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 2, filter);
+}
+
+static void mbfl_filt_ident_utf7_base64_4(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 4, filter);
+}
+
+static void mbfl_filt_ident_utf7_base64_6(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 6, filter);
+}
+
+static void mbfl_filt_ident_utf7_base64_8(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 8, filter);
+}
+
+static void mbfl_filt_ident_utf7_base64_10(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 10, filter);
+}
+
+static void mbfl_filt_ident_utf7_base64_12(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 12, filter);
+}
+
+static void mbfl_filt_ident_utf7_base64_14(unsigned char c, mbfl_identify_filter *filter)
+{
+	identify_utf7_base64(c, 14, filter);
+}
+
+static void mbfl_filt_ident_utf7(unsigned char c, mbfl_identify_filter *filter)
+{
+	if (c == '+') { /* '+' shift character */
+		filter->filter_function = mbfl_filt_ident_utf7_base64;
+	} else if (c == '\\' || c == '~' || c > 0x7F) { /* illegal character */
+		filter->flag = 1;	/* bad */
+	}
 }

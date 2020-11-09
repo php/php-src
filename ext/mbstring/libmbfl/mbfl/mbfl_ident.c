@@ -34,6 +34,7 @@
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
 #include "mbfilter_wchar.h"
+#include "../mbstring_singlebyte.h"
 
 #include "filters/mbfilter_euc_cn.h"
 #include "filters/mbfilter_hz.h"
@@ -43,8 +44,9 @@
 #include "filters/mbfilter_euc_kr.h"
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
-#include "filters/mbfilter_sjis_open.h"
 #include "filters/mbfilter_sjis_mobile.h"
+#include "filters/mbfilter_sjis_2004.h"
+#include "filters/mbfilter_sjis_mac.h"
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_iso2022jp_2004.h"
@@ -53,32 +55,11 @@
 #include "filters/mbfilter_euc_jp_win.h"
 #include "filters/mbfilter_euc_jp_2004.h"
 #include "filters/mbfilter_utf8_mobile.h"
-#include "filters/mbfilter_ascii.h"
-#include "filters/mbfilter_koi8r.h"
-#include "filters/mbfilter_koi8u.h"
-#include "filters/mbfilter_cp866.h"
 #include "filters/mbfilter_cp932.h"
 #include "filters/mbfilter_cp936.h"
-#include "filters/mbfilter_cp1251.h"
-#include "filters/mbfilter_cp1252.h"
-#include "filters/mbfilter_cp1254.h"
 #include "filters/mbfilter_cp51932.h"
 #include "filters/mbfilter_cp5022x.h"
 #include "filters/mbfilter_gb18030.h"
-#include "filters/mbfilter_iso8859_1.h"
-#include "filters/mbfilter_iso8859_2.h"
-#include "filters/mbfilter_iso8859_3.h"
-#include "filters/mbfilter_iso8859_4.h"
-#include "filters/mbfilter_iso8859_5.h"
-#include "filters/mbfilter_iso8859_6.h"
-#include "filters/mbfilter_iso8859_7.h"
-#include "filters/mbfilter_iso8859_8.h"
-#include "filters/mbfilter_iso8859_9.h"
-#include "filters/mbfilter_iso8859_10.h"
-#include "filters/mbfilter_iso8859_13.h"
-#include "filters/mbfilter_iso8859_14.h"
-#include "filters/mbfilter_iso8859_15.h"
-#include "filters/mbfilter_iso8859_16.h"
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_uuencode.h"
@@ -93,14 +74,6 @@
 #include "filters/mbfilter_ucs4.h"
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
-#include "filters/mbfilter_armscii8.h"
-#include "filters/mbfilter_cp850.h"
-
-static const struct mbfl_identify_vtbl vtbl_identify_false = {
-	mbfl_no_encoding_pass,
-	mbfl_filt_ident_false_ctor,
-	mbfl_filt_ident_false
-};
 
 static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf8,
@@ -108,7 +81,6 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_ascii,
 	&vtbl_identify_eucjp,
 	&vtbl_identify_sjis,
-	&vtbl_identify_sjis_open,
 	&vtbl_identify_eucjpwin,
 	&vtbl_identify_eucjp2004,
 	&vtbl_identify_cp932,
@@ -156,7 +128,6 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_8859_16,
 	&vtbl_identify_armscii8,
 	&vtbl_identify_cp850,
-	&vtbl_identify_jis_ms,
 	&vtbl_identify_cp50220,
 	&vtbl_identify_cp50221,
 	&vtbl_identify_cp50222,
@@ -172,7 +143,21 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf32,
 	&vtbl_identify_utf32be,
 	&vtbl_identify_utf32le,
-	&vtbl_identify_false,
+	&vtbl_identify_sjis2004,
+	&vtbl_identify_sjis_mac,
+	&vtbl_identify_ucs4,
+	&vtbl_identify_ucs4be,
+	&vtbl_identify_ucs4le,
+	&vtbl_identify_utf7imap,
+	&vtbl_identify_html_ent,
+	&vtbl_identify_byte2be,
+	&vtbl_identify_byte2le,
+	&vtbl_identify_byte4be,
+	&vtbl_identify_byte4le,
+	&vtbl_identify_uuencode,
+	&vtbl_identify_qprint,
+	&vtbl_identify_base64,
+	&vtbl_identify_wchar,
 	NULL
 };
 
@@ -191,38 +176,27 @@ const struct mbfl_identify_vtbl* mbfl_identify_filter_get_vtbl(enum mbfl_no_enco
 
 mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 {
-	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
-	mbfl_identify_filter_init(filter, encoding);
-	return filter;
+	return mbfl_identify_filter_new2(mbfl_no2encoding(encoding));
 }
 
 mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
 {
 	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
-	mbfl_identify_filter_init2(filter, encoding);
+	mbfl_identify_filter_init(filter, encoding);
 	return filter;
 }
 
-void mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
-{
-	const mbfl_encoding *enc = mbfl_no2encoding(encoding);
-	mbfl_identify_filter_init2(filter, enc ? enc : &mbfl_encoding_pass);
-}
-
-void mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
+void mbfl_identify_filter_init(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
 {
 	filter->encoding = encoding;
-	filter->status = filter->flag = filter->score = 0;
+	filter->status = filter->flag = 0;
 
 	/* setup the function table */
 	const struct mbfl_identify_vtbl *vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
-	if (vtbl == NULL) {
-		vtbl = &vtbl_identify_false;
-	}
-	filter->filter_ctor = vtbl->filter_ctor;
+	ZEND_ASSERT(vtbl);
 	filter->filter_function = vtbl->filter_function;
 
-	(*filter->filter_ctor)(filter);
+	(*vtbl->filter_ctor)(filter);
 }
 
 void mbfl_identify_filter_delete(mbfl_identify_filter *filter)
@@ -235,22 +209,5 @@ void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter)
 	filter->status = filter->flag = 0;
 }
 
-/* A (useless) filter which says that _every_ string is invalid in a certain encoding.
- * Obviously, that cannot be true. Remove after all encodings have proper identify filters */
-int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter)
-{
-	filter->flag = 1;	/* bad */
-	return c;
-}
-
-void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter)
-{
-	filter->status = 0;
-	filter->flag = 1;
-}
-
 /* For encodings in which _every_ possible input string is valid */
-int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter)
-{
-	return c;
-}
+void mbfl_filt_ident_true(unsigned char c, mbfl_identify_filter *filter) {}

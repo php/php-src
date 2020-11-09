@@ -31,13 +31,15 @@
 #include "mbfilter.h"
 #include "mbfilter_byte2.h"
 
+static void mbfl_filt_ident_byte2(unsigned char c, mbfl_identify_filter *filter);
+
 const mbfl_encoding mbfl_encoding_byte2be = {
 	mbfl_no_encoding_byte2be,
 	"byte2be",
 	NULL,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_SBCS,
+	MBFL_ENCTYPE_WCS2,
 	&vtbl_byte2be_wchar,
 	&vtbl_wchar_byte2be
 };
@@ -48,9 +50,21 @@ const mbfl_encoding mbfl_encoding_byte2le = {
 	NULL,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_SBCS,
+	MBFL_ENCTYPE_WCS2,
 	&vtbl_byte2le_wchar,
 	&vtbl_wchar_byte2le
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_byte2be = {
+	mbfl_no_encoding_byte2be,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_byte2
+};
+
+const struct mbfl_identify_vtbl vtbl_identify_byte2le = {
+	mbfl_no_encoding_byte2le,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_byte2
 };
 
 const struct mbfl_convert_vtbl vtbl_byte2be_wchar = {
@@ -59,8 +73,7 @@ const struct mbfl_convert_vtbl vtbl_byte2be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_byte2be_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_byte2be = {
@@ -69,8 +82,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte2be = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_byte2be,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_byte2le_wchar = {
@@ -79,8 +91,7 @@ const struct mbfl_convert_vtbl vtbl_byte2le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_byte2le_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_byte2le = {
@@ -89,54 +100,45 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte2le = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_byte2le,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-int mbfl_filt_conv_byte2be_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_byte2be_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = (c & 0xff) << 8;
-		filter->cache = n;
+		filter->cache = (c & 0xff) << 8;
 	} else {
 		filter->status = 0;
-		n = (c & 0xff) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		(*filter->output_function)((c & 0xff) | filter->cache, filter->data);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_byte2be(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_byte2be(int c, mbfl_convert_filter *filter)
 {
-	CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-	CK((*filter->output_function)(c & 0xff, filter->data));
-	return c;
+	(*filter->output_function)((c >> 8) & 0xff, filter->data);
+	(*filter->output_function)(c & 0xff, filter->data);
 }
 
-int mbfl_filt_conv_byte2le_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_byte2le_wchar(int c, mbfl_convert_filter *filter)
 {
-	int n;
-
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = c & 0xff;
-		filter->cache = n;
+		filter->cache = c & 0xff;
 	} else {
 		filter->status = 0;
-		n = ((c & 0xff) << 8) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+		(*filter->output_function)(((c & 0xff) << 8) | filter->cache, filter->data);
 	}
-	return c;
 }
 
-int mbfl_filt_conv_wchar_byte2le(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_byte2le(int c, mbfl_convert_filter *filter)
 {
-	CK((*filter->output_function)(c & 0xff, filter->data));
-	CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-	return c;
+	(*filter->output_function)(c & 0xff, filter->data);
+	(*filter->output_function)((c >> 8) & 0xff, filter->data);
+}
+
+static void mbfl_filt_ident_byte2(unsigned char c, mbfl_identify_filter *filter)
+{
+	/* Input string must be a multiple of 2 bytes */
+	filter->status = (filter->status + 1) % 2;
 }

@@ -33,8 +33,8 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
-static int mbfl_filt_ident_jis(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_jis7(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp(unsigned char c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_jis = {
 	mbfl_no_encoding_jis,
@@ -42,7 +42,7 @@ const mbfl_encoding mbfl_encoding_jis = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_jis_wchar,
 	&vtbl_wchar_jis
 };
@@ -53,7 +53,7 @@ const mbfl_encoding mbfl_encoding_2022jp = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_wchar,
 	&vtbl_wchar_2022jp
 };
@@ -61,7 +61,7 @@ const mbfl_encoding mbfl_encoding_2022jp = {
 const struct mbfl_identify_vtbl vtbl_identify_jis = {
 	mbfl_no_encoding_jis,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_jis
+	mbfl_filt_ident_jis7
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_2022jp = {
@@ -76,8 +76,7 @@ const struct mbfl_convert_vtbl vtbl_jis_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_jis = {
@@ -86,8 +85,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_jis = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_jis,
-	mbfl_filt_conv_any_jis_flush,
-	NULL,
+	mbfl_filt_conv_any_jis_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
@@ -96,8 +94,7 @@ const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jp = {
@@ -106,17 +103,13 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_2022jp,
-	mbfl_filt_conv_any_jis_flush,
-	NULL,
+	mbfl_filt_conv_any_jis_flush
 };
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * JIS => wchar
  */
-int
-mbfl_filt_conv_jis_wchar(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_jis_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, s, w;
 
@@ -135,22 +128,22 @@ retry:
 		} else if (c == 0x0f) {		/* "kana out" */
 			filter->status = 0;
 		} else if (filter->status == 0x10 && c == 0x5c) {	/* YEN SIGN */
-			CK((*filter->output_function)(0xa5, filter->data));
+			(*filter->output_function)(0xa5, filter->data);
 		} else if (filter->status == 0x10 && c == 0x7e) {	/* OVER LINE */
-			CK((*filter->output_function)(0x203e, filter->data));
+			(*filter->output_function)(0x203e, filter->data);
 		} else if (filter->status == 0x20 && c > 0x20 && c < 0x60) {		/* kana */
-			CK((*filter->output_function)(0xff40 + c, filter->data));
+			(*filter->output_function)(0xff40 + c, filter->data);
 		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c < 0x7f) {		/* kanji first char */
 			filter->cache = c;
 			filter->status += 1;
 		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(c, filter->data);
 		} else if (c > 0xa0 && c < 0xe0) {	/* GR kana */
-			CK((*filter->output_function)(0xfec0 + c, filter->data));
+			(*filter->output_function)(0xfec0 + c, filter->data);
 		} else {
 			w = c & MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -184,16 +177,12 @@ retry:
 					w |= MBFL_WCSPLANE_JIS0212;
 				}
 			}
-			CK((*filter->output_function)(w, filter->data));
-		} else if (c == 0x1b) {
-			filter->status += 2;
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
+			(*filter->output_function)(w, filter->data);
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			(*filter->output_function)(w, filter->data);
 		}
 		break;
 
@@ -210,7 +199,7 @@ retry:
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
 			goto retry;
 		}
 		break;
@@ -228,8 +217,8 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
-			CK((*filter->output_function)(0x24, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
+			(*filter->output_function)(0x24, filter->data);
 			goto retry;
 		}
 		break;
@@ -247,9 +236,9 @@ retry:
 			filter->status = 0x90;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
-			CK((*filter->output_function)(0x24, filter->data));
-			CK((*filter->output_function)(0x28, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
+			(*filter->output_function)(0x24, filter->data);
+			(*filter->output_function)(0x28, filter->data);
 			goto retry;
 		}
 		break;
@@ -269,8 +258,8 @@ retry:
 			filter->status = 0x20;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
-			CK((*filter->output_function)(0x28, filter->data));
+			(*filter->output_function)(0x1b, filter->data);
+			(*filter->output_function)(0x28, filter->data);
 			goto retry;
 		}
 		break;
@@ -279,19 +268,15 @@ retry:
 		filter->status = 0;
 		break;
 	}
-
-	return c;
 }
 
 /*
  * wchar => JIS
  */
-int
-mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 {
-	int c1, s;
+	int s = 0;
 
-	s = 0;
 	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
@@ -302,13 +287,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 		s = ucs_r_jis_table[c - ucs_r_jis_table_min];
 	}
 	if (s <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_JIS0208) {
-			s = c & MBFL_WCSPLANE_MASK;
-		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
-			s = c & MBFL_WCSPLANE_MASK;
-			s |= 0x8080;
-		} else if (c == 0xa5) {		/* YEN SIGN */
+		if (c == 0xa5) {		/* YEN SIGN */
 			s = 0x1005c;
 		} else if (c == 0x203e) {	/* OVER LINE */
 			s = 0x1007e;
@@ -335,62 +314,58 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 	}
 	if (s >= 0) {
 		if (s < 0x80) { /* ASCII */
-			if ((filter->status & 0xff00) != 0) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
+			if (filter->status != 0) {
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x28, filter->data);		/* '(' */
+				(*filter->output_function)(0x42, filter->data);		/* 'B' */
 			}
 			filter->status = 0;
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else if (s < 0x100) { /* kana */
-			if ((filter->status & 0xff00) != 0x100) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x49, filter->data));		/* 'I' */
+			if (filter->status != 0x100) {
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x28, filter->data);		/* '(' */
+				(*filter->output_function)(0x49, filter->data);		/* 'I' */
 			}
 			filter->status = 0x100;
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			(*filter->output_function)(s & 0x7f, filter->data);
 		} else if (s < 0x8080) { /* X 0208 */
-			if ((filter->status & 0xff00) != 0x200) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
+			if (filter->status != 0x200) {
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x24, filter->data);		/* '$' */
+				(*filter->output_function)(0x42, filter->data);		/* 'B' */
 			}
 			filter->status = 0x200;
-			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			(*filter->output_function)((s >> 8) & 0x7f, filter->data);
+			(*filter->output_function)(s & 0x7f, filter->data);
 		} else if (s < 0x10000) { /* X 0212 */
-			if ((filter->status & 0xff00) != 0x300) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x44, filter->data));		/* 'D' */
+			if (filter->status != 0x300) {
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x24, filter->data);		/* '$' */
+				(*filter->output_function)(0x28, filter->data);		/* '(' */
+				(*filter->output_function)(0x44, filter->data);		/* 'D' */
 			}
 			filter->status = 0x300;
-			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			(*filter->output_function)((s >> 8) & 0x7f, filter->data);
+			(*filter->output_function)(s & 0x7f, filter->data);
 		} else { /* X 0201 latin */
-			if ((filter->status & 0xff00) != 0x400) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x4a, filter->data));		/* 'J' */
+			if (filter->status != 0x400) {
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x28, filter->data);		/* '(' */
+				(*filter->output_function)(0x4a, filter->data);		/* 'J' */
 			}
 			filter->status = 0x400;
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			(*filter->output_function)(s & 0x7f, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
-
 
 /*
  * wchar => ISO-2022-JP
  */
-int
-mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
+void mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 {
 	int s;
 
@@ -435,225 +410,248 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 	if (s >= 0) {
 		if (s < 0x80) { /* ASCII */
 			if ((filter->status & 0xff00) != 0) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x28, filter->data);		/* '(' */
+				(*filter->output_function)(0x42, filter->data);		/* 'B' */
 			}
 			filter->status = 0;
-			CK((*filter->output_function)(s, filter->data));
+			(*filter->output_function)(s, filter->data);
 		} else if (s < 0x10000) { /* X 0208 */
 			if ((filter->status & 0xff00) != 0x200) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-				CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x24, filter->data);		/* '$' */
+				(*filter->output_function)(0x42, filter->data);		/* 'B' */
 			}
 			filter->status = 0x200;
-			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			(*filter->output_function)((s >> 8) & 0x7f, filter->data);
+			(*filter->output_function)(s & 0x7f, filter->data);
 		} else { /* X 0201 latin */
 			if ((filter->status & 0xff00) != 0x400) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x4a, filter->data));		/* 'J' */
+				(*filter->output_function)(0x1b, filter->data);		/* ESC */
+				(*filter->output_function)(0x28, filter->data);		/* '(' */
+				(*filter->output_function)(0x4a, filter->data);		/* 'J' */
 			}
 			filter->status = 0x400;
-			CK((*filter->output_function)(s & 0x7f, filter->data));
+			(*filter->output_function)(s & 0x7f, filter->data);
 		}
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
-
-	return c;
 }
 
-int
-mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter)
+void mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter)
 {
 	/* back to latin */
-	if ((filter->status & 0xff00) != 0) {
-		CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
+	if (filter->status & 0xff00) {
+		(*filter->output_function)(0x1b, filter->data);		/* ESC */
+		(*filter->output_function)(0x28, filter->data);		/* '(' */
+		(*filter->output_function)(0x42, filter->data);		/* 'B' */
 	}
 	filter->status &= 0xff;
 
-	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+}
+
+static void mbfl_filt_ident_jis7_0208(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_jis7_0212(unsigned char c, mbfl_identify_filter *filter);
+static void mbfl_filt_ident_2022jp_0208(unsigned char c, mbfl_identify_filter *filter);
+
+/* ISO 2022-JP has different modes, which can be selected by a sequence
+ * starting with ESC (0x1B). In each mode, characters can be selected from a
+ * different character set. */
+static int handle_basic_esc_sequence(int c, mbfl_identify_filter *filter)
+{
+	/* If we are on the 2nd byte of a 2-byte character, `filter->status` will
+	 * be `first_byte << 8` */
+
+	switch (filter->status) {
+	case 0: /* Starting new character */
+		if (c == 0x1B) { /* ESC */
+			filter->status = 1;
+			return 1;
+		}
+		break;
+
+	case 1: /* Already saw ESC */
+		if (c == '$') {
+			filter->status = 2;
+		} else if (c == '(') {
+			filter->status = 3;
+		} else {
+			filter->flag = 1;
+			filter->status = 0;
+		}
+		return 1;
+
+	case 2: /* Already saw ESC $ */
+		if (c == '(') {
+			filter->status = 4;
+			return 1;
+		}
 	}
 
 	return 0;
 }
 
-static int mbfl_filt_ident_jis(int c, mbfl_identify_filter *filter)
+static int handle_esc_sequence_jis7(int c, mbfl_identify_filter *filter)
 {
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x20:	 X 0201 kana */
-/*	case 0x80:	 X 0208 */
-/*	case 0x90:	 X 0212 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (c == 0x0e) {			/* "kana in" */
-			filter->status = 0x20;
-		} else if (c == 0x0f) {			/* "kana out" */
-			filter->status = 0;
-		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
+	if (handle_basic_esc_sequence(c, filter)) {
+		return 1;
+	}
 
-/*	case 0x81:	 X 0208 second char */
-/*	case 0x91:	 X 0212 second char */
-	case 1:
-		filter->status &= ~0xf;
-		if (c == 0x1b) {
-			goto retry;
-		} else if (c < 0x21 || c > 0x7e) {		/* bad */
+	switch (filter->status) {
+	case 2: /* Already saw ESC $ */
+		if (c == 'B' || c == '@') {
+			/* Switch to JIS X 0208 */
+			filter->filter_function = mbfl_filt_ident_jis7_0208;
+		} else {
 			filter->flag = 1;
 		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ ( */
-	case 4:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x44) {		/* 'D' */
-			filter->status = 0x90;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42 || c == 0x48) {		/* 'B' or 'H' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else if (c == 0x49) {		/* 'I' */
-			filter->status = 0x20;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
 		filter->status = 0;
-		break;
+		return 1;
+
+	case 3: /* Already saw ESC ( */
+		if (c == 'B' || c == 'H' || c == 'J' || c == 'I') {
+			/* B => switch to ASCII
+			 * J => switch to JIS X 0201 Roman
+			 * I => switch to JIS X 0201 Kana
+			 * We don't care about the difference, because the valid byte
+			 * sequences are the same in any case! */
+			filter->filter_function = mbfl_filt_ident_jis7;
+		} else {
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		return 1;
+
+	case 4: /* Already saw ESC $ ( */
+		if (c == 'D') {
+			/* Switch to JIS X 0212
+			 * This is an extension from ISO-2022-JP-1 (RFC 2237) */
+			filter->filter_function = mbfl_filt_ident_jis7_0212;
+		} else {
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		return 1;
 	}
 
-	return c;
+	return 0;
 }
 
-static int mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter)
+static void mbfl_filt_ident_jis7(unsigned char c, mbfl_identify_filter *filter)
 {
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x80:	 X 0208 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
+	/* We convert single bytes from 0xA1-0xDF to JIS X 0201 kana, even if
+	 * no escape to shift to JIS X 0201 has been seen */
+	if (!handle_esc_sequence_jis7(c, filter) && ((c >= 0x80 && c <= 0xA0) || c >= 0xE0)) {
+		filter->flag = 1;
+	}
+}
 
-/*	case 0x81:	 X 0208 second char */
-	case 1:
-		if (c == 0x1b) {
-			filter->status++;
-		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
-				filter->flag = 1;
-			}
-		}
-		break;
+/* Not all byte sequences in JIS X 0208 which would otherwise be valid are
+ * actually mapped to a character */
+static inline int in_unused_jisx0208_range(int c1, int c2)
+{
+	unsigned int s = (c1 - 0x21)*94 + c2 - 0x21;
+	return s >= jisx0208_ucs_table_size || !jisx0208_ucs_table[s];
+}
 
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
+static void handle_jisx_0208(int c, mbfl_identify_filter *filter)
+{
+	if (filter->status == 0) {
+		if (c >= 0x21 && c <= 0x7E) {
+			filter->status = c << 8;
+		} else if (c > 0x7F) {
+			filter->flag = 1;
 		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
+	} else if (c < 0x21 || c > 0x7E || in_unused_jisx0208_range(filter->status >> 8, c)) {
+		filter->flag = 1;
+	} else {
 		filter->status = 0;
-		break;
+	}
+}
+
+static void mbfl_filt_ident_jis7_0208(unsigned char c, mbfl_identify_filter *filter)
+{
+	if (!handle_esc_sequence_jis7(c, filter)) {
+		handle_jisx_0208(c, filter);
+	}
+}
+
+static inline int in_unused_jisx0212_range(int c1, int c2)
+{
+	unsigned int s = (c1 - 0x21)*94 + c2 - 0x21;
+	return s >= jisx0212_ucs_table_size || !jisx0212_ucs_table[s];
+}
+
+static void mbfl_filt_ident_jis7_0212(unsigned char c, mbfl_identify_filter *filter)
+{
+	if (handle_esc_sequence_jis7(c, filter)) {
+		return;
+	} else if (filter->status == 0) {
+		if (c >= 0x21 && c <= 0x7E) {
+			filter->status = c << 8;
+		} else if (c > 0x7F) {
+			filter->flag = 1;
+		}
+	} else if (c < 0x21 || c > 0x7E || in_unused_jisx0212_range(filter->status >> 8, c)) {
+		filter->flag = 1;
+	} else {
+		filter->status = 0;
+	}
+}
+
+static int handle_esc_sequence_2022jp(int c, mbfl_identify_filter *filter)
+{
+	if (handle_basic_esc_sequence(c, filter)) {
+		return 1;
 	}
 
-	return c;
+	switch (filter->status) {
+	case 2: /* Already saw ESC $ */
+		if (c == 'B' || c == '@') {
+			/* Switch to JIS X 0208 */
+			filter->filter_function = mbfl_filt_ident_2022jp_0208;
+		} else {
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		return 1;
+
+	case 3: /* Already saw ESC ( */
+		if (c == 'B' || c == 'J') {
+			/* B => switch to ASCII
+			 * J => switch to JIS X 0201 Roman
+			 * We don't care about the difference, because the valid byte
+			 * sequences are the same in any case! */
+			filter->filter_function = mbfl_filt_ident_2022jp;
+		} else {
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		return 1;
+
+	case 4: /* Already saw ESC $ ( */
+		filter->flag = 1;
+		filter->status = 0;
+		return 1;
+	}
+
+	return 0;
+}
+
+static void mbfl_filt_ident_2022jp(unsigned char c, mbfl_identify_filter *filter)
+{
+	if (!handle_esc_sequence_2022jp(c, filter) && c > 0x7F) {
+		filter->flag = 1;
+	}
+}
+
+static void mbfl_filt_ident_2022jp_0208(unsigned char c, mbfl_identify_filter *filter)
+{
+	if (!handle_esc_sequence_2022jp(c, filter)) {
+		handle_jisx_0208(c, filter);
+	}
 }

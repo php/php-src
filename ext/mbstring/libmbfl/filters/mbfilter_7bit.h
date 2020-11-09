@@ -38,7 +38,7 @@ extern const struct mbfl_identify_vtbl vtbl_identify_7bit;
 extern const struct mbfl_convert_vtbl vtbl_8bit_7bit;
 extern const struct mbfl_convert_vtbl vtbl_7bit_8bit;
 
-int mbfl_filt_conv_7bit_any(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_7bit_any(int c, mbfl_convert_filter *filter);
+void mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_7BIT_H */
