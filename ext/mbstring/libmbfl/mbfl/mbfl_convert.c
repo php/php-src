@@ -192,7 +192,7 @@ unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsi
 int mbfl_convert_filter_flush(mbfl_convert_filter *filter)
 {
 	(*filter->filter_flush)(filter);
-	return filter->flush_function ? (*filter->flush_function)(filter->data) : 0;
+	return 0;
 }
 
 void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to)
@@ -392,16 +392,12 @@ const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding
  */
 void mbfl_filt_conv_common_ctor(mbfl_convert_filter *filter)
 {
-	filter->status = 0;
-	filter->cache = 0;
+	filter->status = filter->cache = 0;
 }
 
 int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
 {
-	filter->status = 0;
-	filter->cache = 0;
-
-	if (filter->flush_function != NULL) {
+	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
 	}
 	return 0;
