@@ -68,42 +68,37 @@ const struct mbfl_convert_vtbl vtbl_wchar_gb18030 = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-
-int
-mbfl_bisec_srch(int w, const unsigned short *tbl, int n)
+/* `tbl` contains inclusive ranges, each represented by a pair of unsigned shorts */
+int mbfl_bisec_srch(int w, const unsigned short *tbl, int n)
 {
-	int k, k1 = 0, k2 = n-1;
-
-	while (k1 < k2) {
-		k = (k1+k2) >> 1;
-		if (w <= tbl[2*k+1]) {
-			k2 = k;
-		} else if (w >= tbl[2*k+2]) {
-			k1 = k + 1;
+	int l = 0, r = n-1;
+	while (l <= r) {
+		int probe = (l + r) >> 1;
+		unsigned short lo = tbl[2 * probe], hi = tbl[(2 * probe) + 1];
+		if (w < lo) {
+			r = probe - 1;
+		} else if (w > hi) {
+			l = probe + 1;
 		} else {
-			return -1;
+			return probe;
 		}
 	}
-	return k1;
+	return -1;
 }
 
-int
-mbfl_bisec_srch2(int w, const unsigned short tbl[], int n)
+/* `tbl` contains single values, not ranges */
+int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n)
 {
-	int k, k1 = 0, k2 = n;
-
-	if (w == tbl[0]) {
-		return 0;
-	}
-
-	while (k2 - k1 > 1) {
-		k = (k1 + k2) >> 1;
-		if (w < tbl[k]) {
-			k2 = k;
-		} else if (w > tbl[k]) {
-			k1 = k;
+	int l = 0, r = n-1;
+	while (l <= r) {
+		int probe = (l + r) >> 1;
+		unsigned short val = tbl[probe];
+		if (w < val) {
+			r = probe - 1;
+		} else if (w > val) {
+			l = probe + 1;
 		} else {
-			return k;
+			return probe;
 		}
 	}
 	return -1;
