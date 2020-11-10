@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0RC4
+12 Nov 2020, PHP 8.0.0RC4
 
 - Core:
   . Fixed bug #80334 (assert() vs named parameters - confusing error). (Nikita)
