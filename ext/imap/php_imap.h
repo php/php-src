@@ -85,11 +85,6 @@ typedef enum {
 	FLIST_OBJECT
 } folderlist_style_t;
 
-typedef struct php_imap_le_struct {
-	MAILSTREAM *imap_stream;
-	long flags;
-} pils;
-
 typedef struct php_imap_mailbox_struct {
 	SIZEDTEXT text;
 	DTYPE delimiter;
