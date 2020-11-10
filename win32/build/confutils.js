@@ -94,12 +94,14 @@ if (typeof(CWD) == "undefined") {
 	CWD = FSO.GetParentFolderName(FSO.GetParentFolderName(FSO.GetAbsolutePathName("main\\php_version.h")));
 }
 
-/* defaults; we pick up the precise versions from configure.ac */
-var PHP_VERSION = 7;
-var PHP_MINOR_VERSION = 4;
-var PHP_RELEASE_VERSION = 0;
-var PHP_EXTRA_VERSION = "";
-var PHP_VERSION_STRING = "7.4.0";
+if (!MODE_PHPIZE) {
+	/* defaults; we pick up the precise versions from configure.ac */
+	var PHP_VERSION = 7;
+	var PHP_MINOR_VERSION = 4;
+	var PHP_RELEASE_VERSION = 0;
+	var PHP_EXTRA_VERSION = "";
+	var PHP_VERSION_STRING = "7.4.0";
+}
 
 /* Get version numbers and DEFINE as a string */
 function get_version_numbers()
@@ -2340,6 +2342,8 @@ function generate_phpize()
 	MF.WriteLine("var PHP_VERSION=" + PHP_VERSION);
 	MF.WriteLine("var PHP_MINOR_VERSION=" + PHP_MINOR_VERSION);
 	MF.WriteLine("var PHP_RELEASE_VERSION=" + PHP_RELEASE_VERSION);
+	MF.WriteLine("var PHP_EXTRA_VERSION=\"" + PHP_EXTRA_VERSION + "\"");
+	MF.WriteLine("var PHP_VERSION_STRING=\"" + PHP_VERSION_STRING + "\"");
 	MF.WriteBlankLines(1);
 	MF.WriteLine("/* Genereted extensions list with mode (static/shared) */");
 

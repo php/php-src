@@ -217,6 +217,12 @@ C.WriteLine("var PHP_ANALYZER = 'disabled';");
 C.WriteLine("var PHP_PGO = 'no';");
 C.WriteLine("var PHP_PGI = 'no';");
 
+C.WriteLine("var PHP_VERSION=" + PHP_VERSION);
+C.WriteLine("var PHP_MINOR_VERSION=" + PHP_MINOR_VERSION);
+C.WriteLine("var PHP_RELEASE_VERSION=" + PHP_RELEASE_VERSION);
+C.WriteLine("var PHP_EXTRA_VERSION=\"" + PHP_EXTRA_VERSION + "\"");
+C.WriteLine("var PHP_VERSION_STRING=\"" + PHP_VERSION_STRING + "\"");
+
 C.Write(file_get_contents(PHP_DIR + "//script//ext_deps.js"));
 if (FSO.FileExists(PHP_DIR + "/script/ext_pickle.js")) {
 	C.Write(file_get_contents(PHP_DIR + "//script//ext_pickle.js"));
