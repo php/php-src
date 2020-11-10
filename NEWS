@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #74558 (Can't rebind closure returned by Closure::fromCallable()).
     (cmb)
+  . Fixed bug #80345 (PHPIZE configuration has outdated PHP_RELEASE_VERSION).
+    (cmb)
 
 26 Nov 2020, PHP 7.4.13
 
