@@ -2909,7 +2909,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 
 	/* Uncaught exception */
 	if (zend_observer_fcall_op_array_extension != -1) {
-		EX(opline) = opline;
 		zend_observer_fcall_end(execute_data, EX(return_value));
 	}
 	cleanup_live_vars(execute_data, op_num, 0);
@@ -3153,7 +3152,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 
-
 			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
 		} else {
@@ -3288,7 +3286,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_OBSERVER_
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
-			EX(opline) = opline;
 			zend_observer_fcall_begin(execute_data);
 			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();

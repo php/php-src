@@ -7710,7 +7710,6 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 
 	/* Uncaught exception */
 	if (zend_observer_fcall_op_array_extension != -1) {
-		EX(opline) = opline;
 		zend_observer_fcall_end(execute_data, EX(return_value));
 	}
 	cleanup_live_vars(execute_data, op_num, 0);
@@ -8518,7 +8517,6 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY, SPEC(OBSERVER))
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
-			ZEND_OBSERVER_SAVE_OPLINE();
 			ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
