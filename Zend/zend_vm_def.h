@@ -3956,6 +3956,7 @@ ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	ZEND_OBSERVER_SAVE_OPLINE();
 	ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 	LOAD_OPLINE_EX();
 
@@ -3981,6 +3982,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+		ZEND_OBSERVER_SAVE_OPLINE();
 		ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 		LOAD_OPLINE_EX();
 
@@ -4075,13 +4077,15 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
-		ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			ZEND_OBSERVER_SAVE_OPLINE();
+			ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
 		} else {
 			SAVE_OPLINE_EX();
+			ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
@@ -4299,6 +4303,7 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 			}
 		}
 	}
+	ZEND_OBSERVER_SAVE_OPLINE();
 	ZEND_OBSERVER_FCALL_END(execute_data, return_value);
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
@@ -7705,6 +7710,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 
 	/* Uncaught exception */
 	if (zend_observer_fcall_op_array_extension != -1) {
+		EX(opline) = opline;
 		zend_observer_fcall_end(execute_data, EX(return_value));
 	}
 	cleanup_live_vars(execute_data, op_num, 0);
@@ -8511,12 +8517,14 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY, SPEC(OBSERVER))
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-		ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			ZEND_OBSERVER_SAVE_OPLINE();
+			ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
 		} else {
 			SAVE_OPLINE_EX();
+			ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
