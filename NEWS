@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.25
+?? ??? ????, PHP 7.3.26
+
+
+26 Nov 2020, PHP 7.3.25
 
 - Core:
   . Fixed bug #80280 (ADD_EXTENSION_DEP() fails for ext/standard and ext/date).
