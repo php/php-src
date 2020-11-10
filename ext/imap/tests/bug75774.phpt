@@ -20,6 +20,5 @@ fclose($var1);
 unlink($fn);
 
 ?>
---EXPECTF--
-Warning: imap_append(): Internal date not correctly formatted in %s on line %d
-imap_append(): supplied resource is not a valid imap resource
+--EXPECT--
+imap_append(): Argument #1 ($imap) must be of type IMAPConnection, resource given
