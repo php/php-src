@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #80345 (PHPIZE configuration has outdated PHP_RELEASE_VERSION).
     (cmb)
+  . Fixed bug #72964 (White space not unfolded for CC/Bcc headers). (cmb)
 
 26 Nov 2020, PHP 7.4.13
 
