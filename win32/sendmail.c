@@ -458,6 +458,16 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 			tempMailTo = estrndup(pos1, strlen(pos1));
 		} else {
+			char *pos3;
+			while (pos2[2] == ' ' || pos2[2] == '\t') {
+				pos3 = strstr(pos2 + 2, "\r\n");
+				if (pos3 != NULL) {
+					pos2 = pos3;
+				} else {
+					pos2 += strlen(pos2);
+					break;
+				}
+			}
 			tempMailTo = estrndup(pos1, pos2 - pos1);
 		}
 
@@ -516,7 +526,22 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 				   header we know it was the last thing. */
 				pos2 = pos1;
 			} else {
+				char *pos3 = NULL;
+				while (pos2[2] == ' ' || pos2[2] == '\t') {
+					pos3 = strstr(pos2 + 2, "\r\n");
+					if (pos3 != NULL) {
+						pos2 = pos3;
+					} else {
+						pos2 += strlen(pos2);
+						break;
+					}
+				}
 				tempMailTo = estrndup(pos1, pos2 - pos1);
+				if (pos3 == NULL) {
+					/* Later, when we remove the Bcc: out of the
+					   header we know it was the last thing. */
+					pos2 = pos1;
+				}
 			}
 
 			token = strtok(tempMailTo, ",");
