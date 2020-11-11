@@ -1608,7 +1608,11 @@ PHP_FUNCTION(mysqli_next_result) {
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_BOOL(!mysql_next_result(mysql->mysql));
+	if (mysql_next_result(mysql->mysql)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1640,7 +1644,11 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	RETURN_BOOL(!mysql_stmt_next_result(stmt->stmt));
+	if (mysql_stmt_next_result(stmt->stmt)) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
