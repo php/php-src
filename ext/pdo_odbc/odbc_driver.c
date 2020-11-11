@@ -134,7 +134,9 @@ static int odbc_handle_closer(pdo_dbh_t *dbh)
 	}
 	SQLFreeHandle(SQL_HANDLE_ENV, H->env);
 	H->env = NULL;
-	pefree(H, dbh->is_persistent);
+	if (EG(active)) {
+		pefree(H, dbh->is_persistent);
+	}
 	dbh->driver_data = NULL;
 
 	return 0;
