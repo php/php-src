@@ -794,6 +794,9 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
             ($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
             : "\\0",
         "/ZEND_OBSERVER_ENABLED/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "1" : "0",
+        "/ZEND_OBSERVER_USE_RETVAL/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "zval observer_retval" : "",
+        "/ZEND_OBSERVER_SET_RETVAL\(\)/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "if (!return_value) { return_value = &observer_retval; }" : "",
+        "/ZEND_OBSERVER_FREE_RETVAL\(\)/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "if (return_value == &observer_retval) { zval_ptr_dtor_nogc(&observer_retval); }" : "",
         "/ZEND_OBSERVER_SAVE_OPLINE\(\)/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "SAVE_OPLINE()" : "",
         "/ZEND_OBSERVER_FCALL_BEGIN\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
             ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_begin(\\1)")
