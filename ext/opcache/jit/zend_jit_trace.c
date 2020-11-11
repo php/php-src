@@ -1751,6 +1751,9 @@ propagate_arg:
 								}
 							}
 						}
+						if (opline->op1_type == IS_CV && (info & MAY_BE_RC1)) {
+							info |= MAY_BE_RCN;
+						}
 						if (info & MAY_BE_UNDEF) {
 							info |= MAY_BE_NULL;
 							info &= ~MAY_BE_UNDEF;
