@@ -829,7 +829,8 @@ static int zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, c
 					} else if (instanceof_function(info->ce, tssa->var_info[ssa_var].ce)) {
 						// TODO: TSSA may miss Pi() functions and corresponding instanceof() constraints ???
 					} else {
-						ZEND_UNREACHABLE();
+						// TODO: classes may implement the same interface ???
+						//ZEND_UNREACHABLE();
 					}
 				}
 				tssa->var_info[ssa_var].is_instanceof =
