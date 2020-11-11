@@ -102,6 +102,7 @@ jobs:
           exit 1
         fi
       displayName: 'Test PHPUnit'
+    - script: |
         php7.3 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
         cd symfony_demo
         export USE_ZEND_ALLOC=0
