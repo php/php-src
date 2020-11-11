@@ -9841,6 +9841,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					if (!trace && op_array == &func->op_array) {
 						/* recursive call */
 						if (ZEND_OBSERVER_ENABLED) {
+							|	SAVE_IP
 							|	mov FCARG1a, FP
 							|	EXT_CALL zend_observer_fcall_begin, r0
 						}
@@ -9950,6 +9951,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 
 		if (ZEND_OBSERVER_ENABLED) {
+			|	SAVE_IP
 			|	mov FCARG1a, FP
 			|	EXT_CALL zend_observer_fcall_begin, r0
 		}
@@ -11364,6 +11366,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		if (ZEND_OBSERVER_ENABLED) {
 			|	xor FCARG2a, FCARG2a
 			|	mov FCARG1a, FP
+			|	SET_EX_OPLINE opline, r0
 			|	EXT_CALL zend_observer_fcall_end, r0
 		}
 		return 1;
@@ -11437,6 +11440,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	if (ZEND_OBSERVER_ENABLED) {
 		|	LOAD_ZVAL_ADDR FCARG2a, ret_addr
 		|	mov FCARG1a, FP
+		|	SET_EX_OPLINE opline, r0
 		|	EXT_CALL zend_observer_fcall_end, r0
 	}
 	return 1;

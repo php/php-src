@@ -315,7 +315,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 		}
 #ifdef HAVE_GCC_GLOBAL_REGS
 		execute_data = EG(current_execute_data);
-		opline = EX(opline);
+		opline = execute_data ? EX(opline) : NULL;
 		return;
 #else
 		return 1;
