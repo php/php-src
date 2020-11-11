@@ -272,7 +272,6 @@ static int php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct 
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
-		efree(out_sock);
 		return 0;
 	}
 
