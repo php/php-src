@@ -4157,7 +4157,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_OBSER
 		}
 	}
 	SAVE_OPLINE();
-	zend_observer_fcall_end(execute_data, return_value);
+	zend_observer_fcall_end(execute_data, retval_ptr);
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -4277,7 +4277,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPE
 		if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));};
 	} while (0);
 
-	zend_observer_fcall_end(execute_data, EX(return_value));
+	zend_observer_fcall_end(execute_data, retval_ptr);
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -54830,7 +54830,7 @@ zend_leave_helper_SPEC_LABEL:
 		}
 	}
 	SAVE_OPLINE();
-	zend_observer_fcall_end(execute_data, return_value);
+	zend_observer_fcall_end(execute_data, retval_ptr);
 	goto zend_leave_helper_SPEC_LABEL;
 }
 

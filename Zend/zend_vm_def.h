@@ -4304,7 +4304,7 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 		}
 	}
 	ZEND_OBSERVER_SAVE_OPLINE();
-	ZEND_OBSERVER_FCALL_END(execute_data, return_value);
+	ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
@@ -4365,7 +4365,7 @@ ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC, 
 		FREE_OP1_VAR_PTR();
 	} while (0);
 
-	ZEND_OBSERVER_FCALL_END(execute_data, EX(return_value));
+	ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
