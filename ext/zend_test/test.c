@@ -37,6 +37,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_return_type;
 	int observer_show_return_value;
 	int observer_show_init_backtrace;
+	int observer_show_opcode;
 	int observer_nesting_depth;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
@@ -330,6 +331,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.show_opcode", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_opcode, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
@@ -441,6 +443,14 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 	return SUCCESS;
 }
 
+static void observer_show_opcode(zend_execute_data *execute_data)
+{
+	if (!ZT_G(observer_show_opcode)) {
+		return;
+	}
+	php_printf("%*s<!-- opcode: '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", zend_get_opcode_name(EX(opline)->opcode));
+}
+
 static void observer_begin(zend_execute_data *execute_data)
 {
 	if (!ZT_G(observer_show_output)) {
@@ -457,6 +467,7 @@ static void observer_begin(zend_execute_data *execute_data)
 		php_printf("%*s<file '%s'>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->op_array.filename));
 	}
 	ZT_G(observer_nesting_depth)++;
+	observer_show_opcode(execute_data);
 }
 
 static void get_retval_info(zval *retval, smart_str *buf)
@@ -485,6 +496,7 @@ static void observer_end(zend_execute_data *execute_data, zval *retval)
 	if (EG(exception)) {
 		php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
 	}
+	observer_show_opcode(execute_data);
 	ZT_G(observer_nesting_depth)--;
 	if (execute_data->func && execute_data->func->common.function_name) {
 		smart_str retval_info = {0};
@@ -541,6 +553,7 @@ static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execu
 		if (ZT_G(observer_show_init_backtrace)) {
 			observer_show_init_backtrace(execute_data);
 		}
+		observer_show_opcode(execute_data);
 	}
 
 	if (ZT_G(observer_observe_all)) {

@@ -1350,8 +1350,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 	LOAD_OPLINE_EX();
+
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1374,8 +1374,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 	LOAD_OPLINE_EX();
+
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1398,8 +1398,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_OBS
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-	zend_observer_fcall_begin(execute_data);
 	LOAD_OPLINE_EX();
+	SAVE_OPLINE();
+	zend_observer_fcall_begin(execute_data);
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1423,8 +1424,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 		LOAD_OPLINE_EX();
+
 
 		ZEND_VM_ENTER_EX();
 	} else {
@@ -1517,8 +1518,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 		LOAD_OPLINE_EX();
+
 
 		ZEND_VM_ENTER_EX();
 	} else {
@@ -1611,8 +1612,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-		zend_observer_fcall_begin(execute_data);
 		LOAD_OPLINE_EX();
+		SAVE_OPLINE();
+		zend_observer_fcall_begin(execute_data);
 
 		ZEND_VM_ENTER_EX();
 	} else {
@@ -1708,9 +1710,12 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
+
+
 			ZEND_VM_ENTER_EX();
 		} else {
 			SAVE_OPLINE_EX();
+
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
@@ -1813,9 +1818,12 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
+
+
 			ZEND_VM_ENTER_EX();
 		} else {
 			SAVE_OPLINE_EX();
+
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
@@ -1915,13 +1923,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
-		zend_observer_fcall_begin(execute_data);
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
+			SAVE_OPLINE();
+			zend_observer_fcall_begin(execute_data);
 			ZEND_VM_ENTER_EX();
 		} else {
 			SAVE_OPLINE_EX();
+			zend_observer_fcall_begin(execute_data);
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
@@ -3136,12 +3146,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
+
+
 			ZEND_VM_ENTER_EX();
 		} else {
 			SAVE_OPLINE_EX();
+
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
@@ -3270,12 +3282,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_OBSERVER_
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-		zend_observer_fcall_begin(execute_data);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			LOAD_OPLINE_EX();
+			SAVE_OPLINE();
+			zend_observer_fcall_begin(execute_data);
 			ZEND_VM_ENTER_EX();
 		} else {
 			SAVE_OPLINE_EX();
+			zend_observer_fcall_begin(execute_data);
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
@@ -4069,6 +4083,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_
 		}
 	}
 
+
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -4141,6 +4156,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_OBSER
 			}
 		}
 	}
+	SAVE_OPLINE();
 	zend_observer_fcall_end(execute_data, return_value);
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
@@ -18574,6 +18590,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HA
 		}
 	}
 
+
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -21138,6 +21155,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HA
 			}
 		}
 	}
+
 
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
@@ -37669,6 +37687,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HAN
 			}
 		}
 	}
+
 
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
@@ -54736,6 +54755,7 @@ zend_leave_helper_SPEC_LABEL:
 		}
 	}
 
+
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -54809,6 +54829,7 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
+	SAVE_OPLINE();
 	zend_observer_fcall_end(execute_data, return_value);
 	goto zend_leave_helper_SPEC_LABEL;
 }
@@ -56344,6 +56365,7 @@ zend_leave_helper_SPEC_LABEL:
 		}
 	}
 
+
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -56641,6 +56663,7 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
+
 
 	goto zend_leave_helper_SPEC_LABEL;
 }
@@ -57755,6 +57778,7 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
+
 
 	goto zend_leave_helper_SPEC_LABEL;
 }
