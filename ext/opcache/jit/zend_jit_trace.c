@@ -2197,7 +2197,8 @@ propagate_arg:
 						ssa_var_info[phi->sources[0]].type = MAY_BE_GUARD | (t & t0);
 					}
 					if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
-						if (is_checked_guard(tssa, ssa_opcodes, phi->sources[1], phi->ssa_var)) {
+						if (((t & t1) & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != 0
+						 && is_checked_guard(tssa, ssa_opcodes, phi->sources[1], phi->ssa_var)) {
 							ssa_var_info[phi->sources[1]].type = MAY_BE_GUARD | (t & t1);
 							ssa_var_info[phi->ssa_var].type = t & ~MAY_BE_GUARD;
 						}
