@@ -104,6 +104,8 @@ typedef struct {
 	zend_bool                     in_callback;
 	uint32_t*                     clone;
 	zval                          postfields;
+	/* CurlShareHandle object set using CURLOPT_SHARE. */
+	struct _php_curlsh *share;
 	zend_object                   std;
 } php_curl;
 
@@ -124,7 +126,7 @@ typedef struct {
 	zend_object std;
 } php_curlm;
 
-typedef struct {
+typedef struct _php_curlsh {
 	CURLSH                   *share;
 	struct {
 		int no;
