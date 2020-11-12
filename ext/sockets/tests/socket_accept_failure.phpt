@@ -8,5 +8,5 @@ var_dump(socket_accept($socket));
 
 ?>
 --EXPECTF--
-Warning: socket_accept(): unable to accept incoming connection [%d]: %a in %s on line %d
+Warning: socket_accept(): unable to accept incoming connection [%d]: %s in %s on line %d
 bool(false)
