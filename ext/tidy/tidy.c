@@ -1101,6 +1101,7 @@ static PHP_RINIT_FUNCTION(tidy)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+	TG(clean_output) = 0;
 	php_tidy_clean_output_start(ZEND_STRL("ob_tidyhandler"));
 
 	return SUCCESS;
