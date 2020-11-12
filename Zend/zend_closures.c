@@ -104,7 +104,7 @@ static zend_bool zend_valid_closure_binding(
 	}
 
 	if (is_fake_closure && scope != func->common.scope) {
-		zend_error(E_WARNING, "Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()");
+		zend_error(E_WARNING, "Cannot rebind scope of closure");
 		return 0;
 	}
 
