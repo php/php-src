@@ -7719,15 +7719,19 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 	}
 
 	/* Uncaught exception */
-	if (zend_observer_fcall_op_array_extension != -1) {
-		zend_observer_fcall_end(execute_data, EX(return_value));
-	}
-	cleanup_live_vars(execute_data, op_num, 0);
 	if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
 		zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
+		if (zend_observer_fcall_op_array_extension != -1) {
+			zend_observer_fcall_end(execute_data, &generator->retval);
+		}
+		cleanup_live_vars(execute_data, op_num, 0);
 		zend_generator_close(generator, 1);
 		ZEND_VM_RETURN();
 	} else {
+		if (zend_observer_fcall_op_array_extension != -1) {
+			zend_observer_fcall_end(execute_data, EX(return_value));
+		}
+		cleanup_live_vars(execute_data, op_num, 0);
 		/* We didn't execute RETURN, and have to initialize return_value */
 		if (EX(return_value)) {
 			ZVAL_UNDEF(EX(return_value));
