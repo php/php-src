@@ -1,5 +1,5 @@
 --TEST--
-Observer: Retvals are observable that are: IS_CONST
+Observer: Retvals are observable that are: IS_CV, IS_UNDEF
 --SKIPIF--
 <?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
 --INI--
@@ -9,7 +9,7 @@ zend_test.observer.show_return_value=1
 --FILE--
 <?php
 function foo() {
-    return 'I should be observable'; // IS_CONST
+    return $i_do_not_exist; // IS_CV && IS_UNDEF
 }
 
 $res = foo(); // Retval used
@@ -22,8 +22,12 @@ echo 'Done' . PHP_EOL;
 <file '%s/observer_retval_%d.php'>
   <!-- init foo() -->
   <foo>
-  </foo:'I should be observable'>
+
+Warning: Undefined variable $i_do_not_exist in %s on line %d
+  </foo:NULL>
   <foo>
-  </foo:'I should be observable'>
+
+Warning: Undefined variable $i_do_not_exist in %s on line %d
+  </foo:NULL>
 Done
 </file '%s/observer_retval_%d.php'>

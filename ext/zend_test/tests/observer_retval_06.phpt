@@ -1,5 +1,5 @@
 --TEST--
-Observer: Retvals are observable that are: IS_CONST
+Observer: Retvals are observable that are: IS_CV
 --SKIPIF--
 <?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
 --INI--
@@ -9,7 +9,8 @@ zend_test.observer.show_return_value=1
 --FILE--
 <?php
 function foo() {
-    return 'I should be observable'; // IS_CONST
+    $retval = 'I should be observable';
+    return $retval; // IS_CV
 }
 
 $res = foo(); // Retval used

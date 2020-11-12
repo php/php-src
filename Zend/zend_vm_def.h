@@ -4248,6 +4248,8 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 		if (return_value) {
 			ZVAL_NULL(return_value);
 		}
+		ZEND_OBSERVER_SAVE_OPLINE();
+		ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 	} else if (!return_value) {
 		if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(retval_ptr) && !Z_DELREF_P(retval_ptr)) {
@@ -4255,6 +4257,8 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 				rc_dtor_func(Z_COUNTED_P(retval_ptr));
 			}
 		}
+		ZEND_OBSERVER_SAVE_OPLINE();
+		ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 	} else {
 		if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
 			ZVAL_COPY_VALUE(return_value, retval_ptr);
@@ -4263,6 +4267,8 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 					Z_ADDREF_P(return_value);
 				}
 			}
+			ZEND_OBSERVER_SAVE_OPLINE();
+			ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 		} else if (OP1_TYPE == IS_CV) {
 			do {
 				if (Z_OPT_REFCOUNTED_P(retval_ptr)) {
@@ -4274,6 +4280,8 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
+							ZEND_OBSERVER_SAVE_OPLINE();
+							ZEND_OBSERVER_FCALL_END(execute_data, return_value);
 							break;
 						} else {
 							Z_ADDREF_P(retval_ptr);
@@ -4286,6 +4294,8 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 					}
 				}
 				ZVAL_COPY_VALUE(return_value, retval_ptr);
+				ZEND_OBSERVER_SAVE_OPLINE();
+				ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 			} while (0);
 		} else /* if (OP1_TYPE == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(retval_ptr))) {
@@ -4301,10 +4311,10 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 			} else {
 				ZVAL_COPY_VALUE(return_value, retval_ptr);
 			}
+			ZEND_OBSERVER_SAVE_OPLINE();
+			ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 		}
 	}
-	ZEND_OBSERVER_SAVE_OPLINE();
-	ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 

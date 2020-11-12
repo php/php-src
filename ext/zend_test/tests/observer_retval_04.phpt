@@ -1,5 +1,5 @@
 --TEST--
-Observer: Retvals are observable that are: IS_CONST
+Observer: Retvals are observable that are: refcounted, IS_VAR
 --SKIPIF--
 <?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
 --INI--
@@ -8,8 +8,14 @@ zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 --FILE--
 <?php
+class MyRetval {}
+
+function getObj() {
+    return new MyRetval(); // Refcounted
+}
+
 function foo() {
-    return 'I should be observable'; // IS_CONST
+    return getObj(); // IS_VAR
 }
 
 $res = foo(); // Retval used
@@ -22,8 +28,13 @@ echo 'Done' . PHP_EOL;
 <file '%s/observer_retval_%d.php'>
   <!-- init foo() -->
   <foo>
-  </foo:'I should be observable'>
+    <!-- init getObj() -->
+    <getObj>
+    </getObj:object(MyRetval)#%d>
+  </foo:object(MyRetval)#%d>
   <foo>
-  </foo:'I should be observable'>
+    <getObj>
+    </getObj:object(MyRetval)#%d>
+  </foo:object(MyRetval)#%d>
 Done
 </file '%s/observer_retval_%d.php'>
