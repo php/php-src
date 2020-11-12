@@ -89,12 +89,10 @@ close stream
 stream_set_blocking TypeError: stream_set_blocking(): supplied resource is not a valid stream resource
 
 socket_set_block 
-Warning: socket_set_block(): unable to set blocking mode [10038]: %s
- in %ssocket_import_stream-4-win.php on line %d
+Warning: socket_set_block(): unable to set blocking mode [10038]: %s in %ssocket_import_stream-4-win.php on line %d
 
 socket_get_option 
-Warning: socket_get_option(): Unable to retrieve socket option [10038]: %s
- in %ssocket_import_stream-4-win.php on line %d
+Warning: socket_get_option(): Unable to retrieve socket option [10038]: %s in %ssocket_import_stream-4-win.php on line %d
 
 
 

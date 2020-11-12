@@ -46,8 +46,7 @@ require 'ipv6_skipif.inc';
     socket_close($socket);
 ?>
 --EXPECTF--
-Warning: socket_recvfrom(): unable to recvfrom [10022]: %s
- in %s on line %d
+Warning: socket_recvfrom(): unable to recvfrom [10022]: %s in %s on line %d
 Received Ping! from remote address ::1 and remote port 1223
 --CREDITS--
 Falko Menge <mail at falko-menge dot de>
