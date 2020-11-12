@@ -1432,6 +1432,10 @@ static void reflection_class_constant_factory(zend_string *name_str, zend_class_
 
 static int get_parameter_default(zval *result, parameter_reference *param) {
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
+		if (param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
+			/* We don't have a way to determine the default value for this case right now. */
+			return FAILURE;
+		}
 		return zend_get_default_from_internal_arg_info(
 			result, (zend_internal_arg_info *) param->arg_info);
 	} else {
@@ -2717,7 +2721,8 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueAvailable)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
-		RETURN_BOOL(((zend_internal_arg_info*) (param->arg_info))->default_value);
+		RETURN_BOOL(!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)
+			&& ((zend_internal_arg_info*) (param->arg_info))->default_value);
 	} else {
 		zval *default_value = get_default_from_recv((zend_op_array *)param->fptr, param->offset);
 		RETURN_BOOL(default_value != NULL);
