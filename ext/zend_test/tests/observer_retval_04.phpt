@@ -21,6 +21,13 @@ function foo() {
 $res = foo(); // Retval used
 foo(); // Retval unused
 
+function bar($what) {
+  return 'This gets ' . $what . ' in the return handler when unused'; // Refcounted + IS_VAR
+}
+
+$res = bar('freed'); // Retval used
+bar('freed'); // Retval unused
+
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
@@ -36,5 +43,10 @@ echo 'Done' . PHP_EOL;
     <getObj>
     </getObj:object(MyRetval)#%d>
   </foo:object(MyRetval)#%d>
+  <!-- init bar() -->
+  <bar>
+  </bar:'This gets freed in the return handler when unused'>
+  <bar>
+  </bar:'This gets freed in the return handler when unused'>
 Done
 </file '%s/observer_retval_%d.php'>

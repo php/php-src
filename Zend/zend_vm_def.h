@@ -4251,14 +4251,14 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 		ZEND_OBSERVER_SAVE_OPLINE();
 		ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 	} else if (!return_value) {
+		ZEND_OBSERVER_SAVE_OPLINE();
+		ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 		if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(retval_ptr) && !Z_DELREF_P(retval_ptr)) {
 				SAVE_OPLINE();
 				rc_dtor_func(Z_COUNTED_P(retval_ptr));
 			}
 		}
-		ZEND_OBSERVER_SAVE_OPLINE();
-		ZEND_OBSERVER_FCALL_END(execute_data, retval_ptr);
 	} else {
 		if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
 			ZVAL_COPY_VALUE(return_value, retval_ptr);
