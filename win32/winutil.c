@@ -24,7 +24,7 @@
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 {/*{{{*/
-	wchar_t *bufw = NULL;
+	wchar_t *bufw = NULL, *pw;
 	char *buf;
 
 	DWORD ret = FormatMessageW(
@@ -35,6 +35,10 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 	if (!ret || !bufw) {
 		return "";
 	}
+
+	/* strip trailing line breaks and periods */
+	for (pw = bufw + wcslen(bufw) - 1; pw >= bufw && (*pw == L'\r' || *pw == L'\n' || *pw == L'.'); pw--);
+	pw[1] = L'\0';
 
 	buf = php_win32_cp_conv_w_to_any(bufw, ret, PHP_WIN32_CP_IGNORE_LEN_P);
 

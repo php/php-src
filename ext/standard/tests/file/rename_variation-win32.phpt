@@ -65,7 +65,7 @@ bool(false)
 bool(true)
 -- Iteration 2 --
 
-Warning: rename(%s/rename_variation/rename_variation.tmp/,%s/rename_variation2.tmp): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(%s/rename_variation/rename_variation.tmp/,%s/rename_variation2.tmp): The filename, directory name, or volume label syntax is incorrect (code: 123) in %s on line %d
 bool(false)
 bool(false)
 bool(false)
