@@ -36,12 +36,9 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 		return "";
 	}
 
-	size_t lenw = wcslen(bufw);
-	if (lenw > 0) {
-		/* strip trailing line breaks and periods */
-		for (pw = bufw + lenw - 1; *pw == L'\r' || *pw == L'\n' || *pw == L'.'; pw--);
-		pw[1] = L'\0';
-	}
+	/* strip trailing line breaks and periods */
+	for (pw = bufw + wcslen(bufw) - 1; pw >= bufw && (*pw == L'\r' || *pw == L'\n' || *pw == L'.'); pw--);
+	pw[1] = L'\0';
 
 	buf = php_win32_cp_conv_w_to_any(bufw, ret, PHP_WIN32_CP_IGNORE_LEN_P);
 
