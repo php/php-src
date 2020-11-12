@@ -26,7 +26,6 @@ unset($socket);
 unset($socketConn);
 ?>
 --EXPECTF--
-Warning: socket_connect(): unable to connect [%d]: No connection could be made because the target machine actively refused it.
- in %s on line %d
+Warning: socket_connect(): unable to connect [%d]: No connection could be made because the target machine actively refused it in %s on line %d
 int(%d)
 int(%d)

@@ -30,20 +30,16 @@ unlink($file_path."/disk_free_space.tmp");
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: disk_free_space(): The system cannot find the path specified.
- in %s on line %d
+Warning: disk_free_space(): The system cannot find the path specified in %s on line %d
 bool(false)
 
-Warning: diskfreespace(): The system cannot find the path specified.
- in %s on line %d
+Warning: diskfreespace(): The system cannot find the path specified in %s on line %d
 bool(false)
 
-Warning: disk_free_space(): The directory name is invalid.
- in %s on line %d
+Warning: disk_free_space(): The directory name is invalid in %s on line %d
 bool(false)
 
-Warning: diskfreespace(): The directory name is invalid.
- in %s on line %d
+Warning: diskfreespace(): The directory name is invalid in %s on line %d
 bool(false)
 
 -- Done --
