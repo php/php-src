@@ -109,8 +109,8 @@ static int zend_file_cache_flock(int fd, int type)
 #endif
 
 #define SUFFIX ".bin"
-#define T_PHP_OPCODE "<?pho"
-#define T_PHP_OPCODE_LEN 5
+#define T_PHP_OPCODE "<?phpo"
+#define T_PHP_OPCODE_LEN 6
 
 #define IS_SERIALIZED_INTERNED(ptr) \
 	((size_t)(ptr) & Z_UL(1))
@@ -1648,7 +1648,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	UNSERIALIZE_PTR(script->arena_mem);
 }
 
-static int zend_opcache_check_jump_opcode_tag(int fd, char* filename) {
+static int zend_opcache_check_opcode_file_tag(int fd, char* filename) {
 	zend_opcode_file_taginfo taginfo;
 	uint32_t php_version_id = (uint32_t)PHP_VERSION_ID;
 
@@ -1662,7 +1662,11 @@ static int zend_opcache_check_jump_opcode_tag(int fd, char* filename) {
 	}
 
 	if(memcmp(&taginfo.php_version_id, &php_version_id, sizeof(php_version_id)) != 0) {
-		zend_error(E_STRICT, "Opcode file '%s' (version id: %d) is compiled by different versions of PHP (version id: %d), it's not safe and not suggest", filename, taginfo.php_version_id, php_version_id);
+		int version_errno = E_WARNING;
+		if(ZCG(accel_directives).prohibit_different_version_opcode) {
+			version_errno = E_ERROR;
+		} 
+		zend_error(version_errno, "Opcode file '%s' (version id: %d) is compiled by different versions of PHP (version id: %d), it's not safe and not suggest", filename, taginfo.php_version_id, php_version_id);
 	}
 	return 0;
 }
@@ -1757,7 +1761,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if(ZCG(accel_directives).allow_direct_exec_opcode) {
 		fd = zend_file_cache_open(ZSTR_VAL(full_path),  O_RDONLY | O_BINARY);
 
-		if(fd < 0 || zend_opcache_check_jump_opcode_tag(fd, ZSTR_VAL(full_path)) < 0) {
+		if(fd < 0 || zend_opcache_check_opcode_file_tag(fd, ZSTR_VAL(full_path)) < 0) {
 			close(fd);
 			fd = -1;
 		} else {
