@@ -315,7 +315,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 		}
 #ifdef HAVE_GCC_GLOBAL_REGS
 		execute_data = EG(current_execute_data);
-		opline = EX(opline);
+		opline = execute_data ? EX(opline) : NULL;
 		return;
 #else
 		return 1;
@@ -406,7 +406,7 @@ static int zend_jit_trace_recursive_ret_count(const zend_op_array *op_array, con
 
 static int zend_jit_trace_has_recursive_ret(zend_execute_data *ex, const zend_op_array *orig_op_array, const zend_op *orig_opline, int ret_level)
 {
-	while (ex != NULL && ret_level < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
+	while (ex != NULL && ex->func != NULL && ret_level < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
 		if (&ex->func->op_array == orig_op_array && ex->opline + 1 == orig_opline) {
 			return 1;
 		}
@@ -1022,7 +1022,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					stop = ZEND_JIT_TRACE_STOP_LOOP;
 					ret_level = 0;
 					break;
-				} else if (loop_unroll_limit < JIT_G(max_loops_unroll)) {
+				} else if (loop_unroll_limit < JIT_G(max_loop_unrolls)) {
 					last_loop = idx;
 					last_loop_opline = opline;
 					last_loop_level = level;

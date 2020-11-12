@@ -57,7 +57,7 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	mbfl_no_encoding_html_ent,
 	"HTML-ENTITIES",
 	"HTML-ENTITIES",
-	(const char *(*)[])&mbfl_encoding_html_ent_aliases,
+	mbfl_encoding_html_ent_aliases,
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_html_wchar,

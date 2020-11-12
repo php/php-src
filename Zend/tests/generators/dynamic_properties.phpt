@@ -9,7 +9,7 @@ function gen() {
 
 $gen = gen();
 try {
-    $gen->prop = 42;
+    $gen->prop = new stdClass;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

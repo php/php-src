@@ -428,6 +428,7 @@ PHP_RINIT_FUNCTION(pcntl)
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
 	PCNTL_G(async_signals) = 0;
+	PCNTL_G(last_error) = 0;
 	return SUCCESS;
 }
 

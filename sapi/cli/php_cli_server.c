@@ -1879,12 +1879,8 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 				int nfds = php_pollfd_for(client->sock, POLLOUT, &tv);
 				if (nfds > 0) {
 					continue;
-				} else if (nfds < 0) {
-					/* error */
-					php_handle_aborted_connection();
-					return nbytes_left;
 				} else {
-					/* timeout */
+					/* error or timeout */
 					php_handle_aborted_connection();
 					return nbytes_left;
 				}

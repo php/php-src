@@ -66,8 +66,6 @@ typedef struct _php_basic_globals {
 	char *strtok_last;
 	char strtok_table[256];
 	size_t strtok_len;
-	zend_fcall_info array_walk_fci;
-	zend_fcall_info_cache array_walk_fci_cache;
 	zend_fcall_info user_compare_fci;
 	zend_fcall_info_cache user_compare_fci_cache;
 	zend_llist *user_tick_functions;

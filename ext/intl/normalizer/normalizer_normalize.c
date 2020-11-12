@@ -69,7 +69,7 @@ static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uin
 	const UNormalizer2 *norm = intl_get_normalizer(form, err);
 
 	if(U_FAILURE(*err)) {
-		return FALSE;
+		return false;
 	}
 
 	return unorm2_isNormalized(norm, uinput, uinput_len, err);
@@ -226,7 +226,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	int		uinput_len = 0;
 	UErrorCode	status = U_ZERO_ERROR;
 
-	UBool		uret = FALSE;
+	UBool		uret = false;
 
 	intl_error_reset( NULL );
 

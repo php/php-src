@@ -517,7 +517,7 @@ PHP_METHOD(PDO, prepare)
 		}
 		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
 			zend_value_error("PDO::ATTR_STATEMENT_CLASS value must be an array with the format "
-				"array(classname, array(ctor_args))");
+				"array(classname, constructor_args)");
 			RETURN_THROWS();
 		}
 		if (Z_TYPE_P(item) != IS_STRING || (pce = zend_lookup_class(Z_STR_P(item))) == NULL) {
@@ -535,7 +535,7 @@ PHP_METHOD(PDO, prepare)
 		}
 		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 			if (Z_TYPE_P(item) != IS_ARRAY) {
-				zend_type_error("PDO::ATTR_STATEMENT_CLASS ctor_args must be of type ?array, %s given",
+				zend_type_error("PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
 					zend_zval_type_name(value));
 				RETURN_THROWS();
 			}
@@ -577,6 +577,14 @@ PHP_METHOD(PDO, prepare)
 }
 /* }}} */
 
+
+static zend_bool pdo_is_in_transaction(pdo_dbh_t *dbh) {
+	if (dbh->methods->in_transaction) {
+		return dbh->methods->in_transaction(dbh);
+	}
+	return dbh->in_txn;
+}
+
 /* {{{ Initiates a transaction */
 PHP_METHOD(PDO, beginTransaction)
 {
@@ -586,7 +594,7 @@ PHP_METHOD(PDO, beginTransaction)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (dbh->in_txn) {
+	if (pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is already an active transaction");
 		RETURN_THROWS();
 	}
@@ -617,7 +625,7 @@ PHP_METHOD(PDO, commit)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (!dbh->in_txn) {
+	if (!pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
 		RETURN_THROWS();
 	}
@@ -641,7 +649,7 @@ PHP_METHOD(PDO, rollBack)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (!dbh->in_txn) {
+	if (!pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
 		RETURN_THROWS();
 	}
@@ -665,11 +673,7 @@ PHP_METHOD(PDO, inTransaction)
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (!dbh->methods->in_transaction) {
-		RETURN_BOOL(dbh->in_txn);
-	}
-
-	RETURN_BOOL(dbh->methods->in_transaction(dbh));
+	RETURN_BOOL(pdo_is_in_transaction(dbh));
 }
 /* }}} */
 
@@ -765,7 +769,7 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
 				zend_value_error("PDO::ATTR_STATEMENT_CLASS value must be an array with the format "
-					"array(classname, array(ctor_args))");
+					"array(classname, constructor_args)");
 				return FAILURE;
 			}
 			if (Z_TYPE_P(item) != IS_STRING || (pce = zend_lookup_class(Z_STR_P(item))) == NULL) {
@@ -787,7 +791,7 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 				if (Z_TYPE_P(item) != IS_ARRAY) {
-					zend_type_error("PDO::ATTR_STATEMENT_CLASS ctor_args must be of type ?array, %s given",
+					zend_type_error("PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
 						zend_zval_type_name(value));
 					return FAILURE;
 				}
@@ -810,9 +814,7 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 	}
 
 fail:
-	if (attr == PDO_ATTR_AUTOCOMMIT) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0, "The auto-commit mode cannot be changed for this driver");
-	} else if (!dbh->methods->set_attribute) {
+	if (!dbh->methods->set_attribute) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support setting attributes");
 	} else {
 		PDO_HANDLE_DBH_ERR();
@@ -1291,8 +1293,12 @@ static int dbh_compare(zval *object1, zval *object2)
 static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(object);
-	*gc_data = &dbh->def_stmt_ctor_args;
-	*gc_count = 1;
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	zend_get_gc_buffer_add_zval(gc_buffer, &dbh->def_stmt_ctor_args);
+	if (dbh->methods && dbh->methods->get_gc) {
+		dbh->methods->get_gc(dbh, gc_buffer);
+	}
+	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_count);
 	return zend_std_get_properties(object);
 }
 

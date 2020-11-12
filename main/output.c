@@ -105,14 +105,18 @@ static void php_output_header(void)
 	if (!SG(headers_sent)) {
 		if (!OG(output_start_filename)) {
 			if (zend_is_compiling()) {
-				OG(output_start_filename) = ZSTR_VAL(zend_get_compiled_filename());
+				OG(output_start_filename) = zend_get_compiled_filename();
 				OG(output_start_lineno) = zend_get_compiled_lineno();
 			} else if (zend_is_executing()) {
-				OG(output_start_filename) = zend_get_executed_filename();
+				OG(output_start_filename) = zend_get_executed_filename_ex();
 				OG(output_start_lineno) = zend_get_executed_lineno();
 			}
+			if (OG(output_start_filename)) {
+				zend_string_addref(OG(output_start_filename));
+			}
 #if PHP_OUTPUT_DEBUG
-			fprintf(stderr, "!!! output started at: %s (%d)\n", OG(output_start_filename), OG(output_start_lineno));
+			fprintf(stderr, "!!! output started at: %s (%d)\n",
+				ZSTR_VAL(OG(output_start_filename)), OG(output_start_lineno));
 #endif
 		}
 		if (!php_header()) {
@@ -189,6 +193,11 @@ PHPAPI void php_output_deactivate(void)
 			}
 		}
 		zend_stack_destroy(&OG(handlers));
+	}
+
+	if (OG(output_start_filename)) {
+		zend_string_release(OG(output_start_filename));
+		OG(output_start_filename) = NULL;
 	}
 }
 /* }}} */
@@ -749,7 +758,7 @@ PHPAPI void php_output_set_implicit_flush(int flush)
  * Get the file name where output has started */
 PHPAPI const char *php_output_get_start_filename(void)
 {
-	return OG(output_start_filename);
+	return OG(output_start_filename) ? ZSTR_VAL(OG(output_start_filename)) : NULL;
 }
 /* }}} */
 

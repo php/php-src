@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 65bcea1c2313ff50b3e15588e1cdba036995c131 */
+ * Stub hash: ae7df94646bf08874d7b9804833d0081c40e0348 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -71,7 +71,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_RecursiveIteratorIterator_nextElement arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveIteratorIterator_setMaxDepth, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, max_depth, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxDepth, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveIteratorIterator_getMaxDepth arginfo_class_EmptyIterator_current
@@ -80,7 +80,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IteratorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IteratorIterator_getInnerIterator arginfo_class_EmptyIterator_current
@@ -118,13 +118,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ParentIterator_accept arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SeekableIterator_seek, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_LimitIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_LimitIterator_rewind arginfo_class_EmptyIterator_current
@@ -160,11 +160,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator_setFlags, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator_offsetGet, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator_offsetSet, 0, 0, 2)
-	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -216,10 +216,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RegexIterator___construct, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_TYPE_INFO(0, regex, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::MATCH")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preg_flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pregFlags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RegexIterator_accept arginfo_class_EmptyIterator_current
@@ -239,15 +239,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_RegexIterator_getPregFlags arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RegexIterator_setPregFlags, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, preg_flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, pregFlags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveRegexIterator___construct, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
-	ZEND_ARG_TYPE_INFO(0, regex, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::MATCH")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preg_flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pregFlags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveRegexIterator_accept arginfo_class_EmptyIterator_current
@@ -259,7 +259,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, iterator)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "self::BYPASS_KEY")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, caching_it_flags, IS_LONG, 0, "CachingIterator::CATCH_GET_CHILD")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cachingIteratorFlags, IS_LONG, 0, "CachingIterator::CATCH_GET_CHILD")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::SELF_FIRST")
 ZEND_END_ARG_INFO()
 

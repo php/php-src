@@ -69,7 +69,7 @@ PHP_FUNCTION( datefmt_get_pattern )
 	UChar  value_buf[64];
 	uint32_t    length = USIZE( value_buf );
 	UChar* value  = value_buf;
-	zend_bool   is_pattern_localized =FALSE;
+	zend_bool   is_pattern_localized = false;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -106,7 +106,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 	size_t      value_len = 0;
 	int32_t     slength = 0;
 	UChar*	    svalue  = NULL;
-	zend_bool   is_pattern_localized =FALSE;
+	zend_bool   is_pattern_localized = false;
 
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -184,7 +184,7 @@ PHP_FUNCTION( datefmt_is_lenient )
 /* {{{ Set formatter lenient. */
 PHP_FUNCTION( datefmt_set_lenient )
 {
-	zend_bool isLenient  = FALSE;
+	zend_bool isLenient = false;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 

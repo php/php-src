@@ -32,6 +32,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [0] {
       }
+      - Return [ void ]
     }
 
     Method [ <internal:Reflection, ctor> public method __construct ] {
@@ -261,7 +262,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method newInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> mixed ...$args = <default> ]
+        Parameter #0 [ <optional> mixed ...$args ]
       }
     }
 

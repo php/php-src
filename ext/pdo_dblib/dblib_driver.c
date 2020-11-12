@@ -417,7 +417,8 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	NULL  /* in transaction */
+	NULL, /* in transaction */
+	NULL /* get gc */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)

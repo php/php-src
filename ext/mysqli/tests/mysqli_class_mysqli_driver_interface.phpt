@@ -72,9 +72,6 @@ require_once('skipifconnectfailure.inc');
     $driver->report_mode = MYSQLI_REPORT_STRICT;
     assert($driver->report_mode === MYSQLI_REPORT_STRICT);
 
-    assert(is_bool($driver->embedded));
-    printf("driver->embedded = '%s'\n", $driver->embedded);
-
     printf("driver->reconnect = '%s'\n", $driver->reconnect);
 
     printf("\nAccess to undefined properties:\n");
@@ -93,7 +90,6 @@ Class variables:
 client_info
 client_version
 driver_version
-embedded
 reconnect
 report_mode
 
@@ -101,7 +97,6 @@ Object variables:
 client_info
 client_version
 driver_version
-embedded
 reconnect
 report_mode
 
@@ -110,7 +105,6 @@ driver->client_info = '%s'
 driver->client_version = '%d'
 driver->driver_version = '%d'
 driver->report_mode = '%d'
-driver->embedded = ''
 driver->reconnect = ''
 
 Access to undefined properties:

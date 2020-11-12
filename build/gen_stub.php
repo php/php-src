@@ -12,7 +12,12 @@ use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
 
-function processDirectory(string $dir, Context $context) {
+/**
+ * @return FileInfo[]
+ */
+function processDirectory(string $dir, Context $context): array {
+    $fileInfos = [];
+
     $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
@@ -20,47 +25,51 @@ function processDirectory(string $dir, Context $context) {
     foreach ($it as $file) {
         $pathName = $file->getPathName();
         if (preg_match('/\.stub\.php$/', $pathName)) {
-            processStubFile($pathName, $context);
+            $fileInfo = processStubFile($pathName, $context);
+            if ($fileInfo) {
+                $fileInfos[] = $fileInfo;
+            }
         }
     }
+
+    return $fileInfos;
 }
 
-function processStubFile(string $stubFile, Context $context) {
+function processStubFile(string $stubFile, Context $context): ?FileInfo {
     try {
         if (!file_exists($stubFile)) {
             throw new Exception("File $stubFile does not exist");
         }
 
-        $arginfoFile = str_replace('.stub.php', '', $stubFile)
-                     . ($context->legacy ? '_legacy' : '') . '_arginfo.h';
+        $arginfoFile = str_replace('.stub.php', '_arginfo.h', $stubFile);
+        $legacyFile = str_replace('.stub.php', '_legacy_arginfo.h', $stubFile);
+
         $stubCode = file_get_contents($stubFile);
         $stubHash = computeStubHash($stubCode);
         $oldStubHash = extractStubHash($arginfoFile);
-        if ($stubHash === $oldStubHash && $context->forceRegeneration === false) {
+        if ($stubHash === $oldStubHash && !$context->forceParse) {
             /* Stub file did not change, do not regenerate. */
-            return;
+            return null;
         }
 
         initPhpParser();
         $fileInfo = parseStubFile($stubCode);
-        if ($context->legacy) {
+        $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
+        if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
+            echo "Saved $arginfoFile\n";
+        }
+
+        if ($fileInfo->generateLegacyArginfo) {
             foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
-        }
-
-        $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
-        file_put_contents($arginfoFile, $arginfoCode);
-
-        // Collect parameter name statistics.
-        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
-            foreach ($funcInfo->args as $argInfo) {
-                if (!isset($context->parameterStats[$argInfo->name])) {
-                    $context->parameterStats[$argInfo->name] = 0;
-                }
-                $context->parameterStats[$argInfo->name]++;
+            $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
+            if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($legacyFile, $arginfoCode)) {
+                echo "Saved $legacyFile\n";
             }
-        }
+		}
+
+        return $fileInfo;
     } catch (Exception $e) {
         echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
@@ -86,9 +95,9 @@ function extractStubHash(string $arginfoFile): ?string {
 
 class Context {
     /** @var bool */
+    public $forceParse = false;
+    /** @var bool */
     public $forceRegeneration = false;
-    /** @var array */
-    public $parameterStats = [];
 }
 
 class SimpleType {
@@ -104,6 +113,11 @@ class SimpleType {
 
     public static function fromNode(Node $node) {
         if ($node instanceof Node\Name) {
+            if ($node->toLowerString() === 'static') {
+                // PHP internally considers "static" a builtin type.
+                return new SimpleType($node->toString(), true);
+            }
+
             assert($node->isFullyQualified());
             return new SimpleType($node->toString(), false);
         }
@@ -140,6 +154,8 @@ class SimpleType {
             return "IS_ITERABLE";
         case "mixed":
             return "IS_MIXED";
+        case "static":
+            return "IS_STATIC";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -168,6 +184,8 @@ class SimpleType {
             return "MAY_BE_CALLABLE";
         case "mixed":
             return "MAY_BE_ANY";
+        case "static":
+            return "MAY_BE_STATIC";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -341,6 +359,9 @@ interface FunctionOrMethodName {
     public function getDeclaration(): string;
     public function getArgInfoName(): string;
     public function __toString(): string;
+    public function isMethod(): bool;
+    public function isConstructor(): bool;
+    public function isDestructor(): bool;
 }
 
 class FunctionName implements FunctionOrMethodName {
@@ -358,10 +379,6 @@ class FunctionName implements FunctionOrMethodName {
         return null;
     }
 
-    public function getShortName(): string {
-        return $this->name->getLast();
-    }
-
     public function getNonNamespacedName(): string {
         if ($this->name->isQualified()) {
             throw new Exception("Namespaced name not supported here");
@@ -369,8 +386,12 @@ class FunctionName implements FunctionOrMethodName {
         return $this->name->toString();
     }
 
+    public function getDeclarationName(): string {
+        return $this->name->getLast();
+    }
+
     public function getDeclaration(): string {
-        return "ZEND_FUNCTION({$this->name->getLast()});\n";
+        return "ZEND_FUNCTION({$this->getDeclarationName()});\n";
     }
 
     public function getArgInfoName(): string {
@@ -381,29 +402,57 @@ class FunctionName implements FunctionOrMethodName {
     public function __toString(): string {
         return $this->name->toString();
     }
+
+    public function isMethod(): bool {
+        return false;
+    }
+
+    public function isConstructor(): bool {
+        return false;
+    }
+
+    public function isDestructor(): bool {
+        return false;
+    }
 }
 
 class MethodName implements FunctionOrMethodName {
+    /** @var Name */
+    private $className;
     /** @var string */
-    public $className;
-    /** @var string */
-    public $name;
+    public $methodName;
 
-    public function __construct(string $className, string $name) {
+    public function __construct(Name $className, string $methodName) {
         $this->className = $className;
-        $this->name = $name;
+        $this->methodName = $methodName;
+    }
+
+    public function getDeclarationClassName(): string {
+        return implode('_', $this->className->parts);
     }
 
     public function getDeclaration(): string {
-        return "ZEND_METHOD($this->className, $this->name);\n";
+        return "ZEND_METHOD({$this->getDeclarationClassName()}, $this->methodName);\n";
     }
 
     public function getArgInfoName(): string {
-        return "arginfo_class_{$this->className}_{$this->name}";
+        return "arginfo_class_{$this->getDeclarationClassName()}_{$this->methodName}";
     }
 
     public function __toString(): string {
-        return "$this->className::$this->name";
+        return "$this->className::$this->methodName";
+    }
+
+    public function isMethod(): bool {
+        return true;
+    }
+
+    public function isConstructor(): bool {
+        return $this->methodName === "__construct";
+    }
+
+    public function isDestructor(): bool {
+        return $this->methodName === "__destruct";
     }
 }
 
@@ -428,6 +477,8 @@ class FuncInfo {
     /** @var FunctionOrMethodName */
     public $name;
     /** @var int */
+    public $classFlags;
+    /** @var int */
     public $flags;
     /** @var string|null */
     public $aliasType;
@@ -435,6 +486,8 @@ class FuncInfo {
     public $alias;
     /** @var bool */
     public $isDeprecated;
+    /** @var bool */
+    public $verify;
     /** @var ArgInfo[] */
     public $args;
     /** @var ReturnInfo */
@@ -446,24 +499,43 @@ class FuncInfo {
 
     public function __construct(
         FunctionOrMethodName $name,
+        int $classFlags,
         int $flags,
         ?string $aliasType,
         ?FunctionOrMethodName $alias,
         bool $isDeprecated,
+        bool $verify,
         array $args,
         ReturnInfo $return,
         int $numRequiredArgs,
         ?string $cond
     ) {
         $this->name = $name;
+        $this->classFlags = $classFlags;
         $this->flags = $flags;
         $this->aliasType = $aliasType;
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
+        $this->verify = $verify;
         $this->args = $args;
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
         $this->cond = $cond;
+    }
+
+    public function isMethod(): bool
+    {
+        return $this->name->isMethod();
+    }
+
+    public function isFinalMethod(): bool
+    {
+        return ($this->flags & Class_::MODIFIER_FINAL) || ($this->classFlags & Class_::MODIFIER_FINAL);
+    }
+
+    public function isInstanceMethod(): bool
+    {
+        return !($this->flags & Class_::MODIFIER_STATIC) && $this->isMethod() && !$this->name->isConstructor();
     }
 
     public function equalsApartFromName(FuncInfo $other): bool {
@@ -510,58 +582,63 @@ class FuncInfo {
                 if ($this->alias instanceof MethodName) {
                     return sprintf(
                         "\tZEND_MALIAS(%s, %s, %s, %s, %s)\n",
-                        $this->alias->className, $this->name->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $this->alias->getDeclarationClassName(), $this->name->methodName,
+                        $this->alias->methodName, $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 } else if ($this->alias instanceof FunctionName) {
                     return sprintf(
                         "\tZEND_ME_MAPPING(%s, %s, %s, %s)\n",
-                        $this->name->name, $this->alias->getNonNamespacedName(),
+                        $this->name->methodName, $this->alias->getNonNamespacedName(),
                         $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 } else {
                     throw new Error("Cannot happen");
                 }
             } else {
+                $declarationClassName = $this->name->getDeclarationClassName();
                 if ($this->flags & Class_::MODIFIER_ABSTRACT) {
                     return sprintf(
                         "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
-                        $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
+                        $this->getFlagsAsString()
                     );
                 }
 
                 return sprintf(
                     "\tZEND_ME(%s, %s, %s, %s)\n",
-                    $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                    $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
+                    $this->getFlagsAsString()
                 );
             }
         } else if ($this->name instanceof FunctionName) {
             $namespace = $this->name->getNamespace();
-            $shortName = $this->name->getShortName();
+            $declarationName = $this->name->getDeclarationName();
 
             if ($this->alias && $this->isDeprecated) {
                 return sprintf(
                     "\tZEND_DEP_FALIAS(%s, %s, %s)\n",
-                    $shortName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
                 );
             }
 
             if ($this->alias) {
                 return sprintf(
                     "\tZEND_FALIAS(%s, %s, %s)\n",
-                    $shortName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
                 );
             }
 
             if ($this->isDeprecated) {
-                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $shortName, $this->getArgInfoName());
+                return sprintf(
+                    "\tZEND_DEP_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
 
             if ($namespace) {
                 return sprintf(
                     "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    $namespace, $shortName, $this->getArgInfoName());
+                    $namespace, $declarationName, $this->getArgInfoName());
             } else {
-                return sprintf("\tZEND_FE(%s, %s)\n", $shortName, $this->getArgInfoName());
+                return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
         } else {
             throw new Error("Cannot happen");
@@ -606,12 +683,12 @@ class FuncInfo {
 }
 
 class ClassInfo {
-    /** @var string */
+    /** @var Name */
     public $name;
     /** @var FuncInfo[] */
     public $funcInfos;
 
-    public function __construct(string $name, array $funcInfos) {
+    public function __construct(Name $name, array $funcInfos) {
         $this->name = $name;
         $this->funcInfos = $funcInfos;
     }
@@ -626,6 +703,8 @@ class FileInfo {
     public $generateFunctionEntries = false;
     /** @var string */
     public $declarationPrefix = "";
+    /** @var bool */
+    public $generateLegacyArginfo = false;
 
     /**
      * @return iterable<FuncInfo>
@@ -696,6 +775,7 @@ function parseDocComment(DocComment $comment): array {
 function parseFunctionLike(
     PrettyPrinterAbstract $prettyPrinter,
     FunctionOrMethodName $name,
+    int $classFlags,
     int $flags,
     Node\FunctionLike $func,
     ?string $cond
@@ -705,6 +785,7 @@ function parseFunctionLike(
     $aliasType = null;
     $alias = null;
     $isDeprecated = false;
+    $verify = true;
     $haveDocReturnType = false;
     $docParamTypes = [];
 
@@ -723,10 +804,12 @@ function parseFunctionLike(
                 if (count($aliasParts) === 1) {
                     $alias = new FunctionName(new Name($aliasParts[0]));
                 } else {
-                    $alias = new MethodName($aliasParts[0], $aliasParts[1]);
+                    $alias = new MethodName(new Name($aliasParts[0]), $aliasParts[1]);
                 }
             } else if ($tag->name === 'deprecated') {
                 $isDeprecated = true;
+            }  else if ($tag->name === 'no-verify') {
+                $verify = false;
             } else if ($tag->name === 'return') {
                 $haveDocReturnType = true;
             } else if ($tag->name === 'param') {
@@ -796,7 +879,7 @@ function parseFunctionLike(
     }
 
     $returnType = $func->getReturnType();
-    if ($returnType === null && !$haveDocReturnType && strpos($name->name, '__') !== 0) {
+    if ($returnType === null && !$haveDocReturnType && !$name->isConstructor() && !$name->isDestructor()) {
         throw new Exception("Missing return type for function $name()");
     }
 
@@ -807,10 +890,12 @@ function parseFunctionLike(
 
     return new FuncInfo(
         $name,
+        $classFlags,
         $flags,
         $aliasType,
         $alias,
         $isDeprecated,
+        $verify,
         $args,
         $return,
         $numRequiredArgs,
@@ -881,6 +966,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 $prettyPrinter,
                 new FunctionName($stmt->namespacedName),
                 0,
+                0,
                 $stmt,
                 $cond
             );
@@ -888,7 +974,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
         }
 
         if ($stmt instanceof Stmt\ClassLike) {
-            $className = $stmt->name->toString();
+            $className = $stmt->namespacedName;
             $methodInfos = [];
             foreach ($stmt->stmts as $classStmt) {
                 $cond = handlePreprocessorConditions($conds, $classStmt);
@@ -898,6 +984,11 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
 
                 if (!$classStmt instanceof Stmt\ClassMethod) {
                     throw new Exception("Not implemented {$classStmt->getType()}");
+                }
+
+                $classFlags = 0;
+                if ($stmt instanceof Class_) {
+                    $classFlags = $stmt->flags;
                 }
 
                 $flags = $classStmt->flags;
@@ -912,6 +1003,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 $methodInfos[] = parseFunctionLike(
                     $prettyPrinter,
                     new MethodName($className, $classStmt->name->toString()),
+                    $classFlags,
                     $flags,
                     $classStmt,
                     $cond
@@ -948,6 +1040,8 @@ function parseStubFile(string $code): FileInfo {
             if ($tag->name === 'generate-function-entries') {
                 $fileInfo->generateFunctionEntries = true;
                 $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
+            } else if ($tag->name === 'generate-legacy-arginfo') {
+                $fileInfo->generateLegacyArginfo = true;
             }
         }
     }
@@ -1140,10 +1234,14 @@ function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
 }
 
 /** @param FuncInfo[] $funcInfos */
-function generateFunctionEntries(?string $className, array $funcInfos): string {
+function generateFunctionEntries(?Name $className, array $funcInfos): string {
     $code = "";
 
-    $functionEntryName = $className ? "class_{$className}_methods" : "ext_functions";
+    $functionEntryName = "ext_functions";
+    if ($className) {
+        $underscoreName = implode("_", $className->parts);
+        $functionEntryName = "class_{$underscoreName}_methods";
+    }
 
     $code .= "\n\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
     $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {
@@ -1220,26 +1318,132 @@ function initPhpParser() {
 }
 
 $optind = null;
-$options = getopt("f", ["force-regeneration", "parameter-stats", "legacy"], $optind);
+$options = getopt("fh", ["force-regeneration", "parameter-stats", "help", "verify"], $optind);
 
 $context = new Context;
 $printParameterStats = isset($options["parameter-stats"]);
-$context->legacy = isset($options["legacy"]);
-$context->forceRegeneration =
-    isset($options["f"]) || isset($options["force-regeneration"]) || $printParameterStats;
+$verify = isset($options["verify"]);
+$context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
+$context->forceParse = $context->forceRegeneration || $printParameterStats || $verify;
 
+if (isset($options["h"]) || isset($options["help"])) {
+    die("\nusage: gen-stub.php [ -f | --force-regeneration ] [ --parameter-stats ] [ --verify ] [ -h | --help ] [ name.stub.php | directory ]\n\n");
+}
+
+$fileInfos = [];
 $location = $argv[$optind] ?? ".";
 if (is_file($location)) {
     // Generate single file.
-    processStubFile($location, $context);
+    $fileInfo = processStubFile($location, $context);
+    if ($fileInfo) {
+        $fileInfos[] = $fileInfo;
+    }
 } else if (is_dir($location)) {
-    processDirectory($location, $context);
+    $fileInfos = processDirectory($location, $context);
 } else {
     echo "$location is neither a file nor a directory.\n";
     exit(1);
 }
 
 if ($printParameterStats) {
-    arsort($context->parameterStats);
-    echo json_encode($context->parameterStats, JSON_PRETTY_PRINT), "\n";
+    $parameterStats = [];
+
+    foreach ($fileInfos as $fileInfo) {
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            foreach ($funcInfo->args as $argInfo) {
+                if (!isset($parameterStats[$argInfo->name])) {
+                    $parameterStats[$argInfo->name] = 0;
+                }
+                $parameterStats[$argInfo->name]++;
+            }
+        }
+    }
+
+    arsort($parameterStats);
+    echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
+}
+
+if ($verify) {
+    $errors = [];
+    $funcMap = [];
+    $aliases = [];
+
+    foreach ($fileInfos as $fileInfo) {
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            /** @var FuncInfo $funcInfo */
+            $funcMap[$funcInfo->name->__toString()] = $funcInfo;
+
+            if ($funcInfo->aliasType === "alias") {
+                $aliases[] = $funcInfo;
+            }
+        }
+    }
+
+    foreach ($aliases as $aliasFunc) {
+        if (!isset($funcMap[$aliasFunc->alias->__toString()])) {
+            $errors[] = "Aliased function {$aliasFunc->alias}() cannot be found";
+            continue;
+        }
+
+        if (!$aliasFunc->verify) {
+            continue;
+        }
+
+        $aliasedFunc = $funcMap[$aliasFunc->alias->__toString()];
+        $aliasedArgs = $aliasedFunc->args;
+        $aliasArgs = $aliasFunc->args;
+
+        if ($aliasFunc->isInstanceMethod() !== $aliasedFunc->isInstanceMethod()) {
+            if ($aliasFunc->isInstanceMethod()) {
+                $aliasedArgs = array_slice($aliasedArgs, 1);
+            }
+
+            if ($aliasedFunc->isInstanceMethod()) {
+                $aliasArgs = array_slice($aliasArgs, 1);
+            }
+        }
+
+        array_map(
+            function(?ArgInfo $aliasArg, ?ArgInfo $aliasedArg) use ($aliasFunc, $aliasedFunc, &$errors) {
+                if ($aliasArg === null) {
+                    assert($aliasedArg !== null);
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() is missing";
+                    return null;
+                }
+
+                if ($aliasedArg === null) {
+                    assert($aliasArg !== null);
+                    $errors[] = "{$aliasedFunc->name}(): Argument \$$aliasArg->name of alias function {$aliasFunc->name}() is missing";
+                    return null;
+                }
+
+                if ($aliasArg->name !== $aliasedArg->name) {
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasArg->name and argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() must have the same name";
+                    return null;
+                }
+
+                if ($aliasArg->type != $aliasedArg->type) {
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasArg->name and argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() must have the same type";
+                }
+
+                if ($aliasArg->defaultValue !== $aliasedArg->defaultValue) {
+                    $errors[] = "{$aliasFunc->name}(): Argument \$$aliasArg->name and argument \$$aliasedArg->name of aliased function {$aliasedFunc->name}() must have the same default value";
+                }
+            },
+            $aliasArgs, $aliasedArgs
+        );
+
+        if ((!$aliasedFunc->isMethod() || $aliasedFunc->isFinalMethod()) &&
+            (!$aliasFunc->isMethod() || $aliasFunc->isFinalMethod()) &&
+            $aliasFunc->return != $aliasedFunc->return
+        ) {
+            $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same return type";
+        }
+    }
+
+    echo implode("\n", $errors);
+    if (!empty($errors)) {
+        echo "\n";
+        exit(1);
+    }
 }

@@ -17,5 +17,5 @@ trycatch_dump(
 );
 ?>
 --EXPECT--
-!! [ValueError] imagefilledpolygon(): Argument #3 ($num_points_or_col) must be greater than or equal to 3
-!! [ValueError] imagepolygon(): Argument #3 ($num_points_or_col) must be greater than or equal to 3
+!! [ValueError] imagefilledpolygon(): Argument #3 ($num_points_or_color) must be greater than or equal to 3
+!! [ValueError] imagepolygon(): Argument #3 ($num_points_or_color) must be greater than or equal to 3

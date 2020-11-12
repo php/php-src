@@ -542,7 +542,11 @@ PHP_FUNCTION(bcscale)
 			RETURN_THROWS();
 		}
 
-		BCG(bc_precision) = (int) new_scale;
+		zend_string *ini_name = zend_string_init("bcmath.scale", sizeof("bcmath.scale") - 1, 0);
+		zend_string *new_scale_str = zend_long_to_str(new_scale);
+		zend_alter_ini_entry(ini_name, new_scale_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release(new_scale_str);
+		zend_string_release(ini_name);
 	}
 
 	RETURN_LONG(old_scale);

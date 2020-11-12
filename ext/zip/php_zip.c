@@ -288,11 +288,13 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 	}
 
 	if (!expand_filepath(filename, resolved_path)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		return -1;
 	}
 
 	php_stat(resolved_path, strlen(resolved_path), FS_EXISTS, &exists_flag);
 	if (Z_TYPE(exists_flag) == IS_FALSE) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		return -1;
 	}
 
@@ -1163,6 +1165,7 @@ PHP_FUNCTION(zip_open)
 	}
 
 	if(!expand_filepath(ZSTR_VAL(filename), resolved_path)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
@@ -1444,6 +1447,7 @@ PHP_METHOD(ZipArchive, open)
 	}
 
 	if (!(resolved_path = expand_filepath(ZSTR_VAL(filename), NULL))) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
@@ -3213,16 +3217,25 @@ static PHP_MINFO_FUNCTION(zip)
 	php_info_print_table_row(2, "Zip", "enabled");
 	php_info_print_table_row(2, "Zip version", PHP_ZIP_VERSION);
 #ifdef HAVE_LIBZIP_VERSION
-	php_info_print_table_row(2, "Libzip headers version", LIBZIP_VERSION);
-	php_info_print_table_row(2, "Libzip library version", zip_libzip_version());
-#else
-	php_info_print_table_row(2, "Libzip version", LIBZIP_VERSION);
+	if (strcmp(LIBZIP_VERSION, zip_libzip_version())) {
+		php_info_print_table_row(2, "Libzip headers version", LIBZIP_VERSION);
+		php_info_print_table_row(2, "Libzip library version", zip_libzip_version());
+	} else
 #endif
+	{
+		php_info_print_table_row(2, "Libzip version", LIBZIP_VERSION);
+	}
 #ifdef HAVE_METHOD_SUPPORTED
 	php_info_print_table_row(2, "BZIP2 compression",
 		zip_compression_method_supported(ZIP_CM_BZIP2, 1) ? "Yes" : "No");
 	php_info_print_table_row(2, "XZ compression",
 		zip_compression_method_supported(ZIP_CM_XZ, 1) ? "Yes" : "No");
+#ifdef ZIP_CM_ZSTD
+	php_info_print_table_row(2, "ZSTD compression",
+		zip_compression_method_supported(ZIP_CM_ZSTD, 1) ? "Yes" : "No");
+#else
+	php_info_print_table_row(2, "ZSTD compression", "No");
+#endif
 	php_info_print_table_row(2, "AES-128 encryption",
 		zip_encryption_method_supported(ZIP_EM_AES_128, 1) ? "Yes" : "No");
 	php_info_print_table_row(2, "AES-192 encryption",

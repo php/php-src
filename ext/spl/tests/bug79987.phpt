@@ -15,5 +15,24 @@ try {
 } catch (Throwable $e) {
     echo $e->getMessage() . "\n";
 }
+try {
+    var_dump($x->getFilename());
+} catch (Throwable $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    var_dump($x->getExtension());
+} catch (Throwable $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    var_dump($x->getBasename());
+} catch (Throwable $e) {
+    echo $e->getMessage() . "\n";
+}
+?>
 --EXPECT--
+Object not initialized
+Object not initialized
+Object not initialized
 Object not initialized

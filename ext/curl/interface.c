@@ -2832,6 +2832,12 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				if (Z_TYPE_P(zvalue) == IS_OBJECT && Z_OBJCE_P(zvalue) == curl_share_ce) {
 					php_curlsh *sh = Z_CURL_SHARE_P(zvalue);
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
+
+					if (ch->share) {
+						OBJ_RELEASE(&ch->share->std);
+					}
+					GC_ADDREF(&sh->std);
+					ch->share = sh;
 				}
 			}
 			break;
@@ -3372,6 +3378,10 @@ static void curl_free_obj(zend_object *object)
 
 	efree(ch->handlers);
 	zval_ptr_dtor(&ch->postfields);
+
+	if (ch->share) {
+		OBJ_RELEASE(&ch->share->std);
+	}
 
 	zend_object_std_dtor(&ch->std);
 }

@@ -15,7 +15,7 @@ session.serialize_handler=php
 session.save_handler=files
 --FILE--
 <?php
-$sessdir = __DIR__.'/sessions/';
+$sessdir = __DIR__.'/bug42596/';
 @rmdir($sessdir);
 mkdir($sessdir);
 $save_path = '0;0777;'.$sessdir;

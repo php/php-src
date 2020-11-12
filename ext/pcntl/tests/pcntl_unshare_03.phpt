@@ -15,6 +15,7 @@ if (@pcntl_unshare(CLONE_NEWNET) == false && pcntl_get_last_error() == PCNTL_EPE
     die("skip Insufficient privileges for CLONE_NEWPID");
 }
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
+if (getenv("SKIP_REPEAT")) die("skip cannot be repeated");
 ?>
 --FILE--
 <?php

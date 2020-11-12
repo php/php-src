@@ -301,7 +301,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.jit_hot_side_exit"             , "8",                          PHP_INI_ALL,    OnUpdateCounter,  hot_side_exit,         zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_blacklist_root_trace"      , "16",                         PHP_INI_ALL,    OnUpdateCounter,  blacklist_root_trace,  zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_blacklist_side_trace"      , "8",                          PHP_INI_ALL,    OnUpdateCounter,  blacklist_side_trace,  zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_max_loops_unroll"          , "8",                          PHP_INI_ALL,    OnUpdateUnrollL,  max_loops_unroll,      zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_max_loop_unrolls"          , "8",                          PHP_INI_ALL,    OnUpdateUnrollL,  max_loop_unrolls,      zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_max_recursive_calls"       , "2",                          PHP_INI_ALL,    OnUpdateUnrollC,  max_recursive_calls,   zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_max_recursive_returns"     , "2",                          PHP_INI_ALL,    OnUpdateUnrollR,  max_recursive_returns, zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_max_polymorphic_calls"     , "2",                          PHP_INI_ALL,    OnUpdateLong,     max_polymorphic_calls, zend_jit_globals, jit_globals)
@@ -785,7 +785,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives,   "opcache.jit_hot_return", JIT_G(hot_return));
 	add_assoc_long(&directives,   "opcache.jit_hot_side_exit", JIT_G(hot_side_exit));
 	add_assoc_long(&directives,   "opcache.jit_max_exit_counters", JIT_G(max_exit_counters));
-	add_assoc_long(&directives,   "opcache.jit_max_loops_unroll", JIT_G(max_loops_unroll));
+	add_assoc_long(&directives,   "opcache.jit_max_loop_unrolls", JIT_G(max_loop_unrolls));
 	add_assoc_long(&directives,   "opcache.jit_max_polymorphic_calls", JIT_G(max_polymorphic_calls));
 	add_assoc_long(&directives,   "opcache.jit_max_recursive_calls", JIT_G(max_recursive_calls));
 	add_assoc_long(&directives,   "opcache.jit_max_recursive_returns", JIT_G(max_recursive_returns));

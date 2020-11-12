@@ -285,7 +285,7 @@ function time_sleep_until(float $timestamp): bool {}
 
 function get_current_user(): string {}
 
-function get_cfg_var(string $name): string|array|false {}
+function get_cfg_var(string $option): string|array|false {}
 
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
@@ -312,16 +312,16 @@ function php_strip_whitespace(string $filename): string {}
 
 function highlight_string(string $string, bool $return = false): string|bool {}
 
-function ini_get(string $name): string|false {}
+function ini_get(string $option): string|false {}
 
 function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
-function ini_set(string $name, string $value): string|false {}
+function ini_set(string $option, string $value): string|false {}
 
 /** @alias ini_set */
-function ini_alter(string $name, string $value): string|false {}
+function ini_alter(string $option, string $value): string|false {}
 
-function ini_restore(string $name): void {}
+function ini_restore(string $option): void {}
 
 function set_include_path(string $include_path): string|false {}
 
@@ -461,7 +461,7 @@ function getmypid(): int|false {}
 
 function getmyinode(): int|false {}
 
-function getlastmod(): int {}
+function getlastmod(): int|false {}
 
 /* sha1.c */
 
@@ -528,8 +528,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
-/** @param string|callable|null $value */
-function assert_options(int $option, $value = UNKNOWN): array|object|int|string|null {}
+function assert_options(int $option, mixed $value = UNKNOWN): array|object|int|string|null {}
 
 /* string.c */
 
@@ -723,7 +722,7 @@ function rewinddir($dir_handle = null): void {}
 function readdir($dir_handle = null): string|false {}
 
 /** @param resource|null $context */
-function scandir(string $directory, int $sorting_order = 0, $context = null): array|false {}
+function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
 #ifdef HAVE_GLOB
 function glob(string $pattern, int $flags = 0): array|false {}
@@ -823,16 +822,16 @@ function ftell($stream): int|false {}
 function fflush($stream): bool {}
 
 /** @param resource $stream */
-function fwrite($stream, string $string, ?int $max_length = null): int|false {}
+function fwrite($stream, string $data, ?int $length = null): int|false {}
 
 /**
  * @param resource $stream
  * @alias fwrite
  */
-function fputs($stream, string $string, ?int $max_length = null): int|false {}
+function fputs($stream, string $data, ?int $length = null): int|false {}
 
 /** @param resource|null $context */
-function mkdir(string $directory, int $mode = 0777, bool $recursive = false, $context = null): bool {}
+function mkdir(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool {}
 
 /** @param resource|null $context */
 function rename(string $from, string $to, $context = null): bool {}
@@ -849,13 +848,13 @@ function tmpfile() {}
 function file(string $filename, int $flags = 0, $context = null): array|false {}
 
 /** @param resource|null $context */
-function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $max_length = null): string|false {}
+function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null): string|false {}
 
 /** @param resource|null $context */
 function unlink(string $filename, $context = null): bool {}
 
 /** @param resource|null $context */
-function file_put_contents(string $filename, mixed $content, int $flags = 0, $context = null): int|false {}
+function file_put_contents(string $filename, mixed $data, int $flags = 0, $context = null): int|false {}
 
 /** @param resource $stream */
 function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
@@ -922,7 +921,7 @@ function lchown(string $filename, string|int $user): bool {}
 function lchgrp(string $filename, string|int $group): bool {}
 #endif
 
-function chmod(string $filename, int $mode): bool {}
+function chmod(string $filename, int $permissions): bool {}
 
 #if HAVE_UTIME
 function touch(string $filename, ?int $mtime = null, ?int $atime = null): bool {}
@@ -1111,7 +1110,7 @@ function dechex(int $num): string {}
 
 function base_convert(string $num, int $from_base, int $to_base): string {}
 
-function number_format(float $num, int $decimals = 0, ?string $decimal_separator = "." , ?string $thousands_separator = ","): string {}
+function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
 
 function fmod(float $num1, float $num2): float {}
 
@@ -1126,7 +1125,7 @@ function gettimeofday(bool $as_float = false): array|float {}
 #endif
 
 #ifdef HAVE_GETRUSAGE
-function getrusage(bool $mode = 0): array|false {}
+function getrusage(int $mode = 0): array|false {}
 #endif
 
 /* pack.c */
@@ -1278,7 +1277,7 @@ function stream_socket_sendto($socket, string $data, int $flags = 0, string $add
  * @param resource $stream
  * @param resource|null $session_stream
  */
-function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_type = null, $session_stream = null): int|bool {}
+function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method = null, $session_stream = null): int|bool {}
 
 #ifdef HAVE_SHUTDOWN
 /** @param resource $stream */
@@ -1293,10 +1292,10 @@ function stream_socket_pair(int $domain, int $type, int $protocol): array|false 
  * @param resource $from
  * @param resource $to
  */
-function stream_copy_to_stream($from, $to, ?int $max_length = null, int $offset = 0): int|false {}
+function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
 
 /** @param resource $stream */
-function stream_get_contents($stream, ?int $max_length = null, int $offset = -1): string|false {}
+function stream_get_contents($stream, ?int $length = null, int $offset = -1): string|false {}
 
 /** @param resource $stream */
 function stream_supports_lock($stream): bool {}
@@ -1332,7 +1331,7 @@ function stream_get_meta_data($stream): array {}
 function socket_get_status($stream): array {}
 
 /** @param resource $stream */
-function stream_get_line($stream, int $max_length, string $ending = ""): string|false {}
+function stream_get_line($stream, int $length, string $ending = ""): string|false {}
 
 function stream_resolve_include_path(string $filename): string|false {}
 
@@ -1440,8 +1439,7 @@ function rawurlencode(string $string): string {}
 function rawurldecode(string $string): string {}
 
 /** @param resource $context */
-// TODO: Make bool argument?
-function get_headers(string $url, int $as_assoc_array = 0, $context = null): array|false {}
+function get_headers(string $url, bool $associative = false, $context = null): array|false {}
 
 /* user_filters.c */
 
@@ -1477,7 +1475,7 @@ function debug_zval_dump(mixed $value, mixed ...$values): void {}
 
 function serialize(mixed $value): string {}
 
-function unserialize(string $value, array $options = []): mixed {}
+function unserialize(string $data, array $options = []): mixed {}
 
 function memory_get_usage(bool $real_usage = false): int {}
 

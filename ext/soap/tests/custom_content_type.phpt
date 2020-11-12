@@ -8,8 +8,6 @@ SOAP customized Content-Type, eg. SwA use case
         echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
     }
 ?>
---CONFLICTS--
-server
 --FILE--
 <?php
 

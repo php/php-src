@@ -312,7 +312,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 /* {{{ Sort array using specified collator. */
 PHP_FUNCTION( collator_sort )
 {
-	collator_sort_internal( TRUE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
+	collator_sort_internal( true, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
@@ -495,7 +495,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 /* {{{ Sort array using specified collator, maintaining index association. */
 PHP_FUNCTION( collator_asort )
 {
-	collator_sort_internal( FALSE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
+	collator_sort_internal( false, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 

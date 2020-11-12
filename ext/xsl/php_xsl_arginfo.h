@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4a3997bafb6c17714ee94443837be2d2842386e2 */
+ * Stub hash: a119247725ff61dbd615cb86ee6201ee6603ba51 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
@@ -7,7 +7,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_transformToDoc, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, document, IS_OBJECT, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return_class, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, returnClass, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_transformToUri, 0, 0, 2)
@@ -36,7 +36,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_hasExsltSupport, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_registerPHPFunctions, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, restrict, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_MASK(0, functions, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setProfiling, 0, 0, 1)
@@ -44,7 +44,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setProfiling, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setSecurityPrefs, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, securityPrefs, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, preferences, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_XSLTProcessor_getSecurityPrefs arginfo_class_XSLTProcessor_hasExsltSupport

@@ -147,6 +147,6 @@ Exception: Too few arguments to function mysqli_fetch_object_construct::__constr
 NULL
 NULL
 mysqli_result object is already closed
-[0] mysqli_fetch_object(): Argument #3 ($params) must be of type array, string given in %s on line %d
+[0] mysqli_fetch_object(): Argument #3 ($constructor_args) must be of type array, string given in %s on line %d
 mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, this_class_does_not_exist given
 done!

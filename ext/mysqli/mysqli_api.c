@@ -169,6 +169,7 @@ PHP_FUNCTION(mysqli_autocommit)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	if (mysql_autocommit(mysql->mysql, (my_bool)automode)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -708,6 +709,7 @@ PHP_FUNCTION(mysqli_commit)
 #else
 	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
 #endif
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1070,7 +1072,8 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (FAIL  == mysqlnd_stmt_fetch(stmt->stmt, &fetched_anything)) {
+	if (FAIL == mysqlnd_stmt_fetch(stmt->stmt, &fetched_anything)) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_BOOL(FALSE);
 	} else if (fetched_anything == TRUE) {
 		RETURN_BOOL(TRUE);
@@ -1482,13 +1485,6 @@ PHP_FUNCTION(mysqli_init)
 }
 /* }}} */
 
-/* {{{ Initialize mysqli and return a resource for use with mysql_real_connect */
-PHP_FUNCTION(mysqli_init_method)
-{
-	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
-}
-/* }}} */
-
 /* {{{ Get the ID generated from the previous INSERT operation */
 PHP_FUNCTION(mysqli_insert_id)
 {
@@ -1556,7 +1552,11 @@ PHP_FUNCTION(mysqli_next_result) {
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_BOOL(!mysql_next_result(mysql->mysql));
+	if (mysql_next_result(mysql->mysql)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1587,7 +1587,11 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	RETURN_BOOL(!mysql_stmt_next_result(stmt->stmt));
+	if (mysql_stmt_next_result(stmt->stmt)) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
@@ -1927,6 +1931,7 @@ PHP_FUNCTION(mysqli_rollback)
 #else
 	if (FAIL == mysqlnd_rollback(mysql->mysql, flags, name)) {
 #endif
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2297,6 +2302,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 #else
 	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
 #endif
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;

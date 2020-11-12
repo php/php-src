@@ -914,12 +914,9 @@ static int sapi_cgi_activate(void)
 			if (fcgi_is_fastcgi()) {
 				fcgi_request *request = (fcgi_request*) SG(server_context);
 
-				/* Prefer CONTEXT_DOCUMENT_ROOT if set */
-				doc_root = FCGI_GETENV(request, "CONTEXT_DOCUMENT_ROOT");
-				doc_root = doc_root ? doc_root : FCGI_GETENV(request, "DOCUMENT_ROOT");
+				doc_root = FCGI_GETENV(request, "DOCUMENT_ROOT");
 			} else {
-				doc_root = getenv("CONTEXT_DOCUMENT_ROOT");
-				doc_root = doc_root ? doc_root : getenv("DOCUMENT_ROOT");
+				doc_root = getenv("DOCUMENT_ROOT");
 			}
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {

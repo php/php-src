@@ -52,6 +52,6 @@ echo "Done\n";
 --EXPECTF--
 bool(true)
 bool(false)
-oci_define_by_name(): Argument #2 ($column_name) cannot be empty
+oci_define_by_name(): Argument #2 ($column) cannot be empty
 string(4) "some"
 Done

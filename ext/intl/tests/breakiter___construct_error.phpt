@@ -50,7 +50,7 @@ Exception: IntlRuleBasedBreakIterator::__construct() expects at least 1 argument
 
 Exception: IntlRuleBasedBreakIterator::__construct() expects at most 2 arguments, 3 given in %s on line %d
 
-Exception: IntlRuleBasedBreakIterator::__construct(): Argument #2 ($areCompiled) must be of type bool, array given in %s on line %d
+Exception: IntlRuleBasedBreakIterator::__construct(): Argument #2 ($compiled) must be of type bool, array given in %s on line %d
 
 Exception: IntlRuleBasedBreakIterator::__construct(): unable to create instance from compiled rules in %s on line %d
 

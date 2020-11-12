@@ -1082,7 +1082,12 @@ ZEND_API zend_result do_bind_function(zval *lcname) /* {{{ */
 		return FAILURE;
 	}
 	function = (zend_function*)Z_PTR_P(zv);
-	zv = zend_hash_set_bucket_key(EG(function_table), (Bucket*)zv, Z_STR_P(lcname));
+	if (UNEXPECTED(function->common.fn_flags & ZEND_ACC_PRELOADED)
+			&& !(CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
+		zv = zend_hash_add(EG(function_table), Z_STR_P(lcname), zv);
+	} else {
+		zv = zend_hash_set_bucket_key(EG(function_table), (Bucket*)zv, Z_STR_P(lcname));
+	}
 	if (UNEXPECTED(!zv)) {
 		do_bind_function_error(Z_STR_P(lcname), &function->op_array, 0);
 		return FAILURE;
@@ -3939,13 +3944,18 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		}
 		opline->result.num = zend_alloc_cache_slot();
 
-		if (args->children == 1 &&
-		    (args->child[0]->kind != ZEND_AST_ZVAL ||
-		     Z_TYPE_P(zend_ast_get_zval(args->child[0])) != IS_STRING)) {
+		if (args->children == 1) {
 			/* add "assert(condition) as assertion message */
-			zend_ast_list_add((zend_ast*)args,
-				zend_ast_create_zval_from_str(
-					zend_ast_export("assert(", args->child[0], ")")));
+			zend_ast *arg = zend_ast_create_zval_from_str(
+				zend_ast_export("assert(", args->child[0], ")"));
+			if (args->child[0]->kind == ZEND_AST_NAMED_ARG) {
+				/* If the original argument was named, add the new argument as named as well,
+				 * as mixing named and positional is not allowed. */
+				zend_ast *name = zend_ast_create_zval_from_str(
+					zend_string_init("description", sizeof("description") - 1, 0));
+				arg = zend_ast_create(ZEND_AST_NAMED_ARG, name, arg);
+			}
+			zend_ast_list_add((zend_ast *) args, arg);
 		}
 
 		zend_compile_call_common(result, (zend_ast*)args, fbc);
@@ -5865,7 +5875,7 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 /* }}} */
 
 /* Check whether this is the first statement, not counting declares. */
-static zend_result zend_is_first_statement(zend_ast *ast) /* {{{ */
+static zend_result zend_is_first_statement(zend_ast *ast, zend_bool allow_nop) /* {{{ */
 {
 	uint32_t i = 0;
 	zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
@@ -5874,8 +5884,9 @@ static zend_result zend_is_first_statement(zend_ast *ast) /* {{{ */
 		if (file_ast->child[i] == ast) {
 			return SUCCESS;
 		} else if (file_ast->child[i] == NULL) {
-			/* Empty statements count as statements. */
-			return FAILURE;
+			if (!allow_nop) {
+				return FAILURE;
+			}
 		} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
 			return FAILURE;
 		}
@@ -5909,14 +5920,14 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zval_ptr_dtor_nogc(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
-			if (FAILURE == zend_is_first_statement(ast)) {
+			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ 0)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 
-			if (FAILURE == zend_is_first_statement(ast)) {
+			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ 0)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must be "
 					"the very first statement in the script");
 			}
@@ -7037,10 +7048,13 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 					&& !zend_is_valid_default_value(type, &value_zv)) {
 				zend_string *str = zend_type_to_string(type);
 				if (Z_TYPE(value_zv) == IS_NULL) {
+					ZEND_TYPE_FULL_MASK(type) |= MAY_BE_NULL;
+					zend_string *nullable_str = zend_type_to_string(type);
+
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Default value for property of type %s may not be null. "
-						"Use the nullable type ?%s to allow null default value",
-						ZSTR_VAL(str), ZSTR_VAL(str));
+						"Use the nullable type %s to allow null default value",
+						ZSTR_VAL(str), ZSTR_VAL(nullable_str));
 				} else {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot use %s as default value for property %s::$%s of type %s",
@@ -7377,7 +7391,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 	if (toplevel
 		/* We currently don't early-bind classes that implement interfaces or use traits */
 	 && !ce->num_interfaces && !ce->num_traits
-	 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
+	 && !(CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)) {
 		if (extends_ast) {
 			zend_class_entry *parent_ce = zend_lookup_class_ex(
 				ce->parent_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
@@ -7669,7 +7683,7 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 
 	zend_bool is_first_namespace = (!with_bracket && !FC(current_namespace))
 		|| (with_bracket && !FC(has_bracketed_namespaces));
-	if (is_first_namespace && FAILURE == zend_is_first_statement(ast)) {
+	if (is_first_namespace && FAILURE == zend_is_first_statement(ast, /* allow_nop */ 1)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Namespace declaration statement has to be "
 			"the very first statement or after any declare call in the script");
 	}

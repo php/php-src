@@ -1149,13 +1149,6 @@ PHP_MINIT_FUNCTION(openssl)
 	OpenSSL_add_all_ciphers();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_algorithms();
-
-#if !defined(OPENSSL_NO_AES) && defined(EVP_CIPH_CCM_MODE) && OPENSSL_VERSION_NUMBER < 0x100020000
-	EVP_add_cipher(EVP_aes_128_ccm());
-	EVP_add_cipher(EVP_aes_192_ccm());
-	EVP_add_cipher(EVP_aes_256_ccm());
-#endif
-
 	SSL_load_error_strings();
 #else
 	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
@@ -3671,26 +3664,18 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 			case OPENSSL_KEYTYPE_RSA:
 				{
 					RSA* rsaparam;
-#if OPENSSL_VERSION_NUMBER < 0x10002000L
-					/* OpenSSL 1.0.2 deprecates RSA_generate_key */
-					PHP_OPENSSL_RAND_ADD_TIME();
-					rsaparam = (RSA*)RSA_generate_key(req->priv_key_bits, RSA_F4, NULL, NULL);
-#else
-					{
-						BIGNUM *bne = (BIGNUM *)BN_new();
-						if (BN_set_word(bne, RSA_F4) != 1) {
-							BN_free(bne);
-							php_error_docref(NULL, E_WARNING, "Failed setting exponent");
-							return NULL;
-						}
-						rsaparam = RSA_new();
-						PHP_OPENSSL_RAND_ADD_TIME();
-						if (rsaparam == NULL || !RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL)) {
-							php_openssl_store_errors();
-						}
+					BIGNUM *bne = (BIGNUM *)BN_new();
+					if (BN_set_word(bne, RSA_F4) != 1) {
 						BN_free(bne);
+						php_error_docref(NULL, E_WARNING, "Failed setting exponent");
+						return NULL;
 					}
-#endif
+					rsaparam = RSA_new();
+					PHP_OPENSSL_RAND_ADD_TIME();
+					if (rsaparam == NULL || !RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL)) {
+						php_openssl_store_errors();
+					}
+					BN_free(bne);
 					if (rsaparam && EVP_PKEY_assign_RSA(req->priv_key, rsaparam)) {
 						return_val = req->priv_key;
 					} else {
@@ -5907,7 +5892,7 @@ PHP_FUNCTION(openssl_cms_sign)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_LONG(encoding)
-		Z_PARAM_PATH(extracertsfilename, extracertsfilename_len)
+		Z_PARAM_PATH_OR_NULL(extracertsfilename, extracertsfilename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;
@@ -6889,6 +6874,8 @@ PHP_FUNCTION(openssl_digest)
 struct php_openssl_cipher_mode {
 	zend_bool is_aead;
 	zend_bool is_single_run_aead;
+	zend_bool set_tag_length_always;
+	zend_bool set_tag_length_when_encrypting;
 	int aead_get_tag_flag;
 	int aead_set_tag_flag;
 	int aead_ivlen_flag;
@@ -6896,27 +6883,43 @@ struct php_openssl_cipher_mode {
 
 static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type) /* {{{ */
 {
-	switch (EVP_CIPHER_mode(cipher_type)) {
-#ifdef EVP_CIPH_GCM_MODE
+	int cipher_mode = EVP_CIPHER_mode(cipher_type);
+	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
+	switch (cipher_mode) {
+#if PHP_OPENSSL_API_VERSION >= 0x10100
+		case EVP_CIPH_GCM_MODE:
+		case EVP_CIPH_OCB_MODE:
+		case EVP_CIPH_CCM_MODE:
+			mode->is_aead = 1;
+			/* For OCB mode, explicitly set the tag length even when decrypting,
+			 * see https://github.com/openssl/openssl/issues/8331. */
+			mode->set_tag_length_always = cipher_mode == EVP_CIPH_OCB_MODE;
+			mode->set_tag_length_when_encrypting = cipher_mode == EVP_CIPH_CCM_MODE;
+			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
+			mode->aead_get_tag_flag = EVP_CTRL_AEAD_GET_TAG;
+			mode->aead_set_tag_flag = EVP_CTRL_AEAD_SET_TAG;
+			mode->aead_ivlen_flag = EVP_CTRL_AEAD_SET_IVLEN;
+			break;
+#else
+# ifdef EVP_CIPH_GCM_MODE
 		case EVP_CIPH_GCM_MODE:
 			mode->is_aead = 1;
-			mode->is_single_run_aead = 0;
 			mode->aead_get_tag_flag = EVP_CTRL_GCM_GET_TAG;
 			mode->aead_set_tag_flag = EVP_CTRL_GCM_SET_TAG;
 			mode->aead_ivlen_flag = EVP_CTRL_GCM_SET_IVLEN;
 			break;
-#endif
-#ifdef EVP_CIPH_CCM_MODE
+# endif
+# ifdef EVP_CIPH_CCM_MODE
 		case EVP_CIPH_CCM_MODE:
 			mode->is_aead = 1;
 			mode->is_single_run_aead = 1;
+			mode->set_tag_length_when_encrypting = 1;
 			mode->aead_get_tag_flag = EVP_CTRL_CCM_GET_TAG;
 			mode->aead_set_tag_flag = EVP_CTRL_CCM_SET_TAG;
 			mode->aead_ivlen_flag = EVP_CTRL_CCM_SET_IVLEN;
 			break;
+# endif
 #endif
-		default:
-			memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
 	}
 }
 /* }}} */
@@ -6998,12 +7001,13 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	if (php_openssl_validate_iv(piv, piv_len, max_iv_len, free_iv, cipher_ctx, mode) == FAILURE) {
 		return FAILURE;
 	}
-	if (mode->is_single_run_aead && enc) {
+	if (mode->set_tag_length_always || (enc && mode->set_tag_length_when_encrypting)) {
 		if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL)) {
 			php_error_docref(NULL, E_WARNING, "Setting tag length for AEAD cipher failed");
 			return FAILURE;
 		}
-	} else if (!enc && tag && tag_len > 0) {
+	}
+	if (!enc && tag && tag_len > 0) {
 		if (!mode->is_aead) {
 			php_error_docref(NULL, E_WARNING, "The tag cannot be used because the cipher algorithm does not support AEAD");
 		} else if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag)) {
@@ -7156,8 +7160,6 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 			}
 		} else if (tag) {
 			ZEND_TRY_ASSIGN_REF_NULL(tag);
-			php_error_docref(NULL, E_WARNING,
-					"The authenticated tag cannot be provided for cipher that doesn not support AEAD");
 		} else if (mode.is_aead) {
 			php_error_docref(NULL, E_WARNING, "A tag should be provided when using AEAD mode");
 			zend_string_release_ex(outbuf, 0);

@@ -729,10 +729,7 @@ static int sapi_cgi_activate(void) /* {{{ */
 
 		/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
 		if (PG(user_ini_filename) && *PG(user_ini_filename)) {
-			/* Prefer CONTEXT_DOCUMENT_ROOT if set */
-			doc_root = FCGI_GETENV(request, "CONTEXT_DOCUMENT_ROOT");
-			doc_root = doc_root ? doc_root : FCGI_GETENV(request, "DOCUMENT_ROOT");
-
+			doc_root = FCGI_GETENV(request, "DOCUMENT_ROOT");
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
 				doc_root_len = strlen(doc_root);

@@ -851,17 +851,13 @@ zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *sy
 	return SUCCESS;
 }
 
-void highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *str_name)
+void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *str_name)
 {
 	zend_lex_state original_lex_state;
-	zval tmp;
-
-	if (UNEXPECTED(Z_TYPE_P(str) != IS_STRING)) {
-		ZVAL_STR(&tmp, zval_get_string_func(str));
-		str = &tmp;
-	}
+	zval str_zv;
+	ZVAL_STR_COPY(&str_zv, str);
 	zend_save_lexical_state(&original_lex_state);
-	zend_prepare_string_for_scanning(str, str_name);
+	zend_prepare_string_for_scanning(&str_zv, str_name);
 	BEGIN(INITIAL);
 	zend_highlight(syntax_highlighter_ini);
 	if (SCNG(script_filtered)) {
@@ -869,9 +865,7 @@ void highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter
 		SCNG(script_filtered) = NULL;
 	}
 	zend_restore_lexical_state(&original_lex_state);
-	if (UNEXPECTED(str == &tmp)) {
-		zval_ptr_dtor(&tmp);
-	}
+	zval_ptr_dtor(&str_zv);
 }
 
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding)

@@ -35,6 +35,7 @@
 #include "fileinfo_arginfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_interfaces.h"
 
 /* {{{ macros and type definitions */
 typedef struct _php_fileinfo {
@@ -132,13 +133,16 @@ PHP_MINIT_FUNCTION(finfo)
 {
 	zend_class_entry _finfo_class_entry;
 	INIT_CLASS_ENTRY(_finfo_class_entry, "finfo", class_finfo_methods);
-	_finfo_class_entry.create_object = finfo_objects_new;
 	finfo_class_entry = zend_register_internal_class(&_finfo_class_entry);
+	finfo_class_entry->create_object = finfo_objects_new;
+	finfo_class_entry->serialize = zend_class_serialize_deny;
+	finfo_class_entry->unserialize = zend_class_unserialize_deny;
 
 	/* copy the standard object handlers to you handler table */
 	memcpy(&finfo_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	finfo_object_handlers.offset = XtOffsetOf(finfo_object, zo);
 	finfo_object_handlers.free_obj = finfo_objects_free;
+	finfo_object_handlers.clone_obj = NULL;
 
 	le_fileinfo = zend_register_list_destructors_ex(finfo_resource_destructor, NULL, "file_info", module_number);
 

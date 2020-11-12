@@ -63,7 +63,7 @@ var_dump($array);
 echo "Done\n";
 ?>
 --EXPECTF--
-oci_bind_array_by_name(): Argument #4 ($maximum_array_length) must be greater than 0
+oci_bind_array_by_name(): Argument #4 ($max_array_length) must be greater than 0
 
 Warning: oci_execute(): ORA-%r(01008|57000)%r: %s in %s on line %d
 array(5) {

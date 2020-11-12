@@ -744,14 +744,14 @@ static int module_startup = 1;
 static int module_shutdown = 0;
 
 /* {{{ php_during_module_startup */
-static int php_during_module_startup(void)
+PHPAPI int php_during_module_startup(void)
 {
 	return module_startup;
 }
 /* }}} */
 
 /* {{{ php_during_module_shutdown */
-static int php_during_module_shutdown(void)
+PHPAPI int php_during_module_shutdown(void)
 {
 	return module_shutdown;
 }
@@ -1450,7 +1450,7 @@ PHP_FUNCTION(set_time_limit)
 /* {{{ php_fopen_wrapper_for_zend */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
 {
-	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
+	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
 

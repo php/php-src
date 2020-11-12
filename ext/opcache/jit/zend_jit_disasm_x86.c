@@ -421,6 +421,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_is_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_isset_helper);
+	REGISTER_HELPER(zend_jit_fetch_dim_str_offset_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_is_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_r_helper);
@@ -490,6 +491,9 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_pre_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_post_inc_obj_helper);
 	REGISTER_HELPER(zend_jit_post_dec_obj_helper);
+#if (PHP_VERSION_ID <= 80000) && (SIZEOF_SIZE_T == 4)
+	REGISTER_HELPER(zval_jit_update_constant_ex);
+#endif
 #undef  REGISTER_HELPER
 
 #ifndef _WIN32

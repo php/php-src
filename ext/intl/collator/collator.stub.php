@@ -16,37 +16,37 @@ class Collator
      * @return int|false
      * @alias collator_compare
      */
-    public function compare(string $str1, string $str2) {}
+    public function compare(string $string1, string $string2) {}
 
     /**
      * @return bool
      * @alias collator_sort
      */
-    public function sort(array &$arr, int $sort_flag = Collator::SORT_REGULAR) {}
+    public function sort(array &$array, int $flags = Collator::SORT_REGULAR) {}
 
     /**
      * @return bool
      * @alias collator_sort_with_sort_keys
      */
-    public function sortWithSortKeys(array &$arr) {}
+    public function sortWithSortKeys(array &$array) {}
 
     /**
      * @return bool
      * @alias collator_asort
      */
-    public function asort(array &$arr, int $sort_flag = Collator::SORT_REGULAR) {}
+    public function asort(array &$array, int $flags = Collator::SORT_REGULAR) {}
 
     /**
      * @return int|false
      * @alias collator_get_attribute
      */
-    public function getAttribute(int $attr) {}
+    public function getAttribute(int $attribute) {}
 
     /**
      * @return bool
      * @alias collator_set_attribute
      */
-    public function setAttribute(int $attr, int $val) {}
+    public function setAttribute(int $attribute, int $value) {}
 
     /**
      * @return int
@@ -82,5 +82,5 @@ class Collator
      * @return string|false
      * @alias collator_get_sort_key
      */
-    public function getSortKey(string $str) {}
+    public function getSortKey(string $string) {}
 }

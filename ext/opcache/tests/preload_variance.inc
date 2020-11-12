@@ -13,19 +13,25 @@ class B extends Z {
 class C extends Z {
     public function method($a): self {}
     public function method2($a): C {}
+    public function method3($a): object {}
+    public function method4(D $a) {}
 }
 class D extends C {
     public function method($a): self {}
     public function method2($a): D {}
+    public function method3($a): stdClass {}
+    public function method4(C $a) {}
 }
 
 // Works.
 interface I {}
 interface J extends I {}
 class E {
+    public I|J $prop;
     public function method($a): I {}
 }
 class F extends E {
+    public J|I $prop;
     public function method($a): J {}
 }
 

@@ -83,14 +83,14 @@ static const char * const 	LOC_PREFERRED_GRANDFATHERED[]  = {
 	NULL
 };
 
-/*returns TRUE if a is an ID separator FALSE otherwise*/
+/* returns true if a is an ID separator, false otherwise */
 #define isIDSeparator(a) (a == '_' || a == '-')
 #define isKeywordSeparator(a) (a == '@' )
 #define isEndOfTag(a) (a == '\0' )
 
 #define isPrefixLetter(a) ((a=='x')||(a=='X')||(a=='i')||(a=='I'))
 
-/*returns TRUE if one of the special prefixes is here (s=string)
+/*returns true if one of the special prefixes is here (s=string)
   'x-' or 'i-' */
 #define isIDPrefix(s) (isPrefixLetter(s[0])&&isIDSeparator(s[1]))
 #define isKeywordPrefix(s) ( isKeywordSeparator(s[0]) )

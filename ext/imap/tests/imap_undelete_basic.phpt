@@ -4,13 +4,13 @@ imap_undelete() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = setup_test_mailbox('', 1);
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = setup_test_mailbox('imapundeletebasic', 1);
 
 imap_delete($stream_id, 1);
 
@@ -21,9 +21,10 @@ imap_close($stream_id);
 ?>
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imapundeletebasic';
+require_once(__DIR__ . '/setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 bool(true)

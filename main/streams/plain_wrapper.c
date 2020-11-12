@@ -351,7 +351,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif
 		if (bytes_written < 0) {
-			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+			if (PHP_IS_TRANSIENT_ERROR(errno)) {
 				return 0;
 			}
 			if (errno == EINTR) {
@@ -420,7 +420,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 		}
 
 		if (ret < 0) {
-			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+			if (PHP_IS_TRANSIENT_ERROR(errno)) {
 				/* Not an error. */
 				ret = 0;
 			} else if (errno == EINTR) {

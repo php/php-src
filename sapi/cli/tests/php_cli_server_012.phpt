@@ -7,8 +7,8 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('print_r($_REQUEST); $_REQUEST["foo"] = "bar"; return FALSE;');
-$doc_root = __DIR__;
+$info = php_cli_server_start('print_r($_REQUEST); $_REQUEST["foo"] = "bar"; return FALSE;');
+$doc_root = $info->docRoot;
 file_put_contents($doc_root . '/request.php', '<?php print_r($_REQUEST); ?>');
 
 $host = PHP_CLI_SERVER_HOSTNAME;

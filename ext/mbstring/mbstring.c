@@ -34,12 +34,12 @@
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "libmbfl/mbfl/mbfilter_wchar.h"
-#include "libmbfl/filters/mbfilter_ascii.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_qprint.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
 #include "libmbfl/filters/mbfilter_tl_jisx0201_jisx0208.h"
+#include "libmbfl/filters/mbfilter_singlebyte.h"
 
 #include "php_variables.h"
 #include "php_globals.h"
@@ -1193,7 +1193,7 @@ PHP_FUNCTION(mb_language)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(name)
+		Z_PARAM_STR_OR_NULL(name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
@@ -1221,7 +1221,7 @@ PHP_FUNCTION(mb_internal_encoding)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING_OR_NULL(name, name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
@@ -1252,7 +1252,7 @@ PHP_FUNCTION(mb_http_input)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(type, type_len)
+		Z_PARAM_STRING_OR_NULL(type, type_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (type == NULL) {
@@ -1328,7 +1328,7 @@ PHP_FUNCTION(mb_http_output)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING_OR_NULL(name, name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
@@ -1496,9 +1496,6 @@ PHP_FUNCTION(mb_preferred_mime_name)
 	}
 }
 /* }}} */
-
-#define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
-#define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
 /* {{{ Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
@@ -1866,7 +1863,7 @@ PHP_FUNCTION(mb_strpos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -1900,7 +1897,7 @@ PHP_FUNCTION(mb_strrpos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -1934,7 +1931,7 @@ PHP_FUNCTION(mb_stripos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -1969,7 +1966,7 @@ PHP_FUNCTION(mb_strripos)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -2010,7 +2007,7 @@ static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int va
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(part)
-		Z_PARAM_STR(encoding_name)
+		Z_PARAM_STR_OR_NULL(encoding_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -2093,7 +2090,7 @@ PHP_FUNCTION(mb_substr_count)
 		Z_PARAM_STRING(haystack_val, haystack.len)
 		Z_PARAM_STRING(needle_val, needle.len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	haystack.val = (unsigned char*)haystack_val;
@@ -2130,12 +2127,12 @@ PHP_FUNCTION(mb_substr)
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
-	ZEND_PARSE_PARAMETERS_START(2, 5)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_LONG(from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.encoding = php_mb_get_encoding(encoding, 4);
@@ -2194,12 +2191,12 @@ PHP_FUNCTION(mb_strcut)
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
-	ZEND_PARSE_PARAMETERS_START(2, 5)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(string_val, string.len)
 		Z_PARAM_LONG(from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char*)string_val;
@@ -2255,7 +2252,7 @@ PHP_FUNCTION(mb_strwidth)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(string_val, string.len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(enc_name)
+		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char*)string_val;
@@ -2285,7 +2282,7 @@ PHP_FUNCTION(mb_strimwidth)
 		Z_PARAM_LONG(width)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(trimmarker, trimmarker_len)
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.encoding = marker.encoding = php_mb_get_encoding(encoding, 5);
@@ -2587,7 +2584,7 @@ PHP_FUNCTION(mb_convert_case)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_LONG(case_mode)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 3);
@@ -2620,7 +2617,7 @@ PHP_FUNCTION(mb_strtoupper)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
@@ -2651,7 +2648,7 @@ PHP_FUNCTION(mb_strtolower)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(from_encoding)
+		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	enc = php_mb_get_encoding(from_encoding, 2);
@@ -2764,8 +2761,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 
 	array_init(return_value);
 	if (encoding->aliases != NULL) {
-		const char **alias;
-		for (alias = *encoding->aliases; *alias; ++alias) {
+		for (const char **alias = encoding->aliases; *alias; ++alias) {
 			add_next_index_string(return_value, (char *)*alias);
 		}
 	}
@@ -2864,7 +2860,7 @@ PHP_FUNCTION(mb_convert_kana)
 		Z_PARAM_STRING(string_val, string.len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(optstr, optstr_len)
-		Z_PARAM_STR(encname)
+		Z_PARAM_STR_OR_NULL(encname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char*)string_val;
@@ -3195,7 +3191,7 @@ PHP_FUNCTION(mb_encode_numericentity)
 		Z_PARAM_STRING(str, string.len)
 		Z_PARAM_ARRAY_HT(target_hash)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 		Z_PARAM_BOOL(is_hex)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3232,7 +3228,7 @@ PHP_FUNCTION(mb_decode_numericentity)
 		Z_PARAM_STRING(str, string.len)
 		Z_PARAM_ARRAY_HT(target_hash)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(encoding)
+		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char *)str;
@@ -3649,7 +3645,7 @@ PHP_FUNCTION(mb_send_mail)
 	if (!suppressed_hdrs.cnt_type) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);
 
-		p = (char *)mbfl_no2preferred_mime_name(tran_cs->no_encoding);
+		p = (char *)mbfl_encoding_preferred_mime_name(tran_cs);
 		if (p != NULL) {
 			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
 			mbfl_memory_device_strcat(&device, p);
@@ -3658,7 +3654,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 	if (!suppressed_hdrs.cnt_trans_enc) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
-		p = (char *)mbfl_no2preferred_mime_name(body_enc->no_encoding);
+		p = (char *)mbfl_encoding_preferred_mime_name(body_enc);
 		if (p == NULL) {
 			p = "7bit";
 		}
@@ -3859,70 +3855,43 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-
-static inline mbfl_buffer_converter *php_mb_init_convd(const mbfl_encoding *encoding)
+static int mbfl_filt_check_errors(int c, void* data)
 {
-	mbfl_buffer_converter *convd;
-
-	convd = mbfl_buffer_converter_new(encoding, encoding, 0);
-	if (convd == NULL) {
-		return NULL;
+	if (c & MBFL_WCSGROUP_THROUGH) {
+		(*((mbfl_convert_filter**)data))->num_illegalchar++;
 	}
-	mbfl_buffer_converter_illegal_mode(convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
-	mbfl_buffer_converter_illegal_substchar(convd, 0);
-	return convd;
-}
-
-
-static inline int php_mb_check_encoding_impl(mbfl_buffer_converter *convd, const char *input, size_t length, const mbfl_encoding *encoding) {
-	mbfl_string string, result;
-
-	mbfl_string_init_set(&string, encoding);
-	mbfl_string_init(&result);
-
-	string.val = (unsigned char *) input;
-	string.len = length;
-
-	mbfl_string *ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-	size_t illegalchars = mbfl_buffer_illegalchars(convd);
-
-	if (ret != NULL) {
-		if (illegalchars == 0 && string.len == result.len && memcmp(string.val, result.val, string.len) == 0) {
-			mbfl_string_clear(&result);
-			return 1;
-		}
-		mbfl_string_clear(&result);
-	}
-	return 0;
+	return c;
 }
 
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
 {
-	mbfl_buffer_converter *convd = php_mb_init_convd(encoding);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
+	mbfl_convert_filter *filter = mbfl_convert_filter_new(encoding, &mbfl_encoding_wchar, mbfl_filt_check_errors, NULL, &filter);
 
-	int result = php_mb_check_encoding_impl(convd, input, length, encoding);
-	mbfl_buffer_converter_delete(convd);
+	while (length--) {
+		unsigned char c = *input++;
+		(filter->filter_function)(c, filter);
+		if (filter->num_illegalchar) {
+			mbfl_convert_filter_delete(filter);
+			return 0;
+		}
+	}
+
+	(filter->filter_flush)(filter);
+	int result = !filter->num_illegalchar;
+	mbfl_convert_filter_delete(filter);
 	return result;
 }
 
 static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
 {
-	mbfl_buffer_converter *convd;
 	zend_long idx;
 	zend_string *key;
 	zval *entry;
 	int valid = 1;
 
-	(void)(idx);
-
-	convd = php_mb_init_convd(encoding);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
+	(void)(idx); /* Suppress spurious compiler warning that `idx` is not used */
 
 	if (GC_IS_RECURSIVE(vars)) {
-		mbfl_buffer_converter_delete(convd);
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return 0;
 	}
@@ -3930,14 +3899,14 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
-			if (!php_mb_check_encoding_impl(convd, ZSTR_VAL(key), ZSTR_LEN(key), encoding)) {
+			if (!php_mb_check_encoding(ZSTR_VAL(key), ZSTR_LEN(key), encoding)) {
 				valid = 0;
 				break;
 			}
 		}
 		switch (Z_TYPE_P(entry)) {
 			case IS_STRING:
-				if (!php_mb_check_encoding_impl(convd, Z_STRVAL_P(entry), Z_STRLEN_P(entry), encoding)) {
+				if (!php_mb_check_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), encoding)) {
 					valid = 0;
 					break;
 				}
@@ -3961,10 +3930,8 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 		}
 	} ZEND_HASH_FOREACH_END();
 	GC_TRY_UNPROTECT_RECURSION(vars);
-	mbfl_buffer_converter_delete(convd);
 	return valid;
 }
-
 
 /* {{{ Check if the string is valid for the specified encoding */
 PHP_FUNCTION(mb_check_encoding)

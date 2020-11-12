@@ -1,8 +1,9 @@
 --TEST--
-locale_get_display_name() icu >= 64.0
+locale_get_display_name() icu >= 65.0 && icu < 68.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '65.0') < 0) die('skip for ICU >= 65.0'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '68.1') >= 0) die('skip for ICU < 68.1'); ?>
 --FILE--
 <?php
 

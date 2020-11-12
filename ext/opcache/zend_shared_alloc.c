@@ -86,7 +86,7 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 	fchmod(lock_file, 0666);
 
 	if (lock_file == -1) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Unable to create lock file: %s (%d)", strerror(errno), errno);
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create lock file: %s (%d)", strerror(errno), errno);
 	}
 	val = fcntl(lock_file, F_GETFD, 0);
 	val |= FD_CLOEXEC;
@@ -98,7 +98,7 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 
 static void no_memory_bailout(size_t allocate_size, char *error)
 {
-	zend_accel_error(ACCEL_LOG_FATAL, "Unable to allocate shared memory segment of %zu bytes: %s: %s (%d)", allocate_size, error?error:"unknown", strerror(errno), errno );
+	zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to allocate shared memory segment of %zu bytes: %s: %s (%d)", allocate_size, error?error:"unknown", strerror(errno), errno );
 }
 
 static void copy_shared_segments(void *to, void *from, int count, int size)
@@ -231,14 +231,14 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 
 	p_tmp_shared_globals = (zend_smm_shared_globals *) zend_shared_alloc(sizeof(zend_smm_shared_globals));
 	if (!p_tmp_shared_globals) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return ALLOC_FAILURE;
 	}
 	memset(p_tmp_shared_globals, 0, sizeof(zend_smm_shared_globals));
 
 	tmp_shared_segments = zend_shared_alloc(shared_segments_array_size + ZSMMG(shared_segments_count) * sizeof(void *));
 	if (!tmp_shared_segments) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return ALLOC_FAILURE;
 	}
 
@@ -252,7 +252,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 
 	ZSMMG(shared_memory_state).positions = (int *)zend_shared_alloc(sizeof(int) * ZSMMG(shared_segments_count));
 	if (!ZSMMG(shared_memory_state).positions) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return ALLOC_FAILURE;
 	}
 
@@ -263,7 +263,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 			ZSMMG(reserved) = (char*)ZSMMG(shared_segments)[i]->p + ZSMMG(shared_segments)[i]->end;
 			ZSMMG(reserved_size) = reserved_size;
 		} else {
-			zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 			return ALLOC_FAILURE;
 		}
 	}
@@ -340,7 +340,7 @@ void *zend_shared_alloc(size_t size)
 
 #if 1
 	if (!ZCG(locked)) {
-		zend_accel_error(ACCEL_LOG_ERROR, "Shared memory lock not obtained");
+		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Shared memory lock not obtained");
 	}
 #endif
 	if (block_size > ZSMMG(shared_free)) { /* No hope to find a big-enough block */
@@ -482,7 +482,7 @@ void zend_shared_alloc_lock(void)
 			if (errno == EINTR) {
 				continue;
 			}
-			zend_accel_error(ACCEL_LOG_ERROR, "Cannot create lock - %s (%d)", strerror(errno), errno);
+			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Cannot create lock - %s (%d)", strerror(errno), errno);
 		}
 		break;
 	}
@@ -508,7 +508,7 @@ void zend_shared_alloc_unlock(void)
 
 #ifndef ZEND_WIN32
 	if (fcntl(lock_file, F_SETLK, &mem_write_unlock) == -1) {
-		zend_accel_error(ACCEL_LOG_ERROR, "Cannot remove lock - %s (%d)", strerror(errno), errno);
+		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Cannot remove lock - %s (%d)", strerror(errno), errno);
 	}
 #ifdef ZTS
 	tsrm_mutex_unlock(zts_lock);
@@ -631,7 +631,7 @@ void zend_accel_shared_protect(int mode)
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		DWORD oldProtect;
 		if (!VirtualProtect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode, &oldProtect)) {
-			zend_accel_error(ACCEL_LOG_ERROR, "Failed to protect memory");
+			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Failed to protect memory");
 		}
 	}
 #endif

@@ -51,33 +51,12 @@
 #define MBFL_WCSPLANE_JIS0208		0x70e10000		/* JIS HEX : 2121h - 7E7Eh */
 #define MBFL_WCSPLANE_JIS0212		0x70e20000		/* JIS HEX : 2121h - 7E7Eh */
 #define MBFL_WCSPLANE_WINCP932		0x70e30000		/* JIS HEX : 2121h - 9898h */
-#define MBFL_WCSPLANE_8859_1		0x70e40000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_2		0x70e50000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_3		0x70e60000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_4		0x70e70000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_5		0x70e80000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_6		0x70e90000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_7		0x70ea0000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_8		0x70eb0000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_9		0x70ec0000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_10		0x70ed0000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_13		0x70ee0000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_14		0x70ef0000		/*  00h - FFh */
-#define MBFL_WCSPLANE_8859_15		0x70f00000		/*  00h - FFh */
 #define MBFL_WCSPLANE_KSC5601		0x70f10000		/*  2121h - 7E7Eh */
 #define MBFL_WCSPLANE_GB2312		0x70f20000		/*  2121h - 7E7Eh */
 #define MBFL_WCSPLANE_WINCP936		0x70f30000		/*  2121h - 9898h */
 #define MBFL_WCSPLANE_BIG5		0x70f40000		/*  2121h - 9898h */
 #define MBFL_WCSPLANE_CNS11643		0x70f50000		/*  2121h - 9898h */
 #define MBFL_WCSPLANE_UHC		0x70f60000		/*  8141h - fefeh */
-#define MBFL_WCSPLANE_CP1251		0x70f70000
-#define MBFL_WCSPLANE_CP866		0x70f80000
-#define MBFL_WCSPLANE_KOI8R 		0x70f90000
-#define MBFL_WCSPLANE_8859_16		0x70fa0000		/*  00h - FFh */
-#define MBFL_WCSPLANE_ARMSCII8 		0x70fb0000
-#define MBFL_WCSPLANE_KOI8U 		0x70fc0000
-#define MBFL_WCSPLANE_CP1254	        0x70fd0000              /*  00h - FFh */
-#define MBFL_WCSPLANE_CP850	        0x70fe0000              /*  00h - FFh */
 #define MBFL_WCSPLANE_GB18030		0x70ff0000		/* a1a1h-e3329a35h  */
 #define MBFL_WCSGROUP_MASK                0xffffff
 #define MBFL_WCSGROUP_UCS4MAX		0x70000000

@@ -38,6 +38,8 @@ DONE
 ?>
 --EXPECTF--
 %s.txt
+
+Warning: ZipArchive::addFile(): No such file or directory in %s on line %d
 add failed
 close ok
 DONE

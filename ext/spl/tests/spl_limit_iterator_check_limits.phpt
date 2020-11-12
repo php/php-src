@@ -25,4 +25,4 @@ $limitIterator = new LimitIterator($arrayIterator, 0, -1);
 ?>
 --EXPECT--
 LimitIterator::__construct(): Argument #2 ($offset) must be greater than or equal to 0
-LimitIterator::__construct(): Argument #3 ($count) must be greater than or equal to -1
+LimitIterator::__construct(): Argument #3 ($limit) must be greater than or equal to -1

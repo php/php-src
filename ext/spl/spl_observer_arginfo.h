@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c526488c83b1de019f4257e2ddaaa8fb8f1bb323 */
+ * Stub hash: aaefa4d4ac3b795212191d9fe06982d29948f552 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObserver_update, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -54,7 +54,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplObjectStorage_next arginfo_class_SplSubject_notify
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_unserialize, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_serialize arginfo_class_SplSubject_notify

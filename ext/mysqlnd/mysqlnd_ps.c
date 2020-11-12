@@ -109,7 +109,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 			}
 			/* Position at the first row */
 			set->data_cursor = set->data;
-		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
+		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_C) {
 			/*TODO*/
 		}
 
@@ -119,9 +119,11 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 		stmt->state = MYSQLND_STMT_USE_OR_STORE_CALLED;
 	} else {
 		COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
+		COPY_CLIENT_ERROR(stmt->error_info, result->stored_data->error_info);
 		stmt->result->m.free_result_contents(stmt->result);
 		stmt->result = NULL;
 		stmt->state = MYSQLND_STMT_PREPARED;
+		DBG_RETURN(NULL);
 	}
 
 	DBG_RETURN(result);
@@ -149,13 +151,19 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 	}
 
 	if (stmt->cursor_exists) {
-		/* Silently convert buffered to unbuffered, for now */
-		DBG_RETURN(s->m->use_result(s));
+		/* Prepared statement cursors are not supported as of yet */
+		char * msg;
+		mnd_sprintf(&msg, 0, "%s() cannot be used with cursors", get_active_function_name());
+		SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+		if (msg) {
+			mnd_sprintf_free(msg);
+		}
+		DBG_RETURN(NULL);
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
 	if (GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA || stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE) {
-		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
+		SET_CLIENT_ERROR(stmt->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(NULL);
 	}
 
@@ -176,7 +184,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 			break;
 		}
 
-		if ((result = result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY))) {
+		if (result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY)) {
 			UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, result->stored_data->row_count);
 			stmt->state = MYSQLND_STMT_PREPARED;
 			result->type = MYSQLND_RES_PS_BUF;
@@ -407,6 +415,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 
 		ret = conn->command->stmt_prepare(conn, query_string);
 		if (FAIL == ret) {
+			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			goto fail;
 		}
 	}
@@ -879,9 +888,13 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
 			COPY_CLIENT_ERROR(conn->error_info, row_packet->error_info);
-			COPY_CLIENT_ERROR(stmt->error_info, row_packet->error_info);
+			if (stmt) {
+				COPY_CLIENT_ERROR(stmt->error_info, row_packet->error_info);
+			}
 		}
-		SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		if (GET_CONNECTION_STATE(&conn->state) != CONN_QUIT_SENT) {
+			SET_CONNECTION_STATE(&conn->state, CONN_READY);
+		}
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		DBG_INF("EOF");

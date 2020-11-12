@@ -1,13 +1,62 @@
 --TEST--
 Test that there is no arginfo/zpp mismatch
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die("skip msan misses interceptors for some functions");
+?>
 --FILE--
 <?php
 
+require __DIR__ . "/arginfo_zpp_mismatch.inc";
+
 function test($function) {
+    if (skipFunction($function)) {
+        return;
+    }
+
+    ob_start();
+    if (is_string($function)) {
+        echo "Testing $function\n";
+    } else {
+        echo "Testing " . get_class($function[0]) . "::$function[1]\n";
+    }
+    try {
+        @$function();
+    } catch (Throwable) {
+    }
+    try {
+        @$function(null);
+    } catch (Throwable) {
+    }
+    try {
+        @$function(null, null);
+    } catch (Throwable) {
+    }
+    try {
+        @$function(null, null, null);
+    } catch (Throwable) {
+    }
+    try {
+        @$function(null, null, null, null);
+    } catch (Throwable) {
+    }
+    try {
+        @$function(null, null, null, null, null);
+    } catch (Throwable) {
+    }
+    try {
+        @$function(null, null, null, null, null, null);
+    } catch (Throwable) {
+    }
+    try {
+        @$function(null, null, null, null, null, null, null);
+    } catch (Throwable) {
+    }
     try {
         @$function(null, null, null, null, null, null, null, null);
     } catch (Throwable) {
     }
+    ob_end_clean();
 }
 
 foreach (get_defined_functions()["internal"] as $function) {
@@ -29,20 +78,6 @@ foreach (get_declared_classes() as $class) {
 
 // var_dump() and debug_zval_dump() print all arguments
 ?>
+===DONE===
 --EXPECT--
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+===DONE===

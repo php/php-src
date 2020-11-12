@@ -9,6 +9,10 @@ if (PHP_ZTS) {
     /* TODO eliminate difference in TS build. */
     die("skip Not for ZTS");
 }
+if (getenv('SKIP_REPEAT')) {
+    /* The cwd is persistent across repeats */
+    die("skip Not repeatable");
+}
 ?>
 --FILE--
 <?php

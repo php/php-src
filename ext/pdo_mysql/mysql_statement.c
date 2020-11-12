@@ -255,7 +255,10 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 
 			/* if buffered, pre-fetch all the data */
 			if (H->buffered) {
-				mysql_stmt_store_result(S->stmt);
+				if (mysql_stmt_store_result(S->stmt)) {
+					pdo_mysql_error_stmt(stmt);
+					PDO_DBG_RETURN(0);
+				}
 			}
 		}
 	}
@@ -298,6 +301,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 		/* if buffered, pre-fetch all the data */
 		if (H->buffered) {
 			if (mysql_stmt_store_result(S->stmt)) {
+				pdo_mysql_error_stmt(stmt);
 				PDO_DBG_RETURN(0);
 			}
 		}
@@ -386,7 +390,8 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 			/* if buffered, pre-fetch all the data */
 			if (H->buffered) {
 				if (mysql_stmt_store_result(S->stmt)) {
-					PDO_DBG_RETURN(1);
+					pdo_mysql_error_stmt(stmt);
+					PDO_DBG_RETURN(0);
 				}
 			}
 		}
@@ -621,6 +626,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 	if (S->stmt) {
 		if (FAIL == mysqlnd_stmt_fetch(S->stmt, &fetched_anything) || fetched_anything == FALSE) {
+			pdo_mysql_error_stmt(stmt);
 			PDO_DBG_RETURN(0);
 		}
 
@@ -660,11 +666,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 #endif /* PDO_USE_MYSQLND */
 
 	if ((S->current_data = mysql_fetch_row(S->result)) == NULL) {
-#ifdef PDO_USE_MYSQLND
-		if (S->result->unbuf && !S->result->unbuf->eof_reached && mysql_errno(S->H->server)) {
-#else
-		if (!S->result->eof && mysql_errno(S->H->server)) {
-#endif
+		if (!S->H->buffered && mysql_errno(S->H->server)) {
 			pdo_mysql_error_stmt(stmt);
 		}
 		PDO_DBG_RETURN(0);

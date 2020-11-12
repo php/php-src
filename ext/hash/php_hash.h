@@ -105,6 +105,9 @@ extern const php_hash_ops php_hash_fnv1a32_ops;
 extern const php_hash_ops php_hash_fnv164_ops;
 extern const php_hash_ops php_hash_fnv1a64_ops;
 extern const php_hash_ops php_hash_joaat_ops;
+extern const php_hash_ops php_hash_murmur3a_ops;
+extern const php_hash_ops php_hash_murmur3c_ops;
+extern const php_hash_ops php_hash_murmur3f_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern const php_hash_ops php_hash_##p##haval##b##_ops;
 

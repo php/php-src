@@ -75,7 +75,8 @@ retry:
 	if (didwrite <= 0) {
 		char *estr;
 		int err = php_socket_errno();
-		if (err == EWOULDBLOCK || err == EAGAIN) {
+
+		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			if (sock->is_blocked) {
 				int retval;
 
@@ -166,7 +167,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	err = php_socket_errno();
 
 	if (nr_bytes < 0) {
-		if (err == EAGAIN || err == EWOULDBLOCK) {
+		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			nr_bytes = 0;
 		} else {
 			stream->eof = 1;

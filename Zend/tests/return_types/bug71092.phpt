@@ -1,7 +1,5 @@
 --TEST--
 Bug #71092 (Segmentation fault with return type hinting)
---INI--
-opcache.enable=0
 --FILE--
 <?php
 

@@ -16,64 +16,64 @@ class NumberFormatter
      * @return string|false
      * @alias numfmt_format
      */
-    public function format(int|float $value, int $type = NumberFormatter::TYPE_DEFAULT) {}
+    public function format(int|float $num, int $type = NumberFormatter::TYPE_DEFAULT) {}
 
     /**
-     * @param int $position
+     * @param int $offset
      * @return int|float|false
      * @alias numfmt_parse
      */
-    public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE, &$position = null) {}
+    public function parse(string $string, int $type = NumberFormatter::TYPE_DOUBLE, &$offset = null) {}
 
     /**
      * @return string|false
      * @alias numfmt_format_currency
      */
-    public function formatCurrency(float $value, string $currency) {}
+    public function formatCurrency(float $amount, string $currency) {}
 
     /**
      * @param string $currency
-     * @param int $position
+     * @param int $offset
      * @return float|false
      * @alias numfmt_parse_currency
      */
-    public function parseCurrency(string $value, &$currency, &$position = null) {}
+    public function parseCurrency(string $string, &$currency, &$offset = null) {}
 
     /**
      * @return bool
      * @alias numfmt_set_attribute
      */
-    public function setAttribute(int $attr, int|float $value) {}
+    public function setAttribute(int $attribute, int|float $value) {}
 
     /**
      * @return int|float|false
      * @alias numfmt_get_attribute
      */
-    public function getAttribute(int $attr) {}
+    public function getAttribute(int $attribute) {}
 
     /**
      * @return bool
      * @alias numfmt_set_text_attribute
      */
-    public function setTextAttribute(int $attr, string $value) {}
+    public function setTextAttribute(int $attribute, string $value) {}
 
     /**
      * @return string|false
      * @alias numfmt_get_text_attribute
      */
-    public function getTextAttribute(int $attr) {}
+    public function getTextAttribute(int $attribute) {}
 
     /**
      * @return bool
      * @alias numfmt_set_symbol
      */
-    public function setSymbol(int $attr, string $value) {}
+    public function setSymbol(int $symbol, string $value) {}
 
     /**
      * @return string|false
      * @alias numfmt_get_symbol
      */
-    public function getSymbol(int $attr) {}
+    public function getSymbol(int $symbol) {}
 
     /**
      * @return bool

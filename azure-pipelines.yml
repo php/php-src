@@ -3,6 +3,7 @@ trigger:
   branches:
     include:
       - PHP-7.4
+      - PHP-8.0
       - master
   paths:
     exclude:
@@ -10,6 +11,15 @@ trigger:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
+
+schedules:
+  - cron: "0 1 * * *"
+    displayName: Nightly build
+    branches:
+      include:
+        - PHP-7.4
+        - PHP-8.0
+        - master
 
 jobs:
   - template: azure/job.yml
@@ -74,7 +84,7 @@ jobs:
       parameters:
         configurationName: DEBUG_ZTS_MSAN
         configurationParameters: '--enable-debug --enable-zts'
-        runTestsParameters: --asan
+        runTestsParameters: --msan
         timeoutInMinutes: 90
     - template: azure/community_job.yml
       parameters:
@@ -92,3 +102,9 @@ jobs:
       parameters:
         configurationName: DEBUG_NTS_FILE_CACHE
         configurationParameters: '--enable-debug --disable-zts'
+        timeoutInMinutes: 90
+    - template: azure/job.yml
+      parameters:
+        configurationName: DEBUG_NTS_REPEAT
+        configurationParameters: '--enable-debug --disable-zts'
+        runTestsParameters: '--repeat 2'

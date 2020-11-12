@@ -32,6 +32,9 @@
 # include <sys/sysctl.h>
 #elif defined(__NetBSD__)
 # include <lwp.h>
+#elif defined(__DragonFly__)
+# include <sys/lwp.h>
+# include <sys/sysctl.h>
 #elif defined(__sun)
 // avoiding thread.h inclusion as it conflicts with vtunes types.
 extern unsigned int thr_self(void);
@@ -124,7 +127,7 @@ static void zend_jit_perf_jitdump_open(void)
 	fd = open("/proc/self/exe", O_RDONLY);
 #elif defined(__NetBSD__)
 	fd = open("/proc/curproc/exe", O_RDONLY);
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
 	char path[PATH_MAX];
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
@@ -226,6 +229,8 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		thread_id = getthrid();
 #elif defined(__NetBSD__)
 		thread_id = _lwp_self();
+#elif defined(__DragonFly__)
+		thread_id = lwp_gettid();
 #elif defined(__sun)
 		thread_id = thr_self();
 #endif

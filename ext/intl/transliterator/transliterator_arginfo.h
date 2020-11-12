@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 52c803e82863ebdbe7a2fdcbe8508fb22984cbfd */
+ * Stub hash: 4bcb458de884a68797bee28339399fb8c8664605 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -19,7 +19,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Transliterator_listIDs arginfo_class_Transliterator___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator_transliterate, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, end, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()

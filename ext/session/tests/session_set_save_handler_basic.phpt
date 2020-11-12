@@ -20,7 +20,8 @@ var_dump(session_module_name(FALSE));
 var_dump(session_module_name("blah"));
 var_dump(session_module_name("foo"));
 
-$path = __DIR__;
+$path = __DIR__ . '/session_set_save_handler_basic';
+@mkdir($path);
 session_save_path($path);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 
@@ -55,6 +56,7 @@ session_start();
 session_destroy();
 
 ob_end_flush();
+rmdir($path);
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : basic functionality ***

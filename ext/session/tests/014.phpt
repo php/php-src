@@ -14,7 +14,7 @@ session.save_handler=files
 <?php
 error_reporting(E_ALL);
 
-session_id("abtest");
+session_id("test014");
 session_start();
 
 ?>

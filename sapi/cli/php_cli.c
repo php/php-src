@@ -172,6 +172,9 @@ const opt_struct OPTIONS[] = {
 	{14,  1, "ri"},
 	{14,  1, "rextinfo"},
 	{15,  0, "ini"},
+	/* Internal testing option -- may be changed or removed without notice,
+	 * including in patch releases. */
+	{16,  1, "repeat"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -529,7 +532,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(void) /* {{{ */
+static void cli_register_file_handles(zend_bool no_close) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -546,11 +549,11 @@ static void cli_register_file_handles(void) /* {{{ */
 		return;
 	}
 
-#if PHP_DEBUG
-	/* do not close stdout and stderr */
-	s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-#endif
+	if (no_close) {
+		s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+		s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+		s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	}
 
 	s_in_process = s_in;
 
@@ -614,6 +617,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	int interactive=0;
 	const char *param_error=NULL;
 	int hide_argv = 0;
+	int num_repeats = 1;
+	pid_t pid = getpid();
 
 	zend_try {
 
@@ -839,6 +844,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			case 15:
 				behavior = PHP_MODE_SHOW_INI_CONFIG;
 				break;
+			case 16:
+				num_repeats = atoi(php_optarg);
+				break;
 			default:
 				break;
 			}
@@ -873,6 +881,12 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			fflush(stdout);
 		}
 
+		if (num_repeats > 1) {
+			fprintf(stdout, "Executing for the first time...\n");
+			fflush(stdout);
+		}
+
+do_repeat:
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > php_optind
 		  && !script_file
@@ -940,7 +954,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
 			if (strcmp(file_handle.filename, "Standard input code")) {
-				cli_register_file_handles();
+				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 			}
 
 			if (interactive && cli_shell_callbacks.cli_shell_run) {
@@ -975,7 +989,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			}
 			break;
 		case PHP_MODE_CLI_DIRECT:
-			cli_register_file_handles();
+			cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
 			break;
 
@@ -985,7 +999,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				size_t len, index = 0;
 				zval argn, argi;
 
-				cli_register_file_handles();
+				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 
 				if (exec_begin) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
@@ -1111,6 +1125,12 @@ out:
 	}
 	if (translated_path) {
 		free(translated_path);
+	}
+	/* Don't repeat fork()ed processes. */
+	if (--num_repeats && pid == getpid()) {
+		fprintf(stdout, "Finished execution, repeating...\n");
+		fflush(stdout);
+		goto do_repeat;
 	}
 	return EG(exit_status);
 err:

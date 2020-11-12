@@ -23,4 +23,4 @@ try {
 unlink('SplFileObject__fgetcsv3.csv');
 ?>
 --EXPECT--
-SplFileObject::fgetcsv(): Argument #1 ($delimiter) must be a single character
+SplFileObject::fgetcsv(): Argument #1 ($separator) must be a single character

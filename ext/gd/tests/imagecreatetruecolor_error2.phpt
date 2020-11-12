@@ -19,5 +19,5 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] imagecreatetruecolor(): Argument #1 ($x_size) must be greater than 0
-!! [ValueError] imagecreatetruecolor(): Argument #2 ($y_size) must be greater than 0
+!! [ValueError] imagecreatetruecolor(): Argument #1 ($width) must be greater than 0
+!! [ValueError] imagecreatetruecolor(): Argument #2 ($height) must be greater than 0

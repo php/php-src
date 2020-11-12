@@ -89,7 +89,7 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 		RETURN_NULL();
 	}
 
-	tz = timezone_convert_datetimezone(tzobj->type, tzobj, FALSE, NULL,
+	tz = timezone_convert_datetimezone(tzobj->type, tzobj, false, NULL,
 		"intltz_from_date_time_zone");
 	if (tz == NULL) {
 		RETURN_NULL();

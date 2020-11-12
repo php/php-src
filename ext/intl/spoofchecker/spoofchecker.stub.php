@@ -7,19 +7,19 @@ class Spoofchecker
     public function __construct() {}
 
     /**
-     * @param int $error
+     * @param int $errorCode
      * @return bool
      */
-    public function isSuspicious(string $text, &$error = null) {}
+    public function isSuspicious(string $string, &$errorCode = null) {}
 
     /**
-     * @param int $error
+     * @param int $errorCode
      * @return bool
      */
-    public function areConfusable(string $s1, string $s2, &$error = null) {}
+    public function areConfusable(string $string1, string $string2, &$errorCode = null) {}
 
     /** @return void */
-    public function setAllowedLocales(string $locale_list) {}
+    public function setAllowedLocales(string $locales) {}
 
     /** @return void */
     public function setChecks(int $checks) {}

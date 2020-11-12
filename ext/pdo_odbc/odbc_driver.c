@@ -384,7 +384,11 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL,	/* last id */
 	pdo_odbc_fetch_error_func,
 	odbc_handle_get_attr,	/* get attr */
-	NULL,	/* check_liveness */
+	NULL, /* check_liveness */
+	NULL, /* get_driver_methods */
+	NULL, /* request_shutdown */
+	NULL, /* in_transaction */
+	NULL /* get_gc */
 };
 
 static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */

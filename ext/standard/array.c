@@ -1321,7 +1321,13 @@ PHP_FUNCTION(max)
 }
 /* }}} */
 
-static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
+typedef struct {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+} php_array_walk_context;
+
+static int php_array_walk(
+	php_array_walk_context *context, zval *array, zval *userdata, int recursive)
 {
 	zval args[3],		/* Arguments to userland function */
 		 retval,		/* Return value - unused */
@@ -1331,15 +1337,19 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 	uint32_t ht_iter;
 	int result = SUCCESS;
 
+	/* Create a local copy of fci, as we want to use different arguments at different
+	 * levels of recursion. */
+	zend_fcall_info fci = context->fci;
+
 	/* Set up known arguments */
 	ZVAL_UNDEF(&args[1]);
 	if (userdata) {
 		ZVAL_COPY(&args[2], userdata);
 	}
 
-	BG(array_walk_fci).retval = &retval;
-	BG(array_walk_fci).param_count = userdata ? 3 : 2;
-	BG(array_walk_fci).params = args;
+	fci.retval = &retval;
+	fci.param_count = userdata ? 3 : 2;
+	fci.params = args;
 
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	ht_iter = zend_hash_iterator_add(target_hash, pos);
@@ -1386,8 +1396,6 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 
 		if (recursive && Z_TYPE_P(Z_REFVAL_P(zv)) == IS_ARRAY) {
 			HashTable *thash;
-			zend_fcall_info orig_array_walk_fci;
-			zend_fcall_info_cache orig_array_walk_fci_cache;
 			zval ref;
 			ZVAL_COPY_VALUE(&ref, zv);
 
@@ -1400,28 +1408,20 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 				break;
 			}
 
-			/* backup the fcall info and cache */
-			orig_array_walk_fci = BG(array_walk_fci);
-			orig_array_walk_fci_cache = BG(array_walk_fci_cache);
-
 			Z_ADDREF(ref);
 			GC_PROTECT_RECURSION(thash);
-			result = php_array_walk(zv, userdata, recursive);
+			result = php_array_walk(context, zv, userdata, recursive);
 			if (Z_TYPE_P(Z_REFVAL(ref)) == IS_ARRAY && thash == Z_ARRVAL_P(Z_REFVAL(ref))) {
 				/* If the hashtable changed in the meantime, we'll "leak" this apply count
 				 * increment -- our reference to thash is no longer valid. */
 				GC_UNPROTECT_RECURSION(thash);
 			}
 			zval_ptr_dtor(&ref);
-
-			/* restore the fcall info and cache */
-			BG(array_walk_fci) = orig_array_walk_fci;
-			BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		} else {
 			ZVAL_COPY(&args[0], zv);
 
 			/* Call the userland function */
-			result = zend_call_function(&BG(array_walk_fci), &BG(array_walk_fci_cache));
+			result = zend_call_function(&fci, &context->fci_cache);
 			if (result == SUCCESS) {
 				zval_ptr_dtor(&retval);
 			}
@@ -1458,33 +1458,22 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 	zend_hash_iterator_del(ht_iter);
 	return result;
 }
-/* }}} */
 
 /* {{{ Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
 	zval *array;
 	zval *userdata = NULL;
-	zend_fcall_info orig_array_walk_fci;
-	zend_fcall_info_cache orig_array_walk_fci_cache;
-
-	orig_array_walk_fci = BG(array_walk_fci);
-	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
+	php_array_walk_context context;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
-		Z_PARAM_FUNC(BG(array_walk_fci), BG(array_walk_fci_cache))
+		Z_PARAM_FUNC(context.fci, context.fci_cache)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(userdata)
-	ZEND_PARSE_PARAMETERS_END_EX(
-		BG(array_walk_fci) = orig_array_walk_fci;
-		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
-		return
-	);
+	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_walk(array, userdata, 0);
-	BG(array_walk_fci) = orig_array_walk_fci;
-	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
+	php_array_walk(&context, array, userdata, 0);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1494,26 +1483,16 @@ PHP_FUNCTION(array_walk_recursive)
 {
 	zval *array;
 	zval *userdata = NULL;
-	zend_fcall_info orig_array_walk_fci;
-	zend_fcall_info_cache orig_array_walk_fci_cache;
-
-	orig_array_walk_fci = BG(array_walk_fci);
-	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
+	php_array_walk_context context;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
-		Z_PARAM_FUNC(BG(array_walk_fci), BG(array_walk_fci_cache))
+		Z_PARAM_FUNC(context.fci, context.fci_cache)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(userdata)
-	ZEND_PARSE_PARAMETERS_END_EX(
-		BG(array_walk_fci) = orig_array_walk_fci;
-		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
-		return
-	);
+	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_walk(array, userdata, 1);
-	BG(array_walk_fci) = orig_array_walk_fci;
-	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
+	php_array_walk(&context, array, userdata, 1);
 	RETURN_TRUE;
 }
 /* }}} */

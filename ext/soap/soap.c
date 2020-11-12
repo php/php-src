@@ -2188,7 +2188,7 @@ PHP_METHOD(SoapClient, __construct)
 }
 /* }}} */
 
-static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, int version, int one_way, zval *response) /* {{{ */
+static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, int version, zend_bool one_way, zval *response) /* {{{ */
 {
 	int    ret = TRUE;
 	char  *buf;
@@ -2226,7 +2226,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 			ZVAL_STRING(&params[2], action);
 		}
 		ZVAL_LONG(&params[3], version);
-		ZVAL_LONG(&params[4], one_way);
+		ZVAL_BOOL(&params[4], one_way);
 
 		if (call_user_function(NULL, this_ptr, &func, response, 5, params) != SUCCESS) {
 			add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() failed", NULL, NULL);
@@ -2361,7 +2361,7 @@ static void do_soap_call(zend_execute_data *execute_data,
  			fn = get_function(sdl, function);
  			if (fn != NULL) {
 				sdlBindingPtr binding = fn->binding;
-				int one_way = 0;
+				zend_bool one_way = 0;
 
 				if (fn->responseName == NULL &&
 				    fn->responseParameters == NULL &&
@@ -2758,10 +2758,10 @@ PHP_METHOD(SoapClient, __doRequest)
 	char      *location, *action;
 	size_t     location_size, action_size;
 	zend_long  version;
-	zend_long  one_way = 0;
+	zend_bool  one_way = 0;
 	zval      *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|b",
 	    &buf,
 	    &location, &location_size,
 	    &action, &action_size,
