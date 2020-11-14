@@ -292,8 +292,6 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s = 0x2141;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
 			s = 0x2142;
 		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
@@ -389,8 +387,6 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s = 0x2141;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
 			s = 0x2142;
 		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */

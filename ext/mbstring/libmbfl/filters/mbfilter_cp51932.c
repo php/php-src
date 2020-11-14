@@ -218,8 +218,6 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s1 = 0x2141;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
 			s1 = 0x2142;
 		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
