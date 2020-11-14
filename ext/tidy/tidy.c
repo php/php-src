@@ -1110,6 +1110,8 @@ static PHP_RINIT_FUNCTION(tidy)
 static PHP_RSHUTDOWN_FUNCTION(tidy)
 {
 	TG(clean_output) = INI_ORIG_BOOL("tidy.clean_output");
+
+	return SUCCESS;
 }
 
 static PHP_MSHUTDOWN_FUNCTION(tidy)
