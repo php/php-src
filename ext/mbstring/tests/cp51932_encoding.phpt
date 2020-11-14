@@ -84,6 +84,9 @@ unset($fromUnicode["\x30\x94"]); // Don't map hiragana vu to katakana vu
 for ($i = 0; $i <= 0x7F; $i++)
   $validChars[chr($i)] = "\x00" . chr($i);
 
+/* U+00A5 is YEN SIGN; convert to FULLWIDTH YEN SIGN */
+$fromUnicode["\x00\xA5"] = "\xA1\xEF";
+
 testAllValidChars($validChars, 'CP51932', 'UTF-16BE', false);
 testAllValidChars($fromUnicode, 'UTF-16BE', 'CP51932', false);
 echo "CP51932 verification and conversion works on all valid characters\n";

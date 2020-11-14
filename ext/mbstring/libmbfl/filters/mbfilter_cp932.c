@@ -251,8 +251,8 @@ mbfl_filt_conv_wchar_cp932(int c, mbfl_convert_filter *filter)
 		s2 = 1;
 	}
 	if (s1 <= 0) {
-		if (c == 0xa5) {		/* YEN SIGN */
-			s1 = 0x005c;	/* YEN SIGN */
+		if (c == 0xa5) { /* YEN SIGN */
+			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
 		} else if (c == 0x203e) {	/* OVER LINE */
 			s1 = 0x007e;	/* FULLWIDTH MACRON */
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
