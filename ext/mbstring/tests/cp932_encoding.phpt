@@ -50,6 +50,9 @@ $fromUnicode["\x00\xAC"] = "\x81\xCA";
 /* U+203E is OVERLINE; convert to JIS X 0208 FULLWIDTH MACRON */
 $fromUnicode["\x20\x3E"] = "\x81\x50";
 
+/* U+00AF is MACRON; it can also go to FULLWIDTH MACRON */
+$fromUnicode["\x00\xAF"] = "\x81\x50";
+
 findInvalidChars($validChars, $invalidChars, $truncated, array_fill_keys(range(0x81, 0x9F), 2) + array_fill_keys(range(0xE0, 0xFC), 2));
 
 findInvalidChars($fromUnicode, $invalidCodepoints, $unused, array_fill_keys(range(0, 0xFF), 2));

@@ -64,6 +64,8 @@ $fromUnicode["\x20\x15"] = "\x81\x5C";
 
 /* Convert U+203E (OVERLINE) to 0x8150 (FULLWIDTH MACRON) */
 $fromUnicode["\x20\x3E"] = "\x81\x50";
+/* And also U+00AF (MACRON) */
+$fromUnicode["\x00\xAF"] = "\x81\x50";
 
 /* Convert U+FF5E (FULLWIDTH TILDE) to 0x8160 (WAVE DASH) */
 $fromUnicode["\xFF\x5E"] = "\x81\x60";

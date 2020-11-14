@@ -211,7 +211,7 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 		/* Unicode 0x7E is a tilde, but Shift-JIS uses 0x7E for overline (or
 		 * macron). JIS X 0208 kuten 0x2141 is 'WAVE DASH' */
 		s1 = 0x2141;
-	} else if (c == 0x203E) { /* U+203E is OVERLINE */
+	} else if (c == 0xAF || c == 0x203E) { /* U+00AF is MACRON, U+203E is OVERLINE */
 		s1 = 0x7E; /* Halfwidth overline/macron */
 	} else if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];

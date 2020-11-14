@@ -24,6 +24,8 @@ $fromUnicode["\x00\x7E"] = "\x81\x60";
 /* DEL character */
 $validChars["\x7F"] = "\x00\x7F";
 $fromUnicode["\x00\x7F"] = "\x7F";
+/* U+00AF is MACRON; Shift-JIS 0x7E is overline */
+$fromUnicode["\x00\xAF"] = "\x7E";
 /* Use fullwidth reverse solidus, not (halfwidth) backslash (0x5C) */
 $validChars["\x81\x5F"] = "\xFF\x3C";
 $fromUnicode["\xFF\x3C"] = "\x81\x5F";
