@@ -30,6 +30,8 @@ for ($i = 0xF0; $i <= 0xF9; $i++) {
 $fromUnicode["\x00\xA2"] = "\x81\x91";
 /* U+00A3 is POUND SIGN; convert to FULLWIDTH POUND SIGN */
 $fromUnicode["\x00\xA3"] = "\x81\x92";
+/* U+00A5 is YEN SIGN; convert to FULLWIDTH YEN SIGN */
+$fromUnicode["\x00\xA5"] = "\x81\x8F";
 
 /* We map the JIS X 0208 FULLWIDTH TILDE to U+FF5E (FULLWIDTH TILDE)
  * But when converting Unicode to CP932, we also accept U+301C (WAVE DASH) */
