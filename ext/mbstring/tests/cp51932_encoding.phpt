@@ -88,6 +88,8 @@ for ($i = 0; $i <= 0x7F; $i++)
 $fromUnicode["\x00\xA5"] = "\xA1\xEF";
 /* U+203E is OVERLINE; convert to FULLWIDTH MACRON */
 $fromUnicode["\x20\x3E"] = "\xA1\xB1";
+/* U+00AF is MACRON; convert to FULLWIDTH MACRON */
+$fromUnicode["\x00\xAF"] = "\xA1\xB1";
 
 testAllValidChars($validChars, 'CP51932', 'UTF-16BE', false);
 testAllValidChars($fromUnicode, 'UTF-16BE', 'CP51932', false);
