@@ -37,7 +37,10 @@ while ($line = fgets($fp, 256)) {
 	}
 }
 $fromUnicode["\x00\x7E"] = "\x7E"; /* Not reversible; SJIS 0x7E -> U+203E */
-$fromUnicode["\x00\x5C"] = "\x5C"; /* Not reversible; SJIS 0x5C -> U+00A5 */
+
+/* U+005C is backslash, Shift-JIS 0x815F is REVERSE SOLIDUS
+ * (ie. a fancy way to say "backslash") */
+$fromUnicode["\x00\x5C"] = "\x81\x5F";
 
 testAllValidChars($validChars, 'SJIS-2004', 'UTF-32BE');
 echo "SJIS-2004 verification and conversion works for all valid characters\n";
