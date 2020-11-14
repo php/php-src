@@ -749,8 +749,6 @@ int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 	if (s1 <= 0) {
 		if (c == 0xA5) { /* YEN SIGN */
 			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
-		} else if (c == 0x203E) { /* OVER LINE */
-			s1 = 0x2131; /* FULLWIDTH MACRON */
 		} else if (c == 0xFF3c) { /* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
 		} else if (c == 0xFF5E) { /* FULLWIDTH TILDE */

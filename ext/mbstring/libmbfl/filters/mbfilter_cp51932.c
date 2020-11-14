@@ -216,8 +216,6 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 	if (s1 <= 0) {
 		if (c == 0xa5) { /* YEN SIGN */
 			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s1 = 0x007e;			/* FULLWIDTH MACRON */
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
 		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */

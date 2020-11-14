@@ -211,6 +211,8 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 		/* Unicode 0x7E is a tilde, but Shift-JIS uses 0x7E for overline (or
 		 * macron). JIS X 0208 kuten 0x2141 is 'WAVE DASH' */
 		s1 = 0x2141;
+	} else if (c == 0x203E) { /* U+203E is OVERLINE */
+		s1 = 0x7E; /* Halfwidth overline/macron */
 	} else if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
@@ -223,8 +225,6 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 	if (s1 <= 0) {
 		if (c == 0xA5) { /* YEN SIGN */
 			s1 = 0x5C;
-		} else if (c == 0x203E) { /* OVER LINE */
-			s1 = 0x7E;
 		} else if (c == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
 		} else if (c == 0xFF5E) { /* FULLWIDTH TILDE */

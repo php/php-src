@@ -62,6 +62,9 @@ $fromUnicode["\x00\x7F"] = "\x7F";
  * and U+2015 */
 $fromUnicode["\x20\x15"] = "\x81\x5C";
 
+/* Convert U+203E (OVERLINE) to 0x8150 (FULLWIDTH MACRON) */
+$fromUnicode["\x20\x3E"] = "\x81\x50";
+
 testAllValidChars($validChars, 'SJIS-mac', 'UTF-32BE');
 echo "MacJapanese verification and conversion works on all valid characters\n";
 
