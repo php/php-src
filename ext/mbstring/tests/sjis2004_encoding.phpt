@@ -36,7 +36,9 @@ while ($line = fgets($fp, 256)) {
 		}
 	}
 }
-$fromUnicode["\x00\x7E"] = "\x7E"; /* Not reversible; SJIS 0x7E -> U+203E */
+
+/* U+007E is TILDE, Shift-JIS 0x8160 is WAVE DASH */
+$fromUnicode["\x00\x7E"] = "\x81\x60";
 
 /* U+005C is backslash, Shift-JIS 0x815F is REVERSE SOLIDUS
  * (ie. a fancy way to say "backslash") */
