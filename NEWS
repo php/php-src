@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #74558 (Can't rebind closure returned by Closure::fromCallable()).
     (cmb)
 
+- Reflection:
+  . Fixed bug #80370 (getAttributes segfault on dynamic properties). (Benjamin
+    Eberlei)
+
 12 Nov 2020, PHP 8.0.0RC4
 
 - Core:
