@@ -121,6 +121,10 @@ Options:
     --color
     --no-color  Do/Don't colorize the result type in the test result.
 
+    --repeat [n]
+                Run the tests multiple times in the same process and check the
+                output of the last execution (CLI SAPI only).
+
 
 HELP;
 }
