@@ -251,7 +251,7 @@ class DateTimeImmutable implements DateTimeInterface
     /** @return void */
     public function __wakeup() {}
 
-    /** @return DateTimeZone */
+    /** @return DateTimeImmutable */
     public static function __set_state(array $array) {}
 
     /**
