@@ -2905,7 +2905,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 
 	/* Uncaught exception */
 	if (zend_observer_fcall_op_array_extension != -1) {
-		zend_observer_fcall_end(execute_data, EX(return_value));
+		zend_observer_fcall_end(execute_data, NULL);
 	}
 	cleanup_live_vars(execute_data, op_num, 0);
 	if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
