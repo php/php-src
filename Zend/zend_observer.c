@@ -44,11 +44,13 @@ zend_llist zend_observer_error_callbacks;
 int zend_observer_fcall_op_array_extension = -1;
 
 ZEND_TLS zend_arena *fcall_handlers_arena = NULL;
+ZEND_TLS zend_execute_data *first_observed_frame = NULL;
+ZEND_TLS zend_execute_data *current_observed_frame = NULL;
 
 // Call during minit/startup ONLY
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
-	/* We don't want to get an extension handle unless an ext installs an observer */
 	if (!ZEND_OBSERVER_ENABLED) {
+		/* We don't want to get an extension handle unless an ext installs an observer */
 		zend_observer_fcall_op_array_extension =
 			zend_get_op_array_extension_handle("Zend Observer");
 
@@ -160,6 +162,11 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 		return;
 	}
 
+	if (first_observed_frame == NULL) {
+		first_observed_frame = execute_data;
+	}
+	current_observed_frame = execute_data;
+
 	end = fcall_data->end;
 	for (handlers = fcall_data->handlers; handlers != end; ++handlers) {
 		if (handlers->begin) {
@@ -208,6 +215,25 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 			handlers->end(execute_data, return_value);
 		}
 	}
+
+	if (first_observed_frame == execute_data) {
+		first_observed_frame = NULL;
+		current_observed_frame = NULL;
+	} else {
+		current_observed_frame = execute_data->prev_execute_data;
+	}
+}
+
+ZEND_API void zend_observer_fcall_end_all(void)
+{
+	zend_execute_data *ex = current_observed_frame;
+	while (ex != NULL) {
+		if (ex->func->type != ZEND_INTERNAL_FUNCTION) {
+			zend_observer_fcall_end(ex, NULL);
+		}
+		ex = ex->prev_execute_data;
+	}
+	current_observed_frame = NULL;
 }
 
 ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
