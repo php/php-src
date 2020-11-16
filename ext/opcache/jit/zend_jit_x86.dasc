@@ -10092,7 +10092,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
 		    !JIT_G(current_frame) ||
 		    !JIT_G(current_frame)->call ||
-		    !TRACE_FRAME_IS_NESTED(JIT_G(current_frame)->call)) {
+		    !TRACE_FRAME_IS_NESTED(JIT_G(current_frame)->call) ||
+		    prev_opline->opcode == ZEND_SEND_UNPACK ||
+		    prev_opline->opcode == ZEND_SEND_ARRAY ||
+			prev_opline->opcode == ZEND_CHECK_UNDEF_ARGS) {
 
 			|	// zend_vm_stack_free_call_frame(call);
 			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], (ZEND_CALL_ALLOCATED >> 16)
