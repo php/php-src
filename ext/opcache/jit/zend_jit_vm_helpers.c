@@ -928,7 +928,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				if (JIT_G(max_polymorphic_calls) == 0
 				 && zend_jit_may_be_polymorphic_call(opline - 1)) {
 					func = NULL;
-				} else if (is_megamorphic == ZEND_JIT_EXIT_DYNAMIC_CALL
+				} else if ((is_megamorphic == ZEND_JIT_EXIT_METHOD_CALL
+						 || is_megamorphic == ZEND_JIT_EXIT_CLOSURE_CALL)
 						&& trace_buffer[1].opline == opline - 1) {
 					func = NULL;
 				}

@@ -6640,7 +6640,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
 			fprintf(stderr, "/CALL");
 		}
-		if (t->exit_info[i].flags & (ZEND_JIT_EXIT_POLYMORPHISM|ZEND_JIT_EXIT_DYNAMIC_CALL)) {
+		if (t->exit_info[i].flags & (ZEND_JIT_EXIT_POLYMORPHISM|ZEND_JIT_EXIT_METHOD_CALL|ZEND_JIT_EXIT_CLOSURE_CALL)) {
 			fprintf(stderr, "/POLY");
 		}
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_FREE_OP1) {
@@ -7043,12 +7043,12 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	}
 
 	if (JIT_G(max_polymorphic_calls) > 0) {
-		if ((zend_jit_traces[parent_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_DYNAMIC_CALL)
+		if ((zend_jit_traces[parent_num].exit_info[exit_num].flags & (ZEND_JIT_EXIT_METHOD_CALL|ZEND_JIT_EXIT_CLOSURE_CALL))
 		 || ((zend_jit_traces[parent_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_POLYMORPHISM)
 		  && EX(call))) {
 			if (zend_jit_traces[parent_num].polymorphism >= JIT_G(max_polymorphic_calls) - 1) {
 				is_megamorphic = zend_jit_traces[parent_num].exit_info[exit_num].flags &
-					(ZEND_JIT_EXIT_DYNAMIC_CALL | ZEND_JIT_EXIT_POLYMORPHISM);
+					(ZEND_JIT_EXIT_METHOD_CALL | ZEND_JIT_EXIT_CLOSURE_CALL | ZEND_JIT_EXIT_POLYMORPHISM);
 			} else if (!zend_jit_traces[parent_num].polymorphism) {
 				polymorphism = 1;
 			} else if (exit_num == 0) {
@@ -7246,6 +7246,16 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		}
 		if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)) {
 			if (EG(exception)) {
+				return 1;
+			}
+		}
+		if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL) {
+			zend_function *func = (zend_function*)regs->r[0];
+
+			if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+				zend_string_release_ex(func->common.function_name, 0);
+				zend_free_trampoline(func);
+				EX(opline) = opline;
 				return 1;
 			}
 		}
