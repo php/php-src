@@ -118,10 +118,10 @@ bindTo(new Cls, null):
 Success!
 
 bindTo(new Cls, Cls::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from function
 
 bindTo(null, Cls::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from function
 
 bindTo(null, stdClass::class):
 Cannot bind closure to scope of internal class stdClass
@@ -139,10 +139,10 @@ bindTo(new Cls, null):
 Success!
 
 bindTo(new Cls, Cls::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from function
 
 bindTo(null, Cls::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from function
 
 bindTo(null, stdClass::class):
 Cannot bind closure to scope of internal class stdClass
@@ -163,13 +163,13 @@ bindTo(new Cls, Cls::class):
 Cannot bind an instance to a static closure
 
 bindTo(null, null):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 bindTo(null, ClsChild::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 bindTo(null, ClsUnrelated::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 (new Cls)->method()
 -------------------
@@ -187,13 +187,13 @@ bindTo(new ClsUnrelated, Cls::class):
 Cannot bind method Cls::method() to object of class ClsUnrelated
 
 bindTo(new Cls, null):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 bindTo(new Cls, ClsUnrelated::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 bindTo(new Cls, ClsChild::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 (new SplDoublyLinkedList)->count()
 ----------------------------------
@@ -214,10 +214,10 @@ bindTo(null, SplDoublyLinkedList::class):
 Cannot unbind $this of method
 
 bindTo(new SplDoublyLinkedList, null):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 bindTo(new SplDoublyLinkedList, ClsUnrelated::class):
-Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+Cannot rebind scope of closure created from method
 
 (function() {})()
 -----------------
