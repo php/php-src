@@ -9348,7 +9348,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		int32_t exit_point;
 		const void *exit_addr;
 
-		exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_DYNAMIC_CALL);
+		exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_METHOD_CALL);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
@@ -9500,7 +9500,7 @@ static int zend_jit_init_closure_call(dasm_State          **Dst,
 
 		func = (zend_function*)trace->func;
 		opcodes = func->op_array.opcodes;
-		exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_DYNAMIC_CALL);
+		exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_CLOSURE_CALL);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
