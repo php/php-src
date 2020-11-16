@@ -1940,6 +1940,16 @@ propagate_arg:
 						if (ssa_ops[idx].result_def >= 0) {
 							zend_jit_trace_copy_ssa_var_range(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].result_def);
 						}
+					} else {
+						if (ssa_ops[idx].op1_def >= 0) {
+							ssa_vars[ssa_ops[idx].op1_def].alias = zend_jit_var_may_alias(op_array, ssa, EX_VAR_TO_NUM(opline->op1.var));
+						}
+						if (ssa_ops[idx].op2_def >= 0) {
+							ssa_vars[ssa_ops[idx].op2_def].alias = zend_jit_var_may_alias(op_array, ssa, EX_VAR_TO_NUM(opline->op2.var));
+						}
+						if (ssa_ops[idx].result_def >= 0) {
+							ssa_vars[ssa_ops[idx].result_def].alias = zend_jit_var_may_alias(op_array, ssa, EX_VAR_TO_NUM(opline->result.var));
+						}
 					}
 					if (opline->opcode == ZEND_RECV_INIT
 					 && !(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
@@ -2001,19 +2011,22 @@ propagate_arg:
 					if (ssa->var_info
 					 && zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
 						/* pass */
-					} else if (op_array->arg_info) {
-						zend_arg_info *arg_info = &op_array->arg_info[i];
-						zend_class_entry *ce;
-						uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
-
-						if (ZEND_ARG_SEND_MODE(arg_info)) {
-							tmp |= MAY_BE_REF;
-						}
-						ssa_var_info[v].type = tmp;
-						ssa_var_info[v].ce = ce;
-						ssa_var_info[v].is_instanceof = 1;
 					} else {
-						ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+						ssa_vars[v].alias = zend_jit_var_may_alias(op_array, ssa, i);
+						if (op_array->arg_info) {
+							zend_arg_info *arg_info = &op_array->arg_info[i];
+							zend_class_entry *ce;
+							uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
+
+							if (ZEND_ARG_SEND_MODE(arg_info)) {
+								tmp |= MAY_BE_REF;
+							}
+							ssa_var_info[v].type = tmp;
+							ssa_var_info[v].ce = ce;
+							ssa_var_info[v].is_instanceof = 1;
+						} else {
+							ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+						}
 					}
 				} else {
 					if (ssa->vars) {
