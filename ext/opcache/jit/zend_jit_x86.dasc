@@ -12015,6 +12015,13 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 		}
 	}
 
+#ifdef ZEND_JIT_USE_RC_INFERENCE
+	if ((opline->op2_type & (IS_TMP_VAR|IS_VAR)) && (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
+		/* ASSIGN_DIM may increase refcount of the key */
+		op2_info |= MAY_BE_RCN;
+	}
+#endif
+
 	|8:
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
 

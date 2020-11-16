@@ -5332,7 +5332,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_FETCH_THIS:
 						delayed_fetch_this = 0;
-						if (ssa_op->result_def >= 0) {
+						if (ssa_op->result_def >= 0 && opline->result_type != IS_CV) {
 							if (zend_jit_may_delay_fetch_this(ssa, ssa_opcodes, ssa_op->result_def)) {
 								ssa->var_info[ssa_op->result_def].delayed_fetch_this = 1;
 								delayed_fetch_this = 1;
