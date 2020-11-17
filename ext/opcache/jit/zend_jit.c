@@ -448,7 +448,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 					name,
 					(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
 					op_array,
-					&ssa->cfg,
+					ssa ? &ssa->cfg : NULL,
 					entry,
 					size);
 			}
