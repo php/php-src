@@ -5498,6 +5498,10 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+	if (ref->prop == NULL) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
 		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
