@@ -3296,7 +3296,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_init_method_call(&dasm_state, opline, b, op_array, ssa, ssa_op, call_level,
 								op1_info, op1_addr, ce, ce_is_instanceof, 0, NULL,
-								NULL, 1)) {
+								NULL, 1, 0)) {
 							goto jit_failure;
 						}
 						goto done;

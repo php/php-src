@@ -1,5 +1,5 @@
 --TEST--
-JIT Trampoline 001: trampoline cleanup
+JIT Trampoline 002: trampoline cleanup
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -22,13 +22,19 @@ class C extends A {
 		echo "C";
 	}
 }
+class D extends A {
+	function foo() {
+		echo "D";
+	}
+}
 $b = new B;
 $c = new C;
-$a = [$b, $b, $b, $c, $c, $c];
+$d = new D;
+$a = [$b, $b, $b, $c, $c, $c, $d, $d, $d, $c, $c, $c];
 foreach ($a as $x) {
 	$x->foo();
 }
 echo "\n";
 ?>
 --EXPECT--
-BBBCCC
+BBBCCCDDDCCC
