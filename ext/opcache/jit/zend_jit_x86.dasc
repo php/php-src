@@ -551,9 +551,9 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro SSE_OP, sse_ins, reg, addr
+|.macro SSE_OP, sse_ins, reg, addr, tmp_reg
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		MEM_OP2_2 sse_ins, xmm(reg-ZREG_XMM0), qword, Z_ZV(addr), r0
+|		MEM_OP2_2 sse_ins, xmm(reg-ZREG_XMM0), qword, Z_ZV(addr), tmp_reg
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |		sse_ins xmm(reg-ZREG_XMM0), qword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||	} else if (Z_MODE(addr) == IS_REG) {
@@ -658,19 +658,19 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro SSE_MATH, opcode, reg, addr
+|.macro SSE_MATH, opcode, reg, addr, tmp_reg
 ||	switch (opcode) {
 ||		case ZEND_ADD:
-|			SSE_OP addsd, reg, addr
+|			SSE_OP addsd, reg, addr, tmp_reg
 ||			break;
 ||		case ZEND_SUB:
-|			SSE_OP subsd, reg, addr
+|			SSE_OP subsd, reg, addr, tmp_reg
 ||			break;
 ||		case ZEND_MUL:
-|			SSE_OP mulsd, reg, addr
+|			SSE_OP mulsd, reg, addr, tmp_reg
 ||			break;
 ||		case ZEND_DIV:
-|			SSE_OP divsd, reg, addr
+|			SSE_OP divsd, reg, addr, tmp_reg
 ||			break;
 ||	}
 |.endmacro
@@ -703,9 +703,9 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro AVX_OP, avx_ins, reg, op1_reg, addr
+|.macro AVX_OP, avx_ins, reg, op1_reg, addr, tmp_reg
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		MEM_OP3_3 avx_ins, xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword, Z_ZV(addr), r0
+|		MEM_OP3_3 avx_ins, xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword, Z_ZV(addr), tmp_reg
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |		avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||	} else if (Z_MODE(addr) == IS_REG) {
@@ -715,19 +715,19 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro AVX_MATH, opcode, reg, op1_reg, addr
+|.macro AVX_MATH, opcode, reg, op1_reg, addr, tmp_reg
 ||	switch (opcode) {
 ||		case ZEND_ADD:
-|			AVX_OP vaddsd, reg, op1_reg, addr
+|			AVX_OP vaddsd, reg, op1_reg, addr, tmp_reg
 ||			break;
 ||		case ZEND_SUB:
-|			AVX_OP vsubsd, reg, op1_reg, addr
+|			AVX_OP vsubsd, reg, op1_reg, addr, tmp_reg
 ||			break;
 ||		case ZEND_MUL:
-|			AVX_OP vmulsd, reg, op1_reg, addr
+|			AVX_OP vmulsd, reg, op1_reg, addr, tmp_reg
 ||			break;
 ||		case ZEND_DIV:
-|			AVX_OP vdivsd, reg, op1_reg, addr
+|			AVX_OP vdivsd, reg, op1_reg, addr, tmp_reg
 ||			break;
 ||	}
 |.endmacro
@@ -4323,10 +4323,20 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
 		(Z_MODE(res_addr) == IS_REG) ? Z_REG(res_addr) : ZREG_XMM0;
 
 	|	SSE_GET_ZVAL_LVAL result_reg, op1_addr
-	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
-		|	AVX_MATH opcode, result_reg, result_reg, op2_addr
+
+	if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+		/* ASSIGN_DIM_OP */
+		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+			|	AVX_MATH opcode, result_reg, result_reg, op2_addr, r1
+		} else {
+			|	SSE_MATH opcode, result_reg, op2_addr, r1
+		}
 	} else {
-		|	SSE_MATH opcode, result_reg, op2_addr
+		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+			|	AVX_MATH opcode, result_reg, result_reg, op2_addr, r0
+		} else {
+			|	SSE_MATH opcode, result_reg, op2_addr, r0
+		}
 	}
 	|	SSE_SET_ZVAL_DVAL res_addr, result_reg
 
@@ -4356,10 +4366,19 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			result_reg = ZREG_XMM0;
 		}
 		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr
-		if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
-			|	AVX_MATH opcode, result_reg, result_reg, op1_addr
+		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+			/* ASSIGN_DIM_OP */
+			if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+				|	AVX_MATH opcode, result_reg, result_reg, op1_addr, r1
+			} else {
+				|	SSE_MATH opcode, result_reg, op1_addr, r1
+			}
 		} else {
-			|	SSE_MATH opcode, result_reg, op1_addr
+			if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+				|	AVX_MATH opcode, result_reg, result_reg, op1_addr, r0
+			} else {
+				|	SSE_MATH opcode, result_reg, op1_addr, r0
+			}
 		}
 	} else {
 		zend_reg tmp_reg;
@@ -4454,8 +4473,11 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 		if ((opcode == ZEND_MUL) &&
 			Z_MODE(val_addr) == IS_CONST_ZVAL && Z_DVAL_P(Z_ZV(val_addr)) == 2.0) {
 			|	AVX_MATH_REG ZEND_ADD, result_reg, op1_reg, op1_reg
+		} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+			/* ASSIGN_DIM_OP */
+			|	AVX_MATH opcode, result_reg, op1_reg, val_addr, r1
 		} else {
-			|	AVX_MATH opcode, result_reg, op1_reg, val_addr
+			|	AVX_MATH opcode, result_reg, op1_reg, val_addr, r0
 		}
 	} else {
 		zend_jit_addr val_addr;
@@ -4472,8 +4494,11 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 		} else if ((opcode == ZEND_MUL) &&
 			Z_MODE(val_addr) == IS_CONST_ZVAL && Z_DVAL_P(Z_ZV(val_addr)) == 2.0) {
 			|	SSE_MATH_REG ZEND_ADD, result_reg, result_reg
+		} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+			/* ASSIGN_DIM_OP */
+			|	SSE_MATH opcode, result_reg, val_addr, r1
 		} else {
-			|	SSE_MATH opcode, result_reg, val_addr
+			|	SSE_MATH opcode, result_reg, val_addr, r0
 		}
 	}
 	|	SSE_SET_ZVAL_DVAL res_addr, result_reg
