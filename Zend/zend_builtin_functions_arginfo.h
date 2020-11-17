@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9a77101b93e8584315bf43305830e129d359b033 */
+ * Stub hash: b09e9199a21595a3b6f6c02db81c8e22c36c277f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -84,12 +84,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class_methods, 0, 1, IS_ARRA
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_method_exists, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, object_or_class, IS_MIXED, 0)
+	ZEND_ARG_INFO(0, object_or_class)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_property_exists, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, object_or_class, IS_MIXED, 0)
+	ZEND_ARG_INFO(0, object_or_class)
 	ZEND_ARG_TYPE_INFO(0, property, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
