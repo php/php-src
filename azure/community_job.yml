@@ -49,20 +49,6 @@ jobs:
         echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
-        git clone https://github.com/laravel/framework.git --branch=master --depth=1
-        cd framework
-        #php7.3 /usr/bin/composer require "doctrine/dbal:^3.0" --no-interaction
-        php7.3 /usr/bin/composer install --no-progress
-        # Hack to disable a test that hangs on azure
-        sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
-        export USE_ZEND_ALLOC=0
-        export ASAN_OPTIONS=exitcode=139
-        php vendor/bin/phpunit
-        if [ $? -gt 128 ]; then
-          exit 1
-        fi
-      displayName: 'Test Laravel'
-    - script: |
         git clone https://github.com/symfony/symfony.git --depth=1
         cd symfony
         php7.3 /usr/bin/composer install --no-progress
@@ -71,43 +57,6 @@ jobs:
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
         export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
-        X=0
-        for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-          php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient;
-          if [ $? -gt 128 ]; then
-            X=1;
-          fi
-        done
-        exit $X
+        php ./phpunit src/Symfony/Component/Console --exclude-group tty,benchmark,intl-data,transient;
       displayName: 'Test Symfony'
-      condition: or(succeeded(), failed())
-    - script: |
-        git clone https://github.com/amphp/amp.git --branch=master --depth=1
-        cd amp
-        php /usr/bin/composer install --no-progress --ignore-platform-reqs
-        export USE_ZEND_ALLOC=0
-        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
-        php vendor/bin/phpunit
-      displayName: 'Test Amphp'
-      condition: or(succeeded(), failed())
-    - script: |
-        git clone https://github.com/sebastianbergmann/phpunit.git --branch=master --depth=1
-        cd phpunit
-        export USE_ZEND_ALLOC=0
-        export USE_TRACKED_ALLOC=1
-        export ASAN_OPTIONS=exitcode=139
-        php7.3 /usr/bin/composer install --no-progress
-        php ./phpunit
-        if [ $? -gt 128 ]; then
-          exit 1
-        fi
-      displayName: 'Test PHPUnit'
-    - script: |
-        php7.3 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
-        cd symfony_demo
-        export USE_ZEND_ALLOC=0
-        export USE_TRACKED_ALLOC=1
-        sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
-        php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
-      displayName: 'Symfony Preloading'
       condition: or(succeeded(), failed())
