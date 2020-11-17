@@ -480,7 +480,14 @@ static void get_retval_info(zval *retval, smart_str *buf)
 	if (retval == NULL) {
 		smart_str_appendl(buf, "NULL", 4);
 	} else if (ZT_G(observer_show_return_value)) {
-		php_var_export_ex(retval, 2 * ZT_G(observer_nesting_depth) + 3, buf);
+		if (Z_TYPE_P(retval) == IS_OBJECT) {
+			smart_str_appendl(buf, "object(", 7);
+			smart_str_append(buf, Z_OBJCE_P(retval)->name);
+			smart_str_appendl(buf, ")#", 2);
+			smart_str_append_long(buf, Z_OBJ_HANDLE_P(retval));
+		} else {
+			php_var_export_ex(retval, 2 * ZT_G(observer_nesting_depth) + 3, buf);
+		}
 	} else if (ZT_G(observer_show_return_type)) {
 		smart_str_appends(buf, zend_zval_type_name(retval));
 	}

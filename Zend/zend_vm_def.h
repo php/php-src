@@ -4239,9 +4239,11 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 	USE_OPLINE
 	zval *retval_ptr;
 	zval *return_value;
+	ZEND_OBSERVER_USE_RETVAL;
 
 	retval_ptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	return_value = EX(return_value);
+	ZEND_OBSERVER_SET_RETVAL();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(retval_ptr) == IS_UNDEF)) {
 		SAVE_OPLINE();
 		retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -4305,6 +4307,7 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 	}
 	ZEND_OBSERVER_SAVE_OPLINE();
 	ZEND_OBSERVER_FCALL_END(execute_data, return_value);
+	ZEND_OBSERVER_FREE_RETVAL();
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
@@ -4312,9 +4315,13 @@ ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC, 
 {
 	USE_OPLINE
 	zval *retval_ptr;
+	zval *return_value;
+	ZEND_OBSERVER_USE_RETVAL;
 
 	SAVE_OPLINE();
 
+	return_value = EX(return_value);
+	ZEND_OBSERVER_SET_RETVAL();
 	do {
 		if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR)) ||
 		    (OP1_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_VALUE)) {
@@ -4322,15 +4329,15 @@ ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC, 
 			zend_error(E_NOTICE, "Only variable references should be returned by reference");
 
 			retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-			if (!EX(return_value)) {
+			if (!return_value) {
 				FREE_OP1();
 			} else {
 				if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISREF_P(retval_ptr))) {
-					ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
+					ZVAL_COPY_VALUE(return_value, retval_ptr);
 					break;
 				}
 
-				ZVAL_NEW_REF(EX(return_value), retval_ptr);
+				ZVAL_NEW_REF(return_value, retval_ptr);
 				if (OP1_TYPE == IS_CONST) {
 					Z_TRY_ADDREF_P(retval_ptr);
 				}
@@ -4344,8 +4351,8 @@ ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC, 
 			ZEND_ASSERT(retval_ptr != &EG(uninitialized_zval));
 			if (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr)) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
-				if (EX(return_value)) {
-					ZVAL_NEW_REF(EX(return_value), retval_ptr);
+				if (return_value) {
+					ZVAL_NEW_REF(return_value, retval_ptr);
 				} else {
 					FREE_OP1_VAR_PTR();
 				}
@@ -4353,19 +4360,20 @@ ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC, 
 			}
 		}
 
-		if (EX(return_value)) {
+		if (return_value) {
 			if (Z_ISREF_P(retval_ptr)) {
 				Z_ADDREF_P(retval_ptr);
 			} else {
 				ZVAL_MAKE_REF_EX(retval_ptr, 2);
 			}
-			ZVAL_REF(EX(return_value), Z_REF_P(retval_ptr));
+			ZVAL_REF(return_value, Z_REF_P(retval_ptr));
 		}
 
 		FREE_OP1_VAR_PTR();
 	} while (0);
 
-	ZEND_OBSERVER_FCALL_END(execute_data, EX(return_value));
+	ZEND_OBSERVER_FCALL_END(execute_data, return_value);
+	ZEND_OBSERVER_FREE_RETVAL();
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
@@ -7710,7 +7718,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 
 	/* Uncaught exception */
 	if (zend_observer_fcall_op_array_extension != -1) {
-		zend_observer_fcall_end(execute_data, EX(return_value));
+		zend_observer_fcall_end(execute_data, NULL);
 	}
 	cleanup_live_vars(execute_data, op_num, 0);
 	if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
