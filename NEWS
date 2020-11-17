@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #80362 (Running dtrace scripts can cause php to crash).
     (al at coralnet dot name)
 
+- Standard:
+  . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
+
 - Tidy:
   . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
 
