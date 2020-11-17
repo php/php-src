@@ -3168,7 +3168,8 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
                                          int                      parent_vars_count,
                                          zend_ssa                *ssa,
                                          zend_jit_trace_stack    *stack,
-                                         zend_lifetime_interval **ra)
+                                         zend_lifetime_interval **ra,
+                                         zend_bool                polymorphic_side_trace)
 {
 	int i;
 	zend_bool has_constants = 0;
@@ -3242,7 +3243,9 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 				if (reg < ZREG_NUM) {
 					/* pass */
 				} else if (reg == ZREG_THIS) {
-					if (!zend_jit_load_this(Dst, EX_NUM_TO_VAR(i))) {
+					if (polymorphic_side_trace) {
+						ssa->var_info[i].delayed_fetch_this = 1;
+					} else if (!zend_jit_load_this(Dst, EX_NUM_TO_VAR(i))) {
 						return 0;
 					}
 				} else {
@@ -3441,6 +3444,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	zend_bool ce_is_instanceof;
 	zend_bool delayed_fetch_this = 0;
 	zend_bool avoid_refcounting = 0;
+	zend_bool polymorphic_side_trace =
+		parent_trace &&
+		(zend_jit_traces[parent_trace].exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL);
 	uint32_t i;
 	zend_jit_trace_stack_frame *frame, *top, *call;
 	zend_jit_trace_stack *stack;
@@ -3603,7 +3609,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			if (!zend_jit_trace_deoptimization(&dasm_state,
 					zend_jit_traces[parent_trace].exit_info[exit_num].flags,
 					zend_jit_traces[parent_trace].exit_info[exit_num].opline,
-					parent_stack, parent_vars_count, ssa, stack, ra)) {
+					parent_stack, parent_vars_count, ssa, stack, ra,
+					polymorphic_side_trace)) {
 				goto jit_failure;
 			}
 		}
@@ -5449,7 +5456,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						} else {
 							op1_info = OP1_INFO();
 							op1_addr = OP1_REG_ADDR();
-							if (orig_op1_type != IS_UNKNOWN
+							if (polymorphic_side_trace) {
+								op1_info = MAY_BE_OBJECT;
+								op1_addr = 0;
+							} else if (orig_op1_type != IS_UNKNOWN
 							 && (orig_op1_type & IS_TRACE_REFERENCE)) {
 								if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
 										!ssa->var_info[ssa_op->op1_use].guarded_reference, 1)) {
@@ -5479,7 +5489,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1,
 								op_array, ssa, ssa_op, frame->call_level,
 								op1_info, op1_addr, ce, ce_is_instanceof, delayed_fetch_this, op1_ce,
-								p + 1, used_stack < 0)) {
+								p + 1, used_stack < 0, polymorphic_side_trace)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -5549,6 +5559,7 @@ generic_dynamic_call:
 			}
 
 done:
+			polymorphic_side_trace = 0;
 			switch (opline->opcode) {
 				case ZEND_DO_FCALL:
 				case ZEND_DO_ICALL:
@@ -6083,7 +6094,7 @@ done:
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK
 	        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
 		if (!zend_jit_trace_deoptimization(&dasm_state, 0, NULL,
-				stack, op_array->last_var + op_array->T, NULL, NULL, NULL)) {
+				stack, op_array->last_var + op_array->T, NULL, NULL, NULL, 0)) {
 			goto jit_failure;
 		}
 		if (p->stop == ZEND_JIT_TRACE_STOP_LINK) {
@@ -6247,7 +6258,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	if (!zend_jit_trace_deoptimization(&dasm_state,
 			zend_jit_traces[trace_num].exit_info[exit_num].flags,
 			zend_jit_traces[trace_num].exit_info[exit_num].opline,
-			stack, stack_size, NULL, NULL, NULL)) {
+			stack, stack_size, NULL, NULL, NULL, 0)) {
 		goto jit_failure;
 	}
 
