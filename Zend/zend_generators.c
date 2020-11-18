@@ -340,6 +340,16 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 		return NULL;
 	}
 
+	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
+		/* If the generator is currently running, we certainly won't be able to GC any values it
+		 * holds on to. The execute_data state might be inconsistent during execution (e.g. because
+		 * GC has been triggered in the middle of a variable reassignment), so we should not try
+		 * to inspect it here. */
+		*table = NULL;
+		*n = 0;
+		return NULL;
+	}
+
 	op_array = &EX(func)->op_array;
 	gc_buffer_size = calc_gc_buffer_size(generator);
 	if (generator->gc_buffer_size < gc_buffer_size) {
