@@ -33,6 +33,9 @@ PHP                                                                        NEWS
 - Phpdbg:
   . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
 
+- SPL:
+  . Fixed #62004 (SplFileObject: fgets after seek returns wrong line). (cmb)
+
 - Standard:
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
 
