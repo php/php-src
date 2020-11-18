@@ -3137,6 +3137,10 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 		}
 	}
 
+	if (parent && parent->exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL) {
+		ZEND_REGSET_EXCL(regset, ZREG_R0);
+	}
+
 	current_trace_num = trace_num;
 
 	|	// EG(jit_trace_num) = trace_num;
