@@ -494,6 +494,7 @@ static int zend_jit_disasm_init(void)
 #if (PHP_VERSION_ID <= 80000) && (SIZEOF_SIZE_T == 4)
 	REGISTER_HELPER(zval_jit_update_constant_ex);
 #endif
+	REGISTER_HELPER(zend_jit_free_trampoline_helper);
 #undef  REGISTER_HELPER
 
 #ifndef _WIN32

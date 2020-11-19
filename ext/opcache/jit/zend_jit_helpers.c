@@ -2667,3 +2667,10 @@ static zend_result ZEND_FASTCALL zval_jit_update_constant_ex(zval *p, zend_class
 	return SUCCESS;
 }
 #endif
+
+static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
+{
+	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	zend_string_release_ex(func->common.function_name, 0);
+	zend_free_trampoline(func);
+}
