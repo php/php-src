@@ -4,7 +4,7 @@
 
 class CURLFile
 {
-    public function __construct(string $filename, ?string $mime_type = null, ?string $posted_filename = null) {}
+    public function __construct(string $filename, ?string $mimeType = null, ?string $postedFilename = null) {}
 
     /** @return string */
     public function getFilename() {}
@@ -16,8 +16,8 @@ class CURLFile
     public function getPostFilename() {}
 
     /** @return void */
-    public function setMimeType(string $mime_type) {}
+    public function setMimeType(string $mimeType) {}
 
     /** @return void */
-    public function setPostFilename(string $posted_filename) {}
+    public function setPostFilename(string $postedFilename) {}
 }

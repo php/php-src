@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a81720edab23748f6dce30306f5a5ffc9634da5d */
+ * Stub hash: a8200d12580edfbbb7ebaac5f47a6b420f590e0d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mime_type, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, posted_filename, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mimeType, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, postedFilename, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_getFilename, 0, 0, 0)
@@ -15,11 +15,11 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_CURLFile_getPostFilename arginfo_class_CURLFile_getFilename
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_setMimeType, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, mime_type, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, mimeType, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_setPostFilename, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, posted_filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, postedFilename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 
