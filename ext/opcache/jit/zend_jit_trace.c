@@ -3289,6 +3289,12 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 		}
 	}
 
+	if ((flags & ZEND_JIT_EXIT_METHOD_CALL) && !polymorphic_side_trace) {
+		if (!zend_jit_free_trampoline(Dst)) {
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
