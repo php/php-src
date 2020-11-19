@@ -3307,7 +3307,7 @@ ZEND_API zend_string *zend_get_callable_name(zval *callable) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline zend_bool zend_is_callable_impl(
+ZEND_API zend_bool zend_is_callable_at_frame(
 		zval *callable, zend_object *object, zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error) /* {{{ */
 {
@@ -3436,7 +3436,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 		frame = frame->prev_execute_data;
 	}
 
-	zend_bool ret = zend_is_callable_impl(callable, object, frame, check_flags, fcc, error);
+	zend_bool ret = zend_is_callable_at_frame(callable, object, frame, check_flags, fcc, error);
 	if (callable_name) {
 		*callable_name = zend_get_callable_name_ex(callable, object);
 	}
