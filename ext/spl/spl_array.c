@@ -311,7 +311,7 @@ try_again:
 	case IS_STRING:
 	   offset_key = Z_STR_P(offset);
 fetch_dim_string:
-		retval = zend_symtable_find(ht, offset_key);
+		retval = zend_hash_find(ht, offset_key);
 		if (retval) {
 			if (Z_TYPE_P(retval) == IS_INDIRECT) {
 				retval = Z_INDIRECT_P(retval);
