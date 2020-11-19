@@ -82,7 +82,7 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 
-#define abort()	php_error_docref(NULL, E_ERROR, "fatal libmagic error")
+#define abort()	zend_error_noreturn(E_ERROR, "fatal libmagic error")
 
 #define ENABLE_CONDITIONALS
 

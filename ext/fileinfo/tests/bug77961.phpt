@@ -11,4 +11,4 @@ finfo_open(FILEINFO_NONE, __DIR__ . '/bug77961.magic');
 --EXPECTF--
 Notice: finfo_open(): Warning: Expected numeric type got `indirect' in %s on line %d
 
-Fatal error: finfo_open(): fatal libmagic error in %s on line %d
+Fatal error: fatal libmagic error in %s on line %d
