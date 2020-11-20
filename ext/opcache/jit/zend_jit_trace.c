@@ -3460,6 +3460,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	const zend_op *opline, *orig_opline;
 	const zend_ssa_op *ssa_op, *orig_ssa_op;
 	int used_stack;
+	uint32_t frame_flags = 0;
 
 	JIT_G(current_trace) = trace_buffer;
 
@@ -3748,6 +3749,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				op2_ce = (zend_class_entry*)(p+1)->ce;
 				p++;
 			}
+
+			frame_flags = 0;
 
 			switch (opline->opcode) {
 				case ZEND_INIT_FCALL:
@@ -4513,6 +4516,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
+						frame_flags = TRACE_FRAME_MASK_NESTED;
 						if (!zend_jit_init_fcall(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1, used_stack < 0)) {
 							goto jit_failure;
 						}
@@ -5491,6 +5495,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								delayed_fetch_this = ssa->var_info[ssa_op->op1_use].delayed_fetch_this;
 							}
 						}
+						frame_flags = TRACE_FRAME_MASK_NESTED;
 						if (!zend_jit_init_method_call(&dasm_state, opline,
 								op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1,
 								op_array, ssa, ssa_op, frame->call_level,
@@ -5505,6 +5510,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
+						frame_flags = TRACE_FRAME_MASK_NESTED;
 						if (!zend_jit_init_closure_call(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1, used_stack < 0)) {
 							goto jit_failure;
 						}
@@ -5946,7 +5952,7 @@ done:
 			}
 
 			call = top;
-			TRACE_FRAME_INIT(call, p->func, TRACE_FRAME_MASK_NESTED, num_args);
+			TRACE_FRAME_INIT(call, p->func, frame_flags, num_args);
 			call->prev = frame->call;
 			if (!(p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 				TRACE_FRAME_SET_LAST_SEND_BY_VAL(call);
