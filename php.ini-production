@@ -1632,7 +1632,7 @@ zend.assertions = -1
 ; http input encoding.
 ; mbstring.encoding_translation = On is needed to use this setting.
 ; If empty, default_charset or input_encoding or mbstring.input is used.
-; The precedence is: default_charset < input_encoding < mbsting.http_input
+; The precedence is: default_charset < input_encoding < mbstring.http_input
 ; http://php.net/mbstring.http-input
 ;mbstring.http_input =
 
