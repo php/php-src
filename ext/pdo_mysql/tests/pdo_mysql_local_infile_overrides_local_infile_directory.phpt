@@ -4,6 +4,7 @@ PDO::MYSQL_ATTR_LOCAL_INFILE overrides PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
 $dataPath = __DIR__ . '/foo/foo.data';
 if (!file_exists($dataPath))
 	die("skip Can't find '" . $dataPath . "' file");
