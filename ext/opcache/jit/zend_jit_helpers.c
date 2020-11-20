@@ -2639,7 +2639,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 	}
 }
 
-#if (PHP_VERSION_ID <= 80000) && (SIZEOF_SIZE_T == 4)
+#if (PHP_VERSION_ID <= 80100) && (SIZEOF_SIZE_T == 4)
 static zend_result ZEND_FASTCALL zval_jit_update_constant_ex(zval *p, zend_class_entry *scope)
 {
 	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
