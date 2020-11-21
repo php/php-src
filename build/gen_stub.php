@@ -1576,6 +1576,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
         RecursiveIteratorIterator::LEAVES_ONLY
     );
 
+    /** @var SplFileInfo $file */
     foreach ($it as $file) {
         $pathName = $file->getPathName();
         if (!preg_match('/\.xml$/i', $pathName)) {
@@ -1630,6 +1631,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             }
             $funcName = $item->textContent;
             if (!isset($funcMap[$funcName])) {
+                echo "Warning: Function $funcName() is not defined\n";
                 continue;
             }
             $funcInfo = $funcMap[$funcName];
