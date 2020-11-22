@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #72964 (White space not unfolded for CC/Bcc headers). (cmb)
 
+- Tidy:
+  . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
+
 26 Nov 2020, PHP 8.0.0
 
 - BZ2:
