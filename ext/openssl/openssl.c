@@ -2414,14 +2414,14 @@ PHP_FUNCTION(openssl_x509_parse)
 	}
 
 	hex_serial = BN_bn2hex(bn_serial);
+	str_serial = BN_bn2dec(bn_serial);
 	BN_free(bn_serial);
 	/* Can return NULL on error or memory allocation failure */
-	if (!hex_serial) {
+	if (!hex_serial || !str_serial) {
 		php_openssl_store_errors();
 		RETURN_FALSE;
 	}
 
-	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
 	add_assoc_string(return_value, "serialNumber", str_serial);
 	OPENSSL_free(str_serial);
 
