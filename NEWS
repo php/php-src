@@ -1473,6 +1473,11 @@ PHP                                                                        NEWS
   . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
+- Standard:
+  . Added support for the SameSite cookie directive, including an alternative
+    signature for setcookie(), setrawcookie() and session_set_cookie_params().
+    (Frederik Bosch, pmmaga)
+    
 - Sqlite3:
   . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
      (Dan Ackroyd)

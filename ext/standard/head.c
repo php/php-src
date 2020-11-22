@@ -73,7 +73,7 @@ PHPAPI int php_header(TSRMLS_D)
 }
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly, char *samesite, int samesite_len TSRMLS_DC)
 {
 	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
@@ -106,6 +106,9 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	}
 	if (domain) {
 		len += domain_len;
+	}
+	if (samesite) {
+		len += samesite_len;
 	}
 
 	cookie = emalloc(len + 100);
@@ -162,7 +165,12 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	if (httponly) {
 		strlcat(cookie, "; httponly", len + 100);
 	}
-
+	
+	if (samesite && samesite_len > 0) {
+		strlcat(cookie, "; SameSite=", len + 100);
+		strlcat(cookie, samesite, len + 100);
+	}
+	
 	ctr.line = cookie;
 	ctr.line_len = strlen(cookie);
 
@@ -177,18 +185,18 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
    Send a cookie */
 PHP_FUNCTION(setcookie)
 {
-	char *name, *value = NULL, *path = NULL, *domain = NULL;
+	char *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	long expires = 0;
 	zend_bool secure = 0, httponly = 0;
-	int name_len, value_len = 0, path_len = 0, domain_len = 0;
+	int name_len, value_len = 0, path_len = 0, domain_len = 0, samesite_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbbs", &name,
 							  &name_len, &value, &value_len, &expires, &path,
-							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
+							  &path_len, &domain, &domain_len, &secure, &httponly,&samesite, &samesite_len) == FAILURE) {
 		return;
 	}
 
-	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 1, httponly TSRMLS_CC) == SUCCESS) {
+	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 1, httponly,samesite, samesite_len TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -200,18 +208,18 @@ PHP_FUNCTION(setcookie)
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
-	char *name, *value = NULL, *path = NULL, *domain = NULL;
+	char *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	long expires = 0;
 	zend_bool secure = 0, httponly = 0;
-	int name_len, value_len = 0, path_len = 0, domain_len = 0;
+	int name_len, value_len = 0, path_len = 0, domain_len = 0, samesite_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbbs", &name,
 							  &name_len, &value, &value_len, &expires, &path,
-							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
+							  &path_len, &domain, &domain_len, &secure, &httponly,&samesite, &samesite_len) == FAILURE) {
 		return;
 	}
 
-	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 0, httponly TSRMLS_CC) == SUCCESS) {
+	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 0, httponly,samesite, samesite_len TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;

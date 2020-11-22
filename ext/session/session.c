@@ -798,6 +798,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cookie_domain",      "",          PHP_INI_ALL, OnUpdateString, cookie_domain,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",    "",          PHP_INI_ALL, OnUpdateBool,   cookie_secure,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_httponly",  "",          PHP_INI_ALL, OnUpdateBool,   cookie_httponly,    php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_samesite",    "",          PHP_INI_ALL, OnUpdateString, cookie_samesite,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",      "1",         PHP_INI_ALL, OnUpdateBool,   use_cookies,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "1",         PHP_INI_ALL, OnUpdateBool,   use_only_cookies,   php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_strict_mode",  "0",         PHP_INI_ALL, OnUpdateBool,   use_strict_mode,    php_ps_globals,    ps_globals)
@@ -1302,6 +1303,7 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 #define COOKIE_DOMAIN	"; domain="
 #define COOKIE_SECURE	"; secure"
 #define COOKIE_HTTPONLY	"; HttpOnly"
+#define COOKIE_SAMESITE	"; SameSite="
 
 /*
  * Remove already sent session ID cookie.
@@ -1411,6 +1413,11 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	if (PS(cookie_httponly)) {
 		smart_str_appends(&ncookie, COOKIE_HTTPONLY);
 	}
+
+	if (PS(cookie_samesite)[0]) {
+    	smart_str_appends(&ncookie, COOKIE_SAMESITE);
+    	smart_str_appends(&ncookie, PS(cookie_samesite));
+    }
 
 	smart_str_0(&ncookie);
 
@@ -1680,17 +1687,17 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
    * Userspace exported functions *
    ******************************** */
 
-/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]])
+/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly[, string samesite]]]]])
    Set session cookie parameters */
 static PHP_FUNCTION(session_set_cookie_params)
 {
 	zval **lifetime = NULL;
-	char *path = NULL, *domain = NULL;
-	int path_len, domain_len, argc = ZEND_NUM_ARGS();
+	char *path = NULL, *domain = NULL, *samesite = NULL;
+	int path_len, domain_len,samesite_len, argc = ZEND_NUM_ARGS();
 	zend_bool secure = 0, httponly = 0;
 
 	if (!PS(use_cookies) ||
-		zend_parse_parameters(argc TSRMLS_CC, "Z|ssbb", &lifetime, &path, &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
+		zend_parse_parameters(argc TSRMLS_CC, "Z|ssbbs", &lifetime, &path, &path_len, &domain, &domain_len, &secure, &httponly, &samesite, &samesite_len) == FAILURE) {
 		return;
 	}
 
@@ -1703,6 +1710,9 @@ static PHP_FUNCTION(session_set_cookie_params)
 	}
 	if (domain) {
 		zend_alter_ini_entry("session.cookie_domain", sizeof("session.cookie_domain"), domain, domain_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	}
+	if (samesite) {
+		zend_alter_ini_entry("session.cookie_samesite", sizeof("session.cookie_samesite"), samesite, samesite_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 
 	if (argc > 3) {
@@ -1729,6 +1739,8 @@ static PHP_FUNCTION(session_get_cookie_params)
 	add_assoc_string(return_value, "domain", PS(cookie_domain), 1);
 	add_assoc_bool(return_value, "secure", PS(cookie_secure));
 	add_assoc_bool(return_value, "httponly", PS(cookie_httponly));
+	add_assoc_string(return_value, "samesite", PS(cookie_samesite),1);
+	
 }
 /* }}} */
 
@@ -2268,6 +2280,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, secure)
 	ZEND_ARG_INFO(0, httponly)
+	ZEND_ARG_INFO(0, samesite)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_session_class_open, 0)

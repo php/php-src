@@ -278,6 +278,24 @@ PHP 5.6 UPGRADE NOTES
 - JSON:
   Added JSON_PRESERVE_ZERO_FRACTION option (PHP >= 5.6.5)
 
+Session:
+  . session_set_cookie_params() now also supports the following signature:
+    session_set_cookie_params(array $options)
+    where $options is an associative array which may have any of the keys
+    "lifetime", "path", "domain", "secure", "httponly" and "samesite".
+    Accordingly, the return value of session_get_cookie_params() now also has an
+    element with the key "samesite".
+
+Standard:
+  . debug_zval_dump() was changed to display recursive arrays and objects
+    in the same way as var_dump(). Now, it doesn't display them twice.
+  . array_push() and array_unshift() can now also be called with a single
+    argument, which is particularly convenient wrt. the spread operator.
+  . setcookie() and setrawcookie() now also support the following signature:
+    set(raw)cookie(string $name, [string $value, [array $options]])
+    where $options is an associative array which may have any of the keys
+    "expires", "path", "domain", "secure", "httponly" and "samesite".
+
 ========================================
 6. New Functions
 ========================================
@@ -467,6 +485,11 @@ PHP 5.6 UPGRADE NOTES
 - OpenSSL:
   openssl.cafile and openssl.capath ini directives have been added to allow
   global CA default specification as necessary.
+
+- session.cookie_samesite
+  . New INI option to allow to set the SameSite directive for cookies. Defaults
+    to "" (empty string), so no SameSite directive is set. Can be set to "Lax"
+    or "Strict", which sets the respective SameSite directive.
 
 ========================================
 12. Other Changes
