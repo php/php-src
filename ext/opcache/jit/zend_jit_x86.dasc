@@ -4162,6 +4162,22 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 	return 1;
 }
 
+static int zend_jit_opline_uses_reg(const zend_op  *opline, int8_t reg)
+{
+	if ((opline+1)->opcode == ZEND_OP_DATA
+	 && ((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR|IS_CV))
+	 && JIT_G(current_frame)->stack[EX_VAR_TO_NUM((opline+1)->op1.var)].reg == reg) {
+		return 1;
+	}
+	return
+		((opline->result_type & (IS_VAR|IS_TMP_VAR|IS_CV)) &&
+			JIT_G(current_frame)->stack[EX_VAR_TO_NUM(opline->result.var)].reg == reg) ||
+		((opline->op1_type & (IS_VAR|IS_TMP_VAR|IS_CV)) &&
+			JIT_G(current_frame)->stack[EX_VAR_TO_NUM(opline->op1.var)].reg == reg) ||
+		((opline->op2_type & (IS_VAR|IS_TMP_VAR|IS_CV)) &&
+			JIT_G(current_frame)->stack[EX_VAR_TO_NUM(opline->op2.var)].reg == reg);
+}
+
 static int zend_jit_math_long_long(dasm_State    **Dst,
                                    const zend_op  *opline,
                                    zend_uchar      opcode,
@@ -4176,7 +4192,14 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	zend_reg result_reg;
 
 	if (Z_MODE(res_addr) == IS_REG && (res_info & MAY_BE_LONG)) {
-		result_reg = Z_REG(res_addr);
+		if (may_overflow && (res_info & MAY_BE_GUARD)
+		 && JIT_G(current_frame)
+		 && JIT_G(current_frame)->stack
+		 && zend_jit_opline_uses_reg(opline, Z_REG(res_addr))) {
+			result_reg = ZREG_R0;
+		} else {
+			result_reg = Z_REG(res_addr);
+		}
 	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
 		result_reg = Z_REG(op1_addr);
 	} else if (Z_REG(res_addr) != ZREG_R0) {
@@ -4247,6 +4270,9 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if ((res_info & MAY_BE_ANY) == MAY_BE_LONG) {
 				|	jo &exit_addr
+				if (Z_MODE(res_addr) == IS_REG && result_reg != Z_REG(res_addr)) {
+					|	mov Ra(Z_REG(res_addr)), Ra(result_reg)
+				}
 			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 				|	jno &exit_addr
 			} else {
