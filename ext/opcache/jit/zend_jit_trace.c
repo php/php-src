@@ -3245,6 +3245,9 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 				} else if (reg == ZREG_THIS) {
 					if (polymorphic_side_trace) {
 						ssa->var_info[i].delayed_fetch_this = 1;
+						if (stack) {
+							SET_STACK_REG(stack, i, ZREG_THIS);
+						}
 					} else if (!zend_jit_load_this(Dst, EX_NUM_TO_VAR(i))) {
 						return 0;
 					}
