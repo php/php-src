@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start
- * Source code: ext/standard/dir.c
- * Alias to functions: rewind
- */
-
 /*
  * Open and close a directory handle then call rewinddir() to test behaviour
  */
@@ -29,9 +23,12 @@ var_dump(readdir($dir_handle));
 closedir($dir_handle);
 
 echo "\n-- Call to rewinddir() --\n";
-var_dump(rewinddir($dir_handle));
+try {
+    var_dump(rewinddir($dir_handle));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . '/私はガラスを食べられますrewinddir_variation2';
@@ -45,7 +42,4 @@ resource(%d) of type (stream)
 string(%d) "%s"
 
 -- Call to rewinddir() --
-
-Warning: rewinddir(): %s is not a valid Directory resource in %s on line %d
-bool(false)
-===DONE===
+rewinddir(): %s is not a valid Directory resource

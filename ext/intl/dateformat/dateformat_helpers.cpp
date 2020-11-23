@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -30,30 +28,24 @@ extern "C" {
 
 using icu::GregorianCalendar;
 
-int datefmt_process_calendar_arg(zval* calendar_zv,
-								 Locale const& locale,
-								 const char *func_name,
-								 intl_error *err,
-								 Calendar*& cal,
-								 zend_long& cal_int_type,
-								 bool& calendar_owned)
-{
+int datefmt_process_calendar_arg(
+	zend_object *calendar_obj, zend_long calendar_long, zend_bool calendar_is_null, Locale const& locale,
+	const char *func_name, intl_error *err, Calendar*& cal, zend_long& cal_int_type, bool& calendar_owned
+) {
 	char *msg;
 	UErrorCode status = UErrorCode();
 
-	if (calendar_zv == NULL || Z_TYPE_P(calendar_zv) == IS_NULL) {
-
+	if (calendar_is_null) {
 		// default requested
 		cal = new GregorianCalendar(locale, status);
 		calendar_owned = true;
 
 		cal_int_type = UCAL_GREGORIAN;
 
-	} else if (Z_TYPE_P(calendar_zv) == IS_LONG) {
-
-		zend_long v = Z_LVAL_P(calendar_zv);
+	} else if (!calendar_obj) {
+		zend_long v = calendar_long;
 		if (v != (zend_long)UCAL_TRADITIONAL && v != (zend_long)UCAL_GREGORIAN) {
-			spprintf(&msg, 0, "%s: invalid value for calendar type; it must be "
+			spprintf(&msg, 0, "%s: Invalid value for calendar type; it must be "
 					"one of IntlDateFormatter::TRADITIONAL (locale's default "
 					"calendar) or IntlDateFormatter::GREGORIAN. "
 					"Alternatively, it can be an IntlCalendar object",
@@ -68,13 +60,10 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 		}
 		calendar_owned = true;
 
-		cal_int_type = Z_LVAL_P(calendar_zv);
+		cal_int_type = calendar_long;
 
-	} else if (Z_TYPE_P(calendar_zv) == IS_OBJECT &&
-			instanceof_function_ex(Z_OBJCE_P(calendar_zv),
-			Calendar_ce_ptr, 0)) {
-
-		cal = calendar_fetch_native_calendar(calendar_zv);
+	} else if (calendar_obj) {
+		cal = calendar_fetch_native_calendar(calendar_obj);
 		if (cal == NULL) {
 			spprintf(&msg, 0, "%s: Found unconstructed IntlCalendar object",
 					func_name);

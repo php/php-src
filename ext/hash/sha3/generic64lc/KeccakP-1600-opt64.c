@@ -17,6 +17,14 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include <stdlib.h>
 #include "brg_endian.h"
 #include "KeccakP-1600-opt64-config.h"
+#ifdef __has_feature
+# if __has_feature(undefined_behavior_sanitizer)
+#  define ALLOW_MISALIGNED_ACCESS __attribute__((no_sanitize("alignment")))
+# endif
+#endif
+#ifndef ALLOW_MISALIGNED_ACCESS
+# define ALLOW_MISALIGNED_ACCESS
+#endif
 
 typedef unsigned char UINT8;
 typedef unsigned long long int UINT64;
@@ -114,6 +122,7 @@ void KeccakP1600_AddBytesInLane(void *state, unsigned int lanePosition, const un
 
 /* ---------------------------------------------------------------- */
 
+ALLOW_MISALIGNED_ACCESS
 void KeccakP1600_AddLanes(void *state, const unsigned char *data, unsigned int laneCount)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -462,6 +471,7 @@ void KeccakP1600_ExtractAndAddBytes(const void *state, const unsigned char *inpu
 
 /* ---------------------------------------------------------------- */
 
+ALLOW_MISALIGNED_ACCESS
 size_t KeccakF1600_FastLoop_Absorb(void *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen)
 {
     size_t originalDataByteLen = dataByteLen;

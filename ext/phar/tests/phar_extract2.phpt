@@ -24,17 +24,16 @@ $phar->extractTo(__DIR__ . '/extract2');
 $out = array();
 
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/extract2', 0x00003000), RecursiveIteratorIterator::CHILD_FIRST) as $path => $file) {
-	$extracted[] = $path;
+    $extracted[] = $path;
 }
 
 sort($extracted);
 
 foreach ($extracted as $out) {
-	echo "$out\n";
+    echo "$out\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tempmanifest2.phar.php');
@@ -57,4 +56,3 @@ $dir = __DIR__ . '/extract1/';
 %sextract2%csubdir
 %sextract2%csubdir%cectory
 %sextract2%csubdir%cectory%cfile.txt
-===DONE===

@@ -89,6 +89,7 @@ foreach ($tests as $t) {
 }
 
 echo "\nDone.\n";
+?>
 --EXPECT--
 *** HTML 4.01  ***
 &#0;	NOT DECODED

@@ -15,5 +15,6 @@ $stmt = $db->prepare('SELECT rowid FROM dual');
 $stmt->execute();
 $row = $stmt->fetch();
 var_dump(strlen($row[0]) > 0);
+?>
 --EXPECT--
 bool(true)

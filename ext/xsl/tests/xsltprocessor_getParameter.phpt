@@ -12,6 +12,7 @@ include __DIR__ .'/prepare.inc';
 $proc->importStylesheet($xsl);
 $proc->setParameter('', 'key', 'value');
 var_dump($proc->getParameter('', 'key'));
+?>
 --EXPECT--
 string(5) "value"
 --CREDITS--

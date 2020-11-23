@@ -21,7 +21,5 @@ echo " ";
 echo $reader->getAttribute('num');
 echo "\n";
 ?>
-===DONE===
 --EXPECT--
 book 2
-===DONE===

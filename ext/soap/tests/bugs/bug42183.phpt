@@ -13,15 +13,16 @@ $req = <<<EOF
 EOF;
 
 function test() {
-	return new PHPObject();
+    return new PHPObject();
 }
 
 $server = new SoapServer(NULL, array('uri' => 'http://ws.sit.com',
-	'classmap' => array('Object' => 'PHPObject')));
+    'classmap' => array('Object' => 'PHPObject')));
 $server->addFunction("test");
 ob_start();
 $server->handle($req);
 ob_end_clean();
 echo "ok\n";
+?>
 --EXPECT--
 ok

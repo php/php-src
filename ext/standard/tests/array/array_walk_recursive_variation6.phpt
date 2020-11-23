@@ -2,11 +2,6 @@
 Test array_walk_recursive() function : usage variations - 'input' argument as diff. associative arrays
 --FILE--
 <?php
-/* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Passing 'input' argument as an associative array
  *    with Numeric & string keys
@@ -14,13 +9,6 @@ Test array_walk_recursive() function : usage variations - 'input' argument as di
 
 echo "*** Testing array_walk_recursive() : 'input' as an associative array ***\n";
 
-// callback functions
-/* Prototype : for_numeric( int $value, int $key, int $user_data)
- * Parameters : $value - value from key/value pair of the array
- *              $key - key from key/value pair of the array
- *              $user_data - data to be added to 'value'
- * Description : Function adds values with keys & user_data
- */
 function for_numeric($value, $key, $user_data)
 {
   // dump the input values to see if they are
@@ -31,11 +19,6 @@ function for_numeric($value, $key, $user_data)
   echo "\n"; // new line to separate the output between each element
 }
 
-/* Prototype : for_string( string $value, string $key)
- * Parameters : $value - values in given input array
- *              $key - keys in given input array
- * Description : Function appends key to the value
- */
 function for_string($value, $key)
 {
   // dump the input values to see if they are
@@ -45,11 +28,6 @@ function for_string($value, $key)
   echo "\n"; // new line to separate the output between each element
 }
 
-/* Prototype : for_mixed( mixed $value, mixed $key)
- * Parameters : $value - values in given input array
- *              $key - keys in given input array
- * Description : Function displays each element of an array with keys
- */
 function for_mixed($value, $key)
 {
   // dump the input values to see if they are

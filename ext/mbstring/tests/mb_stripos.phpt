@@ -41,30 +41,6 @@ print mb_stripos($euc_jp, 0, -15,       'EUC-JP') . "\n";
 print mb_stripos($euc_jp, 0, -43,       'EUC-JP') . "\n";
 
 
-// Invalid offset - should return false with warning
-print ("== INVALID OFFSET ==\n");
-
-$r =  mb_stripos($euc_jp, '日本語', 44, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_stripos($euc_jp, '日本語', 50, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_stripos($euc_jp, '0', 50,     'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_stripos($euc_jp, 3, 50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =   mb_stripos($euc_jp, 0, 50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, '日本語', -50, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, '0', -50,     'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, 3, -50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, 0, -50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, 0, -44,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-
 // Out of range - should return false
 print ("== OUT OF RANGE ==\n");
 
@@ -125,21 +101,8 @@ $r = mb_stripos($euc_jp, '韓国語');
 $r = mb_stripos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
-
-// Invalid Parameters
-echo "== INVALID PARAMETER TEST ==\n";
-
-$r = mb_stripos($euc_jp,'','EUC-JP');
-($r === NULL) ? print("OK_NULL\n") : print("NG_NULL\n");
-$r = mb_stripos($euc_jp, $t_ary, 'EUC-JP');
-($r === NULL) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
-$r = mb_stripos($euc_jp, $t_obj, 'EUC-JP');
-($r === NULL) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
-$r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING');
-($r === NULL) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 ?>
-==DONE==
---EXPECTF--
+--EXPECT--
 String len: 43
 == POSITIVE OFFSET ==
 10
@@ -156,37 +119,6 @@ String len: 43
 33
 30
 0
-== INVALID OFFSET ==
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
 == OUT OF RANGE ==
 OK_OUT_RANGE
 OK_OUT_RANGE
@@ -213,17 +145,3 @@ OK_NEWLINE
 0
 OK_STR
 OK_NEWLINE
-== INVALID PARAMETER TEST ==
-
-Warning: mb_stripos() expects parameter 3 to be int, string given in %s on line %d
-OK_NULL
-
-Warning: mb_stripos() expects parameter 2 to be string, array given in %s on line %d
-OK_ARRAY
-
-Warning: mb_stripos() expects parameter 2 to be string, object given in %s on line %d
-OK_OBJECT
-
-Warning: mb_stripos() expects parameter 2 to be string, object given in %s on line %d
-OK_BAD_ENCODING
-==DONE==

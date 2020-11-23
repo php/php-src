@@ -9,14 +9,14 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 function loadEntities($entity_information) {
-	$entity_types = new StdClass();
-	$entity_types->b = 0;
-	foreach ($entity_information as $ex) {
-		var_dump((bool)$entity_types->b);
-		foreach ($entity_information as $info) {
-			$entity_types->b = 1;
-		}
-	}
+    $entity_types = new StdClass();
+    $entity_types->b = 0;
+    foreach ($entity_information as $ex) {
+        var_dump((bool)$entity_types->b);
+        foreach ($entity_information as $info) {
+            $entity_types->b = 1;
+        }
+    }
 }
 
 loadEntities(array("first", "second"));

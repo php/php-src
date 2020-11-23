@@ -3,12 +3,18 @@
 #ifndef FPM_REQUEST_H
 #define FPM_REQUEST_H 1
 
-void fpm_request_accepting();				/* hanging in accept() */
-void fpm_request_reading_headers();			/* start reading fastcgi request from very first byte */
-void fpm_request_info();					/* not a stage really but a point in the php code, where all request params have become known to sapi */
-void fpm_request_executing();				/* the script is executing */
-void fpm_request_end(void);				/* request ended: script response have been sent to web server */
-void fpm_request_finished();				/* request processed: cleaning current request */
+/* hanging in accept() */
+void fpm_request_accepting();
+/* start reading fastcgi request from very first byte */
+void fpm_request_reading_headers();
+/* not a stage really but a point in the php code, where all request params have become known to sapi */
+void fpm_request_info();
+/* the script is executing */
+void fpm_request_executing();
+/* request ended: script response have been sent to web server */
+void fpm_request_end(void);
+/* request processed: cleaning current request */
+void fpm_request_finished();
 
 struct fpm_child_s;
 struct timeval;

@@ -4,12 +4,12 @@ Test ReflectionProperty::isInitialized()
 <?php
 
 class A {
-	public static ?string $ssv = null;
-	public static ?string $ss;
-	public static $s;
-	public ?int $iv = null;
-	public ?int $i;
-	public $n;
+    public static ?string $ssv = null;
+    public static ?string $ss;
+    public static $s;
+    public ?int $iv = null;
+    public ?int $i;
+    public $n;
 
     private int $p;
 }
@@ -62,6 +62,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    var_dump($rp->isInitialized());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 class WithMagic {
     public $prop;
     public int $intProp;
@@ -103,11 +109,12 @@ Dynamic properties:
 bool(true)
 bool(false)
 Visibility handling:
-Cannot access non-public member A::$p
+Cannot access non-public property A::$p
 bool(false)
 Object type:
 bool(false)
 Given object is not an instance of the class this property was declared in
+ReflectionProperty::isInitialized(): Argument #1 ($object) must be provided for instance properties
 Class with __isset:
 bool(false)
 bool(false)

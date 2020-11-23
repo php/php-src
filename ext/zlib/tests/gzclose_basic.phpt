@@ -3,7 +3,7 @@ Test function gzclose() by calling it with its expected arguments
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -17,23 +17,27 @@ gzread($h, 20);
 var_dump(gzclose($h));
 
 //should fail.
-gzread($h, 20);
+try {
+    gzread($h, 20);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $h = gzopen($f, 'r');
 gzread($h, 20);
 var_dump(fclose($h));
 
 //should fail.
-gzread($h, 20);
+try {
+    gzread($h, 20);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
-
-Warning: gzread(): supplied resource is not a valid stream resource in %s on line %d
+gzread(): supplied resource is not a valid stream resource
 bool(true)
-
-Warning: gzread(): supplied resource is not a valid stream resource in %s on line %d
-===DONE===
+gzread(): supplied resource is not a valid stream resource

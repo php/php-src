@@ -3,34 +3,34 @@ Magic object handlers segfaults and memory errors
 --FILE--
 <?php
 function f($x) {
-	return $x;
+    return $x;
 }
 
 class foo implements ArrayAccess {
-	function __get($property) {
-		$GLOBALS["y"] = $property;
-	}
-	function __set($property, $value) {
-		$GLOBALS["y"] = $property;
-	}
-	function __call($func, $args) {
-		$GLOBALS["y"] = $func;
-	}
-	static function __callStatic($func, $args) {
-		$GLOBALS["y"] = $func;
-	}
-	function offsetGet($index) {
-		$GLOBALS["y"] = $index;
-	}
-	function offsetSet($index, $newval) {
-		$GLOBALS["y"] = $index;
-	}
-	function offsetExists($index) {
-		$GLOBALS["y"] = $index;
-	}
-	function offsetUnset($index) {
-		$GLOBALS["y"] = $index;
-	}
+    function __get($property) {
+        $GLOBALS["y"] = $property;
+    }
+    function __set($property, $value) {
+        $GLOBALS["y"] = $property;
+    }
+    function __call($func, $args) {
+        $GLOBALS["y"] = $func;
+    }
+    static function __callStatic($func, $args) {
+        $GLOBALS["y"] = $func;
+    }
+    function offsetGet($index) {
+        $GLOBALS["y"] = $index;
+    }
+    function offsetSet($index, $newval) {
+        $GLOBALS["y"] = $index;
+    }
+    function offsetExists($index) {
+        $GLOBALS["y"] = $index;
+    }
+    function offsetUnset($index) {
+        $GLOBALS["y"] = $index;
+    }
 }
 
 $x = new foo();

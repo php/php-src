@@ -4,25 +4,15 @@ Test get_browser() function : basic functionality
 browscap={PWD}/browscap.ini
 --FILE--
 <?php
-/* Prototype  : mixed get_browser([string browser_name [, bool return_array]])
- * Description: Get information about the capabilities of a browser.
- * If browser_name is omitted or null, HTTP_USER_AGENT is used.
- * Returns an object by default; if return_array is true, returns an array.
- *
- * Source code: ext/standard/browscap.c
- * Alias to functions:
- */
-
 $browsers = include __DIR__ . DIRECTORY_SEPARATOR . 'browsernames.inc';
 
 echo "*** Testing get_browser() : basic functionality ***\n";
 
 for( $x = 0; $x < 20; $x++) {
-	var_dump( get_browser( $browsers[$x], true ) );
+    var_dump( get_browser( $browsers[$x], true ) );
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing get_browser() : basic functionality ***
 array(35) {
@@ -1455,4 +1445,3 @@ array(35) {
   ["aolversion"]=>
   string(1) "0"
 }
-===DONE===

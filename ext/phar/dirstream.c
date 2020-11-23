@@ -152,23 +152,11 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {
 /**
  * Used for sorting directories alphabetically
  */
-static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
+static int phar_compare_dir_name(Bucket *f, Bucket *s)  /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	int result;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-	result = zend_binary_strcmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
-
-	if (result < 0) {
-		return -1;
-	} else if (result > 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+	int result = zend_binary_strcmp(
+		ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
+	return ZEND_NORMALIZE_BOOL(result);
 }
 /* }}} */
 
@@ -285,10 +273,7 @@ PHAR_ADD_ENTRY:
 
 	if (FAILURE != zend_hash_has_more_elements(data)) {
 		efree(dir);
-		if (zend_hash_sort(data, phar_compare_dir_name, 0) == FAILURE) {
-			FREE_HASHTABLE(data);
-			return NULL;
-		}
+		zend_hash_sort(data, phar_compare_dir_name, 0);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	} else {
 		efree(dir);

@@ -24,10 +24,8 @@ foreach ($di as $entry) {
     }
 }
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s%eext%espl%etests%ebug68825.php"
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/bug68825';

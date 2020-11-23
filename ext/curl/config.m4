@@ -4,7 +4,7 @@ PHP_ARG_WITH([curl],
     [Include cURL support])])
 
 if test "$PHP_CURL" != "no"; then
-  PKG_CHECK_MODULES([CURL], [libcurl >= 7.15.5])
+  PKG_CHECK_MODULES([CURL], [libcurl >= 7.29.0])
   PKG_CHECK_VAR([CURL_FEATURES], [libcurl], [supported_features])
 
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)
@@ -82,5 +82,6 @@ int main(int argc, char *argv[])
   ])
 
   PHP_NEW_EXTENSION(curl, interface.c multi.c share.c curl_file.c, $ext_shared)
+  PHP_INSTALL_HEADERS([ext/curl], [php_curl.h])
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi

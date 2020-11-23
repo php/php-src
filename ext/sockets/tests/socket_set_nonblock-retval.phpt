@@ -15,14 +15,13 @@ socket_close($socket);
 
 $socket2 = socket_create_listen(31340);
 socket_close($socket2);
-var_dump(socket_set_nonblock($socket2));
+try {
+    var_dump(socket_set_nonblock($socket2));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
-
-Warning: socket_set_nonblock(): supplied resource is not a valid Socket resource in %s on line %d
-bool(false)
---CREDITS--
-Robin Mehner, robin@coding-robin.de
-PHP Testfest Berlin 2009-05-09
+socket_set_nonblock(): Argument #1 ($socket) has already been closed

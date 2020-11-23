@@ -5,9 +5,9 @@ FFI 101: PHP symbols (function address)
 <?php require_once('utils.inc'); ?>
 <?php
 try {
-	ffi_cdef("extern void *zend_printf;", ffi_get_php_dll_name());
+    ffi_cdef("extern void *zend_printf;", ffi_get_php_dll_name());
 } catch (Throwable $e) {
-	die('skip PHP symbols not available');
+    die('skip PHP symbols not available');
 }
 ?>
 --INI--
@@ -17,13 +17,13 @@ ffi.enable=1
 require_once('utils.inc');
 $fastcall = ffi_get_fastcall_specifier();
 $zend = ffi_cdef("
-	const char *get_zend_version(void);
-	//char *get_zend_version(void);
-	extern size_t (*zend_printf)(const char *format, ...);
+    const char *get_zend_version(void);
+    //char *get_zend_version(void);
+    extern size_t (*zend_printf)(const char *format, ...);
 
-	unsigned long $fastcall zend_hash_func(const char *str, size_t len);
+    unsigned long $fastcall zend_hash_func(const char *str, size_t len);
 
-	void $fastcall zend_str_tolower(char *str, size_t length);
+    void $fastcall zend_str_tolower(char *str, size_t length);
 
 ", ffi_get_php_dll_name());
 $f = $zend->get_zend_version;

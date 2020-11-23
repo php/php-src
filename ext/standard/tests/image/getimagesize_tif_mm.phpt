@@ -2,18 +2,11 @@
 GetImageSize() for tiff format with big-endian (aka Motorola, aka MM) ordering
 --FILE--
 <?php
-/* Prototype  : proto array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array
- * Source code: ext/standard/image.c
- * Alias to functions:
- */
-
 echo "*** Testing getimagesize() : tiff_mm format ***\n";
 var_dump(getimagesize(__DIR__ . "/2x2mm.tiff", $arr));
 var_dump($arr);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing getimagesize() : tiff_mm format ***
 array(5) {
@@ -30,4 +23,3 @@ array(5) {
 }
 array(0) {
 }
-===DONE===

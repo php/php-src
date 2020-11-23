@@ -108,7 +108,7 @@ regarding how PHP is supposed to be built (shared module, program, etc).
 For example for APXS:
 
 ```m4
-PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php7.c php_apache.c)
+PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php.c php_apache.c)
 ```
 
 ## General info

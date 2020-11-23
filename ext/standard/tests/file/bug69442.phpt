@@ -17,7 +17,7 @@ EOC;
     $output = join("\n", $output);
     unlink($tmpFile);
 
-    if (strstr($output, "pty pseudo terminal not supported on this system") !== false) {
+    if (strstr($output, "PTY (pseudoterminal) not supported on this system") !== false) {
         die("skip PTY pseudo terminals are not supported");
     }
 --FILE--
@@ -28,17 +28,32 @@ $pipes = array();
 
 $process = proc_open($cmd, $descriptors, $pipes);
 
-foreach ($pipes as $type => $pipe) {
-    $data = fread($pipe, 999);
-    echo 'type ' . $type . ' ';
-    var_dump($data);
-    fclose($pipe);
+function read_from_pipe($pipe) {
+    $result = fread($pipe, 1000);
+    /* We can't guarantee that everything written to the pipe will be returned by a single call
+     *   to fread(), even if it was written with a single syscall and the number of bytes written
+     *   was small */
+    $again  = @fread($pipe, 1000);
+    if ($again) {
+        $result .= $again;
+    }
+    return $result;
 }
+
+$data0 = read_from_pipe($pipes[0]);
+echo 'read from pipe 0: ';
+var_dump($data0);
+fclose($pipes[0]);
+
+$data3 = read_from_pipe($pipes[3]);
+echo 'read from pipe 3: ';
+var_dump($data3);
+fclose($pipes[3]);
+
 proc_close($process);
+?>
 --EXPECT--
-type 0 string(5) "foo
+read from pipe 0: string(5) "foo
 "
-type 1 string(0) ""
-type 2 string(0) ""
-type 3 string(3) "42
+read from pipe 3: string(3) "42
 "

@@ -17,14 +17,14 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $pdo->beginTransaction();
 
 try {
-	$pdo->query("CREATE TABLE b67462 (a int NOT NULL PRIMARY KEY DEFERRABLE INITIALLY DEFERRED)");
-	$pdo->query("INSERT INTO b67462 VALUES (1), (1)");
+    $pdo->query("CREATE TABLE b67462 (a int NOT NULL PRIMARY KEY DEFERRABLE INITIALLY DEFERRED)");
+    $pdo->query("INSERT INTO b67462 VALUES (1), (1)");
 
-	var_dump($pdo->inTransaction());
-	$pdo->commit(); // This should fail!
+    var_dump($pdo->inTransaction());
+    $pdo->commit(); // This should fail!
 } catch (\Exception $e) {
-	var_dump($pdo->inTransaction());
-	var_dump($pdo->beginTransaction());
+    var_dump($pdo->inTransaction());
+    var_dump($pdo->beginTransaction());
 }
 
 ?>

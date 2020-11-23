@@ -3,8 +3,8 @@ $this as global variable
 --FILE--
 <?php
 function foo() {
-	global $this;
-	var_dump($this);
+    global $this;
+    var_dump($this);
 }
 foo();
 ?>

@@ -35,10 +35,8 @@ system("dir /b " . $fn);
 remove_data("file");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\gef‰ﬂ"
 bool(true)
 bool(true)
 gef‰ﬂ
-===DONE===

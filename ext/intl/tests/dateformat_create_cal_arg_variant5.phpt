@@ -41,7 +41,6 @@ $df = new IntlDateFormatter('es_ES', 0, 0, 'UTC', 0);
 echo $df->format($ts), "\n";
 
 ?>
-==DONE==
 --EXPECTF--
 domingo%S 1 de enero de 2012, 0:00:00 (%siempo %sniversal %sordinado)
 domingo%S 8 de %safar de 1433, 0:00:00 (%siempo %sniversal %sordinado)
@@ -50,4 +49,3 @@ sábado, 31 de diciembre de 2011 d. C., 23:00:00 (hora estándar de las Azores)
 sábado, 7 de %safar de 1433 AH, 23:00:00 (hora estándar de las Azores)
 domingo%S 8 de %safar de 1433 AH, 0:00:00 (%siempo %sniversal %sordinado)
 domingo%S 1 de enero de 2012, 0:00:00 (%siempo %sniversal %sordinado)
-==DONE==

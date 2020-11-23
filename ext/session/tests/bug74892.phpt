@@ -16,10 +16,8 @@ session_start();
 <p><a href="index.php#place">External link with anchor</a></p>
 <p><a href="http://php.net#foo">External link with anchor 2</a></p>
 <p><a href="#place">Internal link</a></p>
-===DONE===
 --EXPECT--
 <p><a href="index.php?PHPSESSID=sessionidhere">Click This Anchor Tag!</a></p>
 <p><a href="index.php?PHPSESSID=sessionidhere#place">External link with anchor</a></p>
 <p><a href="http://php.net?PHPSESSID=sessionidhere#foo">External link with anchor 2</a></p>
 <p><a href="#place">Internal link</a></p>
-===DONE===

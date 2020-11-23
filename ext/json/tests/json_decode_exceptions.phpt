@@ -1,14 +1,12 @@
 --TEST--
 Test json_decode() function : JSON_THROW_ON_ERROR flag
---SKIPIF--
-<?php if(!extension_loaded('json')) die('skip json extension not loaded') ?>
 --FILE--
 <?php
 
 try {
-	var_dump(json_decode("{", false, 512, JSON_THROW_ON_ERROR));
+    var_dump(json_decode("{", false, 512, JSON_THROW_ON_ERROR));
 } catch (JsonException $e) {
-	var_dump($e);
+    var_dump($e);
 }
 
 ?>

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -385,9 +383,12 @@ zend_string *php_base64_decode_ex_default(const unsigned char *str, size_t lengt
 PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) __attribute__((ifunc("resolve_base64_encode")));
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) __attribute__((ifunc("resolve_base64_decode")));
 
+typedef zend_string *(*base64_encode_func_t)(const unsigned char *, size_t);
+typedef zend_string *(*base64_decode_func_t)(const unsigned char *, size_t, zend_bool);
+
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static void *resolve_base64_encode() {
+static base64_encode_func_t resolve_base64_encode() {
 # if ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
 		return php_base64_encode_avx2;
@@ -403,7 +404,7 @@ static void *resolve_base64_encode() {
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static void *resolve_base64_decode() {
+static base64_decode_func_t resolve_base64_decode() {
 # if ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
 		return php_base64_decode_ex_avx2;
@@ -924,8 +925,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 #endif
 /* }}} */
 
-/* {{{ proto string base64_encode(string str)
-   Encodes string using MIME base64 algorithm */
+/* {{{ Encodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_encode)
 {
 	char *str;
@@ -941,8 +941,7 @@ PHP_FUNCTION(base64_encode)
 }
 /* }}} */
 
-/* {{{ proto string base64_decode(string str[, bool strict])
-   Decodes string using MIME base64 algorithm */
+/* {{{ Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode)
 {
 	char *str;

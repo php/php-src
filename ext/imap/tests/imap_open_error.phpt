@@ -1,47 +1,37 @@
 --TEST--
-imap_open() incorrect parameter count
+imap_open() ValueErrors
 --CREDITS--
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
+if (getenv("SKIP_ASAN")) die("skip leak sanitizer crashes");
 ?>
 --FILE--
 <?php
-echo "Checking with no parameters\n";
-imap_open();
-imap_open(false);
-imap_open(false, false);
-imap_open('');
-imap_open('', '');
 
 echo "Checking with incorrect parameters\n" ;
 imap_open('', '', '');
-imap_open('', '', '', -1);
 
-require_once(__DIR__.'/imap_include.inc');
-imap_open($default_mailbox, $username, $password, NIL, -1);
+try {
+    imap_open('', '', '', -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    imap_open('', '', '', NIL, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Checking with no parameters
-
-Warning: imap_open() expects at least 3 parameters, 0 given in %s on line %d
-
-Warning: imap_open() expects at least 3 parameters, 1 given in %s on line %d
-
-Warning: imap_open() expects at least 3 parameters, 2 given in %s on line %d
-
-Warning: imap_open() expects at least 3 parameters, 1 given in %s on line %d
-
-Warning: imap_open() expects at least 3 parameters, 2 given in %s on line %d
 Checking with incorrect parameters
 
 Warning: imap_open(): Couldn't open stream  in %s on line %d
-
-Warning: imap_open(): Couldn't open stream  in %s on line %d
-
-Warning: imap_open(): Retries must be greater or equal to 0 in %s on line %d
+imap_open(): Argument #4 ($flags) must be a bitmask of the OP_* constants, and CL_EXPUNGE
+imap_open(): Argument #5 ($retries) must be greater than or equal to 0
 
 Notice: Unknown: Can't open mailbox : no such mailbox (errflg=2) in Unknown on line 0

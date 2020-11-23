@@ -7,22 +7,22 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+    $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
-	$mysql->query("DROP TABLE IF EXISTS not_exists");
+    $mysql->query("DROP TABLE IF EXISTS not_exists");
 
-	var_dump($mysql->warning_count);
+    var_dump($mysql->warning_count);
 
-	$w = $mysql->get_warnings();
+    $w = $mysql->get_warnings();
 
-	var_dump($w->errno);
-	var_dump($w->message);
-	var_dump($w->sqlstate);
+    var_dump($w->errno);
+    var_dump($w->message);
+    var_dump($w->sqlstate);
 
-	$mysql->close();
-	echo "done!"
+    $mysql->close();
+    echo "done!"
 ?>
 --EXPECTF--
 int(1)

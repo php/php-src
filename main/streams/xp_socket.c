@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,7 +23,7 @@
 # undef AF_UNIX
 #endif
 
-#if defined(AF_UNIX)
+#ifdef AF_UNIX
 #include <sys/un.h>
 #endif
 
@@ -77,7 +75,8 @@ retry:
 	if (didwrite <= 0) {
 		char *estr;
 		int err = php_socket_errno();
-		if (err == EWOULDBLOCK || err == EAGAIN) {
+
+		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			if (sock->is_blocked) {
 				int retval;
 
@@ -106,7 +105,7 @@ retry:
 		}
 
 		estr = php_socket_strerror(err, NULL, 0);
-		php_error_docref(NULL, E_NOTICE, "send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
+		php_error_docref(NULL, E_NOTICE, "Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
 				(zend_long)count, err, estr);
 		efree(estr);
 	}
@@ -168,7 +167,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	err = php_socket_errno();
 
 	if (nr_bytes < 0) {
-		if (err == EAGAIN || err == EWOULDBLOCK) {
+		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			nr_bytes = 0;
 		} else {
 			stream->eof = 1;
@@ -239,7 +238,7 @@ static int php_sockop_flush(php_stream *stream)
 
 static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb)
 {
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 	return 0;
 #else
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -451,12 +450,11 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 #endif
 
 				default:
-					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+					break;
 			}
-
-		default:
-			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
+
+	return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 }
 
 static int php_sockop_cast(php_stream *stream, int castas, void **ret)

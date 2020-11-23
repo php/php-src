@@ -10,6 +10,7 @@
 #include <errno.h>
 
 #include "php_syslog.h"
+#include "php_network.h"
 
 #include "fpm.h"
 #include "fpm_children.h"
@@ -49,7 +50,7 @@ static inline int fpm_use_error_log() {  /* {{{ */
 	 * - SysV init launch php-fpm as a daemon
 	 * - Systemd launch php-fpm in foreground
 	 */
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 	if (fpm_global_config.daemonize || (!isatty(STDERR_FILENO) && !fpm_globals.force_stderr)) {
 #else
 	if (fpm_global_config.daemonize) {
@@ -166,7 +167,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 stdio_read:
 		in_buf = read(fd, buf, max_buf_size - 1);
 		if (in_buf <= 0) { /* no data */
-			if (in_buf == 0 || (errno != EAGAIN && errno != EWOULDBLOCK)) {
+			if (in_buf == 0 || !PHP_IS_TRANSIENT_ERROR(errno)) {
 				/* pipe is closed or error */
 				read_fail = (in_buf < 0) ? in_buf : 1;
 			}

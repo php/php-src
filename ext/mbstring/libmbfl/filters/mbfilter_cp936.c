@@ -27,16 +27,10 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_cp936.h"
 #define UNICODE_TABLE_CP936_DEF
 #include "unicode_table_cp936.h"
-
-static int mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_cp936[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -63,36 +57,31 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 	mbfl_no_encoding_cp936,
 	"CP936",
 	"CP936",
-	(const char *(*)[])&mbfl_encoding_cp936_aliases,
+	mbfl_encoding_cp936_aliases,
 	mblen_table_cp936,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp936_wchar,
 	&vtbl_wchar_cp936
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_cp936 = {
-	mbfl_no_encoding_cp936,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp936
-};
-
 const struct mbfl_convert_vtbl vtbl_cp936_wchar = {
 	mbfl_no_encoding_cp936,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_cp936_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp936 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp936,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp936,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -282,24 +271,6 @@ mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter)
-{
-	if (filter->status) {		/* kanji second char */
-		if (c < 0x40 || c > 0xfe || c == 0x7f) {	/* bad */
-		    filter->flag = 1;
-		}
-		filter->status = 0;
-	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
-		;
-	} else if (c > 0x80 && c < 0xff) {	/* DBCS lead byte */
-		filter->status = 1;
-	} else {							/* bad */
-		filter->flag = 1;
 	}
 
 	return c;

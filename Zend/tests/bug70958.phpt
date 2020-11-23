@@ -4,13 +4,13 @@ Bug #70958 (Invalid opcode while using ::class as trait method parameter default
 <?php
 trait Foo
 {
-	function bar($a = self::class) {
-		var_dump($a);
-	}
+    function bar($a = self::class) {
+        var_dump($a);
+    }
 }
 
 class B {
-	use Foo;
+    use Foo;
 }
 
 $b = new B;

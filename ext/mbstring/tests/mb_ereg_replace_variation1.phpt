@@ -9,12 +9,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
 ?>
 --FILE--
 <?php
-/* Prototype  : proto string mb_ereg_replace(string pattern, string replacement, string string [, string option])
- * Description: Replace regular expression for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions:
- */
-
 echo "*** Testing mb_ereg_replace() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -96,87 +90,53 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg_replace() : usage variations ***
 
 -- Iteration 1 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 2 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 3 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 4 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-
-Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
-bool(false)
+string(10) "string_val"
 
 -- Iteration 5 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 6 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-
-Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
-bool(false)
+string(10) "string_val"
 
 -- Iteration 7 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 8 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 9 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 10 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 11 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 12 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 13 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 14 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 15 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 16 --
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
@@ -194,17 +154,11 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 21 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(10) "string_val"
 
 -- Iteration 22 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 23 --
-
-Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 Done

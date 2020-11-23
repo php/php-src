@@ -7,11 +7,6 @@ function_exists('iconv_substr') or die("skip iconv_substr() is not available in 
 ?>
 --FILE--
 <?php
-/* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
- * Description: Returns part of a string
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Pass an unknown encoding to iconv_substr() to test behaviour
  */
@@ -30,6 +25,6 @@ echo "Done";
 --EXPECTF--
 *** Testing iconv_substr() : error conditions ***
 
-Notice: iconv_substr(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
+Warning: iconv_substr(): Wrong encoding, conversion from "unknown-encoding" to "UCS-4LE" is not allowed in %s on line %d
 bool(false)
 Done

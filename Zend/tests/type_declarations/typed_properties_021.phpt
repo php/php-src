@@ -3,7 +3,7 @@ Test typed properties delay type check on constant
 --FILE--
 <?php
 class Foo {
-	public int $bar = BAR::BAZ;
+    public int $bar = BAR::BAZ;
 }
 
 try {
@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-Class 'BAR' not found
+Class "BAR" not found

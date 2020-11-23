@@ -8,17 +8,17 @@ SQLite3::createAggregate() test
 require_once(__DIR__ . '/new_db.inc');
 
 function sum_list_step($context, $rows, $string) {
-	if (empty($context))
-	{
-		$context = array('total' => 0, 'values' => array());
-	}
-	$context['total'] += intval($string);
-	$context['values'][] = $context['total'];
-	return $context;
+    if (empty($context))
+    {
+        $context = array('total' => 0, 'values' => array());
+    }
+    $context['total'] += intval($string);
+    $context['values'][] = $context['total'];
+    return $context;
 }
 
 function sum_list_finalize($context) {
-	return implode(',', $context['values']);
+    return implode(',', $context['values']);
 }
 
 echo "Creating Table\n";

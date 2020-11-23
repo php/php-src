@@ -17,8 +17,8 @@ var_dump($obj->isCloneable());
 $h = clone $foo;
 
 class bar {
-	private function __clone() {
-	}
+    private function __clone() {
+    }
 }
 $bar = new bar;
 print "User class - private __clone\n";

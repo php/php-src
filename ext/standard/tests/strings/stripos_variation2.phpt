@@ -2,11 +2,6 @@
 Test stripos() function : usage variations - single quoted strings for 'haystack' & 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 /* Test stripos() function by passing single quoted strings to 'haystack' & 'needle' arguments */
 
 echo "*** Testing stripos() function: with single quoted strings ***\n";
@@ -83,7 +78,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: with single quoted strings ***
 -- Iteration 1 --
 int(2)
@@ -119,36 +114,20 @@ bool(false)
 int(10)
 int(10)
 -- Iteration 12 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(0)
+int(11)
 -- Iteration 13 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(0)
+int(12)
 -- Iteration 14 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(0)
+int(13)
 -- Iteration 15 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(0)
+int(14)
 -- Iteration 16 --
-bool(false)
-bool(false)
+int(0)
+int(15)
 -- Iteration 17 --
 int(14)
 int(51)
@@ -234,11 +213,7 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 45 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-int(26)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+bool(false)
 bool(false)
 -- Iteration 46 --
 int(0)

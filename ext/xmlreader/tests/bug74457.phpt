@@ -8,8 +8,6 @@ $rm = new ReflectionMethod(XMLReader::class, 'expand');
 var_dump($rm->getNumberOfParameters());
 var_dump($rm->getNumberOfRequiredParameters());
 ?>
-===DONE===
 --EXPECT--
 int(1)
 int(0)
-===DONE===

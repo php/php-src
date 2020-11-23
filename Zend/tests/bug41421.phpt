@@ -4,12 +4,12 @@ Bug #41421 (Uncaught exception from a stream wrapper segfaults)
 <?php
 
 class wrapper {
-	function stream_open() {
-		return true;
-	}
-	function stream_eof() {
-		throw new exception();
-	}
+    function stream_open() {
+        return true;
+    }
+    function stream_eof() {
+        throw new exception();
+    }
 }
 
 stream_wrapper_register("wrap", "wrapper");

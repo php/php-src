@@ -18,13 +18,6 @@ if (PHP_OS_FAMILY === 'Windows') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of touch() on stats of link */
 
 $file_path = __DIR__;

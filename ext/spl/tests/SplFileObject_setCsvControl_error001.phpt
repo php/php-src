@@ -13,11 +13,15 @@ CDATA
 );
 $s = new SplFileObject('csv_control_data_error001.csv');
 $s->setFlags(SplFileObject::READ_CSV);
-$s->setCsvControl('||');
+try {
+    $s->setCsvControl('||');
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
 unlink('csv_control_data_error001.csv');
 ?>
---EXPECTF--
-Warning: SplFileObject::setCsvControl(): delimiter must be a character in %s on line %d
+--EXPECT--
+SplFileObject::setCsvControl(): Argument #1 ($separator) must be a single character

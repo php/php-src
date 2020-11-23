@@ -9,13 +9,6 @@ if (PHP_OS_FAMILY === 'Windows') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of rename() on stats of link */
 
 $file_path = __DIR__;
@@ -47,7 +40,6 @@ $keys_to_compare = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12,
                        "rdev", "size", "atime", "mtime", "blksize", "blocks");
 var_dump( compare_stats($old_stat, $new_stat, $keys_to_compare) );
 ?>
-===Done===
 --CLEAN--
 <?php
 $file_path = __DIR__;
@@ -60,4 +52,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===Done===

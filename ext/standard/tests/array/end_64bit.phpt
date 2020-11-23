@@ -8,10 +8,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: mixed end ( array &$array );
-   Description: Advances internal pointer of array to last element, and returns its value.
-*/
-
 $arrays = array (
   array( 0 ),
   range(1, 100 ),
@@ -106,28 +102,9 @@ $resources = array($file_handle, $dir_handle);
 var_dump( end($resources) );
 var_dump( current($resources) );
 
-echo "\n*** Testing error conditions ***\n";
-/* checking for unexpected number of arguments */
-var_dump( end() );
-var_dump( end($array[0], $array[0]) );
-
-/* checking for unexpected type of arguments */
-$var=1;
-$var1="string";
-var_dump( end($var) );
-var_dump( end($var1) );
-
-/* checking null array */
-$null_array = array();
-var_dump( end($null_array) );
-
 echo "Done\n";
 
 ?>
---CLEAN--
-/* cleaning resource handles */
-fclose( $file_handle );  //file resource handle deleted
-closedir( $dir_handle );  //dir resource handle deleted
 --EXPECTF--
 *** Testing end() on different arrays ***
 -- Iteration 1 --
@@ -218,19 +195,4 @@ array(2) {
 *** Testing end() on resource type ***
 resource(%d) of type (stream)
 resource(%d) of type (stream)
-
-*** Testing error conditions ***
-
-Warning: end() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: end() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: end() expects parameter 1 to be array, int given in %s on line %d
-NULL
-
-Warning: end() expects parameter 1 to be array, string given in %s on line %d
-NULL
-bool(false)
 Done

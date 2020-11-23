@@ -10,7 +10,6 @@ Phar::interceptFileFuncs();
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
-readfile(array());
 chdir(__DIR__);
 file_put_contents($fname, "blah\n");
 file_put_contents("readfile_edgecases.txt", "test\n");
@@ -29,12 +28,10 @@ readfile("../oops");
 ');
 include $pname . '/foo/hi';
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/readfile_edgecases.txt'); ?>
 --EXPECTF--
-Warning: readfile() expects parameter 1 to be a valid path, array given in %sreadfile_edgecases.php on line %d
 blah
 <?php
 readfile("foo/" . basename(__FILE__));
@@ -57,5 +54,4 @@ readfile("./hi", 0, $context);
 readfile("../oops");
 ?>
 
-Warning: readfile(phar://%sreadfile_edgecases.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sreadfile_edgecases.phar.php/foo/hi on line %d
-===DONE===
+Warning: readfile(phar://%sreadfile_edgecases.phar.php/oops): Failed to open stream: phar error: path "oops" is a directory in phar://%sreadfile_edgecases.phar.php/foo/hi on line %d

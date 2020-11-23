@@ -29,10 +29,10 @@ $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 $f = fopen($fn, 'w');
 if ($f) {
-	var_dump($f, fwrite($f, "writing to an mb filename"));
-	var_dump(fclose($f));
+    var_dump($f, fwrite($f, "writing to an mb filename"));
+    var_dump(fclose($f));
 } else {
-	echo "open failed\n";
+    echo "open failed\n";
 }
 
 var_dump(file_get_contents($fn));
@@ -43,7 +43,6 @@ var_dump(unlink($fn));
 remove_data("file_cp1251");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -56,4 +55,3 @@ bool(true)
 string(%d) "%s\привет7"
 Active code page: %d
 bool(true)
-===DONE===

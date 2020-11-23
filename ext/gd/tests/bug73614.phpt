@@ -21,7 +21,5 @@ imagefilledarc($image, 250, 250, 500, 250, 91, 360 , $red, IMG_ARC_PIE);
 
 test_image_equals_file(__DIR__ . '/bug73614.png', $image);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

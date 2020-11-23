@@ -17,15 +17,15 @@ class SOAPComplexType {
 $struct = new SOAPComplexType('arg',34,325.325);
 
 function echoAnyElement($x) {
-	global $g;
+    global $g;
 
-	$g = $x;
-	$struct = $x->inputAny->any["SOAPComplexType"];
-	if ($struct instanceof SOAPComplexType) {
-		return array("return" => array("any" => array("SOAPComplexType"=>new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPComplexType", "http://soapinterop.org/xsd", "SOAPComplexType", "http://soapinterop.org/"))));
-	} else {
-		return "?";
-	}
+    $g = $x;
+    $struct = $x->inputAny->any["SOAPComplexType"];
+    if ($struct instanceof SOAPComplexType) {
+        return array("return" => array("any" => array("SOAPComplexType"=>new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPComplexType", "http://soapinterop.org/xsd", "SOAPComplexType", "http://soapinterop.org/"))));
+    } else {
+        return "?";
+    }
 }
 
 class TestSoapClient extends SoapClient {

@@ -3,11 +3,6 @@ Test array_push() function
 --FILE--
 <?php
 
-/* Prototype: int array_push( array &array );
- * Description: Push one or more elements onto the end of array
- and returns the new number of elements in the array.
- */
-
 $empty_array = array();
 $number = 5;
 $str = "abc";
@@ -31,16 +26,7 @@ $mixed_array = array(
 );
 
 /* Error Conditions */
-echo "\n*** Testing Error Conditions ***\n";
-
-/* Zero argument  */
-var_dump( array_push() );
-
-/* Scalar argument */
-var_dump( array_push($number, 22) );
-
-/* String argument */
-var_dump( array_push($str, 22) );
+echo "\n*** Testing Edge Conditions ***\n";
 
 /* Invalid Number of arguments */
 var_dump( array_push($mixed_array[1],1,2) );
@@ -69,17 +55,8 @@ var_dump( $mixed_array[2] );
 
 echo"\nDone";
 ?>
---EXPECTF--
-*** Testing Error Conditions ***
-
-Warning: array_push() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: array_push() expects parameter 1 to be array, int given in %s on line %d
-NULL
-
-Warning: array_push() expects parameter 1 to be array, string given in %s on line %d
-NULL
+--EXPECT--
+*** Testing Edge Conditions ***
 int(11)
 int(1)
 

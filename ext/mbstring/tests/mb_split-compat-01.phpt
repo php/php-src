@@ -8,10 +8,10 @@ function_exists('mb_split') or die("skip mb_split() is not available in this bui
 --FILE--
 <?php
 /* (counterpart: ext/standard/tests/reg/009.phpt) */
-	$a=mb_split("[[:space:]]","this is	a
+    $a=mb_split("[[:space:]]","this is	a
 test");
-	echo count($a) . "\n";
-	for ($i = 0; $i < count($a); $i++) {
+    echo count($a) . "\n";
+    for ($i = 0; $i < count($a); $i++) {
           echo $a[$i] . "\n";
         }
 ?>

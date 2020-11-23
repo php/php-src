@@ -3,10 +3,10 @@ mb_send_mail() test 4 (lang=German)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. Not valid for Windows');
+    die('skip.. Not valid for Windows');
 }
 if (!function_exists("mb_send_mail") || !mb_language("german")) {
-	die("skip mb_send_mail() not available");
+    die("skip mb_send_mail() not available");
 }
 ?>
 --INI--
@@ -21,8 +21,8 @@ mb_send_mail($to, mb_language(), "test");
 
 /* German (iso-8859-15) */
 if (mb_language("german")) {
-	mb_internal_encoding("ISO-8859-15");
-	mb_send_mail($to, "Pr"."\xfc"."fung ".mb_language(), "Pr"."\xfc"."fung");
+    mb_internal_encoding("ISO-8859-15");
+    mb_send_mail($to, "Pr"."\xfc"."fung ".mb_language(), "Pr"."\xfc"."fung");
 }
 ?>
 --EXPECTF--

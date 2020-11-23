@@ -12,6 +12,7 @@ $c = new UConverter('latin1', 'ascii');
 var_dump($c->getSourceEncoding());
 $c->setSourceEncoding('utf-7');
 var_dump($c->getSourceEncoding());
+?>
 --EXPECT--
 string(8) "US-ASCII"
 string(5) "UTF-7"

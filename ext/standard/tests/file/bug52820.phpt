@@ -10,7 +10,7 @@ if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 $handle=curl_init('file:///i_dont_exist/');
 curl_setopt($handle, CURLOPT_VERBOSE, true);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-if (!curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
+if (!@curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
     die("skip fopencookie not supported on this platform");
 --FILE--
 <?php
@@ -39,6 +39,7 @@ echo "\nmemory stream (leak):\n";
 zend_leak_variable(do_stuff("php://memory"));
 
 echo "\nDone.\n";
+?>
 --EXPECTF--
 temp stream (close after):
 About to rewind!

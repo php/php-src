@@ -8,8 +8,6 @@ phar.require_hash=0
 --FILE--
 <?php
 Phar::interceptFileFuncs();
-is_file();
-is_link();
 var_dump(is_file(__FILE__));
 
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
@@ -34,14 +32,10 @@ include "phar://" . __FILE__ . "/foo/stat.php";
 __HALT_COMPILER();');
 include $fname3;
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
---EXPECTF--
-Warning: is_file() expects exactly 1 parameter, 0 given in %sstat2_5.3.php on line %d
-
-Warning: is_link() expects exactly 1 parameter, 0 given in %sstat2_5.3.php on line %d
+--EXPECT--
 bool(true)
 is_link
 bool(false)
@@ -57,4 +51,3 @@ bool(false)
 dir
 bool(true)
 bool(false)
-===DONE===

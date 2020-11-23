@@ -30,7 +30,7 @@ object(foo\foo)#1 (0) {
 object(foo\bar\foo)#2 (0) {
 }
 
-Fatal error: Uncaught Error: Class 'foo\bar' not found in %s:%d
+Fatal error: Uncaught Error: Class "foo\bar" not found in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

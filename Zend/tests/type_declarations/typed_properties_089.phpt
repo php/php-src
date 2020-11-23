@@ -4,17 +4,17 @@ Modification of typed property during assignment must not leak
 <?php
 
 class A {
-	public string $prop = "";
+    public string $prop = "";
 }
 
 class B {
-	public function __toString() {
-		global $a;
-		$a->prop = "dont ";
-		$a->prop .= "leak ";
-		$a->prop .= "me!";
-		return "test";
-	}
+    public function __toString() {
+        global $a;
+        $a->prop = "dont ";
+        $a->prop .= "leak ";
+        $a->prop .= "me!";
+        return "test";
+    }
 }
 
 $a = new A;

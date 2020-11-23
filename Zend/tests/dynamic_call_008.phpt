@@ -4,10 +4,14 @@ Don't optimize dynamic call to non-dynamic one if it drops the warning
 <?php
 
 function test() {
-    ((string) 'extract')(['a' => 42]);
+    try {
+        ((string) 'extract')(['a' => 42]);
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 test();
 
 ?>
---EXPECTF--
-Warning: Cannot call extract() dynamically in %s on line %d
+--EXPECT--
+Cannot call extract() dynamically

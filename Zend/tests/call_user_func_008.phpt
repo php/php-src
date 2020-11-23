@@ -25,30 +25,30 @@ var_dump($i, $j);
 
 ?>
 --EXPECTF--
-Warning: Parameter 1 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #1 ($ref1) must be passed by reference, value given in %s on line %d
 
-Warning: Parameter 2 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #2 ($ref2) must be passed by reference, value given in %s on line %d
 bool(true)
 int(0)
 int(0)
 
-Warning: Parameter 1 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #1 ($ref1) must be passed by reference, value given in %s on line %d
 
-Warning: Parameter 2 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #2 ($ref2) must be passed by reference, value given in %s on line %d
 bool(true)
 int(0)
 int(0)
 
-Warning: Parameter 1 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #1 ($ref1) must be passed by reference, value given in %s on line %d
 
-Warning: Parameter 2 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #2 ($ref2) must be passed by reference, value given in %s on line %d
 bool(true)
 int(0)
 int(0)
 
-Warning: Parameter 1 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #1 ($ref1) must be passed by reference, value given in %s on line %d
 
-Warning: Parameter 2 to test() expected to be a reference, value given in %s on line %d
+Warning: test(): Argument #2 ($ref2) must be passed by reference, value given in %s on line %d
 bool(true)
 int(0)
 int(0)

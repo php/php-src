@@ -3,11 +3,11 @@ jmp into a finally block 03
 --FILE--
 <?php
 function foo() {
-	try {
+    try {
     } finally {
 test:
     }
-	goto test;
+    goto test;
 }
 ?>
 --EXPECTF--

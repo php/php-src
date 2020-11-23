@@ -2,8 +2,8 @@
 DBA Sync Test
 --SKIPIF--
 <?php
-	require_once __DIR__ .'/skipif.inc';
-	die("info $HND handler used");
+    require_once __DIR__ .'/skipif.inc';
+    die("info $HND handler used");
 ?>
 --FILE--
 <?php
@@ -23,8 +23,6 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
         echo dba_exists("key$i", $db_file) ? "Y" : "N";
     }
     echo "\n";
-    var_dump(dba_sync());
-    var_dump(dba_sync(""));
     var_dump(dba_sync($db_file));
     dba_close($db_file);
 } else {
@@ -32,20 +30,11 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 database handler: flatfile
 2YY
-
-Warning: dba_sync() expects exactly 1 parameter, 0 given in %sdba_sync.php on line %d
-NULL
-
-Warning: dba_sync() expects parameter 1 to be resource, string given in %sdba_sync.php on line %d
-NULL
 bool(true)
-===DONE===

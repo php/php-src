@@ -49,8 +49,6 @@ dq($c, 'select /*+ MONITOR */ \'dboptest\' from dual');
 dq($c, 'select sql_text, dbop_name from v$sql_monitor where sql_text like \'%dboptest%\' order by dbop_exec_id desc');
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 array(1) {
@@ -76,4 +74,3 @@ array(2) {
   ["DBOP_NAME"]=>
   NULL
 }
-===DONE===

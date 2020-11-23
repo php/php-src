@@ -48,7 +48,7 @@ class fooIterator extends \RecursiveFilterIterator
   {
     public Function __destruct ()
       {
-		eval("class A extends NotExists {}");
+        eval("class A extends NotExists {}");
 
         /* CRASH */
       }
@@ -68,13 +68,13 @@ foreach (new \RecursiveIteratorIterator (new fooIterator ($foo)) as $bar) ;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Class 'NotExists' not found in %s:%d
+Fatal error: Uncaught Error: Class "NotExists" not found in %s:%d
 Stack trace:
 #0 %s(%d): eval()
 #1 %s(%d): fooIterator->__destruct()
 #2 {main}
 
-Next Error: Class 'NotExists' not found in %s:%d
+Next Error: Class "NotExists" not found in %s:%d
 Stack trace:
 #0 %s(%d): eval()
 #1 %s(%d): fooIterator->__destruct()

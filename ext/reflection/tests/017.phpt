@@ -3,7 +3,7 @@ ReflectionClass::__toString() (constants)
 --FILE--
 <?php
 class Foo {
-	const test = "ok";
+    const test = "ok";
 }
 $class = new ReflectionClass("Foo");
 echo $class;

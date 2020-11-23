@@ -2,11 +2,6 @@
 Test array_walk() function : error conditions - callback parameters
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_walk() by passing more number of parameters to callback function
  */
@@ -23,45 +18,43 @@ echo "*** Testing array_walk() : error conditions - callback parameters ***\n";
 
 // expected: Missing argument Warning
 try {
-	var_dump( array_walk($input, "callback1") );
+    var_dump( array_walk($input, "callback1") );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	var_dump( array_walk($input, "callback2", 4) );
+    var_dump( array_walk($input, "callback2", 4) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 // expected: Warning is suppressed
 try {
-	var_dump( @array_walk($input, "callback1") );
+    var_dump( @array_walk($input, "callback1") );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	var_dump( @array_walk($input, "callback2", 4) );
+    var_dump( @array_walk($input, "callback2", 4) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "-- Testing array_walk() function with too many callback parameters --\n";
 try {
-	var_dump( array_walk($input, "callback1", 20, 10) );
+    var_dump( array_walk($input, "callback1", 20, 10) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : error conditions - callback parameters ***
 Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
 Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected
 Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
 Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected
 -- Testing array_walk() function with too many callback parameters --
-
-Warning: array_walk() expects at most 3 parameters, 4 given in %s on line %d
-NULL
+Exception: array_walk() expects at most 3 arguments, 4 given
 Done

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -22,7 +20,6 @@
 #if U_ICU_VERSION_MAJOR_NUM < 56
 #include <unicode/unorm.h>
 
-#define NORMALIZER_NONE UNORM_NONE
 #define NORMALIZER_FORM_D UNORM_NFD
 #define NORMALIZER_NFD UNORM_NFD
 #define NORMALIZER_FORM_KD UNORM_NFKD
@@ -35,7 +32,6 @@
 #else
 #include <unicode/unorm2.h>
 
-#define NORMALIZER_NONE 0x2
 #define NORMALIZER_FORM_D 0x4
 #define NORMALIZER_NFD NORMALIZER_FORM_D
 #define NORMALIZER_FORM_KD 0x8

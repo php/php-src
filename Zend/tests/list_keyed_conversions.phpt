@@ -29,6 +29,6 @@ int(1)
 int(0)
 int(1)
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Notice: Undefined offset: 1 in %s on line %d
+Warning: Undefined array key 1 in %s on line %d

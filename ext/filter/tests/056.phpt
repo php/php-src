@@ -25,7 +25,7 @@ array(),
 '\r\n',
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME));
+    var_dump(filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME));
 }
 
 var_dump(filter_var('_example.com', FILTER_VALIDATE_DOMAIN));

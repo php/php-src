@@ -3,13 +3,13 @@ Test typed static property
 --FILE--
 <?php
 function &ref() {
-	static $a = 5;
-	return $a;
+    static $a = 5;
+    return $a;
 }
 
 class Foo {
-	public static int $i;
-	public static string $s = "x";
+    public static int $i;
+    public static string $s = "x";
 }
 
 var_dump(Foo::$i = 1);

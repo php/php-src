@@ -8,11 +8,11 @@ function test(array... $args) {
 }
 
 try {
-	test([0], [1], 2);
+    test([0], [1], 2);
 } catch(Error $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>
 --EXPECTF--
-string(%d) "Argument 3 passed to test() must be of the type array, int given, called in %s on line %d"
+string(%d) "test(): Argument #3 must be of type array, int given, called in %s on line %d"

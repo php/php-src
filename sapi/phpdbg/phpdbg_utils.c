@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -41,7 +39,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ color structures */
-const static phpdbg_color_t colors[] = {
+static const phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("none",             "0;0"),
 
 	PHPDBG_COLOR_D("white",            "0;64"),
@@ -72,7 +70,7 @@ const static phpdbg_color_t colors[] = {
 }; /* }}} */
 
 /* {{{ */
-const static phpdbg_element_t elements[] = {
+static const phpdbg_element_t elements[] = {
 	PHPDBG_ELEMENT_D("prompt", PHPDBG_COLOR_PROMPT),
 	PHPDBG_ELEMENT_D("error", PHPDBG_COLOR_ERROR),
 	PHPDBG_ELEMENT_D("notice", PHPDBG_COLOR_NOTICE),
@@ -711,7 +709,6 @@ head_done:
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						element_dump_func(val, key, num);
 					} ZEND_HASH_FOREACH_END();
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) element_dump_func, 0);
 					GC_UNPROTECT_RECURSION(myht);
 					if (Z_TYPE_P(zv) == IS_OBJECT) {
 						zend_release_properties(myht);

@@ -7,13 +7,7 @@ if( substr(PHP_OS, 0, 3) != 'Sun')
 ?>
 --FILE--
 <?php
-/*
- * Prototype: resource popen ( string command, string mode )
- * Description: Opens process file pointer.
 
- * Prototype: int pclose ( resource handle );
- * Description: Closes process file pointer.
- */
 $file_path = __DIR__;
 echo "*** Testing for error conditions ***\n";
 var_dump( popen() );  // Zero Arguments

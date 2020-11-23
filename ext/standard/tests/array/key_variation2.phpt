@@ -2,11 +2,6 @@
 Test key() function : usage variations
 --FILE--
 <?php
-/* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays where keys are different data types as $array_arg to key() to test behaviour
  */
@@ -97,13 +92,12 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
   while (key($input) !== NULL) {
-  	var_dump(key($input));
-  	next($input);
+    var_dump(key($input));
+    next($input);
   }
   $iterator++;
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing key() : usage variations ***
 
@@ -152,4 +146,3 @@ string(0) ""
 
 -- Iteration 12 : unset data --
 string(0) ""
-===DONE===

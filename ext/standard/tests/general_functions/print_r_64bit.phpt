@@ -8,12 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: bool print_r ( mixed $expression [, bool $return] );
-   Description: Prints human-readable information about a variable
-*/
 
-/* Prototype: void check_printr( $variables )
-   Description: use print_r() to print variables */
 function check_printr( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {
@@ -105,7 +100,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_printr() to display contents of strings using print_r() */
 check_printr($strings);
@@ -244,8 +239,8 @@ $resources = array (
    using print_r() */
 check_printr($resources);
 
-echo "\n*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***\n";
+echo "\n*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
 unset($unset_var);
@@ -265,40 +260,22 @@ $variations = array (
    non-scalar variables using print_r() */
 check_printr($variations);
 
-echo "\n*** Testing print_r() on miscelleneous input arguments ***\n";
+echo "\n*** Testing print_r() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_printr() to display miscelleneous data using print_r() */
+/* calling check_printr() to display miscellaneous data using print_r() */
 check_printr($misc_values);
-
-/* checking print_r() on functions */
-echo "\n*** Testing print_r() on anonymous functions ***\n";
-$newfunc = create_function('$a,$b', 'return "$a * $b = " . ($a * $b);');
-echo "New anonymous function: $newfunc\n";
-print_r( $newfunc(2, 3) );
-/* creating anonymous function dynamically */
-print_r( create_function('$a', 'return "$a * $a = " . ($a * $b);') );
-
-echo "\n\n*** Testing error conditions ***\n";
-//passing zero argument
-var_dump( print_r() );
-
-//passing more than required no. of arguments
-var_dump( print_r(123, true, "abc") );
-
-// check when second arg is given other than boolean TRUE
-var_dump( print_r ($value, "string") );
 
 /* closing resource handle used */
 closedir($dir_handle);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing print_r() on integer variables ***
 
 -- Iteration 1 --
@@ -626,13 +603,13 @@ abcd efgh ijkl mnop 0qrst uvwx 0yz
 -- Iteration 14 --
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 *** Testing print_r() on boolean variables ***
 
 -- Iteration 1 --
@@ -1491,8 +1468,8 @@ Resource id #5
 Resource id #6
 Resource id #6
 Resource id #6
-*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***
+*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***
 
 -- Iteration 1 --
 Array
@@ -1701,7 +1678,7 @@ Array
     [3] => /00\7
 )
 
-*** Testing print_r() on miscelleneous input arguments ***
+*** Testing print_r() on miscellaneous input arguments ***
 
 -- Iteration 1 --
 
@@ -1718,23 +1695,4 @@ Array
 -- Iteration 4 --
 
 
-
-*** Testing print_r() on anonymous functions ***
-
-Deprecated: Function create_function() is deprecated in %s on line %d
-New anonymous function:  lambda_1
-2 * 3 = 6
-Deprecated: Function create_function() is deprecated in %s on line %d
- lambda_2
-
-*** Testing error conditions ***
-
-Warning: print_r() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: print_r() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-
-Notice: Undefined variable: value in %s on line %d
-string(0) ""
 Done

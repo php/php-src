@@ -12,7 +12,5 @@ include('skipif.inc');
 var_dump(ini_get("session.upload_progress.freq"));
 ?>
 --EXPECTF--
-PHP Warning:  PHP Startup: session.upload_progress.freq must be greater than or equal to zero in %s
-
-Warning: PHP Startup: session.upload_progress.freq must be greater than or equal to zero in %s
+Warning: PHP Startup: session.upload_progress.freq must be greater than or equal to 0 in Unknown on line 0
 string(%d) "1%"

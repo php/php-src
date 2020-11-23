@@ -39,4 +39,4 @@ try { test4(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
 Cannot instantiate abstract class Foo
 Cannot instantiate interface Bar
 Cannot instantiate trait Baz
-Cannot declare self-referencing constant 'Abc::BAR'
+Cannot declare self-referencing constant Abc::BAR

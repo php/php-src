@@ -5,14 +5,14 @@ SOAP Server 22: user fault (through throw of subclass)
 --FILE--
 <?php
 class MyFault extends SoapFault {
-	function __construct() {
-		parent::__construct("MyFault","My fault string");
-	}
+    function __construct() {
+        parent::__construct("MyFault","My fault string");
+    }
 }
 
 
 function test() {
-	throw new MyFault;
+    throw new MyFault;
 }
 
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));

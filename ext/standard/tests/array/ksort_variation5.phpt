@@ -2,15 +2,10 @@
 Test ksort() function : usage variations - sort strings
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing ksort() by providing array of string values for $array argument with
  * following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
@@ -40,7 +35,7 @@ echo "\n-- Testing ksort() by supplying various string arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n";
+  echo "- With default sort flag -\n";
   $temp_array = $array;
   var_dump(ksort($temp_array) ); // expecting : bool(true)
   var_dump($temp_array);
@@ -63,7 +58,7 @@ echo "Done\n";
 -- Testing ksort() by supplying various string arrays --
 
 -- Iteration 1 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   [""]=>
@@ -149,7 +144,7 @@ array(11) {
 }
 
 -- Iteration 2 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   ["Apple"]=>

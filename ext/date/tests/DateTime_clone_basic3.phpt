@@ -25,7 +25,6 @@ echo "\n-- clone it --\n";
 $d2_clone = clone $d1_clone;
 var_dump($d2_clone);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing clone on DateTime objects ***
 
@@ -102,4 +101,3 @@ object(DateTime)#%d (7) {
   ["timezone"]=>
   string(3) "GMT"
 }
-===DONE===

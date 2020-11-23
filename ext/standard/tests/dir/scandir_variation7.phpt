@@ -9,11 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Create directories with different permissions to test whether scandir() can access them
  */
@@ -44,23 +39,22 @@ $permission_values = array(
 
 $iterator = 1;
 foreach ($permission_values as $perm) {
-	echo "\n-- Iteration $iterator --\n";
+    echo "\n-- Iteration $iterator --\n";
 
-	// Remove the directory if already exists
-	if (is_dir($dir_path)){
-		chmod ($dir_path, 0777); // change dir permission to allow all operation
-		rmdir ($dir_path);
-	}
-	mkdir($dir_path);
+    // Remove the directory if already exists
+    if (is_dir($dir_path)){
+        chmod ($dir_path, 0777); // change dir permission to allow all operation
+        rmdir ($dir_path);
+    }
+    mkdir($dir_path);
 
-	// change the dir permisson to test dir on it
-	var_dump( chmod($dir_path, $perm) );
+    // change the dir permission to test dir on it
+    var_dump( chmod($dir_path, $perm) );
 
-	var_dump(scandir($dir_path));
-	$iterator++;
+    var_dump(scandir($dir_path));
+    $iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/scandir_variation7";
@@ -158,4 +152,3 @@ array(2) {
   [1]=>
   string(2) ".."
 }
-===DONE===

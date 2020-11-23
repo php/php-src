@@ -41,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_big5");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -53,4 +52,3 @@ bool(true)
 string(%d) "%s測試多字節路徑5\測試多字節路徑4"
 Active code page: %d
 bool(true)
-===DONE===

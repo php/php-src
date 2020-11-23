@@ -22,5 +22,5 @@ var_dump($test);
 Cannot assign array to reference held by property Test::$prop of type int
 object(Test)#1 (1) {
   ["prop"]=>
-  &int(42)
+  int(42)
 }

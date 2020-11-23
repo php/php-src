@@ -20,10 +20,13 @@ var_dump(gmp_binomial(1, 1));
 var_dump(gmp_binomial(-1, 5)); // == -(1 + 5 - 1 over 5)
 var_dump(gmp_binomial(-2, 6)); // == (2 + 6 - 1 over 6)
 
-var_dump(gmp_binomial(5, -2));
-
+try {
+    var_dump(gmp_binomial(5, -2));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
---EXPECTF--
+--EXPECT--
 object(GMP)#1 (1) {
   ["num"]=>
   string(3) "252"
@@ -64,6 +67,4 @@ object(GMP)#2 (1) {
   ["num"]=>
   string(1) "7"
 }
-
-Warning: gmp_binomial(): k cannot be negative in %s on line %d
-bool(false)
+gmp_binomial(): Argument #2 ($k) must be greater than or equal to 0

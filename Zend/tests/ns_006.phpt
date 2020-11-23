@@ -9,5 +9,6 @@ class Exception {
 
 $x = "test\\ns1\\Exception";
 echo get_class(new $x),"\n";
+?>
 --EXPECT--
 test\ns1\Exception

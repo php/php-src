@@ -11,12 +11,13 @@
 
 PHP is a popular general-purpose scripting language that is especially suited to
 web development. Fast, flexible and pragmatic, PHP powers everything from your
-blog to the most popular websites in the world. PHP is distributed under the PHP
-License v3.01.
+blog to the most popular websites in the world. PHP is distributed under the
+[PHP License v3.01](LICENSE).
 
 [![Build status](https://travis-ci.org/php/php-src.svg?branch=master)](https://travis-ci.org/php/php-src)
-[![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy?svg=true)](https://ci.appveyor.com/project/php/php-src)
-[![Build Status](https://dev.azure.com/phpazuredevops/php/_apis/build/status/php.php-src?branchName=PHP-7.4)](https://dev.azure.com/phpazuredevops/php/_build/latest?definitionId=1&branchName=PHP-7.4)
+[![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy/branch/master?svg=true)](https://ci.appveyor.com/project/php/php-src)
+[![Build Status](https://dev.azure.com/phpazuredevops/php/_apis/build/status/php.php-src?branchName=master)](https://dev.azure.com/phpazuredevops/php/_build/latest?definitionId=1&branchName=master)
+[![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:php)
 
 ## Documentation
 
@@ -38,24 +39,31 @@ For other systems, see the [installation chapter](https://php.net/install).
 
 *For Windows, see [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2).*
 
-PHP uses autotools on Unix systems to configure the build:
+For a minimal PHP build from Git, you will need autoconf, bison, and re2c. For
+a default build, you will additionally need libxml2 and libsqlite3. On Ubuntu,
+you can install these using:
+
+    sudo apt install -y pkg-config build-essential autoconf bison re2c \
+                        libxml2-dev libsqlite3-dev
+
+Generate configure:
 
     ./buildconf
-    ./configure [options]
 
-*See `./configure -h` for configuration options.*
+Configure your build. `--enable-debug` is recommended for development, see
+`./configure --help` for a full list of options.
 
-    make [options]
+    # For development
+    ./configure --enable-debug
+    # For production
+    ./configure
 
-*See `make -h` for make options.*
-
-The `-j` option shall set the maximum number of jobs `make` can use for the
-build:
+Build PHP. To speed up the build, specify the maximum number of jobs using `-j`:
 
     make -j4
 
-Shall run `make` with a maximum of 4 concurrent jobs: Generally the maximum
-number of jobs should not exceed the number of cores available.
+The number of jobs should usually match the number of available cores, which
+can be determined using `nproc`.
 
 ## Testing PHP source code
 

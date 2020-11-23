@@ -2,12 +2,12 @@
 Bug #41442 (imagegd2() under output control)
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-	if (!function_exists("imagegd2")) {
-		die("skip GD2 support unavailable");
-	}
+    if (!extension_loaded('gd')) {
+        die("skip gd extension not available.");
+    }
+    if (!function_exists("imagegd2")) {
+        die("skip GD2 support unavailable");
+    }
 ?>
 --FILE--
 <?php
@@ -31,7 +31,9 @@ var_dump(imagecreatefromstring($str2));
 
 echo "Done\n";
 ?>
---EXPECTF--
-resource(%d) of type (gd)
-resource(%d) of type (gd)
+--EXPECT--
+object(GdImage)#2 (0) {
+}
+object(GdImage)#2 (0) {
+}
 Done

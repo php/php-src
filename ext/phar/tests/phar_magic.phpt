@@ -18,7 +18,6 @@ include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
 include $fname;
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -28,4 +27,3 @@ __HALT_COMPILER();
 in b
 <?php include "b/c.php";
 in d
-===DONE===

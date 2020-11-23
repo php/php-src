@@ -13,7 +13,6 @@ if (PHP_MYSQLI != "no") {
 		"mysqli_api.c " +
 		"mysqli_driver.c " +
 		"mysqli_exception.c " +
-		"mysqli_fe.c " +
 		"mysqli_nonapi.c " +
 		"mysqli_prop.c " +
 		"mysqli_result_iterator.c " +

@@ -10,7 +10,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 $xml=new SimpleXMLElement(0,9000000000);var_dump($xml->getDocNamespaces())?>
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: Invalid options in %sbug74950.php:%d
+Fatal error: Uncaught Exception: SimpleXMLElement::__construct(): Argument #2 ($options) is invalid in %sbug74950.php:%d
 Stack trace:
 #0 %sbug74950.php(%d): SimpleXMLElement->__construct('0', 9000000000)
 #1 {main}

@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass readdir() a directory handle pointing to an empty directory to test behaviour
  */
@@ -25,21 +20,20 @@ $dir_handle = opendir($path);
 
 echo "\n-- Pass an empty directory to readdir() --\n";
 function mysort($a,$b) {
-	return strlen($a) > strlen($b) ? 1 : -1;
+    return strlen($a) > strlen($b) ? 1 : -1;
 }
 $entries = array();
 while(FALSE !== ($file = readdir($dir_handle))){
-	$entries[] = $file;
+    $entries[] = $file;
 }
 
 closedir($dir_handle);
 
 usort($entries, "mysort");
 foreach($entries as $entry) {
-	var_dump($entry);
+    var_dump($entry);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $path = __DIR__ . '/私はガラスを食べられますreaddir_variation2';
@@ -51,4 +45,3 @@ rmdir($path);
 -- Pass an empty directory to readdir() --
 string(1) "."
 string(2) ".."
-===DONE===

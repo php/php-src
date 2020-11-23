@@ -16,19 +16,19 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute (\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
 $test = function () use ($pdo) {
-	$arr = [
-		0 => "a",
-		2 => "b",
-	];
+    $arr = [
+        0 => "a",
+        2 => "b",
+    ];
 
-	$stmt = $pdo->prepare("SELECT (?)::text AS a, (?)::text AS b");
+    $stmt = $pdo->prepare("SELECT (?)::text AS a, (?)::text AS b");
 
-	try {
-		$stmt->execute($arr);
-		var_dump($stmt->fetch());
-	} catch (\Exception $e) {
-		echo $e->getMessage()."\n";
-	}
+    try {
+        $stmt->execute($arr);
+        var_dump($stmt->fetch());
+    } catch (\Exception $e) {
+        echo $e->getMessage()."\n";
+    }
 };
 
 $test();

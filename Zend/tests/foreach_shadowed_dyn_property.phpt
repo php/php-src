@@ -2,7 +2,7 @@
 Dynamic property shadowed by private property
 --FILE--
 <?php
-  
+
 class Test {
     private $prop = "Test";
 

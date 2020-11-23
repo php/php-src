@@ -14,7 +14,5 @@ if ($im) { // which is not supposed to happen
     var_dump(imagesx($im));
 }
 ?>
-===DONE===
 --EXPECT--
 bool(false)
-===DONE===

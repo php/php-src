@@ -4,19 +4,19 @@ Bug #70873 (Regression on private static properties access)
 <?php
 
 class A {
-	private static $x = 1;
+    private static $x = 1;
 }
 
 class B extends A {
-	function bar() {
-		var_dump(self::$x);
-	}
+    function bar() {
+        var_dump(self::$x);
+    }
 };
 
 class C extends A {
-	function bar() {
-		var_dump(A::$x);
-	}
+    function bar() {
+        var_dump(A::$x);
+    }
 };
 
 

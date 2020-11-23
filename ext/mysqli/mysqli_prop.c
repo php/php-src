@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,9 +30,8 @@
 #define CHECK_STATUS(value, quiet) \
 	if (!obj->ptr || ((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
 		if (!quiet) { \
-			php_error_docref(NULL, E_WARNING, "Property access is not allowed yet"); \
+			zend_throw_error(NULL, "Property access is not allowed yet"); \
 		} \
-		ZVAL_FALSE(retval); \
 		return FAILURE; \
 	} \
 
@@ -42,9 +39,8 @@
 MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	if (!quiet) { \
-		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name)); \
+		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
 	} \
-	ZVAL_FALSE(retval);\
 	return FAILURE; \
 } else { \
 	CHECK_STATUS(statusval, quiet);\
@@ -55,9 +51,8 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 MYSQL_RES *p; \
 if (!obj->ptr) { \
 	if (!quiet) { \
-		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name)); \
+		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
 	} \
-	ZVAL_NULL(retval);\
 	return FAILURE; \
 } else { \
 	CHECK_STATUS(statusval, quiet);\
@@ -68,9 +63,8 @@ if (!obj->ptr) { \
 MYSQL_STMT *p; \
 if (!obj->ptr) { \
 	if (!quiet) { \
-		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name)); \
+		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
 	} \
-	ZVAL_NULL(retval);\
 	return FAILURE; \
 } else { \
 	CHECK_STATUS(statusval, quiet); \
@@ -198,7 +192,7 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, zend_bool quie
 
 	if (mysql) {
 		array_init(retval);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 		if (1) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
 			zend_llist_position pos;
@@ -270,7 +264,7 @@ static int result_type_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 static int result_lengths_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQL_RES *p;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	const size_t *ret;
 #else
 	const zend_ulong *ret;
@@ -362,7 +356,7 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, zend_bool quie
  	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	if (stmt && stmt->stmt) {
 		array_init(retval);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 		if (stmt->stmt->data && stmt->stmt->data->error_info) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
 			zend_llist_position pos;

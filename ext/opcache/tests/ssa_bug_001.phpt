@@ -1,5 +1,5 @@
 --TEST--
-SSA constrution for CFG with unreachable basic blocks
+SSA construction for CFG with unreachable basic blocks
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

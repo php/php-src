@@ -26,8 +26,6 @@ foreach ($dll as $k => $v) {
 var_dump($dll->count());
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 2=>4
 1=>3
@@ -40,4 +38,3 @@ int(3)
 0=>3
 0=>4
 int(0)
-===DONE===

@@ -85,14 +85,14 @@
 #ifndef MBFL_MBFILTER_H
 #define MBFL_MBFILTER_H
 
+#include "zend.h"
+
 #include "mbfl_defs.h"
 #include "mbfl_consts.h"
-#include "mbfl_allocators.h"
 #include "mbfl_encoding.h"
 #include "mbfl_language.h"
 #include "mbfl_string.h"
 #include "mbfl_convert.h"
-#include "mbfl_ident.h"
 
 /* Prefer local fix, otherwise need to include too much. */
 #ifndef ssize_t
@@ -136,20 +136,15 @@ struct _mbfl_buffer_converter {
 	mbfl_convert_filter *filter1;
 	mbfl_convert_filter *filter2;
 	mbfl_memory_device device;
-	const mbfl_encoding *from;
 	const mbfl_encoding *to;
 };
 
 MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new(const mbfl_encoding *from, const mbfl_encoding *to, size_t buf_initsz);
 MBFLAPI extern void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd);
-MBFLAPI extern void mbfl_buffer_converter_reset(mbfl_buffer_converter *convd);
 MBFLAPI extern int mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
 MBFLAPI extern int mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar);
-MBFLAPI extern int mbfl_buffer_converter_strncat(mbfl_buffer_converter *convd, const unsigned char *p, size_t n);
-MBFLAPI extern int mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
-MBFLAPI extern int mbfl_buffer_converter_feed2(mbfl_buffer_converter *convd, mbfl_string *string, size_t *loc);
+MBFLAPI extern size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
 MBFLAPI extern int mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
-MBFLAPI extern mbfl_string * mbfl_buffer_converter_getbuffer(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
 MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
@@ -160,7 +155,7 @@ MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
 typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
 
 struct _mbfl_encoding_detector {
-	mbfl_identify_filter **filter_list;
+	mbfl_convert_filter **filter_list;
 	int filter_list_size;
 	int strict;
 };
@@ -193,16 +188,16 @@ static inline int mbfl_is_error(size_t len) {
  * strlen
  */
 MBFLAPI extern size_t
-mbfl_strlen(mbfl_string *string);
+mbfl_strlen(const mbfl_string *string);
+
+#define MBFL_ERROR_NOT_FOUND ((size_t) -1)
+#define MBFL_ERROR_ENCODING ((size_t) -4)
+#define MBFL_ERROR_EMPTY ((size_t) -8)
+#define MBFL_ERROR_OFFSET ((size_t) -16)
 
 /*
- * oddlen
- */
-MBFLAPI extern size_t
-mbfl_oddlen(mbfl_string *string);
-
-/*
- * strpos
+ * strpos.
+ * Errors: MBFL_ERROR_NOT_FOUND, MBFL_ERROR_ENCODING, MBFL_ERROR_OFFSET
  */
 MBFLAPI extern size_t
 mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);
@@ -256,9 +251,6 @@ mime_header_encoder_new(
 MBFLAPI extern void
 mime_header_encoder_delete(struct mime_header_encoder_data *pe);
 
-MBFLAPI extern int
-mime_header_encoder_feed(int c, struct mime_header_encoder_data *pe);
-
 MBFLAPI extern mbfl_string *
 mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *result);
 
@@ -280,9 +272,6 @@ mime_header_decoder_new(const mbfl_encoding *outcode);
 
 MBFLAPI extern void
 mime_header_decoder_delete(struct mime_header_decoder_data *pd);
-
-MBFLAPI extern int
-mime_header_decoder_feed(int c, struct mime_header_decoder_data *pd);
 
 MBFLAPI extern mbfl_string *
 mime_header_decoder_result(struct mime_header_decoder_data *pd, mbfl_string *result);

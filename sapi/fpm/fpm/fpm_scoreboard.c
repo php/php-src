@@ -71,6 +71,11 @@ int fpm_scoreboard_init_main() /* {{{ */
 		wp->scoreboard->pm          = wp->config->pm;
 		wp->scoreboard->start_epoch = time(NULL);
 		strlcpy(wp->scoreboard->pool, wp->config->name, sizeof(wp->scoreboard->pool));
+
+		if (wp->shared) {
+			/* shared pool is added after non shared ones so the shared scoreboard is allocated */
+			wp->scoreboard->shared = wp->shared->scoreboard;
+		}
 	}
 	return 0;
 }
@@ -101,7 +106,7 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 		if (lq_len >= 0) {
 			scoreboard->lq_len = lq_len;
 		}
-#ifdef HAVE_FPM_LQ /* prevent unnecessary test */
+#if HAVE_FPM_LQ /* prevent unnecessary test */
 		if (scoreboard->lq > scoreboard->lq_max) {
 			scoreboard->lq_max = scoreboard->lq;
 		}

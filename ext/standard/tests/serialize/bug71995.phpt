@@ -4,13 +4,13 @@ Bug #71995 (Returning the same var twice from __sleep() produces broken serializ
 <?php
 
 class A {
-	public $b;
-	public function __construct() {
-		$this->b = new StdClass();
-	}
-	public  function __sleep() {
-		return array("b", "b");
-	}
+    public $b;
+    public function __construct() {
+        $this->b = new StdClass();
+    }
+    public  function __sleep() {
+        return array("b", "b");
+    }
 }
 $a = new A();
 $s = serialize($a);
@@ -18,7 +18,7 @@ var_dump($s);
 var_dump(unserialize($s));
 ?>
 --EXPECTF--
-Notice: serialize(): "b" is returned from __sleep multiple times in %sbug71995.php on line %d
+Notice: serialize(): "b" is returned from __sleep() multiple times in %s on line %d
 string(39) "O:1:"A":1:{s:1:"b";O:8:"stdClass":0:{}}"
 object(A)#%d (1) {
   ["b"]=>

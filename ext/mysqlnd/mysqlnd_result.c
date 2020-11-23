@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -1887,7 +1885,12 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, free_result),
 	MYSQLND_METHOD(mysqlnd_res, free_result_internal),
 	MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal),
-	mysqlnd_result_meta_init
+	mysqlnd_result_meta_init,
+	NULL, /* unused1 */
+	NULL, /* unused2 */
+	NULL, /* unused3 */
+	NULL, /* unused4 */
+	NULL  /* unused5 */
 MYSQLND_CLASS_METHODS_END;
 
 

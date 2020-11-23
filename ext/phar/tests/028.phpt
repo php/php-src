@@ -29,7 +29,6 @@ echo "======\n";
 include $pname . '/a.php';
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
@@ -44,4 +43,3 @@ This is b
 This is b/c
 This is b/d
 This is e
-===DONE===

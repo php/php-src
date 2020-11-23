@@ -4,25 +4,45 @@ SoapFault class: Invalid Fault code warning given? Can't be an empty string, an 
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$fault = new SoapFault("", "message"); // Can't be an empty string
-$fault = new SoapFault(0, "message");  // Can't be a non-string (except for null)
+
+try {
+    new SoapFault("", "message"); // Can't be an empty string
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    new SoapFault(new stdClass(), "message");  // Can't be a non-string (except for null)
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 $fault = new SoapFault("Sender", "message");
 echo get_class($fault) . "\n";
 $fault = new SoapFault(null, "message");
 echo get_class($fault) . "\n";
-$fault = new SoapFault(["more"], "message");  // two elements in array required
-$fault = new SoapFault(["m", "more", "superflous"], "message"); // two required
+
+try {
+    new SoapFault(["more"], "message");  // two elements in array required
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    new SoapFault(["m", "more", "superfluous"], "message"); // two required
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 $fault = new SoapFault(["more-ns", "Sender"], "message");  // two given
 echo get_class($fault);
+
 ?>
---EXPECTF--
-Warning: SoapFault::SoapFault(): Invalid fault code in %s on line %d
-
-Warning: SoapFault::SoapFault(): Invalid fault code in %s on line %d
+--EXPECT--
+SoapFault::__construct(): Argument #1 ($code) is not a valid fault code
+SoapFault::__construct(): Argument #1 ($code) must be of type array|string|null, stdClass given
 SoapFault
 SoapFault
-
-Warning: SoapFault::SoapFault(): Invalid fault code in %s on line %d
-
-Warning: SoapFault::SoapFault(): Invalid fault code in %s on line %d
+SoapFault::__construct(): Argument #1 ($code) is not a valid fault code
+SoapFault::__construct(): Argument #1 ($code) is not a valid fault code
 SoapFault

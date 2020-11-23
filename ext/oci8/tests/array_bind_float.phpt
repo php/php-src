@@ -61,7 +61,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 array(5) {
   [0]=>
   float(5.9999)
@@ -70,7 +70,7 @@ array(5) {
   [2]=>
   float(3.4234)
   [3]=>
-  float(2.5658)
+  float(2.5658%S)
   [4]=>
   float(1.243)
 }

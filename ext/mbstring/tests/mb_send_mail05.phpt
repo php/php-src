@@ -3,13 +3,13 @@ mb_send_mail() test 5 (lang=Simplified Chinese)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. Not valid for Windows');
+    die('skip.. Not valid for Windows');
 }
 if (!function_exists("mb_send_mail") || !mb_language("Simplified Chinese")) {
-	die("skip mb_send_mail() not available");
+    die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('GB2312')) {
-	die("skip GB2312 encoding is not available on this platform");
+    die("skip GB2312 encoding is not available on this platform");
 }
 ?>
 --INI--
@@ -24,8 +24,8 @@ mb_send_mail($to, mb_language(), "test");
 
 /* Simplified Chinese (HK-GB-2312) */
 if (mb_language("simplified chinese")) {
-	mb_internal_encoding('GB2312');
-	mb_send_mail($to, "测验 ".mb_language(), "测验");
+    mb_internal_encoding('GB2312');
+    mb_send_mail($to, "测验 ".mb_language(), "测验");
 }
 ?>
 --EXPECTF--

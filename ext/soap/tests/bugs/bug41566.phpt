@@ -44,8 +44,8 @@ echo "ok\n";
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope" 
-  xmlns:ns1="http://testuri.org" 
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:ns1="http://testuri.org"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:enc="http://www.w3.org/2003/05/soap-encoding">
   <env:Body>
@@ -56,6 +56,7 @@ EOF;
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ob_flush();
+?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:testResponse><return SOAP-ENC:arrayType="SOAP-ENC:Struct[4]" xsi:type="SOAP-ENC:Array"><item xsi:type="SOAP-ENC:Struct" id="ref1"><sName xsi:type="xsd:string">newUser</sName></item><item href="#ref1"/><item href="#ref1"/><item href="#ref1"/></return></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>

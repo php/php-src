@@ -1,48 +1,46 @@
 --TEST--
-imap_body() incorrect parameter count
+imap_body() ValueError
 --CREDITS--
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
-echo "Checking with no parameters\n";
-imap_body();
 
-echo  "Checking with incorrect parameter type\n";
-imap_body('');
-imap_body(false);
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = imap_open($default_mailbox, $username, $password) or
-	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
-imap_body($stream_id);
-imap_body($stream_id,-1);
-imap_body($stream_id,1,-1);
+require_once(__DIR__.'/setup/imap_include.inc');
+
+$imap_stream = setup_test_mailbox("imapbodyvalueerror", 0);
+
+try {
+    imap_body($imap_stream,-1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    imap_body($imap_stream,1,-1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 //Access not existing
-var_dump(imap_body($stream_id, 999, FT_UID));
+var_dump(imap_body($imap_stream, 255, FT_UID));
 
-imap_close($stream_id);
+imap_close($imap_stream);
 
 ?>
+--CLEAN--
+<?php
+$mailbox_suffix = 'imapbodyvalueerror';
+require_once(__DIR__ . '/setup/clean.inc');
+?>
 --EXPECTF--
-Checking with no parameters
+Create a temporary mailbox and add 0 msgs
+New mailbox created
+imap_body(): Argument #2 ($message_num) must be greater than 0
+imap_body(): Argument #3 ($flags) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
 
-Warning: imap_body() expects at least 2 parameters, 0 given in %s on line %d
-Checking with incorrect parameter type
-
-Warning: imap_body() expects at least 2 parameters, 1 given in %s on line %d
-
-Warning: imap_body() expects at least 2 parameters, 1 given in %s on line %d
-
-Warning: imap_body() expects at least 2 parameters, 1 given in %s on line %d
-
-Warning: imap_body(): Bad message number in %s on line %d
-
-Warning: imap_body(): invalid value for the options parameter in %s on line %d
-
-Warning: imap_body(): Bad message number in %s on line %d
+Warning: imap_body(): UID does not exist in %s on line %d
 bool(false)

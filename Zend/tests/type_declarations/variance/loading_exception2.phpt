@@ -46,6 +46,5 @@ Class I does not exist
 
 Fatal error: During inheritance of B with variance dependencies: Uncaught Exception: Class I does not exist in %s:%d
 Stack trace:
-#0 [internal function]: {closure}('I')
-#1 %s(%d): spl_autoload_call('I')
-#2 {main} in %s on line %d
+#0 %s(%d): {closure}('I')
+#1 {main} in %s on line %d

@@ -8,11 +8,11 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 --FILE--
 <?php
 function throwit() {
-	throw new Exception('it');
+    throw new Exception('it');
 }
 $var10 = "throwit";
 try {
-	$var14 = mb_ereg_replace_callback("", $var10, "");
+    $var14 = mb_ereg_replace_callback("", $var10, "");
 } catch(Exception $e) {}
 ?>
 DONE

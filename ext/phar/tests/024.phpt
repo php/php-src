@@ -22,11 +22,9 @@ include $pname . '/b.php';
 include $pname . '/b/c.php';
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 This is a
 This is b
 This is b/c
-===DONE===

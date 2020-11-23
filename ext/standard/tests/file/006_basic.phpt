@@ -9,14 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*
-  Prototype: int fileperms ( string $filename );
-  Description: Returns the permissions on the file, or FALSE in case of an error
-
-  Prototype: bool chmod ( string $filename, int $mode );
-  Description: Attempts to change the mode of the file specified by
-    filename to that given in mode
-*/
 $path = __DIR__;
 
 echo "*** Testing fileperms(), chmod() with files and dirs ***\n";

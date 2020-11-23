@@ -25,7 +25,6 @@ foreach ($longVals as $longVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
 float(NAN)
@@ -57,4 +56,3 @@ float(NAN)
 float(NAN)
 --- testing: -9.2233720368548E+18 ---
 float(NAN)
-===DONE===

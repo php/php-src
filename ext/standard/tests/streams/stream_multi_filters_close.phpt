@@ -4,41 +4,41 @@ Check if multiple filters are closed correctly and never called again after clos
 <?php
 
 class FirstFilter extends php_user_filter {
-	public function filter($in, $out, &$consumed, $closing) {
-		static $closed = 0;
+    public function filter($in, $out, &$consumed, $closing) {
+        static $closed = 0;
 
-		while ($bucket = stream_bucket_make_writeable($in)) {
-			stream_bucket_append($out, stream_bucket_new($this->stream, $bucket->data));
-		}
+        while ($bucket = stream_bucket_make_writeable($in)) {
+            stream_bucket_append($out, stream_bucket_new($this->stream, $bucket->data));
+        }
 
-		if ($closing) {
-			$closed++;
-		}
+        if ($closing) {
+            $closed++;
+        }
 
-		if ($closed > 0) {
-			var_dump($closed++);
-		}
-		return PSFS_PASS_ON;
-	}
+        if ($closed > 0) {
+            var_dump($closed++);
+        }
+        return PSFS_PASS_ON;
+    }
 }
 
 class SecondFilter extends php_user_filter {
-	public function filter($in, $out, &$consumed, $closing) {
-		static $closed = 0;
+    public function filter($in, $out, &$consumed, $closing) {
+        static $closed = 0;
 
-		while ($bucket = stream_bucket_make_writeable($in)) {
-			stream_bucket_append($out, stream_bucket_new($this->stream, $bucket->data));
-		}
+        while ($bucket = stream_bucket_make_writeable($in)) {
+            stream_bucket_append($out, stream_bucket_new($this->stream, $bucket->data));
+        }
 
-		if ($closing) {
-			$closed++;
-		}
+        if ($closing) {
+            $closed++;
+        }
 
-		if ($closed > 0) {
-			var_dump($closed++);
-		}
-		return PSFS_PASS_ON;
-	}
+        if ($closed > 0) {
+            var_dump($closed++);
+        }
+        return PSFS_PASS_ON;
+    }
 }
 
 $r = fopen("php://stdout", "w+");

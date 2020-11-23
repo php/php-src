@@ -17,14 +17,15 @@ var_dump(gmp_cmp(0,$n) < 0);
 $n1 = gmp_init("827278512385463739");
 var_dump(gmp_cmp($n1,$n));
 
-var_dump(gmp_cmp($n1,$n,1));
-var_dump(gmp_cmp(array(),array()));
-var_dump(gmp_cmp(array()));
-var_dump(gmp_cmp());
+try {
+    var_dump(gmp_cmp(array(),array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(2)
 int(0)
 int(-1)
@@ -33,16 +34,5 @@ int(1)
 int(-1)
 bool(true)
 int(0)
-
-Warning: gmp_cmp() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_cmp(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_cmp() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_cmp() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
+gmp_cmp(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

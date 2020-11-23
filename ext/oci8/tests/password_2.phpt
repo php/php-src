@@ -14,7 +14,7 @@ if ($test_drcp) die("skip password change not supported in DRCP Mode");
 require(__DIR__."/connect.inc");
 
 $stmtarray = array(
-	"drop user testuser_pw2 cascade",
+    "drop user testuser_pw2 cascade",
     "create user testuser_pw2 identified by testuserpwd",
     "grant connect, create session to testuser_pw2"
 );
@@ -40,21 +40,21 @@ $rn3 = (int)$c3;
 
 // Connections should differ
 if ($rn1 == $rn2) {
-	echo "First and second connections share a resource: Not OK\n";
-	var_dump($c1);
+    echo "First and second connections share a resource: Not OK\n";
+    var_dump($c1);
 }
 else {
-	echo "First and second connections are different: OK\n";
+    echo "First and second connections are different: OK\n";
 }
 
 // Connections should be the same
 if ($rn1 == $rn3) {
-	echo "First and third connections share a resource: OK\n";
+    echo "First and third connections share a resource: OK\n";
 }
 else {
-	echo "First and third connections are different: Not OK\n";
-	var_dump($c1);
-	var_dump($c2);
+    echo "First and third connections are different: Not OK\n";
+    var_dump($c1);
+    var_dump($c2);
 }
 
 echo "Done\n";

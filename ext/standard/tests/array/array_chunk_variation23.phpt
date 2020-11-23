@@ -4,12 +4,12 @@ array_chunk() - variation 23
 <?php
 $array = array ("p" => 1, "q" => 2, "r" => 3, "s" => 4, "u" => 5, "v" => 6);
 var_dump ($array);
-for ($i = 0; $i < (sizeof($array) + 1); $i++) {
-	echo "[$i]\n";
-	var_dump (@array_chunk ($array, $i));
-	var_dump (@array_chunk ($array, $i, TRUE));
-	var_dump (@array_chunk ($array, $i, FALSE));
-	echo "\n";
+for ($i = 1; $i < (sizeof($array) + 1); $i++) {
+    echo "[$i]\n";
+    var_dump (array_chunk ($array, $i));
+    var_dump (array_chunk ($array, $i, TRUE));
+    var_dump (array_chunk ($array, $i, FALSE));
+    echo "\n";
 }
 ?>
 --EXPECT--
@@ -27,11 +27,6 @@ array(6) {
   ["v"]=>
   int(6)
 }
-[0]
-NULL
-NULL
-NULL
-
 [1]
 array(6) {
   [0]=>

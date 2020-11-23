@@ -10,6 +10,6 @@ socket_recvmsg($socket, $message, -1);
 
 ?>
 --EXPECTF--
-Warning: socket_sendmsg(): error in sendmsg [%d]: %a in %s on line %d
+Warning: socket_sendmsg(): Error in sendmsg [%d]: %a in %s on line %d
 
-Warning: socket_recvmsg(): error in recvmsg [%d]: %a in %s on line %d
+Warning: socket_recvmsg(): Error in recvmsg [%d]: %a in %s on line %d

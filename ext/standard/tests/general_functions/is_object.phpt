@@ -2,10 +2,6 @@
 Test is_object() function
 --FILE--
 <?php
-/* Prototype: bool is_object ( mixed $var );
- * Description: Finds whether the given variable is an object
- */
-
 echo "*** Testing is_object() with valid objects ***\n";
 
 // class with no members
@@ -138,13 +134,6 @@ foreach ($not_objects as $type ) {
   var_dump( is_object($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_object() );
-
-//arguments more than expected
-var_dump( is_object($myClass_object, $myClass_object) );
-
 echo "Done\n";
 
 // close the resources used
@@ -152,7 +141,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_object() with valid objects ***
 -- Iteration 1 --
 bool(true)
@@ -215,13 +204,5 @@ bool(false)
 -- Iteration 18 --
 bool(false)
 -- Iteration 19 --
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_object() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_object() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

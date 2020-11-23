@@ -4,11 +4,11 @@ SimpleXMLElement->addAttribute()
 <?php if (!extension_loaded("simplexml")) die("skip"); ?>
 --FILE--
 <?php
-	$simple = simplexml_load_file(__DIR__."/book.xml");
-	$simple->addAttribute('type','novels');
+    $simple = simplexml_load_file(__DIR__."/book.xml");
+    $simple->addAttribute('type','novels');
 
-	var_dump($simple->attributes());
-	echo "Done";
+    var_dump($simple->attributes());
+    echo "Done";
 ?>
 --EXPECT--
 object(SimpleXMLElement)#2 (1) {

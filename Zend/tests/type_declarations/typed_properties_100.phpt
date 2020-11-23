@@ -2,7 +2,7 @@
 Property type not enforced for __get if the property is not visible
 --FILE--
 <?php
-  
+
 class Test {
     private int $prop;
 

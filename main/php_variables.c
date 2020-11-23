@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,33 +25,24 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
-#ifdef PHP_WIN32
-# include "win32/php_inttypes.h"
-#endif
 
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr) = _php_import_environment_variables;
 
-PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_array)
+PHPAPI void php_register_variable(const char *var, const char *strval, zval *track_vars_array)
 {
 	php_register_variable_safe(var, strval, strlen(strval), track_vars_array);
 }
 
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *strval, size_t str_len, zval *track_vars_array)
+PHPAPI void php_register_variable_safe(const char *var, const char *strval, size_t str_len, zval *track_vars_array)
 {
 	zval new_entry;
 	assert(strval != NULL);
 
-	/* Prepare value */
-	if (str_len == 0) {
-		ZVAL_EMPTY_STRING(&new_entry);
-	} else if (str_len == 1) {
-		ZVAL_INTERNED_STR(&new_entry, ZSTR_CHAR((zend_uchar)*strval));
-	} else {
-		ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
-	}
+	ZVAL_STRINGL_FAST(&new_entry, strval, str_len);
+
 	php_register_variable_ex(var, &new_entry, track_vars_array);
 }
 
@@ -65,7 +54,7 @@ static zend_always_inline void php_register_variable_quick(const char *name, siz
 	zend_string_release_ex(key, 0);
 }
 
-PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars_array)
+PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *track_vars_array)
 {
 	char *p = NULL;
 	char *ip = NULL;		/* index pointer */
@@ -189,8 +178,14 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 			} else {
 				ip = strchr(ip, ']');
 				if (!ip) {
-					/* PHP variables cannot contain '[' in their names, so we replace the character with a '_' */
+					/* not an index; un-terminate the var name */
 					*(index_s - 1) = '_';
+					/* PHP variables cannot contain ' ', '.', '[' in their names, so we replace the characters with a '_' */
+					for (p = index_s; *p; p++) {
+						if (*p == ' ' || *p == '.' || *p == '[') {
+							*p = '_';
+						}
+					}
 
 					index_len = 0;
 					if (index) {
@@ -559,13 +554,7 @@ static zend_always_inline void import_environment_variable(HashTable *ht, char *
 	name_len = p - env;
 	p++;
 	len = strlen(p);
-	if (len == 0) {
-		ZVAL_EMPTY_STRING(&val);
-	} else if (len == 1) {
-		ZVAL_INTERNED_STR(&val, ZSTR_CHAR((zend_uchar)*p));
-	} else {
-		ZVAL_NEW_STR(&val, zend_string_init(p, len, 0));
-	}
+	ZVAL_STRINGL_FAST(&val, p, len);
 	if (ZEND_HANDLE_NUMERIC_STR(env, name_len, idx)) {
 		zend_hash_index_update(ht, idx, &val);
 	} else {
@@ -575,21 +564,15 @@ static zend_always_inline void import_environment_variable(HashTable *ht, char *
 
 void _php_import_environment_variables(zval *array_ptr)
 {
-#ifndef PHP_WIN32
-	char **env;
-#else
-	char *environment, *env;
-#endif
-
 	tsrm_env_lock();
 
 #ifndef PHP_WIN32
-	for (env = environ; env != NULL && *env != NULL; env++) {
+	for (char **env = environ; env != NULL && *env != NULL; env++) {
 		import_environment_variable(Z_ARRVAL_P(array_ptr), *env);
 	}
 #else
-	environment = GetEnvironmentStringsA();
-	for (env = environment; env != NULL && *env; env += strlen(env) + 1) {
+	char *environment = GetEnvironmentStringsA();
+	for (char *env = environment; env != NULL && *env; env += strlen(env) + 1) {
 		import_environment_variable(Z_ARRVAL_P(array_ptr), env);
 	}
 	FreeEnvironmentStringsA(environment);
@@ -604,13 +587,11 @@ zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 	return 0; /* don't rearm */
 }
 
-/* {{{ php_build_argv
- */
-PHPAPI void php_build_argv(char *s, zval *track_vars_array)
+/* {{{ php_build_argv */
+PHPAPI void php_build_argv(const char *s, zval *track_vars_array)
 {
 	zval arr, argc, tmp;
 	int count = 0;
-	char *ss, *space;
 
 	if (!(SG(request_info).argc || track_vars_array)) {
 		return;
@@ -628,24 +609,18 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 			}
 		}
 	} else 	if (s && *s) {
-		ss = s;
-		while (ss) {
-			space = strchr(ss, '+');
-			if (space) {
-				*space = '\0';
-			}
+		while (1) {
+			const char *space = strchr(s, '+');
 			/* auto-type */
-			ZVAL_STRING(&tmp, ss);
+			ZVAL_STRINGL(&tmp, s, space ? space - s : strlen(s));
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
 				zend_string_efree(Z_STR(tmp));
 			}
-			if (space) {
-				*space = '+';
-				ss = space + 1;
-			} else {
-				ss = space;
+			if (!space) {
+				break;
 			}
+			s = space + 1;
 		}
 	}
 
@@ -670,8 +645,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 }
 /* }}} */
 
-/* {{{ php_register_server_variables
- */
+/* {{{ php_register_server_variables */
 static inline void php_register_server_variables(void)
 {
 	zval tmp;
@@ -709,8 +683,7 @@ static inline void php_register_server_variables(void)
 }
 /* }}} */
 
-/* {{{ php_autoglobal_merge
- */
+/* {{{ php_autoglobal_merge */
 static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 {
 	zval *src_entry, *dest_entry;
@@ -742,8 +715,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 }
 /* }}} */
 
-/* {{{ php_hash_environment
- */
+/* {{{ php_hash_environment */
 PHPAPI int php_hash_environment(void)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));

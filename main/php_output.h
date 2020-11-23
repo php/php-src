@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -139,7 +137,7 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	zend_stack handlers;
 	php_output_handler *active;
 	php_output_handler *running;
-	const char *output_start_filename;
+	zend_string *output_start_filename;
 	int output_start_lineno;
 	int flags;
 ZEND_END_MODULE_GLOBALS(output)

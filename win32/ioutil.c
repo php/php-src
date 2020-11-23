@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -862,7 +860,6 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 	BY_HANDLE_FILE_INFORMATION d;
 	PBY_HANDLE_FILE_INFORMATION data;
 	LARGE_INTEGER t;
-	wchar_t mypath[MAXPATHLEN];
 	uint8_t is_dir;
 
 	data = !dp ? &d : dp;

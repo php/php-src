@@ -6,14 +6,15 @@ Cloning unconstructed IntlDateFormatter
 <?php
 
 class A extends IntlDateFormatter {
-	function __construct() {}
+    function __construct() {}
 }
 
 $a = new A;
 try {
-	$b = clone $a;
+    $b = clone $a;
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
+?>
 --EXPECTF--
 string(%s) "Cannot clone unconstructed IntlDateFormatter"

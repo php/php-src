@@ -2,14 +2,9 @@
 Test ksort() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing ksort() by providing  array of integer/string values to check the basic functionality with following flag values :
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
  *  4.SORT_STRING - compare items as strings
@@ -19,19 +14,19 @@ echo "*** Testing ksort() : basic functionality ***\n";
 
 // an array containing unsorted string values with indices
 $unsorted_strings =   array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
 // an array containing unsorted numeric values with indices
 $unsorted_numerics =  array( 100 => 4, 33 => 3, 555 => 2, 22 => 1 );
 
-echo "\n-- Testing ksort() by supplying string array, 'flag' value is defualt --\n";
+echo "\n-- Testing ksort() by supplying string array, 'flag' value is default --\n";
 $temp_array = $unsorted_strings;
 var_dump( ksort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing ksort() by supplying numeric array, 'flag' value is defualt --\n";
+echo "\n-- Testing ksort() by supplying numeric array, 'flag' value is default --\n";
 $temp_array = $unsorted_numerics;
 var_dump( ksort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -76,7 +71,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing ksort() : basic functionality ***
 
--- Testing ksort() by supplying string array, 'flag' value is defualt --
+-- Testing ksort() by supplying string array, 'flag' value is default --
 bool(true)
 array(8) {
   ["O"]=>
@@ -97,7 +92,7 @@ array(8) {
   string(8) "orange20"
 }
 
--- Testing ksort() by supplying numeric array, 'flag' value is defualt --
+-- Testing ksort() by supplying numeric array, 'flag' value is default --
 bool(true)
 array(4) {
   [22]=>

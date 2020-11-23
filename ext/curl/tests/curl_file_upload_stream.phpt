@@ -21,8 +21,6 @@ var_dump(curl_setopt($ch, CURLOPT_POSTFIELDS, $params));
 var_dump(curl_exec($ch));
 curl_close($ch);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 string(24) "i-love-php|text/plain|11"
-===DONE===

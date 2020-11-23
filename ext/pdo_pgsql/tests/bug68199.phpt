@@ -9,7 +9,7 @@ PDOTest::skip();
 
 $db = PDOTest::factory();
 if (version_compare($db->getAttribute(PDO::ATTR_SERVER_VERSION), '9.0.0') < 0) {
-	die("skip Requires 9.0+");
+    die("skip Requires 9.0+");
 }
 
 ?>

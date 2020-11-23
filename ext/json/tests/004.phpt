@@ -1,7 +1,5 @@
 --TEST--
 json_encode() & endless loop - 2
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 

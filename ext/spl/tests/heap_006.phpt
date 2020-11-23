@@ -15,8 +15,6 @@ foreach ($h as $k => $o) {
     echo "$k => $o\n";
 }
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 99 => 100
 98 => 99
@@ -118,4 +116,3 @@ foreach ($h as $k => $o) {
 2 => 3
 1 => 2
 0 => 1
-===DONE===

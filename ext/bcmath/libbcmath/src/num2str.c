@@ -55,7 +55,6 @@ zend_string
 		str = zend_string_alloc(num->n_len + scale + signch + 1, 0);
 	else
 		str = zend_string_alloc(num->n_len + signch, 0);
-	if (str == NULL) bc_out_of_memory();
 
 	/* The negative sign if needed. */
 	sptr = ZSTR_VAL(str);

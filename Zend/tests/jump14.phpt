@@ -6,21 +6,21 @@ Testing GOTO inside blocks
 goto A;
 
 {
-	B:
-		goto C;
-		return;
+    B:
+        goto C;
+        return;
 }
 
 A:
-	goto B;
+    goto B;
 
 
 
 {
-	C:
-	{
-		print "Done!\n";
-	}
+    C:
+    {
+        print "Done!\n";
+    }
 }
 
 ?>

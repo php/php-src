@@ -5,27 +5,31 @@ file upload greater than 2G
 include "skipif.inc";
 
 if (PHP_INT_SIZE < 8) {
-	die("skip need PHP_INT_SIZE>=8");
+    die("skip need PHP_INT_SIZE>=8");
+}
+
+if (disk_free_space(sys_get_temp_dir()) < 2300000000) {
+    die("skip need more than 2.15G of free disk space for the uploaded file");
 }
 
 if (!file_exists('/proc/meminfo')) {
-	die('skip Cannot check free RAM from /proc/meminfo on this platform');
+    die('skip Cannot check free RAM from /proc/meminfo on this platform');
 }
 
 $free_ram = 0;
 if ($f = fopen("/proc/meminfo","r")) {
-	while (!feof($f)) {
-		if (preg_match('/MemFree[^\d]*(\d+)/i', fgets($f), $m)) {
-			$free_ram = max($free_ram, $m[1]/1024/1024);
-			if ($free_ram > 3) {
-				$enough_free_ram = true;
-			}
-		}
-	}
+    while (!feof($f)) {
+        if (preg_match('/MemFree[^\d]*(\d+)/i', fgets($f), $m)) {
+            $free_ram = max($free_ram, $m[1]/1024/1024);
+            if ($free_ram > 3) {
+                $enough_free_ram = true;
+            }
+        }
+    }
 }
 
 if (empty($enough_free_ram)) {
-	die(sprintf("skip need +3G free RAM, but only %01.2f available", $free_ram));
+    die(sprintf("skip need +3G free RAM, but only %01.2f available", $free_ram));
 }
 
 if (getenv('TRAVIS')) {
@@ -44,7 +48,7 @@ echo "Test\n";
 include "php_cli_server.inc";
 
 php_cli_server_start("var_dump(\$_FILES);", null,
-	["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
+    ["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
 
 $length = 2150000000;
 $output = "";
@@ -70,13 +74,13 @@ EOF
 
 $data = str_repeat("0123456789", 10000);
 for ($i = 0; $i < $length; $i += 10000 * 10) {
-	fwrite($fp, $data) or die("write failed @ ($i)");
+    fwrite($fp, $data) or die("write failed @ ($i)");
 }
 
 fwrite($fp, $post) or die("write post failed");
 
 while (!feof($fp)) {
-	$output .= fgets($fp);
+    $output .= fgets($fp);
 }
 echo $output;
 fclose($fp);

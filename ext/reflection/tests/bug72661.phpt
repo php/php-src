@@ -6,6 +6,5 @@ function test(iterable $arg) { }
 
 var_dump((string)(new ReflectionParameter("test", 0))->getType());
 ?>
---EXPECTF--
-Deprecated: Function ReflectionType::__toString() is deprecated in %s on line %d
+--EXPECT--
 string(8) "iterable"

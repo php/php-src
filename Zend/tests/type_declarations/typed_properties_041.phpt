@@ -4,7 +4,7 @@ Test typed properties weak conversion of strings
 <?php
 
 class Foo {
-	public int $bar = 1;
+    public int $bar = 1;
 }
 
 $foo = new Foo;

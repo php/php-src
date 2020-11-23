@@ -71,7 +71,7 @@ listen = 127.0.0.1:9000
 ; process.priority = -19
 
 ; Set the process dumpable flag (PR_SET_DUMPABLE prctl) even if the process user
-; or group is differrent than the master process user. It allows to create process
+; or group is different than the master process user. It allows to create process
 ; core dump and ptrace the process for the pool user.
 ; Default Value: no
 ; process.dumpable = yes
@@ -140,7 +140,7 @@ pm.max_spare_servers = 3
 ;pm.max_requests = 500
 
 ; The URI to view the FPM status page. If this value is not set, no URI will be
-; recognized as a status page. It shows the following informations:
+; recognized as a status page. It shows the following information:
 ;   pool                 - the name of the pool;
 ;   process manager      - static, dynamic or ondemand;
 ;   start time           - the date and time FPM has started;
@@ -238,6 +238,22 @@ pm.max_spare_servers = 3
 ; Default Value: not set
 ;pm.status_path = /status
 
+; The address on which to accept FastCGI status request. This creates a new
+; invisible pool that can handle requests independently. This is useful
+; if the main pool is busy with long running requests because it is still possible
+; to get the status before finishing the long running requests.
+;
+; Valid syntaxes are:
+;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific IPv4 address on
+;                            a specific port;
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
+;                            a specific port;
+;   'port'                 - to listen on a TCP socket to all addresses
+;                            (IPv6 and IPv4-mapped) on a specific port;
+;   '/path/to/unix/socket' - to listen on a unix socket.
+; Default Value: value of the listen option
+;pm.status_listen = 127.0.0.1:9001
+
 ; The ping URI to call the monitoring page of FPM. If this value is not set, no
 ; URI will be recognized as a ping page. This could be used to test from outside
 ; that FPM is alive and responding, or to
@@ -270,13 +286,13 @@ pm.max_spare_servers = 3
 ;  %d: time taken to serve the request
 ;      it can accept the following format:
 ;      - %{seconds}d (default)
-;      - %{miliseconds}d
+;      - %{milliseconds}d
 ;      - %{mili}d
 ;      - %{microseconds}d
 ;      - %{micro}d
 ;  %e: an environment variable (same as $_ENV or $_SERVER)
 ;      it must be associated with embraces to specify the name of the env
-;      variable. Some exemples:
+;      variable. Some examples:
 ;      - server specifics like: %{REQUEST_METHOD}e or %{SERVER_PROTOCOL}e
 ;      - HTTP headers like: %{HTTP_HOST}e or %{HTTP_USER_AGENT}e
 ;  %f: script filename
@@ -375,7 +391,7 @@ pm.max_spare_servers = 3
 
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and
 ; stderr will be redirected to /dev/null according to FastCGI specs.
-; Note: on highloaded environement, this can cause some delay in the page
+; Note: on highloaded environment, this can cause some delay in the page
 ; process time (several ms).
 ; Default Value: no
 ;catch_workers_output = yes

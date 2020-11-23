@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf.c,v 1.114 2019/02/20 02:35:27 christos Exp $")
+FILE_RCSID("@(#)$File: cdf.c,v 1.116 2019/08/26 14:31:39 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -61,6 +61,10 @@ FILE_RCSID("@(#)$File: cdf.c,v 1.114 2019/02/20 02:35:27 christos Exp $")
 
 #ifndef EFTYPE
 #define EFTYPE EINVAL
+#endif
+
+#ifndef SIZE_T_MAX
+#define SIZE_T_MAX CAST(size_t, ~0ULL)
 #endif
 
 #include "cdf.h"
@@ -388,17 +392,29 @@ ssize_t
 cdf_read_sector(const cdf_info_t *info, void *buf, size_t offs, size_t len,
     const cdf_header_t *h, cdf_secid_t id)
 {
-	size_t pos = CDF_SEC_POS(h, id);
-	assert(CDF_SEC_SIZE(h) == len);
-	return cdf_read(info, CAST(zend_off_t, pos), RCAST(char *, buf) + offs, len);
+	size_t ss = CDF_SEC_SIZE(h);
+	size_t pos;
+
+	if (SIZE_T_MAX / ss < CAST(size_t, id))
+		return -1;
+
+	pos = CDF_SEC_POS(h, id);
+	assert(ss == len);
+	return cdf_read(info, CAST(off_t, pos), RCAST(char *, buf) + offs, len);
 }
 
 ssize_t
 cdf_read_short_sector(const cdf_stream_t *sst, void *buf, size_t offs,
     size_t len, const cdf_header_t *h, cdf_secid_t id)
 {
-	size_t pos = CDF_SHORT_SEC_POS(h, id);
-	assert(CDF_SHORT_SEC_SIZE(h) == len);
+	size_t ss = CDF_SHORT_SEC_SIZE(h);
+	size_t pos;
+
+	if (SIZE_T_MAX / ss < CAST(size_t, id))
+		return -1;
+
+	pos = CDF_SHORT_SEC_POS(h, id);
+	assert(ss == len);
 	if (pos + len > CDF_SEC_SIZE(h) * sst->sst_len) {
 		DPRINTF(("Out of bounds read %" SIZE_T_FORMAT "u > %"
 		    SIZE_T_FORMAT "u\n",

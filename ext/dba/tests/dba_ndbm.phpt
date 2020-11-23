@@ -2,16 +2,15 @@
 DBA NDBM handler test
 --SKIPIF--
 <?php
-	$handler = 'ndbm';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'ndbm';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-	$handler = 'ndbm';
-	require_once __DIR__ .'/test.inc';
-	require_once __DIR__ .'/dba_handler.inc';
+    $handler = 'ndbm';
+    require_once __DIR__ .'/test.inc';
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --EXPECT--
 database handler: ndbm
 3NYNYY
@@ -47,4 +46,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

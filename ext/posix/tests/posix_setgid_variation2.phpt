@@ -29,11 +29,9 @@ foreach ( $variation_array as $var ) {
   var_dump(posix_setgid( $var  ) );
 }
 ?>
-===DONE===
 --EXPECT--
 *** Test substituting argument 1 with boolean values ***
 bool(false)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

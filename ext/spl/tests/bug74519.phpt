@@ -10,14 +10,12 @@ $iterator->append($events);
 $events->next();
 
 while($iterator->valid()) {
-	echo $iterator->current(), "\n";
-	$iterator->next();
+    echo $iterator->current(), "\n";
+    $iterator->next();
 }
 ?>
-===DONE===
 --EXPECT--
 2
 3
 4
 5
-===DONE===

@@ -46,11 +46,11 @@ $db = PDOTest::test_factory('ext/pdo_odbc/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
-	if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
-		if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
-			die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
-		}
-	}
+    if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
+        if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
+            die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
+        }
+    }
 }
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -61,35 +61,36 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $sizes = array(32, 53, 64, 79, 128, 253, 254, 255, 256, 257, 258, 1022, 1023, 1024, 1025, 1026, 510, 511, 512, 513, 514, 1278, 1279, 1280, 1281, 1282, 2046, 2047, 2048, 2049, 2050, 1534, 1535, 1536, 1537, 1538, 3070, 3071, 3072, 3073, 3074, 3998, 3999, 4000);
 
 function alpha_repeat($len) {
-	// use the alphabet instead of 'i' characters to make sure the blocks don't overlap when they are reassembled
-	$out = "";
-	while (strlen($out) < $len) {
-		$out .= "abcdefghijklmnopqrstuvwxyz";
-	}
-	return substr($out, 0, $len);
+    // use the alphabet instead of 'i' characters to make sure the blocks don't overlap when they are reassembled
+    $out = "";
+    while (strlen($out) < $len) {
+        $out .= "abcdefghijklmnopqrstuvwxyz";
+    }
+    return substr($out, 0, $len);
 }
 
 // don't use Prepared Statements. that fails on MS SQL server (works with Access, MyODBC), which is a separate failure, feature/code-path from what
 // this test does - nice to be able to test using MS SQL server
 foreach ($sizes as $num) {
-	$text = alpha_repeat($num);
-	$db->exec("INSERT INTO TEST VALUES($num, '$text')");
+    $text = alpha_repeat($num);
+    $db->exec("INSERT INTO TEST VALUES($num, '$text')");
 }
 
 // verify data
 foreach ($db->query('SELECT id, data from TEST ORDER BY LEN(data) ASC') as $row) {
-	$expect = alpha_repeat($row[0]);
-	if (strcmp($expect, $row[1])) {
-		echo "Failed on size $row[id]:\n";
-		printf("Expected %d bytes, got %d\n", strlen($expect), strlen($row['data']));
-		echo ($expect) . "\n";
-		echo ($row['data']) . "\n";
-	} else {
-		echo "Passed on size $row[id]\n";
-	}
+    $expect = alpha_repeat($row[0]);
+    if (strcmp($expect, $row[1])) {
+        echo "Failed on size $row[id]:\n";
+        printf("Expected %d bytes, got %d\n", strlen($expect), strlen($row['data']));
+        echo ($expect) . "\n";
+        echo ($row['data']) . "\n";
+    } else {
+        echo "Passed on size $row[id]\n";
+    }
 }
 
 echo "Finished\n";
+?>
 --EXPECT--
 Passed on size 32
 Passed on size 53

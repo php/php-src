@@ -7,11 +7,6 @@ function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available i
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_strtoupper(string $sourcestring [, string $encoding]
- * Description: Returns a uppercased version of $sourcestring
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Pass characters from different languages to check that mb_strtoupper is
  * doing a correct case conversion
@@ -27,14 +22,14 @@ $lowers = array('Basic Latin' => 'abcdefghijklmnopqrstuvwxyz',
                 'Russian' => base64_decode('0LDQsdCy0LPQtNC10LbQtw=='));
 
 foreach ($lowers as $lang => $sourcestring) {
-	echo "\n-- $lang --\n";
-	$a = mb_strtoupper($sourcestring, 'UTF-8');
-	var_dump(base64_encode($a));
-	if ($a == $uppers[$lang]) {
-		echo "Correctly Converted\n";
-	} else {
-		echo "Incorrectly Converted\n";
-	}
+    echo "\n-- $lang --\n";
+    $a = mb_strtoupper($sourcestring, 'UTF-8');
+    var_dump(base64_encode($a));
+    if ($a == $uppers[$lang]) {
+        echo "Correctly Converted\n";
+    } else {
+        echo "Incorrectly Converted\n";
+    }
 }
 
 echo "Done";

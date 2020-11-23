@@ -8,7 +8,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-	var_dump(is_string(gethostbyname("www.php.net")));
+    var_dump(is_string(gethostbyname("www.php.net")));
 ?>
 --EXPECT--
 bool(true)

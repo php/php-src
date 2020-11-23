@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-DOMAttr::__construct() expects at least 1 parameter, 0 given
+DOMAttr::__construct() expects at least 1 argument, 0 given

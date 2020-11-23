@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,9 +18,6 @@
 #define IDN_IDN_H
 
 #include <php.h>
-
-PHP_FUNCTION(idn_to_ascii);
-PHP_FUNCTION(idn_to_utf8);
 
 void idn_register_constants(INIT_FUNC_ARGS);
 

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -111,7 +109,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 			}
 			/* Position at the first row */
 			set->data_cursor = set->data;
-		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
+		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_C) {
 			/*TODO*/
 		}
 
@@ -1314,7 +1312,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 		  max_allowed_packet_size on the server and resending the data.
 		*/
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-#if HAVE_USLEEP && !defined(PHP_WIN32)
+#if defined(HAVE_USLEEP) && !defined(PHP_WIN32)
 		usleep(120000);
 #endif
 		if ((packet_len = conn->protocol_frame_codec->m.consume_uneaten_data(conn->protocol_frame_codec, COM_STMT_SEND_LONG_DATA))) {

@@ -20,10 +20,10 @@ $rows = pg_fetch_all($result);
 $unesc_image = pg_unescape_bytea($rows[0]['bin']);
 
 if ($unesc_image !== $image) {
-	echo "NG";
+    echo "NG";
 }
 else {
-	echo "OK";
+    echo "OK";
 }
 ?>
 --EXPECT--

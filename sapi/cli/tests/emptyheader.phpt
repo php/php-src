@@ -15,7 +15,7 @@ $fp = php_cli_server_connect();
 fwrite($fp, "GET / HTTP/1.1\r\nUser-Agent\r\nAccept: */*\r\nReferer:\r\nHi\r\n\r\n");
 fflush($fp);
 while (!feof($fp)) {
-	echo fgets($fp);
+    echo fgets($fp);
 }
 fclose($fp);
 ?>

@@ -11,7 +11,6 @@ if (!extension_loaded("dom")) die("skip no dom extension");
 $dom = new ReflectionExtension('dom');
 var_dump($dom->getDependencies());
 ?>
-==DONE==
 --EXPECTF--
 array(2) {
   ["libxml"]=>
@@ -19,4 +18,3 @@ array(2) {
   ["domxml"]=>
   %s(9) "Conflicts"
 }
-==DONE==

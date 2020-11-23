@@ -8,5 +8,6 @@ class Exception {
 }
 
 echo get_class(new Exception()),"\n";
+?>
 --EXPECT--
 test\ns1\Exception

@@ -20,7 +20,5 @@ echo " ";
 echo $reader->getAttributeNs('isbn', 'uri');
 echo "\n";
 ?>
-===DONE===
 --EXPECT--
 prefix:books 12isbn
-===DONE===

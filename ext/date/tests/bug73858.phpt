@@ -45,7 +45,7 @@ var_dump($d->days); // 30 ... and should be 30
 
 /*
 [Workaround]
-This final test seems to prove that the input string is important and that the "- 1 secord" has a negative knock-on
+This final test seems to prove that the input string is important and that the "- 1 second" has a negative knock-on
 effect on the results of the diff. By modifying the datetime with ->modify everything works as expected ...
 it just means you have to be careful of how we work with DateTimes .
 */

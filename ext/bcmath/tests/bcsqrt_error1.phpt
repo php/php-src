@@ -7,7 +7,11 @@ antoni@solucionsinternet.com
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
 --FILE--
 <?php
-echo bcsqrt('-9');
+try {
+    bcsqrt('-9');
+} catch (ValueError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: bcsqrt(): Square root of negative number in %s.php on line %d
+--EXPECT--
+bcsqrt(): Argument #1 ($num) must be greater than or equal to 0

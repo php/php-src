@@ -19,6 +19,6 @@ $context = stream_context_create(
     $socket = stream_socket_client('tcp://localhost:1443', $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context);
 ?>
 --EXPECTF--
-Warning: stream_socket_client(): unable to connect to tcp://localhost:1443 (%s) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to tcp://localhost:1443 (%s) in %s on line %d
 
-Warning: stream_socket_client(): unable to connect to tcp://localhost:1443 (%s) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to tcp://localhost:1443 (%s) in %s on line %d

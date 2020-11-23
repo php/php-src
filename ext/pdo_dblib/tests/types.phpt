@@ -10,31 +10,31 @@ require __DIR__ . '/config.inc';
 require __DIR__ . '/config.inc';
 
 function get_expected_float_string() {
-	global $db;
+    global $db;
 
-	switch ($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION)) {
-		case '5.0':
-		case '6.0':
-		case '7.0':
-		case '7.1':
-		case '7.2':
-		case '8.0':
-			return '10.500';
-		default:
-			return '10.5';
-	}
+    switch ($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION)) {
+        case '5.0':
+        case '6.0':
+        case '7.0':
+        case '7.1':
+        case '7.2':
+        case '8.0':
+            return '10.500';
+        default:
+            return '10.5';
+    }
 }
 
 $sql = "
-	SELECT
-		'foo' AS [char],
-		CAST('2030-01-01 23:59:59' AS DATETIME) AS [datetime],
-		CAST(0 AS BIT) AS [false],
-		10.500 AS [float],
-		1000 AS [int],
-		CAST(10.500 AS MONEY) AS [money],
-		CAST('1950-01-18 23:00:00' AS SMALLDATETIME) as [smalldatetime],
-		CAST(1 AS BIT) AS [true]
+    SELECT
+        'foo' AS [char],
+        CAST('2030-01-01 23:59:59' AS DATETIME) AS [datetime],
+        CAST(0 AS BIT) AS [false],
+        10.500 AS [float],
+        1000 AS [int],
+        CAST(10.500 AS MONEY) AS [money],
+        CAST('1950-01-18 23:00:00' AS SMALLDATETIME) as [smalldatetime],
+        CAST(1 AS BIT) AS [true]
 ";
 
 $stmt = $db->query($sql);

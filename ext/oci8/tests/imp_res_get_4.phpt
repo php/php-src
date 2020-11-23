@@ -118,8 +118,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
   1  abcde
@@ -143,4 +141,3 @@ Return is false
 
 Warning: oci_fetch_array(): ORA-01002: %s in %simp_res_get_4.php on line %d
 Return is false
-===DONE===

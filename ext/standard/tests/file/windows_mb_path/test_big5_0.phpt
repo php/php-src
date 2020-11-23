@@ -29,19 +29,17 @@ $fn = $prefix . DIRECTORY_SEPARATOR . "$item";
 
 $f = fopen($fn, 'r');
 if ($f) {
-	var_dump($f, fread($f, 42));
-	var_dump(fclose($f));
+    var_dump($f, fread($f, 42));
+    var_dump(fclose($f));
 } else {
-	echo "open utf8 failed\n";
+    echo "open utf8 failed\n";
 }
 
 remove_data("file_big5");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 string(%d) "reading file wihh multibyte filename
 "
 bool(true)
-===DONE===

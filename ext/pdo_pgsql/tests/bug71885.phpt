@@ -16,19 +16,19 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_NUM);
 
 foreach ([false, true] as $emulate) {
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
 
-	try {
-		$stmt = $db->prepare('select ?- lseg \'((-1,0),(1,0))\'');
-		$stmt->execute();
-	} catch (PDOException $e) {
-		var_dump('ERR');
-	}
+    try {
+        $stmt = $db->prepare('select ?- lseg \'((-1,0),(1,0))\'');
+        $stmt->execute();
+    } catch (PDOException $e) {
+        var_dump('ERR');
+    }
 
-	$stmt = $db->prepare('select ??- lseg \'((-1,0),(1,0))\'');
-	$stmt->execute();
+    $stmt = $db->prepare('select ??- lseg \'((-1,0),(1,0))\'');
+    $stmt->execute();
 
-	var_dump($stmt->fetch());
+    var_dump($stmt->fetch());
 }
 
 ?>

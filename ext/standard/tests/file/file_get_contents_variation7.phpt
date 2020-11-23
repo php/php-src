@@ -4,12 +4,6 @@ Test file_get_contents() function : variation - various absolute and relative pa
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_get_contents() : variation ***\n";
 $mainDir = "fileGetContentsVar7.dir";
 $subDir = "fileGetContentsVar7Sub";
@@ -76,12 +70,12 @@ string(%d) "contents read"
 
 -- Iteration 5 --
 
-Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/..///fileGetContentsVar7Sub//..//../fileGetContentsVar7Sub/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/..///fileGetContentsVar7Sub//..//../fileGetContentsVar7Sub/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -98,7 +92,7 @@ string(%d) "contents read"
 
 -- Iteration 11 --
 
-Warning: file_get_contents(BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(BADDIR/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

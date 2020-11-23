@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -105,7 +103,7 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }/*}}}*/
 
-char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
+const char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
 {/*{{{*/
 	PSID pSid = TWG(impersonation_token_sid);
 	char *ptcSid = NULL;
@@ -445,7 +443,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 	return popen_ex(command, type, NULL, NULL);
 }/*}}}*/
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, const char *env)
 {/*{{{*/
 	FILE *stream = NULL;
 	int fno, type_len, read, mode;
@@ -480,12 +478,12 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
+	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /s /c ")+2);
 	if (!cmd) {
 		return NULL;
 	}
 
-	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
+	sprintf(cmd, "%s /s /c \"%s\"", TWG(comspec), command);
 	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
@@ -771,7 +769,6 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 	}
 }/*}}}*/
 
-#if HAVE_UTIME
 static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 {
 	// Note that LONGLONG is a 64-bit value
@@ -825,5 +822,4 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	return 1;
 }
 /* }}} */
-#endif
 #endif

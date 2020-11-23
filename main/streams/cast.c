@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -295,7 +293,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	}
 
 	if (php_stream_is_filtered(stream)) {
-		php_error_docref(NULL, E_WARNING, "cannot cast a filtered stream on this system");
+		php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
 		return FAILURE;
 	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
 		goto exit_success;
@@ -310,7 +308,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			"select()able descriptor"
 		};
 
-		php_error_docref(NULL, E_WARNING, "cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
+		php_error_docref(NULL, E_WARNING, "Cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
 	}
 
 	return FAILURE;

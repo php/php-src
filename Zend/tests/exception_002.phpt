@@ -6,10 +6,10 @@ Testing exception and GOTO
 goto foo;
 
 try {
-	print 1;
+    print 1;
 
-	foo:
-	print 2;
+    foo:
+    print 2;
 } catch (Exception $e) {
 
 }

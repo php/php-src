@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_uuencode.h"
 
@@ -49,9 +45,10 @@ const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
 	mbfl_no_encoding_uuencode,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_uudec,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -89,7 +86,7 @@ int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 			}
 			if (filter->cache == 5)
 			{
-				/* thats good enough - wait for a newline */
+				/* that's good enough - wait for a newline */
 				filter->status = uudec_state_until_newline;
 				filter->cache = 0;
 			}

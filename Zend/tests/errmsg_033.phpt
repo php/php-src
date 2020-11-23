@@ -5,11 +5,11 @@ errmsg: __destruct() cannot be static
 
 class test {
 
-	static function __destruct() {
-	}
+    static function __destruct() {
+    }
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Destructor test::__destruct() cannot be static in %s on line %d
+Fatal error: Method test::__destruct() cannot be static in %s on line %d

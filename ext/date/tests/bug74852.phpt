@@ -13,5 +13,5 @@ var_dump($interval->abcde);
 bool(false)
 bool(false)
 
-Notice: Undefined property: DateInterval::$abcde in %s on line %d
+Warning: Undefined property: DateInterval::$abcde in %s on line %d
 NULL

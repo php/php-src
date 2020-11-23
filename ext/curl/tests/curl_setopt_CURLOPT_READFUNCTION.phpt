@@ -40,7 +40,6 @@ fclose ($hReadHandle);
 $sOutput = file_get_contents($sWriteFile);
 var_dump($sOutput);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $sFileBase  = __DIR__.DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
@@ -51,4 +50,3 @@ unlink($sWriteFile);
 ?>
 --EXPECT--
 string(27) "custom:contents of tempfile"
-===DONE===

@@ -6,13 +6,13 @@ include('skipif.inc');
 
 $test = @iconv_strpos("abbttt","ttt",0,"UTF-8");
 if ($test === false) {
-	die("skip UTF-8 is not supported?");
+    die("skip UTF-8 is not supported?");
 }
 
 ?>
 --FILE--
 <?php
-	var_dump(iconv_substr('x', 0, 1, 'UTF-8'));
+    var_dump(iconv_substr('x', 0, 1, 'UTF-8'));
 ?>
 --EXPECT--
 string(1) "x"

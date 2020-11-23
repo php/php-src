@@ -26,9 +26,9 @@ undef_bool_cast();
 --EXPECTF--
 In undef_negation
 
-Notice: Undefined variable: v in %s on line 4
+Warning: Undefined variable $v in %s on line 4
 true
 In undef_bool_cast
 
-Notice: Undefined variable: v in %s on line 10
+Warning: Undefined variable $v in %s on line 10
 false

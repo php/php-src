@@ -5,11 +5,11 @@ mb_strstr()
 --FILE--
 <?php
 function EUC_JP($utf8str) {
-	return mb_convert_encoding($utf8str, "EUC-JP", "UTF-8");
+    return mb_convert_encoding($utf8str, "EUC-JP", "UTF-8");
 }
 
 function FROM_EUC_JP($eucjpstr) {
-	return mb_convert_encoding($eucjpstr, "UTF-8", "EUC-JP");
+    return mb_convert_encoding($eucjpstr, "UTF-8", "EUC-JP");
 }
 
 var_dump(mb_strstr("あいうえおかきくけこ", "おかき"));

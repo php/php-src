@@ -7,11 +7,11 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class ItemArray implements Iterator {
-	private $a = array();
+    private $a = array();
 
-	public function __construct(array $a) {
-		$this->a = $a;
-	}
+    public function __construct(array $a) {
+        $this->a = $a;
+    }
 
     public function rewind()    { return reset($this->a); }
     public function current()   { return current($this->a); }
@@ -23,26 +23,26 @@ class ItemArray implements Iterator {
 class Item {
     public $text;
 
-	public function __construct($n) {
-		$this->text = 'text'.$n;
-	}
+    public function __construct($n) {
+        $this->text = 'text'.$n;
+    }
 }
 
 class handlerClass {
     public function getItems()
     {
         return new ItemArray(array(
-        		new Item(0),
-        		new Item(1),
-        		new Item(2),
-        		new Item(3),
-        		new Item(4),
-        		new Item(5),
-        		new Item(6),
-        		new Item(7),
-        		new Item(8),
-        		new Item(9)
-        	));
+                new Item(0),
+                new Item(1),
+                new Item(2),
+                new Item(3),
+                new Item(4),
+                new Item(5),
+                new Item(6),
+                new Item(7),
+                new Item(8),
+                new Item(9)
+            ));
     }
 }
 

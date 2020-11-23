@@ -4,10 +4,10 @@ iterable type#003 - Return types
 <?php
 
 function foo(): iterable {
-	return [];
+    return [];
 }
 function bar(): iterable {
-	return (function () { yield; })();
+    return (function () { yield; })();
 }
 
 function baz(): iterable {
@@ -29,4 +29,4 @@ array(0) {
 }
 object(Generator)#2 (0) {
 }
-Return value of baz() must be iterable, int returned
+baz(): Return value must be of type iterable, int returned

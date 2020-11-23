@@ -3,8 +3,11 @@ Bug #70245 (strtotime does not emit warning when 2nd parameter is object or stri
 --FILE--
 <?php
 $d = new DateTime('2011-01-15 00:00:00');
-var_dump(strtotime('-1 month', $d));
+try {
+    var_dump(strtotime('-1 month', $d));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: strtotime() expects parameter 2 to be int, object given in %sbug70245.php on line %d
-bool(false)
+--EXPECT--
+strtotime(): Argument #2 ($baseTimestamp) must be of type ?int, DateTime given

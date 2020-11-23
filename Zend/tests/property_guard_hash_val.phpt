@@ -12,5 +12,5 @@ $test = new Test;
 var_dump($test->x);
 ?>
 --EXPECTF--
-Notice: Undefined property: Test::$x in %s on line %d
+Warning: Undefined property: Test::$x in %s on line %d
 NULL

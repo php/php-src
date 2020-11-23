@@ -7,20 +7,20 @@ ffi.enable=1
 --FILE--
 <?php
 try {
-	FFI::cdef("struct X {struct X x[2];};");
-	echo "ok\n";
+    FFI::cdef("struct X {struct X x[2];};");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct X {struct X *ptr[2];};");
-	echo "ok\n";
+    FFI::cdef("struct X {struct X *ptr[2];};");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 ?>
 ok
 --EXPECT--
-FFI\ParserException: incomplete 'struct X' at line 1
+FFI\ParserException: Incomplete struct "X" at line 1
 ok
 ok

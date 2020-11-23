@@ -1,7 +1,6 @@
+%require "3.0"
 %code top {
 /*
-  +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
@@ -42,10 +41,9 @@ int json_yydebug = 1;
 
 }
 
-%define api.pure full
 %define api.prefix {php_json_yy}
-%lex-param  { php_json_parser *parser  }
-%parse-param { php_json_parser *parser }
+%define api.pure full
+%param  { php_json_parser *parser  }
 
 %union {
 	zval value;
@@ -120,7 +118,7 @@ object_end:
 ;
 
 members:
-		/* empty */
+		%empty
 			{
 				if ((parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) && parser->methods.object_create == php_json_parser_object_create) {
 					ZVAL_EMPTY_ARRAY(&$$);
@@ -184,7 +182,7 @@ array_end:
 ;
 
 elements:
-		/* empty */
+		%empty
 			{
 				if (parser->methods.array_create == php_json_parser_array_create) {
 					ZVAL_EMPTY_ARRAY(&$$);
@@ -243,10 +241,10 @@ static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
 		array_init(object);
-		return SUCCESS;
 	} else {
-		return object_init(object);
+		object_init(object);
 	}
+	return SUCCESS;
 }
 
 static int php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
@@ -255,7 +253,6 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
 	} else {
-		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
 			zend_string_release_ex(key, 0);
@@ -263,8 +260,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 		}
-		ZVAL_NEW_STR(&zkey, key);
-		zend_std_write_property(object, &zkey, zvalue, NULL);
+		zend_std_write_property(Z_OBJ_P(object), key, zvalue, NULL);
 		Z_TRY_DELREF_P(zvalue);
 	}
 	zend_string_release_ex(key, 0);
@@ -305,7 +301,7 @@ static const php_json_parser_methods default_parser_methods =
 
 PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 		zval *return_value,
-		char *str,
+		const char *str,
 		size_t str_len,
 		int options,
 		int max_depth,
@@ -321,7 +317,7 @@ PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 
 PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 		zval *return_value,
-		char *str,
+		const char *str,
 		size_t str_len,
 		int options,
 		int max_depth)

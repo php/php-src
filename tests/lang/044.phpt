@@ -18,7 +18,7 @@ echo $wrongClassname::$methodname()."\n";
 --EXPECTF--
 foo
 
-Fatal error: Uncaught Error: Class 'B' not found in %s044.php:%d
+Fatal error: Uncaught Error: Class "B" not found in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s044.php on line %d

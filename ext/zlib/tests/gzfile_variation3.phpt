@@ -25,26 +25,17 @@ $variation = array(
 
 
 foreach ( $variation as $var ) {
-  var_dump(gzfile( $var ,  $use_include_path ) );
+    try {
+        var_dump(gzfile( $var ,  $use_include_path ) );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 ?>
-===DONE===
---EXPECTF--
-Warning: gzfile(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: gzfile(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: gzfile(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: gzfile(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: gzfile(): Filename cannot be empty in %s on line %d
-bool(false)
-
-Warning: gzfile(): Filename cannot be empty in %s on line %d
-bool(false)
-===DONE===
+--EXPECT--
+Path cannot be empty
+Path cannot be empty
+Path cannot be empty
+Path cannot be empty
+Path cannot be empty
+Path cannot be empty

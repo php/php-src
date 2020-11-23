@@ -68,7 +68,6 @@ include "my/index.php";
 __HALT_COMPILER();');
 include $fname;
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -223,4 +222,3 @@ not found 2
 
 Warning: fileperms(): stat failed for not/found in phar://%sstat.phar.php/my/index.php on line %d
 bool(false)
-===DONE===

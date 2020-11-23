@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -142,7 +140,8 @@ static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 	resourcebundle_iterator_key,
 	resourcebundle_iterator_step,
 	resourcebundle_iterator_reset,
-	resourcebundle_iterator_invalidate
+	resourcebundle_iterator_invalidate,
+	NULL, /* get_gc */
 };
 /* }}} */
 

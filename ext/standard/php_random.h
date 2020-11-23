@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,9 +18,6 @@
 #define PHP_RANDOM_H
 
 BEGIN_EXTERN_C()
-
-PHP_FUNCTION(random_bytes);
-PHP_FUNCTION(random_int);
 
 PHP_MINIT_FUNCTION(random);
 PHP_MSHUTDOWN_FUNCTION(random);

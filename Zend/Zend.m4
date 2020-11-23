@@ -146,9 +146,7 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill finite sigsetjmp)
-
-AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
+AC_CHECK_FUNCS(getpid kill sigsetjmp)
 
 ZEND_CHECK_FLOAT_PRECISION
 
@@ -157,6 +155,7 @@ AC_MSG_CHECKING(whether double cast to long preserves least significant bits)
 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <limits.h>
+#include <stdlib.h>
 
 int main()
 {
@@ -191,23 +190,14 @@ dnl LIBZEND_OTHER_CHECKS
 dnl
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
-AC_ARG_ENABLE([maintainer-zts],
-  [AS_HELP_STRING([--enable-maintainer-zts],
-    [Enable thread safety - for code maintainers only!!])],
-  [ZEND_MAINTAINER_ZTS=$enableval],
-  [ZEND_MAINTAINER_ZTS=no])
-
-AC_ARG_ENABLE([inline-optimization],
-  [AS_HELP_STRING([--disable-inline-optimization],
-    [If building zend_execute.lo fails, try this switch])],
-  [ZEND_INLINE_OPTIMIZATION=$enableval],
-  [ZEND_INLINE_OPTIMIZATION=yes])
+AC_ARG_ENABLE([zts],
+  [AS_HELP_STRING([--enable-zts],
+    [Enable thread safety])],
+  [ZEND_ZTS=$enableval],
+  [ZEND_ZTS=no])
 
 AC_MSG_CHECKING(whether to enable thread-safety)
-AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
-
-AC_MSG_CHECKING(whether to enable inline optimization for GCC)
-AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
+AC_MSG_RESULT($ZEND_ZTS)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
@@ -222,25 +212,22 @@ else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
-test -n "$GCC" && CFLAGS="$CFLAGS -Wall -Wno-strict-aliasing"
+test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-strict-aliasing -Wno-implicit-fallthrough -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
+dnl Check if compiler supports -Wno-clobbered (only GCC)
+AX_CHECK_COMPILE_FLAG([-Wno-clobbered], CFLAGS="-Wno-clobbered $CFLAGS", , [-Werror])
+AX_CHECK_COMPILE_FLAG([-Wduplicated-cond], CFLAGS="-Wduplicated-cond $CFLAGS", , [-Werror])
+AX_CHECK_COMPILE_FLAG([-Wlogical-op], CFLAGS="-Wlogical-op $CFLAGS", , [-Werror])
+AX_CHECK_COMPILE_FLAG([-Wformat-truncation], CFLAGS="-Wformat-truncation $CFLAGS", , [-Werror])
+AX_CHECK_COMPILE_FLAG([-fno-common], CFLAGS="-fno-common $CFLAGS", , [-Werror])
+
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
-if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
+if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
 fi
 
-changequote({,})
-if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
-  INLINE_CFLAGS=`echo $ac_n "$CFLAGS $ac_c" | sed s/-O[0-9s]*//`
-else
-  INLINE_CFLAGS="$CFLAGS"
-fi
-changequote([,])
-
 AC_C_INLINE
-
-AC_SUBST(INLINE_CFLAGS)
 
 AC_MSG_CHECKING(target system is Darwin)
 if echo "$target" | grep "darwin" > /dev/null; then
@@ -256,6 +243,7 @@ AC_MSG_CHECKING(for MM alignment and log values)
 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef union _mm_align_test {
   void *ptr;
@@ -384,135 +372,6 @@ else
   HAVE_GCC_GLOBAL_REGS=no
 fi
 AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
-
-dnl Check if atof() accepts NAN.
-AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isnan(atof("NAN")) ? 0 : 1;
-}
-]])],[
-  ac_cv_atof_accept_nan=yes
-],[
-  ac_cv_atof_accept_nan=no
-],[
-  ac_cv_atof_accept_nan=no
-])])
-if test "$ac_cv_atof_accept_nan" = "yes"; then
-  AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
-fi
-
-dnl Check if atof() accepts INF.
-AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isinf(atof("INF")) && zend_isinf(atof("-INF")) ? 0 : 1;
-}
-]])],[
-  ac_cv_atof_accept_inf=yes
-],[
-  ac_cv_atof_accept_inf=no
-],[
-  ac_cv_atof_accept_inf=no
-])])
-if test "$ac_cv_atof_accept_inf" = "yes"; then
-  AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
-fi
-
-dnl Check if HUGE_VAL == INF.
-AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isinf(HUGE_VAL) ? 0 : 1;
-}
-]])],[
-  ac_cv_huge_val_inf=yes
-],[
-  ac_cv_huge_val_inf=no
-],[
-  ac_cv_huge_val_inf=yes
-])])
-dnl This is the most probable fallback so we assume yes in case of cross compile.
-if test "$ac_cv_huge_val_inf" = "yes"; then
-  AC_DEFINE([HAVE_HUGE_VAL_INF], 1, [whether HUGE_VAL == INF])
-fi
-
-dnl Check if HUGE_VAL + -HUGEVAL == NAN.
-AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-#if defined(__sparc__) && !(__GNUC__ >= 3)
-	/* prevent bug #27830 */
-	return 1;
-#else
-	return zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
-#endif
-}
-]])],[
-  ac_cv_huge_val_nan=yes
-],[
-  ac_cv_huge_val_nan=no
-],[
-  ac_cv_huge_val_nan=yes
-])])
-dnl This is the most probable fallback so we assume yes in case of cross compile.
-if test "$ac_cv_huge_val_nan" = "yes"; then
-  AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
-fi
 
 dnl Check whether __cpuid_count is available.
 AC_CACHE_CHECK(whether __cpuid_count is available, ac_cv_cpuid_count_available, [

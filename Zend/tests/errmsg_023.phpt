@@ -4,11 +4,11 @@ errmsg: access level must be the same or weaker
 <?php
 
 class test1 {
-	protected $var;
+    protected $var;
 }
 
 class test extends test1 {
-	private $var;
+    private $var;
 }
 
 echo "Done\n";

@@ -45,22 +45,22 @@ if (file_exists($outfile)) {
 bool(true)
 bool(true)
 
-Warning: openssl_pkcs7_decrypt(): unable to get private key in %s on line %d
+Warning: openssl_pkcs7_decrypt(): Unable to get private key in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
-Warning: openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs7_decrypt(): unable to get private key in %s on line %d
+Warning: openssl_pkcs7_decrypt(): Unable to get private key in %s on line %d
 bool(false)
 true
 true

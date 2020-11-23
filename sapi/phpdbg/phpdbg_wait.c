@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -36,7 +34,7 @@ static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 
 
 static int phpdbg_dearm_autoglobals(zend_auto_global *auto_global) {
-	if (ZSTR_LEN(auto_global->name) != sizeof("GLOBALS") - 1 || memcmp(ZSTR_VAL(auto_global->name), "GLOBALS", sizeof("GLOBALS") - 1)) {
+	if (zend_string_equals_literal(auto_global->name, "GLOBALS")) {
 		auto_global->armed = 0;
 	}
 
@@ -48,13 +46,9 @@ typedef struct {
 	HashPosition pos[2];
 } phpdbg_intersect_ptr;
 
-static int phpdbg_array_data_compare(const void *a, const void *b) {
-	Bucket *f, *s;
+static int phpdbg_array_data_compare(Bucket *f, Bucket *s) {
 	int result;
 	zval *first, *second;
-
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
 
 	first = &f->val;
 	second = &s->val;
@@ -74,8 +68,8 @@ static void phpdbg_array_intersect_init(phpdbg_intersect_ptr *info, HashTable *h
 	info->ht[0] = ht1;
 	info->ht[1] = ht2;
 
-	zend_hash_sort(info->ht[0], (compare_func_t) phpdbg_array_data_compare, 0);
-	zend_hash_sort(info->ht[1], (compare_func_t) phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[0], phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[1], phpdbg_array_data_compare, 0);
 
 	zend_hash_internal_pointer_reset_ex(info->ht[0], &info->pos[0]);
 	zend_hash_internal_pointer_reset_ex(info->ht[1], &info->pos[1]);

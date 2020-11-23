@@ -22,6 +22,7 @@ if ($ns2 == NULL) {
   echo 'namespace node prefix=' . $ns2->prefix . "\n";
   echo 'namespace node namespaceURI=' . $ns2->namespaceURI . "\n";
 }
+?>
 --EXPECT--
 namespace node prefix=ns2
 namespace node namespaceURI=http://ns2

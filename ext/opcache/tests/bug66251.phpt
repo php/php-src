@@ -5,7 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 --SKIPIF--
-<?php if (!extension_loaded('Zend OPcache') || php_sapi_name() != "cli") die("skip CLI only"); ?>
+<?php if (!extension_loaded('Zend OPcache')) die("skip Zend OPcache extension not loaded"); ?>
 --FILE--
 <?php
 printf ("A=%s\n", getA());
@@ -13,5 +13,8 @@ const A="hello";
 function getA() {return A;}
 ?>
 --EXPECTF--
-Warning: Use of undefined constant A - assumed 'A' (this will throw an Error in a future version of PHP) in %sbug66251.php on line 4
-A=A
+Fatal error: Uncaught Error: Undefined constant "A" in %s:%d
+Stack trace:
+#0 %s(%d): getA()
+#1 {main}
+  thrown in %s on line %d

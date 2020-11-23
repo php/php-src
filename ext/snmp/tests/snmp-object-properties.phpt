@@ -54,13 +54,24 @@ $param = 'there is no such parameter';
 var_dump($session->$param);
 var_dump(property_exists($session, $param));
 
-$session->valueretrieval = 67;
-var_dump($session->valueretrieval);
-$session->oid_output_format = 78;
-var_dump($session->oid_output_format);
-
-$session->info = array("blah" => 2);
-var_dump($session->info);
+try {
+    $session->valueretrieval = 67;
+    var_dump($session->valueretrieval);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    $session->oid_output_format = 78;
+    var_dump($session->oid_output_format);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    $session->info = array("blah" => 2);
+    var_dump($session->info);
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $session->max_oids = NULL;
 var_dump($session->max_oids);
@@ -69,11 +80,9 @@ var_dump($session->max_oids);
 Check working
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -96,11 +105,9 @@ object(SNMP)#%d (%d) {
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -123,11 +130,9 @@ object(SNMP)#%d (%d) {
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -153,11 +158,9 @@ bool(true)
 bool(false)
 object(SNMP)#%d (%d) {
   ["info"]=>
-  array(4) {
+  array(3) {
     ["hostname"]=>
     string(%d) "%s"
-    ["port"]=>
-    int(%d)
     ["timeout"]=>
     int(%i)
     ["retries"]=>
@@ -184,25 +187,10 @@ string(11) "param_value"
 bool(true)
 Error handling
 
-Notice: Undefined property: SNMP::$there is no such parameter in %s on line %d
+Warning: Undefined property: SNMP::$there is no such parameter in %s on line %d
 NULL
 bool(false)
-
-Warning: main(): Unknown SNMP value retrieval method '67' in %s on line %d
-int(1)
-
-Warning: main(): Unknown SNMP output print format '78' in %s on line %d
-int(3)
-
-Warning: main(): info property is read-only in %s on line %d
-array(4) {
-  ["hostname"]=>
-  string(%d) "%s"
-  ["port"]=>
-  int(%d)
-  ["timeout"]=>
-  int(%i)
-  ["retries"]=>
-  int(%d)
-}
+SNMP retrieval method must be a bitmask of SNMP_VALUE_LIBRARY, SNMP_VALUE_PLAIN, and SNMP_VALUE_OBJECT
+SNMP output print format must be an SNMP_OID_OUTPUT_* constant
+SNMP::$info property is read-only
 NULL

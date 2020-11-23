@@ -35,7 +35,7 @@ extern ZEND_API zend_class_entry *zend_ce_closure;
 ZEND_API void zend_create_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr);
 ZEND_API void zend_create_fake_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr);
 ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
-ZEND_API const zend_function *zend_get_closure_method_def(zval *obj);
+ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj);
 
 END_EXTERN_C()

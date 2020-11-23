@@ -19,9 +19,7 @@ var_dump(posix_setgid( $gid ) );
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Test by calling method or function with its expected arguments ***
 bool(true)
-===DONE===
 	

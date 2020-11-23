@@ -6,12 +6,8 @@ readline_list_history(): Basic test
 <?php
 
 var_dump(readline_list_history());
-var_dump(readline_list_history(1));
 
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }
-
-Warning: readline_list_history() expects exactly 0 parameters, 1 given in %s on line %d
-NULL

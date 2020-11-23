@@ -3,13 +3,13 @@ Bug #71287 (Error message contains hexadecimal instead of decimal number)
 --FILE--
 <?php
 class Stream {
-	public function stream_open($path, $mode, $options, $opened_path) {
-		return true;
-	}
+    public function stream_open($path, $mode, $options, $opened_path) {
+        return true;
+    }
 
-	public function stream_write($data) {
-		return strlen($data) - 2;
-	}
+    public function stream_write($data) {
+        return strlen($data) - 2;
+    }
 }
 
 stream_wrapper_register('test', Stream::class);

@@ -38,7 +38,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1255");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -50,4 +49,3 @@ bool(true)
 string(%s) "%s\כללים מרובים42\כללים מרובים4"
 Active code page: %d
 bool(true)
-===DONE===

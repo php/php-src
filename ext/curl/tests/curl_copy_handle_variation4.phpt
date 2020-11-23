@@ -37,7 +37,7 @@ curl_multi_remove_handle($mh, $ch3);
 curl_multi_close($mh);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 АБВ.txt|application/octet-stream|5АБВ.txt|application/octet-stream|5===DONE===
 --CLEAN--

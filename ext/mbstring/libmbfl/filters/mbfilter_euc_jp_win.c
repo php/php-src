@@ -27,18 +27,12 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_euc_jp_win.h"
 
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
-
-static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -59,22 +53,13 @@ static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
 };
 
-
-static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open",
-							"eucJP-ms", NULL};
-
-const struct mbfl_identify_vtbl vtbl_identify_eucjpwin = {
-	mbfl_no_encoding_eucjp_win,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_eucjp_win
-};
+static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open", "eucJP-ms", NULL};
 
 const mbfl_encoding mbfl_encoding_eucjp_win = {
 	mbfl_no_encoding_eucjp_win,
 	"eucJP-win",
 	"EUC-JP",
-	(const char *(*)[])&mbfl_encoding_eucjp_win_aliases,
+	mbfl_encoding_eucjp_win_aliases,
 	mblen_table_eucjp,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_eucjpwin_wchar,
@@ -85,18 +70,20 @@ const struct mbfl_convert_vtbl vtbl_eucjpwin_wchar = {
 	mbfl_no_encoding_eucjp_win,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_eucjpwin_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_eucjpwin = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_eucjp_win,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_eucjpwin,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -322,8 +309,6 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 			s1 = 0x2172;
 		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
 			s1 = 0x224c;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s1 = 0x2141;
 		} else {
 			s1 = -1;
 			c1 = 0;
@@ -374,58 +359,6 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter)
-{
-	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* kanji first char */
-			filter->status = 1;
-		} else if (c == 0x8e) {				/* kana first char */
-			filter->status = 2;
-		} else if (c == 0x8f) {				/* X 0212 first char */
-			filter->status = 3;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	case  1:	/* got first half */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case  2:	/* got 0x8e */
-		if (c < 0xa1 || c > 0xdf) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case  3:	/* got 0x8f */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status++;
-		break;
-	case  4:	/* got 0x8f */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	default:
-		filter->status = 0;
-		break;
 	}
 
 	return c;

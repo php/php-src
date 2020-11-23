@@ -9,19 +9,8 @@ if(substr(PHP_OS, 0, 3) == 'WIN')
 disk_total_space
 --FILE--
 <?php
-/*
- *  Prototype: float disk_total_space( string $directory );
- *  Description: given a string containing a directory, this function
- *               will return the total number of bytes on the corresponding
- *               filesystem or disk partition
- */
-
 echo "*** Testing error conditions ***\n";
 $file_path = __DIR__;
-var_dump( disk_total_space() ); // Zero Arguments
-
-var_dump( disk_total_space( $file_path, "extra argument") ); // More than valid number of arguments
-
 
 var_dump( disk_total_space( $file_path."/dir1" )); // Invalid directory
 
@@ -40,14 +29,8 @@ unlink($file_path."/disk_total_space.tmp");
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: disk_total_space() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: disk_total_space() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
 Warning: disk_total_space(): No such file or directory in %s on line %d
 bool(false)
-float(%d)
+float(%f)
 
 --- Done ---

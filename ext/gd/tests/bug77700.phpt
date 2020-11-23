@@ -14,10 +14,8 @@ imagegif($im, __DIR__ . 'bug77700.gif');
 $im = imagecreatefromgif(__DIR__ . 'bug77700.gif');
 var_dump(imageinterlace($im));
 ?>
-===DONE===
 --EXPECT--
 int(1)
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . 'bug77700.gif');

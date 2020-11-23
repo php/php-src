@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -260,13 +258,13 @@ END_EXTERN_C()
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \
 				"stream", php_file_le_stream(), php_file_le_pstream())) == NULL) { \
-		RETURN_FALSE; \
+		return; \
 	} \
 } while (0)
 #define php_stream_from_res(xstr, res)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2((res), \
 			   	"stream", php_file_le_stream(), php_file_le_pstream())) == NULL) { \
-		RETURN_FALSE; \
+		return; \
 	} \
 } while (0)
 #define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
@@ -551,9 +549,6 @@ END_EXTERN_C()
 
 /* Allow blocking reads on anonymous pipes on Windows. */
 #define STREAM_USE_BLOCKING_PIPE        0x00008000
-
-/* Antique - no longer has meaning */
-#define IGNORE_URL_WIN 0
 
 int php_init_stream_wrappers(int module_number);
 int php_shutdown_stream_wrappers(int module_number);

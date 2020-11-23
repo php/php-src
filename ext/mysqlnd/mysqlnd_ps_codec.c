@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -98,7 +96,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 			case 8:lval = (int64_t) sint8korr(*row);break;
 			/*
 			  7, 6 and 5 are not possible.
-			  BIT is only unsigned, thus only uint5|6|7 macroses exist
+			  BIT is only unsigned, thus only uint5|6|7 macros exist
 			*/
 			case 4:lval = (int64_t) sint4korr(*row);break;
 			case 3:lval = (int64_t) sint3korr(*row);break;
@@ -638,7 +636,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				  We do transformation here, which will be used later when sending types. The code later relies on this.
 				*/
-				if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+				if (d >= (double) ZEND_LONG_MAX || d < (double) ZEND_LONG_MIN) {
 					stmt->send_types_to_server = *resend_types_next_time = 1;
 					convert_to_string_ex(tmp_data);
 				} else {

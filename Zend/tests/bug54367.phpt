@@ -10,7 +10,7 @@ class MyObjet implements ArrayAccess
 
     public function offsetGet ($offset)
     {
-	return function ($var) use ($offset) { // here is the problem
+    return function ($var) use ($offset) { // here is the problem
               var_dump($offset, $var);
         };
     }

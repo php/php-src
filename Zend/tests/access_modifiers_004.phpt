@@ -4,8 +4,8 @@ using multiple access modifiers (abstract methods)
 <?php
 
 class test {
-	abstract abstract function foo() {
-	}
+    abstract abstract function foo() {
+    }
 }
 
 echo "Done\n";

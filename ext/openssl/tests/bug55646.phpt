@@ -36,7 +36,7 @@ $csr_res = openssl_csr_new(
 if (!$csr_res) {
     while ($e = openssl_error_string()) {
         $err = $e;
-	}
+    }
     die("Failed; last error: $err");
 }
 openssl_csr_export($csr_res, $csr);

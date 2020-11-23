@@ -9,7 +9,6 @@ mbstring.internal_encoding=UTF-8
 mbstring.http_input=ISO-8859-1
 mbstring.http_output=ISO-8859-15
 mbstring.http_output_conv_mimetypes=abc
-mbstring.func_overload=2
 mbstring.detect_order=UTF-8,ISO-8859-15,ISO-8859-1,ASCII
 mbstring.substitute_character=123
 mbstring.strict_detection=1
@@ -24,8 +23,12 @@ foreach (array_keys($result) as $key) {
 }
 ?>
 --EXPECT--
-Deprecated: The mbstring.func_overload directive is deprecated in Unknown on line 0
-array(15) {
+Deprecated: PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
+array(13) {
   ["internal_encoding"]=>
   string(5) "UTF-8"
   ["http_input"]=>
@@ -34,35 +37,6 @@ array(15) {
   string(11) "ISO-8859-15"
   ["http_output_conv_mimetypes"]=>
   string(3) "abc"
-  ["func_overload"]=>
-  int(2)
-  ["func_overload_list"]=>
-  array(12) {
-    ["strlen"]=>
-    string(9) "mb_strlen"
-    ["strpos"]=>
-    string(9) "mb_strpos"
-    ["strrpos"]=>
-    string(10) "mb_strrpos"
-    ["stripos"]=>
-    string(10) "mb_stripos"
-    ["strripos"]=>
-    string(11) "mb_strripos"
-    ["strstr"]=>
-    string(9) "mb_strstr"
-    ["strrchr"]=>
-    string(10) "mb_strrchr"
-    ["stristr"]=>
-    string(10) "mb_stristr"
-    ["substr"]=>
-    string(9) "mb_substr"
-    ["strtolower"]=>
-    string(13) "mb_strtolower"
-    ["strtoupper"]=>
-    string(13) "mb_strtoupper"
-    ["substr_count"]=>
-    string(15) "mb_substr_count"
-  }
   ["mail_charset"]=>
   string(11) "ISO-2022-KR"
   ["mail_header_encoding"]=>
@@ -99,60 +73,6 @@ string(11) "ISO-8859-15"
 string(11) "ISO-8859-15"
 string(3) "abc"
 string(3) "abc"
-int(2)
-int(2)
-array(12) {
-  ["strlen"]=>
-  string(9) "mb_strlen"
-  ["strpos"]=>
-  string(9) "mb_strpos"
-  ["strrpos"]=>
-  string(10) "mb_strrpos"
-  ["stripos"]=>
-  string(10) "mb_stripos"
-  ["strripos"]=>
-  string(11) "mb_strripos"
-  ["strstr"]=>
-  string(9) "mb_strstr"
-  ["strrchr"]=>
-  string(10) "mb_strrchr"
-  ["stristr"]=>
-  string(10) "mb_stristr"
-  ["substr"]=>
-  string(9) "mb_substr"
-  ["strtolower"]=>
-  string(13) "mb_strtolower"
-  ["strtoupper"]=>
-  string(13) "mb_strtoupper"
-  ["substr_count"]=>
-  string(15) "mb_substr_count"
-}
-array(12) {
-  ["strlen"]=>
-  string(9) "mb_strlen"
-  ["strpos"]=>
-  string(9) "mb_strpos"
-  ["strrpos"]=>
-  string(10) "mb_strrpos"
-  ["stripos"]=>
-  string(10) "mb_stripos"
-  ["strripos"]=>
-  string(11) "mb_strripos"
-  ["strstr"]=>
-  string(9) "mb_strstr"
-  ["strrchr"]=>
-  string(10) "mb_strrchr"
-  ["stristr"]=>
-  string(10) "mb_stristr"
-  ["substr"]=>
-  string(9) "mb_substr"
-  ["strtolower"]=>
-  string(13) "mb_strtolower"
-  ["strtoupper"]=>
-  string(13) "mb_strtoupper"
-  ["substr_count"]=>
-  string(15) "mb_substr_count"
-}
 string(11) "ISO-2022-KR"
 string(11) "ISO-2022-KR"
 string(6) "BASE64"

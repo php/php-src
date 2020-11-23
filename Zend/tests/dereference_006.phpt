@@ -6,7 +6,7 @@ Testing array dereference and references
 error_reporting(E_ALL);
 
 function &foo(&$foo) {
-	return $foo;
+    return $foo;
 }
 
 $a = array(1);

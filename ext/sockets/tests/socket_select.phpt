@@ -19,6 +19,7 @@ $write  = null;
 $except = null;
 $ref =& $sockets[0]; // bug #78038
 var_dump(socket_select($sockets, $write, $except, 0));
+?>
 --EXPECT--
 int(0)
 --CREDITS--

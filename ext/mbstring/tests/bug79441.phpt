@@ -6,8 +6,12 @@ Bug #79441 Segfault in mb_chr() if internal encoding is unsupported
 <?php
 
 mb_internal_encoding("utf-7");
-mb_chr(0xd800);
+try {
+    mb_chr(0xd800);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: mb_chr(): Unsupported encoding "UTF-7" in %s on line %d
+--EXPECT--
+mb_chr() does not support the "UTF-7" encoding

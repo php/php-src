@@ -24,9 +24,9 @@ class MyHeap extends SplHeap
 $heap = new MyHeap();
 $heap->insert(1);
 try {
-	count($heap);// refers to MyHeap->count() method
+    count($heap);// refers to MyHeap->count() method
 } catch (Exception $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 ?>

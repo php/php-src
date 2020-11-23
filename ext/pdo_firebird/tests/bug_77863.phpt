@@ -107,8 +107,8 @@ try {
   echo "OK\n";
 }
 catch(Exception $e) {
-	echo $e->getMessage() . '<br>';
-	echo $e->getTraceAsString();
+    echo $e->getMessage() . '<br>';
+    echo $e->getTraceAsString();
 }
 ?>
 --EXPECT--

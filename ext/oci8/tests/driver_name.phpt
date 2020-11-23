@@ -43,7 +43,7 @@ echo "Done\n";
 
 function get_attr($conn)
 {
-	$sel_stmt = "select client_driver
+    $sel_stmt = "select client_driver
         from v\$session_connect_info sci, v\$session s
         where sci.client_driver is not null
           and sci.sid = s.sid
@@ -57,11 +57,11 @@ function get_attr($conn)
 ?>
 --EXPECT--
 **Test 1.1 - Default values for the attribute **************
-The value of DRIVER_NAME is PHP OCI8 : 2.2.0
+The value of DRIVER_NAME is PHP OCI8 : 3.0.0
 
 ***Test 1.2 - Get the values from different connections **************
 Testing with oci_pconnect()
-The value of DRIVER_NAME is PHP OCI8 : 2.2.0
+The value of DRIVER_NAME is PHP OCI8 : 3.0.0
 Testing with oci_new_connect()
-The value of DRIVER_NAME is PHP OCI8 : 2.2.0
+The value of DRIVER_NAME is PHP OCI8 : 3.0.0
 Done

@@ -2,10 +2,6 @@
 Test glob() function: basic functions
 --FILE--
 <?php
-/* Prototype: array glob ( string $pattern [, int $flags] );
-   Description: Find pathnames matching a pattern
-*/
-
 echo "*** Testing glob() : basic functions ***\n";
 
 $file_path = __DIR__;

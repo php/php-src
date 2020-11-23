@@ -18,7 +18,7 @@ cross join information_schema.columns ic3");
 $x = $stmt->execute();
 $n = 0;
 while (($r = $stmt->fetch())) {
-	$n++;
+    $n++;
 }
 $stmt = null;
 

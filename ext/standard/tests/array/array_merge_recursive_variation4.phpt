@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - associative array with different keys
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_merge_recursive() by passing different
  * associative arrays having different keys to $arr1 argument.
@@ -50,7 +45,7 @@ $arrays = array (
        array("hello", $heredoc => array("heredoc", 'string'), "string"),
 
        // array with object, unset variable and resource variable
-/*8*/ array(new classA() => 11, @$unset_var => array("unset"), $fp => 'resource', 11, "hello")
+/*8*/ array(@$unset_var => array("unset"), $fp => 'resource', 11, "hello")
 );
 
 // initialise the second array
@@ -80,9 +75,7 @@ echo "Done";
 --EXPECTF--
 *** Testing array_merge_recursive() : assoc. array with diff. keys to $arr1 argument ***
 
-Warning: Illegal offset type in %s on line %d
-
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 -- With default argument --
 array(2) {

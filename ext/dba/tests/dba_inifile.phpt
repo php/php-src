@@ -2,19 +2,18 @@
 DBA INIFILE handler test
 --SKIPIF--
 <?php
-	$handler = 'inifile';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'inifile';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-	$handler = 'inifile';
-	require_once __DIR__ .'/test.inc';
-	require_once __DIR__ .'/dba_handler.inc';
+    $handler = 'inifile';
+    require_once __DIR__ .'/test.inc';
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 database handler: inifile
@@ -51,4 +50,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

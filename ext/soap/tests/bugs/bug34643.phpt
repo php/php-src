@@ -9,9 +9,9 @@ soap.wsdl_cache_enabled=0
 ini_set("soap.wsdl_cache_enabled", 0);
 
 class fp {
-	public function get_it($opt="zzz") {
-		return $opt;
-	}
+    public function get_it($opt="zzz") {
+        return $opt;
+    }
 }
 
 class LocalSoapClient extends SoapClient {

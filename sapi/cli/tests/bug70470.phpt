@@ -22,7 +22,7 @@ fflush($fp);
 usleep(200000);
 fwrite($fp, "se\r\n\r\n");
 while (!feof($fp)) {
-	echo fgets($fp);
+    echo fgets($fp);
 }
 fclose($fp);
 ?>

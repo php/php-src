@@ -25,10 +25,8 @@ foreach ($sxe->children('http://www.example.com/hot') as $element_name => $eleme
 }
 
 ?>
-===DONE===
 --EXPECT--
 drink is Cola
 drink is Juice
 drink is Coffee
 drink is Tea
-===DONE===

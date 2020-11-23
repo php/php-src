@@ -11,7 +11,7 @@ opcache.optimization_level=-1
 
 
 function small_numbers() {
-	    return [0,1,2];
+        return [0,1,2];
 }
 
 list ($zero, $one, $two) = small_numbers();

@@ -4,9 +4,9 @@ Exceptions on improper access to string
 <?php
 $s = "ABC";
 try {
-	$s[] = "D";
+    $s[] = "D";
 } catch (Error $e) {
-	echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
+    echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
 $s[] = "D";

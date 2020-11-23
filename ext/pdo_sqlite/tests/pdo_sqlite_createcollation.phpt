@@ -18,7 +18,7 @@ $db->sqliteCreateCollation('MYCOLLATE', function($a, $b) { return strnatcmp($a, 
 
 $result = $db->query('SELECT name FROM foobar ORDER BY name COLLATE MYCOLLATE');
 foreach ($result as $row) {
-	echo $row['name'] . "\n";
+    echo $row['name'] . "\n";
 }
 
 $result = $db->query('SELECT name FROM foobar ORDER BY name');

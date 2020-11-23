@@ -75,8 +75,6 @@ unlink($tmpFileIn);
 unlink($tmpFileOut);
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
-==DONE==

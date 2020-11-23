@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,12 +32,12 @@
 BEGIN_EXTERN_C()
 void php_startup_auto_globals(void);
 extern PHPAPI void (*php_import_environment_variables)(zval *array_ptr);
-PHPAPI void php_register_variable(char *var, char *val, zval *track_vars_array);
+PHPAPI void php_register_variable(const char *var, const char *val, zval *track_vars_array);
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *val, size_t val_len, zval *track_vars_array);
-PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_array);
+PHPAPI void php_register_variable_safe(const char *var, const char *val, size_t val_len, zval *track_vars_array);
+PHPAPI void php_register_variable_ex(const char *var, zval *val, zval *track_vars_array);
 
-PHPAPI void php_build_argv(char *s, zval *track_vars_array);
+PHPAPI void php_build_argv(const char *s, zval *track_vars_array);
 PHPAPI int php_hash_environment(void);
 END_EXTERN_C()
 

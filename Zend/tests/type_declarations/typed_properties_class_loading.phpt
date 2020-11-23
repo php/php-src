@@ -43,9 +43,9 @@ var_dump($test->propY);
 
 ?>
 --EXPECT--
-Typed property Test::$propX must be an instance of X, stdClass used
+Cannot assign stdClass to property Test::$propX of type X
 object(X)#3 (0) {
 }
-Typed property Test::$propY must be an instance of Y or null, stdClass used
+Cannot assign stdClass to property Test::$propY of type ?Y
 object(Y)#4 (0) {
 }

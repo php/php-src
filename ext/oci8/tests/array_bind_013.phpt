@@ -11,7 +11,12 @@ $statement = oci_parse($c, 'SELECT user FROM v$session');
 
 $array = array();
 
-var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, -10, SQLT_CHR, -10));
+try {
+    var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, -10, SQLT_CHR, -10));
+} catch (ArgumentCountError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, -10));
 var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, -1));
 var_dump(oci_bind_array_by_name($statement, ":c1", $array, 5, 0));
@@ -23,8 +28,7 @@ var_dump($array);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: oci_bind_array_by_name() expects at most 6 parameters, 7 given in %s on line %d
-NULL
+oci_bind_array_by_name() expects at most 6 arguments, 7 given
 
 Warning: oci_bind_array_by_name(): You must provide max length value for empty arrays in %s on line %d
 bool(false)

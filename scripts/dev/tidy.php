@@ -22,9 +22,11 @@ $excludes = [
     'ext/hash/php_hash_whirlpool_tables.h',
     'ext/mbstring/libmbfl/',
     'ext/mbstring/unicode_data.h',
+    'ext/opcache/jit/dynasm',
+    'ext/opcache/jit/libudis86',
+    'ext/opcache/jit/vtune',
     'ext/pcre/pcre2lib/',
     'ext/standard/html_tables/html_table_gen.php',
-    'ext/xmlrpc/libxmlrpc/',
     'sapi/cli/php_http_parser.c',
     'sapi/cli/php_http_parser.h',
     'sapi/litespeed/',
@@ -62,12 +64,11 @@ foreach ($it as $file) {
         $code = stripTrailingWhitespace($code);
         $code = reindentToSpaces($code);
     } else if ($lang === 'phpt') {
-        // TODO: Don't reformat .phpt on PHP-7.4.
-        /*$code = transformTestCode($code, function(string $code) {
+        $code = transformTestCode($code, function(string $code) {
             $code = stripTrailingWhitespace($code);
             $code = reindentToSpaces($code);
             return $code;
-        });*/
+        });
     }
 
     if ($origCode !== $code) {
@@ -116,7 +117,7 @@ function transformTestCode(string $code, callable $transformer): string {
     }
 
     return preg_replace_callback(
-        '/(--FILE--)(.+?)(--[A-Z_]+--)/s',
+        '/(--(?:FILE|SKIPIF|CLEAN)--)(.+?)(--[A-Z_]+--)/s',
         function(array $matches) use($transformer) {
             return $matches[1] . $transformer($matches[2]) . $matches[3];
         },
@@ -134,8 +135,7 @@ function getLanguageFromExtension(string $ext): ?string {
     case 're':
         return 'c';
     case 'php':
-    // TODO: Reformat .inc files.
-    //case 'inc':
+    case 'inc':
         return 'php';
     case 'phpt':
         return 'phpt';

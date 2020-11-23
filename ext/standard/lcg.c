@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -112,13 +110,11 @@ PHP_MINIT_FUNCTION(lcg) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto float lcg_value()
-   Returns a value from the combined linear congruential generator */
+/* {{{ Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_DOUBLE(php_combined_lcg());
 }
 /* }}} */

@@ -23,6 +23,7 @@ ns3\ns1\bar();
 function bar() {
   echo __FUNCTION__,"\n";
 }
+?>
 --EXPECT--
 test\ns1\foo
 test\ns1\bar

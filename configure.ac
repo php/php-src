@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[7.4.13-dev],[https://bugs.php.net],[php],[https://www.php.net])
+AC_INIT([PHP],[8.1.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -43,8 +43,6 @@ AH_TOP([
 #define ZEND_DLIMPORT
 ])
 AH_BOTTOM([
-#ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
-
 #include <stdlib.h>
 
 #ifdef HAVE_SYS_TYPES_H
@@ -55,55 +53,7 @@ AH_BOTTOM([
 #include <sys/select.h>
 #endif
 
-#ifdef HAVE_IEEEFP_H
-# include <ieeefp.h>
-#endif
-
 #include <string.h>
-
-#if defined(__cplusplus) && __cplusplus >= 201103L
-extern "C++" {
-#include <cmath>
-#define zend_isnan std::isnan
-#define zend_isinf std::isinf
-#define zend_finite std::isfinite
-}
-#else
-#include <math.h>
-
-#ifndef zend_isnan
-#if HAVE_DECL_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) ((a) != (a))
-#endif
-#endif
-
-#if HAVE_DECL_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY || (a)==-INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-#if HAVE_DECL_ISFINITE
-#define zend_finite(a) isfinite(a)
-#elif defined(HAVE_FINITE)
-#define zend_finite(a) finite(a)
-#elif defined(fpclassify)
-#define zend_finite(a) ((fpclassify((a))!=FP_INFINITE&&fpclassify((a))!=FP_NAN)?1:0)
-#else
-#define zend_finite(a) (zend_isnan(a) ? 0 : zend_isinf(a) ? 0 : 1)
-#endif
-
-#endif
-#endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
 #endif /* PHP_CONFIG_H */
 ])
@@ -178,6 +128,7 @@ PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
+AC_PROG_CC_C99
 AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
@@ -273,10 +224,8 @@ case $host_alias in
     ;;
   *darwin*)
     if test -n "$GCC"; then
-      PHP_CHECK_GCC_ARG(-no-cpp-precomp, gcc_no_cpp_precomp=yes)
-      if test "$gcc_no_cpp_precomp" = "yes"; then
-        CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
-      fi
+      AX_CHECK_COMPILE_FLAG([-no-cpp-precomp],
+                            [CPPFLAGS="$CPPFLAGS -no-cpp-precomp"])
     fi
     ;;
   *mips*)
@@ -323,9 +272,9 @@ dnl SAPI configuration.
 dnl ----------------------------------------------------------------------------
 
 dnl Paths to the targets are relative to the build directory.
-SAPI_SHARED=libs/libphp[]$PHP_MAJOR_VERSION[.]$SHLIB_DL_SUFFIX_NAME
-SAPI_STATIC=libs/libphp[]$PHP_MAJOR_VERSION[.a]
-SAPI_LIBTOOL=libphp[]$PHP_MAJOR_VERSION[.la]
+SAPI_SHARED=libs/libphp.[]$SHLIB_DL_SUFFIX_NAME
+SAPI_STATIC=libs/libphp.a
+SAPI_LIBTOOL=libphp.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
 
@@ -349,7 +298,7 @@ if test -z "$PHP_INSTALLED_SAPIS"; then
 fi
 
 dnl Force ZTS.
-if test "$enable_maintainer_zts" = "yes"; then
+if test "$enable_zts" = "yes"; then
   dnl Add pthreads linker and compiler flags.
   if test -n "$ac_cv_pthreads_lib"; then
     LIBS="$LIBS -l$ac_cv_pthreads_lib"
@@ -393,13 +342,13 @@ dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try to avoid -lnsl
 dnl checks, if we already have the functions which are usually in libnsl. Also,
 dnl uClibc will bark at linking with glibc's libnsl.
 
-PHP_CHECK_FUNC(socket, socket)
-PHP_CHECK_FUNC(socketpair, socket)
-PHP_CHECK_FUNC(htonl, socket)
-PHP_CHECK_FUNC(gethostname, nsl)
-PHP_CHECK_FUNC(gethostbyaddr, nsl)
-PHP_CHECK_FUNC(dlopen, dl)
-PHP_CHECK_FUNC(dlsym, dl)
+PHP_CHECK_FUNC(socket, socket, network)
+PHP_CHECK_FUNC(socketpair, socket, network)
+PHP_CHECK_FUNC(htonl, socket, network)
+PHP_CHECK_FUNC(gethostname, nsl, network)
+PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
+PHP_CHECK_FUNC(dlopen, dl, root)
+PHP_CHECK_FUNC(dlsym, dl, root)
 if test "$ac_cv_func_dlopen" = "yes"; then
   AC_DEFINE(HAVE_LIBDL, 1, [ ])
 fi
@@ -412,9 +361,7 @@ dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
-dnl locale.h is checked for supporting old code in extensions such as imagick.
 AC_CHECK_HEADERS([ \
-inttypes.h \
 stdint.h \
 dirent.h \
 sys/param.h \
@@ -430,17 +377,14 @@ fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
-locale.h \
 malloc.h \
-monetary.h \
-netdb.h \
 poll.h \
+pty.h \
 pwd.h \
 resolv.h \
 strings.h \
 syslog.h \
 sysexits.h \
-sys/auxv.h \
 sys/ioctl.h \
 sys/file.h \
 sys/mman.h \
@@ -457,7 +401,6 @@ sys/sysexits.h \
 sys/uio.h \
 sys/wait.h \
 sys/loadavg.h \
-termios.h \
 unistd.h \
 unix.h \
 utime.h \
@@ -466,6 +409,7 @@ sys/ipc.h \
 dlfcn.h \
 tmmintrin.h \
 nmmintrin.h \
+wmmintrin.h \
 immintrin.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
@@ -521,6 +465,10 @@ dnl Check __builtin_expect
 PHP_CHECK_BUILTIN_EXPECT
 dnl Check __builtin_clz
 PHP_CHECK_BUILTIN_CLZ
+dnl Check __builtin_clzl
+PHP_CHECK_BUILTIN_CLZL
+dnl Check __builtin_clzll
+PHP_CHECK_BUILTIN_CLZLL
 dnl Check __builtin_ctzl
 PHP_CHECK_BUILTIN_CTZL
 dnl Check __builtin_ctzll
@@ -542,11 +490,19 @@ PHP_CHECK_BUILTIN_CPU_INIT
 dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
 
-dnl Check instructions.
-PHP_CHECK_CPU_SUPPORTS([ssse3])
-PHP_CHECK_CPU_SUPPORTS([sse4.2])
-PHP_CHECK_CPU_SUPPORTS([avx])
-PHP_CHECK_CPU_SUPPORTS([avx2])
+dnl Check for __alignof__ support in the compiler
+AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+]],[[
+  int align = __alignof__(int);
+]])],[
+  ac_cv_alignof_exists=yes
+],[
+  ac_cv_alignof_exists=no
+])])
+if test "$ac_cv_alignof_exists" = "yes"; then
+  AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
+fi
 
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
@@ -588,10 +544,8 @@ alphasort \
 asctime_r \
 chroot \
 ctime_r \
-crypt \
 explicit_memset \
 flock \
-fpclass \
 ftok \
 funopen \
 gai_strerror \
@@ -610,23 +564,18 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-grantpt \
 inet_ntoa \
 inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
-mbrlen \
 memmove \
 mkstemp \
 mmap \
 nice \
 nl_langinfo \
 poll \
-ptsname \
 putenv \
-realpath \
-rand_r \
 scandir \
 setitimer \
 setenv \
@@ -636,13 +585,11 @@ statfs \
 statvfs \
 std_syslog \
 strcasecmp \
-strfmon \
 strnlen \
 strptime \
 strtok_r \
 symlink \
 tzset \
-unlockpt \
 unsetenv \
 usleep \
 utime \
@@ -657,6 +604,9 @@ AX_FUNC_WHICH_GETHOSTBYNAME_R
 dnl Some systems (like OpenSolaris) do not have nanosleep in libc.
 PHP_CHECK_FUNC_LIB(nanosleep, rt)
 
+dnl Haiku does not have network api in libc.
+PHP_CHECK_FUNC_LIB(setsockopt, network)
+
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
@@ -665,6 +615,8 @@ AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 #include <string.h>
 #include <netdb.h>
 #include <sys/types.h>
+#include <string.h>
+#include <stdlib.h>
 #ifndef AF_INET
 # include <sys/socket.h>
 #endif
@@ -704,22 +656,10 @@ if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 
-dnl Check for the __sync_fetch_and_add builtin.
-AC_CACHE_CHECK([for __sync_fetch_and_add], ac_cv_func_sync_fetch_and_add,
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[int x;__sync_fetch_and_add(&x,1);]])],[ac_cv_func_sync_fetch_and_add=yes],[ac_cv_func_sync_fetch_and_add=no])])
-if test "$ac_cv_func_sync_fetch_and_add" = yes; then
-  AC_DEFINE(HAVE_SYNC_FETCH_AND_ADD,1,[Define if you have the __sync_fetch_and_add function])
-fi
-
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 PHP_CHECK_IN_ADDR_T
-
-AC_CHECK_FUNCS(crypt_r, [ php_crypt_r="1" ], [ php_crypt_r="0" ])
-if test "x$php_crypt_r" = "x1"; then
-  PHP_CRYPT_R_STYLE
-fi
 
 AC_CACHE_CHECK([for aarch64 CRC32 API], ac_cv_func___crc32d,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <arm_acle.h>]],[[__crc32d(0, 0);]])],[ac_cv_func___crc32d=yes],[ac_cv_func___crc32d="no"])])
@@ -765,6 +705,9 @@ if test "$PHP_VALGRIND" != "no"; then
     fi
   fi
 fi
+
+dnl Check for openpty. It may require linking against libutil or libbsd.
+PHP_CHECK_FUNC(openpty, util, bsd)
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------
@@ -840,6 +783,18 @@ if test "$PHP_DEBUG" = "yes"; then
 else
   PHP_DEBUG=0
   ZEND_DEBUG=no
+fi
+
+PHP_ARG_ENABLE([debug-assertions],
+  [whether to enable debug assertions in release mode],
+  [AS_HELP_STRING([--enable-debug-assertions],
+    [Compile with debug assertions even in release mode])],
+  [no],
+  [no])
+
+if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
+  PHP_DEBUG=1
+  ZEND_DEBUG=yes
 fi
 
 PHP_ARG_ENABLE([rtld-now],
@@ -1014,6 +969,11 @@ PHP_ARG_ENABLE([werror],,
     [Enable -Werror])],
   [no],
   [no])
+PHP_ARG_ENABLE([memory-sanitizer],,
+  [AS_HELP_STRING([--enable-memory-sanitizer],
+    [Enable memory sanitizer (clang only)])],
+  [no],
+  [no])
 
 dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
@@ -1085,7 +1045,9 @@ enable_static=yes
 
 case $php_sapi_module in
   shared[)]
-    enable_static=no
+    if test "$PHP_CGI" = "no" && test "$PHP_CLI" = "no" && test "$PHP_FPM" = "no" && test "$PHP_LITESPEED" = "no" && test "$PHP_PHPDBG" = "no"; then
+      enable_static=no
+    fi
     case $with_pic in
       yes)
         standard_libtool_flag='-prefer-pic'
@@ -1174,7 +1136,7 @@ LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
 
-if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
+if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   PHP_THREAD_SAFETY=yes
 else
@@ -1195,7 +1157,7 @@ unset LIBS LDFLAGS
 PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
 if test "$PHP_THREAD_SAFETY" = "yes"; then
-  TSRM_THREADS_CHECKS
+  TSRM_CHECK_PTHREADS
 fi
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
@@ -1243,7 +1205,7 @@ if test -z "$EXTENSION_DIR"; then
     else
       part1=no-debug
     fi
-    if test "$enable_maintainer_zts" = "yes"; then
+    if test "$enable_zts" = "yes"; then
       part2=zts
     else
       part2=non-zts
@@ -1251,7 +1213,7 @@ if test -z "$EXTENSION_DIR"; then
     extbasedir=$part1-$part2-$extbasedir
     EXTENSION_DIR=$libdir/extensions/$extbasedir
   else
-    if test "$enable_maintainer_zts" = "yes"; then
+    if test "$enable_zts" = "yes"; then
       extbasedir=$extbasedir-zts
     fi
 
@@ -1302,33 +1264,30 @@ AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_SCAN_DIR)
 
-if test -n "$php_ldflags_add_usr_lib"; then
-  PHP_RPATHS="$PHP_RPATHS /usr/lib"
-fi
-
 PHP_UTILIZE_RPATHS
 
-if test -z "$php_ldflags_add_usr_lib"; then
-  PHP_REMOVE_USR_LIB(PHP_LDFLAGS)
-  PHP_REMOVE_USR_LIB(LDFLAGS)
-fi
+PHP_REMOVE_USR_LIB(PHP_LDFLAGS)
+PHP_REMOVE_USR_LIB(LDFLAGS)
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
-
-dnl SOURCE_DATE_EPOCH for reproducible builds
-dnl https://reproducible-builds.org/specs/source-date-epoch/
-PHP_BUILD_DATE=`date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d 2>/dev/null`
-if test $? -ne 0 ; then
-PHP_BUILD_DATE=`date -u +%Y-%m-%d`
-fi
-AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
 UNAME=`uname -a | xargs`
 PHP_UNAME=${PHP_UNAME:-$UNAME}
 AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
 PHP_OS=`uname | xargs`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
+PHP_BUILD_SYSTEM=${PHP_BUILD_SYSTEM:-$PHP_UNAME}
+AC_DEFINE_UNQUOTED(PHP_BUILD_SYSTEM,"$PHP_BUILD_SYSTEM",[builder uname output])
+if test -n "${PHP_BUILD_PROVIDER}"; then
+  AC_DEFINE_UNQUOTED(PHP_BUILD_PROVIDER,"$PHP_BUILD_PROVIDER",[build provider])
+fi
+if test -n "${PHP_BUILD_COMPILER}"; then
+  AC_DEFINE_UNQUOTED(COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
+fi
+if test -n "${PHP_BUILD_ARCH}"; then
+  AC_DEFINE_UNQUOTED(ARCHITECTURE,"$PHP_BUILD_ARCH",[build architecture])
+fi
 
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
@@ -1386,7 +1345,6 @@ PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
 PHP_SUBST_OLD(PEAR_INSTALLDIR)
-PHP_SUBST(PHP_BUILD_DATE)
 PHP_SUBST_OLD(PHP_LDFLAGS)
 PHP_SUBST_OLD(PHP_LIBS)
 PHP_SUBST(OVERALL_TARGET)
@@ -1404,13 +1362,19 @@ old_CC=$CC
 
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
-  INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
   CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
+dnl Enable -Werror late, because it may break configure checks throwing warnings.
 if test "$PHP_WERROR" = "yes"; then
   CFLAGS="$CFLAGS -Werror"
-  CPPFLAGS="$CPPFLAGS -Werror"
+  CXXFLAGS="$CXXFLAGS -Werror"
+fi
+
+dnl Enable -fsanitize=memory late, because interceptors may break linking detection.
+if test "$PHP_MEMORY_SANITIZER" = "yes"; then
+  CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
 fi
 
 dnl
@@ -1451,7 +1415,6 @@ PHP_CONFIGURE_PART(Generating files)
 CXXFLAGS_CLEAN=$CXXFLAGS
 CFLAGS_CLEAN="$CFLAGS \$(PROF_FLAGS)"
 CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
-INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag \$(PROF_FLAGS)"
 
 if test "$PHP_PHAR" != "no" && test "$PHP_CLI" != "no"; then
@@ -1476,7 +1439,7 @@ PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
+       strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
@@ -1496,23 +1459,14 @@ PHP_ADD_SOURCES(Zend, \
     zend_execute_API.c zend_highlight.c zend_llist.c \
     zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
-    zend_list.c zend_builtin_functions.c \
+    zend_list.c zend_builtin_functions.c zend_attributes.c zend_execute.c \
     zend_ini.c zend_sort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c, \
+    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
+    zend_observer.c zend_system_id.c, \
 	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-
-dnl Selectively disable optimization due to high RAM usage during compiling the
-dnl executor.
-if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
-  flag=-O0
-else
-  flag=
-fi
-
-PHP_ADD_SOURCES_X(Zend, zend_execute.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,PHP_GLOBAL_OBJS,,$flag)
 
 PHP_ADD_BUILD_DIR(main main/streams)
 PHP_ADD_BUILD_DIR(TSRM)
@@ -1587,7 +1541,7 @@ cat <<X
 |                                                                    |
 | You have built PHP for Apache's current non-threaded MPM.          |
 | If you change Apache to use a threaded MPM you must reconfigure    |
-| PHP with --enable-maintainer-zts                                   |
+| PHP with --enable-zts                                              |
 X
         fi
       fi

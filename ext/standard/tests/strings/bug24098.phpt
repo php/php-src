@@ -2,7 +2,7 @@
 Bug #24098 (pathinfo() crash)
 --FILE--
 <?php
-	var_dump(pathinfo("/dsds.asa"));
+    var_dump(pathinfo("/dsds.asa"));
 ?>
 --EXPECTF--
 array(4) {

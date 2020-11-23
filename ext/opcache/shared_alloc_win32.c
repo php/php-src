@@ -24,6 +24,7 @@
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_execute.h"
+#include "zend_system_id.h"
 #include "SAPI.h"
 #include "tsrm_win32.h"
 #include "win32/winutil.h"
@@ -71,7 +72,7 @@ static void zend_win_error_message(int type, char *msg, int err)
 static char *create_name_with_username(char *name)
 {
 	static char newname[MAXPATHLEN + 32 + 4 + 1 + 32 + 21];
-	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.20s@%.32s", name, accel_uname_id, sapi_module.name, accel_system_id);
+	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.20s@%.32s", name, accel_uname_id, sapi_module.name, zend_system_id);
 
 	return newname;
 }
@@ -163,7 +164,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		return ALLOC_FAILURE;
 	}
 
-	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
+	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS|FILE_MAP_EXECUTE, 0, 0, 0, wanted_mapping_base);
 
 	if (mapping_base == NULL) {
 		err = GetLastError();
@@ -172,7 +173,16 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 			return ALLOC_FAILURE;
 		}
 		return ALLOC_FAIL_MAPPING;
+	} else {
+		DWORD old;
+
+		if (!VirtualProtect(mapping_base, requested_size, PAGE_READWRITE, &old)) {
+			err = GetLastError();
+			zend_win_error_message(ACCEL_LOG_FATAL, "VirtualProtect() failed", err);
+			return ALLOC_FAIL_MAPPING;
+		}
 	}
+
 	smm_shared_globals = (zend_smm_shared_globals *) ((char*)mapping_base + ACCEL_BASE_POINTER_SIZE);
 
 	return SUCCESSFULLY_REATTACHED;
@@ -203,7 +213,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   can be called before the child process is killed. In this case, the map will fail
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
-		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
+		memfile = OpenFileMapping(FILE_MAP_READ|FILE_MAP_WRITE|FILE_MAP_EXECUTE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
 		if (memfile == NULL) {
 			err = GetLastError();
 			break;
@@ -247,7 +257,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
-	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, size_high, size_low,
+	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_EXECUTE_READWRITE | SEC_COMMIT, size_high, size_low,
 								create_name_with_username(ACCEL_FILEMAP_NAME));
 	if (memfile == NULL) {
 		err = GetLastError();
@@ -277,7 +287,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	}
 
 	do {
-		shared_segment->p = mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, *wanted_mapping_base);
+		shared_segment->p = mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS|FILE_MAP_EXECUTE, 0, 0, 0, *wanted_mapping_base);
 		if (*wanted_mapping_base == NULL) { /* Auto address (NULL) is the last option on the array */
 			break;
 		}
@@ -291,6 +301,14 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		*error_in = "MapViewOfFile";
 		return ALLOC_FAILURE;
 	} else {
+		DWORD old;
+
+		if (!VirtualProtect(mapping_base, requested_size, PAGE_READWRITE, &old)) {
+			err = GetLastError();
+			zend_win_error_message(ACCEL_LOG_FATAL, "VirtualProtect() failed", err);
+			return ALLOC_FAILURE;
+		}
+
 		((void**)mapping_base)[0] = mapping_base;
 		((void**)mapping_base)[1] = (void*)execute_ex;
 	}

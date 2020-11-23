@@ -9,7 +9,6 @@ precision=14
 
 var_dump(filter_var(array(1,"1","", "-23234", "text", "asdf234asdfgs", array()), FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY));
 var_dump(filter_var(array(1.2,"1.7","", "-23234.123", "text", "asdf234.2asdfgs", array()), FILTER_VALIDATE_FLOAT, FILTER_REQUIRE_ARRAY));
-var_dump(filter_var(1, array()));
 var_dump(filter_var(1, FILTER_SANITIZE_STRING, 1));
 var_dump(filter_var(1, FILTER_SANITIZE_STRING, 0));
 var_dump(filter_var(1, FILTER_SANITIZE_STRING, array()));
@@ -53,12 +52,13 @@ array(7) {
   array(0) {
   }
 }
+string(1) "1"
+string(1) "1"
+string(1) "1"
 
-Warning: filter_var() expects parameter 2 to be int, array given in %s on line %d
-NULL
-string(1) "1"
-string(1) "1"
-string(1) "1"
+Warning: filter_var(): Unknown filter with ID -1 in %s on line %d
 bool(false)
+
+Warning: filter_var(): Unknown filter with ID 0 in %s on line %d
 bool(false)
 Done

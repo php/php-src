@@ -19,15 +19,19 @@ echo "SELECTING results\n";
 $results = $db->query("SELECT * FROM test ORDER BY id ASC");
 while ($result = $results->fetchArray(SQLITE3_NUM))
 {
-	var_dump($result);
-	/* Only read one row and break */
-	break;
+    var_dump($result);
+    /* Only read one row and break */
+    break;
 }
 
 echo "Closing database\n";
 var_dump($db->close());
 echo "Check db was closed\n";
-var_dump($results->numColumns());
+try {
+    var_dump($results->numColumns());
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -46,7 +50,5 @@ array(2) {
 Closing database
 bool(true)
 Check db was closed
-
-Warning: SQLite3Result::numColumns(): The SQLite3Result object has not been correctly initialised in %s on line %d
-bool(false)
+The SQLite3Result object has not been correctly initialised or is already closed
 Done

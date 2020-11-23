@@ -8,7 +8,6 @@ $params = $method->getParameters();
 var_dump($params);
 
 ?>
-===DONE===
 --EXPECT--
 array(4) {
   [0]=>
@@ -19,7 +18,7 @@ array(4) {
   [1]=>
   object(ReflectionParameter)#3 (1) {
     ["name"]=>
-    string(9) "delimiter"
+    string(9) "separator"
   }
   [2]=>
   object(ReflectionParameter)#4 (1) {
@@ -32,4 +31,3 @@ array(4) {
     string(6) "escape"
   }
 }
-===DONE===

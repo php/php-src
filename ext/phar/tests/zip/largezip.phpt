@@ -20,10 +20,8 @@ copy($fname, $fname2);
 $p2 = new Phar($fname2);
 var_dump(strlen($p2['big']->getContent()));
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php'); ?>
 --EXPECT--
 int(200000)
-===DONE===

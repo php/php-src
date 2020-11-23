@@ -2,9 +2,7 @@
 SPL: Test ArrayObject::ksort() function : basic functionality with array based store
 --FILE--
 <?php
-/* Prototype  : int ArrayObject::ksort()
- * Description: proto int ArrayIterator::ksort()
- * Sort the entries by key.
+/* Sort the entries by key.
  * Source code: ext/spl/spl_array.c
  * Alias to functions:
  */
@@ -14,12 +12,15 @@ $ao1 = new ArrayObject(array(4,2,3));
 $ao2 = new ArrayObject(array('b'=>4,'a'=>2,'q'=>3, 99=>'x'));
 var_dump($ao1->ksort());
 var_dump($ao1);
-var_dump($ao2->ksort('blah'));
+try {
+    var_dump($ao2->ksort('blah'));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($ao2);
 var_dump($ao2->ksort(SORT_STRING));
 var_dump($ao2);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ArrayObject::ksort() : basic functionality ***
 bool(true)
@@ -34,9 +35,7 @@ object(ArrayObject)#%d (1) {
     int(3)
   }
 }
-
-Warning: ksort() expects parameter 2 to be int, string given in %sarrayObject_ksort_basic1.php on line %d
-bool(false)
+ArrayObject::ksort(): Argument #1 ($flags) must be of type int, string given
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   array(4) {
@@ -64,4 +63,3 @@ object(ArrayObject)#%d (1) {
     int(3)
   }
 }
-===DONE===

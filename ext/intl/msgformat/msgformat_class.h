@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -48,9 +46,8 @@ extern zend_class_entry *MessageFormatter_ce_ptr;
 #define MSG_FORMAT_METHOD_FETCH_OBJECT									\
 	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;							\
 	if (MSG_FORMAT_OBJECT(mfo) == NULL)	{								\
-		intl_errors_set(&mfo->mf_data.error, U_ILLEGAL_ARGUMENT_ERROR,	\
-				"Found unconstructed MessageFormatter", 0);	\
-		RETURN_FALSE;													\
+		zend_throw_error(NULL, "Found unconstructed MessageFormatter");	\
+		RETURN_THROWS();												\
 	}
 
 #define MSG_FORMAT_OBJECT(mfo)			(mfo)->mf_data.umsgf

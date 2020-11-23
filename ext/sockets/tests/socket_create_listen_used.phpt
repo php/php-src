@@ -18,13 +18,11 @@ fa@php.net
     // default invocation
     $s_c_l2 = socket_create_listen(31330+$rand);
     var_dump($s_c_l2);
-    socket_close($s_c_l2);
     socket_close($s_c_l);
 ?>
 --EXPECTF--
-resource(%i) of type (Socket)
+object(Socket)#%d (0) {
+}
 
 Warning: socket_create_listen(): unable to bind to given address [%i]: %a in %s on line %d
 bool(false)
-
-Warning: socket_close() expects parameter 1 to be resource, bool given in %s on line %d

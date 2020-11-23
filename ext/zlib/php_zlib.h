@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -49,6 +47,7 @@ typedef struct _php_zlib_context {
 	int status;
 	size_t inflateDictlen;
 	php_zlib_buffer buffer;
+	zend_object std;
 } php_zlib_context;
 
 ZEND_BEGIN_MODULE_GLOBALS(zlib)

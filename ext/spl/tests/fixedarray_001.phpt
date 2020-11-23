@@ -44,7 +44,6 @@ $b = clone $a;
 $a[0] = "valueNew";
 var_dump($b[0]);
 ?>
-===DONE===
 --EXPECT--
 Exception: Index invalid or out of range
 Exception: Index invalid or out of range
@@ -57,4 +56,3 @@ int(10)
 int(10)
 bool(true)
 string(6) "value0"
-===DONE===

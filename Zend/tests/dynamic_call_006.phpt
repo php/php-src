@@ -3,46 +3,56 @@ Dynamic calls to scope introspection functions are forbidden (function variation
 --FILE--
 <?php
 function test() {
-    $func = 'extract';
-    $func(['a' => 'b']);
 
-    $func = 'compact';
-    $func(['a']);
+    try {
+        $func = 'extract';
+        $func(['a' => 'b']);
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 
-    $func = 'parse_str';
-    $func('a=b');
+    try {
+        $func = 'compact';
+        $func(['a']);
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 
-    $func = 'get_defined_vars';
-    $func();
+    try {
+        $func = 'get_defined_vars';
+        $func();
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 
-    $func = 'assert';
-    $func('1==2');
+    try {
+        $func = 'func_get_args';
+        $func();
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 
-    $func = 'func_get_args';
-    $func();
+    try {
+        $func = 'func_get_arg';
+        $func(1);
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 
-    $func = 'func_get_arg';
-    $func(1);
-
-    $func = 'func_num_args';
-    $func();
+    try {
+        $func = 'func_num_args';
+        $func();
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 test();
 
 ?>
---EXPECTF--
-Warning: Cannot call extract() dynamically in %s on line %d
-
-Warning: Cannot call compact() dynamically in %s on line %d
-
-Warning: Cannot call parse_str() with a single argument dynamically in %s on line %d
-
-Warning: Cannot call get_defined_vars() dynamically in %s on line %d
-
-Warning: Cannot call assert() with string argument dynamically in %s on line %d
-
-Warning: Cannot call func_get_args() dynamically in %s on line %d
-
-Warning: Cannot call func_get_arg() dynamically in %s on line %d
-
-Warning: Cannot call func_num_args() dynamically in %s on line %d
+--EXPECT--
+Cannot call extract() dynamically
+Cannot call compact() dynamically
+Cannot call get_defined_vars() dynamically
+Cannot call func_get_args() dynamically
+Cannot call func_get_arg() dynamically
+Cannot call func_num_args() dynamically

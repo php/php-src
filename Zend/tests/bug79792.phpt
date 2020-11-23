@@ -12,5 +12,5 @@ foreach ($a as &$c) {
 ?>
 ===DONE===
 --EXPECTF--
-Warning: Invalid argument supplied for foreach() in %s on line %d
+Warning: foreach() argument must be of type array|object, null given in %s on line %d
 ===DONE===

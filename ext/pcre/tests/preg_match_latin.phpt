@@ -2,11 +2,6 @@
 preg_match() single line match with latin input
 --FILE--
 <?php
-/* Prototype  : int preg_match  ( string $pattern  , string $subject  [, array &$matches  [, int $flags  [, int $offset  ]]] )
- * Description: Perform a regular expression match
- * Source code: ext/pcre/php_pcre.c
- */
-
 preg_match('/^[\w\p{Cyrillic}\s\-\']+$/u', 'latin', $test1);
 preg_match('/^[\w\p{Cyrillic}\s\-\']+$/u', 'кириллица', $test2);
 preg_match('/^[\w\s\-\']+$/u', 'latin', $test3);

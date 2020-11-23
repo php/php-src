@@ -4,14 +4,14 @@ Bug #62956: "incompatible" signatures for private methods should not cause E_WAR
 <?php
 class Base
 {
-	private function test()
-	{}
+    private function test()
+    {}
 }
 
 class Extension extends Base
 {
-	private function test($arg)
-	{}
+    private function test($arg)
+    {}
 }
 
 ?>

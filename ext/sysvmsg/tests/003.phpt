@@ -16,9 +16,10 @@ var_dump(msg_remove_queue($res));
 var_dump(msg_queue_exists($id));
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
-resource(%d) of type (sysvmsg queue)
+object(SysvMessageQueue)#1 (0) {
+}
 bool(true)
 bool(true)
 bool(false)

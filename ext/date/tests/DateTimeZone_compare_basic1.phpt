@@ -38,7 +38,11 @@ class MyDateTimeZone extends DateTimeZone {
 
 $tz1 = new MyDateTimeZone();
 $tz2 = new MyDateTimeZone();
-var_dump($tz1 == $tz2);
+try {
+    var_dump($tz1 == $tz2);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
@@ -69,6 +73,4 @@ compare Europe/Amsterdam with Europe/Berlin
 
 Warning: main(): Trying to compare different kinds of DateTimeZone objects in %s on line %d
 bool(false)
-
-Warning: main(): Trying to compare uninitialized DateTimeZone objects in %s on line %d
-bool(false)
+Trying to compare uninitialized DateTimeZone objects

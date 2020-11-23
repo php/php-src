@@ -27,14 +27,8 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_utf7.h"
-
-static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter);
 
 static const unsigned char mbfl_base64_table[] = {
  /* 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', */
@@ -55,36 +49,31 @@ const mbfl_encoding mbfl_encoding_utf7 = {
 	mbfl_no_encoding_utf7,
 	"UTF-7",
 	"UTF-7",
-	(const char *(*)[])&mbfl_encoding_utf7_aliases,
+	mbfl_encoding_utf7_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_utf7_wchar,
 	&vtbl_wchar_utf7
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_utf7 = {
-	mbfl_no_encoding_utf7,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_utf7
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7_wchar = {
 	mbfl_no_encoding_utf7,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf7_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf7,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf7,
-	mbfl_filt_conv_wchar_utf7_flush
+	mbfl_filt_conv_wchar_utf7_flush,
+	NULL,
 };
 
 
@@ -411,53 +400,4 @@ int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
-}
-
-static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter)
-{
-	int n;
-
-	switch (filter->status) {
-	/* directly encoded characters */
-	case 0:
-		if (c == 0x2b) {	/* '+'  shift character */
-			filter->status++;
-		} else if (c == 0x5c || c == 0x7e || c < 0 || c > 0x7f) {	/* illegal character */
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-	/* Modified Base64 */
-	case 1:
-	case 2:
-		n = 0;
-		if (c >= 0x41 && c <= 0x5a) {		/* A - Z */
-			n = 1;
-		} else if (c >= 0x61 && c <= 0x7a) {	/* a - z */
-			n = 1;
-		} else if (c >= 0x30 && c <= 0x39) {	/* 0 - 9 */
-			n = 1;
-		} else if (c == 0x2b) {			/* '+' */
-			n = 1;
-		} else if (c == 0x2f) {			/* '/' */
-			n = 1;
-		}
-		if (n <= 0) {
-			if (filter->status == 1 && c != 0x2d) {
-				filter->flag = 1;	/* bad */
-			} else if (c < 0 || c > 0x7f) {
-				filter->flag = 1;	/* bad */
-			}
-			filter->status = 0;
-		} else {
-			filter->status = 2;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
 }

@@ -9,12 +9,6 @@ session.cookie_samesite=test
 
 ob_start();
 
-/*
- * Prototype : void session_set_cookie_params(array $options)
- * Description : Set the session cookie parameters
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_cookie_params() : variation ***\n";
 
 var_dump(ini_get("session.cookie_samesite"));
@@ -40,7 +34,7 @@ string(7) "nothing"
 bool(true)
 string(7) "nothing"
 
-Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 18
+Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in %s on line %d
 bool(false)
 string(7) "nothing"
 bool(true)

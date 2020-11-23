@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -79,6 +77,9 @@ typedef struct {
 #	define PHP_SXE_API ZEND_API
 #endif
 
-PHP_SXE_API zend_class_entry *sxe_get_element_class_entry();
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator;
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
+
+PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void);
 
 #endif

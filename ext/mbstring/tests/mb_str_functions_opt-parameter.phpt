@@ -16,7 +16,6 @@ echo mb_substr('foobarbaz', 6, null, 'UTF-8') . "\n";
 echo mb_strcut('foobarbaz', 6, null, 'UTF-8') . "\n";
 echo mb_strimwidth('foobar', 0, 3, null, 'UTF-8') . "\n";
 ?>
-==DONE==
 --EXPECT--
 1
 2
@@ -29,4 +28,3 @@ baz
 baz
 baz
 foo
-==DONE==

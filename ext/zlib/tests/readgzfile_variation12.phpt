@@ -23,7 +23,6 @@ foreach ( $variation as $var ) {
   var_dump(readgzfile( $filename, $var  ) );
 }
 ?>
-===DONE===
 --EXPECT--
 When you're taught through feelings
 Destiny flying high above
@@ -53,4 +52,3 @@ Destiny who cares
 as it turns around
 and I know that it descends down on me
 int(176)
-===DONE===

@@ -23,7 +23,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 $files['.phar/alias.txt'] = 'hio';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 
 $tar->close();
@@ -46,7 +46,6 @@ include $alias . '/b/c.php';
 
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
@@ -69,4 +68,3 @@ object(PharFileInfo)#%d (2) {
 }
 string(5) "extra"
 extra
-===DONE===

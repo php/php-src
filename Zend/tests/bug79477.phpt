@@ -4,7 +4,7 @@ Bug #79477: casting object into array creates references
 <?php
 
 class Test {
-	public $prop = 'default value';
+    public $prop = 'default value';
 }
 
 $obj = new Test;

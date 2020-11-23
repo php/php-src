@@ -2,15 +2,9 @@
 Test arsort() function : object functionality - sort objects
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing arsort() by providing integer/string object arrays with following flag values
- * 1. Defualt flag value
+ * 1. Default flag value
  * 2. SORT_REGULAR - compare items normally
 */
 
@@ -59,14 +53,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing arsort() function by supplying integer object array, flag value is defualt
+// testing arsort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(arsort($temp_array) );
 var_dump($temp_array);
 
-// testing arsort() function by supplying string object array, flag value is defualt
+// testing arsort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(arsort($temp_array) );
 var_dump($temp_array);
@@ -87,7 +81,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing arsort() : object functionality ***
 
--- Testing arsort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing arsort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(6) {
   [2]=>

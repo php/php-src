@@ -10,17 +10,21 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 file_put_contents($filename, $xmlstring);
 
 $reader = new XMLReader();
-if ($reader->open('')) exit();
+try {
+    $reader->open('');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 $reader = new XMLReader();
 if (!$reader->open($filename)) {
-	$reader->close();
-	exit();
+    $reader->close();
+    exit();
 }
 
 // Only go through
 while ($reader->read()) {
-	echo $reader->name."\n";
+    echo $reader->name."\n";
 }
 $reader->close();
 unlink($filename);
@@ -31,9 +35,7 @@ $reader->close();
 unlink($filename);
 
 ?>
-===DONE===
---EXPECTF--
-Warning: XMLReader::open(): Empty string supplied as input in %s on line %d
+--EXPECT--
+XMLReader::open(): Argument #1 ($uri) cannot be empty
 books
 books
-===DONE===

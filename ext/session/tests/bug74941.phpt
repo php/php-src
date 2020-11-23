@@ -15,8 +15,6 @@ echo ".\n";
 session_id('BUG74941');
 var_dump(session_start());
 ?>
-===DONE===
 --EXPECT--
 .
 bool(true)
-===DONE===

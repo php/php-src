@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -35,7 +33,7 @@ PHPDBG_PRINT(method);
 PHPDBG_PRINT(func);
 PHPDBG_PRINT(stack);
 
-PHPDBG_API void phpdbg_print_opcodes(char *function);
+PHPDBG_API void phpdbg_print_opcodes(const char *function);
 
 extern const phpdbg_command_t phpdbg_print_commands[];
 

@@ -21,7 +21,6 @@
 #define ZEND_SORT_H
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
 ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
 ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
 END_EXTERN_C()

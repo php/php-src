@@ -2,12 +2,6 @@
 Test get_class() function : usage variations  - passing unexpected types.
 --FILE--
 <?php
-/* Prototype  : proto string get_class([object object])
- * Description: Retrieves the class name
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing get_class() : usage variations ***\n";
 
 //  Note: basic use cases in Zend/tests/009.phpt
@@ -67,8 +61,12 @@ $values = array(
 // loop through each element of the array for object
 
 foreach($values as $value) {
-      echo @"\nArg value: $value (type: " . gettype($value) . ")\n";
-      var_dump( get_class($value) );
+    echo @"\nArg value: $value (type: " . gettype($value) . ")\n";
+    try {
+        var_dump( get_class($value) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 };
 
 echo "Done";
@@ -76,137 +74,85 @@ echo "Done";
 --EXPECTF--
 *** Testing get_class() : usage variations ***
 
-Notice: Undefined variable: undefined_var in %sget_class_variation_001.php on line 58
+Warning: Undefined variable $undefined_var in %s on line %d
 
-Notice: Undefined variable: unset_var in %sget_class_variation_001.php on line 61
+Warning: Undefined variable $unset_var in %s on line %d
 
 Arg value: 0 (type: integer)
-
-Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 1 (type: integer)
-
-Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 12345 (type: integer)
-
-Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: -2345 (type: integer)
-
-Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 10.5 (type: double)
-
-Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: -10.5 (type: double)
-
-Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 101234567000 (type: double)
-
-Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 1.07654321E-9 (type: double)
-
-Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 0.5 (type: double)
-
-Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: Array (type: array)
-
-Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-
-Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-
-Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-
-Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-
-Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value:  (type: NULL)
-
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value:  (type: NULL)
-
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value: 1 (type: boolean)
-
-Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value:  (type: boolean)
-
-Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value: 1 (type: boolean)
-
-Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value:  (type: boolean)
-
-Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value:  (type: string)
-
-Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value:  (type: string)
-
-Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value: string (type: string)
-
-Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value: string (type: string)
-
-Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value:  (type: NULL)
-
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value:  (type: NULL)
-
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-bool(false)
+get_class(): Argument #1 ($object) must be of type object, null given
 Done

@@ -14,7 +14,5 @@ try {
     echo 'expected exception: ' . $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 expected exception: Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen
-===DONE===

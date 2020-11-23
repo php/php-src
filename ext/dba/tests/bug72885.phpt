@@ -17,7 +17,6 @@ var_dump(dba_fetch('foo', $db));
 dba_close($db);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__ .'/clean.inc');
@@ -25,4 +24,3 @@ require_once(__DIR__ .'/clean.inc');
 --EXPECT--
 bool(true)
 string(3) "baz"
-===DONE===

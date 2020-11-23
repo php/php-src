@@ -2,11 +2,6 @@
 Test debug_zval_dump() function : usage variations
 --FILE--
 <?php
-/* Prototype: void debug_zval_dump ( mixed $variable );
-   Description: Dumps a string representation of an internal zend value
-                to output.
-*/
-
 echo "*** Testing debug_zval_dump() on functions ***\n";
 echo "--- Variation 1: global variable inside a function ---\n";
 $global_var = 10;  //declaring global variable
@@ -85,7 +80,7 @@ debug_zval_dump($var_1);
 echo "\n-- Value of \$var_2: --\n";
 debug_zval_dump($var_2);
 
-echo "\n*** Testing debug_zval_dump() on miscelleneous input arguments ***\n";
+echo "\n*** Testing debug_zval_dump() on miscellaneous input arguments ***\n";
 /* unset a variable */
 $unset_var = 10.5;
 unset($unset_var);
@@ -147,7 +142,7 @@ int(10)
 
 -- Value of $ref_first_var --
 
-Notice: Undefined variable: ref_first_var in %s on line %d
+Warning: Undefined variable $ref_first_var in %s on line %d
 NULL
 
 -- Value of $first_var --
@@ -166,7 +161,7 @@ int(10)
 
 -- Value of $var_3: (after unsetting var_3) --
 
-Notice: Undefined variable: var_3 in %s on line %d
+Warning: Undefined variable $var_3 in %s on line %d
 NULL
 
 -- Value of $var_2: --
@@ -177,13 +172,13 @@ int(10)
 
 -- Value of $var_1: (after unsetting variable_1) --
 
-Notice: Undefined variable: var_1 in %s on line %d
+Warning: Undefined variable $var_1 in %s on line %d
 NULL
 
 -- Value of $var_2: --
 int(10)
 
-*** Testing debug_zval_dump() on miscelleneous input arguments ***
+*** Testing debug_zval_dump() on miscellaneous input arguments ***
 -- Iteration 1 --
 NULL
 -- Iteration 2 --

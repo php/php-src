@@ -4,22 +4,22 @@ Bug #69420 (Invalid read in zend_std_get_method)
 <?php
 
 trait T {
-	protected function test() {
-		echo "okey";
-	}
+    protected function test() {
+        echo "okey";
+    }
 }
 
 
 class A {
-	protected function test() {
-	}
+    protected function test() {
+    }
 }
 
 class B extends A {
-	use T;
-	public function foo() {
-		$this->test();
-	}
+    use T;
+    public function foo() {
+        $this->test();
+    }
 }
 
 

@@ -8,8 +8,8 @@ class T {
     public $_this;
 
     public function __toString() {
-		global $handler;
-	    $handler = $this;
+        global $handler;
+        $handler = $this;
         $this->_this = $this; // <-- uncomment this
         return 'A';
     }
@@ -18,9 +18,10 @@ class T {
 $t = new T;
 for ($i = 0; $i < 3; $i++) {
     strip_tags($t);
-	strip_tags(new T);
+    strip_tags(new T);
 }
 var_dump($handler);
+?>
 --EXPECTF--
 object(T)#%d (1) {
   ["_this"]=>

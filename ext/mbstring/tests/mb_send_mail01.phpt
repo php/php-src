@@ -3,10 +3,10 @@ mb_send_mail() test 1 (lang=neutral)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. Not valid for Windows');
+    die('skip.. Not valid for Windows');
 }
 if (!function_exists("mb_send_mail") || !mb_language("neutral")) {
-	die("skip mb_send_mail() not available");
+    die("skip mb_send_mail() not available");
 }
 ?>
 --INI--
@@ -21,8 +21,8 @@ mb_send_mail($to, mb_language(), "test");
 
 /* neutral (UTF-8) */
 if (mb_language("neutral")) {
-	mb_internal_encoding("none");
-	mb_send_mail($to, "test ".mb_language(), "test");
+    mb_internal_encoding("UTF-8");
+    mb_send_mail($to, "test ".mb_language(), "test");
 }
 ?>
 --EXPECTF--

@@ -22,10 +22,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_cp5022x.h"
 #include "mbfilter_jis.h"
@@ -40,10 +36,6 @@ typedef struct _mbfl_filt_conv_wchar_cp50220_ctx {
 	mbfl_convert_filter last;
 } mbfl_filt_conv_wchar_cp50220_ctx;
 
-static int mbfl_filt_ident_jis_ms(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_cp50220(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_cp50221(int c, mbfl_identify_filter *filter);
-static int mbfl_filt_ident_cp50222(int c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest);
@@ -54,7 +46,7 @@ const mbfl_encoding mbfl_encoding_jis_ms = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_jis_ms_wchar,
 	&vtbl_wchar_jis_ms
 };
@@ -63,9 +55,9 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	mbfl_no_encoding_cp50220,
 	"CP50220",
 	"ISO-2022-JP",
-	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	NULL,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50220_wchar,
 	&vtbl_wchar_cp50220
 };
@@ -74,9 +66,9 @@ const mbfl_encoding mbfl_encoding_cp50220raw = {
 	mbfl_no_encoding_cp50220raw,
 	"CP50220raw",
 	"ISO-2022-JP",
-	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	NULL,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50220raw_wchar,
 	&vtbl_wchar_cp50220raw
 };
@@ -87,7 +79,7 @@ const mbfl_encoding mbfl_encoding_cp50221 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50221_wchar,
 	&vtbl_wchar_cp50221
 };
@@ -98,71 +90,39 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp50222_wchar,
 	&vtbl_wchar_cp50222
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_jis_ms = {
-	mbfl_no_encoding_jis_ms,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_jis_ms
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_cp50220 = {
-	mbfl_no_encoding_cp50220,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp50220
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_cp50220raw = {
-	mbfl_no_encoding_cp50220raw,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp50220
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_cp50221 = {
-	mbfl_no_encoding_cp50221,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp50221
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_cp50222 = {
-	mbfl_no_encoding_cp50222,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp50222
 };
 
 const struct mbfl_convert_vtbl vtbl_jis_ms_wchar = {
 	mbfl_no_encoding_jis_ms,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_jis_ms = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_jis_ms,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_jis_ms,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
 	mbfl_no_encoding_cp50220,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220 = {
@@ -179,9 +139,10 @@ const struct mbfl_convert_vtbl vtbl_cp50220raw_wchar = {
 	mbfl_no_encoding_cp50220raw,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220raw = {
@@ -198,36 +159,40 @@ const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
 	mbfl_no_encoding_cp50221,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50221 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp50221,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp50221,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
 	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50222 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp50222,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp50222,
-	mbfl_filt_conv_wchar_cp50222_flush
+	mbfl_filt_conv_wchar_cp50222_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -579,21 +544,16 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 
 	mbfl_filt_conv_common_ctor(filt);
 
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	if (ctx == NULL) {
-		mbfl_filt_conv_common_dtor(filt);
-		return;
-	}
-
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	ctx->tl_param.mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
 
 	ctx->last = *filt;
 	ctx->last.opaque = ctx;
 	ctx->last.data = filt->data;
 	filt->filter_function = vtbl_tl_jisx0201_jisx0208.filter_function;
-	filt->filter_flush = vtbl_tl_jisx0201_jisx0208.filter_flush;
-	filt->output_function = (int(*)(int, void *))ctx->last.filter_function;
-	filt->flush_function = (int(*)(void *))ctx->last.filter_flush;
+	filt->filter_flush = (filter_flush_t)vtbl_tl_jisx0201_jisx0208.filter_flush;
+	filt->output_function = (output_function_t)ctx->last.filter_function;
+	filt->flush_function = (flush_function_t)ctx->last.filter_flush;
 	filt->data = &ctx->last;
 	filt->opaque = ctx;
 	vtbl_tl_jisx0201_jisx0208.filter_ctor(filt);
@@ -605,11 +565,7 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
 
 	*dest = *src;
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	if (ctx != NULL) {
-		*ctx = *(mbfl_filt_conv_wchar_cp50220_ctx*)src->opaque;
-	}
-
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	dest->opaque = ctx;
 	dest->data = &ctx->last;
 }
@@ -617,13 +573,9 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 static void
 mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 {
-	vtbl_tl_jisx0201_jisx0208.filter_dtor(filt);
-
 	if (filt->opaque != NULL) {
-		mbfl_free(filt->opaque);
+		efree(filt->opaque);
 	}
-
-	mbfl_filt_conv_common_dtor(filt);
 }
 
 /*
@@ -961,333 +913,4 @@ mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
-}
-
-
-static int mbfl_filt_ident_jis_ms(int c, mbfl_identify_filter *filter)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x20:	 X 0201 kana */
-/*	case 0x80:	 X 0208 */
-/*	case 0x90:	 X 0212 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (c == 0x0e) {			/* "kana in" */
-			filter->status = 0x20;
-		} else if (c == 0x0f) {			/* "kana out" */
-			filter->status = 0;
-		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x81:	 X 0208 second char */
-/*	case 0x91:	 X 0212 second char */
-	case 1:
-		filter->status &= ~0xf;
-		if (c == 0x1b) {
-			goto retry;
-		} else if (c < 0x21 || c > 0x7e) {		/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ ( */
-	case 4:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x44) {		/* 'D' */
-			filter->status = 0x90;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42 || c == 0x48) {		/* 'B' or 'H' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else if (c == 0x49) {		/* 'I' */
-			filter->status = 0x20;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_cp50220(int c, mbfl_identify_filter *filter)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x80:	 X 0208 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x81:	 X 0208 second char */
-	case 1:
-		if (c == 0x1b) {
-			filter->status++;
-		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
-				filter->flag = 1;
-			}
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_cp50221(int c, mbfl_identify_filter *filter)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x80:	 X 0208 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x81:	 X 0208 second char */
-	case 1:
-		if (c == 0x1b) {
-			filter->status++;
-		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
-				filter->flag = 1;
-			}
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else if (c == 0x49) {		/* 'I' */
-			filter->status = 0x20;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_cp50222(int c, mbfl_identify_filter *filter)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x80:	 X 0208 */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if (filter->status == 0x80 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x81:	 X 0208 second char */
-	case 1:
-		if (c == 0x1b) {
-			filter->status++;
-		} else {
-			filter->status &= ~0xf;
-			if (c < 0x21 || c > 0x7e) {		/* bad */
-				filter->flag = 1;
-			}
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0x10;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
 }

@@ -22,15 +22,12 @@
 
 #include "zend_globals.h"
 
-#define CONST_CS				(1<<0)				/* Case Sensitive */
-#define CONST_PERSISTENT		(1<<1)				/* Persistent */
-#define CONST_CT_SUBST			(1<<2)				/* Allow compile-time substitution */
-#define CONST_NO_FILE_CACHE		(1<<3)				/* Can't be saved in file cache */
+#define CONST_CS				0					/* No longer used -- always case sensitive */
+#define CONST_PERSISTENT		(1<<0)				/* Persistent */
+#define CONST_NO_FILE_CACHE		(1<<1)				/* Can't be saved in file cache */
+#define CONST_DEPRECATED		(1<<2)				/* Deprecated */
 
 #define	PHP_USER_CONSTANT   0x7fffff /* a constant defined in user space */
-
-/* Flag for zend_get_constant_ex(). Must not class with ZEND_FETCH_CLASS_* flags. */
-#define ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK 0x1000
 
 typedef struct _zend_constant {
 	zval value;
@@ -72,10 +69,10 @@ typedef struct _zend_constant {
 BEGIN_EXTERN_C()
 void clean_module_constants(int module_number);
 void free_zend_constant(zval *zv);
-int zend_startup_constants(void);
-int zend_shutdown_constants(void);
+void zend_startup_constants(void);
+void zend_shutdown_constants(void);
 void zend_register_standard_constants(void);
-ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
+ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
 ZEND_API zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, uint32_t flags);
@@ -83,12 +80,23 @@ ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zen
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number);
 ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number);
 ZEND_API void zend_register_double_constant(const char *name, size_t name_len, double dval, int flags, int module_number);
-ZEND_API void zend_register_string_constant(const char *name, size_t name_len, char *strval, int flags, int module_number);
-ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number);
-ZEND_API int zend_register_constant(zend_constant *c);
+ZEND_API void zend_register_string_constant(const char *name, size_t name_len, const char *strval, int flags, int module_number);
+ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number);
+ZEND_API zend_result zend_register_constant(zend_constant *c);
 #ifdef ZTS
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 #endif
+
+ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t name_len);
+
+static zend_always_inline zend_constant *zend_get_special_const(
+		const char *name, size_t name_len) {
+	if (name_len == 4 || name_len == 5) {
+		return _zend_get_special_const(name, name_len);
+	}
+	return NULL;
+}
+
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR free_zend_constant

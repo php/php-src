@@ -18,7 +18,5 @@ $p12 = base64_decode($p12_base64);
 
 test($p12, 'qwerty');
 ?>
-===DONE===
 --EXPECT--
 int(2)
-===DONE===

@@ -4,9 +4,9 @@ Generators must return a valid variable with return type specified
 <?php
 
 $gen = (function (): Generator {
-	1 + $a = 1; // force a temporary
-	return true;
-	yield;
+    1 + $a = 1; // force a temporary
+    return true;
+    yield;
 })();
 
 var_dump($gen->valid());

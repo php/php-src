@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -92,6 +90,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				exit_status = PSFS_PASS_ON;
 			} else if (status != Z_OK) {
 				/* Something bad happened */
+				php_error_docref(NULL, E_NOTICE, "zlib: %s", zError(status));
 				php_stream_bucket_delref(bucket);
 				/* reset these because despite the error the filter may be used again */
 				data->strm.next_in = data->inbuf;

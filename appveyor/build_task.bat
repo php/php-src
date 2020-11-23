@@ -54,6 +54,8 @@ if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INT
 set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp
 if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
+set CFLAGS=/W1 /WX
+
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
 	--disable-debug-pack ^

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,7 +23,7 @@
    +----------------------------------------------------------------------+
 */
 
-#if HAVE_OCI8
+#ifdef HAVE_OCI8
 # ifndef PHP_OCI8_INT_H
 #  define PHP_OCI8_INT_H
 
@@ -371,22 +369,22 @@ typedef struct {
 
 #define PHP_OCI_ZVAL_TO_CONNECTION(zval, connection) \
 	if ((connection = (php_oci_connection *)zend_fetch_resource2(Z_RES_P(zval), "oci8 connection", le_connection, le_pconnection)) == NULL) { \
-		RETURN_FALSE; \
+		RETURN_THROWS(); \
 	}
 
 #define PHP_OCI_ZVAL_TO_STATEMENT(zval, statement) \
 	if ((statement = (php_oci_statement *)zend_fetch_resource(Z_RES_P(zval), "oci8 statement", le_statement)) == NULL) { \
-		RETURN_FALSE; \
+		RETURN_THROWS(); \
 	}
 
 #define PHP_OCI_ZVAL_TO_DESCRIPTOR(zval, descriptor) \
 	if ((descriptor = (php_oci_descriptor *)zend_fetch_resource(Z_RES_P(zval), "oci8 descriptor", le_descriptor)) == NULL) { \
-		RETURN_FALSE; \
+		RETURN_THROWS(); \
 	}
 
 #define PHP_OCI_ZVAL_TO_COLLECTION(zval, collection) \
 	if ((collection = (php_oci_collection *)zend_fetch_resource(Z_RES_P(zval), "oci8 collection", le_collection)) == NULL) { \
-		RETURN_FALSE; \
+		RETURN_THROWS(); \
 	}
 
 #define PHP_OCI_FETCH_RESOURCE_EX(zval, var, type, name, resource_type)						 \

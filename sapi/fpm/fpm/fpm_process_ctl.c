@@ -390,7 +390,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 
 		if (idle < wp->config->pm_min_spare_servers) {
 			if (wp->running_children >= wp->config->pm_max_children) {
-				if (!wp->warn_max_children) {
+				if (!wp->warn_max_children && !wp->shared) {
 					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
 					zlog(ZLOG_WARNING, "[pool %s] server reached pm.max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
@@ -409,7 +409,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			/* get sure it won't exceed max_children */
 			children_to_fork = MIN(children_to_fork, wp->config->pm_max_children - wp->running_children);
 			if (children_to_fork <= 0) {
-				if (!wp->warn_max_children) {
+				if (!wp->warn_max_children && !wp->shared) {
 					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
 					zlog(ZLOG_WARNING, "[pool %s] server reached pm.max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
@@ -513,7 +513,7 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 /*	zlog(ZLOG_DEBUG, "[pool %s] heartbeat running_children=%d", wp->config->name, wp->running_children);*/
 
 	if (wp->running_children >= wp->config->pm_max_children) {
-		if (!wp->warn_max_children) {
+		if (!wp->warn_max_children && !wp->shared) {
 			fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
 			zlog(ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 			wp->warn_max_children = 1;
@@ -528,7 +528,6 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 			return;
 		}
 	}
-
 	wp->warn_max_children = 0;
 	fpm_children_make(wp, 1, 1, 1);
 

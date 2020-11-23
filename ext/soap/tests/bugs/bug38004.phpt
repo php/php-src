@@ -7,9 +7,9 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function Test($param) {
-	global $g;
-	$g = $param->strA."\n".$param->strB."\n";
-	return $g;
+    global $g;
+    $g = $param->strA."\n".$param->strB."\n";
+    return $g;
 }
 
 class TestSoapClient extends SoapClient {

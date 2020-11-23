@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
@@ -260,12 +258,14 @@ out:
 	return row_count;
 }
 
+/* TODO: Do ODBC quoter
 static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type param_type )
 {
-	/* pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data; */
-	/* TODO: figure it out */
+	// pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	// TODO: figure it out
 	return 0;
 }
+*/
 
 static int odbc_handle_begin(pdo_dbh_t *dbh)
 {
@@ -376,7 +376,7 @@ static const struct pdo_dbh_methods odbc_methods = {
 	odbc_handle_closer,
 	odbc_handle_preparer,
 	odbc_handle_doer,
-	odbc_handle_quoter,
+	NULL, /* quoter */
 	odbc_handle_begin,
 	odbc_handle_commit,
 	odbc_handle_rollback,
@@ -384,7 +384,11 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL,	/* last id */
 	pdo_odbc_fetch_error_func,
 	odbc_handle_get_attr,	/* get attr */
-	NULL,	/* check_liveness */
+	NULL, /* check_liveness */
+	NULL, /* get_driver_methods */
+	NULL, /* request_shutdown */
+	NULL, /* in_transaction */
+	NULL /* get_gc */
 };
 
 static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
@@ -423,7 +427,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 	}
 
 	rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT,
-		(SQLPOINTER)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_INTEGER);
+		(SQLPOINTER)(intptr_t)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT");
 		goto fail;

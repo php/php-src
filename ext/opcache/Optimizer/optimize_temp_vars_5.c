@@ -102,7 +102,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 				if (!zend_bitset_in(valid_T, currT)) {
 					int use_new_var = 0;
 
-					/* Code in "finally" blocks may modify temorary variables.
+					/* Code in "finally" blocks may modify temporary variables.
 					 * We allocate new temporaries for values that need to
 					 * relive FAST_CALLs.
 					 */

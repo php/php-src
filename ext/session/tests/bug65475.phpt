@@ -25,6 +25,7 @@ session_start();
 var_dump($session_id === session_id());
 var_dump($_SESSION['cnt']); // Should be int(2)
 session_write_close();
+?>
 --EXPECT--
 Testing file module
 bool(true)

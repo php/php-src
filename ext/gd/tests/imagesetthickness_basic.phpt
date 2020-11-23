@@ -4,8 +4,8 @@ Testing imagetruecolortopalette() of GD library
 Rafael Dohms <rdohms [at] gmail [dot] com>
 --SKIPIF--
 <?php
-	if (!extension_loaded("gd")) die("skip GD not present");
-	if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
+    if (!extension_loaded("gd")) die("skip GD not present");
+    if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
 ?>
 --FILE--
 <?php

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -126,22 +124,6 @@ typedef struct dba_handler {
 	DBA_OPTIMIZE_FUNC(x); \
 	DBA_SYNC_FUNC(x); \
 	DBA_INFO_FUNC(x)
-
-PHP_FUNCTION(dba_open);
-PHP_FUNCTION(dba_popen);
-PHP_FUNCTION(dba_close);
-PHP_FUNCTION(dba_firstkey);
-PHP_FUNCTION(dba_nextkey);
-PHP_FUNCTION(dba_replace);
-PHP_FUNCTION(dba_insert);
-PHP_FUNCTION(dba_delete);
-PHP_FUNCTION(dba_exists);
-PHP_FUNCTION(dba_fetch);
-PHP_FUNCTION(dba_optimize);
-PHP_FUNCTION(dba_sync);
-PHP_FUNCTION(dba_handlers);
-PHP_FUNCTION(dba_list);
-PHP_FUNCTION(dba_key_split);
 
 #else
 #define dba_module_ptr NULL

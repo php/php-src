@@ -13,7 +13,7 @@ numfmt_get/set_symbol() icu >= 4.8
 
 function ut_main()
 {
-	$longstr = str_repeat("blah", 10);
+    $longstr = str_repeat("blah", 10);
     $symbols = array(
         'DECIMAL_SEPARATOR_SYMBOL' => array( NumberFormatter::DECIMAL_SEPARATOR_SYMBOL, '_._', 12345.123456, NumberFormatter::DECIMAL ),
         'GROUPING_SEPARATOR_SYMBOL' => array( NumberFormatter::GROUPING_SEPARATOR_SYMBOL, '_,_', 12345.123456, NumberFormatter::DECIMAL ),
@@ -33,8 +33,8 @@ function ut_main()
         'NAN_SYMBOL' => array( NumberFormatter::NAN_SYMBOL, '_N_', 12345.123456, NumberFormatter::DECIMAL ),
         'SIGNIFICANT_DIGIT_SYMBOL' => array( NumberFormatter::SIGNIFICANT_DIGIT_SYMBOL, '_SD_', 12345.123456, NumberFormatter::DECIMAL ),
         'MONETARY_GROUPING_SEPARATOR_SYMBOL' => array( NumberFormatter::MONETARY_GROUPING_SEPARATOR_SYMBOL, '_MG_', 12345.123456, NumberFormatter::CURRENCY ),
-	'MONETARY_GROUPING_SEPARATOR_SYMBOL-2' => array( NumberFormatter::MONETARY_GROUPING_SEPARATOR_SYMBOL, "&nbsp;", 12345.123456, NumberFormatter::CURRENCY ),
-	'MONETARY_GROUPING_SEPARATOR_SYMBOL-3' => array( NumberFormatter::MONETARY_GROUPING_SEPARATOR_SYMBOL, $longstr, 12345.123456, NumberFormatter::CURRENCY ),
+    'MONETARY_GROUPING_SEPARATOR_SYMBOL-2' => array( NumberFormatter::MONETARY_GROUPING_SEPARATOR_SYMBOL, "&nbsp;", 12345.123456, NumberFormatter::CURRENCY ),
+    'MONETARY_GROUPING_SEPARATOR_SYMBOL-3' => array( NumberFormatter::MONETARY_GROUPING_SEPARATOR_SYMBOL, $longstr, 12345.123456, NumberFormatter::CURRENCY ),
     );
 
     $res_str = '';
@@ -76,9 +76,9 @@ function ut_main()
     }
     $badvals = array(2147483648, -2147483648, -1, 4294901761);
     foreach($badvals as $badval) {
-	    if(ut_nfmt_get_symbol( $fmt, 2147483648 ))  {
-		$res_str .= "Bad value $badval should return false!\n";
-	    }
+        if(ut_nfmt_get_symbol( $fmt, 2147483648 ))  {
+        $res_str .= "Bad value $badval should return false!\n";
+        }
     }
     return $res_str;
 }

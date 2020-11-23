@@ -21,6 +21,7 @@
 #include "phar_internal.h"
 #include "SAPI.h"
 #include "func_interceptors.h"
+#include "ext/standard/php_var.h"
 
 static void destroy_phar_data(zval *zv);
 
@@ -229,20 +230,7 @@ void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 		HT_INVALIDATE(&phar->virtual_dirs);
 	}
 
-	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
-		if (phar->is_persistent) {
-			if (phar->metadata_len) {
-				/* for zip comments that are strings */
-				free(Z_PTR(phar->metadata));
-			} else {
-				zval_internal_ptr_dtor(&phar->metadata);
-			}
-		} else {
-			zval_ptr_dtor(&phar->metadata);
-		}
-		phar->metadata_len = 0;
-		ZVAL_UNDEF(&phar->metadata);
-	}
+	phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 
 	if (phar->fp) {
 		php_stream_close(phar->fp);
@@ -383,25 +371,7 @@ void destroy_phar_manifest_entry_int(phar_entry_info *entry) /* {{{ */
 		entry->fp = 0;
 	}
 
-	if (Z_TYPE(entry->metadata) != IS_UNDEF) {
-		if (entry->is_persistent) {
-			if (entry->metadata_len) {
-				/* for zip comments that are strings */
-				free(Z_PTR(entry->metadata));
-			} else {
-				zval_internal_ptr_dtor(&entry->metadata);
-			}
-		} else {
-			zval_ptr_dtor(&entry->metadata);
-		}
-		entry->metadata_len = 0;
-		ZVAL_UNDEF(&entry->metadata);
-	}
-
-	if (entry->metadata_str.s) {
-		smart_str_free(&entry->metadata_str);
-		entry->metadata_str.s = NULL;
-	}
+	phar_metadata_tracker_free(&entry->metadata_tracker, entry->is_persistent);
 
 	pefree(entry->filename, entry->is_persistent);
 
@@ -600,46 +570,150 @@ int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t ali
 /* }}}*/
 
 /**
- * Parse out metadata from the manifest for a single file
+ * Attempt to serialize the data.
+ * Callers are responsible for handling EG(exception) if one occurs.
+ */
+void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker *tracker, int persistent) /* {{{ */
+{
+	php_serialize_data_t metadata_hash;
+	smart_str metadata_str = {0};
+	if (tracker->str || Z_ISUNDEF(tracker->val)) {
+		/* Already has serialized the value or there is no value */
+		return;
+	}
+	/* Assert it should not be possible to create raw zvals in a persistent phar (i.e. from cache_list) */
+	ZEND_ASSERT(!persistent);
+
+	PHP_VAR_SERIALIZE_INIT(metadata_hash);
+	php_var_serialize(&metadata_str, &tracker->val, &metadata_hash);
+	PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
+	if (!metadata_str.s) {
+		return;
+	}
+	tracker->str = metadata_str.s;
+}
+/* }}} */
+
+/**
+ * Parse out metadata when phar_metadata_tracker_has_data is true.
+ *
+ * Precondition: phar_metadata_tracker_has_data is true
+ */
+int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker *tracker, zval *metadata, int persistent, HashTable *unserialize_options, const char* method_name) /* {{{ */
+{
+	const zend_bool has_unserialize_options = unserialize_options != NULL && zend_array_count(unserialize_options) > 0;
+	/* It should be impossible to create a zval in a persistent phar/entry. */
+	ZEND_ASSERT(!persistent || Z_ISUNDEF(tracker->val));
+
+	if (Z_ISUNDEF(tracker->val) || has_unserialize_options) {
+		if (EG(exception)) {
+			/* Because other parts of the phar code haven't been updated to check for exceptions after doing something that may throw,
+			 * check for exceptions before potentially serializing/unserializing instead. */
+			return FAILURE;
+		}
+		/* Persistent phars should always be unserialized. */
+		const char *start;
+		/* Assert it should not be possible to create raw data in a persistent phar (i.e. from cache_list) */
+
+		/* Precondition: This has serialized data, either from setMetadata or the phar file. */
+		ZEND_ASSERT(tracker->str != NULL);
+		ZVAL_NULL(metadata);
+		start = ZSTR_VAL(tracker->str);
+
+		php_unserialize_with_options(metadata, start, ZSTR_LEN(tracker->str), unserialize_options, method_name);
+		if (EG(exception)) {
+			zval_ptr_dtor(metadata);
+			ZVAL_UNDEF(metadata);
+			return FAILURE;
+		}
+		return SUCCESS;
+	} else {
+		/* TODO: what is the current/expected behavior when fetching an object set with setMetadata then getting it
+		 * with getMetadata() and modifying a property? Previously, it was underdefined, and probably unimportant to support. */
+		ZVAL_COPY(metadata, &tracker->val);
+	}
+
+	return SUCCESS;
+}
+/* }}}*/
+
+/**
+ * Check if this has any data, serialized or as a raw value.
+ */
+zend_bool phar_metadata_tracker_has_data(const phar_metadata_tracker *tracker, int persistent) /* {{{ */
+{
+	ZEND_ASSERT(!persistent || Z_ISUNDEF(tracker->val));
+	return !Z_ISUNDEF(tracker->val) || tracker->str != NULL;
+}
+/* }}} */
+
+/**
+ * Free memory used to track the metadata and set all fields to be null/undef.
+ */
+void phar_metadata_tracker_free(phar_metadata_tracker *tracker, int persistent) /* {{{ */
+{
+	/* Free the string before the zval in case the zval's destructor modifies the metadata */
+	if (tracker->str) {
+		zend_string_release(tracker->str);
+		tracker->str = NULL;
+	}
+	if (!Z_ISUNDEF(tracker->val)) {
+		/* Here, copy the original zval to a different pointer without incrementing the refcount in case something uses the original while it's being freed. */
+		zval zval_copy;
+
+		ZEND_ASSERT(!persistent);
+		ZVAL_COPY_VALUE(&zval_copy, &tracker->val);
+		ZVAL_UNDEF(&tracker->val);
+		zval_ptr_dtor(&zval_copy);
+	}
+}
+/* }}} */
+
+/**
+ * Free memory used to track the metadata and set all fields to be null/undef.
+ */
+void phar_metadata_tracker_copy(phar_metadata_tracker *dest, const phar_metadata_tracker *source, int persistent) /* {{{ */
+{
+	ZEND_ASSERT(dest != source);
+	phar_metadata_tracker_free(dest, persistent);
+
+	if (!Z_ISUNDEF(source->val)) {
+		ZEND_ASSERT(!persistent);
+		ZVAL_COPY(&dest->val, &source->val);
+	}
+	if (source->str) {
+		dest->str = zend_string_copy(source->str);
+	}
+}
+/* }}} */
+
+/**
+ * Increment reference counts after a metadata entry was copied
+ */
+void phar_metadata_tracker_clone(phar_metadata_tracker *tracker) /* {{{ */
+{
+	Z_TRY_ADDREF_P(&tracker->val);
+	if (tracker->str) {
+		tracker->str = zend_string_copy(tracker->str);
+	}
+}
+/* }}} */
+
+/**
+ * Parse out metadata from the manifest for a single file, saving it into a string.
  *
  * Meta-data is in this format:
  * [len32][data...]
  *
  * data is the serialized zval
  */
-int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len) /* {{{ */
+void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, int persistent) /* {{{ */
 {
-	php_unserialize_data_t var_hash;
-
+	phar_metadata_tracker_free(tracker, persistent);
 	if (zip_metadata_len) {
-		const unsigned char *p;
-		unsigned char *p_buff = (unsigned char *)estrndup(*buffer, zip_metadata_len);
-		p = p_buff;
-		ZVAL_NULL(metadata);
-		PHP_VAR_UNSERIALIZE_INIT(var_hash);
-
-		if (!php_var_unserialize(metadata, &p, p + zip_metadata_len, &var_hash)) {
-			efree(p_buff);
-			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-			zval_ptr_dtor(metadata);
-			ZVAL_UNDEF(metadata);
-			return FAILURE;
-		}
-		efree(p_buff);
-		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-
-		if (PHAR_G(persist)) {
-			/* lazy init metadata */
-			zval_ptr_dtor(metadata);
-			Z_PTR_P(metadata) = pemalloc(zip_metadata_len, 1);
-			memcpy(Z_PTR_P(metadata), *buffer, zip_metadata_len);
-			return SUCCESS;
-		}
-	} else {
-		ZVAL_UNDEF(metadata);
+		/* lazy init metadata */
+		tracker->str = zend_string_init(buffer, zip_metadata_len, persistent);
 	}
-
-	return SUCCESS;
 }
 /* }}}*/
 
@@ -1028,7 +1102,6 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	/* check whether we have meta data, zero check works regardless of byte order */
 	SAFE_PHAR_GET_32(buffer, endbuffer, len);
 	if (mydata->is_persistent) {
-		mydata->metadata_len = len;
 		if (!len) {
 			/* FIXME: not sure why this is needed but removing it breaks tests */
 			SAFE_PHAR_GET_32(buffer, endbuffer, len);
@@ -1037,9 +1110,8 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	if(len > (size_t)(endbuffer - buffer)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (trying to read past buffer end)");
 	}
-	if (phar_parse_metadata(&buffer, &mydata->metadata, len) == FAILURE) {
-		MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
-	}
+	/* Don't implicitly call unserialize() on potentially untrusted input unless getMetadata() is called directly. */
+	phar_parse_metadata_lazy(buffer, &mydata->metadata_tracker, len, mydata->is_persistent);
 	buffer += len;
 
 	/* set up our manifest */
@@ -1112,19 +1184,15 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 		}
 
 		PHAR_GET_32(buffer, len);
-		if (entry.is_persistent) {
-			entry.metadata_len = len;
-		} else {
-			entry.metadata_len = 0;
-		}
 		if (len > (size_t)(endbuffer - buffer)) {
 			pefree(entry.filename, entry.is_persistent);
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
-		if (phar_parse_metadata(&buffer, &entry.metadata, len) == FAILURE) {
-			pefree(entry.filename, entry.is_persistent);
-			MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
-		}
+		/* Don't implicitly call unserialize() on potentially untrusted input unless getMetadata() is called directly. */
+		/* The same local variable entry is reused in a loop, so reset the state before reading data. */
+		ZVAL_UNDEF(&entry.metadata_tracker.val);
+		entry.metadata_tracker.str = NULL;
+		phar_parse_metadata_lazy(buffer, &entry.metadata_tracker, len, entry.is_persistent);
 		buffer += len;
 
 		entry.offset = entry.offset_abs = offset;
@@ -1133,39 +1201,21 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
 			case PHAR_ENT_COMPRESSED_GZ:
 				if (!PHAR_G(has_zlib)) {
-					if (Z_TYPE(entry.metadata) != IS_UNDEF) {
-						if (entry.is_persistent) {
-							free(Z_PTR(entry.metadata));
-						} else {
-							zval_ptr_dtor(&entry.metadata);
-						}
-					}
+					phar_metadata_tracker_free(&entry.metadata_tracker, entry.is_persistent);
 					pefree(entry.filename, entry.is_persistent);
 					MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 				}
 				break;
 			case PHAR_ENT_COMPRESSED_BZ2:
 				if (!PHAR_G(has_bz2)) {
-					if (Z_TYPE(entry.metadata) != IS_UNDEF) {
-						if (entry.is_persistent) {
-							free(Z_PTR(entry.metadata));
-						} else {
-							zval_ptr_dtor(&entry.metadata);
-						}
-					}
+					phar_metadata_tracker_free(&entry.metadata_tracker, entry.is_persistent);
 					pefree(entry.filename, entry.is_persistent);
 					MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 				}
 				break;
 			default:
 				if (entry.uncompressed_filesize != entry.compressed_filesize) {
-					if (Z_TYPE(entry.metadata) != IS_UNDEF) {
-						if (entry.is_persistent) {
-							free(Z_PTR(entry.metadata));
-						} else {
-							zval_ptr_dtor(&entry.metadata);
-						}
-					}
+					phar_metadata_tracker_free(&entry.metadata_tracker, entry.is_persistent);
 					pefree(entry.filename, entry.is_persistent);
 					MAPPHAR_FAIL("internal corruption of phar \"%s\" (compressed and uncompressed size does not match for uncompressed entry)");
 				}
@@ -2673,9 +2723,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 	/* compress as necessary, calculate crcs, serialize meta-data, manifest size, and file sizes */
 	main_metadata_str.s = NULL;
-	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
+	if (phar->metadata_tracker.str) {
+		smart_str_appendl(&main_metadata_str, ZSTR_VAL(phar->metadata_tracker.str), ZSTR_LEN(phar->metadata_tracker.str));
+	} else if (!Z_ISUNDEF(phar->metadata_tracker.val)) {
 		PHP_VAR_SERIALIZE_INIT(metadata_hash);
-		php_var_serialize(&main_metadata_str, &phar->metadata, &metadata_hash);
+		php_var_serialize(&main_metadata_str, &phar->metadata_tracker.val, &metadata_hash);
 		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
 	}
 	new_manifest_count = 0;
@@ -2710,23 +2762,18 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			/* we use this to calculate API version, 1.1.1 is used for phars with directories */
 			has_dirs = 1;
 		}
-		if (Z_TYPE(entry->metadata) != IS_UNDEF) {
-			if (entry->metadata_str.s) {
-				smart_str_free(&entry->metadata_str);
-			}
-			entry->metadata_str.s = NULL;
+		if (!Z_ISUNDEF(entry->metadata_tracker.val) && !entry->metadata_tracker.str) {
+			ZEND_ASSERT(!entry->is_persistent);
+			/* Assume serialization will succeed. TODO: Set error and throw if EG(exception) != NULL */
+			smart_str buf = {0};
 			PHP_VAR_SERIALIZE_INIT(metadata_hash);
-			php_var_serialize(&entry->metadata_str, &entry->metadata, &metadata_hash);
+			php_var_serialize(&buf, &entry->metadata_tracker.val, &metadata_hash);
 			PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-		} else {
-			if (entry->metadata_str.s) {
-				smart_str_free(&entry->metadata_str);
-			}
-			entry->metadata_str.s = NULL;
+			entry->metadata_tracker.str = buf.s;
 		}
 
 		/* 32 bits for filename length, length of filename, manifest + metadata, and add 1 for trailing / if a directory */
-		offset += 4 + entry->filename_len + sizeof(entry_buffer) + (entry->metadata_str.s ? ZSTR_LEN(entry->metadata_str.s) : 0) + (entry->is_dir ? 1 : 0);
+		offset += 4 + entry->filename_len + sizeof(entry_buffer) + (entry->metadata_tracker.str ? ZSTR_LEN(entry->metadata_tracker.str) : 0) + (entry->is_dir ? 1 : 0);
 
 		/* compress and rehash as necessary */
 		if ((oldfile && !entry->is_modified) || entry->is_dir) {
@@ -2916,6 +2963,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 	/* now write the manifest */
 	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+		const zend_string *metadata_str;
 		if (entry->is_deleted || entry->is_mounted) {
 			/* remove this from the new phar if deleted, ignore if mounted */
 			continue;
@@ -2960,11 +3008,12 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
 		phar_set_32(entry_buffer+12, entry->crc32);
 		phar_set_32(entry_buffer+16, entry->flags);
-		phar_set_32(entry_buffer+20, entry->metadata_str.s ? ZSTR_LEN(entry->metadata_str.s) : 0);
+		metadata_str = entry->metadata_tracker.str;
+		phar_set_32(entry_buffer+20, metadata_str ? ZSTR_LEN(metadata_str) : 0);
 
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
-		|| (entry->metadata_str.s &&
-		    ZSTR_LEN(entry->metadata_str.s) != php_stream_write(newfile, ZSTR_VAL(entry->metadata_str.s), ZSTR_LEN(entry->metadata_str.s)))) {
+		|| (metadata_str &&
+		    ZSTR_LEN(metadata_str) != php_stream_write(newfile, ZSTR_VAL(metadata_str), ZSTR_LEN(metadata_str)))) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -3206,15 +3255,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(phar)
 #endif
-
-/* {{{ phar_functions[]
- *
- * Every user visible function must have an entry in phar_functions[].
- */
-static const zend_function_entry phar_functions[] = {
-	PHP_FE_END
-};
-/* }}}*/
 
 static ssize_t phar_zend_stream_reader(void *handle, char *buf, size_t len) /* {{{ */
 {
@@ -3558,8 +3598,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 }
 /* }}} */
 
-/* {{{ phar_module_entry
- */
+/* {{{ phar_module_entry */
 static const zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("apc")
 	ZEND_MOD_OPTIONAL("bz2")
@@ -3575,7 +3614,7 @@ zend_module_entry phar_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	phar_deps,
 	"Phar",
-	phar_functions,
+	NULL,
 	PHP_MINIT(phar),
 	PHP_MSHUTDOWN(phar),
 	NULL,

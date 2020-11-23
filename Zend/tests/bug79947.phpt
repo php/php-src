@@ -4,10 +4,14 @@ Bug #79947: Memory leak on invalid offset type in compound assignment
 <?php
 $array = [];
 $key = [];
-$array[$key] += [$key];
+try {
+    $array[$key] += [$key];
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($array);
 ?>
---EXPECTF--
-Warning: Illegal offset type in %s on line %d
+--EXPECT--
+Illegal offset type
 array(0) {
 }

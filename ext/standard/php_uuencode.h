@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,10 +17,7 @@
 #ifndef PHP_UUENCODE_H
 #define PHP_UUENCODE_H
 
-PHP_FUNCTION(convert_uudecode);
-PHP_FUNCTION(convert_uuencode);
-
-PHPAPI zend_string *php_uudecode(char *src, size_t src_len);
-PHPAPI zend_string *php_uuencode(char *src, size_t src_len);
+PHPAPI zend_string *php_uudecode(const char *src, size_t src_len);
+PHPAPI zend_string *php_uuencode(const char *src, size_t src_len);
 
 #endif /* PHP_UUENCODE_H */

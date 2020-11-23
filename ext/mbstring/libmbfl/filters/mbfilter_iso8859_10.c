@@ -27,50 +27,41 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso8859_10.h"
 #include "unicode_table_iso8859_10.h"
 
-static const char *mbfl_encoding_8859_10_aliases[] = {"ISO_8859-10", "latin6", NULL};
+static const char *mbfl_encoding_8859_10_aliases[] = {"ISO8859-10", "latin6", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_10 = {
 	mbfl_no_encoding_8859_10,
 	"ISO-8859-10",
 	"ISO-8859-10",
-	(const char *(*)[])&mbfl_encoding_8859_10_aliases,
+	mbfl_encoding_8859_10_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8859_10_wchar,
 	&vtbl_wchar_8859_10
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_8859_10 = {
-	mbfl_no_encoding_8859_10,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true
-};
-
 const struct mbfl_convert_vtbl vtbl_8859_10_wchar = {
 	mbfl_no_encoding_8859_10,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_8859_10_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_8859_10 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_10,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_8859_10,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -86,11 +77,6 @@ int mbfl_filt_conv_8859_10_wchar(int c, mbfl_convert_filter *filter)
 		s = c;
 	} else if (c >= 0xa0 && c < 0x100) {
 		s = iso8859_10_ucs_table[c - 0xa0];
-		if (s <= 0) {
-			s = c;
-			s &= MBFL_WCSPLANE_MASK;
-			s |= MBFL_WCSPLANE_8859_10;
-		}
 	} else {
 		s = c;
 		s &= MBFL_WCSGROUP_MASK;
@@ -120,9 +106,6 @@ int mbfl_filt_conv_wchar_8859_10(int c, mbfl_convert_filter *filter)
 				break;
 			}
 			n--;
-		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_8859_10) {
-			s = c & MBFL_WCSPLANE_MASK;
 		}
 	}
 

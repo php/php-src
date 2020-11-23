@@ -27,15 +27,9 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_euc_kr.h"
 #include "unicode_table_uhc.h"
-
-static int mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_euckr[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -62,36 +56,31 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	mbfl_no_encoding_euc_kr,
 	"EUC-KR",
 	"EUC-KR",
-	(const char *(*)[])&mbfl_encoding_euc_kr_aliases,
+	mbfl_encoding_euc_kr_aliases,
 	mblen_table_euckr,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_euckr_wchar,
 	&vtbl_wchar_euckr
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_euckr = {
-	mbfl_no_encoding_euc_kr,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_euckr
-};
-
 const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_no_encoding_euc_kr,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_euckr_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_kr,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_euckr,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -222,34 +211,6 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-static int mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter)
-{
-	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
-			filter->status = 1;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	case  1:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	default:
-		filter->status = 0;
-		break;
 	}
 
 	return c;

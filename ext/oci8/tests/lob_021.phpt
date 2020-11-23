@@ -27,10 +27,18 @@ var_dump($blob->write("test"));
 var_dump($blob->close());
 var_dump($blob->write("test"));
 var_dump(oci_free_descriptor($blob));
-var_dump($blob->write("test"));
 
-var_dump(oci_free_descriptor($blob));
-var_dump(oci_free_descriptor(new stdclass));
+try {
+    var_dump($blob->write("test"));
+} catch(\TypeError $exception) {
+    var_dump($exception->getMessage());
+}
+
+try {
+    var_dump(oci_free_descriptor($blob));
+} catch(\TypeError $exception) {
+    var_dump($exception->getMessage());
+}
 
 $blob = oci_new_descriptor($c,OCI_D_LOB);
 unset($blob->descriptor);
@@ -54,15 +62,8 @@ int(4)
 bool(true)
 int(4)
 bool(true)
-
-Warning: OCI-Lob::write(): %s is not a valid oci8 descriptor resource in %s on line %d
-bool(false)
-
-Warning: oci_free_descriptor(): %s is not a valid oci8 descriptor resource in %s on line %d
-bool(false)
-
-Warning: oci_free_descriptor() expects parameter 1 to be OCI-Lob, object given in %s on line %d
-NULL
+string(%d) "OCILob::write(): %s is not a valid oci8 descriptor resource"
+string(%d) "oci_free_descriptor(): %s is not a valid oci8 descriptor resource"
 
 Warning: oci_free_descriptor(): Unable to find descriptor property in %s on line %d
 bool(false)

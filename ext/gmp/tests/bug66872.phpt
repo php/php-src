@@ -5,9 +5,12 @@ Bug #66872: Crash when passing string to gmp_testbit
 --FILE--
 <?php
 
-var_dump(gmp_testbit("abc", 1));
+try {
+    var_dump(gmp_testbit("abc", 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: gmp_testbit(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-bool(false)
+--EXPECT--
+gmp_testbit(): Argument #1 ($num) is not an integer string

@@ -2,11 +2,6 @@
 Test array_diff_key() function : usage variation - Passing float indexed array
 --FILE--
 <?php
-/* Prototype  : array array_diff_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -18,7 +13,6 @@ echo "\n-- Testing array_diff_key() function with float indexed array --\n";
 var_dump( array_diff_key($input_array, $float_indx_array) );
 var_dump( array_diff_key($float_indx_array, $input_array) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
@@ -31,4 +25,3 @@ array(2) {
 }
 array(0) {
 }
-===DONE===

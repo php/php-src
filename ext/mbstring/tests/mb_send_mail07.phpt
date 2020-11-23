@@ -3,13 +3,13 @@ mb_send_mail() test 7 (lang=Korean)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. Not valid for Windows');
+    die('skip.. Not valid for Windows');
 }
 if (!function_exists("mb_send_mail") || !mb_language("Korean")) {
-	die("skip mb_send_mail() not available");
+    die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('ISO-2022-KR')) {
-	die("skip ISO-2022-KR encoding is not available on this platform");
+    die("skip ISO-2022-KR encoding is not available on this platform");
 }
 ?>
 --INI--
@@ -24,8 +24,8 @@ mb_send_mail($to, mb_language(), "test");
 
 /* Korean */
 if (mb_language("korean")) {
-	mb_internal_encoding('EUC-KR');
-	mb_send_mail($to, "테스트 ".mb_language(), "테스트");
+    mb_internal_encoding('EUC-KR');
+    mb_send_mail($to, "테스트 ".mb_language(), "테스트");
 }
 ?>
 --EXPECTF--

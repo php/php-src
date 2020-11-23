@@ -6,13 +6,6 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of touch() on stats of file */
 
 $file_path = __DIR__;
@@ -30,7 +23,7 @@ echo "*** Testing stat() for file after using touch() on the file ***\n";
 $old_stat = stat($file_name);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( touch($file_name) );
 $new_stat = stat($file_name);
 

@@ -3,26 +3,19 @@ Bug #71969 (str_replace returns an incorrect resulting array after a foreach by 
 --FILE--
 <?php
 $a = array(
-	array("one" => array("a"=>"0000", "b"=>"1111")),
+    array("one" => array("a"=>"0000", "b"=>"1111")),
 );
 
 //foreach by reference, changing the array value
 foreach($a as &$record)
 {
-	$record["one"]["a"] = "2222";
+    $record["one"]["a"] = "2222";
 }
 var_dump(str_replace("2", "3", $a));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
-  array(1) {
-    ["one"]=>
-    array(2) {
-      ["a"]=>
-      string(4) "2222"
-      ["b"]=>
-      string(4) "1111"
-    }
-  }
+  string(5) "Array"
 }

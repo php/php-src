@@ -4,7 +4,7 @@ Bug #60120 (proc_open hangs when data in stdin/out/err is getting larger or equa
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE');
 if (!$php) {
-	die("skip No php executable defined\n");
+    die("skip No php executable defined\n");
 }
 ?>
 --FILE--
@@ -14,7 +14,7 @@ error_reporting(E_ALL);
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 if (!$php) {
-	die("No php executable defined\n");
+    die("No php executable defined\n");
 }
 $cmd = 'php -r "fwrite(STDOUT, $in = file_get_contents(\'php://stdin\')); fwrite(STDERR, $in);"';
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));

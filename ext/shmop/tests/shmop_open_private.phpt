@@ -15,9 +15,6 @@ $shm2 = shmop_open(0, 'c', 0777, 1024);
 $read = shmop_read($shm2, 0, 4);
 
 var_dump(is_string($read) && $read !== $write);
-
-shmop_close($shm1);
-shmop_close($shm2);
 ?>
 --EXPECT--
 bool(true)

@@ -27,14 +27,8 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_utf8.h"
-
-int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter);
 
 const unsigned char mblen_table_utf8[] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -61,36 +55,31 @@ const mbfl_encoding mbfl_encoding_utf8 = {
 	mbfl_no_encoding_utf8,
 	"UTF-8",
 	"UTF-8",
-	(const char *(*)[])&mbfl_encoding_utf8_aliases,
+	mbfl_encoding_utf8_aliases,
 	mblen_table_utf8,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf8_wchar,
 	&vtbl_wchar_utf8
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_utf8 = {
-	mbfl_no_encoding_utf8,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_utf8
-};
-
 const struct mbfl_convert_vtbl vtbl_utf8_wchar = {
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf8_wchar,
-	mbfl_filt_conv_utf8_wchar_flush
+	mbfl_filt_conv_utf8_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf8,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -235,79 +224,6 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return c;
-}
-
-int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
-{
-	int c1;
-
-	c1 = (filter->status >> 8) & 0xff;
-	filter->status &= 0xff;
-
-	if (c < 0x80) {
-		if (c < 0) {
-			filter->flag = 1;	/* bad */
-		} else if (filter->status) {
-			filter->flag = 1;	/* bad */
-		}
-		filter->status = 0;
-	} else if (c < 0xc0) {
-		switch (filter->status) {
-		case 0x20: /* 3 byte code 2nd char */
-			if ((c1 == 0x0 && c >= 0xa0) ||
-				(c1 == 0xd && c < 0xa0) ||
-				(c1 > 0x0 && c1 != 0xd)) {
-				filter->status++;
-			} else {
-				filter->flag = 1;	/* bad */
-				filter->status = 0;
-			}
-			break;
-		case 0x30: /* 4 byte code 2nd char */
-			if ((c1 == 0x0 && c >= 0x90) ||
-				(c1 > 0x0 && c1 < 0x4) ||
-				(c1 == 0x4 && c < 0x90)) {
-				filter->status++;
-			} else {
-				filter->flag = 1;	/* bad */
-				filter->status = 0;
-			}
-			break;
-		case 0x31: /* 4 byte code 3rd char */
-			filter->status++;
-			break;
-		case 0x10: /* 2 byte code 2nd char */
-		case 0x21: /* 3 byte code 3rd char */
-		case 0x32: /* 4 byte code 4th char */
-			filter->status = 0;
-			break;
-		default:
-			filter->flag = 1;	/* bad */
-			filter->status = 0;
-			break;
-		}
-	} else if (c < 0xc2) { /* 0xc0,0xc1 */
-		filter->flag = 1;	/* bad */
-		filter->status = 0;
-	} else {
-		if (filter->status) {
-			filter->flag = 1;	/* bad */
-		}
-		filter->status = 0;
-		if (c < 0xe0) {				/* 2 byte code first char */
-			filter->status = 0x10;
-		} else if (c < 0xf0) {		/* 3 byte code 1st char */
-			filter->status = 0x20;
-			filter->status |= (c & 0xf) << 8;
-		} else if (c < 0xf5) {		/* 4 byte code 1st char */
-			filter->status = 0x30;
-			filter->status |= (c & 0x7) << 8;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
 	}
 
 	return c;

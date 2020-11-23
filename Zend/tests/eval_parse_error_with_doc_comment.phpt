@@ -12,4 +12,4 @@ EOC
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected end of file in %s(%d) : eval()'d code on line %d
+Parse error: Unclosed '{' in %s(%d) : eval()'d code on line %d

@@ -1,11 +1,5 @@
 --TEST--
 Bug #70018 (exec does not strip all whitespace)
---SKIPIF--
-<?php
-if ("cli" != php_sapi_name()) {
-  die("skip.. CLI only test");
-}
-?>
 --FILE--
 <?php
 $output = array();

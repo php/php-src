@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -52,8 +50,6 @@ typedef uint64_t php_hrtime_t;
 PHPAPI php_hrtime_t php_hrtime_current(void);
 
 PHP_MINIT_FUNCTION(hrtime);
-
-PHP_FUNCTION(hrtime);
 
 END_EXTERN_C()
 

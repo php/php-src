@@ -8,7 +8,7 @@ require_once(__DIR__.'/skipif.inc');
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
-	die("skip no IPv6 support");
+    die("skip no IPv6 support");
 }
 ?>
 --FILE--
@@ -25,5 +25,5 @@ var_dump(snmpget('[dead:beef::', $community, '.1.3.6.1.2.1.1.1.0'));
 --EXPECTF--
 string(%d) "%s"
 
-Warning: snmpget(): malformed IPv6 address, closing square bracket missing in %s on line %d
+Warning: snmpget(): Malformed IPv6 address, closing square bracket missing in %s on line %d
 bool(false)

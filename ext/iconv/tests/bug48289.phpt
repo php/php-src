@@ -13,6 +13,7 @@ $options = array(
 );
 
 echo iconv_mime_encode('Subject', $text, $options);
+?>
 --EXPECT--
 Subject: =?UTF-8?Q?=E3=83=86?=
  =?UTF-8?Q?=E3=82=B9?=

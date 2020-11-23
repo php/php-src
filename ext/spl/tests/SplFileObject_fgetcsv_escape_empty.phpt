@@ -14,7 +14,6 @@ while (($data = $file->fgetcsv(',', '"', ''))) {
     print_r($data);
 }
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -28,4 +27,3 @@ Array
     [0] => \\\line1
 line2\\\
 )
-===DONE===

@@ -8,13 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: string readlink ( string $path );
-   Description: Returns the target of a symbolic link
-
-   Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 $name_prefix = __DIR__;
 // create temp dir

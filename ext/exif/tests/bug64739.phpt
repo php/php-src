@@ -12,8 +12,8 @@ echo "Test\n";
 $headers1 = exif_read_data(__DIR__ . '/bug64739.jpg');
 
 if ($headers1 === false) {
-	echo 'Error, failed to read exif data';
-	exit;
+    echo 'Error, failed to read exif data';
+    exit;
 }
 
 var_dump($headers1['Title'][0] === '?');
@@ -24,8 +24,8 @@ ini_set('exif.decode_unicode_motorola', 'UCS-2LE');
 $headers2 = exif_read_data(__DIR__ . '/bug64739.jpg');
 
 if ($headers2 === false) {
-	echo 'Error, failed to read exif data';
-	exit;
+    echo 'Error, failed to read exif data';
+    exit;
 }
 
 var_dump($headers2['Title']);

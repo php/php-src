@@ -8,7 +8,7 @@ $fh = fopen('php://memory', 'rw');
 fwrite($fh, "abc");
 rewind($fh);
 if (false === @stream_filter_append($fh, 'convert.iconv.ucs-2/utf8//IGNORE', STREAM_FILTER_READ, [])) {
-	stream_filter_append($fh, 'convert.iconv.ucs-2/utf-8//IGNORE', STREAM_FILTER_READ, []);
+    stream_filter_append($fh, 'convert.iconv.ucs-2/utf-8//IGNORE', STREAM_FILTER_READ, []);
 }
 var_dump(stream_get_contents($fh));
 ?>

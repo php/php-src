@@ -15,5 +15,6 @@ $so = socket_set_option($socket, IPPROTO_IP, MCAST_JOIN_GROUP, array(
     "interface" => 0,
 ));
 var_dump($so);
+?>
 --EXPECT--
 bool(true)

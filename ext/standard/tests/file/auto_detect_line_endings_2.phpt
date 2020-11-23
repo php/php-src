@@ -16,7 +16,7 @@ var_dump(fgets($stdin));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "on"
 string(8) "fooBar1"
 string(8) "fooBar2"

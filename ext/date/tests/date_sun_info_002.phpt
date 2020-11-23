@@ -6,13 +6,13 @@ date_default_timezone_set('Europe/Oslo');
 $sun_info = date_sun_info(strtotime("2007-04-13 08:31:15 UTC"), 59.21, 9.61);
 foreach ($sun_info as $key => $elem )
 {
-	echo date( 'Y-m-d H:i:s T', $elem ),  " ", $key, "\n";
+    echo date( 'Y-m-d H:i:s T', $elem ),  " ", $key, "\n";
 }
 echo "Done\n";
 ?>
 --EXPECT--
-2007-04-13 06:13:31 CEST sunrise
-2007-04-13 20:30:51 CEST sunset
+2007-04-13 06:11:26 CEST sunrise
+2007-04-13 20:32:56 CEST sunset
 2007-04-13 13:22:11 CEST transit
 2007-04-13 05:29:22 CEST civil_twilight_begin
 2007-04-13 21:15:00 CEST civil_twilight_end

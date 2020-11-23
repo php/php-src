@@ -12,8 +12,8 @@ Writes the value 'test' to a temporary file. Use curl to access this file, passi
 
 function curl_callback($curl_handle, $received_data)
 {
-	echo $received_data;
-	return strlen($received_data);
+    echo $received_data;
+    return strlen($received_data);
 }
 
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');

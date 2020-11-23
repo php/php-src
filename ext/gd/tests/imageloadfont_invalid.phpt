@@ -2,7 +2,7 @@
 imageloadfont() function crashes
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
+    if (!extension_loaded('gd')) die("skip gd extension not available\n");
 ?>
 --FILE--
 <?php
@@ -19,7 +19,7 @@ imagestring($image, $font, 0, 0, "Hello", $black);
 unlink($filename);
 ?>
 --EXPECTF--
-Warning: imageloadfont(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imageloadfont(): Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %simageloadfont_invalid.php on line %d
 
 Warning: imageloadfont(): Error reading font, invalid font header in %simageloadfont_invalid.php on line %d

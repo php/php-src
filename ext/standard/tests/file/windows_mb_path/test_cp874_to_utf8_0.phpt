@@ -19,31 +19,30 @@ skip_if_no_required_exts();
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $names = array( /* cp874 */
-	"เป็นแฟ้มที่ทดสอบ1",
-	"เป็นแฟ้มที่ทดสอบ2",
-	"เป็นแฟ้มที่ทดสอบ3",
-	"เป็นแฟ้มที่ทดสอบ4",
-	"เป็นแฟ้มที่ทดสอบ5",
-	"เป็นแฟ้มที่ทดสอบ6",
-	"เป็นแฟ้มที่ทดสอบ7",
-	"เป็นแฟ้มที่ทดสอบ8",
-	"เป็นแฟ้มที่ทดสอบ8 10",
+    "เป็นแฟ้มที่ทดสอบ1",
+    "เป็นแฟ้มที่ทดสอบ2",
+    "เป็นแฟ้มที่ทดสอบ3",
+    "เป็นแฟ้มที่ทดสอบ4",
+    "เป็นแฟ้มที่ทดสอบ5",
+    "เป็นแฟ้มที่ทดสอบ6",
+    "เป็นแฟ้มที่ทดสอบ7",
+    "เป็นแฟ้มที่ทดสอบ8",
+    "เป็นแฟ้มที่ทดสอบ8 10",
 );
 
 $i = 0;
 foreach ($names as $name) {
-	$pathw = __DIR__ . DIRECTORY_SEPARATOR . iconv('cp874', 'utf-8', $name) . ".txt";
+    $pathw = __DIR__ . DIRECTORY_SEPARATOR . iconv('cp874', 'utf-8', $name) . ".txt";
 
-	file_put_contents($pathw, "hello" . $i++);
+    file_put_contents($pathw, "hello" . $i++);
 
-	get_basename_with_cp($pathw, 65001);
-	var_dump(file_get_contents($pathw));
+    get_basename_with_cp($pathw, 65001);
+    var_dump(file_get_contents($pathw));
 
-	unlink($pathw);
+    unlink($pathw);
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: %d
 getting basename of %sเน€เธเนเธเนเธเนเธกเธ—เธตเนเธ—เธ”เธชเธญเธ1.txt
@@ -108,4 +107,3 @@ bool(true)
 string(%d) "%sเน€เธเนเธเนเธเนเธกเธ—เธตเนเธ—เธ”เธชเธญเธ8 10.txt"
 Active code page: %d
 string(6) "hello8"
-===DONE===

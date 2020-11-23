@@ -33,7 +33,7 @@ foreach ($data as $row) {
 }
 
 class Test {
-	public $id, $val, $val2;
+    public $id, $val, $val2;
 }
 
 $stmt = $db->prepare('SELECT * FROM test');
@@ -41,21 +41,21 @@ $stmt->setFetchMode(PDO::FETCH_INTO, new Test);
 $stmt->execute();
 
 foreach($stmt as $obj) {
-	var_dump($obj);
+    var_dump($obj);
 }
 
 echo "===FAIL===\n";
 
 class Fail {
-	protected $id;
-	public $val, $val2;
+    protected $id;
+    public $val, $val2;
 }
 
 $stmt->setFetchMode(PDO::FETCH_INTO, new Fail);
 $stmt->execute();
 
 foreach($stmt as $obj) {
-	var_dump($obj);
+    var_dump($obj);
 }
 
 ?>

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -114,7 +112,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	/* sanity check the stream: it can be either read-only or write-only */
 	if (strchr(mode, '+')) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "cannot open a zlib stream for reading and writing at the same time!");
+			php_error_docref(NULL, E_WARNING, "Cannot open a zlib stream for reading and writing at the same time!");
 		}
 		return NULL;
 	}

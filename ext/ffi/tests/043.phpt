@@ -12,7 +12,7 @@ typedef unsigned int a;
 ");
 ?>
 --EXPECTF--
-Fatal error: Uncaught FFI\ParserException: redeclaration of 'a' at line 3 in %s043.php:2
+Fatal error: Uncaught FFI\ParserException: Redeclaration of "a" at line 3 in %s043.php:2
 Stack trace:
 #0 %s043.php(2): FFI::cdef('%s')
 #1 {main}

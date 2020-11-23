@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,13 +32,12 @@ extern zend_module_entry xsl_module_entry;
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
 #include <libxslt/security.h>
-#if HAVE_XSL_EXSLT
+#ifdef HAVE_XSL_EXSLT
 #include <libexslt/exslt.h>
 #include <libexslt/exsltconfig.h>
 #endif
 
 #include "../dom/xml_common.h"
-#include "xsl_fe.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>
@@ -82,19 +79,6 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
-
-#define REGISTER_XSL_CLASS(ce, name, parent_ce, funcs, entry) \
-INIT_CLASS_ENTRY(ce, name, funcs); \
-ce.create_object = xsl_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce);
-
-#define XSL_DOMOBJ_NEW(zval, obj, ret) \
-	zval = php_xsl_create_object(obj, ret, zval, return_value); \
-	if (ZVAL_IS_NULL(zval)) { \
-		php_error_docref(NULL, E_WARNING, "Cannot create required DOM object"); \
-		RETURN_FALSE; \
-	}
-
 
 PHP_MINIT_FUNCTION(xsl);
 PHP_MSHUTDOWN_FUNCTION(xsl);

@@ -11,5 +11,5 @@ chown("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
 echo "ALIVE\n";
 ?>
 --EXPECTF--
-Warning: chown(): parameter 2 should be string or int, null given in %schown.php on line %d
+Warning: chown(): No such file or directory in %s on line %d
 ALIVE

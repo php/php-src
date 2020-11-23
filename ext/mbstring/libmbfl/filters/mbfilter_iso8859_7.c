@@ -27,50 +27,41 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_iso8859_7.h"
 #include "unicode_table_iso8859_7.h"
 
-static const char *mbfl_encoding_8859_7_aliases[] = {"ISO_8859-7", "greek", NULL};
+static const char *mbfl_encoding_8859_7_aliases[] = {"ISO8859-7", "greek", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_7 = {
 	mbfl_no_encoding_8859_7,
 	"ISO-8859-7",
 	"ISO-8859-7",
-	(const char *(*)[])&mbfl_encoding_8859_7_aliases,
+	mbfl_encoding_8859_7_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8859_7_wchar,
 	&vtbl_wchar_8859_7
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_8859_7 = {
-	mbfl_no_encoding_8859_7,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true
-};
-
 const struct mbfl_convert_vtbl vtbl_8859_7_wchar = {
 	mbfl_no_encoding_8859_7,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_8859_7_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_8859_7 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_7,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_8859_7,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -121,9 +112,6 @@ int mbfl_filt_conv_wchar_8859_7(int c, mbfl_convert_filter *filter)
 				break;
 			}
 			n--;
-		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_8859_7) {
-			s = c & MBFL_WCSPLANE_MASK;
 		}
 	}
 

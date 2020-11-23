@@ -1,81 +1,15 @@
- magic/Magdir/animation     | 47 +++++++++++++++++++---------------------------
- magic/Magdir/images        | 28 +++++++++++++--------------
- magic/Magdir/rpm           |  1 +
- magic/Magdir/securitycerts |  2 ++
- 4 files changed, 36 insertions(+), 42 deletions(-)
-
-diff --git a/magic/Magdir/animation b/magic/Magdir/animation
-index aaf32dd4..5c9ee1d9 100644
---- a/magic/Magdir/animation
-+++ b/magic/Magdir/animation
+diff -u magic.orig/Magdir/images magic/Magdir/images
+--- magic.orig/Magdir/images	2020-05-31 12:34:40.000000000 +0200
++++ magic/Magdir/images	2020-07-05 20:00:41.664783368 +0200
 @@ -1,6 +1,6 @@
  
  #------------------------------------------------------------------------------
--# $File: animation,v 1.71 2019/04/19 00:42:27 christos Exp $
-+# $File: animation,v 1.73 2019/07/05 19:20:38 christos Exp $
- # animation:  file(1) magic for animation/movie formats
+-# $File: images,v 1.181 2020/05/30 23:49:03 christos Exp $
++# $File: images,v 1.183 2020/06/26 17:08:32 christos Exp $
+ # images:  file(1) magic for image formats (see also "iff", and "c-lang" for
+ # XPM bitmaps)
  #
- # animation formats
-@@ -445,36 +445,27 @@
- # modified by Joerg Jenderek
- # GRR the original test are too common for many DOS files
- # so don't accept as MP3 until we've tested the rate
-+# But also beat GEMDOS fonts
- 0       beshort&0xFFFE  0xFFFA
- # rates
-->2      byte&0xF0       0x10           MPEG ADTS, layer III, v1,  32 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x20           MPEG ADTS, layer III, v1,  40 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x30           MPEG ADTS, layer III, v1,  48 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x40           MPEG ADTS, layer III, v1,  56 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x50           MPEG ADTS, layer III, v1,  64 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x60           MPEG ADTS, layer III, v1,  80 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x70           MPEG ADTS, layer III, v1,  96 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x80           MPEG ADTS, layer III, v1, 112 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x90           MPEG ADTS, layer III, v1, 128 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xA0           MPEG ADTS, layer III, v1, 160 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xB0           MPEG ADTS, layer III, v1, 192 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xC0           MPEG ADTS, layer III, v1, 224 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xD0           MPEG ADTS, layer III, v1, 256 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xE0           MPEG ADTS, layer III, v1, 320 kbps
-+>2	byte&0xF0	!0	
-+>>2	byte&0xF0	!0xF0		MPEG ADTS, layer III, v1
-+!:strength +20
- !:mime	audio/mpeg
-+>2	byte&0xF0	0x10		\b, 32 kbps
-+>2	byte&0xF0	0x20		\b, 40 kbps
-+>2	byte&0xF0	0x30		\b, 48 kbps
-+>2	byte&0xF0	0x40		\b, 56 kbps
-+>2	byte&0xF0	0x50		\b, 64 kbps
-+>2	byte&0xF0	0x60		\b, 80 kbps
-+>2	byte&0xF0	0x70		\b, 96 kbps
-+>2	byte&0xF0	0x80		\b, 112 kbps
-+>2	byte&0xF0	0x90		\b, 128 kbps
-+>2	byte&0xF0	0xA0		\b, 160 kbps
-+>2	byte&0xF0	0xB0		\b, 192 kbps
-+>2	byte&0xF0	0xC0		\b, 224 kbps
-+>2	byte&0xF0	0xD0		\b, 256 kbps
-+>2	byte&0xF0	0xE0		\b, 320 kbps
- # timing
- >2      byte&0x0C       0x00           \b, 44.1 kHz
- >2      byte&0x0C       0x04           \b, 48 kHz
-diff --git a/magic/Magdir/images b/magic/Magdir/images
-index 0e314ade..edf647d7 100644
---- a/magic/Magdir/images
-+++ b/magic/Magdir/images
-@@ -30,22 +30,22 @@
+@@ -32,22 +32,22 @@
  # Prevent conflicts with CRI ADX.
  >(2.S-2) belong	!0x28632943
  # skip more garbage like *.iso by looking for positive image type
@@ -112,10 +46,54 @@ index 0e314ade..edf647d7 100644
  #	display tga bitmap image information
  0	name				tga-image
  >2	ubyte		<34		Targa image data
-diff --git a/magic/Magdir/rpm b/magic/Magdir/rpm
-index fa336c07..00bda501 100644
---- a/magic/Magdir/rpm
-+++ b/magic/Magdir/rpm
+@@ -615,7 +615,7 @@
+ 0	leshort		40
+ # skip bad samples like GAME by looking for valid number of color planes
+ >12	uleshort	1		Device independent bitmap graphic
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	dib
+ >>4	lelong		x		\b, %d x
+@@ -641,7 +641,7 @@
+ >>18	leshort		x		\b, %d x
+ >>20	leshort		x		%d
+ >14	leshort		64		PC bitmap, OS/2 2.x format
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	bmp
+ # image width and height fields are unsigned integers for OS/2
+@@ -662,7 +662,7 @@
+ #>>(10.l) ubequad		!0	\b, bits 0x%16.16llx
+ # BITMAPV2INFOHEADER	adds RGB bit masks
+ >14	leshort		52		PC bitmap, Adobe Photoshop
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	bmp
+ >>18	lelong		x		\b, %d x
+@@ -670,7 +670,7 @@
+ >>28	leshort		x		%d
+ # BITMAPV3INFOHEADER	adds alpha channel bit mask
+ >14	leshort		56		PC bitmap, Adobe Photoshop with alpha channel mask
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	bmp
+ >>18	lelong		x		\b, %d x
+@@ -679,7 +679,7 @@
+ >14	leshort		40
+ # jump 4 bytes before end of file/header to skip fmt-116-signature-id-118.dib
+ >>(2.l-4)	ulong	x		PC bitmap, Windows 3.x format
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ >>>18	lelong		x		\b, %d x
+ >>>22	lelong		x		%d
+diff -u magic.orig/Magdir/rpm magic/Magdir/rpm
+--- magic.orig/Magdir/rpm	2019-02-22 14:06:34.000000000 +0100
++++ magic/Magdir/rpm	2020-07-05 19:38:02.720419674 +0200
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -124,10 +102,9 @@ index fa336c07..00bda501 100644
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff --git a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
-index d315a157..301d3c3d 100644
---- a/magic/Magdir/securitycerts
-+++ b/magic/Magdir/securitycerts
+diff -u magic.orig/Magdir/securitycerts magic/Magdir/securitycerts
+--- magic.orig/Magdir/securitycerts	2019-02-22 14:06:34.000000000 +0100
++++ magic/Magdir/securitycerts	2020-07-05 19:38:02.720419674 +0200
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text

@@ -11,12 +11,17 @@ class MyClass
 }
 
 $r = new ReflectionMethod('MyClass', 'doSomething');
-$r->invoke('WTF?');
-$r->invokeArgs('WTF?', array());
+try {
+    $r->invoke('WTF?');
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $r->invokeArgs('WTF?', array());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
-===DONE===
---EXPECTF--
-Warning: ReflectionMethod::invoke() expects parameter 1 to be object, string given in %s%erequest38992.php on line %d
-
-Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, string given in %s%erequest38992.php on line %d
-===DONE===
+--EXPECT--
+ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, string given
+ReflectionMethod::invokeArgs(): Argument #1 ($object) must be of type ?object, string given

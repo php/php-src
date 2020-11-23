@@ -11,13 +11,13 @@ opcache.optimization_level=-1
 function MetaType($t)
 {
 
-	switch (strtoupper($t)) {
-	case PHP_INT_MAX :
-		return 1;
-	case 0:
-	default:
-		return 0;
-	}
+    switch (strtoupper($t)) {
+    case PHP_INT_MAX :
+        return 1;
+    case 0:
+    default:
+        return 0;
+    }
 }
 
 var_dump(MetaType("aa"));

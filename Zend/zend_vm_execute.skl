@@ -55,7 +55,9 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 	}
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_code_execute_data(execute_data, op_array, return_value);
+	ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 	zend_{%EXECUTOR_NAME%}_ex(execute_data);
+	/* Observer end handlers are called from ZEND_RETURN */
 	zend_vm_stack_free_call_frame(execute_data);
 }
 
@@ -85,7 +87,7 @@ static void init_opcode_serialiser(void)
 	zval tmp;
 
 	zend_handlers_table = malloc(sizeof(HashTable));
-	zend_hash_init_ex(zend_handlers_table, zend_handlers_count, NULL, NULL, 1, 0);
+	zend_hash_init(zend_handlers_table, zend_handlers_count, NULL, NULL, 1);
 	zend_hash_real_init(zend_handlers_table, 0);
 	Z_TYPE_INFO(tmp) = IS_LONG;
 	for (i = 0; i < zend_handlers_count; i++) {

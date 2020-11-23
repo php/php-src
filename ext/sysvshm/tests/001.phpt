@@ -8,13 +8,23 @@ if (!function_exists('ftok')){ print 'skip'; }
 --FILE--
 <?php
 
-var_dump(ftok());
-var_dump(ftok(1));
-var_dump(ftok(1,1,1));
+try {
+    ftok("","");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(ftok("",""));
-var_dump(ftok(-1, -1));
-var_dump(ftok("qwertyu","qwertyu"));
+try {
+    ftok(-1, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    ftok("qwertyu","qwertyu");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(ftok("nonexistentfile","q"));
 
@@ -23,23 +33,9 @@ var_dump(ftok(__FILE__,"q"));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: ftok() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: ftok() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: ftok() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: ftok(): Pathname is invalid in %s on line %d
-int(-1)
-
-Warning: ftok(): Project identifier is invalid in %s on line %d
-int(-1)
-
-Warning: ftok(): Project identifier is invalid in %s on line %d
-int(-1)
+ftok(): Argument #1 ($filename) cannot be empty
+ftok(): Argument #2 ($project_id) must be a single character
+ftok(): Argument #2 ($project_id) must be a single character
 
 Warning: ftok(): ftok() failed - No such file or directory in %s on line %d
 int(-1)

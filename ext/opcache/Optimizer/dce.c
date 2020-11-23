@@ -106,6 +106,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
 		case ZEND_CASE:
+		case ZEND_CASE_STRICT:
 		case ZEND_CAST:
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
@@ -124,6 +125,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_IN_ARRAY:
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
+		case ZEND_ARRAY_KEY_EXISTS:
 			/* No side effects */
 			return 0;
 		case ZEND_ROPE_END:
@@ -138,6 +140,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
+		case ZEND_JMP_NULL:
 			/* For our purposes a jumps and branches are side effects. */
 			return 1;
 		case ZEND_BEGIN_SILENCE:
@@ -145,10 +148,10 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ECHO:
 		case ZEND_INCLUDE_OR_EVAL:
 		case ZEND_THROW:
+		case ZEND_MATCH_ERROR:
 		case ZEND_EXT_STMT:
 		case ZEND_EXT_FCALL_BEGIN:
 		case ZEND_EXT_FCALL_END:
-		case ZEND_EXT_NOP:
 		case ZEND_TICKS:
 		case ZEND_YIELD:
 		case ZEND_YIELD_FROM:
@@ -241,6 +244,8 @@ static inline zend_bool may_have_side_effects(
 				}
 			}
 			return 0;
+		case ZEND_CHECK_VAR:
+			return (OP1_INFO() & MAY_BE_UNDEF) != 0;
 		default:
 			/* For everything we didn't handle, assume a side-effect */
 			return 1;
@@ -388,7 +393,8 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
 			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)
-				&& opline->opcode != ZEND_CASE) {
+				&& opline->opcode != ZEND_CASE
+				&& opline->opcode != ZEND_CASE_STRICT) {
 				free_var = ssa_op->op1_use;
 				free_var_type = opline->op1_type;
 			}
@@ -413,7 +419,7 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 
 	if (free_var >= 0) {
 		opline->opcode = ZEND_FREE;
-		opline->op1.var = (uintptr_t) ZEND_CALL_VAR_NUM(NULL, ssa->vars[free_var].var);
+		opline->op1.var = EX_NUM_TO_VAR(ssa->vars[free_var].var);
 		opline->op1_type = free_var_type;
 
 		ssa_op->op1_use = free_var;
@@ -529,7 +535,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], ssa, 0);
 				}
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
-					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
+					|| zend_may_throw(&op_array->opcodes[i], &ssa->ops[i], op_array, ssa)
 					|| (has_varargs && may_break_varargs(op_array, ssa, &ssa->ops[i]))) {
 				if (op_array->opcodes[i].opcode == ZEND_NEW
 						&& op_array->opcodes[i+1].opcode == ZEND_DO_FCALL

@@ -6,13 +6,13 @@ FFI 023: GCC struct extensions
 ffi.enable=1
 --FILE--
 <?php
-	try {
-		var_dump(FFI::sizeof(FFI::new("struct {}")));
-	} catch (Throwable $e) {
-		echo get_class($e) . ": " . $e->getMessage() . "\n";
-	}
-	var_dump(FFI::sizeof(FFI::new("struct {int a}")));
-	var_dump(FFI::sizeof(FFI::new("struct {int a; int b}")));
+    try {
+        var_dump(FFI::sizeof(FFI::new("struct {}")));
+    } catch (Throwable $e) {
+        echo get_class($e) . ": " . $e->getMessage() . "\n";
+    }
+    var_dump(FFI::sizeof(FFI::new("struct {int a}")));
+    var_dump(FFI::sizeof(FFI::new("struct {int a; int b}")));
 ?>
 ok
 --EXPECT--

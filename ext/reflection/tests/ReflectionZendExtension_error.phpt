@@ -1,5 +1,5 @@
 --TEST--
-Test ReflectionZendExtension class erros
+Test ReflectionZendExtension class errors
 --CREDITS--
 Gabriel Caruso (carusogabriel34@gmail.com)
 --SKIPIF--
@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-Zend Extension zend_opcache does not exist
+Zend Extension "zend_opcache" does not exist

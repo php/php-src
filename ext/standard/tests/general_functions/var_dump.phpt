@@ -8,12 +8,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: void var_dump ( mixed $expression [, mixed $expression [, $...]] );
-   Description: Displays structured information about one or more expressions that includes its type and value.
-*/
 
-/* Prototype: void check_vardump( $variables );
-   Description: use var_dump() to display the variables */
 function check_vardump( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {
@@ -99,7 +94,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_vardump() to display contents of strings
    using var_dump() */
@@ -239,8 +234,8 @@ $resources = array (
    using var_dump() */
 check_vardump($resources);
 
-echo "\n*** Testing var_dump() on different combinations of scalar 
-            and non-scalar variables ***\n";
+echo "\n*** Testing var_dump() on different combinations of scalar
+    and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
 unset($unset_var);
@@ -260,31 +255,19 @@ $variations = array (
    non-scalar variables using var_dump() */
 check_vardump($variations);
 
-echo "\n*** Testing var_dump() on miscelleneous input arguments ***\n";
+echo "\n*** Testing var_dump() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_vardump() to display miscelleneous data using var_dump() */
+/* calling check_vardump() to display miscellaneous data using var_dump() */
 check_vardump($misc_values);
 
 echo "\n*** Testing var_dump() on multiple arguments ***\n";
 var_dump( $integers, $floats, $strings, $arrays, $booleans, $resources,
           $objects, $misc_values, $variations );
-
-/* checking var_dump() on functions */
-echo "\n*** Testing var_dump() on anonymous functions ***\n";
-$newfunc = create_function('$a,$b', 'return "$a * $b = " . ($a * $b);');
-echo "New anonymous function: $newfunc\n";
-var_dump( $newfunc(2, 3) );
-/* creating anonymous function dynamically */
-var_dump( create_function('$a', 'return "$a * $a = " . ($a * $b);') );
-
-echo "\n*** Testing error conditions ***\n";
-//passing zero argument
-var_dump();
 
 /* closing resource handle used */
 closedir($dir_handle);
@@ -462,7 +445,7 @@ string(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
 -- Iteration 14 --
 string(22) "1234	
 5678
-	9100abcda"
+	9100"abcda"
 
 *** Testing var_dump() on boolean variables ***
 -- Iteration 1 --
@@ -848,8 +831,8 @@ resource(%d) of type (stream)
 -- Iteration 2 --
 resource(%d) of type (stream)
 
-*** Testing var_dump() on different combinations of scalar 
-            and non-scalar variables ***
+*** Testing var_dump() on different combinations of scalar
+    and non-scalar variables ***
 -- Iteration 1 --
 array(3) {
   [0]=>
@@ -935,7 +918,7 @@ array(4) {
   string(5) "/00\7"
 }
 
-*** Testing var_dump() on miscelleneous input arguments ***
+*** Testing var_dump() on miscellaneous input arguments ***
 -- Iteration 1 --
 NULL
 -- Iteration 2 --
@@ -1116,7 +1099,7 @@ array(14) {
   [13]=>
   string(22) "1234	
 5678
-	9100abcda"
+	9100"abcda"
 }
 array(15) {
   [0]=>
@@ -1561,17 +1544,4 @@ array(6) {
     string(5) "/00\7"
   }
 }
-
-*** Testing var_dump() on anonymous functions ***
-
-Deprecated: Function create_function() is deprecated in %s on line %d
-New anonymous function:  lambda_1
-string(9) "2 * 3 = 6"
-
-Deprecated: Function create_function() is deprecated in %s on line %d
-string(9) " lambda_2"
-
-*** Testing error conditions ***
-
-Warning: var_dump() expects at least 1 parameter, 0 given in %s on line %d
 Done

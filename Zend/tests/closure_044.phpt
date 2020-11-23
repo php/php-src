@@ -8,10 +8,10 @@ Closure 044: Scope/bounding combination invariants; non static closures
 $nonstaticUnscoped = function () { var_dump(isset(A::$priv)); var_dump(isset($this)); };
 
 class A {
-	private static $priv = 7;
-	function getClosure() {
-		return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
-	}
+    private static $priv = 7;
+    function getClosure() {
+        return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
+    }
 }
 
 $a = new A();
@@ -23,7 +23,7 @@ $nonstaticScoped(); echo "\n";
 
 echo "After binding, null scope, no instance", "\n";
 $d = $nonstaticUnscoped->bindTo(null, null); $d(); echo "\n";
-$d = $nonstaticScoped->bindTo(null, null); $d(); echo "\n";
+$d = $nonstaticScoped->bindTo(null, null); var_dump($d); echo "\n";
 
 echo "After binding, null scope, with instance", "\n";
 $d = $nonstaticUnscoped->bindTo(new A, null); $d(); echo "\n";
@@ -31,13 +31,14 @@ $d = $nonstaticScoped->bindTo(new A, null); $d(); echo "\n";
 
 echo "After binding, with scope, no instance", "\n";
 $d = $nonstaticUnscoped->bindTo(null, 'A'); $d(); echo "\n";
-$d = $nonstaticScoped->bindTo(null, 'A'); $d(); echo "\n";
+$d = $nonstaticScoped->bindTo(null, 'A'); var_dump($d); echo "\n";
 
 echo "After binding, with scope, with instance", "\n";
 $d = $nonstaticUnscoped->bindTo(new A, 'A'); $d(); echo "\n";
 $d = $nonstaticScoped->bindTo(new A, 'A'); $d(); echo "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Before binding
 bool(false)
@@ -51,9 +52,8 @@ bool(false)
 bool(false)
 
 
-Deprecated: Unbinding $this of closure is deprecated in %s on line %d
-bool(false)
-bool(false)
+Warning: Cannot unbind $this of closure using $this in %s on line %d
+NULL
 
 After binding, null scope, with instance
 bool(false)
@@ -67,9 +67,8 @@ bool(true)
 bool(false)
 
 
-Deprecated: Unbinding $this of closure is deprecated in %s on line %d
-bool(true)
-bool(false)
+Warning: Cannot unbind $this of closure using $this in %s on line %d
+NULL
 
 After binding, with scope, with instance
 bool(true)

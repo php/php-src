@@ -23,7 +23,6 @@ var_dump(isset($x->o->zz));
 var_dump(isset($x->o->text));
 var_dump(isset($x->o->xx));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(false)
@@ -31,5 +30,4 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-===DONE===
 	

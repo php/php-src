@@ -27,10 +27,18 @@ $tests = <<<TESTS
 
 "123|==1234567890|==123" === wordwrap("123 1234567890 123", 10, "|==", 1)
 
-FALSE === @wordwrap(chr(0), 0, "")
-
 TESTS;
 
 include(__DIR__ . '/../../../../tests/quicktester.inc');
+
+echo "\n";
+
+try {
+    wordwrap(chr(0), 0, "");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+?>
 --EXPECT--
 OK
+wordwrap(): Argument #3 ($break) cannot be empty

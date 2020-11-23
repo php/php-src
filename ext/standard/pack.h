@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,7 +18,5 @@
 #define PACK_H
 
 PHP_MINIT_FUNCTION(pack);
-PHP_FUNCTION(pack);
-PHP_FUNCTION(unpack);
 
 #endif /* PACK_H */

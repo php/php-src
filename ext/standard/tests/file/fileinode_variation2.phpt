@@ -6,15 +6,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 obscure_filename
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 /* Testing fileinode() with invalid arguments -int, float, bool, NULL, resource */
 
 $file_path = __DIR__;
-$file_handle = fopen($file_path."/fileinode_variation2.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
 $filenames = array(
@@ -25,7 +19,6 @@ $filenames = array(
   TRUE,
   FALSE,
   NULL,
-  $file_handle,
 
   /* scalars */
   1234,
@@ -37,7 +30,6 @@ foreach( $filenames as $filename ) {
   var_dump( fileinode($filename) );
   clearstatcache();
 }
-fclose($file_handle);
 ?>
 --CLEAN--
 <?php
@@ -58,9 +50,6 @@ Warning: fileinode(): stat failed for 1 in %s on line %d
 bool(false)
 bool(false)
 bool(false)
-
-Warning: fileinode() expects parameter 1 to be a valid path, resource given in %s on line %d
-NULL
 
 Warning: fileinode(): stat failed for 1234 in %s on line %d
 bool(false)

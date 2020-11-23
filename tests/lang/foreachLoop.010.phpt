@@ -24,13 +24,13 @@ $container = null;
 
 $i=0;
 foreach ($a as $v) {
-	array_push($a, 'new');
-	var_dump($v);
+    array_push($a, 'new');
+    var_dump($v);
 
-	if (++$i>10) {
-		echo "Infinite loop detected\n";
-		break;
-	}
+    if (++$i>10) {
+        echo "Infinite loop detected\n";
+        break;
+    }
 }
 
 ?>

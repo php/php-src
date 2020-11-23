@@ -9,10 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_executable ( string $filename );
-   Description: Tells whether the filename is executable
-*/
-
 /* test is_executable() with file/dir having different permissions */
 
 require __DIR__.'/file.inc';
@@ -26,7 +22,7 @@ chmod("$file_path/is_executable_variation2", 0444);
 var_dump( is_executable("$file_path/is_executable_variation2") );  // exp: bool(false)
 chmod("$file_path/is_executable_variation2", 0777);  // chmod to enable deletion of directory
 
-echo "\n*** Testing miscelleneous input for is_executable() function ***\n";
+echo "\n*** Testing miscellaneous input for is_executable() function ***\n";
 $name_prefix = "is_executable_variation2";
 create_files(__DIR__, 1, "numeric", 0755, 1, "w", $name_prefix, 1);
 create_files(__DIR__, 1, "text", 0755, 1, "w", $name_prefix, 2);
@@ -77,7 +73,7 @@ rmdir(__DIR__."/is_executable_variation2/");
 *** Testing is_executable() on directory without execute permission ***
 bool(false)
 
-*** Testing miscelleneous input for is_executable() function ***
+*** Testing miscellaneous input for is_executable() function ***
 -- Iteration 1 --
 bool(true)
 -- Iteration 2 --

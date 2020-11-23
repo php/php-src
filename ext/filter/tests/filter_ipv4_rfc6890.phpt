@@ -20,10 +20,10 @@ $privateRanges['172.16.0.0/12'] = array('172.16.0.0', '172.31.0.0');
 $privateRanges['192.168.0.0/16'] = array('192.168.0.0', '192.168.255.255');
 
 foreach ($privateRanges as $key => $range) {
-	list($min, $max) = $range;
-	var_dump($key);
-	var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
-	var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
+    list($min, $max) = $range;
+    var_dump($key);
+    var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
+    var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
 }
 
 $reservedRanges = array();
@@ -74,10 +74,10 @@ $reservedRanges['203.0.113.0/24'] = array('203.0.113.0', '203.0.113.255');
 $reservedRanges['240.0.0.0/4'] = array('224.0.0.0', '255.255.255.255');
 
 foreach ($reservedRanges as $key => $range) {
-	list($min, $max) = $range;
-	var_dump($key);
-	var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
-	var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
+    list($min, $max) = $range;
+    var_dump($key);
+    var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
+    var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
 }
 
 ?>

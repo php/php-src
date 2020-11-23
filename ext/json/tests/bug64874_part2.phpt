@@ -1,12 +1,10 @@
 --TEST--
 Case-sensitivity part of bug #64874 ("json_decode handles whitespace and case-sensitivity incorrectly")
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 function decode($json) {
-	var_dump(json_decode($json));
-	echo ((json_last_error() !== 0) ? 'ERROR' : 'SUCCESS') . PHP_EOL;
+    var_dump(json_decode($json));
+    echo ((json_last_error() !== 0) ? 'ERROR' : 'SUCCESS') . PHP_EOL;
 }
 
 // Only lowercase should work
@@ -29,6 +27,7 @@ decode('[Null]');
 echo PHP_EOL;
 
 echo "Done\n";
+?>
 --EXPECT--
 bool(true)
 SUCCESS

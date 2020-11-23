@@ -13,7 +13,5 @@ $hash = password_hash(
 );
 var_dump(substr($hash, -1, 1) !== "\0");
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

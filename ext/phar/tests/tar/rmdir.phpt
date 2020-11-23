@@ -21,7 +21,7 @@ $files = array();
 $files['a/x'] = 'a';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 $tar->mkdir('a');
 

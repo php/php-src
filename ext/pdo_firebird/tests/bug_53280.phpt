@@ -7,6 +7,7 @@ PDO_Firebird: bug 53280 segfaults if query column count is less than param count
 
 require("testdb.inc");
 
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz(A VARCHAR(30), B VARCHAR(30), C VARCHAR(30))');
 $dbh->exec("INSERT INTO testz VALUES ('A', 'B', 'C')");

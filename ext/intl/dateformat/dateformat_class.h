@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -48,8 +46,8 @@ extern zend_class_entry *IntlDateFormatter_ce_ptr;
 		DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;	\
 	if (dfo->datef_data.udatf == NULL)				\
 	{												\
-		intl_errors_set(&dfo->datef_data.error, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlDateFormatter", 0); \
-		RETURN_FALSE;								\
+		zend_throw_error(NULL, "Found unconstructed IntlDateFormatter"); \
+		RETURN_THROWS();								\
 	}
 
 #define DATE_FORMAT_OBJECT(dfo)		(dfo)->datef_data.udatf

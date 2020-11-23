@@ -10,8 +10,8 @@ soap.wsdl_cache_enabled=0
 $d = null;
 
 function test($x) {
-	global $d;
-	$d = $x;
+    global $d;
+    $d = $x;
 }
 
 class LocalSoapClient extends SoapClient {

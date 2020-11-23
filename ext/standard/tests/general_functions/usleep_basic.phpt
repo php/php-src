@@ -6,11 +6,6 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-/* Prototype  : void usleep  ( int $micro_seconds  )
- * Description: Delays program execution for the given number of micro seconds.
- * Source code: ext/standard/basic_functions.c
- */
-
 set_time_limit(20);
 
 echo "*** Testing usleep() : basic functionality ***\n";
@@ -30,13 +25,11 @@ $time = ($time_end - $time_start) * 1000 * 1000;
 $summary = "Thread slept for " . $time . " micro-seconds\n";
 
 if ($time >= $sleeplow) {
-	echo "TEST PASSED: $summary";
+    echo "TEST PASSED: $summary";
 } else {
-	echo "TEST FAILED: $summary";
+    echo "TEST FAILED: $summary";
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usleep() : basic functionality ***
 TEST PASSED: Thread slept for %f micro-seconds
-===DONE===

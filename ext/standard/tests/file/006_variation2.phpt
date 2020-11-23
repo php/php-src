@@ -9,15 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*
-  Prototype: int fileperms ( string $filename );
-  Description: Returns the permissions on the file, or FALSE in case of an error
-
-  Prototype: bool chmod ( string $filename, int $mode );
-  Description: Attempts to change the mode of the file specified by
-               filename to that given in mode
-*/
-
 /* Testing with miscellaneous Permission */
 
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
@@ -58,15 +49,23 @@ $perms_array = array(
 $count = 1;
 foreach($perms_array as $permission) {
   echo "-- Iteration $count --\n";
-  var_dump( chmod($file_name, $permission) );
-  printf("%o", fileperms($file_name) );
-  echo "\n";
-  clearstatcache();
+  try {
+    var_dump( chmod($file_name, $permission) );
+    printf("%o", fileperms($file_name) );
+    echo "\n";
+    clearstatcache();
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
 
-  var_dump( chmod($dir_name, $permission) );
-  printf("%o", fileperms($dir_name) );
-  echo "\n";
-  clearstatcache();
+  try {
+    var_dump( chmod($dir_name, $permission) );
+    printf("%o", fileperms($dir_name) );
+    echo "\n";
+    clearstatcache();
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count++;
 }
 echo "*** Done ***\n";
@@ -78,7 +77,7 @@ chmod(__DIR__."/006_variation2", 0777);
 unlink(__DIR__."/006_variation2.tmp");
 rmdir(__DIR__."/006_variation2");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fileperms() & chmod() : usage variations ***
 
 *** Testing fileperms(), chmod() with miscellaneous permissions ***
@@ -138,39 +137,15 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 13 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 14 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 15 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 *** Done ***

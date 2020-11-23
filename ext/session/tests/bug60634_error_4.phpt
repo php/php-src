@@ -16,17 +16,17 @@ function open($save_path, $session_name) {
 }
 
 function close() {
-	echo "close: goodbye cruel world\n";
-	exit;
+    echo "close: goodbye cruel world\n";
+    exit;
 }
 
 function read($id) {
-	return '';
+    return '';
 }
 
 function write($id, $session_data) {
-	echo "write: goodbye cruel world\n";
-	throw new Exception;
+    echo "write: goodbye cruel world\n";
+    throw new Exception;
 }
 
 function destroy($id) {

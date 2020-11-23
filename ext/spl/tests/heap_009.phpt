@@ -11,26 +11,26 @@ function testForException( $heap )
     {
         foreach( $heap as &$item );
     }
-    catch( RuntimeException $e )
+    catch( \Error $e )
     {
         echo $e->getMessage(),"\n";
     }
 }
 
-// 1. SplMinHeap emtpy
+// 1. SplMinHeap empty
 $heap = new SplMinHeap;
 testForException( $heap );
 
-// 2. SplMinHeap non-emtpy
+// 2. SplMinHeap non-empty
 $heap = new SplMinHeap;
 $heap->insert( 1 );
 testForException( $heap );
 
-// 3. SplMaxHeap emtpy
+// 3. SplMaxHeap empty
 $heap = new SplMaxHeap;
 testForException( $heap );
 
-// 4. SplMaxHeap non-emtpy
+// 4. SplMaxHeap non-empty
 $heap = new SplMaxHeap;
 $heap->insert( 1 );
 testForException( $heap );
@@ -45,7 +45,6 @@ $heap->insert( 1, 2 );
 testForException( $heap );
 
 ?>
-==DONE==
 --EXPECT--
 An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
@@ -53,4 +52,3 @@ An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
-==DONE==

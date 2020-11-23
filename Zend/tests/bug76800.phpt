@@ -8,6 +8,7 @@ foreach($arr as $key => &$val) {   // without & will print both keys
     $arr[0] = 0;                   // without this line will print both keys
     unset($arr[0]);
 }
+?>
 --EXPECT--
 See key 1
 See key 3

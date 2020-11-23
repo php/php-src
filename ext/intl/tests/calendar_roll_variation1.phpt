@@ -5,7 +5,7 @@ date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -21,12 +21,10 @@ var_dump($intlcal->get(IntlCalendar::FIELD_MONTH)); //1 (Feb)
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH)); //28
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 int(1)
 int(29)
 bool(true)
 int(1)
-int(28)
-==DONE==
+int(28)

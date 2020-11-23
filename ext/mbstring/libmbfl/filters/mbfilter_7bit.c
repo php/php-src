@@ -28,10 +28,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_7bit.h"
 
@@ -50,18 +46,20 @@ const struct mbfl_convert_vtbl vtbl_8bit_7bit = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_7bit,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_any_7bit,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_7bit_8bit = {
 	mbfl_no_encoding_7bit,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_7bit_any,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -77,6 +75,8 @@ int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
+	} else {
+		mbfl_filt_conv_illegal_output(c, filter);
 	}
 	return c;
 }

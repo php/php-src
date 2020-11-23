@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -57,7 +55,7 @@ PHP_FUNCTION(pcntl_strerror);
 PHP_FUNCTION(pcntl_sigprocmask);
 #endif
 #ifdef HAVE_STRUCT_SIGINFO_T
-# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+# if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 PHP_FUNCTION(pcntl_sigwaitinfo);
 PHP_FUNCTION(pcntl_sigtimedwait);
 # endif

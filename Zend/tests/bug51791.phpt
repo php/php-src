@@ -6,9 +6,12 @@ Bug #51791 (constant() failed to check undefined constant and php interpreter st
 class A  {
     const B = 1;
 }
-var_dump(constant('A::B1'));
+try {
+    constant('A::B1');
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: constant(): Couldn't find constant A::B1 in %s on line %d
-NULL
+--EXPECT--
+Undefined constant A::B1

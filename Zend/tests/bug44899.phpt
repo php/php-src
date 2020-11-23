@@ -5,17 +5,17 @@ Bug #44899 (__isset usage changes behavior of empty())
 
 class myclass
 {
-	private $_data = array();
+    private $_data = array();
 
-	function __construct($data)
-	{
-		$this->_data = $data;
-	}
+    function __construct($data)
+    {
+        $this->_data = $data;
+    }
 
-	function __isset($field_name)
-	{
-		return isset($this->_data[$field_name]);
-	}
+    function __isset($field_name)
+    {
+        return isset($this->_data[$field_name]);
+    }
 }
 
 $arr = array('foo' => '');
@@ -34,5 +34,5 @@ echo "\n";
 isset
 empty
 
-Notice: Undefined property: myclass::$foo in %s on line %d
+Warning: Undefined property: myclass::$foo in %s on line %d
 empty

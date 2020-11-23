@@ -3,7 +3,7 @@ IntlBreakIterator::getPartsIterator(): argument variations
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -19,7 +19,6 @@ var_dump(iterator_to_array($it->getPartsIterator(IntlPartsIterator::KEY_LEFT)));
 var_dump(iterator_to_array($it->getPartsIterator(IntlPartsIterator::KEY_RIGHT)));
 
 ?>
-==DONE==
 --EXPECT--
 array(5) {
   [0]=>
@@ -57,4 +56,3 @@ array(5) {
   [12]=>
   string(3) "tao"
 }
-==DONE==

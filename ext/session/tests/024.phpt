@@ -34,7 +34,7 @@ class handler {
     function write($key, $val)
     {
         print "WRITE: $key, $val\n";
-		$GLOBALS["hnd"]->data = $val;
+        $GLOBALS["hnd"]->data = $val;
         return true;
     }
 
@@ -56,7 +56,7 @@ class foo {
 
 session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
 
-session_id("abtest");
+session_id("test024");
 session_start();
 
 $baz = $_SESSION['baz'];
@@ -79,7 +79,7 @@ session_destroy();
 ?>
 --EXPECTF--
 OPEN: PHPSESSID
-READ: abtest
+READ: test024
 object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
@@ -95,9 +95,9 @@ array(1) {
     int(2)
   }
 }
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
+WRITE: test024, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
 OPEN: PHPSESSID
-READ: abtest
+READ: test024
 object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
@@ -113,4 +113,4 @@ array(1) {
     int(2)
   }
 }
-DESTROY: abtest
+DESTROY: test024

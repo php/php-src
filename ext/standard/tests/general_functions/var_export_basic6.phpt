@@ -2,12 +2,6 @@
 Test var_export() function with valid objects
 --FILE--
 <?php
-/* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
 echo "*** Testing var_export() with valid objects ***\n";
 
 // class with no members
@@ -92,16 +86,15 @@ $valid_objects = array(
 /* Loop to check for above objects with var_export() */
 echo "\n*** Output for objects ***\n";
 foreach($valid_objects as $key => $obj) {
-	echo "\n-- Iteration: $key --\n";
-	var_export( $obj );
-	echo "\n";
-	var_export( $obj, FALSE);
-	echo "\n";
-	var_dump( var_export( $obj, TRUE) );
-	echo "\n";
+    echo "\n-- Iteration: $key --\n";
+    var_export( $obj );
+    echo "\n";
+    var_export( $obj, FALSE);
+    echo "\n";
+    var_dump( var_export( $obj, TRUE) );
+    echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid objects ***
 
@@ -307,4 +300,3 @@ concreteClass::__set_state(array(
 string(36) "concreteClass::__set_state(array(
 ))"
 
-===DONE===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,7 +26,6 @@ typedef struct {
 } php_lcg_globals;
 
 PHPAPI double php_combined_lcg(void);
-PHP_FUNCTION(lcg_value);
 
 PHP_MINIT_FUNCTION(lcg);
 

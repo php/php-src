@@ -12,5 +12,6 @@ opcache.interned_strings_buffer=0
 --FILE--
 <?php
 echo "ok\n";
+?>
 --EXPECT--
 ok

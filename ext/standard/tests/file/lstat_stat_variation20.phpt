@@ -9,13 +9,6 @@ if (PHP_OS_FAMILY === 'Windows') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test for stats of link when their names are stored in object and array */
 
 $file_path = __DIR__;

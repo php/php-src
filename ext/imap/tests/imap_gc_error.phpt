@@ -1,35 +1,31 @@
 --TEST--
-imap_gc() incorrect parameter count
+imap_gc() ValueError
 --CREDITS--
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
-echo "Checking with no parameters\n";
-imap_gc();
 
-echo  "Checking with incorrect parameter type\n";
-imap_gc('', false);
-imap_gc(false, false);
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = setup_test_mailbox('imapgcerror', 1);
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = imap_open($default_mailbox, $username, $password) or
-	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
-imap_gc($stream_id, -1);
+try {
+    imap_gc($stream_id, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Checking with no parameters
-
-Warning: imap_gc() expects exactly 2 parameters, 0 given in %s on line %d
-Checking with incorrect parameter type
-
-Warning: imap_gc() expects parameter 1 to be resource, string given in %s on line %d
-
-Warning: imap_gc() expects parameter 1 to be resource, bool given in %s on line %d
-
-Warning: imap_gc(): invalid value for the flags parameter in %s on line %d
+--CLEAN--
+<?php
+$mailbox_suffix = 'imapgcerror';
+require_once(__DIR__.'/setup/clean.inc');
+?>
+--EXPECT--
+Create a temporary mailbox and add 1 msgs
+New mailbox created
+imap_gc(): Argument #2 ($flags) must be a bitmask of IMAP_GC_TEXTS, IMAP_GC_ELT, and IMAP_GC_ENV

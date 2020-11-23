@@ -1,7 +1,5 @@
 /*
 	+----------------------------------------------------------------------+
-	| PHP Version 7                                                        |
-	+----------------------------------------------------------------------+
 	| Copyright (c) The PHP Group                                          |
 	+----------------------------------------------------------------------+
 	| This source file is subject to version 3.01 of the PHP license,      |
@@ -17,8 +15,7 @@
 	+----------------------------------------------------------------------+
 */
 
-/* {{{ includes
- */
+/* {{{ includes */
 #include "php.h"
 #include "php_main.h"
 #include "zend_modules.h"
@@ -98,8 +95,7 @@
 #endif
 /* }}} */
 
-/* {{{ php_builtin_extensions[]
- */
+/* {{{ php_builtin_extensions[] */
 static zend_module_entry * const php_builtin_extensions[] = {
 	phpext_standard_ptr
 #if HAVE_BCMATH

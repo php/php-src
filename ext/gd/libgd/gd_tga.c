@@ -141,7 +141,7 @@ gdImagePtr gdImageCreateFromTgaCtx(gdIOCtx* ctx)
  *	Reads the header block from a binary TGA file populating the referenced TGA structure.
  *	\param ctx Pointer to TGA binary file
  *	\param tga Pointer to TGA structure
- *	\return int 1 on sucess, -1 on failure
+ *	\return int 1 on success, -1 on failure
  */
 int read_header_tga(gdIOCtx *ctx, oTga *tga)
 {
@@ -149,7 +149,7 @@ int read_header_tga(gdIOCtx *ctx, oTga *tga)
 	unsigned char header[18];
 
 	if (gdGetBuf(header, sizeof(header), ctx) < 18) {
-		gd_error("fail to read header");
+		gd_error("Fail to read header");
 		return -1;
 	}
 
@@ -168,7 +168,7 @@ int read_header_tga(gdIOCtx *ctx, oTga *tga)
 	tga->fliph = (header[17] & 0x10) ? 1 : 0;
 	tga->flipv = (header[17] & 0x20) ? 0 : 1;
 
-#if DEBUG
+#ifdef DEBUG
 	printf("format bps: %i\n", tga->bits);
 	printf("flip h/v: %i / %i\n", tga->fliph, tga->flipv);
 	printf("alpha: %i\n", tga->alphabits);
@@ -201,7 +201,7 @@ int read_header_tga(gdIOCtx *ctx, oTga *tga)
  *	Reads the image data block from a binary TGA file populating the referenced TGA structure.
  *	\param ctx Pointer to TGA binary file
  *	\param tga Pointer to TGA structure
- *	\return int 0 on sucess, -1 on failure
+ *	\return int 0 on success, -1 on failure
  */
 int read_image_tga( gdIOCtx *ctx, oTga *tga )
 {

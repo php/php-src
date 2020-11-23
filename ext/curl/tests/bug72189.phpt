@@ -2,15 +2,7 @@
 Request #72189 (Add missing CURL_VERSION_* constants)
 --SKIPIF--
 <?php
-
 include 'skipif.inc';
-
-$version = curl_version();
-
-if ($version['version_number'] < 0x071306) {
-    exit('skip: test works only with curl >= 7.19.6');
-}
-
 ?>
 --FILE--
 <?php

@@ -7,11 +7,11 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipif.inc'); ?>
 <?php if (!function_exists("ldap_sasl_bind")) die("skip LDAP extension not compiled with SASL support"); ?>
 <?php
-	require "connect.inc";
-	$link = @fsockopen($host, $port);
-	if (!$link) {
-		die("skip no server listening");
-	}
+    require "connect.inc";
+    $link = @fsockopen($host, $port);
+    if (!$link) {
+        die("skip no server listening");
+    }
 ?>
 --FILE--
 <?php
@@ -25,7 +25,6 @@ $link = ldap_connect($host, $port);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 var_dump(ldap_sasl_bind($link, null, $sasl_passwd, 'DIGEST-MD5', 'realm', $sasl_user));
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -35,4 +34,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECT--
 bool(true)
-===DONE===

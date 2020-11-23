@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -256,9 +254,9 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 					ms->fsize = newsize;
 					return PHP_STREAM_OPTION_RETURN_OK;
 			}
-		default:
-			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
+
+	return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 }
 /* }}} */
 
@@ -317,7 +315,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 
 
 /* {{{ */
-PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length STREAMS_DC)
+PHPAPI php_stream *_php_stream_memory_open(int mode, const char *buf, size_t length STREAMS_DC)
 {
 	php_stream *stream;
 	php_stream_memory_data *ms;
@@ -327,7 +325,7 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 
 		if (mode == TEMP_STREAM_READONLY || mode == TEMP_STREAM_TAKE_BUFFER) {
 			/* use the buffer directly */
-			ms->data = buf;
+			ms->data = (char *) buf;
 			ms->fsize = length;
 		} else {
 			if (length) {
@@ -600,7 +598,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 /* }}} */
 
 /* {{{ _php_stream_temp_open */
-PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC)
+PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, const char *buf, size_t length STREAMS_DC)
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
@@ -621,7 +619,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 /* }}} */
 
 PHPAPI const php_stream_ops php_stream_rfc2397_ops = {
-	php_stream_temp_write, php_stream_temp_read,
+	NULL, php_stream_temp_read,
 	php_stream_temp_close, php_stream_temp_flush,
 	"RFC2397",
 	php_stream_temp_seek,

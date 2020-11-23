@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -111,7 +109,7 @@
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
 
-/* Hey, apple. One shouldn't define *functions* from the standard C library as marcos. */
+/* Hey, apple. One shouldn't define *functions* from the standard C library as macros. */
 #ifdef memcpy
 #define memcpy_tmp(...) memcpy(__VA_ARGS__)
 #undef memcpy
@@ -277,7 +275,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
 	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
-	zend_op_array *(*compile_string)(zval *source_string, char *filename);
+	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename);
 	HashTable file_sources;
 
 	FILE *oplog;                                 /* opline log */
@@ -316,7 +314,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int input_buflen;                            /* length of stdin input buffer */
 	phpdbg_signal_safe_mem sigsafe_mem;          /* memory to use in async safe environment (only once!) */
 
-	JMP_BUF *sigsegv_bailout;                    /* bailout address for accesibility probing */
+	JMP_BUF *sigsegv_bailout;                    /* bailout address for accessibility probing */
 
 	uint64_t flags;                              /* phpdbg flags */
 

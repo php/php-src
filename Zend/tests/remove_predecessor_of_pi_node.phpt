@@ -11,4 +11,4 @@ test();
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: n in %s on line %d
+Warning: Undefined variable $n in %s on line %d

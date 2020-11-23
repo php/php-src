@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,7 +31,7 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
-#if HAVE_OCI8
+#ifdef HAVE_OCI8
 
 #include "php_oci8.h"
 #include "php_oci8_int.h"
@@ -52,11 +50,7 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 
 	collection->connection = connection;
 	collection->collection = NULL;
-#if PHP_VERSION_ID < 70300
-	++GC_REFCOUNT(collection->connection->id);
-#else
 	GC_ADDREF(collection->connection->id);
-#endif
 
 	/* get type handle by name */
 	PHP_OCI_CALL_RETURN(errstatus, OCITypeByName,
@@ -197,7 +191,7 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 			break;
 			/* we only support VARRAYs and TABLEs */
 		default:
-			php_error_docref(NULL, E_WARNING, "unknown collection type %d", collection->coll_typecode);
+			php_error_docref(NULL, E_WARNING, "Unknown collection type %d", collection->coll_typecode);
 			break;
 	}
 

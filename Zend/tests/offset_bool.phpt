@@ -25,30 +25,30 @@ var_dump($bool[$arr]);
 echo "Done\n";
 ?>
 --EXPECTF--
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 
-Notice: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on value of type bool in %s on line %d
 NULL
 Done

@@ -11,7 +11,8 @@ $p = new Phar(__DIR__.'/bug69324.phar', 0);
 $meta=$p->getMetadata();
 var_dump($meta);
 } catch(Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
+?>
 --EXPECTF--
 internal corruption of phar "%s" (truncated manifest entry)

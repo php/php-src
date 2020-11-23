@@ -7,10 +7,6 @@ if (!function_exists('fnmatch'))
 ?>
 --FILE--
 <?php
-/* Prototype: bool fnmatch ( string $pattern, string $string [, int $flags] )
-   Description: fnmatch() checks if the passed string would match
-     the given shell wildcard pattern.
-*/
 
 echo "*** Testing fnmatch() with file ***\n";
 $file = basename(__FILE__);

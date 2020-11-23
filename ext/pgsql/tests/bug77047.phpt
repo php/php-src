@@ -14,8 +14,8 @@ $db = pg_connect($conn_str);
 
 pg_query($db, "DROP TABLE IF EXISTS bug77047");
 pg_query($db, "CREATE TABLE bug77047 (
-		t TIME WITHOUT TIME ZONE
-	)");
+        t TIME WITHOUT TIME ZONE
+    )");
 
 pg_insert($db, "bug77047", array("t" => "13:31"));
 pg_insert($db, "bug77047", array("t" => "13:31:13"));
@@ -26,7 +26,7 @@ pg_insert($db, "bug77047", array("t" => ""));
 
 $res = pg_query($db, "SELECT t FROM bug77047");
 while (false !== ($row = pg_fetch_row($res))) {
-	var_dump(array_pop($row));
+    var_dump(array_pop($row));
 }
 
 ?>

@@ -3,7 +3,7 @@ SQLite3::open error test
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
-	die('skip windows only test');
+    die('skip windows only test');
 }
 require_once(__DIR__ . '/skipif.inc');
 ?>
@@ -19,9 +19,9 @@ $cmd = $icacls . ' ' . $unreadable . ' /inheritance:r /deny ' . $user . ':(F,M,R
 exec($cmd);
 
 try {
-	$db = new SQLite3($unreadable);
+    $db = new SQLite3($unreadable);
 } catch (Exception $e) {
-	echo $e . "\n";
+    echo $e . "\n";
 }
 echo "Done\n";
 

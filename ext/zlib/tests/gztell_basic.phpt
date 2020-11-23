@@ -3,7 +3,7 @@ Test function gztell() by calling it with its expected arguments when reading
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -21,7 +21,6 @@ foreach ($intervals as $interval) {
 
 gzclose($h);
 ?>
-===DONE===
 --EXPECT--
 int(0)
 int(7)
@@ -31,4 +30,3 @@ int(100)
 int(127)
 int(142)
 int(176)
-===DONE===

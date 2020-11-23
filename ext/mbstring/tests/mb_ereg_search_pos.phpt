@@ -12,13 +12,13 @@ $test_str = 'Iñtërnâtiônàlizætiøn';
 
 if(mb_ereg_search_init($test_str))
 {
-	$val=mb_ereg_search_pos("nâtiôn");
+    $val=mb_ereg_search_pos("nâtiôn");
 
-	var_dump($val);
+    var_dump($val);
 
 }
 else{
-	var_dump("false");
+    var_dump("false");
 }
 ?>
 --EXPECT--

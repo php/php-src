@@ -4,7 +4,7 @@ Ensure proper backtraces with anon classes
 <?php
 
 (function($obj) {
-	throw new Exception();
+    throw new Exception();
 })(new class {});
 
 ?>

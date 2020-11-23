@@ -9,11 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Open a directory with different premissions then try to read it
  * to test behaviour of readdir()
@@ -46,26 +41,25 @@ $permission_values = array(
 // Open directory with different permission values, read and close, expected: none of them to succeed.
 $iterator = 1;
 foreach($permission_values as $perm) {
-	echo "\n-- Iteration $iterator --\n";
+    echo "\n-- Iteration $iterator --\n";
 
-	if (is_dir($dir_path)) {
-		chmod ($dir_path, 0777); // change dir permission to allow all operation
-		rmdir ($dir_path);
-	}
-	mkdir($dir_path);
+    if (is_dir($dir_path)) {
+        chmod ($dir_path, 0777); // change dir permission to allow all operation
+        rmdir ($dir_path);
+    }
+    mkdir($dir_path);
 
-	// change the dir permisson to test dir on it
-	var_dump( chmod($dir_path, $perm) );
-	var_dump($dh = opendir($dir_path));
+    // change the dir permission to test dir on it
+    var_dump( chmod($dir_path, $perm) );
+    var_dump($dh = opendir($dir_path));
 
-	echo "-- Calling readdir() --\n";
-	var_dump(readdir($dh));
+    echo "-- Calling readdir() --\n";
+    var_dump(readdir($dh));
 
-	closedir($dh);
-	$iterator++;
+    closedir($dh);
+    $iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/readdir_variation5";
@@ -133,4 +127,3 @@ bool(true)
 resource(%d) of type (stream)
 -- Calling readdir() --
 string(%d) "%s"
-===DONE===

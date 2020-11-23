@@ -20,16 +20,14 @@ $a->addFile('hardlink', 'internal/file.txt', array(
 $a->close();
 
 try {
-	$p = new PharData($fname);
+    $p = new PharData($fname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECTF--
 phar error: "%slinks2.tar" is a corrupted tar file - hard link to non-existent file "internal/file.txt"
-===DONE===

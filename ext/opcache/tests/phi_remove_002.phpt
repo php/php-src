@@ -9,13 +9,13 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 function func($blogname, $user = '' ) {
-	if (! is_object( $user ) || ( is_object($user) && ( $user->login != $blogname )) ) {
-		test();
-	}
+    if (! is_object( $user ) || ( is_object($user) && ( $user->login != $blogname )) ) {
+        test();
+    }
 
-	$result = array('user' => $user);
+    $result = array('user' => $user);
 
-	return true;
+    return true;
 }
 ?>
 okey

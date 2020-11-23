@@ -14,10 +14,11 @@ $document->appendChild($root);
 $attr = $root->setAttribute('category', 'books');
 $document->removeChild($root);
 $root = null;
-var_dump($attr->ownerElement);
+try {
+    var_dump($attr->ownerElement);
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: Couldn't fetch DOMAttr. Node no longer exists in %s on line %d
-
-Notice: Undefined property: DOMAttr::$ownerElement in %s on line %d
-NULL
+--EXPECT--
+Error: Couldn't fetch DOMAttr. Node no longer exists

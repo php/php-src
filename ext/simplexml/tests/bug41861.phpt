@@ -6,11 +6,11 @@ Bug #41861 (getNamespaces() returns the namespaces of a node's siblings)
 <?php
 
 $xml = simplexml_load_string('<root>
-	<first_node_no_ns />
-	<ns1:node1 xmlns:ns1="#ns1" />
-	<ns2:node2 xmlns:ns2="#ns2" />
-	<ns3:node3 xmlns:ns3="#ns3" />
-	<last_node_no_ns />
+    <first_node_no_ns />
+    <ns1:node1 xmlns:ns1="#ns1" />
+    <ns2:node2 xmlns:ns2="#ns2" />
+    <ns3:node3 xmlns:ns3="#ns3" />
+    <last_node_no_ns />
 </root>');
 
 $name = $xml->getName();
@@ -21,16 +21,15 @@ echo "root(non-recursive): '$name' -- namespaces: ", implode(', ', $namespaces),
 
 foreach (array(null, '#ns1', '#ns2', '#ns3') as $ns)
 {
-	foreach ($xml->children($ns) as $child)
-	{
-		$name = $child->getName();
-		$namespaces = $child->getNamespaces(false);
+    foreach ($xml->children($ns) as $child)
+    {
+        $name = $child->getName();
+        $namespaces = $child->getNamespaces(false);
 
-		echo "children($ns): '$name' -- namespaces: ", implode(', ', $namespaces), "\n";
-	}
+        echo "children($ns): '$name' -- namespaces: ", implode(', ', $namespaces), "\n";
+    }
 }
 ?>
-===DONE===
 --EXPECT--
 root(recursive): 'root' -- namespaces: #ns1, #ns2, #ns3
 root(non-recursive): 'root' -- namespaces: 
@@ -39,4 +38,3 @@ children(): 'last_node_no_ns' -- namespaces:
 children(#ns1): 'node1' -- namespaces: #ns1
 children(#ns2): 'node2' -- namespaces: #ns2
 children(#ns3): 'node3' -- namespaces: #ns3
-===DONE===

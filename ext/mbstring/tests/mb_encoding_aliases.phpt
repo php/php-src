@@ -4,16 +4,19 @@ mb_encoding_aliases()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
-mb_encoding_aliases();
 $list = mb_encoding_aliases("ASCII");
 sort($list);
 var_dump($list);
 var_dump(mb_encoding_aliases("7bit"));
 var_dump(mb_encoding_aliases("8bit"));
-var_dump(mb_encoding_aliases("BAD"));
+
+try {
+    var_dump(mb_encoding_aliases("BAD"));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: mb_encoding_aliases() expects exactly 1 parameter, 0 given in %s on line 2
+--EXPECT--
 array(11) {
   [0]=>
   string(14) "ANSI_X3.4-1968"
@@ -44,6 +47,4 @@ array(1) {
   [0]=>
   string(6) "binary"
 }
-
-Warning: mb_encoding_aliases(): Unknown encoding "BAD" in %s on line %d
-bool(false)
+mb_encoding_aliases(): Argument #1 ($encoding) must be a valid encoding, "BAD" given

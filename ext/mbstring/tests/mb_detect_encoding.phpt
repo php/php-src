@@ -15,8 +15,8 @@ $jis = base64_decode('GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4Iz
 // EUC-JP string
 $euc_jp = '日本語テキストです。01234５６７８９。';
 
-// Test with sigle "form encoding"
-// Note: For some reason it complains, results are differ. Not reserched.
+// Test with single "form encoding"
+// Note: For some reason it complains, results are different. Not researched.
 echo "== BASIC TEST ==\n";
 $s = $sjis;
 $s = mb_detect_encoding($s, 'SJIS');
@@ -41,7 +41,6 @@ echo "== ARRAY ENCODING LIST ==\n";
 
 $a = array(0=>'UTF-8',1=>'EUC-JP', 2=>'SJIS', 3=>'JIS');
 
-// Note: Due to detect order, detected as UTF-8
 $s = $jis;
 $s = mb_detect_encoding($s, $a);
 print("JIS: $s\n");
@@ -84,23 +83,21 @@ $s = mb_detect_encoding('', 'EUC-JP');
 print("EUC-JP: $s\n");  // SJIS
 
 $s = $euc_jp;
-$s = mb_detect_encoding($s, 'BAD');
-print("BAD: $s\n"); // BAD
-
-$s = $euc_jp;
-$s = mb_detect_encoding();
-print("MP: $s\n"); // Missing parameter
-
+try {
+    var_dump(mb_detect_encoding($s, 'BAD'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 == BASIC TEST ==
 SJIS: SJIS
 JIS: JIS
 EUC-JP: EUC-JP
 EUC-JP: EUC-JP
 == ARRAY ENCODING LIST ==
-JIS: UTF-8
+JIS: JIS
 EUC-JP: EUC-JP
 SJIS: SJIS
 == DETECT ORDER ==
@@ -110,9 +107,4 @@ SJIS: SJIS
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
-
-Warning: mb_detect_encoding(): Illegal argument in %s on line %d
-BAD: EUC-JP
-
-Warning: mb_detect_encoding() expects at least 1 parameter, 0 given in %s on line %d
-MP: 
+mb_detect_encoding(): Argument #2 ($encodings) contains invalid encoding "BAD"

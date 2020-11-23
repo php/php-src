@@ -3,7 +3,7 @@ jump 07: goto into loop (backward)
 --FILE--
 <?php
 while (0) {
-	L1: echo "bug\n";
+    L1: echo "bug\n";
 }
 goto L1;
 ?>

@@ -3,7 +3,7 @@ Bug #75420.7 (Indirect modification of magic method argument)
 --FILE--
 <?php
 class Test {
-	public function __set($x,$v) { $GLOBALS["name"] = 24; var_dump($x); }
+    public function __set($x,$v) { $GLOBALS["name"] = 24; var_dump($x); }
 }
 
 $obj = new Test;

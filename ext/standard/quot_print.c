@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -195,8 +193,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 * Decoding  Quoted-printable string.
 *
 */
-/* {{{ proto string quoted_printable_decode(string str)
-   Convert a quoted-printable string to an 8 bit string */
+/* {{{ Convert a quoted-printable string to an 8 bit string */
 PHP_FUNCTION(quoted_printable_decode)
 {
 	zend_string *arg1;
@@ -259,7 +256,7 @@ PHP_FUNCTION(quoted_printable_decode)
 }
 /* }}} */
 
-/* {{{ proto string quoted_printable_encode(string str) */
+/* {{{ */
 PHP_FUNCTION(quoted_printable_encode)
 {
 	zend_string *str;

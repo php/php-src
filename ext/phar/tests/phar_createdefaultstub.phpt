@@ -32,7 +32,6 @@ var_dump(Phar::createDefaultStub('hio', str_repeat('a', 401)));
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 string(6641) "<?php
 
@@ -926,4 +925,3 @@ __HALT_COMPILER(); ?>"
 ============================================================================
 int(7032)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
-===DONE===

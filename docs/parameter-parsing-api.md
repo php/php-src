@@ -75,7 +75,7 @@ f  - function or array containing php method call info (returned as
 h  - array (returned as HashTable*)
 H  - array or HASH_OF(object) (returned as HashTable*)
 l  - long (zend_long)
-L  - long, limits out-of-range numbers to LONG_MAX/LONG_MIN (zend_long, ZEND_LONG_MAX/ZEND_LONG_MIN)
+n  - long or double (zval*)
 o  - object of any type (zval*)
 O  - object of specific type given by class entry (zval*, zend_class_entry)
 p  - valid path (string without null bytes in the middle) and its length (char*, size_t)
@@ -100,6 +100,9 @@ The following characters also have a meaning in the specifier string:
   zend_bool* must be passed after the corresponding bool*, zend_long* or
   double* arguments, respectively. A non-zero value will be written to the
   zend_bool if a PHP NULL is passed.
+  For `f` use the ``ZEND_FCI_INITIALIZED(fci)`` macro to check if a callable
+  has been provided and ``!ZEND_FCI_INITIALIZED(fci)`` to check if a PHP NULL
+  is passed.
 
 ## Note on 64bit compatibility
 

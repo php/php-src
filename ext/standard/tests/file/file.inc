@@ -202,7 +202,7 @@ function change_file_perms($file_path,
    permissions. File is filled with content of size specified.
    $file_path = dir where files will be created
    $name_prefix = prefix to be used for names, name is suffix with a
-     unqiue numeric value to make the file name unique, default = file
+     unique numeric value to make the file name unique, default = file
    $name_suffix = suffix to be used for the name, default = 1
    $count = total no. of files to be created, default = 1
    $mode = file open mode as specified in fopen() call. Do not use
@@ -215,7 +215,7 @@ function change_file_perms($file_path,
      "empty" = empty file
      "text_with_new_line" = similar to text fill type, but writes with new line char
      "alphanumeric" = fill file with alpha numeric text
-     If imporper $content type is specified, file is created as empty
+     If improper $content type is specified, file is created as empty
    $size = size of the fill in terms of kilobyte, i.e size of the file.
            if $flag is specified as "byte", then then given size is taken in bytes
    $flag = specify if size has to be treated as no of total bytes or
@@ -309,7 +309,7 @@ function create_files( $file_path,
 
 /*
  Function: function create_links( $file_path,
-		       $filename,
+               $filename,
                        $link_count = 1,
                        $link_type = "soft",
                        $link_size = 1024,

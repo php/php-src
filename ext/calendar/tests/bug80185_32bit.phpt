@@ -7,11 +7,19 @@ if (PHP_INT_SIZE != 4) die("skip for 32bit platforms only");
 ?>
 --FILE--
 <?php
-var_dump(jdtounix(2465712));
+try {
+    var_dump(jdtounix(2465712));
+} catch (ValueError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 var_dump(jdtounix(PHP_INT_MAX / 86400 + 2440588));
-var_dump(jdtounix(PHP_INT_MAX / 86400 + 2440589));
+try {
+    var_dump(jdtounix(PHP_INT_MAX / 86400 + 2440589));
+} catch (ValueError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 ?>
 --EXPECT--
-bool(false)
+jday must be between 2440588 and 2465443
 int(2147472000)
-bool(false)
+jday must be between 2440588 and 2465443

@@ -5,7 +5,7 @@ Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 User Group: PHPSP #phptestfestbrasil
 --SKIPIF--
 <?php
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
+    if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
 <?php

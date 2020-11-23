@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -41,27 +39,6 @@
 #include "mysqli_mysqlnd.h"
 #else
 
-/*
-  The libmysql headers (a PITA) also define it and there will be an warning.
-  Undef it and later we might need to define it again.
-*/
-#ifdef HAVE_MBRLEN
-#undef HAVE_MBRLEN
-#define WE_HAD_MBRLEN
-#endif
-#ifdef HAVE_MBSTATE_T
-#undef HAVE_MBSTATE_T
-#define WE_HAD_MBSTATE_T
-#endif
-
-#if !defined(HAVE_MBRLEN) && defined(WE_HAD_MBRLEN)
-#define HAVE_MBRLEN 1
-#endif
-
-#if !defined(HAVE_MBSTATE_T) && defined(WE_HAD_MBSTATE_T)
-#define HAVE_MBSTATE_T 1
-#endif
-
 #include <mysql.h>
 #if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
 typedef _Bool		my_bool;
@@ -76,7 +53,6 @@ typedef _Bool		my_bool;
 
 enum mysqli_status {
 	MYSQLI_STATUS_UNKNOWN=0,
-	MYSQLI_STATUS_CLEARED,
 	MYSQLI_STATUS_INITIALIZED,
 	MYSQLI_STATUS_VALID
 };
@@ -92,7 +68,7 @@ typedef struct {
 	unsigned int	var_cnt;
 	VAR_BUFFER		*buf;
 	zval			*vars;
-	char			*is_null;
+	my_bool			*is_null;
 } BIND_BUFFER;
 
 typedef struct {
@@ -113,7 +89,7 @@ typedef struct {
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	zend_bool		persistent;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	int				async_result_fetch_type;
 #endif
 } MY_MYSQL;
@@ -239,13 +215,13 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(intern->zo.ce->name));\
-		RETURN_FALSE;\
+		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));\
+		RETURN_THROWS();\
   	}\
 	__ptr = (__type)my_res->ptr; \
-	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
-		RETURN_FALSE;\
+	if (my_res->status < __check) { \
+		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name)); \
+		RETURN_THROWS();\
 	}\
 }
 
@@ -253,12 +229,12 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 { \
 	MYSQLI_RESOURCE *my_res; \
 	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(intern->zo.ce->name));\
-  		return;\
-  	}\
+		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));\
+		return;\
+	}\
 	__ptr = (__type)my_res->ptr; \
-	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
+	if (my_res->status < __check) { \
+		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name)); \
 		return;\
 	}\
 }
@@ -267,20 +243,15 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 { \
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
 	if (!(__ptr)->mysql) { \
-		mysqli_object *intern = Z_MYSQLI_P(__id); \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
-		RETURN_NULL(); \
+		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(Z_OBJCE_P(__id)->name)); \
+		RETURN_THROWS(); \
 	} \
 }
 
 #define MYSQLI_FETCH_RESOURCE_STMT(__ptr, __id, __check) \
 { \
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
-	if (!(__ptr)->stmt) { \
-		mysqli_object *intern = Z_MYSQLI_P(__id); \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
-		RETURN_NULL();\
-	} \
+	ZEND_ASSERT((__ptr)->stmt && "Missing statement?"); \
 }
 
 #define MYSQLI_SET_STATUS(__id, __value) \
@@ -318,7 +289,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	zend_long			report_mode;
 	HashTable		*report_ht;
 	zend_ulong	multi_query;
-	zend_ulong	embedded;
 	zend_bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 

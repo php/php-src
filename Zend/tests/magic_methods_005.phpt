@@ -4,9 +4,9 @@ Testing __call() declaration in interface with wrong modifier
 <?php
 
 interface a {
-	static function __call($a, $b);
+    static function __call($a, $b);
 }
 
 ?>
 --EXPECTF--
-Warning: The magic method __call() must have public visibility and cannot be static in %s on line %d
+Fatal error: Method a::__call() cannot be static in %s on line %d

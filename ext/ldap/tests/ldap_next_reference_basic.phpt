@@ -28,7 +28,6 @@ var_dump($ref2 = ldap_next_reference($link, $ref));
 ldap_parse_reference($link, $ref2, $refs);
 var_dump($refs);
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -45,4 +44,3 @@ array(1) {
   [0]=>
   string(%d) "cn=userB,%s"
 }
-===DONE===

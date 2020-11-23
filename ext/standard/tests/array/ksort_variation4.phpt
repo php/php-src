@@ -2,14 +2,9 @@
 Test ksort() function : usage variations - sort bool values
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing ksort() by providing array of boolean values for $array argument with following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
 */
 
@@ -18,7 +13,7 @@ echo "*** Testing ksort() : usage variations ***\n";
 // bool value array
 $bool_values = array (true => true, false => false, TRUE => TRUE, FALSE => FALSE);
 
-echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is defualt --\n";
+echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is default --\n";
 $temp_array = $bool_values;
 var_dump(ksort($temp_array) );
 var_dump($temp_array);
@@ -43,7 +38,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing ksort() : usage variations ***
 
--- Testing ksort() by supplying boolean value array, 'flag' value is defualt --
+-- Testing ksort() by supplying boolean value array, 'flag' value is default --
 bool(true)
 array(2) {
   [0]=>

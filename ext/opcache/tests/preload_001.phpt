@@ -20,7 +20,7 @@ include(__DIR__ . "/preload.inc");
 var_dump(function_exists("f2"));
 ?>
 OK
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)

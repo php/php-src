@@ -3,9 +3,9 @@ jmp into a finally block 03
 --FILE--
 <?php
 function foo() {
-	try {
+    try {
     } finally {
-	goto test;
+    goto test;
 test:
     }
 }

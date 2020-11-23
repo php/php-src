@@ -6,8 +6,13 @@ DateTimeZone::getOffset() accepts a DateTimeInterface object
 $tz = new DateTimeZone('Europe/London');
 $dt = new DateTimeImmutable('2014-09-20', $tz);
 
-echo $tz->getOffset($dt);
-echo $tz->getOffset(1);
---EXPECTF--
+echo $tz->getOffset($dt), "\n";
+try {
+    echo $tz->getOffset(1);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
+--EXPECT--
 3600
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, int given in %s
+DateTimeZone::getOffset(): Argument #1 ($datetime) must be of type DateTimeInterface, int given

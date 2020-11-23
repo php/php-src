@@ -18,5 +18,5 @@ echo "ok\n";
 --EXPECTF--
 1
 
-Notice: Undefined index: x in %sunset_cv06.php on line %d
+Warning: Undefined array key "x" in %s on line %d
 ok

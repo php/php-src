@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -199,7 +197,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			path += 11;
 			max_memory = ZEND_STRTOL(path, NULL, 10);
 			if (max_memory < 0) {
-				zend_throw_error(NULL, "Max memory must be >= 0");
+				zend_argument_value_error(2, "must be greater than or equal to 0");
 				return NULL;
 			}
 		}

@@ -4,21 +4,21 @@ ZE2 A class constructor must keep the signature of base class interfaces
 <?php
 interface constr
 {
-	function __construct();
+    function __construct();
 }
 
 class implem implements constr
 {
-	function __construct()
-	{
-	}
+    function __construct()
+    {
+    }
 }
 
 class derived extends implem
 {
-	function __construct($a)
-	{
-	}
+    function __construct($a)
+    {
+    }
 }
 
 ?>

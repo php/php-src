@@ -64,6 +64,8 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	if (!destroy_elements) {
 		persistent_script->script.function_table.pDestructor = NULL;
 		persistent_script->script.class_table.pDestructor = NULL;
+	} else {
+		destroy_op_array(&persistent_script->script.main_op_array);
 	}
 
 	zend_hash_destroy(&persistent_script->script.function_table);
@@ -233,11 +235,28 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 				prop_info->ce = ARENA_REALLOC(prop_info->ce);
 			}
 
-			if (ZEND_TYPE_IS_CE(prop_info->type)) {
+			if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
+				zend_type_list *list = ZEND_TYPE_LIST(prop_info->type);
+				if (IN_ARENA(list)) {
+					list = ARENA_REALLOC(list);
+					ZEND_TYPE_SET_PTR(prop_info->type, list);
+
+					zend_type *list_type;
+					ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(prop_info->type), list_type) {
+						if (ZEND_TYPE_HAS_CE(*list_type)) {
+							zend_class_entry *ce = ZEND_TYPE_CE(*list_type);
+							if (IN_ARENA(ce)) {
+								ce = ARENA_REALLOC(ce);
+								ZEND_TYPE_SET_PTR(*list_type, ce);
+							}
+						}
+					} ZEND_TYPE_LIST_FOREACH_END();
+				}
+			} else if (ZEND_TYPE_HAS_CE(prop_info->type)) {
 				zend_class_entry *ce = ZEND_TYPE_CE(prop_info->type);
 				if (IN_ARENA(ce)) {
 					ce = ARENA_REALLOC(ce);
-					prop_info->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
+					ZEND_TYPE_SET_PTR(prop_info->type, ce);
 				}
 			}
 		}
@@ -350,17 +369,13 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__get);
 	zend_update_inherited_handler(__set);
 	zend_update_inherited_handler(__call);
-/* 5.1 stuff */
-	zend_update_inherited_handler(serialize_func);
-	zend_update_inherited_handler(unserialize_func);
 	zend_update_inherited_handler(__isset);
 	zend_update_inherited_handler(__unset);
-/* 5.2 stuff */
 	zend_update_inherited_handler(__tostring);
-
-/* 5.3 stuff */
 	zend_update_inherited_handler(__callstatic);
 	zend_update_inherited_handler(__debugInfo);
+	zend_update_inherited_handler(__serialize);
+	zend_update_inherited_handler(__unserialize);
 
 /* 5.4 traits */
 	if (ce->num_traits) {

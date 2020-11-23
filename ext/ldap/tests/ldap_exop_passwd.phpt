@@ -24,7 +24,6 @@ var_dump(
   test_bind($host, $port, "cn=userA,$base", "newPassword", $protocol_version)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -41,4 +40,3 @@ string(%d) "%s"
 bool(true)
 bool(true)
 bool(true)
-===DONE===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -35,7 +33,7 @@
 #include "php_ini.h"
 #include "zend_smart_str.h"
 
-#if HAVE_OCI8
+#ifdef HAVE_OCI8
 
 /* PHP 5.2 is the minimum supported version for OCI8 2.0 */
 #if PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
@@ -43,6 +41,9 @@
 #elif PHP_MAJOR_VERSION < 7
 /* PHP 7 is the minimum supported version for OCI8 2.1 */
 #error Use PHP OCI8 2.0 for your version of PHP
+#elif PHP_MAJOR_VERSION < 8
+/* PHP 8 is the minimum supported version for OCI8 3.0 */
+#error Use PHP OCI8 2.2 for your version of PHP
 #endif
 
 #include "php_oci8.h"
@@ -124,772 +125,14 @@ ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
 
-/* {{{ Function arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_define_by_name, 0, 0, 3)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_name)
-	ZEND_ARG_INFO(1, variable)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
+#include "oci8_arginfo.h"
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_bind_by_name, 0, 0, 3)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_name)
-	ZEND_ARG_INFO(1, variable)
-	ZEND_ARG_INFO(0, maximum_length)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_bind_array_by_name, 0, 0, 4)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_name)
-	ZEND_ARG_INFO(1, variable)
-	ZEND_ARG_INFO(0, maximum_array_length)
-	ZEND_ARG_INFO(0, maximum_item_length)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_descriptor, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_save, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_import, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_load, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_read, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_eof, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_tell, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_rewind, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_seek, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, whence)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_size, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_append, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor_to)
-	ZEND_ARG_INFO(0, lob_descriptor_from)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_truncate, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_erase, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_flush, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, flag)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ocisetbufferinglob, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ocigetbufferinglob, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_copy, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor_to)
-	ZEND_ARG_INFO(0, lob_descriptor_from)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_is_equal, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, lob_descriptor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_descriptor, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_rollback, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_commit, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_name, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_size, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_scale, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_precision, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type_raw, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_is_null, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_internal_debug, 0, 0, 1)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_execute, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_cancel, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ocifetchinto, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(1, result)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_all, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(1, output)
-	ZEND_ARG_INFO(0, skip)
-	ZEND_ARG_INFO(0, maximum_rows)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_object, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_row, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_assoc, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_array, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_statement, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_connect, 0, 0, 2)
-	ZEND_ARG_INFO(0, username)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, connection_string)
-	ZEND_ARG_INFO(0, character_set)
-	ZEND_ARG_INFO(0, session_mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_connect, 0, 0, 2)
-	ZEND_ARG_INFO(0, username)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, connection_string)
-	ZEND_ARG_INFO(0, character_set)
-	ZEND_ARG_INFO(0, session_mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_pconnect, 0, 0, 2)
-	ZEND_ARG_INFO(0, username)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, connection_string)
-	ZEND_ARG_INFO(0, character_set)
-	ZEND_ARG_INFO(0, session_mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_error, 0, 0, 0)
-	ZEND_ARG_INFO(0, connection_or_statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_num_fields, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_parse, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, sql_text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_get_implicit_resultset, 0, 0, 1)
-ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_prefetch, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, number_of_rows)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_client_identifier, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, client_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_edition, 0, 0, 1)
-	ZEND_ARG_INFO(0, edition_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_module_name, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, module_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_action, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, action)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_client_info, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, client_information)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_db_operation, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, action)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_call_timeout, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, call_timeout)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_password_change, 0, 0, 4)
-	ZEND_ARG_INFO(0, connection_resource_or_connection_string)
-	ZEND_ARG_INFO(0, username)
-	ZEND_ARG_INFO(0, old_password)
-	ZEND_ARG_INFO(0, new_password)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_cursor, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_result, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number_or_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_client_version, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_server_version, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_statement_type, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_num_rows, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement_resource)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_collection, 0, 0, 1)
-	ZEND_ARG_INFO(0, collection)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append, 0, 0, 2)
-	ZEND_ARG_INFO(0, collection)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_get, 0, 0, 2)
-	ZEND_ARG_INFO(0, collection)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_assign, 0, 0, 2)
-	ZEND_ARG_INFO(0, collection_to)
-	ZEND_ARG_INFO(0, collection_from)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_assign, 0, 0, 3)
-	ZEND_ARG_INFO(0, collection)
-	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_size, 0, 0, 1)
-	ZEND_ARG_INFO(0, collection)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_max, 0, 0, 1)
-	ZEND_ARG_INFO(0, collection)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim, 0, 0, 2)
-	ZEND_ARG_INFO(0, collection)
-	ZEND_ARG_INFO(0, number)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_collection, 0, 0, 2)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, type_name)
-	ZEND_ARG_INFO(0, schema_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_register_taf_callback, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, function_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_unregister_taf_callback, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection_resource)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ LOB Method arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_save_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_import_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_load_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_read_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_eof_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_tell_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_rewind_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_seek_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, whence)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_size_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_append_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, lob_descriptor_from)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_truncate_method, 0, 0, 0)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_erase_method, 0, 0, 0)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_flush_method, 0, 0, 0)
-	ZEND_ARG_INFO(0, flag)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_setbuffering_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_getbuffering_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_export_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write_temporary_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_close_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_free_descriptor_method, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ Collection Method arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_free_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_get_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_assign_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, collection_from)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_assign_method, 0, 0, 2)
-	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_size_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_max_method, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim_method, 0, 0, 1)
-	ZEND_ARG_INFO(0, number)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ extension function prototypes
-*/
-PHP_FUNCTION(oci_bind_by_name);
-PHP_FUNCTION(oci_bind_array_by_name);
-PHP_FUNCTION(oci_define_by_name);
-PHP_FUNCTION(oci_field_is_null);
-PHP_FUNCTION(oci_field_name);
-PHP_FUNCTION(oci_field_size);
-PHP_FUNCTION(oci_field_scale);
-PHP_FUNCTION(oci_field_precision);
-PHP_FUNCTION(oci_field_type);
-PHP_FUNCTION(oci_field_type_raw);
-PHP_FUNCTION(oci_execute);
-PHP_FUNCTION(oci_fetch);
-PHP_FUNCTION(oci_cancel);
-PHP_FUNCTION(ocifetchinto);
-PHP_FUNCTION(oci_fetch_object);
-PHP_FUNCTION(oci_fetch_row);
-PHP_FUNCTION(oci_fetch_assoc);
-PHP_FUNCTION(oci_fetch_array);
-PHP_FUNCTION(ocifetchstatement);
-PHP_FUNCTION(oci_fetch_all);
-PHP_FUNCTION(oci_free_statement);
-PHP_FUNCTION(oci_internal_debug);
-PHP_FUNCTION(oci_close);
-PHP_FUNCTION(oci_connect);
-PHP_FUNCTION(oci_new_connect);
-PHP_FUNCTION(oci_pconnect);
-PHP_FUNCTION(oci_error);
-PHP_FUNCTION(oci_free_descriptor);
-PHP_FUNCTION(oci_commit);
-PHP_FUNCTION(oci_rollback);
-PHP_FUNCTION(oci_new_descriptor);
-PHP_FUNCTION(oci_num_fields);
-PHP_FUNCTION(oci_parse);
-PHP_FUNCTION(oci_get_implicit_resultset);
-PHP_FUNCTION(oci_new_cursor);
-PHP_FUNCTION(oci_result);
-PHP_FUNCTION(oci_client_version);
-PHP_FUNCTION(oci_server_version);
-PHP_FUNCTION(oci_statement_type);
-PHP_FUNCTION(oci_num_rows);
-PHP_FUNCTION(oci_set_prefetch);
-PHP_FUNCTION(oci_set_client_identifier);
-PHP_FUNCTION(oci_set_db_operation);
-PHP_FUNCTION(oci_set_call_timeout);
-PHP_FUNCTION(oci_set_edition);
-PHP_FUNCTION(oci_set_module_name);
-PHP_FUNCTION(oci_set_action);
-PHP_FUNCTION(oci_set_client_info);
-PHP_FUNCTION(oci_password_change);
-PHP_FUNCTION(oci_lob_save);
-PHP_FUNCTION(oci_lob_import);
-PHP_FUNCTION(oci_lob_export);
-PHP_FUNCTION(oci_lob_load);
-PHP_FUNCTION(oci_lob_tell);
-PHP_FUNCTION(oci_lob_write);
-PHP_FUNCTION(oci_lob_append);
-PHP_FUNCTION(oci_lob_copy);
-PHP_FUNCTION(oci_lob_truncate);
-PHP_FUNCTION(oci_lob_erase);
-PHP_FUNCTION(oci_lob_flush);
-PHP_FUNCTION(ocisetbufferinglob);
-PHP_FUNCTION(ocigetbufferinglob);
-PHP_FUNCTION(oci_lob_is_equal);
-PHP_FUNCTION(oci_lob_rewind);
-PHP_FUNCTION(oci_lob_read);
-PHP_FUNCTION(oci_lob_eof);
-PHP_FUNCTION(oci_lob_seek);
-PHP_FUNCTION(oci_lob_size);
-PHP_FUNCTION(oci_lob_write_temporary);
-PHP_FUNCTION(oci_lob_close);
-PHP_FUNCTION(oci_new_collection);
-PHP_FUNCTION(oci_free_collection);
-PHP_FUNCTION(oci_collection_append);
-PHP_FUNCTION(oci_collection_element_get);
-PHP_FUNCTION(oci_collection_element_assign);
-PHP_FUNCTION(oci_collection_assign);
-PHP_FUNCTION(oci_collection_size);
-PHP_FUNCTION(oci_collection_max);
-PHP_FUNCTION(oci_collection_trim);
-PHP_FUNCTION(oci_register_taf_callback);
-PHP_FUNCTION(oci_unregister_taf_callback);
-/* }}} */
-
-/* {{{ extension definition structures
-*/
-static const zend_function_entry php_oci_functions[] = {
-	PHP_FE(oci_define_by_name,			arginfo_oci_define_by_name)
-	PHP_FE(oci_bind_by_name,			arginfo_oci_bind_by_name)
-	PHP_FE(oci_bind_array_by_name,		arginfo_oci_bind_array_by_name)
-	PHP_FE(oci_field_is_null,			arginfo_oci_field_is_null)
-	PHP_FE(oci_field_name,				arginfo_oci_field_name)
-	PHP_FE(oci_field_size,				arginfo_oci_field_size)
-	PHP_FE(oci_field_scale,				arginfo_oci_field_scale)
-	PHP_FE(oci_field_precision,			arginfo_oci_field_precision)
-	PHP_FE(oci_field_type,				arginfo_oci_field_type)
-	PHP_FE(oci_field_type_raw,			arginfo_oci_field_type_raw)
-	PHP_FE(oci_execute,					arginfo_oci_execute)
-	PHP_FE(oci_cancel,					arginfo_oci_cancel)
-	PHP_FE(oci_fetch,					arginfo_oci_fetch)
-	PHP_FE(oci_fetch_object,			arginfo_oci_fetch_object)
-	PHP_FE(oci_fetch_row,				arginfo_oci_fetch_row)
-	PHP_FE(oci_fetch_assoc,				arginfo_oci_fetch_assoc)
-	PHP_FE(oci_fetch_array,				arginfo_oci_fetch_array)
-	PHP_FE(ocifetchinto,				arginfo_ocifetchinto)
-	PHP_FE(oci_fetch_all,				arginfo_oci_fetch_all)
-	PHP_FE(oci_free_statement,			arginfo_oci_free_statement)
-	PHP_FE(oci_internal_debug,			arginfo_oci_internal_debug)
-	PHP_FE(oci_num_fields,				arginfo_oci_num_fields)
-	PHP_FE(oci_parse,					arginfo_oci_parse)
-	PHP_FE(oci_get_implicit_resultset,	arginfo_oci_get_implicit_resultset)
-	PHP_FE(oci_new_cursor,				arginfo_oci_new_cursor)
-	PHP_FE(oci_result,					arginfo_oci_result)
-	PHP_FE(oci_client_version,			arginfo_oci_client_version)
-	PHP_FE(oci_server_version,			arginfo_oci_server_version)
-	PHP_FE(oci_statement_type,			arginfo_oci_statement_type)
-	PHP_FE(oci_num_rows,				arginfo_oci_num_rows)
-	PHP_FE(oci_close,					arginfo_oci_close)
-	PHP_FE(oci_connect,					arginfo_oci_connect)
-	PHP_FE(oci_new_connect,				arginfo_oci_new_connect)
-	PHP_FE(oci_pconnect,				arginfo_oci_pconnect)
-	PHP_FE(oci_error,					arginfo_oci_error)
-	PHP_FE(oci_free_descriptor,			arginfo_oci_free_descriptor)
-	PHP_FE(oci_lob_save,				arginfo_oci_lob_save)
-	PHP_FE(oci_lob_import,				arginfo_oci_lob_import)
-	PHP_FE(oci_lob_size,				arginfo_oci_lob_size)
-	PHP_FE(oci_lob_load,				arginfo_oci_lob_load)
-	PHP_FE(oci_lob_read,				arginfo_oci_lob_read)
-	PHP_FE(oci_lob_eof,					arginfo_oci_lob_eof)
-	PHP_FE(oci_lob_tell,				arginfo_oci_lob_tell)
-	PHP_FE(oci_lob_truncate,			arginfo_oci_lob_truncate)
-	PHP_FE(oci_lob_erase,				arginfo_oci_lob_erase)
-	PHP_FE(oci_lob_flush,				arginfo_oci_lob_flush)
-	PHP_FE(ocisetbufferinglob,			arginfo_ocisetbufferinglob)
-	PHP_FE(ocigetbufferinglob,			arginfo_ocigetbufferinglob)
-	PHP_FE(oci_lob_is_equal,			arginfo_oci_lob_is_equal)
-	PHP_FE(oci_lob_rewind,				arginfo_oci_lob_rewind)
-	PHP_FE(oci_lob_write,				arginfo_oci_lob_write)
-	PHP_FE(oci_lob_append,				arginfo_oci_lob_append)
-	PHP_FE(oci_lob_copy,				arginfo_oci_lob_copy)
-	PHP_FE(oci_lob_export,				arginfo_oci_lob_export)
-	PHP_FE(oci_lob_seek,				arginfo_oci_lob_seek)
-	PHP_FE(oci_commit,					arginfo_oci_commit)
-	PHP_FE(oci_rollback,				arginfo_oci_rollback)
-	PHP_FE(oci_new_descriptor,			arginfo_oci_new_descriptor)
-	PHP_FE(oci_set_prefetch,			arginfo_oci_set_prefetch)
-	PHP_FE(oci_set_client_identifier,	arginfo_oci_set_client_identifier)
-	PHP_FE(oci_set_db_operation,		arginfo_oci_set_db_operation)
-	PHP_FE(oci_set_call_timeout,		arginfo_oci_set_call_timeout)
-	PHP_FE(oci_set_edition,				arginfo_oci_set_edition)
-	PHP_FE(oci_set_module_name,			arginfo_oci_set_module_name)
-	PHP_FE(oci_set_action,				arginfo_oci_set_action)
-	PHP_FE(oci_set_client_info,			arginfo_oci_set_client_info)
-	PHP_FE(oci_password_change,			arginfo_oci_password_change)
-	PHP_FE(oci_free_collection,			arginfo_oci_free_collection)
-	PHP_FE(oci_collection_append,		arginfo_oci_collection_append)
-	PHP_FE(oci_collection_element_get,	arginfo_oci_collection_element_get)
-	PHP_FE(oci_collection_element_assign,	arginfo_oci_collection_element_assign)
-	PHP_FE(oci_collection_assign,		arginfo_oci_collection_assign)
-	PHP_FE(oci_collection_size,			arginfo_oci_collection_size)
-	PHP_FE(oci_collection_max,			arginfo_oci_collection_max)
-	PHP_FE(oci_collection_trim,			arginfo_oci_collection_trim)
-	PHP_FE(oci_new_collection,			arginfo_oci_new_collection)
-	PHP_FE(oci_register_taf_callback,   arginfo_oci_register_taf_callback)
-	PHP_FE(oci_unregister_taf_callback, arginfo_oci_unregister_taf_callback)
-
-	PHP_FALIAS(oci_free_cursor,		oci_free_statement,		arginfo_oci_free_statement)
-	PHP_FALIAS(ocifreecursor,		oci_free_statement,		arginfo_oci_free_statement)
-	PHP_FALIAS(ocibindbyname,		oci_bind_by_name,		arginfo_oci_bind_by_name)
-	PHP_FALIAS(ocidefinebyname,		oci_define_by_name,		arginfo_oci_define_by_name)
-	PHP_FALIAS(ocicolumnisnull,		oci_field_is_null,		arginfo_oci_field_is_null)
-	PHP_FALIAS(ocicolumnname,		oci_field_name,			arginfo_oci_field_name)
-	PHP_FALIAS(ocicolumnsize,		oci_field_size,			arginfo_oci_field_size)
-	PHP_FALIAS(ocicolumnscale,		oci_field_scale,		arginfo_oci_field_scale)
-	PHP_FALIAS(ocicolumnprecision,	oci_field_precision,	arginfo_oci_field_precision)
-	PHP_FALIAS(ocicolumntype,		oci_field_type,			arginfo_oci_field_type)
-	PHP_FALIAS(ocicolumntyperaw,	oci_field_type_raw,		arginfo_oci_field_type_raw)
-	PHP_FALIAS(ociexecute,			oci_execute,			arginfo_oci_execute)
-	PHP_FALIAS(ocicancel,			oci_cancel,				arginfo_oci_cancel)
-	PHP_FALIAS(ocifetch,			oci_fetch,				arginfo_oci_fetch)
-	PHP_FALIAS(ocifetchstatement,	oci_fetch_all,			arginfo_oci_fetch_all)
-	PHP_FALIAS(ocifreestatement,	oci_free_statement,		arginfo_oci_free_statement)
-	PHP_FALIAS(ociinternaldebug,	oci_internal_debug,		arginfo_oci_internal_debug)
-	PHP_FALIAS(ocinumcols,			oci_num_fields,			arginfo_oci_num_fields)
-	PHP_FALIAS(ociparse,			oci_parse,				arginfo_oci_parse)
-	PHP_FALIAS(ocinewcursor,		oci_new_cursor,			arginfo_oci_new_cursor)
-	PHP_FALIAS(ociresult,			oci_result,				arginfo_oci_result)
-	PHP_FALIAS(ociserverversion,	oci_server_version,		arginfo_oci_server_version)
-	PHP_FALIAS(ocistatementtype,	oci_statement_type,		arginfo_oci_statement_type)
-	PHP_FALIAS(ocirowcount,			oci_num_rows,			arginfo_oci_num_rows)
-	PHP_FALIAS(ocilogoff,			oci_close,				arginfo_oci_close)
-	PHP_FALIAS(ocilogon,			oci_connect,			arginfo_oci_connect)
-	PHP_FALIAS(ocinlogon,			oci_new_connect,		arginfo_oci_new_connect)
-	PHP_FALIAS(ociplogon,			oci_pconnect,			arginfo_oci_pconnect)
-	PHP_FALIAS(ocierror,			oci_error,				arginfo_oci_error)
-	PHP_FALIAS(ocifreedesc,			oci_free_descriptor,	arginfo_oci_free_descriptor)
-	PHP_FALIAS(ocisavelob,			oci_lob_save,			arginfo_oci_lob_save)
-	PHP_FALIAS(ocisavelobfile,		oci_lob_import,			arginfo_oci_lob_import)
-	PHP_FALIAS(ociwritelobtofile,	oci_lob_export,			arginfo_oci_lob_export)
-	PHP_FALIAS(ociloadlob,			oci_lob_load,			arginfo_oci_lob_load)
-	PHP_FALIAS(ocicommit,			oci_commit,				arginfo_oci_commit)
-	PHP_FALIAS(ocirollback,			oci_rollback,			arginfo_oci_rollback)
-	PHP_FALIAS(ocinewdescriptor,	oci_new_descriptor,		arginfo_oci_new_descriptor)
-	PHP_FALIAS(ocisetprefetch,		oci_set_prefetch,		arginfo_oci_set_prefetch)
-	PHP_FALIAS(ocipasswordchange,	oci_password_change,	arginfo_oci_password_change)
-	PHP_FALIAS(ocifreecollection,	oci_free_collection,	arginfo_oci_free_collection)
-	PHP_FALIAS(ocinewcollection,	oci_new_collection,		arginfo_oci_new_collection)
-	PHP_FALIAS(ocicollappend,		oci_collection_append,	arginfo_oci_collection_append)
-	PHP_FALIAS(ocicollgetelem,		oci_collection_element_get,		arginfo_oci_collection_element_get)
-	PHP_FALIAS(ocicollassignelem,	oci_collection_element_assign,	arginfo_oci_collection_element_assign)
-	PHP_FALIAS(ocicollsize,			oci_collection_size,	arginfo_oci_collection_size)
-	PHP_FALIAS(ocicollmax,			oci_collection_max,		arginfo_oci_collection_max)
-	PHP_FALIAS(ocicolltrim,			oci_collection_trim,	arginfo_oci_collection_trim)
-	PHP_FE_END
-};
-
-static const zend_function_entry php_oci_lob_class_functions[] = {
-	PHP_FALIAS(load,		oci_lob_load,			arginfo_oci_lob_load_method)
-	PHP_FALIAS(tell,		oci_lob_tell,			arginfo_oci_lob_tell_method)
-	PHP_FALIAS(truncate,	oci_lob_truncate,		arginfo_oci_lob_truncate_method)
-	PHP_FALIAS(erase,		oci_lob_erase,			arginfo_oci_lob_erase_method)
-	PHP_FALIAS(flush,		oci_lob_flush,			arginfo_oci_lob_flush_method)
-	PHP_FALIAS(setbuffering,ocisetbufferinglob,		arginfo_oci_lob_setbuffering_method)
-	PHP_FALIAS(getbuffering,ocigetbufferinglob,		arginfo_oci_lob_getbuffering_method)
-	PHP_FALIAS(rewind,		oci_lob_rewind,			arginfo_oci_lob_rewind_method)
-	PHP_FALIAS(read,		oci_lob_read,			arginfo_oci_lob_read_method)
-	PHP_FALIAS(eof,			oci_lob_eof,			arginfo_oci_lob_eof_method)
-	PHP_FALIAS(seek,		oci_lob_seek,			arginfo_oci_lob_seek_method)
-	PHP_FALIAS(write,		oci_lob_write,			arginfo_oci_lob_write_method)
-	PHP_FALIAS(append,		oci_lob_append,			arginfo_oci_lob_append_method)
-	PHP_FALIAS(size,		oci_lob_size,			arginfo_oci_lob_size_method)
-	PHP_FALIAS(writetofile, oci_lob_export,			arginfo_oci_lob_export_method)
-	PHP_FALIAS(export,		oci_lob_export,			arginfo_oci_lob_export_method)
-	PHP_FALIAS(import,		oci_lob_import,			arginfo_oci_lob_import_method)
-	PHP_FALIAS(writetemporary,	oci_lob_write_temporary,	arginfo_oci_lob_write_temporary_method)
-	PHP_FALIAS(close,			oci_lob_close,				arginfo_oci_lob_close_method)
-	PHP_FALIAS(save,		oci_lob_save,			arginfo_oci_lob_save_method)
-	PHP_FALIAS(savefile,	oci_lob_import,			arginfo_oci_lob_import_method)
-	PHP_FALIAS(free,		oci_free_descriptor,	arginfo_oci_free_descriptor_method)
-	PHP_FE_END
-};
-
-static const zend_function_entry php_oci_coll_class_functions[] = {
-	PHP_FALIAS(append,		  oci_collection_append,			arginfo_oci_collection_append_method)
-	PHP_FALIAS(getelem,		  oci_collection_element_get,		arginfo_oci_collection_element_get_method)
-	PHP_FALIAS(assignelem,	  oci_collection_element_assign,	arginfo_oci_collection_element_assign_method)
-	PHP_FALIAS(assign,		  oci_collection_assign,			arginfo_oci_collection_assign_method)
-	PHP_FALIAS(size,		  oci_collection_size,				arginfo_oci_collection_size_method)
-	PHP_FALIAS(max,			  oci_collection_max,				arginfo_oci_collection_max_method)
-	PHP_FALIAS(trim,		  oci_collection_trim,				arginfo_oci_collection_trim_method)
-	PHP_FALIAS(free,		  oci_free_collection,				arginfo_oci_collection_free_method)
-	PHP_FE_END
-};
+/* {{{ extension definition structures */
 
 zend_module_entry oci8_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"oci8",				  /* extension name */
-	php_oci_functions,	  /* extension function list */
+	ext_functions,	      /* extension function list */
 	PHP_MINIT(oci),		  /* extension-wide startup function */
 	PHP_MSHUTDOWN(oci),	  /* extension-wide shutdown function */
 	PHP_RINIT(oci),		  /* per-request startup function */
@@ -922,8 +165,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ startup, shutdown and info functions
-*/
+/* {{{ startup, shutdown and info functions */
 
 /* {{{	php_oci_init_global_handles()
  *
@@ -1049,8 +291,8 @@ PHP_MINIT_FUNCTION(oci)
 	le_descriptor = zend_register_list_destructors_ex(php_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
 	le_collection = zend_register_list_destructors_ex(php_oci_collection_list_dtor, NULL, "oci8 collection", module_number);
 
-	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
-	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI-Collection", php_oci_coll_class_functions);
+	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCILob", class_OCILob_methods);
+	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCICollection", class_OCICollection_methods);
 
 	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
 	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry);
@@ -1540,7 +782,7 @@ sb4 php_oci_error(OCIError *err_p, sword errstatus)
 			if (errcode) {
 				php_error_docref(NULL, E_WARNING, "%s", errbuf);
 			} else {
-				php_error_docref(NULL, E_WARNING, "failed to fetch error message");
+				php_error_docref(NULL, E_WARNING, "Failed to fetch error message");
 			}
 			break;
 		case OCI_INVALID_HANDLE:
@@ -1635,7 +877,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 		Z_PARAM_STRING(username, username_len)
 		Z_PARAM_STRING(password, password_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(dbname, dbname_len)
+		Z_PARAM_STRING_OR_NULL(dbname, dbname_len)
 		Z_PARAM_STRING(charset, charset_len)
 		Z_PARAM_LONG(session_mode)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1675,7 +917,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, zend_long session_mode, int persistent, int exclusive)
 {
 	zval *zvp;
-	zend_resource *le;
+	zend_resource *le = NULL;
 	zend_resource new_le;
 	php_oci_connection *connection = NULL;
 	smart_str hashed_details = {0};
@@ -1756,7 +998,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	if (password_len) {
 		zend_ulong password_hash;
-		password_hash = zend_inline_hash_func(password, password_len);
+		password_hash = zend_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&hashed_details, password_hash, 0);
 	}
 	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
@@ -1921,7 +1163,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				/* We have to do a hash_del but need to preserve the resource if there is a positive
 				 * refcount. Set the data pointer in the list entry to NULL
 				 */
-				if (connection == connection->id->ptr) {
+				if (connection == connection->id->ptr && le) {
 					le->ptr = NULL;
 				}
 
@@ -2047,10 +1289,6 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	/* add to the appropriate hash */
 	if (connection->is_persistent) {
-#if PHP_VERSION_ID < 70300
-		new_le.ptr = connection;
-		new_le.type = le_pconnection;
-#endif
 		connection->used_this_request = 1;
 		PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
 
@@ -2061,11 +1299,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		if (OCI_G(old_oci_close_semantics)) {
 			GC_ADDREF(connection->id);
 		}
-#if PHP_VERSION_ID < 70300
-		zend_hash_update_mem(&EG(persistent_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
-#else
 		zend_register_persistent_resource_ex(connection->hash_key, connection, le_pconnection);
-#endif
 		OCI_G(num_persistent)++;
 		OCI_G(num_links)++;
 	} else if (!exclusive) {
@@ -2893,9 +2127,6 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 {
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
-#if PHP_VERSION_ID < 70300
-	zend_resource spool_le = {{0}};
-#endif
 	zend_resource *spool_out_le = NULL;
 	zend_bool iserror = 0;
 	zval *spool_out_zv = NULL;
@@ -2911,7 +2142,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
 	if (password_len) {
 		zend_ulong password_hash;
-		password_hash = zend_inline_hash_func(password, password_len);
+		password_hash = zend_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&spool_hashed_details, password_hash, 0);
 	}
 	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
@@ -2942,14 +2173,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 			iserror = 1;
 			goto exit_get_spool;
 		}
-#if PHP_VERSION_ID < 70300
-		spool_le.ptr  = session_pool;
-		spool_le.type = le_psessionpool;
-		PHP_OCI_REGISTER_RESOURCE(session_pool, le_psessionpool);
-		zend_hash_update_mem(&EG(persistent_list), session_pool->spool_hash_key, (void *)&spool_le, sizeof(zend_resource));
-#else
 		zend_register_persistent_resource_ex(session_pool->spool_hash_key, session_pool, le_psessionpool);
-#endif
 	} else if (spool_out_le->type == le_psessionpool &&
 		ZSTR_LEN(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key) == ZSTR_LEN(spool_hashed_details.s) &&
 		memcmp(ZSTR_VAL(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key), ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s)) == 0) {

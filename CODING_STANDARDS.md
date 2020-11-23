@@ -272,43 +272,22 @@ use these rules.
 1. Extensions should be well tested using `*.phpt` tests. Read about that at
     [qa.php.net](https://qa.php.net/write-test.php) documentation.
 
-## Documentation and folding hooks
+## Folding hooks
 
-In order to make sure that the online documentation stays in line with the code,
-each user-level function should have its user-level function prototype before it
-along with a brief one-line description of what the function does. It would look
-like this:
+Use `{{{` symbols for the folding mode in Emacs and vim (`set fdm=marker`).
+Folding is very useful when dealing with large files because you can scroll
+through the file quickly and just unfold the function you wish to work on.
+The `}}}` at the end of each function marks the end of the fold, and should
+be on a separate line.
 
 ```c
-/* {{{ proto int abs(int number)
-   Returns the absolute value of the number */
+/* {{{ Returns the absolute value of the number */
 PHP_FUNCTION(abs)
 {
     ...
 }
 /* }}} */
 ```
-
-The `{{{` symbols are the default folding symbols for the folding mode in Emacs
-and vim (`set fdm=marker`). Folding is very useful when dealing with large files
-because you can scroll through the file quickly and just unfold the function you
-wish to work on. The `}}}` at the end of each function marks the end of the
-fold, and should be on a separate line.
-
-The `proto` keyword there is just a helper for the `doc/genfuncsummary` script
-which generates a full function summary. Having this keyword in front of the
-function prototypes allows us to put folds elsewhere in the code without
-messing up the function summary.
-
-Optional arguments are written like this:
-
-```c
-/* {{{ proto object imap_header(int stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
-   Returns a header object with the defined parameters */
-```
-
-And yes, please keep the prototype on a single line, even if that line is
-massive.
 
 ## New and experimental functions
 
@@ -334,8 +313,7 @@ purposes, these will only be documented by the most current name, with the
 aliases listed in the documentation for the parent function. For ease of
 reference, user-functions with completely different names, that alias to the
 same function (such as `highlight_file` and `show_source`), will be separately
-documented. The proto should still be included, describing which function is
-aliased.
+documented.
 
 Backwards compatible functions and names should be maintained as long as the
 code can be reasonably be kept as part of the codebase. See the `README` in the

@@ -6,10 +6,11 @@ if (!extension_loaded('bcmath')) die('skip bcmath extension is not available');
 ?>
 --FILE--
 <?php
-var_dump(bcpow('1', '1.1', 2));
+try {
+    var_dump(bcpow('1', '1.1', 2));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
-===DONE===
---EXPECTF--
-Warning: bcpow(): non-zero scale in exponent in %s on line %d
-string(4) "1.00"
-===DONE===
+--EXPECT--
+bcpow(): Argument #2 ($exponent) cannot have a fractional part

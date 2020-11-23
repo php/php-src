@@ -1,11 +1,11 @@
 --TEST--
-catch shouldn't call __autoload
+catch shouldn't call autoloader
 --FILE--
 <?php
 
 spl_autoload_register(function ($name) {
-	echo("AUTOLOAD '$name'\n");
-	eval("class $name {}");
+    echo("AUTOLOAD '$name'\n");
+    eval("class $name {}");
 });
 
 try {
@@ -16,7 +16,7 @@ try {
   throw new Exception();
 } catch (B $e) {
 } catch (Exception $e) {
-	echo "ok\n";
+    echo "ok\n";
 }
 ?>
 --EXPECT--

@@ -45,7 +45,6 @@ var_dump($db->errorInfo());
 
 $db->exec("DROP TABLE test");
 ?>
-===DONE===
 --EXPECTF--
 ===FAIL===
 
@@ -81,4 +80,3 @@ array(3) {
   [2]=>
   NULL
 }
-===DONE===

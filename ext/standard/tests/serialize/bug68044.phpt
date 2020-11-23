@@ -2,7 +2,7 @@
 Bug #68044 Integer overflow in unserialize() (32-bits only)
 --FILE--
 <?php
-	echo unserialize('C:3:"XYZ":18446744075857035259:{}');
+    echo unserialize('C:3:"XYZ":18446744075857035259:{}');
 ?>
 ===DONE==
 --EXPECTF--

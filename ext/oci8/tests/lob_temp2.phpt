@@ -27,7 +27,6 @@ oci_fetch_all($s, $res);
 var_dump($res);
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 array(1) {
@@ -37,4 +36,3 @@ array(1) {
     string(4) "test"
   }
 }
-===DONE===

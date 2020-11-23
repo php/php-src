@@ -99,7 +99,7 @@ function bug43449_getCur($c)
 
     $ret = array();
 
-    while (ocifetchinto($cur, $row, OCI_ASSOC)) {
+    while ($row = oci_fetch_assoc($cur)) {
         $ret[] = $row;
     }
 

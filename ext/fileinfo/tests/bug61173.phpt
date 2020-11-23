@@ -3,7 +3,7 @@ Bug #61173: Unable to detect error from finfo constructor
 --SKIPIF--
 <?php
 if (!class_exists('finfo'))
-	die('skip no fileinfo extension');
+    die('skip no fileinfo extension');
 --FILE--
 <?php
 
@@ -13,5 +13,6 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+?>
 --EXPECT--
-finfo::finfo() expects at most 2 parameters, 3 given
+finfo::__construct() expects at most 2 arguments, 3 given

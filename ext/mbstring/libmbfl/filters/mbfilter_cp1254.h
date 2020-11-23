@@ -33,7 +33,6 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_cp1254;
-extern const struct mbfl_identify_vtbl vtbl_identify_cp1254;
 extern const struct mbfl_convert_vtbl vtbl_cp1254_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_cp1254;
 

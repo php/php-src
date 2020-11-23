@@ -3,7 +3,7 @@ IntlTimeZone::useDaylightTime: basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -16,10 +16,8 @@ var_dump($gmt->useDaylightTime());
 var_dump(intltz_use_daylight_time($lsb));
 var_dump(intltz_use_daylight_time($gmt));
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(false)
 bool(true)
-bool(false)
-==DONE==
+bool(false)

@@ -21,7 +21,7 @@ $files = array();
 $files['a/x'] = 'a';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 
 $tar->close();
@@ -39,4 +39,4 @@ echo file_get_contents($alias . '/a/x') . "\n";
 a
 a
 
-Warning: file_get_contents(phar://%srename_dir.phar.tar/a/x): failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.tar" in %srename_dir.php on line %d
+Warning: file_get_contents(phar://%srename_dir.phar.tar/a/x): Failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.tar" in %srename_dir.php on line %d

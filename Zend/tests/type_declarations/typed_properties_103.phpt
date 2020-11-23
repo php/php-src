@@ -15,7 +15,7 @@ function foo() {
 foo();
 ?>
 --EXPECTF--
-Notice: Undefined property: C::$a in %s on line %d
+Warning: Undefined property: C::$a in %s on line %d
 object(C)#1 (1) {
   ["a"]=>
   int(2)

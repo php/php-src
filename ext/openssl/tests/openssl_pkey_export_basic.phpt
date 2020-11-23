@@ -39,17 +39,19 @@ $tempname = tempnam(sys_get_temp_dir(), 'openssl_ec');
 var_dump(openssl_pkey_export_to_file($key, $tempname, NULL, $config_arg));
 $details = openssl_pkey_get_details(openssl_pkey_get_private('file://' . $tempname));
 var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
-var_dump(is_resource($key));
+var_dump($key instanceof OpenSSLAsymmetricKey);
 // Clean the temporary file
 @unlink($tempname);
 ?>
 --EXPECTF--
-resource(%d) of type (OpenSSL key)
+object(OpenSSLAsymmetricKey)#%d (0) {
+}
 bool(true)
 -----BEGIN EC PRIVATE KEY-----%a-----END EC PRIVATE KEY-----
 bool(true)
 bool(true)
-resource(%d) of type (OpenSSL key)
+object(OpenSSLAsymmetricKey)#%d (0) {
+}
 array(1) {
   ["d"]=>
   string(32) "%a"

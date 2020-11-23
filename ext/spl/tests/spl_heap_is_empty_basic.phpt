@@ -21,11 +21,8 @@ $heap->insert(1);
 var_dump($heap->isEmpty());
 $heap->extract();
 var_dump($heap->isEmpty());
-$heap->isEmpty('var');
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)
-
-Warning: SplHeap::isEmpty() expects exactly 0 parameters, 1 given in %s

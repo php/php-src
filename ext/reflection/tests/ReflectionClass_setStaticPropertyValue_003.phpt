@@ -11,7 +11,7 @@ class Test {
 $rc = new ReflectionClass('Test');
 
 try {
-	$rc->setStaticPropertyValue("y", "foo");
+    $rc->setStaticPropertyValue("y", "foo");
 } catch (TypeError $e) { echo $e->getMessage(), "\n"; }
 var_dump(Test::$y);
 
@@ -22,7 +22,7 @@ var_dump(Test::$y);
 Test::$x =& Test::$y;
 
 try {
-	$rc->setStaticPropertyValue("x", "foo");
+    $rc->setStaticPropertyValue("x", "foo");
 } catch (TypeError $e) { echo $e->getMessage(), "\n"; }
 var_dump(Test::$y);
 
@@ -31,7 +31,7 @@ var_dump(Test::$y);
 
 ?>
 --EXPECT--
-Typed property Test::$y must be int, string used
+Cannot assign string to property Test::$y of type int
 int(2)
 int(21)
 Cannot assign string to reference held by property Test::$y of type int

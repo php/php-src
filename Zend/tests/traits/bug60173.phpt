@@ -7,6 +7,7 @@ trait foo { }
 
 $rc = new ReflectionClass('foo');
 $rc->newInstance();
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot instantiate trait foo in %s:%d
 Stack trace:

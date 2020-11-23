@@ -4,13 +4,6 @@ Test disk_total_space() function : basic functionality
 disk_total_space
 --FILE--
 <?php
-/*
- *  Prototype: float disk_total_space( string $directory );
- *  Description: given a string containing a directory, this function will
- *               return the total number of bytes on the corresponding filesyatem
- *               or disk partition.
- */
-
 $file_path = __DIR__;
 
 echo "*** Testing with normal directory ***\n";
@@ -39,11 +32,11 @@ rmdir($file_path."/disk_total_space");
 ?>
 --EXPECTF--
 *** Testing with normal directory ***
-float(%d)
+float(%f)
 *** Testing with newly created directory ***
-float(%d)
+float(%f)
 
 Total Space after writing to a file
-float(%d)
+float(%f)
 
 -- Done --

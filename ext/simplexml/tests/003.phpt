@@ -29,7 +29,6 @@ EOF;
 var_dump(simplexml_load_string($xml));
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (2) {
   ["@attributes"]=>
@@ -66,4 +65,3 @@ object(SimpleXMLElement)#%d (2) {
     }
   }
 }
-===DONE===

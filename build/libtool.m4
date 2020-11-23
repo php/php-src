@@ -945,6 +945,7 @@ else
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef RTLD_GLOBAL
 #  define LT_DLGLOBAL		RTLD_GLOBAL

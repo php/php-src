@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
@@ -144,7 +142,7 @@ zend_bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *new
 		case WATCH_ON_STR:
 			return memcmp(oldPtr, newPtr, *(size_t *) oldPtr + XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len)) != 0;
 		case WATCH_ON_HASHDATA:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 	}
 	return 0;
 }
@@ -212,7 +210,7 @@ void phpdbg_print_watch_diff(phpdbg_watchtype type, zend_string *name, void *old
 			break;
 
 		case WATCH_ON_HASHDATA:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 	}
 
 	phpdbg_xml("</watchdata>");
@@ -1074,7 +1072,7 @@ void phpdbg_reenable_memory_watches(void) {
 	phpdbg_watchpoint_t *watch;
 
 	ZEND_HASH_FOREACH_NUM_KEY(PHPDBG_G(watchlist_mem), page) {
-		/* Disble writing again if there are any watchers on that page */
+		/* Disable writing again if there are any watchers on that page */
 		res = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), page + phpdbg_pagesize - 1);
 		if (res) {
 			watch = res->ptr;
@@ -1251,10 +1249,12 @@ static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key
 		if (element->child) {
 			element = element->child;
 		}
-		element->id = PHPDBG_G(watch_elements).nNextFreeElement;
-		zend_hash_index_add_ptr(&PHPDBG_G(watch_elements), element->id, element);
 
-		phpdbg_notice("watchadd", "index=\"%d\" variable=\"%.*s\"", "Added%s watchpoint #%d for %.*s", (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursive" : "", element->id, (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
+		/* work around missing API for extending an array with a new element, and getting its index */
+		zend_hash_next_index_insert_ptr(&PHPDBG_G(watch_elements), element);
+		element->id = PHPDBG_G(watch_elements).nNextFreeElement - 1;
+
+		phpdbg_notice("watchadd", "index=\"%d\" variable=\"%.*s\"", "Added%s watchpoint #%u for %.*s", (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursive" : "", element->id, (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
 	}
 
 	PHPDBG_G(watch_tmp) = NULL;
@@ -1385,11 +1385,11 @@ PHPDBG_WATCH(array) /* {{{ */
 
 
 void phpdbg_setup_watchpoints(void) {
-#if _SC_PAGE_SIZE
+#if defined(_SC_PAGE_SIZE)
 	phpdbg_pagesize = sysconf(_SC_PAGE_SIZE);
-#elif _SC_PAGESIZE
+#elif defined(_SC_PAGESIZE)
 	phpdbg_pagesize = sysconf(_SC_PAGESIZE);
-#elif _SC_NUTC_OS_PAGESIZE
+#elif defined(_SC_NUTC_OS_PAGESIZE)
 	phpdbg_pagesize = sysconf(_SC_NUTC_OS_PAGESIZE);
 #else
 	phpdbg_pagesize = 4096; /* common pagesize */

@@ -3,11 +3,11 @@ Bug #39775 ("Indirect modification ..." message is not shown)
 --FILE--
 <?php
 class test {
-	var $array = array();
-	function __get($var) {
-		$v =& $this->array;
-		return $this->array;
-	}
+    var $array = array();
+    function __get($var) {
+        $v =& $this->array;
+        return $this->array;
+    }
 }
 $t = new test;
 $t->anything[] = 'bar';

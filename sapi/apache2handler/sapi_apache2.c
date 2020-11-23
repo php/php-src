@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,6 +19,12 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "php_main.h"
 #include "php_ini.h"
 #include "php_variables.h"
@@ -55,7 +59,7 @@
 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php7-script"
+#define PHP_SCRIPT "php-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -239,7 +243,7 @@ php_apache_sapi_read_cookies(void)
 }
 
 static char *
-php_apache_sapi_getenv(char *name, size_t name_len)
+php_apache_sapi_getenv(const char *name, size_t name_len)
 {
 	php_struct *ctx = SG(server_context);
 	const char *env_var;
@@ -301,7 +305,7 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
+static void php_apache_sapi_log_message(const char *msg, int syslog_type_int)
 {
 	php_struct *ctx;
 	int aplog_type = APLOG_ERR;
@@ -350,7 +354,7 @@ static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
 	}
 }
 
-static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
+static void php_apache_sapi_log_message_ex(const char *msg, request_rec *r)
 {
 	if (r) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, msg, r->filename);
@@ -551,7 +555,7 @@ typedef struct {
 	HashTable config;
 } php_conf_rec;
 		zend_string *str;
-		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php7_module);
+		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php_module);
 
 		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
 			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
@@ -582,7 +586,7 @@ static int php_handler(request_rec *r)
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req);
 
-	conf = ap_get_module_config(r->per_dir_config, &php7_module);
+	conf = ap_get_module_config(r->per_dir_config, &php_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
 	ctx = SG(server_context);

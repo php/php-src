@@ -3,7 +3,7 @@ Bug #72663: Create an Unexpected Object and Don't Invoke __wakeup() in Deseriali
 --SKIPIF--
 <?php
 if (!extension_loaded("session")) {
-	die("skip");
+    die("skip");
 }
 ?>
 --FILE--
@@ -18,6 +18,8 @@ var_dump($_SESSION);
 DONE
 --EXPECTF--
 Notice: session_decode(): Unexpected end of serialized data in %sbug72663_2.php on line %d
+
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d
 array(0) {
 }
 DONE

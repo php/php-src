@@ -3,38 +3,40 @@ Bug #38802 (ignore_errors and max_redirects)
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
+<?php require 'server.inc'; http_server_skipif();
 --FILE--
 <?php
 require 'server.inc';
 
+function genResponses($server) {
+    $uri = 'http://' . stream_socket_get_name($server, false);
+    yield "data://text/plain,HTTP/1.1 302 Moved Temporarily\r\nLocation: $uri/foo/bar2\r\n\r\n1";
+    yield "data://text/plain,HTTP/1.1 301 Moved Permanently\r\nLocation: $uri/foo/bar3\r\n\r\n";
+    yield "data://text/plain,HTTP/1.1 302 Moved Temporarily\r\nLocation: $uri/foo/bar4\r\n\r\n3";
+    yield "data://text/plain,HTTP/1.1 200 OK\r\n\r\ndone.";
+}
+
 function do_test($context_options) {
 
-	$context = stream_context_create(array('http' => $context_options));
+    $context = stream_context_create(array('http' => $context_options));
 
-	$responses = array(
-		"data://text/plain,HTTP/1.0 302 Moved Temporarily\r\nLocation: http://127.0.0.1:12342/foo/bar2\r\n\r\n1",
-		"data://text/plain,HTTP/1.0 301 Moved Permanently\r\nLocation: http://127.0.0.1:12342/foo/bar3\r\n\r\n",
-		"data://text/plain,HTTP/1.0 302 Moved Temporarily\r\nLocation: http://127.0.0.1:12342/foo/bar4\r\n\r\n3",
-		"data://text/plain,HTTP/1.0 200 OK\r\n\r\ndone.",
-	);
+	$uri = null;
+    ['pid' => $pid, 'uri' => $uri ] = http_server('genResponses', $output);
 
-	$pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
+    $fd = fopen("$uri/foo/bar", 'rb', false, $context);
+    var_dump($fd);
 
-	$fd = fopen('http://127.0.0.1:12342/foo/bar', 'rb', false, $context);
-	var_dump($fd);
+    if ($fd) {
+        $meta_data = stream_get_meta_data($fd);
+        var_dump($meta_data['wrapper_data']);
 
-	if ($fd) {
-		$meta_data = stream_get_meta_data($fd);
-		var_dump($meta_data['wrapper_data']);
+        var_dump(stream_get_contents($fd));
+    }
 
-		var_dump(stream_get_contents($fd));
-	}
+    fseek($output, 0, SEEK_SET);
+    var_dump(stream_get_contents($output));
 
-	fseek($output, 0, SEEK_SET);
-	var_dump(stream_get_contents($output));
-
-	http_server_kill($pid);
+    http_server_kill($pid);
 }
 
 echo "-- Test: follow all redirections --\n";
@@ -71,66 +73,66 @@ do_test(array('max_redirects' => 2, 'ignore_errors' => 1), 2);
 resource(%d) of type (stream)
 array(7) {
   [0]=>
-  string(30) "HTTP/1.0 302 Moved Temporarily"
+  string(30) "HTTP/1.1 302 Moved Temporarily"
   [1]=>
-  string(41) "Location: http://127.0.0.1:12342/foo/bar2"
+  string(%d) "Location: http://%s:%d/foo/bar2"
   [2]=>
-  string(30) "HTTP/1.0 301 Moved Permanently"
+  string(30) "HTTP/1.1 301 Moved Permanently"
   [3]=>
-  string(41) "Location: http://127.0.0.1:12342/foo/bar3"
+  string(%d) "Location: http://%s:%d/foo/bar3"
   [4]=>
-  string(30) "HTTP/1.0 302 Moved Temporarily"
+  string(30) "HTTP/1.1 302 Moved Temporarily"
   [5]=>
-  string(41) "Location: http://127.0.0.1:12342/foo/bar4"
+  string(%d) "Location: http://%s:%d/foo/bar4"
   [6]=>
-  string(15) "HTTP/1.0 200 OK"
+  string(15) "HTTP/1.1 200 OK"
 }
 string(5) "done."
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
-GET /foo/bar2 HTTP/1.0
-Host: 127.0.0.1:12342
+GET /foo/bar2 HTTP/1.1
+Host: %s:%d
 Connection: close
 
-GET /foo/bar3 HTTP/1.0
-Host: 127.0.0.1:12342
+GET /foo/bar3 HTTP/1.1
+Host: %s:%d
 Connection: close
 
-GET /foo/bar4 HTTP/1.0
-Host: 127.0.0.1:12342
+GET /foo/bar4 HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
 -- Test: fail after 2 redirections --
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
+Warning: fopen(http://%s:%d/foo/bar): Failed to open stream: Redirection limit reached, aborting in %s
 bool(false)
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
-GET /foo/bar2 HTTP/1.0
-Host: 127.0.0.1:12342
+GET /foo/bar2 HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
 -- Test: fail at first redirection --
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
+Warning: fopen(http://%s:%d/foo/bar): Failed to open stream: Redirection limit reached, aborting in %s
 bool(false)
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
 -- Test: fail at first redirection (2) --
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
+Warning: fopen(http://%s:%d/foo/bar): Failed to open stream: Redirection limit reached, aborting in %s
 bool(false)
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
@@ -138,13 +140,13 @@ Connection: close
 resource(%d) of type (stream)
 array(2) {
   [0]=>
-  string(30) "HTTP/1.0 302 Moved Temporarily"
+  string(30) "HTTP/1.1 302 Moved Temporarily"
   [1]=>
-  string(41) "Location: http://127.0.0.1:12342/foo/bar2"
+  string(%d) "Location: http://%s:%d/foo/bar2"
 }
 string(1) "1"
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
@@ -152,13 +154,13 @@ Connection: close
 resource(%d) of type (stream)
 array(2) {
   [0]=>
-  string(30) "HTTP/1.0 302 Moved Temporarily"
+  string(30) "HTTP/1.1 302 Moved Temporarily"
   [1]=>
-  string(41) "Location: http://127.0.0.1:12342/foo/bar2"
+  string(%d) "Location: http://%s:%d/foo/bar2"
 }
 string(1) "1"
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
@@ -166,21 +168,21 @@ Connection: close
 resource(%d) of type (stream)
 array(4) {
   [0]=>
-  string(30) "HTTP/1.0 302 Moved Temporarily"
+  string(30) "HTTP/1.1 302 Moved Temporarily"
   [1]=>
-  string(41) "Location: http://127.0.0.1:12342/foo/bar2"
+  string(%d) "Location: http://%s:%d/foo/bar2"
   [2]=>
-  string(30) "HTTP/1.0 301 Moved Permanently"
+  string(30) "HTTP/1.1 301 Moved Permanently"
   [3]=>
-  string(41) "Location: http://127.0.0.1:12342/foo/bar3"
+  string(%d) "Location: http://%s:%d/foo/bar3"
 }
 string(0) ""
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
-GET /foo/bar2 HTTP/1.0
-Host: 127.0.0.1:12342
+GET /foo/bar2 HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "

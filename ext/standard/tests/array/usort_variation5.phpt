@@ -2,11 +2,6 @@
 Test usort() function : usage variations - string data
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays of string data to usort() to test how it is re-ordered
  */
@@ -73,7 +68,6 @@ echo "\n-- Sorting Heredoc String values --\n";
 var_dump( usort($heredoc_values, 'cmp_function') );
 var_dump($heredoc_values);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usort() : usage variation ***
 
@@ -140,4 +134,3 @@ array(4) {
   string(%d) "heredoc string	with!@# and 123
 Test this!!!"
 }
-===DONE===

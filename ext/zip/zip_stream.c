@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,7 +18,7 @@
 #   include "config.h"
 #endif
 #include "php.h"
-#if HAVE_ZIP
+#ifdef HAVE_ZIP
 
 #include "php_streams.h"
 #include "ext/standard/file.h"

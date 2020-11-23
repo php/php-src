@@ -2,7 +2,7 @@
 Bug #71952 (Corruption inside imageaffinematrixget)
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
+    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 ?>
 --FILE--
 <?php

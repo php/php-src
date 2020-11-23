@@ -25,7 +25,9 @@ int(0)
 int(0)
 string(%d) "%s"
 string(0) ""
-object(ZipArchive)#%d (5) {
+object(ZipArchive)#%d (6) {
+  ["lastId"]=>
+  int(-1)
   ["status"]=>
   int(0)
   ["statusSys"]=>

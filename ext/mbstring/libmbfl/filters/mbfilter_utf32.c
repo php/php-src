@@ -27,12 +27,10 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_utf32.h"
+
+static int mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf32_aliases[] = {"utf32", NULL};
 
@@ -40,7 +38,7 @@ const mbfl_encoding mbfl_encoding_utf32 = {
 	mbfl_no_encoding_utf32,
 	"UTF-32",
 	"UTF-32",
-	(const char *(*)[])&mbfl_encoding_utf32_aliases,
+	mbfl_encoding_utf32_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS4BE,
 	&vtbl_utf32_wchar,
@@ -73,54 +71,60 @@ const struct mbfl_convert_vtbl vtbl_utf32_wchar = {
 	mbfl_no_encoding_utf32,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf32_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_utf32_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf32 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf32,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf32be,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf32be_wchar = {
 	mbfl_no_encoding_utf32be,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf32be_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_utf32_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf32be = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf32be,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf32be,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf32le_wchar = {
 	mbfl_no_encoding_utf32le,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_utf32le_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_utf32_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf32le,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_utf32le,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -286,4 +290,19 @@ int mbfl_filt_conv_wchar_utf32le(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status & 0xF) {
+		/* Input string was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	filter->status = filter->cache = 0;
+	return 0;
 }

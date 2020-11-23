@@ -6,10 +6,10 @@ SOAP XML Schema 65: Attribute with default value
 <?php
 include "test_schema.inc";
 $schema = <<<EOF
-	<complexType name="testType">
-		<attribute name="str" type="string"/>
-		<attribute name="int" type="int" default="5"/>
-	</complexType>
+    <complexType name="testType">
+        <attribute name="str" type="string"/>
+        <attribute name="int" type="int" default="5"/>
+    </complexType>
 EOF;
 test_schema($schema,'type="tns:testType"',(object)array("str"=>"str"));
 echo "ok";

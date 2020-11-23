@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,12 +16,6 @@
 
 #ifndef PAGEINFO_H
 #define PAGEINFO_H
-
-PHP_FUNCTION(getmyuid);
-PHP_FUNCTION(getmygid);
-PHP_FUNCTION(getmypid);
-PHP_FUNCTION(getmyinode);
-PHP_FUNCTION(getlastmod);
 
 PHPAPI void php_statpage(void);
 PHPAPI time_t php_getlastmod(void);

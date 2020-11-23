@@ -48,7 +48,7 @@ Test::staticMethod();
 --EXPECTF--
 instance scoped, non-static, $this used
 
-Deprecated: Unbinding $this of closure is deprecated in %s on line %d
+Warning: Cannot unbind $this of closure using $this in %s on line %d
 instance scoped, static, $this used
 instance scoped, non-static, $this not used
 static scoped, non-static, $this used

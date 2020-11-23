@@ -27,4 +27,4 @@ $pdo = MySQLPDOTest::factory();
 $pdo->exec("DROP TABLE IF EXISTS bug79596");
 ?>
 --EXPECT--
-float(4,9)
+float(4.9)

@@ -3,7 +3,7 @@ IntlBreakIterator: clone handler
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -17,6 +17,7 @@ $bi->setText('foobar');
 $bi_clone = clone $bi;
 var_dump(get_class($bi), get_class($bi_clone));
 var_dump($bi == $bi_clone);
+?>
 --EXPECT--
 string(26) "IntlRuleBasedBreakIterator"
 string(26) "IntlRuleBasedBreakIterator"

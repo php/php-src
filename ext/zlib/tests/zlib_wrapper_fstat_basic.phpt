@@ -3,7 +3,7 @@ Test function fstat() on zlib wrapper
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -13,7 +13,5 @@ $h = gzopen($f, "r");
 var_dump(fstat($h));
 fclose($h);
 ?>
-===DONE===
 --EXPECT--
 bool(false)
-===DONE===

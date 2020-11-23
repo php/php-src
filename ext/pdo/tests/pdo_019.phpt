@@ -36,7 +36,7 @@ $stmt->bindColumn('txt', $txt);
 $stmt->execute();
 
 while($stmt->fetch(PDO::FETCH_BOUND)) {
-	var_dump(array($idx=>$txt));
+    var_dump(array($idx=>$txt));
 }
 
 ?>

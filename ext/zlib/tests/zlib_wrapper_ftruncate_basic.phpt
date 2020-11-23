@@ -3,7 +3,7 @@ Test function ftruncate() on zlib wrapper by calling it with its expected argume
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -23,9 +23,7 @@ fclose($h);
 unlink($f2);
 
 ?>
-===DONE===
 --EXPECTF--
 Warning: ftruncate(): Can't truncate this stream! in %s on line %d
 
 Warning: ftruncate(): Can't truncate this stream! in %s on line %d
-===DONE===

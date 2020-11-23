@@ -7,19 +7,24 @@ function val() {
     return 42;
 }
 
-$str = "foo";
 $var = 24;
-var_dump($str->foo =& $var);
-var_dump($str);
-var_dump($str->foo =& val());
-var_dump($str);
+$arr = [PHP_INT_MAX => "foo"];
+try {
+    var_dump($arr[] =& $var);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump(count($arr));
+try {
+    var_dump($arr[] =& val());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump(count($arr));
 
 ?>
---EXPECTF--
-Warning: Attempt to modify property 'foo' of non-object in %s on line %d
-NULL
-string(3) "foo"
-
-Warning: Attempt to modify property 'foo' of non-object in %s on line %d
-NULL
-string(3) "foo"
+--EXPECT--
+Cannot add element to the array as the next element is already occupied
+int(1)
+Cannot add element to the array as the next element is already occupied
+int(1)

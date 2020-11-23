@@ -21,6 +21,8 @@
 #include "zend_compile.h"
 #include "zend_vm.h"
 #include "zend_interfaces.h"
+#include "zend_attributes.h"
+#include "zend_system_id.h"
 
 #include "php.h"
 #ifdef ZEND_WIN32
@@ -32,6 +34,10 @@
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
+
+#if HAVE_JIT
+#include "jit/zend_jit.h"
+#endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -158,6 +164,25 @@ static int zend_file_cache_flock(int fd, int type)
 		} \
 	} while (0)
 
+#define SERIALIZE_ATTRIBUTES(attributes) do { \
+	if ((attributes) && !IS_SERIALIZED(attributes)) { \
+		HashTable *ht; \
+		SERIALIZE_PTR(attributes); \
+		ht = (attributes); \
+		UNSERIALIZE_PTR(ht); \
+		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_attribute); \
+	} \
+} while (0)
+
+#define UNSERIALIZE_ATTRIBUTES(attributes) do { \
+	if ((attributes) && !IS_UNSERIALIZED(attributes)) { \
+		HashTable *ht; \
+		UNSERIALIZE_PTR(attributes); \
+		ht = (attributes); \
+		zend_file_cache_unserialize_hash(ht, script, buf, zend_file_cache_unserialize_attribute, NULL); \
+	} \
+} while (0)
+
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
@@ -256,7 +281,7 @@ static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
 			memcpy(ret, str, size);
 			/* String wasn't interned but we will use it as interned anyway */
 			GC_SET_REFCOUNT(ret, 1);
-			GC_TYPE_INFO(ret) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERSISTENT | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
+			GC_TYPE_INFO(ret) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERSISTENT | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
 		}
 	} else {
 		ret = str;
@@ -375,26 +400,48 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 	}
 }
 
-/* Adjust serialized pointer to conform to zend_type assumptions:
- * Pointer must have low two bits unset and be larger than 0x400. */
-#define ZEND_TYPE_PTR_ENCODE(ptr) \
-	(void*)(((uintptr_t)ptr << 2) + 0x400)
-#define ZEND_TYPE_PTR_DECODE(ptr) \
-	(void*)(((uintptr_t)ptr - 0x400) >> 2)
+static void zend_file_cache_serialize_attribute(zval                     *zv,
+                                                zend_persistent_script   *script,
+                                                zend_file_cache_metainfo *info,
+                                                void                     *buf)
+{
+	zend_attribute *attr = Z_PTR_P(zv);
+	uint32_t i;
+
+	SERIALIZE_PTR(Z_PTR_P(zv));
+	attr = Z_PTR_P(zv);
+	UNSERIALIZE_PTR(attr);
+
+	SERIALIZE_STR(attr->name);
+	SERIALIZE_STR(attr->lcname);
+
+	for (i = 0; i < attr->argc; i++) {
+		SERIALIZE_STR(attr->args[i].name);
+		zend_file_cache_serialize_zval(&attr->args[i].value, script, info, buf);
+	}
+}
 
 static void zend_file_cache_serialize_type(
 		zend_type *type, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
 {
-	if (ZEND_TYPE_IS_NAME(*type)) {
-		zend_string *name = ZEND_TYPE_NAME(*type);
-		SERIALIZE_STR(name);
-		name = ZEND_TYPE_PTR_ENCODE(name);
-		*type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(*type));
-	} else if (ZEND_TYPE_IS_CE(*type)) {
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		zend_type_list *list = ZEND_TYPE_LIST(*type);
+		SERIALIZE_PTR(list);
+		ZEND_TYPE_SET_PTR(*type, list);
+		UNSERIALIZE_PTR(list);
+
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+			zend_file_cache_serialize_type(list_type, script, info, buf);
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string *type_name = ZEND_TYPE_NAME(*type);
+		SERIALIZE_STR(type_name);
+		ZEND_TYPE_SET_PTR(*type, type_name);
+	} else if (ZEND_TYPE_HAS_CE(*type)) {
 		zend_class_entry *ce = ZEND_TYPE_CE(*type);
 		SERIALIZE_PTR(ce);
-		ce = ZEND_TYPE_PTR_ENCODE(ce);
-		*type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(*type));
+		ZEND_TYPE_SET_PTR(*type, ce);
 	}
 }
 
@@ -437,6 +484,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			SERIALIZE_PTR(op_array->live_range);
 			SERIALIZE_PTR(op_array->scope);
 			SERIALIZE_STR(op_array->doc_comment);
+			SERIALIZE_ATTRIBUTES(op_array->attributes);
 			SERIALIZE_PTR(op_array->try_catch_array);
 			SERIALIZE_PTR(op_array->prototype);
 			return;
@@ -503,6 +551,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
+				case ZEND_JMP_NULL:
 					SERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_CATCH:
@@ -514,6 +563,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_FE_FETCH_RW:
 				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
+				case ZEND_MATCH:
 					/* relative extended_value don't have to be changed */
 					break;
 			}
@@ -563,6 +613,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		SERIALIZE_PTR(op_array->live_range);
 		SERIALIZE_PTR(op_array->scope);
 		SERIALIZE_STR(op_array->doc_comment);
+		SERIALIZE_ATTRIBUTES(op_array->attributes);
 		SERIALIZE_PTR(op_array->try_catch_array);
 		SERIALIZE_PTR(op_array->prototype);
 	}
@@ -600,8 +651,9 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 			if (prop->doc_comment) {
 				SERIALIZE_STR(prop->doc_comment);
 			}
+			SERIALIZE_ATTRIBUTES(prop->attributes);
+			zend_file_cache_serialize_type(&prop->type, script, info, buf);
 		}
-		zend_file_cache_serialize_type(&prop->type, script, info, buf);
 	}
 }
 
@@ -626,6 +678,8 @@ static void zend_file_cache_serialize_class_constant(zval                     *z
 			if (c->doc_comment) {
 				SERIALIZE_STR(c->doc_comment);
 			}
+
+			SERIALIZE_ATTRIBUTES(c->attributes);
 		}
 	}
 }
@@ -678,6 +732,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	zend_file_cache_serialize_hash(&ce->constants_table, script, info, buf, zend_file_cache_serialize_class_constant);
 	SERIALIZE_STR(ce->info.user.filename);
 	SERIALIZE_STR(ce->info.user.doc_comment);
+	SERIALIZE_ATTRIBUTES(ce->attributes);
 	zend_file_cache_serialize_hash(&ce->properties_info, script, info, buf, zend_file_cache_serialize_prop_info);
 
 	if (ce->properties_info_table) {
@@ -782,8 +837,8 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_PTR(ce->__get);
 	SERIALIZE_PTR(ce->__set);
 	SERIALIZE_PTR(ce->__call);
-	SERIALIZE_PTR(ce->serialize_func);
-	SERIALIZE_PTR(ce->unserialize_func);
+	SERIALIZE_PTR(ce->__serialize);
+	SERIALIZE_PTR(ce->__unserialize);
 	SERIALIZE_PTR(ce->__isset);
 	SERIALIZE_PTR(ce->__unset);
 	SERIALIZE_PTR(ce->__tostring);
@@ -803,6 +858,26 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 }
 
+static void zend_file_cache_serialize_warnings(
+		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (script->warnings) {
+		zend_recorded_warning **warnings;
+		SERIALIZE_PTR(script->warnings);
+		warnings = script->warnings;
+		UNSERIALIZE_PTR(warnings);
+
+		for (uint32_t i = 0; i < script->num_warnings; i++) {
+			zend_recorded_warning *warning;
+			SERIALIZE_PTR(warnings[i]);
+			warning = warnings[i];
+			UNSERIALIZE_PTR(warning);
+			SERIALIZE_STR(warning->error_filename);
+			SERIALIZE_STR(warning->error_message);
+		}
+	}
+}
+
 static void zend_file_cache_serialize(zend_persistent_script   *script,
                                       zend_file_cache_metainfo *info,
                                       void                     *buf)
@@ -810,7 +885,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_persistent_script *new_script;
 
 	memcpy(info->magic, "OPCACHE", 8);
-	memcpy(info->system_id, accel_system_id, 32);
+	memcpy(info->system_id, zend_system_id, 32);
 	info->mem_size = script->size;
 	info->str_size = 0;
 	info->script_offset = (char*)script - (char*)script->mem;
@@ -824,6 +899,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_file_cache_serialize_hash(&new_script->script.class_table, script, info, buf, zend_file_cache_serialize_class);
 	zend_file_cache_serialize_hash(&new_script->script.function_table, script, info, buf, zend_file_cache_serialize_func);
 	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
+	zend_file_cache_serialize_warnings(new_script, info, buf);
 
 	SERIALIZE_PTR(new_script->arena_mem);
 	new_script->mem = NULL;
@@ -839,7 +915,7 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	filename = emalloc(len + 33 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '/';
-	memcpy(filename + len + 1, accel_system_id, 32);
+	memcpy(filename + len + 1, zend_system_id, 32);
 	memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
 	memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
 #else
@@ -853,7 +929,7 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	len += 1 + 32;
 	filename[len] = '\\';
 
-	memcpy(filename + len + 1, accel_system_id, 32);
+	memcpy(filename + len + 1, zend_system_id, 32);
 
 	if (ZSTR_LEN(script_path) >= 7 && ':' == ZSTR_VAL(script_path)[4] && '/' == ZSTR_VAL(script_path)[5]  && '/' == ZSTR_VAL(script_path)[6]) {
 		/* phar:// or file:// */
@@ -893,6 +969,13 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	struct iovec vec[3];
 #endif
 	void *mem, *buf;
+
+#ifdef HAVE_JIT
+	/* FIXME: dump jited codes out to file cache? */
+	if (JIT_G(on)) {
+		return FAILURE;
+	}
+#endif
 
 	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
@@ -1093,19 +1176,43 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 	}
 }
 
+static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_script *script, void *buf)
+{
+	zend_attribute *attr;
+	uint32_t i;
+
+	UNSERIALIZE_PTR(Z_PTR_P(zv));
+	attr = Z_PTR_P(zv);
+
+	UNSERIALIZE_STR(attr->name);
+	UNSERIALIZE_STR(attr->lcname);
+
+	for (i = 0; i < attr->argc; i++) {
+		UNSERIALIZE_STR(attr->args[i].name);
+		zend_file_cache_unserialize_zval(&attr->args[i].value, script, buf);
+	}
+}
+
 static void zend_file_cache_unserialize_type(
 		zend_type *type, zend_persistent_script *script, void *buf)
 {
-	if (ZEND_TYPE_IS_NAME(*type)) {
-		zend_string *name = ZEND_TYPE_NAME(*type);
-		name = ZEND_TYPE_PTR_DECODE(name);
-		UNSERIALIZE_STR(name);
-		*type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(*type));
-	} else if (ZEND_TYPE_IS_CE(*type)) {
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		zend_type_list *list = ZEND_TYPE_LIST(*type);
+		UNSERIALIZE_PTR(list);
+		ZEND_TYPE_SET_PTR(*type, list);
+
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+			zend_file_cache_unserialize_type(list_type, script, buf);
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string *type_name = ZEND_TYPE_NAME(*type);
+		UNSERIALIZE_STR(type_name);
+		ZEND_TYPE_SET_PTR(*type, type_name);
+	} else if (ZEND_TYPE_HAS_CE(*type)) {
 		zend_class_entry *ce = ZEND_TYPE_CE(*type);
-		ce = ZEND_TYPE_PTR_DECODE(ce);
 		UNSERIALIZE_PTR(ce);
-		*type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(*type));
+		ZEND_TYPE_SET_PTR(*type, ce);
 	}
 }
 
@@ -1159,6 +1266,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_PTR(op_array->live_range);
 		UNSERIALIZE_PTR(op_array->scope);
 		UNSERIALIZE_STR(op_array->doc_comment);
+		UNSERIALIZE_ATTRIBUTES(op_array->attributes);
 		UNSERIALIZE_PTR(op_array->try_catch_array);
 		UNSERIALIZE_PTR(op_array->prototype);
 		return;
@@ -1216,6 +1324,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
+				case ZEND_JMP_NULL:
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_CATCH:
@@ -1274,6 +1383,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_PTR(op_array->live_range);
 		UNSERIALIZE_PTR(op_array->scope);
 		UNSERIALIZE_STR(op_array->doc_comment);
+		UNSERIALIZE_ATTRIBUTES(op_array->attributes);
 		UNSERIALIZE_PTR(op_array->try_catch_array);
 		UNSERIALIZE_PTR(op_array->prototype);
 	}
@@ -1307,8 +1417,9 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 			if (prop->doc_comment) {
 				UNSERIALIZE_STR(prop->doc_comment);
 			}
+			UNSERIALIZE_ATTRIBUTES(prop->attributes);
+			zend_file_cache_unserialize_type(&prop->type, script, buf);
 		}
-		zend_file_cache_unserialize_type(&prop->type, script, buf);
 	}
 }
 
@@ -1331,6 +1442,7 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 			if (c->doc_comment) {
 				UNSERIALIZE_STR(c->doc_comment);
 			}
+			UNSERIALIZE_ATTRIBUTES(c->attributes);
 		}
 	}
 }
@@ -1379,6 +1491,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 			script, buf, zend_file_cache_unserialize_class_constant, NULL);
 	UNSERIALIZE_STR(ce->info.user.filename);
 	UNSERIALIZE_STR(ce->info.user.doc_comment);
+	UNSERIALIZE_ATTRIBUTES(ce->attributes);
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, NULL);
 
@@ -1469,8 +1582,8 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->__get);
 	UNSERIALIZE_PTR(ce->__set);
 	UNSERIALIZE_PTR(ce->__call);
-	UNSERIALIZE_PTR(ce->serialize_func);
-	UNSERIALIZE_PTR(ce->unserialize_func);
+	UNSERIALIZE_PTR(ce->__serialize);
+	UNSERIALIZE_PTR(ce->__unserialize);
 	UNSERIALIZE_PTR(ce->__isset);
 	UNSERIALIZE_PTR(ce->__unset);
 	UNSERIALIZE_PTR(ce->__tostring);
@@ -1499,6 +1612,18 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	}
 }
 
+static void zend_file_cache_unserialize_warnings(zend_persistent_script *script, void *buf)
+{
+	if (script->warnings) {
+		UNSERIALIZE_PTR(script->warnings);
+		for (uint32_t i = 0; i < script->num_warnings; i++) {
+			UNSERIALIZE_PTR(script->warnings[i]);
+			UNSERIALIZE_STR(script->warnings[i]->error_filename);
+			UNSERIALIZE_STR(script->warnings[i]->error_message);
+		}
+	}
+}
+
 static void zend_file_cache_unserialize(zend_persistent_script  *script,
                                         void                    *buf)
 {
@@ -1511,6 +1636,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	zend_file_cache_unserialize_hash(&script->script.function_table,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
+	zend_file_cache_unserialize_warnings(script, buf);
 
 	UNSERIALIZE_PTR(script->arena_mem);
 }
@@ -1563,7 +1689,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		efree(filename);
 		return NULL;
 	}
-	if (memcmp(info.system_id, accel_system_id, 32) != 0) {
+	if (memcmp(info.system_id, zend_system_id, 32) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);

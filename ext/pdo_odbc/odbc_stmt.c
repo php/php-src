@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
@@ -567,7 +565,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	RETCODE rc;
 	SWORD	colnamelen;
 	SQLULEN	colsize;
-	SQLLEN displaysize;
+	SQLLEN displaysize = 0;
 
 	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,
 			sizeof(S->cols[colno].colname)-1, &colnamelen,

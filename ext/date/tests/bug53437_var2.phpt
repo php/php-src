@@ -11,7 +11,6 @@ $di1 = unserialize($s);
 var_dump($di0, $di1);
 
 ?>
-==DONE==
 --EXPECT--
 object(DateInterval)#1 (16) {
   ["y"]=>
@@ -81,4 +80,3 @@ object(DateInterval)#2 (16) {
   ["have_special_relative"]=>
   int(0)
 }
-==DONE==

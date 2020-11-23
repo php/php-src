@@ -2,11 +2,6 @@
 Test htmlspecialchars_decode() function : usage variations - double quoted strings for 'string' argument
 --FILE--
 <?php
-/* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters
- * Source code: ext/standard/html.c
-*/
-
 /*
  * testing htmlspecialchars_decode() for various double quoted strings as argument for $string
 */

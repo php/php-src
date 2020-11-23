@@ -12,10 +12,26 @@ include 'config.inc';
 $db = pg_connect($conn_str);
 $result = pg_query("select 'a' union select 'b'");
 
-var_dump(pg_fetch_array($result, -1));
-var_dump(pg_fetch_assoc($result, -1));
-var_dump(pg_fetch_object($result, -1));
-var_dump(pg_fetch_row($result, -1));
+try {
+    var_dump(pg_fetch_array($result, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(pg_fetch_assoc($result, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(pg_fetch_object($result, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(pg_fetch_row($result, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(pg_fetch_array($result, 0));
 var_dump(pg_fetch_assoc($result, 0));
@@ -25,18 +41,11 @@ var_dump(pg_fetch_row($result, 0));
 pg_close($db);
 
 ?>
---EXPECTF--
-Warning: pg_fetch_array(): The row parameter must be greater or equal to zero in %sbug60244.php on line %d
-bool(false)
-
-Warning: pg_fetch_assoc(): The row parameter must be greater or equal to zero in %sbug60244.php on line %d
-bool(false)
-
-Warning: pg_fetch_object(): The row parameter must be greater or equal to zero in %sbug60244.php on line %d
-bool(false)
-
-Warning: pg_fetch_row(): The row parameter must be greater or equal to zero in %sbug60244.php on line %d
-bool(false)
+--EXPECT--
+pg_fetch_array(): Argument #2 ($row) must be greater than or equal to 0
+pg_fetch_assoc(): Argument #2 ($row) must be greater than or equal to 0
+pg_fetch_object(): Argument #2 ($row) must be greater than or equal to 0
+pg_fetch_row(): Argument #2 ($row) must be greater than or equal to 0
 array(2) {
   [0]=>
   string(1) "a"

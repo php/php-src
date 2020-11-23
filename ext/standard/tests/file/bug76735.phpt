@@ -5,4 +5,4 @@ Bug #76735 (Incorrect message in fopen on invalid mode)
 fopen(__FILE__, 'Q');
 ?>
 --EXPECTF--
-Warning: fopen(%s): failed to open stream: `Q' is not a valid mode for fopen in %s on line %d
+Warning: fopen(%s): Failed to open stream: `Q' is not a valid mode for fopen in %s on line %d

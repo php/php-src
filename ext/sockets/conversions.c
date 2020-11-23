@@ -17,7 +17,7 @@
 # include <sys/ioctl.h>
 # include <net/if.h>
 #else
-# include <win32/php_stdint.h>
+# include <stdint.h>
 #endif
 
 #include <limits.h>
@@ -36,16 +36,6 @@ struct _WSAMSG {
     WSABUF           Control;			//void *msg_control, size_t msg_controllen
     DWORD            dwFlags;			//int msg_flags
 }
-struct __WSABUF {
-  u_long			len;				//size_t iov_len (2nd member)
-  char FAR			*buf;				//void *iov_base (1st member)
-}
-struct _WSACMSGHDR {
-  UINT        cmsg_len;					//socklen_t cmsg_len
-  INT         cmsg_level;				//int       cmsg_level
-  INT         cmsg_type;				//int       cmsg_type;
-  followed by UCHAR cmsg_data[]
-}
 */
 # define msg_name		name
 # define msg_namelen	namelen
@@ -57,7 +47,6 @@ struct _WSACMSGHDR {
 # define iov_base		buf
 # define iov_len		len
 
-# define cmsghdr		_WSACMSGHDR
 # ifdef CMSG_DATA
 #  undef CMSG_DATA
 # endif
@@ -1352,29 +1341,32 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 {
 	int *iarr = args[0];
 
-	if (Z_TYPE_P(elem) == IS_RESOURCE) {
-		php_stream *stream;
-		php_socket *sock;
-
-		sock = (php_socket *)zend_fetch_resource_ex(elem, NULL, php_sockets_le_socket());
-		if (sock) {
-			iarr[i] = sock->bsd_socket;
+	if (Z_TYPE_P(elem) == IS_OBJECT && Z_OBJCE_P(elem) == socket_ce) {
+		php_socket *sock = Z_SOCKET_P(elem);
+		if (IS_INVALID_SOCKET(sock)) {
+			do_from_zval_err(ctx, "socket is already closed");
 			return;
 		}
+
+		iarr[i] = sock->bsd_socket;
+		return;
+	}
+
+	if (Z_TYPE_P(elem) == IS_RESOURCE) {
+		php_stream *stream;
 
 		stream = (php_stream *)zend_fetch_resource2_ex(elem, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
-			do_from_zval_err(ctx, "resource is not a stream or a socket");
+			do_from_zval_err(ctx, "resource is not a stream");
 			return;
 		}
 
-		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i - 1],
-				REPORT_ERRORS) == FAILURE) {
+		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i - 1], REPORT_ERRORS) == FAILURE) {
 			do_from_zval_err(ctx, "cast stream to file descriptor failed");
 			return;
 		}
 	} else {
-		do_from_zval_err(ctx, "expected a resource variable");
+		do_from_zval_err(ctx, "expected a Socket object or a stream resource");
 	}
 }
 void from_zval_write_fd_array(const zval *arr, char *int_arr, ser_context *ctx)
@@ -1425,8 +1417,10 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 			return;
 		}
 		if (S_ISSOCK(statbuf.st_mode)) {
-			php_socket *sock = socket_import_file_descriptor(fd);
-			ZVAL_RES(&elem, zend_register_resource(sock, php_sockets_le_socket()));
+			object_init_ex(&elem, socket_ce);
+			php_socket *sock = Z_SOCKET_P(&elem);
+
+			socket_import_file_descriptor(fd, sock);
 		} else {
 			php_stream *stream = php_stream_fopen_from_fd(fd, "rw", NULL);
 			php_stream_to_zval(stream, &elem);

@@ -2,7 +2,6 @@
 proc_open without bypass_shell subprocess parameter passing
 --SKIPIF--
 <?php
-if (php_sapi_name() != "cli") die('skip CLI only test');
 if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 ?>
 --FILE--
@@ -14,21 +13,21 @@ $f = __DIR__ . DIRECTORY_SEPARATOR . "proc_only_mb1.php";
 file_put_contents($f,'<?php var_dump($argv); ?>');
 
 $ds = array(
-		0 => array("pipe", "r"),
-		1 => array("pipe", "w"),
-		2 => array("pipe", "w")
-		);
+        0 => array("pipe", "r"),
+        1 => array("pipe", "w"),
+        2 => array("pipe", "w")
+        );
 
 $p = proc_open(
-		"$php -n $f テストマルチバイト・パス füße карамба",
-		$ds,
-		$pipes
-		);
+        "$php -n $f テストマルチバイト・パス füße карамба",
+        $ds,
+        $pipes
+        );
 
 $out = "";
 
 while (!feof($pipes[1])) {
-	$out .= fread($pipes[1], 1024);
+    $out .= fread($pipes[1], 1024);
 }
 
 proc_close($p);
@@ -36,7 +35,6 @@ proc_close($p);
 echo $out;
 
 ?>
-==DONE==
 --EXPECTF--
 array(4) {
   [0]=>
@@ -48,4 +46,3 @@ array(4) {
   [3]=>
   string(14) "карамба"
 }
-==DONE==

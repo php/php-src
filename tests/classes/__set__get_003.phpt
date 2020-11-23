@@ -3,8 +3,8 @@ ZE2 __set() signature check
 --FILE--
 <?php
 class Test {
-	function __set() {
-	}
+    function __set() {
+    }
 }
 
 ?>

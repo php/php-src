@@ -12,7 +12,7 @@ $tmp_link = __FILE__.".tmp.link";
 $tmp_link2 = __FILE__.".tmp.link2";
 
 if (symlink(__DIR__."/there_is_no_such_file", $tmp_link)) {
-	rename($tmp_link, $tmp_link2);
+    rename($tmp_link, $tmp_link2);
 }
 
 clearstatcache();

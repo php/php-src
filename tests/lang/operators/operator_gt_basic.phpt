@@ -8,16 +8,16 @@ $valid_false = array(0, "", 0.0, array(), NULL);
 $int1 = 679;
 $int2 = -67835;
 $valid_int1 = array("678", "678abc", " 678", "678  ", 678.0, 6.789E2, "+678", +678);
-$valid_int2 = array("-67836", "-67836abc", " -67836", "-67836  ", -67835.0001, -6.78351E4);
+$valid_int2 = array("-67836", " -67836", -67835.0001, -6.78351E4, "-67836  ");
 $invalid_int1 = array(679, "679");
-$invalid_int2 = array(-67835, "-67835");
+$invalid_int2 = array(-67835, "-67835", "-67836abc");
 
 $float1 = 57385.45835;
 $float2 = -67345.76567;
 $valid_float1 = array("57385.45834",  "57385.45834aaa", "  57385.45834", 5.738545834e4);
-$valid_float2 = array("-67345.76568", "-67345.76568aaa", "  -67345.76568", -6.734576568E4);
+$valid_float2 = array("-67345.76568", "  -67345.76568", -6.734576568E4);
 $invalid_float1 = array(57385.45835, 5.738545835e4);
-$invalid_float2 = array(-67345.76567, -6.734576567E4);
+$invalid_float2 = array(-67345.76567, -6.734576567E4, "-67345.76568aaa");
 
 
 $toCompare = array(
@@ -59,7 +59,5 @@ if ($failed == false) {
    echo "Test Passed\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Test Passed
-===DONE===

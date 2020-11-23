@@ -2,11 +2,6 @@
 Test array_merge() function : usage variations - Diff. data types as array keys
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass an array with different data types as keys to test how array_merge
  * adds it onto an existing array

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,7 +28,7 @@
 
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
-#if HAVE_EXPLICIT_MEMSET
+#ifdef HAVE_EXPLICIT_MEMSET
     explicit_memset(dst, 0, siz);
 #elif defined(PHP_WIN32)
 	RtlSecureZeroMemory(dst, siz);

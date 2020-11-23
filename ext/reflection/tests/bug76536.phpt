@@ -2,7 +2,7 @@
 Bug #76536 (PHP crashes with core dump when throwing exception in error handler)
 --FILE--
 <?php
-class SomeConstants {const SOME_CONSTANT = SOME_NONSENSE;}
+class SomeConstants {const SOME_CONSTANT = "0foo" % 5; }
 
 function handleError() {throw new ErrorException();}
 

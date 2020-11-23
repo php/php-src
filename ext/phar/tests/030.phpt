@@ -32,7 +32,6 @@ $p['.phar/test'];
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -45,4 +44,3 @@ This is b/d
 This is e
 bool(false)
 Cannot directly get any files or directories in magic ".phar" directory
-===DONE===

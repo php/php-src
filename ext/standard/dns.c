@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -120,18 +118,15 @@ static zend_string *php_gethostbyaddr(char *ip);
 static zend_string *php_gethostbyname(char *name);
 
 #ifdef HAVE_GETHOSTNAME
-/* {{{ proto string gethostname()
-   Get the host name of the current machine */
+/* {{{ Get the host name of the current machine */
 PHP_FUNCTION(gethostname)
 {
 	char buf[HOST_NAME_MAX + 1];
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (gethostname(buf, sizeof(buf))) {
-		php_error_docref(NULL, E_WARNING, "unable to fetch host [%d]: %s", errno, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to fetch host [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -144,8 +139,7 @@ PHP_FUNCTION(gethostname)
  we can have a dns.c, dns_unix.c and dns_win32.c instead of a messy dns.c full of #ifdef
 */
 
-/* {{{ proto string gethostbyaddr(string ip_address)
-   Get the Internet host name corresponding to a given IP address */
+/* {{{ Get the Internet host name corresponding to a given IP address */
 PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
@@ -206,8 +200,7 @@ static zend_string *php_gethostbyaddr(char *ip)
 }
 /* }}} */
 
-/* {{{ proto string gethostbyname(string hostname)
-   Get the IP address corresponding to a given Internet host name */
+/* {{{ Get the IP address corresponding to a given Internet host name */
 PHP_FUNCTION(gethostbyname)
 {
 	char *hostname;
@@ -217,9 +210,9 @@ PHP_FUNCTION(gethostbyname)
 		Z_PARAM_STRING(hostname, hostname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(hostname_len > MAXFQDNLEN) {
+	if (hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
+		php_error_docref(NULL, E_WARNING, "Host name cannot be longer than %d characters", MAXFQDNLEN);
 		RETURN_STRINGL(hostname, hostname_len);
 	}
 
@@ -227,8 +220,7 @@ PHP_FUNCTION(gethostbyname)
 }
 /* }}} */
 
-/* {{{ proto array gethostbynamel(string hostname)
-   Return a list of IP addresses that a given hostname resolves to. */
+/* {{{ Return a list of IP addresses that a given hostname resolves to. */
 PHP_FUNCTION(gethostbynamel)
 {
 	char *hostname;
@@ -241,9 +233,9 @@ PHP_FUNCTION(gethostbynamel)
 		Z_PARAM_STRING(hostname, hostname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(hostname_len > MAXFQDNLEN) {
+	if (hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
+		php_error_docref(NULL, E_WARNING, "Host name cannot be longer than %d characters", MAXFQDNLEN);
 		RETURN_FALSE;
 	}
 
@@ -358,8 +350,7 @@ static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
 #define php_dns_free_res(__res__)
 #endif
 
-/* {{{ proto bool dns_check_record(string host [, string type])
-   Check DNS records corresponding to a given Internet host name or IP address */
+/* {{{ Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(dns_check_record)
 {
 	HEADER *hp;
@@ -383,8 +374,8 @@ PHP_FUNCTION(dns_check_record)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Host cannot be empty");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (rectype) {
@@ -402,8 +393,8 @@ PHP_FUNCTION(dns_check_record)
 		else if (!strcasecmp("NAPTR", rectype)) type = DNS_T_NAPTR;
 		else if (!strcasecmp("A6",    rectype)) type = DNS_T_A6;
 		else {
-			php_error_docref(NULL, E_WARNING, "Type '%s' not supported", rectype);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a valid DNS record type");
+			RETURN_THROWS();
 		}
 	}
 
@@ -799,8 +790,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 }
 /* }}} */
 
-/* {{{ proto array|false dns_get_record(string hostname [, int type[, array &authns[, array &addtl[, bool raw]]]])
-   Get any Resource Record corresponding to a given Internet host name */
+/* {{{ Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
@@ -835,26 +825,25 @@ PHP_FUNCTION(dns_get_record)
 	if (authns) {
 		authns = zend_try_array_init(authns);
 		if (!authns) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 	if (addtl) {
 		addtl = zend_try_array_init(addtl);
 		if (!addtl) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
 	if (!raw) {
 		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
-			php_error_docref(NULL, E_WARNING, "Type '" ZEND_LONG_FMT "' not supported", type_param);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be a DNS_* constant");
+			RETURN_THROWS();
 		}
 	} else {
 		if ((type_param < 1) || (type_param > 0xFFFF)) {
-			php_error_docref(NULL, E_WARNING,
-				"Numeric DNS record type must be between 1 and 65535, '" ZEND_LONG_FMT "' given", type_param);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be between 1 and 65535 when argument #5 ($raw) is true");
+			RETURN_THROWS();
 		}
 	}
 
@@ -866,7 +855,7 @@ PHP_FUNCTION(dns_get_record)
 	 *   store_results is used to skip storing the results retrieved in step
 	 *   NUMTYPES+1 when results were already fetched.
 	 * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY. (step NUMTYPES+1 )
-	 * - In case of raw mode, we query only the requestd type instead of looping type by type
+	 * - In case of raw mode, we query only the requested type instead of looping type by type
 	 *   before going with the additional info stuff.
 	 */
 
@@ -1039,8 +1028,7 @@ PHP_FUNCTION(dns_get_record)
 }
 /* }}} */
 
-/* {{{ proto bool dns_get_mx(string hostname, array mxhosts [, array weight])
-   Get MX records corresponding to a given Internet host name */
+/* {{{ Get MX records corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_mx)
 {
 	char *hostname;
@@ -1071,13 +1059,13 @@ PHP_FUNCTION(dns_get_mx)
 
 	mx_list = zend_try_array_init(mx_list);
 	if (!mx_list) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (weight_list) {
 		weight_list = zend_try_array_init(weight_list);
 		if (!weight_list) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

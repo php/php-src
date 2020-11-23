@@ -23,8 +23,6 @@ $xml->pos["act_idx"] = $val;
 var_dump($val);
 
 ?>
-===DONE===
 --EXPECT--
 int(1)
 int(1)
-===DONE===

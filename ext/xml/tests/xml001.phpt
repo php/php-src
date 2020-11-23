@@ -22,54 +22,54 @@ if (!($fp = @fopen("xmltest.xml", "r"))) {
 }
 
 while ($data = fread($fp, 4096)) {
-	if (!xml_parse($xml_parser, $data, feof($fp))) {
-		die(sprintf("XML error: %s at line %d\n",
-		xml_error_string(xml_get_error_code($xml_parser)),
-		xml_get_current_line_number($xml_parser)));
-	}
+    if (!xml_parse($xml_parser, $data, feof($fp))) {
+        die(sprintf("XML error: %s at line %d\n",
+        xml_error_string(xml_get_error_code($xml_parser)),
+        xml_get_current_line_number($xml_parser)));
+    }
 }
 print "parse complete\n";
 xml_parser_free($xml_parser);
 
 function startElement($parser, $name, $attribs)
 {
-	print '{'.$name;
-	if (sizeof($attribs)) {
+    print '{'.$name;
+    if (sizeof($attribs)) {
         foreach ($attribs as $k => $v) {
-			print " $k=\"$v\"";
-		}
-	}
-	print '}';
+            print " $k=\"$v\"";
+        }
+    }
+    print '}';
 }
 
 function endElement($parser, $name)
 {
-	print '{/'.$name.'}';
+    print '{/'.$name.'}';
 }
 
 function characterData($parser, $data)
 {
-	print '{CDATA['.$data.']}';
+    print '{CDATA['.$data.']}';
 }
 
 function PIHandler($parser, $target, $data)
 {
-	print '{PI['.$target.','.$data.']}';
+    print '{PI['.$target.','.$data.']}';
 }
 
 function defaultHandler($parser, $data)
 {
-	if (substr($data, 0, 1) == "&" && substr($data, -1, 1) == ";") {
-		print '{ENTREF['.$data.']}';
-	} else {
-		print '{?['.$data.']}';
-	}
+    if (substr($data, 0, 1) == "&" && substr($data, -1, 1) == ";") {
+        print '{ENTREF['.$data.']}';
+    } else {
+        print '{?['.$data.']}';
+    }
 }
 
 function externalEntityRefHandler($parser, $openEntityNames, $base, $systemId, $publicId)
 {
-	print '{EXTENTREF['.$openEntityNames.','.$base.','.$systemId.','.$publicId."]}\n";
-	return true;
+    print '{EXTENTREF['.$openEntityNames.','.$base.','.$systemId.','.$publicId."]}\n";
+    return true;
 }
 
 ?>

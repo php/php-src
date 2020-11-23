@@ -8,8 +8,6 @@ $user_agent = 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-US) AppleWebKit/522+ 
 $caps = get_browser($user_agent, true);
 var_dump($caps['browser'], $caps['version']);
 ?>
-==DONE==
 --EXPECT--
 string(7) "OmniWeb"
 string(3) "5.6"
-==DONE==

@@ -3,11 +3,11 @@ Ensure a class may not shadow a constant inherited from an interface.
 --FILE--
 <?php
 interface I {
-	const FOO = 10;
+    const FOO = 10;
 }
 
 class C implements I {
-	const FOO = 10;
+    const FOO = 10;
 }
 
 echo "Done\n";

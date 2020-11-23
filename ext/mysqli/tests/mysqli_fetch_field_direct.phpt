@@ -3,50 +3,48 @@ mysqli_fetch_field_direct()
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    require('table.inc');
 
-	if (!is_null($tmp = @mysqli_fetch_field_direct()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	if (!is_null($tmp = @mysqli_fetch_field_direct($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        var_dump(mysqli_fetch_field_direct($res, -1));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    var_dump(mysqli_fetch_field_direct($res, 0));
 
-	if (!is_null($tmp = @mysqli_fetch_field_direct($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        var_dump(mysqli_fetch_field_direct($res, 2));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
-	require('table.inc');
+    mysqli_free_result($res);
 
-	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    try {
+        mysqli_fetch_field_direct($res, 0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	var_dump(mysqli_fetch_field_direct($res, -1));
-	var_dump(mysqli_fetch_field_direct($res, 0));
-	var_dump(mysqli_fetch_field_direct($res, 2));
-
-	mysqli_free_result($res);
-
-	if (false !== ($tmp = mysqli_fetch_field_direct($res, 0)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
-
-	mysqli_close($link);
-	print "done!";
+    mysqli_close($link);
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
-bool(false)
+mysqli_fetch_field_direct(): Argument #2 ($index) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
@@ -75,9 +73,6 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(%d)
 }
-
-Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
-bool(false)
-
-Warning: mysqli_fetch_field_direct(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_fetch_field_direct(): Argument #2 ($index) must be less than the number of fields for this result set
+mysqli_result object is already closed
 done!

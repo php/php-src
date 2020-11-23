@@ -63,7 +63,7 @@ static void zend_vm_trace_init(void)
 
 	f = fopen("zend_vm.map", "w+");
 	if (f) {
-		zend_hash_sort(&vm_trace_ht, (compare_func_t)zend_vm_trace_compare, 0);
+		zend_hash_sort(&vm_trace_ht, (bucket_compare_func_t)zend_vm_trace_compare, 0);
 		prev_key = NULL;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(&vm_trace_ht, key, val) {
 			if (prev_key) {

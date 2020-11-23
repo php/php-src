@@ -7,7 +7,7 @@ abstract class test {
 }
 
 class Impl extends Test {
-	function Foo();
+    function Foo();
 }
 
 echo "Done\n";

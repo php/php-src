@@ -20,9 +20,9 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $insert = $db->prepare("insert into test (field1, field2, field3) values (:value1, :value2, :value3)");
 
 $parm = array(
-	":value1" => 15,
-	":value2" => 20,
-	":value3" => 25
+    ":value1" => 15,
+    ":value2" => 20,
+    ":value3" => 25
 );
 
 $insert->execute($parm);

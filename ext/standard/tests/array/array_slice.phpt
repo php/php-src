@@ -20,26 +20,6 @@ $var_array = array(
 $num = 4;
 $str = "john";
 
-/* Zero args */
-echo"\n*** Output for Zero Argument ***\n";
-array_slice();
-
-/* Single args */
-echo"\n*** Output for Single array Argument ***\n";
-array_slice($var_array);
-
-/* More than valid no. of args (ie. >4 )  */
-echo"\n*** Output for invalid number of Arguments ***\n";
-array_slice($var_array, 2, 4, true, 3);
-
-/* Scalar arg */
-echo"\n*** Output for scalar Argument ***\n";
-array_slice($num, 2);
-
-/* String arg */
-echo"\n*** Output for string Argument ***\n";
-array_slice($str, 2);
-
 $counter = 1;
 foreach ($var_array as $sub_array)
 {
@@ -88,27 +68,7 @@ foreach ($var_array as $sub_array)
   var_dump (array_slice($var_array[2], -3, -2, false) );
 
 ?>
---EXPECTF--
-*** Output for Zero Argument ***
-
-Warning: array_slice() expects at least 2 parameters, 0 given in %s on line %d
-
-*** Output for Single array Argument ***
-
-Warning: array_slice() expects at least 2 parameters, 1 given in %s on line %d
-
-*** Output for invalid number of Arguments ***
-
-Warning: array_slice() expects at most 4 parameters, 5 given in %s on line %d
-
-*** Output for scalar Argument ***
-
-Warning: array_slice() expects parameter 1 to be array, int given in %s on line %d
-
-*** Output for string Argument ***
-
-Warning: array_slice() expects parameter 1 to be array, string given in %s on line %d
-
+--EXPECT--
 *** Iteration 1 ***
 
 *** Variation with first two Arguments ***

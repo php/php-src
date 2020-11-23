@@ -25,7 +25,7 @@ $files['b'] = 'b';
 $files['c'] = 'c';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 $phar->stopBuffering();
 
@@ -46,7 +46,6 @@ $p2->setAlias('unused2');
 $p3 = new Phar($fname3);
 echo $p3->getAlias(), "\n";
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -59,4 +58,3 @@ hio
 test
 test
 test
-===DONE===

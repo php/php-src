@@ -24,6 +24,10 @@ class B extends A {
         B::test();
         call_user_func("B::test");
         call_user_func(array("B", "test"));
+
+        (self::class)::test();
+        call_user_func(self::class . "::test");
+        call_user_func(array(self::class, "test"));
     }
 }
 
@@ -45,6 +49,9 @@ C
 A
 A
 A
+B
+B
+B
 B
 B
 B

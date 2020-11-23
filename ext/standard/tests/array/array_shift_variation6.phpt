@@ -2,11 +2,6 @@
 Test array_shift() function : usage variations - Referenced arrays
 --FILE--
 <?php
-/* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how array_shift when passed:
  * 1. a variable that is referenced to an array

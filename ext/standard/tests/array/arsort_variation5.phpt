@@ -2,15 +2,9 @@
 Test arsort() function : usage variations - sort strings
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing arsort() by providing different string arrays for $array argument with following flag values
- *  flag value as defualt
+ *  flag value as default
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */

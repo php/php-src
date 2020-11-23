@@ -2,8 +2,8 @@
 Test posix_getgrnam() function : basic functionality
 --SKIPIF--
 <?php
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
-	if (!posix_getgroups()) die('skip - groups unavailable (ci)');
+    if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
+    if (!posix_getgroups()) die('skip - groups unavailable (ci)');
 ?>
 --FILE--
 <?php

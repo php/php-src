@@ -10,8 +10,10 @@ echo $r->getParameters()[0], "\n";
 echo $r->getReturnType()->getName(), "\n";
 echo $r,"\n";
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "x"
+
+Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
 object(ReflectionClass)#4 (1) {
   ["name"]=>
   string(8) "stdClass"

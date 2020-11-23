@@ -316,8 +316,7 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
 
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
-
-Warning: mysqli_kill(): processid should have positive value in %s on line %d
+mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
@@ -334,8 +333,7 @@ Warning: mysqli_stmt_prepare(): (%s/%d): Commands out of sync; you can't run thi
 Warning: mysqli_store_result(): (%s/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_stmt_attr_set(): (%s/%d): Not implemented in %s on line %d
-
-Warning: mysqli_kill(): processid should have positive value in %s on line %d
+mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_stmt_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 [013] Access denied for user '%s'@'%s' (using password: YES)

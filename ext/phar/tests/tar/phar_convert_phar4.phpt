@@ -42,7 +42,6 @@ var_dump(strlen($phar->getStub()));
 var_dump($phar->getMetadata());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
@@ -68,4 +67,3 @@ bool(true)
 bool(true)
 int(6641)
 string(2) "hi"
-===DONE===

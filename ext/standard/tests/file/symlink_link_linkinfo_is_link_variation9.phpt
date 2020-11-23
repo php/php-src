@@ -9,19 +9,6 @@ if (PHP_OS_FAMILY === 'Windows') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool symlink ( string $target, string $link );
-   Description: creates a symbolic link to the existing target with the specified name link
-
-   Prototype: bool is_link ( string $filename );
-   Description: Tells whether the given file is a symbolic link.
-
-   Prototype: bool link ( string $target, string $link );
-   Description: Create a hard link
-
-   Prototype: int linkinfo ( string $path );
-   Description: Gets information about a link
-*/
-
 /* Variation 9 : Check lstat of soft/hard link created
                  Check linkinfo() value with lstat['dev']
 */
@@ -51,7 +38,7 @@ var_dump(is_int($linkinfo) && $linkinfo !== -1);
 if( $s1[0] == $linkinfo )
   echo "\nlinkinfo() value matches lstat['dev']\n";
 else
-  echo "\nWarning: linkinfo() value doesnt match lstat['dev']\n";
+  echo "\nWarning: linkinfo() value doesn't match lstat['dev']\n";
 // delete link
 unlink($soft_link);
 
@@ -66,7 +53,7 @@ var_dump(is_int($linkinfo) && $linkinfo !== -1);
 if( $s1[0] == $linkinfo )
   echo "\nlinkinfo() value matches lstat['dev']\n";
 else
-  echo "\nWarning: linkinfo() value doesnt match lstat['dev']\n";
+  echo "\nWarning: linkinfo() value doesn't match lstat['dev']\n";
 
 // delete link
 unlink($hard_link);
@@ -83,7 +70,7 @@ var_dump(is_int($linkinfo) && $linkinfo !== -1);
 if( $s1[0] == $linkinfo )
   echo "\nlinkinfo() value matches lstat['dev']\n";
 else
-  echo "\nWarning: linkinfo() value doesnt match lstat['dev']\n";
+  echo "\nWarning: linkinfo() value doesn't match lstat['dev']\n";
 
 // delete link
 if (PHP_OS_FAMILY === 'Windows') {

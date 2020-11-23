@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -60,8 +58,8 @@ static inline BreakIterator_object *php_intl_breakiterator_fetch_object(zend_obj
 	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (bio->biter == NULL) \
 	{ \
-		intl_errors_set(&bio->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed BreakIterator", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed BreakIterator"); \
+		RETURN_THROWS(); \
 	}
 
 void breakiterator_object_create(zval *object, BreakIterator *break_iter, int brand_new);

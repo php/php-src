@@ -6,10 +6,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_readable ( string $filename );
-   Description: Tells whether the filename is readable.
-*/
-
 /* test is_readable() with file having different filepath notation */
 
 require __DIR__.'/file.inc';
@@ -50,7 +46,11 @@ $counter = 1;
    is a writable file */
 foreach($files_arr as $file) {
   echo "-- Iteration $counter --\n";
-  var_dump( is_readable($file) );
+  try {
+    var_dump( is_readable($file) );
+  } catch (Error $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
   clearstatcache();
 }
@@ -77,17 +77,11 @@ bool(false)
 -- Iteration 6 --
 bool(false)
 -- Iteration 7 --
-
-Warning: is_readable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_readable(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 8 --
-
-Warning: is_readable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_readable(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 9 --
-
-Warning: is_readable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_readable(): Argument #1 ($filename) must not contain any null bytes
 -- Iteration 10 --
 bool(true)
 -- Iteration 11 --
