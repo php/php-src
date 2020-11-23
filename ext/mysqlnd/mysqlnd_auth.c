@@ -80,7 +80,7 @@ mysqlnd_run_authentication(
 	}
 
 	do {
-        struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
+		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
 
 		if (!auth_plugin) {
 			if (first_call) {
@@ -1324,15 +1324,15 @@ const char SASL_SCRAM_SHA1[] = "SCRAM-SHA-1";
 const char SASL_SCRAM_SHA256[] = "SCRAM-SHA-256";
 
 static const sasl_callback_t sasl_op_callbacks[] = {
-    #ifdef SASL_CB_GETREALM
-    {SASL_CB_GETREALM, NULL, NULL},
-    #endif
-    {SASL_CB_USER, NULL, NULL},
-    {SASL_CB_AUTHNAME, NULL, NULL},
-    {SASL_CB_PASS, NULL, NULL},
-    {SASL_CB_ECHOPROMPT, NULL, NULL},
-    {SASL_CB_NOECHOPROMPT, NULL, NULL},
-    {SASL_CB_LIST_END, NULL, NULL}
+	#ifdef SASL_CB_GETREALM
+	{SASL_CB_GETREALM, NULL, NULL},
+	#endif
+	{SASL_CB_USER, NULL, NULL},
+	{SASL_CB_AUTHNAME, NULL, NULL},
+	{SASL_CB_PASS, NULL, NULL},
+	{SASL_CB_ECHOPROMPT, NULL, NULL},
+	{SASL_CB_NOECHOPROMPT, NULL, NULL},
+	{SASL_CB_LIST_END, NULL, NULL}
 };
 
 /*
@@ -1344,54 +1344,54 @@ static const sasl_callback_t sasl_op_callbacks[] = {
   https://www.sendmail.org/~ca/email/cyrus2/mechanisms.html
 */
 sasl_security_properties_t security_properties = {
-    /** Minimum acceptable final level. (min_ssf) */
-    56,
-    /** Maximum acceptable final level. (max_ssf) */
-    0,
-    /** Maximum security layer receive buffer size. */
-    0,
-    /** security flags (security_flags) */
-    0,
-    /** Property names. (property_names) */
-    NULL,
-    /** Property values. (property_values)*/
-    NULL,
+	/** Minimum acceptable final level. (min_ssf) */
+	56,
+	/** Maximum acceptable final level. (max_ssf) */
+	0,
+	/** Maximum security layer receive buffer size. */
+	0,
+	/** security flags (security_flags) */
+	0,
+	/** Property names. (property_names) */
+	NULL,
+	/** Property values. (property_values)*/
+	NULL,
 };
 
 
 /* {{{ handle_comm */
 void handle_comm(
-        sasl_interact_t *ilist,
-        const char * const user,
-        const char * const passwd
-)
+		sasl_interact_t *ilist,
+		const char * const user,
+		const char * const passwd
+		)
 {
-    DBG_ENTER("handle_comm");
+	DBG_ENTER("handle_comm");
 
-    while (ilist->id != SASL_CB_LIST_END) {
-        switch (ilist->id) {
-        /*
-        the name of the user authenticating
-      */
-        case SASL_CB_USER:
-            ilist->result = user;
-            ilist->len = strlen((const char *)ilist->result);
-            break;
-        case SASL_CB_AUTHNAME:
-            ilist->result = user;
-            ilist->len = strlen((const char *)ilist->result);
-            break;
-        case SASL_CB_PASS:
-            ilist->result = passwd;
-            ilist->len = strlen((const char *)ilist->result);
-            break;
-        default:
-            ilist->result = NULL;
-            ilist->len = 0;
-        }
-        ilist++;
-    }
-    DBG_VOID_RETURN;
+	while (ilist->id != SASL_CB_LIST_END) {
+		switch (ilist->id) {
+		/*
+		the name of the user authenticating
+	  */
+		case SASL_CB_USER:
+			ilist->result = user;
+			ilist->len = strlen((const char *)ilist->result);
+			break;
+		case SASL_CB_AUTHNAME:
+			ilist->result = user;
+			ilist->len = strlen((const char *)ilist->result);
+			break;
+		case SASL_CB_PASS:
+			ilist->result = passwd;
+			ilist->len = strlen((const char *)ilist->result);
+			break;
+		default:
+			ilist->result = NULL;
+			ilist->len = 0;
+		}
+		ilist++;
+	}
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -1399,39 +1399,39 @@ void handle_comm(
 /* {{{ sasl_run */
 static
 int sasl_run(
-        sasl_conn_t* connection,
-        const char* auth_mechanism,
-        const char * const user,
-        const char * const passwd,
-        char **client_output,
-        unsigned int *client_output_length
-        )
+		sasl_conn_t* connection,
+		const char* auth_mechanism,
+		const char * const user,
+		const char * const passwd,
+		char **client_output,
+		unsigned int *client_output_length
+		)
 {
-    DBG_ENTER("sasl_run");
+	DBG_ENTER("sasl_run");
 
-    int rc_sasl = SASL_FAIL;
-    const char *mechanism = NULL;
-    char *sasl_client_output = NULL;
-    sasl_interact_t *interactions = NULL;
+	int rc_sasl = SASL_FAIL;
+	const char *mechanism = NULL;
+	char *sasl_client_output = NULL;
+	sasl_interact_t *interactions = NULL;
 
-    void *sasl_client_output_p = &sasl_client_output;
-    do {
-        rc_sasl =
-                sasl_client_start(connection, auth_mechanism, &interactions,
-                                  (const char **)(sasl_client_output_p),
-                                  (unsigned int *)client_output_length, &mechanism);
-        if (rc_sasl == SASL_INTERACT) {
-            handle_comm(interactions,user,passwd);
-        }
-    } while (rc_sasl == SASL_INTERACT);
+	void *sasl_client_output_p = &sasl_client_output;
+	do {
+		rc_sasl =
+				sasl_client_start(connection, auth_mechanism, &interactions,
+								  (const char **)(sasl_client_output_p),
+								  (unsigned int *)client_output_length, &mechanism);
+		if (rc_sasl == SASL_INTERACT) {
+			handle_comm(interactions,user,passwd);
+		}
+	} while (rc_sasl == SASL_INTERACT);
 
-    if (rc_sasl == SASL_NOMECH) {
-        DBG_RETURN( FAIL);
-    }
-    if (client_output != NULL) {
-        *client_output = sasl_client_output;
-    }
-    DBG_RETURN( rc_sasl );
+	if (rc_sasl == SASL_NOMECH) {
+		DBG_RETURN( FAIL);
+	}
+	if (client_output != NULL) {
+		*client_output = sasl_client_output;
+	}
+	DBG_RETURN( rc_sasl );
 }
 /* }}} */
 
@@ -1439,38 +1439,38 @@ int sasl_run(
 /* {{{ sasl_step */
 static
 int sasl_step(sasl_conn_t *connection,
-              const char * const user,
-              const char * const passwd,
-              zend_uchar *server_in,
-              int server_in_length,
-              zend_uchar **client_out,
-              int *client_out_length
-)
+			  const char * const user,
+			  const char * const passwd,
+			  zend_uchar *server_in,
+			  int server_in_length,
+			  zend_uchar **client_out,
+			  int *client_out_length
+			  )
 {
-    DBG_ENTER("sasl_step");
+	DBG_ENTER("sasl_step");
 
-    int rc_sasl = SASL_FAIL;
-    sasl_interact_t *interactions = NULL;
+	int rc_sasl = SASL_FAIL;
+	sasl_interact_t *interactions = NULL;
 
-    if (connection == NULL) {
-        DBG_RETURN( rc_sasl );
-    }
-    void *client_out_p = client_out;
-    do {
-        if (server_in && server_in[0] == 0x0) {
-            server_in_length = 0;
-            server_in = NULL;
-        }
-        rc_sasl = sasl_client_step(
-                    connection, (server_in == NULL) ? NULL : (const char*)server_in,
-                    (server_in == NULL) ? 0 : server_in_length, &interactions,
-                    (const char **)(client_out_p),
-                    (unsigned int *)client_out_length);
-        if (rc_sasl == SASL_INTERACT) {
-            handle_comm(interactions,user,passwd);
-        }
-    } while (rc_sasl == SASL_INTERACT);
-    DBG_RETURN( rc_sasl );
+	if (connection == NULL) {
+		DBG_RETURN( rc_sasl );
+	}
+	void *client_out_p = client_out;
+	do {
+		if (server_in && server_in[0] == 0x0) {
+			server_in_length = 0;
+			server_in = NULL;
+		}
+		rc_sasl = sasl_client_step(
+					connection, (server_in == NULL) ? NULL : (const char*)server_in,
+					(server_in == NULL) ? 0 : server_in_length, &interactions,
+					(const char **)(client_out_p),
+					(unsigned int *)client_out_length);
+		if (rc_sasl == SASL_INTERACT) {
+			handle_comm(interactions,user,passwd);
+		}
+	} while (rc_sasl == SASL_INTERACT);
+	DBG_RETURN( rc_sasl );
 }
 /* }}} */
 
@@ -1478,42 +1478,42 @@ int sasl_step(sasl_conn_t *connection,
 /* {{{ sasl_server_comm */
 static
 int sasl_server_comm(
-        MYSQLND_CONN_DATA * conn,
-        zend_uchar *request,
-        int request_len,
-        zend_uchar*response,
-        int response_len,
-        int only_resp
-)
+		MYSQLND_CONN_DATA * conn,
+		zend_uchar *request,
+		int request_len,
+		zend_uchar*response,
+		int response_len,
+		int only_resp
+		)
 {
-    DBG_ENTER("sasl_server_comm");
+	DBG_ENTER("sasl_server_comm");
 
-    if( !only_resp ){
-        MYSQLND_PACKET_SASL_PK_REQUEST sasl_req;
-        conn->payload_decoder_factory->m.init_sasl_pk_request_packet(&sasl_req);
-        sasl_req.data = request;
-        sasl_req.data_len = request_len;
+	if( !only_resp ){
+		MYSQLND_PACKET_SASL_PK_REQUEST sasl_req;
+		conn->payload_decoder_factory->m.init_sasl_pk_request_packet(&sasl_req);
+		sasl_req.data = request;
+		sasl_req.data_len = request_len;
 
-        if (! PACKET_WRITE(conn, &sasl_req)) {
-            DBG_ERR_FMT("Error while sending a sasl packet");
-            php_error(E_WARNING, "Error while sending a sasl packet. PID=%d", getpid());
-            SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-            DBG_RETURN( SASL_FAIL );
-        }
-    }
+		if (! PACKET_WRITE(conn, &sasl_req)) {
+			DBG_ERR_FMT("Error while sending a sasl packet");
+			php_error(E_WARNING, "Error while sending a sasl packet. PID=%d", getpid());
+			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+			DBG_RETURN( SASL_FAIL );
+		}
+	}
 
-    MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE sasl_resp;
-    conn->payload_decoder_factory->m.init_sasl_pk_request_response_packet(&sasl_resp);
-    sasl_resp.data = response;
-    sasl_resp.data_len = response_len;
+	MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE sasl_resp;
+	conn->payload_decoder_factory->m.init_sasl_pk_request_response_packet(&sasl_resp);
+	sasl_resp.data = response;
+	sasl_resp.data_len = response_len;
 
-    if (FAIL == PACKET_READ(conn, &sasl_resp) || NULL == sasl_resp.data) {
-        DBG_ERR_FMT("Error while receiving a SASL response.");
-        php_error(E_WARNING, "Error while receiving a SASL response. PID=%d", getpid());
-        SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-        DBG_RETURN( SASL_FAIL );
-    }
-    DBG_RETURN( sasl_resp.data_len );
+	if (FAIL == PACKET_READ(conn, &sasl_resp) || NULL == sasl_resp.data) {
+		DBG_ERR_FMT("Error while receiving a SASL response.");
+		php_error(E_WARNING, "Error while receiving a SASL response. PID=%d", getpid());
+		SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+		DBG_RETURN( SASL_FAIL );
+	}
+	DBG_RETURN( sasl_resp.data_len );
 }
 /* }}} */
 
@@ -1521,64 +1521,64 @@ int sasl_server_comm(
 /* {{{ sasl_auth_exchange */
 static
 int sasl_auth_exchange(
-        MYSQLND_CONN_DATA * conn,
-        sasl_conn_t* connection,
-        const char * const user,
-        const char * const passwd,
-        zend_uchar *request,
-        int request_len,
-        int second_step
-)
+		MYSQLND_CONN_DATA * conn,
+		sasl_conn_t* connection,
+		const char * const user,
+		const char * const passwd,
+		zend_uchar *request,
+		int request_len,
+		int second_step
+		)
 {
-    DBG_ENTER("sasl_auth_exchange");
+	DBG_ENTER("sasl_auth_exchange");
 
-    zend_uchar* server_packet = (zend_uchar*)malloc( SASL_MAX_PKT_SIZE );
-    if( !server_packet ) {
-        DBG_RETURN(FAIL);
-    }
-    int rc_sasl = SASL_FAIL;
-    int pkt_len = 0;
-    zend_uchar *sasl_client_output = request;
-    int sasl_client_output_len = request_len;
-    if( second_step ){
-        memcpy(server_packet,request,request_len);
-        pkt_len = request_len;
-    }
-    do {
-      if( !second_step && sasl_client_output_len > 0) {
-          pkt_len = sasl_server_comm(conn,
-                                sasl_client_output,
-                                sasl_client_output_len,
-                                server_packet,
-                                SASL_MAX_PKT_SIZE,
-                                FALSE);
-          if (pkt_len < 0) {
-              DBG_ERR_FMT("Error while communicating with the SASL server");
-              php_error(E_ERROR, "Error while communicating with the SASL server");
-              rc_sasl = SASL_FAIL;
-              goto cleanup;
-          }
-      }
-      sasl_client_output = NULL;
-      sasl_client_output_len = 0;
-      if( pkt_len > 0) {
-          rc_sasl = sasl_step(connection,
-                              user,passwd,
-                              server_packet,
-                              pkt_len,
-                             &sasl_client_output,
-                              &sasl_client_output_len);
-      }
-      if( sasl_client_output_len == 0) {
-          DBG_INF_FMT("Got empty response while handshaking with the SASL server.");
-      }
-      second_step = FALSE;
-    } while (rc_sasl == SASL_CONTINUE);
+	zend_uchar* server_packet = (zend_uchar*)malloc( SASL_MAX_PKT_SIZE );
+	if( !server_packet ) {
+		DBG_RETURN(FAIL);
+	}
+	int rc_sasl = SASL_FAIL;
+	int pkt_len = 0;
+	zend_uchar *sasl_client_output = request;
+	int sasl_client_output_len = request_len;
+	if( second_step ){
+		memcpy(server_packet,request,request_len);
+		pkt_len = request_len;
+	}
+	do {
+		if( !second_step && sasl_client_output_len > 0) {
+			pkt_len = sasl_server_comm(conn,
+									   sasl_client_output,
+									   sasl_client_output_len,
+									   server_packet,
+									   SASL_MAX_PKT_SIZE,
+									   FALSE);
+			if (pkt_len < 0) {
+				DBG_ERR_FMT("Error while communicating with the SASL server");
+				php_error(E_ERROR, "Error while communicating with the SASL server");
+				rc_sasl = SASL_FAIL;
+				goto cleanup;
+			}
+		}
+		sasl_client_output = NULL;
+		sasl_client_output_len = 0;
+		if( pkt_len > 0) {
+			rc_sasl = sasl_step(connection,
+								user,passwd,
+								server_packet,
+								pkt_len,
+								&sasl_client_output,
+								&sasl_client_output_len);
+		}
+		if( sasl_client_output_len == 0) {
+			DBG_INF_FMT("Got empty response while handshaking with the SASL server.");
+		}
+		second_step = FALSE;
+	} while (rc_sasl == SASL_CONTINUE);
 cleanup:
-    if( server_packet ) {
-        free(server_packet);
-    }
-    DBG_RETURN( rc_sasl );
+	if( server_packet ) {
+		free(server_packet);
+	}
+	DBG_RETURN( rc_sasl );
 }
 /* }}} */
 
@@ -1586,130 +1586,130 @@ cleanup:
 /* {{{ mysqlnd_ldap_sasl_get_auth_data */
 static zend_uchar *
 mysqlnd_ldap_sasl__get_auth_data(
-        struct st_mysqlnd_authentication_plugin * self,
-        size_t * auth_data_len,
-        MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
-        const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
-        const MYSQLND_SESSION_OPTIONS * const session_options,
-        const MYSQLND_PFC_DATA * const pfc_data,
-        const zend_ulong mysql_flags
-)
+		struct st_mysqlnd_authentication_plugin * self,
+		size_t * auth_data_len,
+		MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
+		const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
+		const MYSQLND_SESSION_OPTIONS * const session_options,
+		const MYSQLND_PFC_DATA * const pfc_data,
+		const zend_ulong mysql_flags
+		)
 {
-    DBG_ENTER("mysqlnd_ldap_sasl_get_auth_data");
+	DBG_ENTER("mysqlnd_ldap_sasl_get_auth_data");
 
-    int rc_sasl = SASL_FAIL;
-    sasl_conn_t *connection;
-    char *sasl_client_output = NULL;
-    unsigned int sasl_client_output_len = 0;
+	int rc_sasl = SASL_FAIL;
+	sasl_conn_t *connection;
+	char *sasl_client_output = NULL;
+	unsigned int sasl_client_output_len = 0;
 
-    if (strcmp((const char*)auth_plugin_data, SASL_SCRAM_SHA1) &&
-            strcmp((const char*)auth_plugin_data, SASL_SCRAM_SHA256) ) {
-        DBG_ERR_FMT("Not supported SASL method: %s", auth_plugin_data);
-        php_error(E_ERROR, "Not supported SASL method: %s, "
-                  "please make sure correct method is set in "
-                  "LDAP SASL server side plug-in", auth_plugin_data);
-        DBG_RETURN( NULL );
-    }
+	if (strcmp((const char*)auth_plugin_data, SASL_SCRAM_SHA1) &&
+			strcmp((const char*)auth_plugin_data, SASL_SCRAM_SHA256) ) {
+		DBG_ERR_FMT("Not supported SASL method: %s", auth_plugin_data);
+		php_error(E_ERROR, "Not supported SASL method: %s, "
+						   "please make sure correct method is set in "
+						   "LDAP SASL server side plug-in", auth_plugin_data);
+		DBG_RETURN( NULL );
+	}
 
-    rc_sasl = sasl_client_init(NULL);
-    if (rc_sasl == SASL_OK) {
-        rc_sasl = sasl_client_new(SASL_SERVICE_NAME, NULL, NULL, NULL, sasl_op_callbacks, 0,
-                                  &connection);
-    }
-    if (rc_sasl != SASL_OK) {
-        DBG_ERR_FMT("Error while configuring the SASL client: %d", rc_sasl);
-        php_error(E_ERROR, "Error while configuring the SASL client: %d", rc_sasl);
-        DBG_RETURN( NULL );
-    }
+	rc_sasl = sasl_client_init(NULL);
+	if (rc_sasl == SASL_OK) {
+		rc_sasl = sasl_client_new(SASL_SERVICE_NAME, NULL, NULL, NULL, sasl_op_callbacks, 0,
+								  &connection);
+	}
+	if (rc_sasl != SASL_OK) {
+		DBG_ERR_FMT("Error while configuring the SASL client: %d", rc_sasl);
+		php_error(E_ERROR, "Error while configuring the SASL client: %d", rc_sasl);
+		DBG_RETURN( NULL );
+	}
 
-    conn->sasl_connection = connection;
-    sasl_setprop(connection, SASL_SEC_PROPS, &security_properties);
-    rc_sasl = sasl_run(connection,conn->authentication_plugin_data.s,
-                       user,passwd,
-                       &sasl_client_output, &sasl_client_output_len);
-    if ((rc_sasl != SASL_OK) && (rc_sasl != SASL_CONTINUE)) {
-        DBG_ERR_FMT("Error while starting up the SASL authentication: %d", rc_sasl);
-        php_error(E_ERROR, "Error while starting up the SASL authentication: %d", rc_sasl);
-        goto cleanup;
-    }
+	conn->sasl_connection = connection;
+	sasl_setprop(connection, SASL_SEC_PROPS, &security_properties);
+	rc_sasl = sasl_run(connection,conn->authentication_plugin_data.s,
+					   user,passwd,
+					   &sasl_client_output, &sasl_client_output_len);
+	if ((rc_sasl != SASL_OK) && (rc_sasl != SASL_CONTINUE)) {
+		DBG_ERR_FMT("Error while starting up the SASL authentication: %d", rc_sasl);
+		php_error(E_ERROR, "Error while starting up the SASL authentication: %d", rc_sasl);
+		goto cleanup;
+	}
 
-    zend_uchar* data = (zend_uchar*)malloc(sasl_client_output_len);
-    memcpy(data,sasl_client_output,sasl_client_output_len);
-    *auth_data_len = sasl_client_output_len;
-    return data;
+	zend_uchar* data = (zend_uchar*)malloc(sasl_client_output_len);
+	memcpy(data,sasl_client_output,sasl_client_output_len);
+	*auth_data_len = sasl_client_output_len;
+	return data;
 cleanup:
-    if( connection ) {
-        sasl_dispose(&connection);
-    }
-    DBG_RETURN(NULL);
+	if( connection ) {
+		sasl_dispose(&connection);
+	}
+	DBG_RETURN(NULL);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_ldap_sasl_get_auth_data */
 enum_func_status mysqlnd_ldap_sasl__handle_server_response(
-        struct st_mysqlnd_authentication_plugin * self,
-        MYSQLND_CONN_DATA * conn,
-        const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-        const char * const user,
-        const char * const passwd,
-        const size_t passwd_len,
-        char **new_auth_protocol, size_t *new_auth_protocol_len,
-        zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
-        )
+		struct st_mysqlnd_authentication_plugin * self,
+		MYSQLND_CONN_DATA * conn,
+		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+		const char * const user,
+		const char * const passwd,
+		const size_t passwd_len,
+		char **new_auth_protocol, size_t *new_auth_protocol_len,
+		zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
+		)
 {
-    DBG_ENTER("mysqlnd_ldap_sasl__handle_server_response");
-    zend_uchar* server_packet = (zend_uchar*)malloc(SASL_MAX_PKT_SIZE);
-    if( !server_packet ) {
-        DBG_RETURN(FAIL);
-    }
-    int rc_sasl = SASL_FAIL;
-    int pkt_size = sasl_server_comm(conn,
-                NULL,0,
-                server_packet,
-                SASL_MAX_PKT_SIZE,TRUE);
+	DBG_ENTER("mysqlnd_ldap_sasl__handle_server_response");
+	zend_uchar* server_packet = (zend_uchar*)malloc(SASL_MAX_PKT_SIZE);
+	if( !server_packet ) {
+		DBG_RETURN(FAIL);
+	}
+	int rc_sasl = SASL_FAIL;
+	int pkt_size = sasl_server_comm(conn,
+									NULL,0,
+									server_packet,
+									SASL_MAX_PKT_SIZE,TRUE);
 
-    if( conn->sasl_connection) {
-        sasl_conn_t *connection = (sasl_conn_t*)conn->sasl_connection;
-        rc_sasl = sasl_auth_exchange(conn,
-                                     connection,
-                                     user,
-                                     passwd,
-                                     server_packet,
-                                     pkt_size,
-                                     TRUE);
-        sasl_dispose(&connection);
-        conn->sasl_connection = NULL;
-    }
-    if( server_packet ) {
-        free(server_packet);
-    }
-    DBG_RETURN( rc_sasl == SASL_OK ? PASS : FAIL );
+	if( conn->sasl_connection) {
+		sasl_conn_t *connection = (sasl_conn_t*)conn->sasl_connection;
+		rc_sasl = sasl_auth_exchange(conn,
+									 connection,
+									 user,
+									 passwd,
+									 server_packet,
+									 pkt_size,
+									 TRUE);
+		sasl_dispose(&connection);
+		conn->sasl_connection = NULL;
+	}
+	if( server_packet ) {
+		free(server_packet);
+	}
+	DBG_RETURN( rc_sasl == SASL_OK ? PASS : FAIL );
 }
 /* }}} */
 
 
 static struct st_mysqlnd_authentication_plugin mysqlnd_ldap_sasl_auth_plugin =
 {
-    {
-        MYSQLND_PLUGIN_API_VERSION,
-        "auth_plugin_authentication_ldap_sasl_client",
-        MYSQLND_VERSION_ID,
-        PHP_MYSQLND_VERSION,
-        "PHP License 3.01",
-        "Filip Janiszewski <fjanisze@php.net>",
-        {
-            NULL, /* no statistics , will be filled later if there are some */
-            NULL, /* no statistics */
-        },
-        {
-            NULL /* plugin shutdown */
-        }
-    },
-    {/* methods */
-        mysqlnd_ldap_sasl__get_auth_data,
-        mysqlnd_ldap_sasl__handle_server_response
-    }
+{
+	MYSQLND_PLUGIN_API_VERSION,
+	"auth_plugin_authentication_ldap_sasl_client",
+	MYSQLND_VERSION_ID,
+	PHP_MYSQLND_VERSION,
+	"PHP License 3.01",
+	"Filip Janiszewski <fjanisze@php.net>",
+	{
+		NULL, /* no statistics , will be filled later if there are some */
+				NULL, /* no statistics */
+	},
+{
+	NULL /* plugin shutdown */
+}
+},
+{/* methods */
+	mysqlnd_ldap_sasl__get_auth_data,
+	mysqlnd_ldap_sasl__handle_server_response
+}
 };
 
 #endif //MYSQLND_HAVE_SASL
@@ -1721,7 +1721,7 @@ mysqlnd_register_builtin_authentication_plugins(void)
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_native_auth_plugin);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_pam_authentication_plugin);
 #if MYSQLND_HAVE_SASL
-    mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_ldap_sasl_auth_plugin);
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_ldap_sasl_auth_plugin);
 #endif
 #ifdef MYSQLND_HAVE_SSL
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_caching_sha2_auth_plugin);
