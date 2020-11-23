@@ -4194,7 +4194,6 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	if (Z_MODE(res_addr) == IS_REG && (res_info & MAY_BE_LONG)) {
 		if (may_overflow && (res_info & MAY_BE_GUARD)
 		 && JIT_G(current_frame)
-		 && JIT_G(current_frame)->stack
 		 && zend_jit_opline_uses_reg(opline, Z_REG(res_addr))) {
 			result_reg = ZREG_R0;
 		} else {
