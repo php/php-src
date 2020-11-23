@@ -234,6 +234,8 @@ typedef struct st_mysqlnd_session_options
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool	int_and_float_native;
 #endif
+
+	char		*local_infile_directory;
 } MYSQLND_SESSION_OPTIONS;
 
 
