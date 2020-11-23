@@ -82,6 +82,8 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 
+#define abort()	zend_error_noreturn(E_ERROR, "fatal libmagic error")
+
 #define ENABLE_CONDITIONALS
 
 #ifndef MAGIC
