@@ -13,6 +13,13 @@ PHP_ARG_ENABLE([mysqlnd_compression_support],
   [yes],
   [no])
 
+PHP_ARG_ENABLE([mysqlnd_sasl_support],
+  [whether to enable sasl support in mysqlnd],
+  [AS_HELP_STRING([--enable-mysqlnd-sasl-support],
+    [Enable support for the sasl protocol in mysqlnd])],
+  [no],
+  [yes])
+
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   mysqlnd_ps_sources="mysqlnd_ps.c mysqlnd_ps_codec.c"
@@ -30,7 +37,15 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
     AC_DEFINE([MYSQLND_COMPRESSION_WANTED], 1, [Enable compressed protocol support])
   fi
 
+  if test "$PHP_MYSQLND_SASL_SUPPORT" != "no"; then
+    PKG_CHECK_MODULES([SASL], [libsasl2])
+    PHP_EVAL_LIBLINE($SASL_LIBS, MYSQLND_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($SASL_CFLAGS)
+    AC_DEFINE([MYSQLND_HAVE_SASL], 1, [SASL protocol support])
+  fi
+
   AC_DEFINE([MYSQLND_SSL_SUPPORTED], 1, [Enable core mysqlnd SSL code])
+  AC_DEFINE([MYSQLND_SASL_SUPPORTED], 1, [Enable sasl code])
 
   test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
 

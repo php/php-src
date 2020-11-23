@@ -1311,6 +1311,8 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin 
 };
 #endif
 
+#ifdef MYSQLND_HAVE_SASL
+
 /******************************************* LDAP SASL ***********************************/
 
 #define SASL_SERVICE_NAME "ldap"
@@ -1388,7 +1390,7 @@ void handle_comm(
         }
         ilist++;
     }
-    DBG_VOID_RETURN();
+    DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -1401,7 +1403,7 @@ int sasl_run(
         const char * const user,
         const char * const passwd,
         char **client_output,
-        int *client_output_length
+        unsigned int *client_output_length
         )
 {
     DBG_ENTER("sasl_run");
@@ -1459,7 +1461,7 @@ int sasl_step(sasl_conn_t *connection,
             server_in = NULL;
         }
         rc_sasl = sasl_client_step(
-                    connection, (server_in == NULL) ? NULL : server_in,
+                    connection, (server_in == NULL) ? NULL : (const char*)server_in,
                     (server_in == NULL) ? 0 : server_in_length, &interactions,
                     (const char **)(client_out_p),
                     (unsigned int *)client_out_length);
@@ -1597,10 +1599,10 @@ mysqlnd_ldap_sasl__get_auth_data(
     int rc_sasl = SASL_FAIL;
     sasl_conn_t *connection;
     char *sasl_client_output = NULL;
-    int sasl_client_output_len = 0;
+    unsigned int sasl_client_output_len = 0;
 
-    if (strcmp(auth_plugin_data, SASL_SCRAM_SHA1) &&
-            strcmp(auth_plugin_data, SASL_SCRAM_SHA256) ) {
+    if (strcmp((const char*)auth_plugin_data, SASL_SCRAM_SHA1) &&
+            strcmp((const char*)auth_plugin_data, SASL_SCRAM_SHA256) ) {
         DBG_ERR_FMT("Not supported SASL method: %s", auth_plugin_data);
         php_error(E_ERROR, "Not supported SASL method: %s, "
                   "please make sure correct method is set in "
@@ -1656,7 +1658,7 @@ enum_func_status mysqlnd_ldap_sasl__handle_server_response(
         )
 {
     DBG_ENTER("mysqlnd_ldap_sasl__handle_server_response");
-    char* server_packet = (char*)malloc(SASL_MAX_PKT_SIZE);
+    zend_uchar* server_packet = (zend_uchar*)malloc(SASL_MAX_PKT_SIZE);
     if( !server_packet ) {
         DBG_RETURN(FAIL);
     }
@@ -1667,14 +1669,16 @@ enum_func_status mysqlnd_ldap_sasl__handle_server_response(
                 SASL_MAX_PKT_SIZE,TRUE);
 
     if( conn->sasl_connection) {
+        sasl_conn_t *connection = (sasl_conn_t*)conn->sasl_connection;
         rc_sasl = sasl_auth_exchange(conn,
-                                     conn->sasl_connection,
+                                     connection,
                                      user,
                                      passwd,
                                      server_packet,
                                      pkt_size,
                                      TRUE);
-        sasl_dispose(&conn->sasl_connection);
+        sasl_dispose(&connection);
+        conn->sasl_connection = NULL;
     }
     if( server_packet ) {
         free(server_packet);
@@ -1707,13 +1711,17 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_ldap_sasl_auth_plugin =
     }
 };
 
+#endif //MYSQLND_HAVE_SASL
+
 /* {{{ mysqlnd_register_builtin_authentication_plugins */
 void
 mysqlnd_register_builtin_authentication_plugins(void)
 {
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_native_auth_plugin);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_pam_authentication_plugin);
+#if MYSQLND_HAVE_SASL
     mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_ldap_sasl_auth_plugin);
+#endif
 #ifdef MYSQLND_HAVE_SSL
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_caching_sha2_auth_plugin);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin);

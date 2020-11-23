@@ -939,7 +939,7 @@ struct st_mysqlnd_connection_data
 	unsigned int	protocol_version;
 	unsigned int	port;
 	zend_ulong		server_capabilities;
-    void*           sasl_connection;
+        void*           sasl_connection;
 
 	/* For UPSERT queries */
 	MYSQLND_UPSERT_STATUS * upsert_status;
