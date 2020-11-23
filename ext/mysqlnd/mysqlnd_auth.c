@@ -26,10 +26,11 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
+#ifdef MYSQLND_HAVE_SASL
 #include <krb5/krb5.h>
 #include <sasl/sasl.h>
 #include <profile.h>
-
+#endif
 static const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using the old insecure authentication. "
 "Please use an administration tool to reset your password with the command SET PASSWORD = PASSWORD('your_existing_password'). This will "
 "store a new, and more secure, hash value in mysql.user. If this user is used in other scripts executed by PHP 5.2 or earlier you might need to remove the old-passwords "
