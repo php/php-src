@@ -61,6 +61,11 @@ PHP 8.1 UPGRADE NOTES
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
 
+- Standard:
+  . --with-password-argon2 now uses pkg-config to detect libargon2. As such,
+    an alternative libargon2 location should now be specified using
+    PKG_CONFIG_PATH.
+
 ========================================
 10. New Global Constants
 ========================================
