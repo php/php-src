@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     (al at coralnet dot name)
   . Fixed bug #80393 (Build of PHP extension fails due to configuration gap
     with libtool). (kir dot morozov at gmail dot com)
+  . Fixed bug #80402 (configure filtering out -lpthread). (Nikita)
 
 - Fileinfo:
   . Fixed bug #77961 (finfo_open crafted magic parsing SIGABRT). (cmb)
