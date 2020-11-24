@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #80345 (PHPIZE configuration has outdated PHP_RELEASE_VERSION).
     (cmb)
   . Fixed bug #72964 (White space not unfolded for CC/Bcc headers). (cmb)
+  . Fixed bug #80362 (Running dtrace scripts can cause php to crash).
+    (al at coralnet dot name)
 
 - Tidy:
   . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
