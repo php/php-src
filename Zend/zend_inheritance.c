@@ -323,6 +323,10 @@ static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce
 
 static zend_bool zend_type_contains_traversable(zend_type type) {
 	zend_type *single_type;
+	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
+		return 1;
+	}
+
 	ZEND_TYPE_FOREACH(type, single_type) {
 		if (ZEND_TYPE_HAS_NAME(*single_type)
 				&& zend_string_equals_literal_ci(ZEND_TYPE_NAME(*single_type), "Traversable")) {
