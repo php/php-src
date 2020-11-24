@@ -478,7 +478,7 @@ dnl Internal, don't use.
 dnl
 AC_DEFUN([_PHP_ADD_LIBRARY_SKELETON],[
   case $1 in
-  c|c_r|pthread*[)] ;;
+  c|c_r[)] ;;
   *[)] ifelse($3,,[
     _PHP_X_ADD_LIBRARY($1,$2,$5)
   ],[
