@@ -1041,51 +1041,38 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	zval				*mysql_link;
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	char				*statement;
+	char				*statement = NULL;
 	size_t					statement_len;
 
-	switch (ZEND_NUM_ARGS())
-	{
-		case 1:  /* mysql_stmt_init */
-			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				return;
-			}
-			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-
-			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
-
-			stmt->stmt = mysql_stmt_init(mysql->mysql);
-		break;
-		case 2:
-			if (zend_parse_parameters(2, "Os", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
-				return;
-			}
-			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-
-			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
-
-			if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
-				mysql_stmt_prepare(stmt->stmt, (char *)statement, statement_len);
-			}
-		break;
-		default:
-			WRONG_PARAM_COUNT;
-		break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!", &mysql_link, mysqli_link_class_entry, &statement, &statement_len) == FAILURE) {
+		return;
 	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	if (!stmt->stmt) {
+	stmt = (MY_STMT *) ecalloc(1, sizeof(MY_STMT));
+
+	if (!(stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		efree(stmt);
 		RETURN_FALSE;
 	}
+
 #ifndef MYSQLI_USE_MYSQLND
 	ZVAL_COPY(&stmt->link_handle, mysql_link);
 #endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
-	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
+	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
+
+	if (statement) {
+		if(mysql_stmt_prepare(stmt->stmt, statement, statement_len)) {
+			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+			RETURN_FALSE;
+		}
+		mysqli_resource->status = MYSQLI_STATUS_VALID;
+	}
 }
 /* }}} */
 
