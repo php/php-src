@@ -2306,10 +2306,10 @@ ZEND_METHOD(reflection_parameter, __construct)
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
 				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, lcname)) == NULL) {
+					zend_throw_exception_ex(reflection_exception_ptr, 0,
+						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 					zend_string_release(name);
 					zend_string_release(lcname);
-					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), Z_STRVAL_P(method));
 					return;
 				}
 				zend_string_release(name);
