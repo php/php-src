@@ -797,6 +797,19 @@ if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
   ZEND_DEBUG=yes
 fi
 
+AC_ARG_ENABLE([zts],
+  [AS_HELP_STRING([--enable-zts],
+    [Enable thread safety])],
+  [ZEND_ZTS=$enableval],
+  [ZEND_ZTS=no])
+
+if test "$ZEND_ZTS" = "yes"; then
+  AC_DEFINE(ZTS, 1,[ ])
+  PHP_THREAD_SAFETY=yes
+else
+  PHP_THREAD_SAFETY=no
+fi
+
 PHP_ARG_ENABLE([rtld-now],
   [whether to dlopen extensions with RTLD_NOW instead of RTLD_LAZY],
   [AS_HELP_STRING([--enable-rtld-now],
@@ -1135,13 +1148,6 @@ PHP_CONFIGURE_PART(Configuring Zend)
 LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
-
-if test "$ZEND_ZTS" = "yes"; then
-  AC_DEFINE(ZTS,1,[ ])
-  PHP_THREAD_SAFETY=yes
-else
-  PHP_THREAD_SAFETY=no
-fi
 
 INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
 INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
