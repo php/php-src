@@ -982,8 +982,8 @@ PHP 8.0 UPGRADE NOTES
 - Zip:
   . ZipArchive::setMtimeName and ZipArchive::setMtimeIndex to set the
     modification time of an entry.
-  . ZipArchive::setProgressCallback to provide updates during archive close.
-  . ZipArchive::setCancelCallback to allow cancellation during archive close.
+  . ZipArchive::registerProgressCallback to provide updates during archive close.
+  . ZipArchive::registerCancelCallback to allow cancellation during archive close.
   . ZipArchive::replaceFile to replace an entry content.
   . ZipArchive::isCompressionMethodSupported to check optional compression
     features.
