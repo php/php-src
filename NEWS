@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #80345 (PHPIZE configuration has outdated PHP_RELEASE_VERSION).
     (cmb)
   . Fixed bug #72964 (White space not unfolded for CC/Bcc headers). (cmb)
+  . Fixed bug #80391 (Iterable not covariant to mixed). (Nikita)
 
 - Tidy:
   . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
