@@ -1,28 +1,28 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7014b171486b2a597f659369a707a592c26b3b2f */
+ * Stub hash: d42215062c41775bae538cd310bc60e63fa06a8e */
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XmlParser, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create_ns, 0, 0, XmlParser, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create_ns, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\":\"")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_set_object, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_set_element_handler, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_INFO(0, start_handler)
 	ZEND_ARG_INFO(0, end_handler)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_set_character_data_handler, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_INFO(0, handler)
 ZEND_END_ARG_INFO()
 
@@ -41,20 +41,20 @@ ZEND_END_ARG_INFO()
 #define arginfo_xml_set_end_namespace_decl_handler arginfo_xml_set_character_data_handler
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_parse, 0, 2, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, is_final, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_parse_into_struct, 0, 3, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(1, values)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, index, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_get_error_code, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_error_string, 0, 1, IS_STRING, 1)
@@ -68,17 +68,17 @@ ZEND_END_ARG_INFO()
 #define arginfo_xml_get_current_byte_index arginfo_xml_get_error_code
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_parser_free, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_parser_set_option, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_xml_parser_get_option, 0, 2, MAY_BE_STRING|MAY_BE_LONG)
-	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
+	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -134,6 +134,6 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
-static const zend_function_entry class_XmlParser_methods[] = {
+static const zend_function_entry class_XMLParser_methods[] = {
 	ZEND_FE_END
 };
