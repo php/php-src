@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #80404 (Incorrect range inference result when division results
     in float). (Nikita)
 
+- Standard:
+  . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
+
 - Tidy:
   . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
 

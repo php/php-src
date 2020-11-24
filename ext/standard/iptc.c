@@ -203,7 +203,9 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (spool < 2) {
-		zend_fstat(fileno(fp), &sb);
+		if (zend_fstat(fileno(fp), &sb) != 0) {
+			RETURN_FALSE;
+		}
 
 		spoolbuf = zend_string_safe_alloc(1, iptcdata_len + sizeof(psheader) + 1024 + 1, sb.st_size, 0);
 		poi = (unsigned char*)ZSTR_VAL(spoolbuf);
