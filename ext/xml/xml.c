@@ -254,7 +254,7 @@ static void php_xml_free_wrapper(void *ptr)
 PHP_MINIT_FUNCTION(xml)
 {
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "XmlParser", class_XmlParser_methods);
+	INIT_CLASS_ENTRY(ce, "XMLParser", class_XMLParser_methods);
 	xml_parser_ce = zend_register_internal_class(&ce);
 	xml_parser_ce->create_object = xml_parser_create_object;
 	xml_parser_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
@@ -423,7 +423,7 @@ static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 }
 
 static zend_function *xml_parser_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct XmlParser, use xml_parser_create() or xml_parser_create_ns() instead");
+	zend_throw_error(NULL, "Cannot directly construct XMLParser, use xml_parser_create() or xml_parser_create_ns() instead");
 	return NULL;
 }
 

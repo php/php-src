@@ -36,6 +36,9 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
 
+- XML:
+  . XmlParser opaque object renamed to XMLParser for consistency with other XML objects. (girgias)
+
 26 Nov 2020, PHP 8.0.0
 
 - BZ2:

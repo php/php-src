@@ -11,8 +11,8 @@ serialize($parser);
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Uncaught Exception: Serialization of 'XmlParser' is not allowed in %s:%d
+Fatal error: Uncaught Exception: Serialization of 'XMLParser' is not allowed in %s:%d
 Stack trace:
-#0 %s(%d): serialize(Object(XmlParser))
+#0 %s(%d): serialize(Object(XMLParser))
 #1 {main}
   thrown in %s on line %d
