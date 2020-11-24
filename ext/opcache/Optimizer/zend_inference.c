@@ -548,6 +548,19 @@ static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
 	}
 }
 
+/* If b does not divide a exactly, return the two adjacent values between which the real result
+ * lies. */
+static void float_div(zend_long a, zend_long b, zend_long *r1, zend_long *r2) {
+	*r1 = *r2 = a / b;
+	if (a % b != 0) {
+		if (*r2 < 0) {
+			(*r2)--;
+		} else {
+			(*r2)++;
+		}
+	}
+}
+
 static int zend_inference_calc_binary_op_range(
 		const zend_op_array *op_array, zend_ssa *ssa,
 		zend_op *opline, zend_ssa_op *ssa_op, zend_uchar opcode, zend_ssa_range *tmp) {
@@ -644,32 +657,36 @@ static int zend_inference_calc_binary_op_range(
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
 				if (op2_min <= 0 && op2_max >= 0) {
+					/* If op2 crosses zero, then floating point values close to zero might be
+					 * possible, which will result in arbitrarily large results. As such, we can't
+					 * do anything useful in that case. */
 					break;
 				}
 				if (op1_min == ZEND_LONG_MIN && op2_max == -1) {
 					/* Avoid ill-defined division, which may trigger SIGFPE. */
 					break;
 				}
-				t1 = op1_min / op2_min;
-				t2 = op1_min / op2_max;
-				t3 = op1_max / op2_min;
-				t4 = op1_max / op2_max;
-				// FIXME: more careful overflow checks?
+
+				zend_long t1_, t2_, t3_, t4_;
+				float_div(op1_min, op2_min, &t1, &t1_);
+				float_div(op1_min, op2_max, &t2, &t2_);
+				float_div(op1_max, op2_min, &t3, &t3_);
+				float_div(op1_max, op2_max, &t4, &t4_);
+
+				/* The only case in which division can "overflow" either a division by an absolute
+				 * value smaller than one, or LONG_MIN / -1 in particular. Both cases have already
+				 * been excluded above. */
 				if (OP1_RANGE_UNDERFLOW() ||
 					OP2_RANGE_UNDERFLOW() ||
 					OP1_RANGE_OVERFLOW()  ||
-					OP2_RANGE_OVERFLOW()  ||
-					t1 != (zend_long)((double)op1_min / (double)op2_min) ||
-					t2 != (zend_long)((double)op1_min / (double)op2_max) ||
-					t3 != (zend_long)((double)op1_max / (double)op2_min) ||
-					t4 != (zend_long)((double)op1_max / (double)op2_max)) {
+					OP2_RANGE_OVERFLOW()) {
 					tmp->underflow = 1;
 					tmp->overflow = 1;
 					tmp->min = ZEND_LONG_MIN;
 					tmp->max = ZEND_LONG_MAX;
 				} else {
-					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+					tmp->min = MIN(MIN(MIN(t1, t2), MIN(t3, t4)), MIN(MIN(t1_, t2_), MIN(t3_, t4_)));
+					tmp->max = MAX(MAX(MAX(t1, t2), MAX(t3, t4)), MAX(MAX(t1_, t2_), MAX(t3_, t4_)));
 				}
 				return 1;
 			}
