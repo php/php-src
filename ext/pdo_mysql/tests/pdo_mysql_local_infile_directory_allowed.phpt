@@ -5,6 +5,7 @@ PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY vs access allowed
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipifinfilenotallowed.inc');
 $dataPath = __DIR__ . '/foo/bar/bar.data';
 if (!file_exists($dataPath))
 	die("skip Can't find '" . $dataPath . "' file");
