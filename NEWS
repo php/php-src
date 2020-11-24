@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #72964 (White space not unfolded for CC/Bcc headers). (cmb)
   . Fixed bug #80391 (Iterable not covariant to mixed). (Nikita)
 
+- Fileinfo:
+  . Fixed bug #77961 (finfo_open crafted magic parsing SIGABRT). (cmb)
+
 - Opcache:
   . Fixed bug #80404 (Incorrect range inference result when division results
     in float). (Nikita)
