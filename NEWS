@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #80404 (Incorrect range inference result when division results
     in float). (Nikita)
+  . Fixed bug #80377 (Opcache misses executor_globals). (Nikita)
 
 - Standard:
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
