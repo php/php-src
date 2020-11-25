@@ -23,9 +23,9 @@ $id = '1311200011005001566';
 require_once('connect.inc');
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-		$host, $user, $db, $port, $socket);
-	exit(1);
+    printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+        $host, $user, $db, $port, $socket);
+    exit(1);
 }
 
 $link->query($table_drop);
@@ -33,8 +33,8 @@ $link->query($table_create);
 
 $stmt = $link->prepare($table_insert);
 if (!$stmt) {
-	printf("Can't prepare\n");
-	exit(1);
+    printf("Can't prepare\n");
+    exit(1);
 }
 
 echo "Using 'i':\n";
@@ -43,8 +43,8 @@ $stmt->bind_param('i', $id);
 if ($stmt->execute()){
     echo "insert id:{$id}=>{$stmt->insert_id}\n";
 } else {
-	printf("Can't execute\n");
-	exit(1);
+    printf("Can't execute\n");
+    exit(1);
 }
 
 
@@ -55,8 +55,8 @@ if ($result){
         echo "fetch  id:{$row['id']}\n";
     }
 } else {
-	printf("Can't select\n");
-	exit(1);
+    printf("Can't select\n");
+    exit(1);
 }
 
 $stmt->close();
@@ -73,8 +73,8 @@ echo "Using 's':\n";
 if ($stmt->execute()){
     echo "insert id:{$id}\n";
 } else{
-	printf("Can't execute\n");
-	exit(1);
+    printf("Can't execute\n");
+    exit(1);
 }
 
 $result = $link->query($table_select);
@@ -84,8 +84,8 @@ if ($result){
         echo "fetch  id:{$row['id']}\n";
     }
 } else {
-	printf("Can't select\n");
-	exit(1);
+    printf("Can't select\n");
+    exit(1);
 }
 
 $link->close();

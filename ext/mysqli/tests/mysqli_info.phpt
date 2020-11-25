@@ -94,7 +94,7 @@ mysqli.allow_local_infile=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

@@ -83,9 +83,9 @@ max_execution_time=240
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
-	mysqli_query($link, 'DROP USER pamtest');
-	mysqli_query($link, 'DROP USER pamtest@localhost');
+    require_once("clean_table.inc");
+    mysqli_query($link, 'DROP USER pamtest');
+    mysqli_query($link, 'DROP USER pamtest@localhost');
 ?>
 --EXPECTF--
 Warning: mysqli_real_connect(): (28000/1045): Access denied for user %s

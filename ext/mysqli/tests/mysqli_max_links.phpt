@@ -38,7 +38,7 @@ mysqli.max_links=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 bool(true)

@@ -182,7 +182,7 @@ memory_limit=83886080
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 FLOAT

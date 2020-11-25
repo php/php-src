@@ -94,7 +94,7 @@ memory_limit=256M
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 int(%d)

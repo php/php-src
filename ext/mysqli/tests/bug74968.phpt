@@ -7,13 +7,13 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$mysqli = new mysqli("$host:$port", $user, $passwd, $db);
-	abstract class test {
-		public $a;
-	}
-	$mysqli->query("SELECT 1 as a")->fetch_object("test");
+    $mysqli = new mysqli("$host:$port", $user, $passwd, $db);
+    abstract class test {
+        public $a;
+    }
+    $mysqli->query("SELECT 1 as a")->fetch_object("test");
 ?>
 ==DONE==
 --EXPECTF--

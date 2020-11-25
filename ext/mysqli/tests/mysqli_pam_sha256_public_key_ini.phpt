@@ -116,11 +116,11 @@ mysqlnd.sha256_server_public_key="test_sha256_ini"
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
-	$link->query('DROP USER shatest');
-	$link->query('DROP USER shatest@localhost');
-	$file = "test_sha256_ini";
-	@unlink($file);
+    require_once("clean_table.inc");
+    $link->query('DROP USER shatest');
+    $link->query('DROP USER shatest@localhost');
+    $file = "test_sha256_ini";
+    @unlink($file);
 ?>
 --EXPECTF--
 Warning: mysqli::__construct(): (HY000/1045): %s in %s on line %d

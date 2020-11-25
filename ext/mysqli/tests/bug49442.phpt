@@ -106,7 +106,7 @@ mysqli.max_persistent=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 array(2) {

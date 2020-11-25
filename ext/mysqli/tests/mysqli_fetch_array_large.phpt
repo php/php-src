@@ -161,7 +161,7 @@ memory_limit=-1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 stop: %s

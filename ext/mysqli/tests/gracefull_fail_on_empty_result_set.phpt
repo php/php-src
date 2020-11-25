@@ -8,17 +8,17 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
-	require('table.inc');
+    require_once("connect.inc");
+    require('table.inc');
 
-	// Returns only one result set
-	$link->multi_query("SELECT 1");
+    // Returns only one result set
+    $link->multi_query("SELECT 1");
     var_dump($link->next_result()); // should return false
     var_dump($link->store_result()); // now what happens here!?
 
 
-	// Returns only one result set
-	$link->multi_query("SELECT 1");
+    // Returns only one result set
+    $link->multi_query("SELECT 1");
     var_dump($link->next_result());
     var_dump($link->use_result());
 

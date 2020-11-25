@@ -91,7 +91,7 @@ mysqlnd.collect_memory_statistics=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 BEGINNING: rows_fetched_from_client_ps_unbuffered = %d

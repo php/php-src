@@ -38,7 +38,7 @@ mysqlnd.collect_memory_statistics=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 BEGINNING: implicit_free_result = %d

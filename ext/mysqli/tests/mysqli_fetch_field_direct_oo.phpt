@@ -8,46 +8,46 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    $tmp    = NULL;
+    $link   = NULL;
 
-	$mysqli = new mysqli();
-	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_field_direct()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    $mysqli = new mysqli();
+    $res = @new mysqli_result($mysqli);
+    if (!is_null($tmp = @$res->fetch_field_direct()))
+        printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	require('table.inc');
+    require('table.inc');
 
-	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-			$host, $user, $db, $port, $socket);
+    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
+        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
 
-	if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	if (!is_null($tmp = @$res->fetch_field_direct()))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (!is_null($tmp = @$res->fetch_field_direct()))
+        printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!is_null($tmp = @$res->fetch_field_direct($link)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (!is_null($tmp = @$res->fetch_field_direct($link)))
+        printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!is_null($tmp = @$res->fetch_field_direct($link, $link)))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (!is_null($tmp = @$res->fetch_field_direct($link, $link)))
+        printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	var_dump($res->fetch_field_direct(-1));
-	var_dump($res->fetch_field_direct(0));
-	var_dump($res->fetch_field_direct(2));
+    var_dump($res->fetch_field_direct(-1));
+    var_dump($res->fetch_field_direct(0));
+    var_dump($res->fetch_field_direct(2));
 
-	$res->free_result();
+    $res->free_result();
 
-	if (false !== ($tmp = $res->fetch_field_direct(0)))
-		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    if (false !== ($tmp = $res->fetch_field_direct(0)))
+        printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
-	$mysqli->close();
-	print "done!";
+    $mysqli->close();
+    print "done!";
 ?>
 --CLEAN--
 <?php
