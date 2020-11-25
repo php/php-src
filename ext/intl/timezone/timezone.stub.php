@@ -95,7 +95,7 @@ class IntlTimeZone
     /**
      * @param int $rawOffset
      * @param int $dstOffset
-     * @return bool
+     * @return int
      * @alias intltz_get_offset
      */
     public function getOffset(float $timestamp, bool $local, &$rawOffset, &$dstOffset) {}
