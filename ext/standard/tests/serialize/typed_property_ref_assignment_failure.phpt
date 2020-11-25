@@ -16,6 +16,14 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+$s = <<<'STR'
+O:4:"Test":1:{s:4:"prop";a:1:{i:0;R:2;
+STR;
+var_dump(unserialize($s));
+
 ?>
---EXPECT--
+--EXPECTF--
 Cannot assign stdClass to property Test::$prop of type int
+
+Notice: unserialize(): Error at offset 38 of 38 bytes in %s on line %d
+bool(false)

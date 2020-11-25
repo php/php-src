@@ -578,6 +578,11 @@ string_key:
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
+			if (info && Z_ISREF_P(data)) {
+				/* Add type source even if we failed to unserialize.
+				 * The data is still stored in the property. */
+				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			}
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
