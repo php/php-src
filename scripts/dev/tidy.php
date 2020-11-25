@@ -4,9 +4,18 @@ set_error_handler(function($_, $msg) {
     throw new Exception($msg);
 });
 
-$rootDir = __DIR__ . '/../..';
+if ($argc > 1) {
+    $dir = $argv[1];
+} else {
+    $dir = __DIR__ . '/../..';
+}
+if (!is_dir($dir)) {
+    echo "Directory $dir does not exist.\n";
+    exit(1);
+}
+
 $it = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator($rootDir),
+    new RecursiveDirectoryIterator($dir),
     RecursiveIteratorIterator::LEAVES_ONLY
 );
 
