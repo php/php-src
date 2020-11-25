@@ -443,6 +443,12 @@ PHP 8.0 UPGRADE NOTES
             string $statement, ?int $fetch_mode = null, ...$fetch_mode_args)
         PDOStatement::setFetchMode(int $mode, ...$params)
 
+- PDO MySQL:
+  . PDO::inTransaction() now reports the actual transaction state of the
+    connection, rather than an approximation maintained by PDO. If a query that
+    is subject to "implicit commit" is executed, PDO::inTransaction() will
+    subsequently return false, as a transaction is no longer active.
+
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
 
