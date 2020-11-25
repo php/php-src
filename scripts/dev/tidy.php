@@ -126,9 +126,9 @@ function transformTestCode(string $code, callable $transformer): string {
     }
 
     return preg_replace_callback(
-        '/(--(?:FILE|SKIPIF|CLEAN)--)(.+?)(--[A-Z_]+--)/s',
+        '/(--(?:FILE|SKIPIF|CLEAN)--)(.+?)(?=--[A-Z_]+--)/s',
         function(array $matches) use($transformer) {
-            return $matches[1] . $transformer($matches[2]) . $matches[3];
+            return $matches[1] . $transformer($matches[2]);
         },
         $code
     );
