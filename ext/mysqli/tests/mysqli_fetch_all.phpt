@@ -6,7 +6,7 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_fetch_all'))
-	die("skip: function only available with mysqlnd");
+    die("skip: function only available with mysqlnd");
 ?>
 --FILE--
 <?php
@@ -323,7 +323,7 @@ if (!function_exists('mysqli_fetch_all'))
 ?>
 --CLEAN--
 <?php
-	// require_once("clean_table.inc");
+    // require_once("clean_table.inc");
 ?>
 --EXPECTF--
 [005]

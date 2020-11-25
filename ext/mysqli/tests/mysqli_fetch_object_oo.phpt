@@ -126,7 +126,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 [E_WARNING] mysqli_result::__construct(): invalid object or resource mysql%s

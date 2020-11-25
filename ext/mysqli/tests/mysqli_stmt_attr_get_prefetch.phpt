@@ -23,7 +23,7 @@ die("SKIP: prefetch isn't supported at the moment");
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

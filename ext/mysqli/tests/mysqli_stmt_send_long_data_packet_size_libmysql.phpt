@@ -7,7 +7,7 @@ require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (stristr(mysqli_get_client_info(), 'mysqlnd'))
-	die("skip: test for libmysql");
+    die("skip: test for libmysql");
 ?>
 --FILE--
 <?php
@@ -92,7 +92,7 @@ if (stristr(mysqli_get_client_info(), 'mysqlnd'))
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

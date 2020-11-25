@@ -121,7 +121,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_field_seek(): Invalid field offset in %s on line %d

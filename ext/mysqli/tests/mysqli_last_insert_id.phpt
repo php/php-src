@@ -176,7 +176,7 @@ API vs. SQL LAST_INSERT_ID()
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 API: %d, SQL: %d

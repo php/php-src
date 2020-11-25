@@ -8,10 +8,10 @@ require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		die(printf("skip: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+        die(printf("skip: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (mysqli_get_server_version($link) < 50041)
-	die("skip: Due to many MySQL Server differences, the test requires 5.0.41+");
+    die("skip: Due to many MySQL Server differences, the test requires 5.0.41+");
 
 mysqli_close($link);
 ?>
@@ -220,7 +220,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

@@ -7,45 +7,45 @@ require_once('skipifemb.inc');
 require_once('connect.inc');
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-		$host, $user, $db, $port, $socket));
+    die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+        $host, $user, $db, $port, $socket));
 }
 
 if ($link->server_version < 50610)
-	die(sprintf("SKIP Needs MySQL 5.6.10 or newer, found MySQL %s\n", $link->server_info));
+    die(sprintf("SKIP Needs MySQL 5.6.10 or newer, found MySQL %s\n", $link->server_info));
 
 if  (!$IS_MYSQLND && (mysqli_get_client_version() < 50610)) {
-	die(sprintf("SKIP Needs libmysql 5.6.10 or newer, found  %s\n", mysqli_get_client_version()));
+    die(sprintf("SKIP Needs libmysql 5.6.10 or newer, found  %s\n", mysqli_get_client_version()));
 }
 
 mysqli_query($link, 'DROP USER expiretest');
 mysqli_query($link, 'DROP USER expiretest@localhost');
 
 if (!mysqli_query($link, 'CREATE USER expiretest@"%"') ||
-	!mysqli_query($link, 'CREATE USER expiretest@"localhost"')) {
-	printf("skip Cannot create second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
-	mysqli_close($link);
-	die("skip CREATE USER failed");
+    !mysqli_query($link, 'CREATE USER expiretest@"localhost"')) {
+    printf("skip Cannot create second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
+    mysqli_close($link);
+    die("skip CREATE USER failed");
 }
 
 if (!mysqli_query($link, 'ALTER USER expiretest@"%" PASSWORD EXPIRE') ||
-	!mysqli_query($link, 'ALTER USER expiretest@"localhost" PASSWORD EXPIRE')) {
-	printf("skip Cannot modify second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
-	mysqli_close($link);
-	die("skip ALTER USER failed");
+    !mysqli_query($link, 'ALTER USER expiretest@"localhost" PASSWORD EXPIRE')) {
+    printf("skip Cannot modify second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
+    mysqli_close($link);
+    die("skip ALTER USER failed");
 }
 
 if (!$link->query("DROP TABLE IF EXISTS test") ||
-	!$link->query("CREATE TABLE test (id INT)") || !$link->query("INSERT INTO test(id) VALUES (1)"))
-	die(sprintf("SKIP [%d] %s\n", $link->errno, $link->error));
+    !$link->query("CREATE TABLE test (id INT)") || !$link->query("INSERT INTO test(id) VALUES (1)"))
+    die(sprintf("SKIP [%d] %s\n", $link->errno, $link->error));
 
 
 
 if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%%'", $db)) ||
-	!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'localhost'", $db))) {
-	printf("skip Cannot grant SELECT to user [%d] %s", mysqli_errno($link), mysqli_error($link));
-	mysqli_close($link);
-	die("skip GRANT failed");
+    !mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'localhost'", $db))) {
+    printf("skip Cannot grant SELECT to user [%d] %s", mysqli_errno($link), mysqli_error($link));
+    mysqli_close($link);
+    die("skip GRANT failed");
 }
 ?>
 --FILE--
@@ -118,9 +118,9 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
-	mysqli_query($link, 'DROP USER expiretest');
-	mysqli_query($link, 'DROP USER expiretest@localhost');
+    require_once("clean_table.inc");
+    mysqli_query($link, 'DROP USER expiretest');
+    mysqli_query($link, 'DROP USER expiretest@localhost');
 ?>
 --EXPECTF--
 Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d

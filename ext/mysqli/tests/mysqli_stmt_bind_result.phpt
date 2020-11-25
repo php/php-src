@@ -315,7 +315,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_stmt_bind_result() expects at least 2 parameters, 1 given in %s on line %d

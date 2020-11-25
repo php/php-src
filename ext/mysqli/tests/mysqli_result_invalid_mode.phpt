@@ -23,7 +23,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_result::__construct(): Invalid value for resultmode in %s on line %d

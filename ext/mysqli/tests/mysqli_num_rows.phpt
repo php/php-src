@@ -75,7 +75,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in %s on line %d

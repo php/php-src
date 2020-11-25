@@ -94,10 +94,10 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("connect.inc");
-	if (!$link->query('DROP PROCEDURE IF EXISTS p123')) {
-		printf("[001] [%d] %s\n", $link->error, $link->errno);
-	}
+    require_once("connect.inc");
+    if (!$link->query('DROP PROCEDURE IF EXISTS p123')) {
+        printf("[001] [%d] %s\n", $link->error, $link->errno);
+    }
 ?>
 --EXPECT--
 string(4) "pre:"

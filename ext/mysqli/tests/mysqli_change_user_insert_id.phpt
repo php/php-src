@@ -8,7 +8,7 @@ require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 if (!$IS_MYSQLND) {
-	die("skip Might hit known and open bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184");
+    die("skip Might hit known and open bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184");
 }
 ?>
 --FILE--
@@ -59,7 +59,7 @@ if (!$IS_MYSQLND) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

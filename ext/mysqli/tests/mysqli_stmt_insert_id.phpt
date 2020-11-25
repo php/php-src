@@ -69,7 +69,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_stmt_insert_id(): Couldn't fetch mysqli_stmt in %s on line %d

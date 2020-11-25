@@ -2,20 +2,20 @@
 function test: nested selects (cursors)
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifconnectfailure.inc');
-	require_once("connect.inc");
+    require_once('skipif.inc');
+    require_once('skipifconnectfailure.inc');
+    require_once("connect.inc");
 
-	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		die("skip Cannot connect to check required version");
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+        die("skip Cannot connect to check required version");
 
-	/* skip cursor test for versions < 50004 */
-	if ((!$IS_MYSQLND && (mysqli_get_client_version() < 50009)) ||
-			(mysqli_get_server_version($link) < 50009)) {
-			die(sprintf("skip Client library doesn't support cursors (%s/%s)",
-					mysqli_get_client_version(), mysqli_get_server_version($link)));
-	}
-	mysqli_close($link);
+    /* skip cursor test for versions < 50004 */
+    if ((!$IS_MYSQLND && (mysqli_get_client_version() < 50009)) ||
+            (mysqli_get_server_version($link) < 50009)) {
+            die(sprintf("skip Client library doesn't support cursors (%s/%s)",
+                    mysqli_get_client_version(), mysqli_get_server_version($link)));
+    }
+    mysqli_close($link);
 ?>
 --FILE--
 <?php
@@ -71,8 +71,8 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 for ($i =0; $i < 3; $i++) {
-	if (!mysqli_query($link, sprintf("DROP TABLE IF EXISTS cursor%d", $i)))
-		printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if (!mysqli_query($link, sprintf("DROP TABLE IF EXISTS cursor%d", $i)))
+        printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 
 mysqli_close($link);

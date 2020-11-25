@@ -7,7 +7,7 @@ require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
 
 if ("127.0.0.1" != $host && "localhost" != $host) {
-	die("skip require 127.0.0.1 connection");
+    die("skip require 127.0.0.1 connection");
 }
 
 ?>

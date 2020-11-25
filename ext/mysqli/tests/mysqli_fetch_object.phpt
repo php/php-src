@@ -142,7 +142,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 [E_WARNING] mysqli_fetch_object() expects at least 1 parameter, 0 given in %s on line %d

@@ -5,7 +5,7 @@ Bug #46614 (Extended MySQLi class gives incorrect empty() result)
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!defined("MYSQLI_ASYNC")) {
-	die("skip mysqlnd only");
+    die("skip mysqlnd only");
 }
 ?>
 --FILE--

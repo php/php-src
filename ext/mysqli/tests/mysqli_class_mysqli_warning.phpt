@@ -8,7 +8,7 @@ require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 if (!$TEST_EXPERIMENTAL)
-	die("skip - experimental (= unsupported) feature");
+    die("skip - experimental (= unsupported) feature");
 ?>
 --FILE--
 <?php
@@ -91,7 +91,7 @@ if (!$TEST_EXPERIMENTAL)
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: Wrong parameter count for mysqli_warning::mysqli_warning() in %s on line %d

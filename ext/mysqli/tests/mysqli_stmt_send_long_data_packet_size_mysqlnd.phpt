@@ -7,7 +7,7 @@ require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
-	die("skip: warnings only available in mysqlnd");
+    die("skip: warnings only available in mysqlnd");
 ?>
 --FILE--
 <?php
@@ -97,7 +97,7 @@ Warning: mysqli_stmt_send_long_data(): There was an error while sending long dat
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

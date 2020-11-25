@@ -387,7 +387,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_stmt_bind_param(): Number of elements in type definition string doesn't match number of bind variables in %s on line %d
