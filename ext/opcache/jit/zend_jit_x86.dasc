@@ -14196,10 +14196,10 @@ static int zend_jit_load_this(dasm_State **Dst, uint32_t var)
 {
 	zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 
-	|	mov r0, aword EX->This.value.ptr
-	|	SET_ZVAL_PTR var_addr, r0
+	|	mov FCARG1a, aword EX->This.value.ptr
+	|	SET_ZVAL_PTR var_addr, FCARG1a
 	|	SET_ZVAL_TYPE_INFO var_addr, IS_OBJECT_EX
-	|	GC_ADDREF r0
+	|	GC_ADDREF FCARG1a
 
 	return 1;
 }
