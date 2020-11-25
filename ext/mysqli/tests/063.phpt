@@ -16,9 +16,18 @@ require_once('skipifconnectfailure.inc');
     $stmt->bind_result($foo);
     $stmt->fetch();
     $stmt->close();
-    $mysql->close();
-
     var_dump($foo);
+
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    try {
+        // an exception should be thrown from prepare (i.e. constructor) not from execute
+        $stmt = new mysqli_stmt($mysql, "SELECT invalid FROM DUAL");
+    } catch(mysqli_sql_exception $e) {
+        echo $e->getMessage()."\n";
+    }
+
+    $mysql->close();
 ?>
 --EXPECT--
 string(3) "foo"
+Unknown column 'invalid' in 'field list'
