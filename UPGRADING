@@ -100,6 +100,11 @@ PHP 8.1 UPGRADE NOTES
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
+  . Added CURLStringFile, which can be used to post a file from a string rather
+    than a file:
+
+        $file = new CURLStringFile($data, 'filename.txt', 'text/plain');
+        curl_setopt($curl, CURLOPT_POSTFIELDS, ['file' => $file]);
 
 - hash:
   . The following functions have changed signatures:
