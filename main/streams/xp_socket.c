@@ -103,10 +103,13 @@ retry:
 			}
 		}
 
-		estr = php_socket_strerror(err, NULL, 0);
-		php_error_docref(NULL, E_NOTICE, "Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
+		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
+			estr = php_socket_strerror(err, NULL, 0);
+			php_error_docref(NULL, E_NOTICE,
+				"Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
 				(zend_long)count, err, estr);
-		efree(estr);
+			efree(estr);
+		}
 	}
 
 	if (didwrite > 0) {
