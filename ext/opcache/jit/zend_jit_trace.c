@@ -5687,8 +5687,23 @@ done:
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op1_def]) {
-							SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
-								ra[ssa_op->op1_def]->flags & ZREG_STORE);
+							uint8_t flags = ra[ssa_op->op1_def]->flags & ZREG_STORE;
+
+							if (ssa_op->op1_use >= 0) {
+								if (opline->opcode == ZEND_SEND_VAR
+								 || opline->opcode == ZEND_CAST
+								 || opline->opcode == ZEND_QM_ASSIGN
+								 || opline->opcode == ZEND_JMP_SET
+								 || opline->opcode == ZEND_COALESCE
+								 || opline->opcode == ZEND_JMP_NULL
+								 || opline->opcode == ZEND_FE_RESET_R) {
+									if (!ra[ssa_op->op1_use]
+									 || ra[ssa_op->op1_use]->reg != ra[ssa_op->op1_def]->reg) {
+										flags |= ZREG_LOAD;
+									}
+								}
+							}
+							SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg, flags);
 						}
 					}
 					if (type == IS_LONG
@@ -5715,8 +5730,17 @@ done:
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op2_def]) {
-							SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op2.var), ra[ssa_op->op2_def]->reg,
-								ra[ssa_op->op2_def]->flags & ZREG_STORE);
+							uint8_t flags = ra[ssa_op->op2_def]->flags & ZREG_STORE;
+
+							if (ssa_op->op2_use >= 0) {
+								if (opline->opcode == ZEND_ASSIGN) {
+									if (!ra[ssa_op->op2_use]
+									 || ra[ssa_op->op2_use]->reg != ra[ssa_op->op2_def]->reg) {
+										flags |= ZREG_LOAD;
+									}
+								}
+							}
+							SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op2.var), ra[ssa_op->op2_def]->reg, flags);
 						}
 					}
 					if (type == IS_LONG
