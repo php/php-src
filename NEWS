@@ -107,7 +107,7 @@ PHP                                                                        NEWS
   . Fixed bug #80280 (ADD_EXTENSION_DEP() fails for ext/standard and ext/date).
     (cmb)
   . Fixed bug #80334 (assert() vs named parameters - confusing error). (Nikita)
-  . Fixed bug #8055 (Abstract trait methods returning "self" cannot be
+  . Fixed bug #80055 (Abstract trait methods returning "self" cannot be
     fulfilled by traits). (Nikita)
   . Fixed faulty generator cleanup with yield from. (Bob)
   . Implement #[Attr] Attribute syntax as per final vote in RFC
