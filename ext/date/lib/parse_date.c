@@ -22898,7 +22898,7 @@ timelib_time *timelib_parse_from_format_with_map(const char *format, const char 
 					break;
 
 				default:
-					add_pbf_error(s, TIMELIB_ERR_DATA_MISSING, "Data missing", string, ptr);
+					add_pbf_error(s, TIMELIB_ERR_DATA_MISSING, "Date format doesn't match - Data missing", string, ptr);
 					done = 1;
 			}
 			fptr++;

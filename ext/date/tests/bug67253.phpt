@@ -37,7 +37,7 @@ array(12) {
     [1]=>
     string(29) "A meridian could not be found"
     [9]=>
-    string(12) "Data missing"
+    string(12) "Date format doesn't match - Data missing"
   }
   ["is_localtime"]=>
   bool(false)
