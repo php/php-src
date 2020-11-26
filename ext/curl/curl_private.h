@@ -90,6 +90,9 @@ struct _php_curl_send_headers {
 struct _php_curl_free {
 	zend_llist post;
 	zend_llist stream;
+#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
+	zend_llist buffers;
+#endif
 	HashTable *slist;
 };
 
@@ -155,6 +158,7 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 void curl_multi_register_handlers(void);
 void curl_share_register_handlers(void);
 void curlfile_register_class(void);
+void curlstringfile_register_class(void);
 int curl_cast_object(zend_object *obj, zval *result, int type);
 
 #endif  /* _PHP_CURL_PRIVATE_H */

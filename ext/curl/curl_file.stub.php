@@ -28,3 +28,12 @@ class CURLFile
     /** @return void */
     public function setPostFilename(string $posted_filename) {}
 }
+
+class CURLStringFile
+{
+    public string $data;
+    public string $postname;
+    public string $mime;
+
+    public function __construct(string $data, string $postname, string $mime = "application/octet-stream") {}
+}
