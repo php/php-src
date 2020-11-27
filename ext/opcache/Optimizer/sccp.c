@@ -845,13 +845,16 @@ static inline int ct_eval_func_call(
 				|| zend_string_equals_literal(name, "urldecode")
 				|| zend_string_equals_literal(name, "rawurlencode")
 				|| zend_string_equals_literal(name, "rawurldecode")
-				|| zend_string_equals_literal(name, "php_uname")) {
+				|| zend_string_equals_literal(name, "php_uname")
+				|| zend_string_equals_literal(name, "dirname")
+				|| zend_string_equals_literal(name, "crc32")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING) {
 				return FAILURE;
 			}
 			/* pass */
 		} else if (zend_string_equals_literal(name, "array_keys")
-				|| zend_string_equals_literal(name, "array_values")) {
+				|| zend_string_equals_literal(name, "array_values")
+				|| zend_string_equals_literal(name, "array_filter")) {
 			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
 				return FAILURE;
 			}
@@ -868,7 +871,8 @@ static inline int ct_eval_func_call(
 				}
 			} ZEND_HASH_FOREACH_END();
 			/* pass */
-		} else if (zend_string_equals_literal(name, "implode")) {
+		} else if (zend_string_equals_literal(name, "implode")
+				|| zend_string_equals_literal(name, "array_unique")) {
 			zval *entry;
 
 			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
@@ -906,6 +910,17 @@ static inline int ct_eval_func_call(
 						&& Z_TYPE_P(args[0]) != IS_NULL)) {
 				return FAILURE;
 			}
+			/* pass */
+		} else if (zend_string_equals_literal(name, "dirname")) {
+			if (Z_TYPE_P(args[0]) != IS_STRING
+					|| (Z_TYPE_P(args[1]) != IS_LONG)) {
+				return FAILURE;
+			}
+			if (Z_LVAL_P(args[1]) < 1) {
+				// levels must be >= 1, else we get a ValueError
+				return FAILURE;
+			}
+
 			/* pass */
 		} else if (zend_string_equals_literal(name, "trim")
 				|| zend_string_equals_literal(name, "rtrim")
@@ -1005,7 +1020,8 @@ static inline int ct_eval_func_call(
 				}
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "version_compare")) {
+		// todo: version_compare with 3 arguments got removed, as we should add a proper check for the comperator, else we hide a ValueError
+		} else if (zend_string_equals_literal(name, "str_replace")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING
 					|| Z_TYPE_P(args[2]) != IS_STRING) {
