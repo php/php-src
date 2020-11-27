@@ -3615,7 +3615,7 @@ PHPAPI void php_stripslashes(zend_string *str) {
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(string_intrin)
 {
-	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
+	if (zend_cpu_supports_sse42()) {
 		php_addslashes_ptr = php_addslashes_sse42;
 		php_stripslashes_ptr = php_stripslashes_sse42;
 	} else {
