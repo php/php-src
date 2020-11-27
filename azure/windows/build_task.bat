@@ -23,7 +23,7 @@ if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 
-cd /D %APPVEYOR_BUILD_FOLDER%
+cd /D %BUILD_SOURCESDIRECTORY%
 if %errorlevel% neq 0 exit /b 3
 
 if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
