@@ -17,17 +17,18 @@ if not exist "%DEPS_DIR%" (
 	exit /b 3
 )
 
-rem rem setup MySQL related exts
-rem set MYSQL_PWD=Password12!
-rem set MYSQL_TEST_PASSWD=%MYSQL_PWD%
-rem set MYSQL_TEST_USER=root
-rem set MYSQL_TEST_HOST=127.0.0.1
-rem set MYSQL_TEST_PORT=3306
-rem set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
-rem set PDO_MYSQL_TEST_PASS=%MYSQL_PWD%
-rem set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
-rem set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
-rem set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
+rem setup MySQL related exts
+set MYSQL_PWD=Password12!
+set MYSQL_TEST_PASSWD=%MYSQL_PWD%
+set MYSQL_TEST_USER=root
+set MYSQL_TEST_HOST=127.0.0.1
+set MYSQL_TEST_PORT=3306
+set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
+set PDO_MYSQL_TEST_PASS=%MYSQL_PWD%
+set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
+set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
+set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
+rem TODO All the extension setup
 rem "C:\Program Files\MySql\MySQL Server 5.7\bin\mysql.exe" --user=%MYSQL_TEST_USER% -e "CREATE DATABASE IF NOT EXISTS test"
 rem if %errorlevel% neq 0 exit /b 3
 rem 
@@ -95,13 +96,11 @@ set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%\phpdbg.exe
 
 mkdir c:\tests_tmp
 
-set TEST_PHP_JUNIT=c:\junit.out.xml
+set TEST_PHP_JUNIT=c:\junit.xml
 
 cd "%BUILD_SOURCESDIRECTORY%"
-nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp -j2"
 
 set EXIT_CODE=%errorlevel%
-
-powershell -Command "$wc = New-Object 'System.Net.WebClient'; $wc.UploadFile('https://ci.appveyor.com/api/testresults/junit/%APPVEYOR_JOB_ID%', 'c:\junit.out.xml')"
 
 exit /b %EXIT_CODE%
