@@ -26,8 +26,8 @@ if %errorlevel% neq 0 exit /b 3
 cd /D %BUILD_SOURCESDIRECTORY%
 if %errorlevel% neq 0 exit /b 3
 
-if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
-	set BRANCH=%APPVEYOR_REPO_BRANCH:~4,3%
+if /i "%BUILD_SOURCEBRANCHNAME:~0,4%" equ "php-" (
+	set BRANCH=%BUILD_SOURCEBRANCHNAME:~4,3%
 ) else (
 	set BRANCH=master
 )
