@@ -781,6 +781,122 @@ static inline int ct_eval_array_key_exists(zval *result, zval *op1, zval *op2) {
 	return SUCCESS;
 }
 
+static zend_bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **args) {
+	/* Functions that can be evaluated independently of what the arguments are.
+	 * It's okay if these functions throw on invalid arguments, but they should not warn. */
+	if (false
+		|| zend_string_equals_literal(name, "array_diff")
+		|| zend_string_equals_literal(name, "array_diff_assoc")
+		|| zend_string_equals_literal(name, "array_diff_key")
+		|| zend_string_equals_literal(name, "array_key_exists")
+		|| zend_string_equals_literal(name, "array_keys")
+		|| zend_string_equals_literal(name, "array_merge")
+		|| zend_string_equals_literal(name, "array_merge_recursive")
+		|| zend_string_equals_literal(name, "array_replace")
+		|| zend_string_equals_literal(name, "array_replace_recursive")
+		|| zend_string_equals_literal(name, "array_values")
+		|| zend_string_equals_literal(name, "base64_decode")
+		|| zend_string_equals_literal(name, "base64_encode")
+		|| zend_string_equals_literal(name, "imagetypes")
+		|| zend_string_equals_literal(name, "in_array")
+		|| zend_string_equals_literal(name, "ltrim")
+		|| zend_string_equals_literal(name, "php_sapi_name")
+		|| zend_string_equals_literal(name, "php_uname")
+		|| zend_string_equals_literal(name, "phpversion")
+		|| zend_string_equals_literal(name, "pow")
+		|| zend_string_equals_literal(name, "preg_quote")
+		|| zend_string_equals_literal(name, "rawurldecode")
+		|| zend_string_equals_literal(name, "rawurlencode")
+		|| zend_string_equals_literal(name, "rtrim")
+		|| zend_string_equals_literal(name, "serialize")
+		|| zend_string_equals_literal(name, "str_contains")
+		|| zend_string_equals_literal(name, "str_ends_with")
+		|| zend_string_equals_literal(name, "str_split")
+		|| zend_string_equals_literal(name, "str_split")
+		|| zend_string_equals_literal(name, "str_starts_with")
+		|| zend_string_equals_literal(name, "strpos")
+		|| zend_string_equals_literal(name, "substr")
+		|| zend_string_equals_literal(name, "trim")
+		|| zend_string_equals_literal(name, "urldecode")
+		|| zend_string_equals_literal(name, "urlencode")
+		|| zend_string_equals_literal(name, "version_compare")
+	) {
+		return true;
+	}
+
+	/* For the following functions we need to check arguments to prevent warnings during
+	 * evaluation. */
+	if (num_args == 1) {
+		if (zend_string_equals_literal(name, "array_flip")) {
+			zval *entry;
+
+			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
+				return false;
+			}
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
+				/* Throws warning for non int/string values. */
+				if (Z_TYPE_P(entry) != IS_LONG && Z_TYPE_P(entry) != IS_STRING) {
+					return false;
+				}
+			} ZEND_HASH_FOREACH_END();
+			return true;
+		}
+		if (zend_string_equals_literal(name, "implode")) {
+			zval *entry;
+
+			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
+				return false;
+			}
+
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
+				/* May throw warning during conversion to string. */
+				if (Z_TYPE_P(entry) > IS_STRING) {
+					return false;
+				}
+			} ZEND_HASH_FOREACH_END();
+			return true;
+		}
+		return false;
+	}
+
+	if (num_args == 2) {
+		if (zend_string_equals_literal(name, "str_repeat")) {
+			/* Avoid creating overly large strings at compile-time. */
+			bool overflow;
+			return Z_TYPE_P(args[0]) == IS_STRING
+				&& Z_TYPE_P(args[1]) == IS_LONG
+				&& zend_safe_address(Z_STRLEN_P(args[0]), Z_LVAL_P(args[1]), 0, &overflow) < 64 * 1024
+				&& !overflow;
+		} else if (zend_string_equals_literal(name, "implode")) {
+			zval *entry;
+
+			if ((Z_TYPE_P(args[0]) != IS_STRING || Z_TYPE_P(args[1]) != IS_ARRAY)
+					&& (Z_TYPE_P(args[0]) != IS_ARRAY || Z_TYPE_P(args[1]) != IS_STRING)) {
+				return false;
+			}
+
+			/* May throw warning during conversion to string. */
+			if (Z_TYPE_P(args[0]) == IS_ARRAY) {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
+					if (Z_TYPE_P(entry) > IS_STRING) {
+						return false;
+					}
+				} ZEND_HASH_FOREACH_END();
+			} else {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[1]), entry) {
+					if (Z_TYPE_P(entry) > IS_STRING) {
+						return false;
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	return false;
+}
+
 /* The functions chosen here are simple to implement and either likely to affect a branch,
  * or just happened to be commonly used with constant operands in WP (need to test other
  * applications as well, of course). */
@@ -788,18 +904,13 @@ static inline int ct_eval_func_call(
 		zval *result, zend_string *name, uint32_t num_args, zval **args) {
 	uint32_t i;
 	zend_execute_data *execute_data, *prev_execute_data;
-	zend_function *func;
-	bool overflow;
+	zend_function *func = zend_hash_find_ptr(CG(function_table), name);
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+		return FAILURE;
+	}
 
-	if (num_args == 0) {
-		if (zend_string_equals_literal(name, "php_sapi_name")
-				|| zend_string_equals_literal(name, "imagetypes")
-				|| zend_string_equals_literal(name, "phpversion")) {
-			/* pass */
-		} else {
-			return FAILURE;
-		}
-	} else if (num_args == 1) {
+	if (num_args == 1) {
+		/* Handle a few functions for which we manually implement evaluation here. */
 		if (zend_string_equals_literal(name, "chr")) {
 			zend_long c;
 			if (Z_TYPE_P(args[0]) != IS_LONG) {
@@ -834,200 +945,10 @@ static inline int ct_eval_func_call(
 				ZVAL_EMPTY_STRING(result);
 			}
 			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "trim")
-				|| zend_string_equals_literal(name, "rtrim")
-				|| zend_string_equals_literal(name, "ltrim")
-				|| zend_string_equals_literal(name, "str_split")
-				|| zend_string_equals_literal(name, "preg_quote")
-				|| zend_string_equals_literal(name, "base64_encode")
-				|| zend_string_equals_literal(name, "base64_decode")
-				|| zend_string_equals_literal(name, "urlencode")
-				|| zend_string_equals_literal(name, "urldecode")
-				|| zend_string_equals_literal(name, "rawurlencode")
-				|| zend_string_equals_literal(name, "rawurldecode")
-				|| zend_string_equals_literal(name, "php_uname")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "array_keys")
-				|| zend_string_equals_literal(name, "array_values")) {
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "array_flip")) {
-			zval *entry;
-
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return FAILURE;
-			}
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-				if (Z_TYPE_P(entry) != IS_LONG && Z_TYPE_P(entry) != IS_STRING) {
-					return FAILURE;
-				}
-			} ZEND_HASH_FOREACH_END();
-			/* pass */
-		} else if (zend_string_equals_literal(name, "implode")) {
-			zval *entry;
-
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return FAILURE;
-			}
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-				if (Z_TYPE_P(entry) > IS_STRING) {
-					return FAILURE;
-				}
-			} ZEND_HASH_FOREACH_END();
-			/* pass */
-		} else if (zend_string_equals_literal(name, "serialize")) {
-			/* pass */
-		} else {
-			return FAILURE;
 		}
-	} else if (num_args == 2) {
-		if (zend_string_equals_literal(name, "in_array")) {
-			if (Z_TYPE_P(args[1]) != IS_ARRAY) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "str_split")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG
-					|| Z_LVAL_P(args[1]) <= 0) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "array_key_exists")) {
-			if (Z_TYPE_P(args[1]) != IS_ARRAY
-					|| (Z_TYPE_P(args[0]) != IS_LONG
-						&& Z_TYPE_P(args[0]) != IS_STRING
-						&& Z_TYPE_P(args[0]) != IS_NULL)) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "trim")
-				|| zend_string_equals_literal(name, "rtrim")
-				|| zend_string_equals_literal(name, "ltrim")
-				|| zend_string_equals_literal(name, "preg_quote")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_STRING) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "str_repeat")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG
-					|| zend_safe_address(Z_STRLEN_P(args[0]), Z_LVAL_P(args[1]), 0, &overflow) > 64 * 1024
-					|| overflow) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "array_merge")
-				|| zend_string_equals_literal(name, "array_replace")
-				|| zend_string_equals_literal(name, "array_merge_recursive")
-				|| zend_string_equals_literal(name, "array_replace_recursive")
-				|| zend_string_equals_literal(name, "array_diff")
-				|| zend_string_equals_literal(name, "array_diff_assoc")
-				|| zend_string_equals_literal(name, "array_diff_key")) {
-			for (i = 0; i < num_args; i++) {
-				if (Z_TYPE_P(args[i]) != IS_ARRAY) {
-					return FAILURE;
-				}
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "implode")) {
-			zval *entry;
-
-			if ((Z_TYPE_P(args[0]) != IS_STRING || Z_TYPE_P(args[1]) != IS_ARRAY)
-					&& (Z_TYPE_P(args[0]) != IS_ARRAY || Z_TYPE_P(args[1]) != IS_STRING)) {
-				return FAILURE;
-			}
-
-			if (Z_TYPE_P(args[0]) == IS_ARRAY) {
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-					if (Z_TYPE_P(entry) > IS_STRING) {
-						return FAILURE;
-					}
-				} ZEND_HASH_FOREACH_END();
-			} else {
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[1]), entry) {
-					if (Z_TYPE_P(entry) > IS_STRING) {
-						return FAILURE;
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "strpos")
-				|| zend_string_equals_literal(name, "str_contains")
-				|| zend_string_equals_literal(name, "str_starts_with")
-				|| zend_string_equals_literal(name, "str_ends_with")
-				|| zend_string_equals_literal(name, "version_compare")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_STRING) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "substr")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "pow")) {
-			if ((Z_TYPE_P(args[0]) != IS_LONG && Z_TYPE_P(args[0]) != IS_DOUBLE)
-					|| (Z_TYPE_P(args[1]) != IS_LONG && Z_TYPE_P(args[1]) != IS_DOUBLE)) {
-				return FAILURE;
-			}
-			/* pass */
-		} else {
-			return FAILURE;
-		}
-	} else if (num_args == 3) {
-		if (zend_string_equals_literal(name, "in_array")) {
-			if (Z_TYPE_P(args[1]) != IS_ARRAY
-				|| (Z_TYPE_P(args[2]) != IS_FALSE
-					&& Z_TYPE_P(args[2]) != IS_TRUE)) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "array_merge")
-				|| zend_string_equals_literal(name, "array_replace")
-				|| zend_string_equals_literal(name, "array_merge_recursive")
-				|| zend_string_equals_literal(name, "array_replace_recursive")
-				|| zend_string_equals_literal(name, "array_diff")
-				|| zend_string_equals_literal(name, "array_diff_assoc")
-				|| zend_string_equals_literal(name, "array_diff_key")) {
-			for (i = 0; i < num_args; i++) {
-				if (Z_TYPE_P(args[i]) != IS_ARRAY) {
-					return FAILURE;
-				}
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "version_compare")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_STRING
-					|| Z_TYPE_P(args[2]) != IS_STRING) {
-				return FAILURE;
-			}
-			/* pass */
-		} else if (zend_string_equals_literal(name, "substr")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG
-					|| Z_TYPE_P(args[2]) != IS_LONG) {
-				return FAILURE;
-			}
-			/* pass */
-		} else {
-			return FAILURE;
-		}
-	} else {
-		return FAILURE;
 	}
 
-	func = zend_hash_find_ptr(CG(function_table), name);
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+	if (!can_ct_eval_func_call(name, num_args, args)) {
 		return FAILURE;
 	}
 
