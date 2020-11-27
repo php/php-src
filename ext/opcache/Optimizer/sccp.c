@@ -26,6 +26,7 @@
 #include "Optimizer/scdf.h"
 #include "Optimizer/zend_dump.h"
 #include "ext/standard/php_string.h"
+#include "zend_exceptions.h"
 
 /* This implements sparse conditional constant propagation (SCCP) based on the SCDF framework. The
  * used value lattice is defined as follows:
@@ -1040,12 +1041,20 @@ static inline int ct_eval_func_call(
 	for (i = 0; i < num_args; i++) {
 		ZVAL_COPY(EX_VAR_NUM(i), args[i]);
 	}
+	ZVAL_NULL(result);
 	func->internal_function.handler(execute_data, result);
 	for (i = 0; i < num_args; i++) {
 		zval_ptr_dtor_nogc(EX_VAR_NUM(i));
 	}
 	efree(execute_data);
 	EG(current_execute_data) = prev_execute_data;
+
+	if (EG(exception)) {
+		zval_ptr_dtor(result);
+		zend_clear_exception();
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 
