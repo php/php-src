@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #77961 (finfo_open crafted magic parsing SIGABRT). (cmb)
 
+- Intl:
+  . Fixed bug #80425 (MessageFormatAdapter::getArgTypeList redefined). (Nikita)
+
 - Standard:
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
   . Fixed bug #80411 (References to null-serialized object break serialize()).
