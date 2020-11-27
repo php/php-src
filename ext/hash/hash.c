@@ -425,7 +425,7 @@ PHP_FUNCTION(hash)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(raw_output)
-		Z_PARAM_ARRAY_HT_OR_NULL(args)
+		Z_PARAM_ARRAY_HT(args)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_hash_do_hash(return_value, algo, data, data_len, raw_output, 0, args);
@@ -447,7 +447,7 @@ PHP_FUNCTION(hash_file)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(raw_output)
-		Z_PARAM_ARRAY_HT_OR_NULL(args)
+		Z_PARAM_ARRAY_HT(args)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_hash_do_hash(return_value, algo, data, data_len, raw_output, 1, args);
@@ -611,7 +611,7 @@ PHP_FUNCTION(hash_init)
 	php_hashcontext_object *hash;
 	HashTable *args = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lSh!", &algo, &options, &key, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lSh", &algo, &options, &key, &args) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -643,7 +643,7 @@ PHP_FUNCTION(hash_init)
 	hash->context = context;
 	hash->options = options;
 	hash->key = NULL;
-	hash->args = args ? zend_array_dup(args) : NULL;
+	hash->args = args && zend_hash_num_elements(args) > 0 ? zend_array_dup(args) : NULL;
 
 	if (options & PHP_HASH_HMAC) {
 		char *K = emalloc(ops->block_size);
@@ -1205,7 +1205,7 @@ PHP_FUNCTION(mhash)
 	size_t data_len, key_len = 0;
 	HashTable *args;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls|s!h!", &algorithm, &data, &data_len, &key, &key_len, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls|s!h", &algorithm, &data, &data_len, &key, &key_len, &args) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1292,7 +1292,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	char padded_salt[SALT_SIZE];
 	HashTable *args;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssl|h!", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssl|h", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes, &args) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1389,6 +1389,9 @@ static void php_hashcontext_dtor(zend_object *obj) {
 	}
 
 	if (hash->args) {
+		if (GC_REFCOUNT(hash->args) > 1) {
+			GC_DELREF(hash->args);
+		}
 		zend_array_destroy(hash->args);
 		hash->args = NULL;
 	}
@@ -1553,9 +1556,10 @@ PHP_METHOD(HashContext, __unserialize)
 	hash->ops = ops;
 	hash->context = php_hash_alloc_context(ops);
 	hash->options = options;
-	if (args_zv && IS_ARRAY == Z_TYPE_P(args_zv)) {
+	if (args_zv && IS_ARRAY == Z_TYPE_P(args_zv) && zend_hash_num_elements(Z_ARRVAL_P(args_zv)) > 0) {
 		ops->hash_init(hash->context, Z_ARRVAL_P(args_zv));
-		hash->args = zend_array_dup(Z_ARRVAL_P(args_zv));
+		hash->args = Z_ARRVAL_P(args_zv);
+		GC_ADDREF(hash->args);
 	} else {
 		ops->hash_init(hash->context, NULL);
 		hash->args = NULL;

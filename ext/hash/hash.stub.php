@@ -2,15 +2,15 @@
 
 /** @generate-function-entries */
 
-function hash(string $algo, string $data, bool $binary = false, array $args = null): string|false {}
+function hash(string $algo, string $data, bool $binary = false, array $args = []): string|false {}
 
-function hash_file(string $algo, string $filename, bool $binary = false, array $args = null): string|false {}
+function hash_file(string $algo, string $filename, bool $binary = false, array $args = []): string|false {}
 
 function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string|false {}
 
 function hash_hmac_file(string $algo, string $data, string $key, bool $binary = false): string|false {}
 
-function hash_init(string $algo, int $flags = 0, string $key = "", array $args = null): HashContext {}
+function hash_init(string $algo, int $flags = 0, string $key = "", array $args = []): HashContext {}
 
 function hash_update(HashContext $context, string $data): bool {}
 
@@ -39,11 +39,11 @@ function mhash_get_block_size(int $algo): int|false {}
 
 function mhash_get_hash_name(int $algo): string|false {}
 
-function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length, array $args = null): string|false {}
+function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length, array $args = []): string|false {}
 
 function mhash_count(): int {}
 
-function mhash(int $algo, string $data, ?string $key = null, array $args = null): string|false {}
+function mhash(int $algo, string $data, ?string $key = null, array $args = []): string|false {}
 #endif
 
 final class HashContext
