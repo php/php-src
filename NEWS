@@ -20,8 +20,12 @@ PHP                                                                        NEWS
   . Fixed bug #80404 (Incorrect range inference result when division results
     in float). (Nikita)
   . Fixed bug #80377 (Opcache misses executor_globals). (Nikita)
-  . Fixed bug #80433 ( 	Unable to disable the use of the AVX command when using
+  . Fixed bug #80433 (Unable to disable the use of the AVX command when using
     JIT). (Nikita)
+
+- OpenSSL:
+  . Fixed bug #80368 (OpenSSL extension fails to build against LibreSSL due to
+    lack of OCB support). (Nikita)
 
 - Standard:
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
