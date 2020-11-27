@@ -99,6 +99,7 @@ void zend_cpu_startup(void)
 }
 
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature) {
+	ZEND_ASSERT(cpuinfo.initialized);
 	if (feature & ZEND_CPU_EDX_MASK) {
 		return (cpuinfo.edx & (feature & ~ZEND_CPU_EDX_MASK));
 	} else if (feature & ZEND_CPU_EBX_MASK) {

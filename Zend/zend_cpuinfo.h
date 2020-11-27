@@ -164,9 +164,9 @@ static zend_always_inline int zend_cpu_supports_sse42() {
 ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_pclmul() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
-        __builtin_cpu_init();
+	__builtin_cpu_init();
 #endif
-        return __builtin_cpu_supports("pclmul");
+	return __builtin_cpu_supports("pclmul");
 }
 #endif
 
@@ -208,7 +208,7 @@ static zend_always_inline int zend_cpu_supports_sse42() {
 }
 
 static zend_always_inline int zend_cpu_supports_pclmul() {
-        return zend_cpu_supports(ZEND_CPU_FEATURE_PCLMULQDQ);
+	return zend_cpu_supports(ZEND_CPU_FEATURE_PCLMULQDQ);
 }
 
 static zend_always_inline int zend_cpu_supports_avx() {
