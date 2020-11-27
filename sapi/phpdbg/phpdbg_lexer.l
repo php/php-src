@@ -84,7 +84,10 @@ ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
 INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\n\000'])+[']|[^\n\000#"'])+
 
-<!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
+<!*> {
+	if (YYCURSOR == NULL) return T_UNEXPECTED;
+	yyleng = (size_t) YYCURSOR - (size_t) yytext;
+}
 
 <*>[\n\000] {
 	return 0;
