@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #77961 (finfo_open crafted magic parsing SIGABRT). (cmb)
 
+- Intl:
+  . Fixed bug #80425 (MessageFormatAdapter::getArgTypeList redefined). (Nikita)
+
 - Opcache:
   . Fixed bug #80404 (Incorrect range inference result when division results
     in float). (Nikita)
