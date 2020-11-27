@@ -1046,16 +1046,17 @@ static inline int ct_eval_func_call(
 	for (i = 0; i < num_args; i++) {
 		zval_ptr_dtor_nogc(EX_VAR_NUM(i));
 	}
-	efree(execute_data);
-	EG(current_execute_data) = prev_execute_data;
 
+	int retval = SUCCESS;
 	if (EG(exception)) {
 		zval_ptr_dtor(result);
 		zend_clear_exception();
-		return FAILURE;
+		retval = FAILURE;
 	}
 
-	return SUCCESS;
+	efree(execute_data);
+	EG(current_execute_data) = prev_execute_data;
+	return retval;
 }
 
 #define SET_RESULT(op, zv) do { \
