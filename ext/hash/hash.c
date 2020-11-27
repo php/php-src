@@ -1487,7 +1487,7 @@ PHP_METHOD(HashContext, __serialize)
 
 	if (hash->args) {
 		ZVAL_ARR(&tmp, hash->args);
-		Z_TRY_ADDREF(tmp);
+		Z_ADDREF(tmp);
 	} else {
 		ZVAL_NULL(&tmp);
 	}
