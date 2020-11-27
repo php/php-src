@@ -812,7 +812,6 @@ static zend_bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zva
 		|| zend_string_equals_literal(name, "str_contains")
 		|| zend_string_equals_literal(name, "str_ends_with")
 		|| zend_string_equals_literal(name, "str_split")
-		|| zend_string_equals_literal(name, "str_split")
 		|| zend_string_equals_literal(name, "str_starts_with")
 		|| zend_string_equals_literal(name, "strpos")
 		|| zend_string_equals_literal(name, "substr")
