@@ -4079,8 +4079,6 @@ static int zend_jit_parse_config_num(zend_long jit)
 
 ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 {
-	zend_ulong num;
-
 	if (stage != ZEND_INI_STAGE_STARTUP && !JIT_G(enabled)) {
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
 			zend_error(E_WARNING, "Cannot change opcache.jit setting at run-time (JIT is disabled)");
@@ -4118,8 +4116,10 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		JIT_G(trigger) = ZEND_JIT_ON_SCRIPT_LOAD;
 		JIT_G(opt_flags) = ZEND_JIT_REG_ALLOC_GLOBAL | ZEND_JIT_CPU_AVX;
 		return SUCCESS;
-	} else if (ZEND_HANDLE_NUMERIC(jit, num)) {
-		if (zend_jit_parse_config_num((zend_long)num) != SUCCESS) {
+	} else  {
+		char *end;
+		zend_long num = ZEND_STRTOL(ZSTR_VAL(jit), &end, 10);
+		if (end != ZSTR_VAL(jit) + ZSTR_LEN(jit) || zend_jit_parse_config_num(num) != SUCCESS) {
 			goto failure;
 		}
 		JIT_G(enabled) = 1;
