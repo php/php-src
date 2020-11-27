@@ -73,6 +73,38 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 }
 #endif
 
+/* Function based on compiler-rt implementation. */
+static unsigned get_xcr0_eax() {
+#if defined(__GNUC__) || defined(__clang__)
+	// Check xgetbv; this uses a .byte sequence instead of the instruction
+	// directly because older assemblers do not include support for xgetbv and
+	// there is no easy way to conditionally compile based on the assembler used.
+	unsigned eax, edx;
+	__asm__(".byte 0x0f, 0x01, 0xd0" : "=a"(eax), "=d"(edx) : "c"(0));
+	return eax;
+#elif defined(ZEND_WIN32) && defined(_XCR_XFEATURE_ENABLED_MASK)
+	return _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
+#else
+	return 0;
+#endif
+}
+
+static zend_bool is_avx_supported() {
+	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_AVX)) {
+		/* No support for AVX */
+		return 0;
+	}
+	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_OSXSAVE)) {
+		/* The operating system does not support XSAVE. */
+		return 0;
+	}
+	if ((get_xcr0_eax() & 0x6) != 0x6) {
+		/* XCR0 SSE and AVX bits must be set. */
+		return 0;
+	}
+	return 1;
+}
+
 void zend_cpu_startup(void)
 {
 	if (!cpuinfo.initialized) {
@@ -94,6 +126,11 @@ void zend_cpu_startup(void)
 			cpuinfo.ebx = ebx.ebx;
 		} else {
 			cpuinfo.ebx = 0;
+		}
+
+		if (!is_avx_supported()) {
+			cpuinfo.edx &= ~ZEND_CPU_FEATURE_AVX;
+			cpuinfo.ebx &= ~(ZEND_CPU_FEATURE_AVX2 & ~ZEND_CPU_EBX_MASK);
 		}
 	}
 }
