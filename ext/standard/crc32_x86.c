@@ -339,7 +339,7 @@ size_t crc32_x86_simd_update(X86_CRC32_TYPE type, uint32_t *crc, const unsigned 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(crc32_x86_intrin)
 {
-	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42) && zend_cpu_supports(ZEND_CPU_FEATURE_PCLMULQDQ)) {
+	if (zend_cpu_supports_sse42() && zend_cpu_supports_pclmul()) {
 		crc32_x86_simd_ptr = crc32_sse42_pclmul_update;
 	}
 	return SUCCESS;

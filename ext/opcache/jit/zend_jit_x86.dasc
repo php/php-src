@@ -2849,12 +2849,12 @@ extern char *_tls_end;
 
 static int zend_jit_setup(void)
 {
-	if (!zend_cpu_supports(ZEND_CPU_FEATURE_SSE2)) {
+	if (!zend_cpu_supports_sse2()) {
 		zend_error(E_CORE_ERROR, "CPU doesn't support SSE2");
 		return FAILURE;
 	}
 	allowed_opt_flags = 0;
-	if (zend_cpu_supports(ZEND_CPU_FEATURE_AVX)) {
+	if (zend_cpu_supports_avx()) {
 		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
 	}
 
