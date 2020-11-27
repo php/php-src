@@ -812,7 +812,6 @@ static zend_bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zva
 		|| zend_string_equals_literal(name, "str_contains")
 		|| zend_string_equals_literal(name, "str_ends_with")
 		|| zend_string_equals_literal(name, "str_split")
-		|| zend_string_equals_literal(name, "str_split")
 		|| zend_string_equals_literal(name, "str_starts_with")
 		|| zend_string_equals_literal(name, "strpos")
 		|| zend_string_equals_literal(name, "substr")
@@ -901,9 +900,8 @@ static zend_bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zva
  * or just happened to be commonly used with constant operands in WP (need to test other
  * applications as well, of course). */
 static inline int ct_eval_func_call(
-		zval *result, zend_string *name, uint32_t num_args, zval **args) {
+		zend_op_array *op_array, zval *result, zend_string *name, uint32_t num_args, zval **args) {
 	uint32_t i;
-	zend_execute_data *execute_data, *prev_execute_data;
 	zend_function *func = zend_hash_find_ptr(CG(function_table), name);
 	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
 		return FAILURE;
@@ -952,9 +950,20 @@ static inline int ct_eval_func_call(
 		return FAILURE;
 	}
 
+	zend_execute_data *prev_execute_data = EG(current_execute_data);
+	zend_execute_data *execute_data, dummy_frame;
+	zend_op dummy_opline;
+
+	/* Add a dummy frame to get the correct strict_types behavior. */
+	memset(&dummy_frame, 0, sizeof(zend_execute_data));
+	memset(&dummy_opline, 0, sizeof(zend_op));
+	dummy_frame.func = (zend_function *) op_array;
+	dummy_frame.opline = &dummy_opline;
+	dummy_opline.opcode = ZEND_DO_FCALL;
+
 	execute_data = safe_emalloc(num_args, sizeof(zval), ZEND_CALL_FRAME_SLOT * sizeof(zval));
 	memset(execute_data, 0, sizeof(zend_execute_data));
-	prev_execute_data = EG(current_execute_data);
+	execute_data->prev_execute_data = &dummy_frame;
 	EG(current_execute_data) = execute_data;
 
 	EX(func) = func;
@@ -1832,7 +1841,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			if (ct_eval_func_call(&zv, Z_STR_P(name), call->num_args, args) == SUCCESS) {
+			if (ct_eval_func_call(scdf->op_array, &zv, Z_STR_P(name), call->num_args, args) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
