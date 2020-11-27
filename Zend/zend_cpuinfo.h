@@ -159,17 +159,6 @@ static zend_always_inline int zend_cpu_supports_sse42() {
 	return __builtin_cpu_supports("sse4.2");
 }
 
-/* __builtin_cpu_supports has pclmul from gcc9 */
-#if (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
-ZEND_NO_SANITIZE_ADDRESS
-static zend_always_inline int zend_cpu_supports_pclmul() {
-#if PHP_HAVE_BUILTIN_CPU_INIT
-	__builtin_cpu_init();
-#endif
-	return __builtin_cpu_supports("pclmul");
-}
-#endif
-
 ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_avx() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -207,10 +196,6 @@ static zend_always_inline int zend_cpu_supports_sse42() {
 	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE42);
 }
 
-static zend_always_inline int zend_cpu_supports_pclmul() {
-	return zend_cpu_supports(ZEND_CPU_FEATURE_PCLMULQDQ);
-}
-
 static zend_always_inline int zend_cpu_supports_avx() {
 	return zend_cpu_supports(ZEND_CPU_FEATURE_AVX);
 }
@@ -218,7 +203,21 @@ static zend_always_inline int zend_cpu_supports_avx() {
 static zend_always_inline int zend_cpu_supports_avx2() {
 	return zend_cpu_supports(ZEND_CPU_FEATURE_AVX2);
 }
+#endif
 
+/* __builtin_cpu_supports has pclmul from gcc9 */
+#if PHP_HAVE_BUILTIN_CPU_SUPPORTS && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
+ZEND_NO_SANITIZE_ADDRESS
+static zend_always_inline int zend_cpu_supports_pclmul() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("pclmul");
+}
+#else
+static zend_always_inline int zend_cpu_supports_pclmul() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_PCLMULQDQ);
+}
 #endif
 
 #endif
