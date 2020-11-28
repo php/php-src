@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #77961 (finfo_open crafted magic parsing SIGABRT). (cmb)
 
+- FPM:
+  . Fixed bug #69625 (FPM returns 200 status on request without
+    SCRIPT_FILENAME env). (Jakub Zelenka)
+
 - Intl:
   . Fixed bug #80425 (MessageFormatAdapter::getArgTypeList redefined). (Nikita)
 

@@ -564,6 +564,10 @@ class Tester
             ],
             $headers
         );
+        $params = array_filter($params, function($value) {
+            return !is_null($value);
+        });
+
         try {
             $this->response = new Response(
                 $this->getClient($address, $connKeepAlive)->request_data($params, false)
