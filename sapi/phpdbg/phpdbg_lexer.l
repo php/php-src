@@ -33,7 +33,7 @@ void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 
 	YYSETCONDITION(INITIAL);
 
-	LEX(text) = YYCURSOR = (unsigned char *) input;
+	LEX(text) = YYCURSOR = YYMARKER = (unsigned char *) input;
 	LEX(len) = strlen(input);
 }
 
@@ -84,10 +84,7 @@ ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
 INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\n\000'])+[']|[^\n\000#"'])+
 
-<!*> {
-	if (YYCURSOR == NULL) return T_UNEXPECTED;
-	yyleng = (size_t) YYCURSOR - (size_t) yytext;
-}
+<!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
 <*>[\n\000] {
 	return 0;
@@ -166,6 +163,10 @@ INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\
 	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_ID;
+}
+
+<NORMAL>* {
+	return T_UNEXPECTED;
 }
 
 <RAW>{INPUT} {
