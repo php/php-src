@@ -973,7 +973,7 @@ static void init_request_info(void)
 
 	/* initialize the defaults */
 	SG(request_info).path_translated = NULL;
-	SG(request_info).request_method = NULL;
+	SG(request_info).request_method = FCGI_GETENV(request, "REQUEST_METHOD");
 	SG(request_info).proto_num = 1000;
 	SG(request_info).query_string = NULL;
 	SG(request_info).request_uri = NULL;
@@ -1314,7 +1314,6 @@ static void init_request_info(void)
 			SG(request_info).path_translated = estrdup(script_path_translated);
 		}
 
-		SG(request_info).request_method = FCGI_GETENV(request, "REQUEST_METHOD");
 		/* FIXME - Work out proto_num here */
 		SG(request_info).query_string = FCGI_GETENV(request, "QUERY_STRING");
 		SG(request_info).content_type = (content_type ? content_type : "" );
