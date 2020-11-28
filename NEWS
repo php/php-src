@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #80368 (OpenSSL extension fails to build against LibreSSL due to
     lack of OCB support). (Nikita)
 
+- Phpdbg:
+  . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
+
 - Standard:
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
   . Fixed bug #80411 (References to null-serialized object break serialize()).
