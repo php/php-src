@@ -770,9 +770,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 			node = tidyGetBody(obj->ptdoc->doc);
 			break;
 
-		default:
-			RETURN_NULL();
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	if (!node) {
