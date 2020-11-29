@@ -1294,7 +1294,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **name)
 			goto quit;
 		}
 
-		*name = new_extension->name;
+		*name = (char *) new_extension->name;
 
 		zend_register_extension(new_extension, handle);
 
