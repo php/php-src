@@ -1227,7 +1227,7 @@ static void add_zendext_info(zend_extension *ext) /* {{{ */ {
 /* }}} */
 
 #ifdef HAVE_LIBDL
-PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **name) /* {{{ */ {
+PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char **name) /* {{{ */ {
 	DL_HANDLE handle;
 	char *extension_dir;
 
@@ -1294,7 +1294,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **name)
 			goto quit;
 		}
 
-		*name = (char *) new_extension->name;
+		*name = new_extension->name;
 
 		zend_register_extension(new_extension, handle);
 
@@ -1325,7 +1325,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **name)
 		}
 
 		module_entry = get_module();
-		*name = (char *) module_entry->name;
+		*name = module_entry->name;
 
 		if (strcmp(ZEND_EXTENSION_BUILD_ID, module_entry->build_id)) {
 			phpdbg_error("dl", "type=\"wrongbuild\" module=\"%s\" buildneeded=\"%s\" buildinstalled=\"%s\"",  "%s was built with configuration %s, whereas running engine is %s", module_entry->name, module_entry->build_id, ZEND_EXTENSION_BUILD_ID);
@@ -1386,7 +1386,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 			path = estrndup(param->str, param->len);
 
 			phpdbg_activate_err_buf(1);
-			if ((type = phpdbg_load_module_or_extension(&path, &name)) == NULL) {
+			if ((type = phpdbg_load_module_or_extension(&path, (const char **) &name)) == NULL) {
 				phpdbg_error("dl", "path=\"%s\" %b", "Could not load %s, not found or invalid zend extension / module: %b", path);
 				efree(name);
 			} else {
