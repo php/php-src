@@ -643,7 +643,12 @@ PHP_FUNCTION(hash_init)
 	hash->context = context;
 	hash->options = options;
 	hash->key = NULL;
-	hash->args = args && zend_hash_num_elements(args) > 0 ? zend_array_dup(args) : NULL;
+	if (args && zend_hash_num_elements(args)) {
+		hash->args = args;
+		GC_TRY_ADDREF(hash->args);
+	} else {
+		hash->args = NULL;
+	}
 
 	if (options & PHP_HASH_HMAC) {
 		char *K = emalloc(ops->block_size);
@@ -1389,10 +1394,7 @@ static void php_hashcontext_dtor(zend_object *obj) {
 	}
 
 	if (hash->args) {
-		if (GC_REFCOUNT(hash->args) > 1) {
-			GC_DELREF(hash->args);
-		}
-		zend_array_destroy(hash->args);
+		zend_array_release(hash->args);
 		hash->args = NULL;
 	}
 }
@@ -1487,7 +1489,7 @@ PHP_METHOD(HashContext, __serialize)
 
 	if (hash->args) {
 		ZVAL_ARR(&tmp, hash->args);
-		Z_ADDREF(tmp);
+		Z_TRY_ADDREF(tmp);
 	} else {
 		ZVAL_NULL(&tmp);
 	}
@@ -1559,7 +1561,7 @@ PHP_METHOD(HashContext, __unserialize)
 	if (args_zv && IS_ARRAY == Z_TYPE_P(args_zv) && zend_hash_num_elements(Z_ARRVAL_P(args_zv)) > 0) {
 		ops->hash_init(hash->context, Z_ARRVAL_P(args_zv));
 		hash->args = Z_ARRVAL_P(args_zv);
-		GC_ADDREF(hash->args);
+		GC_TRY_ADDREF(hash->args);
 	} else {
 		ops->hash_init(hash->context, NULL);
 		hash->args = NULL;
