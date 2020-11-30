@@ -17,7 +17,6 @@ $filenames = array(
   "",
   TRUE,
   FALSE,
-  NULL,
 
   /* scalars */
   1234,
@@ -37,9 +36,6 @@ unlink($file_path."/readlink_variation2.tmp");
 ?>
 --EXPECTF--
 *** Testing Invalid file types ***
-
-Warning: readlink(): %s in %s on line %d
-bool(false)
 
 Warning: readlink(): %s in %s on line %d
 bool(false)

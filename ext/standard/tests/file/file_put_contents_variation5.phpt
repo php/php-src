@@ -19,7 +19,7 @@ runtest();
 $newpath = "";
 set_include_path($newpath);
 runtest();
-set_include_path(null);
+set_include_path("");
 runtest();
 set_include_path(";;  ; ;c:\\rubbish");
 runtest();

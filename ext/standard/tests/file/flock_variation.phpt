@@ -5,7 +5,7 @@ Test flock() function: Variations
 echo "*** Testing flock() fun with the various operation and
     wouldblock values                                ***\n";
 
-$file = preg_replace("~\.phpt?$~", null, __FILE__);
+$file = preg_replace("~\.phpt?$~", '', __FILE__);
 $fp = fopen($file, "w");
 
 /* array of operations */

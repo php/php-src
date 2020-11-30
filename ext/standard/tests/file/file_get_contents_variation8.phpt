@@ -19,7 +19,6 @@ $names_arr = array(
   -1,
   TRUE,
   FALSE,
-  NULL,
   "",
   " ",
   "\0",
@@ -57,20 +56,18 @@ ValueError: Path cannot be empty
 -- Iteration 3 --
 ValueError: Path cannot be empty
 -- Iteration 4 --
-ValueError: Path cannot be empty
--- Iteration 5 --
 
 Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
--- Iteration 6 --
+-- Iteration 5 --
 ValueError: file_get_contents(): Argument #1 ($filename) must not contain any null bytes
--- Iteration 7 --
+-- Iteration 6 --
 TypeError: file_get_contents(): Argument #1 ($filename) must be of type string, array given
--- Iteration 8 --
+-- Iteration 7 --
 
 Warning: file_get_contents(/no/such/file/dir): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
--- Iteration 9 --
+-- Iteration 8 --
 
 Warning: file_get_contents(php/php): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

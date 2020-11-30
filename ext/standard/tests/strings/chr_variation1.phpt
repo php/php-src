@@ -5,10 +5,6 @@ Test chr() function : usage variations - test values for $ascii argument
 
 echo "*** Testing chr() function: with unexpected inputs for 'ascii' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
-
 //defining a class
 class sample  {
   public function __toString() {
@@ -42,12 +38,6 @@ $inputs =  array (
           // null values
 /*15*/	  NULL,
           null,
-
-          // undefined variable
-/*19*/	  @$undefined_var,
-
-          // unset variable
-/*20*/	  @$unset_var
 );
 
 // loop through with each element of the $inputs array to test chr() function
@@ -61,7 +51,7 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
 string(2) "00"
@@ -86,10 +76,10 @@ string(2) "01"
 -- Iteration 11 --
 string(2) "00"
 -- Iteration 12 --
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(2) "00"
 -- Iteration 13 --
-string(2) "00"
--- Iteration 14 --
-string(2) "00"
--- Iteration 15 --
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(2) "00"
