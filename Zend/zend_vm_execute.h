@@ -50850,6 +50850,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 #endif
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 	memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);
+	if (zend_touch_vm_stack_data) {
+		zend_touch_vm_stack_data(&vm_stack_data);
+	}
 #endif
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)

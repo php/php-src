@@ -2089,6 +2089,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
                         out($f,$m[1]."memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);\n");
+                        out($f,$m[1]."if (zend_touch_vm_stack_data) {\n");
+                        out($f,$m[1]."\tzend_touch_vm_stack_data(&vm_stack_data);\n");
+                        out($f,$m[1]."}\n");
                         out($f,"#endif\n");
                     }
                     break;

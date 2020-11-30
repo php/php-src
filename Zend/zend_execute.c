@@ -4757,6 +4757,11 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 		} \
 	} while (0)
 
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+/* This callback disables optimization of "vm_stack_data" variable in VM */
+void (*zend_touch_vm_stack_data)(void *vm_stack_data) = NULL;
+#endif
+
 #include "zend_vm_execute.h"
 
 ZEND_API zend_result zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler)
