@@ -2835,10 +2835,10 @@ PHP_FUNCTION(imap_uid)
 PHP_FUNCTION(imap_msgno)
 {
 	zval *streamind;
-	zend_long msgno;
+	zend_long msg_uid;
 	pils *imap_le_struct;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &streamind, &msgno) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &streamind, &msg_uid) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2846,9 +2846,13 @@ PHP_FUNCTION(imap_msgno)
 		RETURN_THROWS();
 	}
 
-	PHP_IMAP_CHECK_MSGNO(msgno, 2);
+	/* Do NOT use the PHP_IMAP_CHECK_MSGNO() macro as UID cannot be checked for their upper bound. */
+	if (msg_uid < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
 
-	RETURN_LONG(mail_msgno(imap_le_struct->imap_stream, msgno));
+	RETURN_LONG(mail_msgno(imap_le_struct->imap_stream, msg_uid));
 }
 /* }}} */
 
