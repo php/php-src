@@ -556,6 +556,10 @@ string_key:
 						/* This is a property with a declaration */
 						old_data = Z_INDIRECT_P(old_data);
 						info = zend_get_typed_property_info_for_slot(obj, old_data);
+						if (Z_ISREF_P(old_data)) {
+							/* If the value is overwritten, remove old type source from ref. */
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
+						}
 						var_push_dtor(var_hash, old_data);
 						Z_TRY_DELREF_P(old_data);
 						ZVAL_COPY_VALUE(old_data, &d);
