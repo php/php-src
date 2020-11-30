@@ -426,9 +426,20 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 }
 /* }}} */
 
+static ZEND_COLD bool zend_null_arg_deprecated(const char *type) {
+	zend_string *func_name = get_active_function_or_method_name();
+	zend_error(E_DEPRECATED, "%s(): Passing null to argument of type %s is deprecated",
+		ZSTR_VAL(func_name), type);
+	zend_string_release(func_name);
+	return !EG(exception);
+}
+
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("bool")) {
+			return 0;
+		}
 		*dest = zend_is_true(arg);
 	} else {
 		return 0;
@@ -479,6 +490,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest)
 			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("int")) {
+			return 0;
+		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
@@ -517,6 +531,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) 
 			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("float")) {
+			return 0;
+		}
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1.0;
@@ -572,6 +589,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("string")) {
+			return 0;
+		}
 		convert_to_string(arg);
 		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
