@@ -2833,7 +2833,8 @@ COMMAND $cmd
         }
 
         // write .sh
-        $sh_script = <<<SH
+        if (strpos($log_format, 'S') !== false) {
+            $sh_script = <<<SH
 #!/bin/sh
 
 case "$1" in
@@ -2851,10 +2852,11 @@ case "$1" in
     ;;
 esac
 SH;
-        if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, $sh_script) === false) {
-            error("Cannot create test shell script - $sh_filename");
+            if (file_put_contents($sh_filename, $sh_script) === false) {
+                error("Cannot create test shell script - $sh_filename");
+            }
+            chmod($sh_filename, 0755);
         }
-        chmod($sh_filename, 0755);
 
         // write .log
         if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, "
