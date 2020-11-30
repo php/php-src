@@ -739,22 +739,22 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 				ZVAL_DOUBLE(arg, dval);
 				return 1;
 			}
-		} else if (zend_parse_arg_long_weak(arg, &lval)) {
+		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
 			zval_ptr_dtor(arg);
 			ZVAL_LONG(arg, lval);
 			return 1;
 		}
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval)) {
+	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
 		zval_ptr_dtor(arg);
 		ZVAL_DOUBLE(arg, dval);
 		return 1;
 	}
-	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str)) {
+	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str, 0)) {
 		/* on success "arg" is converted to IS_STRING */
 		return 1;
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval)) {
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, 0)) {
 		zval_ptr_dtor(arg);
 		ZVAL_BOOL(arg, bval);
 		return 1;
@@ -781,16 +781,16 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 	double dval;
 	bool bval;
 
-	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval)) {
+	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval, 0)) {
 		return 1;
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval)) {
+	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
 		return 1;
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval)) {
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, 0)) {
 		return 1;
 	}
 	return 0;

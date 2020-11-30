@@ -9,5 +9,6 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 <?php
 var_dump(mb_ereg_search_init(NULL));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: mb_ereg_search_init(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 bool(true)

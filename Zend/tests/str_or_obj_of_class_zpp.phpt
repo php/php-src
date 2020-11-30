@@ -51,9 +51,11 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(6) "string"
 string(1) "1"
+
+Deprecated: zend_string_or_stdclass(): Passing null to parameter #1 ($param) of type string is deprecated in %s on line %d
 string(0) ""
 object(stdClass)#1 (0) {
 }

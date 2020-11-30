@@ -426,9 +426,41 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest) /* {{{ */
+static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32_t arg_num) {
+	zend_function *func = EG(current_execute_data)->func;
+	ZEND_ASSERT(arg_num > 0);
+	uint32_t arg_offset = arg_num - 1;
+	if (arg_offset >= func->common.num_args) {
+		ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_VARIADIC);
+		arg_offset = func->common.num_args;
+	}
+
+	zend_arg_info *arg_info = &func->common.arg_info[arg_offset];
+	zend_string *func_name = get_active_function_or_method_name();
+	const char *arg_name = get_active_function_arg_name(arg_num);
+
+	/* If no type is specified in arginfo, use the specified fallback_type determined through
+	 * zend_parse_parameters instead. */
+	zend_string *type_str = zend_type_to_string(arg_info->type);
+	const char *type = type_str ? ZSTR_VAL(type_str) : fallback_type;
+	zend_error(E_DEPRECATED,
+		"%s(): Passing null to parameter #%" PRIu32 "%s%s%s of type %s is deprecated",
+		ZSTR_VAL(func_name), arg_num,
+		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "",
+		type);
+	zend_string_release(func_name);
+	if (type_str) {
+		zend_string_release(type_str);
+	}
+	return !EG(exception);
+}
+
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("bool", arg_num)) {
+			return 0;
+		}
 		*dest = zend_is_true(arg);
 	} else {
 		return 0;
@@ -437,16 +469,16 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest) /* {
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, bool *dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, bool *dest, uint32_t arg_num) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_bool_weak(arg, dest);
+	return zend_parse_arg_bool_weak(arg, dest, arg_num);
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
@@ -479,6 +511,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest)
 			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("int", arg_num)) {
+			return 0;
+		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
@@ -489,16 +524,16 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest)
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest, uint32_t arg_num) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_long_weak(arg, dest);
+	return zend_parse_arg_long_weak(arg, dest, arg_num);
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = (double)Z_LVAL_P(arg);
@@ -517,6 +552,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) 
 			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("float", arg_num)) {
+			return 0;
+		}
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1.0;
@@ -527,7 +565,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) 
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		/* SSTH Exception: IS_LONG may be accepted instead as IS_DOUBLE */
@@ -535,11 +573,11 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest) 
 	} else if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_double_weak(arg, dest);
+	return zend_parse_arg_double_weak(arg, dest, arg_num);
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, uint32_t arg_num) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
@@ -558,6 +596,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /
 		}
 		zend_string_release(str);
 	} else if (Z_TYPE_P(arg) < IS_TRUE) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("int|float", arg_num)) {
+			return 0;
+		}
 		ZVAL_LONG(arg, 0);
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
 		ZVAL_LONG(arg, 1);
@@ -569,9 +610,12 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("string", arg_num)) {
+			return 0;
+		}
 		convert_to_string(arg);
 		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
@@ -591,24 +635,24 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **des
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_str_weak(arg, dest);
+	return zend_parse_arg_str_weak(arg, dest, arg_num);
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	if (zend_parse_arg_long_weak(arg, dest_long)) {
+	if (zend_parse_arg_long_weak(arg, dest_long, arg_num)) {
 		*dest_str = NULL;
 		return 1;
-	} else if (zend_parse_arg_str_weak(arg, dest_str)) {
+	} else if (zend_parse_arg_str_weak(arg, dest_str, arg_num)) {
 		*dest_long = 0;
 		return 1;
 	} else {
@@ -617,7 +661,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_stri
 }
 /* }}} */
 
-static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec, char **error) /* {{{ */
+static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec, char **error, uint32_t arg_num) /* {{{ */
 {
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -650,7 +694,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 					is_null = va_arg(*va, bool *);
 				}
 
-				if (!zend_parse_arg_long(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_long(arg, p, is_null, check_null, arg_num)) {
 					return check_null ? "?int" : "int";
 				}
 			}
@@ -665,7 +709,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 					is_null = va_arg(*va, bool *);
 				}
 
-				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_double(arg, p, is_null, check_null, arg_num)) {
 					return check_null ? "?float" : "float";
 				}
 			}
@@ -675,7 +719,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 			{
 				zval **p = va_arg(*va, zval **);
 
-				if (!zend_parse_arg_number(arg, p, check_null)) {
+				if (!zend_parse_arg_number(arg, p, check_null, arg_num)) {
 					return check_null ? "int|float|null" : "int|float";
 				}
 			}
@@ -685,7 +729,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_string(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_string(arg, p, pl, check_null, arg_num)) {
 					return check_null ? "?string" : "string";
 				}
 			}
@@ -695,7 +739,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_path(arg, p, pl, check_null, arg_num)) {
 					if (Z_TYPE_P(arg) == IS_STRING) {
 						zend_spprintf(error, 0, "must not contain any null bytes");
 						return "";
@@ -709,7 +753,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 		case 'P':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_path_str(arg, str, check_null)) {
+				if (!zend_parse_arg_path_str(arg, str, check_null, arg_num)) {
 					if (Z_TYPE_P(arg) == IS_STRING) {
 						zend_spprintf(error, 0, "must not contain any null bytes");
 						return "";
@@ -723,7 +767,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 		case 'S':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_str(arg, str, check_null)) {
+				if (!zend_parse_arg_str(arg, str, check_null, arg_num)) {
 					return check_null ? "?string" : "string";
 				}
 			}
@@ -738,7 +782,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 					is_null = va_arg(*va, bool *);
 				}
 
-				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_bool(arg, p, is_null, check_null, arg_num)) {
 					return check_null ? "?bool" : "bool";
 				}
 			}
@@ -899,7 +943,7 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 	const char *expected_type = NULL;
 	char *error = NULL;
 
-	expected_type = zend_parse_arg_impl(arg, va, spec, &error);
+	expected_type = zend_parse_arg_impl(arg, va, spec, &error, arg_num);
 	if (expected_type) {
 		if (EG(exception)) {
 			return FAILURE;

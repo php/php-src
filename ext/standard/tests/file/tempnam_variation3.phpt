@@ -21,7 +21,6 @@ $names_arr = array(
   -1,
   TRUE,
   FALSE,
-  NULL,
   "",
   " ",
   "\0",
@@ -98,18 +97,14 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 5 --
-File name is => %s/%s
-File permissions are => 100600
-File created in => directory specified
--- Iteration 6 --
 tempnam(): Argument #2 ($prefix) must not contain any null bytes
--- Iteration 7 --
+-- Iteration 6 --
 tempnam(): Argument #2 ($prefix) must be of type string, array given
--- Iteration 8 --
+-- Iteration 7 --
 File name is => %s/dir%s
 File permissions are => 100600
 File created in => directory specified
--- Iteration 9 --
+-- Iteration 8 --
 File name is => %s/php%s
 File permissions are => 100600
 File created in => directory specified

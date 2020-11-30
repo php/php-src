@@ -5,10 +5,6 @@ Test chr() function : usage variations - test values for $ascii argument
 
 echo "*** Testing chr() function: with unexpected inputs for 'ascii' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
-
 //defining a class
 class sample  {
   public function __toString() {
@@ -38,16 +34,6 @@ $inputs =  array (
           false,
           TRUE,
           FALSE,
-
-          // null values
-/*15*/	  NULL,
-          null,
-
-          // undefined variable
-/*19*/	  @$undefined_var,
-
-          // unset variable
-/*20*/	  @$unset_var
 );
 
 // loop through with each element of the $inputs array to test chr() function
@@ -84,12 +70,4 @@ string(2) "00"
 -- Iteration 10 --
 string(2) "01"
 -- Iteration 11 --
-string(2) "00"
--- Iteration 12 --
-string(2) "00"
--- Iteration 13 --
-string(2) "00"
--- Iteration 14 --
-string(2) "00"
--- Iteration 15 --
 string(2) "00"

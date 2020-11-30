@@ -29,7 +29,7 @@ image_type_to_extension()
         printf("Constant: %s\n\tWith dot: %s\n\tWithout dot: %s\n", $name, image_type_to_extension($constant), image_type_to_extension($constant, false));
     }
 
-    var_dump(image_type_to_extension(1000000, NULL));
+    var_dump(image_type_to_extension(1000000, false));
     var_dump(image_type_to_extension(0));
 ?>
 Done

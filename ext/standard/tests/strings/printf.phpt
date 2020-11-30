@@ -50,11 +50,6 @@ try {
 echo "\n*** Output for scalar argument ***\n";
 printf(3);
 
-/* NULL argument */
-echo "\n*** Output for NULL as argument ***\n";
-printf(NULL);
-
-
 /* Float type variations */
 
 $counter = 1;
@@ -244,8 +239,6 @@ printf() expects at least %d argument, %d given
 Error found: 5 arguments are required, 3 given
 *** Output for scalar argument ***
 3
-*** Output for NULL as argument ***
-
 
 *** Output for float type ***
 

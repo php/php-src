@@ -37,7 +37,7 @@ catch (\Error $e) {
 
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing hash_init(): error conditions ***
 
 -- Testing hash_init() function with unknown algorithms --
@@ -48,4 +48,6 @@ hash_init(): Argument #1 ($algo) must be a cryptographic hashing algorithm if HM
 
 -- Testing hash_init() function with HASH_HMAC and no key --
 hash_init(): Argument #3 ($key) cannot be empty when HMAC is requested
+
+Deprecated: hash_init(): Passing null to parameter #3 ($key) of type string is deprecated in %s on line %d
 hash_init(): Argument #3 ($key) cannot be empty when HMAC is requested

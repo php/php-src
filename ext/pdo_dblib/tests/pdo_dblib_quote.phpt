@@ -29,10 +29,12 @@ $db = new PDO($dsn, $user, $pass, [PDO::ATTR_DEFAULT_STR_PARAM => PDO::PARAM_STR
 var_dump($db->getAttribute(PDO::ATTR_DEFAULT_STR_PARAM) === PDO::PARAM_STR_NATL);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(3) "'1'"
 string(2) "''"
 string(4) "'42'"
+
+Deprecated: PDO::quote(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 string(2) "''"
 string(4) "''''"
 string(5) "'foo'"

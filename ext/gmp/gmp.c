@@ -628,7 +628,7 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 	}
 	default: {
 		zend_long lval;
-		if (!zend_parse_arg_long_slow(val, &lval)) {
+		if (!zend_parse_arg_long_slow(val, &lval, arg_pos)) {
 			zend_argument_type_error(arg_pos, "must be of type GMP|string|int, %s given", zend_zval_type_name(val));
 			return FAILURE;
 		}

@@ -12,7 +12,6 @@ $dirnames = array(
   -2.34555,
   TRUE,
   FALSE,
-  NULL,
   " ",
 
   /* scalars */
@@ -27,7 +26,6 @@ foreach($dirnames as $dirname) {
 ?>
 --EXPECT--
 *** Testing is_dir() with Invalid arguments: expected bool(false) ***
-bool(false)
 bool(false)
 bool(false)
 bool(false)

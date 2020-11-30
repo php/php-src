@@ -27,6 +27,16 @@ PHP 8.1 UPGRADE NOTES
     array is no longer supported. For example, array_pop($GLOBALS) will result
     in an error.
     RFC: https://wiki.php.net/rfc/restrict_globals_usage
+  . Passing null to a non-nullable argument of a built-in function is
+    deprecated. This matches the behavior of user-defined functions, where null
+    is never accepted by non-nullable arguments.
+    user-defined functions.
+
+        var_dump(str_contains("foobar", null));
+        // Deprecated: Passing null to parameter #2 ($needle) of type string
+        //             is deprecated
+
+    RFC: https://wiki.php.net/rfc/deprecate_null_to_scalar_internal_arg
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects

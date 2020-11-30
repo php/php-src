@@ -14,7 +14,7 @@ require __DIR__  . '/func.inc';
 $image = imagecreatetruecolor(50, 50);
 
 trycatch_dump(
-    fn() => imagetruecolortopalette($image, true, null)
+    fn() => imagetruecolortopalette($image, true, 0)
 );
 
 ?>
