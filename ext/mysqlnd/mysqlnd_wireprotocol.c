@@ -971,7 +971,6 @@ size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	const unsigned int error_reporting = EG(error_reporting);
 	size_t sent = 0;
 
 	DBG_ENTER("php_mysqlnd_cmd_write");
@@ -980,10 +979,6 @@ size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	  Every command starts a new TX and packet numbers are reset to 0.
 	*/
 	pfc->data->m.reset(pfc, stats, error_info);
-
-	if (error_reporting) {
-		EG(error_reporting) = 0;
-	}
 
 	MYSQLND_INC_CONN_STATISTIC(stats, STAT_PACKETS_SENT_CMD);
 
@@ -1017,10 +1012,6 @@ size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		}
 	}
 end:
-	if (error_reporting) {
-		/* restore error reporting */
-		EG(error_reporting) = error_reporting;
-	}
 	if (!sent) {
 		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 	}
