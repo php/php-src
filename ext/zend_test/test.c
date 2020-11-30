@@ -39,6 +39,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_init_backtrace;
 	int observer_show_opcode;
 	int observer_nesting_depth;
+	int replace_zend_execute_ex;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -332,9 +333,16 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_opcode", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_opcode, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
+
+void (*old_zend_execute_ex)(zend_execute_data *execute_data);
+static void custom_zend_execute_ex(zend_execute_data *execute_data)
+{
+	old_zend_execute_ex(execute_data);
+}
 
 PHP_MINIT_FUNCTION(zend_test)
 {
@@ -429,6 +437,11 @@ PHP_MINIT_FUNCTION(zend_test)
 		}
 	} else {
 		(void)ini_entries;
+	}
+
+	if (ZT_G(replace_zend_execute_ex)) {
+		old_zend_execute_ex = zend_execute_ex;
+		zend_execute_ex = custom_zend_execute_ex;
 	}
 
 	return SUCCESS;

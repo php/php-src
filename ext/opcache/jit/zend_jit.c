@@ -4164,16 +4164,38 @@ ZEND_EXT_API void zend_jit_init(void)
 #endif
 }
 
-ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
+ZEND_EXT_API int zend_jit_check_support(void)
 {
-	int ret;
+	int i;
 
 	zend_jit_vm_kind = zend_vm_kind();
 	if (zend_jit_vm_kind != ZEND_VM_KIND_CALL &&
 	    zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
-		// TODO: error reporting and cleanup ???
+		zend_error(E_WARNING, "JIT is compatible only with CALL and HYBRID VM. JIT disabled.");
+		JIT_G(enabled) = 0;
 		return FAILURE;
 	}
+
+	if (zend_execute_ex != execute_ex) {
+		zend_error(E_WARNING, "JIT is incompatible with third party extensions that override zend_execute_ex(). JIT disabled.");
+		JIT_G(enabled) = 0;
+		return FAILURE;
+	}
+
+	for (i = 0; i <= 256; i++) {
+		if (zend_get_user_opcode_handler(i) != NULL) {
+			zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
+			JIT_G(enabled) = 0;
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
+{
+	int ret;
 
 	zend_jit_halt_op = zend_get_halt_op();
 
