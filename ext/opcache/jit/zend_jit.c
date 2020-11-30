@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "main/php.h"
+#include "main/SAPI.h"
 #include "php_version.h"
 #include <ZendAccelerator.h>
 #include "zend_shared_alloc.h"
@@ -4177,7 +4179,9 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	}
 
 	if (zend_execute_ex != execute_ex) {
-		zend_error(E_WARNING, "JIT is incompatible with third party extensions that override zend_execute_ex(). JIT disabled.");
+		if (strcmp(sapi_module.name, "phpdbg") != 0) {
+			zend_error(E_WARNING, "JIT is incompatible with third party extensions that override zend_execute_ex(). JIT disabled.");
+		}
 		JIT_G(enabled) = 0;
 		return FAILURE;
 	}
