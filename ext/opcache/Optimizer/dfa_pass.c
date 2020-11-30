@@ -474,16 +474,16 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 							int var = ssa_op->result_def;
 							int use = ssa->vars[var].use_chain;
 
-							if (ssa->vars[var].phi_use_chain == NULL) {
-								if (ssa->ops[use].op1_use == var
-								 && ssa->ops[use].op1_use_chain == -1) {
-									call_info->caller_call_opline->result_type = IS_TMP_VAR;
-									op_array->opcodes[use].op1_type = IS_TMP_VAR;
-								} else if (ssa->ops[use].op2_use == var
-								 && ssa->ops[use].op2_use_chain == -1) {
-									call_info->caller_call_opline->result_type = IS_TMP_VAR;
-									op_array->opcodes[use].op2_type = IS_TMP_VAR;
-								}
+							/* If the result is used only in a JMPZ/JMPNZ, replace result type with
+							 * IS_TMP_VAR, which will enable use of smart branches. Don't do this
+							 * in other cases, as not all opcodes support both VAR and TMP. */
+							if (ssa->vars[var].phi_use_chain == NULL
+								&& ssa->ops[use].op1_use == var
+								&& ssa->ops[use].op1_use_chain == -1
+								&& (op_array->opcodes[use].opcode == ZEND_JMPZ
+									|| op_array->opcodes[use].opcode == ZEND_JMPNZ)) {
+								call_info->caller_call_opline->result_type = IS_TMP_VAR;
+								op_array->opcodes[use].op1_type = IS_TMP_VAR;
 							}
 						}
 					}
