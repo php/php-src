@@ -5,9 +5,6 @@ Test detection of inline string manipulations on zval watch
 if (PHP_INT_SIZE == 4) {
     die("xfail There may be flaws in the implementation of watchpoints that cause failures");
 }
-if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
-    die('xfail breakpoint/watchpoint issues with JIT on Windows');
-}
 if (getenv('SKIP_ASAN')) {
     die("skip intentionally causes segfaults");
 }
