@@ -2970,7 +2970,8 @@ static zend_result accel_post_startup(void)
 		size_t jit_size = 0;
 		zend_bool reattached = 0;
 
-		if (JIT_G(enabled) && JIT_G(buffer_size)) {
+		if (JIT_G(enabled) && JIT_G(buffer_size)
+		 && zend_jit_check_support() == SUCCESS) {
 			size_t page_size;
 
 # ifdef _WIN32
