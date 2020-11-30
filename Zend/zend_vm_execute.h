@@ -50826,14 +50826,33 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 {
 	DCL_OPLINE
 
+#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_IP_GLOBAL_REG)
+	struct {
 #ifdef ZEND_VM_IP_GLOBAL_REG
-	const zend_op *orig_opline = opline;
+		const zend_op *orig_opline;
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
-	zend_execute_data *orig_execute_data = execute_data;
+		zend_execute_data *orig_execute_data;
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+		char hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];
+#endif
+#endif
+	} vm_stack_data;
+#endif
+#ifdef ZEND_VM_IP_GLOBAL_REG
+	vm_stack_data.orig_opline = opline;
+#endif
+#ifdef ZEND_VM_FP_GLOBAL_REG
+	vm_stack_data.orig_execute_data = execute_data;
 	execute_data = ex;
 #else
 	zend_execute_data *execute_data = ex;
+#endif
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+	memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);
+	if (zend_touch_vm_stack_data) {
+		zend_touch_vm_stack_data(&vm_stack_data);
+	}
 #endif
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
@@ -58788,10 +58807,10 @@ zend_leave_helper_SPEC_LABEL:
 				HYBRID_BREAK();
 			HYBRID_CASE(HYBRID_HALT):
 #ifdef ZEND_VM_FP_GLOBAL_REG
-				execute_data = orig_execute_data;
+				execute_data = vm_stack_data.orig_execute_data;
 #endif
 #ifdef ZEND_VM_IP_GLOBAL_REG
-				opline = orig_opline;
+				opline = vm_stack_data.orig_opline;
 #endif
 				return;
 			HYBRID_DEFAULT:
@@ -58800,9 +58819,9 @@ zend_leave_helper_SPEC_LABEL:
 				HYBRID_BREAK(); /* Never reached */
 #else
 #ifdef ZEND_VM_FP_GLOBAL_REG
-			execute_data = orig_execute_data;
+			execute_data = vm_stack_data.orig_execute_data;
 # ifdef ZEND_VM_IP_GLOBAL_REG
-			opline = orig_opline;
+			opline = vm_stack_data.orig_opline;
 # endif
 			return;
 #else
@@ -58811,7 +58830,7 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_VM_LOOP_INTERRUPT_CHECK();
 			} else {
 # ifdef ZEND_VM_IP_GLOBAL_REG
-				opline = orig_opline;
+				opline = vm_stack_data.orig_opline;
 # endif
 				return;
 			}

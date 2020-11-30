@@ -1780,10 +1780,10 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
         case ZEND_VM_KIND_HYBRID:
             out($f,"\t\t\tHYBRID_CASE(HYBRID_HALT):\n");
             out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
-            out($f,"\t\t\t\texecute_data = orig_execute_data;\n");
+            out($f,"\t\t\t\texecute_data = vm_stack_data.orig_execute_data;\n");
             out($f,"#endif\n");
             out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
-            out($f,"\t\t\t\topline = orig_opline;\n");
+            out($f,"\t\t\t\topline = vm_stack_data.orig_opline;\n");
             out($f,"#endif\n");
             out($f,"\t\t\t\treturn;\n");
             out($f,"\t\t\tHYBRID_DEFAULT:\n");
@@ -2065,14 +2065,33 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
                         out($f,"#endif\n");
                     } else {
+                        out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_IP_GLOBAL_REG)\n");
+                        out($f,$m[1]."struct {\n");
                         out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
-                        out($f,$m[1]."const zend_op *orig_opline = opline;\n");
+                        out($f,$m[1]."\tconst zend_op *orig_opline;\n");
                         out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
-                        out($f,$m[1]."zend_execute_data *orig_execute_data = execute_data;\n");
+                        out($f,$m[1]."\tzend_execute_data *orig_execute_data;\n");
+                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
+                        out($f,$m[1]."\tchar hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];\n");
+                        out($f,"#endif\n");
+                        out($f,"#endif\n");
+                        out($f,$m[1]."} vm_stack_data;\n");
+                        out($f,"#endif\n");
+                        out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
+                        out($f,$m[1]."vm_stack_data.orig_opline = opline;\n");
+                        out($f,"#endif\n");
+                        out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
+                        out($f,$m[1]."vm_stack_data.orig_execute_data = execute_data;\n");
                         out($f,$m[1]."execute_data = ex;\n");
                         out($f,"#else\n");
                         out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
+                        out($f,"#endif\n");
+                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
+                        out($f,$m[1]."memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);\n");
+                        out($f,$m[1]."if (zend_touch_vm_stack_data) {\n");
+                        out($f,$m[1]."\tzend_touch_vm_stack_data(&vm_stack_data);\n");
+                        out($f,$m[1]."}\n");
                         out($f,"#endif\n");
                     }
                     break;
@@ -2159,9 +2178,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         }
                         out($f,
                                 "#ifdef ZEND_VM_FP_GLOBAL_REG\n" .
-                                $m[1]."execute_data = orig_execute_data;\n" .
+                                $m[1]."execute_data = vm_stack_data.orig_execute_data;\n" .
                                 "# ifdef ZEND_VM_IP_GLOBAL_REG\n" .
-                                $m[1]."opline = orig_opline;\n" .
+                                $m[1]."opline = vm_stack_data.orig_opline;\n" .
                                 "# endif\n" .
                                 $m[1]."return;\n" .
                                 "#else\n" .
@@ -2170,7 +2189,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 $m[1]."\tZEND_VM_LOOP_INTERRUPT_CHECK();\n".
                                 $m[1]."} else {\n" .
                                 "# ifdef ZEND_VM_IP_GLOBAL_REG\n" .
-                                $m[1]."\topline = orig_opline;\n" .
+                                $m[1]."\topline = vm_stack_data.orig_opline;\n" .
                                 "# endif\n".
                                 $m[1]."\treturn;\n".
                                 $m[1]."}\n".
@@ -2577,6 +2596,12 @@ function gen_vm($def, $skel) {
     } else {
         fputs($f, "#define ZEND_VM_KIND\t\t" . $GLOBALS["vm_kind_name"][ZEND_VM_KIND] . "\n");
     }
+    fputs($f, "\n");
+    fputs($f, "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)\n");
+    fputs($f, "# if (defined(i386) || defined(__x86_64__) || defined(_M_X64))\n");
+    fputs($f, "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16\n");
+    fputs($f, "# endif\n");
+    fputs($f, "#endif\n");
     fputs($f, "\n");
     foreach($vm_op_flags as $name => $val) {
         fprintf($f, "#define %-24s 0x%08x\n", $name, $val);

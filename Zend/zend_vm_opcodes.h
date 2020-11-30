@@ -34,6 +34,12 @@
 # define ZEND_VM_KIND		ZEND_VM_KIND_CALL
 #endif
 
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)
+# if (defined(i386) || defined(__x86_64__) || defined(_M_X64))
+#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16
+# endif
+#endif
+
 #define ZEND_VM_OP_SPEC          0x00000001
 #define ZEND_VM_OP_CONST         0x00000002
 #define ZEND_VM_OP_TMPVAR        0x00000004
