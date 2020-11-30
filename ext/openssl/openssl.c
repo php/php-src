@@ -6496,8 +6496,9 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
 	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
 	switch (cipher_mode) {
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-		/* Note: While OpenSSL 1.1 supports OCB mode, LibreSSL does not support it. */
+#ifdef EVP_CIPH_OCB_MODE
+		/* Since OpenSSL 1.1, all AEAD ciphers use a common framework. We check for
+		 * EVP_CIPH_OCB_MODE, because LibreSSL does not support it. */
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_OCB_MODE:
 		case EVP_CIPH_CCM_MODE:
