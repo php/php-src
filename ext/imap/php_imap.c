@@ -2037,7 +2037,8 @@ PHP_FUNCTION(imap_savebody)
 		RETURN_THROWS();
 	}
 
-	PHP_IMAP_CHECK_MSGNO(msgno, 3);
+	// TODO Fix for UID and normal MSGNO
+	//PHP_IMAP_CHECK_MSGNO(msgno, 3);
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
 		zend_argument_value_error(5, "must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL");

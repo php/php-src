@@ -123,6 +123,22 @@ function create_mailbox($imap_stream, string $mailbox_suffix, int $message_count
     return $mailbox;
 }
 
+function setup_test_mailbox_for_uid_tests(string $mailbox_suffix, &$msg_no = null, &$msg_uid = null)
+{
+    $mail_box = setup_test_mailbox($mailbox_suffix, 10);
+    echo "Delete 4 messages for Unique ID generation\n";
+    // Delete messages to remove the numerical ordering
+    imap_delete($mail_box, 3);
+    imap_delete($mail_box, 4);
+    imap_delete($mail_box, 5);
+    imap_delete($mail_box, 6);
+    imap_expunge($mail_box);
+    $msg_no = 5;
+    $msg_uid = 9;
+
+    return $mail_box;
+}
+
 /**
  * Populate a mailbox with generic emails
  *
