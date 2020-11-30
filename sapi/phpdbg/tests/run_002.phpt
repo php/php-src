@@ -2,8 +2,8 @@
 Stdin and escaped args being passed to run command
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
-    die('xfail breakpoint/watchpoint issues with JIT on Windows');
+if (ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+  die('skip phpdbg is incompatible with JIT');
 }
 ?>
 --CLEAN--

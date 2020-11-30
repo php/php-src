@@ -1,5 +1,11 @@
 --TEST--
 Test stdin input with breakpoints
+--SKIPIF--
+<?php
+if (ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('skip phpdbg is incompatible with JIT');
+}
+?>
 --PHPDBG--
 stdin foo
 <?php

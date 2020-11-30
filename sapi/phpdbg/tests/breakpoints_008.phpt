@@ -1,5 +1,11 @@
 --TEST--
 Test namespaced and non-lowercase breakpoint names
+--SKIPIF--
+<?php
+if (ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('skip phpdbg is incompatible with JIT');
+}
+?>
 --PHPDBG--
 b foo\bar::foo
 b \Foo\Bar::Foo

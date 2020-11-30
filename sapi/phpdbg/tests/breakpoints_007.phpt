@@ -1,5 +1,11 @@
 --TEST--
 Basic method breakpoints
+--SKIPIF--
+<?php
+if (ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('skip phpdbg is incompatible with JIT');
+}
+?>
 --PHPDBG--
 b bar::foo
 r

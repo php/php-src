@@ -1,5 +1,11 @@
 --TEST--
 Test phpdbg_*_oplog() functions
+--SKIPIF--
+<?php
+if (ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('skip phpdbg is incompatible with JIT');
+}
+?>
 --INI--
 opcache.enable_cli=0
 --PHPDBG--

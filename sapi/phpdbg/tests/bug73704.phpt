@@ -1,5 +1,11 @@
 --TEST--
 Bug #73704 (phpdbg shows the wrong line in files with shebang)
+--SKIPIF--
+<?php
+if (ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('skip phpdbg is incompatible with JIT');
+}
+?>
 --PHPDBG--
 list 6
 b 4

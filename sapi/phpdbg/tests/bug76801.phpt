@@ -1,5 +1,11 @@
 --TEST--
 include()ing files should not raise "too many open files" error
+--SKIPIF--
+<?php
+if (ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('skip phpdbg is incompatible with JIT');
+}
+?>
 --PHPDBG--
 r
 q
