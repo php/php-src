@@ -745,6 +745,7 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 			info = ssa->var_info + op->result_use;
 		} else {
 			assert(0);
+			return 0;
 		}
 		tssa->vars[ssa_var].no_val = no_val;
 		tssa->vars[ssa_var].alias = alias;
@@ -780,6 +781,7 @@ static int zend_jit_trace_copy_ssa_var_range(const zend_op_array *op_array, cons
 			info = ssa->var_info + op->result_def;
 		} else {
 			assert(0);
+			return 0;
 		}
 
 		tssa->vars[ssa_var].no_val = no_val;
@@ -819,6 +821,7 @@ static int zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, c
 			info = ssa->var_info + op->result_def;
 		} else {
 			assert(0);
+			return 0;
 		}
 		tssa->var_info[ssa_var].type &= info->type;
 		if (info->ce) {
