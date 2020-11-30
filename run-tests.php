@@ -699,7 +699,7 @@ function main(): void
         $environment['TEST_PHP_EXECUTABLE'] = $php;
     }
 
-    if (strlen($conf_passed)) {
+    if ($conf_passed !== null) {
         if (IS_WINDOWS) {
             $pass_options .= " -c " . escapeshellarg($conf_passed);
         } else {
