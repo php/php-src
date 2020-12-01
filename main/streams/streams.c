@@ -542,6 +542,7 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 	/* allocate/fill the buffer */
 
 	if (stream->readfilters.head) {
+		size_t to_read_now = MIN(size, stream->chunk_size);
 		char *chunk_buf;
 		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
 		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
@@ -549,7 +550,7 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && (stream->writepos - stream->readpos < (zend_off_t)size)) {
+		while (!stream->eof && (stream->writepos - stream->readpos < (zend_off_t)to_read_now)) {
 			ssize_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
