@@ -1319,6 +1319,11 @@ exit_loop:
 
 	sapi_module->ini_entries = ini_entries;
 
+	/* -e option */
+	if (use_extended_info) {
+		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+	}
+
 	/* startup after we get the above ini override se we get things right */
 	if (sapi_module->startup(sapi_module) == FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
@@ -1343,11 +1348,6 @@ exit_loop:
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif
-
-	/* -e option */
-	if (use_extended_info) {
-		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
-	}
 
 	zend_first_try {
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
