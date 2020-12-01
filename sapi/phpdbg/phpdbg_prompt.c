@@ -1371,8 +1371,8 @@ quit:
 
 PHPDBG_COMMAND(dl) /* {{{ */
 {
-	const char *type;
-	char *name, *path;
+	const char *type, *name;
+	char *path;
 
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_notice("dl", "extensiontype=\"Zend extension\"", "Zend extensions");
@@ -1386,9 +1386,8 @@ PHPDBG_COMMAND(dl) /* {{{ */
 			path = estrndup(param->str, param->len);
 
 			phpdbg_activate_err_buf(1);
-			if ((type = phpdbg_load_module_or_extension(&path, (const char **) &name)) == NULL) {
+			if ((type = phpdbg_load_module_or_extension(&path, &name)) == NULL) {
 				phpdbg_error("dl", "path=\"%s\" %b", "Could not load %s, not found or invalid zend extension / module: %b", path);
-				efree(name);
 			} else {
 				phpdbg_notice("dl", "extensiontype=\"%s\" name=\"%s\" path=\"%s\"", "Successfully loaded the %s %s at path %s", type, name, path);
 			}
