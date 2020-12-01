@@ -38,7 +38,7 @@ dump_error(fn() => array_key_exists('foo', $foo?->foo()));
 
 ?>
 --EXPECTF--
-Deprecated: {closure}(): Passing null to argument of type string is deprecated in %s on line %d
+Deprecated: strlen(): Passing null to argument of type string is deprecated in %s on line %d
 int(0)
 bool(true)
 bool(false)

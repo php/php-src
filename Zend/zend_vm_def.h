@@ -8310,6 +8310,16 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 				zend_string *str;
 				zval tmp;
 
+				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
+					zend_error(E_DEPRECATED,
+						"strlen(): Passing null to argument of type string is deprecated");
+					if (UNEXPECTED(EG(exception))) {
+						HANDLE_EXCEPTION();
+					}
+					ZVAL_LONG(EX_VAR(opline->result.var), 0);
+					break;
+				}
+
 				ZVAL_COPY(&tmp, value);
 				if (zend_parse_arg_str_weak(&tmp, &str)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
