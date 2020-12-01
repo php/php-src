@@ -3662,7 +3662,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 		zend_jit_label(&dasm_state, 0); /* start of of trace loop */
 
-		if (ra && trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
+		if (ra) {
 			zend_ssa_phi *phi = ssa->blocks[1].phis;
 
 			while (phi) {
