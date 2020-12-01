@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 
 - IMAP
   . Fixed bug #80438 (imap_msgno() incorrectly warns and return false on valid UIDs in PHP 8.0.0). (girgias)
+  . Fix a regression with valid UIDs in imap_savebody() (girgias)
+  . Make warnings for invalid message numbers/UIDs between functions consistent (girgias)
 
 - Intl:
   . Fixed bug #80425 (MessageFormatAdapter::getArgTypeList redefined). (Nikita)
