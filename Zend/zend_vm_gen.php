@@ -2598,7 +2598,7 @@ function gen_vm($def, $skel) {
     }
     fputs($f, "\n");
     fputs($f, "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)\n");
-    fputs($f, "# if (defined(i386) || defined(__x86_64__) || defined(_M_X64))\n");
+    fputs($f, "# if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))\n");
     fputs($f, "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16\n");
     fputs($f, "# endif\n");
     fputs($f, "#endif\n");
