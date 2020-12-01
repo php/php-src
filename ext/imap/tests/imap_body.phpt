@@ -5,33 +5,40 @@ Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = imap_open($default_mailbox, $username, $password) or
-    die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
+require_once(__DIR__.'/setup/imap_include.inc');
+
+$imap_stream = setup_test_mailbox("imapbodyvalueerror", 0);
 
 try {
-    imap_body($stream_id,-1);
+    imap_body($imap_stream,-1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    imap_body($stream_id,1,-1);
+    imap_body($imap_stream,1,-1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 //Access not existing
-var_dump(imap_body($stream_id, 255, FT_UID));
+var_dump(imap_body($imap_stream, 255, FT_UID));
 
-imap_close($stream_id);
+imap_close($imap_stream);
 
 ?>
+--CLEAN--
+<?php
+$mailbox_suffix = 'imapbodyvalueerror';
+require_once(__DIR__ . '/setup/clean.inc');
+?>
 --EXPECTF--
+Create a temporary mailbox and add 0 msgs
+New mailbox created
 imap_body(): Argument #2 ($message_num) must be greater than 0
 imap_body(): Argument #3 ($flags) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
 

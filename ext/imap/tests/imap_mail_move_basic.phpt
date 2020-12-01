@@ -4,36 +4,33 @@ Test imap_mail_move() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 echo "*** Testing imap_mail_move() : basic functionality ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
-
+require_once(__DIR__.'/setup/imap_include.inc');
 
 echo "Create a new mailbox for test\n";
-$imap_stream = setup_test_mailbox("", 1);
-if (!is_resource($imap_stream)) {
-    exit("TEST FAILED: Unable to create test mailbox\n");
-}
+$imap_stream = setup_test_mailbox("movebasic", 1);
 
 $check = imap_check($imap_stream);
 echo "Msg Count in new mailbox: ". $check->Nmsgs . "\n";
 
-var_dump(imap_mail_move($imap_stream, '1', 'INBOX.'.$mailbox_prefix));
+var_dump(imap_mail_move($imap_stream, '1', 'INBOX.' . IMAP_MAILBOX_PHPT_PREFIX . 'movebasic'));
 
 imap_close($imap_stream);
 ?>
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'movebasic';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing imap_mail_move() : basic functionality ***
 Create a new mailbox for test
 Create a temporary mailbox and add 1 msgs
-.. mailbox '%s' created
+New mailbox created
 Msg Count in new mailbox: 1
 bool(true)

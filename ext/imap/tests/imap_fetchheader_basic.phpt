@@ -2,15 +2,15 @@
 Test imap_fetchheader() function : basic function
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 echo "*** Testing imap_fetchheader() : basic functionality ***\n";
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 // Initialise all required variables
-$stream_id = setup_test_mailbox('', 1, $mailbox, 'multiPart'); // setup temp mailbox with 1 msg
+$stream_id = setup_test_mailbox('imapfetchheaderbasic', 1, $mailbox, false); // setup temp mailbox with 1 msg
 $msg_no = 1;
 $options = array('FT_UID' => FT_UID, 'FT_INTERNAL' => FT_INTERNAL,
                  'FT_PREFETCHTEXT' => FT_PREFETCHTEXT);
@@ -33,12 +33,13 @@ var_dump( imap_fetchheader($stream_id, $msg_no) );
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapfetchheaderbasic';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchheader() : basic functionality ***
 Create a temporary mailbox and add 1 msgs
-.. mailbox '%s.phpttest' created
+New mailbox created
 
 -- All possible arguments --
 -- Option is FT_UID --

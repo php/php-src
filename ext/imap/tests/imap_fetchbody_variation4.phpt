@@ -2,7 +2,7 @@
 Test imap_fetchbody() function : usage variations - FT_UID option
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -13,10 +13,10 @@ require_once(__DIR__.'/skipif.inc');
  */
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 // Initialise required variables
-$stream_id = setup_test_mailbox('', 1); // set up temporary mailbox with one simple message
+$stream_id = setup_test_mailbox('imapfetchbodyvar4', 1); // set up temporary mailbox with one simple message
 $msg_no = 1;
 $msg_uid = imap_uid($stream_id, $msg_no);
 $section = 1;
@@ -47,12 +47,13 @@ foreach($flags as $option) {
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapfetchbodyvar4';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing imap_fetchbody() : usage variations ***
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
 -- Iteration 1 --
 FT_UID valid

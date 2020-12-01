@@ -2,7 +2,7 @@
 Test imap_fetchheader() function : usage variations - $message_num argument
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -13,9 +13,9 @@ require_once(__DIR__.'/skipif.inc');
 
 echo "*** Testing imap_fetchheader() : usage variations ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
-$stream_id = setup_test_mailbox('', 3, $mailbox, 'notSimple'); // set up temp mailbox with 3 msgs
+$stream_id = setup_test_mailbox('imapfetchheadervar5', 3, $mailbox, false); // set up temp mailbox with 3 msgs
 
 $sequences = [0, /* out of range */ 4, 1];
 
@@ -33,12 +33,13 @@ imap_errors();
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapfetchheadervar5';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchheader() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
 -- $message_num is 0 --
 imap_fetchheader(): Argument #2 ($message_num) must be greater than 0

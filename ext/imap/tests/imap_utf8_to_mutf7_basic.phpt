@@ -2,7 +2,6 @@
 imap_utf8_to_mutf7
 --SKIPIF--
 <?php if (!extension_loaded("imap")) print "skip imap extension not loaded"; ?>
-<?php if (!function_exists("imap_utf8_to_mutf7")) print "skip imap_utf8_to_mutf7() not available"; ?>
 --FILE--
 <?php
 
