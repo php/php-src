@@ -234,65 +234,6 @@ function main(): void
     $php_cgi = null;
     $phpdbg = null;
 
-    if (getenv('TEST_PHP_EXECUTABLE')) {
-        $php = getenv('TEST_PHP_EXECUTABLE');
-
-        if ($php == 'auto') {
-            $php = TEST_PHP_SRCDIR . '/sapi/cli/php';
-            putenv("TEST_PHP_EXECUTABLE=$php");
-
-            if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
-                $php_cgi = TEST_PHP_SRCDIR . '/sapi/cgi/php-cgi';
-
-                if (file_exists($php_cgi)) {
-                    putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
-                } else {
-                    $php_cgi = null;
-                }
-            }
-        }
-        $environment['TEST_PHP_EXECUTABLE'] = $php;
-    }
-
-    if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
-        $php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
-
-        if ($php_cgi == 'auto') {
-            $php_cgi = TEST_PHP_SRCDIR . '/sapi/cgi/php-cgi';
-            putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
-        }
-
-        $environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
-    }
-
-    if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
-        if (IS_WINDOWS && file_exists(dirname($php) . "/phpdbg.exe")) {
-            $phpdbg = realpath(dirname($php) . "/phpdbg.exe");
-        } elseif (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
-            $phpdbg = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg");
-        } elseif (file_exists("./sapi/phpdbg/phpdbg")) {
-            $phpdbg = realpath("./sapi/phpdbg/phpdbg");
-        } elseif (file_exists(dirname($php) . "/phpdbg")) {
-            $phpdbg = realpath(dirname($php) . "/phpdbg");
-        } else {
-            $phpdbg = null;
-        }
-        if ($phpdbg) {
-            putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
-        }
-    }
-
-    if (getenv('TEST_PHPDBG_EXECUTABLE')) {
-        $phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
-
-        if ($phpdbg == 'auto') {
-            $phpdbg = TEST_PHP_SRCDIR . '/sapi/phpdbg/phpdbg';
-            putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
-        }
-
-        $environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
-    }
-
     if (getenv('TEST_PHP_LOG_FORMAT')) {
         $log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
     } else {
@@ -692,12 +633,33 @@ function main(): void
         return;
     }
 
-    // Default to PHP_BINARY as executable
-    if (!isset($environment['TEST_PHP_EXECUTABLE'])) {
-        $php = PHP_BINARY;
-        putenv("TEST_PHP_EXECUTABLE=$php");
-        $environment['TEST_PHP_EXECUTABLE'] = $php;
+    if (!$php) {
+        $php = getenv('TEST_PHP_EXECUTABLE');
     }
+    if (!$php) {
+        $php = PHP_BINARY;
+    }
+
+    if (!$php_cgi) {
+        $php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
+    }
+    if (!$php_cgi) {
+        $php_cgi = get_binary($php, 'php-cgi', 'sapi/cgi/php-cgi');
+    }
+
+    if (!$phpdbg) {
+        $phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
+    }
+    if (!$phpdbg) {
+        $phpdbg = get_binary($php, 'phpdbg', 'sapi/phpdbg/phpdbg');
+    }
+
+    putenv("TEST_PHP_EXECUTABLE=$php");
+    $environment['TEST_PHP_EXECUTABLE'] = $php;
+    putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
+    $environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+    putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
+    $environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
 
     if ($conf_passed !== null) {
         if (IS_WINDOWS) {
@@ -1056,6 +1018,21 @@ function save_or_mail_results(): void
             }
         }
     }
+}
+
+function get_binary(string $php, string $sapi, string $sapi_path): ?string
+{
+    $dir = dirname($php);
+    if (IS_WINDOWS && file_exists("$dir/$sapi.exe")) {
+        return realpath("$dir/$sapi.exe");
+    }
+    if (file_exists("$dir/../../$sapi_path")) {
+        return realpath("$dir/../../$sapi_path");
+    }
+    if (file_exists("$dir/$sapi")) {
+        return realpath("$dir/$sapi");
+    }
+    return null;
 }
 
 function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false): void
@@ -2007,25 +1984,14 @@ TEST $file
 
     /* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
     if (array_key_exists('CGI', $section_text) || !empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
-        if (isset($php_cgi)) {
-            $php = $php_cgi . ' -C ';
-        } elseif (IS_WINDOWS && file_exists(dirname($php) . "/php-cgi.exe")) {
-            $php = realpath(dirname($php) . "/php-cgi.exe") . ' -C ';
-        } else {
-            if (file_exists(dirname($php) . "/../../sapi/cgi/php-cgi")) {
-                $php = realpath(dirname($php) . "/../../sapi/cgi/php-cgi") . ' -C ';
-            } elseif (file_exists("./sapi/cgi/php-cgi")) {
-                $php = realpath("./sapi/cgi/php-cgi") . ' -C ';
-            } elseif (file_exists(dirname($php) . "/php-cgi")) {
-                $php = realpath(dirname($php) . "/php-cgi") . ' -C ';
-            } else {
-                return skip_test($tested, $tested_file, $shortname, 'CGI not available');
-            }
+        if (!$php_cgi) {
+            return skip_test($tested, $tested_file, $shortname, 'CGI not available');
         }
+        $php = $php_cgi . ' -C ';
+        $uses_cgi = true;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
         }
-        $uses_cgi = true;
     }
 
     /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
