@@ -33,7 +33,10 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 	if (attr->argc > 0) {
 		zval flags;
 
-		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, scope)) {
+		/* As this is run in the middle of compilation, fetch the attribute value without
+		 * specifying a scope. The class is not fully linked yet, and we may seen an
+		 * inconsistent state. */
+		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, NULL)) {
 			return;
 		}
 
