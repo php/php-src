@@ -2,11 +2,10 @@
 Bug #80438: imap_msgno() incorrectly warns and return false on valid UIDs in PHP 8.0.0
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
-echo "*** Testing imap_fetch_overview() : basic functionality ***\n";
 
 require_once __DIR__.'/setup/imap_include.inc';
 
@@ -41,7 +40,6 @@ $mailbox_suffix = 'bug80438';
 require_once __DIR__.'/setup/clean.inc';
 ?>
 --EXPECT--
-*** Testing imap_fetch_overview() : basic functionality ***
 Create a temporary mailbox and add 10 msgs
 New mailbox created
 array(6) {
