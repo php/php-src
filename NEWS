@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #80368 (OpenSSL extension fails to build against LibreSSL due to
     lack of OCB support). (Nikita)
 
+- Phar:
+  . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)
+
 - Phpdbg:
   . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
 
