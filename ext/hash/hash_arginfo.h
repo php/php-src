@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9352e0ac98e2ac53dc15d5024f9ef0c8092c4e9c */
+ * Stub hash: f162e966d646f8dfaab19481c600bc5ce537a464 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_hash, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -115,7 +115,31 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mhash, 0, 2, MAY_BE_STRING|MAY_B
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_HashContext___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_HashContext___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, key, IS_STRING, 0, "\'\'")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_HashContext_update, 0, 1, HashContext, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_HashContext_updateFile, 0, 1, HashContext, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, stream_context, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_HashContext_updateStream, 0, 1, HashContext, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_HashContext_final, 0, 0, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, binary, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_HashContext_getAlgo, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_HashContext___serialize arginfo_hash_algos
@@ -156,6 +180,11 @@ ZEND_FUNCTION(mhash_count);
 ZEND_FUNCTION(mhash);
 #endif
 ZEND_METHOD(HashContext, __construct);
+ZEND_METHOD(HashContext, update);
+ZEND_METHOD(HashContext, updateFile);
+ZEND_METHOD(HashContext, updateStream);
+ZEND_METHOD(HashContext, final);
+ZEND_METHOD(HashContext, getAlgo);
 ZEND_METHOD(HashContext, __serialize);
 ZEND_METHOD(HashContext, __unserialize);
 
@@ -196,7 +225,12 @@ static const zend_function_entry ext_functions[] = {
 
 
 static const zend_function_entry class_HashContext_methods[] = {
-	ZEND_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, update, arginfo_class_HashContext_update, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, updateFile, arginfo_class_HashContext_updateFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, updateStream, arginfo_class_HashContext_updateStream, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, final, arginfo_class_HashContext_final, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, getAlgo, arginfo_class_HashContext_getAlgo, ZEND_ACC_PUBLIC)
 	ZEND_ME(HashContext, __serialize, arginfo_class_HashContext___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(HashContext, __unserialize, arginfo_class_HashContext___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
