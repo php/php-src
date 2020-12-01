@@ -5,7 +5,7 @@ Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 if (getenv("SKIP_ASAN")) die("skip leak sanitizer crashes");
 ?>
 --FILE--
@@ -20,10 +20,8 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-require_once(__DIR__.'/imap_include.inc');
-
 try {
-    imap_open($default_mailbox, $username, $password, NIL, -1);
+    imap_open('', '', '', NIL, -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

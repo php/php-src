@@ -2,7 +2,7 @@
 Test imap_close() function : usage variations - different ints as $flags arg
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -13,11 +13,11 @@ require_once(__DIR__.'/skipif.inc');
 
 echo "*** Testing imap_close() : usage variations ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 $inputs = array (0, 3.2768e4, -32768, PHP_INT_MAX, -PHP_INT_MAX);
 
-$stream_id = setup_test_mailbox('', 3, $mailbox); // set up temp mailbox with 3 messages
+$stream_id = setup_test_mailbox('imapclosevar4', 3, $mailbox); // set up temp mailbox with 3 messages
 
 // loop through each element of $inputs to check the behavior of imap_close()
 $iterator = 1;
@@ -40,7 +40,7 @@ foreach($inputs as $input) {
         imap_close($stream_id, CL_EXPUNGE);
     } else {
         // if imap_close was successful test whether CL_EXPUNGE was set by doing a message count
-        $imap_stream = imap_open($mailbox, $username, $password);
+        $imap_stream = imap_open($mailbox, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD);
         $num_msg = imap_num_msg($imap_stream);
         if ($num_msg != 0) {
             echo "CL_EXPUNGE was not set, $num_msg msgs in mailbox\n";
@@ -53,19 +53,20 @@ foreach($inputs as $input) {
     $iterator++;
 
     // get $stream_id for next iteration
-    $stream_id = imap_open($mailbox, $username, $password);
+    $stream_id = imap_open($mailbox, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD);
     populate_mailbox($stream_id, $mailbox, 3);
 
 };
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapclosevar4';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing imap_close() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
 -- Iteration 1 --
 bool(true)

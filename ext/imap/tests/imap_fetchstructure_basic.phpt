@@ -4,13 +4,13 @@ imap_fetchstructure() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
-$stream_id = setup_test_mailbox('', 1);
+require_once(__DIR__.'/setup/imap_include.inc');
+$stream_id = setup_test_mailbox('imapfetchstructurebasic', 1);
 
 try {
     imap_fetchstructure($stream_id,0);
@@ -38,11 +38,12 @@ imap_close($stream_id);
 ?>
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imapfetchstructurebasic';
+require_once('setup/clean.inc');
 ?>
 --EXPECTF--
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{127.0.0.1:143/norsh}INBOX.phpttest' created
+New mailbox created
 imap_fetchstructure(): Argument #2 ($message_num) must be greater than 0
 bool(true)
 bool(true)
