@@ -2,7 +2,7 @@
 Bug #80438: imap_msgno() incorrectly warns and return false on valid UIDs in PHP 8.0.0
 --SKIPIF--
 <?php
-require_once(__DIR__.'/setup/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
