@@ -643,12 +643,6 @@ PHP_FUNCTION(hash_init)
 	hash->context = context;
 	hash->options = options;
 	hash->key = NULL;
-	if (args && zend_hash_num_elements(args)) {
-		hash->args = args;
-		GC_TRY_ADDREF(hash->args);
-	} else {
-		hash->args = NULL;
-	}
 
 	if (options & PHP_HASH_HMAC) {
 		char *K = emalloc(ops->block_size);
@@ -803,7 +797,7 @@ PHP_FUNCTION(hash_final)
 		}
 
 		/* Feed this result into the outer hash */
-		hash->ops->hash_init(hash->context, hash->args);
+		hash->ops->hash_init(hash->context, NULL);
 		hash->ops->hash_update(hash->context, hash->key, hash->ops->block_size);
 		hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(digest), hash->ops->digest_size);
 		hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
@@ -1392,11 +1386,6 @@ static void php_hashcontext_dtor(zend_object *obj) {
 		efree(hash->key);
 		hash->key = NULL;
 	}
-
-	if (hash->args) {
-		zend_array_release(hash->args);
-		hash->args = NULL;
-	}
 }
 /* }}} */
 
@@ -1411,7 +1400,7 @@ static zend_object *php_hashcontext_clone(zend_object *zobj) {
 	newobj->ops = oldobj->ops;
 	newobj->options = oldobj->options;
 	newobj->context = php_hash_alloc_context(newobj->ops);
-	newobj->ops->hash_init(newobj->context, oldobj->args);
+	newobj->ops->hash_init(newobj->context, NULL);
 
 	if (SUCCESS != newobj->ops->hash_copy(newobj->ops, oldobj->context, newobj->context)) {
 		efree(newobj->context);
@@ -1487,14 +1476,6 @@ PHP_METHOD(HashContext, __serialize)
 	Z_TRY_ADDREF(tmp);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
-	if (hash->args) {
-		ZVAL_ARR(&tmp, hash->args);
-		Z_TRY_ADDREF(tmp);
-	} else {
-		ZVAL_NULL(&tmp);
-	}
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
-
 	return;
 
 serialize_failure:
@@ -1558,14 +1539,7 @@ PHP_METHOD(HashContext, __unserialize)
 	hash->ops = ops;
 	hash->context = php_hash_alloc_context(ops);
 	hash->options = options;
-	if (args_zv && IS_ARRAY == Z_TYPE_P(args_zv) && zend_hash_num_elements(Z_ARRVAL_P(args_zv)) > 0) {
-		ops->hash_init(hash->context, Z_ARRVAL_P(args_zv));
-		hash->args = Z_ARRVAL_P(args_zv);
-		GC_TRY_ADDREF(hash->args);
-	} else {
-		ops->hash_init(hash->context, NULL);
-		hash->args = NULL;
-	}
+	ops->hash_init(hash->context, NULL);
 
 	unserialize_result = ops->hash_unserialize(hash, magic, hash_zv);
 	if (unserialize_result != SUCCESS) {

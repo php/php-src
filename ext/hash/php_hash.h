@@ -61,8 +61,6 @@ struct _php_hashcontext_object {
 	zend_long options;
 	unsigned char *key;
 
-	HashTable *args;
-
 	zend_object std;
 };
 
