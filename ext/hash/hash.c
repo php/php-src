@@ -1490,7 +1490,7 @@ PHP_METHOD(HashContext, __unserialize)
 	zval *object = ZEND_THIS;
 	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(object));
 	HashTable *data;
-	zval *algo_zv, *magic_zv, *options_zv, *hash_zv, *members_zv, *args_zv;
+	zval *algo_zv, *magic_zv, *options_zv, *hash_zv, *members_zv;
 	zend_long magic, options;
 	int unserialize_result;
 	const php_hash_ops *ops;
@@ -1509,7 +1509,6 @@ PHP_METHOD(HashContext, __unserialize)
 	hash_zv = zend_hash_index_find(data, 2);
 	magic_zv = zend_hash_index_find(data, 3);
 	members_zv = zend_hash_index_find(data, 4);
-	args_zv = zend_hash_index_find(data, 5);
 
 	if (!algo_zv || Z_TYPE_P(algo_zv) != IS_STRING
 		|| !magic_zv || Z_TYPE_P(magic_zv) != IS_LONG
