@@ -1531,8 +1531,9 @@ PHP_FUNCTION(imagecreatefromstring)
 	}
 
 	if (ZSTR_LEN(data) < sizeof(sig)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
+		/* Handle this the same way as an unknown image type. */
+		php_error_docref(NULL, E_WARNING, "Data is not in a recognized format");
+		RETURN_FALSE;
 	}
 
 	memcpy(sig, ZSTR_VAL(data), sizeof(sig));
