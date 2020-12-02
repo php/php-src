@@ -2675,6 +2675,21 @@ static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static bool is_globals_fetch(const zend_ast *ast)
+{
+	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
+		zval *name = zend_ast_get_zval(ast->child[0]);
+		return Z_TYPE_P(name) == IS_STRING && zend_string_equals_literal(Z_STR_P(name), "GLOBALS");
+	}
+
+	return 0;
+}
+
+static bool is_global_var_fetch(zend_ast *ast)
+{
+	return ast->kind == ZEND_AST_DIM && is_globals_fetch(ast->child[0]);
+}
+
 static zend_bool this_guaranteed_exists() /* {{{ */
 {
 	zend_op_array *op_array = CG(active_op_array);
@@ -2694,6 +2709,13 @@ static zend_op *zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t t
 			result->op_type = IS_TMP_VAR;
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
+		return opline;
+	} else if (is_globals_fetch(ast)) {
+		zend_op *opline = zend_emit_op(result, ZEND_FETCH_GLOBALS, NULL, NULL);
+		if (type == BP_VAR_R || type == BP_VAR_IS) {
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
+		}
 		return opline;
 	} else if (zend_try_compile_cv(result, ast) == FAILURE) {
 		return zend_compile_simple_var_no_cv(result, ast, type, delayed);
@@ -2740,10 +2762,22 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 
 	znode var_node, dim_node;
 
-	zend_short_circuiting_mark_inner(var_ast);
-	opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
-	if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
-		opline->extended_value |= ZEND_FETCH_DIM_WRITE;
+	if (is_globals_fetch(var_ast)) {
+		zend_compile_expr(&dim_node, dim_ast);
+		if (dim_node.op_type == IS_CONST) {
+			convert_to_string(&dim_node.u.constant);
+		}
+
+		opline = zend_delayed_emit_op(result, ZEND_FETCH_R, &dim_node, NULL);
+		opline->extended_value = ZEND_FETCH_GLOBAL;
+		zend_adjust_for_fetch_type(opline, result, type);
+		return opline;
+	} else {
+		zend_short_circuiting_mark_inner(var_ast);
+		opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
+		if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
+			opline->extended_value |= ZEND_FETCH_DIM_WRITE;
+		}
 	}
 
 	zend_separate_if_call_and_write(&var_node, var_ast, type);
@@ -3021,6 +3055,10 @@ static void zend_ensure_writable_variable(const zend_ast *ast) /* {{{ */
 	if (zend_ast_is_short_circuited(ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Can't use nullsafe operator in write context");
 	}
+	if (is_globals_fetch(ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"$GLOBALS can only be modified using the $GLOBALS[$name] = $value syntax");
+	}
 }
 /* }}} */
 
@@ -3064,7 +3102,9 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_ensure_writable_variable(var_ast);
 
-	switch (var_ast->kind) {
+	/* Treat $GLOBALS['x'] assignment like assignment to variable. */
+	zend_ast_kind kind = is_global_var_fetch(var_ast) ? ZEND_AST_VAR : var_ast->kind;
+	switch (kind) {
 		case ZEND_AST_VAR:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W, 0);
@@ -3172,6 +3212,9 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	if (zend_ast_is_short_circuited(source_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
 	}
+	if (is_globals_fetch(source_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot acquire reference to $GLOBALS");
+	}
 
 	offset = zend_delayed_compile_begin();
 	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W, 1);
@@ -3241,7 +3284,9 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_ensure_writable_variable(var_ast);
 
-	switch (var_ast->kind) {
+	/* Treat $GLOBALS['x'] assignment like assignment to variable. */
+	zend_ast_kind kind = is_global_var_fetch(var_ast) ? ZEND_AST_VAR : var_ast->kind;
+	switch (kind) {
 		case ZEND_AST_VAR:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
@@ -3411,7 +3456,9 @@ uint32_t zend_compile_args(
 			arg_count++;
 		}
 
-		if (zend_is_call(arg)) {
+		/* Treat passing of $GLOBALS the same as passing a call.
+		 * This will error at runtime if the argument is by-ref. */
+		if (zend_is_call(arg) || is_globals_fetch(arg)) {
 			zend_compile_var(&arg_node, arg, BP_VAR_R, 0);
 			if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
 				/* Function call was converted into builtin instruction */
@@ -4558,6 +4605,7 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 		convert_to_string(&name_node.u.constant);
 	}
 
+	// TODO(GLOBALS) Forbid "global $GLOBALS"?
 	if (is_this_fetch(var_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as global variable");
 	} else if (zend_try_compile_cv(&result, var_ast) == SUCCESS) {
@@ -4628,6 +4676,17 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	zend_ensure_writable_variable(var_ast);
+
+	if (is_global_var_fetch(var_ast)) {
+		zend_compile_expr(&var_node, var_ast->child[1]);
+		if (var_node.op_type == IS_CONST) {
+			convert_to_string(&var_node.u.constant);
+		}
+
+		opline = zend_emit_op(NULL, ZEND_UNSET_VAR, &var_node, NULL);
+		opline->extended_value = ZEND_FETCH_GLOBAL;
+		return;
+	}
 
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
@@ -8709,6 +8768,24 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 				"Cannot use isset() on the result of an expression "
 				"(you can use \"null !== expression\" instead)");
 		}
+	}
+
+	if (is_globals_fetch(var_ast)) {
+		result->op_type = IS_CONST;
+		ZVAL_BOOL(&result->u.constant, ast->kind == ZEND_AST_ISSET);
+		return;
+	}
+
+	if (is_global_var_fetch(var_ast)) {
+		zend_compile_expr(&var_node, var_ast->child[1]);
+		if (var_node.op_type == IS_CONST) {
+			convert_to_string(&var_node.u.constant);
+		}
+
+		opline = zend_emit_op_tmp(result, ZEND_ISSET_ISEMPTY_VAR, &var_node, NULL);
+		opline->extended_value =
+			ZEND_FETCH_GLOBAL | (ast->kind == ZEND_AST_EMPTY ? ZEND_ISEMPTY : 0);
+		return;
 	}
 
 	zend_short_circuiting_mark_inner(var_ast);

@@ -19,6 +19,15 @@ PHP 8.1 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Access to the $GLOBALS array is now subject to a number of restrictions.
+    Read and write access to individual array elements like $GLOBALS['var']
+    continues to work as-is. Read-only access to the entire $GLOBALS array also
+    continues to be supported. However, write access to the entire $GLOBALS
+    array is no longer supported. For example, array_pop($GLOBALS) will result
+    in an error.
+    RFC: https://wiki.php.net/rfc/restrict_globals_usage
+
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects
     instead of resources.
