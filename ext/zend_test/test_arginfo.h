@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cf8958513064fb7257203b3304c8dc67c8e008b9 */
+ * Stub hash: 9d8859e602bc4d05596c7025e22dec5d7705193e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -51,11 +51,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_suppress_exception_internal_return_false, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_is_object, 0, 0, IS_LONG, 0)
+#define arginfo_zend_suppress_exception_internal_return_true arginfo_zend_suppress_exception_internal_return_false
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_suppress_exception_internal_return_int, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_func arginfo_zend_suppress_exception_internal_return_false
+
+#define arginfo_class__ZendTestClass_is_object arginfo_zend_suppress_exception_internal_return_int
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -63,7 +69,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_returnsStatic, 0, 0, IS_STATIC, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class__ZendTestTrait_testMethod arginfo_ZendTestNS2_ZendSubNS_namespaced_func
+#define arginfo_class__ZendTestTrait_testMethod arginfo_zend_suppress_exception_internal_return_false
 
 #define arginfo_class_ZendTestNS_Foo_method arginfo_zend_test_void_return
 
@@ -85,6 +91,9 @@ static ZEND_FUNCTION(zend_string_or_object_or_null);
 static ZEND_FUNCTION(zend_string_or_stdclass);
 static ZEND_FUNCTION(zend_string_or_stdclass_or_null);
 static ZEND_FUNCTION(zend_iterable);
+static ZEND_FUNCTION(zend_suppress_exception_internal_return_false);
+static ZEND_FUNCTION(zend_suppress_exception_internal_return_true);
+static ZEND_FUNCTION(zend_suppress_exception_internal_return_int);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -109,6 +118,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_string_or_stdclass, arginfo_zend_string_or_stdclass)
 	ZEND_FE(zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null)
 	ZEND_FE(zend_iterable, arginfo_zend_iterable)
+	ZEND_FE(zend_suppress_exception_internal_return_false, arginfo_zend_suppress_exception_internal_return_false)
+	ZEND_FE(zend_suppress_exception_internal_return_true, arginfo_zend_suppress_exception_internal_return_true)
+	ZEND_FE(zend_suppress_exception_internal_return_int, arginfo_zend_suppress_exception_internal_return_int)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
