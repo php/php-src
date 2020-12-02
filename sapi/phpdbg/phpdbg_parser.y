@@ -39,6 +39,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 %define api.value.type {phpdbg_param_t}
 %define parse.error verbose
 
+%token END 0 "end of command"
 %token T_EVAL       "eval"
 %token T_RUN        "run"
 %token T_SHELL      "shell"
