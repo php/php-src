@@ -47,6 +47,10 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed bug #77594 (ob_tidyhandler is never reset). (cmb)
 
+- Tokenizer:
+  . Fixed bug #80462 (Nullsafe operator tokenize with TOKEN_PARSE flag fails).
+    (Nikita)
+
 - XML:
   . XmlParser opaque object renamed to XMLParser for consistency with other XML objects. (girgias)
 
