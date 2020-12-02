@@ -1116,7 +1116,10 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	if (!stmt->result || stmt->state < MYSQLND_STMT_WAITING_USE_OR_STORE) {
+	if (!stmt->result) {
+		DBG_RETURN(FAIL);
+	}
+	else if (stmt->state < MYSQLND_STMT_WAITING_USE_OR_STORE) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_ERR("command out of sync");
 		DBG_RETURN(FAIL);

@@ -656,7 +656,6 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 #endif /* PDO_USE_MYSQLND */
 
 	if (!S->result) {
-		strcpy(stmt->error_code, "HY000");
 		PDO_DBG_RETURN(0);
 	}
 #ifdef PDO_USE_MYSQLND
