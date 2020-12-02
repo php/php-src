@@ -429,7 +429,7 @@ PHP_FUNCTION(stream_get_contents)
 		Z_PARAM_LONG(desiredpos)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	if (maxlen < 0 && maxlen != PHP_STREAM_COPY_ALL) {
+	if (maxlen < 0 && maxlen != (ssize_t)PHP_STREAM_COPY_ALL) {
 		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero, or -1");
 		RETURN_FALSE;
 	}
