@@ -76,9 +76,9 @@ bool(false)
 -- Iteration 5 --
 bool(false)
 -- Iteration 6 --
-is_executable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 -- Iteration 7 --
-is_executable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 -- Iteration 8 --
 bool(false)
 -- Iteration 9 --
