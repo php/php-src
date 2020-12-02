@@ -271,6 +271,15 @@ int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alia
 		memset(hdr->checksum, ' ', sizeof(hdr->checksum));
 		sum2 = phar_tar_checksum(buf, old?sizeof(old_tar_header):sizeof(tar_header));
 
+		if (old && sum2 != sum1) {
+			uint32_t sum3 = phar_tar_checksum(buf, sizeof(tar_header));
+			if (sum3 == sum1) {
+				/* apparently a broken tar which is in ustar format w/o setting the ustar marker */
+				sum2 = sum3;
+				old = 0;
+			}
+		}
+
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
 			phar_tar_number(hdr->size, sizeof(hdr->size));
 
