@@ -728,7 +728,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 	const char *local;
 	php_stream_wrapper *wrapper;
 
-	if (!filename_length || strlen(filename) != filename_length) {
+	if (!filename_length || CHECK_NULL_PATH(filename, filename_length)) {
 		RETURN_FALSE;
 	}
 
