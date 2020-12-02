@@ -62,6 +62,7 @@ $im = imagecreatefromstring(' asdf jklp foo');
 --EXPECTF--
 createfromstring truecolor png: ok
 createfromstring palette png: ok
-imagecreatefromstring(): Argument #1 ($data) cannot be empty
 
-Warning: imagecreatefromstring(): Data is not in a recognized format in %screatefromstring.php on line %d
+Warning: imagecreatefromstring(): Data is not in a recognized format in %s on line %d
+
+Warning: imagecreatefromstring(): Data is not in a recognized format in %s on line %d
