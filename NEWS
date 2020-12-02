@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.26
 
+- Standard:
+  . Fixed bug #80457 (stream_get_contents() fails with maxlength=-1 or default).
+    (bruno dot premont at restena dot lu)
 
 26 Nov 2020, PHP 7.3.25
 
