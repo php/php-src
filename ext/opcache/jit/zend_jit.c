@@ -4175,6 +4175,7 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	    zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
 		zend_error(E_WARNING, "JIT is compatible only with CALL and HYBRID VM. JIT disabled.");
 		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
 		return FAILURE;
 	}
 
@@ -4183,6 +4184,7 @@ ZEND_EXT_API int zend_jit_check_support(void)
 			zend_error(E_WARNING, "JIT is incompatible with third party extensions that override zend_execute_ex(). JIT disabled.");
 		}
 		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
 		return FAILURE;
 	}
 
@@ -4190,6 +4192,7 @@ ZEND_EXT_API int zend_jit_check_support(void)
 		if (zend_get_user_opcode_handler(i) != NULL) {
 			zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
 			JIT_G(enabled) = 0;
+			JIT_G(on) = 0;
 			return FAILURE;
 		}
 	}

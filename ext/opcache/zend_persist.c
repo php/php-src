@@ -1201,7 +1201,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
 
 #ifdef HAVE_JIT
-	if (JIT_G(enabled) && JIT_G(on) && for_shm) {
+	if (JIT_G(on) && for_shm) {
 		zend_jit_unprotect();
 	}
 #endif
@@ -1223,7 +1223,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 
 #ifdef HAVE_JIT
-	if (JIT_G(enabled) && JIT_G(on) && for_shm) {
+	if (JIT_G(on) && for_shm) {
 		if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
 			zend_jit_script(&script->script);
 		}
