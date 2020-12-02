@@ -729,6 +729,9 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 	php_stream_wrapper *wrapper;
 
 	if (!filename_length || CHECK_NULL_PATH(filename, filename_length)) {
+		if (filename_length && !IS_EXISTS_CHECK(type)) {
+			php_error_docref(NULL, E_WARNING, "Filename contains null byte");
+		}
 		RETURN_FALSE;
 	}
 

@@ -74,8 +74,12 @@ bool(false)
 Warning: fileinode(): stat failed for %s/fileinode_variation3/fileinode*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
+
+Warning: fileinode(): Filename contains null byte in %s on line %d
 bool(false)
 - Iteration 8 -
+
+Warning: fileinode(): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***

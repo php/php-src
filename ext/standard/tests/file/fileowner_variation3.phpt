@@ -75,8 +75,12 @@ bool(false)
 Warning: fileowner(): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
+
+Warning: fileowner(): Filename contains null byte in %s on line %d
 bool(false)
 - Iteration 8 -
+
+Warning: fileowner(): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***
