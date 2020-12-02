@@ -2,7 +2,6 @@
 Test array_shift() function
 --FILE--
 <?php
-array_shift($GLOBALS);
 
 $empty_array = array();
 $number = 5;

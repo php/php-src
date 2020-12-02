@@ -1727,8 +1727,9 @@ ZEND_VM_C_LABEL(fetch_this):
 		} else if (type == BP_VAR_IS) {
 			retval = &EG(uninitialized_zval);
 		} else {
-			zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(name));
-			if (type == BP_VAR_RW) {
+			zend_error(E_WARNING, "Undefined %svariable $%s",
+				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+			if (type == BP_VAR_RW && !EG(exception)) {
 				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
 			} else {
 				retval = &EG(uninitialized_zval);
@@ -1746,8 +1747,9 @@ ZEND_VM_C_LABEL(fetch_this):
 			} else if (type == BP_VAR_IS) {
 				retval = &EG(uninitialized_zval);
 			} else {
-				zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(name));
-				if (type == BP_VAR_RW) {
+				zend_error(E_WARNING, "Undefined %svariable $%s",
+					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+				if (type == BP_VAR_RW && !EG(exception)) {
 					ZVAL_NULL(retval);
 				} else {
 					retval = &EG(uninitialized_zval);
@@ -8701,6 +8703,16 @@ ZEND_VM_HOT_HANDLER(184, ZEND_FETCH_THIS, UNUSED, UNUSED)
 	} else {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
 	}
+}
+
+ZEND_VM_HANDLER(200, ZEND_FETCH_GLOBALS, UNUSED, UNUSED)
+{
+	USE_OPLINE
+
+	/* For symbol tables we need to deal with exactly the same problems as for property tables. */
+	ZVAL_ARR(EX_VAR(opline->result.var),
+		zend_proptable_to_symtable(&EG(symbol_table), /* always_duplicate */ 1));
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(186, ZEND_ISSET_ISEMPTY_THIS, UNUSED, UNUSED)
