@@ -4129,7 +4129,7 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 	}
 
 failure:
-	zend_error(E_WARNING, "Invalid \"opcache.jit\" setting. Should be \"disable\", \"on\", \"off\" or 4-digit number");
+	zend_error(E_WARNING, "Invalid \"opcache.jit\" setting. Should be \"disable\", \"on\", \"off\", \"tracing\", \"function\" or 4-digit number");
 	JIT_G(enabled) = 0;
 	JIT_G(on) = 0;
 	return FAILURE;
