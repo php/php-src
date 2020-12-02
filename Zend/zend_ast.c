@@ -1950,8 +1950,6 @@ simple_list:
 			FUNC_OP("empty");
 		case ZEND_AST_ISSET:
 			FUNC_OP("isset");
-		case ZEND_AST_SILENCE:
-			PREFIX_OP("@", 240, 241);
 		case ZEND_AST_SHELL_EXEC:
 			smart_str_appendc(str, '`');
 			if (ast->child[0]->kind == ZEND_AST_ENCAPS_LIST) {
@@ -2335,6 +2333,16 @@ simple_list:
 			smart_str_appends(str, ": ");
 			ast = ast->child[1];
 			goto tail_call;
+		case ZEND_AST_SILENCE:
+			smart_str_appends(str, "@");
+			if (ast->child[1]) {
+				smart_str_appends(str, "<");
+				zend_ast_export_catch_name_list(str, zend_ast_get_list(ast->child[0]), indent);
+				smart_str_appends(str, ">");
+			}
+			/* Expression is the first child of the AST even if it comes after */
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			break;
 
 		/* 3 child nodes */
 		case ZEND_AST_METHOD_CALL:

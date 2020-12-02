@@ -7473,6 +7473,59 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(203, ZEND_SILENCE_CATCH, ANY, ANY)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+
+	zend_exception_restore();
+
+	/* Came from class list virtual catch blocks */
+	if (opline->extended_value == 2) {
+		if (EG(exception) == NULL) {
+			/* Free object (needed to not leak memory on @new) */
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_OBJECT) {
+				//OBJ_RELEASE(Z_OBJ_P(EX_VAR(opline->result.var)));
+			}
+
+			/* Set value to NULL */
+			if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+		} else {
+			zend_rethrow_exception(execute_data);
+			HANDLE_EXCEPTION();
+		}
+	} else if (EG(exception) && opline->extended_value != 2) {
+#ifdef HAVE_DTRACE
+		if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
+			DTRACE_EXCEPTION_CAUGHT((char *)EG(exception)->ce->name);
+		}
+#endif /* HAVE_DTRACE */
+		OBJ_RELEASE(EG(exception));
+		EG(exception) = NULL;
+
+		/* Free object (needed to not leak memory on @new) */
+		if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_OBJECT) {
+			//OBJ_RELEASE(Z_OBJ_P(EX_VAR(opline->result.var)));
+		}
+
+		/* Set value to NULL */
+		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+			/* Make internal functions which set a return value early return false */
+			if (UNEXPECTED(Z_TYPE_P(EX_VAR(opline->result.var)) != IS_UNDEF
+					&& Z_TYPE_P(EX_VAR(opline->result.var)) <= IS_TRUE)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_COLD_CONST_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
@@ -7918,7 +7971,10 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		}
 	}
 
-	cleanup_unfinished_calls(execute_data, throw_op_num);
+	/* Do not cleanup unfinished calls for SILENCE live range as it might still get executed */
+	if (!is_in_silence_live_range(EX(func)->op_array, throw_op_num)) {
+		cleanup_unfinished_calls(execute_data, throw_op_num);
+	}
 
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
 		switch (throw_op->opcode) {

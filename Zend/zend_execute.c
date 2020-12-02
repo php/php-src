@@ -4222,6 +4222,18 @@ static const zend_live_range *find_live_range(const zend_op_array *op_array, uin
 }
 /* }}} */
 
+/* TODO Can this be done using find_live_range? */
+static bool is_in_silence_live_range(const zend_op_array op_array, uint32_t op_num) {
+	for (int i = 0; i < op_array.last_live_range; i++) {
+		zend_live_range range = op_array.live_range[i];
+		if (op_num >= range.start && op_num < range.end
+				&& (range.var & ZEND_LIVE_MASK) == ZEND_LIVE_SILENCE) {
+			return true;
+		}
+	}
+	return false;
+}
+
 static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
 	int i;

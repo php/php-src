@@ -430,6 +430,29 @@ static ZEND_FUNCTION(zend_test_parameter_with_attribute)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(1);
+
+/* Tests possibility to return a value different than null for internal functions
+ * being swallowed by the @ operator. */
+static ZEND_FUNCTION(zend_suppress_exception_internal_return_false)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETVAL_FALSE;
+	zend_throw_error(NULL, "Shouldn't be seen");
+}
+static ZEND_FUNCTION(zend_suppress_exception_internal_return_true)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETVAL_TRUE;
+	zend_throw_error(NULL, "Shouldn't be seen");
+}
+static ZEND_FUNCTION(zend_suppress_exception_internal_return_int)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETVAL_LONG(20);
+	zend_throw_error(NULL, "Shouldn't be seen");
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)

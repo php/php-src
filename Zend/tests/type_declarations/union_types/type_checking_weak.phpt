@@ -23,7 +23,7 @@ function test(string $type, array $values) {
 
         try {
             error_clear_last();
-            $value = @$fn($value);
+            $value = $fn($value);
             echo dump($value);
             if ($e = error_get_last()) {
                 echo ' (', $e['message'], ')';

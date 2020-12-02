@@ -240,6 +240,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
  * It will be fixed up by zend_yytnamerr() later. */
 %token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
 %token T_BAD_CHARACTER   "invalid character"
+%token T_SILENCE_LIST    "@<"
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
@@ -264,7 +265,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
-%type <ast> echo_expr_list unset_variables catch_name_list catch_list optional_variable parameter_list class_statement_list
+%type <ast> echo_expr_list unset_variables class_name_union catch_list optional_variable parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
@@ -532,13 +533,13 @@ statement:
 catch_list:
 		%empty
 			{ $$ = zend_ast_create_list(0, ZEND_AST_CATCH_LIST); }
-	|	catch_list T_CATCH '(' catch_name_list optional_variable ')' '{' inner_statement_list '}'
+	|	catch_list T_CATCH '(' class_name_union optional_variable ')' '{' inner_statement_list '}'
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_CATCH, $4, $5, $8)); }
 ;
 
-catch_name_list:
+class_name_union:
 		class_name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
-	|	catch_name_list '|' class_name { $$ = zend_ast_list_add($1, $3); }
+	|	class_name_union '|' class_name { $$ = zend_ast_list_add($1, $3); }
 ;
 
 optional_variable:
@@ -1195,7 +1196,8 @@ expr:
 	|	T_BOOL_CAST expr	{ $$ = zend_ast_create_cast(_IS_BOOL, $2); }
 	|	T_UNSET_CAST expr	{ $$ = zend_ast_create_cast(IS_NULL, $2); }
 	|	T_EXIT exit_expr	{ $$ = zend_ast_create(ZEND_AST_EXIT, $2); }
-	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
+	|	T_SILENCE_LIST class_name_union '>' expr { $$ = zend_ast_create(ZEND_AST_SILENCE, $4, $2); }
+	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2, NULL); }
 	|	scalar { $$ = $1; }
 	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
 	|	T_PRINT expr { $$ = zend_ast_create(ZEND_AST_PRINT, $2); }

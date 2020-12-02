@@ -4984,7 +4984,7 @@ static void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 		/* Mark this as an "expression throw" for opcache. */
 		opline->extended_value = ZEND_THROW_IS_EXPR;
 		result->op_type = IS_CONST;
-		ZVAL_TRUE(&result->u.constant);
+		ZVAL_NULL(&result->u.constant);
 	}
 }
 /* }}} */
@@ -9332,6 +9332,14 @@ static void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	znode silence_node;
+	zend_op *silence_catch_op;
+	uint32_t try_catch_offset;
+	uint32_t virtual_catch_op_num;
+	uint32_t silence_catch_op_num;
+
+	/* Insert virtual try */
+	try_catch_offset = zend_add_try_element(get_next_op_number());
+	CG(context).try_catch_offset = try_catch_offset;
 
 	zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL);
 
@@ -9344,6 +9352,73 @@ static void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL);
+
+	/* Fetch next OPcode number */
+	silence_catch_op_num = get_next_op_number();
+	silence_catch_op = zend_emit_op(NULL, ZEND_SILENCE_CATCH, NULL, NULL);
+
+	SET_NODE(silence_catch_op->result, result);
+
+	/* Emit catch OPcodes */
+	/* Jump for virtual catch block */
+	virtual_catch_op_num = zend_emit_jump(0);
+
+	/* Have classes been provided using @<class>expr */
+	if (ast->child[1] != NULL) {
+		zend_ast_list *classes = zend_ast_get_list(ast->child[1]);
+		uint32_t opnum_catch = (uint32_t)-1;
+
+		/* Inform SILENCE_CATCH opcode that there is an exception class list */
+		silence_catch_op->extended_value = 2;
+
+		ZEND_ASSERT(classes->children > 0 && "Should have at least one class");
+
+		for (uint32_t j = 0; j < classes->children; j++) {
+			zend_ast *class_ast = classes->child[j];
+			zend_op *opline;
+			bool is_last_class = (j + 1 == classes->children);
+
+			if (!zend_is_const_default_class_ref(class_ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
+			}
+
+			opnum_catch = get_next_op_number();
+
+			/* If this is the first virtual catch block, propagate info for try catch ketchup */
+			if (j == 0) {
+				CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
+			}
+
+			/* Create ZEND_CATCH opcode */
+			opline = get_next_op();
+			opline->opcode = ZEND_CATCH;
+			opline->op1_type = IS_CONST;
+			opline->op1.constant = zend_add_class_name_literal(
+					zend_resolve_class_name_ast(class_ast));
+			opline->extended_value = zend_alloc_cache_slot();
+
+			opline->result_type = IS_UNUSED;
+			opline->result.var = -1;
+
+			/* Jump to silence catch block */
+			if (is_last_class) {
+				opline->extended_value |= ZEND_LAST_CATCH;
+				/* Jump to SILENCE_CATCH opcode to set a return value */
+				zend_emit_jump(silence_catch_op_num);
+			} else {
+				/* Set JMP address for next catch block,
+				 * we can do this as the catch blocks are virtual and have no body. */
+				opline->op2.opline_num = get_next_op_number();
+			}
+		}
+	} else {
+		/* TODO Try to use ZEND_DISCARD_EXCEPTION OPCode? */
+		/* Propagate info for try catch ketchup */
+		CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = silence_catch_op_num;
+	}
+
+	/* Update catch jump op num ? */
+	zend_update_jump_target_to_next(virtual_catch_op_num);
 }
 /* }}} */
 
