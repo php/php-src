@@ -621,7 +621,12 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
-#if PDO_USE_MYSQLND
+
+	if (!S->result) {
+		PDO_DBG_RETURN(0);
+	}
+
+#ifdef PDO_USE_MYSQLND
 	zend_bool fetched_anything;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_fetch");
@@ -633,6 +638,10 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 		}
 
 		PDO_DBG_RETURN(1);
+	}
+
+	if (!S->stmt && S->current_data) {
+		mnd_free(S->current_data);
 	}
 #else
 	int ret;
@@ -654,16 +663,6 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 		}
 
 		PDO_DBG_RETURN(1);
-	}
-#endif /* PDO_USE_MYSQLND */
-
-	if (!S->result) {
-		strcpy(stmt->error_code, "HY000");
-		PDO_DBG_RETURN(0);
-	}
-#if PDO_USE_MYSQLND
-	if (!S->stmt && S->current_data) {
-		mnd_free(S->current_data);
 	}
 #endif /* PDO_USE_MYSQLND */
 
