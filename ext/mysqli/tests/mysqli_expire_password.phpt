@@ -1,5 +1,5 @@
 --TEST--
-MySQL 5.6 EXPIRE PASSWORD protocol change
+MySQL 5.6 / MariaDB 10.4.3 EXPIRE PASSWORD protocol change
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -14,6 +14,18 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 if ($link->server_version < 50610)
 	die(sprintf("SKIP Needs MySQL 5.6.10 or newer, found MySQL %s\n", $link->server_info));
 
+if ($link->server_version >= 100000) {
+	if ($link->server_version < 100403)
+		die(sprintf("SKIP Needs MariaDB 10.4.3 or newer, found MariaDB %s\n", $link->server_info));
+	$result = $link->query("select @@disconnect_on_expired_password");
+	if (!$result)
+		die("SKIP Failed to query MariaDB @@disconnect_on_expired_password value");
+	$row = mysqli_fetch_row($result);
+	if ($row[0] == 0)
+		die("SKIP Cannot run in MariaDB @@disconnect_on_expired_password=OFF state");
+
+}
+
 if  (!$IS_MYSQLND && (mysqli_get_client_version() < 50610)) {
 	die(sprintf("SKIP Needs libmysql 5.6.10 or newer, found  %s\n", mysqli_get_client_version()));
 }
@@ -21,15 +33,15 @@ if  (!$IS_MYSQLND && (mysqli_get_client_version() < 50610)) {
 mysqli_query($link, 'DROP USER expiretest');
 mysqli_query($link, 'DROP USER expiretest@localhost');
 
-if (!mysqli_query($link, 'CREATE USER expiretest@"%"') ||
-	!mysqli_query($link, 'CREATE USER expiretest@"localhost"')) {
+if (!mysqli_query($link, 'CREATE USER expiretest IDENTIFIED BY \'expiredpassword\'') ||
+	!mysqli_query($link, 'CREATE USER expiretest@localhost IDENTIFIED BY \'expiredpassword\'')) {
 	printf("skip Cannot create second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
 	mysqli_close($link);
 	die("skip CREATE USER failed");
 }
 
-if (!mysqli_query($link, 'ALTER USER expiretest@"%" PASSWORD EXPIRE') ||
-	!mysqli_query($link, 'ALTER USER expiretest@"localhost" PASSWORD EXPIRE')) {
+if (!mysqli_query($link, 'ALTER USER expiretest PASSWORD EXPIRE') ||
+	!mysqli_query($link, 'ALTER USER expiretest@localhost PASSWORD EXPIRE')) {
 	printf("skip Cannot modify second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
 	mysqli_close($link);
 	die("skip ALTER USER failed");
@@ -54,7 +66,7 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 	require_once('table.inc');
 
 	/* default */
-	if (!$link = my_mysqli_connect($host, 'expiretest', "", $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, 'expiretest', 'expiredpassword', $db, $port, $socket)) {
 		printf("[001] Cannot connect [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 	} else {
@@ -65,7 +77,7 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 	/* explicitly requesting default */
 	$link = mysqli_init();
 	$link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 0);
-	if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
+	if (!my_mysqli_real_connect($link, $host, 'expiretest', 'expiredpassword', $db, $port, $socket)) {
 		printf("[003] Cannot connect [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 	} else {
@@ -76,7 +88,7 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 	/* allow connect */
 	$link = mysqli_init();
 	$link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 1);
-	if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
+	if (!my_mysqli_real_connect($link, $host, 'expiretest', 'expiredpassword', $db, $port, $socket)) {
 		printf("[005] Cannot connect [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 	} else {
@@ -88,7 +100,7 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 	/* allow connect, fix pw */
 	$link = mysqli_init();
 	$link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 1);
-	if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
+	if (!my_mysqli_real_connect($link, $host, 'expiretest', 'expiredpassword', $db, $port, $socket)) {
 		printf("[007] Cannot connect [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 	} else {
@@ -122,11 +134,11 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 	mysqli_query($link, 'DROP USER expiretest@localhost');
 ?>
 --EXPECTF--
-Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d
-[001] Cannot connect [1862] %s
+Warning: mysqli%sconnect(): (HY000/%d): %s in %s on line %d
+[001] Cannot connect [%d] %s
 
-Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d
-[003] Cannot connect [1862] %s
+Warning: mysqli%sconnect(): (HY000/%d): %s in %s on line %d
+[003] Cannot connect [%d] %s
 [006] Connect allowed, query fail, [1820] %s
 [008] Connect allowed, pw set, [0%A
 array(1) {
