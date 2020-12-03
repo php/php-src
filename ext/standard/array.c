@@ -659,7 +659,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 		GC_PROTECT_RECURSION(ht);
 	}
 
-	cnt = zend_array_count(ht);
+	cnt = zend_hash_num_elements(ht);
 	ZEND_HASH_FOREACH_VAL(ht, element) {
 		ZVAL_DEREF(element);
 		if (Z_TYPE_P(element) == IS_ARRAY) {
@@ -693,7 +693,7 @@ PHP_FUNCTION(count)
 	switch (Z_TYPE_P(array)) {
 		case IS_ARRAY:
 			if (mode != COUNT_RECURSIVE) {
-				cnt = zend_array_count(Z_ARRVAL_P(array));
+				cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 			} else {
 				cnt = php_count_recursive(Z_ARRVAL_P(array));
 			}

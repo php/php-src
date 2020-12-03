@@ -10325,7 +10325,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
+			count = zend_hash_num_elements(Z_ARRVAL_P(op1));
 			break;
 		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
 			zend_object *zobj = Z_OBJ_P(op1);
@@ -17566,7 +17566,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDL
 
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
+			count = zend_hash_num_elements(Z_ARRVAL_P(op1));
 			break;
 		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
 			zend_object *zobj = Z_OBJ_P(op1);
@@ -47382,7 +47382,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
+			count = zend_hash_num_elements(Z_ARRVAL_P(op1));
 			break;
 		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
 			zend_object *zobj = Z_OBJ_P(op1);

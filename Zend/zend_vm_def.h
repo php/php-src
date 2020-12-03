@@ -8917,7 +8917,7 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 
 	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
+			count = zend_hash_num_elements(Z_ARRVAL_P(op1));
 			break;
 		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
 			zend_object *zobj = Z_OBJ_P(op1);
