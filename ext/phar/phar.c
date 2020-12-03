@@ -601,7 +601,7 @@ void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker 
  */
 int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker *tracker, zval *metadata, int persistent, HashTable *unserialize_options, const char* method_name) /* {{{ */
 {
-	const zend_bool has_unserialize_options = unserialize_options != NULL && zend_array_count(unserialize_options) > 0;
+	const zend_bool has_unserialize_options = unserialize_options != NULL && zend_hash_num_elements(unserialize_options) > 0;
 	/* It should be impossible to create a zval in a persistent phar/entry. */
 	ZEND_ASSERT(!persistent || Z_ISUNDEF(tracker->val));
 

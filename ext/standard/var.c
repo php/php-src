@@ -130,9 +130,9 @@ again:
 				GC_ADDREF(myht);
 				GC_PROTECT_RECURSION(myht);
 			}
-			count = zend_array_count(myht);
+			count = zend_hash_num_elements(myht);
 			php_printf("%sarray(%d) {\n", COMMON, count);
-			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
+			ZEND_HASH_FOREACH_KEY_VAL(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
@@ -311,9 +311,9 @@ again:
 			GC_ADDREF(myht);
 			GC_PROTECT_RECURSION(myht);
 		}
-		count = zend_array_count(myht);
+		count = zend_hash_num_elements(myht);
 		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) - 1 : 1);
-		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
+		ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
 		} ZEND_HASH_FOREACH_END();
 		if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
@@ -529,7 +529,7 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 			smart_str_appendl(buf, "array (\n", 8);
-			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
+			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
 				php_array_element_export(val, index, key, level, buf);
 			} ZEND_HASH_FOREACH_END();
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
