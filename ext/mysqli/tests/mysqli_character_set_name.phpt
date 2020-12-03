@@ -1,5 +1,5 @@
 --TEST--
-mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
+mysqli_character_set_name(), mysql_client_encoding() [alias]
 --SKIPIF--
 <?php
 require_once('skipif.inc');
