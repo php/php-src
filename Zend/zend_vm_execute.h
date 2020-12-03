@@ -21597,16 +21597,9 @@ fe_fetch_r_exit:
 			pos++;
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
+			ZEND_ASSERT(value_type != IS_INDIRECT);
 			if (EXPECTED(value_type != IS_UNDEF)) {
-				if (UNEXPECTED(value_type == IS_INDIRECT)) {
-					value = Z_INDIRECT_P(value);
-					value_type = Z_TYPE_INFO_P(value);
-					if (EXPECTED(value_type != IS_UNDEF)) {
-						break;
-					}
-				} else {
-					break;
-				}
+				break;
 			}
 			p++;
 		}
@@ -21749,16 +21742,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 			pos++;
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
+			ZEND_ASSERT(value_type != IS_INDIRECT);
 			if (EXPECTED(value_type != IS_UNDEF)) {
-				if (UNEXPECTED(value_type == IS_INDIRECT)) {
-					value = Z_INDIRECT_P(value);
-					value_type = Z_TYPE_INFO_P(value);
-					if (EXPECTED(value_type != IS_UNDEF)) {
-						break;
-					}
-				} else {
-					break;
-				}
+				break;
 			}
 			p++;
 		}
@@ -30794,16 +30780,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 		pos++;
 		value = &p->val;
 		value_type = Z_TYPE_INFO_P(value);
+		ZEND_ASSERT(value_type != IS_INDIRECT);
 		if (EXPECTED(value_type != IS_UNDEF)) {
-			if (UNEXPECTED(value_type == IS_INDIRECT)) {
-				value = Z_INDIRECT_P(value);
-				value_type = Z_TYPE_INFO_P(value);
-				if (EXPECTED(value_type != IS_UNDEF)) {
-					break;
-				}
-			} else {
-				break;
-			}
+			break;
 		}
 		p++;
 	}
@@ -30846,16 +30825,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 		pos++;
 		value = &p->val;
 		value_type = Z_TYPE_INFO_P(value);
+		ZEND_ASSERT(value_type != IS_INDIRECT);
 		if (EXPECTED(value_type != IS_UNDEF)) {
-			if (UNEXPECTED(value_type == IS_INDIRECT)) {
-				value = Z_INDIRECT_P(value);
-				value_type = Z_TYPE_INFO_P(value);
-				if (EXPECTED(value_type != IS_UNDEF)) {
-					break;
-				}
-			} else {
-				break;
-			}
+			break;
 		}
 		p++;
 	}

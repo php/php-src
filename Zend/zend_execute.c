@@ -2089,31 +2089,7 @@ num_undef:
 		}
 str_index:
 		retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
-		if (retval) {
-			/* support for $GLOBALS[...] */
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-				retval = Z_INDIRECT_P(retval);
-				if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-					switch (type) {
-						case BP_VAR_R:
-							zend_undefined_index(offset_key);
-							/* break missing intentionally */
-						case BP_VAR_UNSET:
-						case BP_VAR_IS:
-							retval = &EG(uninitialized_zval);
-							break;
-						case BP_VAR_RW:
-							if (UNEXPECTED(zend_undefined_index_write(ht, offset_key))) {
-								return NULL;
-							}
-							/* break missing intentionally */
-						case BP_VAR_W:
-							ZVAL_NULL(retval);
-							break;
-					}
-				}
-			}
-		} else {
+		if (!retval) {
 			switch (type) {
 				case BP_VAR_R:
 					zend_undefined_index(offset_key);

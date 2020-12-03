@@ -6677,16 +6677,9 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 			pos++;
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
+			ZEND_ASSERT(value_type != IS_INDIRECT);
 			if (EXPECTED(value_type != IS_UNDEF)) {
-				if (UNEXPECTED(value_type == IS_INDIRECT)) {
-					value = Z_INDIRECT_P(value);
-					value_type = Z_TYPE_INFO_P(value);
-					if (EXPECTED(value_type != IS_UNDEF)) {
-						break;
-					}
-				} else {
-					break;
-				}
+				break;
 			}
 			p++;
 		}
@@ -6829,16 +6822,9 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 			pos++;
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
+			ZEND_ASSERT(value_type != IS_INDIRECT);
 			if (EXPECTED(value_type != IS_UNDEF)) {
-				if (UNEXPECTED(value_type == IS_INDIRECT)) {
-					value = Z_INDIRECT_P(value);
-					value_type = Z_TYPE_INFO_P(value);
-					if (EXPECTED(value_type != IS_UNDEF)) {
-						break;
-					}
-				} else {
-					break;
-				}
+				break;
 			}
 			p++;
 		}
@@ -9651,16 +9637,9 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 		pos++;
 		value = &p->val;
 		value_type = Z_TYPE_INFO_P(value);
+		ZEND_ASSERT(value_type != IS_INDIRECT);
 		if (EXPECTED(value_type != IS_UNDEF)) {
-			if (UNEXPECTED(value_type == IS_INDIRECT)) {
-				value = Z_INDIRECT_P(value);
-				value_type = Z_TYPE_INFO_P(value);
-				if (EXPECTED(value_type != IS_UNDEF)) {
-					break;
-				}
-			} else {
-				break;
-			}
+			break;
 		}
 		p++;
 	}
