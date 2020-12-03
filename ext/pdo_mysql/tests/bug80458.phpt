@@ -41,12 +41,12 @@ $stmt = $db->prepare('SELECT first FROM test WHERE first=5');
 $stmt->execute();
 var_dump($stmt->fetchAll());
 
-$db->exec('DROP PROCEDURE IF EXISTS empty');
-$db->exec('CREATE PROCEDURE empty() BEGIN DELETE FROM test WHERE first=6; END;');
-$stmt4 = $db->prepare('CALL empty()');
+$db->exec('DROP PROCEDURE IF EXISTS nores');
+$db->exec('CREATE PROCEDURE nores() BEGIN DELETE FROM test WHERE first=6; END;');
+$stmt4 = $db->prepare('CALL nores()');
 $stmt4->execute();
 var_dump($stmt4->fetchAll());
-$db->exec('DROP PROCEDURE IF EXISTS empty');
+$db->exec('DROP PROCEDURE IF EXISTS nores');
 
 $db->exec('DROP PROCEDURE IF EXISTS ret');
 $db->exec('CREATE PROCEDURE ret() BEGIN SELECT first FROM test WHERE first=7; END;');
@@ -82,12 +82,12 @@ $stmt = $db->prepare('SELECT first FROM test WHERE first=12');
 $stmt->execute();
 var_dump($stmt->fetchAll());
 
-$db->exec('DROP PROCEDURE IF EXISTS empty');
-$db->exec('CREATE PROCEDURE empty() BEGIN DELETE FROM test WHERE first=13; END;');
-$stmt4 = $db->prepare('CALL empty()');
+$db->exec('DROP PROCEDURE IF EXISTS nores');
+$db->exec('CREATE PROCEDURE nores() BEGIN DELETE FROM test WHERE first=13; END;');
+$stmt4 = $db->prepare('CALL nores()');
 $stmt4->execute();
 var_dump($stmt4->fetchAll());
-$db->exec('DROP PROCEDURE IF EXISTS empty');
+$db->exec('DROP PROCEDURE IF EXISTS nores');
 
 $db->exec('DROP PROCEDURE IF EXISTS ret');
 $db->exec('CREATE PROCEDURE ret() BEGIN SELECT first FROM test WHERE first=14; END;');
