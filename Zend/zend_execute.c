@@ -2089,31 +2089,7 @@ num_undef:
 		}
 str_index:
 		retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
-		if (retval) {
-			/* support for $GLOBALS[...] */
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-				retval = Z_INDIRECT_P(retval);
-				if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-					switch (type) {
-						case BP_VAR_R:
-							zend_undefined_index(offset_key);
-							/* break missing intentionally */
-						case BP_VAR_UNSET:
-						case BP_VAR_IS:
-							retval = &EG(uninitialized_zval);
-							break;
-						case BP_VAR_RW:
-							if (UNEXPECTED(zend_undefined_index_write(ht, offset_key))) {
-								return NULL;
-							}
-							/* break missing intentionally */
-						case BP_VAR_W:
-							ZVAL_NULL(retval);
-							break;
-					}
-				}
-			}
-		} else {
+		if (!retval) {
 			switch (type) {
 				case BP_VAR_R:
 					zend_undefined_index(offset_key);
@@ -2467,7 +2443,7 @@ num_idx:
 		return zend_hash_index_find(ht, hval);
 	} else if (Z_TYPE_P(offset) == IS_NULL) {
 str_idx:
-		return zend_hash_find_ex_ind(ht, ZSTR_EMPTY_ALLOC(), 1);
+		return zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
 	} else if (Z_TYPE_P(offset) == IS_FALSE) {
 		hval = 0;
 		goto num_idx;
@@ -2577,11 +2553,11 @@ try_again:
 			goto num_key;
 		}
 str_key:
-		return zend_hash_find_ind(ht, str) != NULL;
+		return zend_hash_exists(ht, str);
 	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
 		hval = Z_LVAL_P(key);
 num_key:
-		return zend_hash_index_find(ht, hval) != NULL;
+		return zend_hash_index_exists(ht, hval);
 	} else if (EXPECTED(Z_ISREF_P(key))) {
 		key = Z_REFVAL_P(key);
 		goto try_again;

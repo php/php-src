@@ -614,9 +614,6 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 
 			p = &ht->arData[pos];
 			value = &p->val;
-			if (Z_TYPE_P(value) == IS_INDIRECT) {
-				value = Z_INDIRECT_P(value);
-			}
 			pos++;
 		} while (Z_ISUNDEF_P(value));
 

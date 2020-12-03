@@ -426,7 +426,7 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 	zval *val;
 
 	GC_PROTECT_RECURSION(ht);
-	ZEND_HASH_FOREACH_VAL_IND(ht, val) {
+	ZEND_HASH_FOREACH_VAL(ht, val) {
 		ZVAL_DEREF(val);
 		if (Z_REFCOUNTED_P(val)) {
 			if (Z_TYPE_P(val) == IS_ARRAY) {
@@ -459,7 +459,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 	zval *new_val, *val;
 
 	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
-	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(src), idx, key, val) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(src), idx, key, val) {
 		/* constant arrays can't contain references */
 		ZVAL_DEREF(val);
 		if (key) {
