@@ -152,6 +152,28 @@ static int le_imap;
 		RETURN_FALSE;	\
 	}	\
 
+#define PHP_IMAP_CHECK_MSGNO_MAYBE_UID_PRE_FLAG_CHECKS(msgindex, arg_pos) \
+	if (msgindex < 1) { \
+		zend_argument_value_error(arg_pos, "must be greater than 0"); \
+		RETURN_THROWS(); \
+	} \
+
+#define PHP_IMAP_CHECK_MSGNO_MAYBE_UID_POST_FLAG_CHECKS(msgindex, arg_pos, func_flags, uid_flag) \
+	if (func_flags & uid_flag) { \
+		/* This should be cached; if it causes an extra RTT to the  IMAP server, */ \
+		/* then that's the price we pay for making sure we don't crash. */ \
+		unsigned int msg_no_from_uid = mail_msgno(imap_le_struct->imap_stream, msgindex); \
+		if (msg_no_from_uid == 0) { \
+			php_error_docref(NULL, E_WARNING, "UID does not exist"); \
+			RETURN_FALSE; \
+		} \
+	} else { \
+		if (((unsigned) msgindex) > imap_le_struct->imap_stream->nmsgs) { \
+			php_error_docref(NULL, E_WARNING, "Bad message number"); \
+			RETURN_FALSE; \
+		} \
+	} \
+
 /* {{{ mail_close_it */
 static void mail_close_it(zend_resource *rsrc)
 {
@@ -1258,7 +1280,6 @@ PHP_FUNCTION(imap_body)
 	zval *streamind;
 	zend_long msgno, flags = 0;
 	pils *imap_le_struct;
-	unsigned long msgindex;
 	char *body;
 	unsigned long body_len = 0;
 
@@ -1270,32 +1291,15 @@ PHP_FUNCTION(imap_body)
 		RETURN_THROWS();
 	}
 
-	if (msgno < 1) {
-		zend_argument_value_error(2, "must be greater than 0");
-		RETURN_THROWS();
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_PRE_FLAG_CHECKS(msgno, 2);
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
 		zend_argument_value_error(3, "must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL");
 		RETURN_THROWS();
 	}
 
-	if (flags && (flags & FT_UID)) {
-		/* This should be cached; if it causes an extra RTT to the
-		   IMAP server, then that's the price we pay for making
-		   sure we don't crash. */
-		msgindex = mail_msgno(imap_le_struct->imap_stream, msgno);
-		if (msgindex == 0) {
-			php_error_docref(NULL, E_WARNING, "UID does not exist");
-			RETURN_FALSE;
-		}
-	} else {
-		msgindex = (unsigned long) msgno;
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_POST_FLAG_CHECKS(msgno, 2, flags, FT_UID);
 
-	PHP_IMAP_CHECK_MSGNO(msgindex, 2);
-
-	/* TODO Shouldn't this pass msgindex??? */
 	body = mail_fetchtext_full (imap_le_struct->imap_stream, msgno, &body_len, flags);
 	if (body_len == 0) {
 		RETVAL_EMPTY_STRING();
@@ -1305,6 +1309,7 @@ PHP_FUNCTION(imap_body)
 }
 /* }}} */
 
+/* TODO UID Tests */
 /* {{{ Copy specified message to a mailbox */
 PHP_FUNCTION(imap_mail_copy)
 {
@@ -1334,6 +1339,7 @@ PHP_FUNCTION(imap_mail_copy)
 }
 /* }}} */
 
+/* TODO UID Tests */
 /* {{{ Move specified message to a mailbox */
 PHP_FUNCTION(imap_mail_move)
 {
@@ -1605,13 +1611,15 @@ PHP_FUNCTION(imap_delete)
 		RETURN_THROWS();
 	}
 
+	// TODO Check sequence validity?
+
 	if (flags && ((flags & ~FT_UID) != 0)) {
 		zend_argument_value_error(3, "must be FT_UID or 0");
 		RETURN_THROWS();
 	}
 
 	mail_setflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), "\\DELETED", flags);
-	RETVAL_TRUE;
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1882,7 +1890,6 @@ PHP_FUNCTION(imap_fetchstructure)
 	zend_long msgno, flags = 0;
 	pils *imap_le_struct;
 	BODY *body;
-	int msgindex;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|l", &streamind, &msgno, &flags) == FAILURE) {
 		RETURN_THROWS();
@@ -1892,34 +1899,18 @@ PHP_FUNCTION(imap_fetchstructure)
 		RETURN_THROWS();
 	}
 
-	if (msgno < 1) {
-		zend_argument_value_error(2, "must be greater than 0");
-		RETURN_THROWS();
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_PRE_FLAG_CHECKS(msgno, 2);
 
 	if (flags && ((flags & ~FT_UID) != 0)) {
 		zend_argument_value_error(3, "must be FT_UID or 0");
 		RETURN_THROWS();
 	}
 
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_POST_FLAG_CHECKS(msgno, 2, flags, FT_UID);
+
 	object_init(return_value);
 
-	if (flags & FT_UID) {
-		/* This should be cached; if it causes an extra RTT to the
-		   IMAP server, then that's the price we pay for making
-		   sure we don't crash. */
-		msgindex = mail_msgno(imap_le_struct->imap_stream, msgno);
-		if (msgindex == 0) {
-			php_error_docref(NULL, E_WARNING, "UID does not exist");
-			RETURN_FALSE;
-		}
-	} else {
-		msgindex = msgno;
-	}
-	PHP_IMAP_CHECK_MSGNO(msgindex, 2);
-
-	/* TODO Shouldn't this pass msgindex??? */
-	mail_fetchstructure_full(imap_le_struct->imap_stream, msgno, &body , (ZEND_NUM_ARGS() == 3 ? flags : NIL));
+	mail_fetchstructure_full(imap_le_struct->imap_stream, msgno, &body , flags);
 
 	if (!body) {
 		php_error_docref(NULL, E_WARNING, "No body information available");
@@ -1948,20 +1939,14 @@ PHP_FUNCTION(imap_fetchbody)
 		RETURN_THROWS();
 	}
 
-	if (msgno < 1) {
-		zend_argument_value_error(2, "must be greater than 0");
-		RETURN_THROWS();
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_PRE_FLAG_CHECKS(msgno, 2);
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
 		zend_argument_value_error(4, "must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL");
 		RETURN_THROWS();
 	}
 
-	if (!(flags & FT_UID)) {
-		/* only perform the check if the msgno is a message number and not a UID */
-		PHP_IMAP_CHECK_MSGNO(msgno, 2);
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_POST_FLAG_CHECKS(msgno, 2, flags, FT_UID);
 
 	body = mail_fetchbody_full(imap_le_struct->imap_stream, msgno, ZSTR_VAL(sec), &len, flags);
 
@@ -1989,24 +1974,18 @@ PHP_FUNCTION(imap_fetchmime)
 		RETURN_THROWS();
 	}
 
-	if (msgno < 1) {
-		zend_argument_value_error(2, "must be greater than 0");
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
 		RETURN_THROWS();
 	}
+
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_PRE_FLAG_CHECKS(msgno, 2);
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
 		zend_argument_value_error(4, "must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL");
 		RETURN_THROWS();
 	}
 
-	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
-		RETURN_THROWS();
-	}
-
-	if (!(flags & FT_UID)) {
-		/* only perform the check if the msgno is a message number and not a UID */
-		PHP_IMAP_CHECK_MSGNO(msgno, 2);
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_POST_FLAG_CHECKS(msgno, 2, flags, FT_UID);
 
 	body = mail_fetch_mime(imap_le_struct->imap_stream, msgno, ZSTR_VAL(sec), &len, flags);
 
@@ -2037,17 +2016,14 @@ PHP_FUNCTION(imap_savebody)
 		RETURN_THROWS();
 	}
 
-	PHP_IMAP_CHECK_MSGNO(msgno, 3);
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_PRE_FLAG_CHECKS(msgno, 3)
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
 		zend_argument_value_error(5, "must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL");
 		RETURN_THROWS();
 	}
 
-	// TODO Drop this?
-	if (!imap_le_struct) {
-		RETURN_FALSE;
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_POST_FLAG_CHECKS(msgno, 3, flags, FT_UID);
 
 	switch (Z_TYPE_P(out))
 	{
@@ -2771,9 +2747,8 @@ PHP_FUNCTION(imap_sort)
 PHP_FUNCTION(imap_fetchheader)
 {
 	zval *streamind;
-	zend_long msgno, flags = 0L;
+	zend_long msgno, flags = 0;
 	pils *imap_le_struct;
-	int msgindex;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|l", &streamind, &msgno, &flags) == FAILURE) {
 		RETURN_THROWS();
@@ -2783,30 +2758,16 @@ PHP_FUNCTION(imap_fetchheader)
 		RETURN_THROWS();
 	}
 
-	// TODO Check for msgno < 1 now or wait later for PHP_IMAP_CHECK_MSGNO check?
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_PRE_FLAG_CHECKS(msgno, 2);
 
 	if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
 		zend_argument_value_error(3, "must be a bitmask of FT_UID, FT_PREFETCHTEXT, and FT_INTERNAL");
 		RETURN_THROWS();
 	}
 
-	if (flags & FT_UID) {
-		/* This should be cached; if it causes an extra RTT to the
-		   IMAP server, then that's the price we pay for making sure
-		   we don't crash. */
-		msgindex = mail_msgno(imap_le_struct->imap_stream, msgno);
-		if (msgindex == 0) {
-			php_error_docref(NULL, E_WARNING, "UID does not exist");
-			RETURN_FALSE;
-		}
-	} else {
-		msgindex = msgno;
-	}
+	PHP_IMAP_CHECK_MSGNO_MAYBE_UID_POST_FLAG_CHECKS(msgno, 2, flags, FT_UID);
 
-	PHP_IMAP_CHECK_MSGNO(msgindex, 2);
-
-	/* TODO Check shouldn't this pass msgindex???? */
-	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, msgno, NIL, NIL, (ZEND_NUM_ARGS() == 3 ? flags : NIL)));
+	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, msgno, NIL, NIL, flags));
 }
 /* }}} */
 
