@@ -6496,7 +6496,7 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
 	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
 	switch (cipher_mode) {
-#if PHP_OPENSSL_API_VERSION >= 0x10100
+#if PHP_OPENSSL_API_VERSION >= 0x10100 && defined(EVP_CIPH_OCB_MODE)
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_OCB_MODE:
 		case EVP_CIPH_CCM_MODE:
