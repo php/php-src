@@ -75,8 +75,12 @@ bool(false)
 Warning: fileowner(): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-fileowner(): Argument #1 ($filename) must not contain any null bytes
+
+Warning: fileowner(): Filename contains null byte in %s on line %d
+bool(false)
 - Iteration 8 -
-fileowner(): Argument #1 ($filename) must not contain any null bytes
+
+Warning: fileowner(): Filename contains null byte in %s on line %d
+bool(false)
 
 *** Done ***

@@ -74,8 +74,12 @@ bool(false)
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-fileperms(): Argument #1 ($filename) must not contain any null bytes
+
+Warning: fileperms(): Filename contains null byte in %s on line %d
+bool(false)
 - Iteration 8 -
-fileperms(): Argument #1 ($filename) must not contain any null bytes
+
+Warning: fileperms(): Filename contains null byte in %s on line %d
+bool(false)
 
 *** Done ***

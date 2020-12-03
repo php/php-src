@@ -728,7 +728,10 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 	const char *local;
 	php_stream_wrapper *wrapper;
 
-	if (!filename_length) {
+	if (!filename_length || CHECK_NULL_PATH(filename, filename_length)) {
+		if (filename_length && !IS_EXISTS_CHECK(type)) {
+			php_error_docref(NULL, E_WARNING, "Filename contains null byte");
+		}
 		RETURN_FALSE;
 	}
 
@@ -937,7 +940,7 @@ ZEND_NAMED_FUNCTION(name) { \
 	size_t filename_len; \
 	\
 	ZEND_PARSE_PARAMETERS_START(1, 1) \
-		Z_PARAM_PATH(filename, filename_len) \
+		Z_PARAM_STRING(filename, filename_len) \
 	ZEND_PARSE_PARAMETERS_END(); \
 	\
 	php_stat(filename, filename_len, funcnum, return_value); \
