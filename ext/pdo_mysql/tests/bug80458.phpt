@@ -54,9 +54,11 @@ $stmt5 = $db->prepare('CALL ret()');
 $stmt5->execute();
 var_dump($stmt5->fetchAll());
 $stmt5->nextRowset(); // needed to fetch the empty result set of CALL
+var_dump($stmt5->fetchAll());
 $db->exec('DROP PROCEDURE IF EXISTS ret');
 
 /* With emulated prepares */
+print("Emulated prepares\n");
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 
 $stmt = $db->prepare('DELETE FROM test WHERE first=8');
@@ -93,6 +95,7 @@ $stmt5 = $db->prepare('CALL ret()');
 $stmt5->execute();
 var_dump($stmt5->fetchAll());
 $stmt5->nextRowset(); // needed to fetch the empty result set of CALL
+var_dump($stmt5->fetchAll());
 $db->exec('DROP PROCEDURE IF EXISTS ret');
 
 ?>
@@ -131,6 +134,9 @@ array(1) {
 }
 array(0) {
 }
+Emulated prepares
+array(0) {
+}
 array(0) {
 }
 bool(false)
@@ -153,4 +159,6 @@ array(1) {
     [0]=>
     string(2) "14"
   }
+}
+array(0) {
 }

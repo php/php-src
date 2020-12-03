@@ -620,14 +620,8 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
-	if(S->stmt) {
-		MYSQL_RES     *prepare_meta_result;
-		if(!(prepare_meta_result = mysql_stmt_result_metadata(S->stmt))) {
-			pdo_mysql_error_stmt(stmt);
-			PDO_DBG_RETURN(0);
-		} else {
-			mysql_free_result(prepare_meta_result);
-		}
+	if(S->stmt && S->stmt->data && !S->stmt->data->result) {
+		PDO_DBG_RETURN(0);
 	}
 
 #ifdef PDO_USE_MYSQLND
