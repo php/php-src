@@ -619,6 +619,12 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+
+	if(S->stmt && !mysql_stmt_result_metadata(S->stmt)) {
+		pdo_mysql_error_stmt(stmt);
+		PDO_DBG_RETURN(0);
+	}
+
 #ifdef PDO_USE_MYSQLND
 	zend_bool fetched_anything;
 
