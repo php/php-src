@@ -637,6 +637,10 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 
 		PDO_DBG_RETURN(1);
 	}
+
+	if (!S->stmt && S->current_data) {
+		mnd_free(S->current_data);
+	}
 #else
 	int ret;
 
@@ -657,12 +661,6 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 		}
 
 		PDO_DBG_RETURN(1);
-	}
-#endif /* PDO_USE_MYSQLND */
-
-#ifdef PDO_USE_MYSQLND
-	if (!S->stmt && S->current_data) {
-		mnd_free(S->current_data);
 	}
 #endif /* PDO_USE_MYSQLND */
 
