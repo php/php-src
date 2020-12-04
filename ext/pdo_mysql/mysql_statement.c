@@ -620,7 +620,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
-	if(S->stmt && S->stmt->data && !S->stmt->data->result) {
+	if (!S->result) {
 		PDO_DBG_RETURN(0);
 	}
 
@@ -660,9 +660,6 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	}
 #endif /* PDO_USE_MYSQLND */
 
-	if (!S->result) {
-		PDO_DBG_RETURN(0);
-	}
 #ifdef PDO_USE_MYSQLND
 	if (!S->stmt && S->current_data) {
 		mnd_free(S->current_data);

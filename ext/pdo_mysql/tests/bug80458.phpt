@@ -17,7 +17,7 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
 $db->query('DROP TABLE IF EXISTS test');
 $db->query('CREATE TABLE test (first int) ENGINE = InnoDB');
-$res = $db->query('INSERT INTO test(first) VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14)');
+$res = $db->query('INSERT INTO test(first) VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16)');
 var_dump($res->fetchAll());
 
 $stmt = $db->prepare('DELETE FROM test WHERE first=1');
@@ -98,6 +98,17 @@ $stmt5->nextRowset(); // needed to fetch the empty result set of CALL
 var_dump($stmt5->fetchAll());
 $db->exec('DROP PROCEDURE IF EXISTS ret');
 
+$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+
+$stmt = $db->prepare('DELETE FROM test WHERE first=15');
+$stmt->execute();
+var_dump($stmt->fetchAll());
+
+$stmt = $db->prepare('SELECT first FROM test WHERE first=16');
+$stmt->execute();
+var_dump($stmt->fetchAll());
+
 ?>
 --CLEAN--
 <?php
@@ -161,4 +172,15 @@ array(1) {
   }
 }
 array(0) {
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(2) {
+    ["first"]=>
+    int(16)
+    [0]=>
+    int(16)
+  }
 }
