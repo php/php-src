@@ -1526,11 +1526,10 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
+							RETURN_STR_COPY(str_idx);
 						} else {
-							RETVAL_LONG(num_idx);
+							RETURN_LONG(num_idx);
 						}
-						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1542,11 +1541,10 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
+							RETURN_STR_COPY(str_idx);
 						} else {
-							RETVAL_LONG(num_idx);
+							RETURN_LONG(num_idx);
 						}
-						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1559,11 +1557,10 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
+							RETURN_STR_COPY(str_idx);
 						} else {
-							RETVAL_LONG(num_idx);
+							RETURN_LONG(num_idx);
 						}
-						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1574,11 +1571,10 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
+							RETURN_STR_COPY(str_idx);
 						} else {
-							RETVAL_LONG(num_idx);
+							RETURN_LONG(num_idx);
 						}
-						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1589,11 +1585,10 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
+							RETURN_STR_COPY(str_idx);
 						} else {
-							RETVAL_LONG(num_idx);
+							RETURN_LONG(num_idx);
 						}
-						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
