@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug #80368 (OpenSSL extension fails to build against LibreSSL due to
     lack of OCB support). (Nikita)
 
+- PDO MySQL:
+  . Fixed bug #80458 (PDOStatement::fetchAll() throws for upsert queries).
+    (Kamil Tekiela)
+
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)
   . Fixed #75102 (`PharData` says invalid checksum for valid tar). (cmb)
