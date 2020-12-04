@@ -3262,6 +3262,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_l
 	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
 	zend_property_info **ptr, **end;
 
+	ZEND_ASSERT(prop);
 	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
 		ZEND_ASSERT(source_list->ptr == prop);
 		source_list->ptr = NULL;
