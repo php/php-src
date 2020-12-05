@@ -39,11 +39,11 @@ function mhash_get_block_size(int $algo): int|false {}
 
 function mhash_get_hash_name(int $algo): string|false {}
 
-function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length, array $args = []): string|false {}
+function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length): string|false {}
 
 function mhash_count(): int {}
 
-function mhash(int $algo, string $data, ?string $key = null, array $args = []): string|false {}
+function mhash(int $algo, string $data, ?string $key = null): string|false {}
 #endif
 
 final class HashContext

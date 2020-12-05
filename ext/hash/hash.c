@@ -1202,9 +1202,8 @@ PHP_FUNCTION(mhash)
 	zend_string *algo = NULL;
 	char *data, *key = NULL;
 	size_t data_len, key_len = 0;
-	HashTable *args;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls|s!h", &algorithm, &data, &data_len, &key, &key_len, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls|s", &algorithm, &data, &data_len, &key, &key_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1219,7 +1218,7 @@ PHP_FUNCTION(mhash)
 	if (key) {
 		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, 1, 0);
 	} else {
-		php_hash_do_hash(return_value, algo, data, data_len, 1, 0, args);
+		php_hash_do_hash(return_value, algo, data, data_len, 1, 0, NULL);
 	}
 
 	if (algo) {
@@ -1289,9 +1288,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	char *password, *salt;
 	size_t password_len, salt_len;
 	char padded_salt[SALT_SIZE];
-	HashTable *args;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssl|h", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssl", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1327,13 +1325,13 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				}
 
 				context = php_hash_alloc_context(ops);
-				ops->hash_init(context, args);
+				ops->hash_init(context, NULL);
 
 				key = ecalloc(1, times * block_size);
 				digest = emalloc(ops->digest_size + 1);
 
 				for (i = 0; i < times; i++) {
-					ops->hash_init(context, args);
+					ops->hash_init(context, NULL);
 
 					for (j=0;j<i;j++) {
 						ops->hash_update(context, &null, 1);
