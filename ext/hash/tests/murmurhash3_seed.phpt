@@ -3,7 +3,7 @@ Hash: MurmurHash3 seed
 --FILE--
 <?php
 
-$ctx = hash_init("murmur3f", args: ["seed" => 42]);
+$ctx = hash_init("murmur3f", options: ["seed" => 42]);
 hash_update($ctx, "Two");
 hash_update($ctx, " hashes");
 hash_update($ctx, " meet");
@@ -13,10 +13,10 @@ hash_update($ctx, " bar.");
 $h0 = hash_final($ctx);
 echo $h0, "\n";
 
-$h0 = hash("murmur3f", "Two hashes meet in a bar.", args: ["seed" => 42]);
+$h0 = hash("murmur3f", "Two hashes meet in a bar.", options: ["seed" => 42]);
 echo $h0, "\n";
 
-$ctx = hash_init("murmur3c", args: ["seed" => 106]);
+$ctx = hash_init("murmur3c", options: ["seed" => 106]);
 hash_update($ctx, "Two");
 hash_update($ctx, " hashes");
 hash_update($ctx, " meet");
@@ -26,10 +26,10 @@ hash_update($ctx, " bar.");
 $h0 = hash_final($ctx);
 echo $h0, "\n";
 
-$h0 = hash("murmur3c", "Two hashes meet in a bar.", args: ["seed" => 106]);
+$h0 = hash("murmur3c", "Two hashes meet in a bar.", options: ["seed" => 106]);
 echo $h0, "\n";
 
-$ctx = hash_init("murmur3a", args: ["seed" => 2345]);
+$ctx = hash_init("murmur3a", options: ["seed" => 2345]);
 hash_update($ctx, "Two");
 hash_update($ctx, " hashes");
 hash_update($ctx, " meet");
@@ -39,7 +39,7 @@ hash_update($ctx, " bar.");
 $h0 = hash_final($ctx);
 echo $h0, "\n";
 
-$h0 = hash("murmur3a", "Two hashes meet in a bar.", args: ["seed" => 2345]);
+$h0 = hash("murmur3a", "Two hashes meet in a bar.", options: ["seed" => 2345]);
 echo $h0, "\n";
 
 ?>
