@@ -4778,6 +4778,22 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t a
 }
 /* }}} */
 
+//in tag && in quote ...
+#define _PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR(CHAR) \
+			(state == 1 && in_q>1 && allow && c == CHAR) 
+
+ //resize for the encode char &gt; or &lt;
+#define _PHP_STRIP_TAGS_ENCODE_CHAR(ENCODE_CHAR)  \
+			if (((tp - tbuf) + 4) >= PHP_TAG_BUF_SIZE) { \
+				pos = tp - tbuf; \
+				tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + 4 ); \
+				tp = tbuf + pos; \
+			} \
+			\
+			memcpy(tp, ENCODE_CHAR, (tp-tbuf)+4); \
+			tp+=4;
+
+
 /* {{{ php_strip_tags
 
 	A simple little state-machine to strip out html and php tags
@@ -4832,6 +4848,12 @@ state_0:
 		case '\0':
 			break;
 		case '<':
+		
+			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('<')) {
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;")
+				break;
+			}
+ 
 			if (in_q) {
 				break;
 			}
@@ -4857,6 +4879,11 @@ state_0:
 				break;
 			}
 
+			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				break;
+			}
+
 			if (in_q) {
 				break;
 			}
@@ -4879,6 +4906,12 @@ state_1:
 		case '\0':
 			break;
 		case '<':
+
+			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('<')) {
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;")
+				break;
+			}
+
 			if (in_q) {
 				break;
 			}
@@ -4892,6 +4925,12 @@ state_1:
 				depth--;
 				break;
 			}
+
+			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				break;
+			}
+
 			if (in_q) {
 				break;
 			}
@@ -4986,6 +5025,12 @@ state_2:
 				depth--;
 				break;
 			}
+
+			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				break;
+			}
+
 			if (in_q) {
 				break;
 			}
@@ -5046,6 +5091,12 @@ state_3:
 				depth--;
 				break;
 			}
+
+			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				break;
+			}
+
 			if (in_q) {
 				break;
 			}
