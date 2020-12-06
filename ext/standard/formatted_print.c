@@ -770,7 +770,7 @@ PHP_FUNCTION(sprintf)
 
 	result = php_formatted_print(format, format_len, args, argc, 1);
 	if (result == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 	RETVAL_STR(result);
 }
@@ -796,7 +796,7 @@ PHP_FUNCTION(vsprintf)
 	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 	RETVAL_STR(result);
 }
@@ -819,7 +819,7 @@ PHP_FUNCTION(printf)
 
 	result = php_formatted_print(format, format_len, args, argc, 1);
 	if (result == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 	rlen = PHPWRITE(ZSTR_VAL(result), ZSTR_LEN(result));
 	zend_string_efree(result);
@@ -848,7 +848,7 @@ PHP_FUNCTION(vprintf)
 	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 	rlen = PHPWRITE(ZSTR_VAL(result), ZSTR_LEN(result));
 	zend_string_efree(result);
@@ -876,7 +876,7 @@ PHP_FUNCTION(fprintf)
 
 	result = php_formatted_print(format, format_len, args, argc, 2);
 	if (result == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_write(stream, ZSTR_VAL(result), ZSTR_LEN(result));
@@ -910,7 +910,7 @@ PHP_FUNCTION(vfprintf)
 	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_write(stream, ZSTR_VAL(result), ZSTR_LEN(result));
