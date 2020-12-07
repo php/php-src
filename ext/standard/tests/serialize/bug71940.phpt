@@ -43,7 +43,8 @@ $serialized = serialize([$entry1, $entry2]);
 print_r(unserialize($serialized));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: The Serializable interface is deprecated. If you need to retain the Serializable interface for cross-version compatibility, you can suppress this warning by implementing __serialize() and __unserialize() in addition, which will take precedence over Serializable in PHP versions that support them in %s on line %d
 Array
 (
     [0] => Entry Object

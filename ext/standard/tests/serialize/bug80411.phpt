@@ -21,7 +21,8 @@ $recovered = unserialize($data);
 var_export($recovered);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: The Serializable interface is deprecated. If you need to retain the Serializable interface for cross-version compatibility, you can suppress this warning by implementing __serialize() and __unserialize() in addition, which will take precedence over Serializable in PHP versions that support them in %s on line %d
 a:4:{i:0;N;i:1;N;i:2;s:6:"endcap";i:3;R:4;}
 array (
   0 => NULL,

@@ -432,6 +432,10 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 	if (!class_type->unserialize) {
 		class_type->unserialize = zend_user_unserialize;
 	}
+	if (!(class_type->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)
+			&& (!class_type->__serialize || !class_type->__unserialize)) {
+		zend_error(E_DEPRECATED, "The Serializable interface is deprecated. If you need to retain the Serializable interface for cross-version compatibility, you can suppress this warning by implementing __serialize() and __unserialize() in addition, which will take precedence over Serializable in PHP versions that support them");
+	}
 	return SUCCESS;
 }
 /* }}}*/

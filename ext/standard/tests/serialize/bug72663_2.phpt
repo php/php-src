@@ -19,6 +19,8 @@ var_dump(unserialize($exploit));
 
 ?>
 --EXPECTF--
+Deprecated: The Serializable interface is deprecated. If you need to retain the Serializable interface for cross-version compatibility, you can suppress this warning by implementing __serialize() and __unserialize() in addition, which will take precedence over Serializable in PHP versions that support them in %s on line %d
+
 Notice: unserialize(): Unexpected end of serialized data in %s on line %d
 
 Notice: unserialize(): Error at offset 49 of 50 bytes in %s on line %d
