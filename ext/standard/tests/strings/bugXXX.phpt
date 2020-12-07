@@ -1,6 +1,5 @@
 --TEST--
 Bug #XXXXX: strip_tags strip >< in attributes with allow tag
-Bug #74371: strip_tags strip >< in attributes with allow tag
 --FILE--
 <?php
 
