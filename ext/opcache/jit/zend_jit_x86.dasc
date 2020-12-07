@@ -599,7 +599,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro SSE_GET_LONG, reg, lval
+|.macro SSE_GET_LONG, reg, lval, tmp_reg
 ||		if (lval == 0) {
 ||			if (CAN_USE_AVX()) {
 |				vxorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
@@ -609,26 +609,26 @@ static void* dasm_labels[zend_lb_MAX];
 ||		} else {
 |.if X64
 ||			if (!IS_SIGNED_32BIT(lval)) {
-|				mov64 r0, lval
+|				mov64 Ra(tmp_reg), lval
 ||			} else {
-|				mov r0, lval
+|				mov Ra(tmp_reg), lval
 ||			}
 |.else
-|			mov r0, lval
+|			mov Ra(tmp_reg), lval
 |.endif
 ||			if (CAN_USE_AVX()) {
 |				vxorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
-|				vcvtsi2sd, xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), r0
+|				vcvtsi2sd, xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), Ra(tmp_reg)
 ||			} else {
 |				xorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
-|				cvtsi2sd, xmm(reg-ZREG_XMM0), r0
+|				cvtsi2sd, xmm(reg-ZREG_XMM0), Ra(tmp_reg)
 ||			}
 ||		}
 |.endmacro
 
-|.macro SSE_GET_ZVAL_LVAL, reg, addr
+|.macro SSE_GET_ZVAL_LVAL, reg, addr, tmp_reg
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		SSE_GET_LONG reg, Z_LVAL_P(Z_ZV(addr))
+|		SSE_GET_LONG reg, Z_LVAL_P(Z_ZV(addr)), tmp_reg
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 ||		if (CAN_USE_AVX()) {
 |			vxorps xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0)
@@ -934,7 +934,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			SSE_SET_ZVAL_DVAL dst_addr, dst_reg
 ||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ? Z_REG(dst_addr) : ZREG_XMM0;
-|			SSE_GET_LONG dst_reg, Z_LVAL_P(zv)
+|			SSE_GET_LONG dst_reg, Z_LVAL_P(zv), ZREG_R0
 |			SSE_SET_ZVAL_DVAL dst_addr, dst_reg
 ||		} else if (Z_LVAL_P(zv) == 0 && Z_MODE(dst_addr) == IS_REG) {
 |			xor Ra(Z_REG(dst_addr)), Ra(Z_REG(dst_addr))
@@ -989,13 +989,13 @@ static void* dasm_labels[zend_lb_MAX];
 |			SSE_SET_ZVAL_DVAL res_addr, ZREG_XMM0
 ||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
 ||			if (Z_MODE(dst_addr) == IS_REG) {
-|				SSE_GET_LONG Z_REG(dst_addr), Z_LVAL_P(zv)
+|				SSE_GET_LONG Z_REG(dst_addr), Z_LVAL_P(zv), ZREG_R0
 |				SSE_SET_ZVAL_DVAL res_addr, Z_REG(dst_addr)
 ||			} else if (Z_MODE(res_addr) == IS_REG) {
-|				SSE_GET_LONG Z_REG(res_addr), Z_LVAL_P(zv)
+|				SSE_GET_LONG Z_REG(res_addr), Z_LVAL_P(zv), ZREG_R0
 |				SSE_SET_ZVAL_DVAL dst_addr, Z_REG(res_addr)
 ||			} else {
-|				SSE_GET_LONG ZREG_XMM0, Z_LVAL_P(zv)
+|				SSE_GET_LONG ZREG_XMM0, Z_LVAL_P(zv), ZREG_R0
 |				SSE_SET_ZVAL_DVAL dst_addr, ZREG_XMM0
 |				SSE_SET_ZVAL_DVAL res_addr, ZREG_XMM0
 ||			}
@@ -4208,6 +4208,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 {
 	zend_bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 	zend_reg result_reg;
+	zend_reg tmp_reg = ZREG_R0;
 
 	if (Z_MODE(res_addr) == IS_REG && (res_info & MAY_BE_LONG)) {
 		if (may_overflow && (res_info & MAY_BE_GUARD)
@@ -4224,6 +4225,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	} else {
 		/* ASSIGN_DIM_OP */
 		result_reg = ZREG_FCARG1a;
+		tmp_reg = ZREG_FCARG1a;
 	}
 
 	if (opcode == ZEND_MUL &&
@@ -4346,8 +4348,8 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 				}
 			}
 
-			|	SSE_GET_ZVAL_LVAL tmp_reg1, op1_addr
-			|	SSE_GET_ZVAL_LVAL tmp_reg2, op2_addr
+			|	SSE_GET_ZVAL_LVAL tmp_reg1, op1_addr, tmp_reg
+			|	SSE_GET_ZVAL_LVAL tmp_reg2, op2_addr, tmp_reg
 			if (CAN_USE_AVX()) {
 				|	AVX_MATH_REG opcode, tmp_reg1, tmp_reg1, tmp_reg2
 			} else {
@@ -4379,8 +4381,16 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
 {
 	zend_reg result_reg =
 		(Z_MODE(res_addr) == IS_REG) ? Z_REG(res_addr) : ZREG_XMM0;
+	zend_reg tmp_reg;
 
-	|	SSE_GET_ZVAL_LVAL result_reg, op1_addr
+	if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+		/* ASSIGN_DIM_OP */
+		tmp_reg = ZREG_R1;
+	} else {
+		tmp_reg = ZREG_R0;
+	}
+
+	|	SSE_GET_ZVAL_LVAL result_reg, op1_addr, tmp_reg
 
 	if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
 		/* ASSIGN_DIM_OP */
@@ -4414,7 +4424,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
                                      zend_jit_addr   res_addr,
                                      uint32_t        res_use_info)
 {
-	zend_reg result_reg;
+	zend_reg result_reg, tmp_reg;
 
 	if (zend_is_commutative(opcode)
 	 && (Z_MODE(res_addr) != IS_REG || Z_MODE(op1_addr) != IS_REG || Z_REG(res_addr) != Z_REG(op1_addr))) {
@@ -4423,7 +4433,13 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 		} else {
 			result_reg = ZREG_XMM0;
 		}
-		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr
+		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+			/* ASSIGN_DIM_OP */
+			tmp_reg = ZREG_R1;
+		} else {
+			tmp_reg = ZREG_R0;
+		}
+		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr, tmp_reg
 		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
 			/* ASSIGN_DIM_OP */
 			if (CAN_USE_AVX()) {
@@ -4465,7 +4481,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 				/* +/- 0 */
 			} else {
-				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_R0
 				|	AVX_MATH_REG opcode, result_reg, op1_reg, tmp_reg
 			}
 		} else {
@@ -4475,7 +4491,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 				/* +/- 0 */
 			} else {
-				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_R0
 				|	SSE_MATH_REG opcode, result_reg, tmp_reg
 			}
 		}
@@ -7354,7 +7370,7 @@ static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, zen
 {
 	zend_reg tmp_reg = ZREG_XMM0;
 
-	|	SSE_GET_ZVAL_LVAL tmp_reg, op1_addr
+	|	SSE_GET_ZVAL_LVAL tmp_reg, op1_addr, ZREG_R0
 	|	SSE_AVX_OP ucomisd, vucomisd, tmp_reg, op2_addr
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, 0, smart_branch_opcode, target_label, target_label2, exit_addr);
@@ -7364,7 +7380,7 @@ static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, zen
 {
 	zend_reg tmp_reg = ZREG_XMM0;
 
-	|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
+	|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_R0
 	|	SSE_AVX_OP ucomisd, vucomisd, tmp_reg, op1_addr
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, /* swap */ 1, smart_branch_opcode, target_label, target_label2, exit_addr);
