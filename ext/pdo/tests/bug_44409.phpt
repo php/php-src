@@ -40,7 +40,10 @@ $stmt = $db->query("SELECT * FROM test");
 print_r($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, "bug44409"));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: The Serializable interface is deprecated. If you need to retain the Serializable interface for cross-version compatibility, you can suppress this warning by implementing __serialize() and __unserialize() in addition, which will take precedence over Serializable in PHP versions that support them in %s on line %d
+
+Deprecated: PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
 Method called: bug44409::unserialize('Data from DB')
 Array
 (

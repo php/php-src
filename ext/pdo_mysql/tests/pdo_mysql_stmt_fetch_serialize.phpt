@@ -120,6 +120,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
+Deprecated: The Serializable interface is deprecated. If you need to retain the Serializable interface for cross-version compatibility, you can suppress this warning by implementing __serialize() and __unserialize() in addition, which will take precedence over Serializable in PHP versions that support them in %s on line %d
 Creating an object, serializing it and writing it to DB...
 myclass::singleton(Creating object)
 myclass::__construct(Creating object)
@@ -133,6 +134,10 @@ object(myclass)#4 (1) {
 }
 
 Using PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE to fetch the object from DB and unserialize it...
+
+Deprecated: PDOStatement::setFetchMode(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
+
+Deprecated: PDOStatement::fetch(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
 myclass::unserialize('C:7:"myclass":19:{Data from serialize}')
 object(myclass)#%d (1) {
   ["myprotected":protected]=>
