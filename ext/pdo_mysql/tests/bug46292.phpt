@@ -13,19 +13,9 @@ MySQLPDOTest::skip();
     $pdoDb = MySQLPDOTest::factory();
 
 
-    class myclass implements Serializable {
+    class myclass {
         public function __construct() {
             printf("%s()\n", __METHOD__);
-        }
-
-        public function serialize() {
-            printf("%s()\n", __METHOD__);
-            return "any data from serialize()";
-        }
-
-        public function unserialize($dat) {
-            printf("%s(%s)\n", __METHOD__, var_export($dat, true));
-            return $dat;
         }
     }
 

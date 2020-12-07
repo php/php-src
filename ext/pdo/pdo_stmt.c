@@ -1141,6 +1141,9 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 			ZEND_FALLTHROUGH;
 
 		case PDO_FETCH_CLASS:
+			if (flags & PDO_FETCH_SERIALIZE) {
+				php_error_docref(NULL, E_DEPRECATED, "The PDO::FETCH_SERIALIZE mode is deprecated");
+			}
 			return 1;
 	}
 }

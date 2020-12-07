@@ -48,22 +48,29 @@ echo "\n\n";
 var_dump($_SESSION);
 
 ?>
---EXPECT--
-obj1|C:17:"SerializableClass":65:{a:1:{s:10:"sharedProp";O:8:"stdClass":1:{s:4:"name";s:4:"test";}}}obj2|C:17:"SerializableClass":28:{a:1:{s:10:"sharedProp";r:3;}}
+--EXPECTF--
+Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
+Warning: session_start(): Session cannot be started after headers have already been sent in %s on line %d
+
+Warning: session_encode(): Cannot encode non-existent session in %s on line %d
+
+Warning: session_decode(): Session data cannot be decoded when there is no active session in %s on line %d
+
 
 array(2) {
   ["obj1"]=>
-  object(SerializableClass)#4 (1) {
+  object(SerializableClass)#2 (1) {
     ["sharedProp"]=>
-    object(stdClass)#5 (1) {
+    object(stdClass)#1 (1) {
       ["name"]=>
       string(4) "test"
     }
   }
   ["obj2"]=>
-  object(SerializableClass)#6 (1) {
+  object(SerializableClass)#3 (1) {
     ["sharedProp"]=>
-    object(stdClass)#5 (1) {
+    object(stdClass)#1 (1) {
       ["name"]=>
       string(4) "test"
     }

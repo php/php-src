@@ -254,6 +254,13 @@ PHP 8.1 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Implementing the Serializable interface without also implementing
+    __serialize() and __unserialize() has been deprecated. You should either
+    implement the new methods (if you only support PHP 7.4 and higher) or
+    implement both (if you support older PHP versions as well).
+    RFC: https://wiki.php.net/rfc/phase_out_serializable
+
 - MySQLi:
   . The mysqli_driver::$driver_version property has been deprecated. The driver
     version is meaningless as it hasn't been updated in more than a decade. Use
@@ -262,6 +269,10 @@ PHP 8.1 UPGRADE NOTES
     mysqli_get_client_info() function has been deprecated. Use
     mysqli_get_client_info() without any arguments to obtain the client
     library version information.
+
+- PDO:
+  . The PDO::FETCH_SERIALIZE mode has been deprecated.
+    RFC: https://wiki.php.net/rfc/phase_out_serializable
 
 ========================================
 5. Changed Functions
