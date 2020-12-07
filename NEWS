@@ -29,6 +29,7 @@ PHP                                                                        NEWS
     JIT). (Nikita)
   . Fixed bug #80447 (Strange out of memory error when running with JIT).
     (Dmitry)
+  . Fixed bug #80480 (Segmentation fault with JIT enabled). (Dmitry)
 
 - OpenSSL:
   . Fixed bug #80368 (OpenSSL extension fails to build against LibreSSL due to
