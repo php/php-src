@@ -774,14 +774,15 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 	/* so that other process won't try to force while we are busy cleaning up */
 	ZCSG(force_restart_time) = 0;
 	while (mem_usage_check->l_pid > 0) {
-		/* Clear previous errno, reset success and tries */
+		/* Try SIGTERM first, switch to SIGKILL if not successful. */
+		int signal = SIGTERM;
 		errno = 0;
 		success = 0;
 		tries = 10;
 
 		while (tries--) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Attempting to kill locker %d", mem_usage_check->l_pid);
-			if (kill(mem_usage_check->l_pid, SIGKILL)) {
+			if (kill(mem_usage_check->l_pid, signal)) {
 				if (errno == ESRCH) {
 					/* Process died before the signal was sent */
 					success = 1;
@@ -800,6 +801,8 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 				break;
 			}
 			usleep(10000);
+			/* If SIGTERM was not sufficient, use SIGKILL. */
+			signal = SIGKILL;
 		}
 		if (!success) {
 			/* errno is not ESRCH or we ran out of tries to kill the locker */
