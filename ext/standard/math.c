@@ -717,7 +717,7 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 /*
  * Convert a string representation of a base(2-36) number to a zval.
  */
-PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
+PHPAPI zend_result _php_math_basetozval(zend_string *str, int base, zval *ret)
 {
 	zend_long num = 0;
 	double fnum = 0;
@@ -780,7 +780,8 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	}
 
 	if (invalidchars > 0) {
-		zend_error(E_DEPRECATED, "Invalid characters passed for attempted conversion, these have been ignored");
+		zend_value_error("Invalid characters passed for attempted conversion");
+		return FAILURE;
 	}
 
 	if (mode == 1) {
@@ -788,6 +789,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	} else {
 		ZVAL_LONG(ret, num);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -905,7 +907,9 @@ PHP_FUNCTION(bindec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 2, return_value);
+	if (_php_math_basetozval(arg, 2, return_value) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -918,7 +922,9 @@ PHP_FUNCTION(hexdec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 16, return_value);
+	if (_php_math_basetozval(arg, 16, return_value) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -931,7 +937,9 @@ PHP_FUNCTION(octdec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 8, return_value);
+	if (_php_math_basetozval(arg, 8, return_value) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -997,7 +1005,9 @@ PHP_FUNCTION(base_convert)
 		RETURN_THROWS();
 	}
 
-	_php_math_basetozval(number, (int)frombase, &temp);
+	if (_php_math_basetozval(number, (int)frombase, &temp) == FAILURE) {
+		RETURN_THROWS();
+	}
 	result = _php_math_zvaltobase(&temp, (int)tobase);
 	if (!result) {
 		RETURN_THROWS();
