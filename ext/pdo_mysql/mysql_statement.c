@@ -355,6 +355,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 			PDO_DBG_RETURN(0);
 		}
 		if (mysqlnd_stmt_next_result(S->stmt)) {
+			pdo_mysql_error_stmt(stmt);
 			PDO_DBG_RETURN(0);
 		}
 
