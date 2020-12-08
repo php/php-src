@@ -293,7 +293,7 @@ function ldap_exop_passwd($ldap, string $user = "", string $old_password = "", s
 
 #ifdef HAVE_LDAP_WHOAMI_S
 /** @param resource $ldap */
-function ldap_exop_whoami($ldap): string|bool {}
+function ldap_exop_whoami($ldap): string|false {}
 #endif
 
 #ifdef HAVE_LDAP_REFRESH_S
