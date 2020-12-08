@@ -65,6 +65,9 @@ PHP                                                                        NEWS
 - XML:
   . XmlParser opaque object renamed to XMLParser for consistency with other XML objects. (girgias)
 
+- Zlib:
+  . Fixed #48725 (Support for flushing in zlib stream). (cmb)
+
 26 Nov 2020, PHP 8.0.0
 
 - BZ2:
