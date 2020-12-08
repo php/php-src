@@ -359,16 +359,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 			PDO_DBG_RETURN(0);
 		}
 
-		if (!mysqlnd_stmt_more_results(S->stmt)) {
-			/*
-			MySQL gives us n + 1 result sets for
-			CALL proc() and n result sets returned by the proc itself.
-			Result set n + 1 is about the procedure call itself.
-			As the PDO emulation does not return it, we skip it as well
-			*/
-			PDO_DBG_RETURN(0);
-		}
-
 		/* TODO - this code is stolen from execute() - see above */
 		if (S->result) {
 			mysql_free_result(S->result);

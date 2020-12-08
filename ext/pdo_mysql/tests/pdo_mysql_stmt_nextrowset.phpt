@@ -1,7 +1,5 @@
 --TEST--
 MySQL PDOStatement->nextRowSet()
---XFAIL--
-nextRowset() problem with stored proc & emulation mode & mysqlnd
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
@@ -159,6 +157,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(1) {
   [0]=>
@@ -207,6 +207,8 @@ array(3) {
     ["label"]=>
     string(1) "a"
   }
+}
+array(0) {
 }
 bool(false)
 Native PS...
@@ -258,6 +260,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(1) {
   [0]=>
@@ -306,6 +310,8 @@ array(3) {
     ["label"]=>
     string(1) "a"
   }
+}
+array(0) {
 }
 bool(false)
 done!

@@ -53,31 +53,13 @@ MySQLPDOTest::skip();
         // requires MySQL 5+
         $stmt = $db->prepare('CALL p()');
         $stmt->execute();
-        $expected = array(
-            array(
-                "z" => NULL,
-                "a" => NULL,
-                "b" => " ",
-                "c" => NULL,
-                "d" => " d",
-                "e" => " e",
-            ),
-        );
         do {
-            $tmp = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if ($tmp != $expected) {
-                printf("[004] Expecting %s got %s\n",
-                    var_export($expected, true), var_export($tmp, true));
-            }
+            var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         } while ($stmt->nextRowset());
 
         $stmt->execute();
         do {
-            $tmp = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if ($tmp != $expected) {
-                printf("[005] Expecting %s got %s\n",
-                    var_export($expected, true), var_export($tmp, true));
-            }
+            var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         } while ($stmt->nextRowset());
 
     }
@@ -123,5 +105,43 @@ array(1) {
     ["e"]=>
     string(3) "%se"
   }
+}
+array(1) {
+  [0]=>
+  array(6) {
+    ["z"]=>
+    NULL
+    ["a"]=>
+    string(0) ""
+    ["b"]=>
+    string(1) " "
+    ["c"]=>
+    string(0) ""
+    ["d"]=>
+    string(2) " d"
+    ["e"]=>
+    string(2) " e"
+  }
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(6) {
+    ["z"]=>
+    NULL
+    ["a"]=>
+    string(0) ""
+    ["b"]=>
+    string(1) " "
+    ["c"]=>
+    string(0) ""
+    ["d"]=>
+    string(2) " d"
+    ["e"]=>
+    string(2) " e"
+  }
+}
+array(0) {
 }
 done!
