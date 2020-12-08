@@ -31,6 +31,8 @@ PHP                                                                        NEWS
 - PDO MySQL:
   . Fixed bug #80458 (PDOStatement::fetchAll() throws for upsert queries).
     (Kamil Tekiela)
+  . Fixed bug #63185 (nextRowset() ignores MySQL errors with native prepared
+    statements). (Nikita)
 
 - Phpdbg:
   . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
