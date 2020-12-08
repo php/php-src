@@ -132,6 +132,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(3) {
   [0]=>
@@ -172,6 +174,8 @@ array(3) {
     ["label"]=>
     string(1) "a"
   }
+}
+array(0) {
 }
 bool(false)
 
@@ -219,6 +223,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(3) {
   [0]=>
@@ -259,6 +265,8 @@ array(3) {
     ["label"]=>
     string(1) "a"
   }
+}
+array(0) {
 }
 bool(false)
 string(5) "00000"
