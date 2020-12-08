@@ -144,7 +144,7 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 		}
 
 		stmt->row_count = (zend_long) mysql_num_rows(S->result);
-		stmt->column_count = (int) mysql_num_fields(S->result);
+		php_pdo_stmt_set_column_count(stmt, (int) mysql_num_fields(S->result));
 		S->fields = mysql_fetch_fields(S->result);
 	} else {
 		/* this was a DML or DDL query (INSERT, UPDATE, DELETE, ... */
@@ -194,7 +194,7 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 				efree(S->out_length);
 			}
 
-			stmt->column_count = (int)mysql_num_fields(S->result);
+			php_pdo_stmt_set_column_count(stmt, (int)mysql_num_fields(S->result));
 			S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
 			S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
 			S->out_length = ecalloc(stmt->column_count, sizeof(zend_ulong));
@@ -290,7 +290,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
-	stmt->column_count = mysql_stmt_field_count(S->stmt);
+	php_pdo_stmt_set_column_count(stmt, mysql_stmt_field_count(S->stmt));
 	for (i = 0; i < stmt->column_count; i++) {
 		mysqlnd_stmt_bind_one_result(S->stmt, i);
 	}
@@ -378,7 +378,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 			/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
 			int i;
 
-			stmt->column_count = mysql_stmt_field_count(S->stmt);
+			php_pdo_stmt_set_column_count(stmt, mysql_stmt_field_count(S->stmt));
 			for (i = 0; i < stmt->column_count; i++) {
 				mysqlnd_stmt_bind_one_result(S->stmt, i);
 			}
@@ -407,9 +407,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 /* ensure that we free any previous unfetched results */
 #ifndef PDO_USE_MYSQLND
 	if (S->stmt) {
-		if (S->result) {
-			stmt->column_count = (int)mysql_num_fields(S->result);
-		}
 		mysql_stmt_free_result(S->stmt);
 	}
 #endif
