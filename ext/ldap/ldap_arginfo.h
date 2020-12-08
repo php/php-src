@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 980ee25422e1b026259d63e7a61adea699751b86 */
+ * Stub hash: 836e18943977613fc0abf7443ad4d5afdbe65a0a */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
@@ -313,7 +313,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_LDAP_WHOAMI_S)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_exop_whoami, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_exop_whoami, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, ldap)
 ZEND_END_ARG_INFO()
 #endif
