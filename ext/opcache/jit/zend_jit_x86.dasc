@@ -3489,7 +3489,9 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		|	mov FCARG1a, FP
 	}
 	|	EXT_CALL handler, r0
-	if (may_throw) {
+	if (may_throw
+	 && opline->opcode != ZEND_RETURN
+	 && opline->opcode != ZEND_RETURN_BY_REF) {
 		|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r1
 		|	jne ->exception_handler
 	}
@@ -3511,14 +3513,16 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 	}
 
 	if (zend_jit_trace_may_exit(op_array, opline)) {
-		// TODO: try to avoid this check ???
 		if (opline->opcode == ZEND_RETURN ||
 		    opline->opcode == ZEND_RETURN_BY_REF ||
 		    opline->opcode == ZEND_GENERATOR_CREATE) {
 
 			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+#if 0
+				/* this check should be handled by the following OPLINE guard or jmp [IP] */
 				|	cmp IP, zend_jit_halt_op
 				|	je ->trace_halt
+#endif
 			} else if (GCC_GLOBAL_REGS) {
 				|	test IP, IP
 				|	je ->trace_halt
