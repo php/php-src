@@ -88,7 +88,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				inflateEnd(&(data->strm));
 				data->finished = '\1';
 				exit_status = PSFS_PASS_ON;
-			} else if (status != Z_OK) {
+			} else if (status != Z_OK && status != Z_BUF_ERROR) {
 				/* Something bad happened */
 				php_error_docref(NULL, E_NOTICE, "zlib: %s", zError(status));
 				php_stream_bucket_delref(bucket);
