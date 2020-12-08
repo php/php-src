@@ -184,7 +184,7 @@ struct _zend_executor_globals {
 	bool no_extensions;
 
 	bool vm_interrupt;
-	bool timed_out;
+	zend_long timed_out;
 	zend_long hard_timeout;
 
 #ifdef ZEND_WIN32
@@ -206,6 +206,7 @@ struct _zend_executor_globals {
 
 	/* timeout support */
 	zend_long timeout_seconds;
+	zend_long wall_timeout_seconds;
 
 	int capture_warnings_during_sccp;
 

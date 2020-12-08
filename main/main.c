@@ -400,6 +400,21 @@ static PHP_INI_MH(OnUpdateTimeout)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateWallTimeout)
+{
+	if (stage==PHP_INI_STAGE_STARTUP) {
+		/* Don't set a timeout on startup, only per-request */
+		ZEND_ATOL(EG(wall_timeout_seconds), ZSTR_VAL(new_value));
+		return SUCCESS;
+	}
+	zend_unset_wall_timeout();
+	ZEND_ATOL(EG(wall_timeout_seconds), ZSTR_VAL(new_value));
+	zend_set_wall_timeout(EG(wall_timeout_seconds), 0);
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ php_get_display_errors_mode() helper function */
 static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 {
@@ -688,6 +703,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("max_execution_time",			"30",		PHP_INI_ALL,			OnUpdateTimeout)
+	PHP_INI_ENTRY("max_execution_wall_time",	"0",		PHP_INI_ALL,			OnUpdateWallTimeout)
 	STD_PHP_INI_ENTRY("open_basedir",			NULL,		PHP_INI_ALL,		OnUpdateBaseDir,			open_basedir,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_BOOLEAN("file_uploads",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			file_uploads,			php_core_globals,	core_globals)
@@ -1686,6 +1702,7 @@ int php_request_startup(void)
 		} else {
 			zend_set_timeout(PG(max_input_time), 1);
 		}
+		zend_set_wall_timeout(EG(wall_timeout_seconds), 1);
 
 		/* Disable realpath cache if an open_basedir is set */
 		if (PG(open_basedir) && *PG(open_basedir)) {
@@ -1772,9 +1789,10 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 4. Reset max_execution_time (no longer executing php code after response sent) */
+	/* 4. Reset max_execution_time and max_execution_wall_time (no longer executing php code after response sent) */
 	zend_try {
 		zend_unset_timeout();
+		zend_unset_wall_timeout();
 	} zend_end_try();
 
 	/* 5. Call all extensions RSHUTDOWN functions */

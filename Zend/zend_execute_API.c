@@ -1260,9 +1260,14 @@ ZEND_API zend_result zend_eval_string_ex(const char *str, zval *retval_ptr, cons
 /* }}} */
 
 static void zend_set_timeout_ex(zend_long seconds, bool reset_signals);
+static void zend_set_wall_timeout_ex(zend_long seconds, bool reset_signals);
 
 ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 {
+	zend_long original_timed_out = EG(timed_out);
+	zend_long original_timeout_seconds = EG(timeout_seconds);
+	zend_long original_wall_timeout_seconds = EG(wall_timeout_seconds);
+
 #if defined(PHP_WIN32)
 # ifndef ZTS
 	/* No action is needed if we're timed out because zero seconds are
@@ -1278,10 +1283,18 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 # endif
 #else
 	EG(timed_out) = 0;
-	zend_set_timeout_ex(0, 1);
+	if (original_timed_out == 1) {
+		zend_set_timeout_ex(0, 1);
+	} else {
+		zend_set_wall_timeout_ex(0, 1);
+	}
 #endif
 
-	zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	if (original_timed_out == 1) {
+		zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", original_timeout_seconds, original_timeout_seconds == 1 ? "" : "s");
+	} else {
+		zend_error_noreturn(E_ERROR, "Maximum execution wall-time of " ZEND_LONG_FMT " second%s exceeded", original_wall_timeout_seconds, original_wall_timeout_seconds == 1 ? "" : "s");
+	}
 }
 /* }}} */
 
@@ -1331,6 +1344,57 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 	if (EG(hard_timeout) > 0) {
 		/* Set hard timeout */
 		zend_set_timeout_ex(EG(hard_timeout), 1);
+	}
+#endif
+}
+/* }}} */
+#endif
+
+#ifndef ZEND_WIN32
+static void zend_wall_timeout_handler(int dummy) /* {{{ */
+{
+#ifndef ZTS
+    if (EG(timed_out)) {
+		/* Die on hard timeout */
+		const char *error_filename = NULL;
+		uint32_t error_lineno = 0;
+		char log_buffer[2048];
+		int output_len = 0;
+
+		if (zend_is_compiling()) {
+			error_filename = ZSTR_VAL(zend_get_compiled_filename());
+			error_lineno = zend_get_compiled_lineno();
+		} else if (zend_is_executing()) {
+			error_filename = zend_get_executed_filename();
+			if (error_filename[0] == '[') { /* [no active file] */
+				error_filename = NULL;
+				error_lineno = 0;
+			} else {
+				error_lineno = zend_get_executed_lineno();
+			}
+		}
+		if (!error_filename) {
+			error_filename = "Unknown";
+		}
+
+		output_len = snprintf(log_buffer, sizeof(log_buffer), "\nFatal error: Maximum execution wall-time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(wall_timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
+		if (output_len > 0) {
+			zend_quiet_write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
+		}
+		_exit(124);
+    }
+#endif
+
+	if (zend_on_timeout) {
+		zend_on_timeout(EG(wall_timeout_seconds));
+	}
+
+	EG(timed_out) = 2;
+	EG(vm_interrupt) = 1;
+
+#ifndef ZTS
+	if (EG(hard_timeout)) {
+		zend_set_wall_timeout_ex(EG(hard_timeout), 1);
 	}
 #endif
 }
@@ -1431,11 +1495,85 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 }
 /* }}} */
 
+static void zend_set_wall_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
+{
+#ifdef ZEND_WIN32
+	zend_executor_globals *eg;
+
+	if (!seconds) {
+		return;
+	}
+
+	/* Don't use ChangeTimerQueueTimer() as it will not restart an expired
+	 * timer, so we could end up with just an ignored timeout. Instead
+	 * delete and recreate. */
+	if (NULL != tq_timer) {
+		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
+			tq_timer = NULL;
+			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
+			return;
+		}
+		tq_timer = NULL;
+	}
+
+	/* XXX passing NULL means the default timer queue provided by the system is used */
+	eg = ZEND_MODULE_GLOBALS_BULK(executor);
+	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)eg, seconds*1000, 0, WT_EXECUTEONLYONCE)) {
+		tq_timer = NULL;
+		zend_error_noreturn(E_ERROR, "Could not queue new timer");
+		return;
+	}
+#elif defined(HAVE_SETITIMER)
+	{
+		struct itimerval t_r;		/* timeout requested */
+		int signo;
+
+		if(seconds) {
+			t_r.it_value.tv_sec = seconds;
+			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+
+			setitimer(ITIMER_REAL, &t_r, NULL);
+		}
+		signo = SIGALRM;
+
+		if (reset_signals) {
+
+# ifdef ZEND_SIGNALS
+			zend_signal(signo, zend_wall_timeout_handler);
+# else
+			sigset_t sigset;
+#  ifdef HAVE_SIGACTION
+			struct sigaction act;
+
+			act.sa_handler = zend_wall_timeout_handler;
+			sigemptyset(&act.sa_mask);
+			act.sa_flags = SA_RESETHAND | SA_NODEFER;
+			sigaction(signo, &act, NULL);
+#  else
+			signal(signo, zend_wall_timeout_handler);
+#  endif /* HAVE_SIGACTION */
+			sigemptyset(&sigset);
+			sigaddset(&sigset, signo);
+			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+# endif /* ZEND_SIGNALS */
+		}
+	}
+#endif /* HAVE_SETITIMER */
+}
+/* }}} */
+
 void zend_set_timeout(zend_long seconds, bool reset_signals) /* {{{ */
 {
-
 	EG(timeout_seconds) = seconds;
 	zend_set_timeout_ex(seconds, reset_signals);
+	EG(timed_out) = 0;
+}
+/* }}} */
+
+void zend_set_wall_timeout(zend_long seconds, bool reset_signals) /* {{{ */
+{
+	EG(wall_timeout_seconds) = seconds;
+	zend_set_wall_timeout_ex(seconds, reset_signals);
 	EG(timed_out) = 0;
 }
 /* }}} */
@@ -1463,6 +1601,31 @@ void zend_unset_timeout(void) /* {{{ */
 # else
 		setitimer(ITIMER_PROF, &no_timeout, NULL);
 # endif
+	}
+#endif
+	EG(timed_out) = 0;
+}
+/* }}} */
+
+void zend_unset_wall_timeout(void) /* {{{ */
+{
+#ifdef ZEND_WIN32
+	if (NULL != tq_timer) {
+		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
+			EG(timed_out) = 0;
+			tq_timer = NULL;
+			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
+			return;
+		}
+		tq_timer = NULL;
+	}
+#elif defined(HAVE_SETITIMER)
+	if (EG(wall_timeout_seconds)) {
+		struct itimerval no_timeout;
+
+		no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
+
+		setitimer(ITIMER_REAL, &no_timeout, NULL);
 	}
 #endif
 	EG(timed_out) = 0;
