@@ -1,7 +1,5 @@
 --TEST--
 MySQL Prepared Statements and different column counts
---XFAIL--
-nextRowset() problem with stored proc & emulation mode & mysqlnd
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
@@ -25,10 +23,8 @@ if ($version < 50000)
     $db = MySQLPDOTest::factory();
 
     function check_result($offset, $stmt, $columns) {
-
-        do {
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        } while ($stmt->nextRowSet());
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->nextRowSet();
 
         if (!isset($row['one']) || ($row['one'] != 1)) {
                 printf("[%03d + 1] Expecting array('one' => 1), got %s\n", $offset, var_export($row, true));
