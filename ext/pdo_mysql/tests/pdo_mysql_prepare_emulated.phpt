@@ -326,11 +326,8 @@ require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---XFAIL--
-PDO's PS parser has some problems with invalid SQL and crashes from time to time
-(check with valgrind...)
 --EXPECT--
-PDO::prepare(): Argument #1 ($statement) cannot be empty
+PDO::prepare(): Argument #1 ($query) cannot be empty
 array(1) {
   ["one"]=>
   string(1) "1"
