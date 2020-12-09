@@ -154,6 +154,7 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
+#ifdef PDO_USE_MYSQLND
 static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -179,6 +180,7 @@ static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
 	pdo_mysql_stmt_set_row_count(stmt);
 	return true;
 }
+#endif
 
 #ifndef PDO_USE_MYSQLND
 static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
@@ -361,9 +363,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 
 #ifdef PDO_USE_MYSQLND
 	if (!H->emulate_prepare) {
-		if (!mysqlnd_stmt_more_results(S->stmt)) {
-			PDO_DBG_RETURN(0);
-		}
 		if (mysqlnd_stmt_next_result(S->stmt)) {
 			pdo_mysql_error_stmt(stmt);
 			PDO_DBG_RETURN(0);
@@ -373,25 +372,12 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 	}
 #endif
 
-	if (!mysql_more_results(H->server)) {
-		/* No more results */
-		PDO_DBG_RETURN(0);
-	}
-#ifdef PDO_USE_MYSQLND
-	if (mysql_next_result(H->server) == FAIL) {
+	if (mysql_next_result(H->server)) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	} else {
 		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 	}
-#else
-	if (mysql_next_result(H->server) > 0) {
-		pdo_mysql_error_stmt(stmt);
-		PDO_DBG_RETURN(0);
-	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
-	}
-#endif
 }
 /* }}} */
 
