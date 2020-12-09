@@ -899,7 +899,8 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 	while (mysql_more_results(S->H->server)) {
 		MYSQL_RES *res;
 		if (mysql_next_result(S->H->server) != 0) {
-			break;
+			pdo_mysql_error_stmt(stmt);
+			PDO_DBG_RETURN(0);
 		}
 		res = mysql_store_result(S->H->server);
 		if (res) {
