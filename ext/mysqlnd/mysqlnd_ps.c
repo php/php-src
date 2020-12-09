@@ -1931,10 +1931,6 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result)(MYSQLND_STMT * const s)
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
 
-	if (GET_CONNECTION_STATE(&conn->state) != CONN_QUIT_SENT) {
-		SET_CONNECTION_STATE(&conn->state, CONN_READY);
-	}
-
 	DBG_RETURN(PASS);
 }
 /* }}} */
