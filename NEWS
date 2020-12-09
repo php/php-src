@@ -41,6 +41,8 @@ PHP                                                                        NEWS
     (Kamil Tekiela)
   . Fixed bug #63185 (nextRowset() ignores MySQL errors with native prepared
     statements). (Nikita)
+  . Fixed bug #78152 (PDO::exec() - Bad error handling with multiple commands).
+    (Nikita)
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)

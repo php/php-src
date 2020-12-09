@@ -267,7 +267,8 @@ static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 			MYSQL_RES* result;
 			while (mysql_more_results(H->server)) {
 				if (mysql_next_result(H->server)) {
-					PDO_DBG_RETURN(1);
+					pdo_mysql_error(dbh);
+					PDO_DBG_RETURN(-1);
 				}
 				result = mysql_store_result(H->server);
 				if (result) {
