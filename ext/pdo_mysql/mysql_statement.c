@@ -31,11 +31,9 @@
 #ifdef PDO_USE_MYSQLND
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt)
 #	define pdo_free_bound_result(res) zval_ptr_dtor(res.zv)
-#	define pdo_mysql_stmt_close(stmt) mysqlnd_stmt_close(stmt, 0)
 #else
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt)
 #	define pdo_free_bound_result(res) efree(res.buffer)
-#	define pdo_mysql_stmt_close(stmt) mysql_stmt_close(stmt)
 #endif
 
 
@@ -56,7 +54,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 		S->einfo.errmsg = NULL;
 	}
 	if (S->stmt) {
-		pdo_mysql_stmt_close(S->stmt);
+		mysql_stmt_close(S->stmt);
 		S->stmt = NULL;
 	}
 
@@ -363,7 +361,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 	}
 
 #ifdef PDO_USE_MYSQLND
-	if (!H->emulate_prepare) {
+	if (S->stmt) {
 		if (mysqlnd_stmt_next_result(S->stmt)) {
 			pdo_mysql_error_stmt(stmt);
 			S->done = 1;
