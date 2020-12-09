@@ -154,6 +154,7 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
+#ifdef PDO_USE_MYSQLND
 static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -179,6 +180,7 @@ static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
 	pdo_mysql_stmt_set_row_count(stmt);
 	return true;
 }
+#endif
 
 #ifndef PDO_USE_MYSQLND
 static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
