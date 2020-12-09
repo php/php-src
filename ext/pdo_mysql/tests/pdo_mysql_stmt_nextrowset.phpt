@@ -57,6 +57,11 @@ if (!MySQLPDOTest::isPDOMySQLnd())
         } while ($stmt->nextRowSet());
         var_dump($stmt->nextRowSet());
 
+        echo "Skip fetchAll(): ";
+        unset($stmt);
+        $stmt = $db->query('CALL p()');
+        var_dump($stmt->nextRowSet());
+        $stmt->closeCursor();
     }
 
     try {
@@ -160,6 +165,7 @@ array(3) {
 array(0) {
 }
 bool(false)
+Skip fetchAll(): bool(true)
 array(1) {
   [0]=>
   array(1) {
@@ -211,6 +217,7 @@ array(3) {
 array(0) {
 }
 bool(false)
+Skip fetchAll(): bool(true)
 Native PS...
 array(1) {
   [0]=>
@@ -263,6 +270,7 @@ array(3) {
 array(0) {
 }
 bool(false)
+Skip fetchAll(): bool(true)
 array(1) {
   [0]=>
   array(1) {
@@ -314,4 +322,5 @@ array(3) {
 array(0) {
 }
 bool(false)
+Skip fetchAll(): bool(true)
 done!
