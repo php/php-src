@@ -36,7 +36,6 @@ enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, z
 enum_func_status mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer);
 
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt);
-static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, const unsigned int param_no);
 
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
@@ -542,7 +541,27 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 			stmt->result->conn = conn->m->get_reference(conn);
 		}
 
-		/* Update stmt->field_count as SHOW sets it to 0 at prepare */
+		/* If the field count changed, update the result_bind structure. Ideally result_bind
+		 * would only ever be created after execute, in which case the size cannot change anymore,
+		 * but at least in mysqli this does not seem enforceable. */
+		if (stmt->result_bind && conn->field_count != stmt->field_count) {
+			if (conn->field_count < stmt->field_count) {
+				/* Number of columns decreased, free bindings. */
+				for (unsigned i = conn->field_count; i < stmt->field_count; i++) {
+					zval_ptr_dtor(&stmt->result_bind[i].zv);
+				}
+			}
+			stmt->result_bind =
+				mnd_erealloc(stmt->result_bind, conn->field_count * sizeof(MYSQLND_RESULT_BIND));
+			if (conn->field_count > stmt->field_count) {
+				/* Number of columns increase, initialize new ones. */
+				for (unsigned i = stmt->field_count; i < conn->field_count; i++) {
+					ZVAL_UNDEF(&stmt->result_bind[i].zv);
+					stmt->result_bind[i].bound = false;
+				}
+			}
+		}
+
 		stmt->field_count = stmt->result->field_count = conn->field_count;
 		if (stmt->result->stored_data) {
 			stmt->result->stored_data->lengths = NULL;
@@ -1577,22 +1596,13 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 	SET_EMPTY_ERROR(conn->error_info);
 
 	if (stmt->field_count) {
-		mysqlnd_stmt_separate_one_result_bind(s, param_no);
-		/* Guaranteed is that stmt->result_bind is NULL */
 		if (!stmt->result_bind) {
 			stmt->result_bind = mnd_ecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND));
-		} else {
-			stmt->result_bind = mnd_erealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND));
 		}
-		if (!stmt->result_bind) {
-			DBG_RETURN(FAIL);
+		if (stmt->result_bind[param_no].bound) {
+			zval_ptr_dtor(&stmt->result_bind[param_no].zv);
 		}
 		ZVAL_NULL(&stmt->result_bind[param_no].zv);
-		/*
-		  Don't update is_ref !!! it's not our job
-		  Otherwise either 009.phpt or mysqli_stmt_bind_result.phpt
-		  will fail.
-		*/
 		stmt->result_bind[param_no].bound = TRUE;
 	}
 	DBG_INF("PASS");
@@ -1962,37 +1972,6 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s)
 
 	s->m->free_result_bind(s, stmt->result_bind);
 	stmt->result_bind = NULL;
-
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_stmt_separate_one_result_bind */
-static void
-mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, const unsigned int param_no)
-{
-	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
-	DBG_ENTER("mysqlnd_stmt_separate_one_result_bind");
-	if (!stmt) {
-		DBG_VOID_RETURN;
-	}
-	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u param_no=%u", stmt->stmt_id, stmt->result_bind, stmt->field_count, param_no);
-
-	if (!stmt->result_bind) {
-		DBG_VOID_RETURN;
-	}
-
-	/*
-	  Because only the bound variables can point to our internal buffers, then
-	  separate or free only them. Free is possible because the user could have
-	  lost reference.
-	*/
-	/* Let's try with no cache */
-	if (stmt->result_bind[param_no].bound == TRUE) {
-		DBG_INF_FMT("%u has refcount=%u", param_no, Z_REFCOUNTED(stmt->result_bind[param_no].zv)? Z_REFCOUNT(stmt->result_bind[param_no].zv) : 0);
-		zval_ptr_dtor(&stmt->result_bind[param_no].zv);
-	}
 
 	DBG_VOID_RETURN;
 }
