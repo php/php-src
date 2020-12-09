@@ -34,6 +34,8 @@ PHP                                                                        NEWS
     (Kamil Tekiela)
   . Fixed bug #63185 (nextRowset() ignores MySQL errors with native prepared
     statements). (Nikita)
+  . Fixed bug #78152 (PDO::exec() - Bad error handling with multiple commands).
+    (Nikita)
 
 - Phpdbg:
   . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
