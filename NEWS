@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     statements). (Nikita)
   . Fixed bug #78152 (PDO::exec() - Bad error handling with multiple commands).
     (Nikita)
+  . Fixed bug #70066 (Unexpected "Cannot execute queries while other unbuffered
+    queries"). (Nikita)
 
 - Phpdbg:
   . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
