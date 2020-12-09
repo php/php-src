@@ -222,12 +222,6 @@ case $host_alias in
   *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
     ;;
-  *darwin*)
-    if test -n "$GCC"; then
-      AX_CHECK_COMPILE_FLAG([-no-cpp-precomp],
-                            [CPPFLAGS="$CPPFLAGS -no-cpp-precomp"])
-    fi
-    ;;
   *mips*)
     CPPFLAGS="$CPPFLAGS -D_XPG_IV"
     ;;
