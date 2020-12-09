@@ -201,18 +201,17 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	}
 
 	if (mysql_stmt_prepare(S->stmt, sql, sql_len)) {
-		/* TODO: might need to pull statement specific info here? */
-		/* if the query isn't supported by the protocol, fallback to emulation */
-		if (mysql_errno(H->server) == 1295) {
-			if (nsql) {
-				efree(nsql);
-			}
-			goto fallback;
-		}
-		pdo_mysql_error(dbh);
 		if (nsql) {
 			efree(nsql);
 		}
+		/* TODO: might need to pull statement specific info here? */
+		/* if the query isn't supported by the protocol, fallback to emulation */
+		if (mysql_errno(H->server) == 1295) {
+			mysql_stmt_close(S->stmt);
+			S->stmt = NULL;
+			goto fallback;
+		}
+		pdo_mysql_error(dbh);
 		PDO_DBG_RETURN(0);
 	}
 	if (nsql) {

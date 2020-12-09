@@ -45,6 +45,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #66878 (Multiple rowsets not returned unless PDO statement object
     is unset()). (Nikita)
+  . Fixed bug #70066 (Unexpected "Cannot execute queries while other unbuffered
+    queries"). (Nikita)
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)

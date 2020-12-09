@@ -80,7 +80,7 @@
 #define mysql_stmt_param_count(s)		mysqlnd_stmt_param_count((s))
 #define mysql_stmt_num_rows(s)			mysqlnd_stmt_num_rows((s))
 #define mysql_stmt_insert_id(s)			mysqlnd_stmt_insert_id((s))
-#define mysql_stmt_close(s)				mysqlnd_stmt_close((s))
+#define mysql_stmt_close(s)				mysqlnd_stmt_close((s), 0)
 #define mysql_stmt_bind_param(s,b)		mysqlnd_stmt_bind_param((s), (b))
 #define mysql_stmt_bind_result(s,b)		mysqlnd_stmt_bind_result((s), (b))
 #define mysql_stmt_errno(s)				mysqlnd_stmt_errno((s))
