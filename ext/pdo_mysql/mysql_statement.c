@@ -893,9 +893,7 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 		S->result = NULL;
 	}
 	if (S->stmt) {
-		int retval;
-		retval = mysql_stmt_free_result(S->stmt);
-		PDO_DBG_RETURN(retval ? 0 : 1);
+		mysql_stmt_free_result(S->stmt);
 	}
 
 	while (mysql_more_results(S->H->server)) {
