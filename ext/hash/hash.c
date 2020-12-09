@@ -1203,7 +1203,7 @@ PHP_FUNCTION(mhash)
 	char *data, *key = NULL;
 	size_t data_len, key_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls|s", &algorithm, &data, &data_len, &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls|s!", &algorithm, &data, &data_len, &key, &key_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
