@@ -987,7 +987,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	void *context;
 	HashTable *args;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|lbh!", &algo, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|lbh", &algo, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output, &args) == FAILURE) {
 		RETURN_THROWS();
 	}
 
