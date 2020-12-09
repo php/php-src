@@ -43,6 +43,8 @@ PHP                                                                        NEWS
     statements). (Nikita)
   . Fixed bug #78152 (PDO::exec() - Bad error handling with multiple commands).
     (Nikita)
+  . Fixed bug #66878 (Multiple rowsets not returned unless PDO statement object
+    is unset()). (Nikita)
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)

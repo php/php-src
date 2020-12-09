@@ -142,6 +142,9 @@ typedef struct {
 	zend_ulong				*out_length;
 	unsigned int			params_given;
 	unsigned				max_length:1;
+	/* Whether all result sets have been fully consumed.
+	 * If this flag is not set, they need to be consumed during destruction. */
+	unsigned				done:1;
 } pdo_mysql_stmt;
 
 extern const pdo_driver_t pdo_mysql_driver;
