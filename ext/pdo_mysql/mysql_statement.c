@@ -349,6 +349,15 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 	PDO_DBG_ENTER("pdo_mysql_stmt_next_rowset");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
+	/* ensure that we free any previous unfetched results */
+	if (S->stmt) {
+		mysql_stmt_free_result(S->stmt);
+	}
+	if (S->result) {
+		mysql_free_result(S->result);
+		S->result = NULL;
+	}
+
 #ifdef PDO_USE_MYSQLND
 	if (!H->emulate_prepare) {
 		if (!mysqlnd_stmt_more_results(S->stmt)) {
@@ -359,11 +368,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 			PDO_DBG_RETURN(0);
 		}
 
-		/* TODO - this code is stolen from execute() - see above */
-		if (S->result) {
-			mysql_free_result(S->result);
-			S->result = NULL;
-		}
 		{
 			/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
 			int i;
@@ -393,17 +397,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 		PDO_DBG_RETURN(1);
 	}
 #endif
-
-/* ensure that we free any previous unfetched results */
-#ifndef PDO_USE_MYSQLND
-	if (S->stmt) {
-		mysql_stmt_free_result(S->stmt);
-	}
-#endif
-	if (S->result) {
-		mysql_free_result(S->result);
-		S->result = NULL;
-	}
 
 	if (!mysql_more_results(H->server)) {
 		/* No more results */
