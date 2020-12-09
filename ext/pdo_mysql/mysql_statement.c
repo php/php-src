@@ -154,6 +154,32 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
+static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
+	pdo_mysql_stmt *S = stmt->driver_data;
+	pdo_mysql_db_handle *H = S->H;
+
+	/* For SHOW/DESCRIBE and others the column/field count is not available before execute. */
+	php_pdo_stmt_set_column_count(stmt, mysql_stmt_field_count(S->stmt));
+	for (int i = 0; i < stmt->column_count; i++) {
+		mysqlnd_stmt_bind_one_result(S->stmt, i);
+	}
+
+	S->result = mysqlnd_stmt_result_metadata(S->stmt);
+	if (S->result) {
+		S->fields = mysql_fetch_fields(S->result);
+		/* If buffered, pre-fetch all the data */
+		if (H->buffered) {
+			if (mysql_stmt_store_result(S->stmt)) {
+				pdo_mysql_error_stmt(stmt);
+				return false;
+			}
+		}
+	}
+
+	pdo_mysql_stmt_set_row_count(stmt);
+	return true;
+}
+
 #ifndef PDO_USE_MYSQLND
 static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 {
@@ -272,8 +298,6 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
-	pdo_mysql_db_handle *H = S->H;
-	int i;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute_prepared_mysqlnd");
 
@@ -288,26 +312,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 		S->result = NULL;
 	}
 
-	/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
-	php_pdo_stmt_set_column_count(stmt, mysql_stmt_field_count(S->stmt));
-	for (i = 0; i < stmt->column_count; i++) {
-		mysqlnd_stmt_bind_one_result(S->stmt, i);
-	}
-
-	S->result = mysqlnd_stmt_result_metadata(S->stmt);
-	if (S->result) {
-		S->fields = mysql_fetch_fields(S->result);
-		/* if buffered, pre-fetch all the data */
-		if (H->buffered) {
-			if (mysql_stmt_store_result(S->stmt)) {
-				pdo_mysql_error_stmt(stmt);
-				PDO_DBG_RETURN(0);
-			}
-		}
-	}
-
-	pdo_mysql_stmt_set_row_count(stmt);
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
 }
 /* }}} */
 #endif
@@ -364,30 +369,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 			PDO_DBG_RETURN(0);
 		}
 
-		{
-			/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
-			int i;
-
-			php_pdo_stmt_set_column_count(stmt, mysql_stmt_field_count(S->stmt));
-			for (i = 0; i < stmt->column_count; i++) {
-				mysqlnd_stmt_bind_one_result(S->stmt, i);
-			}
-		}
-
-		S->result = mysqlnd_stmt_result_metadata(S->stmt);
-		if (S->result) {
-			S->fields = mysql_fetch_fields(S->result);
-
-			/* if buffered, pre-fetch all the data */
-			if (H->buffered) {
-				if (mysql_stmt_store_result(S->stmt)) {
-					pdo_mysql_error_stmt(stmt);
-					PDO_DBG_RETURN(0);
-				}
-			}
-		}
-		pdo_mysql_stmt_set_row_count(stmt);
-		PDO_DBG_RETURN(1);
+		PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
 	}
 #endif
 
