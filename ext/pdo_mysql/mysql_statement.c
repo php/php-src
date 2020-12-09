@@ -84,7 +84,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	}
 #endif
 
-	if (!Z_ISUNDEF(stmt->database_object_handle)
+	if (!S->done && !Z_ISUNDEF(stmt->database_object_handle)
 		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
 		&& (!(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED))) {
 		while (mysql_more_results(S->H->server)) {
@@ -326,6 +326,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
+	S->done = 0;
 	if (S->stmt) {
 		PDO_DBG_RETURN(pdo_mysql_stmt_execute_prepared(stmt));
 	}
@@ -365,6 +366,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 	if (!H->emulate_prepare) {
 		if (mysqlnd_stmt_next_result(S->stmt)) {
 			pdo_mysql_error_stmt(stmt);
+			S->done = 1;
 			PDO_DBG_RETURN(0);
 		}
 
@@ -374,6 +376,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 
 	if (mysql_next_result(H->server)) {
 		pdo_mysql_error_stmt(stmt);
+		S->done = 1;
 		PDO_DBG_RETURN(0);
 	} else {
 		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
@@ -842,6 +845,8 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_cursor_closer");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
+
+	S->done = 1;
 	if (S->result) {
 		mysql_free_result(S->result);
 		S->result = NULL;
