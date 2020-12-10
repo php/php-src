@@ -52,6 +52,8 @@ PHP                                                                        NEWS
   . Fixed bug #76815 (PDOStatement cannot be GCed/closeCursor-ed when a
     PROCEDURE resultset SIGNAL). (Nikita)
   . Fixed bug #79872 (Can't execute query with pending result sets). (Nikita)
+  . Fixed bug #79131 (PDO does not throw an exception when parameter values are
+    missing). (Nikita)
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)

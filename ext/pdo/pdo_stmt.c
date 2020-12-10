@@ -341,8 +341,8 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	 * a reference to param, as it resides in transient storage only
 	 * at this time. */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
-				)) {
+		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE)) {
+			PDO_HANDLE_STMT_ERR();
 			if (param->name) {
 				zend_string_release_ex(param->name, 0);
 				param->name = NULL;
@@ -367,8 +367,8 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC
-					)) {
+		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC)) {
+			PDO_HANDLE_STMT_ERR();
 			/* undo storage allocation; the hash will free the parameter
 			 * name if required */
 			if (pparam->name) {
@@ -479,6 +479,7 @@ PHP_METHOD(PDOStatement, execute)
 		}
 
 		if (ret && !dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_POST)) {
+			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
 
