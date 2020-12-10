@@ -282,8 +282,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							ZEND_ATOL(param->paramno, namevar + 1);
 							param->paramno--;
 						} else {
-							pdo_pgsql_error_stmt_msg(
-								stmt, PGRES_FATAL_ERROR, "HY093", ZSTR_VAL(param->name));
+							pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", ZSTR_VAL(param->name));
 							return 0;
 						}
 					}
@@ -295,8 +294,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					return 1;
 				}
 				if (!zend_hash_index_exists(stmt->bound_param_map, param->paramno)) {
-					pdo_pgsql_error_stmt_msg(
-						stmt, PGRES_FATAL_ERROR, "HY093", "parameter was not defined");
+					pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", "parameter was not defined");
 					return 0;
 				}
 			case PDO_PARAM_EVT_EXEC_POST:

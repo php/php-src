@@ -155,7 +155,8 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		if (dbh->methods->fetch_err(dbh, stmt, &info)) {
 			zval *item;
 
-			if ((item = zend_hash_index_find(Z_ARRVAL(info), 1)) != NULL) {
+			if ((item = zend_hash_index_find(Z_ARRVAL(info), 1)) != NULL
+					&& Z_TYPE_P(item) == IS_LONG) {
 				native_code = Z_LVAL_P(item);
 			}
 
@@ -165,8 +166,10 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		}
 	}
 
-	if (supp) {
+	if (native_code && supp) {
 		message = strpprintf(0, "SQLSTATE[%s]: %s: " ZEND_LONG_FMT " %s", *pdo_err, msg, native_code, supp);
+	} else if (supp) {
+		message = strpprintf(0, "SQLSTATE[%s]: %s: %s", *pdo_err, msg, supp);
 	} else {
 		message = strpprintf(0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}

@@ -114,6 +114,10 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
+	} else {
+		add_next_index_null(info);
+	}
+	if (einfo->errmsg) {
 		add_next_index_string(info, einfo->errmsg);
 	}
 

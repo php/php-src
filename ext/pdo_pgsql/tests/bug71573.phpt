@@ -18,4 +18,4 @@ $statement->execute([ 'test', 'test', 'test' ]);
 
 ?>
 --EXPECTF--
-Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: 7 parameter was not defined in %s on line %d
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: parameter was not defined in %s on line %d
