@@ -1357,6 +1357,13 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, row_packet.server_status);
 	}
 
+	if (ret == FAIL) {
+		/* Error packets do not contain server status information. However, we know that after
+		 * an error there will be no further result sets. */
+		UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status,
+			UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & ~SERVER_MORE_RESULTS_EXISTS);
+	}
+
 	/* save some memory */
 	if (free_rows) {
 		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */

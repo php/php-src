@@ -49,6 +49,8 @@ PHP                                                                        NEWS
     queries"). (Nikita)
   . Fixed bug #71145 (Multiple statements in init command triggers unbuffered
     query error). (Nikita)
+  . Fixed bug #76815 (PDOStatement cannot be GCed/closeCursor-ed when a
+    PROCEDURE resultset SIGNAL). (Nikita)
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)
