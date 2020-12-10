@@ -81,13 +81,13 @@ Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %
 )
 array(0) {
 }
-array(1) {
-  [0]=>
-  array(2) {
-    ["id"]=>
-    string(3) "101"
-    ["label"]=>
-    string(12) ":placeholder"
-  }
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
+[005] Execute has failed, 'HY093' array (
+  0 => 'HY093',
+  1 => NULL,
+  2 => NULL,
+)
+array(0) {
 }
 done!

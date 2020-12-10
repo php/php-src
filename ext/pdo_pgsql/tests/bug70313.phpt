@@ -19,7 +19,7 @@ try {
 
     $stmt->execute([1]);
 } catch (PDOException $e) {
-    var_dump($e->getCode());
+    echo $e->getMessage(), "\n";
 }
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
@@ -28,10 +28,10 @@ try {
 
     $stmt->execute([1]);
 } catch (PDOException $e) {
-    var_dump($e->getCode());
+    echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECT--
-string(5) "42601"
-string(5) "42601"
+--EXPECTF--
+SQLSTATE[42601]: Syntax error: %A
+SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens

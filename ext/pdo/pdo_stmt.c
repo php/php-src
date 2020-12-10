@@ -458,7 +458,6 @@ PHP_METHOD(PDOStatement, execute)
 			ret = 1;
 		} else if (ret == -1) {
 			/* something broke */
-			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
 	} else if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE)) {
