@@ -83,10 +83,12 @@ foreach ($queries as $k => $query) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 1
 00000 -  - 
 -------------------------------------------------------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [1] Query: [[SELECT 1 FROM DUAL WHERE 1 = '?\'\'']]
 
 00000 -  - 
@@ -123,18 +125,24 @@ O'\0
 1
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [5] Query: [[SELECT 'a', 'b\'' FROM DUAL WHERE '''' LIKE '\'' AND 1]]
-a - b'
+
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [6] Query: [[SELECT 'a''', '\'b\'' FROM DUAL WHERE '''' LIKE '\'' AND 1]]
-a' - 'b'
+
 00000 -  - 
 --------
 [7] Query: [[SELECT UPPER(:id) FROM DUAL WHERE '1']]
 1
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [8] Query: [[SELECT 1 FROM DUAL WHERE '\'']]
 
 00000 -  - 
@@ -147,13 +155,16 @@ a' - 'b'
 
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [11] Query: [[SELECT 1 FROM DUAL WHERE '\'' = '''']]
-1
+
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [12] Query: [[SELECT '\n' '1 FROM DUAL WHERE '''' and :id']]
 
-1 FROM DUAL WHERE '' and :id
 00000 -  - 
 --------
 [13] Query: [[SELECT 1 'FROM DUAL WHERE :id AND '''' = '''' OR 1 = 1 AND ':id]]
