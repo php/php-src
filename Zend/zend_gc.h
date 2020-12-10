@@ -55,8 +55,6 @@ void gc_reset(void);
 size_t zend_gc_globals_size(void);
 #endif
 
-END_EXTERN_C()
-
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
 		if (GC_TYPE_INFO(_p) & GC_INFO_MASK) { \
@@ -121,5 +119,7 @@ static zend_always_inline void zend_get_gc_buffer_use(
 	*table = gc_buffer->start;
 	*n = gc_buffer->cur - gc_buffer->start;
 }
+
+END_EXTERN_C()
 
 #endif /* ZEND_GC_H */
