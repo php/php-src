@@ -454,12 +454,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 					ret = FAIL;
 					break;
 				}
-				if (conn->last_query_type == QUERY_SELECT) {
-					MYSQLND_RES * result = conn->m->use_result(conn, 0);
-					if (result) {
-						result->m.free_result(result, TRUE);
+				do {
+					if (conn->last_query_type == QUERY_SELECT) {
+						MYSQLND_RES * result = conn->m->use_result(conn, 0);
+						if (result) {
+							result->m.free_result(result, TRUE);
+						}
 					}
-				}
+				} while (conn->m->next_result(conn) != FAIL);
 			}
 		}
 	}
