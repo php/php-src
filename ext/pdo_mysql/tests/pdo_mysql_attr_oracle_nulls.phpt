@@ -40,7 +40,7 @@ MySQLPDOTest::skip();
     $db->setAttribute(PDO::ATTR_ORACLE_NULLS, 1);
     $stmt = $db->query('SELECT VERSION() as _version');
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ((int)substr($row['_version'], 0, 1) >= 5)
+    if ((int)strtok($row['_version'], '.') >= 5)
         $have_procedures = true;
     else
         $have_procedures = false;
