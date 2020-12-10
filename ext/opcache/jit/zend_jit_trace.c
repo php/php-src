@@ -4134,8 +4134,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+							 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+								ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 							}
 						} else {
 							CHECK_OP1_TRACE_TYPE();
@@ -4196,8 +4196,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									goto jit_failure;
 								}
 								if (opline->op1_type == IS_CV
-								 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+								 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+									ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 								}
 							} else {
 								CHECK_OP1_TRACE_TYPE();
@@ -4268,8 +4268,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									goto jit_failure;
 								}
 								if (opline->op1_type == IS_CV
-								 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+								 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+									ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 								}
 							} else {
 								CHECK_OP1_TRACE_TYPE();
@@ -4334,8 +4334,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									goto jit_failure;
 								}
 								if (opline->op1_type == IS_CV
-								 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+								 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+									ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 								}
 							} else {
 								CHECK_OP1_TRACE_TYPE();
@@ -4357,6 +4357,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_indirect, ce, ce_is_instanceof, delayed_fetch_this, op1_ce,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
+						}
+						if ((opline+1)->op1_type == IS_CV
+						 && (ssa_op+1)->op1_def >= 0
+						 && ssa->vars[(ssa_op+1)->op1_def].alias == NO_ALIAS) {
+							ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
 						}
 						goto done;
 					case ZEND_ASSIGN_DIM:
@@ -4381,8 +4386,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+							 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+								ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 							}
 						} else {
 							CHECK_OP1_TRACE_TYPE();
@@ -4395,6 +4400,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, op1_addr, op2_info, op1_data_info,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
+						}
+						if ((opline+1)->op1_type == IS_CV
+						 && (ssa_op+1)->op1_def >= 0
+						 && ssa->vars[(ssa_op+1)->op1_def].alias == NO_ALIAS) {
+							ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
 						}
 						goto done;
 					case ZEND_ASSIGN:
@@ -4422,8 +4432,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									goto jit_failure;
 								}
 								if (opline->op1_type == IS_CV
-								 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+								 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+									ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 								}
 								if (!zend_jit_assign_to_typed_ref(&dasm_state, opline, opline->op2_type, op2_addr, 1)) {
 									goto jit_failure;
@@ -4488,6 +4498,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
+						if (opline->op2_type == IS_CV
+						 && ssa_op->op2_def >= 0
+						 && ssa->vars[ssa_op->op2_def].alias == NO_ALIAS) {
+							ssa->var_info[ssa_op->op2_def].guarded_reference = ssa->var_info[ssa_op->op2_use].guarded_reference;
+						}
 						goto done;
 					case ZEND_CAST:
 						if (opline->extended_value != op1_type) {
@@ -4517,6 +4532,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, op1_addr, op1_def_addr,
 								res_use_info, res_info, RES_REG_ADDR())) {
 							goto jit_failure;
+						}
+						if (opline->op1_type == IS_CV
+						 && ssa_op->op1_def >= 0
+						 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+							ssa->var_info[ssa_op->op1_def].guarded_reference = ssa->var_info[ssa_op->op1_use].guarded_reference;
 						}
 						goto done;
 					case ZEND_INIT_FCALL:
@@ -4566,6 +4586,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, 0)) {
 							goto jit_failure;
 						}
+						if (opline->op1_type == IS_CV
+						 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+							ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
+						}
 						goto done;
 					case ZEND_SEND_VAR:
 					case ZEND_SEND_VAR_EX:
@@ -4594,6 +4618,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_send_var(&dasm_state, opline, op_array,
 								op1_info, op1_addr, op1_def_addr)) {
 							goto jit_failure;
+						}
+						if (opline->op1_type == IS_CV
+						 && ssa_op->op1_def >= 0
+						 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+							ssa->var_info[ssa_op->op1_def].guarded_reference = ssa->var_info[ssa_op->op1_use].guarded_reference;
 						}
 						if (frame->call
 						 && frame->call->func
@@ -5096,8 +5125,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							if (opline->op1_type == IS_CV
-							 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+							 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+								ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 							}
 						} else {
 							CHECK_OP1_TRACE_TYPE();
@@ -5251,7 +5280,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 								if (opline->op1_type == IS_CV
 								 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
-									ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+									ssa->var_info[ssa_op->op1_def >= 0 ? ssa_op->op1_def : ssa_op->op1_use].guarded_reference = 1;
 								}
 							} else {
 								CHECK_OP1_TRACE_TYPE();
@@ -5288,6 +5317,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info = MAY_BE_ANY|MAY_BE_REF;
 							} else {
 								op1_info = OP1_INFO();
+							}
+							if (ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
+								ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 							}
 							if (!zend_jit_bind_global(&dasm_state, opline, op1_info)) {
 								goto jit_failure;
