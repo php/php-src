@@ -38,6 +38,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #70066 (Unexpected "Cannot execute queries while other unbuffered
     queries"). (Nikita)
+  . Fixed bug #71145 (Multiple statements in init command triggers unbuffered
+    query error). (Nikita)
 
 - Phpdbg:
   . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
