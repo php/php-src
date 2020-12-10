@@ -51,6 +51,7 @@ PHP                                                                        NEWS
     query error). (Nikita)
   . Fixed bug #76815 (PDOStatement cannot be GCed/closeCursor-ed when a
     PROCEDURE resultset SIGNAL). (Nikita)
+  . Fixed bug #79872 (Can't execute query with pending result sets). (Nikita)
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)

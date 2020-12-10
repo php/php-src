@@ -73,12 +73,20 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 
 	if (einfo->errcode) {
 		if (einfo->errcode == 2014) {
-			einfo->errmsg = pestrdup(
-				"Cannot execute queries while other unbuffered queries are active.  "
-				"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
-				"is only ever going to run against mysql, you may enable query "
-				"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
-				dbh->is_persistent);
+			if (mysql_more_results(H->server)) {
+				einfo->errmsg = pestrdup(
+					"Cannot execute queries while there are pending result sets. "
+					"Consider unsetting the previous PDOStatement or calling "
+					"PDOStatement::closeCursor()",
+					dbh->is_persistent);
+			} else {
+				einfo->errmsg = pestrdup(
+					"Cannot execute queries while other unbuffered queries are active.  "
+					"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
+					"is only ever going to run against mysql, you may enable query "
+					"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+					dbh->is_persistent);
+			}
 		} else if (einfo->errcode == 2057) {
 			einfo->errmsg = pestrdup(
 				"A stored procedure returning result sets of different size was called. "
