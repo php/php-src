@@ -161,6 +161,18 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 }
 /* }}} */
 
+static char *phar_find_eocd(char *s, size_t n)
+{
+	char *p;
+
+	for (p = s + n - 1; p >= s; p--) {
+		if (*p == 'P' && ((p - s) + sizeof(phar_zip_dir_end) <= n && !memcmp(p + 1, "K\5\6", 3))) {
+			return p;
+		}
+	}
+	return NULL;
+}
+
 /**
  * Does not check for a previously opened phar in the cache.
  *
@@ -205,57 +217,55 @@ int phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alia
 		return FAILURE;
 	}
 
-	while ((p=(char *) memchr(p + 1, 'P', (size_t) (size - (p + 1 - buf)))) != NULL) {
-		if ((p - buf) + sizeof(locator) <= (size_t)size && !memcmp(p + 1, "K\5\6", 3)) {
-			memcpy((void *)&locator, (void *) p, sizeof(locator));
-			if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
-				/* split archives not handled */
-				php_stream_close(fp);
-				if (error) {
-					spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
-				}
-				return FAILURE;
+	if ((p = phar_find_eocd(buf, (size_t) size)) != NULL) {
+		memcpy((void *)&locator, (void *) p, sizeof(locator));
+		if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
+			/* split archives not handled */
+			php_stream_close(fp);
+			if (error) {
+				spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
 			}
-
-			if (PHAR_GET_16(locator.counthere) != PHAR_GET_16(locator.count)) {
-				if (error) {
-					spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
-				}
-				php_stream_close(fp);
-				return FAILURE;
-			}
-
-			mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
-			mydata->is_persistent = PHAR_G(persist);
-
-			/* read in archive comment, if any */
-			if (PHAR_GET_16(locator.comment_len)) {
-
-				metadata = p + sizeof(locator);
-
-				if (PHAR_GET_16(locator.comment_len) != size - (metadata - buf)) {
-					if (error) {
-						spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
-					}
-					php_stream_close(fp);
-					pefree(mydata, mydata->is_persistent);
-					return FAILURE;
-				}
-
-				mydata->metadata_len = PHAR_GET_16(locator.comment_len);
-
-				if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len)) == FAILURE) {
-					mydata->metadata_len = 0;
-					/* if not valid serialized data, it is a regular string */
-
-					ZVAL_NEW_STR(&mydata->metadata, zend_string_init(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
-				}
-			} else {
-				ZVAL_UNDEF(&mydata->metadata);
-			}
-
-			goto foundit;
+			return FAILURE;
 		}
+
+		if (PHAR_GET_16(locator.counthere) != PHAR_GET_16(locator.count)) {
+			if (error) {
+				spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
+			}
+			php_stream_close(fp);
+			return FAILURE;
+		}
+
+		mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
+		mydata->is_persistent = PHAR_G(persist);
+
+		/* read in archive comment, if any */
+		if (PHAR_GET_16(locator.comment_len)) {
+
+			metadata = p + sizeof(locator);
+
+			if (PHAR_GET_16(locator.comment_len) != size - (metadata - buf)) {
+				if (error) {
+					spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
+				}
+				php_stream_close(fp);
+				pefree(mydata, mydata->is_persistent);
+				return FAILURE;
+			}
+
+			mydata->metadata_len = PHAR_GET_16(locator.comment_len);
+
+			if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len)) == FAILURE) {
+				mydata->metadata_len = 0;
+				/* if not valid serialized data, it is a regular string */
+
+				ZVAL_NEW_STR(&mydata->metadata, zend_string_init(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
+			}
+		} else {
+			ZVAL_UNDEF(&mydata->metadata);
+		}
+
+		goto foundit;
 	}
 
 	php_stream_close(fp);
