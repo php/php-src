@@ -508,13 +508,11 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
 			ZVAL_LONG(return_value, H->max_buffer_size);
 			break;
-#else
-		case PDO_MYSQL_ATTR_LOCAL_INFILE:
-			ZVAL_BOOL(
-				return_value,
-				(H->server->data->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES);
-			break;
 #endif
+
+		case PDO_MYSQL_ATTR_LOCAL_INFILE:
+			ZVAL_BOOL(return_value, H->local_infile);
+			break;
 
 		default:
 			PDO_DBG_RETURN(0);
@@ -709,18 +707,15 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			goto cleanup;
 		}
 
-#if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
-		unsigned int local_infile = (unsigned int) pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
-# ifndef PDO_USE_MYSQLND
-		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
-			local_infile = 0;
-		}
-# endif
-		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
-			pdo_mysql_error(dbh);
-			goto cleanup;
-		}
+		if (pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0)) {
+			H->local_infile = 1;
+#ifndef PDO_USE_MYSQLND
+			if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
+				H->local_infile = 0;
+			}
 #endif
+		}
+
 #ifdef MYSQL_OPT_RECONNECT
 		/* since 5.0.3, the default for this option is 0 if not specified.
 		 * we want the old behaviour
@@ -824,15 +819,13 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			}
 		}
 #endif
-	} else {
-#if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
-		// in case there are no driver options disable 'local infile' explicitly
-		unsigned int local_infile = 0;
-		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
-			pdo_mysql_error(dbh);
-			goto cleanup;
-		}
-#endif
+	}
+
+	/* Always explicitly set the LOCAL_INFILE option. */
+	unsigned int local_infile = H->local_infile;
+	if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
+		pdo_mysql_error(dbh);
+		goto cleanup;
 	}
 
 	if (vars[0].optval && mysql_options(H->server, MYSQL_SET_CHARSET_NAME, vars[0].optval)) {
