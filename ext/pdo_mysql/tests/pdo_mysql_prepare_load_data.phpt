@@ -65,52 +65,37 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
     $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
     MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
-    /* affected rows related */
-    try {
+    exec_and_count(2, $db, 'DROP TABLE IF EXISTS test', 0);
+    exec_and_count(3, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
 
-        exec_and_count(2, $db, 'DROP TABLE IF EXISTS test', 0);
-        exec_and_count(3, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
-
-        $stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
-        if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
-            $filename = $row['value'] . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
-        } else {
-            $filename =  MySQLPDOTest::getTempDir() . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
-        }
-
-        $fp = fopen($filename, "w");
-        fwrite($fp, "1;foo\n");
-        fwrite($fp, "2;bar");
-        fclose($fp);
-
-        // This should fail, the PS protocol should not support it.
-        // mysqlnd will give 2014 as a follow-up of the fallback logic
-        // libmysql will give a little more precise 2030 error code
-        // However, you get an error and the big question is what happens to the line
-        $stmt = $db->prepare(sprintf("LOAD DATA INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename)));
-        if (!$stmt->execute()) {
-            printf("[004] [%d] %s\n", $stmt->errorCode(), var_export($stmt->errorInfo(), true));
-        }
-
-        // Check the line
-        $stmt = $db->query("SELECT 1 as 'one'");
-        if ($stmt->errorCode() != '0000') {
-            printf("[005] [%d] %s\n", $stmt->errorCode(), var_export($stmt->errorInfo(), true));
-        } else {
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (!isset($rows[0]['one']) || $rows[0]['one'] != 1)
-                printf("[006] [%d] %s\n",  $stmt->errorCode(), var_export($stmt->errorInfo(), true));
-        }
-
-        unlink($filename);
-
-    } catch (PDOException $e) {
-        printf("[001] %s, [%s] %s (%s)\n",
-            $e->getMessage(),
-            $db->errorCode(),
-            implode(' ', $db->errorInfo()),
-            (isset($stmt)) ? implode(' ', $stmt->errorInfo()) : 'N/A');
+    $stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
+    if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
+        $filename = $row['value'] . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
+    } else {
+        $filename =  MySQLPDOTest::getTempDir() . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
     }
+
+    $fp = fopen($filename, "w");
+    fwrite($fp, "1;foo\n");
+    fwrite($fp, "2;bar");
+    fclose($fp);
+
+    $stmt = $db->prepare(sprintf("LOAD DATA INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename)));
+    if (!$stmt->execute()) {
+        printf("[004] [%d] %s\n", $stmt->errorCode(), var_export($stmt->errorInfo(), true));
+    }
+
+    // Check the line
+    $stmt = $db->query("SELECT 1 as 'one'");
+    if ($stmt->errorCode() != '0000') {
+        printf("[005] [%d] %s\n", $stmt->errorCode(), var_export($stmt->errorInfo(), true));
+    } else {
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!isset($rows[0]['one']) || $rows[0]['one'] != 1)
+            printf("[006] [%d] %s\n",  $stmt->errorCode(), var_export($stmt->errorInfo(), true));
+    }
+
+    unlink($filename);
 
     print "done!";
 ?>
@@ -120,10 +105,4 @@ require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
-Warning: PDOStatement::execute(): SQLSTATE[HY000]: General error: %s in %s on line %d
-[004] [0] array (
-  0 => 'HY000',
-  1 => %d,
-  2 => %s,
-)
 done!
