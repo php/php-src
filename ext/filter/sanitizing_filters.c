@@ -168,7 +168,6 @@ static void filter_map_apply(zval *value, filter_map *map)
 /* {{{ php_filter_string */
 void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 {
-	size_t new_len;
 	unsigned char enc[256] = {0};
 	zend_string* new_string;
 
@@ -196,10 +195,10 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	php_filter_encode_html(value, enc);
 
 	/* strip tags, implicitly also removes \0 chars */
-	new_string = php_strip_tags_ex(Z_STR(value), Z_STRLEN_P(value), NULL, 0, 1);
+	new_string = php_strip_tags_ex(Z_STR_P(value), Z_STRLEN_P(value), NULL, 0, 1);
 	Z_STRLEN_P(value) = ZSTR_LEN(new_string);
 
-	if (new_len == 0) {
+	if (ZSTR_LEN(new_string) == 0) {
 		zval_ptr_dtor(value);
 		if (flags & FILTER_FLAG_EMPTY_STRING_NULL) {
 			ZVAL_NULL(value);
