@@ -341,30 +341,29 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
 	/* ensure that we free any previous unfetched results */
-	if (S->stmt) {
-		mysql_stmt_free_result(S->stmt);
-	}
 	pdo_mysql_free_result(S);
 
-#ifdef PDO_USE_MYSQLND
 	if (S->stmt) {
-		if (mysqlnd_stmt_next_result(S->stmt)) {
+		mysql_stmt_free_result(S->stmt);
+		if (mysql_stmt_next_result(S->stmt)) {
 			pdo_mysql_error_stmt(stmt);
 			S->done = 1;
 			PDO_DBG_RETURN(0);
 		}
+	} else {
+		if (mysql_next_result(H->server)) {
+			pdo_mysql_error_stmt(stmt);
+			S->done = 1;
+			PDO_DBG_RETURN(0);
+		}
+	}
 
+#ifdef PDO_USE_MYSQLND
+	if (S->stmt) {
 		PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
 	}
 #endif
-
-	if (mysql_next_result(H->server)) {
-		pdo_mysql_error_stmt(stmt);
-		S->done = 1;
-		PDO_DBG_RETURN(0);
-	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
-	}
+	PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 }
 /* }}} */
 
