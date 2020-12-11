@@ -64,49 +64,42 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
     MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
     /* affected rows related */
-    try {
 
-        exec_and_count(2, $db, 'DROP TABLE IF EXISTS test', 0);
-        exec_and_count(3, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
+    exec_and_count(2, $db, 'DROP TABLE IF EXISTS test', 0);
+    exec_and_count(3, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
 
-        $stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
-        if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
-            $filename = $row['value'] . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
-        } else {
-            $filename =  MySQLPDOTest::getTempDir() . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
-        }
+    $stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
+    if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
+        $filename = $row['value'] . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
+    } else {
+        $filename =  MySQLPDOTest::getTempDir() . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
+    }
 
-        $fp = fopen($filename, "w");
-        fwrite($fp, "1;foo\n");
-        fwrite($fp, "2;bar");
-        fclose($fp);
+    $fp = fopen($filename, "w");
+    fwrite($fp, "1;foo\n");
+    fwrite($fp, "2;bar");
+    fclose($fp);
 
-        $sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename));
+    $sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename));
 
-        if (exec_and_count(4, $db, $sql, 2)) {
+    if (exec_and_count(4, $db, $sql, 2)) {
 
-            $stmt = $db->query('SELECT id, col1 FROM test ORDER BY id ASC');
-            $expected = array(array("id" => 1, "col1" => "foo"), array("id" => 2, "col1" => "bar"));
-            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($expected as $offset => $exp) {
-                foreach ($exp as $key => $value) {
-                    if ($ret[$offset][$key] != $value) {
-                        printf("Results seem wrong, check manually\n");
-                        var_dump($ret);
-                        var_dump($expected);
-                        break 2;
-                    }
+        $stmt = $db->query('SELECT id, col1 FROM test ORDER BY id ASC');
+        $expected = array(array("id" => 1, "col1" => "foo"), array("id" => 2, "col1" => "bar"));
+        $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($expected as $offset => $exp) {
+            foreach ($exp as $key => $value) {
+                if ($ret[$offset][$key] != $value) {
+                    printf("Results seem wrong, check manually\n");
+                    var_dump($ret);
+                    var_dump($expected);
+                    break 2;
                 }
             }
         }
-
-        unlink($filename);
-
-    } catch (PDOException $e) {
-        printf("[001] %s, [%s] %s\n",
-            $e->getMessage(),
-            $db->errorCode(), implode(' ', $db->errorInfo()));
     }
+
+    unlink($filename);
 
     print "done!";
 ?>
