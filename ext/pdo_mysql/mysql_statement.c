@@ -158,11 +158,11 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-#ifdef PDO_USE_MYSQLND
 static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 
+#ifdef PDO_USE_MYSQLND
 	/* For SHOW/DESCRIBE and others the column/field count is not available before execute. */
 	php_pdo_stmt_set_column_count(stmt, mysql_stmt_field_count(S->stmt));
 	for (int i = 0; i < stmt->column_count; i++) {
@@ -180,17 +180,90 @@ static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
 			}
 		}
 	}
+#else
+	/* figure out the result set format, if any */
+	S->result = mysql_stmt_result_metadata(S->stmt);
+	if (S->result) {
+		int calc_max_length = H->buffered && S->max_length == 1;
+		S->fields = mysql_fetch_fields(S->result);
+
+		php_pdo_stmt_set_column_count(stmt, (int)mysql_num_fields(S->result));
+		S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
+		S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
+		S->out_length = ecalloc(stmt->column_count, sizeof(zend_ulong));
+
+		/* summon memory to hold the row */
+		for (int i = 0; i < stmt->column_count; i++) {
+			if (calc_max_length && S->fields[i].type == FIELD_TYPE_BLOB) {
+				my_bool on = 1;
+				mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
+				calc_max_length = 0;
+			}
+			switch (S->fields[i].type) {
+				case FIELD_TYPE_INT24:
+					S->bound_result[i].buffer_length = MAX_MEDIUMINT_WIDTH + 1;
+					break;
+				case FIELD_TYPE_LONG:
+					S->bound_result[i].buffer_length = MAX_INT_WIDTH + 1;
+					break;
+				case FIELD_TYPE_LONGLONG:
+					S->bound_result[i].buffer_length = MAX_BIGINT_WIDTH + 1;
+					break;
+				case FIELD_TYPE_TINY:
+					S->bound_result[i].buffer_length = MAX_TINYINT_WIDTH + 1;
+					break;
+				case FIELD_TYPE_SHORT:
+					S->bound_result[i].buffer_length = MAX_SMALLINT_WIDTH + 1;
+					break;
+				default:
+					S->bound_result[i].buffer_length =
+						S->fields[i].max_length? S->fields[i].max_length:
+						S->fields[i].length;
+					/* work-around for longtext and alike */
+					if (S->bound_result[i].buffer_length > H->max_buffer_size) {
+						S->bound_result[i].buffer_length = H->max_buffer_size;
+					}
+			}
+
+			/* there are cases where the length reported by mysql is too short.
+			 * eg: when describing a table that contains an enum column. Since
+			 * we have no way of knowing the true length either, we'll bump up
+			 * our buffer size to a reasonable size, just in case */
+			if (S->fields[i].max_length == 0 && S->bound_result[i].buffer_length < 128 && MYSQL_TYPE_VAR_STRING) {
+				S->bound_result[i].buffer_length = 128;
+			}
+
+			S->out_length[i] = 0;
+
+			S->bound_result[i].buffer = emalloc(S->bound_result[i].buffer_length);
+			S->bound_result[i].is_null = &S->out_null[i];
+			S->bound_result[i].length = &S->out_length[i];
+			S->bound_result[i].buffer_type = MYSQL_TYPE_STRING;
+		}
+
+		if (mysql_stmt_bind_result(S->stmt, S->bound_result)) {
+			pdo_mysql_error_stmt(stmt);
+			PDO_DBG_RETURN(0);
+		}
+
+		/* if buffered, pre-fetch all the data */
+		if (H->buffered) {
+			if (mysql_stmt_store_result(S->stmt)) {
+				pdo_mysql_error_stmt(stmt);
+				PDO_DBG_RETURN(0);
+			}
+		}
+	}
+#endif
 
 	pdo_mysql_stmt_set_row_count(stmt);
 	return true;
 }
-#endif
 
 #ifndef PDO_USE_MYSQLND
 static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
-	pdo_mysql_db_handle *H = S->H;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute_prepared_libmysql");
 
@@ -207,86 +280,7 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 		PDO_DBG_RETURN(0);
 	}
 
-	if (!S->result) {
-		int i;
-
-		/* figure out the result set format, if any */
-		S->result = mysql_stmt_result_metadata(S->stmt);
-		if (S->result) {
-			int calc_max_length = H->buffered && S->max_length == 1;
-			S->fields = mysql_fetch_fields(S->result);
-
-			php_pdo_stmt_set_column_count(stmt, (int)mysql_num_fields(S->result));
-			S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
-			S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
-			S->out_length = ecalloc(stmt->column_count, sizeof(zend_ulong));
-
-			/* summon memory to hold the row */
-			for (i = 0; i < stmt->column_count; i++) {
-				if (calc_max_length && S->fields[i].type == FIELD_TYPE_BLOB) {
-					my_bool on = 1;
-					mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
-					calc_max_length = 0;
-				}
-				switch (S->fields[i].type) {
-					case FIELD_TYPE_INT24:
-						S->bound_result[i].buffer_length = MAX_MEDIUMINT_WIDTH + 1;
-						break;
-					case FIELD_TYPE_LONG:
-						S->bound_result[i].buffer_length = MAX_INT_WIDTH + 1;
-						break;
-					case FIELD_TYPE_LONGLONG:
-						S->bound_result[i].buffer_length = MAX_BIGINT_WIDTH + 1;
-						break;
-					case FIELD_TYPE_TINY:
-						S->bound_result[i].buffer_length = MAX_TINYINT_WIDTH + 1;
-						break;
-					case FIELD_TYPE_SHORT:
-						S->bound_result[i].buffer_length = MAX_SMALLINT_WIDTH + 1;
-						break;
-					default:
-						S->bound_result[i].buffer_length =
-							S->fields[i].max_length? S->fields[i].max_length:
-							S->fields[i].length;
-						/* work-around for longtext and alike */
-						if (S->bound_result[i].buffer_length > H->max_buffer_size) {
-							S->bound_result[i].buffer_length = H->max_buffer_size;
-						}
-				}
-
-				/* there are cases where the length reported by mysql is too short.
-				 * eg: when describing a table that contains an enum column. Since
-				 * we have no way of knowing the true length either, we'll bump up
-				 * our buffer size to a reasonable size, just in case */
-				if (S->fields[i].max_length == 0 && S->bound_result[i].buffer_length < 128 && MYSQL_TYPE_VAR_STRING) {
-					S->bound_result[i].buffer_length = 128;
-				}
-
-				S->out_length[i] = 0;
-
-				S->bound_result[i].buffer = emalloc(S->bound_result[i].buffer_length);
-				S->bound_result[i].is_null = &S->out_null[i];
-				S->bound_result[i].length = &S->out_length[i];
-				S->bound_result[i].buffer_type = MYSQL_TYPE_STRING;
-			}
-
-			if (mysql_stmt_bind_result(S->stmt, S->bound_result)) {
-				pdo_mysql_error_stmt(stmt);
-				PDO_DBG_RETURN(0);
-			}
-
-			/* if buffered, pre-fetch all the data */
-			if (H->buffered) {
-				if (mysql_stmt_store_result(S->stmt)) {
-					pdo_mysql_error_stmt(stmt);
-					PDO_DBG_RETURN(0);
-				}
-			}
-		}
-	}
-
-	pdo_mysql_stmt_set_row_count(stmt);
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
 }
 /* }}} */
 #endif
@@ -349,20 +343,15 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 			S->done = 1;
 			PDO_DBG_RETURN(0);
 		}
+		PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
 	} else {
 		if (mysql_next_result(H->server)) {
 			pdo_mysql_error_stmt(stmt);
 			S->done = 1;
 			PDO_DBG_RETURN(0);
 		}
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 	}
-
-#ifdef PDO_USE_MYSQLND
-	if (S->stmt) {
-		PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
-	}
-#endif
-	PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 }
 /* }}} */
 

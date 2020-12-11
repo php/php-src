@@ -15,9 +15,6 @@ $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 50000)
     die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
         $matches[1], $matches[2], $matches[3], $version));
-
-if (!MySQLPDOTest::isPDOMySQLnd())
-    die("skip This will not work with libmysql");
 ?>
 --FILE--
 <?php
