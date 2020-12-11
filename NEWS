@@ -59,6 +59,8 @@ PHP                                                                        NEWS
   . Fixed bug #62889 (LOAD DATA INFILE broken). (Nikita)
   . Fixed bug #67004 (Executing PDOStatement::fetch() more than once prevents
     releasing resultset). (Nikita)
+  . Fixed bug #79132 (PDO re-uses parameter values from earlier calls to
+    execute()). (Nikita)
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)

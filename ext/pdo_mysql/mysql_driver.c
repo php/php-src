@@ -229,7 +229,6 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	S->num_params = mysql_stmt_param_count(S->stmt);
 
 	if (S->num_params) {
-		S->params_given = 0;
 #ifdef PDO_USE_MYSQLND
 		S->params = NULL;
 #else

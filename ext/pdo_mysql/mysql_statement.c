@@ -387,7 +387,6 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					strcpy(stmt->error_code, "HY093");
 					PDO_DBG_RETURN(0);
 				}
-				S->params_given++;
 
 #ifndef PDO_USE_MYSQLND
 				b = &S->params[param->paramno];
@@ -399,7 +398,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				PDO_DBG_RETURN(1);
 
 			case PDO_PARAM_EVT_EXEC_PRE:
-				if (S->params_given < (unsigned int) S->num_params) {
+				if (zend_hash_num_elements(stmt->bound_params) < (unsigned int) S->num_params) {
 					/* too few parameter bound */
 					PDO_DBG_ERR("too few parameters bound");
 					strcpy(stmt->error_code, "HY093");
