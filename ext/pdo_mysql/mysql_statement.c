@@ -30,13 +30,34 @@
 
 #ifdef PDO_USE_MYSQLND
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt)
-#	define pdo_free_bound_result(res) zval_ptr_dtor(res.zv)
 #else
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt)
-#	define pdo_free_bound_result(res) efree(res.buffer)
 #endif
 
 
+static void pdo_mysql_free_result(pdo_mysql_stmt *S)
+{
+	if (S->result) {
+#ifndef PDO_USE_MYSQLND
+		if (S->bound_result) {
+			/* We can't use stmt->column_count here, because it gets reset before the
+			 * next_rowset handler is called. */
+			unsigned column_count = mysql_num_fields(S->result);
+			for (unsigned i = 0; i < column_count; i++) {
+				efree(S->bound_result[i].buffer);
+			}
+
+			efree(S->bound_result);
+			efree(S->out_null);
+			efree(S->out_length);
+			S->bound_result = NULL;
+		}
+#endif
+
+		mysql_free_result(S->result);
+		S->result = NULL;
+	}
+}
 
 static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 {
@@ -44,11 +65,8 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_dtor");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
-	if (S->result) {
-		/* free the resource */
-		mysql_free_result(S->result);
-		S->result = NULL;
-	}
+
+	pdo_mysql_free_result(S);
 	if (S->einfo.errmsg) {
 		pefree(S->einfo.errmsg, stmt->dbh->is_persistent);
 		S->einfo.errmsg = NULL;
@@ -67,18 +85,6 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	}
 	if (S->in_length) {
 		efree(S->in_length);
-	}
-
-	if (S->bound_result)
-	{
-		int i;
-		for (i = 0; i < stmt->column_count; i++) {
-			pdo_free_bound_result(S->bound_result[i]);
-		}
-
-		efree(S->bound_result);
-		efree(S->out_null);
-		efree(S->out_length);
 	}
 #endif
 
@@ -209,15 +215,6 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 		if (S->result) {
 			int calc_max_length = H->buffered && S->max_length == 1;
 			S->fields = mysql_fetch_fields(S->result);
-			if (S->bound_result) {
-				int i;
-				for (i = 0; i < stmt->column_count; i++) {
-					efree(S->bound_result[i].buffer);
-				}
-				efree(S->bound_result);
-				efree(S->out_null);
-				efree(S->out_length);
-			}
 
 			php_pdo_stmt_set_column_count(stmt, (int)mysql_num_fields(S->result));
 			S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
@@ -306,12 +303,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 		PDO_DBG_RETURN(0);
 	}
 
-	if (S->result) {
-		/* TODO: add a test to check if we really have zvals here... */
-		mysql_free_result(S->result);
-		S->result = NULL;
-	}
-
+	pdo_mysql_free_result(S);
 	PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
 }
 /* }}} */
@@ -330,10 +322,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	/* ensure that we free any previous unfetched results */
-	if (S->result) {
-		mysql_free_result(S->result);
-		S->result = NULL;
-	}
+	pdo_mysql_free_result(S);
 
 	if (mysql_real_query(H->server, stmt->active_query_string, stmt->active_query_stringlen) != 0) {
 		pdo_mysql_error_stmt(stmt);
@@ -355,10 +344,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 	if (S->stmt) {
 		mysql_stmt_free_result(S->stmt);
 	}
-	if (S->result) {
-		mysql_free_result(S->result);
-		S->result = NULL;
-	}
+	pdo_mysql_free_result(S);
 
 #ifdef PDO_USE_MYSQLND
 	if (S->stmt) {
@@ -845,10 +831,7 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
 	S->done = 1;
-	if (S->result) {
-		mysql_free_result(S->result);
-		S->result = NULL;
-	}
+	pdo_mysql_free_result(S);
 	if (S->stmt) {
 		mysql_stmt_free_result(S->stmt);
 	}
