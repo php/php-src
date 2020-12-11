@@ -303,7 +303,6 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 		PDO_DBG_RETURN(0);
 	}
 
-	pdo_mysql_free_result(S);
 	PDO_DBG_RETURN(pdo_mysql_stmt_after_execute_prepared(stmt));
 }
 /* }}} */
@@ -316,13 +315,13 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
+	/* ensure that we free any previous unfetched results */
+	pdo_mysql_free_result(S);
 	S->done = 0;
+
 	if (S->stmt) {
 		PDO_DBG_RETURN(pdo_mysql_stmt_execute_prepared(stmt));
 	}
-
-	/* ensure that we free any previous unfetched results */
-	pdo_mysql_free_result(S);
 
 	if (mysql_real_query(H->server, stmt->active_query_string, stmt->active_query_stringlen) != 0) {
 		pdo_mysql_error_stmt(stmt);
