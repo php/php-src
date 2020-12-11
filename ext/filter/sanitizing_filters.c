@@ -196,7 +196,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	php_filter_encode_html(value, enc);
 
 	/* strip tags, implicitly also removes \0 chars */
-	new_string = php_strip_tags_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, 0, 1);
+	new_string = php_strip_tags_ex(Z_STR(value), Z_STRLEN_P(value), NULL, 0, 1);
 	Z_STRLEN_P(value) = ZSTR_LEN(new_string);
 
 	if (new_len == 0) {
