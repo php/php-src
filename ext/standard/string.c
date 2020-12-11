@@ -4535,6 +4535,7 @@ PHP_FUNCTION(strip_tags)
 	const char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
 	smart_str tags_ss = {0};
+	zend_string *stripped_tag_buf;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
@@ -4564,9 +4565,11 @@ PHP_FUNCTION(strip_tags)
 	}
 
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-	ZSTR_LEN(buf) = php_strip_tags_ex(ZSTR_VAL(buf), ZSTR_LEN(str), allowed_tags, allowed_tags_len, 0);
+	stripped_tag_buf = php_strip_tags_ex(buf, ZSTR_LEN(buf), allowed_tags, allowed_tags_len, 0);
+	
+	zend_string_release(buf);
 	smart_str_free(&tags_ss);
-	RETURN_NEW_STR(buf);
+	RETURN_STR(stripped_tag_buf);
 }
 /* }}} */
 
@@ -4772,7 +4775,7 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 }
 /* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len) /* {{{ */
+PHPAPI zend_string* php_strip_tags(zend_string *rbuf, size_t len, const char *allow, size_t allow_len) /* {{{ */
 {
 	return php_strip_tags_ex(rbuf, len, allow, allow_len, 0);
 }
@@ -4780,19 +4783,19 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t a
 
 //in tag && in quote ...
 #define _PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR(CHAR) \
-			(state == 1 && in_q>1 && allow && c == CHAR) 
+	(state == 1 && in_q>1 && allow && c == CHAR) 
 
  //resize for the encode char &gt; or &lt;
-#define _PHP_STRIP_TAGS_ENCODE_CHAR(ENCODE_CHAR)  \
-			if (((tp - tbuf) + 4) >= PHP_TAG_BUF_SIZE) { \
-				pos = tp - tbuf; \
-				tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + 4 ); \
-				tp = tbuf + pos; \
-			} \
-			\
-			memcpy(tp, ENCODE_CHAR, (tp-tbuf)+4); \
-			tp+=4;
-
+#define _PHP_STRIP_TAGS_ENCODE_CHAR(ENCODE_CHAR,LEN_CHAR)  \
+	if (((tp - tbuf) + LEN_CHAR) >= PHP_TAG_BUF_SIZE) { \
+		pos = tp - tbuf; \
+		tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + LEN_CHAR ); \
+		tp = tbuf + pos; \
+	} \
+	\
+	memcpy(tp, ENCODE_CHAR, (tp-tbuf)+LEN_CHAR); \
+	tp+=LEN_CHAR;	
+	
 
 /* {{{ php_strip_tags
 
@@ -4814,22 +4817,28 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t a
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_input, size_t len, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
-	char *tbuf, *tp, *rp, c, lc;
+	char *tbuf, *tp, *rp, c, lc, *r_stripped_buffer;
 	const char *buf, *p, *end;
 	int br, depth=0, in_q = 0;
 	uint8_t state = 0;
 	size_t pos;
 	char *allow_free = NULL;
 	char is_xml = 0;
+	const int len_lt = 4; 
+	const int len_gt = 4; 
 
-	buf = estrndup(rbuf, len);
-	end = buf + len;
-	lc = '\0';
+	buf = estrndup(ZSTR_VAL(zend_string_input), len);
 	p = buf;
-	rp = rbuf;
+	end = buf + len;
+
+	r_stripped_buffer = estrndup(ZSTR_VAL(zend_string_input), len);
+	rp = r_stripped_buffer;
+
+	lc = '\0';
 	br = 0;
+
 	if (allow) {
 		allow_free = zend_str_tolower_dup_ex(allow, allow_len);
 		allow = allow_free ? allow_free : allow;
@@ -4850,7 +4859,7 @@ state_0:
 		case '<':
 		
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('<')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;")
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;",len_lt)
 				break;
 			}
  
@@ -4880,7 +4889,7 @@ state_0:
 			}
 
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
 				break;
 			}
 
@@ -4906,9 +4915,8 @@ state_1:
 		case '\0':
 			break;
 		case '<':
-
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('<')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;")
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;",len_lt)
 				break;
 			}
 
@@ -4927,7 +4935,7 @@ state_1:
 			}
 
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
 				break;
 			}
 
@@ -5027,7 +5035,7 @@ state_2:
 			}
 
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
 				break;
 			}
 
@@ -5093,7 +5101,7 @@ state_3:
 			}
 
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;")
+				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
 				break;
 			}
 
@@ -5157,7 +5165,7 @@ state_4:
 	}
 
 finish:
-	if (rp < rbuf + len) {
+	if (rp < r_stripped_buffer + len) {
 		*rp = '\0';
 	}
 	efree((void *)buf);
@@ -5168,7 +5176,11 @@ finish:
 		efree(allow_free);
 	}
 
-	return (size_t)(rp - rbuf);
+	size_t lenrbuf = rp-r_stripped_buffer; 
+	zend_string *new_string =  zend_string_init(r_stripped_buffer,lenrbuf,0);
+	efree(r_stripped_buffer);
+	
+	return new_string;
 }
 /* }}} */
 
