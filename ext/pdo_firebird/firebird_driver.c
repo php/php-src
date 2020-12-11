@@ -504,7 +504,7 @@ static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* called by PDO to prepare an SQL query */
-static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
+static int firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 	pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -524,7 +524,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_
 		zend_hash_init(np, 8, NULL, NULL, 0);
 
 		/* allocate and prepare statement */
-		if (!firebird_alloc_prepare_stmt(dbh, sql, sql_len, &num_sqlda, &s, np)) {
+		if (!firebird_alloc_prepare_stmt(dbh, ZSTR_VAL(sql), ZSTR_LEN(sql), &num_sqlda, &s, np)) {
 			break;
 		}
 

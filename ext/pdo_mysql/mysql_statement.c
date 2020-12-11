@@ -317,7 +317,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 		PDO_DBG_RETURN(pdo_mysql_stmt_execute_prepared(stmt));
 	}
 
-	if (mysql_real_query(H->server, stmt->active_query_string, stmt->active_query_stringlen) != 0) {
+	if (mysql_real_query(H->server, ZSTR_VAL(stmt->active_query_string), ZSTR_LEN(stmt->active_query_string)) != 0) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	}

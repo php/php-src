@@ -59,7 +59,7 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 	}
 
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
-		msg, einfo->dberr, einfo->severity, stmt ? stmt->active_query_string : "");
+		msg, einfo->dberr, einfo->severity, stmt ? ZSTR_VAL(stmt->active_query_string) : "");
 
 	add_next_index_long(info, einfo->dberr);
 	add_next_index_string(info, message);
@@ -94,7 +94,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 	return 0;
 }
 
-static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int dblib_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));

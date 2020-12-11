@@ -162,18 +162,17 @@ static int mysql_handle_closer(pdo_dbh_t *dbh)
 /* }}} */
 
 /* {{{ mysql_handle_preparer */
-static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
-	char *nsql = NULL;
-	size_t nsql_len = 0;
+	zend_string *nsql = NULL;
 	int ret;
 	int server_version;
 
 	PDO_DBG_ENTER("mysql_handle_preparer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("sql=%.*s", (int)sql_len, sql);
+	PDO_DBG_INF_FMT("sql=%.*s", ZSTR_LEN(sql), ZSTR_VAL(sql));
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -188,12 +187,11 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 		goto fallback;
 	}
 	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
-	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
+	ret = pdo_parse_params(stmt, sql, &nsql);
 
 	if (ret == 1) {
 		/* query was rewritten */
 		sql = nsql;
-		sql_len = nsql_len;
 	} else if (ret == -1) {
 		/* failed to parse */
 		strcpy(dbh->error_code, stmt->error_code);
@@ -203,14 +201,14 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	if (!(S->stmt = mysql_stmt_init(H->server))) {
 		pdo_mysql_error(dbh);
 		if (nsql) {
-			efree(nsql);
+			zend_string_release(nsql);
 		}
 		PDO_DBG_RETURN(0);
 	}
 
-	if (mysql_stmt_prepare(S->stmt, sql, sql_len)) {
+	if (mysql_stmt_prepare(S->stmt, ZSTR_VAL(sql), ZSTR_LEN(sql))) {
 		if (nsql) {
-			efree(nsql);
+			zend_string_release(nsql);
 		}
 		/* TODO: might need to pull statement specific info here? */
 		/* if the query isn't supported by the protocol, fallback to emulation */
@@ -223,7 +221,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 		PDO_DBG_RETURN(0);
 	}
 	if (nsql) {
-		efree(nsql);
+		zend_string_release(nsql);
 	}
 
 	S->num_params = mysql_stmt_param_count(S->stmt);

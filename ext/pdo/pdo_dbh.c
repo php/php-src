@@ -452,10 +452,9 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 	zval query_string;
 	zend_string *key;
 
-	ZVAL_STRINGL(&query_string, stmt->query_string, stmt->query_stringlen);
+	ZVAL_STR(&query_string, stmt->query_string);
 	key = zend_string_init("queryString", sizeof("queryString") - 1, 0);
 	zend_std_write_property(Z_OBJ_P(object), key, &query_string, NULL);
-	zval_ptr_dtor(&query_string);
 	zend_string_release_ex(key, 0);
 
 	if (dbstmt_ce->constructor) {
@@ -490,22 +489,21 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 PHP_METHOD(PDO, prepare)
 {
 	pdo_stmt_t *stmt;
-	char *statement;
-	size_t statement_len;
+	zend_string *statement;
 	zval *options = NULL, *value, *item, ctor_args;
 	zend_class_entry *dbstmt_ce, *pce;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(statement, statement_len)
+		Z_PARAM_STR(statement)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (statement_len == 0) {
+	if (ZSTR_LEN(statement) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
@@ -557,8 +555,7 @@ PHP_METHOD(PDO, prepare)
 	stmt = Z_PDO_STMT_P(return_value);
 
 	/* unconditionally keep this for later reference */
-	stmt->query_string = estrndup(statement, statement_len);
-	stmt->query_stringlen = statement_len;
+	stmt->query_string = zend_string_copy(statement);
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
@@ -566,7 +563,7 @@ PHP_METHOD(PDO, prepare)
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
-	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options)) {
+	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args);
 		return;
 	}
@@ -1051,8 +1048,7 @@ fill_array:
 PHP_METHOD(PDO, query)
 {
 	pdo_stmt_t *stmt;
-	char *statement;
-	size_t statement_len;
+	zend_string *statement;
 	zend_long fetch_mode;
 	zend_bool fetch_mode_is_null = 1;
 	zval *args = NULL;
@@ -1060,14 +1056,14 @@ PHP_METHOD(PDO, query)
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l!*", &statement, &statement_len,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S|l!*", &statement,
 			&fetch_mode, &fetch_mode_is_null, &args, &num_args)) {
 		RETURN_THROWS();
 	}
 
 	PDO_CONSTRUCT_CHECK;
 
-	if (statement_len == 0) {
+	if (ZSTR_LEN(statement) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
@@ -1080,19 +1076,16 @@ PHP_METHOD(PDO, query)
 	stmt = Z_PDO_STMT_P(return_value);
 
 	/* unconditionally keep this for later reference */
-	stmt->query_string = estrndup(statement, statement_len);
-	stmt->query_stringlen = statement_len;
-
+	stmt->query_string = zend_string_copy(statement);
+	stmt->active_query_string = zend_string_copy(stmt->query_string);
 	stmt->default_fetch_type = dbh->default_fetch_type;
-	stmt->active_query_string = stmt->query_string;
-	stmt->active_query_stringlen = statement_len;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
 	ZVAL_OBJ_COPY(&stmt->database_object_handle, &dbh_obj->std);
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
-	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, NULL)) {
+	if (dbh->methods->preparer(dbh, statement, stmt, NULL)) {
 		PDO_STMT_CLEAR_ERR();
 		if (fetch_mode_is_null || pdo_stmt_setup_fetch_mode(stmt, fetch_mode, 2, args, num_args)) {
 			/* now execute the statement */

@@ -138,15 +138,14 @@ static int odbc_handle_closer(pdo_dbh_t *dbh)
 	return 0;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	pdo_odbc_stmt *S = ecalloc(1, sizeof(*S));
 	enum pdo_cursor_type cursor_type = PDO_CURSOR_FWDONLY;
 	int ret;
-	char *nsql = NULL;
-	size_t nsql_len = 0;
+	zend_string *nsql = NULL;
 
 	S->H = H;
 	S->assume_utf8 = H->assume_utf8;
@@ -154,7 +153,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 	/* before we prepare, we need to peek at the query; if it uses named parameters,
 	 * we want PDO to rewrite them for us */
 	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
-	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
+	ret = pdo_parse_params(stmt, sql, &nsql);
 
 	if (ret == 1) {
 		/* query was re-written */
@@ -171,7 +170,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 	if (rc == SQL_INVALID_HANDLE || rc == SQL_ERROR) {
 		efree(S);
 		if (nsql) {
-			efree(nsql);
+			zend_string_release(nsql);
 		}
 		pdo_odbc_drv_error("SQLAllocStmt");
 		return 0;
@@ -186,15 +185,15 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 			pdo_odbc_stmt_error("SQLSetStmtAttr: SQL_ATTR_CURSOR_SCROLLABLE");
 			SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
 			if (nsql) {
-				efree(nsql);
+				zend_string_release(nsql);
 			}
 			return 0;
 		}
 	}
 
-	rc = SQLPrepare(S->stmt, (SQLCHAR *) sql, SQL_NTS);
+	rc = SQLPrepare(S->stmt, (SQLCHAR *) ZSTR_VAL(sql), SQL_NTS);
 	if (nsql) {
-		efree(nsql);
+		zend_string_release(nsql);
 	}
 
 	stmt->methods = &odbc_stmt_methods;

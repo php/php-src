@@ -247,7 +247,7 @@ typedef struct {
 typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
 
 /* prepare a statement and stash driver specific portion into stmt */
-typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options);
+typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options);
 
 /* execute a statement (that does not return a result set) */
 typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len);
@@ -604,12 +604,10 @@ struct _pdo_stmt_t {
 	zend_long row_count;
 
 	/* used to hold the statement's current query */
-	char *query_string;
-	size_t query_stringlen;
+	zend_string *query_string;
 
 	/* the copy of the query with expanded binds ONLY for emulated-prepare drivers */
-	char *active_query_string;
-	size_t active_query_stringlen;
+	zend_string *active_query_string;
 
 	/* the cursor specific error code. */
 	pdo_error_type error_code;
@@ -685,8 +683,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inquery_len,
-	char **outquery, size_t *outquery_len);
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string **outquery);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 	const char *sqlstate, const char *supp);

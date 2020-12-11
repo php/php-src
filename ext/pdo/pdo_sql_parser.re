@@ -81,11 +81,9 @@ static void free_param_name(zval *el) {
 	efree(Z_PTR_P(el));
 }
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inquery_len,
-	char **outquery, size_t *outquery_len)
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string **outquery)
 {
 	Scanner s;
-	const char *ptr;
 	char *newbuffer;
 	ptrdiff_t t;
 	uint32_t bindno = 0;
@@ -96,9 +94,8 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inque
 	int query_type = PDO_PLACEHOLDER_NONE;
 	struct placeholder *placeholders = NULL, *placetail = NULL, *plc = NULL;
 
-	ptr = *outquery;
-	s.cur = inquery;
-	s.end = inquery + inquery_len + 1;
+	s.cur = ZSTR_VAL(inquery);
+	s.end = s.cur + ZSTR_LEN(inquery) + 1;
 
 	/* phase 1: look for args */
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
@@ -110,7 +107,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inque
 
 			if (t == PDO_PARSER_BIND) {
 				ptrdiff_t len = s.cur - s.tok;
-				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
+				if ((ZSTR_VAL(inquery) < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}
 				query_type |= PDO_PLACEHOLDER_NAMED;
@@ -179,7 +176,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inque
 	if (stmt->supports_placeholders == query_type && !stmt->named_rewrite_template) {
 		/* query matches native syntax */
 		if (escapes) {
-			newbuffer_len = inquery_len;
+			newbuffer_len = ZSTR_LEN(inquery);
 			goto rewrite;
 		}
 
@@ -201,7 +198,7 @@ safe:
 	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
 		/* query generation */
 
-		newbuffer_len = inquery_len;
+		newbuffer_len = ZSTR_LEN(inquery);
 
 		/* let's quote all the values */
 		for (plc = placeholders; plc && params; plc = plc->next) {
@@ -328,12 +325,12 @@ safe:
 
 rewrite:
 		/* allocate output buffer */
-		newbuffer = emalloc(newbuffer_len + 1);
-		*outquery = newbuffer;
+		*outquery = zend_string_alloc(newbuffer_len, 0);
+		newbuffer = ZSTR_VAL(*outquery);
 
 		/* and build the query */
+		const char *ptr = ZSTR_VAL(inquery);
 		plc = placeholders;
-		ptr = inquery;
 
 		do {
 			t = plc->pos - ptr;
@@ -353,13 +350,13 @@ rewrite:
 			plc = plc->next;
 		} while (plc);
 
-		t = (inquery + inquery_len) - ptr;
+		t = ZSTR_VAL(inquery) + ZSTR_LEN(inquery) - ptr;
 		if (t) {
 			memcpy(newbuffer, ptr, t);
 			newbuffer += t;
 		}
 		*newbuffer = '\0';
-		*outquery_len = newbuffer - *outquery;
+		ZSTR_LEN(*outquery) = newbuffer - ZSTR_VAL(*outquery);
 
 		ret = 1;
 		goto clean_up;
@@ -370,7 +367,7 @@ rewrite:
 		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
 		int bind_no = 1;
 
-		newbuffer_len = inquery_len;
+		newbuffer_len = ZSTR_LEN(inquery);
 
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
@@ -416,7 +413,7 @@ rewrite:
 	} else {
 		/* rewrite :name to ? */
 
-		newbuffer_len = inquery_len;
+		newbuffer_len = ZSTR_LEN(inquery);
 
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);

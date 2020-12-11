@@ -443,18 +443,16 @@ PHP_METHOD(PDOStatement, execute)
 		 */
 
 		/* string is leftover from previous calls so PDOStatement::debugDumpParams() can access */
-		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-			efree(stmt->active_query_string);
+		if (stmt->active_query_string) {
+			zend_string_release(stmt->active_query_string);
+			stmt->active_query_string = NULL;
 		}
-		stmt->active_query_string = NULL;
 
-		ret = pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen,
-			&stmt->active_query_string, &stmt->active_query_stringlen);
+		ret = pdo_parse_params(stmt, stmt->query_string, &stmt->active_query_string);
 
 		if (ret == 0) {
 			/* no changes were made */
-			stmt->active_query_string = stmt->query_string;
-			stmt->active_query_stringlen = stmt->query_stringlen;
+			stmt->active_query_string = zend_string_copy(stmt->query_string);
 			ret = 1;
 		} else if (ret == -1) {
 			/* something broke */
@@ -2035,16 +2033,16 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 	}
 
 	/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
-	php_stream_printf(out, "SQL: [%zd] ", stmt->query_stringlen);
-	php_stream_write(out, stmt->query_string, stmt->query_stringlen);
+	php_stream_printf(out, "SQL: [%zd] ", ZSTR_LEN(stmt->query_string));
+	php_stream_write(out, ZSTR_VAL(stmt->query_string), ZSTR_LEN(stmt->query_string));
 	php_stream_write(out, "\n", 1);
 
 	/* show parsed SQL if emulated prepares enabled */
 	/* pointers will be equal if PDO::query() was invoked */
 	if (stmt->active_query_string != NULL && stmt->active_query_string != stmt->query_string) {
 		/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
-		php_stream_printf(out, "Sent SQL: [%zd] ", stmt->active_query_stringlen);
-		php_stream_write(out, stmt->active_query_string, stmt->active_query_stringlen);
+		php_stream_printf(out, "Sent SQL: [%zd] ", ZSTR_LEN(stmt->active_query_string));
+		php_stream_write(out, ZSTR_VAL(stmt->active_query_string), ZSTR_LEN(stmt->active_query_string));
 		php_stream_write(out, "\n", 1);
 	}
 
@@ -2175,11 +2173,11 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 	if (stmt->methods && stmt->methods->dtor) {
 		stmt->methods->dtor(stmt);
 	}
-	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-		efree(stmt->active_query_string);
+	if (stmt->active_query_string) {
+		zend_string_release(stmt->active_query_string);
 	}
 	if (stmt->query_string) {
-		efree(stmt->query_string);
+		zend_string_release(stmt->query_string);
 	}
 
 	pdo_stmt_reset_columns(stmt);
