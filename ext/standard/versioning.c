@@ -205,7 +205,7 @@ PHP_FUNCTION(version_compare)
 {
 	char *v1, *v2;
 	zend_string *op = NULL;
-	size_t v1_len, v2_len, op_len = 0;
+	size_t v1_len, v2_len;
 	int compare;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
