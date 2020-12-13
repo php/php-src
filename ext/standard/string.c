@@ -4567,9 +4567,9 @@ PHP_FUNCTION(strip_tags)
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
 	stripped_tag_buf = php_strip_tags_ex(buf, ZSTR_LEN(buf), allowed_tags, allowed_tags_len, 0);
 	
-	zend_string_release(buf);
+	// zend_string_release(buf);
 	smart_str_free(&tags_ss);
-	RETURN_STR(stripped_tag_buf);
+	RETURN_STR(buf);
 }
 /* }}} */
 
@@ -5177,10 +5177,25 @@ finish:
 	}
 
 	size_t lenrbuf = rp-r_stripped_buffer; 
-	zend_string *new_string =  zend_string_init(r_stripped_buffer,lenrbuf,0);
-	efree(r_stripped_buffer);
+	zend_string *new_string;
+
+	if (lenrbuf == 0 ) {
+		zend_string_input->val[0] = '\0';
+		zend_string_input->len = 0;
+		new_string = zend_string_init('\0',lenrbuf,0);
+	}
 	
-	return new_string;
+	if (lenrbuf > 0 ) {
+		memcpy(zend_string_input->val, r_stripped_buffer, lenrbuf);
+		zend_string_input->len = lenrbuf;
+		zend_string_input->val[lenrbuf] = '\0';
+		new_string =  zend_string_init(r_stripped_buffer,lenrbuf+1,0); //fix buf69203
+	}
+
+	efree(r_stripped_buffer);
+	efree(new_string);
+	
+	return NULL;
 }
 /* }}} */
 
