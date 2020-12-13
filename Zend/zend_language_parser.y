@@ -652,7 +652,9 @@ case_separator:
 
 match:
 		T_MATCH '(' expr ')' '{' match_arm_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); }
+		| T_MATCH '{' match_arm_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, 'true', $3); }
 ;
 
 match_arm_list:
