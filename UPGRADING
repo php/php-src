@@ -19,6 +19,9 @@ PHP 8.1 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Standard:
+  . version_compare() no longer accepts undocumented operator abbreviations.
+
 ========================================
 2. New Features
 ========================================
