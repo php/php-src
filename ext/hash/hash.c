@@ -52,7 +52,7 @@ struct mhash_bc_entry {
 	int value;
 };
 
-#define MHASH_NUM_ALGOS 38
+#define MHASH_NUM_ALGOS 42
 
 static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"CRC32", "crc32", 0}, /* used by bzip */
@@ -93,6 +93,10 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"MURMUR3A", "murmur3a", 35},
 	{"MURMUR3C", "murmur3c", 36},
 	{"MURMUR3F", "murmur3f", 37},
+	{"XXH32", "xxh32", 38},
+	{"XXH64", "xxh64", 39},
+	{"XXH3", "xxh3", 40},
+	{"XXH128", "xxh128", 41},
 };
 #endif
 
@@ -1598,6 +1602,10 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("murmur3a",		&php_hash_murmur3a_ops);
 	php_hash_register_algo("murmur3c",		&php_hash_murmur3c_ops);
 	php_hash_register_algo("murmur3f",		&php_hash_murmur3f_ops);
+	php_hash_register_algo("xxh32",		&php_hash_xxh32_ops);
+	php_hash_register_algo("xxh64",		&php_hash_xxh64_ops);
+	php_hash_register_algo("xxh3",		&php_hash_xxh3_64_ops);
+	php_hash_register_algo("xxh128",		&php_hash_xxh3_128_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);
