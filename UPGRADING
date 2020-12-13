@@ -24,11 +24,28 @@ PHP 8.1 UPGRADE NOTES
 ========================================
 
 - hash:
-  . Added MurmurHash3 with streaming support. The following variants are implemented
+  . The following functions have changed signatures:
+
+    - function hash(string $algo, string $data, bool $binary = false, array $options = []): string|false {}
+    - function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
+    - function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
+
+    The additional `$options` argument can be used to pass algorithm specific data.
+
+  . Added MurmurHash3 with streaming support. The following variants are implemented:
 
     - murmur3a, 32-bit hash
     - murmur3c, 128-bit hash for x86
     - murmur3f, 128-bit hash for x64
+
+    The initial hash state can be passed through the `seed` key in the `$options` array, for example:
+
+    ```php
+    $h = hash("murmur3f", $data, options: ["seed" => 42]);
+    echo $h, "\n";
+    ```
+
+    A valid seed value is within the range from 0 to the plaform defined UINT_MAX, usually 4294967295.
 
 ========================================
 3. Changes in SAPI modules
