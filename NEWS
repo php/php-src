@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #77961 (finfo_open crafted magic parsing SIGABRT). (cmb)
 
+- FPM:
+  . Fixed bug #69625 (FPM returns 200 status on request without
+    SCRIPT_FILENAME env). (Jakub Zelenka)
+
 - IMAP
   . Fixed bug #80438 (imap_msgno() incorrectly warns and return false on valid UIDs in PHP 8.0.0). (girgias)
   . Fix a regression with valid UIDs in imap_savebody() (girgias)
