@@ -5,7 +5,7 @@ Test multiple default arms in match in different arms
 
 $a = 3;
 
-match {
+print match {
   $a < 2 => 'small',
   $a == 3 => 'medium',
   default => 'large',

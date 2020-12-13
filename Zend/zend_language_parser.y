@@ -654,7 +654,10 @@ match:
 		T_MATCH '(' expr ')' '{' match_arm_list '}'
 			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); }
 		| T_MATCH '{' match_arm_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_MATCH, 'true', $3); }
+			{
+			zval zv;
+			ZVAL_BOOL(&zv, 1);
+			$$ = zend_ast_create(ZEND_AST_MATCH, zend_ast_create_zval(&zv), $3); }
 ;
 
 match_arm_list:
