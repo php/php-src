@@ -192,16 +192,10 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 
 	DBG_ENTER("mysqlnd_object_factory::get_prepared_statement");
 	do {
-		if (!ret) {
-			break;
-		}
 		ret->m = mysqlnd_stmt_get_methods();
 
 		stmt = ret->data = mnd_ecalloc(1, sizeof(MYSQLND_STMT_DATA));
 		DBG_INF_FMT("stmt=%p", stmt);
-		if (!stmt) {
-			break;
-		}
 
 		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, 0)) {
 			break;

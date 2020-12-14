@@ -709,17 +709,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		conn->connect_or_select_db.l = database.l;
 		conn->connect_or_select_db.s = mnd_pestrndup(database.s, conn->connect_or_select_db.l, conn->persistent);
 
-		if (!conn->username.s || !conn->password.s|| !conn->connect_or_select_db.s) {
-			SET_OOM_ERROR(conn->error_info);
-			goto err; /* OOM */
-		}
-
 		if (!unix_socket && !named_pipe) {
 			conn->hostname.s = mnd_pestrndup(hostname.s, hostname.l, conn->persistent);
-			if (!conn->hostname.s) {
-				SET_OOM_ERROR(conn->error_info);
-				goto err; /* OOM */
-			}
 			conn->hostname.l = hostname.l;
 			{
 				char *p;
@@ -730,10 +721,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 				}
 				conn->host_info = mnd_pestrdup(p, conn->persistent);
 				mnd_sprintf_free(p);
-				if (!conn->host_info) {
-					SET_OOM_ERROR(conn->error_info);
-					goto err; /* OOM */
-				}
 			}
 		} else {
 			conn->unix_socket.s = mnd_pestrdup(socket_or_pipe.s, conn->persistent);
@@ -746,12 +733,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
 				}
-				conn->host_info =  mnd_pestrdup(p, conn->persistent);
+				conn->host_info = mnd_pestrdup(p, conn->persistent);
 				mnd_sprintf_free(p);
-				if (!conn->host_info) {
-					SET_OOM_ERROR(conn->error_info);
-					goto err; /* OOM */
-				}
 			} else {
 				php_error_docref(NULL, E_WARNING, "Impossible. Should be either socket or a pipe. Report a bug!");
 			}
@@ -1672,14 +1655,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			/* when num_commands is 0, then realloc will be effectively a malloc call, internally */
 			/* Don't assign to conn->options->init_commands because in case of OOM we will lose the pointer and leak */
 			new_init_commands = mnd_perealloc(conn->options->init_commands, sizeof(char *) * (conn->options->num_commands + 1), conn->persistent);
-			if (!new_init_commands) {
-				goto oom;
-			}
 			conn->options->init_commands = new_init_commands;
 			new_command = mnd_pestrdup(value, conn->persistent);
-			if (!new_command) {
-				goto oom;
-			}
 			conn->options->init_commands[conn->options->num_commands] = new_command;
 			++conn->options->num_commands;
 			break;
@@ -1702,9 +1679,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			}
 
 			new_charset_name = mnd_pestrdup(value, conn->persistent);
-			if (!new_charset_name) {
-				goto oom;
-			}
 			if (conn->options->charset_name) {
 				mnd_pefree(conn->options->charset_name, conn->persistent);
 			}
@@ -1740,9 +1714,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQLND_OPT_AUTH_PROTOCOL:
 		{
 			char * new_auth_protocol = value? mnd_pestrdup(value, conn->persistent) : NULL;
-			if (value && !new_auth_protocol) {
-				goto oom;
-			}
 			if (conn->options->auth_protocol) {
 				mnd_pefree(conn->options->auth_protocol, conn->persistent);
 			}
@@ -1781,9 +1752,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 	}
 	conn->m->local_tx_end(conn, this_func, ret);
 	DBG_RETURN(ret);
-oom:
-	SET_OOM_ERROR(conn->error_info);
-	conn->m->local_tx_end(conn, this_func, FAIL);
 end:
 	DBG_RETURN(FAIL);
 }
@@ -1811,9 +1779,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			if (!conn->options->connect_attr) {
 				DBG_INF("Initializing connect_attr hash");
 				conn->options->connect_attr = mnd_pemalloc(sizeof(HashTable), conn->persistent);
-				if (!conn->options->connect_attr) {
-					goto oom;
-				}
 				zend_hash_init(conn->options->connect_attr, 0, NULL, conn->persistent ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR, conn->persistent);
 			}
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
@@ -1839,9 +1804,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 	}
 	conn->m->local_tx_end(conn, this_func, ret);
 	DBG_RETURN(ret);
-oom:
-	SET_OOM_ERROR(conn->error_info);
-	conn->m->local_tx_end(conn, this_func, FAIL);
 end:
 	DBG_RETURN(FAIL);
 }

@@ -1074,14 +1074,9 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			*/
 			len = packet->header.size - 1;
 			packet->info_or_local_file.s = mnd_emalloc(len + 1);
-			if (packet->info_or_local_file.s) {
-				memcpy(packet->info_or_local_file.s, p, len);
-				packet->info_or_local_file.s[len] = '\0';
-				packet->info_or_local_file.l = len;
-			} else {
-				SET_OOM_ERROR(error_info);
-				ret = FAIL;
-			}
+			memcpy(packet->info_or_local_file.s, p, len);
+			packet->info_or_local_file.s[len] = '\0';
+			packet->info_or_local_file.l = len;
 			break;
 		case 0x00:
 			DBG_INF("UPSERT");
@@ -1101,14 +1096,9 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			/* Check for additional textual data */
 			if (packet->header.size  > (size_t) (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
 				packet->info_or_local_file.s = mnd_emalloc(len + 1);
-				if (packet->info_or_local_file.s) {
-					memcpy(packet->info_or_local_file.s, p, len);
-					packet->info_or_local_file.s[len] = '\0';
-					packet->info_or_local_file.l = len;
-				} else {
-					SET_OOM_ERROR(error_info);
-					ret = FAIL;
-				}
+				memcpy(packet->info_or_local_file.s, p, len);
+				packet->info_or_local_file.s[len] = '\0';
+				packet->info_or_local_file.l = len;
 			}
 			DBG_INF_FMT("affected_rows=%llu last_insert_id=%llu server_status=%u warning_count=%u",
 						packet->affected_rows, packet->last_insert_id,
