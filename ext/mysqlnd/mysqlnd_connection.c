@@ -146,7 +146,7 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ mysqlnd_error_info_init */
-PHPAPI enum_func_status
+PHPAPI void
 mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const zend_bool persistent)
 {
 	DBG_ENTER("mysqlnd_error_info_init");
@@ -155,7 +155,7 @@ mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const zend_bool persist
 
 	zend_llist_init(&info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, persistent);
 	info->persistent = persistent;
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 

@@ -116,10 +116,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYP
 	new_object->m = mysqlnd_conn_get_methods();
 	data = new_object->data;
 
-	if (FAIL == mysqlnd_error_info_init(&data->error_info_impl, persistent)) {
-		new_object->m->dtor(new_object);
-		DBG_RETURN(NULL);
-	}
+	mysqlnd_error_info_init(&data->error_info_impl, persistent);
 	data->error_info = &data->error_info_impl;
 
 	data->options = &(data->options_impl);
@@ -191,44 +188,29 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 	MYSQLND_STMT_DATA * stmt = NULL;
 
 	DBG_ENTER("mysqlnd_object_factory::get_prepared_statement");
-	do {
-		ret->m = mysqlnd_stmt_get_methods();
+	ret->m = mysqlnd_stmt_get_methods();
 
-		stmt = ret->data = mnd_ecalloc(1, sizeof(MYSQLND_STMT_DATA));
-		DBG_INF_FMT("stmt=%p", stmt);
+	stmt = ret->data = mnd_ecalloc(1, sizeof(MYSQLND_STMT_DATA));
+	DBG_INF_FMT("stmt=%p", stmt);
 
-		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, 0)) {
-			break;
-		}
-		stmt->error_info = &stmt->error_info_impl;
+	mysqlnd_error_info_init(&stmt->error_info_impl, 0);
+	stmt->error_info = &stmt->error_info_impl;
 
-		mysqlnd_upsert_status_init(&stmt->upsert_status_impl);
-		stmt->upsert_status = &(stmt->upsert_status_impl);
-		stmt->state = MYSQLND_STMT_INITTED;
-		stmt->execute_cmd_buffer.length = 4096;
-		stmt->execute_cmd_buffer.buffer = mnd_emalloc(stmt->execute_cmd_buffer.length);
-		if (!stmt->execute_cmd_buffer.buffer) {
-			break;
-		}
+	mysqlnd_upsert_status_init(&stmt->upsert_status_impl);
+	stmt->upsert_status = &(stmt->upsert_status_impl);
+	stmt->state = MYSQLND_STMT_INITTED;
+	stmt->execute_cmd_buffer.length = 4096;
+	stmt->execute_cmd_buffer.buffer = mnd_emalloc(stmt->execute_cmd_buffer.length);
+	stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
 
-		stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
+	/*
+	  Mark that we reference the connection, thus it won't be
+	  be destructed till there is open statements. The last statement
+	  or normal query result will close it then.
+	*/
+	stmt->conn = conn->m->get_reference(conn);
 
-		/*
-		  Mark that we reference the connection, thus it won't be
-		  be destructed till there is open statements. The last statement
-		  or normal query result will close it then.
-		*/
-		stmt->conn = conn->m->get_reference(conn);
-
-		DBG_RETURN(ret);
-	} while (0);
-
-	SET_OOM_ERROR(conn->error_info);
-	if (ret) {
-		ret->m->dtor(ret, TRUE);
-		ret = NULL;
-	}
-	DBG_RETURN(NULL);
+	DBG_RETURN(ret);
 }
 /* }}} */
 

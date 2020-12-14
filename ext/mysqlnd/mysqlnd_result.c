@@ -1388,17 +1388,9 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	if (flags & MYSQLND_STORE_NO_COPY) {
 		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result, result->field_count, flags & MYSQLND_STORE_PS);
-		if (!result->stored_data) {
-			SET_OOM_ERROR(conn->error_info);
-			DBG_RETURN(NULL);
-		}
 		row_buffers = &result->stored_data->row_buffers;
 	} else if (flags & MYSQLND_STORE_COPY) {
 		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_c_init(result, result->field_count, flags & MYSQLND_STORE_PS);
-		if (!result->stored_data) {
-			SET_OOM_ERROR(conn->error_info);
-			DBG_RETURN(NULL);
-		}
 		row_buffers = &result->stored_data->row_buffers;
 	}
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, row_buffers, flags & MYSQLND_STORE_PS);
@@ -1965,9 +1957,7 @@ mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
-	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		DBG_RETURN(NULL);
-	}
+	mysqlnd_error_info_init(&ret->error_info, /* persistent */ 0);
 
 	ret->lengths = pool->get_chunk(pool, field_count * sizeof(size_t));
 	memset(ret->lengths, 0, field_count * sizeof(size_t));
@@ -2006,9 +1996,7 @@ mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_co
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
-	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		DBG_RETURN(NULL);
-	}
+	mysqlnd_error_info_init(&ret->error_info, /* persistent */ 0);
 
 	ret->lengths = pool->get_chunk(pool, field_count * sizeof(size_t));
 	memset(ret->lengths, 0, field_count * sizeof(size_t));
