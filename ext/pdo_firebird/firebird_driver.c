@@ -171,10 +171,11 @@ static const char classes_array[] = {
 	/* 127     */ 0
 };
 
-inline char classes(char idx)
+static inline char classes(char idx)
 {
-	if (idx > 127) return 0;
-	return classes_array[idx];
+	unsigned char uidx = (unsigned char) idx;
+	if (uidx > 127) return 0;
+	return classes_array[uidx];
 }
 
 typedef enum {
@@ -1085,7 +1086,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
-		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%d] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%ld] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}
 
