@@ -27,115 +27,6 @@
 #include "mysqlnd_debug.h"
 #include "mysqlnd_ext_plugin.h"
 
-/* {{{ mysqlnd_result_buffered_zval::initialize_result_set_rest */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result,
-																		 MYSQLND_RES_METADATA * const meta,
-																		 MYSQLND_STATS * stats,
-																		 zend_bool int_and_float_native)
-{
-	enum_func_status ret = PASS;
-	const unsigned int field_count = meta->field_count;
-	const uint64_t row_count = result->row_count;
-
-	zval *data_begin = ((MYSQLND_RES_BUFFERED_ZVAL *) result)->data;
-	zval *data_cursor = data_begin;
-
-	DBG_ENTER("mysqlnd_result_buffered_zval::initialize_result_set_rest");
-
-	if (!data_cursor || row_count == result->initialized_rows) {
-		DBG_RETURN(ret);
-	}
-	while ((data_cursor - data_begin) < (int)(row_count * field_count)) {
-		if (Z_ISUNDEF(data_cursor[0])) {
-			unsigned int i;
-			const size_t current_row_num = (data_cursor - data_begin) / field_count;
-			enum_func_status rc = result->m.row_decoder(&result->row_buffers[current_row_num],
-														data_cursor,
-														field_count,
-														meta->fields,
-														int_and_float_native,
-														stats);
-			if (rc != PASS) {
-				ret = FAIL;
-				break;
-			}
-			++result->initialized_rows;
-			for (i = 0; i < field_count; ++i) {
-				/*
-				  NULL fields are 0 length, 0 is not more than 0
-				  String of zero size, definitely can't be the next max_length.
-				  Thus for NULL and zero-length we are quite efficient.
-				*/
-				if (Z_TYPE(data_cursor[i]) == IS_STRING) {
-					const size_t len = Z_STRLEN(data_cursor[i]);
-					if (meta->fields[i].max_length < len) {
-						meta->fields[i].max_length = len;
-					}
-				}
-			}
-		}
-		data_cursor += field_count;
-	}
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_result_buffered_c::initialize_result_set_rest */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result,
-																	  MYSQLND_RES_METADATA * const meta,
-																	  MYSQLND_STATS * stats,
-																	  const zend_bool int_and_float_native)
-{
-	unsigned int row, field;
-	enum_func_status ret = PASS;
-	const unsigned int field_count = meta->field_count;
-	const uint64_t row_count = result->row_count;
-	enum_func_status rc;
-	DBG_ENTER("mysqlnd_result_buffered_c::initialize_result_set_rest");
-
-	if (result->initialized_rows < row_count) {
-		zend_uchar *initialized = ((MYSQLND_RES_BUFFERED_C *) result)->initialized;
-		zval *current_row = mnd_emalloc(field_count * sizeof(zval));
-
-		for (row = 0; row < result->row_count; row++) {
-			/* (row / 8) & the_bit_for_row*/
-			if (ZEND_BIT_TEST(initialized, row)) {
-				continue;
-			}
-
-			rc = result->m.row_decoder(&result->row_buffers[row], current_row, field_count, meta->fields, int_and_float_native, stats);
-
-			if (rc != PASS) {
-				ret = FAIL;
-				break;
-			}
-			result->initialized_rows++;
-			initialized[row >> 3] |= (1 << (row & 7));
-			for (field = 0; field < field_count; field++) {
-				/*
-				  NULL fields are 0 length, 0 is not more than 0
-				  String of zero size, definitely can't be the next max_length.
-				  Thus for NULL and zero-length we are quite efficient.
-				*/
-				if (Z_TYPE(current_row[field]) == IS_STRING) {
-					const size_t len = Z_STRLEN(current_row[field]);
-					if (meta->fields[field].max_length < len) {
-						meta->fields[field].max_length = len;
-					}
-				}
-				zval_ptr_dtor_nogc(&current_row[field]);
-			}
-		}
-		mnd_efree(current_row);
-	}
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_result_unbuffered::free_last_data */
 static void
 MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED * unbuf, MYSQLND_STATS * const global_stats)
@@ -219,8 +110,6 @@ static void
 MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)(MYSQLND_RES_BUFFERED_C * const set)
 {
 	DBG_ENTER("mysqlnd_result_buffered_c::free_result");
-	mnd_efree(set->initialized);
-	set->initialized = NULL;
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -690,10 +579,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 				if (lengths) {
 					lengths[i] = len;
 				}
-
-				if (field->max_length < len) {
-					field->max_length = len;
-				}
 			}
 		}
 		result->unbuf->row_count++;
@@ -825,10 +710,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 					if (lengths) {
 						lengths[i] = len;
 					}
-
-					if (field->max_length < len) {
-						field->max_length = len;
-					}
 				}
 			}
 		}
@@ -944,20 +825,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 				if (rc != PASS) {
 					DBG_RETURN(FAIL);
 				}
-				++set->initialized_rows;
-				for (i = 0; i < field_count; ++i) {
-					/*
-					  NULL fields are 0 length, 0 is not more than 0
-					  String of zero size, definitely can't be the next max_length.
-					  Thus for NULL and zero-length we are quite efficient.
-					*/
-					if (Z_TYPE(current_row[i]) == IS_STRING) {
-						const size_t len = Z_STRLEN(current_row[i]);
-						if (meta->fields[i].max_length < len) {
-							meta->fields[i].max_length = len;
-						}
-					}
-				}
 			}
 
 /* BEGIN difference between normal normal fetch and _c */
@@ -1028,20 +895,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 													 conn->stats);
 			if (rc != PASS) {
 				DBG_RETURN(FAIL);
-			}
-			++set->initialized_rows;
-			for (i = 0; i < field_count; ++i) {
-				/*
-				  NULL fields are 0 length, 0 is not more than 0
-				  String of zero size, definitely can't be the next max_length.
-				  Thus for NULL and zero-length we are quite efficient.
-				*/
-				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					const size_t len = Z_STRLEN(current_row[i]);
-					if (meta->fields[i].max_length < len) {
-						meta->fields[i].max_length = len;
-					}
-				}
 			}
 		}
 
@@ -1116,25 +969,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 												conn->stats);
 		if (rc != PASS) {
 			DBG_RETURN(FAIL);
-		}
-		if (!ZEND_BIT_TEST(set->initialized, set->current_row)) {
-			set->initialized[set->current_row >> 3] |= (1 << (set->current_row & 7)); /* mark initialized */
-
-			++set->initialized_rows;
-
-			for (i = 0; i < field_count; ++i) {
-				/*
-				  NULL fields are 0 length, 0 is not more than 0
-				  String of zero size, definitely can't be the next max_length.
-				  Thus for NULL and zero-length we are quite efficient.
-				*/
-				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					const size_t len = Z_STRLEN(current_row[i]);
-					if (meta->fields[i].max_length < len) {
-						meta->fields[i].max_length = len;
-					}
-				}
-			}
 		}
 
 		for (i = 0; i < field_count; ++i) {
@@ -1393,7 +1227,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 		} else if (flags & MYSQLND_STORE_COPY) {
 			MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result->stored_data;
 			set->current_row = 0;
-			set->initialized = mnd_ecalloc((unsigned int) ((set->row_count / 8) + 1), sizeof(zend_uchar)); /* +1 for safety */
 		}
 	}
 
@@ -1547,28 +1380,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result)
 	DBG_ENTER("mysqlnd_res::fetch_field");
 	do {
 		if (result->meta) {
-			/*
-			  We optimize the result set, so we don't convert all the data from raw buffer format to
-			  zval arrays during store. In the case someone doesn't read all the lines this will
-			  save time. However, when a metadata call is done, we need to calculate max_length.
-			  We don't have control whether max_length will be used, unfortunately. Otherwise we
-			  could have been able to skip that step.
-			  Well, if the mysqli API switches from returning stdClass to class like mysqli_field_metadata,
-			  then we can have max_length as dynamic property, which will be calculated during runtime and
-			  not during mysqli_fetch_field() time.
-			*/
-			if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
-				const MYSQLND_CONN_DATA * const conn = result->conn;
-				DBG_INF_FMT("We have decode the whole result set to be able to satisfy this meta request");
-				/* we have to initialize the rest to get the updated max length */
-				if (PASS != result->stored_data->m.initialize_result_set_rest(result->stored_data,
-																			  result->meta,
-																			  conn->stats,
-																			  conn->options->int_and_float_native))
-				{
-					break;
-				}
-			}
 			DBG_RETURN(result->meta->m->fetch_field(result->meta));
 		}
 	} while (0);
@@ -1584,28 +1395,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result, cons
 	DBG_ENTER("mysqlnd_res::fetch_field_direct");
 	do {
 		if (result->meta) {
-			/*
-			  We optimize the result set, so we don't convert all the data from raw buffer format to
-			  zval arrays during store. In the case someone doesn't read all the lines this will
-			  save time. However, when a metadata call is done, we need to calculate max_length.
-			  We don't have control whether max_length will be used, unfortunately. Otherwise we
-			  could have been able to skip that step.
-			  Well, if the mysqli API switches from returning stdClass to class like mysqli_field_metadata,
-			  then we can have max_length as dynamic property, which will be calculated during runtime and
-			  not during mysqli_fetch_field_direct() time.
-			*/
-			if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
-				const MYSQLND_CONN_DATA * const conn = result->conn;
-				DBG_INF_FMT("We have decode the whole result set to be able to satisfy this meta request");
-				/* we have to initialized the rest to get the updated max length */
-				if (PASS != result->stored_data->m.initialize_result_set_rest(result->stored_data,
-																			  result->meta,
-																			  conn->stats,
-																			  conn->options->int_and_float_native))
-				{
-					break;
-				}
-			}
 			DBG_RETURN(result->meta->m->fetch_field_direct(result->meta, fieldnr));
 		}
 	} while (0);
@@ -1622,17 +1411,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_fields)(MYSQLND_RES * const result)
 	DBG_ENTER("mysqlnd_res::fetch_fields");
 	do {
 		if (result->meta) {
-			if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
-				const MYSQLND_CONN_DATA * const conn = result->conn;
-				/* we have to initialize the rest to get the updated max length */
-				if (PASS != result->stored_data->m.initialize_result_set_rest(result->stored_data,
-																			  result->meta,
-																			  conn->stats,
-																			  conn->options->int_and_float_native))
-				{
-					break;
-				}
-			}
 			DBG_RETURN(result->meta->m->fetch_fields(result->meta));
 		}
 	} while (0);
@@ -1799,7 +1577,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_result_buffered)
 	MYSQLND_METHOD(mysqlnd_result_buffered, num_rows),
 	NULL, /* fetch_lengths */
 	NULL, /* data_seek */
-	NULL, /* initialize_result_set_rest */
 	MYSQLND_METHOD(mysqlnd_result_buffered, free_result)
 MYSQLND_CLASS_METHODS_END;
 
@@ -1903,7 +1680,6 @@ mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field
 	ret->m.fetch_row		= MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row);
 	ret->m.fetch_lengths 	= MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths);
 	ret->m.data_seek		= MYSQLND_METHOD(mysqlnd_result_buffered_zval, data_seek);
-	ret->m.initialize_result_set_rest = MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1942,7 +1718,6 @@ mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_co
 	ret->m.fetch_row		= MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row);
 	ret->m.fetch_lengths 	= MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths);
 	ret->m.data_seek		= MYSQLND_METHOD(mysqlnd_result_buffered_c, data_seek);
-	ret->m.initialize_result_set_rest = MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest);
 
 	DBG_RETURN(ret);
 }
