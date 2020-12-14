@@ -896,6 +896,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_PARAM_REF      (1<<3)
 #define ZEND_PARAM_VARIADIC (1<<4)
 
+#define ZEND_MATCH_SHORT (1<<5)
+
 #define ZEND_NAME_FQ       0
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2

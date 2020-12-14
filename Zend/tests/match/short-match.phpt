@@ -1,5 +1,5 @@
 --TEST--
-Test multiple default arms in match in different arms
+Short-hand match with implicit true subject.
 --FILE--
 <?php
 
