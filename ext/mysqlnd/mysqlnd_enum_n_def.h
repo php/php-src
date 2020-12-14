@@ -686,18 +686,6 @@ enum php_mysqlnd_server_command
 #define MYSQLND_REFRESH_BACKUP_LOG	0x200000L
 
 
-#define MYSQLND_STORE_PS		1
-#define MYSQLND_STORE_NO_COPY	2
-#define MYSQLND_STORE_COPY		4
-
-enum mysqlnd_buffered_type
-{
-	MYSQLND_BUFFERED_TYPE_ZVAL = 1,
-	MYSQLND_BUFFERED_TYPE_C
-};
-
-
 #define MYSQLND_CLIENT_NO_FLAG				0
-#define MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA	1
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */

@@ -1369,7 +1369,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	*/
 
 	/*
-	  We're allocating an extra byte, as php_mysqlnd_rowp_read_text_protocol_aux
+	  We're allocating an extra byte, as php_mysqlnd_rowp_read_text_protocol
 	  needs to be able to append a terminating \0 for atoi/atof.
 	*/
 	prealloc_more_bytes = 1;
@@ -1525,7 +1525,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 enum_func_status
-php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
+php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats)
 {
@@ -1535,7 +1535,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 	const size_t data_size = row_buffer->size;
 	const zend_uchar * const packet_end = (zend_uchar*) p + data_size;
 
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
 
 	if (!fields) {
 		DBG_RETURN(FAIL);
@@ -1663,34 +1663,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 	}
 
 	DBG_RETURN(PASS);
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
-enum_func_status
-php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-										 const unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 const zend_bool as_int_or_float, MYSQLND_STATS * stats)
-{
-	enum_func_status ret;
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_zval");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_rowp_read_text_protocol_c */
-enum_func_status
-php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
-									  const zend_bool as_int_or_float, MYSQLND_STATS * const stats)
-{
-	enum_func_status ret;
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_c");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
-	DBG_RETURN(ret);
 }
 /* }}} */
 

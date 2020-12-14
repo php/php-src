@@ -112,9 +112,8 @@ PHPAPI void mysqlnd_debug(const char *mode);
 
 PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num);
 
-#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data, 0)
-#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_NO_COPY)
-#define mysqlnd_store_result_ofs(conn)	((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_COPY)
+#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data)
+#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data)
 #define mysqlnd_next_result(conn)		((conn)->data)->m->next_result((conn)->data)
 #define mysqlnd_more_results(conn)		((conn)->data)->m->more_results((conn)->data)
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i))
@@ -311,7 +310,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_long		debug_calloc_fail_threshold;
 	zend_long		debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
-	zend_bool		fetch_data_copy;
 	zend_bool		collect_statistics;
 	zend_bool		collect_memory_statistics;
 ZEND_END_MODULE_GLOBALS(mysqlnd)

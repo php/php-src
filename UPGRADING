@@ -25,6 +25,11 @@ PHP 8.1 UPGRADE NOTES
     result set and taking the maximum length. This is what PHP was doing
     internally previously.
   . The MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH option no longer has an effect.
+  . The MYSQLI_STORE_RESULT_COPY_DATA option no longer has an effect.
+
+- MySQLnd:
+  . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
+    should not result in user-visible behavior changes.
 
 - Standard:
   . version_compare() no longer accepts undocumented operator abbreviations.
