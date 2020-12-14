@@ -97,12 +97,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 	DBG_ENTER("mysqlnd_result_buffered_c::initialize_result_set_rest");
 
 	if (result->initialized_rows < row_count) {
-		zend_uchar * initialized = ((MYSQLND_RES_BUFFERED_C *) result)->initialized;
-		zval * current_row = mnd_emalloc(field_count * sizeof(zval));
-
-		if (!current_row) {
-			DBG_RETURN(FAIL);
-		}
+		zend_uchar *initialized = ((MYSQLND_RES_BUFFERED_C *) result)->initialized;
+		zval *current_row = mnd_emalloc(field_count * sizeof(zval));
 
 		for (row = 0; row < result->row_count; row++) {
 			/* (row / 8) & the_bit_for_row*/
@@ -343,10 +339,6 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 	}
 
 	result->meta = result->m.result_meta_init(result, result->field_count);
-	if (!result->meta) {
-		SET_OOM_ERROR(conn->error_info);
-		DBG_RETURN(FAIL);
-	}
 
 	/* 1. Read all fields metadata */
 
@@ -704,33 +696,29 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 			}
 			{
 				*row = mnd_malloc(field_count * sizeof(char *));
-				if (*row) {
-					MYSQLND_FIELD * field = meta->fields;
-					size_t * lengths = result->unbuf->lengths;
+				MYSQLND_FIELD * field = meta->fields;
+				size_t * lengths = result->unbuf->lengths;
 
-					for (i = 0; i < field_count; i++, field++) {
-						zval * data = &result->unbuf->last_row_data[i];
-						const size_t len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
+				for (i = 0; i < field_count; i++, field++) {
+					zval * data = &result->unbuf->last_row_data[i];
+					const size_t len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 /* BEGIN difference between normal normal fetch and _c */
-						if (Z_TYPE_P(data) != IS_NULL) {
-							convert_to_string(data);
-							(*row)[i] = Z_STRVAL_P(data);
-						} else {
-							(*row)[i] = NULL;
-						}
+					if (Z_TYPE_P(data) != IS_NULL) {
+						convert_to_string(data);
+						(*row)[i] = Z_STRVAL_P(data);
+					} else {
+						(*row)[i] = NULL;
+					}
 /* END difference between normal normal fetch and _c */
 
-						if (lengths) {
-							lengths[i] = len;
-						}
-
-						if (field->max_length < len) {
-							field->max_length = len;
-						}
+					if (lengths) {
+						lengths[i] = len;
 					}
-				} else {
-					SET_OOM_ERROR(conn->error_info);
+
+					if (field->max_length < len) {
+						field->max_length = len;
+					}
 				}
 			}
 		}
@@ -930,9 +918,6 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_b
 	}
 
 	result->unbuf = mysqlnd_result_unbuffered_init(result, result->field_count, ps);
-	if (!result->unbuf) {
-		goto oom;
-	}
 
 	/*
 	  Will be freed in the mysqlnd_internal_free_result_contents() called
@@ -953,9 +938,6 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_b
 	}
 
 	DBG_RETURN(result);
-oom:
-	SET_OOM_ERROR(conn->error_info);
-	DBG_RETURN(NULL);
 }
 /* }}} */
 
@@ -1009,26 +991,21 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 			}
 
 /* BEGIN difference between normal normal fetch and _c */
-			/* there is no conn handle in this function thus we can't set OOM in error_info */
 			*row = mnd_malloc(field_count * sizeof(char *));
-			if (*row) {
-				for (i = 0; i < field_count; ++i) {
-					zval * data = &current_row[i];
+			for (i = 0; i < field_count; ++i) {
+				zval * data = &current_row[i];
 
-					set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
+				set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
-					if (Z_TYPE_P(data) != IS_NULL) {
-						convert_to_string(data);
-						(*row)[i] = Z_STRVAL_P(data);
-					} else {
-						(*row)[i] = NULL;
-					}
+				if (Z_TYPE_P(data) != IS_NULL) {
+					convert_to_string(data);
+					(*row)[i] = Z_STRVAL_P(data);
+				} else {
+					(*row)[i] = NULL;
 				}
-				set->data_cursor += field_count;
-				MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_BUF);
-			} else {
-				SET_OOM_ERROR(conn->error_info);
 			}
+			set->data_cursor += field_count;
+			MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_BUF);
 /* END difference between normal normal fetch and _c */
 
 			*fetched_anything = *row? TRUE:FALSE;
@@ -1161,11 +1138,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 		unsigned int i;
 
 		current_row = mnd_emalloc(field_count * sizeof(zval));
-		if (!current_row) {
-			SET_OOM_ERROR(conn->error_info);
-			DBG_RETURN(FAIL);
-		}
-
 		rc = result->stored_data->m.row_decoder(&result->stored_data->row_buffers[set->current_row],
 												current_row,
 												field_count,
@@ -1320,11 +1292,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 				new_row_buffers = mnd_erealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_ROW_BUFFER)));
 			} else {
 				new_row_buffers = mnd_emalloc((size_t)(total_allocated_rows * sizeof(MYSQLND_ROW_BUFFER)));
-			}
-			if (!new_row_buffers) {
-				SET_OOM_ERROR(conn->error_info);
-				ret = FAIL;
-				goto free_end;
 			}
 			*row_buffers = new_row_buffers;
 		}
