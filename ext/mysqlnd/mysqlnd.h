@@ -24,7 +24,6 @@
 
 #define MYSQLND_PLUGIN_API_VERSION 2
 
-#define MYSQLND_STRING_TO_INT_CONVERSION
 /*
   This force mysqlnd to do a single (or more depending on amount of data)
   non-blocking read() calls before sending a command to the server. Useful

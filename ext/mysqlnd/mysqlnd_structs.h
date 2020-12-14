@@ -231,9 +231,7 @@ typedef struct st_mysqlnd_session_options
 	/* maximum allowed packet size for communication */
 	unsigned int		max_allowed_packet;
 
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool	int_and_float_native;
-#endif
 } MYSQLND_SESSION_OPTIONS;
 
 

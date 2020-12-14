@@ -1555,10 +1555,8 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 											  " bytes after end of packet", (p + len) - packet_end - 1);
 			DBG_RETURN(FAIL);
 		} else {
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 			struct st_mysqlnd_perm_bind perm_bind =
 					mysqlnd_ps_fetch_functions[fields_metadata[i].type];
-#endif
 			if (MYSQLND_G(collect_statistics)) {
 				enum_mysqlnd_collected_stats statistic;
 				switch (fields_metadata[i].type) {
@@ -1594,7 +1592,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				}
 				MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1, STAT_BYTES_RECEIVED_PURE_DATA_TEXT, len);
 			}
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 			if (as_int_or_float && perm_bind.php_type == IS_LONG) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
@@ -1639,9 +1636,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				*(p + len) = '\0';
 				ZVAL_DOUBLE(current_field, atof((char *) p));
 				*(p + len) = save;
-			} else
-#endif /* MYSQLND_STRING_TO_INT_CONVERSION */
-			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
+			} else if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
 				/*
 				  BIT fields are specially handled. As they come as bit mask, they have
 				  to be converted to human-readable representation.
