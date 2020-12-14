@@ -25,8 +25,7 @@ struct st_mysqlnd_plugin__plugin_area_getters
 	void ** (*get_connection_data_area)(const MYSQLND_CONN_DATA * conn, const unsigned int plugin_id);
 	void ** (*get_result_area)(const MYSQLND_RES * result, const unsigned int plugin_id);
 	void ** (*get_unbuffered_area)(const MYSQLND_RES_UNBUFFERED * result, const unsigned int plugin_id);
-	void ** (*get_result_buffered_area)(const MYSQLND_RES_BUFFERED_ZVAL * result, const unsigned int plugin_id);
-	void ** (*get_result_buffered_aread_c)(const MYSQLND_RES_BUFFERED_C * result, const unsigned int plugin_id);
+	void ** (*get_result_buffered_aread)(const MYSQLND_RES_BUFFERED * result, const unsigned int plugin_id);
 	void ** (*get_stmt_area)(const MYSQLND_STMT * stmt, const unsigned int plugin_id);
 	void ** (*get_protocol_decoder_area)(const MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory, const unsigned int plugin_id);
 	void ** (*get_pfc_area)(const MYSQLND_PFC * pfc, const unsigned int plugin_id);
@@ -39,8 +38,7 @@ PHPAPI extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_
 #define mysqlnd_plugin_get_plugin_connection_data_data(c, p_id)			mysqlnd_plugin_area_getters.get_connection_data_area((c), (p_id))
 #define mysqlnd_plugin_get_plugin_result_data(res, p_id)				mysqlnd_plugin_area_getters.get_result_area((res), (p_id))
 #define mysqlnd_plugin_get_plugin_result_unbuffered_data(res, p_id)		mysqlnd_plugin_area_getters.get_unbuffered_area((res), (p_id))
-#define mysqlnd_plugin_get_plugin_result_buffered_data_zval(res, p_id)	mysqlnd_plugin_area_getters.get_result_buffered_area((res), (p_id))
-#define mysqlnd_plugin_get_plugin_result_buffered_data_c(res, p_id)		mysqlnd_plugin_area_getters.get_result_buffered_aread_c((res), (p_id))
+#define mysqlnd_plugin_get_plugin_result_buffered_data_c(res, p_id)		mysqlnd_plugin_area_getters.get_result_buffered_aread((res), (p_id))
 #define mysqlnd_plugin_get_plugin_stmt_data(stmt, p_id)					mysqlnd_plugin_area_getters.get_stmt_area((stmt), (p_id))
 #define mysqlnd_plugin_get_plugin_protocol_data(proto, p_id)			mysqlnd_plugin_area_getters.get_protocol_decoder_area((proto), (p_id))
 #define mysqlnd_plugin_get_plugin_pfc_data(pfc, p_id)					mysqlnd_plugin_area_getters.get_pfc_area((pfc), (p_id))

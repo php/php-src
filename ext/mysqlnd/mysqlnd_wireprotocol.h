@@ -308,11 +308,7 @@ enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-enum_func_status php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
-
-enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
+enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 

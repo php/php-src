@@ -1459,7 +1459,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 	  We create always persistent, as if the user want to connect
 	  to p:somehost, we can't convert the handle then
 	*/
-	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, TRUE)))
+	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, TRUE)))
 #endif
 	{
 		efree(mysql);
@@ -2527,11 +2527,7 @@ PHP_FUNCTION(mysqli_store_result)
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-#ifdef MYSQLI_USE_MYSQLND
-	result = flags & MYSQLI_STORE_RESULT_COPY_DATA? mysqlnd_store_result_ofs(mysql->mysql) : mysqlnd_store_result(mysql->mysql);
-#else
 	result = mysql_store_result(mysql->mysql);
-#endif
 	if (!result) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;

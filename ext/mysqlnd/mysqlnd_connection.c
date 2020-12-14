@@ -456,7 +456,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 				}
 				do {
 					if (conn->last_query_type == QUERY_SELECT) {
-						MYSQLND_RES * result = conn->m->use_result(conn, 0);
+						MYSQLND_RES * result = conn->m->use_result(conn);
 						if (result) {
 							result->m.free_result(result, TRUE);
 						}
@@ -928,7 +928,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const c
 		}
 
 		if (PASS == conn->m->query(conn, show_query, show_query_len)) {
-			result = conn->m->store_result(conn, MYSQLND_STORE_NO_COPY);
+			result = conn->m->store_result(conn);
 		}
 		if (show_query != query) {
 			mnd_sprintf_free(show_query);
@@ -1810,7 +1810,7 @@ end:
 
 /* {{{ mysqlnd_conn_data::use_result */
 static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn, const unsigned int flags)
+MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), use_result);
 	MYSQLND_RES * result = NULL;
@@ -1852,7 +1852,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn, co
 
 /* {{{ mysqlnd_conn_data::store_result */
 static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, const unsigned int flags)
+MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), store_result);
 	MYSQLND_RES * result = NULL;
@@ -1862,7 +1862,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
-			unsigned int f = flags;
 			if (!conn->current_result) {
 				break;
 			}
@@ -1875,25 +1874,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 			}
 
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
-
-			/* overwrite */
-			if ((conn->m->get_client_api_capabilities(conn) & MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA)) {
-				if (MYSQLND_G(fetch_data_copy)) {
-					f &= ~MYSQLND_STORE_NO_COPY;
-					f |= MYSQLND_STORE_COPY;
-				}
-			} else {
-				/* if for some reason PDO borks something */
-				if (!(f & (MYSQLND_STORE_NO_COPY | MYSQLND_STORE_COPY))) {
-					f |= MYSQLND_STORE_COPY;
-				}
-			}
-			if (!(f & (MYSQLND_STORE_NO_COPY | MYSQLND_STORE_COPY))) {
-				SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Unknown fetch mode");
-				DBG_ERR("Unknown fetch mode");
-				break;
-			}
-			result = conn->current_result->m.store_result(conn->current_result, conn, f);
+			result = conn->current_result->m.store_result(conn->current_result, conn, NULL);
 			if (!result) {
 				conn->current_result->m.free_result(conn->current_result, TRUE);
 			}

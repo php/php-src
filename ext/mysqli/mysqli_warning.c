@@ -125,7 +125,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 		return NULL;
 	}
 
-	result = mysql->m->use_result(mysql, 0);
+	result = mysql->m->use_result(mysql);
 
 	for (;;) {
 		zval *entry;

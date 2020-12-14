@@ -245,7 +245,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #ifndef MYSQLI_USE_MYSQLND
 		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
-		if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, persistent))) {
+		if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, persistent))) {
 #endif
 			goto err;
 		}
@@ -307,7 +307,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		}
 	}
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
-						port, socket, flags, MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA) == NULL)
+						port, socket, flags, MYSQLND_CLIENT_NO_FLAG) == NULL)
 #endif
 	{
 		/* Save error messages - for mysqli_connect_error() & mysqli_connect_errno() */
@@ -689,12 +689,7 @@ PHP_FUNCTION(mysqli_query)
 	switch (resultmode & ~MYSQLI_ASYNC) {
 #endif
 		case MYSQLI_STORE_RESULT:
-#ifdef MYSQLI_USE_MYSQLND
-			if (resultmode & MYSQLI_STORE_RESULT_COPY_DATA) {
-				result = mysqlnd_store_result_ofs(mysql->mysql);
-			} else
-#endif
-				result = mysql_store_result(mysql->mysql);
+			result = mysql_store_result(mysql->mysql);
 			break;
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
