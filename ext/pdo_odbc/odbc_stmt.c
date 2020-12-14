@@ -567,7 +567,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	SQLULEN	colsize;
 	SQLLEN displaysize = 0;
 
-	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,
+	rc = SQLDescribeCol(S->stmt, colno+1, (SQLCHAR *) S->cols[colno].colname,
 			sizeof(S->cols[colno].colname)-1, &colnamelen,
 			&S->cols[colno].coltype, &colsize, NULL, NULL);
 
@@ -777,7 +777,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val)
 	switch (attr) {
 		case PDO_ATTR_CURSOR_NAME:
 			convert_to_string(val);
-			rc = SQLSetCursorName(S->stmt, Z_STRVAL_P(val), Z_STRLEN_P(val));
+			rc = SQLSetCursorName(S->stmt, (SQLCHAR *) Z_STRVAL_P(val), Z_STRLEN_P(val));
 
 			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 				return 1;
@@ -806,7 +806,7 @@ static int odbc_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 		{
 			char buf[256];
 			SQLSMALLINT len = 0;
-			rc = SQLGetCursorName(S->stmt, buf, sizeof(buf), &len);
+			rc = SQLGetCursorName(S->stmt, (SQLCHAR *) buf, sizeof(buf), &len);
 
 			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 				ZVAL_STRINGL(val, buf, len);
