@@ -3058,8 +3058,10 @@ static zend_result accel_post_startup(void)
 		zend_accel_error(ACCEL_LOG_FATAL, "opcache.file_cache_only is set without a proper setting of opcache.file_cache");
 		return SUCCESS;
 	} else {
+#ifdef HAVE_JIT
 		JIT_G(enabled) = 0;
 		JIT_G(on) = 0;
+#endif
 		accel_shared_globals = calloc(1, sizeof(zend_accel_shared_globals));
 
 		/* Init auto-global strings */
