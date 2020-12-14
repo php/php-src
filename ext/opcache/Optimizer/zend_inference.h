@@ -29,7 +29,7 @@
 #define MAY_BE_PACKED_GUARD         (1<<27) /* needs packed array guard */
 #define MAY_BE_CLASS_GUARD          (1<<27) /* needs class guard */
 #define MAY_BE_GUARD                (1<<28) /* needs type guard */
-#define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
+//#define MAY_BE_IN_REG               (1<<29) /* deprecated and not used */
 
 //TODO: remome MAY_BE_RC1, MAY_BE_RCN???
 #define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
