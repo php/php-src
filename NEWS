@@ -35,6 +35,8 @@ PHP                                                                        NEWS
   . Fixed bug #80447 (Strange out of memory error when running with JIT).
     (Dmitry)
   . Fixed bug #80480 (Segmentation fault with JIT enabled). (Dmitry)
+  . Fixed bug #80506 (Immediate SIGSEGV upon ini_set("opcache.jit_debug", 1)).
+    (Dmitry)
 
 - OpenSSL:
   . Fixed bug #80368 (OpenSSL extension fails to build against LibreSSL due to
