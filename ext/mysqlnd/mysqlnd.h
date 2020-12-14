@@ -309,9 +309,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_long		log_mask;
 	zend_long		net_read_timeout;
 	zend_long		mempool_default_size;
-	zend_long		debug_emalloc_fail_threshold;
-	zend_long		debug_ecalloc_fail_threshold;
-	zend_long		debug_erealloc_fail_threshold;
 	zend_long		debug_malloc_fail_threshold;
 	zend_long		debug_calloc_fail_threshold;
 	zend_long		debug_realloc_fail_threshold;
