@@ -695,7 +695,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 				DBG_RETURN(FAIL);
 			}
 			{
-				*row = mnd_malloc(field_count * sizeof(char *));
+				*row = mnd_emalloc(field_count * sizeof(char *));
 				MYSQLND_FIELD * field = meta->fields;
 				size_t * lengths = result->unbuf->lengths;
 
@@ -991,7 +991,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 			}
 
 /* BEGIN difference between normal normal fetch and _c */
-			*row = mnd_malloc(field_count * sizeof(char *));
+			*row = mnd_emalloc(field_count * sizeof(char *));
 			for (i = 0; i < field_count; ++i) {
 				zval * data = &current_row[i];
 

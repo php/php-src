@@ -106,7 +106,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 
 #ifdef PDO_USE_MYSQLND
 	if (!S->stmt && S->current_data) {
-		mnd_free(S->current_data);
+		mnd_efree(S->current_data);
 	}
 #endif /* PDO_USE_MYSQLND */
 
@@ -554,7 +554,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	}
 
 	if (!S->stmt && S->current_data) {
-		mnd_free(S->current_data);
+		mnd_efree(S->current_data);
 	}
 #else
 	int ret;
