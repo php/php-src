@@ -89,7 +89,6 @@ typedef struct st_mysqlnd_field
 	const char  *catalog;		/* Catalog for table */
 	char  *def;                 /* Default value */
 	zend_ulong length;		/* Width of column (create length) */
-	zend_ulong max_length;	/* Max width for selected set */
 	unsigned int name_length;
 	unsigned int org_name_length;
 	unsigned int table_length;
@@ -718,8 +717,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered)
 };
 
 typedef uint64_t			(*func_mysqlnd_result_buffered__num_rows)(const MYSQLND_RES_BUFFERED * const result);
-typedef enum_func_status	(*func_mysqlnd_result_buffered__initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta,
-																						MYSQLND_STATS * stats, const zend_bool int_and_float_native);
 typedef const size_t *		(*func_mysqlnd_result_buffered__fetch_lengths)(const MYSQLND_RES_BUFFERED * const result);
 typedef enum_func_status	(*func_mysqlnd_result_buffered__data_seek)(MYSQLND_RES_BUFFERED * const result, const uint64_t row);
 typedef void				(*func_mysqlnd_result_buffered__free_result)(MYSQLND_RES_BUFFERED * const result);
@@ -731,7 +728,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered)
 	func_mysqlnd_result_buffered__num_rows		num_rows;
 	func_mysqlnd_result_buffered__fetch_lengths	fetch_lengths;
 	func_mysqlnd_result_buffered__data_seek		data_seek;
-	func_mysqlnd_result_buffered__initialize_result_set_rest initialize_result_set_rest;
 	func_mysqlnd_result_buffered__free_result	free_result;
 };
 
@@ -1185,7 +1181,6 @@ struct st_mysqlnd_result_metadata
 #define def_mysqlnd_buffered_result_parent 			\
 	MYSQLND_ROW_BUFFER	*row_buffers;				\
 	uint64_t			row_count;					\
-	uint64_t			initialized_rows;			\
 													\
 	/*  Column lengths of current row - both buffered and unbuffered. For buffered results it duplicates the data found in **data */ \
 	size_t				*lengths;					\
@@ -1224,7 +1219,6 @@ struct st_mysqlnd_buffered_result_c
 {
 	def_mysqlnd_buffered_result_parent;
 
-	zend_uchar	*initialized; /* every row is a single bit */
 	uint64_t	current_row;
 };
 

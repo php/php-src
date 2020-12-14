@@ -766,22 +766,6 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 					if (PASS != rc) {
 						DBG_RETURN(FAIL);
 					}
-					result->stored_data->initialized_rows++;
-					if (stmt->update_max_length) {
-						for (i = 0; i < result->field_count; i++) {
-							/*
-							  NULL fields are 0 length, 0 is not more than 0
-							  String of zero size, definitely can't be the next max_length.
-							  Thus for NULL and zero-length we are quite efficient.
-							*/
-							if (Z_TYPE(current_row[i]) == IS_STRING) {
-								zend_ulong len = Z_STRLEN(current_row[i]);
-								if (meta->fields[i].max_length < len) {
-									meta->fields[i].max_length = len;
-								}
-							}
-						}
-					}
 				}
 
 				for (i = 0; i < result->field_count; i++) {
@@ -820,7 +804,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_PACKET_ROW * row_packet;
 	MYSQLND_CONN_DATA * conn = result->conn;
-	const MYSQLND_RES_METADATA * const meta = result->meta;
 	void *checkpoint;
 
 	DBG_ENTER("mysqlnd_stmt_fetch_row_unbuffered");
@@ -873,11 +856,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 				zval *resultzv = &stmt->result_bind[i].zv;
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
-
-					if (Z_TYPE_P(data) == IS_STRING && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
-						meta->fields[i].max_length = Z_STRLEN_P(data);
-					}
-
 					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
@@ -1026,7 +1004,6 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 
 	UPSERT_STATUS_RESET(stmt->upsert_status);
 	if (PASS == (ret = PACKET_READ(conn, row_packet)) && !row_packet->eof) {
-		const MYSQLND_RES_METADATA * const meta = result->meta;
 		unsigned int i, field_count = result->field_count;
 
 		if (stmt->result_bind) {
@@ -1054,11 +1031,6 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, &stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
 							   	Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
-
-					if (Z_TYPE_P(data) == IS_STRING &&
-							(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
-						meta->fields[i].max_length = Z_STRLEN_P(data);
-					}
 
 					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
@@ -1744,13 +1716,6 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s)
 		DBG_RETURN(NULL);
 	}
 
-	if (stmt->update_max_length && stmt->result->stored_data) {
-		/* stored result, we have to update the max_length before we clone the meta data :( */
-		stmt->result->stored_data->m.initialize_result_set_rest(stmt->result->stored_data,
-																stmt->result->meta,
-																conn->stats,
-																conn->options->int_and_float_native);
-	}
 	/*
 	  TODO: This implementation is kind of a hack,
 			find a better way to do it. In different functions I have put

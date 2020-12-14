@@ -1116,7 +1116,7 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field)
 	 */
 	add_property_string(value, "catalog", "def");
 
-	add_property_long(value, "max_length", field->max_length);
+	add_property_long(value, "max_length", 0);
 	add_property_long(value, "length", field->length);
 	add_property_long(value, "charsetnr", field->charsetnr);
 	add_property_long(value, "flags", field->flags);
