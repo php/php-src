@@ -195,18 +195,14 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	php_filter_encode_html(value, enc);
 
 	/* strip tags, implicitly also removes \0 chars */
-	new_string = php_strip_tags_ex(Z_STR_P(value), Z_STRLEN_P(value), NULL, 0, 1);
+	new_string = php_strip_tags_ex(Z_STR_P(value), NULL, 0, 1);
 	new_len = ZSTR_LEN(new_string);
 
 	memcpy(value->value.str->val,ZSTR_VAL(new_string),new_len);
 	value->value.str->val[new_len] = '\0';
 	value->value.str->len = new_len;
 
-	// value->value.str->val = '\0';
-	// value->value.str->len = new_len;
-
 	zend_string_release(new_string);
-	// php_printf("\n value: [%s] ",value->value.str->val);
 
 	if (new_len == 0) {
 		zval_ptr_dtor(value);

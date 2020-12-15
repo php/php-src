@@ -4565,7 +4565,7 @@ PHP_FUNCTION(strip_tags)
 	}
 
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-	stripped_tag_buf = php_strip_tags_ex(buf, ZSTR_LEN(buf), allowed_tags, allowed_tags_len, 0);
+	stripped_tag_buf = php_strip_tags_ex(buf, allowed_tags, allowed_tags_len, 0);
 	
 	zend_string_release(buf);
 	smart_str_free(&tags_ss);
@@ -4775,9 +4775,9 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 }
 /* }}} */
 
-PHPAPI zend_string* php_strip_tags(zend_string *rbuf, size_t len, const char *allow, size_t allow_len) /* {{{ */
+PHPAPI zend_string* php_strip_tags(zend_string *rbuf, const char *allow, size_t allow_len) /* {{{ */
 {
-	return php_strip_tags_ex(rbuf, len, allow, allow_len, 0);
+	return php_strip_tags_ex(rbuf, allow, allow_len, 0);
 }
 /* }}} */
 
@@ -4789,7 +4789,7 @@ PHPAPI zend_string* php_strip_tags(zend_string *rbuf, size_t len, const char *al
 #define _PHP_STRIP_TAGS_ENCODE_CHAR(ENCODE_CHAR,LEN_CHAR)  \
 	if (((tp - tbuf) + LEN_CHAR) >= PHP_TAG_BUF_SIZE) { \
 		pos = tp - tbuf; \
-		tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + LEN_CHAR ); \
+		tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + LEN_CHAR+1 ); \
 		tp = tbuf + pos; \
 	} \
 	\
@@ -4817,7 +4817,7 @@ PHPAPI zend_string* php_strip_tags(zend_string *rbuf, size_t len, const char *al
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_input, size_t len, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_input, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *tp, *rp, c, lc, *r_stripped_buffer;
 	const char *buf, *p, *end;
@@ -4828,6 +4828,7 @@ PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_input, size_t len
 	char is_xml = 0;
 	const int len_lt = 4; 
 	const int len_gt = 4; 
+	size_t len = ZSTR_LEN(zend_string_input);
 
 	buf = estrndup(ZSTR_VAL(zend_string_input), len);
 	p = buf;
@@ -5184,7 +5185,7 @@ finish:
 	}
 	
 	if (lenrbuf > 0 ) {
-		new_string =  zend_string_init(r_stripped_buffer,lenrbuf,0); //fix buf69203
+		new_string =  zend_string_init(r_stripped_buffer,lenrbuf,0);
 	}
 
 	efree(r_stripped_buffer);
