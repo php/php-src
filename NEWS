@@ -49,9 +49,6 @@ PHP                                                                        NEWS
   . Fixed bug #76815 (PDOStatement cannot be GCed/closeCursor-ed when a
     PROCEDURE resultset SIGNAL). (Nikita)
 
-- Phpdbg:
-  . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
-
 - Standard:
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
   . Fixed bug #80411 (References to null-serialized object break serialize()).
