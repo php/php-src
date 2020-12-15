@@ -520,6 +520,12 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 		case PDO_PARAM_ZVAL:
 			if (value && value_len == sizeof(zval)) {
 				ZVAL_COPY_VALUE(dest, (zval *)value);
+
+				if (Z_TYPE_P(dest) == IS_STRING && Z_STRLEN_P(dest) == 0
+						&& stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING) {
+					zval_ptr_dtor_str(dest);
+					ZVAL_NULL(dest);
+				}
 			} else {
 				ZVAL_NULL(dest);
 			}

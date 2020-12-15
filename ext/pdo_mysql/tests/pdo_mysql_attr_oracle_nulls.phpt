@@ -112,11 +112,11 @@ array(1) {
     ["z"]=>
     NULL
     ["a"]=>
-    string(0) ""
+    NULL
     ["b"]=>
     string(1) " "
     ["c"]=>
-    string(0) ""
+    NULL
     ["d"]=>
     string(2) " d"
     ["e"]=>
@@ -131,11 +131,11 @@ array(1) {
     ["z"]=>
     NULL
     ["a"]=>
-    string(0) ""
+    NULL
     ["b"]=>
     string(1) " "
     ["c"]=>
-    string(0) ""
+    NULL
     ["d"]=>
     string(2) " d"
     ["e"]=>
