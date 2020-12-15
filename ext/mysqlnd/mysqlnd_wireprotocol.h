@@ -206,7 +206,6 @@ typedef struct st_mysqlnd_packet_res_field {
 /* Row packet */
 typedef struct st_mysqlnd_packet_row {
 	MYSQLND_PACKET_HEADER	header;
-	zval		*fields;
 	uint32_t	field_count;
 	zend_bool	eof;
 	/*
@@ -219,7 +218,6 @@ typedef struct st_mysqlnd_packet_row {
 	MYSQLND_ROW_BUFFER	row_buffer;
 	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 
-	zend_bool		skip_extraction;
 	zend_bool		binary_protocol;
 	MYSQLND_FIELD	*fields_metadata;
 

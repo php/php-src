@@ -1696,10 +1696,6 @@ php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 
 
 /* {{{ php_mysqlnd_rowp_read */
-/*
-  if normal statements => packet->fields is created by this function,
-  if PS => packet->fields is passed from outside
-*/
 static enum_func_status
 php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -1760,33 +1756,10 @@ php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			DBG_INF_FMT("server_status=%u warning_count=%u", packet->server_status, packet->warning_count);
 		}
 	} else {
+		packet->eof = FALSE;
 		MYSQLND_INC_CONN_STATISTIC(stats,
 									packet->binary_protocol? STAT_ROWS_FETCHED_FROM_SERVER_PS:
 															 STAT_ROWS_FETCHED_FROM_SERVER_NORMAL);
-
-		packet->eof = FALSE;
-		/* packet->field_count is set by the user of the packet */
-
-		if (!packet->skip_extraction) {
-			if (!packet->fields) {
-				DBG_INF("Allocating packet->fields");
-				/*
-				  old-API will probably set packet->fields to NULL every time, though for
-				  unbuffered sets it makes not much sense as the zvals in this buffer matter,
-				  not the buffer. Constantly allocating and deallocating brings nothing.
-
-				  For PS - if stmt_store() is performed, thus we don't have a cursor, it will
-				  behave just like old-API buffered. Cursors will behave like a bit different,
-				  but mostly like old-API unbuffered and thus will populate this array with
-				  value.
-				*/
-				packet->fields = mnd_ecalloc(packet->field_count, sizeof(zval));
-			}
-		} else {
-			MYSQLND_INC_CONN_STATISTIC(stats,
-										packet->binary_protocol? STAT_ROWS_SKIPPED_PS:
-																 STAT_ROWS_SKIPPED_NORMAL);
-		}
 	}
 
 end:
@@ -1807,13 +1780,6 @@ php_mysqlnd_rowp_free_mem(void * _packet)
 		p->result_set_memory_pool->free_chunk(p->result_set_memory_pool, p->row_buffer.ptr);
 		p->row_buffer.ptr = NULL;
 	}
-	/*
-	  Don't free packet->fields :
-	  - normal queries -> store_result() | fetch_row_unbuffered() will transfer
-	    the ownership and NULL it.
-	  - PS will pass in it the bound variables, we have to use them! and of course
-	    not free the array. As it is passed to us, we should not clean it ourselves.
-	*/
 	DBG_VOID_RETURN;
 }
 /* }}} */

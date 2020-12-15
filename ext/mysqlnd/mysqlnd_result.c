@@ -147,18 +147,12 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 	}
 
 	DBG_INF_FMT("field_count=%u", unbuf->field_count);
-	if (unbuf->last_row_data) {
-		unsigned int i;
-		for (i = 0; i < unbuf->field_count; i++) {
-			zval_ptr_dtor_nogc(&(unbuf->last_row_data[i]));
-		}
-
-		/* Free last row's zvals */
-		mnd_efree(unbuf->last_row_data);
-		unbuf->last_row_data = NULL;
-	}
 	if (unbuf->last_row_buffer.ptr) {
 		DBG_INF("Freeing last row buffer");
+		for (unsigned i = 0; i < unbuf->field_count; i++) {
+			zval_ptr_dtor_nogc(&unbuf->last_row_data[i]);
+		}
+
 		/* Nothing points to this buffer now, free it */
 		unbuf->result_set_memory_pool->free_chunk(
 			unbuf->result_set_memory_pool, unbuf->last_row_buffer.ptr);
@@ -612,7 +606,7 @@ static const size_t *
 MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(const MYSQLND_RES_UNBUFFERED * const result)
 {
 	/* simulate output of libmysql */
-	return (result->last_row_data || result->eof_reached)? result->lengths : NULL;
+	return (result->last_row_buffer.ptr || result->eof_reached)? result->lengths : NULL;
 }
 /* }}} */
 
@@ -660,8 +654,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		/* Not fully initialized object that is being cleaned up */
 		DBG_RETURN(FAIL);
 	}
-	/* Let the row packet fill our buffer and skip additional mnd_malloc + memcpy */
-	row_packet->skip_extraction = FALSE;
 
 	checkpoint = result->memory_pool->checkpoint;
 	mysqlnd_mempool_save_state(result->memory_pool);
@@ -673,52 +665,48 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 	if (PASS == (ret = PACKET_READ(conn, row_packet)) && !row_packet->eof) {
 		result->unbuf->m.free_last_data(result->unbuf, conn->stats);
 
-		result->unbuf->last_row_data = row_packet->fields;
 		result->unbuf->last_row_buffer = row_packet->row_buffer;
-		row_packet->fields = NULL;
 		row_packet->row_buffer.ptr = NULL;
 
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
 
-		if (!row_packet->skip_extraction) {
-			unsigned int i, field_count = meta->field_count;
+		unsigned int i, field_count = meta->field_count;
 
-			enum_func_status rc = result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
-											result->unbuf->last_row_data,
-											field_count,
-											row_packet->fields_metadata,
-											conn->options->int_and_float_native,
-											conn->stats);
-			if (PASS != rc) {
-				mysqlnd_mempool_restore_state(result->memory_pool);
-				result->memory_pool->checkpoint = checkpoint;
-				DBG_RETURN(FAIL);
-			}
-			{
-				*row = mnd_emalloc(field_count * sizeof(char *));
-				MYSQLND_FIELD * field = meta->fields;
-				size_t * lengths = result->unbuf->lengths;
+		enum_func_status rc = result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
+										result->unbuf->last_row_data,
+										field_count,
+										row_packet->fields_metadata,
+										conn->options->int_and_float_native,
+										conn->stats);
+		if (PASS != rc) {
+			mysqlnd_mempool_restore_state(result->memory_pool);
+			result->memory_pool->checkpoint = checkpoint;
+			DBG_RETURN(FAIL);
+		}
+		{
+			*row = mnd_emalloc(field_count * sizeof(char *));
+			MYSQLND_FIELD * field = meta->fields;
+			size_t * lengths = result->unbuf->lengths;
 
-				for (i = 0; i < field_count; i++, field++) {
-					zval * data = &result->unbuf->last_row_data[i];
-					const size_t len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
+			for (i = 0; i < field_count; i++, field++) {
+				zval * data = &result->unbuf->last_row_data[i];
+				const size_t len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 /* BEGIN difference between normal normal fetch and _c */
-					if (Z_TYPE_P(data) != IS_NULL) {
-						convert_to_string(data);
-						(*row)[i] = Z_STRVAL_P(data);
-					} else {
-						(*row)[i] = NULL;
-					}
+				if (Z_TYPE_P(data) != IS_NULL) {
+					convert_to_string(data);
+					(*row)[i] = Z_STRVAL_P(data);
+				} else {
+					(*row)[i] = NULL;
+				}
 /* END difference between normal normal fetch and _c */
 
-					if (lengths) {
-						lengths[i] = len;
-					}
+				if (lengths) {
+					lengths[i] = len;
+				}
 
-					if (field->max_length < len) {
-						field->max_length = len;
-					}
+				if (field->max_length < len) {
+					field->max_length = len;
 				}
 			}
 		}
@@ -788,8 +776,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		/* Not fully initialized object that is being cleaned up */
 		DBG_RETURN(FAIL);
 	}
-	/* Let the row packet fill our buffer and skip additional mnd_malloc + memcpy */
-	row_packet->skip_extraction = row? FALSE:TRUE;
 
 	checkpoint = result->memory_pool->checkpoint;
 	mysqlnd_mempool_save_state(result->memory_pool);
@@ -801,14 +787,12 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 	if (PASS == (ret = PACKET_READ(conn, row_packet)) && !row_packet->eof) {
 		result->unbuf->m.free_last_data(result->unbuf, conn->stats);
 
-		result->unbuf->last_row_data = row_packet->fields;
 		result->unbuf->last_row_buffer = row_packet->row_buffer;
-		row_packet->fields = NULL;
 		row_packet->row_buffer.ptr = NULL;
 
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
 
-		if (!row_packet->skip_extraction) {
+		if (row) {
 			unsigned int i, field_count = meta->field_count;
 
 			enum_func_status rc = result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
@@ -1263,8 +1247,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	row_packet.binary_protocol = binary_protocol;
 	row_packet.fields_metadata = meta->fields;
 
-	row_packet.skip_extraction = TRUE; /* let php_mysqlnd_rowp_read() not allocate row_packet.fields, we will do it */
-
 	while (FAIL != (ret = PACKET_READ(conn, &row_packet)) && !row_packet.eof) {
 		if (!free_rows) {
 			MYSQLND_ROW_BUFFER * new_row_buffers;
@@ -1301,7 +1283,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		set->row_count++;
 
 		/* So row_packet's destructor function won't efree() it */
-		row_packet.fields = NULL;
 		row_packet.row_buffer.ptr = NULL;
 
 		/*
@@ -1459,7 +1440,9 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 																		STAT_FLUSHED_PS_SETS);
 
 		while ((PASS == result->m.fetch_row(result, NULL, 0, &fetched_anything)) && fetched_anything == TRUE) {
-			/* do nothing */;
+			MYSQLND_INC_CONN_STATISTIC(conn->stats,
+				result->type == MYSQLND_RES_NORMAL
+					? STAT_ROWS_SKIPPED_NORMAL : STAT_ROWS_SKIPPED_PS);
 		}
 	}
 	DBG_RETURN(PASS);
@@ -1879,6 +1862,9 @@ mysqlnd_result_unbuffered_init(MYSQLND_RES *result, const unsigned int field_cou
 
 	ret->lengths = pool->get_chunk(pool, field_count * sizeof(size_t));
 	memset(ret->lengths, 0, field_count * sizeof(size_t));
+
+	ret->last_row_data = pool->get_chunk(pool, field_count * sizeof(zval));
+	memset(ret->last_row_data, 0, field_count * sizeof(zval));
 
 	ret->result_set_memory_pool = pool;
 	ret->field_count= field_count;

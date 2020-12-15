@@ -841,9 +841,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 		DBG_RETURN(FAIL);
 	}
 
-	/* Let the row packet fill our buffer and skip additional malloc + memcpy */
-	row_packet->skip_extraction = stmt && stmt->result_bind? FALSE:TRUE;
-
 	checkpoint = result->memory_pool->checkpoint;
 	mysqlnd_mempool_save_state(result->memory_pool);
 
@@ -854,12 +851,10 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 	if (PASS == (ret = PACKET_READ(conn, row_packet)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
 
-		if (!row_packet->skip_extraction) {
+		if (stmt && stmt->result_bind) {
 			result->unbuf->m.free_last_data(result->unbuf, conn->stats);
 
-			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
-			row_packet->fields = NULL;
 			row_packet->row_buffer.ptr = NULL;
 
 			if (PASS != result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
@@ -1029,19 +1024,15 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 
 	}
 
-	row_packet->skip_extraction = stmt->result_bind? FALSE:TRUE;
-
 	UPSERT_STATUS_RESET(stmt->upsert_status);
 	if (PASS == (ret = PACKET_READ(conn, row_packet)) && !row_packet->eof) {
 		const MYSQLND_RES_METADATA * const meta = result->meta;
 		unsigned int i, field_count = result->field_count;
 
-		if (!row_packet->skip_extraction) {
+		if (stmt->result_bind) {
 			result->unbuf->m.free_last_data(result->unbuf, conn->stats);
 
-			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
-			row_packet->fields = NULL;
 			row_packet->row_buffer.ptr = NULL;
 
 			if (PASS != result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
