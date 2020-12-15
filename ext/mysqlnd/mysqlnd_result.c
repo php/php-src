@@ -1692,8 +1692,7 @@ MYSQLND_METHOD(mysqlnd_res, field_tell)(const MYSQLND_RES * const result)
 /* {{{ mysqlnd_res::fetch_into */
 static void
 MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int flags,
-										zval *return_value,
-										enum_mysqlnd_extension extension ZEND_FILE_LINE_DC)
+										zval *return_value ZEND_FILE_LINE_DC)
 {
 	zend_bool fetched_anything;
 	unsigned int array_size;
@@ -1715,15 +1714,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 		RETVAL_FALSE;
 	} else if (fetched_anything == FALSE) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		switch (extension) {
-			case MYSQLND_MYSQLI:
-				RETVAL_NULL();
-				break;
-			case MYSQLND_MYSQL:
-				RETVAL_FALSE;
-				break;
-			default:exit(0);
-		}
+		RETVAL_NULL();
 	}
 	/*
 	  return_value is IS_NULL for no more data and an array for data. Thus it's ok
@@ -1778,7 +1769,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 	array_init_size(return_value, set? (unsigned int) set->row_count : 4);
 
 	do {
-		mysqlnd_fetch_into(result, flags, &row, MYSQLND_MYSQLI);
+		mysqlnd_fetch_into(result, flags, &row);
 		if (Z_TYPE(row) != IS_ARRAY) {
 			zval_ptr_dtor_nogc(&row);
 			break;

@@ -98,7 +98,7 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
 PHPAPI void mysqlnd_debug(const char *mode);
 
 /* Query */
-#define mysqlnd_fetch_into(result, flags, ret_val, ext)	(result)->m.fetch_into((result), (flags), (ret_val), (ext) ZEND_FILE_LINE_CC)
+#define mysqlnd_fetch_into(result, flags, ret_val)	(result)->m.fetch_into((result), (flags), (ret_val) ZEND_FILE_LINE_CC)
 #define mysqlnd_fetch_row_c(result)						(result)->m.fetch_row_c((result))
 #define mysqlnd_fetch_all(result, flags, return_value)	(result)->m.fetch_all((result), (flags), (return_value) ZEND_FILE_LINE_CC)
 #define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) ZEND_FILE_LINE_CC)

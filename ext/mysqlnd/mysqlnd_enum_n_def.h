@@ -148,12 +148,6 @@
 #define TRANS_COR_RELEASE		4
 #define TRANS_COR_NO_RELEASE	8
 
-typedef enum mysqlnd_extension
-{
-	MYSQLND_MYSQL = 0,
-	MYSQLND_MYSQLI
-} enum_mysqlnd_extension;
-
 enum
 {
 	MYSQLND_FETCH_ASSOC = 1,

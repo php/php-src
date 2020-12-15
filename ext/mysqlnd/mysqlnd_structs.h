@@ -641,7 +641,7 @@ typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_ROW_BUFFER * r
 
 typedef MYSQLND_RES *		(*func_mysqlnd_res__use_result)(MYSQLND_RES * const result, const zend_bool ps_protocol);
 typedef MYSQLND_RES *		(*func_mysqlnd_res__store_result)(MYSQLND_RES * result, MYSQLND_CONN_DATA * const conn, const unsigned int flags);
-typedef void 				(*func_mysqlnd_res__fetch_into)(MYSQLND_RES *result, const unsigned int flags, zval *return_value, enum_mysqlnd_extension ext ZEND_FILE_LINE_DC);
+typedef void 				(*func_mysqlnd_res__fetch_into)(MYSQLND_RES *result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC);
 typedef MYSQLND_ROW_C 		(*func_mysqlnd_res__fetch_row_c)(MYSQLND_RES *result);
 typedef void 				(*func_mysqlnd_res__fetch_all)(MYSQLND_RES *result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC);
 typedef uint64_t			(*func_mysqlnd_res__num_rows)(const MYSQLND_RES * const result);
