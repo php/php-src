@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.1RC1
+?? ??? ????, PHP 8.0.2RC1
+
+
+07 Jan 2021, PHP 8.0.1
 
 - Core:
   . Fixed bug #80345 (PHPIZE configuration has outdated PHP_RELEASE_VERSION).
