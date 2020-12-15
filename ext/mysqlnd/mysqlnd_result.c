@@ -1791,42 +1791,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 /* }}} */
 
 
-/* {{{ mysqlnd_res::fetch_field_data */
-static void
-MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, const unsigned int offset, zval *return_value)
-{
-	zval row;
-	zval *entry;
-	unsigned int i = 0;
-
-	DBG_ENTER("mysqlnd_res::fetch_field_data");
-	DBG_INF_FMT("offset=%u", offset);
-	/*
-	  Hint Zend how many elements we will have in the hash. Thus it won't
-	  extend and rehash the hash constantly.
-	*/
-	mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQL);
-	if (Z_TYPE(row) != IS_ARRAY) {
-		zval_ptr_dtor_nogc(&row);
-		RETVAL_NULL();
-		DBG_VOID_RETURN;
-	}
-
-	zend_hash_internal_pointer_reset(Z_ARRVAL(row));
-	while (i++ < offset) {
-		zend_hash_move_forward(Z_ARRVAL(row));
-	}
-
-	entry = zend_hash_get_current_data(Z_ARRVAL(row));
-
-	ZVAL_COPY(return_value, entry);
-	zval_ptr_dtor_nogc(&row);
-
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, fetch_row),
 	MYSQLND_METHOD(mysqlnd_res, use_result),
@@ -1834,7 +1798,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, fetch_into),
 	MYSQLND_METHOD(mysqlnd_res, fetch_row_c),
 	MYSQLND_METHOD(mysqlnd_res, fetch_all),
-	MYSQLND_METHOD(mysqlnd_res, fetch_field_data),
 	MYSQLND_METHOD(mysqlnd_res, num_rows),
 	MYSQLND_METHOD(mysqlnd_res, num_fields),
 	MYSQLND_METHOD(mysqlnd_res, skip_result),

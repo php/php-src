@@ -644,7 +644,6 @@ typedef MYSQLND_RES *		(*func_mysqlnd_res__store_result)(MYSQLND_RES * result, M
 typedef void 				(*func_mysqlnd_res__fetch_into)(MYSQLND_RES *result, const unsigned int flags, zval *return_value, enum_mysqlnd_extension ext ZEND_FILE_LINE_DC);
 typedef MYSQLND_ROW_C 		(*func_mysqlnd_res__fetch_row_c)(MYSQLND_RES *result);
 typedef void 				(*func_mysqlnd_res__fetch_all)(MYSQLND_RES *result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC);
-typedef void 				(*func_mysqlnd_res__fetch_field_data)(MYSQLND_RES *result, const unsigned int offset, zval *return_value);
 typedef uint64_t			(*func_mysqlnd_res__num_rows)(const MYSQLND_RES * const result);
 typedef unsigned int		(*func_mysqlnd_res__num_fields)(const MYSQLND_RES * const result);
 typedef enum_func_status	(*func_mysqlnd_res__skip_result)(MYSQLND_RES * const result);
@@ -678,7 +677,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res)
 	func_mysqlnd_res__fetch_into fetch_into;
 	func_mysqlnd_res__fetch_row_c fetch_row_c;
 	func_mysqlnd_res__fetch_all fetch_all;
-	func_mysqlnd_res__fetch_field_data fetch_field_data;
 	func_mysqlnd_res__num_rows num_rows;
 	func_mysqlnd_res__num_fields num_fields;
 	func_mysqlnd_res__skip_result skip_result;
