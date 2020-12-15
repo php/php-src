@@ -161,16 +161,10 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 }
 /* }}} */
 
-static char *phar_find_eocd(char *s, size_t n)
+static char *phar_find_eocd(const char *s, size_t n)
 {
-	char *p;
-
-	for (p = s + n - 1; p >= s; p--) {
-		if (*p == 'P' && ((p - s) + sizeof(phar_zip_dir_end) <= n && !memcmp(p + 1, "K\5\6", 3))) {
-			return p;
-		}
-	}
-	return NULL;
+	const char *end = s + n + sizeof("PK\5\6") - 1 - sizeof(phar_zip_dir_end);
+	return (char *) zend_memnrstr(s, "PK\5\6", sizeof("PK\5\6") - 1, end);
 }
 
 /**
@@ -217,7 +211,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alia
 		return FAILURE;
 	}
 
-	if ((p = phar_find_eocd(buf, (size_t) size)) != NULL) {
+	if ((p = phar_find_eocd(buf, size)) != NULL) {
 		memcpy((void *)&locator, (void *) p, sizeof(locator));
 		if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
 			/* split archives not handled */
