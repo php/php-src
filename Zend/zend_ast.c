@@ -1981,8 +1981,6 @@ simple_list:
 		case ZEND_AST_MATCH:
 			if (ast->attr & ZEND_MATCH_SHORT) {
 				smart_str_appends(str, "match {\n");
-//				zend_ast_export_ex(str, ast->child[0], 0, indent);
-//				smart_str_appends(str, ") {\n");
 				zend_ast_export_ex(str, ast->child[1], 0, indent + 1);
 				zend_ast_export_indent(str, indent);
 				smart_str_appendc(str, '}');
