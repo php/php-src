@@ -10,6 +10,7 @@ MySQLPDOTest::skip();
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 $stmt = $db->query('SELECT 1; SELECT x FROM does_not_exist');
 var_dump($stmt->fetchAll());

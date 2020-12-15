@@ -11,6 +11,8 @@ $db = MySQLPDOTest::factory();
 <?php
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+
     try {
         $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
@@ -82,7 +84,7 @@ array(1) {
     ["?"]=>
     string(2) "id"
     ["id"]=>
-    int(1)
+    string(1) "1"
     ["label"]=>
     string(4) "row1"
   }

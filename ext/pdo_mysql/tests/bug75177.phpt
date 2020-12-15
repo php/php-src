@@ -18,14 +18,23 @@ $pdo->query("INSERT INTO $tbl (`bit`) VALUES (1)");
 $pdo->query("INSERT INTO $tbl (`bit`) VALUES (0b011)");
 $pdo->query("INSERT INTO $tbl (`bit`) VALUES (0b01100)");
 
+$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $ret = $pdo->query("SELECT * FROM $tbl")->fetchAll();
+foreach ($ret as $i) {
+    var_dump($i["bit"]);
+}
 
+$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+$ret = $pdo->query("SELECT * FROM $tbl")->fetchAll();
 foreach ($ret as $i) {
     var_dump($i["bit"]);
 }
 
 ?>
 --EXPECT--
-string(1) "1"
-string(1) "3"
-string(2) "12"
+int(1)
+int(3)
+int(12)
+int(1)
+int(3)
+int(12)

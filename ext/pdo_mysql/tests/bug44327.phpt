@@ -45,17 +45,17 @@ object(PDORow)#%d (2) {
   ["queryString"]=>
   string(17) "SELECT 1 AS "one""
   ["one"]=>
-  string(1) "1"
+  int(1)
 }
-string(1) "1"
-string(1) "1"
+int(1)
+int(1)
 string(17) "SELECT 1 AS "one""
 ----------------------------------
-object(PDORow)#%d (2) {
+object(PDORow)#5 (2) {
   ["queryString"]=>
   string(19) "SELECT id FROM test"
   ["id"]=>
-  string(1) "1"
+  int(1)
 }
 string(19) "SELECT id FROM test"
 ----------------------------------

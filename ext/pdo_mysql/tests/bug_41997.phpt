@@ -21,6 +21,7 @@ if ($version < 50000)
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 $db->exec('DROP PROCEDURE IF EXISTS p');
 $db->exec('CREATE PROCEDURE p() BEGIN SELECT 1 AS "one"; END');
