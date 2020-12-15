@@ -70,7 +70,9 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed bug #73809 (Phar Zip parse crash - mmap fail). (cmb)
-  . Fixed #75102 (`PharData` says invalid checksum for valid tar). (cmb)
+  . Fixed bug #75102 (`PharData` says invalid checksum for valid tar). (cmb)
+  . Fixed bug #77322 (PharData::addEmptyDir('/') Possible integer overflow).
+    (cmb)
 
 - Phpdbg:
   . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)

@@ -567,7 +567,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 	} else {
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
 	}
-	if (is_dir) {
+	if (is_dir && path_len) {
 		etemp.filename_len--; /* strip trailing / */
 		path_len--;
 	}
