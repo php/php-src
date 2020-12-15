@@ -301,20 +301,6 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * re
 /* }}} */
 
 
-/* {{{ mysqlnd_res::free_result_internal */
-static
-void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
-{
-	DBG_ENTER("mysqlnd_res::free_result_internal");
-
-	result->m.skip_result(result);
-	result->m.free_result_contents(result);
-
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_res::read_result_metadata */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn)
@@ -1361,7 +1347,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	DBG_ENTER("mysqlnd_res::store_result");
 
 	/* We need the conn because we are doing lazy zval initialization in buffered_fetch_row */
-	/* In case of error the reference will be released in free_result_internal() called indirectly by our caller */
+	/* In case of error the reference will be released in free_result() called indirectly by our caller */
 	result->conn = conn->m->get_reference(conn);
 	result->type = MYSQLND_RES_NORMAL;
 
@@ -1460,7 +1446,8 @@ MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const zend_bool i
 							   implicit == TRUE?	STAT_FREE_RESULT_IMPLICIT:
 							   						STAT_FREE_RESULT_EXPLICIT);
 
-	result->m.free_result_internal(result);
+	result->m.skip_result(result);
+	result->m.free_result_contents(result);
 	DBG_RETURN(PASS);
 }
 /* }}} */
@@ -1786,7 +1773,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data),
 	MYSQLND_METHOD(mysqlnd_res, free_result_buffers),
 	MYSQLND_METHOD(mysqlnd_res, free_result),
-	MYSQLND_METHOD(mysqlnd_res, free_result_internal),
 	MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal),
 	mysqlnd_result_meta_init,
 	NULL, /* unused1 */

@@ -1982,7 +1982,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(MYSQLND_STMT * const s)
 	mysqlnd_stmt_separate_result_bind(s);
 	/* Not every statement has a result set attached */
 	if (stmt->result) {
-		stmt->result->m.free_result_internal(stmt->result);
+		stmt->result->m.free_result(stmt->result, /* implicit */ TRUE);
 		stmt->result = NULL;
 	}
 	zend_llist_clean(&stmt->error_info->error_list);

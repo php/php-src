@@ -660,7 +660,6 @@ typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CO
 
 typedef void				(*func_mysqlnd_res__free_result_buffers)(MYSQLND_RES * result);	/* private */
 typedef enum_func_status	(*func_mysqlnd_res__free_result)(MYSQLND_RES * result, const zend_bool implicit);
-typedef void				(*func_mysqlnd_res__free_result_internal)(MYSQLND_RES *result);
 typedef void				(*func_mysqlnd_res__free_result_contents)(MYSQLND_RES *result);
 typedef void				(*func_mysqlnd_res__free_buffered_data)(MYSQLND_RES *result);
 typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *result);
@@ -691,7 +690,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res)
 	func_mysqlnd_res__store_result_fetch_data store_result_fetch_data;
 	func_mysqlnd_res__free_result_buffers free_result_buffers;
 	func_mysqlnd_res__free_result free_result;
-	func_mysqlnd_res__free_result_internal free_result_internal;
 	func_mysqlnd_res__free_result_contents free_result_contents;
 
 	func_mysqlnd_res__result_meta_init result_meta_init;
