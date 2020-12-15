@@ -31,6 +31,12 @@ PHP 8.1 UPGRADE NOTES
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
     should not result in user-visible behavior changes.
 
+- PDO MySQL:
+  . Integers and floats in result sets will now be returned using native PHP
+    types instead of strings when using emulated prepared statements. This
+    matches the behavior of native prepared statements. You can restore the
+    previous behavior by enabling the PDO::ATTR_STRINGIFY_FETCHES option.
+
 - Standard:
   . version_compare() no longer accepts undocumented operator abbreviations.
 

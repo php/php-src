@@ -12,7 +12,8 @@ MySQLPDOTest::skip();
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 $db = MySQLPDOTest::factory();
-$db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 $db->exec('DROP TABLE IF EXISTS test');
 $db->exec('CREATE TABLE test (id INTEGER PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL)');
