@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.14
+?? ??? 2021, PHP 7.4.15
+
+
+
+07 Jan 2021, PHP 7.4.14
 
 - Core:
   . Fixed bug #74558 (Can't rebind closure returned by Closure::fromCallable()).
