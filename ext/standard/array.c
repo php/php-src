@@ -2756,7 +2756,7 @@ PHP_FUNCTION(range)
 		high = (unsigned char)Z_STRVAL_P(zhigh)[0];
 
 		if (low > high) {		/* Negative Steps */
-			if (lstep <= 0) {
+			if (low - high < lstep || lstep <= 0) {
 				err = 1;
 				goto err;
 			}
@@ -2773,7 +2773,7 @@ PHP_FUNCTION(range)
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) {	/* Positive Steps */
-			if (lstep <= 0) {
+			if (high - low < lstep || lstep <= 0) {
 				err = 1;
 				goto err;
 			}
