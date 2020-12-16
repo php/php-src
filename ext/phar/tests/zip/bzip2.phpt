@@ -1,5 +1,7 @@
 --TEST--
 Phar: process bzip2-compressed zip entry
+--INI--
+phar.require_hash=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
