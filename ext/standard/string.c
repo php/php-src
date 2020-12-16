@@ -4787,15 +4787,24 @@ PHPAPI zend_string* php_strip_tags(zend_string *rbuf, const char *allow, size_t 
 
  //resize for the encode char &gt; or &lt;
 #define _PHP_STRIP_TAGS_ENCODE_CHAR(ENCODE_CHAR,LEN_CHAR)  \
-	if (((tp - tbuf) + LEN_CHAR) >= PHP_TAG_BUF_SIZE) { \
+	if (( (tp+LEN_CHAR) - tbuf) >= tbuf_max_size) { \
 		pos = tp - tbuf; \
+		tbuf_max_size+=LEN_CHAR;	\
 		tbuf = erealloc(tbuf, pos + LEN_CHAR+1 ); \
 		tp = tbuf + pos; \
 	} \
 	\
 	memcpy(tp, ENCODE_CHAR, LEN_CHAR); \
 	tp+=LEN_CHAR;	
-	
+
+//increase size tbuf if need more performace with tbuf_max_size approach
+#define _PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED() \
+	if (tp - tbuf >= tbuf_max_size) { \
+		tbuf_max_size+=PHP_TAG_BUF_SIZE;	\
+		pos = tp - tbuf;	\
+		tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);	\
+		tp = tbuf + pos;	\
+	}
 
 /* {{{ php_strip_tags
 
@@ -4829,6 +4838,8 @@ PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_input, const char
 	const int len_lt = 4; 
 	const int len_gt = 4; 
 	size_t len = ZSTR_LEN(zend_string_input);
+	int tbuf_max_size = PHP_TAG_BUF_SIZE;
+
 
 	buf = estrndup(ZSTR_VAL(zend_string_input), len);
 	p = buf;
@@ -4858,12 +4869,7 @@ state_0:
 		case '\0':
 			break;
 		case '<':
-		
-			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('<')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;",len_lt)
-				break;
-			}
- 
+		 
 			if (in_q) {
 				break;
 			}
@@ -4874,11 +4880,7 @@ state_0:
 			lc = '<';
 			state = 1;
 			if (allow) {
-				if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
-					pos = tp - tbuf;
-					tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
-					tp = tbuf + pos;
-				}
+				_PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED() 
 				*(tp++) = '<';
 			}
 			p++;
@@ -4886,11 +4888,6 @@ state_0:
 		case '>':
 			if (depth) {
 				depth--;
-				break;
-			}
-
-			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
 				break;
 			}
 
@@ -4950,11 +4947,7 @@ state_1:
 			}
 			in_q = state = is_xml = 0;
 			if (allow) {
-				if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
-					pos = tp - tbuf;
-					tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
-					tp = tbuf + pos;
-				}
+				_PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED() 
 				*(tp++) = '>';
 				*tp='\0';
 				if (php_tag_find(tbuf, tp-tbuf, allow)) {
@@ -4999,11 +4992,7 @@ state_1:
 		default:
 reg_char_1:
 			if (allow) {
-				if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
-					pos = tp - tbuf;
-					tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
-					tp = tbuf + pos;
-				}
+				_PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED()
 				*(tp++) = c;
 			}
 			break;
@@ -5032,11 +5021,6 @@ state_2:
 		case '>':
 			if (depth) {
 				depth--;
-				break;
-			}
-
-			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
 				break;
 			}
 
@@ -5098,11 +5082,6 @@ state_3:
 		case '>':
 			if (depth) {
 				depth--;
-				break;
-			}
-
-			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
 				break;
 			}
 
