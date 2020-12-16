@@ -8,6 +8,12 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #67983 (mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to
     interpret bit columns). (Nikita)
+  . Fixed bug #64638 (Fetching resultsets from stored procedure with cursor
+    fails). (Nikita)
+  . Fixed bug #72862 (segfault using prepared statements on stored procedures
+    that use a cursor). (Nikita)
+  . Fixed bug #77935 (Crash in mysqlnd_fetch_stmt_row_cursor when calling an SP
+    with a cursor). (Nikita)
 
 07 Jan 2021, PHP 7.4.14
 
