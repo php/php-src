@@ -37,6 +37,36 @@ enum_func_status mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * cons
 
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt);
 
+static enum_func_status mysqlnd_stmt_send_cursor_fetch_command(
+		const MYSQLND_STMT_DATA *stmt, unsigned max_rows)
+{
+	MYSQLND_CONN_DATA *conn = stmt->conn;
+	zend_uchar buf[MYSQLND_STMT_ID_LENGTH /* statement id */ + 4 /* number of rows to fetch */];
+	const MYSQLND_CSTRING payload = {(const char*) buf, sizeof(buf)};
+
+	int4store(buf, stmt->stmt_id);
+	int4store(buf + MYSQLND_STMT_ID_LENGTH, max_rows);
+
+	if (conn->command->stmt_fetch(conn, payload) == FAIL) {
+		COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
+		return FAIL;
+	}
+	return PASS;
+}
+
+static zend_bool mysqlnd_stmt_check_state(const MYSQLND_STMT_DATA *stmt)
+{
+	const MYSQLND_CONN_DATA *conn = stmt->conn;
+	if (stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE) {
+		return 0;
+	}
+	if (stmt->cursor_exists) {
+		return GET_CONNECTION_STATE(&conn->state) == CONN_READY;
+	} else {
+		return GET_CONNECTION_STATE(&conn->state) == CONN_FETCHING_DATA;
+	}
+}
+
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
@@ -57,14 +87,8 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 		DBG_RETURN(NULL);
 	}
 
-	if (stmt->cursor_exists) {
-		/* Silently convert buffered to unbuffered, for now */
-		DBG_RETURN(s->m->use_result(s));
-	}
-
 	/* Nothing to store for UPSERT/LOAD DATA*/
-	if (GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA || stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE)
-	{
+	if (!mysqlnd_stmt_check_state(stmt)) {
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(NULL);
 	}
@@ -74,6 +98,12 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_PS_BUFFERED_SETS);
+
+	if (stmt->cursor_exists) {
+		if (mysqlnd_stmt_send_cursor_fetch_command(stmt, -1) == FAIL) {
+			DBG_RETURN(NULL);
+		}
+	}
 
 	result = stmt->result;
 	result->type			= MYSQLND_RES_PS_BUF;
@@ -127,19 +157,8 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 		DBG_RETURN(NULL);
 	}
 
-	if (stmt->cursor_exists) {
-		/* Prepared statement cursors are not supported as of yet */
-		char * msg;
-		mnd_sprintf(&msg, 0, "%s() cannot be used with cursors", get_active_function_name());
-		SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
-		if (msg) {
-			mnd_sprintf_free(msg);
-		}
-		DBG_RETURN(NULL);
-	}
-
 	/* Nothing to store for UPSERT/LOAD DATA*/
-	if (GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA || stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE) {
+	if (!mysqlnd_stmt_check_state(stmt)) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(NULL);
 	}
@@ -147,6 +166,12 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
+
+	if (stmt->cursor_exists) {
+		if (mysqlnd_stmt_send_cursor_fetch_command(stmt, -1) == FAIL) {
+			DBG_RETURN(NULL);
+		}
+	}
 
 	do {
 		result = conn->m->result_init(stmt->result->field_count);
@@ -718,11 +743,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s)
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	if (!stmt->field_count ||
-		(!stmt->cursor_exists && GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA) ||
-		(stmt->cursor_exists && GET_CONNECTION_STATE(&conn->state) != CONN_READY) ||
-		(stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE))
-	{
+	if (!stmt->field_count || !mysqlnd_stmt_check_state(stmt)) {
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_ERR("command out of sync");
 		DBG_RETURN(NULL);
@@ -752,7 +773,6 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 	enum_func_status ret;
 	MYSQLND_STMT_DATA * stmt = result->unbuf->stmt;
 	MYSQLND_CONN_DATA * conn = stmt->conn;
-	zend_uchar buf[MYSQLND_STMT_ID_LENGTH /* statement id */ + 4 /* number of rows to fetch */];
 	MYSQLND_PACKET_ROW * row_packet;
 	void *checkpoint;
 
@@ -777,18 +797,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);
 
-	int4store(buf, stmt->stmt_id);
-	int4store(buf + MYSQLND_STMT_ID_LENGTH, 1); /* for now fetch only one row */
-
-	{
-		const MYSQLND_CSTRING payload = {(const char*) buf, sizeof(buf)};
-
-		ret = conn->command->stmt_fetch(conn, payload);
-		if (ret == FAIL) {
-			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-			DBG_RETURN(FAIL);
-		}
-
+	/* for now fetch only one row */
+	if (mysqlnd_stmt_send_cursor_fetch_command(stmt, 1) == FAIL) {
+		DBG_RETURN(FAIL);
 	}
 
 	checkpoint = result->memory_pool->checkpoint;
