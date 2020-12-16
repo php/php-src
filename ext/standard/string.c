@@ -4789,7 +4789,7 @@ PHPAPI zend_string* php_strip_tags(zend_string *rbuf, const char *allow, size_t 
 #define _PHP_STRIP_TAGS_ENCODE_CHAR(ENCODE_CHAR,LEN_CHAR)  \
 	if (((tp - tbuf) + LEN_CHAR) >= PHP_TAG_BUF_SIZE) { \
 		pos = tp - tbuf; \
-		tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + LEN_CHAR+1 ); \
+		tbuf = erealloc(tbuf, pos + LEN_CHAR+1 ); \
 		tp = tbuf + pos; \
 	} \
 	\
