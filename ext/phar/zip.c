@@ -673,6 +673,16 @@ foundit:
 		mydata->is_data = 1;
 	}
 
+	/* ensure signature set */
+	if (!mydata->is_data && PHAR_G(require_hash) && !mydata->signature) {
+		php_stream_close(fp);
+		phar_destroy_phar_data(mydata);
+		if (error) {
+			spprintf(error, 0, "zip-based phar \"%s\" does not have a signature", fname);
+		}
+		return FAILURE;
+	}
+
 	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 
 	if (actual_alias) {

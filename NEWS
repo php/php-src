@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #80521 (Parameters with underscores no longer recognized). (cmb,
     Simonov Denis)
 
+- Phar:
+  . Fixed bug #76929 (zip-based phar does not respect phar.require_hash).
+    (david at bamsoftware, cmb)
+
 07 Jan 2021, PHP 8.0.1
 
 - Core:
