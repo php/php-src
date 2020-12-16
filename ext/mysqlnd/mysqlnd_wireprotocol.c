@@ -1592,7 +1592,26 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				}
 				MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1, STAT_BYTES_RECEIVED_PURE_DATA_TEXT, len);
 			}
-			if (as_int_or_float && perm_bind.php_type == IS_LONG) {
+			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
+				/*
+				  BIT fields are specially handled. As they come as bit mask, they have
+				  to be converted to human-readable representation.
+				*/
+				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, (const zend_uchar **) &p, len);
+				/*
+				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
+				  later in this function there will be an advancement.
+				*/
+				p -= len;
+				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
+					/* we are using the text protocol, so convert to string */
+					char tmp[22];
+					const size_t tmp_len = sprintf((char *)&tmp, ZEND_ULONG_FMT, Z_LVAL_P(current_field));
+					ZVAL_STRINGL(current_field, tmp, tmp_len);
+				} else if (Z_TYPE_P(current_field) == IS_STRING) {
+					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
+				}
+			} else if (as_int_or_float && perm_bind.php_type == IS_LONG) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
@@ -1636,25 +1655,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				*(p + len) = '\0';
 				ZVAL_DOUBLE(current_field, atof((char *) p));
 				*(p + len) = save;
-			} else if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
-				/*
-				  BIT fields are specially handled. As they come as bit mask, they have
-				  to be converted to human-readable representation.
-				*/
-				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, (const zend_uchar **) &p, len);
-				/*
-				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
-				  later in this function there will be an advancement.
-				*/
-				p -= len;
-				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
-					/* we are using the text protocol, so convert to string */
-					char tmp[22];
-					const size_t tmp_len = sprintf((char *)&tmp, ZEND_ULONG_FMT, Z_LVAL_P(current_field));
-					ZVAL_STRINGL(current_field, tmp, tmp_len);
-				} else if (Z_TYPE_P(current_field) == IS_STRING) {
-					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
-				}
 			} else {
 				ZVAL_STRINGL_FAST(current_field, (char *)p, len);
 			}
