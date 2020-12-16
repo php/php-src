@@ -619,7 +619,11 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 		if (S->H->fetch_table_names) {
 			cols[i].name = strpprintf(0, "%s.%s", S->fields[i].table, S->fields[i].name);
 		} else {
+#ifdef PDO_USE_MYSQLND
+			cols[i].name = zend_string_copy(S->fields[i].sname);
+#else
 			cols[i].name = zend_string_init(S->fields[i].name, S->fields[i].name_length, 0);
+#endif
 		}
 
 		cols[i].precision = S->fields[i].decimals;

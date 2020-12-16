@@ -138,23 +138,22 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 
 		/* if we are applying case conversions on column names, do so now */
 		if (stmt->dbh->native_case != stmt->dbh->desired_case && stmt->dbh->desired_case != PDO_CASE_NATURAL) {
-			char *s = ZSTR_VAL(stmt->columns[col].name);
-
+			zend_string *orig_name = stmt->columns[col].name;
 			switch (stmt->dbh->desired_case) {
-				case PDO_CASE_UPPER:
+				case PDO_CASE_LOWER:
+					stmt->columns[col].name = zend_string_tolower(orig_name);
+					zend_string_release(orig_name);
+					break;
+				case PDO_CASE_UPPER: {
+					stmt->columns[col].name = zend_string_separate(orig_name, 0);
+					char *s = ZSTR_VAL(stmt->columns[col].name);
 					while (*s != '\0') {
 						*s = toupper(*s);
 						s++;
 					}
 					break;
-				case PDO_CASE_LOWER:
-					while (*s != '\0') {
-						*s = tolower(*s);
-						s++;
-					}
-					break;
-				default:
-					;
+				}
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		}
 
