@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 7.4.15
 
-
+- Core:
+  . Fixed bug #80523 (bogus parse error on >4GB source code). (Nikita)
 
 07 Jan 2021, PHP 7.4.14
 
