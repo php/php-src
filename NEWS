@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #80523 (bogus parse error on >4GB source code). (Nikita)
 
+- MySQLi:
+  . Fixed bug #67983 (mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to
+    interpret bit columns). (Nikita)
+
 07 Jan 2021, PHP 7.4.14
 
 - Core:
