@@ -136,7 +136,7 @@ static const char classes_array[] = {
 	/* 092  \  */ 0,
 	/* 093  ]  */ 0,
 	/* 094  ^  */ 0,
-	/* 095  _  */ 65, /* CHR_IDENT | CHR_INTRODUCER */
+	/* 095  _  */ 68, /* CHR_IDENT | CHR_INTRODUCER */
 	/* 096  `  */ 0,
 	/* 097  a  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
 	/* 098  b  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
