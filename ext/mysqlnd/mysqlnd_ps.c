@@ -576,28 +576,30 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 			DBG_INF_FMT("server_status=%u cursor=%u", UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status),
 						UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) & SERVER_STATUS_CURSOR_EXISTS);
 
-			if (UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) & SERVER_STATUS_CURSOR_EXISTS) {
-				DBG_INF("cursor exists");
-				stmt->cursor_exists = TRUE;
-				SET_CONNECTION_STATE(&conn->state, CONN_READY);
-				/* Only cursor read */
-				stmt->default_rset_handler = s->m->use_result;
-				DBG_INF("use_result");
-			} else if (stmt->flags & CURSOR_TYPE_READ_ONLY) {
-				DBG_INF("asked for cursor but got none");
-				/*
-				  We have asked for CURSOR but got no cursor, because the condition
-				  above is not fulfilled. Then...
+			if (stmt->flags & CURSOR_TYPE_READ_ONLY) {
+				if (UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) & SERVER_STATUS_CURSOR_EXISTS) {
+					DBG_INF("cursor exists");
+					stmt->cursor_exists = TRUE;
+					SET_CONNECTION_STATE(&conn->state, CONN_READY);
+					/* Only cursor read */
+					stmt->default_rset_handler = s->m->use_result;
+					DBG_INF("use_result");
+				} else {
+					DBG_INF("asked for cursor but got none");
+					/*
+					  We have asked for CURSOR but got no cursor, because the condition
+					  above is not fulfilled. Then...
 
-				  This is a single-row result set, a result set with no rows, EXPLAIN,
-				  SHOW VARIABLES, or some other command which either a) bypasses the
-				  cursors framework in the server and writes rows directly to the
-				  network or b) is more efficient if all (few) result set rows are
-				  precached on client and server's resources are freed.
-				*/
-				/* preferred is buffered read */
-				stmt->default_rset_handler = s->m->store_result;
-				DBG_INF("store_result");
+					  This is a single-row result set, a result set with no rows, EXPLAIN,
+					  SHOW VARIABLES, or some other command which either a) bypasses the
+					  cursors framework in the server and writes rows directly to the
+					  network or b) is more efficient if all (few) result set rows are
+					  precached on client and server's resources are freed.
+					*/
+					/* preferred is buffered read */
+					stmt->default_rset_handler = s->m->store_result;
+					DBG_INF("store_result");
+				}
 			} else {
 				DBG_INF("no cursor");
 				/* preferred is unbuffered read */
