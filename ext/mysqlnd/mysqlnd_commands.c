@@ -112,11 +112,6 @@ MYSQLND_METHOD(mysqlnd_command, init_db)(MYSQLND_CONN_DATA * const conn, const M
 		}
 		conn->connect_or_select_db.s = mnd_pestrndup(db.s, db.l, conn->persistent);
 		conn->connect_or_select_db.l = db.l;
-		if (!conn->connect_or_select_db.s) {
-			/* OOM */
-			SET_OOM_ERROR(conn->error_info);
-			ret = FAIL;
-		}
 	}
 
 	DBG_RETURN(ret);

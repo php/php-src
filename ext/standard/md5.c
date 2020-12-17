@@ -290,7 +290,7 @@ static const void *body(PHP_MD5_CTX *ctx, const void *data, size_t size)
 	return ptr;
 }
 
-PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx)
+PHPAPI void PHP_MD5InitArgs(PHP_MD5_CTX *ctx, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	ctx->a = 0x67452301;
 	ctx->b = 0xefcdab89;

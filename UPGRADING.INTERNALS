@@ -5,6 +5,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 2. Build system changes
 
 3. Module changes
+  a. ext/hash
 
 ========================
 1. Internal API changes
@@ -17,3 +18,10 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+  a. ext/hash
+    - The init signatures are extended with an additional `HashTable*`
+      argument. The passed HT is to contain the algorithm specific
+      configuration. If the an algorithm doesn't make use of any
+      additional configuration, the argument is to be marked with
+      ZEND_ATTRIBUTE_UNUSED.

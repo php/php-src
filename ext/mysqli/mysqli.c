@@ -656,7 +656,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
+#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_FLOAT_NATIVE", MYSQLND_OPT_INT_AND_FLOAT_NATIVE, CONST_CS | CONST_PERSISTENT);
 #endif
 #if MYSQL_VERSION_ID < 80000 || MYSQL_VERSION_ID >= 100000 || defined(MYSQLI_USE_MYSQLND)
@@ -988,28 +988,32 @@ PHP_METHOD(mysqli_stmt, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!", &mysql_link, mysqli_link_class_entry, &statement, &statement_len) == FAILURE) {
 		RETURN_THROWS();
 	}
-
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	stmt = (MY_STMT *) ecalloc(1, sizeof(MY_STMT));
-	stmt->stmt = mysql_stmt_init(mysql->mysql);
-	if (stmt->stmt && statement) {
-		mysql_stmt_prepare(stmt->stmt, (char *)statement, statement_len);
-	}
 
-	if (!stmt->stmt) {
+	if (!(stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		efree(stmt);
 		RETURN_FALSE;
 	}
+
 #ifndef MYSQLI_USE_MYSQLND
 	ZVAL_COPY(&stmt->link_handle, mysql_link);
 #endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
-	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
+	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
+
+	if (statement) {
+		if(mysql_stmt_prepare(stmt->stmt, statement, statement_len)) {
+			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+			RETURN_FALSE;
+		}
+		mysqli_resource->status = MYSQLI_STATUS_VALID;
+	}
 }
 
 PHP_METHOD(mysqli_result, __construct)
@@ -1126,7 +1130,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 		}
 	}
 #else
-	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value, MYSQLND_MYSQLI);
+	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value);
 #endif
 }
 /* }}} */

@@ -352,6 +352,9 @@ ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
 ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object);
 ZEND_API zend_string *zend_get_callable_name(zval *callable);
+ZEND_API zend_bool zend_is_callable_at_frame(
+		zval *callable, zend_object *object, zend_execute_data *frame,
+		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error);
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
 ZEND_API zend_bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name);
 ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name);
@@ -442,6 +445,9 @@ ZEND_API void add_assoc_double_ex(zval *arg, const char *key, size_t key_len, do
 ZEND_API void add_assoc_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str);
 ZEND_API void add_assoc_string_ex(zval *arg, const char *key, size_t key_len, const char *str);
 ZEND_API void add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length);
+ZEND_API void add_assoc_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr);
+ZEND_API void add_assoc_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj);
+ZEND_API void add_assoc_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref);
 ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key), __n)
@@ -452,6 +458,9 @@ ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval
 #define add_assoc_str(__arg, __key, __str) add_assoc_str_ex(__arg, __key, strlen(__key), __str)
 #define add_assoc_string(__arg, __key, __str) add_assoc_string_ex(__arg, __key, strlen(__key), __str)
 #define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
+#define add_assoc_array(__arg, __key, __arr) add_assoc_array_ex(__arg, __key, strlen(__key), __arr)
+#define add_assoc_object(__arg, __key, __obj) add_assoc_object_ex(__arg, __key, strlen(__key), __obj)
+#define add_assoc_reference(__arg, __key, __ref) add_assoc_object_ex(__arg, __key, strlen(__key), __ref)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
 
 ZEND_API void add_index_long(zval *arg, zend_ulong index, zend_long n);
@@ -462,6 +471,9 @@ ZEND_API void add_index_double(zval *arg, zend_ulong index, double d);
 ZEND_API void add_index_str(zval *arg, zend_ulong index, zend_string *str);
 ZEND_API void add_index_string(zval *arg, zend_ulong index, const char *str);
 ZEND_API void add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
+ZEND_API void add_index_array(zval *arg, zend_ulong index, zend_array *arr);
+ZEND_API void add_index_object(zval *arg, zend_ulong index, zend_object *obj);
+ZEND_API void add_index_reference(zval *arg, zend_ulong index, zend_reference *ref);
 
 static zend_always_inline zend_result add_index_zval(zval *arg, zend_ulong index, zval *value)
 {
@@ -476,6 +488,9 @@ ZEND_API zend_result add_next_index_double(zval *arg, double d);
 ZEND_API zend_result add_next_index_str(zval *arg, zend_string *str);
 ZEND_API zend_result add_next_index_string(zval *arg, const char *str);
 ZEND_API zend_result add_next_index_stringl(zval *arg, const char *str, size_t length);
+ZEND_API zend_result add_next_index_array(zval *arg, zend_array *arr);
+ZEND_API zend_result add_next_index_object(zval *arg, zend_object *obj);
+ZEND_API zend_result add_next_index_reference(zval *arg, zend_reference *ref);
 
 static zend_always_inline zend_result add_next_index_zval(zval *arg, zval *value)
 {
@@ -492,6 +507,9 @@ ZEND_API void add_property_double_ex(zval *arg, const char *key, size_t key_len,
 ZEND_API void add_property_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str);
 ZEND_API void add_property_string_ex(zval *arg, const char *key, size_t key_len, const char *str);
 ZEND_API void add_property_stringl_ex(zval *arg, const char *key, size_t key_len,  const char *str, size_t length);
+ZEND_API void add_property_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr);
+ZEND_API void add_property_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj);
+ZEND_API void add_property_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref);
 ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key), __n)
@@ -502,6 +520,9 @@ ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, z
 #define add_property_str(__arg, __key, __str) add_property_str_ex(__arg, __key, strlen(__key), __str)
 #define add_property_string(__arg, __key, __str) add_property_string_ex(__arg, __key, strlen(__key), __str)
 #define add_property_stringl(__arg, __key, __str, __length) add_property_stringl_ex(__arg, __key, strlen(__key), __str, __length)
+#define add_property_array(__arg, __key, __arr) add_property_array_ex(__arg, __key, strlen(__key), __arr)
+#define add_property_object(__arg, __key, __obj) add_property_object_ex(__arg, __key, strlen(__key), __obj)
+#define add_property_reference(__arg, __key, __ref) add_property_reference_ex(__arg, __key, strlen(__key), __ref)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key), __value)
 
 

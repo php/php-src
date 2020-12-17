@@ -263,6 +263,7 @@ MYSQLND_METHOD(mysqlnd_vio, post_connect_set_opt)(MYSQLND_VIO * const vio, const
 		}
 
 		net_stream->chunk_size = vio->data->options.net_read_buffer_size;
+		net_stream->flags |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 	}
 
 	DBG_VOID_RETURN;

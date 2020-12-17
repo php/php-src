@@ -556,21 +556,22 @@ string_key:
 						/* This is a property with a declaration */
 						old_data = Z_INDIRECT_P(old_data);
 						info = zend_get_typed_property_info_for_slot(obj, old_data);
+						if (info) {
+							if (Z_ISREF_P(old_data)) {
+								/* If the value is overwritten, remove old type source from ref. */
+								ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
+							}
+
+							if ((*var_hash)->ref_props) {
+								/* Remove old entry from ref_props table, if it exists. */
+								zend_hash_index_del(
+									(*var_hash)->ref_props, (zend_uintptr_t) old_data);
+							}
+						}
 						var_push_dtor(var_hash, old_data);
 						Z_TRY_DELREF_P(old_data);
 						ZVAL_COPY_VALUE(old_data, &d);
 						data = old_data;
-
-						if (UNEXPECTED(info)) {
-							/* Remember to which property this slot belongs, so we can add a
-							 * type source if it is turned into a reference lateron. */
-							if (!(*var_hash)->ref_props) {
-								(*var_hash)->ref_props = emalloc(sizeof(HashTable));
-								zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
-							}
-							zend_hash_index_update_ptr(
-								(*var_hash)->ref_props, (zend_uintptr_t) data, info);
-						}
 					} else {
 						var_push_dtor(var_hash, old_data);
 						data = zend_hash_update_ind(ht, Z_STR(key), &d);
@@ -589,6 +590,11 @@ string_key:
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
+			if (info && Z_ISREF_P(data)) {
+				/* Add type source even if we failed to unserialize.
+				 * The data is still stored in the property. */
+				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			}
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
@@ -600,8 +606,18 @@ string_key:
 				zval_ptr_dtor_nogc(&key);
 				goto failure;
 			}
+
 			if (Z_ISREF_P(data)) {
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			} else {
+				/* Remember to which property this slot belongs, so we can add a
+				 * type source if it is turned into a reference lateron. */
+				if (!(*var_hash)->ref_props) {
+					(*var_hash)->ref_props = emalloc(sizeof(HashTable));
+					zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
+				}
+				zend_hash_index_update_ptr(
+					(*var_hash)->ref_props, (zend_uintptr_t) data, info);
 			}
 		}
 

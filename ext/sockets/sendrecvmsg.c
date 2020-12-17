@@ -295,8 +295,9 @@ PHP_FUNCTION(socket_cmsg_space)
 	}
 
 	if (entry->var_el_size > 0) {
-		size_t rem_size = ZEND_LONG_MAX - entry->size;
-		size_t n_max = rem_size / entry->var_el_size;
+		/* Leading underscore to avoid symbol collision on AIX. */
+		size_t _rem_size = ZEND_LONG_MAX - entry->size;
+		size_t n_max = _rem_size / entry->var_el_size;
 		size_t size = entry->size + n * entry->var_el_size;
 		size_t total_size = CMSG_SPACE(size);
 		if (n > n_max /* zend_long overflow */

@@ -215,9 +215,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta)
 		DBG_INF("no more fields");
 		DBG_RETURN(NULL);
 	}
-	DBG_INF_FMT("name=%s max_length=%u",
-		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"",
-		meta->fields[meta->current_field].max_length);
+	DBG_INF_FMT("name=%s",
+		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"");
 	DBG_RETURN(&meta->fields[meta->current_field++]);
 }
 /* }}} */
@@ -229,9 +228,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA 
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
 	DBG_INF_FMT("fieldnr=%u", fieldnr);
-	DBG_INF_FMT("name=%s max_length=%u",
-		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"",
-		meta->fields[meta->current_field].max_length);
+	DBG_INF_FMT("name=%s",
+		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"");
 	DBG_RETURN(&meta->fields[fieldnr]);
 }
 /* }}} */
@@ -289,20 +287,17 @@ mysqlnd_result_meta_init(MYSQLND_RES *result, unsigned int field_count)
 	MYSQLND_RES_METADATA *ret;
 	DBG_ENTER("mysqlnd_result_meta_init");
 
-	do {
-		ret = result->memory_pool->get_chunk(result->memory_pool, alloc_size);
-		memset(ret, 0, alloc_size);
-		ret->m = & mysqlnd_mysqlnd_res_meta_methods;
+	ret = result->memory_pool->get_chunk(result->memory_pool, alloc_size);
+	memset(ret, 0, alloc_size);
+	ret->m = & mysqlnd_mysqlnd_res_meta_methods;
 
-		ret->field_count = field_count;
-		/* +1 is to have empty marker at the end */
-		alloc_size = (field_count + 1) * sizeof(MYSQLND_FIELD);
-		ret->fields = result->memory_pool->get_chunk(result->memory_pool, alloc_size);
-		memset(ret->fields, 0, alloc_size);
-		DBG_INF_FMT("meta=%p", ret);
-		DBG_RETURN(ret);
-	} while (0);
-	DBG_RETURN(NULL);
+	ret->field_count = field_count;
+	/* +1 is to have empty marker at the end */
+	alloc_size = (field_count + 1) * sizeof(MYSQLND_FIELD);
+	ret->fields = result->memory_pool->get_chunk(result->memory_pool, alloc_size);
+	memset(ret->fields, 0, alloc_size);
+	DBG_INF_FMT("meta=%p", ret);
+	DBG_RETURN(ret);
 }
 /* }}} */
 

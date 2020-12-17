@@ -125,13 +125,13 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 		return NULL;
 	}
 
-	result = mysql->m->use_result(mysql, 0);
+	result = mysql->m->use_result(mysql);
 
 	for (;;) {
 		zval *entry;
 		int errno;
 
-		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQLI);
+		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row);
 		if (Z_TYPE(row) != IS_ARRAY) {
 			zval_ptr_dtor(&row);
 			break;

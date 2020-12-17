@@ -33,6 +33,8 @@ else
   PHP_ADD_BUILD_DIR(ext/hash/$SHA3_DIR, 1)
 fi
 
+PHP_ADD_BUILD_DIR(ext/hash/murmur, 1)
+
 EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
   hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c hash_adler32.c \
   hash_crc32.c hash_fnv.c hash_joaat.c $EXT_HASH_SHA3_SOURCES

@@ -117,7 +117,7 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 /* Mac allows to track anonymous page via vmmap per TAG id.
  * user land applications are allowed to take from 240 to 255.
  */
-# define ZEND_MM_FD (250<<24)
+# define ZEND_MM_FD (250u << 24u)
 #endif
 
 #ifndef ZEND_MM_STAT

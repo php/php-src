@@ -67,7 +67,7 @@ bool(true)
 
 -- Renaming existing file to existing directory name --
 
-Warning: rename(%s/rename_variation3.tmp,%s/rename_variation3_dir): Access is denied. (code: 5) in %s on line %d
+Warning: rename(%s/rename_variation3.tmp,%s/rename_variation3_dir): Access is denied (code: 5) in %s on line %d
 bool(false)
 bool(true)
 bool(true)

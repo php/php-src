@@ -138,23 +138,22 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 
 		/* if we are applying case conversions on column names, do so now */
 		if (stmt->dbh->native_case != stmt->dbh->desired_case && stmt->dbh->desired_case != PDO_CASE_NATURAL) {
-			char *s = ZSTR_VAL(stmt->columns[col].name);
-
+			zend_string *orig_name = stmt->columns[col].name;
 			switch (stmt->dbh->desired_case) {
-				case PDO_CASE_UPPER:
+				case PDO_CASE_LOWER:
+					stmt->columns[col].name = zend_string_tolower(orig_name);
+					zend_string_release(orig_name);
+					break;
+				case PDO_CASE_UPPER: {
+					stmt->columns[col].name = zend_string_separate(orig_name, 0);
+					char *s = ZSTR_VAL(stmt->columns[col].name);
 					while (*s != '\0') {
 						*s = toupper(*s);
 						s++;
 					}
 					break;
-				case PDO_CASE_LOWER:
-					while (*s != '\0') {
-						*s = tolower(*s);
-						s++;
-					}
-					break;
-				default:
-					;
+				}
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		}
 
@@ -172,6 +171,45 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 	return 1;
 }
 /* }}} */
+
+static void pdo_stmt_reset_columns(pdo_stmt_t *stmt) {
+	if (stmt->columns) {
+		int i;
+		struct pdo_column_data *cols = stmt->columns;
+
+		for (i = 0; i < stmt->column_count; i++) {
+			if (cols[i].name) {
+				zend_string_release_ex(cols[i].name, 0);
+			}
+		}
+		efree(stmt->columns);
+	}
+	stmt->columns = NULL;
+	stmt->column_count = 0;
+}
+
+/**
+ * Change the column count on the statement. If it differs from the previous one,
+ * discard existing columns information.
+ */
+PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count)
+{
+	/* Columns not yet "described". */
+	if (!stmt->columns) {
+		stmt->column_count = new_count;
+		return;
+	}
+
+	/* The column count has not changed: No need to reload columns description.
+	 * Note: Do not handle attribute name change, without column count change. */
+	if (new_count == stmt->column_count) {
+		return;
+	}
+
+	/* Free previous columns to force reload description. */
+	pdo_stmt_reset_columns(stmt);
+	stmt->column_count = new_count;
+}
 
 static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 {
@@ -302,8 +340,8 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	 * a reference to param, as it resides in transient storage only
 	 * at this time. */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
-				)) {
+		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE)) {
+			PDO_HANDLE_STMT_ERR();
 			if (param->name) {
 				zend_string_release_ex(param->name, 0);
 				param->name = NULL;
@@ -328,8 +366,8 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC
-					)) {
+		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC)) {
+			PDO_HANDLE_STMT_ERR();
 			/* undo storage allocation; the hash will free the parameter
 			 * name if required */
 			if (pparam->name) {
@@ -404,22 +442,19 @@ PHP_METHOD(PDOStatement, execute)
 		 */
 
 		/* string is leftover from previous calls so PDOStatement::debugDumpParams() can access */
-		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-			efree(stmt->active_query_string);
+		if (stmt->active_query_string) {
+			zend_string_release(stmt->active_query_string);
+			stmt->active_query_string = NULL;
 		}
-		stmt->active_query_string = NULL;
 
-		ret = pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen,
-			&stmt->active_query_string, &stmt->active_query_stringlen);
+		ret = pdo_parse_params(stmt, stmt->query_string, &stmt->active_query_string);
 
 		if (ret == 0) {
 			/* no changes were made */
-			stmt->active_query_string = stmt->query_string;
-			stmt->active_query_stringlen = stmt->query_stringlen;
+			stmt->active_query_string = zend_string_copy(stmt->query_string);
 			ret = 1;
 		} else if (ret == -1) {
 			/* something broke */
-			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
 	} else if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE)) {
@@ -440,6 +475,7 @@ PHP_METHOD(PDOStatement, execute)
 		}
 
 		if (ret && !dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_POST)) {
+			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
 
@@ -483,6 +519,12 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 		case PDO_PARAM_ZVAL:
 			if (value && value_len == sizeof(zval)) {
 				ZVAL_COPY_VALUE(dest, (zval *)value);
+
+				if (Z_TYPE_P(dest) == IS_STRING && Z_STRLEN_P(dest) == 0
+						&& stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING) {
+					zval_ptr_dtor_str(dest);
+					ZVAL_NULL(dest);
+				}
 			} else {
 				ZVAL_NULL(dest);
 			}
@@ -1910,20 +1952,7 @@ PHP_METHOD(PDOStatement, setFetchMode)
 
 static bool pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 {
-	/* un-describe */
-	if (stmt->columns) {
-		int i;
-		struct pdo_column_data *cols = stmt->columns;
-
-		for (i = 0; i < stmt->column_count; i++) {
-			if (cols[i].name) {
-				zend_string_release_ex(cols[i].name, 0);
-			}
-		}
-		efree(stmt->columns);
-		stmt->columns = NULL;
-		stmt->column_count = 0;
-	}
+	pdo_stmt_reset_columns(stmt);
 
 	if (!stmt->methods->next_rowset(stmt)) {
 		/* Set the executed flag to 0 to reallocate columns on next execute */
@@ -2009,16 +2038,16 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 	}
 
 	/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
-	php_stream_printf(out, "SQL: [%zd] ", stmt->query_stringlen);
-	php_stream_write(out, stmt->query_string, stmt->query_stringlen);
+	php_stream_printf(out, "SQL: [%zd] ", ZSTR_LEN(stmt->query_string));
+	php_stream_write(out, ZSTR_VAL(stmt->query_string), ZSTR_LEN(stmt->query_string));
 	php_stream_write(out, "\n", 1);
 
 	/* show parsed SQL if emulated prepares enabled */
 	/* pointers will be equal if PDO::query() was invoked */
 	if (stmt->active_query_string != NULL && stmt->active_query_string != stmt->query_string) {
 		/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
-		php_stream_printf(out, "Sent SQL: [%zd] ", stmt->active_query_stringlen);
-		php_stream_write(out, stmt->active_query_string, stmt->active_query_stringlen);
+		php_stream_printf(out, "Sent SQL: [%zd] ", ZSTR_LEN(stmt->active_query_string));
+		php_stream_write(out, ZSTR_VAL(stmt->active_query_string), ZSTR_LEN(stmt->active_query_string));
 		php_stream_write(out, "\n", 1);
 	}
 
@@ -2149,26 +2178,14 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 	if (stmt->methods && stmt->methods->dtor) {
 		stmt->methods->dtor(stmt);
 	}
-	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-		efree(stmt->active_query_string);
+	if (stmt->active_query_string) {
+		zend_string_release(stmt->active_query_string);
 	}
 	if (stmt->query_string) {
-		efree(stmt->query_string);
+		zend_string_release(stmt->query_string);
 	}
 
-	if (stmt->columns) {
-		int i;
-		struct pdo_column_data *cols = stmt->columns;
-
-		for (i = 0; i < stmt->column_count; i++) {
-			if (cols[i].name) {
-				zend_string_release_ex(cols[i].name, 0);
-				cols[i].name = NULL;
-			}
-		}
-		efree(stmt->columns);
-		stmt->columns = NULL;
-	}
+	pdo_stmt_reset_columns(stmt);
 
 	if (!Z_ISUNDEF(stmt->fetch.into) && stmt->default_fetch_type == PDO_FETCH_INTO) {
 		zval_ptr_dtor(&stmt->fetch.into);

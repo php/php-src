@@ -7,7 +7,7 @@ if (!extension_loaded('sockets')) {
 }
 if (getenv('SKIP_ONLINE_TESTS')) die('skip online test');
 $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-$br = socket_bind($s, '0.0.0.0', 3000);
+$br = socket_bind($s, '0.0.0.0', 0);
 $so = @socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
     "group"	=> '224.0.0.23',
     "interface" => 'lo',
@@ -39,7 +39,8 @@ var_dump($br);
 echo "creating receive socket\n";
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP);
 var_dump($s);
-$br = socket_bind($s, '0.0.0.0', 3000);
+$br = socket_bind($s, '0.0.0.0', 0);
+socket_getsockname($s, $unused, $port);
 var_dump($br);
 
 $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
@@ -48,7 +49,7 @@ $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
 ));
 var_dump($so);
 
-$r = socket_sendto($sends1, $m = "initial packet", strlen($m), 0, $mcastaddr, 3000);
+$r = socket_sendto($sends1, $m = "initial packet", strlen($m), 0, $mcastaddr, $port);
 var_dump($r);
 
 $i = 0;
@@ -64,9 +65,9 @@ if ($i == 1) {
         "interface" => $interface,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", $port);
     var_dump($r);
 }
 if ($i == 2) {
@@ -76,9 +77,9 @@ if ($i == 2) {
         "interface" => $interface,
     ));
     var_dump($so);
-    $r = socket_sendto($sends2, $m = "ignored mcast packet (different interface)", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends2, $m = "ignored mcast packet (different interface)", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
 }
 if ($i == 3) {
@@ -89,9 +90,9 @@ if ($i == 3) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored packet (blocked source)", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored packet (blocked source)", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", $port);
     var_dump($r);
 }
 if ($i == 4) {
@@ -102,7 +103,7 @@ if ($i == 4) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
 }
 if ($i == 5) {
@@ -112,9 +113,9 @@ if ($i == 5) {
         "interface" => $interface,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", $port);
     var_dump($r);
 }
 if ($i == 6) {
@@ -125,7 +126,7 @@ if ($i == 6) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
 }
 if ($i == 7) {
@@ -136,9 +137,9 @@ if ($i == 7) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", $port);
     var_dump($r);
 }
 if ($i == 8) {

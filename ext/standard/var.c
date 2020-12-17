@@ -658,7 +658,7 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 
 	if (zv) {
 		/* References are only counted once, undo the data->n increment above */
-		if (is_ref) {
+		if (is_ref && Z_LVAL_P(zv) != -1) {
 			data->n -= 1;
 		}
 

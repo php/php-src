@@ -100,7 +100,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 		S->param_types = NULL;
 	}
 	if (S->query) {
-		efree(S->query);
+		zend_string_release(S->query);
 		S->query = NULL;
 	}
 
@@ -151,7 +151,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 			efree(q);
 		}
 
-		spprintf(&q, 0, "DECLARE %s SCROLL CURSOR WITH HOLD FOR %s", S->cursor_name, stmt->active_query_string);
+		spprintf(&q, 0, "DECLARE %s SCROLL CURSOR WITH HOLD FOR %s", S->cursor_name, ZSTR_VAL(stmt->active_query_string));
 		S->result = PQexec(H->server, q);
 		efree(q);
 
@@ -177,7 +177,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 stmt_retry:
 			/* we deferred the prepare until now, because we didn't
 			 * know anything about the parameter types; now we do */
-			S->result = PQprepare(H->server, S->stmt_name, S->query,
+			S->result = PQprepare(H->server, S->stmt_name, ZSTR_VAL(S->query),
 						stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
 						S->param_types);
 			status = PQresultStatus(S->result);
@@ -222,7 +222,7 @@ stmt_retry:
 				0);
 	} else if (stmt->supports_placeholders == PDO_PLACEHOLDER_NAMED) {
 		/* execute query with parameters */
-		S->result = PQexecParams(H->server, S->query,
+		S->result = PQexecParams(H->server, ZSTR_VAL(S->query),
 				stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
 				S->param_types,
 				(const char**)S->param_values,
@@ -231,7 +231,7 @@ stmt_retry:
 				0);
 	} else {
 		/* execute plain query (with embedded parameters) */
-		S->result = PQexec(H->server, stmt->active_query_string);
+		S->result = PQexec(H->server, ZSTR_VAL(stmt->active_query_string));
 	}
 	status = PQresultStatus(S->result);
 
@@ -282,7 +282,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							ZEND_ATOL(param->paramno, namevar + 1);
 							param->paramno--;
 						} else {
-							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", ZSTR_VAL(param->name));
+							pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", ZSTR_VAL(param->name));
 							return 0;
 						}
 					}
@@ -294,7 +294,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					return 1;
 				}
 				if (!zend_hash_index_exists(stmt->bound_param_map, param->paramno)) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
+					pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", "parameter was not defined");
 					return 0;
 				}
 			case PDO_PARAM_EVT_EXEC_POST:

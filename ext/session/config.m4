@@ -31,7 +31,7 @@ if test "$PHP_MM" != "no"; then
     AC_MSG_ERROR(cannot find mm library)
   fi
 
-  if test "$enable_zts" = "yes"; then
+  if test "$PHP_THREAD_SAFETY" = "yes"; then
     dnl The mm library is not thread-safe, and mod_mm.c refuses to compile.
     AC_MSG_ERROR(--with-mm cannot be combined with --enable-zts)
   fi

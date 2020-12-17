@@ -68,6 +68,7 @@ var_dump(bin2hex(mb_convert_encoding("\x00\x00\x00\x23\x00\x00\x20\xe3", "UTF-8-
 var_dump(bin2hex(mb_convert_encoding("\x00\x00\x00\x23\x00\x00\x20\xe3", "UTF-8-Mobile#KDDI", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x00\x00\x23\x00\x00\x20\xe3", "UTF-8-Mobile#SOFTBANK", "UCS-4BE")));
 
+/* Chinese flag emoji */
 var_dump(bin2hex(mb_convert_encoding("\x00\x01\xf1\xe8\x00\x01\xf1\xf3", "UTF-8-Mobile#DOCOMO", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x01\xf1\xe8\x00\x01\xf1\xf3", "UTF-8-Mobile#KDDI", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x01\xf1\xe8\x00\x01\xf1\xf3", "UTF-8-Mobile#SOFTBANK", "UCS-4BE")));

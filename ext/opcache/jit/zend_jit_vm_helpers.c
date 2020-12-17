@@ -239,7 +239,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 	}
 }
 
-static zend_always_inline int _zend_quick_get_constant(
+static zend_always_inline zend_constant* _zend_quick_get_constant(
 		const zval *key, uint32_t flags, int check_defined_only)
 {
 #ifndef HAVE_GCC_GLOBAL_REGS
@@ -267,30 +267,29 @@ static zend_always_inline int _zend_quick_get_constant(
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		}
 		CACHE_PTR(opline->extended_value, ENCODE_SPECIAL_CACHE_NUM(zend_hash_num_elements(EG(zend_constants))));
-		return FAILURE;
+		return NULL;
 	}
 
 	if (!check_defined_only) {
-		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
 		if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
 			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(c->name));
 			if (EG(exception)) {
-				return FAILURE;
+				return NULL;
 			}
-			return SUCCESS;
+			return c;
 		}
 	}
 
 	CACHE_PTR(opline->extended_value, c);
-	return SUCCESS;
+	return c;
 }
 
-int ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags)
+zend_constant* ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags)
 {
 	return _zend_quick_get_constant(key, flags, 0);
 }
 
-int ZEND_FASTCALL zend_jit_check_constant(const zval *key)
+zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key)
 {
 	return _zend_quick_get_constant(key, 0, 1);
 }
@@ -928,7 +927,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				if (JIT_G(max_polymorphic_calls) == 0
 				 && zend_jit_may_be_polymorphic_call(opline - 1)) {
 					func = NULL;
-				} else if (is_megamorphic == ZEND_JIT_EXIT_DYNAMIC_CALL
+				} else if ((is_megamorphic == ZEND_JIT_EXIT_METHOD_CALL
+						 || is_megamorphic == ZEND_JIT_EXIT_CLOSURE_CALL)
 						&& trace_buffer[1].opline == opline - 1) {
 					func = NULL;
 				}

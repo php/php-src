@@ -2,15 +2,15 @@
 
 /** @generate-function-entries */
 
-function hash(string $algo, string $data, bool $binary = false): string|false {}
+function hash(string $algo, string $data, bool $binary = false, array $options = []): string|false {}
 
-function hash_file(string $algo, string $filename, bool $binary = false): string|false {}
+function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
 
 function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string|false {}
 
 function hash_hmac_file(string $algo, string $data, string $key, bool $binary = false): string|false {}
 
-function hash_init(string $algo, int $flags = 0, string $key = ""): HashContext {}
+function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
 
 function hash_update(HashContext $context, string $data): bool {}
 

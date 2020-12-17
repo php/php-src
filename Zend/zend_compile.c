@@ -422,6 +422,9 @@ void init_compiler(void) /* {{{ */
 
 void shutdown_compiler(void) /* {{{ */
 {
+	/* Reset filename before destroying the arena, as file cache may use arena allocated strings. */
+	zend_restore_compiled_filename(NULL);
+
 	zend_stack_destroy(&CG(loop_var_stack));
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_stack_destroy(&CG(short_circuiting_opnums));
@@ -437,7 +440,6 @@ void shutdown_compiler(void) /* {{{ */
 		FREE_HASHTABLE(CG(delayed_autoloads));
 		CG(delayed_autoloads) = NULL;
 	}
-	zend_restore_compiled_filename(NULL);
 }
 /* }}} */
 

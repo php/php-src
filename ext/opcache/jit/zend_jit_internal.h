@@ -130,8 +130,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
 zend_bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
 
-int ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
-int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
+zend_constant* ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
+zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 
 /* Tracer */
 #define zend_jit_opline_hash(opline) \
@@ -211,7 +211,8 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
 #define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
 #define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
-#define ZEND_JIT_EXIT_DYNAMIC_CALL  (1<<8) /* exit because of polymorphic INTI_DYNAMIC_CALL call */
+#define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
+#define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */

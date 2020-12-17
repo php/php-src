@@ -136,6 +136,7 @@ ZEND_EXT_API void zend_jit_protect(void);
 ZEND_EXT_API void zend_jit_init(void);
 ZEND_EXT_API int  zend_jit_config(zend_string *jit_options, int stage);
 ZEND_EXT_API int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
+ZEND_EXT_API int  zend_jit_check_support(void);
 ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, zend_bool reattached);
 ZEND_EXT_API void zend_jit_shutdown(void);
 ZEND_EXT_API void zend_jit_activate(void);

@@ -1,8 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d04d007cac328014c6cc76a00cc291237965d56d */
+ * Stub hash: 2c2759e6c1894713439e3ee8da7f56810d00d8cf */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_COMPersistHelper___construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, variant, variant, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_COMPersistHelper___construct, 0, 0, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, variant, variant, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_COMPersistHelper_GetCurFileName, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)

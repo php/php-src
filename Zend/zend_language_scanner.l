@@ -177,7 +177,7 @@ static void yy_pop_state(void)
 	zend_stack_del_top(&SCNG(state_stack));
 }
 
-static void yy_scan_buffer(char *str, unsigned int len)
+static void yy_scan_buffer(char *str, size_t len)
 {
 	YYCURSOR       = (YYCTYPE*)str;
 	YYLIMIT        = YYCURSOR + len;
@@ -571,7 +571,7 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 			}
 		}
 		SCNG(yy_start) = (unsigned char *)buf;
-		yy_scan_buffer(buf, (unsigned int)size);
+		yy_scan_buffer(buf, size);
 	} else {
 		zend_error_noreturn(E_COMPILE_ERROR, "zend_stream_mmap() failed");
 	}
@@ -772,7 +772,7 @@ ZEND_API void zend_prepare_string_for_scanning(zval *str, const char *filename)
 		}
 	}
 
-	yy_scan_buffer(buf, (unsigned int)size);
+	yy_scan_buffer(buf, size);
 
 	new_compiled_filename = zend_string_init(filename, strlen(filename), 0);
 	zend_set_compiled_filename(new_compiled_filename);
@@ -1558,7 +1558,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"?->" {
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
-	return T_NULLSAFE_OBJECT_OPERATOR;
+	RETURN_TOKEN(T_NULLSAFE_OBJECT_OPERATOR);
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {

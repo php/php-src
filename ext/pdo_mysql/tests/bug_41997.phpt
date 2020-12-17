@@ -1,7 +1,5 @@
 --TEST--
 PDO MySQL Bug #41997 (stored procedure call returning single rowset blocks future queries)
---XFAIL--
-nextRowset() problem with stored proc & emulation mode & mysqlnd
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
@@ -45,6 +43,8 @@ array(1) {
     ["one"]=>
     string(1) "1"
   }
+}
+array(0) {
 }
 array(3) {
   [0]=>

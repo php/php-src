@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "main/php.h"
+#include "main/SAPI.h"
 #include "php_version.h"
 #include <ZendAccelerator.h>
 #include "zend_shared_alloc.h"
@@ -448,7 +450,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 					name,
 					(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
 					op_array,
-					&ssa->cfg,
+					ssa ? &ssa->cfg : NULL,
 					entry,
 					size);
 			}
@@ -3261,7 +3263,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_FETCH_CONSTANT:
-						if (!zend_jit_fetch_constant(&dasm_state, opline)) {
+						if (!zend_jit_fetch_constant(&dasm_state, opline, op_array, ssa, ssa_op)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3296,7 +3298,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_init_method_call(&dasm_state, opline, b, op_array, ssa, ssa_op, call_level,
 								op1_info, op1_addr, ce, ce_is_instanceof, 0, NULL,
-								NULL, 1)) {
+								NULL, 1, 0)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -4079,8 +4081,6 @@ static int zend_jit_parse_config_num(zend_long jit)
 
 ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 {
-	zend_ulong num;
-
 	if (stage != ZEND_INI_STAGE_STARTUP && !JIT_G(enabled)) {
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
 			zend_error(E_WARNING, "Cannot change opcache.jit setting at run-time (JIT is disabled)");
@@ -4118,8 +4118,10 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		JIT_G(trigger) = ZEND_JIT_ON_SCRIPT_LOAD;
 		JIT_G(opt_flags) = ZEND_JIT_REG_ALLOC_GLOBAL | ZEND_JIT_CPU_AVX;
 		return SUCCESS;
-	} else if (ZEND_HANDLE_NUMERIC(jit, num)) {
-		if (zend_jit_parse_config_num((zend_long)num) != SUCCESS) {
+	} else  {
+		char *end;
+		zend_long num = ZEND_STRTOL(ZSTR_VAL(jit), &end, 10);
+		if (end != ZSTR_VAL(jit) + ZSTR_LEN(jit) || zend_jit_parse_config_num(num) != SUCCESS) {
 			goto failure;
 		}
 		JIT_G(enabled) = 1;
@@ -4127,7 +4129,7 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 	}
 
 failure:
-	zend_error(E_WARNING, "Invalid \"opcache.jit\" setting. Should be \"disable\", \"on\", \"off\" or 4-digit number");
+	zend_error(E_WARNING, "Invalid \"opcache.jit\" setting. Should be \"disable\", \"on\", \"off\", \"tracing\", \"function\" or 4-digit number");
 	JIT_G(enabled) = 0;
 	JIT_G(on) = 0;
 	return FAILURE;
@@ -4164,16 +4166,43 @@ ZEND_EXT_API void zend_jit_init(void)
 #endif
 }
 
-ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
+ZEND_EXT_API int zend_jit_check_support(void)
 {
-	int ret;
+	int i;
 
 	zend_jit_vm_kind = zend_vm_kind();
 	if (zend_jit_vm_kind != ZEND_VM_KIND_CALL &&
 	    zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
-		// TODO: error reporting and cleanup ???
+		zend_error(E_WARNING, "JIT is compatible only with CALL and HYBRID VM. JIT disabled.");
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
 		return FAILURE;
 	}
+
+	if (zend_execute_ex != execute_ex) {
+		if (strcmp(sapi_module.name, "phpdbg") != 0) {
+			zend_error(E_WARNING, "JIT is incompatible with third party extensions that override zend_execute_ex(). JIT disabled.");
+		}
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		return FAILURE;
+	}
+
+	for (i = 0; i <= 256; i++) {
+		if (zend_get_user_opcode_handler(i) != NULL) {
+			zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
+			JIT_G(enabled) = 0;
+			JIT_G(on) = 0;
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
+{
+	int ret;
 
 	zend_jit_halt_op = zend_get_halt_op();
 

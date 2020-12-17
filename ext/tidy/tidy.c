@@ -228,6 +228,7 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
 static PHP_MINIT_FUNCTION(tidy);
 static PHP_MSHUTDOWN_FUNCTION(tidy);
 static PHP_RINIT_FUNCTION(tidy);
+static PHP_RSHUTDOWN_FUNCTION(tidy);
 static PHP_MINFO_FUNCTION(tidy);
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)
@@ -249,7 +250,7 @@ zend_module_entry tidy_module_entry = {
 	PHP_MINIT(tidy),
 	PHP_MSHUTDOWN(tidy),
 	PHP_RINIT(tidy),
-	NULL,
+	PHP_RSHUTDOWN(tidy),
 	PHP_MINFO(tidy),
 	PHP_TIDY_VERSION,
 	PHP_MODULE_GLOBALS(tidy),
@@ -769,9 +770,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 			node = tidyGetBody(obj->ptdoc->doc);
 			break;
 
-		default:
-			RETURN_NULL();
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	if (!node) {
@@ -859,6 +858,13 @@ static PHP_RINIT_FUNCTION(tidy)
 #endif
 
 	php_tidy_clean_output_start(ZEND_STRL("ob_tidyhandler"));
+
+	return SUCCESS;
+}
+
+static PHP_RSHUTDOWN_FUNCTION(tidy)
+{
+	TG(clean_output) = INI_ORIG_BOOL("tidy.clean_output");
 
 	return SUCCESS;
 }

@@ -2727,7 +2727,7 @@ PHP_METHOD(SplFileObject, ftruncate)
 PHP_METHOD(SplFileObject, seek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_long line_pos;
+	zend_long line_pos, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &line_pos) == FAILURE) {
 		RETURN_THROWS();
@@ -2742,10 +2742,14 @@ PHP_METHOD(SplFileObject, seek)
 
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
 
-	while(intern->u.file.current_line_num < line_pos) {
+	for (i = 0; i < line_pos; i++) {
 		if (spl_filesystem_file_read_line(ZEND_THIS, intern, 1) == FAILURE) {
-			break;
+			return;
 		}
+	}
+	if (line_pos > 0) {
+		intern->u.file.current_line_num++;
+		spl_filesystem_file_free_line(intern);
 	}
 } /* }}} */
 

@@ -1116,7 +1116,7 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field)
 	 */
 	add_property_string(value, "catalog", "def");
 
-	add_property_long(value, "max_length", field->max_length);
+	add_property_long(value, "max_length", 0);
 	add_property_long(value, "length", field->length);
 	add_property_long(value, "charsetnr", field->charsetnr);
 	add_property_long(value, "flags", field->flags);
@@ -1459,7 +1459,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 	  We create always persistent, as if the user want to connect
 	  to p:somehost, we can't convert the handle then
 	*/
-	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, TRUE)))
+	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, TRUE)))
 #endif
 	{
 		efree(mysql);
@@ -1638,9 +1638,7 @@ static int mysqli_options_get_option_zval_type(int option)
 #ifdef MYSQLI_USE_MYSQLND
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
-#endif
 #endif /* MYSQLI_USE_MYSQLND */
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 #ifdef MYSQL_REPORT_DATA_TRUNCATION
@@ -2529,11 +2527,7 @@ PHP_FUNCTION(mysqli_store_result)
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-#ifdef MYSQLI_USE_MYSQLND
-	result = flags & MYSQLI_STORE_RESULT_COPY_DATA? mysqlnd_store_result_ofs(mysql->mysql) : mysqlnd_store_result(mysql->mysql);
-#else
 	result = mysql_store_result(mysql->mysql);
-#endif
 	if (!result) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;

@@ -294,7 +294,7 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 			c = c1;
 		}
 
-		if (filter->status == 1 && filter->cache > 0) {
+		if (filter->status) {
 			return c;
 		}
 

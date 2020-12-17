@@ -92,12 +92,14 @@ if (typeof(CWD) == "undefined") {
 	CWD = FSO.GetParentFolderName(FSO.GetParentFolderName(FSO.GetAbsolutePathName("main\\php_version.h")));
 }
 
-/* defaults; we pick up the precise versions from configure.ac */
-var PHP_VERSION = 8;
-var PHP_MINOR_VERSION = 1;
-var PHP_RELEASE_VERSION = 0;
-var PHP_EXTRA_VERSION = "";
-var PHP_VERSION_STRING = "8.1.0";
+if (!MODE_PHPIZE) {
+	/* defaults; we pick up the precise versions from configure.ac */
+	var PHP_VERSION = 8;
+	var PHP_MINOR_VERSION = 1;
+	var PHP_RELEASE_VERSION = 0;
+	var PHP_EXTRA_VERSION = "";
+	var PHP_VERSION_STRING = "8.1.0";
+}
 
 /* Get version numbers and DEFINE as a string */
 function get_version_numbers()
@@ -1542,7 +1544,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			var _tmp = FSO.CreateTextFile(PHP_DIR + "/include/main/config.pickle.h", true);
 			_tmp.Close();
 		}
-		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
@@ -2207,7 +2208,7 @@ function generate_config_pickle_h()
 			var ln = outfile.ReadLine();
 
 			for (var i in keys) {
-				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*", "g");
+				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*|#undef[\s ]+" + keys[i], "g");
 
 				if (ln.match(reg)) {
 					found = true;
@@ -2233,6 +2234,7 @@ function generate_config_pickle_h()
 			continue;
 		}*/
 
+		lines.push("#undef " + keys[i]);
 		lines.push("#define " + keys[i] + " " + item[0]);
 	}
 
@@ -2309,6 +2311,11 @@ function generate_config_h()
 		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
 
+	outfile.WriteBlankLines(1);
+	outfile.WriteLine("#if __has_include(\"main/config.pickle.h\")");
+	outfile.WriteLine("#include \"main/config.pickle.h\"");
+	outfile.WriteLine("#endif");
+
 	outfile.Close();
 }
 
@@ -2334,6 +2341,8 @@ function generate_phpize()
 	MF.WriteLine("var PHP_VERSION=" + PHP_VERSION);
 	MF.WriteLine("var PHP_MINOR_VERSION=" + PHP_MINOR_VERSION);
 	MF.WriteLine("var PHP_RELEASE_VERSION=" + PHP_RELEASE_VERSION);
+	MF.WriteLine("var PHP_EXTRA_VERSION=\"" + PHP_EXTRA_VERSION + "\"");
+	MF.WriteLine("var PHP_VERSION_STRING=\"" + PHP_VERSION_STRING + "\"");
 	MF.WriteBlankLines(1);
 	MF.WriteLine("/* Generated extensions list with mode (static/shared) */");
 

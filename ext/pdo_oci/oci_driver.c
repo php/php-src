@@ -238,13 +238,12 @@ static int oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options) /* {{{ */
+static int oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
 	ub4 prefetch;
-	char *nsql = NULL;
-	size_t nsql_len = 0;
+	zend_string *nsql = NULL;
 	int ret;
 
 #ifdef HAVE_OCISTMTFETCH2
@@ -257,12 +256,11 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 
 	S->H = H;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
-	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
+	ret = pdo_parse_params(stmt, sql, &nsql);
 
 	if (ret == 1) {
 		/* query was re-written */
 		sql = nsql;
-		sql_len = nsql_len;
 	} else if (ret == -1) {
 		/* couldn't grok it */
 		strcpy(dbh->error_code, stmt->error_code);
@@ -276,10 +274,10 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 	/* and our own private error handle */
 	OCIHandleAlloc(H->env, (dvoid*)&S->err, OCI_HTYPE_ERROR, 0, NULL);
 
-	if (sql_len) {
-		H->last_err = OCIStmtPrepare(S->stmt, H->err, (text*)sql, (ub4) sql_len, OCI_NTV_SYNTAX, OCI_DEFAULT);
+	if (ZSTR_LEN(sql) != 0) {
+		H->last_err = OCIStmtPrepare(S->stmt, H->err, (text*) ZSTR_VAL(sql), (ub4) ZSTR_LEN(sql), OCI_NTV_SYNTAX, OCI_DEFAULT);
 		if (nsql) {
-			efree(nsql);
+			zend_string_release(nsql);
 			nsql = NULL;
 		}
 		if (H->last_err) {
@@ -304,7 +302,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 	stmt->driver_data = S;
 	stmt->methods = &oci_stmt_methods;
 	if (nsql) {
-		efree(nsql);
+		zend_string_release(nsql);
 		nsql = NULL;
 	}
 
