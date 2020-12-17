@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
 
+- PDO:
+  . Fixed bug #40913 (PDO_MYSQL: PDO::PARAM_LOB does not bind to a stream for
+    fetching a BLOB). (Nikita)
+
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSPellConfig. (Sara)

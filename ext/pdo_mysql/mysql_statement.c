@@ -658,18 +658,13 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 
 		cols[i].precision = S->fields[i].decimals;
 		cols[i].maxlen = S->fields[i].length;
-
-#ifdef PDO_USE_MYSQLND
-		cols[i].param_type = PDO_PARAM_ZVAL;
-#else
-		cols[i].param_type = PDO_PARAM_STR;
-#endif
 	}
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
 
-static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees) /* {{{ */
+static int pdo_mysql_stmt_get_col(
+		pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -685,38 +680,33 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_
 	}
 #ifdef PDO_USE_MYSQLND
 	if (S->stmt) {
-		Z_TRY_ADDREF(S->stmt->data->result_bind[colno].zv);
-		*ptr = (char*)&S->stmt->data->result_bind[colno].zv;
+		ZVAL_COPY(result, &S->stmt->data->result_bind[colno].zv);
 	} else {
-		Z_TRY_ADDREF(S->current_row[colno]);
-		*ptr = (char*)&S->current_row[colno];
+		ZVAL_COPY(result, &S->current_row[colno]);
 	}
-	*len = sizeof(zval);
 	PDO_DBG_RETURN(1);
 #else
 	if (S->stmt) {
 		if (S->out_null[colno]) {
-			*ptr = NULL;
-			*len = 0;
 			PDO_DBG_RETURN(1);
 		}
-		*ptr = S->bound_result[colno].buffer;
-		if (S->out_length[colno] > S->bound_result[colno].buffer_length) {
+
+		size_t length = S->out_length[colno];
+		if (length > S->bound_result[colno].buffer_length) {
 			/* mysql lied about the column width */
 			strcpy(stmt->error_code, "01004"); /* truncated */
-			S->out_length[colno] = S->bound_result[colno].buffer_length;
-			*len = S->out_length[colno];
-			PDO_DBG_RETURN(0);
+			length = S->out_length[colno] = S->bound_result[colno].buffer_length;
 		}
-		*len = S->out_length[colno];
+		ZVAL_STRINGL_FAST(result, S->bound_result[colno].buffer, length);
 		PDO_DBG_RETURN(1);
 	}
 
 	if (S->current_data == NULL) {
 		PDO_DBG_RETURN(0);
 	}
-	*ptr = S->current_data[colno];
-	*len = S->current_lengths[colno];
+	if (S->current_data[colno]) {
+		ZVAL_STRINGL_FAST(result, S->current_data[colno], S->current_lengths[colno]);
+	}
 	PDO_DBG_RETURN(1);
 #endif
 } /* }}} */
@@ -815,7 +805,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 		add_assoc_string(return_value, "native_type", str);
 	}
 
-#ifdef PDO_USE_MYSQLND
+	enum pdo_param_type param_type;
 	switch (F->type) {
 		case MYSQL_TYPE_BIT:
 		case MYSQL_TYPE_YEAR:
@@ -826,13 +816,13 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 #if SIZEOF_ZEND_LONG==8
 		case MYSQL_TYPE_LONGLONG:
 #endif
-			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
+			param_type = PDO_PARAM_INT;
 			break;
 		default:
-			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+			param_type = PDO_PARAM_STR;
 			break;
 	}
-#endif
+	add_assoc_long(return_value, "pdo_type", param_type);
 
 	add_assoc_zval(return_value, "flags", &flags);
 	add_assoc_string(return_value, "table", (char *) (F->table?F->table : ""));

@@ -25,3 +25,25 @@ PHP 8.1 INTERNALS UPGRADE NOTES
       configuration. If the an algorithm doesn't make use of any
       additional configuration, the argument is to be marked with
       ZEND_ATTRIBUTE_UNUSED.
+
+  b. ext/pdo
+    - The "preparer" callback now accepts a zend_string* instead of
+      char* + size_t pair the query string. Similarly, the query_string and
+      active_query_string members of pdo_stmt_t are now zend_string*.
+    - The way in which drivers provide results has changed: Previously,
+      the "describer" callback populated the "pdo_type" member in the
+      pdo_column_data structure, and the "get_col" callback then had to return
+      pointers to data of appropriate type.
+
+      In PHP 8.1, the "describer" callback no longer determines the pdo_type
+      (and this member has been removed from pdo_column_data). Instead, the
+      "get_col" callback accepts a zval pointer that may be populated with a
+      value of arbitrary type. This gives drivers more flexibility in
+      determining result types (e.g. based on whether a specific integer fits
+      the PHP integer type) and avoid awkward juggling of temporary buffers.
+
+      As the "describer" no longer determines pdo_type, the "get_column_meta"
+      function is now responsible for providing this information for use by
+      getColumnMeta(). The type provided here does not need to match the type
+      returned by get_col (in fact no corresponding type might exist, e.g. for
+      floats). It should be the closest logical equivalent for the column type.

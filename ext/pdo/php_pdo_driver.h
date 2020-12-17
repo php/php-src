@@ -46,31 +46,13 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
-
-	/* int as in long (the php native int type).
-	 * If you mark a column as an int, PDO expects get_col to return
-	 * a pointer to a long */
+	PDO_PARAM_BOOL,
 	PDO_PARAM_INT,
-
-	/* get_col ptr should point to start of the string buffer */
 	PDO_PARAM_STR,
-
-	/* get_col: when len is 0 ptr should point to a php_stream *,
-	 * otherwise it should behave like a string. Indicate a NULL field
-	 * value by setting the ptr to NULL */
 	PDO_PARAM_LOB,
 
-	/* get_col: will expect the ptr to point to a new PDOStatement object handle,
-	 * but this isn't wired up yet */
+	/* get_col: Not supported (yet?) */
 	PDO_PARAM_STMT, /* hierarchical result set */
-
-	/* get_col ptr should point to a zend_bool */
-	PDO_PARAM_BOOL,
-
-	/* get_col ptr should point to a zval*
-	   and the driver is responsible for adding correct type information to get_column_meta()
-	 */
-	PDO_PARAM_ZVAL,
 
 	/* magic flag to denote a parameter as being input/output */
 	PDO_PARAM_INPUT_OUTPUT = 0x80000000,
@@ -343,13 +325,13 @@ typedef int (*pdo_stmt_fetch_func)(pdo_stmt_t *stmt,
  * Driver should populate stmt->columns[colno] with appropriate info */
 typedef int (*pdo_stmt_describe_col_func)(pdo_stmt_t *stmt, int colno);
 
-/* retrieves pointer and size of the value for a column.
- * Note that PDO expects the driver to manage the lifetime of this data;
- * it will copy the value into a zval on behalf of the script.
- * If the driver sets caller_frees, ptr should point to emalloc'd memory
- * and PDO will free it as soon as it is done using it.
- */
-typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees);
+/* Retrieves zval value of a column. If type is non-NULL, then this specifies the type which
+ * the user requested through bindColumn(). The driver does not need to check this argument,
+ * as PDO will perform any necessary conversions itself. However, it might be used to fetch
+ * a value more efficiently into the final type, or make the behavior dependent on the requested
+ * type. */
+typedef int (*pdo_stmt_get_col_data_func)(
+	pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type);
 
 /* hook for bound params */
 enum pdo_param_event {
@@ -382,8 +364,8 @@ typedef int (*pdo_stmt_get_attr_func)(pdo_stmt_t *stmt, zend_long attr, zval *va
  *   name => the column name
  *   len => the length/size of the column
  *   precision => precision of the column
- *   pdo_type => an integer, one of the PDO_PARAM_XXX values
  *
+ *   pdo_type => an integer, one of the PDO_PARAM_XXX values
  *   scale => the floating point scale
  *   table => the table for that column
  *   type => a string representation of the type, mapped to the PHP equivalent type name
@@ -541,7 +523,6 @@ struct pdo_column_data {
 	zend_string *name;
 	size_t maxlen;
 	zend_ulong precision;
-	enum pdo_param_type param_type;
 };
 
 /* describes a bound parameter */

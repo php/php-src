@@ -532,7 +532,6 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 		S = ecalloc(1, sizeof(*S)-sizeof(XSQLDA) + XSQLDA_LENGTH(num_sqlda.sqld));
 		S->H = H;
 		S->stmt = s;
-		S->fetch_buf = ecalloc(1,sizeof(char*) * num_sqlda.sqld);
 		S->out_sqlda.version = PDO_FB_SQLDA_VERSION;
 		S->out_sqlda.sqln = stmt->column_count = num_sqlda.sqld;
 		S->named_params = np;

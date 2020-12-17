@@ -31,17 +31,17 @@ Key: Name: [5] :bool
 paramno=-1
 name=[5] ":bool"
 is_param=1
-param_type=2
+param_type=3
 Key: Name: [4] :int
 paramno=-1
 name=[4] ":int"
 is_param=1
-param_type=1
+param_type=2
 Key: Name: [7] :string
 paramno=-1
 name=[7] ":string"
 is_param=1
-param_type=2
+param_type=3
 Key: Name: [5] :null
 paramno=-1
 name=[5] ":null"

@@ -21,12 +21,12 @@ array(6) {
   ["flags"]=>
   array(0) {
   }
+  ["pdo_type"]=>
+  int(3)
   ["name"]=>
   string(1) "1"
   ["len"]=>
   int(-1)
   ["precision"]=>
   int(0)
-  ["pdo_type"]=>
-  int(2)
 }

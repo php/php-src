@@ -42,6 +42,10 @@ PHP 8.1 UPGRADE NOTES
 - PDO:
   . PDO::ATTR_STRINGIFY_FETCHES now also stringifies values of type bool to
     "0" or "1". Previously booleans were not stringified.
+  . Calling bindColumn() with PDO::PARAM_LOB (and assuming stringification is
+    not enabled) will now consistently bind a stream result, as documented.
+    Previously the result would be either a stream or a string depending on the
+    used database driver and the time the binding is performed.
 
 - PDO MySQL:
   . Integers and floats in result sets will now be returned using native PHP

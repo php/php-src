@@ -247,21 +247,11 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 	stmt->columns[colno].maxlen = SIZE_MAX;
 	stmt->columns[colno].precision = 0;
 
-	switch (sqlite3_column_type(S->stmt, colno)) {
-		case SQLITE_INTEGER:
-		case SQLITE_FLOAT:
-		case SQLITE3_TEXT:
-		case SQLITE_BLOB:
-		case SQLITE_NULL:
-		default:
-			stmt->columns[colno].param_type = PDO_PARAM_STR;
-			break;
-	}
-
 	return 1;
 }
 
-static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees)
+static int pdo_sqlite_stmt_get_col(
+		pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	if (!S->stmt) {
@@ -274,18 +264,17 @@ static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size
 	}
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
-			*ptr = NULL;
-			*len = 0;
+			ZVAL_NULL(result);
 			return 1;
 
 		case SQLITE_BLOB:
-			*ptr = (char*)sqlite3_column_blob(S->stmt, colno);
-			*len = sqlite3_column_bytes(S->stmt, colno);
+			ZVAL_STRINGL_FAST(result,
+				sqlite3_column_blob(S->stmt, colno), sqlite3_column_bytes(S->stmt, colno));
 			return 1;
 
 		default:
-			*ptr = (char*)sqlite3_column_text(S->stmt, colno);
-			*len = sqlite3_column_bytes(S->stmt, colno);
+			ZVAL_STRINGL_FAST(result,
+				(char *) sqlite3_column_text(S->stmt, colno), sqlite3_column_bytes(S->stmt, colno));
 			return 1;
 	}
 }
@@ -341,6 +330,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 #endif
 
 	add_assoc_zval(return_value, "flags", &flags);
+	add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 
 	return SUCCESS;
 }

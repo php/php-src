@@ -88,31 +88,28 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 	return PDO_ODBC_CONV_NOT_REQUIRED;
 }
 
-static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf,
-	zend_ulong buflen, zend_ulong *outlen)
+static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, zval *result)
 {
 #ifdef PHP_WIN32
-	if (is_unicode && buflen) {
+	ZEND_ASSERT(Z_TYPE_P(result) == IS_STRING);
+	if (is_unicode && Z_STRLEN_P(result) != 0) {
 		pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 		DWORD ret;
 
-		ret = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)buf, buflen/sizeof(WCHAR), NULL, 0, NULL, NULL);
+		ret = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR) Z_STRVAL_P(result), Z_STRLEN_P(result)/sizeof(WCHAR), NULL, 0, NULL, NULL);
 		if (ret == 0) {
 			return PDO_ODBC_CONV_FAIL;
 		}
 
-		if (S->convbufsize <= ret) {
-			S->convbufsize = ret + 1;
-			S->convbuf = erealloc(S->convbuf, S->convbufsize);
-		}
-
-		ret = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)buf, buflen/sizeof(WCHAR), S->convbuf, S->convbufsize, NULL, NULL);
+		zend_string *str = zend_string_alloc(ret, 0);
+		ret = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR) Z_STRVAL_P(result), Z_STRLEN_P(result)/sizeof(WCHAR), ZSTR_VAL(str), ZSTR_LEN(str), NULL, NULL);
 		if (ret == 0) {
 			return PDO_ODBC_CONV_FAIL;
 		}
 
-		*outlen = ret;
-		S->convbuf[*outlen] = '\0';
+		ZSTR_VAL(str)[ret] = '\0';
+		zval_ptr_dtor_str(result);
+		ZVAL_STR(result, str);
 		return PDO_ODBC_CONV_OK;
 	}
 #endif
@@ -480,38 +477,27 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				P = param->driver_data;
 
 				if (P->outbuf) {
-					zend_ulong ulen;
-					char *srcbuf;
-					zend_ulong srclen = 0;
-
 					if (Z_ISREF(param->parameter)) {
 						parameter = Z_REFVAL(param->parameter);
 					} else {
 						parameter = &param->parameter;
 					}
 					zval_ptr_dtor(parameter);
-					ZVAL_NULL(parameter);
 
 					switch (P->len) {
 						case SQL_NULL_DATA:
+							ZVAL_NULL(parameter);
 							break;
 						default:
-							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, P->outbuf, P->len, &ulen)) {
+							ZVAL_STRINGL(parameter, P->outbuf, P->len);
+							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, parameter)) {
 								case PDO_ODBC_CONV_FAIL:
 									/* something fishy, but allow it to come back as binary */
 								case PDO_ODBC_CONV_NOT_REQUIRED:
-									srcbuf = P->outbuf;
-									srclen = P->len;
 									break;
 								case PDO_ODBC_CONV_OK:
-									srcbuf = S->convbuf;
-									srclen = ulen;
 									break;
 							}
-
-							ZVAL_NEW_STR(parameter, zend_string_alloc(srclen, 0));
-							memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
-							Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
 					}
 				}
 				return 1;
@@ -612,9 +598,6 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
 
-	/* returning data as a string */
-	col->param_type = PDO_PARAM_STR;
-
 	/* tell ODBC to put it straight into our buffer, but only if it
 	 * isn't "long" data, and only if we haven't already bound a long
 	 * column. */
@@ -642,16 +625,19 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
-static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees)
+static int odbc_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
+{
+	add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+	return 1;
+}
+
+static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
-	zend_ulong ulen;
 
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
-		zend_ulong used = 0;
-		char *buf;
 		RETCODE rc;
 
 		/* fetch it into C->data, which is allocated with a length
@@ -676,11 +662,9 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 			 this loop has to work whether or not SQLGetData() provides the total column length.
 			 calling SQLDescribeCol() or other, specifically to get the column length, then doing a single read
 			 for that size would be slower except maybe for extremely long columns.*/
-			char *buf2;
-
-			buf2 = emalloc(256);
-			buf = estrndup(C->data, 256);
-			used = 255; /* not 256; the driver NUL terminated the buffer */
+			char *buf2 = emalloc(256);
+			zend_string *str = zend_string_init(C->data, 255, 0);
+			size_t used = 255; /* not 256; the driver NUL terminated the buffer */
 
 			do {
 				C->fetched_len = 0;
@@ -692,12 +676,12 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 					/* point 5, in section "Retrieving Data with SQLGetData" in http://msdn.microsoft.com/en-us/library/windows/desktop/ms715441(v=vs.85).aspx
 					 states that if SQL_SUCCESS_WITH_INFO, fetched_len will be > 255 (greater than buf2's size)
 					 (if a driver fails to follow that and wrote less than 255 bytes to buf2, this will AV or read garbage into buf) */
-					buf = erealloc(buf, used + 255+1);
-					memcpy(buf + used, buf2, 255);
+					str = zend_string_realloc(str, used + 255, 0);
+					memcpy(ZSTR_VAL(str) + used, buf2, 255);
 					used = used + 255;
 				} else if (rc==SQL_SUCCESS) {
-					buf = erealloc(buf, used + C->fetched_len+1);
-					memcpy(buf + used, buf2, C->fetched_len);
+					str = zend_string_realloc(str, used + C->fetched_len, 0);
+					memcpy(ZSTR_VAL(str) + used, buf2, C->fetched_len);
 					used = used + C->fetched_len;
 				} else {
 					/* includes SQL_NO_DATA */
@@ -709,11 +693,8 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 			efree(buf2);
 
 			/* NULL terminate the buffer once, when finished, for use with the rest of PHP */
-			buf[used] = '\0';
-
-			*ptr = buf;
-			*caller_frees = 1;
-			*len = used;
+			ZSTR_VAL(str)[used] = '\0';
+			ZVAL_STR(result, str);
 			if (C->is_unicode) {
 				goto unicode_conv;
 			}
@@ -721,8 +702,6 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 		}
 
 		/* something went caca */
-		*ptr = NULL;
-		*len = 0;
 		return 1;
 	}
 
@@ -730,40 +709,29 @@ in_data:
 	/* check the indicator to ensure that the data is intact */
 	if (C->fetched_len == SQL_NULL_DATA) {
 		/* A NULL value */
-		*ptr = NULL;
-		*len = 0;
+		ZVAL_NULL(result);
 		return 1;
 	} else if (C->fetched_len >= 0) {
 		/* it was stored perfectly */
-		*ptr = C->data;
-		*len = C->fetched_len;
+		ZVAL_STRINGL_FAST(result, C->data, C->fetched_len);
 		if (C->is_unicode) {
 			goto unicode_conv;
 		}
 		return 1;
 	} else {
 		/* no data? */
-		*ptr = NULL;
-		*len = 0;
+		ZVAL_NULL(result);
 		return 1;
 	}
 
-	unicode_conv:
-	switch (pdo_odbc_ucs22utf8(stmt, C->is_unicode, *ptr, *len, &ulen)) {
+unicode_conv:
+	switch (pdo_odbc_ucs22utf8(stmt, C->is_unicode, result)) {
 		case PDO_ODBC_CONV_FAIL:
 			/* oh well.  They can have the binary version of it */
 		case PDO_ODBC_CONV_NOT_REQUIRED:
 			/* shouldn't happen... */
 			return 1;
-
 		case PDO_ODBC_CONV_OK:
-			if (*caller_frees) {
-				efree(*ptr);
-			}
-			*ptr = emalloc(ulen + 1);
-			*len = ulen;
-			memcpy(*ptr, S->convbuf, ulen+1);
-			*caller_frees = 1;
 			return 1;
 	}
 	return 1;
@@ -873,8 +841,8 @@ const struct pdo_stmt_methods odbc_stmt_methods = {
 	odbc_stmt_get_col,
 	odbc_stmt_param_hook,
 	odbc_stmt_set_param,
-	odbc_stmt_get_attr, /* get attr */
-	NULL, /* get column meta */
+	odbc_stmt_get_attr,
+	odbc_stmt_get_column_meta,
 	odbc_stmt_next_rowset,
 	odbc_stmt_close_cursor
 };
