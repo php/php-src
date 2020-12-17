@@ -212,8 +212,7 @@ static void
 ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
 	struct st_mysqlnd_time t;
-	zend_ulong length; /* First byte encodes the length*/
-	char * value;
+	zend_ulong length; /* First byte encodes the length */
 	DBG_ENTER("ps_fetch_time");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
@@ -241,24 +240,13 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 	}
 
     if (field->decimals > 0 && field->decimals < 7) {
-        length = mnd_sprintf(
-            &value,
-            0,
-            "%s%02u:%02u:%02u.%0*u",
-            (t.neg ? "-" : ""),
-            t.hour,
-            t.minute,
-            t.second,
-            field->decimals,
-           (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
-        );
+        ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u.%0*u",
+			(t.neg ? "-" : ""), t.hour, t.minute, t.second, field->decimals,
+			(uint32_t) (t.second_part / pow(10, 6 - field->decimals))));
     } else {
-        length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+         ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u",
+			(t.neg ? "-" : ""), t.hour, t.minute, t.second));
     }
-
-	DBG_INF_FMT("%s", value);
-	ZVAL_STRINGL(zv, value, length);
-	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -270,7 +258,6 @@ ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 {
 	struct st_mysqlnd_time t = {0};
 	zend_ulong length; /* First byte encodes the length*/
-	char * value;
 	DBG_ENTER("ps_fetch_date");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
@@ -291,11 +278,7 @@ ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		t.time_type = MYSQLND_TIMESTAMP_DATE;
 	}
 
-	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u", t.year, t.month, t.day);
-
-	DBG_INF_FMT("%s", value);
-	ZVAL_STRINGL(zv, value, length);
-	mnd_sprintf_free(value);
+	ZVAL_STR(zv, zend_strpprintf(0, "%04u-%02u-%02u", t.year, t.month, t.day));
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -307,7 +290,6 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 {
 	struct st_mysqlnd_time t;
 	zend_ulong length; /* First byte encodes the length*/
-	char * value;
 	DBG_ENTER("ps_fetch_datetime");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
@@ -336,26 +318,13 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 	}
 
     if (field->decimals > 0 && field->decimals < 7) {
-    	length = mnd_sprintf(
-            &value,
-            0,
-            "%04u-%02u-%02u %02u:%02u:%02u.%0*u",
-            t.year,
-            t.month,
-            t.day,
-            t.hour,
-            t.minute,
-            t.second,
-            field->decimals,
-            (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
-        );
+		ZVAL_STR(zv, zend_strpprintf(0, "%04u-%02u-%02u %02u:%02u:%02u.%0*u",
+			t.year, t.month, t.day, t.hour, t.minute, t.second, field->decimals,
+			(uint32_t) (t.second_part / pow(10, 6 - field->decimals))));
     } else {
-    	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
+		ZVAL_STR(zv,  zend_strpprintf(0, "%04u-%02u-%02u %02u:%02u:%02u",
+			t.year, t.month, t.day, t.hour, t.minute, t.second));
     }
-
-	DBG_INF_FMT("%s", value);
-	ZVAL_STRINGL(zv, value, length);
-	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -365,15 +334,11 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 static void
 ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
-	/*
-	  For now just copy, before we make it possible
-	  to write \0 to the row buffer
-	*/
 	const zend_ulong length = php_mysqlnd_net_field_length(row);
 	DBG_ENTER("ps_fetch_string");
 	DBG_INF_FMT("len = %lu", length);
 	DBG_INF("copying from the row buffer");
-	ZVAL_STRINGL(zv, (char *)*row, length);
+	ZVAL_STRINGL_FAST(zv, (char *)*row, length);
 
 	(*row) += length;
 	DBG_VOID_RETURN;
