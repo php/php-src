@@ -113,9 +113,6 @@ typedef struct {
 	/* the named params that were converted to ?'s by the driver */
 	HashTable *named_params;
 
-	/* allocated space to convert fields values to other types */
-	char **fetch_buf;
-
 	/* the input SQLDA */
 	XSQLDA *in_sqlda;
 

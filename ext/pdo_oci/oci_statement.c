@@ -555,12 +555,10 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 			}
 			S->cols[colno].datalen = 512; /* XXX should be INT_MAX and fetched by pieces */
 			S->cols[colno].data = emalloc(S->cols[colno].datalen + 1);
-			col->param_type = PDO_PARAM_STR;
 			break;
 
 		case SQLT_BLOB:
 		case SQLT_CLOB:
-			col->param_type = PDO_PARAM_LOB;
 			STMT_CALL(OCIDescriptorAlloc, (S->H->env, (dvoid**)&S->cols[colno].data, OCI_DTYPE_LOB, 0, NULL));
 			S->cols[colno].datalen = sizeof(OCILobLocator*);
 			dyn = TRUE;
@@ -590,9 +588,6 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 
 			S->cols[colno].data = emalloc(S->cols[colno].datalen + 1);
 			dtype = SQLT_CHR;
-
-			/* returning data as a string */
-			col->param_type = PDO_PARAM_STR;
 	}
 
 	STMT_CALL(OCIDefineByPos, (S->stmt, &S->cols[colno].def, S->err, colno+1,
@@ -742,7 +737,7 @@ static php_stream *oci_create_lob_stream(zval *dbh, pdo_stmt_t *stmt, OCILobLoca
 	return NULL;
 }
 
-static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees) /* {{{ */
+static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	pdo_oci_column *C = &S->cols[colno];
@@ -750,30 +745,27 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 	/* check the indicator to ensure that the data is intact */
 	if (C->indicator == -1) {
 		/* A NULL value */
-		*ptr = NULL;
-		*len = 0;
+		ZVAL_NULL(result);
 		return 1;
 	} else if (C->indicator == 0) {
 		/* it was stored perfectly */
 
 		if (C->dtype == SQLT_BLOB || C->dtype == SQLT_CLOB) {
 			if (C->data) {
-				*ptr = (char*)oci_create_lob_stream(&stmt->database_object_handle, stmt, (OCILobLocator*)C->data);
+				php_stream *stream = oci_create_lob_stream(&stmt->database_object_handle, stmt, (OCILobLocator*)C->data);
 				OCILobOpen(S->H->svc, S->err, (OCILobLocator*)C->data, OCI_LOB_READONLY);
+				php_stream_to_zval(stream, result);
+				return 1;
 			}
-			*len = (size_t) 0;
-			return *ptr ? 1 : 0;
+			return 0;
 		}
 
-		*ptr = C->data;
-		*len = (size_t) C->fetched_len;
+		ZVAL_STRINFL_FAST(result, C->data, C->fetched_len);
 		return 1;
 	} else {
 		/* it was truncated */
 		php_error_docref(NULL, E_WARNING, "Column %d data was too large for buffer and was truncated to fit it", colno);
-
-		*ptr = C->data;
-		*len = (size_t) C->fetched_len;
+		ZVAL_STRINL(result, C->data, C->fetched_len);
 		return 1;
 	}
 } /* }}} */
@@ -941,6 +933,16 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 		/* if the column is NULL */
 		add_assoc_long(return_value, "oci:decl_type", 0);
 		add_assoc_string(return_value, "native_type", "NULL");
+	}
+
+	switch (dtype) {
+		case SQLT_BLOB:
+		case SQLT_CLOB:
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_LOB);
+			break;
+		default:
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+			break;
 	}
 
 	/* column can be null */

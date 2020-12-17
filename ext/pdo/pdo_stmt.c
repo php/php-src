@@ -486,14 +486,8 @@ PHP_METHOD(PDOStatement, execute)
 }
 /* }}} */
 
-static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *type_override) /* {{{ */
+static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo_param_type *type_override) /* {{{ */
 {
-	struct pdo_column_data *col;
-	char *value = NULL;
-	size_t value_len = 0;
-	int caller_frees = 0;
-	int type, new_type;
-
 	if (colno < 0) {
 		zend_value_error("Column index must be greater than or equal to 0");
 		ZVAL_NULL(dest);
@@ -506,126 +500,62 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 		return;
 	}
 
-	col = &stmt->columns[colno];
-	type = PDO_PARAM_TYPE(col->param_type);
-	new_type =  type_override ? (int)PDO_PARAM_TYPE(*type_override) : type;
+	ZVAL_NULL(dest);
+	stmt->methods->get_col(stmt, colno, dest, type_override);
 
-	value = NULL;
-	value_len = 0;
-
-	stmt->methods->get_col(stmt, colno, &value, &value_len, &caller_frees);
-
-	switch (type) {
-		case PDO_PARAM_ZVAL:
-			if (value && value_len == sizeof(zval)) {
-				ZVAL_COPY_VALUE(dest, (zval *)value);
-
-				if (Z_TYPE_P(dest) == IS_STRING && Z_STRLEN_P(dest) == 0
-						&& stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING) {
-					zval_ptr_dtor_str(dest);
-					ZVAL_NULL(dest);
-				}
-			} else {
-				ZVAL_NULL(dest);
-			}
-
-			if (Z_TYPE_P(dest) == IS_NULL) {
-				type = new_type;
-			}
-			break;
-
-		case PDO_PARAM_INT:
-			if (value && value_len == sizeof(zend_long)) {
-				ZVAL_LONG(dest, *(zend_long*)value);
-				break;
-			}
-			ZVAL_NULL(dest);
-			break;
-
-		case PDO_PARAM_BOOL:
-			if (value && value_len == sizeof(zend_bool)) {
-				ZVAL_BOOL(dest, *(zend_bool*)value);
-				break;
-			}
-			ZVAL_NULL(dest);
-			break;
-
-		case PDO_PARAM_LOB:
-			if (value == NULL) {
-				ZVAL_NULL(dest);
-			} else if (value_len == 0) {
-				/* Warning, empty strings need to be passed as stream */
-				if (stmt->dbh->stringify || new_type == PDO_PARAM_STR) {
-					zend_string *buf;
-					buf = php_stream_copy_to_mem((php_stream*)value, PHP_STREAM_COPY_ALL, 0);
-					if (buf == NULL) {
-						ZVAL_EMPTY_STRING(dest);
-					} else {
-						ZVAL_STR(dest, buf);
-					}
-					php_stream_close((php_stream*)value);
-				} else {
-					php_stream_to_zval((php_stream*)value, dest);
-				}
-			} else if (!stmt->dbh->stringify && new_type != PDO_PARAM_STR) {
-				/* they gave us a string, but LOBs are represented as streams in PDO */
-				zend_string *str = zend_string_init(value, value_len, 0);
-				php_stream *stream = php_stream_memory_open(TEMP_STREAM_READONLY, str);
-				if (stream) {
-					php_stream_to_zval(stream, dest);
-				} else {
-					ZVAL_NULL(dest);
-				}
-				zend_string_release(str);
-			} else {
-				ZVAL_STRINGL(dest, value, value_len);
-			}
-			break;
-
-		case PDO_PARAM_STR:
-			if (value && !(value_len == 0 && stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING)) {
-				ZVAL_STRINGL(dest, value, value_len);
-				break;
-			}
-		default:
-			ZVAL_NULL(dest);
+	if (Z_TYPE_P(dest) == IS_STRING && Z_STRLEN_P(dest) == 0
+			&& stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING) {
+		zval_ptr_dtor_str(dest);
+		ZVAL_NULL(dest);
 	}
 
-	if (type != new_type) {
-		switch (new_type) {
+	/* If stringification is requested, override with PDO_PARAM_STR. */
+	enum pdo_param_type pdo_param_str = PDO_PARAM_STR;
+	if (stmt->dbh->stringify) {
+		type_override = &pdo_param_str;
+	}
+
+	if (type_override && Z_TYPE_P(dest) != IS_NULL) {
+		switch (*type_override) {
 			case PDO_PARAM_INT:
-				convert_to_long_ex(dest);
+				convert_to_long(dest);
 				break;
 			case PDO_PARAM_BOOL:
-				convert_to_boolean_ex(dest);
+				convert_to_boolean(dest);
 				break;
 			case PDO_PARAM_STR:
-				convert_to_string_ex(dest);
+				if (Z_TYPE_P(dest) == IS_FALSE) {
+					/* Return "0" rather than "", because this is what database drivers that
+					 * don't have a dedicated boolean type would return. */
+					zval_ptr_dtor_nogc(dest);
+					ZVAL_INTERNED_STR(dest, ZSTR_CHAR('0'));
+				} else if (Z_TYPE_P(dest) == IS_RESOURCE) {
+					/* Convert LOB stream to string */
+					php_stream *stream;
+					php_stream_from_zval_no_verify(stream, dest);
+					zend_string *str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
+					zval_ptr_dtor_nogc(dest);
+					if (str == NULL) {
+						ZVAL_EMPTY_STRING(dest);
+					} else {
+						ZVAL_STR(dest, str);
+					}
+				} else {
+					convert_to_string(dest);
+				}
 				break;
 			case PDO_PARAM_NULL:
-				convert_to_null_ex(dest);
+				convert_to_null(dest);
+				break;
+			case PDO_PARAM_LOB:
+				if (Z_TYPE_P(dest) == IS_STRING) {
+					php_stream *stream =
+						php_stream_memory_open(TEMP_STREAM_READONLY, Z_STR_P(dest));
+					zval_ptr_dtor_str(dest);
+					php_stream_to_zval(stream, dest);
+				}
 				break;
 			default:
-				;
-		}
-	}
-
-	if (caller_frees && value) {
-		efree(value);
-	}
-
-	if (stmt->dbh->stringify) {
-		switch (Z_TYPE_P(dest)) {
-			case IS_FALSE:
-				/* Return "0" rather than "", because this is what database drivers that
-				 * don't have a dedicated boolean type would return. */
-				zval_ptr_dtor_nogc(dest);
-				ZVAL_INTERNED_STR(dest, ZSTR_CHAR('0'));
-				break;
-			case IS_TRUE:
-			case IS_LONG:
-			case IS_DOUBLE:
-				convert_to_string(dest);
 				break;
 		}
 	}
@@ -673,7 +603,7 @@ static bool do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, ze
 				zval_ptr_dtor(Z_REFVAL(param->parameter));
 
 				/* set new value */
-				fetch_value(stmt, Z_REFVAL(param->parameter), param->paramno, (int *)&param->param_type);
+				fetch_value(stmt, Z_REFVAL(param->parameter), param->paramno, &param->param_type);
 
 				/* TODO: some smart thing that avoids duplicating the value in the
 				 * general loop below.  For now, if you're binding output columns,
@@ -1761,10 +1691,6 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 	add_assoc_str(return_value, "name", zend_string_copy(col->name));
 	add_assoc_long(return_value, "len", col->maxlen); /* FIXME: unsigned ? */
 	add_assoc_long(return_value, "precision", col->precision);
-	if (col->param_type != PDO_PARAM_ZVAL) {
-		/* if param_type is PDO_PARAM_ZVAL the driver has to provide correct data */
-		add_assoc_long(return_value, "pdo_type", col->param_type);
-	}
 }
 /* }}} */
 

@@ -48,9 +48,7 @@ typedef struct {
 } pdo_pgsql_db_handle;
 
 typedef struct {
-	zend_long    intval;
 	Oid          pgsql_type;
-	zend_bool    boolval;
 } pdo_pgsql_column;
 
 typedef struct {
