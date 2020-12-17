@@ -827,7 +827,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 
 #ifdef PDO_USE_MYSQLND
-	bool int_and_float_native = true;
+	unsigned int int_and_float_native = 1;
 	if (mysql_options(H->server, MYSQLND_OPT_INT_AND_FLOAT_NATIVE, (const char *) &int_and_float_native)) {
 		pdo_mysql_error(dbh);
 		goto cleanup;
