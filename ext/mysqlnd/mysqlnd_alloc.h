@@ -33,10 +33,6 @@ struct st_mysqlnd_allocator_methods
 	void *	(*m_perealloc)(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
 	void	(*m_efree)(void *ptr MYSQLND_MEM_D);
 	void	(*m_pefree)(void *ptr, zend_bool persistent MYSQLND_MEM_D);
-	void *	(*m_malloc)(size_t size MYSQLND_MEM_D);
-	void *	(*m_calloc)(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-	void *	(*m_realloc)(void *ptr, size_t new_size MYSQLND_MEM_D);
-	void	(*m_free)(void *ptr MYSQLND_MEM_D);
 	char *	(*m_pememdup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
 	char *	(*m_pestrndup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
 	char *	(*m_pestrdup)(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
@@ -55,10 +51,6 @@ PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
 #define mnd_perealloc(ptr, new_size, p)	mysqlnd_allocator.m_perealloc((ptr), (new_size), (p) MYSQLND_MEM_C)
 #define mnd_efree(ptr)					mysqlnd_allocator.m_efree((ptr) MYSQLND_MEM_C)
 #define mnd_pefree(ptr, pers)			mysqlnd_allocator.m_pefree((ptr), (pers) MYSQLND_MEM_C)
-#define mnd_malloc(size)				mysqlnd_allocator.m_malloc((size) MYSQLND_MEM_C)
-#define mnd_calloc(nmemb, size)			mysqlnd_allocator.m_calloc((nmemb), (size) MYSQLND_MEM_C)
-#define mnd_realloc(ptr, new_size)		mysqlnd_allocator.m_realloc((ptr), (new_size) MYSQLND_MEM_C)
-#define mnd_free(ptr)					mysqlnd_allocator.m_free((ptr) MYSQLND_MEM_C)
 #define mnd_pememdup(ptr, size, pers)	mysqlnd_allocator.m_pememdup((ptr), (size), (pers) MYSQLND_MEM_C)
 #define mnd_pestrndup(ptr, size, pers)	mysqlnd_allocator.m_pestrndup((ptr), (size), (pers) MYSQLND_MEM_C)
 #define mnd_pestrdup(ptr, pers)			mysqlnd_allocator.m_pestrdup((ptr), (pers) MYSQLND_MEM_C)

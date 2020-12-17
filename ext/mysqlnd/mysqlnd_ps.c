@@ -437,11 +437,11 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	if (stmt_to_prepare != stmt) {
 		/* swap */
 		size_t real_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
-		char * tmp_swap = mnd_malloc(real_size);
+		char * tmp_swap = mnd_emalloc(real_size);
 		memcpy(tmp_swap, s, real_size);
 		memcpy(s, s_to_prepare, real_size);
 		memcpy(s_to_prepare, tmp_swap, real_size);
-		mnd_free(tmp_swap);
+		mnd_efree(tmp_swap);
 		{
 			MYSQLND_STMT_DATA * tmp_swap_data = stmt_to_prepare;
 			stmt_to_prepare = stmt;

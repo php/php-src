@@ -149,9 +149,6 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 	mysqlnd_globals->net_read_timeout = 31536000;
 	mysqlnd_globals->log_mask = 0;
 	mysqlnd_globals->mempool_default_size = 16000;
-	mysqlnd_globals->debug_malloc_fail_threshold = -1;
-	mysqlnd_globals->debug_calloc_fail_threshold = -1;
-	mysqlnd_globals->debug_realloc_fail_threshold = -1;
 	mysqlnd_globals->sha256_server_public_key = NULL;
 }
 /* }}} */
@@ -185,12 +182,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.mempool_default_size","16000",   PHP_INI_ALL,	OnUpdateLong,	mempool_default_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.sha256_server_public_key",NULL, 	PHP_INI_PERDIR, OnUpdateString,	sha256_server_public_key, zend_mysqlnd_globals, mysqlnd_globals)
-#if PHP_DEBUG
-
-	STD_PHP_INI_ENTRY("mysqlnd.debug_malloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_malloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
-	STD_PHP_INI_ENTRY("mysqlnd.debug_calloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_calloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
-	STD_PHP_INI_ENTRY("mysqlnd.debug_realloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_realloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
-#endif
 PHP_INI_END()
 /* }}} */
 

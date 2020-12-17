@@ -77,7 +77,7 @@ static ssize_t write_compressed_packet(
 #ifdef WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 	if (res == Z_OK) {
 		size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
-		zend_uchar * decompressed_data = mnd_malloc(decompressed_size);
+		zend_uchar * decompressed_data = mnd_emalloc(decompressed_size);
 		int error = pfc->data->m.decode(decompressed_data, decompressed_size,
 										compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
 		if (error == Z_OK) {
@@ -93,7 +93,7 @@ static ssize_t write_compressed_packet(
 		} else {
 			DBG_INF("error decompressing");
 		}
-		mnd_free(decompressed_data);
+		mnd_efree(decompressed_data);
 	}
 #endif /* WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY */
 	DBG_RETURN(bytes_sent);
