@@ -754,6 +754,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 	MYSQLND_CONN_DATA * conn = stmt->conn;
 	zend_uchar buf[MYSQLND_STMT_ID_LENGTH /* statement id */ + 4 /* number of rows to fetch */];
 	MYSQLND_PACKET_ROW * row_packet;
+	void *checkpoint;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
 
@@ -790,6 +791,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 
 	}
 
+	checkpoint = result->memory_pool->checkpoint;
+	mysqlnd_mempool_save_state(result->memory_pool);
+
 	UPSERT_STATUS_RESET(stmt->upsert_status);
 	if (PASS == (ret = PACKET_READ(conn, row_packet)) && !row_packet->eof) {
 		if (row_ptr) {
@@ -804,6 +808,8 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 									  conn->options->int_and_float_native,
 									  conn->stats))
 			{
+				mysqlnd_mempool_restore_state(result->memory_pool);
+				result->memory_pool->checkpoint = checkpoint;
 				DBG_RETURN(FAIL);
 			}
 		} else {
@@ -812,11 +818,6 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 		}
 		/* We asked for one row, the next one should be EOF, eat it */
 		ret = PACKET_READ(conn, row_packet);
-		if (row_packet->row_buffer.ptr) {
-			row_packet->result_set_memory_pool->free_chunk(
-				row_packet->result_set_memory_pool, row_packet->row_buffer.ptr);
-			row_packet->row_buffer.ptr = NULL;
-		}
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_CURSOR);
 
 		result->unbuf->row_count++;
@@ -837,12 +838,14 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 	UPSERT_STATUS_SET_SERVER_STATUS(stmt->upsert_status, row_packet->server_status);
 	UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, row_packet->server_status);
 
+	mysqlnd_mempool_restore_state(result->memory_pool);
+	result->memory_pool->checkpoint = checkpoint;
+
 	DBG_INF_FMT("ret=%s fetched=%u server_status=%u warnings=%u eof=%u",
 				ret == PASS? "PASS":"FAIL", *fetched_anything,
 				row_packet->server_status, row_packet->warning_count,
 				result->unbuf->eof_reached);
 	DBG_RETURN(ret);
-	return FAIL;
 }
 /* }}} */
 
