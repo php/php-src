@@ -1707,24 +1707,30 @@ int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_
 
 	if(write(fd_new, &taginfo, sizeof(taginfo)) != sizeof(taginfo)) {
 		zend_opcache_copy_file_error("write taginfo to file '%s' error\n", opcode_file, cache_file, 0);
+		close(fd_new);
 		return FAILURE;
 	}
 
 	fd_cache = zend_file_cache_open(cache_file, O_RDONLY | O_BINARY);
 	if(fd_cache < 0) {
 		zend_opcache_copy_file_error("can not open opcode cache file '%s' error\n",cache_file, opcode_file, 1);
+		close(fd_new);
 		return FAILURE;
 	}
 
 	while(1) {
 		buf_len = read(fd_cache, buf, chunksize);
-		if(buf_len <= 0) {
+		if(buf_len < 0) {
+			zend_opcache_copy_file_error("read opcode cache file '%s' error\n", cache_file, opcode_file, 1);
+			goto cleanup;
+		}
+		if(buf_len == 0) {
 			break;
 		}
 		write_size = write(fd_new, buf, buf_len);
 		if(write_size != buf_len) {
 			zend_opcache_copy_file_error("write file '%s' error\n", opcode_file, cache_file, 0);
-			return FAILURE;
+			goto cleanup;
 		}
 		if(buf_len < chunksize) {
 			break;
@@ -1738,6 +1744,11 @@ int zend_opcache_copy_opcode_cache_file(char *src_filename, size_t src_filename_
 	efree(cache_file);
 	
 	return SUCCESS;
+
+cleanup:
+	close(fd_new);
+	close(fd_cache);
+	return FAILURE;
 }
 
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
