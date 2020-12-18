@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 480939b71e1dacbdbb4634dbabf375943e399b6f */
+ * Stub hash: 6af7fe4ad33232a118fdde74d13e0fb8a04fb4b0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -353,9 +353,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_more_results, 0, 1, 
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(MYSQLI_USE_MYSQLND)
-#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_more_results
-#endif
+#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_execute
 
 #define arginfo_mysqli_stmt_num_rows arginfo_mysqli_stmt_affected_rows
 
@@ -665,9 +663,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_mysqli_stmt_more_results arginfo_class_mysqli_get_connection_stats
 #endif
 
-#if defined(MYSQLI_USE_MYSQLND)
-#define arginfo_class_mysqli_stmt_next_result arginfo_class_mysqli_get_connection_stats
-#endif
+#define arginfo_class_mysqli_stmt_next_result arginfo_class_mysqli_character_set_name
 
 #define arginfo_class_mysqli_stmt_num_rows arginfo_class_mysqli_character_set_name
 
@@ -790,9 +786,7 @@ ZEND_FUNCTION(mysqli_stmt_insert_id);
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_stmt_more_results);
 #endif
-#if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_stmt_next_result);
-#endif
 ZEND_FUNCTION(mysqli_stmt_num_rows);
 ZEND_FUNCTION(mysqli_stmt_param_count);
 ZEND_FUNCTION(mysqli_stmt_prepare);
@@ -918,9 +912,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_stmt_more_results, arginfo_mysqli_stmt_more_results)
 #endif
-#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_stmt_next_result, arginfo_mysqli_stmt_next_result)
-#endif
 	ZEND_FE(mysqli_stmt_num_rows, arginfo_mysqli_stmt_num_rows)
 	ZEND_FE(mysqli_stmt_param_count, arginfo_mysqli_stmt_param_count)
 	ZEND_FE(mysqli_stmt_prepare, arginfo_mysqli_stmt_prepare)
@@ -1040,9 +1032,7 @@ static const zend_function_entry class_mysqli_stmt_methods[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_ME_MAPPING(more_results, mysqli_stmt_more_results, arginfo_class_mysqli_stmt_more_results, ZEND_ACC_PUBLIC)
 #endif
-#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_ME_MAPPING(next_result, mysqli_stmt_next_result, arginfo_class_mysqli_stmt_next_result, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_ME_MAPPING(num_rows, mysqli_stmt_num_rows, arginfo_class_mysqli_stmt_num_rows, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(send_long_data, mysqli_stmt_send_long_data, arginfo_class_mysqli_stmt_send_long_data, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(free_result, mysqli_stmt_free_result, arginfo_class_mysqli_stmt_free_result, ZEND_ACC_PUBLIC)

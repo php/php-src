@@ -1576,6 +1576,7 @@ PHP_FUNCTION(mysqli_stmt_more_results)
 	RETURN_BOOL(mysqlnd_stmt_more_results(stmt->stmt));
 }
 /* }}} */
+#endif
 
 /* {{{ read next result from multi_query */
 PHP_FUNCTION(mysqli_stmt_next_result) {
@@ -1594,7 +1595,6 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ Get number of fields in result */
 PHP_FUNCTION(mysqli_num_fields)

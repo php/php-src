@@ -457,13 +457,13 @@ class mysqli_stmt
      * @alias mysqli_stmt_more_results
      */
     public function more_results() {}
+#endif
 
     /**
      * @return bool
      * @alias mysqli_stmt_next_result
      */
     public function next_result() {}
-#endif
 
     /**
      * @return int|string
@@ -717,9 +717,9 @@ function mysqli_stmt_insert_id(mysqli_stmt $statement): int|string {}
 
 #if defined(MYSQLI_USE_MYSQLND)
 function mysqli_stmt_more_results(mysqli_stmt $statement): bool {}
+#endif
 
 function mysqli_stmt_next_result(mysqli_stmt $statement): bool {}
-#endif
 
 function mysqli_stmt_num_rows(mysqli_stmt $statement): int|string {}
 
