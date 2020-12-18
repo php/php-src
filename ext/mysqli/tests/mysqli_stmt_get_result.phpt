@@ -109,7 +109,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 
     mysqli_stmt_close($stmt);
 
-    // get_result cannot be used in PS cursor mode
+    // get_result can be used in PS cursor mode
     if (!$stmt = mysqli_stmt_init($link))
         printf("[030] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
@@ -122,23 +122,10 @@ if (!function_exists('mysqli_stmt_get_result'))
     if (!mysqli_stmt_execute($stmt))
         printf("[033] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    try {
-        $res = mysqli_stmt_get_result($stmt);
-        // we expect no segfault if we try to fetch a row because get_result should throw an error or return false
-        mysqli_fetch_assoc($res);
-    } catch (\mysqli_sql_exception $e) {
-        echo $e->getMessage() . "\n";
+    $result = mysqli_stmt_get_result($stmt);
+    while ($row = mysqli_fetch_assoc($result)) {
+        var_dump($row);
     }
-
-    try {
-        $res = $stmt->get_result();
-        // we expect no segfault if we try to fetch a row because get_result should throw an error or return false
-        $res->fetch_assoc();
-    } catch (\mysqli_sql_exception $e) {
-        echo $e->getMessage() . "\n";
-    }
-    mysqli_report(MYSQLI_REPORT_OFF);
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[034] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -196,8 +183,18 @@ if (!function_exists('mysqli_stmt_get_result'))
 mysqli_stmt object is not fully initialized
 mysqli_stmt object is not fully initialized
 mysqli_stmt object is not fully initialized
-mysqli_stmt_get_result() cannot be used with cursors
-get_result() cannot be used with cursors
+array(2) {
+  ["id"]=>
+  int(1)
+  ["label"]=>
+  string(1) "a"
+}
+array(2) {
+  ["id"]=>
+  int(2)
+  ["label"]=>
+  string(1) "b"
+}
 [040] [2014] [Commands out of sync; you can't run this command now]
 [041] [0] []
 array(2) {
