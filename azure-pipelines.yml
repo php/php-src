@@ -109,6 +109,6 @@ jobs:
         configurationParameters: '--enable-debug --disable-zts'
         runTestsParameters: '--repeat 2'
     - template: azure/libmysqlclient_job.yml
-       parameters:
+      parameters:
         configurationName: LIBMYSQLCLIENT_DEBUG_NTS
         configurationParameters: '--enable-debug --disable-zts'
