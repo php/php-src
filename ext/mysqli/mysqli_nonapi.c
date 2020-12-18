@@ -431,28 +431,39 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 /* }}} */
 
 /* {{{ Fetches all result rows as an associative array, a numeric array, or both */
-#ifdef MYSQLI_USE_MYSQLND
 PHP_FUNCTION(mysqli_fetch_all)
 {
 	MYSQL_RES	*result;
 	zval		*mysql_result;
-	zend_long		mode = MYSQLND_FETCH_NUM;
+	zend_long		mode = MYSQLI_NUM;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &mode) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	if (!mode || (mode & ~MYSQLND_FETCH_BOTH)) {
+	if (!mode || (mode & ~MYSQLI_BOTH)) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_FETCH_NUM, "
 		                 "MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH");
 		RETURN_THROWS();
 	}
 
-	mysqlnd_fetch_all(result, mode, return_value);
+	array_init_size(return_value, mysql_num_rows(result));
+
+	zend_ulong i = 0;
+	do {
+		zval row;
+		php_mysqli_fetch_into_hash_aux(&row, result, mode);
+		if (Z_TYPE(row) != IS_ARRAY) {
+			zval_ptr_dtor_nogc(&row);
+			break;
+		}
+		add_index_zval(return_value, i++, &row);
+	} while (1);
 }
 /* }}} */
 
+#ifdef MYSQLI_USE_MYSQLND
 /* {{{ Returns statistics about the zval cache */
 PHP_FUNCTION(mysqli_get_client_stats)
 {

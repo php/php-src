@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - hash:
   . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
 
+- MySQLi:
+  . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
+
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
 

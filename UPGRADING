@@ -96,6 +96,10 @@ PHP 8.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- MySQLi:
+  . The mysqli_stmt::next_result() and mysqli::fetch_all() methods are now
+    available when linking against libmysqlclient.
+
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
 

@@ -102,7 +102,6 @@ PHPAPI void mysqlnd_debug(const char *mode);
 #define mysqlnd_fetch_row_c(result)						(result)->m.fetch_row_c((result))
 #define mysqlnd_fetch_row_zval(result, row_ptr, fetched) \
 	(result)->m.fetch_row((result), (row_ptr), 0, (fetched))
-#define mysqlnd_fetch_all(result, flags, return_value)	(result)->m.fetch_all((result), (flags), (return_value) ZEND_FILE_LINE_CC)
 #define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) ZEND_FILE_LINE_CC)
 #define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats(mysqlnd_global_stats, (values) ZEND_FILE_LINE_CC)
 

@@ -27,6 +27,7 @@ require_once('skipifconnectfailure.inc');
         '__construct'           => true,
         'close'                 => true,
         'data_seek'             => true,
+        'fetch_all'             => true,
         'fetch_array'           => true,
         'fetch_assoc'           => true,
         'fetch_field'           => true,
@@ -39,8 +40,6 @@ require_once('skipifconnectfailure.inc');
         'free_result'           => true,
         'getIterator'           => true,
     );
-    if ($IS_MYSQLND)
-        $expected_methods['fetch_all'] = true;
 
     foreach ($methods as $k => $method) {
         if (isset($expected_methods[$method])) {

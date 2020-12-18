@@ -1050,49 +1050,12 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 /* }}} */
 
 
-/* {{{ mysqlnd_res::fetch_all */
-static void
-MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC)
-{
-	zval  row;
-	zend_ulong i = 0;
-	MYSQLND_RES_BUFFERED *set = result->stored_data;
-
-	DBG_ENTER("mysqlnd_res::fetch_all");
-
-	if ((!result->unbuf && !set)) {
-		php_error_docref(NULL, E_WARNING, "fetch_all can be used only with buffered sets");
-		if (result->conn) {
-			SET_CLIENT_ERROR(result->conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "fetch_all can be used only with buffered sets");
-		}
-		RETVAL_NULL();
-		DBG_VOID_RETURN;
-	}
-
-	/* 4 is a magic value. The cast is safe, if larger then the array will be later extended - no big deal :) */
-	array_init_size(return_value, set? (unsigned int) set->row_count : 4);
-
-	do {
-		mysqlnd_fetch_into(result, flags, &row);
-		if (Z_TYPE(row) != IS_ARRAY) {
-			zval_ptr_dtor_nogc(&row);
-			break;
-		}
-		add_index_zval(return_value, i++, &row);
-	} while (1);
-
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, fetch_row),
 	MYSQLND_METHOD(mysqlnd_res, use_result),
 	MYSQLND_METHOD(mysqlnd_res, store_result),
 	MYSQLND_METHOD(mysqlnd_res, fetch_into),
 	MYSQLND_METHOD(mysqlnd_res, fetch_row_c),
-	MYSQLND_METHOD(mysqlnd_res, fetch_all),
 	MYSQLND_METHOD(mysqlnd_res, num_rows),
 	MYSQLND_METHOD(mysqlnd_res, num_fields),
 	MYSQLND_METHOD(mysqlnd_res, skip_result),
