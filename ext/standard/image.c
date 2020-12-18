@@ -1465,17 +1465,16 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) {  /* {{{ */
 	zval *info = NULL;
 	php_stream *stream = NULL;
-	char *input;
-	size_t input_len;
+	zend_string *input;
 	const int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(input, input_len)
+		Z_PARAM_STR(input)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(info)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode == FROM_PATH && CHECK_NULL_PATH(input, input_len)) {
+	if (mode == FROM_PATH && CHECK_NULL_PATH(ZSTR_VAL(input), ZSTR_LEN(input))) {
 		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
@@ -1488,16 +1487,16 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	}
 
 	if (mode == FROM_PATH) {
-		stream = php_stream_open_wrapper(input, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
+		stream = php_stream_open_wrapper(ZSTR_VAL(input), "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
 	} else {
-		stream = php_stream_memory_open(TEMP_STREAM_READONLY, input, input_len);
+		stream = php_stream_memory_open(TEMP_STREAM_READONLY, input);
 	}
 
 	if (!stream) {
 		RETURN_FALSE;
 	}
 
-	php_getimagesize_from_stream(stream, input, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_getimagesize_from_stream(stream, ZSTR_VAL(input), info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	php_stream_close(stream);
 }
 /* }}} */
