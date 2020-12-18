@@ -39,7 +39,7 @@ steps:
       sapi/cli/php run-tests.php -P -q \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline --show-diff --show-slow 1000 --set-timeout 120 \
-          ext/mysqli ext/pdo_mysql
+          ext/pdo_mysql
     displayName: 'Test ${{ parameters.configurationName }}'
     condition: or(succeeded(), failed())
   - task: PublishTestResults@2
