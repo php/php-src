@@ -36,7 +36,6 @@ typedef struct {
 	char        *data;
 	size_t      fpos;
 	size_t      fsize;
-	size_t      smax;
 	int			mode;
 } php_stream_memory_data;
 
@@ -304,7 +303,6 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 	self->data = NULL;
 	self->fpos = 0;
 	self->fsize = 0;
-	self->smax = ~0u;
 	self->mode = mode;
 
 	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, _php_stream_mode_to_str(mode));
