@@ -26,7 +26,6 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
-$db->exec('insert2', "INSERT INTO test VALUES(:first, :second, :third)");
 
 $data = array(
     array('10', 'Abc', 'zxy'),
@@ -36,7 +35,6 @@ $data = array(
     array('50', 'Mno', 'nml'),
     array('60', 'Pqr', 'kji'),
 );
-
 
 // Insert using question mark placeholders
 $stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");

@@ -152,7 +152,7 @@ static const unsigned char PADDING[64] =
 /* {{{ PHP_SHA1Init
  * SHA1 initialization. Begins an SHA1 operation, writing a new context.
  */
-PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
+PHPAPI void PHP_SHA1InitArgs(PHP_SHA1_CTX * context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->count[0] = context->count[1] = 0;
 	/* Load magic initialization constants.

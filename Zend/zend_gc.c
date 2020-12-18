@@ -177,7 +177,7 @@
 #define GC_MAX_UNCOMPRESSED  (512 * 1024)
 #define GC_MAX_BUF_SIZE      0x40000000
 
-#define GC_THRESHOLD_DEFAULT 10000
+#define GC_THRESHOLD_DEFAULT (10000 + GC_FIRST_ROOT)
 #define GC_THRESHOLD_STEP    10000
 #define GC_THRESHOLD_MAX     1000000000
 #define GC_THRESHOLD_TRIGGER 100
@@ -501,7 +501,7 @@ ZEND_API zend_bool gc_enable(zend_bool enable)
 		GC_G(buf) = (gc_root_buffer*) pemalloc(sizeof(gc_root_buffer) * GC_DEFAULT_BUF_SIZE, 1);
 		GC_G(buf)[0].ref = NULL;
 		GC_G(buf_size) = GC_DEFAULT_BUF_SIZE;
-		GC_G(gc_threshold) = GC_THRESHOLD_DEFAULT + GC_FIRST_ROOT;
+		GC_G(gc_threshold) = GC_THRESHOLD_DEFAULT;
 		gc_reset();
 	}
 	return old_enabled;

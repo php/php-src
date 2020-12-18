@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ef39f4efec05a3ebc5cf56a6b26e01369f00d129 */
+ * Stub hash: a06da9ea0191ed78ee7af8f0d9eaccb17dfa4b20 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_get_all, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
@@ -10,7 +10,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_name, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_PhpToken_getAll arginfo_token_get_all
+#define arginfo_class_PhpToken_tokenize arginfo_token_get_all
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PhpToken___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, id, IS_LONG, 0)
@@ -35,7 +35,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(token_get_all);
 ZEND_FUNCTION(token_name);
-ZEND_METHOD(PhpToken, getAll);
+ZEND_METHOD(PhpToken, tokenize);
 ZEND_METHOD(PhpToken, __construct);
 ZEND_METHOD(PhpToken, is);
 ZEND_METHOD(PhpToken, isIgnorable);
@@ -51,7 +51,7 @@ static const zend_function_entry ext_functions[] = {
 
 
 static const zend_function_entry class_PhpToken_methods[] = {
-	ZEND_ME(PhpToken, getAll, arginfo_class_PhpToken_getAll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(PhpToken, tokenize, arginfo_class_PhpToken_tokenize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(PhpToken, __construct, arginfo_class_PhpToken___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(PhpToken, is, arginfo_class_PhpToken_is, ZEND_ACC_PUBLIC)
 	ZEND_ME(PhpToken, isIgnorable, arginfo_class_PhpToken_isIgnorable, ZEND_ACC_PUBLIC)

@@ -55,8 +55,8 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_CLONE_MASK         0x0100FFFF
 
 #define SPL_ARRAY_METHOD_NO_ARG				0
-#define SPL_ARRAY_METHOD_USE_ARG    		1
-#define SPL_ARRAY_METHOD_MAY_USER_ARG 		2
+#define SPL_ARRAY_METHOD_CALLBACK_ARG  		1
+#define SPL_ARRAY_METHOD_SORT_FLAGS_ARG 	2
 
 typedef struct _spl_array_object {
 	zval              array;
@@ -1079,6 +1079,13 @@ static void spl_array_it_rewind(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
+static HashTable *spl_array_it_get_gc(zend_object_iterator *iter, zval **table, int *n)
+{
+	*n = 1;
+	*table = &iter->data;
+	return NULL;
+}
+
 /* {{{ spl_array_set_array */
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array) {
 	if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
@@ -1135,7 +1142,7 @@ static const zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_move_forward,
 	spl_array_it_rewind,
 	NULL,
-	NULL, /* get_gc */
+	spl_array_it_get_gc,
 };
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
@@ -1422,15 +1429,14 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		intern->nApplyCount++;
 		call_user_function(EG(function_table), NULL, &function_name, return_value, 1, params);
 		intern->nApplyCount--;
-	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
+	} else if (use_arg == SPL_ARRAY_METHOD_SORT_FLAGS_ARG) {
+		zend_long sort_flags = 0;
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &sort_flags) == FAILURE) {
 			goto exit;
 		}
-		if (arg) {
-			ZVAL_COPY_VALUE(&params[1], arg);
-		}
+		ZVAL_LONG(&params[1], sort_flags);
 		intern->nApplyCount++;
-		call_user_function(EG(function_table), NULL, &function_name, return_value, arg ? 2 : 1, params);
+		call_user_function(EG(function_table), NULL, &function_name, return_value, 2, params);
 		intern->nApplyCount--;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
@@ -1461,16 +1467,16 @@ PHP_METHOD(cname, fname) \
 }
 
 /* {{{ Sort the entries by values. */
-SPL_ARRAY_METHOD(ArrayObject, asort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
+SPL_ARRAY_METHOD(ArrayObject, asort, SPL_ARRAY_METHOD_SORT_FLAGS_ARG) /* }}} */
 
 /* {{{ Sort the entries by key. */
-SPL_ARRAY_METHOD(ArrayObject, ksort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
+SPL_ARRAY_METHOD(ArrayObject, ksort, SPL_ARRAY_METHOD_SORT_FLAGS_ARG) /* }}} */
 
 /* {{{ Sort the entries by values user defined function. */
-SPL_ARRAY_METHOD(ArrayObject, uasort, SPL_ARRAY_METHOD_USE_ARG) /* }}} */
+SPL_ARRAY_METHOD(ArrayObject, uasort, SPL_ARRAY_METHOD_CALLBACK_ARG) /* }}} */
 
 /* {{{ Sort the entries by key using user defined function. */
-SPL_ARRAY_METHOD(ArrayObject, uksort, SPL_ARRAY_METHOD_USE_ARG) /* }}} */
+SPL_ARRAY_METHOD(ArrayObject, uksort, SPL_ARRAY_METHOD_CALLBACK_ARG) /* }}} */
 
 /* {{{ Sort the entries by values using "natural order" algorithm. */
 SPL_ARRAY_METHOD(ArrayObject, natsort, SPL_ARRAY_METHOD_NO_ARG) /* }}} */

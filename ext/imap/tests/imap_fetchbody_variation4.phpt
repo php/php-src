@@ -2,34 +2,34 @@
 Test imap_fetchbody() function : usage variations - FT_UID option
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
 /*
- * Test if FT_UID is set by passing the following as $options argument to imap_fetchbody():
+ * Test if FT_UID is set by passing the following as $flags argument to imap_fetchbody():
  * 1. values that equate to 1
  * 2. Minimum and maximum PHP values
  */
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 // Initialise required variables
-$stream_id = setup_test_mailbox('', 1); // set up temporary mailbox with one simple message
+$stream_id = setup_test_mailbox('imapfetchbodyvar4', 1); // set up temporary mailbox with one simple message
 $msg_no = 1;
 $msg_uid = imap_uid($stream_id, $msg_no);
 $section = 1;
 
 //Note: the first four values are valid as they will all be cast to 1L.
-$options = array ('1', true,
+$flags = array ('1', true,
                   1.000000000000001, 0.00001e5,
                   PHP_INT_MAX, -PHP_INT_MAX);
 
-// iterate over each element of $options array to test whether FT_UID is set
+// iterate over each element of $flags array to test whether FT_UID is set
 $iterator = 1;
 imap_check($stream_id);
-foreach($options as $option) {
+foreach($flags as $option) {
     echo "\n-- Iteration $iterator --\n";
 
     try {
@@ -47,12 +47,13 @@ foreach($options as $option) {
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapfetchbodyvar4';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing imap_fetchbody() : usage variations ***
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
 -- Iteration 1 --
 FT_UID valid
@@ -67,7 +68,7 @@ FT_UID valid
 FT_UID valid
 
 -- Iteration 5 --
-imap_fetchbody(): Argument #4 ($options) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
+imap_fetchbody(): Argument #4 ($flags) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
 
 -- Iteration 6 --
-imap_fetchbody(): Argument #4 ($options) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL
+imap_fetchbody(): Argument #4 ($flags) must be a bitmask of FT_UID, FT_PEEK, and FT_INTERNAL

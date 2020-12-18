@@ -4,13 +4,13 @@
 
 class ResourceBundle implements IteratorAggregate, Countable
 {
-    public function __construct(?string $locale, ?string $bundlename, bool $fallback = true) {}
+    public function __construct(?string $locale, ?string $bundle, bool $fallback = true) {}
 
     /**
      * @return ResourceBundle|null
      * @alias resourcebundle_create
      */
-    public static function create(?string $locale, ?string $bundlename, bool $fallback = true) {}
+    public static function create(?string $locale, ?string $bundle, bool $fallback = true) {}
 
     /**
      * @param string|int $index
@@ -29,7 +29,7 @@ class ResourceBundle implements IteratorAggregate, Countable
      * @return array|false
      * @alias resourcebundle_locales
      */
-    public static function getLocales(string $bundlename) {}
+    public static function getLocales(string $bundle) {}
 
     /**
      * @return int

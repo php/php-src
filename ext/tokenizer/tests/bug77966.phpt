@@ -12,7 +12,7 @@ class C {
 }
 CODE;
 
-$tokens = PhpToken::getAll($code, TOKEN_PARSE);
+$tokens = PhpToken::tokenize($code, TOKEN_PARSE);
 foreach ($tokens as $token) {
     echo "{$token->getTokenName()}: \"$token->text\"\n";
 }

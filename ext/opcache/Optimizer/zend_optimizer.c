@@ -1350,11 +1350,21 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 static zend_bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
 	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 	zend_ssa_op *ssa_op = &func_info->ssa.ops[def_opline - op_array->opcodes];
-	if (ssa_op->result_def >= 0) {
-		uint32_t type = func_info->ssa.var_info[ssa_op->result_def].type;
-		return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
+	int ssa_var = ssa_op->result_def;
+	if (ssa_var < 0) {
+		/* Be conservative. */
+		return 1;
 	}
-	return 1;
+
+	/* If the variable is used by a PHI, this may be the assignment of the final branch of a
+	 * ternary/etc structure. While this is where the live range starts, the value from the other
+	 * branch may also be used. As such, use the type of the PHI node for the following check. */
+	if (func_info->ssa.vars[ssa_var].phi_use_chain) {
+		ssa_var = func_info->ssa.vars[ssa_var].phi_use_chain->ssa_var;
+	}
+
+	uint32_t type = func_info->ssa.var_info[ssa_var].type;
+	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 
 void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void *context)

@@ -33,7 +33,6 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_euc_kr;
-extern const struct mbfl_identify_vtbl vtbl_identify_euckr;
 extern const struct mbfl_convert_vtbl vtbl_euckr_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_euckr;
 

@@ -34,7 +34,7 @@ class Transliterator
      * @return string|false
      * @alias transliterator_transliterate
      */
-    public function transliterate(string $subject, int $start = 0, int $end = -1) {}
+    public function transliterate(string $string, int $start = 0, int $end = -1) {}
 
     /**
      * @return int|false

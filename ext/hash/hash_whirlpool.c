@@ -263,7 +263,7 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context)
 	ZEND_SECURE_ZERO(state, sizeof(state));
 }
 
-PHP_HASH_API void PHP_WHIRLPOOLInit(PHP_WHIRLPOOL_CTX *context)
+PHP_HASH_API void PHP_WHIRLPOOLInit(PHP_WHIRLPOOL_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 }

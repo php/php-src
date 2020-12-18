@@ -15,7 +15,7 @@ function foo() {
 PHP;
 
 // Token names and ignorability.
-$tokens = PhpToken::getAll($code);
+$tokens = PhpToken::tokenize($code);
 foreach ($tokens as $i => $token) {
     printf("[%2d] %-26s %s\n", $i, $token->getTokenName(),
         $token->isIgnorable() ? "ignorable" : "meaningful");

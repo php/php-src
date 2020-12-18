@@ -744,14 +744,14 @@ static int module_startup = 1;
 static int module_shutdown = 0;
 
 /* {{{ php_during_module_startup */
-static int php_during_module_startup(void)
+PHPAPI int php_during_module_startup(void)
 {
 	return module_startup;
 }
 /* }}} */
 
 /* {{{ php_during_module_shutdown */
-static int php_during_module_shutdown(void)
+PHPAPI int php_during_module_shutdown(void)
 {
 	return module_shutdown;
 }
@@ -1110,13 +1110,6 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 #ifdef PHP_WIN32
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
 	char *buf = php_win32_error_to_msg(error);
-	size_t buf_len;
-
-	buf_len = strlen(buf);
-	if (buf_len >= 2) {
-		buf[buf_len - 1] = '\0';
-		buf[buf_len - 2] = '\0';
-	}
 	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
 	php_win32_error_msg_free(buf);
 }
@@ -1450,7 +1443,7 @@ PHP_FUNCTION(set_time_limit)
 /* {{{ php_fopen_wrapper_for_zend */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
 {
-	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
+	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
 
@@ -1746,6 +1739,11 @@ void php_request_shutdown(void *dummy)
 	EG(current_execute_data) = NULL;
 
 	php_deactivate_ticks();
+
+	/* 0. Call any open observer end handlers that are still open after a zend_bailout */
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_observer_fcall_end_all();
+	}
 
 	/* 1. Call all possible shutdown functions registered with register_shutdown_function() */
 	if (PG(modules_activated)) {

@@ -37,7 +37,9 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_return_type;
 	int observer_show_return_value;
 	int observer_show_init_backtrace;
+	int observer_show_opcode;
 	int observer_nesting_depth;
+	int replace_zend_execute_ex;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -51,7 +53,7 @@ static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
 static zend_object_handlers zend_test_class_handlers;
 
-ZEND_FUNCTION(zend_test_func)
+static ZEND_FUNCTION(zend_test_func)
 {
 	RETVAL_STR_COPY(EX(func)->common.function_name);
 
@@ -62,23 +64,23 @@ ZEND_FUNCTION(zend_test_func)
 	EX(func) = NULL;
 }
 
-ZEND_FUNCTION(zend_test_array_return)
+static ZEND_FUNCTION(zend_test_array_return)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-ZEND_FUNCTION(zend_test_nullable_array_return)
+static ZEND_FUNCTION(zend_test_nullable_array_return)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-ZEND_FUNCTION(zend_test_void_return)
+static ZEND_FUNCTION(zend_test_void_return)
 {
 	/* dummy */
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-ZEND_FUNCTION(zend_test_deprecated)
+static ZEND_FUNCTION(zend_test_deprecated)
 {
 	zval *arg1;
 
@@ -88,7 +90,7 @@ ZEND_FUNCTION(zend_test_deprecated)
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
-ZEND_FUNCTION(zend_create_unterminated_string)
+static ZEND_FUNCTION(zend_create_unterminated_string)
 {
 	zend_string *str, *res;
 
@@ -104,7 +106,7 @@ ZEND_FUNCTION(zend_create_unterminated_string)
 }
 
 /* Enforce terminate null byte on string. This avoids a warning in debug builds. */
-ZEND_FUNCTION(zend_terminate_string)
+static ZEND_FUNCTION(zend_terminate_string)
 {
 	zend_string *str;
 
@@ -116,7 +118,7 @@ ZEND_FUNCTION(zend_terminate_string)
 }
 
 /* {{{ Cause an intentional memory leak, for testing/debugging purposes */
-ZEND_FUNCTION(zend_leak_bytes)
+static ZEND_FUNCTION(zend_leak_bytes)
 {
 	zend_long leakbytes = 3;
 
@@ -129,7 +131,7 @@ ZEND_FUNCTION(zend_leak_bytes)
 /* }}} */
 
 /* {{{ Leak a refcounted variable */
-ZEND_FUNCTION(zend_leak_variable)
+static ZEND_FUNCTION(zend_leak_variable)
 {
 	zval *zv;
 
@@ -147,7 +149,7 @@ ZEND_FUNCTION(zend_leak_variable)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OR_STR */
-ZEND_FUNCTION(zend_string_or_object)
+static ZEND_FUNCTION(zend_string_or_object)
 {
 	zend_string *str;
 	zend_object *object;
@@ -165,7 +167,7 @@ ZEND_FUNCTION(zend_string_or_object)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OR_STR_OR_NULL */
-ZEND_FUNCTION(zend_string_or_object_or_null)
+static ZEND_FUNCTION(zend_string_or_object_or_null)
 {
 	zend_string *str;
 	zend_object *object;
@@ -185,7 +187,7 @@ ZEND_FUNCTION(zend_string_or_object_or_null)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR */
-ZEND_FUNCTION(zend_string_or_stdclass)
+static ZEND_FUNCTION(zend_string_or_stdclass)
 {
 	zend_string *str;
 	zend_object *object;
@@ -203,7 +205,7 @@ ZEND_FUNCTION(zend_string_or_stdclass)
 /* }}} */
 
 /* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
-ZEND_FUNCTION(zend_string_or_stdclass_or_null)
+static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 {
 	zend_string *str;
 	zend_object *object;
@@ -223,7 +225,7 @@ ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 /* }}} */
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
-ZEND_FUNCTION(zend_iterable)
+static ZEND_FUNCTION(zend_iterable)
 {
 	zval *arg1, *arg2;
 
@@ -292,21 +294,34 @@ void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t ta
 	}
 }
 
-ZEND_METHOD(_ZendTestClass, __toString) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, __toString) {
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_EMPTY_STRING();
 }
-/* }}} */
 
 /* Internal function returns bool, we return int. */
-ZEND_METHOD(_ZendTestClass, is_object) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, is_object) {
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_LONG(42);
 }
-/* }}} */
 
-ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
+static ZEND_METHOD(_ZendTestClass, returnsStatic) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	object_init_ex(return_value, zend_get_called_scope(execute_data));
+}
+
+static ZEND_METHOD(_ZendTestTrait, testMethod) {
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
 }
-/* }}} */
+
+static ZEND_METHOD(ZendTestNS_Foo, method) {
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_METHOD(ZendTestNS2_Foo, method) {
+	ZEND_PARSE_PARAMETERS_NONE();
+}
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.enabled", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_enabled, zend_zend_test_globals, zend_test_globals)
@@ -317,9 +332,17 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.show_opcode", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_opcode, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
+
+void (*old_zend_execute_ex)(zend_execute_data *execute_data);
+static void custom_zend_execute_ex(zend_execute_data *execute_data)
+{
+	old_zend_execute_ex(execute_data);
+}
 
 PHP_MINIT_FUNCTION(zend_test)
 {
@@ -416,6 +439,11 @@ PHP_MINIT_FUNCTION(zend_test)
 		(void)ini_entries;
 	}
 
+	if (ZT_G(replace_zend_execute_ex)) {
+		old_zend_execute_ex = zend_execute_ex;
+		zend_execute_ex = custom_zend_execute_ex;
+	}
+
 	return SUCCESS;
 }
 
@@ -426,6 +454,14 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 	}
 
 	return SUCCESS;
+}
+
+static void observer_show_opcode(zend_execute_data *execute_data)
+{
+	if (!ZT_G(observer_show_opcode)) {
+		return;
+	}
+	php_printf("%*s<!-- opcode: '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", zend_get_opcode_name(EX(opline)->opcode));
 }
 
 static void observer_begin(zend_execute_data *execute_data)
@@ -444,6 +480,7 @@ static void observer_begin(zend_execute_data *execute_data)
 		php_printf("%*s<file '%s'>\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(execute_data->func->op_array.filename));
 	}
 	ZT_G(observer_nesting_depth)++;
+	observer_show_opcode(execute_data);
 }
 
 static void get_retval_info(zval *retval, smart_str *buf)
@@ -456,7 +493,14 @@ static void get_retval_info(zval *retval, smart_str *buf)
 	if (retval == NULL) {
 		smart_str_appendl(buf, "NULL", 4);
 	} else if (ZT_G(observer_show_return_value)) {
-		php_var_export_ex(retval, 2 * ZT_G(observer_nesting_depth) + 3, buf);
+		if (Z_TYPE_P(retval) == IS_OBJECT) {
+			smart_str_appendl(buf, "object(", 7);
+			smart_str_append(buf, Z_OBJCE_P(retval)->name);
+			smart_str_appendl(buf, ")#", 2);
+			smart_str_append_long(buf, Z_OBJ_HANDLE_P(retval));
+		} else {
+			php_var_export_ex(retval, 2 * ZT_G(observer_nesting_depth) + 3, buf);
+		}
 	} else if (ZT_G(observer_show_return_type)) {
 		smart_str_appends(buf, zend_zval_type_name(retval));
 	}
@@ -472,6 +516,7 @@ static void observer_end(zend_execute_data *execute_data, zval *retval)
 	if (EG(exception)) {
 		php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
 	}
+	observer_show_opcode(execute_data);
 	ZT_G(observer_nesting_depth)--;
 	if (execute_data->func && execute_data->func->common.function_name) {
 		smart_str retval_info = {0};
@@ -528,6 +573,7 @@ static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execu
 		if (ZT_G(observer_show_init_backtrace)) {
 			observer_show_init_backtrace(execute_data);
 		}
+		observer_show_opcode(execute_data);
 	}
 
 	if (ZT_G(observer_observe_all)) {
@@ -606,4 +652,10 @@ PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems)
 	for (i = 0; i < elems; i++) {
 		array[i] = i;
 	}
+}
+
+PHP_ZEND_TEST_API int *(*bug79177_cb)(void);
+void bug79177(void)
+{
+	bug79177_cb();
 }

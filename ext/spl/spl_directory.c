@@ -899,6 +899,11 @@ PHP_METHOD(SplFileInfo, getFilename)
 		RETURN_THROWS();
 	}
 
+	if (!intern->file_name) {
+		zend_throw_error(NULL, "Object not initialized");
+		RETURN_THROWS();
+	}
+
 	spl_filesystem_object_get_path(intern, &path_len);
 
 	if (path_len && path_len < intern->file_name_len) {
@@ -934,6 +939,11 @@ PHP_METHOD(SplFileInfo, getExtension)
 	zend_string *ret;
 
 	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!intern->file_name) {
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -997,6 +1007,11 @@ PHP_METHOD(SplFileInfo, getBasename)
 	size_t slen = 0, path_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &suffix, &slen) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!intern->file_name) {
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2712,7 +2727,7 @@ PHP_METHOD(SplFileObject, ftruncate)
 PHP_METHOD(SplFileObject, seek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_long line_pos;
+	zend_long line_pos, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &line_pos) == FAILURE) {
 		RETURN_THROWS();
@@ -2727,10 +2742,14 @@ PHP_METHOD(SplFileObject, seek)
 
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
 
-	while(intern->u.file.current_line_num < line_pos) {
+	for (i = 0; i < line_pos; i++) {
 		if (spl_filesystem_file_read_line(ZEND_THIS, intern, 1) == FAILURE) {
-			break;
+			return;
 		}
+	}
+	if (line_pos > 0) {
+		intern->u.file.current_line_num++;
+		spl_filesystem_file_free_line(intern);
 	}
 } /* }}} */
 

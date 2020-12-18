@@ -121,6 +121,10 @@ Options:
     --color
     --no-color  Do/Don't colorize the result type in the test result.
 
+    --repeat [n]
+                Run the tests multiple times in the same process and check the
+                output of the last execution (CLI SAPI only).
+
 
 HELP;
 }
@@ -147,7 +151,7 @@ function main(): void
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
-           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache;
+           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -229,65 +233,6 @@ function main(): void
     $php = null;
     $php_cgi = null;
     $phpdbg = null;
-
-    if (getenv('TEST_PHP_EXECUTABLE')) {
-        $php = getenv('TEST_PHP_EXECUTABLE');
-
-        if ($php == 'auto') {
-            $php = TEST_PHP_SRCDIR . '/sapi/cli/php';
-            putenv("TEST_PHP_EXECUTABLE=$php");
-
-            if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
-                $php_cgi = TEST_PHP_SRCDIR . '/sapi/cgi/php-cgi';
-
-                if (file_exists($php_cgi)) {
-                    putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
-                } else {
-                    $php_cgi = null;
-                }
-            }
-        }
-        $environment['TEST_PHP_EXECUTABLE'] = $php;
-    }
-
-    if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
-        $php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
-
-        if ($php_cgi == 'auto') {
-            $php_cgi = TEST_PHP_SRCDIR . '/sapi/cgi/php-cgi';
-            putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
-        }
-
-        $environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
-    }
-
-    if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
-        if (IS_WINDOWS && file_exists(dirname($php) . "/phpdbg.exe")) {
-            $phpdbg = realpath(dirname($php) . "/phpdbg.exe");
-        } elseif (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
-            $phpdbg = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg");
-        } elseif (file_exists("./sapi/phpdbg/phpdbg")) {
-            $phpdbg = realpath("./sapi/phpdbg/phpdbg");
-        } elseif (file_exists(dirname($php) . "/phpdbg")) {
-            $phpdbg = realpath(dirname($php) . "/phpdbg");
-        } else {
-            $phpdbg = null;
-        }
-        if ($phpdbg) {
-            putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
-        }
-    }
-
-    if (getenv('TEST_PHPDBG_EXECUTABLE')) {
-        $phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
-
-        if ($phpdbg == 'auto') {
-            $phpdbg = TEST_PHP_SRCDIR . '/sapi/phpdbg/phpdbg';
-            putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
-        }
-
-        $environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
-    }
 
     if (getenv('TEST_PHP_LOG_FORMAT')) {
         $log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
@@ -405,6 +350,7 @@ function main(): void
     $shuffle = false;
     $workers = null;
     $context_line_count = 3;
+    $num_repeats = 1;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -608,16 +554,24 @@ function main(): void
                     $shuffle = true;
                     break;
                 case '--asan':
+                case '--msan':
                     $environment['USE_ZEND_ALLOC'] = 0;
                     $environment['USE_TRACKED_ALLOC'] = 1;
                     $environment['SKIP_ASAN'] = 1;
                     $environment['SKIP_PERF_SENSITIVE'] = 1;
+                    if ($switch === '--msan') {
+                        $environment['SKIP_MSAN'] = 1;
+                    }
 
                     $lsanSuppressions = __DIR__ . '/azure/lsan-suppressions.txt';
                     if (file_exists($lsanSuppressions)) {
                         $environment['LSAN_OPTIONS'] = 'suppressions=' . $lsanSuppressions
                             . ':print_suppressions=0';
                     }
+                    break;
+                case '--repeat':
+                    $num_repeats = (int) $argv[++$i];
+                    $environment['SKIP_REPEAT'] = 1;
                     break;
                 //case 'w'
                 case '-':
@@ -679,14 +633,35 @@ function main(): void
         return;
     }
 
-    // Default to PHP_BINARY as executable
-    if (!isset($environment['TEST_PHP_EXECUTABLE'])) {
+    if (!$php) {
+        $php = getenv('TEST_PHP_EXECUTABLE');
+    }
+    if (!$php) {
         $php = PHP_BINARY;
-        putenv("TEST_PHP_EXECUTABLE=$php");
-        $environment['TEST_PHP_EXECUTABLE'] = $php;
     }
 
-    if (strlen($conf_passed)) {
+    if (!$php_cgi) {
+        $php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
+    }
+    if (!$php_cgi) {
+        $php_cgi = get_binary($php, 'php-cgi', 'sapi/cgi/php-cgi');
+    }
+
+    if (!$phpdbg) {
+        $phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
+    }
+    if (!$phpdbg) {
+        $phpdbg = get_binary($php, 'phpdbg', 'sapi/phpdbg/phpdbg');
+    }
+
+    putenv("TEST_PHP_EXECUTABLE=$php");
+    $environment['TEST_PHP_EXECUTABLE'] = $php;
+    putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
+    $environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+    putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
+    $environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
+
+    if ($conf_passed !== null) {
         if (IS_WINDOWS) {
             $pass_options .= " -c " . escapeshellarg($conf_passed);
         } else {
@@ -885,7 +860,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         'session' => ['session.auto_start=0'],
         'tidy' => ['tidy.clean_output=0'],
         'zlib' => ['zlib.output_compression=Off'],
-        'xdebug' => ['xdebug.default_enable=0','xdebug.mode=off'],
+        'xdebug' => ['xdebug.mode=off'],
         'mbstring' => ['mbstring.func_overload=0'],
     ];
 
@@ -1043,6 +1018,21 @@ function save_or_mail_results(): void
             }
         }
     }
+}
+
+function get_binary(string $php, string $sapi, string $sapi_path): ?string
+{
+    $dir = dirname($php);
+    if (IS_WINDOWS && file_exists("$dir/$sapi.exe")) {
+        return realpath("$dir/$sapi.exe");
+    }
+    if (file_exists("$dir/../../$sapi_path")) {
+        return realpath("$dir/../../$sapi_path");
+    }
+    if (file_exists("$dir/$sapi")) {
+        return realpath("$dir/$sapi");
+    }
+    return null;
 }
 
 function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false): void
@@ -1798,6 +1788,13 @@ function show_file_block(string $file, string $block, ?string $section = null): 
     }
 }
 
+function skip_test(string $tested, string $tested_file, string $shortname, string $reason) {
+    show_result('SKIP', $tested, $tested_file, "reason: $reason");
+    junit_init_suite(junit_get_suitename_for($shortname));
+    junit_mark_test_as('SKIP', $shortname, $tested, 0, $reason);
+    return 'SKIPPED';
+}
+
 //
 //  Run an individual test case.
 //
@@ -1814,6 +1811,7 @@ function run_test(string $php, $file, array $env): string
     global $no_file_cache;
     global $slow_min_ms;
     global $preload, $file_cache;
+    global $num_repeats;
     // Parallel testing
     global $workerID;
     $temp_filenames = null;
@@ -1907,6 +1905,10 @@ TEST $file
         }
     }
 
+    $shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
+    $tested_file = $shortname;
+    $tested = trim($section_text['TEST']);
+
     // the redirect section allows a set of tests to be reused outside of
     // a given test dir
     if ($bork_info === null) {
@@ -1922,6 +1924,10 @@ TEST $file
             if (isset($section_text['FILEEOF'])) {
                 $section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
                 unset($section_text['FILEEOF']);
+            }
+
+            if ($num_repeats > 1 && isset($section_text['FILE_EXTERNAL'])) {
+                return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
             }
 
             foreach (['FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX'] as $prefix) {
@@ -1946,9 +1952,6 @@ TEST $file
         }
     }
     fclose($fp);
-
-    $shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
-    $tested_file = $shortname;
 
     if ($bork_info !== null) {
         show_result("BORK", $bork_info, $tested_file);
@@ -1979,30 +1982,16 @@ TEST $file
         $cmdRedirect = '';
     }
 
-    $tested = trim($section_text['TEST']);
-
     /* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
     if (array_key_exists('CGI', $section_text) || !empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
-        if (isset($php_cgi)) {
-            $php = $php_cgi . ' -C ';
-        } elseif (IS_WINDOWS && file_exists(dirname($php) . "/php-cgi.exe")) {
-            $php = realpath(dirname($php) . "/php-cgi.exe") . ' -C ';
-        } else {
-            if (file_exists(dirname($php) . "/../../sapi/cgi/php-cgi")) {
-                $php = realpath(dirname($php) . "/../../sapi/cgi/php-cgi") . ' -C ';
-            } elseif (file_exists("./sapi/cgi/php-cgi")) {
-                $php = realpath("./sapi/cgi/php-cgi") . ' -C ';
-            } elseif (file_exists(dirname($php) . "/php-cgi")) {
-                $php = realpath(dirname($php) . "/php-cgi") . ' -C ';
-            } else {
-                show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
-
-                junit_init_suite(junit_get_suitename_for($shortname));
-                junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
-                return 'SKIPPED';
-            }
+        if (!$php_cgi) {
+            return skip_test($tested, $tested_file, $shortname, 'CGI not available');
         }
+        $php = $php_cgi . ' -C ';
         $uses_cgi = true;
+        if ($num_repeats > 1) {
+            return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
+        }
     }
 
     /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
@@ -2019,11 +2008,22 @@ TEST $file
             // be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.
             $extra_options = '-rr';
         } else {
-            show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
+            return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
+        }
+        if ($num_repeats > 1) {
+            return skip_test($tested, $tested_file, $shortname, 'phpdbg does not support --repeat');
+        }
+    }
 
-            junit_init_suite(junit_get_suitename_for($shortname));
-            junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
-            return 'SKIPPED';
+    if ($num_repeats > 1) {
+        if (array_key_exists('CLEAN', $section_text)) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with CLEAN might not be repeatable');
+        }
+        if (array_key_exists('STDIN', $section_text)) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with STDIN might not be repeatable');
+        }
+        if (array_key_exists('CAPTURE_STDIO', $section_text)) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with CAPTURE_STDIO might not be repeatable');
         }
     }
 
@@ -2169,6 +2169,9 @@ TEST $file
             // even though all the files are re-created.
             $ini_settings['opcache.validate_timestamps'] = '0';
         }
+    } else if ($num_repeats > 1) {
+        // Make sure warnings still show up on the second run.
+        $ini_settings['opcache.record_warnings'] = '1';
     }
 
     // Any special ini settings
@@ -2179,6 +2182,10 @@ TEST $file
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
         $section_text['INI'] = preg_replace('/{MAIL:(\S+)}/', $replacement, $section_text['INI']);
         settings2array(preg_split("/[\n\r]+/", $section_text['INI']), $ini_settings);
+
+        if ($num_repeats > 1 && isset($ini_settings['opcache.opt_debug_level'])) {
+            return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
+        }
     }
 
     $ini_settings = settings2params($ini_settings);
@@ -2480,7 +2487,8 @@ TEST $file
         $env['CONTENT_TYPE'] = '';
         $env['CONTENT_LENGTH'] = '';
 
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args$cmdRedirect";
+        $repeat_option = $num_repeats > 1 ? "--repeat $num_repeats" : "";
+        $cmd = "$php $pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
     }
 
     if ($valgrind) {
@@ -2550,6 +2558,25 @@ COMMAND $cmd
 
         if (!$leaked) {
             @unlink($memcheck_filename);
+        }
+    }
+
+    if ($num_repeats > 1) {
+        // In repeat mode, retain the output before the first execution,
+        // and of the last execution. Do this early, because the trimming below
+        // makes the newline handling complicated.
+        $separator1 = "Executing for the first time...\n";
+        $separator1_pos = strpos($out, $separator1);
+        if ($separator1_pos !== false) {
+            $separator2 = "Finished execution, repeating...\n";
+            $separator2_pos = strrpos($out, $separator2);
+            if ($separator2_pos !== false) {
+                $out = substr($out, 0, $separator1_pos)
+                     . substr($out, $separator2_pos + strlen($separator2));
+            } else {
+                $out = substr($out, 0, $separator1_pos)
+                     . substr($out, $separator1_pos + strlen($separator1));
+            }
         }
     }
 
@@ -2772,7 +2799,8 @@ COMMAND $cmd
         }
 
         // write .sh
-        $sh_script = <<<SH
+        if (strpos($log_format, 'S') !== false) {
+            $sh_script = <<<SH
 #!/bin/sh
 
 case "$1" in
@@ -2790,10 +2818,11 @@ case "$1" in
     ;;
 esac
 SH;
-        if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, $sh_script) === false) {
-            error("Cannot create test shell script - $sh_filename");
+            if (file_put_contents($sh_filename, $sh_script) === false) {
+                error("Cannot create test shell script - $sh_filename");
+            }
+            chmod($sh_filename, 0755);
         }
-        chmod($sh_filename, 0755);
 
         // write .log
         if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, "

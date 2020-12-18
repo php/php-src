@@ -7,6 +7,7 @@ pcntl: pcntl_sigprocmask(), pcntl_sigwaitinfo(), pcntl_sigtimedwait()
     elseif (!function_exists('pcntl_sigwaitinfo') or !function_exists('pcntl_sigtimedwait')) die('skip required functionality is not available');
     elseif (!defined('CLD_EXITED')) die('skip CLD_EXITED not defined');
     elseif (getenv('SKIP_ASAN')) die('skip Fails intermittently under asan/msan');
+    elseif (getenv("SKIP_REPEAT")) die("skip cannot be repeated");
 ?>
 --FILE--
 <?php

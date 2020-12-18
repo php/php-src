@@ -48,10 +48,10 @@ function get_mangled_object_vars(object $object): array {}
 function get_class_methods(object|string $object_or_class): array {}
 
 /** @param object|string $object_or_class */
-function method_exists(mixed $object_or_class, string $method): bool {}
+function method_exists($object_or_class, string $method): bool {}
 
 /** @param object|string $object_or_class */
-function property_exists(mixed $object_or_class, string $property): bool {}
+function property_exists($object_or_class, string $property): bool {}
 
 function class_exists(string $class, bool $autoload = true): bool {}
 

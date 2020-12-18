@@ -891,7 +891,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	size_t arg_pattern_len, string_len;
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
-	int i, match_len, beg, end;
+	int i, beg, end;
 	OnigOptionType options;
 	char *str;
 
@@ -938,11 +938,8 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		goto out;
 	}
 
-	match_len = 1;
 	str = string;
 	if (array != NULL) {
-
-		match_len = regs->end[0] - regs->beg[0];
 		for (i = 0; i < regs->num_regs; i++) {
 			beg = regs->beg[i];
 			end = regs->end[i];
@@ -959,10 +956,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		}
 	}
 
-	if (match_len == 0) {
-		match_len = 1;
-	}
-	RETVAL_LONG(match_len);
+	RETVAL_TRUE;
 out:
 	if (regs != NULL) {
 		onig_region_free(regs, 1);

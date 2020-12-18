@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9f811912b4a466a87477883abed02f998380481a */
+ * Stub hash: ba5e5a57404b44d2be662e9a6b5abb1a44ccfb22 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, bundlename, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, bundle, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
@@ -18,7 +18,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle_count, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle_getLocales, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, bundlename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, bundle, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ResourceBundle_getErrorCode arginfo_class_ResourceBundle_count

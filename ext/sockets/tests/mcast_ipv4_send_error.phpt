@@ -77,7 +77,7 @@ bool(true)
 int(0)
 
 Setting IP_MULTICAST_TTL with 256
-socket_set_option(): Argument #4 ($optval) must be between 0 and 255
+socket_set_option(): Argument #4 ($value) must be between 0 and 255
 int(1)
 
 Setting IP_MULTICAST_TTL with "254"
@@ -85,5 +85,5 @@ bool(true)
 int(254)
 
 Setting IP_MULTICAST_TTL with -1
-socket_set_option(): Argument #4 ($optval) must be between 0 and 255
+socket_set_option(): Argument #4 ($value) must be between 0 and 255
 int(254)

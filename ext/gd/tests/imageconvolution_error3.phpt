@@ -35,5 +35,5 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] imageconvolution(): Argument #2 ($matrix3x3) must be a 3x3 array, matrix[2] only has 2 elements
-!! [ValueError] imageconvolution(): Argument #2 ($matrix3x3) must be a 3x3 array, matrix[2][2] cannot be found (missing integer key)
+!! [ValueError] imageconvolution(): Argument #2 ($matrix) must be a 3x3 array, matrix[2] only has 2 elements
+!! [ValueError] imageconvolution(): Argument #2 ($matrix) must be a 3x3 array, matrix[2][2] cannot be found (missing integer key)

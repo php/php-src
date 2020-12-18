@@ -1132,8 +1132,13 @@ PHP_METHOD(XMLReader, expand)
 		RETURN_THROWS();
 	}
 #else
-	php_error(E_WARNING, "DOM support is not enabled");
-	return;
+	zval *dummy;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z!", &dummy) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zend_throw_error(NULL, "XMLReader::expand() requires the DOM extension to be enabled");
+	RETURN_THROWS();
 #endif
 }
 /* }}} */

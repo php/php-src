@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 22c47f0b30f6952a42546c403fbd2e92836661fa */
+ * Stub hash: 31f7c4cd39e58d6474b90acd65f4b7bda7a6ddf3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_init, 0, 0, EnchantBroker, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -14,13 +14,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_broker_set_dict_path, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, broker, EnchantBroker, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_enchant_broker_get_dict_path, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, broker, EnchantBroker, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_broker_list_dicts, 0, 1, IS_ARRAY, 0)
@@ -38,7 +38,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_request_pwl_d
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_broker_free_dict, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_broker_dict_exists, 0, 2, _IS_BOOL, 0)
@@ -55,23 +55,23 @@ ZEND_END_ARG_INFO()
 #define arginfo_enchant_broker_describe arginfo_enchant_broker_list_dicts
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_quick_check, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, suggestions, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_check, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_suggest, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_add, 0, 2, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -84,17 +84,17 @@ ZEND_END_ARG_INFO()
 #define arginfo_enchant_dict_is_in_session arginfo_enchant_dict_check
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_store_replacement, 0, 3, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
-	ZEND_ARG_TYPE_INFO(0, mis, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, cor, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
+	ZEND_ARG_TYPE_INFO(0, misspelled, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, correct, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_enchant_dict_get_error, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_describe, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO(0, dict, EnchantDictionary, 0)
+	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 ZEND_END_ARG_INFO()
 
 

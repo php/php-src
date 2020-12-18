@@ -577,7 +577,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "client_info", 		sizeof("client_info") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "client_version", 	sizeof("client_version") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "driver_version", 	sizeof("driver_version") - 1, ZEND_ACC_PUBLIC);
-	zend_declare_property_null(ce, "embedded", 			sizeof("embedded") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "reconnect",			sizeof("reconnect") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "report_mode", 		sizeof("report_mode") - 1, ZEND_ACC_PUBLIC);
 	ce->ce_flags |= ZEND_ACC_FINAL;
@@ -657,7 +656,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
+#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_FLOAT_NATIVE", MYSQLND_OPT_INT_AND_FLOAT_NATIVE, CONST_CS | CONST_PERSISTENT);
 #endif
 #if MYSQL_VERSION_ID < 80000 || MYSQL_VERSION_ID >= 100000 || defined(MYSQLI_USE_MYSQLND)
@@ -989,28 +988,32 @@ PHP_METHOD(mysqli_stmt, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!", &mysql_link, mysqli_link_class_entry, &statement, &statement_len) == FAILURE) {
 		RETURN_THROWS();
 	}
-
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	stmt = (MY_STMT *) ecalloc(1, sizeof(MY_STMT));
-	stmt->stmt = mysql_stmt_init(mysql->mysql);
-	if (stmt->stmt && statement) {
-		mysql_stmt_prepare(stmt->stmt, (char *)statement, statement_len);
-	}
 
-	if (!stmt->stmt) {
+	if (!(stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		efree(stmt);
 		RETURN_FALSE;
 	}
+
 #ifndef MYSQLI_USE_MYSQLND
 	ZVAL_COPY(&stmt->link_handle, mysql_link);
 #endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
-	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
+	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
+
+	if (statement) {
+		if(mysql_stmt_prepare(stmt->stmt, statement, statement_len)) {
+			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+			RETURN_FALSE;
+		}
+		mysqli_resource->status = MYSQLI_STATUS_VALID;
+	}
 }
 
 PHP_METHOD(mysqli_result, __construct)
@@ -1127,7 +1130,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 		}
 	}
 #else
-	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value, MYSQLND_MYSQLI);
+	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value);
 #endif
 }
 /* }}} */
@@ -1200,16 +1203,9 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.param_count = 0;
 			fci.named_params = NULL;
 
-			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+			if (ctor_params) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
-					/* Two problems why we throw exceptions here: PHP is typeless
-					 * and hence passing one argument that's not an array could be
-					 * by mistake and the other way round is possible, too. The
-					 * single value is an array. Also we'd have to make that one
-					 * argument passed by reference.
-					 */
-					zend_argument_error(zend_ce_exception, 3, "must be of type array, %s given", zend_zval_type_name(ctor_params));
-					RETURN_THROWS();
+					ZEND_UNREACHABLE();
 				}
 			}
 
@@ -1223,8 +1219,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				zval_ptr_dtor(&retval);
 			}
 			zend_fcall_info_args_clear(&fci, 1);
-		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
+		} else if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) > 0) {
+			zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
+				"must be empty when the specified class (%s) does not have a constructor",
+				ZSTR_VAL(ce->name)
+			);
 		}
 	}
 }

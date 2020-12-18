@@ -24,7 +24,7 @@ var_dump(snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC));
 ?>
 --EXPECT--
 Checking error handling
-snmp_set_oid_output_format(): Argument #1 ($oid_format) must be an SNMP_OID_OUTPUT_* constant
+snmp_set_oid_output_format(): Argument #1 ($format) must be an SNMP_OID_OUTPUT_* constant
 Checking working
 bool(true)
 bool(true)

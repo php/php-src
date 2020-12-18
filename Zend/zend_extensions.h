@@ -44,7 +44,7 @@ You can use the following macro to check the extension API version for compatibi
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..  */
-#define ZEND_EXTENSION_API_NO	420200930
+#define ZEND_EXTENSION_API_NO	420201009
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -75,11 +75,11 @@ typedef size_t (*op_array_persist_calc_func_t)(zend_op_array *op_array);
 typedef size_t (*op_array_persist_func_t)(zend_op_array *op_array, void *mem);
 
 struct _zend_extension {
-	char *name;
-	char *version;
-	char *author;
-	char *URL;
-	char *copyright;
+	const char *name;
+	const char *version;
+	const char *author;
+	const char *URL;
+	const char *copyright;
 
 	startup_func_t startup;
 	shutdown_func_t shutdown;

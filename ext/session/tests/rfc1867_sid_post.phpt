@@ -21,7 +21,7 @@ Content-Type: multipart/form-data; boundary=---------------------------208960602
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHPSESSID"
 
-rfc1867-tests
+rfc1867-sid-post
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"
 
@@ -45,7 +45,7 @@ var_dump($_SESSION["upload_progress_" . basename(__FILE__)]);
 session_destroy();
 ?>
 --EXPECTF--
-string(%d) "rfc1867-tests"
+string(%d) "rfc1867-sid-post"
 bool(true)
 array(2) {
   ["file1"]=>

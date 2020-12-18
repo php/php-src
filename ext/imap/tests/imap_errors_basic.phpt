@@ -2,16 +2,16 @@
 Test imap_errors() function : invalid password
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once __DIR__.'/setup/skipif.inc';
 ?>
 --FILE--
 <?php
 echo "*** Testing imap_errors() : invalid password ***\n";
-require_once(__DIR__.'/imap_include.inc');
+require_once __DIR__.'/setup/imap_include.inc';
 $password = "bogus"; // invalid password to use in this test
 
 echo "Issue opening with invalid password, 1 retry\n";
-$mbox = imap_open($default_mailbox, $username, $password, OP_READONLY, 1);
+$mbox = imap_open(IMAP_DEFAULT_MAILBOX, IMAP_MAILBOX_USERNAME, $password, OP_READONLY, 1);
 
 echo "List any errors\n";
 var_dump(imap_errors());

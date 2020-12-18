@@ -33,11 +33,8 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/err.h>
-
-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
 #include <openssl/bn.h>
 #include <openssl/dh.h>
-#endif
 
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
@@ -80,9 +77,7 @@
 
 #ifndef OPENSSL_NO_TLSEXT
 #define HAVE_TLS_SNI 1
-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
 #define HAVE_TLS_ALPN 1
-#endif
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
@@ -1294,12 +1289,8 @@ static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /
 
 	zvcurve = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve");
 	if (zvcurve == NULL) {
-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
 		SSL_CTX_set_ecdh_auto(ctx, 1);
 		return SUCCESS;
-#else
-		curve_nid = NID_X9_62_prime256v1;
-#endif
 	} else {
 		if (!try_convert_to_string(zvcurve)) {
 			return FAILURE;

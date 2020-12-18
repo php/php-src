@@ -492,6 +492,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	ALLOCA_FLAG(use_heap_large)
 	wchar_t *pathw = NULL;
+	int may_retry_reparse_point;
 #define FREE_PATHW() \
 	do { free(pathw); } while(0);
 
@@ -591,6 +592,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 
 #ifdef ZEND_WIN32
 retry_reparse_point:
+		may_retry_reparse_point = 0;
 		if (save) {
 			pathw = php_win32_ioutil_any_to_w(path);
 			if (!pathw) {
@@ -685,6 +687,7 @@ retry_reparse_tag_cloud:
 			CloseHandle(hLink);
 
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+				may_retry_reparse_point = 1;
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
 				isabsolute = pbuffer->SymbolicLinkReparseBuffer.Flags == 0;
 #if VIRTUAL_CWD_DEBUG
@@ -821,7 +824,7 @@ retry_reparse_tag_cloud:
 			free_alloca(pbuffer, use_heap_large);
 			free(substitutename);
 
-			{
+			if (may_retry_reparse_point) {
 				DWORD attrs;
 
 				FREE_PATHW()

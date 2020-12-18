@@ -15,9 +15,6 @@ $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 50000)
     die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
         $matches[1], $matches[2], $matches[3], $version));
-
-if (!MySQLPDOTest::isPDOMySQLnd())
-    die("skip This will not work with libmysql");
 ?>
 --FILE--
 <?php
@@ -132,6 +129,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(3) {
   [0]=>
@@ -173,9 +172,11 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 
-Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'INSERT INTO test (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
+Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'INSERT INTO test (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
 string(5) "42000"
 
 Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to true
@@ -219,6 +220,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(3) {
   [0]=>
@@ -259,6 +262,8 @@ array(3) {
     ["label"]=>
     string(1) "a"
   }
+}
+array(0) {
 }
 bool(false)
 string(5) "00000"

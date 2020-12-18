@@ -175,7 +175,7 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int sqlite_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_sqlite_stmt *S = ecalloc(1, sizeof(pdo_sqlite_stmt));
@@ -193,7 +193,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 		return 0;
 	}
 
-	i = sqlite3_prepare_v2(H->db, sql, sql_len, &S->stmt, &tail);
+	i = sqlite3_prepare_v2(H->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &S->stmt, &tail);
 	if (i == SQLITE_OK) {
 		return 1;
 	}
@@ -695,6 +695,25 @@ static void pdo_sqlite_request_shutdown(pdo_dbh_t *dbh)
 	}
 }
 
+static void pdo_sqlite_get_gc(pdo_dbh_t *dbh, zend_get_gc_buffer *gc_buffer)
+{
+	pdo_sqlite_db_handle *H = dbh->driver_data;
+
+	struct pdo_sqlite_func *func = H->funcs;
+	while (func) {
+		zend_get_gc_buffer_add_zval(gc_buffer, &func->func);
+		zend_get_gc_buffer_add_zval(gc_buffer, &func->step);
+		zend_get_gc_buffer_add_zval(gc_buffer, &func->fini);
+		func = func->next;
+	}
+
+	struct pdo_sqlite_collation *collation = H->collations;
+	while (collation) {
+		zend_get_gc_buffer_add_zval(gc_buffer, &collation->callback);
+		collation = collation->next;
+	}
+}
+
 static const struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_closer,
 	sqlite_handle_preparer,
@@ -710,7 +729,8 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
 	pdo_sqlite_request_shutdown,
-	NULL
+	NULL, /* in_transaction */
+	pdo_sqlite_get_gc
 };
 
 static char *make_filename_safe(const char *filename)

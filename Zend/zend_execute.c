@@ -130,13 +130,12 @@ static ZEND_FUNCTION(pass)
 }
 
 ZEND_BEGIN_ARG_INFO_EX(zend_pass_function_arg_info, 0, 0, 0)
-	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
 ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
 	{0, 0, 0},              /* arg_flags         */
-	ZEND_ACC_VARIADIC,      /* fn_flags          */
+	0,                      /* fn_flags          */
 	NULL,                   /* name              */
 	NULL,                   /* scope             */
 	NULL,                   /* prototype         */
@@ -1097,6 +1096,11 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
  * trust that arginfo matches what is enforced by zend_parse_parameters. */
 static zend_always_inline zend_bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
 {
+	if (fbc->internal_function.handler == ZEND_FN(pass)) {
+		/* Be lenient about the special pass function. */
+		return 0;
+	}
+
 	if (fbc->common.required_num_args > ZEND_CALL_NUM_ARGS(call)) {
 		/* Required argument not passed. */
 		return 1;
@@ -1549,7 +1553,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	if ((size_t)offset >= Z_STRLEN_P(str)) {
 		/* Extend string if needed */
 		zend_long old_len = Z_STRLEN_P(str);
-		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), offset + 1, 0));
+		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), (size_t)offset + 1, 0));
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else if (!Z_REFCOUNTED_P(str)) {
@@ -3258,6 +3262,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_l
 	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
 	zend_property_info **ptr, **end;
 
+	ZEND_ASSERT(prop);
 	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
 		ZEND_ASSERT(source_list->ptr == prop);
 		source_list->ptr = NULL;
@@ -4752,6 +4757,11 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
 		} \
 	} while (0)
+
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+/* This callback disables optimization of "vm_stack_data" variable in VM */
+void (*zend_touch_vm_stack_data)(void *vm_stack_data) = NULL;
+#endif
 
 #include "zend_vm_execute.h"
 

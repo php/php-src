@@ -15,6 +15,6 @@ var_dump(mb_eregi('xyzp', 'XYZ'));
 var_dump(mb_eregi('ö', 'Öäü'));
 ?>
 --EXPECT--
-int(1)
+bool(true)
 bool(false)
-int(1)
+bool(true)

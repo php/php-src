@@ -253,7 +253,7 @@ const php_hash_ops php_hash_##p##haval##b##_ops = { \
 	php_hash_unserialize, \
 	PHP_HAVAL_SPEC, \
 	((b) / 8), 128, sizeof(PHP_HAVAL_CTX), 1 }; \
-PHP_HASH_API void PHP_##p##HAVAL##b##Init(PHP_HAVAL_CTX *context) \
+PHP_HASH_API void PHP_##p##HAVAL##b##Init(PHP_HAVAL_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args) \
 {	int i; context->count[0] = 	context->count[1] = 	0; \
 	for(i = 0; i < 8; i++) context->state[i] = D0[i]; \
 	context->passes = p;	context->output = b; \

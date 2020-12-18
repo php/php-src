@@ -9,7 +9,7 @@ var_dump(hash_algos());
 ?>
 --EXPECTF--
 *** Testing hash_algos() : basic functionality ***
-array(53) {
+array(56) {
   [%d]=>
   string(3) "md2"
   [%d]=>
@@ -86,6 +86,12 @@ array(53) {
   string(7) "fnv1a64"
   [%d]=>
   string(5) "joaat"
+  [%d]=>
+  string(8) "murmur3a"
+  [%d]=>
+  string(8) "murmur3c"
+  [%d]=>
+  string(8) "murmur3f"
   [%d]=>
   string(10) "haval128,3"
   [%d]=>

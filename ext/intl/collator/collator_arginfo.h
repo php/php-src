@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4cb1470cf2566c9d947be638c7d14a14a10290dd */
+ * Stub hash: 869c6e60a8f2b153ef79f28a08e165ff3ec2bc14 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -8,28 +8,28 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Collator_create arginfo_class_Collator___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_compare, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sort, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sort_flag, IS_LONG, 0, "Collator::SORT_REGULAR")
+	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Collator::SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sortWithSortKeys, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Collator_asort arginfo_class_Collator_sort
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getAttribute, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, attribute, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_setAttribute, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, val, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, attribute, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getStrength, 0, 0, 0)
@@ -48,7 +48,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Collator_getErrorMessage arginfo_class_Collator_getStrength
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getSortKey, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 

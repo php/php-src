@@ -78,29 +78,12 @@ static void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
-#if PHP_DEBUG
-	zend_long * threshold = &MYSQLND_G(debug_emalloc_fail_threshold);
-	TRACE_ALLOC_ENTER(mysqlnd_emalloc_name);
-
-	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
-		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
-	}
-
-	if (*threshold == 0) {
-		ret = NULL;
-	} else {
-		ret = emalloc_rel(REAL_SIZE(size));
-		--*threshold;
-	}
-#else
 	TRACE_ALLOC_ENTER(mysqlnd_emalloc_name);
 	ret = emalloc_rel(REAL_SIZE(size));
-#endif
 
 	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p", size, ret);
 
-	if (ret && collect_memory_statistics) {
+	if (collect_memory_statistics) {
 		*(size_t *) ret = size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EMALLOC_COUNT, 1, STAT_MEM_EMALLOC_AMOUNT, size);
 	}
@@ -114,29 +97,12 @@ static void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
-#if PHP_DEBUG
-	zend_long * threshold = persistent? &MYSQLND_G(debug_malloc_fail_threshold):&MYSQLND_G(debug_emalloc_fail_threshold);
-	TRACE_ALLOC_ENTER(mysqlnd_pemalloc_name);
-
-	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
-		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
-	}
-
-	if (*threshold == 0) {
-		ret = NULL;
-	} else {
-		ret = pemalloc_rel(REAL_SIZE(size), persistent);
-		--*threshold;
-	}
-#else
 	TRACE_ALLOC_ENTER(mysqlnd_pemalloc_name);
 	ret = pemalloc_rel(REAL_SIZE(size), persistent);
-#endif
 
 	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p persistent=%u", size, ret, persistent);
 
-	if (ret && collect_memory_statistics) {
+	if (collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_MALLOC_COUNT:STAT_MEM_EMALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_MALLOC_AMOUNT:STAT_MEM_EMALLOC_AMOUNT;
 		*(size_t *) ret = size;
@@ -153,31 +119,13 @@ static void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
-#if PHP_DEBUG
-	zend_long * threshold = &MYSQLND_G(debug_ecalloc_fail_threshold);
-	TRACE_ALLOC_ENTER(mysqlnd_ecalloc_name);
-
-	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
-		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
-	}
-	TRACE_ALLOC_INF_FMT("before: %lu", zend_memory_usage(FALSE));
-
-	if (*threshold == 0) {
-		ret = NULL;
-	} else {
-		ret = ecalloc_rel(nmemb, REAL_SIZE(size));
-		--*threshold;
-	}
-#else
 	TRACE_ALLOC_ENTER(mysqlnd_ecalloc_name);
 	TRACE_ALLOC_INF_FMT("before: %lu", zend_memory_usage(FALSE));
 	ret = ecalloc_rel(nmemb, REAL_SIZE(size));
-#endif
 
 	TRACE_ALLOC_INF_FMT("after : %lu", zend_memory_usage(FALSE));
 	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p", size, ret);
-	if (ret && collect_memory_statistics) {
+	if (collect_memory_statistics) {
 		*(size_t *) ret = size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_ECALLOC_COUNT, 1, STAT_MEM_ECALLOC_AMOUNT, size);
 	}
@@ -191,28 +139,12 @@ static void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persi
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
-#if PHP_DEBUG
-	zend_long * threshold = persistent? &MYSQLND_G(debug_calloc_fail_threshold):&MYSQLND_G(debug_ecalloc_fail_threshold);
-	TRACE_ALLOC_ENTER(mysqlnd_pecalloc_name);
-	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
-		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
-	}
-
-	if (*threshold == 0) {
-		ret = NULL;
-	} else {
-		ret = pecalloc_rel(nmemb, REAL_SIZE(size), persistent);
-		--*threshold;
-	}
-#else
 	TRACE_ALLOC_ENTER(mysqlnd_pecalloc_name);
 	ret = pecalloc_rel(nmemb, REAL_SIZE(size), persistent);
-#endif
 
 	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p", size, ret);
 
-	if (ret && collect_memory_statistics) {
+	if (collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_CALLOC_COUNT:STAT_MEM_ECALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_CALLOC_AMOUNT:STAT_MEM_ECALLOC_AMOUNT;
 		*(size_t *) ret = size;
@@ -230,30 +162,12 @@ static void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
-#if PHP_DEBUG
-	zend_long * threshold = &MYSQLND_G(debug_erealloc_fail_threshold);
-	TRACE_ALLOC_ENTER(mysqlnd_erealloc_name);
-
-	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
-		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
-	}
-	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu, new_size=%lu", ptr, old_size, new_size);
-
-	if (*threshold == 0) {
-		ret = NULL;
-	} else {
-		ret = erealloc_rel(REAL_PTR(ptr), REAL_SIZE(new_size));
-		--*threshold;
-	}
-#else
 	TRACE_ALLOC_ENTER(mysqlnd_erealloc_name);
 	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu, new_size=%lu", ptr, old_size, new_size);
 	ret = erealloc_rel(REAL_PTR(ptr), REAL_SIZE(new_size));
-#endif
 
 	TRACE_ALLOC_INF_FMT("new_ptr=%p", (char*)ret);
-	if (ret && collect_memory_statistics) {
+	if (collect_memory_statistics) {
 		*(size_t *) ret = new_size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EREALLOC_COUNT, 1, STAT_MEM_EREALLOC_AMOUNT, new_size);
 	}
@@ -268,31 +182,13 @@ static void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persisten
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
-#if PHP_DEBUG
-	zend_long * threshold = persistent? &MYSQLND_G(debug_realloc_fail_threshold):&MYSQLND_G(debug_erealloc_fail_threshold);
-	TRACE_ALLOC_ENTER(mysqlnd_perealloc_name);
-
-	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
-		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
-	}
-	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu new_size=%lu   persistent=%u", ptr, old_size, new_size, persistent);
-
-	if (*threshold == 0) {
-		ret = NULL;
-	} else {
-		ret = perealloc_rel(REAL_PTR(ptr), REAL_SIZE(new_size), persistent);
-		--*threshold;
-	}
-#else
 	TRACE_ALLOC_ENTER(mysqlnd_perealloc_name);
 	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu new_size=%lu   persistent=%u", ptr, old_size, new_size, persistent);
 	ret = perealloc_rel(REAL_PTR(ptr), REAL_SIZE(new_size), persistent);
-#endif
 
 	TRACE_ALLOC_INF_FMT("new_ptr=%p", (char*)ret);
 
-	if (ret && collect_memory_statistics) {
+	if (collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_REALLOC_COUNT:STAT_MEM_EREALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_REALLOC_AMOUNT:STAT_MEM_EREALLOC_AMOUNT;
 		*(size_t *) ret = new_size;

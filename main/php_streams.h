@@ -181,6 +181,10 @@ struct _php_stream_wrapper	{
 
 #define PHP_STREAM_FLAG_NO_FCLOSE					0x80
 
+/* Suppress generation of PHP warnings on stream read/write errors.
+ * Currently for internal use only. */
+#define PHP_STREAM_FLAG_SUPPRESS_ERRORS				0x100
+
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
@@ -549,9 +553,6 @@ END_EXTERN_C()
 
 /* Allow blocking reads on anonymous pipes on Windows. */
 #define STREAM_USE_BLOCKING_PIPE        0x00008000
-
-/* Antique - no longer has meaning */
-#define IGNORE_URL_WIN 0
 
 int php_init_stream_wrappers(int module_number);
 int php_shutdown_stream_wrappers(int module_number);

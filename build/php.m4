@@ -478,7 +478,7 @@ dnl Internal, don't use.
 dnl
 AC_DEFUN([_PHP_ADD_LIBRARY_SKELETON],[
   case $1 in
-  c|c_r|pthread*[)] ;;
+  c|c_r[)] ;;
   *[)] ifelse($3,,[
     _PHP_X_ADD_LIBRARY($1,$2,$5)
   ],[
@@ -1158,11 +1158,11 @@ $1
     int main() {
     int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
 
-    if (fd < 0) exit(1);
-    if (pwrite(fd, "text", 4, 0) != 4) exit(1);
+    if (fd < 0) return 1;
+    if (pwrite(fd, "text", 4, 0) != 4) return 1;
     /* Linux glibc breakage until 2.2.5 */
-    if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) exit(1);
-    exit(0);
+    if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) return 1;
+    return 0;
     }
 
   ]])],[
@@ -1192,11 +1192,11 @@ $1
     int main() {
     char buf[3];
     int fd = open("conftest_in", O_RDONLY);
-    if (fd < 0) exit(1);
-    if (pread(fd, buf, 2, 0) != 2) exit(1);
+    if (fd < 0) return 1;
+    if (pread(fd, buf, 2, 0) != 2) return 1;
     /* Linux glibc breakage until 2.2.5 */
-    if (pread(fd, buf, 2, -1) != -1 || errno != EINVAL) exit(1);
-    exit(0);
+    if (pread(fd, buf, 2, -1) != -1 || errno != EINVAL) return 1;
+    return 0;
     }
   ]])],[
     ac_cv_pread=yes
@@ -1464,8 +1464,8 @@ int main() {
   FILE *fp = fopencookie(&g, "r", funcs);
 
   if (fp && fseek(fp, 8192, SEEK_SET) == 0 && g.pos == 8192)
-    exit(0);
-  exit(1);
+    return 0;
+  return 1;
 }
 
 ]])], [
@@ -1903,7 +1903,7 @@ dnl
 AC_DEFUN([PHP_SETUP_OPENSSL],[
   found_openssl=no
 
-  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.1], [found_openssl=yes])
+  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.2], [found_openssl=yes])
 
   if test "$found_openssl" = "yes"; then
     PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)

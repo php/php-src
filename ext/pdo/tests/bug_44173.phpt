@@ -73,7 +73,7 @@ try {
 ?>
 --EXPECT--
 PDO::query() expects exactly 2 arguments for the fetch mode provided, 4 given
-PDO::query(): Argument #2 ($fetch_mode) must be of type ?int, string given
+PDO::query(): Argument #2 ($fetchMode) must be of type ?int, string given
 PDO::query() expects at most 4 arguments for the fetch mode provided, 5 given
 PDO::query() expects exactly 3 arguments for the fetch mode provided, 2 given
 PDO::query() expects exactly 3 arguments for the fetch mode provided, 2 given

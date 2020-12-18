@@ -9,6 +9,7 @@ if (!defined("CLONE_NEWUSER")) die("skip flag unavailable");
 if (@pcntl_unshare(CLONE_NEWUSER) == false && pcntl_get_last_error() == PCNTL_EPERM) {
     die("skip Insufficient privileges to use CLONE_NEWUSER");
 }
+if (getenv("SKIP_REPEAT")) die("skip cannot be repeated");
 ?>
 --FILE--
 <?php

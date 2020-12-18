@@ -29,7 +29,7 @@
 #define MAY_BE_PACKED_GUARD         (1<<27) /* needs packed array guard */
 #define MAY_BE_CLASS_GUARD          (1<<27) /* needs class guard */
 #define MAY_BE_GUARD                (1<<28) /* needs type guard */
-#define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
+//#define MAY_BE_IN_REG               (1<<29) /* deprecated and not used */
 
 //TODO: remome MAY_BE_RC1, MAY_BE_RCN???
 #define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
@@ -257,6 +257,7 @@ int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const 
 uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert);
 
 int  zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp);
+int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
 void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow);
 int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);

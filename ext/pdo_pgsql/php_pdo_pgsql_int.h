@@ -60,7 +60,7 @@ typedef struct {
 	pdo_pgsql_column        *cols;
 	char *cursor_name;
 	char *stmt_name;
-	char *query;
+	zend_string *query;
 	char **param_values;
 	int *param_lengths;
 	int *param_formats;
@@ -79,7 +79,8 @@ extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const
 #define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__)
 #define pdo_pgsql_error_msg(d,e,m)	_pdo_pgsql_error(d, NULL, e, NULL, m, __FILE__, __LINE__)
 #define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, NULL, __FILE__, __LINE__)
-#define pdo_pgsql_error_stmt_msg(s,e,m)	_pdo_pgsql_error(s->dbh, s, e, NULL, m, __FILE__, __LINE__)
+#define pdo_pgsql_error_stmt_msg(stmt, e, sqlstate, msg) \
+	_pdo_pgsql_error(stmt->dbh, stmt, e, sqlstate, msg, __FILE__, __LINE__)
 
 extern const struct pdo_stmt_methods pgsql_stmt_methods;
 

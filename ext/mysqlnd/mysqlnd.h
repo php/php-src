@@ -24,7 +24,6 @@
 
 #define MYSQLND_PLUGIN_API_VERSION 2
 
-#define MYSQLND_STRING_TO_INT_CONVERSION
 /*
   This force mysqlnd to do a single (or more depending on amount of data)
   non-blocking read() calls before sending a command to the server. Useful
@@ -99,10 +98,9 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
 PHPAPI void mysqlnd_debug(const char *mode);
 
 /* Query */
-#define mysqlnd_fetch_into(result, flags, ret_val, ext)	(result)->m.fetch_into((result), (flags), (ret_val), (ext) ZEND_FILE_LINE_CC)
+#define mysqlnd_fetch_into(result, flags, ret_val)	(result)->m.fetch_into((result), (flags), (ret_val) ZEND_FILE_LINE_CC)
 #define mysqlnd_fetch_row_c(result)						(result)->m.fetch_row_c((result))
 #define mysqlnd_fetch_all(result, flags, return_value)	(result)->m.fetch_all((result), (flags), (return_value) ZEND_FILE_LINE_CC)
-#define mysqlnd_result_fetch_field_data(res,offset,ret)	(res)->m.fetch_field_data((res), (offset), (ret))
 #define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) ZEND_FILE_LINE_CC)
 #define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats(mysqlnd_global_stats, (values) ZEND_FILE_LINE_CC)
 
@@ -114,9 +112,8 @@ PHPAPI void mysqlnd_debug(const char *mode);
 
 PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num);
 
-#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data, 0)
-#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_NO_COPY)
-#define mysqlnd_store_result_ofs(conn)	((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_COPY)
+#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data)
+#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data)
 #define mysqlnd_next_result(conn)		((conn)->data)->m->next_result((conn)->data)
 #define mysqlnd_more_results(conn)		((conn)->data)->m->more_results((conn)->data)
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i))
@@ -309,14 +306,10 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_long		log_mask;
 	zend_long		net_read_timeout;
 	zend_long		mempool_default_size;
-	zend_long		debug_emalloc_fail_threshold;
-	zend_long		debug_ecalloc_fail_threshold;
-	zend_long		debug_erealloc_fail_threshold;
 	zend_long		debug_malloc_fail_threshold;
 	zend_long		debug_calloc_fail_threshold;
 	zend_long		debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
-	zend_bool		fetch_data_copy;
 	zend_bool		collect_statistics;
 	zend_bool		collect_memory_statistics;
 ZEND_END_MODULE_GLOBALS(mysqlnd)

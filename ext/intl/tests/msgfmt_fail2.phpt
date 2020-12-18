@@ -126,12 +126,12 @@ ArgumentCountError: msgfmt_create() expects exactly 2 arguments, 1 given in %s o
 ArgumentCountError: MessageFormatter::create() expects exactly 2 arguments, 1 given in %s on line %d
 'U_ZERO_ERROR'
 
-IntlException: Constructor failed in %s on line %d
+IntlException: msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-IntlException: Constructor failed in %s on line %d
+IntlException: msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
@@ -145,17 +145,17 @@ TypeError: MessageFormatter::create(): Argument #1 ($locale) must be of type str
 TypeError: msgfmt_create(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
-IntlException: Constructor failed in %s on line %d
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
-'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+IntlException: pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR in %s on line %d
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
 
-IntlException: Constructor failed in %s on line %d
+IntlException: msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES in %s on line %d
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 
-IntlException: Constructor failed in %s on line %d
+IntlException: msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND in %s on line %d
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'

@@ -16,13 +16,13 @@ session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --GET--
-PHPSESSID=rfc1867-tests-get
+PHPSESSID=rfc1867-sid-only-cookie-2-get
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHPSESSID"
 
-rfc1867-tests-post
+rfc1867-sid-only-cookie-2-post
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"
 

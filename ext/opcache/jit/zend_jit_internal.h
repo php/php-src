@@ -130,8 +130,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
 zend_bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
 
-int ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
-int ZEND_FASTCALL zend_jit_check_constant(const zval *key);
+zend_constant* ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
+zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 
 /* Tracer */
 #define zend_jit_opline_hash(opline) \
@@ -211,7 +211,8 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
 #define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
 #define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
-#define ZEND_JIT_EXIT_DYNAMIC_CALL  (1<<8) /* exit because of polymorphic INTI_DYNAMIC_CALL call */
+#define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
+#define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -317,9 +318,10 @@ typedef union _zend_jit_trace_stack {
 	int32_t      ssa_var;
 	uint32_t     info;
 	struct {
-		uint8_t  type;
-		int8_t   reg;
-		uint16_t flags;
+		uint8_t type;     /* variable type (for type inference) */
+		uint8_t mem_type; /* stack slot type  (for eliminate dead type store) */
+		int8_t  reg;
+		uint8_t flags;
 	};
 } zend_jit_trace_stack;
 
@@ -329,21 +331,34 @@ typedef union _zend_jit_trace_stack {
 	(_stack)[_slot].info
 #define STACK_TYPE(_stack, _slot) \
 	(_stack)[_slot].type
+#define STACK_MEM_TYPE(_stack, _slot) \
+	(_stack)[_slot].mem_type
 #define STACK_REG(_stack, _slot) \
 	(_stack)[_slot].reg
+#define STACK_FLAGS(_stack, _slot) \
+	(_stack)[_slot].flags
 #define SET_STACK_VAR(_stack, _slot, _ssa_var) do { \
 		(_stack)[_slot].ssa_var = _ssa_var; \
 	} while (0)
 #define SET_STACK_INFO(_stack, _slot, _info) do { \
 		(_stack)[_slot].info = _info; \
 	} while (0)
-#define SET_STACK_TYPE(_stack, _slot, _type) do { \
-		(_stack)[_slot].type = _type; \
+#define SET_STACK_TYPE(_stack, _slot, _type, _set_mem_type) do { \
+		uint8_t __type = (_type); \
+		(_stack)[_slot].type = __type; \
+		if (_set_mem_type) { \
+			(_stack)[_slot].mem_type = __type; \
+		} \
 		(_stack)[_slot].reg = ZREG_NONE; \
 		(_stack)[_slot].flags = 0; \
 	} while (0)
 #define SET_STACK_REG(_stack, _slot, _reg) do { \
 		(_stack)[_slot].reg = _reg; \
+		(_stack)[_slot].flags = 0; \
+	} while (0)
+#define SET_STACK_REG_EX(_stack, _slot, _reg, _flags) do { \
+		(_stack)[_slot].reg = _reg; \
+		(_stack)[_slot].flags = _flags; \
 	} while (0)
 
 /* trace info flags */
@@ -378,6 +393,7 @@ struct _zend_jit_trace_stack_frame {
 	const zend_op              *call_opline;
 	uint32_t                    call_level;
 	uint32_t                    _info;
+	int                         used_stack;
 	zend_jit_trace_stack        stack[1];
 };
 
@@ -439,6 +455,10 @@ struct _zend_jit_trace_stack_frame {
 	} while (0)
 #define TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame) do { \
 		(frame)->_info |= TRACE_FRAME_MASK_LAST_SEND_BY_VAL; \
+		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_REF; \
+	} while (0)
+#define TRACE_FRAME_SET_LAST_SEND_UNKNOWN(frame) do { \
+		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_VAL; \
 		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_REF; \
 	} while (0)
 #define TRACE_FRAME_SET_RETURN_VALUE_USED(frame) do { \

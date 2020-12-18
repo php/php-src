@@ -437,7 +437,7 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint3
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim, zval *result)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -478,6 +478,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -509,7 +512,7 @@ num_undef:
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim, zval *result)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -550,6 +553,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -578,7 +584,7 @@ num_undef:
 
 static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *dim)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -618,6 +624,9 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -645,7 +654,7 @@ num_undef:
 
 static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *dim)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -688,6 +697,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -726,7 +738,7 @@ num_undef:
 
 static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim)
 {
-	zend_long hval;
+	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
 
@@ -769,6 +781,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 	}
 
 str_index:
+	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+		goto num_index;
+	}
 	retval = zend_hash_find(ht, offset_key);
 	if (retval) {
 		/* support for $GLOBALS[...] */
@@ -834,7 +849,30 @@ try_again:
 	return _zval_get_long_func(dim);
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval *dim, zval *result)
+static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string *str, zend_long offset)
+{
+	if (UNEXPECTED((zend_ulong)offset >= (zend_ulong)ZSTR_LEN(str))) {
+		if (EXPECTED(offset < 0)) {
+			/* Handle negative offset */
+			zend_long real_offset = (zend_long)ZSTR_LEN(str) + offset;
+
+			if (EXPECTED(real_offset >= 0)) {
+				return ZSTR_CHAR((zend_uchar)ZSTR_VAL(str)[real_offset]);
+			}
+		}
+		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
+		return ZSTR_EMPTY_ALLOC();
+	} else {
+		return ZSTR_CHAR((zend_uchar)ZSTR_VAL(str)[offset]);
+	}
+}
+
+static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_offset_r_helper(zend_string *str, zend_long offset)
+{
+	return zend_jit_fetch_dim_str_offset(str, offset);
+}
+
+static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *str, zval *dim)
 {
 	zend_long offset;
 
@@ -843,22 +881,10 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval 
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
-
-	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
-		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
-		ZVAL_EMPTY_STRING(result);
-	} else {
-		zend_uchar c;
-		zend_long real_offset;
-
-		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
-			? (zend_long)Z_STRLEN_P(container) + offset : offset;
-		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-		ZVAL_CHAR(result, c);
-	}
+	return zend_jit_fetch_dim_str_offset(str, offset);
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_dim_str_is_helper(zval *container, zval *dim, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_dim_str_is_helper(zend_string *str, zval *dim, zval *result)
 {
 	zend_long offset;
 
@@ -892,16 +918,19 @@ try_string_offset:
 		offset = Z_LVAL_P(dim);
 	}
 
-	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
+	if ((zend_ulong)offset >= (zend_ulong)ZSTR_LEN(str)) {
+		if (offset < 0) {
+			/* Handle negative offset */
+			zend_long real_offset = (zend_long)ZSTR_LEN(str) + offset;
+
+			if (real_offset >= 0) {
+				ZVAL_CHAR(result, (zend_uchar)ZSTR_VAL(str)[real_offset]);
+				return;
+			}
+		}
 		ZVAL_NULL(result);
 	} else {
-		zend_uchar c;
-		zend_long real_offset;
-
-		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
-			? (zend_long)Z_STRLEN_P(container) + offset : offset;
-		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-		ZVAL_CHAR(result, c);
+		ZVAL_CHAR(result, (zend_uchar)ZSTR_VAL(str)[offset]);
 	}
 }
 
@@ -2608,4 +2637,40 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 		zval_ptr_dtor(&z_copy);
 		zval_ptr_dtor(z);
 	}
+}
+
+#if (PHP_VERSION_ID <= 80100) && (SIZEOF_SIZE_T == 4)
+static zend_result ZEND_FASTCALL zval_jit_update_constant_ex(zval *p, zend_class_entry *scope)
+{
+	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
+		zend_ast *ast = Z_ASTVAL_P(p);
+
+		if (ast->kind == ZEND_AST_CONSTANT) {
+			zend_string *name = zend_ast_get_constant_name(ast);
+			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
+			if (UNEXPECTED(zv == NULL)) {
+				return FAILURE;
+			}
+
+			zval_ptr_dtor_nogc(p);
+			ZVAL_COPY_OR_DUP(p, zv);
+		} else {
+			zval tmp;
+
+			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
+				return FAILURE;
+			}
+			zval_ptr_dtor_nogc(p);
+			ZVAL_COPY_VALUE(p, &tmp);
+		}
+	}
+	return SUCCESS;
+}
+#endif
+
+static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
+{
+	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	zend_string_release_ex(func->common.function_name, 0);
+	zend_free_trampoline(func);
 }

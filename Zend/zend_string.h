@@ -195,6 +195,19 @@ static zend_always_inline zend_string *zend_string_dup(zend_string *s, bool pers
 	}
 }
 
+static zend_always_inline zend_string *zend_string_separate(zend_string *s, bool persistent)
+{
+	if (ZSTR_IS_INTERNED(s) || GC_REFCOUNT(s) > 1) {
+		if (!ZSTR_IS_INTERNED(s)) {
+			GC_DELREF(s);
+		}
+		return zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
+	}
+
+	zend_string_forget_hash_val(s);
+	return s;
+}
+
 static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_t len, bool persistent)
 {
 	zend_string *ret;

@@ -842,6 +842,11 @@ finish:
 		php_stream_close(stream);
 		stream = NULL;
 
+		if (transfer_encoding) {
+			php_stream_filter_free(transfer_encoding);
+			transfer_encoding = NULL;
+		}
+
 		if (location[0] != '\0') {
 
 			char new_path[HTTP_HEADER_BLOCK_SIZE];
@@ -958,10 +963,6 @@ out:
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
 		}
-	} else {
-		if (transfer_encoding) {
-			php_stream_filter_free(transfer_encoding);
-		}
 	}
 
 	return stream;
@@ -980,7 +981,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 
 	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(
-				"http_response_header", sizeof("http_response_header")-1, &headers, 1)) {
+				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
 			zval_ptr_dtor(&headers);
 		}
 	}

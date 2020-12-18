@@ -142,7 +142,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-sodium_crypto_box(): Argument #3 ($key) must be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes long
+sodium_crypto_box(): Argument #3 ($key_pair) must be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes long
 bool(true)
 string(17) "Hi, this is Alice"
 string(21) "Hi Alice! This is Bob"

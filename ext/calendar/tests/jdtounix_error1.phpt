@@ -14,5 +14,5 @@ try {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
---EXPECT--
-jday must be within the Unix epoch
+--EXPECTF--
+jday must be between 2440588 and %d

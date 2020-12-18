@@ -6,8 +6,8 @@ if (!extension_loaded('imap')) die('skip imap extension not available');
 ?>
 --FILE--
 <?php
-imap_mail('1', 1, NULL);
+@imap_mail('1', 1, NULL);
+echo 'done'
 ?>
 --EXPECTF--
-Warning: imap_mail(): No message string in mail command in %s on line %d
-%A
+%Adone

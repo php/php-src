@@ -206,7 +206,6 @@ typedef struct st_mysqlnd_packet_res_field {
 /* Row packet */
 typedef struct st_mysqlnd_packet_row {
 	MYSQLND_PACKET_HEADER	header;
-	zval		*fields;
 	uint32_t	field_count;
 	zend_bool	eof;
 	/*
@@ -219,7 +218,6 @@ typedef struct st_mysqlnd_packet_row {
 	MYSQLND_ROW_BUFFER	row_buffer;
 	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 
-	zend_bool		skip_extraction;
 	zend_bool		binary_protocol;
 	MYSQLND_FIELD	*fields_metadata;
 
@@ -310,11 +308,7 @@ enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-enum_func_status php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
-
-enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
+enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 

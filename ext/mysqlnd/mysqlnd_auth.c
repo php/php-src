@@ -103,10 +103,6 @@ mysqlnd_run_authentication(
 			}
 			conn->authentication_plugin_data.l = plugin_data_len;
 			conn->authentication_plugin_data.s = mnd_pemalloc(conn->authentication_plugin_data.l, conn->persistent);
-			if (!conn->authentication_plugin_data.s) {
-				SET_OOM_ERROR(conn->error_info);
-				goto end;
-			}
 			memcpy(conn->authentication_plugin_data.s, plugin_data, plugin_data_len);
 
 			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);

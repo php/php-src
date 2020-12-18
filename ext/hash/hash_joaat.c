@@ -36,7 +36,7 @@ const php_hash_ops php_hash_joaat_ops = {
 	0
 };
 
-PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context)
+PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = 0;
 }

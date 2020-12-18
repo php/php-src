@@ -223,9 +223,9 @@ NULL
 -----------------------------------------------
 Test with Prefetch (invalid) value set to -12345 
 -----------------------------------------------
-oci_set_prefetch(): Argument #2 ($number_of_rows) must be greater than or equal to 0
+oci_set_prefetch(): Argument #2 ($rows) must be greater than or equal to 0
 -----------------------------------------------
 Test with Prefetch (invalid) value set to -1 
 -----------------------------------------------
-oci_set_prefetch(): Argument #2 ($number_of_rows) must be greater than or equal to 0
+oci_set_prefetch(): Argument #2 ($rows) must be greater than or equal to 0
 Done

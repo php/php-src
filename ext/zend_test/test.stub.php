@@ -1,12 +1,16 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-function-entries static */
+
+namespace {
 
 class _ZendTestClass {
     public static function is_object(): int {}
 
     /** @deprecated */
     public function __toString(): string {}
+
+    public function returnsStatic(): static {}
 }
 
 trait _ZendTestTrait {
@@ -41,3 +45,21 @@ function zend_string_or_stdclass($param): stdClass|string {}
 function zend_string_or_stdclass_or_null($param): stdClass|string|null {}
 
 function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
+
+}
+
+namespace ZendTestNS {
+
+class Foo {
+    public function method(): void {}
+}
+
+}
+
+namespace ZendTestNS2 {
+
+class Foo {
+    public function method(): void {}
+}
+
+}

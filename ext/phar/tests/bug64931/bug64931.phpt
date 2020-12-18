@@ -53,4 +53,4 @@ CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Phar::addFromString(): Argument #1 ($localname) must not contain any null bytes
+CAUGHT: Phar::addFromString(): Argument #1 ($localName) must not contain any null bytes

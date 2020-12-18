@@ -40,10 +40,10 @@ class IntlBreakIterator implements IteratorAggregate
     public function getErrorMessage() {}
 
     /** @return string */
-    public function getLocale(int $locale_type) {}
+    public function getLocale(int $type) {}
 
     /** @return IntlPartsIterator */
-    public function getPartsIterator(string $key_type = IntlPartsIterator::KEY_SEQUENTIAL) {}
+    public function getPartsIterator(string $type = IntlPartsIterator::KEY_SEQUENTIAL) {}
 
     /** @return string|null */
     public function getText() {}
@@ -71,7 +71,7 @@ class IntlBreakIterator implements IteratorAggregate
 
 class IntlRuleBasedBreakIterator extends IntlBreakIterator
 {
-    public function __construct(string $rules, bool $areCompiled = false) {}
+    public function __construct(string $rules, bool $compiled = false) {}
 
     /** @return string|false */
     public function getBinaryRules() {}

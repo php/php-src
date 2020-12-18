@@ -36,16 +36,17 @@ struct bug79096 {
 };
 
 #ifdef PHP_WIN32
-#	ifdef PHP_ZEND_TEST_EXPORTS
-#		define PHP_ZEND_TEST_API __declspec(dllexport)
-#	else
-#		define PHP_ZEND_TEST_API __declspec(dllimport)
-#	endif
+#	define PHP_ZEND_TEST_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_ZEND_TEST_API __attribute__ ((visibility("default")))
 #else
-#	define PHP_ZEND_TEST_API ZEND_API
+#	define PHP_ZEND_TEST_API
 #endif
 
 PHP_ZEND_TEST_API struct bug79096 bug79096(void);
 PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems);
+
+extern PHP_ZEND_TEST_API int *(*bug79177_cb)(void);
+PHP_ZEND_TEST_API void bug79177(void);
 
 #endif

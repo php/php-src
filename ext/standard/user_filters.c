@@ -342,6 +342,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			&retval,
 			0, NULL);
 
+	zval_ptr_dtor(&func_name);
+
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		if (Z_TYPE(retval) == IS_FALSE) {
 			/* User reported filter creation error "return false;" */
@@ -359,7 +361,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		}
 		zval_ptr_dtor(&retval);
 	}
-	zval_ptr_dtor(&func_name);
 
 	/* set the filter property, this will be used during cleanup */
 	ZVAL_RES(&zfilter, zend_register_resource(filter, le_userfilters));

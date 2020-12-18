@@ -2,7 +2,7 @@
 Test imap_fetch_overview() function : usage variations - $msg_no argument
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -12,25 +12,31 @@ require_once(__DIR__.'/skipif.inc');
  */
 
 echo "*** Testing imap_fetch_overview() : usage variations ***\n";
-require_once(__DIR__.'/imap_include.inc');
+require_once __DIR__.'/setup/imap_include.inc';
 
-$stream_id = setup_test_mailbox('', 3, $mailbox, 'notSimple'); // set up temp mailbox with 3 msgs
+$stream_id = setup_test_mailbox('imapfetchoverviewvar5', 3, $mailbox, false); // set up temp mailbox with 3 msgs
 
-$sequences = array (0,     4,     '4', // out of range
-                    '2',   '1,3', '1, 2',
-                    '1:3'); // pass uid without setting FT_UID option
+$sequences = [
+    0,
+    4, // out of range
+    '4', // out of range
+    '2',
+    '1,3',
+    '1, 2',
+    '1:3', // pass uid without setting FT_UID option
+];
 
-foreach($sequences as $msg_no) {
+foreach ($sequences as $msg_no) {
     echo "\n-- \$msg_no is $msg_no --\n";
-        $overview = imap_fetch_overview($stream_id, $msg_no);
+    $overview = imap_fetch_overview($stream_id, $msg_no);
     if (!$overview) {
         echo imap_last_error() . "\n";
-        } else {
+    } else {
         foreach($overview as $ov) {
             echo "\n";
             displayOverviewFields($ov);
-             }
         }
+    }
 }
 
 // clear error stack
@@ -38,12 +44,13 @@ imap_errors();
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapfetchoverviewvar5';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetch_overview() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
 -- $msg_no is 0 --
 Sequence out of range

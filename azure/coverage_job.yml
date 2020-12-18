@@ -32,10 +32,13 @@ jobs:
         runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
           -d zend_extension=opcache.so
+    - script: bash <(curl -s https://codecov.io/bash)
+      displayName: 'Upload ${{ parameters.configurationName }} Test Coverage to Codecov.io'
+      condition: or(succeeded(), failed())
     - script: |
         make gcovr-xml
         mv gcovr.xml coverage.xml
-      displayName: 'Generate ${{ parameters.configurationName }} Test Coverage'
+      displayName: 'Generate ${{ parameters.configurationName }} Test Coverage Cobertura XML Report'
       condition: or(succeeded(), failed())
     - task: PublishCodeCoverageResults@1
       inputs:

@@ -77,11 +77,11 @@ bool(false)
 -- Iteration 6 --
 bool(false)
 -- Iteration 7 --
-is_readable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 -- Iteration 8 --
-is_readable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 -- Iteration 9 --
-is_readable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 -- Iteration 10 --
 bool(true)
 -- Iteration 11 --

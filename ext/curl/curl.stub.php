@@ -48,7 +48,7 @@ function curl_multi_errno(CurlMultiHandle $multi_handle): int {}
 /** @param int $still_running */
 function curl_multi_exec(CurlMultiHandle $multi_handle, &$still_running): int {}
 
-function curl_multi_getcontent(CurlHandle $multi_handle): ?string {}
+function curl_multi_getcontent(CurlHandle $handle): ?string {}
 
 /** @param int $queued_messages */
 function curl_multi_info_read(CurlMultiHandle $multi_handle, &$queued_messages = null): array|false {}

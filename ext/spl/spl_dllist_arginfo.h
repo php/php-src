@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9d17266fba7a05a5fddca0ddf6b64b1c2f683cae */
+ * Stub hash: 404df73577d733275e386226e11887b37a500ade */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -59,7 +59,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SplDoublyLinkedList_valid arginfo_class_SplDoublyLinkedList_pop
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_unserialize, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplDoublyLinkedList_serialize arginfo_class_SplDoublyLinkedList_pop

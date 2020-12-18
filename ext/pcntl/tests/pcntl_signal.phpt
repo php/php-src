@@ -45,7 +45,7 @@ echo "ok\n";
 signal dispatched
 got signal from %r\d+|nobody%r
 bool(true)
-pcntl_signal(): Argument #1 ($signo) must be greater than or equal to 1
-pcntl_signal(): Argument #1 ($signo) must be greater than or equal to 1
+pcntl_signal(): Argument #1 ($signal) must be greater than or equal to 1
+pcntl_signal(): Argument #1 ($signal) must be greater than or equal to 1
 pcntl_signal(): Argument #2 ($handler) must be of type callable|int, string given
 ok

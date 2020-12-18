@@ -674,7 +674,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	smart_str_append_printf(str, "$%s", has_internal_arg_info(fptr)
 		? ((zend_internal_arg_info*)arg_info)->name : ZSTR_VAL(arg_info->name));
 
-	if (!required) {
+	if (!required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 			smart_str_appends(str, " = ");
 			/* TODO: We don't have a way to fetch the default value for an internal function
@@ -1432,6 +1432,10 @@ static void reflection_class_constant_factory(zend_string *name_str, zend_class_
 
 static int get_parameter_default(zval *result, parameter_reference *param) {
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
+		if (param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
+			/* We don't have a way to determine the default value for this case right now. */
+			return FAILURE;
+		}
 		return zend_get_default_from_internal_arg_info(
 			result, (zend_internal_arg_info *) param->arg_info);
 	} else {
@@ -2302,10 +2306,10 @@ ZEND_METHOD(ReflectionParameter, __construct)
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
 				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, lcname)) == NULL) {
+					zend_throw_exception_ex(reflection_exception_ptr, 0,
+						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 					zend_string_release(name);
 					zend_string_release(lcname);
-					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), Z_STRVAL_P(method));
 					RETURN_THROWS();
 				}
 				zend_string_release(name);
@@ -2717,7 +2721,8 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueAvailable)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
-		RETURN_BOOL(((zend_internal_arg_info*) (param->arg_info))->default_value);
+		RETURN_BOOL(!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)
+			&& ((zend_internal_arg_info*) (param->arg_info))->default_value);
 	} else {
 		zval *default_value = get_default_from_recv((zend_op_array *)param->fptr, param->offset);
 		RETURN_BOOL(default_value != NULL);
@@ -2952,6 +2957,9 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 
 	type_mask = ZEND_TYPE_PURE_MASK(param->type);
 	ZEND_ASSERT(!(type_mask & MAY_BE_VOID));
+	if (type_mask & MAY_BE_STATIC) {
+		append_type_mask(return_value, MAY_BE_STATIC);
+	}
 	if (type_mask & MAY_BE_CALLABLE) {
 		append_type_mask(return_value, MAY_BE_CALLABLE);
 	}
@@ -5489,6 +5497,10 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 	property_reference *ref;
 
 	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (ref->prop == NULL) {
+		RETURN_EMPTY_ARRAY();
+	}
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,

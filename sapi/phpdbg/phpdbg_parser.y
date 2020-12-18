@@ -39,6 +39,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 %define api.value.type {phpdbg_param_t}
 %define parse.error verbose
 
+%token END 0 "end of command"
 %token T_EVAL       "eval"
 %token T_RUN        "run"
 %token T_SHELL      "shell"
@@ -63,9 +64,13 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 %% /* Rules */
 
 input
-	: command { $$ = $1; }
-	| input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
+	: non_empty_input { $$ = $1; }
 	| %empty
+	;
+
+non_empty_input
+	: command { $$ = $1; }
+	| non_empty_input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
 	;
 
 command

@@ -6,19 +6,28 @@ final class SysvMessageQueue
 {
 }
 
-function msg_get_queue(int $key, int $perms = 0666): SysvMessageQueue|false {}
+function msg_get_queue(int $key, int $permissions = 0666): SysvMessageQueue|false {}
 
 /**
  * @param string|int|float|bool $message
- * @param int $errorcode
+ * @param int $error_code
  */
-function msg_send(SysvMessageQueue $queue, int $msgtype, $message, bool $serialize = true, bool $blocking = true, &$errorcode = null): bool {}
+function msg_send(SysvMessageQueue $queue, int $message_type, $message, bool $serialize = true, bool $blocking = true, &$error_code = null): bool {}
 
 /**
- * @param int $msgtype
- * @param int $errorcode
+ * @param int $received_message_type
+ * @param int $error_code
  */
-function msg_receive(SysvMessageQueue $queue, int $desiredmsgtype, &$msgtype, int $maxsize, mixed &$message, bool $unserialize = true, int $flags = 0, &$errorcode = null): bool {}
+function msg_receive(
+    SysvMessageQueue $queue,
+    int $desired_message_type,
+    &$received_message_type,
+    int $max_message_size,
+    mixed &$message,
+    bool $unserialize = true,
+    int $flags = 0,
+    &$error_code = null
+): bool {}
 
 function msg_remove_queue(SysvMessageQueue $queue): bool {}
 

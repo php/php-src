@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-socket_select(): Argument #1 ($read_fds) must only have elements of type Socket, string given
+socket_select(): Argument #1 ($read) must only have elements of type Socket, string given

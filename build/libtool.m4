@@ -340,7 +340,7 @@ AC_DEFUN([_LT_REQUIRED_DARWIN_CHECKS],[
      _lt_dar_allow_undefined='${wl}-undefined ${wl}dynamic_lookup' ;;
    10.[[012]]*)
      _lt_dar_allow_undefined='${wl}-flat_namespace ${wl}-undefined ${wl}suppress' ;;
-   10.*)
+   *)
      _lt_dar_allow_undefined='${wl}-undefined ${wl}dynamic_lookup' ;;
       esac
     ;;
@@ -994,7 +994,7 @@ int main ()
   else
     puts (dlerror ());
 
-    exit (status);
+    return (status);
 }]
 EOF
   if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext} 2>/dev/null; then
@@ -1522,7 +1522,7 @@ darwin* | rhapsody*)
   shlibpath_var=DYLD_LIBRARY_PATH
   shrext_cmds='`test .$module = .yes && echo .so || echo .dylib`'
   ifelse([$1], [],[
-  sys_lib_search_path_spec="$sys_lib_search_path_spec /usr/local/lib"]) 
+  sys_lib_search_path_spec="$sys_lib_search_path_spec /usr/local/lib"])
   sys_lib_dlsearch_path_spec='/usr/local/lib /lib /usr/lib'
   ;;
 
@@ -5800,7 +5800,7 @@ _LT_EOF
              10.[[012]])
                _LT_AC_TAGVAR(allow_undefined_flag, $1)='${wl}-flat_namespace ${wl}-undefined ${wl}suppress'
                ;;
-             10.*)
+             *)
                _LT_AC_TAGVAR(allow_undefined_flag, $1)='${wl}-undefined ${wl}dynamic_lookup'
                ;;
            esac

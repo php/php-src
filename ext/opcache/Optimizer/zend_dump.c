@@ -154,11 +154,15 @@ static void zend_dump_range(const zend_ssa_range *r)
 	fprintf(stderr, " RANGE[");
 	if (r->underflow) {
 		fprintf(stderr, "--..");
+	} else if (r->min == ZEND_LONG_MIN) {
+		fprintf(stderr, "MIN..");
 	} else {
 		fprintf(stderr, ZEND_LONG_FMT "..", r->min);
 	}
 	if (r->overflow) {
 		fprintf(stderr, "++]");
+	} else if (r->max == ZEND_LONG_MAX) {
+		fprintf(stderr, "MAX]");
 	} else {
 		fprintf(stderr, ZEND_LONG_FMT "]", r->max);
 	}
@@ -314,11 +318,6 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			if (first) first = 0; else fprintf(stderr, ", ");
 			fprintf(stderr, "resource");
 		}
-	}
-//TODO: this is useful only for JIT???
-	if (info & MAY_BE_IN_REG) {
-		if (first) first = 0; else fprintf(stderr, ", ");
-		fprintf(stderr, "reg");
 	}
 	fprintf(stderr, "]");
 }

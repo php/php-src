@@ -69,7 +69,7 @@ function date_time_set(
 
 function date_date_set(DateTime $object, int $year, int $month, int $day): DateTime {}
 
-function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1): DateTime {}
+function date_isodate_set(DateTime $object, int $year, int $week, int $dayOfWeek = 1): DateTime {}
 
 function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
@@ -98,7 +98,7 @@ function date_interval_create_from_date_string(string $datetime): DateInterval|f
 
 function date_interval_format(DateInterval $object, string $format): string {}
 
-function date_default_timezone_set(string $timezoneID): bool {}
+function date_default_timezone_set(string $timezoneId): bool {}
 
 function date_default_timezone_get(): string {}
 
@@ -134,6 +134,7 @@ interface DateTimeInterface
     /** @return DateInterval|false */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false);
 
+    /** @return void */
     public function __wakeup();
 }
 
@@ -141,6 +142,7 @@ class DateTime implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateTime */
@@ -246,6 +248,7 @@ class DateTimeImmutable implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateTimeZone */
@@ -291,7 +294,7 @@ class DateTimeImmutable implements DateTimeInterface
      * @return DateInterval|false
      * @alias date_diff
      */
-    public function diff(DateTimeInterface $object, bool $absolute = false) {}
+    public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
 
     /** @return DateTimeImmutable|false */
     public function modify(string $modifier) {}
@@ -337,7 +340,7 @@ class DateTimeZone
      * @return int
      * @alias timezone_offset_get
      */
-    public function getOffset(DateTimeInterface $object) {}
+    public function getOffset(DateTimeInterface $datetime) {}
 
     /**
      * @return array|false
@@ -363,6 +366,7 @@ class DateTimeZone
      */
     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateTimeZone */
@@ -385,6 +389,7 @@ class DateInterval
      */
     public function format(string $format) {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DateInterval */
@@ -413,6 +418,7 @@ class DatePeriod implements IteratorAggregate
     /** @return int|null */
     public function getRecurrences() {}
 
+    /** @return void */
     public function __wakeup() {}
 
     /** @return DatePeriod */

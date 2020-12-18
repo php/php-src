@@ -1175,7 +1175,7 @@ PHP_FUNCTION(ldap_bind_ext)
 	LDAPMessage *ldap_res;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!a", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!s!a!", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1446,7 +1446,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		Z_PARAM_LONG(sizelimit)
 		Z_PARAM_LONG(timelimit)
 		Z_PARAM_LONG(deref)
-		Z_PARAM_ARRAY_EX(serverctrls, 0, 1)
+		Z_PARAM_ARRAY_EX(serverctrls, 1, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Reverse -> fall through */
@@ -1557,7 +1557,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				}
 			}
 
-			if (argcount > 8) {
+			if (serverctrls) {
 				/* We have to parse controls again for each link as they use it */
 				_php_ldap_controls_free(&lserverctrls);
 				lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 9);
@@ -1610,7 +1610,7 @@ cleanup_parallel:
 		}
 		ldap_filter = zend_string_copy(filter_str);
 
-		if (argcount > 8) {
+		if (serverctrls) {
 			lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 9);
 			if (lserverctrls == NULL) {
 				ret = 0;
@@ -2183,7 +2183,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	zend_ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|a", &link, &dn, &dn_len, &entry, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|a!", &link, &dn, &dn_len, &entry, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2414,7 +2414,7 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	int rc, msgid;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|a", &link, &dn, &dn_len, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|a!", &link, &dn, &dn_len, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2557,7 +2557,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	);
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|a", &link, &dn, &dn_len, &mods, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|a!", &link, &dn, &dn_len, &mods, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2897,7 +2897,7 @@ PHP_FUNCTION(ldap_compare)
 	int errno;
 	struct berval lvalue;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsss|a", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsss|a!", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3565,7 +3565,7 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	size_t dn_len, newrdn_len, newparent_len;
 	zend_bool deleteoldrdn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsssb|a", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsssb|a!", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 

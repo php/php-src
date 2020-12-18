@@ -1,7 +1,5 @@
 --TEST--
 return type with finally
---INI--
-opcache.enable=0
 --FILE--
 <?php
 

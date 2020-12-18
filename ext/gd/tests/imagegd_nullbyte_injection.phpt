@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-imagegd(): Argument #2 ($to) must not contain any null bytes
+imagegd(): Argument #2 ($file) must not contain any null bytes

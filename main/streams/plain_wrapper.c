@@ -351,14 +351,16 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif
 		if (bytes_written < 0) {
-			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+			if (PHP_IS_TRANSIENT_ERROR(errno)) {
 				return 0;
 			}
 			if (errno == EINTR) {
 				/* TODO: Should this be treated as a proper error or not? */
 				return bytes_written;
 			}
-			php_error_docref(NULL, E_NOTICE, "Write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+			if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
+				php_error_docref(NULL, E_NOTICE, "Write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+			}
 		}
 		return bytes_written;
 	} else {
@@ -420,13 +422,15 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 		}
 
 		if (ret < 0) {
-			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+			if (PHP_IS_TRANSIENT_ERROR(errno)) {
 				/* Not an error. */
 				ret = 0;
 			} else if (errno == EINTR) {
 				/* TODO: Should this be treated as a proper error or not? */
 			} else {
-				php_error_docref(NULL, E_NOTICE, "Read of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+				if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
+					php_error_docref(NULL, E_NOTICE, "Read of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+				}
 
 				/* TODO: Remove this special-case? */
 				if (errno != EBADF) {

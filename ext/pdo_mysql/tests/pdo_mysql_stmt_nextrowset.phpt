@@ -1,7 +1,5 @@
 --TEST--
 MySQL PDOStatement->nextRowSet()
---XFAIL--
-nextRowset() problem with stored proc & emulation mode & mysqlnd
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
@@ -59,6 +57,11 @@ if (!MySQLPDOTest::isPDOMySQLnd())
         } while ($stmt->nextRowSet());
         var_dump($stmt->nextRowSet());
 
+        echo "Skip fetchAll(): ";
+        unset($stmt);
+        $stmt = $db->query('CALL p()');
+        var_dump($stmt->nextRowSet());
+        $stmt->closeCursor();
     }
 
     try {
@@ -159,7 +162,10 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
+Skip fetchAll(): bool(true)
 array(1) {
   [0]=>
   array(1) {
@@ -208,7 +214,10 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
+Skip fetchAll(): bool(true)
 Native PS...
 array(1) {
   [0]=>
@@ -258,7 +267,10 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
+Skip fetchAll(): bool(true)
 array(1) {
   [0]=>
   array(1) {
@@ -307,5 +319,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
+Skip fetchAll(): bool(true)
 done!

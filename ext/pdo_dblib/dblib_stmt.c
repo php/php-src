@@ -177,7 +177,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 
 	pdo_dblib_stmt_cursor_closer(stmt);
 
-	if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
+	if (FAIL == dbcmd(H->link, ZSTR_VAL(stmt->active_query_string))) {
 		return 0;
 	}
 

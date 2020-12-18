@@ -66,8 +66,8 @@ bool(false)
 - Iteration 6 -
 bool(false)
 - Iteration 7 -
-is_file(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 - Iteration 8 -
-is_file(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 
 *** Done ***

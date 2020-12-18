@@ -22,4 +22,4 @@ try {
 
 ?>
 --EXPECT--
-imagecolormatch(): Argument #2 ($im2) must be Palette
+imagecolormatch(): Argument #2 ($image2) must be Palette

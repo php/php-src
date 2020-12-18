@@ -16,25 +16,25 @@ class MessageFormatter
      * @return string|false
      * @alias msgfmt_format
      */
-    public function format(array $args) {}
+    public function format(array $values) {}
 
     /**
      * @return string|false
      * @alias msgfmt_format_message
      */
-    public static function formatMessage(string $locale, string $pattern, array $args) {}
+    public static function formatMessage(string $locale, string $pattern, array $values) {}
 
     /**
      * @return array|false
      * @alias msgfmt_parse
      */
-    public function parse(string $value) {}
+    public function parse(string $string) {}
 
     /**
      * @return array|false
      * @alias msgfmt_parse_message
      */
-    public static function parseMessage(string $locale, string $pattern, string $source) {}
+    public static function parseMessage(string $locale, string $pattern, string $message) {}
 
     /**
      * @return bool

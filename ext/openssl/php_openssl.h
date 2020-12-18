@@ -35,9 +35,7 @@ extern zend_module_entry openssl_module_entry;
 #endif
 #else
 /* OpenSSL version check */
-#if OPENSSL_VERSION_NUMBER < 0x10002000L
-#define PHP_OPENSSL_API_VERSION 0x10001
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 #define PHP_OPENSSL_API_VERSION 0x10002
 #else
 #define PHP_OPENSSL_API_VERSION 0x10100

@@ -548,6 +548,19 @@ static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
 	}
 }
 
+/* If b does not divide a exactly, return the two adjacent values between which the real result
+ * lies. */
+static void float_div(zend_long a, zend_long b, zend_long *r1, zend_long *r2) {
+	*r1 = *r2 = a / b;
+	if (a % b != 0) {
+		if (*r2 < 0) {
+			(*r2)--;
+		} else {
+			(*r2)++;
+		}
+	}
+}
+
 static int zend_inference_calc_binary_op_range(
 		const zend_op_array *op_array, zend_ssa *ssa,
 		zend_op *opline, zend_ssa_op *ssa_op, zend_uchar opcode, zend_ssa_range *tmp) {
@@ -644,32 +657,36 @@ static int zend_inference_calc_binary_op_range(
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
 				if (op2_min <= 0 && op2_max >= 0) {
+					/* If op2 crosses zero, then floating point values close to zero might be
+					 * possible, which will result in arbitrarily large results. As such, we can't
+					 * do anything useful in that case. */
 					break;
 				}
 				if (op1_min == ZEND_LONG_MIN && op2_max == -1) {
 					/* Avoid ill-defined division, which may trigger SIGFPE. */
 					break;
 				}
-				t1 = op1_min / op2_min;
-				t2 = op1_min / op2_max;
-				t3 = op1_max / op2_min;
-				t4 = op1_max / op2_max;
-				// FIXME: more careful overflow checks?
+
+				zend_long t1_, t2_, t3_, t4_;
+				float_div(op1_min, op2_min, &t1, &t1_);
+				float_div(op1_min, op2_max, &t2, &t2_);
+				float_div(op1_max, op2_min, &t3, &t3_);
+				float_div(op1_max, op2_max, &t4, &t4_);
+
+				/* The only case in which division can "overflow" either a division by an absolute
+				 * value smaller than one, or LONG_MIN / -1 in particular. Both cases have already
+				 * been excluded above. */
 				if (OP1_RANGE_UNDERFLOW() ||
 					OP2_RANGE_UNDERFLOW() ||
 					OP1_RANGE_OVERFLOW()  ||
-					OP2_RANGE_OVERFLOW()  ||
-					t1 != (zend_long)((double)op1_min / (double)op2_min) ||
-					t2 != (zend_long)((double)op1_min / (double)op2_max) ||
-					t3 != (zend_long)((double)op1_max / (double)op2_min) ||
-					t4 != (zend_long)((double)op1_max / (double)op2_max)) {
+					OP2_RANGE_OVERFLOW()) {
 					tmp->underflow = 1;
 					tmp->overflow = 1;
 					tmp->min = ZEND_LONG_MIN;
 					tmp->max = ZEND_LONG_MAX;
 				} else {
-					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+					tmp->min = MIN(MIN(MIN(t1, t2), MIN(t3, t4)), MIN(MIN(t1_, t2_), MIN(t3_, t4_)));
+					tmp->max = MAX(MAX(MAX(t1, t2), MAX(t3, t4)), MAX(MAX(t1_, t2_), MAX(t3_, t4_)));
 				}
 				return 1;
 			}
@@ -843,7 +860,6 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 	uint32_t line;
 	zend_op *opline;
 	zend_ssa_op *ssa_op;
-	zend_long op1_min, op2_min, op1_max, op2_max;
 
 	if (ssa->vars[var].definition_phi) {
 		zend_ssa_phi *p = ssa->vars[var].definition_phi;
@@ -983,6 +999,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 	line = ssa->vars[var].definition;
 	opline = op_array->opcodes + line;
 	ssa_op = &ssa->ops[line];
+
+	return zend_inference_propagate_range(op_array, ssa, opline, ssa_op, var, tmp);
+}
+
+int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp)
+{
+	zend_long op1_min, op2_min, op1_max, op2_max;
 
 	tmp->underflow = 0;
 	tmp->overflow = 0;
@@ -1337,16 +1360,20 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			break;
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
-			if (ssa_op->op1_def == var) {
-				if ((opline+1)->opcode == ZEND_OP_DATA) {
-					opline++;
-					ssa_op++;
+		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_DIM_OP:
+		case ZEND_ASSIGN_OBJ_OP:
+		case ZEND_ASSIGN_STATIC_PROP_OP:
+			if ((ssa_op+1)->op1_def == var) {
+				opline++;
+				ssa_op++;
+				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
 					tmp->overflow  = OP1_RANGE_OVERFLOW();
-					return 1;
 				}
+				return 1;
 			}
 			break;
 		case ZEND_ASSIGN_OP:
@@ -1359,31 +1386,14 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				}
 			}
 			break;
-		case ZEND_ASSIGN_DIM_OP:
-		case ZEND_ASSIGN_OBJ_OP:
-		case ZEND_ASSIGN_STATIC_PROP_OP:
-			if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if ((ssa_op+1)->op1_def == var) {
-					opline++;
-					ssa_op++;
-					if (OP1_HAS_RANGE()) {
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
 		case ZEND_OP_DATA:
-			if ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-			    (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
-			    ((opline-1)->opcode == ZEND_ASSIGN_OP &&
-			     ((opline-1)->extended_value == ZEND_ADD ||
-			      (opline-1)->extended_value == ZEND_SUB ||
-			      (opline-1)->extended_value == ZEND_MUL))) {
-				if (ssa_op->op1_def == var) {
+			if (ssa_op->op1_def == var) {
+				if ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
+				    (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
+				    (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP ||
+				    (opline-1)->opcode == ZEND_ASSIGN_DIM_OP ||
+				    (opline-1)->opcode == ZEND_ASSIGN_OBJ_OP ||
+				    (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
@@ -1956,6 +1966,9 @@ uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int
 		} else {
 			tmp |= MAY_BE_ANY | MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 	    }
+		if (write) {
+			tmp |= MAY_BE_INDIRECT;
+		}
 	}
 	if (t1 & MAY_BE_ARRAY) {
 		if (insert) {
@@ -1991,6 +2004,9 @@ uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int
 	}
 	if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		tmp |= MAY_BE_NULL;
+		if (write) {
+			tmp |= MAY_BE_INDIRECT;
+		}
 	}
 	if (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
 		if (!write) {
@@ -2015,24 +2031,28 @@ static uint32_t assign_dim_result_type(
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	if (tmp & MAY_BE_ARRAY) {
-		if (value_type & MAY_BE_UNDEF) {
-			tmp |= MAY_BE_ARRAY_OF_NULL;
-		}
-		if (dim_op_type == IS_UNUSED) {
-			tmp |= MAY_BE_ARRAY_KEY_LONG;
-		} else {
-			if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
-				tmp |= MAY_BE_ARRAY_KEY_LONG;
+		/* Only add key type if we have a value type. We want to maintain the invariant that a
+		 * key type exists iff a value type exists even in dead code that may use empty types. */
+		if (value_type & (MAY_BE_ANY|MAY_BE_UNDEF)) {
+			if (value_type & MAY_BE_UNDEF) {
+				tmp |= MAY_BE_ARRAY_OF_NULL;
 			}
-			if (dim_type & MAY_BE_STRING) {
-				tmp |= MAY_BE_ARRAY_KEY_STRING;
-				if (dim_op_type != IS_CONST) {
-					// FIXME: numeric string
+			if (dim_op_type == IS_UNUSED) {
+				tmp |= MAY_BE_ARRAY_KEY_LONG;
+			} else {
+				if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
 					tmp |= MAY_BE_ARRAY_KEY_LONG;
 				}
-			}
-			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
-				tmp |= MAY_BE_ARRAY_KEY_STRING;
+				if (dim_type & MAY_BE_STRING) {
+					tmp |= MAY_BE_ARRAY_KEY_STRING;
+					if (dim_op_type != IS_CONST) {
+						// FIXME: numeric string
+						tmp |= MAY_BE_ARRAY_KEY_LONG;
+					}
+				}
+				if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+					tmp |= MAY_BE_ARRAY_KEY_STRING;
+				}
 			}
 		}
 		/* Only add value type if we have a key type. It might be that the key type is illegal
@@ -3399,18 +3419,20 @@ static zend_always_inline int _zend_update_type_info(
 				if (opline->result_type != IS_TMP_VAR) {
 					tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 				} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
+					zend_class_entry *ce = NULL;
+
+					if (opline->op1_type == IS_UNUSED) {
+						ce = op_array->scope;
+					} else if (ssa_op->op1_use >= 0 && !ssa->var_info[ssa_op->op1_use].is_instanceof) {
+						ce = ssa->var_info[ssa_op->op1_use].ce;
+					}
 					if (prop_info) {
 						/* FETCH_OBJ_R/IS for plain property increments reference counter,
 						   so it can't be 1 */
-						tmp &= ~MAY_BE_RC1;
-					} else {
-						zend_class_entry *ce = NULL;
-
-						if (opline->op1_type == IS_UNUSED) {
-							ce = op_array->scope;
-						} else if (ssa_op->op1_use >= 0 && !ssa->var_info[ssa_op->op1_use].is_instanceof) {
-							ce = ssa->var_info[ssa_op->op1_use].ce;
+						if (ce && !ce->create_object) {
+							tmp &= ~MAY_BE_RC1;
 						}
+					} else {
 						if (ce && !ce->create_object && !ce->__get) {
 							tmp &= ~MAY_BE_RC1;
 						}

@@ -104,6 +104,7 @@ typedef struct {
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
 	unsigned fetch_table_names:1;
+	unsigned local_infile:1;
 #ifndef PDO_USE_MYSQLND
 	zend_ulong max_buffer_size;
 #endif
@@ -140,8 +141,10 @@ typedef struct {
 	PDO_MYSQL_PARAM_BIND	*bound_result;
 	my_bool					*out_null;
 	zend_ulong				*out_length;
-	unsigned int			params_given;
 	unsigned				max_length:1;
+	/* Whether all result sets have been fully consumed.
+	 * If this flag is not set, they need to be consumed during destruction. */
+	unsigned				done:1;
 } pdo_mysql_stmt;
 
 extern const pdo_driver_t pdo_mysql_driver;

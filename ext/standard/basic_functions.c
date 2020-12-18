@@ -463,8 +463,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BG(strtok_last) = NULL;
 	BG(ctype_string) = NULL;
 	BG(locale_changed) = 0;
-	BG(array_walk_fci) = empty_fcall_info;
-	BG(array_walk_fci_cache) = empty_fcall_info_cache;
 	BG(user_compare_fci) = empty_fcall_info;
 	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 	BG(page_uid) = -1;
@@ -1472,7 +1470,7 @@ PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_le
 			return FAILURE;
 
 		case 3:		/*save to a file */
-			stream = php_stream_open_wrapper(opt, "a", IGNORE_URL_WIN | REPORT_ERRORS, NULL);
+			stream = php_stream_open_wrapper(opt, "a", REPORT_ERRORS, NULL);
 			if (!stream) {
 				return FAILURE;
 			}
@@ -1931,21 +1929,17 @@ PHP_FUNCTION(php_strip_whitespace)
 /* {{{ Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
 {
-	zval *expr;
+	zend_string *str;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	char *hicompiled_string_description;
 	zend_bool i = 0;
 	int old_error_reporting = EG(error_reporting);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(expr)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (!try_convert_to_string(expr)) {
-		RETURN_THROWS();
-	}
 
 	if (i) {
 		php_output_start_default();
@@ -1957,7 +1951,7 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description);
+	highlight_string(str, &syntax_highlighter_ini, hicompiled_string_description);
 	efree(hicompiled_string_description);
 
 	EG(error_reporting) = old_error_reporting;
