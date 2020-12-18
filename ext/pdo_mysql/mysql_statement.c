@@ -368,6 +368,10 @@ static const char * const pdo_param_event_names[] =
 	"PDO_PARAM_EVT_NORMALIZE",
 };
 
+#ifndef PDO_USE_MYSQLND
+static unsigned char libmysql_false_buffer = 0;
+static unsigned char libmysql_true_buffer = 1;
+#endif
 
 static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type) /* {{{ */
 {
@@ -502,6 +506,16 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						b->buffer = Z_STRVAL_P(parameter);
 						b->buffer_length = Z_STRLEN_P(parameter);
 						*b->length = Z_STRLEN_P(parameter);
+						PDO_DBG_RETURN(1);
+
+					case IS_FALSE:
+						b->buffer_type = MYSQL_TYPE_TINY;
+						b->buffer = &libmysql_false_buffer;
+						PDO_DBG_RETURN(1);
+
+					case IS_TRUE:
+						b->buffer_type = MYSQL_TYPE_TINY;
+						b->buffer = &libmysql_true_buffer;
 						PDO_DBG_RETURN(1);
 
 					case IS_LONG:
