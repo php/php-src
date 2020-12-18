@@ -131,7 +131,7 @@ if (mysqli_get_server_version($link) <= 40100) {
 [001] No data supplied for 1 parameter in prepared statement
 [002] No data supplied for 3 parameters in prepared statement
 [003] No data supplied for parameters in prepared statement
-[004] mysqli_stmt::execute(): Argument #1 must be of type array, int given
-[005] mysqli_stmt::execute(): Argument #1 must be of type array, stdClass given
+[004] mysqli_stmt::execute(): Argument #1 ($params) must be of type array, int given
+[005] mysqli_stmt::execute(): Argument #1 ($params) must be of type array, stdClass given
 [006] No data supplied for 3 parameters in prepared statement
 done!
