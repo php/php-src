@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed bug #77565 (Incorrect locator detection in ZIP-based phars). (cmb)
+  . Fixed bug #69279 (Compressed ZIP Phar extractTo() creates garbage files).
+    (cmb)
 
 07 Jan 2021, PHP 7.4.14
 
