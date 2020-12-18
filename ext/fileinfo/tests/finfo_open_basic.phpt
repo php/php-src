@@ -25,14 +25,21 @@ var_dump( new finfo() );
 ?>
 --EXPECTF--
 *** Testing finfo_open() : basic functionality ***
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-object(finfo)#%d (%d) {
+object(finfo)#%d (0) {
 }
-object(finfo)#%d (%d) {
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
 }

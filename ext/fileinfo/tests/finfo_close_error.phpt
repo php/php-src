@@ -19,4 +19,4 @@ try {
 *** Testing finfo_close() : error conditions ***
 
 -- Testing finfo_close() function with wrong resource type --
-finfo_close(): supplied resource is not a valid file_info resource
+finfo_close(): Argument #1 ($finfo) must be of type finfo, resource given

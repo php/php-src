@@ -19,6 +19,10 @@ PHP 8.1 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Fileinfo:
+  . The fileinfo functions now accept and return, respectively, finfo objects
+    instead of resources.
+
 - MySQLi:
   . mysqli_fetch_fields() and mysqli_fetch_field_direct() will now always return
     zero for max_length. You can compute this information by iterating over the

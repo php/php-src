@@ -776,7 +776,7 @@ static const func_info_t func_infos[] = {
 #endif
 
 	/* ext/fileinfo */
-	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("finfo_file",							MAY_BE_FALSE | MAY_BE_STRING),
 	F1("finfo_buffer",							MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mime_content_type",						MAY_BE_FALSE | MAY_BE_STRING),
