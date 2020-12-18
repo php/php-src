@@ -569,13 +569,14 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 				}
 			} else if (!stmt->dbh->stringify && new_type != PDO_PARAM_STR) {
 				/* they gave us a string, but LOBs are represented as streams in PDO */
-				php_stream *stm = php_stream_memory_open(TEMP_STREAM_READONLY,
-					zend_string_init(value, value_len, 0));
-				if (stm) {
-					php_stream_to_zval(stm, dest);
+				zend_string *str = zend_string_init(value, value_len, 0);
+				php_stream *stream = php_stream_memory_open(TEMP_STREAM_READONLY, str);
+				if (stream) {
+					php_stream_to_zval(stream, dest);
 				} else {
 					ZVAL_NULL(dest);
 				}
+				zend_string_release(str);
 			} else {
 				ZVAL_STRINGL(dest, value, value_len);
 			}
