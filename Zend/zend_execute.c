@@ -42,6 +42,7 @@
 #include "zend_smart_str.h"
 #include "zend_observer.h"
 #include "zend_system_id.h"
+#include "zend_attributes.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -4353,6 +4354,21 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 				*cache_slot = fbc;
 				*(uintptr_t *)(cache_slot + 1) = i;
 				return i;
+			}
+
+			if (fbc->common.attributes != NULL) {
+				zend_attribute *attribute = zend_get_parameter_attribute_str(
+					fbc->common.attributes,
+					"namedparameteralias",
+					sizeof("namedparameteralias")-1,
+					i
+				);
+
+				if (attribute && zend_string_equals(arg_name, Z_STR(attribute->args[0].value) )) {
+					*cache_slot = fbc;
+					*(uintptr_t *)(cache_slot + 1) = i;
+					return i;
+				}
 			}
 		}
 	} else {

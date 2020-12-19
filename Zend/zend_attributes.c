@@ -24,6 +24,7 @@
 #include "zend_smart_str.h"
 
 ZEND_API zend_class_entry *zend_ce_attribute;
+ZEND_API zend_class_entry *zend_ce_namedparameteralias_attribute;
 
 static HashTable internal_attributes;
 
@@ -55,6 +56,14 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 	}
 }
 
+void validate_namedparameteralias_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	if (attr->argc != 1) {
+		zend_error_noreturn(E_ERROR, "NameAlias::__construct(): Argument #1 ($alias) is required");
+		// TODO: more validation, must be string
+	}
+}
+
 ZEND_METHOD(Attribute, __construct)
 {
 	zend_long flags = ZEND_ATTRIBUTE_TARGET_ALL;
@@ -65,6 +74,17 @@ ZEND_METHOD(Attribute, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), flags);
+}
+
+ZEND_METHOD(NamedParameterAlias, __construct)
+{
+	zend_string *alias = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_STR(alias)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_STR(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), alias);
 }
 
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
@@ -289,6 +309,18 @@ void zend_register_attribute_ce(void)
 
 	attr = zend_internal_attribute_register(zend_ce_attribute, ZEND_ATTRIBUTE_TARGET_CLASS);
 	attr->validator = validate_attribute;
+
+	INIT_CLASS_ENTRY(ce, "NamedParameterAlias", class_NamedParameterAlias_methods);
+	zend_ce_namedparameteralias_attribute = zend_register_internal_class(&ce);
+	zend_ce_namedparameteralias_attribute->ce_flags |= ZEND_ACC_FINAL;
+
+	ZVAL_UNDEF(&tmp);
+	str = zend_string_init(ZEND_STRL("alias"), 1);
+	zend_declare_typed_property(zend_ce_attribute, str, &tmp, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CODE(IS_STRING, 0, 0));
+	zend_string_release(str);
+
+	attr = zend_internal_attribute_register(zend_ce_namedparameteralias_attribute, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	attr->validator = validate_namedparameteralias_attribute;
 }
 
 void zend_attributes_shutdown(void)
