@@ -232,7 +232,7 @@ class DateTime implements DateTimeInterface
     public function setTimestamp(int $timestamp) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias date_timestamp_get
      */
     public function getTimestamp() {}
@@ -285,7 +285,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function getOffset() {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias date_timestamp_get
      */
     public function getTimestamp() {}
