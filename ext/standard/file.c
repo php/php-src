@@ -831,10 +831,6 @@ PHP_FUNCTION(tempnam)
 		Z_PARAM_PATH(prefix, prefix_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(dir)) {
-		RETURN_FALSE;
-	}
-
 	p = php_basename(prefix, prefix_len, NULL, 0);
 	if (ZSTR_LEN(p) > 64) {
 		ZSTR_VAL(p)[63] = '\0';
@@ -842,7 +838,7 @@ PHP_FUNCTION(tempnam)
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, 1)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ALWAYS)) >= 0) {
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
