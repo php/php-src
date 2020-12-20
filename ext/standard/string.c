@@ -4788,7 +4788,7 @@ PHPAPI zend_string* php_strip_tags(zend_string *rbuf, const char *allow, size_t 
 	(state == 1 && in_q>1 && allow && c == CHAR) 
 
 
-#define _PHP_S_TAGS_EXTEND_BUFF(LEN)	\
+#define _PHP_STRIP_TAGS_EXTEND_BUFF(LEN)	\
 	pos = tp - ZSTR_VAL(tbuf); \
 	if ((pos+LEN) >= ZSTR_LEN(tbuf)) { \
 		tbuf_max_size+=PHP_TAG_BUF_SIZE;	\
