@@ -308,6 +308,10 @@ def_tmp:
 		}
 	}
 
+	if ((flags & PHP_TMP_FILE_OPEN_BASEDIR_CHECK) && php_check_open_basedir(dir)) {
+		return -1;
+	}
+
 	/* Try the directory given as parameter. */
 	fd = php_do_open_temporary_file(dir, pfx, opened_path_p);
 	if (fd == -1) {
