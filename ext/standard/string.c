@@ -4781,30 +4781,22 @@ PHPAPI zend_string* php_strip_tags(zend_string *rbuf, const char *allow, size_t 
 }
 /* }}} */
 
+#define  _PHP_STRIP_TAGS_SIZE_TRIANGULAR_BRACKETS 4
+
 //in tag && in quote ...
 #define _PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR(CHAR) \
 	(state == 1 && in_q>1 && allow && c == CHAR) 
 
- //resize for the encode char &gt; or &lt;
-#define _PHP_STRIP_TAGS_ENCODE_CHAR(ENCODE_CHAR,LEN_CHAR)  \
-	if (( (tp+LEN_CHAR) - tbuf) >= tbuf_max_size) { \
-		pos = tp - tbuf; \
-		tbuf_max_size+=LEN_CHAR;	\
-		tbuf = erealloc(tbuf, pos + LEN_CHAR+1 ); \
-		tp = tbuf + pos; \
-	} \
-	\
-	memcpy(tp, ENCODE_CHAR, LEN_CHAR); \
-	tp+=LEN_CHAR;	
 
-//increase size tbuf if need more performace with tbuf_max_size approach
-#define _PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED() \
-	if (tp - tbuf >= tbuf_max_size) { \
+#define _PHP_S_TAGS_EXTEND_BUFF(LEN)	\
+	pos = tp - ZSTR_VAL(tbuf); \
+	if ((pos+LEN) >= ZSTR_LEN(tbuf)) { \
 		tbuf_max_size+=PHP_TAG_BUF_SIZE;	\
-		pos = tp - tbuf;	\
-		tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);	\
-		tp = tbuf + pos;	\
-	}
+		tbuf = zend_string_extend(tbuf,tbuf_max_size,0);	\
+		tp = ZSTR_VAL(tbuf); 	\
+		tp+=pos;	\
+	} 
+
 
 /* {{{ php_strip_tags
 
@@ -4828,25 +4820,24 @@ PHPAPI zend_string* php_strip_tags(zend_string *rbuf, const char *allow, size_t 
 */
 PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_input, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
-	char *tbuf, *tp, *rp, c, lc, *r_stripped_buffer;
+	char *rp, c, lc;
 	const char *buf, *p, *end;
 	int br, depth=0, in_q = 0;
 	uint8_t state = 0;
 	size_t pos;
 	char *allow_free = NULL;
 	char is_xml = 0;
-	const int len_lt = 4; 
-	const int len_gt = 4; 
 	size_t len = ZSTR_LEN(zend_string_input);
 	int tbuf_max_size = PHP_TAG_BUF_SIZE;
-
+	char *tp;
+	zend_string *tbuf, *ret_stripped_buffer;
 
 	buf = estrndup(ZSTR_VAL(zend_string_input), len);
 	p = buf;
 	end = buf + len;
 
-	r_stripped_buffer = estrndup(ZSTR_VAL(zend_string_input), len);
-	rp = r_stripped_buffer;
+	ret_stripped_buffer = zend_string_dup(zend_string_input,0);
+	rp = ZSTR_VAL(ret_stripped_buffer);
 
 	lc = '\0';
 	br = 0;
@@ -4854,10 +4845,11 @@ PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_input, const char
 	if (allow) {
 		allow_free = zend_str_tolower_dup_ex(allow, allow_len);
 		allow = allow_free ? allow_free : allow;
-		tbuf = emalloc(PHP_TAG_BUF_SIZE + 1);
-		tp = tbuf;
+		tbuf = zend_string_alloc(PHP_TAG_BUF_SIZE+1,0);
+		tp = ZSTR_VAL(tbuf);
 	} else {
-		tbuf = tp = NULL;
+		tbuf = NULL;  
+		tp = NULL;
 	}
 
 state_0:
@@ -4880,7 +4872,7 @@ state_0:
 			lc = '<';
 			state = 1;
 			if (allow) {
-				_PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED() 
+				_PHP_STRIP_TAGS_EXTEND_BUFF(0)
 				*(tp++) = '<';
 			}
 			p++;
@@ -4914,7 +4906,9 @@ state_1:
 			break;
 		case '<':
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('<')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&lt;",len_lt)
+				_PHP_STRIP_TAGS_EXTEND_BUFF(_PHP_STRIP_TAGS_SIZE_TRIANGULAR_BRACKETS)
+				memcpy(tp, "&lt;", _PHP_STRIP_TAGS_SIZE_TRIANGULAR_BRACKETS); 
+				tp+=4;
 				break;
 			}
 
@@ -4933,7 +4927,9 @@ state_1:
 			}
 
 			if (_PHP_STRIP_TAGS_WE_ARE_IN_QUOTE_WITH_ALLOW_CHAR('>')) {
-				_PHP_STRIP_TAGS_ENCODE_CHAR("&gt;",len_gt)
+				_PHP_STRIP_TAGS_EXTEND_BUFF(_PHP_STRIP_TAGS_SIZE_TRIANGULAR_BRACKETS)
+				memcpy(tp, "&gt;", _PHP_STRIP_TAGS_SIZE_TRIANGULAR_BRACKETS); 
+				tp+=4;
 				break;
 			}
 
@@ -4947,14 +4943,24 @@ state_1:
 			}
 			in_q = state = is_xml = 0;
 			if (allow) {
-				_PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED() 
+				_PHP_STRIP_TAGS_EXTEND_BUFF(0)
+				
 				*(tp++) = '>';
 				*tp='\0';
-				if (php_tag_find(tbuf, tp-tbuf, allow)) {
-					memcpy(rp, tbuf, tp-tbuf);
-					rp += tp-tbuf;
+				size_t tpos =  tp-ZSTR_VAL(tbuf);
+				size_t rpos =  rp-ZSTR_VAL(ret_stripped_buffer);
+				if (php_tag_find(ZSTR_VAL(tbuf), tpos, allow)) {
+					
+					if ((rpos+tpos) >= ZSTR_LEN(ret_stripped_buffer)) { 
+						ret_stripped_buffer = zend_string_extend(ret_stripped_buffer,rpos+tpos+10,0);
+					} 
+					rp = ZSTR_VAL(ret_stripped_buffer);
+					rp+=rpos;
+
+					memcpy(rp, ZSTR_VAL(tbuf), tpos);
+					rp+= tpos;
 				}
-				tp = tbuf;
+				tp = ZSTR_VAL(tbuf);
 			}
 			p++;
 			goto state_0;
@@ -4992,7 +4998,7 @@ state_1:
 		default:
 reg_char_1:
 			if (allow) {
-				_PHP_STRIP_TAGS_INCREASE_TBUFF_IF_NEED()
+				_PHP_STRIP_TAGS_EXTEND_BUFF(0)
 				*(tp++) = c;
 			}
 			break;
@@ -5030,7 +5036,7 @@ state_2:
 
 			if (!br && p >= buf + 1 && lc != '\"' && *(p-1) == '?') {
 				in_q = state = 0;
-				tp = tbuf;
+				tp = ZSTR_VAL(tbuf);
 				p++;
 				goto state_0;
 			}
@@ -5089,7 +5095,7 @@ state_3:
 				break;
 			}
 			in_q = state = 0;
-			tp = tbuf;
+			tp = ZSTR_VAL(tbuf);
 			p++;
 			goto state_0;
 		case '"':
@@ -5136,7 +5142,7 @@ state_4:
 		if (c == '>' && !in_q) {
 			if (p >= buf + 2 && *(p-1) == '-' && *(p-2) == '-') {
 				in_q = state = 0;
-				tp = tbuf;
+				tp = ZSTR_VAL(tbuf);
 				p++;
 				goto state_0;
 			}
@@ -5145,18 +5151,18 @@ state_4:
 	}
 
 finish:
-	if (rp < r_stripped_buffer + len) {
+	if (rp < ZSTR_VAL(ret_stripped_buffer) + len) {
 		*rp = '\0';
 	}
 	efree((void *)buf);
 	if (tbuf) {
-		efree(tbuf);
+		zend_string_release(tbuf);
 	}
 	if (allow_free) {
 		efree(allow_free);
 	}
 
-	size_t lenrbuf = rp-r_stripped_buffer; 
+	size_t lenrbuf = rp-ZSTR_VAL(ret_stripped_buffer); 
 	zend_string *new_string;
 
 	if (lenrbuf == 0 ) {
@@ -5164,10 +5170,10 @@ finish:
 	}
 	
 	if (lenrbuf > 0 ) {
-		new_string =  zend_string_init(r_stripped_buffer,lenrbuf,0);
+		new_string =  zend_string_init(ZSTR_VAL(ret_stripped_buffer),lenrbuf,0);
 	}
 
-	efree(r_stripped_buffer);
+	zend_string_release(ret_stripped_buffer);
 	
 	return new_string;
 }
