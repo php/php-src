@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #80523 (bogus parse error on >4GB source code). (Nikita)
 
+- Date:
+  . Fixed bug #80376 (last day of the month causes runway cpu usage. (Derick)
+
 - MySQLi:
   . Fixed bug #67983 (mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to
     interpret bit columns). (Nikita)
