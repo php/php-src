@@ -45,6 +45,9 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #80425 (MessageFormatAdapter::getArgTypeList redefined). (Nikita)
 
+- OCI8
+  . Create Windows DLLs for Oracle Client 19c. (cmb)
+
 - Opcache:
   . Fixed bug #80404 (Incorrect range inference result when division results
     in float). (Nikita)
