@@ -852,8 +852,8 @@ void timelib_error_container_dtor(timelib_error_container *errors);
  * *error is not a NULL pointer, it will be set to 1.
  *
  * timelib_long is a 32 bit signed long integer on 32 bit platforms, and a 64
- * bit signed long long integer on 64 bit platforms. In other words, it makes
- * sure that the value in 'sse' (which is always a signed long long 64 bit
+ * bit signed long integer on 64 bit platforms. In other words, it makes
+ * sure that the value in 'sse' (which is always a signed long 64 bit
  * integer) can be used safely outside of the library.
  */
 timelib_long timelib_date_to_int(timelib_time *d, int *error);
