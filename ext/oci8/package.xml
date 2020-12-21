@@ -8,7 +8,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <summary>Extension for Oracle Database</summary>
 
  <description>
-The OCI8 extension let you access Oracle Database.
+The OCI8 extension lets you access Oracle Database.
 
 Use 'pecl install oci8' to install for PHP 8.
 
