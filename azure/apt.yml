@@ -48,5 +48,7 @@ steps:
                        dovecot-pop3d \
                        dovecot-imapd \
                        sendmail \
+                       freetds-dev \
+                       firebird-dev \
                        ${{ parameters.packages }}
     displayName: 'APT'
