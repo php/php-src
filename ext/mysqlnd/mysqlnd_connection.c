@@ -774,8 +774,10 @@ err:
 
 	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
 	if (!conn->error_info->error_no) {
-		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, conn->error_info->error);
-		php_error_docref(NULL, E_WARNING, "[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
+		char * msg;
+		mnd_sprintf(&msg, 0, "%s (trying to connect via %s)",conn->error_info->error, conn->scheme.s);
+		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
+		mnd_sprintf_free(msg);
 	}
 
 	conn->m->free_contents(conn);
@@ -2100,9 +2102,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 				}
 				ret = conn->m->query(conn, query, query_len);
 				mnd_sprintf_free(query);
-				if (ret && mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY) &&
-					mysqlnd_stmt_errno(conn) == 1064) {
-					php_error_docref(NULL, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
+				if (ret && mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY) && mysqlnd_stmt_errno(conn) == 1064) {
+					SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+						"This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
 					break;
 				}
 			}

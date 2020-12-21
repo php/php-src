@@ -81,8 +81,10 @@ mysqlnd_run_authentication(
 				mnd_pefree(requested_protocol, FALSE);
 				requested_protocol = mnd_pestrdup(MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
 			} else {
-				php_error_docref(NULL, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method unknown to the client");
+				char * msg;
+				mnd_sprintf(&msg, 0, "The server requested authentication method unknown to the client [%s]", requested_protocol);
+				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+				mnd_sprintf_free(msg);
 				goto end;
 			}
 		}
@@ -1270,8 +1272,12 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 		case 2:
 			// The server tried to send a key, which we didn't expect
 			// fall-through
-		default:
-			php_error_docref(NULL, E_WARNING, "Unexpected server response while doing caching_sha2 auth: %i", result_packet.response_code);
+		default: {
+			char * msg;
+			mnd_sprintf(&msg, 0, "Unexpected server response while doing caching_sha2 auth: %i", result_packet.response_code);
+			SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+			mnd_sprintf_free(msg);
+		}
 	}
 
 	DBG_RETURN(PASS);

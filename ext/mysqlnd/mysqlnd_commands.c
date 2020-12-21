@@ -632,11 +632,11 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 		SET_CLIENT_ERROR(conn->error_info, greet_packet.error_no, greet_packet.sqlstate, greet_packet.error);
 		goto err;
 	} else if (greet_packet.pre41) {
-		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet.server_version);
-		php_error_docref(NULL, E_WARNING, "Connecting to 3.22, 3.23 & 4.0 "
-						" is not supported. Server is %-.32s", greet_packet.server_version);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
-						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
+		char * msg;
+		mnd_sprintf(&msg, 0, "Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet.server_version);
+		DBG_ERR(msg);
+		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+		mnd_sprintf_free(msg);
 		goto err;
 	}
 
@@ -646,10 +646,10 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 
 	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
 	if (!conn->greet_charset) {
-		php_error_docref(NULL, E_WARNING,
-			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet.charset_no);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
-			"Server sent charset unknown to the client. Please, report to the developers");
+		char * msg;
+		mnd_sprintf(&msg, 0, "Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet.charset_no);
+		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+		mnd_sprintf_free(msg);
 		goto err;
 	}
 
