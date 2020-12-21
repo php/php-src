@@ -53,12 +53,12 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <active>no</active>
  </lead>
 
- <date>2020-11-26</date>
+ <date>2020-12-21</date>
  <time>12:00:00</time>
 
   <version>
-   <release>3.0.0</release>
-   <api>3.0.0</api>
+   <release>3.0.1</release>
+   <api>3.0.1</api>
   </version>
   <stability>
    <release>stable</release>
@@ -68,15 +68,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <notes>
     This version is for PHP 8 only.
 
-    Deprecated old OCI8 function aliases. (Jens de Nies)
-
-    Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
-
-    The OCI-Lob class is now called OCILob for standards compliance.
-
-    The OCI-Collection class is now called OCICollection for standards compliance.
-
-    Generate arginfo from function stubs. (Jens de Nies)
+    Updated Windows build environment to build with newer Oracle Client libraries. (cmb)
   </notes>
  <contents>
   <dir name="/">
@@ -451,7 +443,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
  <dependencies>
   <required>
    <php>
-    <min>7.0.0</min>
+    <min>8.0.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -481,6 +473,31 @@ Added oci_set_db_operation() for the Oracle Database 'DBOP' end-to-end-tracing a
 Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
 Fixed installation on PHP 7.3.
 Internal change: Convert some parameter parsing to the Fast Parameter Parsing API.
+  </notes>
+</release>
+
+<release>
+  <version>
+   <release>3.0.0</release>
+   <api>3.0.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8 only.
+
+    Deprecated old OCI8 function aliases. (Jens de Nies)
+
+    Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
+
+    The OCI-Lob class is now called OCILob for standards compliance.
+
+    The OCI-Collection class is now called OCICollection for standards compliance.
+
+    Generate arginfo from function stubs. (Jens de Nies)
   </notes>
 </release>
 
