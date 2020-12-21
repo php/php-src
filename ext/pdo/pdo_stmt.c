@@ -616,6 +616,13 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 
 	if (stmt->dbh->stringify) {
 		switch (Z_TYPE_P(dest)) {
+			case IS_FALSE:
+				/* Return "0" rather than "", because this is what database drivers that
+				 * don't have a dedicated boolean type would return. */
+				zval_ptr_dtor_nogc(dest);
+				ZVAL_INTERNED_STR(dest, ZSTR_CHAR('0'));
+				break;
+			case IS_TRUE:
 			case IS_LONG:
 			case IS_DOUBLE:
 				convert_to_string(dest);

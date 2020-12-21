@@ -13,6 +13,7 @@ require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 $errors = array();
 
 $value = true;

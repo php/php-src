@@ -35,6 +35,10 @@ PHP 8.1 UPGRADE NOTES
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
     should not result in user-visible behavior changes.
 
+- PDO:
+  . PDO::ATTR_STRINGIFY_FETCHES now also stringifies values of type bool to
+    "0" or "1". Previously booleans were not stringified.
+
 - PDO MySQL:
   . Integers and floats in result sets will now be returned using native PHP
     types instead of strings when using emulated prepared statements. This
