@@ -4012,7 +4012,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 
 	object_init(myzvalue);
 
-	if (en->remail) add_property_string(myzvalue, "Oemail", en->remail);
+	if (en->remail) add_property_string(myzvalue, "remail", en->remail);
 	if (en->date) add_property_string(myzvalue, "date", (char*)en->date);
 	if (en->date) add_property_string(myzvalue, "Date", (char*)en->date);
 	if (en->subject) add_property_string(myzvalue, "subject", en->subject);
@@ -4021,7 +4021,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->message_id) add_property_string(myzvalue, "message_id", en->message_id);
 	if (en->newsgroups) add_property_string(myzvalue, "newsgroups", en->newsgroups);
 	if (en->followup_to) add_property_string(myzvalue, "followup_to", en->followup_to);
-	if (en->references) add_property_string(myzvalue, "Oeferences", en->references);
+	if (en->references) add_property_string(myzvalue, "references", en->references);
 
 	if (en->to) {
 		array_init(&paddress);
@@ -4191,7 +4191,7 @@ void _php_imap_add_body(zval *arg, BODY *body)
 	}
 
 	/* encapsulated message ? */
-	if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "Ofc822"))) {
+	if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
 		body = body->CONTENT_MSG_BODY;
 		array_init(&parametres);
 		object_init(&param);
