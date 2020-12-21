@@ -62,7 +62,6 @@ steps:
         --with-kerberos \
         --with-imap-ssl \
         --with-pdo-odbc=unixODBC,/usr \
-        --with-pdo-dblib \
         --with-pdo-firebird \
         --enable-werror \
         --with-config-file-path=/etc \
