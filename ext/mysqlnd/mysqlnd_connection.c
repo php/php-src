@@ -2102,9 +2102,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 				}
 				ret = conn->m->query(conn, query, query_len);
 				mnd_sprintf_free(query);
-				if (ret && mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY) &&
-					mysqlnd_stmt_errno(conn) == 1064) {
-					php_error_docref(NULL, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
+				if (ret && mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY) && mysqlnd_stmt_errno(conn) == 1064) {
+					SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, 
+						"This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
 					break;
 				}
 			}
