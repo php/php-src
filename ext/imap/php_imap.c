@@ -474,7 +474,7 @@ PHP_MINIT_FUNCTION(imap)
 #endif
 
 
-	INIT_CLASS_ENTRY(ce, "IMAPConnection", NULL);
+	INIT_CLASS_ENTRY(ce, "IMAPConnection", class_IMAPConnection_methods);
 	php_imap_ce = zend_register_internal_class(&ce);
 	php_imap_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	php_imap_ce->create_object = imap_object_create;

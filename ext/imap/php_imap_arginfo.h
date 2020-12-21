@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 43edfa8b365d3344648ae787dff37923a42a20ca */
+ * Stub hash: 1dbf85a4f8740bf02df35a4e184a67af6cf93e91 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAPConnection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -508,5 +508,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imap_getacl, arginfo_imap_getacl)
 #endif
 	ZEND_FE(imap_mail, arginfo_imap_mail)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_IMAPConnection_methods[] = {
 	ZEND_FE_END
 };
