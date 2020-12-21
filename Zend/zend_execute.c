@@ -763,6 +763,17 @@ static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg
 }
 
 #if ZEND_DEBUG
+static bool can_convert_to_string(zval *zv) {
+	/* We don't call cast_object here, because this check must be side-effect free. As this
+	 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
+	 * more than actually allowed here. */
+	if (Z_TYPE_P(zv) == IS_OBJECT) {
+		return Z_OBJ_HT_P(zv)->cast_object != zend_std_cast_object_tostring
+			|| Z_OBJCE_P(zv)->__tostring;
+	}
+	return Z_TYPE_P(zv) <= IS_STRING;
+}
+
 /* Used to sanity-check internal arginfo types without performing any actual type conversions. */
 static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, zval *arg)
 {
@@ -776,10 +787,7 @@ static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_m
 	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval)) {
 		return 1;
 	}
-	/* We don't call cast_object here, because this check must be side-effect free. As this
-	 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
-	 * more than actually allowed here. */
-	if ((type_mask & MAY_BE_STRING) && (Z_TYPE_P(arg) < IS_STRING || Z_TYPE_P(arg) == IS_OBJECT)) {
+	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval)) {

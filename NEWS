@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #80523 (bogus parse error on >4GB source code). (Nikita)
 
+- DOM:
+  . Fixed bug #80537 (Wrong parameter type in DOMElement::removeAttributeNode
+    stub). (Nikita)
+
 - MySQLi:
   . Fixed bug #67983 (mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to
     interpret bit columns). (Nikita)
