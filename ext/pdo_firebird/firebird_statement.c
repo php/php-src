@@ -368,6 +368,8 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					break;
 				case SQL_INT64:
 					n = *(ISC_INT64*)var->sqldata;
+					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 
 			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
