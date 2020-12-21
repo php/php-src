@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 128108b08807ce0b125fc7b963bf3c5b77e6987a */
+ * Stub hash: 3cf19e361d130ab881091f38e1c354d81f17d967 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -197,7 +197,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMElement_removeAttributeNS arginfo_class_DOMElement_getAttributeNS
 
-#define arginfo_class_DOMElement_removeAttributeNode arginfo_class_DOMElement_getAttribute
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_removeAttributeNode, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, attr, DOMAttr, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setAttribute, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
@@ -210,11 +212,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setAttributeNS, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setAttributeNode, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, attr, DOMAttr, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DOMElement_setAttributeNode arginfo_class_DOMElement_removeAttributeNode
 
-#define arginfo_class_DOMElement_setAttributeNodeNS arginfo_class_DOMElement_setAttributeNode
+#define arginfo_class_DOMElement_setAttributeNodeNS arginfo_class_DOMElement_removeAttributeNode
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setIdAttribute, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)

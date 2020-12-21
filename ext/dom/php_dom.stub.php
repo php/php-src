@@ -205,7 +205,7 @@ class DOMElement implements DOMParentNode, DOMChildNode
     public function removeAttributeNS(?string $namespace, string $localName) {}
 
     /** @return DOMAttr|false */
-    public function removeAttributeNode(string $qualifiedName) {}
+    public function removeAttributeNode(DOMAttr $attr) {}
 
     /** @return DOMAttr|bool */
     public function setAttribute(string $qualifiedName, string $value) {}
