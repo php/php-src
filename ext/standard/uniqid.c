@@ -77,7 +77,7 @@ PHP_FUNCTION(uniqid)
 		if (php_random_bytes_silent(&bytes, sizeof(uint32_t)) == FAILURE) {
 			seed = php_combined_lcg() * 10;
 		} else {
-			seed = (10.0 / ((double) UINT32_MAX / bytes));
+			seed = ((double) bytes / UINT32_MAX) * 10.0;
 		}
 		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, seed);
 	} else {
