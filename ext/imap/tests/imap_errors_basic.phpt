@@ -26,6 +26,4 @@ List any errors
 array(%d) {
   [0]=>
   string(%d) "%s"
-  [1]=>
-  string(%d) "%s"
 }
