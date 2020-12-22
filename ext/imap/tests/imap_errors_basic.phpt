@@ -15,10 +15,10 @@ echo "List any errors\n";
 var_dump(imap_errors());
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing imap_errors() : anonymous user not supported ***
 List any errors
 array(1) {
   [0]=>
-  string(45) "[ALERT] Unsupported authentication mechanism."
+  string(%d) "%s"
 }
