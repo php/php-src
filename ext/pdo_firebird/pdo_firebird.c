@@ -60,6 +60,11 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 
 	php_pdo_register_driver(&pdo_firebird_driver);
 
+#ifdef ZEND_SIGNALS
+	/* firebird replaces some signals at runtime, suppress warnings. */
+	SIGG(check) = 0;
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
