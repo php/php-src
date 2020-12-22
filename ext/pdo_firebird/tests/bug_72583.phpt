@@ -6,8 +6,7 @@ PDO_Firebird: Feature 72583 Fetch integers as php integers not as strings
 <?php
 require 'testdb.inc';
 
-@$dbh->exec('drop table atable');
-$dbh->exec('create table atable (aint integer, asmi smallint)');
+$dbh->exec('recreate table atable (aint integer, asmi smallint)');
 $dbh->exec('insert into atable values (1, -1)');
 $S = $dbh->prepare('select aint, asmi from atable');
 $S->execute();
