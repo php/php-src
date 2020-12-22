@@ -15,7 +15,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
-$db->exec('CREATE TABLE test(id INT NULL)');
+$db->exec('CREATE TABLE test(id INT)');
 
 $stmt = $db->prepare('INSERT INTO test VALUES(:value)');
 
