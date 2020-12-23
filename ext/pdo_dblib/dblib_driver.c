@@ -142,14 +142,14 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 	return DBCOUNT(H->link);
 }
 
-static bool dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
+static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	zend_bool use_national_character_set = 0;
-
 	size_t i;
-	char * q;
-	*quotedlen = 0;
+	char *q;
+	size_t quotedlen = 0;
+	zend_string *quoted_str;
 
 	if (H->assume_national_character_set_strings) {
 		use_national_character_set = 1;
@@ -162,34 +162,34 @@ static bool dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unq
 	}
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
-	for (i = 0; i < unquotedlen; i++) {
-		if (unquoted[i] == '\'') ++*quotedlen;
-		++*quotedlen;
+	for (i = 0; i < ZSTR_LEN(unquoted); i++) {
+		if (ZSTR_VAL(unquoted)[i] == '\'') ++quotedlen;
+		++quotedlen;
 	}
 
-	*quotedlen += 2; /* +2 for opening, closing quotes */
+	quotedlen += 2; /* +2 for opening, closing quotes */
 	if (use_national_character_set) {
-		++*quotedlen; /* N prefix */
+		++quotedlen; /* N prefix */
 	}
-	q = *quoted = emalloc(*quotedlen + 1); /* Add byte for terminal null */
+	quoted_str = zend_string_alloc(quotedlen, 0);
+	q = ZSTR_VAL(quoted_str);
 	if (use_national_character_set) {
 		*q++ = 'N';
 	}
 	*q++ = '\'';
 
-	for (i = 0; i < unquotedlen; i++) {
-		if (unquoted[i] == '\'') {
+	for (i = 0; i < ZSTR_LEN(unquoted); i++) {
+		if (ZSTR_VAL(unquoted)[i] == '\'') {
 			*q++ = '\'';
 			*q++ = '\'';
 		} else {
-			*q++ = unquoted[i];
+			*q++ = ZSTR_VAL(unquoted)[i];
 		}
 	}
 	*q++ = '\'';
+	*q = '\0';
 
-	*q = 0;
-
-	return true;
+	return quoted_str;
 }
 
 static bool pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)

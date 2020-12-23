@@ -235,21 +235,18 @@ safe:
 					php_stream_from_zval_no_verify(stm, parameter);
 					if (stm) {
 						zend_string *buf;
+						zend_string *quoted_buf;
 
 						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
 						if (!buf) {
 							buf = ZSTR_EMPTY_ALLOC();
 						}
-						if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf), ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
-								param->param_type)) {
-							/* bork */
-							ret = -1;
-							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
-							if (buf) {
-								zend_string_release_ex(buf, 0);
-							}
-							goto clean_up;
-						}
+
+						quoted_buf = stmt->dbh->methods->quoter(stmt->dbh, buf, param->param_type);
+						plc->quoted = estrndup(ZSTR_VAL(quoted_buf), ZSTR_LEN(quoted_buf));
+						plc->qlen = ZSTR_LEN(quoted_buf);
+						zend_string_release_ex(quoted_buf, 0);
+
 						if (buf) {
 							zend_string_release_ex(buf, 0);
 						}
@@ -289,21 +286,29 @@ safe:
 							plc->freeq = 0;
 							break;
 
-						default:
+						default: {
+							zend_string *quoted_buf;
+
+							/* TODO Should this be zval_try_get_string_func() ? */
 							buf = zval_get_string(parameter);
-							if (EG(exception) ||
-								!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
-									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
-									param_type)) {
+							/* TODO Check when this can occur? */
+							if (EG(exception)) {
 								/* bork */
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
+								/* TODO Is this dead code now? */
 								if (buf) {
 									zend_string_release_ex(buf, 0);
 								}
 								goto clean_up;
 							}
+
+							quoted_buf = stmt->dbh->methods->quoter(stmt->dbh, buf, param_type);
+							plc->quoted = estrndup(ZSTR_VAL(quoted_buf), ZSTR_LEN(quoted_buf));
+							plc->qlen = ZSTR_LEN(quoted_buf);
 							plc->freeq = 1;
+							zend_string_release_ex(quoted_buf, 0);
+						}
 					}
 
 					if (buf) {

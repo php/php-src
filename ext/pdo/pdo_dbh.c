@@ -1119,18 +1119,17 @@ PHP_METHOD(PDO, query)
 }
 /* }}} */
 
-/* {{{ quotes string for use in a query. The optional paramtype acts as a hint for drivers that have alternate quoting styles. The default value is PDO_PARAM_STR */
+/* {{{ quotes string for use in a query.
+ * The optional paramtype acts as a hint for drivers that have alternate quoting styles.
+ * The default value is PDO_PARAM_STR */
 PHP_METHOD(PDO, quote)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
-	char *str;
-	size_t str_len;
+	zend_string *str;
 	zend_long paramtype = PDO_PARAM_STR;
-	char *qstr;
-	size_t qlen;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(paramtype)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1143,13 +1142,7 @@ PHP_METHOD(PDO, quote)
 		RETURN_FALSE;
 	}
 
-	if (dbh->methods->quoter(dbh, str, str_len, &qstr, &qlen, paramtype)) {
-		RETVAL_STRINGL(qstr, qlen);
-		efree(qstr);
-		return;
-	}
-	PDO_HANDLE_DBH_ERR();
-	RETURN_FALSE;
+	RETURN_STR(dbh->methods->quoter(dbh, str, paramtype));
 }
 /* }}} */
 

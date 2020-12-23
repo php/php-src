@@ -317,33 +317,39 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 	return ret;
 }
 
-static bool pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
+static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	unsigned char *escaped;
+	char *quoted;
+	size_t quotedlen;
+	zend_string *quoted_str;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	size_t tmp_len;
 
 	switch (paramtype) {
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
-			escaped = PQescapeByteaConn(H->server, (unsigned char *)unquoted, unquotedlen, &tmp_len);
-			*quotedlen = tmp_len + 1;
-			*quoted = emalloc(*quotedlen + 1);
-			memcpy((*quoted)+1, escaped, *quotedlen-2);
-			(*quoted)[0] = '\'';
-			(*quoted)[*quotedlen-1] = '\'';
-			(*quoted)[*quotedlen] = '\0';
+			escaped = PQescapeByteaConn(H->server, (unsigned char *)ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &tmp_len);
+			quotedlen = tmp_len + 1;
+			quoted = emalloc(quotedlen + 1);
+			memcpy(quoted+1, escaped, quotedlen-2);
+			quoted[0] = '\'';
+			quoted[quotedlen-1] = '\'';
+			quoted[quotedlen] = '\0';
 			PQfreemem(escaped);
 			break;
 		default:
-			*quoted = safe_emalloc(2, unquotedlen, 3);
-			(*quoted)[0] = '\'';
-			*quotedlen = PQescapeStringConn(H->server, *quoted + 1, unquoted, unquotedlen, NULL);
-			(*quoted)[*quotedlen + 1] = '\'';
-			(*quoted)[*quotedlen + 2] = '\0';
-			*quotedlen += 2;
+			quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
+			quoted[0] = '\'';
+			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), NULL);
+			quoted[quotedlen + 1] = '\'';
+			quoted[quotedlen + 2] = '\0';
+			quotedlen += 2;
 	}
-	return true;
+
+	quoted_str = zend_string_init(quoted, quotedlen, 0);
+	efree(quoted);
+	return quoted_str;
 }
 
 static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
