@@ -170,6 +170,11 @@ static zend_object* imap_object_create(zend_class_entry* ce) {
 	return zobj;
 }
 
+static zend_function *imap_object_get_constructor(zend_object *zobj) {
+	zend_throw_error(NULL, "Cannot directly construct IMAPConnection, use imap_open() instead");
+	return NULL;
+}
+
 static void imap_object_destroy(zend_object *zobj) {
 	php_imap_object *obj = imap_object_from_zend_object(zobj);
 
@@ -483,6 +488,7 @@ PHP_MINIT_FUNCTION(imap)
 
 	memcpy(&imap_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	imap_object_handlers.offset = XtOffsetOf(php_imap_object, std);
+	imap_object_handlers.get_constructor = imap_object_get_constructor;
 	imap_object_handlers.dtor_obj = imap_object_destroy;
 	imap_object_handlers.clone_obj = NULL;
 
