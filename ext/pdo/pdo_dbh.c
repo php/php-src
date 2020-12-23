@@ -600,8 +600,7 @@ PHP_METHOD(PDO, beginTransaction)
 	}
 
 	if (!dbh->methods->begin) {
-		/* TODO: this should be an exception; see the auto-commit mode
-		 * comments below */
+		/* Throw an exception when the driver does not support transactions */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "This driver doesn't support transactions");
 		RETURN_THROWS();
 	}
@@ -904,6 +903,8 @@ PHP_METHOD(PDO, getAttribute)
 			RETURN_FALSE;
 
 		default:
+			/* No error state, just return as the return_value has been assigned
+			 * by the get_attribute handler */
 			return;
 	}
 }
