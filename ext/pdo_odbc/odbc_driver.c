@@ -334,18 +334,18 @@ static bool odbc_handle_rollback(pdo_dbh_t *dbh)
 	return true;
 }
 
-static int odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	switch (attr) {
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
 			H->assume_utf8 = zval_is_true(val);
-			return 1;
+			return true;
 		default:
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
 			H->einfo.what = "setAttribute";
 			strcpy(H->einfo.last_state, "IM001");
-			return 0;
+			return false;
 	}
 }
 

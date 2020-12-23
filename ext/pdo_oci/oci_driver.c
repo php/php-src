@@ -426,7 +426,7 @@ static bool oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	zend_long lval = zval_get_long(val);
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
@@ -440,25 +440,25 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 
 				if (H->last_err) {
 					H->last_err = oci_drv_error("OCITransCommit");
-					return 0;
+					return false;
 				}
 				dbh->in_txn = false;
 			}
 
 			dbh->auto_commit = (unsigned int)lval? 1 : 0;
-			return 1;
+			return true;
 		}
 		case PDO_ATTR_PREFETCH:
 		{
 			H->prefetch = pdo_oci_sanitize_prefetch(lval);
-			return 1;
+			return true;
 		}
 		case PDO_OCI_ATTR_ACTION:
 		{
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *action = zval_try_get_string(val);
 			if (UNEXPECTED(!action)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -466,12 +466,12 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_ACTION, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_ACTION");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_CLIENT_INFO:
@@ -479,7 +479,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *client_info = zval_try_get_string(val);
 			if (UNEXPECTED(!client_info)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -487,12 +487,12 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_CLIENT_INFO, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_CLIENT_INFO");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_CLIENT_IDENTIFIER:
@@ -500,7 +500,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *identifier = zval_try_get_string(val);
 			if (UNEXPECTED(!identifier)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -508,12 +508,12 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_CLIENT_IDENTIFIER, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_CLIENT_IDENTIFIER");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_MODULE:
@@ -521,7 +521,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *module = zval_try_get_string(val);
 			if (UNEXPECTED(!module)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -529,12 +529,12 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_MODULE, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_MODULE");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_CALL_TIMEOUT:
@@ -547,16 +547,16 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_CALL_TIMEOUT, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_CALL_TIMEOUT");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		default:
-			return 0;
+			return false;
 	}
 
 }

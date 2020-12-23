@@ -241,8 +241,9 @@ typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, size_t u
  * Return true if currently inside a transaction, false otherwise. */
 typedef bool (*pdo_dbh_txn_func)(pdo_dbh_t *dbh);
 
-/* setting of attributes */
-typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
+/* setting of attributes
+ * Return true on success and false in case of failure */
+typedef bool (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
 
 /* return last insert id.  NULL indicates error condition, otherwise, the return value
  * MUST be an emalloc'd NULL terminated string. */

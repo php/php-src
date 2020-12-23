@@ -269,28 +269,28 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 	return id;
 }
 
-static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	switch(attr) {
 		case PDO_ATTR_DEFAULT_STR_PARAM:
 			H->assume_national_character_set_strings = zval_get_long(val) == PDO_PARAM_STR_NATL ? 1 : 0;
-			return 1;
+			return true;
 		case PDO_ATTR_TIMEOUT:
 		case PDO_DBLIB_ATTR_QUERY_TIMEOUT:
-			return SUCCEED == dbsettime(zval_get_long(val)) ? 1 : 0;
+			return SUCCEED == dbsettime(zval_get_long(val));
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
 			H->stringify_uniqueidentifier = zval_get_long(val);
-			return 1;
+			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			H->skip_empty_rowsets = zval_is_true(val);
-			return 1;
+			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
 			H->datetime_convert = zval_get_long(val);
-			return 1;
+			return true;
 		default:
-			return 0;
+			return false;
 	}
 }
 
