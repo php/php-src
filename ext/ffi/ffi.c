@@ -4165,7 +4165,7 @@ ZEND_METHOD(FFI, sizeof) /* {{{ */
 		type = ZEND_FFI_TYPE(ctype->type);
 	} else {
 		zend_wrong_parameter_class_error(1, "FFI\\CData or FFI\\CType", zv);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(type->size);
@@ -4191,7 +4191,7 @@ ZEND_METHOD(FFI, alignof) /* {{{ */
 		type = ZEND_FFI_TYPE(ctype->type);
 	} else {
 		zend_wrong_parameter_class_error(1, "FFI\\CData or FFI\\CType", zv);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(type->align);
