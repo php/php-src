@@ -651,7 +651,7 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 }
 /* }}} */
 
-static int pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
+static zend_result pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	sb4 error_code = 0;
