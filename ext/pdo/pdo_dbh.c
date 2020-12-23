@@ -578,7 +578,7 @@ PHP_METHOD(PDO, prepare)
 /* }}} */
 
 
-static zend_bool pdo_is_in_transaction(pdo_dbh_t *dbh) {
+static bool pdo_is_in_transaction(pdo_dbh_t *dbh) {
 	if (dbh->methods->in_transaction) {
 		return dbh->methods->in_transaction(dbh);
 	}
@@ -606,7 +606,7 @@ PHP_METHOD(PDO, beginTransaction)
 	}
 
 	if (dbh->methods->begin(dbh)) {
-		dbh->in_txn = 1;
+		dbh->in_txn = true;
 		RETURN_TRUE;
 	}
 
@@ -630,7 +630,7 @@ PHP_METHOD(PDO, commit)
 	}
 
 	if (dbh->methods->commit(dbh)) {
-		dbh->in_txn = 0;
+		dbh->in_txn = false;
 		RETURN_TRUE;
 	}
 
@@ -654,7 +654,7 @@ PHP_METHOD(PDO, rollBack)
 	}
 
 	if (dbh->methods->rollback(dbh)) {
-		dbh->in_txn = 0;
+		dbh->in_txn = false;
 		RETURN_TRUE;
 	}
 
@@ -1462,7 +1462,7 @@ static void pdo_dbh_free_storage(zend_object *std)
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(std);
 	if (dbh->in_txn && dbh->methods && dbh->methods->rollback) {
 		dbh->methods->rollback(dbh);
-		dbh->in_txn = 0;
+		dbh->in_txn = false;
 	}
 
 	if (dbh->is_persistent && dbh->methods && dbh->methods->persistent_shutdown) {

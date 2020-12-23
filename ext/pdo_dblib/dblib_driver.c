@@ -195,32 +195,32 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 	return 1;
 }
 
-static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
+static bool pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (FAIL == dbcmd(H->link, cmd)) {
-		return 0;
+		return false;
 	}
 
 	if (FAIL == dbsqlexec(H->link)) {
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
-static int dblib_handle_begin(pdo_dbh_t *dbh)
+static bool dblib_handle_begin(pdo_dbh_t *dbh)
 {
 	return pdo_dblib_transaction_cmd("BEGIN TRANSACTION", dbh);
 }
 
-static int dblib_handle_commit(pdo_dbh_t *dbh)
+static bool dblib_handle_commit(pdo_dbh_t *dbh)
 {
 	return pdo_dblib_transaction_cmd("COMMIT TRANSACTION", dbh);
 }
 
-static int dblib_handle_rollback(pdo_dbh_t *dbh)
+static bool dblib_handle_rollback(pdo_dbh_t *dbh)
 {
 	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh);
 }
@@ -417,7 +417,7 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	NULL, /* in transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	NULL /* get gc */
 };
 

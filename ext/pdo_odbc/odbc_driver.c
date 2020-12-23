@@ -266,7 +266,7 @@ static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquo
 }
 */
 
-static int odbc_handle_begin(pdo_dbh_t *dbh)
+static bool odbc_handle_begin(pdo_dbh_t *dbh)
 {
 	if (dbh->auto_commit) {
 		/* we need to disable auto-commit now, to be able to initiate a transaction */
@@ -276,13 +276,13 @@ static int odbc_handle_begin(pdo_dbh_t *dbh)
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
-static int odbc_handle_commit(pdo_dbh_t *dbh)
+static bool odbc_handle_commit(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -293,7 +293,7 @@ static int odbc_handle_commit(pdo_dbh_t *dbh)
 		pdo_odbc_drv_error("SQLEndTran: Commit");
 
 		if (rc != SQL_SUCCESS_WITH_INFO) {
-			return 0;
+			return false;
 		}
 	}
 
@@ -302,13 +302,13 @@ static int odbc_handle_commit(pdo_dbh_t *dbh)
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
-static int odbc_handle_rollback(pdo_dbh_t *dbh)
+static bool odbc_handle_rollback(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -319,7 +319,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh)
 		pdo_odbc_drv_error("SQLEndTran: Rollback");
 
 		if (rc != SQL_SUCCESS_WITH_INFO) {
-			return 0;
+			return false;
 		}
 	}
 	if (dbh->auto_commit && H->dbc) {
@@ -327,11 +327,11 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh)
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
-			return 0;
+			return false;
 		}
 	}
 
-	return 1;
+	return true;
 }
 
 static int odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
@@ -386,7 +386,7 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL, /* check_liveness */
 	NULL, /* get_driver_methods */
 	NULL, /* request_shutdown */
-	NULL, /* in_transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	NULL /* get_gc */
 };
 

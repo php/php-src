@@ -391,14 +391,14 @@ static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquot
 }
 /* }}} */
 
-static int oci_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+static bool oci_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 {
 	/* with Oracle, there is nothing special to be done */
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+static bool oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -406,13 +406,13 @@ static int oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->last_err) {
 		H->last_err = oci_drv_error("OCITransCommit");
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+static bool oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -420,9 +420,9 @@ static int oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->last_err) {
 		H->last_err = oci_drv_error("OCITransRollback");
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -442,7 +442,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 					H->last_err = oci_drv_error("OCITransCommit");
 					return 0;
 				}
-				dbh->in_txn = 0;
+				dbh->in_txn = false;
 			}
 
 			dbh->auto_commit = (unsigned int)lval? 1 : 0;
@@ -705,7 +705,7 @@ static const struct pdo_dbh_methods oci_methods = {
 	pdo_oci_check_liveness,	/* check_liveness */
 	NULL, /* get_driver_methods */
 	NULL, /* request_shutdown */
-	NULL, /* in_transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	NULL /* get_gc */
 };
 

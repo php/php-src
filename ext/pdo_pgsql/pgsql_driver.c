@@ -498,7 +498,7 @@ static zend_result pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 }
 /* }}} */
 
-static int pgsql_handle_in_transaction(pdo_dbh_t *dbh)
+static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H;
 
@@ -507,31 +507,31 @@ static int pgsql_handle_in_transaction(pdo_dbh_t *dbh)
 	return PQtransactionStatus(H->server) > PQTRANS_IDLE;
 }
 
-static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
+static bool pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	PGresult *res;
-	int ret = 1;
+	bool ret = true;
 
 	res = PQexec(H->server, cmd);
 
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 		pdo_pgsql_error(dbh, PQresultStatus(res), pdo_pgsql_sqlstate(res));
-		ret = 0;
+		ret = false;
 	}
 
 	PQclear(res);
 	return ret;
 }
 
-static int pgsql_handle_begin(pdo_dbh_t *dbh)
+static bool pgsql_handle_begin(pdo_dbh_t *dbh)
 {
 	return pdo_pgsql_transaction_cmd("BEGIN", dbh);
 }
 
-static int pgsql_handle_commit(pdo_dbh_t *dbh)
+static bool pgsql_handle_commit(pdo_dbh_t *dbh)
 {
-	int ret = pdo_pgsql_transaction_cmd("COMMIT", dbh);
+	bool ret = pdo_pgsql_transaction_cmd("COMMIT", dbh);
 
 	/* When deferred constraints are used the commit could
 	   fail, and a ROLLBACK implicitly ran. See bug #67462 */
@@ -542,7 +542,7 @@ static int pgsql_handle_commit(pdo_dbh_t *dbh)
 	return ret;
 }
 
-static int pgsql_handle_rollback(pdo_dbh_t *dbh)
+static bool pgsql_handle_rollback(pdo_dbh_t *dbh)
 {
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh);
 }
