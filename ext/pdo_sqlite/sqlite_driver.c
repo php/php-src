@@ -238,7 +238,7 @@ static int sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unq
 	return 1;
 }
 
-static int sqlite_handle_begin(pdo_dbh_t *dbh)
+static bool sqlite_handle_begin(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -247,12 +247,12 @@ static int sqlite_handle_begin(pdo_dbh_t *dbh)
 		pdo_sqlite_error(dbh);
 		if (errmsg)
 			sqlite3_free(errmsg);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
-static int sqlite_handle_commit(pdo_dbh_t *dbh)
+static bool sqlite_handle_commit(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -261,12 +261,12 @@ static int sqlite_handle_commit(pdo_dbh_t *dbh)
 		pdo_sqlite_error(dbh);
 		if (errmsg)
 			sqlite3_free(errmsg);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
-static int sqlite_handle_rollback(pdo_dbh_t *dbh)
+static bool sqlite_handle_rollback(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -275,9 +275,9 @@ static int sqlite_handle_rollback(pdo_dbh_t *dbh)
 		pdo_sqlite_error(dbh);
 		if (errmsg)
 			sqlite3_free(errmsg);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
@@ -729,7 +729,7 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
 	pdo_sqlite_request_shutdown,
-	NULL, /* in_transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	pdo_sqlite_get_gc
 };
 

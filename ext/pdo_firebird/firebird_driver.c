@@ -389,7 +389,7 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 				}
 				strncpy(pname, start, l);
 				pname[l] = '\0';
-				
+
 				if (named_params) {
 					zval tmp;
 					ZVAL_LONG(&tmp, pindex);
@@ -691,7 +691,7 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t u
 /* }}} */
 
 /* called by PDO to start a transaction */
-static int firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
@@ -737,35 +737,35 @@ static int firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 #endif
 	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb-tpb), tpb)) {
 		RECORD_ERROR(dbh);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
 /* called by PDO to commit a transaction */
-static int firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_commit_transaction(H->isc_status, &H->tr)) {
 		RECORD_ERROR(dbh);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
 /* called by PDO to rollback a transaction */
-static int firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_rollback_transaction(H->isc_status, &H->tr)) {
 		RECORD_ERROR(dbh);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -789,7 +789,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 		if (!firebird_handle_begin(dbh)) {
 			return 0;
 		}
-		dbh->in_txn = 1;
+		dbh->in_txn = true;
 	}
 
 	/* allocate the statement */
@@ -804,7 +804,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 	new_sql[0] = '\0';
 	if (!preprocess(sql, sql_len, new_sql, named_params)) {
 		strcpy(dbh->error_code, "07000");
-		efree(new_sql);			
+		efree(new_sql);
 		return 0;
 	}
 
@@ -843,7 +843,7 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 							if (!firebird_handle_commit(dbh)) {
 								break;
 							}
-							dbh->in_txn = 0;
+							dbh->in_txn = false;
 						}
 					}
 					dbh->auto_commit = bval;
@@ -1008,7 +1008,7 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* check_liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	NULL, /* in transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	NULL /* get gc */
 };
 /* }}} */

@@ -341,7 +341,7 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 /* }}} */
 
 /* {{{ mysql_handle_begin */
-static int mysql_handle_begin(pdo_dbh_t *dbh)
+static bool mysql_handle_begin(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
@@ -350,28 +350,28 @@ static int mysql_handle_begin(pdo_dbh_t *dbh)
 /* }}} */
 
 /* {{{ mysql_handle_commit */
-static int mysql_handle_commit(pdo_dbh_t *dbh)
+static bool mysql_handle_commit(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_commit");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	if (mysql_commit(((pdo_mysql_db_handle *)dbh->driver_data)->server)) {
 		pdo_mysql_error(dbh);
-		PDO_DBG_RETURN(0);
+		PDO_DBG_RETURN(false);
 	}
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(true);
 }
 /* }}} */
 
 /* {{{ mysql_handle_rollback */
-static int mysql_handle_rollback(pdo_dbh_t *dbh)
+static bool mysql_handle_rollback(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_rollback");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	if (mysql_rollback(((pdo_mysql_db_handle *)dbh->driver_data)->server)) {
 		pdo_mysql_error(dbh);
-		PDO_DBG_RETURN(0);
+		PDO_DBG_RETURN(false);
 	}
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(true);
 }
 /* }}} */
 
@@ -556,7 +556,7 @@ static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
 #endif
 
 /* {{{ pdo_mysql_in_transaction */
-static int pdo_mysql_in_transaction(pdo_dbh_t *dbh)
+static bool pdo_mysql_in_transaction(pdo_dbh_t *dbh)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("pdo_mysql_in_transaction");
