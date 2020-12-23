@@ -33,11 +33,17 @@ final class FFI
     /** @prefer-ref $ptr */
     public static function addr(FFI\CData $ptr): FFI\CData {}
 
-    /** @prefer-ref $ptr */
-    public static function sizeof(object $ptr): ?int {}
+    /**
+     * @param FFI\CData|FFI\CType $ptr
+     * @prefer-ref $ptr
+     */
+    public static function sizeof($ptr): int {}
 
-    /** @prefer-ref $ptr */
-    public static function alignof(object $ptr): ?int {}
+    /**
+     * @param FFI\CData|FFI\CType $ptr
+     * @prefer-ref $ptr
+     */
+    public static function alignof($ptr): int {}
 
     /**
      * @param FFI\CData|string $from
