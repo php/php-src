@@ -301,10 +301,13 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 #endif
 
 /* {{{ mysql_handle_quoter */
-static bool mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
+static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	zend_bool use_national_character_set = 0;
+	char *quoted;
+	size_t quotedlen;
+	zend_string *quoted_str;
 
 	if (H->assume_national_character_set_strings) {
 		use_national_character_set = 1;
@@ -318,24 +321,27 @@ static bool mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unq
 
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("unquoted=%.*s", (int)unquotedlen, unquoted);
-	*quoted = safe_emalloc(2, unquotedlen, 3 + (use_national_character_set ? 1 : 0));
+	PDO_DBG_INF_FMT("unquoted=%.*s", (int)ZSTR_LEN(unquoted), ZSTR_VAL(unquoted));
+	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3 + (use_national_character_set ? 1 : 0));
 
 	if (use_national_character_set) {
-		*quotedlen = mysql_real_escape_string_quote(H->server, *quoted + 2, unquoted, unquotedlen, '\'');
-		(*quoted)[0] = 'N';
-		(*quoted)[1] = '\'';
+		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 2, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
+		quoted[0] = 'N';
+		quoted[1] = '\'';
 
-		++*quotedlen; /* N prefix */
+		++quotedlen; /* N prefix */
 	} else {
-		*quotedlen = mysql_real_escape_string_quote(H->server, *quoted + 1, unquoted, unquotedlen, '\'');
-		(*quoted)[0] = '\'';
+		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
+		quoted[0] = '\'';
 	}
 
-	(*quoted)[++*quotedlen] = '\'';
-	(*quoted)[++*quotedlen] = '\0';
-	PDO_DBG_INF_FMT("quoted=%.*s", (int)*quotedlen, *quoted);
-	PDO_DBG_RETURN(true);
+	quoted[++quotedlen] = '\'';
+	quoted[++quotedlen] = '\0';
+	PDO_DBG_INF_FMT("quoted=%.*s", (int)quotedlen, quoted);
+
+	quoted_str = zend_string_init(quoted, quotedlen, 0);
+	efree(quoted);
+	PDO_DBG_RETURN(quoted_str);
 }
 /* }}} */
 

@@ -350,40 +350,40 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 }
 /* }}} */
 
-static bool oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype ) /* {{{ */
+static zend_string* oci_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype ) /* {{{ */
 {
 	int qcount = 0;
 	char const *cu, *l, *r;
-	char *c;
+	char *c, *quoted;
+	zend_string *quoted_str;
 
-	if (!unquotedlen) {
-		*quotedlen = 2;
-		*quoted = emalloc(*quotedlen+1);
-		strcpy(*quoted, "''");
-		return true;
+	if (ZSTR_LEN(unquoted) == 0) {
+		return zend_string_init("''", 2, 0);
 	}
 
 	/* count single quotes */
-	for (cu = unquoted; (cu = strchr(cu,'\'')); qcount++, cu++)
+	for (cu = ZSTR_VAL(unquoted); (cu = strchr(cu,'\'')); qcount++, cu++)
 		; /* empty loop */
 
-	*quotedlen = unquotedlen + qcount + 2;
-	*quoted = c = emalloc(*quotedlen+1);
+	quotedlen = ZSTR_LEN(unquoted) + qcount + 2;
+	quoted = c = emalloc(quotedlen+1);
 	*c++ = '\'';
 
 	/* foreach (chunk that ends in a quote) */
-	for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
+	for (l = ZSTR_VAL(unquoted); (r = strchr(l,'\'')); l = r+1) {
 		strncpy(c, l, r-l+1);
 		c += (r-l+1);
 		*c++ = '\'';			/* add second quote */
 	}
 
     /* Copy remainder and add enclosing quote */
-	strncpy(c, l, *quotedlen-(c-*quoted)-1);
-	(*quoted)[*quotedlen-1] = '\'';
-	(*quoted)[*quotedlen]   = '\0';
+	strncpy(c, l, quotedlen-(c-quoted)-1);
+	quoted[quotedlen-1] = '\'';
+	quoted[quotedlen]   = '\0';
 
-	return true;
+	quoted_str = zend_string_init(quoted, quotedlen, 0);
+	efree(quoted);
+	return quoted_str;
 }
 /* }}} */
 

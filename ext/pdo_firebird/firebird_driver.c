@@ -649,30 +649,29 @@ free_statement:
 /* }}} */
 
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
-static bool firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, /* {{{ */
-	char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
+static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	int qcount = 0;
 	char const *co, *l, *r;
 	char *c;
+	size_t quotedlen;
+	zend_string *quoted_str;
 
-	if (!unquotedlen) {
-		*quotedlen = 2;
-		*quoted = emalloc(*quotedlen+1);
-		strcpy(*quoted, "''");
-		return true;
+	if (ZSTR_LEN(unquoted) == 0) {
+		return zend_string_init("''", 2, 0);
 	}
 
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	/* count the number of ' characters */
-	for (co = unquoted; (co = strchr(co,'\'')); qcount++, co++);
+	for (co = ZSTR_VAL(unquoted); (co = strchr(co,'\'')); qcount++, co++);
 
-	*quotedlen = unquotedlen + qcount + 2;
-	*quoted = c = emalloc(*quotedlen+1);
+	quotedlen = ZSTR_LEN(unquoted) + qcount + 2;
+	quoted_str = zend_string_alloc(quotedlen, 0);
+	c = ZSTR_VAL(quoted_str);
 	*c++ = '\'';
 
 	/* foreach (chunk that ends in a quote) */
-	for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
+	for (l = ZSTR_VAL(unquoted); (r = strchr(l,'\'')); l = r+1) {
 		strncpy(c, l, r-l+1);
 		c += (r-l+1);
 		/* add the second quote */
@@ -680,11 +679,11 @@ static bool firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t 
 	}
 
 	/* copy the remainder */
-	strncpy(c, l, *quotedlen-(c-*quoted)-1);
-	(*quoted)[*quotedlen-1] = '\'';
-	(*quoted)[*quotedlen]   = '\0';
+	strncpy(c, l, quotedlen-(c-ZSTR_VAL(quoted_str))-1);
+	ZSTR_VAL(quoted_str)[quotedlen-1] = '\'';
+	ZSTR_VAL(quoted_str)[quotedlen]   = '\0';
 
-	return true;
+	return quoted_str;
 }
 /* }}} */
 

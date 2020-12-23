@@ -47,8 +47,12 @@ PHP 8.1 INTERNALS UPGRADE NOTES
       getColumnMeta(). The type provided here does not need to match the type
       returned by get_col (in fact no corresponding type might exist, e.g. for
       floats). It should be the closest logical equivalent for the column type.
-    - The transaction, set_attribute, quoter, and preparer handler's return type
+    - The transaction, set_attribute, and preparer handler's return type
       has been formalized to bool instead of int.
     - The check_liveness handler's return type has been formalized to zend_return
       instead of int.
     - The closer, and fetch_error handlers have been voidified.
+    - The quoter handler now returns the quoted string as zend_string* instead
+      of returning a boolean, and the quoted string as a pair of out params.
+      Similarly the unquoted string is now a zend_string* instead of a pair of
+      char* and size_t length.

@@ -227,12 +227,14 @@ static char *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t 
 }
 
 /* NB: doesn't handle binary strings... use prepared stmts for that */
-static bool sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
+static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	*quoted = safe_emalloc(2, unquotedlen, 3);
-	sqlite3_snprintf(2*unquotedlen + 3, *quoted, "'%q'", unquoted);
-	*quotedlen = strlen(*quoted);
-	return true;
+	char *quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
+	/* TODO use %Q format? */
+	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
+	zend_string *quoted_str = zend_string_init(quoted, strlen(quoted), 0);
+	efree(quoted);
+	return quoted_str;
 }
 
 static bool sqlite_handle_begin(pdo_dbh_t *dbh)
