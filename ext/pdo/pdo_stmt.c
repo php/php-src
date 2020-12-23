@@ -2018,7 +2018,7 @@ PHP_METHOD(PDOStatement, getIterator)
 /* {{{ overloaded handlers for PDOStatement class */
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
+	if (zend_string_equals_literal(name, "queryString")) {
 		zend_throw_error(NULL, "Property queryString is read only");
 		return value;
 	} else {
@@ -2028,7 +2028,7 @@ static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *val
 
 static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **cache_slot)
 {
-	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
+	if (zend_string_equals_literal(name, "queryString")) {
 		zend_throw_error(NULL, "Property queryString is read only");
 	} else {
 		zend_std_unset_property(object, name, cache_slot);
@@ -2282,8 +2282,7 @@ static zval *row_prop_read(zend_object *object, zend_string *name, int type, voi
 					return rv;
 				}
 			}
-			if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
-				//zval_ptr_dtor(rv);
+			if (zend_string_equals_literal(name, "queryString")) {
 				return zend_std_read_property(&stmt->std, name, type, cache_slot, rv);
 			}
 		}
@@ -2324,8 +2323,7 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 					return rv;
 				}
 			}
-			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
-				//zval_ptr_dtor(rv);
+			if (zend_string_equals_literal(Z_STR_P(member), "queryString")) {
 				return zend_std_read_property(&stmt->std, Z_STR_P(member), type, NULL, rv);
 			}
 		}
