@@ -265,7 +265,7 @@ typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
 /* checking/pinging persistent connections; return SUCCESS if the connection
  * is still alive and ready to be used, FAILURE otherwise.
  * You may set this handler to NULL, which is equivalent to returning SUCCESS. */
-typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh);
+typedef zend_result (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh);
 
 /* called at request end for each persistent dbh; this gives the driver
  * the opportunity to safely release resources that only have per-request

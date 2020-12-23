@@ -488,7 +488,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 }
 
 /* {{{ */
-static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
+static zend_result pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (!PQconsumeInput(H->server) || PQstatus(H->server) == CONNECTION_BAD) {
