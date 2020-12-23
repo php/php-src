@@ -18,11 +18,11 @@ if ($stmt->columnCount()) {
 array(6) {
   ["native_type"]=>
   string(4) "null"
+  ["pdo_type"]=>
+  int(0)
   ["flags"]=>
   array(0) {
   }
-  ["pdo_type"]=>
-  int(3)
   ["name"]=>
   string(1) "1"
   ["len"]=>

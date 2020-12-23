@@ -267,6 +267,24 @@ static int pdo_sqlite_stmt_get_col(
 			ZVAL_NULL(result);
 			return 1;
 
+		case SQLITE_INTEGER: {
+			int64_t i = sqlite3_column_int64(S->stmt, colno);
+#if SIZEOF_ZEND_LONG < 8
+			if (i > ZEND_LONG_MAX || i < ZEND_LONG_MIN) {
+				ZVAL_STRINGL(result,
+					(char *) sqlite3_column_text(S->stmt, colno),
+					sqlite3_column_bytes(S->stmt, colno));
+				return 1;
+			}
+#endif
+			ZVAL_LONG(result, i);
+			return 1;
+		}
+
+		case SQLITE_FLOAT:
+			ZVAL_DOUBLE(result, sqlite3_column_double(S->stmt, colno));
+			return 1;
+
 		case SQLITE_BLOB:
 			ZVAL_STRINGL_FAST(result,
 				sqlite3_column_blob(S->stmt, colno), sqlite3_column_bytes(S->stmt, colno));
@@ -300,20 +318,24 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
 			add_assoc_string(return_value, "native_type", "null");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_NULL);
 			break;
 
 		case SQLITE_FLOAT:
 			add_assoc_string(return_value, "native_type", "double");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_BLOB:
 			add_next_index_string(&flags, "blob");
 		case SQLITE_TEXT:
 			add_assoc_string(return_value, "native_type", "string");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_INTEGER:
 			add_assoc_string(return_value, "native_type", "integer");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
 			break;
 	}
 
@@ -330,7 +352,6 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 #endif
 
 	add_assoc_zval(return_value, "flags", &flags);
-	add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 
 	return SUCCESS;
 }

@@ -53,6 +53,11 @@ PHP 8.1 UPGRADE NOTES
     matches the behavior of native prepared statements. You can restore the
     previous behavior by enabling the PDO::ATTR_STRINGIFY_FETCHES option.
 
+- PDO SQLite:
+  . Integers and floats in results sets will now be returned using native PHP
+    types. You can restore the previous behavior by enabling the
+    PDO::ATTR_STRINGFIY_FETCHES option.
+
 - Standard:
   . version_compare() no longer accepts undocumented operator abbreviations.
 

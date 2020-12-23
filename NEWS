@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug #40913 (PDO_MYSQL: PDO::PARAM_LOB does not bind to a stream for
     fetching a BLOB). (Nikita)
 
+. PDO SQLite:
+  . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
+
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSPellConfig. (Sara)

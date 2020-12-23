@@ -24,4 +24,4 @@ var_dump($num,$result[0]);
 ?>
 --EXPECT--
 int(2147483647)
-string(10) "2147483647"
+int(2147483647)
