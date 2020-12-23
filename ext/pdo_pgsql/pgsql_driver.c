@@ -1149,7 +1149,7 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 	}
 }
 
-static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	zend_bool bval = zval_get_long(val)? 1 : 0;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -1157,12 +1157,12 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
 			H->emulate_prepares = bval;
-			return 1;
+			return true;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
 			H->disable_prepares = bval;
-			return 1;
+			return true;
 		default:
-			return 0;
+			return false;
 	}
 }
 

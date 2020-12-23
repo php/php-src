@@ -295,19 +295,19 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 	return 1;
 }
 
-static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_TIMEOUT:
 			sqlite3_busy_timeout(H->db, zval_get_long(val) * 1000);
-			return 1;
+			return true;
 		case PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES:
 			sqlite3_extended_result_codes(H->db, zval_get_long(val));
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 
 typedef struct {

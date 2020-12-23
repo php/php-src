@@ -390,7 +390,7 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 /* }}} */
 
 /* {{{ pdo_mysql_set_attribute */
-static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	zend_long lval = zval_get_long(val);
 	zend_bool bval = lval ? 1 : 0;
@@ -403,29 +403,29 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			if (dbh->auto_commit ^ bval) {
 				dbh->auto_commit = bval;
 				if (!mysql_handle_autocommit(dbh)) {
-					PDO_DBG_RETURN(0);
+					PDO_DBG_RETURN(false);
 				}
 			}
-			PDO_DBG_RETURN(1);
+			PDO_DBG_RETURN(true);
 
 		case PDO_ATTR_DEFAULT_STR_PARAM:
 			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL;
-			PDO_DBG_RETURN(1);
+			PDO_DBG_RETURN(true);
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
-			PDO_DBG_RETURN(1);
+			PDO_DBG_RETURN(true);
 
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = bval;
-			PDO_DBG_RETURN(1);
+			PDO_DBG_RETURN(true);
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = bval;
-			PDO_DBG_RETURN(1);
+			PDO_DBG_RETURN(true);
 
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
@@ -436,12 +436,12 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			} else {
 				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = lval;
 			}
-			PDO_DBG_RETURN(1);
+			PDO_DBG_RETURN(true);
 			break;
 #endif
 
 		default:
-			PDO_DBG_RETURN(0);
+			PDO_DBG_RETURN(false);
 	}
 }
 /* }}} */

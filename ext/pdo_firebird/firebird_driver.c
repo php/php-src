@@ -821,7 +821,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 /* }}} */
 
 /* called by PDO to set a driver-specific dbh attribute */
-static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -837,7 +837,7 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 							/* turning on auto_commit with an open transaction is illegal, because
 							   we won't know what to do with it */
 							H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
-							return 0;
+							return false;
 						} else {
 							/* close the transaction */
 							if (!firebird_handle_commit(dbh)) {
@@ -849,17 +849,17 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 					dbh->auto_commit = bval;
 				}
 			}
-			return 1;
+			return true;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			H->fetch_table_names = zval_get_long(val)? 1 : 0;
-			return 1;
+			return true;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
 			{
 				zend_string *str = zval_try_get_string(val);
 				if (UNEXPECTED(!str)) {
-					return 0;
+					return false;
 				}
 				if (H->date_format) {
 					efree(H->date_format);
@@ -867,13 +867,13 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				spprintf(&H->date_format, 0, "%s", ZSTR_VAL(str));
 				zend_string_release_ex(str, 0);
 			}
-			return 1;
+			return true;
 
 		case PDO_FB_ATTR_TIME_FORMAT:
 			{
 				zend_string *str = zval_try_get_string(val);
 				if (UNEXPECTED(!str)) {
-					return 0;
+					return false;
 				}
 				if (H->time_format) {
 					efree(H->time_format);
@@ -881,13 +881,13 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				spprintf(&H->time_format, 0, "%s", ZSTR_VAL(str));
 				zend_string_release_ex(str, 0);
 			}
-			return 1;
+			return true;
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
 			{
 				zend_string *str = zval_try_get_string(val);
 				if (UNEXPECTED(!str)) {
-					return 0;
+					return false;
 				}
 				if (H->timestamp_format) {
 					efree(H->timestamp_format);
@@ -895,9 +895,9 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
 				zend_string_release_ex(str, 0);
 			}
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
