@@ -1,7 +1,7 @@
 <?php
 
 /** @generate-function-entries */
-class IMAPConnection {
+final class IMAPConnection {
 
 }
 
