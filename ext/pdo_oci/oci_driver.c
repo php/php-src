@@ -354,7 +354,7 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 }
 /* }}} */
 
-static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype ) /* {{{ */
+static bool oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype ) /* {{{ */
 {
 	int qcount = 0;
 	char const *cu, *l, *r;
@@ -364,7 +364,7 @@ static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquot
 		*quotedlen = 2;
 		*quoted = emalloc(*quotedlen+1);
 		strcpy(*quoted, "''");
-		return 1;
+		return true;
 	}
 
 	/* count single quotes */
@@ -387,7 +387,7 @@ static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquot
 	(*quoted)[*quotedlen-1] = '\'';
 	(*quoted)[*quotedlen]   = '\0';
 
-	return 1;
+	return true;
 }
 /* }}} */
 

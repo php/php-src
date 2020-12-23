@@ -319,7 +319,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 	return ret;
 }
 
-static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
+static bool pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
 	unsigned char *escaped;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -345,7 +345,7 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 			(*quoted)[*quotedlen + 2] = '\0';
 			*quotedlen += 2;
 	}
-	return 1;
+	return true;
 }
 
 static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)

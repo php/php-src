@@ -651,7 +651,7 @@ free_statement:
 /* }}} */
 
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
-static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, /* {{{ */
+static bool firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, /* {{{ */
 	char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
 	int qcount = 0;
@@ -662,7 +662,7 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t u
 		*quotedlen = 2;
 		*quoted = emalloc(*quotedlen+1);
 		strcpy(*quoted, "''");
-		return 1;
+		return true;
 	}
 
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
@@ -686,7 +686,7 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t u
 	(*quoted)[*quotedlen-1] = '\'';
 	(*quoted)[*quotedlen]   = '\0';
 
-	return 1;
+	return true;
 }
 /* }}} */
 

@@ -302,7 +302,7 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 #endif
 
 /* {{{ mysql_handle_quoter */
-static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
+static bool mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	zend_bool use_national_character_set = 0;
@@ -336,7 +336,7 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 	(*quoted)[++*quotedlen] = '\'';
 	(*quoted)[++*quotedlen] = '\0';
 	PDO_DBG_INF_FMT("quoted=%.*s", (int)*quotedlen, *quoted);
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(true);
 }
 /* }}} */
 
