@@ -235,7 +235,7 @@ typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t
 typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len);
 
 /* quote a string */
-typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype);
+typedef bool (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype);
 
 /* transaction related (beingTransaction(), commit, rollBack, inTransaction)
  * Return true if currently inside a transaction, false otherwise. */
