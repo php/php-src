@@ -27,7 +27,7 @@
 #include "php_pdo_odbc_int.h"
 #include "zend_exceptions.h"
 
-static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
+static void pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	pdo_odbc_errinfo *einfo = &H->einfo;
@@ -47,8 +47,6 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 	add_next_index_long(info, einfo->last_error);
 	add_next_index_str(info, message);
 	add_next_index_string(info, einfo->last_state);
-
-	return 1;
 }
 
 

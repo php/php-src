@@ -250,13 +250,16 @@ typedef bool (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val)
  * MUST be an emalloc'd NULL terminated string. */
 typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, size_t *len);
 
-/* fetch error information.  if stmt is not null, fetch information pertaining
- * to the statement, otherwise fetch global error information.  The driver
- * should add the following information to the array "info" in this order:
+/* Fetch error information.
+ * If stmt is not null, fetch information pertaining to the statement,
+ * otherwise fetch global error information.
+ * info is an initialized PHP array, if there are no messages leave it empty.
+ * The driver should add the following information to the array "info" in this order:
  * - native error code
  * - string representation of the error code ... any other optional driver
- *   specific data ...  */
-typedef	int (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info);
+ *   specific data ...
+ * PDO takes care of normalizing the array. */
+typedef void (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info);
 
 /* fetching of attributes
  * There are 3 return states:
