@@ -228,8 +228,9 @@ typedef struct {
 /* close or otherwise disconnect the database */
 typedef void (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
 
-/* prepare a statement and stash driver specific portion into stmt */
-typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options);
+/* prepare a statement and stash driver specific portion into stmt
+ * return true on success, false otherwise */
+typedef bool (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options);
 
 /* execute a statement (that does not return a result set) */
 typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len);

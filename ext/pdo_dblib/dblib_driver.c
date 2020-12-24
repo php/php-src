@@ -93,7 +93,7 @@ static void dblib_handle_closer(pdo_dbh_t *dbh)
 	}
 }
 
-static int dblib_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
+static bool dblib_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));
@@ -105,7 +105,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 	S->computed_column_name_count = 0;
 	S->err.sqlstate = stmt->error_code;
 
-	return 1;
+	return true;
 }
 
 static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)

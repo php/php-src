@@ -136,7 +136,7 @@ static void odbc_handle_closer(pdo_dbh_t *dbh)
 	dbh->driver_data = NULL;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
+static bool odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -160,7 +160,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 		/* couldn't grok it */
 		strcpy(dbh->error_code, stmt->error_code);
 		efree(S);
-		return 0;
+		return false;
 	}
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &S->stmt);
@@ -171,7 +171,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 			zend_string_release(nsql);
 		}
 		pdo_odbc_drv_error("SQLAllocStmt");
-		return 0;
+		return false;
 	}
 
 	stmt->driver_data = S;
@@ -185,7 +185,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 			if (nsql) {
 				zend_string_release(nsql);
 			}
-			return 0;
+			return false;
 		}
 	}
 
@@ -209,9 +209,9 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)

@@ -161,7 +161,7 @@ static void mysql_handle_closer(pdo_dbh_t *dbh)
 /* }}} */
 
 /* {{{ mysql_handle_preparer */
-static int mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
+static bool mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
@@ -194,7 +194,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 	} else if (ret == -1) {
 		/* failed to parse */
 		strcpy(dbh->error_code, stmt->error_code);
-		PDO_DBG_RETURN(0);
+		PDO_DBG_RETURN(false);
 	}
 
 	if (!(S->stmt = mysql_stmt_init(H->server))) {
@@ -202,7 +202,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 		if (nsql) {
 			zend_string_release(nsql);
 		}
-		PDO_DBG_RETURN(0);
+		PDO_DBG_RETURN(false);
 	}
 
 	if (mysql_stmt_prepare(S->stmt, ZSTR_VAL(sql), ZSTR_LEN(sql))) {
@@ -217,7 +217,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 			goto fallback;
 		}
 		pdo_mysql_error(dbh);
-		PDO_DBG_RETURN(0);
+		PDO_DBG_RETURN(false);
 	}
 	if (nsql) {
 		zend_string_release(nsql);
@@ -238,13 +238,13 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 
 	S->max_length = pdo_attr_lval(driver_options, PDO_ATTR_MAX_COLUMN_LEN, 0);
 
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(true);
 
 fallback:
 end:
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(true);
 }
 /* }}} */
 

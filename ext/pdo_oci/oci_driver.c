@@ -236,7 +236,7 @@ static void oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static int oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options) /* {{{ */
+static bool oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
@@ -263,7 +263,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stm
 		/* couldn't grok it */
 		strcpy(dbh->error_code, stmt->error_code);
 		efree(S);
-		return 0;
+		return false;
 	}
 
 	/* create an OCI statement handle */
@@ -283,7 +283,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stm
 			OCIHandleFree(S->stmt, OCI_HTYPE_STMT);
 			OCIHandleFree(S->err, OCI_HTYPE_ERROR);
 			efree(S);
-			return 0;
+			return false;
 		}
 
 	}
@@ -304,7 +304,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stm
 		nsql = NULL;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
