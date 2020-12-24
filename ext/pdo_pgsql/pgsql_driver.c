@@ -107,21 +107,25 @@ static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
 }
 /* }}} */
 
-static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static bool pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_error_info *einfo = &H->einfo;
+	bool return_value = false;
 
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
+		return_value = true;
 	} else {
+		/* Add null to respect expected info array structure */
 		add_next_index_null(info);
 	}
 	if (einfo->errmsg) {
 		add_next_index_string(info, einfo->errmsg);
+		return_value = true;
 	}
 
-	return 1;
+	return return_value;
 }
 /* }}} */
 

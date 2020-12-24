@@ -29,7 +29,7 @@
 
 static inline ub4 pdo_oci_sanitize_prefetch(long prefetch);
 
-static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static bool pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_error_info *einfo;
@@ -47,9 +47,10 @@ static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
+		return true;
 	}
 
-	return 1;
+	return false;
 }
 /* }}} */
 

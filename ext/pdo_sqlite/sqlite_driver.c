@@ -82,7 +82,7 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 }
 /* }}} */
 
-static int pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
+static bool pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_sqlite_error_info *einfo = &H->einfo;
@@ -90,9 +90,10 @@ static int pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *i
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
+		return true;
 	}
 
-	return 1;
+	return false;
 }
 
 static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)

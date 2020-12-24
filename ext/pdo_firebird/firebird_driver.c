@@ -968,7 +968,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 /* }}} */
 
 /* called by PDO to retrieve driver-specific information about an error that has occurred */
-static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static bool pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	const ISC_STATUS *s = H->isc_status;
@@ -983,11 +983,13 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 			strcpy(&buf[i++], " ");
 		}
 		add_next_index_string(info, buf);
+		return true;
 	} else if (H->last_app_error) {
 		add_next_index_long(info, -999);
 		add_next_index_string(info, const_cast(H->last_app_error));
+		return true;
 	}
-	return 1;
+	return false;
 }
 /* }}} */
 
