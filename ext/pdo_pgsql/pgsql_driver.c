@@ -221,7 +221,7 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static int pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
+static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
@@ -272,7 +272,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 	if (ret == -1) {
 		/* couldn't grok it */
 		strcpy(dbh->error_code, stmt->error_code);
-		return 0;
+		return false;
 	} else if (ret == 1) {
 		/* query was re-written */
 		S->query = nsql;
@@ -286,7 +286,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 		spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
 	}
 
-	return 1;
+	return true;
 }
 
 static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)

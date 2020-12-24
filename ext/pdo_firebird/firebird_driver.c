@@ -502,7 +502,7 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* called by PDO to prepare an SQL query */
-static int firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
+static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 	pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -566,7 +566,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 		stmt->methods = &firebird_stmt_methods;
 		stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 
-		return 1;
+		return true;
 
 	} while (0);
 
@@ -582,7 +582,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 		efree(S);
 	}
 
-	return 0;
+	return false;
 }
 /* }}} */
 
