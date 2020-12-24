@@ -467,7 +467,7 @@ void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_lo
 #define RECORD_ERROR(dbh) _firebird_error(dbh, NULL, __FILE__, __LINE__)
 
 /* called by PDO to close a db handle */
-static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -498,8 +498,6 @@ static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	pefree(H, dbh->is_persistent);
-
-	return 0;
 }
 /* }}} */
 

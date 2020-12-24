@@ -185,7 +185,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 }
 /* }}} */
 
-static int oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static void oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -233,8 +233,6 @@ static int oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	pefree(H, dbh->is_persistent);
-
-	return 0;
 }
 /* }}} */
 
