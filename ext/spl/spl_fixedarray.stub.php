@@ -49,4 +49,7 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable
     public function offsetUnset($index) {}
 
     public function getIterator(): Iterator {}
+
+    /** @return SplFixedArray */
+    public static function __set_state(array $state) {}
 }

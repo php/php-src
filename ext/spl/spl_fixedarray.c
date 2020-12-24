@@ -195,22 +195,17 @@ static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, i
 	return ht;
 }
 
-static HashTable* spl_fixedarray_object_get_properties(zend_object *obj)
+static HashTable* spl_fixedarray_get_properties_for(zend_object *obj, zend_prop_purpose purpose)
 {
 	spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
-	HashTable *ht = zend_std_get_properties(obj);
+
+	/* Keep the values and properties separate*/
+	HashTable *ht = zend_array_dup(zend_std_get_properties(obj));
 
 	if (!spl_fixedarray_empty(&intern->array)) {
-		zend_long j = zend_hash_num_elements(ht);
-
 		for (zend_long i = 0; i < intern->array.size; i++) {
-			zend_hash_index_update(ht, i, &intern->array.elements[i]);
+			zend_hash_index_add_new(ht, i, &intern->array.elements[i]);
 			Z_TRY_ADDREF(intern->array.elements[i]);
-		}
-		if (j > intern->array.size) {
-			for (zend_long i = intern->array.size; i < j; ++i) {
-				zend_hash_index_del(ht, i);
-			}
 		}
 	}
 
@@ -628,7 +623,6 @@ PHP_METHOD(SplFixedArray, fromArray)
 	} else if (num > 0 && !save_indexes) {
 		zval *element;
 		zend_long i = 0;
-
 		spl_fixedarray_init(&array, num);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), element) {
@@ -754,6 +748,120 @@ PHP_METHOD(SplFixedArray, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
+/* Assumes the object has been created and the spl_fixedarray_object's
+ * array member is uninitialized or zero-initialized.
+ * The state can have string keys, but they must come prior to integers:
+ *
+ * 	SplFixedArray::__set_state(array(
+ * 	   'property' => 'value',
+ * 	   0 => 1,
+ * 	   1 => 2,
+ * 	   2 => 3,
+ * 	))
+ */
+static zend_result spl_fixedarray_import(zend_object *object, HashTable *ht)
+{
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
+	spl_fixedarray *fixed = &intern->array;
+
+	spl_fixedarray_init(fixed, 0);
+
+	/* For performance we do a single pass over the input array and the
+	 * spl_fixedarray elems. This complicates the implementation, but part
+	 * of the reason for choosing SplFixedArray is for peformance, and
+	 * although that is primarily for memory we should still care about CPU.
+	 *
+	 * We need to track the number of string keys, which must come before
+	 * all the integer keys. This way the total size of the input minus the
+	 * number of string keys equals the number of integer keys, so we can
+	 * allocate the spl_fixedarray.elements and do this in a single pass.
+	 */
+
+	// The total size of the input array
+	const zend_long nht = zend_hash_num_elements(ht);
+	zend_long nstrings = 0; // The number of string keys
+	zend_long nints; // will be nht - nstrings
+
+	zend_string *str_idx = NULL; // current string key of input array
+	zend_ulong num_idx = 0; // current int key (valid iff str_idx == NULL)
+	zval *val = NULL; // current value of input array
+	zend_long max_idx = -1; // the largest index found so far
+	zval *begin = NULL; // pointer to beginning of fixedarray's storage
+	zval *end = NULL; // points one element passed the last element
+	const char *ex_msg = NULL; // message for the value exception
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_idx, str_idx, val) {
+		if (str_idx != NULL) {
+			if (UNEXPECTED(max_idx >= 0)) {
+				ex_msg = "must have all its string keys come before all integer keys";
+				goto value_error;
+			}
+
+			++nstrings;
+			object->handlers->write_property(object, str_idx, val, NULL);
+
+		} else if (UNEXPECTED((zend_long)num_idx != ++max_idx)) {
+			ex_msg = "did not have integer keys that start at 0 and increment sequentially";
+			goto value_error;
+
+		} else {
+			if (UNEXPECTED(max_idx == 0)) {
+				nints = nht - nstrings;
+				fixed->size = nints;
+				fixed->elements =
+					safe_emalloc(nints, sizeof(zval), 0);
+				begin = fixed->elements;
+				end = fixed->elements + nints;
+			}
+
+			ZEND_ASSERT(num_idx == max_idx);
+			ZEND_ASSERT(begin != end);
+
+			ZVAL_COPY(begin++, val);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_ASSERT(begin == end);
+	return SUCCESS;
+
+value_error:
+	spl_fixedarray_dtor_range(fixed, 0, max_idx);
+	if (fixed->elements) {
+		efree(fixed->elements);
+	}
+
+	/* Zero-initialize so the object release is valid. */
+	spl_fixedarray_init(fixed, 0);
+	zend_object_release(object);
+
+	zend_argument_value_error(1, ex_msg);
+	return FAILURE;
+}
+
+PHP_METHOD(SplFixedArray, __set_state)
+{
+	zval *state = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(state);
+	ZEND_PARSE_PARAMETERS_END();
+
+	HashTable *ht = Z_ARRVAL_P(state);
+	zend_class_entry *called_scope = zend_get_called_scope(execute_data);
+
+	zend_result result = object_init_ex(return_value, called_scope);
+	if (UNEXPECTED(result != SUCCESS)) {
+		ZVAL_NULL(return_value);
+		RETURN_THROWS();
+	}
+
+	zend_object *object = Z_OBJ_P(return_value);
+	if (UNEXPECTED(spl_fixedarray_import(object, ht) != SUCCESS)) {
+		ZVAL_NULL(return_value);
+		RETURN_THROWS();
+	}
+}
+
 static void spl_fixedarray_it_dtor(zend_object_iterator *iter)
 {
 	zval_ptr_dtor(&iter->data);
@@ -844,7 +952,8 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.unset_dimension = spl_fixedarray_object_unset_dimension;
 	spl_handler_SplFixedArray.has_dimension   = spl_fixedarray_object_has_dimension;
 	spl_handler_SplFixedArray.count_elements  = spl_fixedarray_object_count_elements;
-	spl_handler_SplFixedArray.get_properties  = spl_fixedarray_object_get_properties;
+	spl_handler_SplFixedArray.get_properties_for
+		= spl_fixedarray_get_properties_for;
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 	spl_handler_SplFixedArray.dtor_obj        = zend_objects_destroy_object;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;

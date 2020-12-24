@@ -1,5 +1,7 @@
 --TEST--
 Objects with overloaded get_properties are incompatible with ArrayObject
+--XFAIL--
+SplFixedArray has migrated to get_properties_for; find new test case
 --FILE--
 <?php
 
