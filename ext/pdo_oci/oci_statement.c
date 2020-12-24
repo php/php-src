@@ -760,12 +760,12 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo_
 			return 0;
 		}
 
-		ZVAL_STRINFL_FAST(result, C->data, C->fetched_len);
+		ZVAL_STRINGL_FAST(result, C->data, C->fetched_len);
 		return 1;
 	} else {
 		/* it was truncated */
 		php_error_docref(NULL, E_WARNING, "Column %d data was too large for buffer and was truncated to fit it", colno);
-		ZVAL_STRINL(result, C->data, C->fetched_len);
+		ZVAL_STRINGL(result, C->data, C->fetched_len);
 		return 1;
 	}
 } /* }}} */
