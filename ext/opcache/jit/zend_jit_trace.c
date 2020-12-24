@@ -3431,6 +3431,89 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 	}
 }
 
+static zend_bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_ssa *ssa, const zend_op **ssa_opcodes)
+{
+	zend_uchar prev_opcode;
+
+	if (opline->op1_type == IS_CONST
+	 && Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) == IS_LONG
+	 && Z_LVAL_P(RT_CONSTANT(opline, opline->op1)) == 0) {
+		if (ssa_op->op2_use >= 0) {
+			if ((ssa_op-1)->op1_def == ssa_op->op2_use) {
+				prev_opcode = ssa_opcodes[(ssa_op - ssa->ops) - 1]->opcode;
+				if (prev_opcode == ZEND_PRE_INC
+				 || prev_opcode == ZEND_PRE_DEC
+				 || prev_opcode == ZEND_POST_INC
+				 || prev_opcode == ZEND_POST_DEC) {
+					return 1;
+				}
+			} else if ((ssa_op-1)->result_def == ssa_op->op2_use) {
+				prev_opcode = ssa_opcodes[(ssa_op - ssa->ops) - 1]->opcode;
+				if (prev_opcode == ZEND_ADD
+				 || prev_opcode == ZEND_SUB) {
+					return 1;
+				}
+			}
+		}
+	} else if (opline->op2_type == IS_CONST
+	 && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG
+	 && Z_LVAL_P(RT_CONSTANT(opline, opline->op2)) == 0) {
+		if (ssa_op->op1_use >= 0) {
+			if ((ssa_op-1)->op1_def == ssa_op->op1_use) {
+				prev_opcode = ssa_opcodes[(ssa_op - ssa->ops) - 1]->opcode;
+				if (prev_opcode == ZEND_PRE_INC
+				 || prev_opcode == ZEND_PRE_DEC
+				 || prev_opcode == ZEND_POST_INC
+				 || prev_opcode == ZEND_POST_DEC) {
+					return 1;
+				}
+			} else if ((ssa_op-1)->result_def == ssa_op->op1_use) {
+				prev_opcode = ssa_opcodes[(ssa_op - ssa->ops) - 1]->opcode;
+				if (prev_opcode == ZEND_ADD
+				 || prev_opcode == ZEND_SUB) {
+					return 1;
+				}
+			}
+		}
+	} else {
+		const zend_ssa_op *prev_ssa_op = ssa_op - 1;
+		prev_opcode = ssa_opcodes[prev_ssa_op - ssa->ops]->opcode;
+
+		if ((prev_opcode == ZEND_JMPZ || prev_opcode == ZEND_JMPNZ)
+		 && prev_ssa_op != ssa->ops
+		 && prev_ssa_op->op1_use >= 0
+		 && prev_ssa_op->op1_use == (prev_ssa_op-1)->result_def) {
+			prev_ssa_op--;
+			prev_opcode = ssa_opcodes[prev_ssa_op - ssa->ops]->opcode;
+		}
+
+		if (ssa_op->op1_use == prev_ssa_op->op1_use
+		 && ssa_op->op2_use == prev_ssa_op->op2_use) {
+			if (prev_opcode == ZEND_IS_EQUAL
+			 || prev_opcode == ZEND_IS_NOT_EQUAL
+			 || prev_opcode == ZEND_IS_SMALLER
+			 || prev_opcode == ZEND_IS_SMALLER_OR_EQUAL
+			 || prev_opcode == ZEND_CASE
+			 || prev_opcode == ZEND_IS_IDENTICAL
+			 || prev_opcode == ZEND_IS_NOT_IDENTICAL
+			 || prev_opcode == ZEND_CASE_STRICT) {
+				if (ssa_op->op1_use < 0) {
+					if (opline->op1.constant != ssa_opcodes[prev_ssa_op - ssa->ops]->op1.constant) {
+						return 0;
+					}
+				}
+				if (ssa_op->op2_use < 0) {
+					if (opline->op2.constant != ssa_opcodes[prev_ssa_op - ssa->ops]->op2.constant) {
+						return 0;
+					}
+				}
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num)
 {
 	const void *handler = NULL;
@@ -3451,6 +3534,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	const void *exit_addr;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info, op1_data_info;
 	zend_bool send_result = 0;
+	zend_bool skip_comparison;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
 	zend_class_entry *ce;
 	zend_bool ce_is_instanceof;
@@ -4675,8 +4759,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_IS_SMALLER_OR_EQUAL:
 					case ZEND_CASE:
 						op1_info = OP1_INFO();
-						CHECK_OP1_TRACE_TYPE();
 						op2_info = OP2_INFO();
+						skip_comparison =
+							ssa_op != ssa->ops &&
+							(op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG &&
+							(op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG &&
+							zend_jit_may_skip_comparison(opline, ssa_op, ssa, ssa_opcodes);
+						CHECK_OP1_TRACE_TYPE();
 						CHECK_OP2_TRACE_TYPE();
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
 							zend_bool exit_if_true = 0;
@@ -4697,7 +4786,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 									RES_REG_ADDR(),
 									zend_may_throw(opline, ssa_op, op_array, ssa),
-									smart_branch_opcode, -1, -1, exit_addr)) {
+									smart_branch_opcode, -1, -1, exit_addr, skip_comparison)) {
 								goto jit_failure;
 							}
 							zend_jit_trace_update_condition_ranges(opline, ssa_op, op_array, ssa, exit_if_true);
@@ -4709,7 +4798,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 									RES_REG_ADDR(),
 									zend_may_throw(opline, ssa_op, op_array, ssa),
-									smart_branch_opcode, -1, -1, exit_addr)) {
+									smart_branch_opcode, -1, -1, exit_addr, skip_comparison)) {
 								goto jit_failure;
 							}
 						}
@@ -4718,8 +4807,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_IS_NOT_IDENTICAL:
 					case ZEND_CASE_STRICT:
 						op1_info = OP1_INFO();
-						CHECK_OP1_TRACE_TYPE();
 						op2_info = OP2_INFO();
+						skip_comparison =
+							ssa_op != ssa->ops &&
+							(op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG &&
+							(op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG &&
+							zend_jit_may_skip_comparison(opline, ssa_op, ssa, ssa_opcodes);
+						CHECK_OP1_TRACE_TYPE();
 						CHECK_OP2_TRACE_TYPE();
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
 							zend_bool exit_if_true = 0;
@@ -4743,7 +4837,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 									RES_REG_ADDR(),
 									zend_may_throw(opline, ssa_op, op_array, ssa),
-									smart_branch_opcode, -1, -1, exit_addr)) {
+									smart_branch_opcode, -1, -1, exit_addr, skip_comparison)) {
 								goto jit_failure;
 							}
 							zend_jit_trace_update_condition_ranges(opline, ssa_op, op_array, ssa, exit_if_true);
@@ -4755,7 +4849,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 									RES_REG_ADDR(),
 									zend_may_throw(opline, ssa_op, op_array, ssa),
-									smart_branch_opcode, -1, -1, exit_addr)) {
+									smart_branch_opcode, -1, -1, exit_addr, skip_comparison)) {
 								goto jit_failure;
 							}
 						}

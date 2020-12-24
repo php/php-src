@@ -6745,7 +6745,8 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
                                   zend_uchar      smart_branch_opcode,
                                   uint32_t        target_label,
                                   uint32_t        target_label2,
-                                  const void     *exit_addr)
+                                  const void     *exit_addr,
+                                  zend_bool       skip_comparison)
 {
 	zend_bool swap = 0;
 	zend_bool result;
@@ -6780,7 +6781,13 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 		return 1;
 	}
 
-	if (Z_MODE(op1_addr) == IS_REG) {
+	if (skip_comparison) {
+		if (Z_MODE(op1_addr) != IS_REG &&
+		    (Z_MODE(op2_addr) == IS_REG ||
+		     (Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_MODE(op2_addr) != IS_CONST_ZVAL))) {
+			swap = 1;
+		}
+	} else if (Z_MODE(op1_addr) == IS_REG) {
 		if (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 			|	test Ra(Z_REG(op1_addr)), Ra(Z_REG(op1_addr))
 		} else {
@@ -7567,7 +7574,8 @@ static int zend_jit_cmp(dasm_State    **Dst,
                         zend_uchar      smart_branch_opcode,
                         uint32_t        target_label,
                         uint32_t        target_label2,
-                        const void     *exit_addr)
+                        const void     *exit_addr,
+                        zend_bool       skip_comparison)
 {
 	zend_bool same_ops = (opline->op1_type == opline->op2_type) && (opline->op1.var == opline->op2.var);
 	zend_bool has_slow;
@@ -7603,7 +7611,7 @@ static int zend_jit_cmp(dasm_State    **Dst,
 				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >9
 			}
 		}
-		if (!zend_jit_cmp_long_long(Dst, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+		if (!zend_jit_cmp_long_long(Dst, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr, skip_comparison)) {
 			return 0;
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
@@ -7805,7 +7813,8 @@ static int zend_jit_identical(dasm_State    **Dst,
                               zend_uchar      smart_branch_opcode,
                               uint32_t        target_label,
                               uint32_t        target_label2,
-                              const void     *exit_addr)
+                              const void     *exit_addr,
+                              zend_bool       skip_comparison)
 {
 	uint32_t identical_label = (uint32_t)-1;
 	uint32_t not_identical_label = (uint32_t)-1;
@@ -7838,7 +7847,7 @@ static int zend_jit_identical(dasm_State    **Dst,
 
 	if ((op1_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG &&
 	    (op2_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) {
-		if (!zend_jit_cmp_long_long(Dst, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+		if (!zend_jit_cmp_long_long(Dst, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr, skip_comparison)) {
 			return 0;
 		}
 		return 1;
