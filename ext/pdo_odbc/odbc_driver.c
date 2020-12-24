@@ -120,7 +120,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 }
 /* }}} */
 
-static int odbc_handle_closer(pdo_dbh_t *dbh)
+static void odbc_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
 
@@ -134,8 +134,6 @@ static int odbc_handle_closer(pdo_dbh_t *dbh)
 	H->env = NULL;
 	pefree(H, dbh->is_persistent);
 	dbh->driver_data = NULL;
-
-	return 0;
 }
 
 static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)

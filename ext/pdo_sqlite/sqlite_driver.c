@@ -148,7 +148,7 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 	}
 }
 
-static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static void sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -171,7 +171,6 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
-	return 0;
 }
 /* }}} */
 

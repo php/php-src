@@ -141,7 +141,7 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 /* }}} */
 
 /* {{{ mysql_handle_closer */
-static int mysql_handle_closer(pdo_dbh_t *dbh)
+static void mysql_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 
@@ -157,7 +157,6 @@ static int mysql_handle_closer(pdo_dbh_t *dbh)
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
-	PDO_DBG_RETURN(0);
 }
 /* }}} */
 

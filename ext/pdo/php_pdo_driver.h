@@ -226,7 +226,7 @@ typedef struct {
 /* {{{ methods for a database handle */
 
 /* close or otherwise disconnect the database */
-typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
+typedef void (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
 
 /* prepare a statement and stash driver specific portion into stmt */
 typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options);
