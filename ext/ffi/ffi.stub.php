@@ -26,18 +26,24 @@ final class FFI
     public static function type(string $type): ?FFI\CType {}
 
     /** @prefer-ref $ptr */
-    public static function typeof(FFI\CData $ptr): ?FFI\CType {}
+    public static function typeof(FFI\CData $ptr): FFI\CType {}
 
     public static function arrayType(FFI\CType $type, array $dimensions): ?FFI\CType {}
 
     /** @prefer-ref $ptr */
     public static function addr(FFI\CData $ptr): FFI\CData {}
 
-    /** @prefer-ref $ptr */
-    public static function sizeof(object $ptr): ?int {}
+    /**
+     * @param FFI\CData|FFI\CType $ptr
+     * @prefer-ref $ptr
+     */
+    public static function sizeof($ptr): int {}
 
-    /** @prefer-ref $ptr */
-    public static function alignof(object $ptr): ?int {}
+    /**
+     * @param FFI\CData|FFI\CType $ptr
+     * @prefer-ref $ptr
+     */
+    public static function alignof($ptr): int {}
 
     /**
      * @param FFI\CData|string $from
@@ -52,7 +58,7 @@ final class FFI
      * @prefer-ref $ptr2
      * @param string|FFI\CData $ptr2
      */
-    public static function memcmp($ptr1, $ptr2, int $size): ?int {}
+    public static function memcmp($ptr1, $ptr2, int $size): int {}
 
     /** @prefer-ref $ptr */
     public static function memset(FFI\CData $ptr, int $value, int $size): void {}

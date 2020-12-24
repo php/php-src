@@ -3865,7 +3865,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 			RETURN_OBJ(&cdata->std);
 		} else {
 			zend_wrong_parameter_class_error(2, "FFI\\CData", zv);
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -4006,7 +4006,7 @@ ZEND_METHOD(FFI, typeof) /* {{{ */
 		}
 	} else {
 		zend_wrong_parameter_class_error(1, "FFI\\CData", zv);
-		return;
+		RETURN_THROWS();
 	}
 
 	ctype = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
@@ -4110,7 +4110,7 @@ ZEND_METHOD(FFI, addr) /* {{{ */
 	ZVAL_DEREF(zv);
 	if (Z_TYPE_P(zv) != IS_OBJECT || Z_OBJCE_P(zv) != zend_ffi_cdata_ce) {
 		zend_wrong_parameter_class_error(1, "FFI\\CData", zv);
-		return;
+		RETURN_THROWS();
 	}
 
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
@@ -4165,7 +4165,7 @@ ZEND_METHOD(FFI, sizeof) /* {{{ */
 		type = ZEND_FFI_TYPE(ctype->type);
 	} else {
 		zend_wrong_parameter_class_error(1, "FFI\\CData or FFI\\CType", zv);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(type->size);
@@ -4191,7 +4191,7 @@ ZEND_METHOD(FFI, alignof) /* {{{ */
 		type = ZEND_FFI_TYPE(ctype->type);
 	} else {
 		zend_wrong_parameter_class_error(1, "FFI\\CData or FFI\\CType", zv);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(type->align);
@@ -4246,7 +4246,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 		}
 	} else {
 		zend_wrong_parameter_class_error(2, "FFI\\CData or string", zv2);
-		return;
+		RETURN_THROWS();
 	}
 
 	memcpy(ptr1, ptr2, size);
@@ -4290,7 +4290,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 		}
 	} else {
 		zend_wrong_parameter_class_error(1, "FFI\\CData or string", zv1);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_DEREF(zv2);
@@ -4314,7 +4314,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 		}
 	} else {
 		zend_wrong_parameter_class_error(2, "FFI\\CData or string", zv2);
-		return;
+		RETURN_THROWS();
 	}
 
 	ret = memcmp(ptr1, ptr2, size);
@@ -4416,7 +4416,7 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 	ZVAL_DEREF(zv);
 	if (Z_TYPE_P(zv) != IS_OBJECT || Z_OBJCE_P(zv) != zend_ffi_cdata_ce) {
 		zend_wrong_parameter_class_error(1, "FFI\\CData", zv);
-		return;
+		RETURN_THROWS();
 	}
 
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
