@@ -30,6 +30,6 @@ PHP                                                                        NEWS
 
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
-  . Convert resource<pspell config> to object \PSPellConfig. (Sara)
+  . Convert resource<pspell config> to object \PSpellConfig. (Sara)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
