@@ -48,17 +48,17 @@ var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array (case insensitive), 'flag' = SORT_STRING|SORT_FLAG_CASE --\n";
 $temp_array = $unsorted_strings;
-var_dump( sort($temp_array, SORT_STRING|SORT_FLAG_CASE) ); // expecting : bool(true)
+var_dump( ksort($temp_array, SORT_STRING|SORT_FLAG_CASE) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array (natural), 'flag' = SORT_NATURAL --\n";
 $temp_array = $unsorted_strings;
-var_dump( sort($temp_array, SORT_NATURAL) ); // expecting : bool(true)
+var_dump( ksort($temp_array, SORT_NATURAL) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array (natural, case insensitive), 'flag' = SORT_NATURAL|SORT_FLAG_CASE --\n";
 $temp_array = $unsorted_strings;
-var_dump( sort($temp_array, SORT_NATURAL|SORT_FLAG_CASE) ); // expecting : bool(true)
+var_dump( ksort($temp_array, SORT_NATURAL|SORT_FLAG_CASE) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying numeric array, 'flag' = SORT_NUMERIC --\n";
