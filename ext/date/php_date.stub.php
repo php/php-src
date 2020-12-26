@@ -125,7 +125,7 @@ interface DateTimeInterface
     /** @return DateTimeZone|false */
     public function getTimezone();
 
-    /** @return int|false */
+    /** @return int */
     public function getOffset();
 
     /** @return int|false */
@@ -202,7 +202,7 @@ class DateTime implements DateTimeInterface
     public function setTimezone(DateTimeZone $timezone) {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias date_offset_get
      */
     public function getOffset() {}
@@ -279,7 +279,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function getTimezone() {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias date_offset_get
      */
     public function getOffset() {}
