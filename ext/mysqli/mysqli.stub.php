@@ -113,7 +113,7 @@ class mysqli
     public function get_warnings() {}
 
     /**
-     * @return mysqli|false
+     * @return void
      */
     public function init() {}
 
@@ -540,7 +540,7 @@ function mysqli_connect(
     ?string $database = null,
     ?int $port = null,
     ?string $socket = null
-): mysqli|null|false {}
+): mysqli|false {}
 
 function mysqli_connect_errno(): int {}
 
