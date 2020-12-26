@@ -385,17 +385,31 @@ static void php_binary_init(void)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH */
-static PHP_INI_MH(OnUpdateTimeout)
+static void updateTimeout(zend_string *new_value, int stage)
 {
-	if (stage==PHP_INI_STAGE_STARTUP) {
+	if (stage == PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
 		ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
-		return SUCCESS;
+		return;
 	}
 	zend_unset_timeout();
 	ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
 	zend_set_timeout(EG(timeout_seconds), 0);
+}
+
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateTimeout)
+{
+	updateTimeout(new_value, stage);
+
+#if defined(WIN32) || defined(__CYGWIN__) || defined(__PASE__)
+	if (stage != PHP_INI_STAGE_STARTUP) {
+		zend_string *alias_name = zend_string_init("max_execution_wall_time", sizeof("max_execution_wall_time") - 1, !(stage & ZEND_INI_STAGE_IN_REQUEST));
+		zend_alter_ini_entry_ex(alias_name, new_value, PHP_INI_ALL, stage, 0, 1);
+		zend_string_release(alias_name);
+	}
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -403,7 +417,15 @@ static PHP_INI_MH(OnUpdateTimeout)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateWallTimeout)
 {
-	if (stage==PHP_INI_STAGE_STARTUP) {
+#if defined(WIN32) || defined(__CYGWIN__) || defined(__PASE__)
+	updateTimeout(new_value, stage);
+	if (stage != PHP_INI_STAGE_STARTUP) {
+		zend_string *alias_name = zend_string_init("max_execution_time", sizeof("max_execution_time") - 1, !(stage & ZEND_INI_STAGE_IN_REQUEST));
+		zend_alter_ini_entry_ex(alias_name, new_value, PHP_INI_ALL, stage, 0, 1);
+		zend_string_release(alias_name);
+	}
+#else
+	if (stage == PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
 		ZEND_ATOL(EG(wall_timeout_seconds), ZSTR_VAL(new_value));
 		return SUCCESS;
@@ -411,6 +433,7 @@ static PHP_INI_MH(OnUpdateWallTimeout)
 	zend_unset_wall_timeout();
 	ZEND_ATOL(EG(wall_timeout_seconds), ZSTR_VAL(new_value));
 	zend_set_wall_timeout(EG(wall_timeout_seconds), 0);
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -1702,7 +1725,9 @@ int php_request_startup(void)
 		} else {
 			zend_set_timeout(PG(max_input_time), 1);
 		}
+#if !defined(WIN32) && !defined(__CYGWIN__) && !defined(__PASE__)
 		zend_set_wall_timeout(EG(wall_timeout_seconds), 1);
+#endif
 
 		/* Disable realpath cache if an open_basedir is set */
 		if (PG(open_basedir) && *PG(open_basedir)) {
@@ -1792,7 +1817,9 @@ void php_request_shutdown(void *dummy)
 	/* 4. Reset max_execution_time and max_execution_wall_time (no longer executing php code after response sent) */
 	zend_try {
 		zend_unset_timeout();
+#if !defined(WIN32) && !defined(__CYGWIN__) && !defined(__PASE__)
 		zend_unset_wall_timeout();
+#endif
 	} zend_end_try();
 
 	/* 5. Call all extensions RSHUTDOWN functions */

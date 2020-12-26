@@ -2128,7 +2128,7 @@ PHP_FUNCTION(ini_set)
 	}
 #undef _CHECK_PATH
 
-	if (zend_alter_ini_entry_ex(varname, new_value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
+	if (zend_alter_ini_entry_ex(varname, new_value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0, 0) == FAILURE) {
 		zval_ptr_dtor_str(return_value);
 		RETVAL_FALSE;
 	}
@@ -2171,7 +2171,7 @@ PHP_FUNCTION(set_include_path)
 	}
 
 	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
-	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
+	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0, 0) == FAILURE) {
 		zend_string_release_ex(key, 0);
 		zval_ptr_dtor_str(return_value);
 		RETURN_FALSE;
