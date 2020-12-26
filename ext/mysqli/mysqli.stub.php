@@ -540,7 +540,7 @@ function mysqli_connect(
     ?string $database = null,
     ?int $port = null,
     ?string $socket = null
-): mysqli|false {}
+): mysqli|null|false {}
 
 function mysqli_connect_errno(): int {}
 
