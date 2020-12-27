@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #80384 (filter buffers entire read until file closed). (Adam
     Seitz, cmb)
 
+- BCMath:
+  . Fixed bug #80545 (bcadd('a', 'a') doesn't throw an exception).
+    (Jens de Nies)
+
 - Date:
   . Fixed bug #80376 (last day of the month causes runway cpu usage). (Derick)
 
