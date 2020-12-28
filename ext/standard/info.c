@@ -798,11 +798,11 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 #ifdef PHP_BUILD_PROVIDER
 		php_info_print_table_row(2, "Build Provider", PHP_BUILD_PROVIDER);
 #endif
-#ifdef COMPILER
-		php_info_print_table_row(2, "Compiler", COMPILER);
+#ifdef PHP_BUILD_COMPILER
+		php_info_print_table_row(2, "Compiler", PHP_BUILD_COMPILER);
 #endif
-#ifdef ARCHITECTURE
-		php_info_print_table_row(2, "Architecture", ARCHITECTURE);
+#ifdef PHP_BUILD_ARCH
+		php_info_print_table_row(2, "Architecture", PHP_BUILD_ARCH);
 #endif
 #ifdef CONFIGURE_COMMAND
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
