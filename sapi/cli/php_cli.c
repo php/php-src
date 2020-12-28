@@ -645,12 +645,12 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #else
 					"NTS "
 #endif
-#ifdef COMPILER
-					COMPILER
+#ifdef PHP_BUILD_COMPILER
+					PHP_BUILD_COMPILER
 					" "
 #endif
-#ifdef ARCHITECTURE
-					ARCHITECTURE
+#ifdef PHP_BUILD_ARCH
+					PHP_BUILD_ARCH
 					" "
 #endif
 #if ZEND_DEBUG
